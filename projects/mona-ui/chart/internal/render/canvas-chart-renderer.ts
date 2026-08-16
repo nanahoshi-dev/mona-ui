@@ -1,7 +1,7 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { crispPixel, drawPointMarker } from "../utils/canvas-utils";
+import { crispPixel, drawBarRect, drawPointMarker } from "../utils/canvas-utils";
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
 import { LineSeriesRenderer } from "./series/line-series-renderer";
@@ -23,7 +23,7 @@ export class CanvasChartRenderer {
 
         context.save();
 
-        // 1. Draw Grid Lines (Muted, subtle lines)
+        // 1. Draw Grid Lines (Muted, subtle lines behind series)
         const gridColor =
             styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
             "rgba(148, 163, 184, 0.2)";
@@ -54,9 +54,33 @@ export class CanvasChartRenderer {
             }
         }
 
-        // 2. Draw Axis Baseline Lines (crisp lines at edges of plotRect)
+        // 2. Draw Series in order (Areas -> Bars -> Lines) clipped to plot area
+        context.save();
+        context.beginPath();
+        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
+        context.clip();
+
+        for (const s of series) {
+            if (s.type === "area") {
+                AreaSeriesRenderer.render(context, s);
+            }
+        }
+        for (const s of series) {
+            if (s.type === "bar") {
+                BarSeriesRenderer.render(context, s);
+            }
+        }
+        for (const s of series) {
+            if (s.type === "line") {
+                LineSeriesRenderer.render(context, s);
+            }
+        }
+        context.restore();
+
+        // 3. Draw Axis Baseline Lines (crisp lines at edges of plotRect on top of series)
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
+            styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(148, 163, 184, 0.45)";
 
         for (const axisScene of axes) {
@@ -85,29 +109,6 @@ export class CanvasChartRenderer {
             context.stroke();
         }
 
-        // 3. Draw Series in order (Areas -> Bars -> Lines) clipped to plot area
-        context.save();
-        context.beginPath();
-        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        context.clip();
-
-        for (const s of series) {
-            if (s.type === "area") {
-                AreaSeriesRenderer.render(context, s);
-            }
-        }
-        for (const s of series) {
-            if (s.type === "bar") {
-                BarSeriesRenderer.render(context, s);
-            }
-        }
-        for (const s of series) {
-            if (s.type === "line") {
-                LineSeriesRenderer.render(context, s);
-            }
-        }
-        context.restore();
-
         // 4. Draw Interaction Overlays
         if (interactionState && (interactionState.activeHitTarget || interactionState.activeHits.length > 0)) {
             const hits =
@@ -124,6 +125,8 @@ export class CanvasChartRenderer {
             if (crosshairX !== null) {
                 const crosshairColor =
                     styleResolver.resolveCssVariable("--mona-chart-crosshair-color") ||
+                    styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                    styleResolver.resolveCssVariable("--color-muted-foreground") ||
                     "rgba(148, 163, 184, 0.4)";
                 context.strokeStyle = crosshairColor;
                 context.lineWidth = 1;
@@ -136,16 +139,26 @@ export class CanvasChartRenderer {
                 context.setLineDash([]);
             }
 
-            // Active point markers
+            // Active point markers & bar highlights
+            const markerStrokeColor =
+                styleResolver.resolveCssVariable("--mona-chart-marker-stroke-color") ||
+                styleResolver.resolveCssVariable("--color-surface") ||
+                "#ffffff";
+            const barHighlightColor =
+                styleResolver.resolveCssVariable("--mona-chart-bar-highlight-color") ||
+                "rgba(255, 255, 255, 0.25)";
+
             for (const hit of hits) {
                 if (hit.point) {
                     const matchingSeries = series.find(s => s.id === hit.seriesId);
                     const color = matchingSeries?.style.color ?? "#3b82f6";
-                    drawPointMarker(context, hit.point.x, hit.point.y, 5, color, "#ffffff", 2);
+                    drawPointMarker(context, hit.point.x, hit.point.y, 5, color, markerStrokeColor, 2);
                 } else if (hit.bounds) {
-                    // Bar highlight overlay
-                    context.fillStyle = "rgba(255, 255, 255, 0.2)";
-                    context.fillRect(hit.bounds.x, hit.bounds.y, hit.bounds.width, hit.bounds.height);
+                    // Bar highlight overlay with rounded top corners
+                    context.save();
+                    context.fillStyle = barHighlightColor;
+                    drawBarRect(context, hit.bounds.x, hit.bounds.y, hit.bounds.width, hit.bounds.height, 4, true);
+                    context.restore();
                 }
             }
         }

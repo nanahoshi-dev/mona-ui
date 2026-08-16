@@ -80,6 +80,7 @@ describe("CanvasChartRenderer", () => {
                         areaFillColor: "#3f6be2",
                         areaFillOpacity: 0.2,
                         color: "#3f6be2",
+                        fillOpacity: 0.2,
                         lineWidth: 2,
                         opacity: 1,
                         pointRadius: 3
@@ -123,6 +124,7 @@ describe("CanvasChartRenderer", () => {
                         areaFillColor: "#3f6be2",
                         areaFillOpacity: 0.5,
                         color: "#3f6be2",
+                        fillOpacity: 0.5,
                         lineWidth: 2,
                         opacity: 1,
                         pointRadius: 3
@@ -137,5 +139,103 @@ describe("CanvasChartRenderer", () => {
 
         expect(ctx.createLinearGradient).not.toHaveBeenCalled();
         expect(ctx.fill).toHaveBeenCalled();
+    });
+
+    it("should render muted grid lines with rgba fallback color and not solid black", () => {
+        const ctx = createMockContext();
+        const strokeStyles: string[] = [];
+        Object.defineProperty(ctx, "strokeStyle", {
+            set: (val: string) => strokeStyles.push(val),
+            get: () => strokeStyles[strokeStyles.length - 1] ?? ""
+        });
+
+        const scene: ChartScene = {
+            axes: [
+                {
+                    axis: "y",
+                    axisLine: true,
+                    gridLines: true,
+                    position: "left",
+                    ticks: [{ coordinate: 100, formattedValue: "100", index: 0, value: 100 }],
+                    title: "",
+                    visible: true
+                }
+            ],
+            coordinateSystem: "cartesian",
+            height: 300,
+            hitTargets: [],
+            plotRect: { height: 200, width: 400, x: 50, y: 50 },
+            series: [],
+            width: 500
+        };
+
+        CanvasChartRenderer.render(ctx, scene, null, styleResolver);
+
+        // Grid stroke style should be subtle rgba and never black (#000000 or rgb(0, 0, 0))
+        expect(strokeStyles[0]).toBe("rgba(148, 163, 184, 0.2)");
+        expect(strokeStyles[0]).not.toBe("#000000");
+        expect(strokeStyles[0]).not.toBe("rgb(0, 0, 0)");
+    });
+
+    it("should render bar hover highlight with rounded drawBarRect and translucent fillStyle", () => {
+        const ctx = createMockContext();
+        const fillStyles: string[] = [];
+        Object.defineProperty(ctx, "fillStyle", {
+            set: (val: string) => fillStyles.push(val),
+            get: () => fillStyles[fillStyles.length - 1] ?? ""
+        });
+
+        const scene: ChartScene = {
+            axes: [],
+            coordinateSystem: "cartesian",
+            height: 300,
+            hitTargets: [
+                {
+                    bounds: { height: 100, width: 30, x: 100, y: 150 },
+                    datum: {},
+                    index: 0,
+                    seriesId: "bar-1",
+                    seriesName: "Bars",
+                    seriesType: "bar",
+                    xValue: "Jan",
+                    yValue: 50
+                }
+            ],
+            plotRect: { height: 200, width: 400, x: 50, y: 50 },
+            series: [
+                {
+                    bars: [{ datum: {}, height: 100, index: 0, isPositive: true, radius: 4, width: 30, x: 100, xValue: "Jan", y: 150, yValue: 50 }],
+                    borderRadius: 4,
+                    fillOpacity: 1,
+                    id: "bar-1",
+                    name: "Bars",
+                    style: {
+                        areaFillColor: "#3b82f6",
+                        areaFillOpacity: 1,
+                        color: "#3b82f6",
+                        fillOpacity: 1,
+                        lineWidth: 1,
+                        opacity: 1,
+                        pointRadius: 3
+                    },
+                    type: "bar"
+                }
+            ],
+            width: 500
+        };
+
+        const interactionState = {
+            activeHits: [scene.hitTargets[0]],
+            activeHitTarget: scene.hitTargets[0],
+            pointerPosition: { x: 110, y: 160 }
+        };
+
+        CanvasChartRenderer.render(ctx, scene, interactionState, styleResolver);
+
+        // Highlight fillStyle should be translucent white and not solid black
+        const highlightStyle = fillStyles[fillStyles.length - 1];
+        expect(highlightStyle).toBe("rgba(255, 255, 255, 0.25)");
+        expect(highlightStyle).not.toBe("#000000");
+        expect(highlightStyle).not.toBe("rgb(0, 0, 0)");
     });
 });

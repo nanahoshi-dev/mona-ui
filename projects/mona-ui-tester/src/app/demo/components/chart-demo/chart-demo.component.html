@@ -47,14 +47,14 @@
                         <div class="flex flex-col gap-2">
                             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Series Visibility</span>
                             <div class="flex flex-wrap gap-4">
-                                <mona-check-box [checked]="showTargetBars()" (checkedChange)="showTargetBars.set($event)">
-                                    Bars (Target)
+                                <mona-check-box [checked]="showBars()" (checkedChange)="showBars.set($event)">
+                                    Bar Series
                                 </mona-check-box>
-                                <mona-check-box [checked]="showActualArea()" (checkedChange)="showActualArea.set($event)">
-                                    Area (Actual)
+                                <mona-check-box [checked]="showArea()" (checkedChange)="showArea.set($event)">
+                                    Area Series
                                 </mona-check-box>
-                                <mona-check-box [checked]="showForecastLine()" (checkedChange)="showForecastLine.set($event)">
-                                    Line (Forecast)
+                                <mona-check-box [checked]="showLine()" (checkedChange)="showLine.set($event)">
+                                    Line Series
                                 </mona-check-box>
                             </div>
                         </div>
@@ -101,7 +101,7 @@
                 <ng-template monaTabContentTemplate>
                     <div class="flex flex-wrap items-center gap-6 p-4">
                         <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Axis Lines</span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Axis Lines & Titles</span>
                             <div class="flex flex-wrap gap-4">
                                 <mona-check-box [checked]="xAxisLine()" (checkedChange)="xAxisLine.set($event)">
                                     X-Axis Line
@@ -109,6 +109,31 @@
                                 <mona-check-box [checked]="yAxisLine()" (checkedChange)="yAxisLine.set($event)">
                                     Y-Axis Line
                                 </mona-check-box>
+                                <mona-check-box [checked]="showAxisTitles()" (checkedChange)="showAxisTitles.set($event)">
+                                    Axis Titles
+                                </mona-check-box>
+                            </div>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Axis Positions</span>
+                            <div class="flex flex-wrap gap-4">
+                                <button
+                                    monaButton
+                                    size="small"
+                                    [look]="xAxisPosition() === 'bottom' ? 'primary' : 'ghost'"
+                                    (click)="xAxisPosition.set(xAxisPosition() === 'bottom' ? 'top' : 'bottom')">
+                                    X: {{ xAxisPosition() === 'bottom' ? 'Bottom' : 'Top' }}
+                                </button>
+                                <button
+                                    monaButton
+                                    size="small"
+                                    [look]="yAxisPosition() === 'left' ? 'primary' : 'ghost'"
+                                    (click)="yAxisPosition.set(yAxisPosition() === 'left' ? 'right' : 'left')">
+                                    Y: {{ yAxisPosition() === 'left' ? 'Left' : 'Right' }}
+                                </button>
                             </div>
                         </div>
 
@@ -134,6 +159,20 @@
                                 Nice Bounds & Zero Baseline
                             </mona-check-box>
                         </div>
+                    </div>
+                </ng-template>
+            </mona-tab>
+
+            <mona-tab title="Theme Synchronization">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex flex-wrap items-center gap-4 p-4">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Switch Theme Palette:</span>
+                        <button monaButton size="small" class="bg-blue-600 text-white" (click)="changeThemeColor('blue')">Blue</button>
+                        <button monaButton size="small" class="bg-indigo-600 text-white" (click)="changeThemeColor('indigo')">Indigo</button>
+                        <button monaButton size="small" class="bg-emerald-600 text-white" (click)="changeThemeColor('emerald')">Emerald</button>
+                        <button monaButton size="small" class="bg-violet-600 text-white" (click)="changeThemeColor('violet')">Violet</button>
+                        <button monaButton size="small" class="bg-rose-600 text-white" (click)="changeThemeColor('rose')">Rose</button>
+                        <button monaButton size="small" class="bg-amber-600 text-white" (click)="changeThemeColor('amber')">Amber</button>
                     </div>
                 </ng-template>
             </mona-tab>
@@ -199,34 +238,45 @@
         @switch (activeTab()) {
             @case ("mixed") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Combined Performance Metrics (Bar + Area + Line)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Mixed Series Comparison (Same Metric Across Series Types)</h3>
                     <mona-chart
                         [data]="displayedMonthlyData()"
                         xField="month"
                         class="h-96 w-full"
                         aria-label="Monthly Performance Metrics"
-                        aria-description="Interactive chart illustrating Target Bars, Actual Area, and Forecast Line."
+                        aria-description="Interactive chart illustrating Bar, Area, and Line series rendering the same metric."
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis [axisLine]="xAxisLine()" [gridLines]="xGridLines()" [nice]="niceAxes()" />
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [formatter]="currencyFormatter" [gridLines]="yGridLines()" [nice]="niceAxes()" />
+                        <mona-chart-x-axis
+                            [axisLine]="xAxisLine()"
+                            [gridLines]="xGridLines()"
+                            [nice]="niceAxes()"
+                            [position]="xAxisPosition()"
+                            [title]="showAxisTitles() ? 'Fiscal Month' : ''" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [formatter]="currencyFormatter"
+                            [gridLines]="yGridLines()"
+                            [nice]="niceAxes()"
+                            [position]="yAxisPosition()"
+                            [title]="showAxisTitles() ? 'Performance ($)' : ''" />
 
-                        @if (showTargetBars()) {
-                            <mona-bar-series field="target" name="Target Budget" [borderRadius]="6" />
+                        @if (showBars()) {
+                            <mona-bar-series field="actual" name="Bar Series" [borderRadius]="6" />
                         }
-                        @if (showActualArea()) {
+                        @if (showArea()) {
                             <mona-area-series
                                 field="actual"
-                                name="Actual Revenue"
+                                name="Area Series"
                                 [curve]="curveType()"
                                 [fillMode]="areaFillMode()"
                                 [showPoints]="showPoints()" />
                         }
-                        @if (showForecastLine()) {
+                        @if (showLine()) {
                             <mona-line-series
-                                field="forecast"
-                                name="Forecast Trend"
+                                field="actual"
+                                name="Line Series"
                                 [curve]="curveType()"
                                 [showPoints]="showPoints()" />
                         }

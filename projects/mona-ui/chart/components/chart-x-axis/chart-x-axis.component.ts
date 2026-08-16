@@ -9,7 +9,8 @@ import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType } from "../.
     template: "",
     host: {
         class: "hidden",
-        "aria-hidden": "true"
+        "aria-hidden": "true",
+        style: "display: none !important;"
     }
 })
 export class MonaChartXAxisComponent implements OnInit {

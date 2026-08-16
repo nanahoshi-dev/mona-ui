@@ -24,6 +24,22 @@ export class MonaChartTooltipComponent implements OnInit {
     );
     protected readonly tooltipContext = computed(() => this.#chartContext?.tooltipContext() ?? null);
     protected readonly tooltipPosition = computed(() => this.#chartContext?.tooltipPosition() ?? null);
+    protected readonly transformStyle = computed(() => {
+        const pos = this.tooltipPosition();
+        if (!pos) return "translate(-50%, -100%) translateY(-10px)";
+        const sceneWidth = this.#chartContext?.scene()?.width ?? 600;
+
+        let xTransform = "-50%";
+        if (pos.x < 100) {
+            xTransform = "0%";
+        } else if (pos.x > sceneWidth - 140) {
+            xTransform = "-100%";
+        }
+
+        const flipY = pos.y < 140;
+        const yTransform = flipY ? "translateY(16px)" : "translateY(-100%) translateY(-10px)";
+        return `translateX(${xTransform}) ${yTransform}`;
+    });
 
     /**
      * @description Whether the tooltip is enabled and will appear during interaction.

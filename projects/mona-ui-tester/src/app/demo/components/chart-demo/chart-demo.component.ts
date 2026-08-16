@@ -1,5 +1,6 @@
-import { Component, computed, signal } from "@angular/core";
+import { Component, computed, inject, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     ChartAxisLabelTemplateDirective,
     ChartLegendItemTemplateDirective,
@@ -68,6 +69,7 @@ interface TimePointMetric {
     templateUrl: "./chart-demo.component.html"
 })
 export class ChartDemoComponent {
+    readonly #themeService = inject(ThemeService, { optional: true });
     #logId: number = 0;
 
     protected readonly activeTab = signal<"custom" | "grouped" | "mixed" | "time">("mixed");
@@ -117,10 +119,11 @@ export class ChartDemoComponent {
     ]);
     protected readonly niceAxes = signal<boolean>(true);
     protected readonly sharedTooltip = signal<boolean>(true);
-    protected readonly showActualArea = signal<boolean>(true);
-    protected readonly showForecastLine = signal<boolean>(true);
+    protected readonly showArea = signal<boolean>(true);
+    protected readonly showAxisTitles = signal<boolean>(false);
+    protected readonly showBars = signal<boolean>(true);
+    protected readonly showLine = signal<boolean>(true);
     protected readonly showPoints = signal<boolean>(true);
-    protected readonly showTargetBars = signal<boolean>(true);
     protected readonly timeFormatter = (value: unknown): string => {
         if (value instanceof Date) {
             return `${value.getHours().toString().padStart(2, "0")}:${value.getMinutes().toString().padStart(2, "0")}`;
@@ -129,17 +132,24 @@ export class ChartDemoComponent {
     };
     protected readonly useCustomNoData = signal<boolean>(false);
     protected readonly xAxisLine = signal<boolean>(true);
+    protected readonly xAxisPosition = signal<"bottom" | "top">("bottom");
     protected readonly xGridLines = signal<boolean>(false);
     protected readonly yAxisLine = signal<boolean>(true);
+    protected readonly yAxisPosition = signal<"left" | "right">("left");
     protected readonly yGridLines = signal<boolean>(true);
+
+    public changeThemeColor(color: string): void {
+        this.#themeService?.setPrimaryColor(color);
+        this.#addLog("themeUpdate", `Applied primary theme color: ${color}`);
+    }
 
     public appendDataPoint(): void {
         const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const currentLength = this.monthlyData().length;
         const monthName = months[currentLength % months.length];
-        const target = Math.round(5000 + Math.random() * 4000);
-        const actual = Math.round(target * (0.85 + Math.random() * 0.3));
-        const forecast = Math.round(target * 0.95);
+        const actual = Math.round(4000 + Math.random() * 5000);
+        const forecast = Math.round(actual * 0.95);
+        const target = Math.round(actual * 1.05);
 
         this.monthlyData.update(list => [...list, { actual, forecast, month: `${monthName} ${currentLength + 1}`, target }]);
         this.#addLog("dataUpdate", `Appended data point: ${monthName}`);

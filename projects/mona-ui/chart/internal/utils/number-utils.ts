@@ -6,6 +6,25 @@ export function isFiniteNumber(value: unknown): value is number {
     return typeof value === "number" && Number.isFinite(value);
 }
 
+export function normalizeNonNegativeNumber(value: unknown, fallback: number): number {
+    return isFiniteNumber(value) && value >= 0 ? value : fallback;
+}
+
+export function normalizePositiveNumber(value: unknown, fallback?: number): number | undefined {
+    return isFiniteNumber(value) && value > 0 ? value : fallback;
+}
+
+export function normalizeOpacity(value: unknown, fallback: number = 1): number {
+    return isFiniteNumber(value) ? clamp(value, 0, 1) : clamp(fallback, 0, 1);
+}
+
+export function normalizeTickCount(value: unknown, fallback: number = 5): number {
+    if (isFiniteNumber(value) && value >= 1) {
+        return Math.min(100, Math.floor(value));
+    }
+    return fallback;
+}
+
 export function formatCompactNumber(value: number): string {
     if (!Number.isFinite(value)) {
         return "";
@@ -21,3 +40,4 @@ export function formatCompactNumber(value: number): string {
     }
     return String(value);
 }
+

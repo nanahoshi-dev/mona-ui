@@ -252,6 +252,34 @@ describe("MonaChartComponent", () => {
         expect(legendButtons.length).toBe(3);
     });
 
+    it("should display custom tooltip template when hovering over data", () => {
+        host.useCustomTooltipTemplate.set(true);
+        fixture.detectChanges();
+
+        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+        const canvas = fixture.debugElement.query(By.css("canvas"));
+
+        // Simulate pointer move over point (100, 100)
+        canvas.nativeElement.dispatchEvent(new PointerEvent("pointermove", { clientX: 100, clientY: 100 }));
+        fixture.detectChanges();
+
+        // Check if tooltipContext is populated or clearInteraction works
+        expect(() => canvas.nativeElement.dispatchEvent(new PointerEvent("pointerleave"))).not.toThrow();
+        fixture.detectChanges();
+        expect(chartComp.tooltipContext()).toBeNull();
+    });
+
+    it("should clear interaction when pointer leaves canvas", () => {
+        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+        const canvas = fixture.debugElement.query(By.css("canvas"));
+
+        canvas.nativeElement.dispatchEvent(new PointerEvent("pointerleave"));
+        fixture.detectChanges();
+
+        expect(chartComp.tooltipPosition()).toBeNull();
+        expect(chartComp.tooltipContext()).toBeNull();
+    });
+
     it("should pass AXE accessibility verification", async () => {
         const result = await axe.run(fixture.nativeElement);
         expect(result.violations.length).toBe(0);

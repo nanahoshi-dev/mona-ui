@@ -14,6 +14,7 @@ export { ChartNoDataTemplateDirective } from "./directives/chart-no-data-templat
 
 export type {
     ChartCoordinateSystem,
+    ChartField,
     ChartPadding,
     ChartPoint,
     ChartRect,

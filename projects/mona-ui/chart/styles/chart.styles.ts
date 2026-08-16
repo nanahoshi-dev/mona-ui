@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 
 export const chartBaseThemeVariants = cva(
-    "relative block select-none h-80 w-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+    "relative block select-none h-80 w-full outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:ring-offset-1 focus-visible:ring-offset-surface",
     {
         variants: {
             interactive: {
@@ -28,12 +28,12 @@ export const chartLegendBaseThemeVariants = cva("flex flex-wrap items-center gap
 });
 
 export const chartLegendItemBaseThemeVariants = cva(
-    "inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 transition-opacity duration-150 outline-none focus-visible:ring-1 focus-visible:ring-ring",
+    "inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 transition-opacity duration-150 outline-none focus-visible:ring-1 focus-visible:ring-focus-indicator/35",
     {
         variants: {
             interactive: {
                 false: "cursor-default",
-                true: "cursor-pointer hover:bg-surface-hover active:bg-surface-active"
+                true: "cursor-pointer hover:bg-hover active:bg-active"
             },
             visible: {
                 false: "opacity-40 line-through",

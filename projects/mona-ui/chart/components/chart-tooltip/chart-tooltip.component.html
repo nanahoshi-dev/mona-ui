@@ -3,7 +3,7 @@
         [class]="tooltipClasses()"
         [style.left.px]="tooltipPosition()?.x ?? 0"
         [style.top.px]="tooltipPosition()?.y ?? 0"
-        [style.transform]="'translate(-50%, -100%) translateY(-10px)'">
+        [style.transform]="transformStyle()">
         @if (customTemplate(); as template) {
             <ng-container
                 [ngTemplateOutlet]="template.templateRef"

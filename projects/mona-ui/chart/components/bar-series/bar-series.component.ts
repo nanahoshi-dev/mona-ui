@@ -1,6 +1,7 @@
 import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
+import type { ChartField } from "../../models/chart.models";
 
 let nextSeriesId = 0;
 
@@ -9,7 +10,8 @@ let nextSeriesId = 0;
     template: "",
     host: {
         "[class]": "userClass()",
-        "aria-hidden": "true"
+        "aria-hidden": "true",
+        style: "display: none !important;"
     }
 })
 export class MonaBarSeriesComponent implements OnInit {
@@ -20,9 +22,9 @@ export class MonaBarSeriesComponent implements OnInit {
 
     /**
      * @description Corner radius in pixels for the bar caps.
-     * @default 4
+     * @default undefined
      */
-    public readonly borderRadius = input(4);
+    public readonly borderRadius = input<number | undefined>(undefined);
 
     /**
      * @description Explicit fill color override for the series bars.
@@ -40,13 +42,13 @@ export class MonaBarSeriesComponent implements OnInit {
      * @description Property key or accessor extracting the Y/value for each bar.
      * @default ""
      */
-    public readonly field = input("");
+    public readonly field = input<ChartField>("");
 
     /**
      * @description Fill opacity applied to the bars.
-     * @default 1
+     * @default undefined
      */
-    public readonly fillOpacity = input(1);
+    public readonly fillOpacity = input<number | undefined>(undefined);
 
     /**
      * @description Maximum width in pixels for each individual bar.
@@ -73,10 +75,10 @@ export class MonaBarSeriesComponent implements OnInit {
     public readonly visible = model(true);
 
     /**
-     * @description Property key extracting the X/category value, overriding the root chart X field.
+     * @description Property key or accessor extracting the X/category value, overriding the root chart X field.
      * @default undefined
      */
-    public readonly xField = input<string | undefined>(undefined);
+    public readonly xField = input<ChartField | undefined>(undefined);
 
     public constructor() {
         effect(() => {
@@ -87,6 +89,7 @@ export class MonaBarSeriesComponent implements OnInit {
             this.fillOpacity();
             this.maxBarWidth();
             this.name();
+            this.userClass();
             this.visible();
             this.xField();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
@@ -114,6 +117,7 @@ export class MonaBarSeriesComponent implements OnInit {
                 return next;
             },
             type: "bar",
+            userClass: this.userClass,
             visible: this.visible,
             xField: this.xField
         });

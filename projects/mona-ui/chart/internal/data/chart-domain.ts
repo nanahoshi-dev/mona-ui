@@ -1,4 +1,5 @@
 import type { ChartXAxisType } from "../../models/chart-axis.models";
+import type { ChartField } from "../../models/chart.models";
 import type { ChartSeriesRegistration } from "../context/chart-registration-context";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
@@ -11,7 +12,7 @@ export interface ContinuousDomain {
 export function inferXAxisType(
     seriesList: readonly ChartSeriesRegistration[],
     rootData: readonly unknown[],
-    rootXField: string | undefined
+    rootXField: ChartField | undefined
 ): ChartXAxisType {
     const visibleSeries = seriesList.filter(s => s.visible());
     if (visibleSeries.length === 0 && rootData.length === 0) {
@@ -51,7 +52,7 @@ export function inferXAxisType(
 export function calculateCategoryDomain(
     seriesList: readonly ChartSeriesRegistration[],
     rootData: readonly unknown[],
-    rootXField: string | undefined
+    rootXField: ChartField | undefined
 ): readonly string[] {
     const keys = new Set<string>();
     const orderedKeys: string[] = [];
@@ -78,7 +79,7 @@ export function calculateCategoryDomain(
 export function calculateTimeDomain(
     seriesList: readonly ChartSeriesRegistration[],
     rootData: readonly unknown[],
-    rootXField: string | undefined,
+    rootXField: ChartField | undefined,
     explicitMin?: Date | number,
     explicitMax?: Date | number
 ): [Date, Date] {
@@ -111,13 +112,23 @@ export function calculateTimeDomain(
         }
     }
 
-    if (explicitMin !== undefined) {
-        const minVal = explicitMin instanceof Date ? explicitMin.getTime() : explicitMin;
-        if (Number.isFinite(minVal)) minTime = minVal;
+    let parsedMin = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin.getTime() : explicitMin) : undefined;
+    let parsedMax = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax.getTime() : explicitMax) : undefined;
+
+    if (parsedMin !== undefined && !Number.isFinite(parsedMin)) parsedMin = undefined;
+    if (parsedMax !== undefined && !Number.isFinite(parsedMax)) parsedMax = undefined;
+
+    if (parsedMin !== undefined && parsedMax !== undefined && parsedMin > parsedMax) {
+        const temp = parsedMin;
+        parsedMin = parsedMax;
+        parsedMax = temp;
     }
-    if (explicitMax !== undefined) {
-        const maxVal = explicitMax instanceof Date ? explicitMax.getTime() : explicitMax;
-        if (Number.isFinite(maxVal)) maxTime = maxVal;
+
+    if (parsedMin !== undefined) {
+        minTime = parsedMin;
+    }
+    if (parsedMax !== undefined) {
+        maxTime = parsedMax;
     }
 
     if (!Number.isFinite(minTime) || !Number.isFinite(maxTime)) {
@@ -135,7 +146,7 @@ export function calculateTimeDomain(
 export function calculateLinearXDomain(
     seriesList: readonly ChartSeriesRegistration[],
     rootData: readonly unknown[],
-    rootXField: string | undefined,
+    rootXField: ChartField | undefined,
     explicitMin?: number,
     explicitMax?: number
 ): [number, number] {
@@ -157,11 +168,20 @@ export function calculateLinearXDomain(
         }
     }
 
-    if (explicitMin !== undefined && Number.isFinite(explicitMin)) {
-        min = explicitMin;
+    let validMin = isFiniteNumber(explicitMin) ? explicitMin : undefined;
+    let validMax = isFiniteNumber(explicitMax) ? explicitMax : undefined;
+
+    if (validMin !== undefined && validMax !== undefined && validMin > validMax) {
+        const temp = validMin;
+        validMin = validMax;
+        validMax = temp;
     }
-    if (explicitMax !== undefined && Number.isFinite(explicitMax)) {
-        max = explicitMax;
+
+    if (validMin !== undefined) {
+        min = validMin;
+    }
+    if (validMax !== undefined) {
+        max = validMax;
     }
 
     if (!Number.isFinite(min) || !Number.isFinite(max)) {
@@ -187,10 +207,17 @@ export function calculateContinuousYDomain(
 
     const visibleSeries = seriesList.filter(s => s.visible());
     if (visibleSeries.length === 0) {
-        return [explicitMin ?? 0, explicitMax ?? 1];
+        let validMin = isFiniteNumber(explicitMin) ? explicitMin : 0;
+        let validMax = isFiniteNumber(explicitMax) ? explicitMax : 1;
+        if (validMin > validMax) {
+            const temp = validMin;
+            validMin = validMax;
+            validMax = temp;
+        }
+        return [validMin, validMax];
     }
 
-    const requiresZeroBaseline = visibleSeries.some(s => s.type === "bar" || s.type === "area");
+    const requiresZeroBaseline = visibleSeries.some(s => s.type === "bar");
     if (requiresZeroBaseline) {
         min = 0;
         max = 0;
@@ -208,11 +235,20 @@ export function calculateContinuousYDomain(
         }
     }
 
-    if (explicitMin !== undefined && Number.isFinite(explicitMin)) {
-        min = explicitMin;
+    let validMin = isFiniteNumber(explicitMin) ? explicitMin : undefined;
+    let validMax = isFiniteNumber(explicitMax) ? explicitMax : undefined;
+
+    if (validMin !== undefined && validMax !== undefined && validMin > validMax) {
+        const temp = validMin;
+        validMin = validMax;
+        validMax = temp;
     }
-    if (explicitMax !== undefined && Number.isFinite(explicitMax)) {
-        max = explicitMax;
+
+    if (validMin !== undefined) {
+        min = validMin;
+    }
+    if (validMax !== undefined) {
+        max = validMax;
     }
 
     if (!Number.isFinite(min) || !Number.isFinite(max)) {
@@ -235,3 +271,34 @@ export function calculateContinuousYDomain(
 
     return [min, max];
 }
+
+export function hasRenderableData(
+    seriesList: readonly ChartSeriesRegistration[],
+    rootData: readonly unknown[],
+    xAxisType?: ChartXAxisType
+): boolean {
+    if (seriesList.length === 0) {
+        return rootData.length > 0;
+    }
+
+    for (const s of seriesList) {
+        if (s.type === "bar" && (xAxisType === "time" || xAxisType === "utc" || xAxisType === "linear")) {
+            // Incompatible bar in Phase 1
+            continue;
+        }
+        const data = resolveData(s.data(), rootData);
+        if (data.length === 0) {
+            continue;
+        }
+        const field = s.field();
+        for (let i = 0; i < data.length; i++) {
+            const val = resolveValue(data[i], field, i);
+            if (isFiniteNumber(val)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+

@@ -33,8 +33,9 @@ import { ChartRenderScheduler } from "../../internal/render/chart-render-schedul
 import type { ChartScene } from "../../internal/scene/chart-scene";
 import type { SceneHitTarget } from "../../internal/scene/scene-geometry";
 import { ChartStyleResolver } from "../../internal/style/chart-style-resolver";
+import { hasRenderableData } from "../../internal/data/chart-domain";
 import { formatCompactNumber } from "../../internal/utils/number-utils";
-import type { ChartPoint } from "../../models/chart.models";
+import type { ChartField, ChartPoint } from "../../models/chart.models";
 import type {
     ChartPointEvent,
     ChartPointFocusEvent,
@@ -88,6 +89,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     #currentWidth: number = 500;
     #interactionState: ChartInteractionState | null = null;
     #resizeObserver: ResizeObserver | null = null;
+    #themeObserver: MutationObserver | null = null;
 
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly axisLabelClasses = computed(() => chartAxisLabelBaseThemeVariants());
@@ -95,12 +97,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
         twMerge(chartBaseThemeVariants({ interactive: true }), this.userClass())
     );
     protected readonly canvasElement = viewChild<ElementRef<HTMLCanvasElement>>("canvas");
-    protected readonly hasNoData = computed(() => {
-        const rootHasData = this.data().length > 0;
-        const seriesList = this.#registeredSeries();
-        const anySeriesHasData = seriesList.some(s => (s.data()?.length ?? 0) > 0);
-        return !rootHasData && !anySeriesHasData;
-    });
+    protected readonly hasNoData = computed(() =>
+        !hasRenderableData(this.#registeredSeries(), this.data(), this.#xAxis()?.type())
+    );
     protected readonly layoutClasses = computed(() => {
         const pos = this.legendPosition();
         if (pos === "top") return "relative flex flex-col h-full w-full overflow-hidden";
@@ -116,7 +115,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const pos = this.legendPosition();
         return pos === "top" || pos === "left" ? 1 : 0;
     });
-    protected readonly scene = signal<ChartScene | null>(null);
+    public readonly scene = signal<ChartScene | null>(null);
+    protected readonly styleRevision = signal(0);
 
     /**
      * @description Detailed accessible description explaining the chart's purpose and trends.
@@ -137,6 +137,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     public readonly data = input<readonly unknown[]>([]);
 
     public readonly legendItems = computed<readonly ChartLegendItem[]>(() => {
+        this.styleRevision();
         const seriesList = this.#registeredSeries();
         return seriesList.map((s, idx) => {
             const style = this.#styleResolver.resolveSeriesStyle(s, idx);
@@ -169,19 +170,18 @@ export class MonaChartComponent implements ChartRegistrationContext {
     public readonly tooltipPosition = signal<ChartPoint | null>(null);
 
     /**
-     * @description Additional CSS classes merged onto the chart container via `tailwind-merge`.
+     * @description Additional CSS classes applied to chart root container.
      * @default ""
      */
     public readonly userClass = input("", { alias: "class" });
-
-    public readonly xAxisRegistration: Signal<ChartAxisRegistration | null> = this.#xAxis.asReadonly();
 
     /**
      * @description Property key or accessor extracting the X-axis coordinate for each data item.
      * @default ""
      */
-    public readonly xField = input<string>("");
+    public readonly xField = input<ChartField>("");
 
+    public readonly xAxisRegistration: Signal<ChartAxisRegistration | null> = this.#xAxis.asReadonly();
     public readonly yAxisRegistration: Signal<ChartAxisRegistration | null> = this.#yAxis.asReadonly();
 
     public constructor() {
@@ -194,13 +194,24 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 this.#resizeObserver.disconnect();
                 this.#resizeObserver = null;
             }
+            if (this.#themeObserver) {
+                this.#themeObserver.disconnect();
+                this.#themeObserver = null;
+            }
         });
 
-        // Invalidate when inputs change
+        // Invalidate when data inputs change
         effect(() => {
             this.data();
             this.xField();
             this.invalidate(ChartInvalidationReason.Data);
+        });
+
+        // Invalidate when userClass changes
+        effect(() => {
+            this.userClass();
+            this.styleRevision.update(v => v + 1);
+            this.invalidate(ChartInvalidationReason.Style);
         });
 
         afterNextRender(() => {
@@ -354,9 +365,13 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.#interactionState = hitState;
             const primaryHit = hitState.activeHits[0] ?? hitState.activeHitTarget;
             if (primaryHit) {
+                const rawX = primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : pointer.x);
+                const rawY = primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : pointer.y);
+                const clampedX = Math.max(10, Math.min(this.#currentWidth - 10, rawX));
+                const clampedY = Math.max(10, Math.min(this.#currentHeight - 10, rawY));
                 const tooltipPos: ChartPoint = {
-                    x: primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : pointer.x),
-                    y: primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : pointer.y)
+                    x: clampedX,
+                    y: clampedY
                 };
                 this.tooltipPosition.set(tooltipPos);
                 this.tooltipContext.set(this.#buildTooltipContext(hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit], shared));
@@ -439,6 +454,16 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 seriesName: s.name(),
                 visible: nextVisibility
             });
+
+            if (!nextVisibility && this.#interactionState) {
+                const isTargetHidden =
+                    this.#interactionState.activeHits.some((h: SceneHitTarget) => h.seriesId === seriesId) ||
+                    this.#interactionState.activeHitTarget?.seriesId === seriesId;
+                if (isTargetHidden) {
+                    this.#clearInteraction();
+                }
+            }
+
             this.invalidate(ChartInvalidationReason.Layout);
             this.#recomputeAndPaint(ChartInvalidationReason.Layout);
         }
@@ -508,6 +533,26 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 }
             });
             this.#resizeObserver.observe(plotEl);
+        }
+
+        if (typeof MutationObserver !== "undefined") {
+            this.#themeObserver = new MutationObserver(() => {
+                this.styleRevision.update(v => v + 1);
+                this.invalidate(ChartInvalidationReason.Style);
+                this.#recomputeAndPaint(ChartInvalidationReason.Style);
+            });
+            if (typeof document !== "undefined" && document.documentElement) {
+                this.#themeObserver.observe(document.documentElement, {
+                    attributeFilter: ["class", "style", "data-theme"],
+                    attributes: true
+                });
+                if (document.body) {
+                    this.#themeObserver.observe(document.body, {
+                        attributeFilter: ["class", "style", "data-theme"],
+                        attributes: true
+                    });
+                }
+            }
         }
 
         // Initial layout pass

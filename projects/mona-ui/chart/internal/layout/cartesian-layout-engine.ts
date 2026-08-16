@@ -1,5 +1,5 @@
 import type { ChartAxisTick, ChartXAxisType } from "../../models/chart-axis.models";
-import type { ChartPadding, ChartRect } from "../../models/chart.models";
+import type { ChartField, ChartPadding, ChartRect } from "../../models/chart.models";
 import type { ChartAxisRegistration, ChartSeriesRegistration } from "../context/chart-registration-context";
 import {
     calculateCategoryDomain,
@@ -26,13 +26,21 @@ import type {
 import type { ChartScene } from "../scene/chart-scene";
 import type { SceneBar, SceneHitTarget, ScenePoint } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { clamp, formatCompactNumber, isFiniteNumber } from "../utils/number-utils";
+import {
+    clamp,
+    formatCompactNumber,
+    isFiniteNumber,
+    normalizeNonNegativeNumber,
+    normalizeOpacity,
+    normalizePositiveNumber,
+    normalizeTickCount
+} from "../utils/number-utils";
 
 export interface CartesianLayoutOptions {
     containerHeight: number;
     containerWidth: number;
     rootData: readonly unknown[];
-    rootXField?: string;
+    rootXField?: ChartField;
     series: readonly ChartSeriesRegistration[];
     styleResolver: ChartStyleResolver;
     xAxis?: ChartAxisRegistration;
@@ -54,13 +62,20 @@ export class CartesianLayoutEngine {
 
         const isXAxisVisible = xAxis?.visible() ?? true;
         const isYAxisVisible = yAxis?.visible() ?? true;
+        const xAxisPosition = xAxis?.position() ?? "bottom";
+        const yAxisPosition = yAxis?.position() ?? "left";
+        const xTitle = xAxis?.title() ?? "";
+        const yTitle = yAxis?.title() ?? "";
 
-        // Reserve margins for axes
+        // Reserve margins for axes dynamically based on position & title
+        const xMargin = isXAxisVisible ? (xTitle ? 44 : 32) : 8;
+        const yMargin = isYAxisVisible ? (yTitle ? 72 : 48) : 8;
+
         const padding: ChartPadding = {
-            bottom: isXAxisVisible ? 32 : 8,
-            left: isYAxisVisible ? 44 : 8,
-            right: 16,
-            top: 16
+            bottom: xAxisPosition === "bottom" ? xMargin : 12,
+            left: yAxisPosition === "left" ? yMargin : 16,
+            right: yAxisPosition === "right" ? yMargin : 16,
+            top: xAxisPosition === "top" ? xMargin : 16
         };
 
         const plotWidth = Math.max(0, containerWidth - padding.left - padding.right);
@@ -96,16 +111,20 @@ export class CartesianLayoutEngine {
                 : inferXAxisType(series, rootData, rootXField);
 
         // Calculate continuous Y domain & scale
-        const explicitYMin = typeof yAxis?.min() === "number" ? (yAxis.min() as number) : undefined;
-        const explicitYMax = typeof yAxis?.max() === "number" ? (yAxis.max() as number) : undefined;
+        const rawYMin = yAxis?.min();
+        const rawYMax = yAxis?.max();
+        const explicitYMin = isFiniteNumber(rawYMin) ? rawYMin : undefined;
+        const explicitYMax = isFiniteNumber(rawYMax) ? rawYMax : undefined;
         const yDomain = calculateContinuousYDomain(series, rootData, explicitYMin, explicitYMax);
         const niceY = yAxis?.nice() ?? true;
-        const yTickCount = yAxis?.tickCount() ?? 5;
+        const yTickCount = normalizeTickCount(yAxis?.tickCount(), 5);
         const yScale = CartesianScaleFactory.createLinearScale(
             yDomain,
             [plotRect.y + plotRect.height, plotRect.y],
             niceY,
-            yTickCount
+            yTickCount,
+            explicitYMin,
+            explicitYMax
         );
 
         // Build Y axis ticks and scene
@@ -165,15 +184,19 @@ export class CartesianLayoutEngine {
                 }
             }
         } else if (xAxisType === "linear") {
-            const explicitXMin = typeof xAxis?.min() === "number" ? (xAxis.min() as number) : undefined;
-            const explicitXMax = typeof xAxis?.max() === "number" ? (xAxis.max() as number) : undefined;
+            const rawXMin = xAxis?.min();
+            const rawXMax = xAxis?.max();
+            const explicitXMin = isFiniteNumber(rawXMin) ? rawXMin : undefined;
+            const explicitXMax = isFiniteNumber(rawXMax) ? rawXMax : undefined;
             const xDomain = calculateLinearXDomain(series, rootData, rootXField, explicitXMin, explicitXMax);
-            const xTickCount = xAxis?.tickCount() ?? 5;
+            const xTickCount = normalizeTickCount(xAxis?.tickCount(), 5);
             linearXScale = CartesianScaleFactory.createLinearScale(
                 xDomain,
                 [plotRect.x, plotRect.x + plotRect.width],
                 xAxis?.nice() ?? true,
-                xTickCount
+                xTickCount,
+                explicitXMin,
+                explicitXMax
             );
             const rawTicks = linearXScale.ticks(xTickCount);
             for (let i = 0; i < rawTicks.length; i++) {
@@ -187,23 +210,29 @@ export class CartesianLayoutEngine {
             }
         } else {
             // Time or UTC
-            const explicitXMin = xAxis?.min() instanceof Date || typeof xAxis?.min() === "number" ? xAxis?.min() : undefined;
-            const explicitXMax = xAxis?.max() instanceof Date || typeof xAxis?.max() === "number" ? xAxis?.max() : undefined;
+            const rawXMin = xAxis?.min();
+            const rawXMax = xAxis?.max();
+            const explicitXMin = rawXMin instanceof Date || isFiniteNumber(rawXMin) ? rawXMin : undefined;
+            const explicitXMax = rawXMax instanceof Date || isFiniteNumber(rawXMax) ? rawXMax : undefined;
             const tDomain = calculateTimeDomain(series, rootData, rootXField, explicitXMin, explicitXMax);
-            const xTickCount = xAxis?.tickCount() ?? 5;
+            const xTickCount = normalizeTickCount(xAxis?.tickCount(), 5);
             timeScale =
                 xAxisType === "utc"
                     ? CartesianScaleFactory.createUtcScale(
                           tDomain,
                           [plotRect.x, plotRect.x + plotRect.width],
                           xAxis?.nice() ?? true,
-                          xTickCount
+                          xTickCount,
+                          explicitXMin,
+                          explicitXMax
                       )
                     : CartesianScaleFactory.createTimeScale(
                           tDomain,
                           [plotRect.x, plotRect.x + plotRect.width],
                           xAxis?.nice() ?? true,
-                          xTickCount
+                          xTickCount,
+                          explicitXMin,
+                          explicitXMax
                       );
 
             const rawTicks = timeScale.ticks(xTickCount);
@@ -255,9 +284,15 @@ export class CartesianLayoutEngine {
             const sField = s.field();
 
             if (s.type === "bar") {
+                // In Phase 1, bars require a category scale
+                if (!bandScale || !nestedBarScale) {
+                    // Continuous scale requested with a bar series -> fail-soft by skipping bar geometry
+                    continue;
+                }
+
                 const bars: SceneBar[] = [];
-                const radius = s.borderRadius?.() ?? 4;
-                const maxBarWidth = s.maxBarWidth?.() ?? Number.POSITIVE_INFINITY;
+                const radius = normalizeNonNegativeNumber(s.borderRadius?.(), 4);
+                const maxBarWidth = normalizePositiveNumber(s.maxBarWidth?.()) ?? Number.POSITIVE_INFINITY;
 
                 for (let dIdx = 0; dIdx < sData.length; dIdx++) {
                     const datum = sData[dIdx];
@@ -269,27 +304,19 @@ export class CartesianLayoutEngine {
                     }
 
                     const catKey = xVal !== undefined && xVal !== null ? String(xVal) : String(dIdx);
-                    let barX = plotRect.x;
-                    let barWidth = 20;
+                    const bandOuterX = bandScale.map(catKey);
+                    if (bandOuterX === undefined) continue;
 
-                    if (bandScale && nestedBarScale) {
-                        const bandOuterX = bandScale.map(catKey);
-                        if (bandOuterX === undefined) continue;
-                        const subX = nestedBarScale.map(s.id) ?? 0;
-                        barWidth = Math.min(nestedBarScale.bandwidth(), maxBarWidth);
-                        const actualSubWidth = nestedBarScale.bandwidth();
-                        const centerOffset = (actualSubWidth - barWidth) / 2;
-                        barX = bandOuterX + subX + centerOffset;
-                    } else if (linearXScale) {
-                        const numericX = isFiniteNumber(xVal) ? xVal : dIdx;
-                        barX = linearXScale.map(numericX) - 10;
-                        barWidth = Math.min(20, maxBarWidth);
-                    }
+                    const subX = nestedBarScale.map(s.id) ?? 0;
+                    const barWidth = Math.min(nestedBarScale.bandwidth(), maxBarWidth);
+                    const actualSubWidth = nestedBarScale.bandwidth();
+                    const centerOffset = (actualSubWidth - barWidth) / 2;
+                    const barX = bandOuterX + subX + centerOffset;
 
                     const yPos = yScale.map(yVal);
                     const isPositive = yVal >= 0;
                     const topY = Math.min(baselineY, yPos);
-                    const barHeight = Math.max(1, Math.abs(baselineY - yPos));
+                    const barHeight = Math.abs(baselineY - yPos);
 
                     const bar: SceneBar = {
                         datum,
@@ -306,7 +333,12 @@ export class CartesianLayoutEngine {
                     bars.push(bar);
 
                     hitTargets.push({
-                        bounds: { height: barHeight, width: barWidth, x: barX, y: topY },
+                        bounds: {
+                            height: Math.max(4, barHeight),
+                            width: barWidth,
+                            x: barX,
+                            y: barHeight === 0 ? baselineY - 2 : topY
+                        },
                         datum,
                         index: dIdx,
                         seriesId: s.id,
@@ -320,7 +352,7 @@ export class CartesianLayoutEngine {
                 const barScene: ChartBarSeriesScene = {
                     bars,
                     borderRadius: radius,
-                    fillOpacity: s.fillOpacity?.() ?? 1,
+                    fillOpacity: normalizeOpacity(s.fillOpacity?.(), 1),
                     id: s.id,
                     name: s.name(),
                     style: sStyle,
@@ -337,27 +369,41 @@ export class CartesianLayoutEngine {
                     const yVal = resolveValue(datum, sField, dIdx);
 
                     let xPos = plotRect.x;
+                    let isXValid = false;
+
                     if (bandScale) {
                         const catKey = xVal !== undefined && xVal !== null ? String(xVal) : String(dIdx);
                         const bPos = bandScale.map(catKey);
-                        xPos = bPos !== undefined ? bPos + bandScale.bandwidth() / 2 : plotRect.x;
-                    } else if (linearXScale) {
-                        const numericX = isFiniteNumber(xVal) ? xVal : dIdx;
-                        xPos = linearXScale.map(numericX);
-                    } else if (timeScale) {
-                        let dateVal: Date;
-                        if (xVal instanceof Date) {
-                            dateVal = xVal;
-                        } else if (typeof xVal === "string" || typeof xVal === "number") {
-                            dateVal = new Date(xVal);
-                        } else {
-                            dateVal = new Date(dIdx);
+                        if (bPos !== undefined) {
+                            xPos = bPos + bandScale.bandwidth() / 2;
+                            isXValid = true;
                         }
-                        xPos = timeScale.map(dateVal);
+                    } else if (linearXScale) {
+                        if (isFiniteNumber(xVal)) {
+                            xPos = linearXScale.map(xVal);
+                            isXValid = true;
+                        }
+                    } else if (timeScale) {
+                        let dateVal: Date | undefined;
+                        if (xVal instanceof Date && !Number.isNaN(xVal.getTime())) {
+                            dateVal = xVal;
+                        } else if (typeof xVal === "number" && Number.isFinite(xVal)) {
+                            dateVal = new Date(xVal);
+                        } else if (typeof xVal === "string") {
+                            const parsed = Date.parse(xVal);
+                            if (!Number.isNaN(parsed)) {
+                                dateVal = new Date(parsed);
+                            }
+                        }
+                        if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
+                            xPos = timeScale.map(dateVal);
+                            isXValid = true;
+                        }
                     }
 
-                    const defined = isFiniteNumber(yVal);
-                    const yPos = defined ? yScale.map(yVal) : baselineY;
+                    const isYValid = isFiniteNumber(yVal);
+                    const defined = isXValid && isYValid;
+                    const yPos = isYValid ? yScale.map(yVal) : baselineY;
 
                     const point: ScenePoint = {
                         datum,
@@ -366,7 +412,7 @@ export class CartesianLayoutEngine {
                         x: xPos,
                         xValue: xVal,
                         y: yPos,
-                        yValue: defined ? yVal : 0
+                        yValue: isYValid ? yVal : 0
                     };
                     points.push(point);
 
@@ -403,7 +449,7 @@ export class CartesianLayoutEngine {
                         connectNulls: s.connectNulls?.() ?? false,
                         curve: s.curve?.() ?? "linear",
                         fillMode: s.fillMode?.() ?? "gradient",
-                        fillOpacity: s.fillOpacity?.() ?? 0.18,
+                        fillOpacity: normalizeOpacity(s.fillOpacity?.(), 0.18),
                         id: s.id,
                         name: s.name(),
                         points,
@@ -427,3 +473,4 @@ export class CartesianLayoutEngine {
         };
     }
 }
+
