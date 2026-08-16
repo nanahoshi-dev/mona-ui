@@ -20,18 +20,21 @@ import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
     ChartInvalidationReason,
     type ChartAxisRegistration,
+    type ChartCartesianSeriesRegistration,
+    type ChartDonutSeriesRegistration,
     type ChartLegendRegistration,
+    type ChartPolarSeriesRegistration,
     type ChartRegistrationContext,
     type ChartSeriesRegistration,
     type ChartTooltipRegistration
 } from "../../internal/context/chart-registration-context";
-import { hasRenderableData } from "../../internal/data/chart-domain";
 import { ChartHitTestEngine } from "../../internal/interaction/chart-hit-test-engine";
 import type { ChartInteractionState } from "../../internal/interaction/chart-interaction-state";
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
 import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer";
 import { ChartRenderScheduler } from "../../internal/render/chart-render-scheduler";
-import type { ChartScene } from "../../internal/scene/chart-scene";
+import type { CartesianChartScene, ChartScene, PolarChartScene } from "../../internal/scene/chart-scene";
+import type { ScenePolarSlice } from "../../internal/scene/polar-scene";
 import type { SceneHitTarget } from "../../internal/scene/scene-geometry";
 import { ChartStyleResolver } from "../../internal/style/chart-style-resolver";
 import { formatXValue, formatYValue } from "../../internal/utils/chart-formatter";
@@ -41,6 +44,12 @@ import type {
     ChartPointFocusEvent,
     ChartSeriesVisibilityEvent
 } from "../../models/chart-event.models";
+import { ChartLabelMeasureDirective } from "../../internal/directives/chart-label-measure.directive";
+import type {
+    ChartLabelMeasurement,
+    ChartSliceContext,
+    ChartSliceLabelTemplateContext
+} from "../../models/chart-polar.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
     ChartTooltipPointContext,
@@ -56,7 +65,7 @@ import {
 @Component({
     selector: "mona-chart",
     templateUrl: "./chart.component.html",
-    imports: [NgTemplateOutlet],
+    imports: [NgTemplateOutlet, ChartLabelMeasureDirective],
     providers: [
         {
             provide: CHART_CONTEXT,
@@ -76,7 +85,9 @@ import {
 export class MonaChartComponent implements ChartRegistrationContext {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #labelMeasurements = new Map<string, ChartLabelMeasurement>();
     readonly #legend = signal<ChartLegendRegistration | null>(null);
+    readonly #observedLabelElements = new Map<Element, string>();
     readonly #registeredSeries = signal<ChartSeriesRegistration[]>([]);
     readonly #renderScheduler: ChartRenderScheduler;
     readonly #styleResolver: ChartStyleResolver;
@@ -90,6 +101,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     #currentHeight: number = 300;
     #currentWidth: number = 500;
     #interactionState: ChartInteractionState | null = null;
+    #labelResizeObserver: ResizeObserver | null = null;
     #pendingPointerEvent: PointerEvent | null = null;
     #pointerFrameId: number | null = null;
     #resizeObserver: ResizeObserver | null = null;
@@ -101,9 +113,26 @@ export class MonaChartComponent implements ChartRegistrationContext {
         twMerge(chartBaseThemeVariants({ interactive: true }), this.userClass())
     );
     protected readonly canvasElement = viewChild<ElementRef<HTMLCanvasElement>>("canvas");
-    protected readonly hasNoData = computed(() =>
-        !hasRenderableData(this.#registeredSeries(), this.data(), this.#xAxis()?.type())
-    );
+    protected readonly cartesianScene = computed<CartesianChartScene | null>(() => {
+        const sc = this.scene();
+        return sc?.coordinateSystem === "cartesian" ? sc : null;
+    });
+    protected readonly polarScene = computed<PolarChartScene | null>(() => {
+        const sc = this.scene();
+        return sc?.coordinateSystem === "polar" ? sc : null;
+    });
+    protected readonly polarSeriesRegistration = computed<ChartPolarSeriesRegistration | null>(() => {
+        const list = this.#registeredSeries();
+        return (list.find(s => s.type === "pie" || s.type === "donut") as ChartPolarSeriesRegistration) ?? null;
+    });
+    protected readonly donutSeriesRegistration = computed<ChartDonutSeriesRegistration | null>(() => {
+        const list = this.#registeredSeries();
+        return (list.find(s => s.type === "donut") as ChartDonutSeriesRegistration) ?? null;
+    });
+    protected readonly hasNoData = computed(() => {
+        const sc = this.scene();
+        return sc ? !sc.hasRenderableData : false;
+    });
     protected readonly layoutClasses = computed(() => {
         const pos = this.legendPosition();
         if (pos === "top") return "relative flex flex-col h-full w-full overflow-hidden";
@@ -142,17 +171,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public readonly legendItems = computed<readonly ChartLegendItem[]>(() => {
         this.styleRevision();
-        const seriesList = this.#registeredSeries();
-        return seriesList.map((s, idx) => {
-            const style = this.#styleResolver.resolveSeriesStyle(s, idx);
-            return {
-                color: style.color,
-                name: s.name(),
-                seriesId: s.id,
-                seriesType: s.type,
-                visible: s.visible()
-            };
-        });
+        return this.scene()?.legendItems ?? [];
     });
 
     /**
@@ -202,6 +221,12 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 this.#resizeObserver.disconnect();
                 this.#resizeObserver = null;
             }
+            if (this.#labelResizeObserver) {
+                this.#labelResizeObserver.disconnect();
+                this.#labelResizeObserver = null;
+            }
+            this.#observedLabelElements.clear();
+            this.#labelMeasurements.clear();
             if (this.#themeObserver) {
                 this.#themeObserver.disconnect();
                 this.#themeObserver = null;
@@ -233,6 +258,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
         this.#renderScheduler.schedule(reason);
     }
 
+    public recomputeScene(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
+        this.#recomputeAndPaint(reason);
+    }
+
     public onCanvasClick(event: MouseEvent): void {
         const pointer = this.#normalizePointer(event);
         let currentScene = this.scene();
@@ -244,16 +273,19 @@ export class MonaChartComponent implements ChartRegistrationContext {
             return;
         }
 
-        const shared = this.#tooltip()?.shared() ?? false;
+        const shared = currentScene.coordinateSystem === "polar" ? false : (this.#tooltip()?.shared() ?? false);
         const hitState = ChartHitTestEngine.testHit(pointer, currentScene, shared);
         if (hitState.activeHitTarget) {
             const target = hitState.activeHitTarget;
             this.pointClick.emit({
+                category: target.category,
                 dataIndex: target.index,
                 datum: target.datum,
+                percentage: target.percentage,
                 seriesId: target.seriesId,
                 seriesName: target.seriesName,
                 seriesType: target.seriesType,
+                sliceId: target.sliceId,
                 xValue: target.xValue,
                 yValue: target.yValue
             });
@@ -315,6 +347,14 @@ export class MonaChartComponent implements ChartRegistrationContext {
             case "ArrowDown":
             case "ArrowUp": {
                 event.preventDefault();
+                if (currentScene.coordinateSystem === "polar") {
+                    // In polar mode, up/down aliases previous/next slice
+                    const step = event.key === "ArrowDown" ? 1 : -1;
+                    const nextBucketIdx =
+                        (this.#activeKeyboardBucketIndex + step + buckets.length) % buckets.length;
+                    this.#setKeyboardSelection(nextBucketIdx, this.#activeKeyboardSeriesId);
+                    break;
+                }
                 if (this.#activeKeyboardBucketIndex < 0) {
                     this.#activeKeyboardBucketIndex = 0;
                 }
@@ -339,11 +379,14 @@ export class MonaChartComponent implements ChartRegistrationContext {
                     const hit = bucket?.hits.find(h => h.seriesId === this.#activeKeyboardSeriesId) ?? bucket?.hits[0];
                     if (hit) {
                         this.pointClick.emit({
+                            category: hit.category,
                             dataIndex: hit.index,
                             datum: hit.datum,
+                            percentage: hit.percentage,
                             seriesId: hit.seriesId,
                             seriesName: hit.seriesName,
                             seriesType: hit.seriesType,
+                            sliceId: hit.sliceId,
                             xValue: hit.xValue,
                             yValue: hit.yValue
                         });
@@ -395,14 +438,16 @@ export class MonaChartComponent implements ChartRegistrationContext {
             return;
         }
 
-        const shared = this.#tooltip()?.shared() ?? false;
+        const shared = currentScene.coordinateSystem === "polar" ? false : (this.#tooltip()?.shared() ?? false);
         const hitState = ChartHitTestEngine.testHit(pointer, currentScene, shared);
 
         if (hitState.activeHitTarget || hitState.activeHits.length > 0) {
             this.#interactionState = hitState;
             const primaryHit = hitState.activeHitTarget ?? hitState.activeHits[0];
             if (primaryHit) {
-                const rawX = primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : pointer.x);
+                const rawX =
+                    primaryHit.point?.x ??
+                    (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : pointer.x);
                 const rawY = primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : pointer.y);
                 const clampedX = Math.max(10, Math.min(this.#currentWidth - 10, rawX));
                 const clampedY = Math.max(10, Math.min(this.#currentHeight - 10, rawY));
@@ -411,7 +456,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
                     y: clampedY
                 };
                 this.tooltipPosition.set(tooltipPos);
-                this.tooltipContext.set(this.#buildTooltipContext(hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit], shared));
+                this.tooltipContext.set(
+                    this.#buildTooltipContext(hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit], shared)
+                );
             }
         } else {
             this.#clearInteraction();
@@ -474,11 +521,23 @@ export class MonaChartComponent implements ChartRegistrationContext {
         };
     }
 
+    public toggleLegendItem(item: ChartLegendItem): void {
+        if (item.kind === "datum" && item.dataIndex !== undefined) {
+            const polarSeries = this.polarSeriesRegistration();
+            if (polarSeries) {
+                polarSeries.toggleSliceVisibility(item.dataIndex);
+                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+            }
+        } else {
+            this.toggleSeriesVisibility(item.seriesId);
+        }
+    }
+
     public toggleSeriesVisibility(seriesId: string): void {
         const s = this.#registeredSeries().find(item => item.id === seriesId);
         if (s) {
             let nextVisibility: boolean;
-            if (s.toggleVisibility) {
+            if ("toggleVisibility" in s && typeof s.toggleVisibility === "function") {
                 nextVisibility = s.toggleVisibility();
             } else if ("set" in s.visible && typeof (s.visible as { set: (v: boolean) => void }).set === "function") {
                 nextVisibility = !s.visible();
@@ -497,7 +556,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 if (activeHits.length === 0) {
                     this.#clearInteraction();
                 } else {
-                    const primary = activeHits.find((h: SceneHitTarget) => h.seriesId === this.#interactionState?.activeHitTarget?.seriesId) ?? activeHits[0];
+                    const primary =
+                        activeHits.find(
+                            (h: SceneHitTarget) => h.seriesId === this.#interactionState?.activeHitTarget?.seriesId
+                        ) ?? activeHits[0];
                     this.#interactionState = {
                         activeHitTarget: primary,
                         activeHits,
@@ -521,20 +583,25 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const xAxisType = xAxis?.type();
 
         const pointContexts: ChartTooltipPointContext[] = hits.map(hit => {
-            const seriesItem = seriesItems.find(s => s.seriesId === hit.seriesId);
-            const color = seriesItem?.color ?? "#3b82f6";
-            const xStr = formatXValue(hit.xValue, hit.index, xFormatter, xAxisType);
+            const seriesItem = seriesItems.find(s => s.itemId === hit.sliceId || s.seriesId === hit.seriesId);
+            const color = hit.color ?? seriesItem?.color ?? "#3b82f6";
+            const xStr = hit.formattedCategory ?? formatXValue(hit.xValue, hit.index, xFormatter, xAxisType);
             const yStr = formatYValue(hit.yValue, hit.index, yFormatter);
 
             return {
+                category: hit.category,
                 color,
                 dataIndex: hit.index,
                 datum: hit.datum,
+                formattedCategory: hit.formattedCategory,
+                formattedPercentage: hit.formattedPercentage,
                 formattedX: xStr,
                 formattedY: yStr,
+                percentage: hit.percentage,
                 seriesId: hit.seriesId,
                 seriesName: hit.seriesName,
                 seriesType: hit.seriesType,
+                sliceId: hit.sliceId,
                 xValue: hit.xValue,
                 yValue: hit.yValue
             };
@@ -657,6 +724,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const newScene = ChartLayoutEngine.computeScene({
             containerHeight: this.#currentHeight,
             containerWidth: this.#currentWidth,
+            measurements: this.#labelMeasurements,
             rootData: this.data(),
             rootXField: this.xField(),
             series: this.#registeredSeries(),
@@ -684,11 +752,13 @@ export class MonaChartComponent implements ChartRegistrationContext {
         this.#activeKeyboardSeriesId = matchingHit.seriesId;
 
         const pointPos: ChartPoint = {
-            x: matchingHit.point?.x ?? (matchingHit.bounds ? matchingHit.bounds.x + matchingHit.bounds.width / 2 : bucket.centerX),
+            x:
+                matchingHit.point?.x ??
+                (matchingHit.bounds ? matchingHit.bounds.x + matchingHit.bounds.width / 2 : bucket.centerX),
             y: matchingHit.point?.y ?? (matchingHit.bounds ? matchingHit.bounds.y : 0)
         };
 
-        const shared = this.#tooltip()?.shared() ?? false;
+        const shared = currentScene.coordinateSystem === "polar" ? false : (this.#tooltip()?.shared() ?? false);
         const activeHits = shared ? bucket.hits : [matchingHit];
 
         this.#interactionState = {
@@ -701,22 +771,144 @@ export class MonaChartComponent implements ChartRegistrationContext {
         this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared));
 
         this.pointFocusChange.emit({
+            category: matchingHit.category,
             dataIndex: matchingHit.index,
             datum: matchingHit.datum,
+            percentage: matchingHit.percentage,
             seriesId: matchingHit.seriesId,
             seriesName: matchingHit.seriesName,
             seriesType: matchingHit.seriesType,
+            sliceId: matchingHit.sliceId,
             xValue: matchingHit.xValue,
             yValue: matchingHit.yValue
         });
 
-        const xAxis = this.#xAxis();
-        const yAxis = this.#yAxis();
-        const xStr = formatXValue(matchingHit.xValue, matchingHit.index, xAxis?.formatter(), xAxis?.type());
-        const yStr = formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter());
-        this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}`);
+        if (currentScene.coordinateSystem === "polar") {
+            const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
+            this.activeAccessibilityText.set(
+                `${matchingHit.seriesName}, ${matchingHit.formattedCategory ?? matchingHit.category}: ${matchingHit.yValue}${pctStr}`
+            );
+        } else {
+            const xAxis = this.#xAxis();
+            const yAxis = this.#yAxis();
+            const xStr = formatXValue(matchingHit.xValue, matchingHit.index, xAxis?.formatter(), xAxis?.type());
+            const yStr = formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter());
+            this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}`);
+        }
 
         this.#paint();
+    }
+
+    protected sliceLabelContext(slice: ScenePolarSlice): ChartSliceLabelTemplateContext {
+        const polarSeries = this.polarSeriesRegistration();
+        const sliceContext: ChartSliceContext = {
+            category: slice.category,
+            color: slice.color,
+            dataIndex: slice.dataIndex,
+            datum: slice.datum,
+            formattedCategory: slice.formattedCategory,
+            formattedPercentage: slice.formattedPercentage,
+            formattedValue: slice.formattedValue,
+            percentage: slice.percentage,
+            seriesId: polarSeries?.id ?? "",
+            seriesName: polarSeries?.name() ?? "",
+            seriesType: polarSeries?.type ?? "pie",
+            value: slice.value
+        };
+
+        return {
+            $implicit: sliceContext,
+            category: slice.category,
+            color: slice.color,
+            dataIndex: slice.dataIndex,
+            datum: slice.datum,
+            formattedCategory: slice.formattedCategory,
+            formattedPercentage: slice.formattedPercentage,
+            formattedValue: slice.formattedValue,
+            percentage: slice.percentage,
+            seriesId: polarSeries?.id ?? "",
+            seriesName: polarSeries?.name() ?? "",
+            seriesType: polarSeries?.type ?? "pie",
+            slice: sliceContext,
+            value: slice.value
+        };
+    }
+
+    public observeLabelElement(element: HTMLElement, sliceId: string): void {
+        if (typeof ResizeObserver === "undefined") {
+            return;
+        }
+        if (!this.#labelResizeObserver) {
+            this.#labelResizeObserver = new ResizeObserver(entries => {
+                let hasChanged = false;
+                for (const entry of entries) {
+                    const targetSliceId = this.#observedLabelElements.get(entry.target);
+                    if (targetSliceId) {
+                        const { width, height } = entry.contentRect;
+                        const prev = this.#labelMeasurements.get(targetSliceId);
+                        const widthDiff = prev ? Math.abs(prev.width - width) : width;
+                        const heightDiff = prev ? Math.abs(prev.height - height) : height;
+                        if (widthDiff > 1 || heightDiff > 1) {
+                            this.#labelMeasurements.set(targetSliceId, { width, height });
+                            hasChanged = true;
+                        }
+                    }
+                }
+                if (hasChanged) {
+                    this.invalidate(ChartInvalidationReason.Layout);
+                }
+            });
+        }
+
+        this.#observedLabelElements.set(element, sliceId);
+        this.#labelResizeObserver.observe(element);
+    }
+
+    public unobserveLabelElement(element: HTMLElement, _sliceId: string): void {
+        if (this.#labelResizeObserver) {
+            this.#labelResizeObserver.unobserve(element);
+        }
+        this.#observedLabelElements.delete(element);
+    }
+
+    protected sliceLabelText(slice: ScenePolarSlice): string {
+        const polarSeries = this.polarSeriesRegistration();
+        const content = polarSeries?.labelContent() ?? "percentage";
+        switch (content) {
+            case "category":
+                return slice.formattedCategory;
+            case "value":
+                return slice.formattedValue;
+            case "category-percentage":
+                return `${slice.formattedCategory} (${slice.formattedPercentage})`;
+            case "percentage":
+            default:
+                return slice.formattedPercentage;
+        }
+    }
+
+    protected shouldShowSliceLabel(slice: ScenePolarSlice): boolean {
+        const polarSeries = this.polarSeriesRegistration();
+        if (!polarSeries || !polarSeries.showLabels()) {
+            return false;
+        }
+        const position = polarSeries.labelPosition ? polarSeries.labelPosition() : "outside";
+        if (position === "outside") {
+            return slice.label?.visible ?? false;
+        }
+        const minAngle = polarSeries.minLabelAngle();
+        const sliceSpanDeg = ((slice.endAngle - slice.startAngle) * 180) / Math.PI;
+        return sliceSpanDeg >= minAngle;
+    }
+
+    protected isOutsideLabel(): boolean {
+        const polarSeries = this.polarSeriesRegistration();
+        const position = polarSeries?.labelPosition ? polarSeries.labelPosition() : "outside";
+        return position === "outside";
+    }
+
+    protected sliceContrastColor(slice: ScenePolarSlice): string {
+        return this.#styleResolver.getReadableForeground(slice.color);
     }
 
     #updateCanvasBackingStore(width: number, height: number): void {
@@ -740,4 +932,3 @@ export class MonaChartComponent implements ChartRegistrationContext {
         }
     }
 }
-

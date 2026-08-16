@@ -1,10 +1,11 @@
 import { Component, computed, inject, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     ChartAxisLabelTemplateDirective,
+    ChartCenterTemplateDirective,
     ChartLegendItemTemplateDirective,
     ChartNoDataTemplateDirective,
+    ChartSliceLabelTemplateDirective,
     ChartTooltipTemplateDirective,
     MonaAreaSeriesComponent,
     MonaBarSeriesComponent,
@@ -13,16 +14,22 @@ import {
     MonaChartTooltipComponent,
     MonaChartXAxisComponent,
     MonaChartYAxisComponent,
+    MonaDonutSeriesComponent,
     MonaLineSeriesComponent,
+    MonaPieSeriesComponent,
     type ChartAreaFillMode,
     type ChartCurve,
     type ChartPointEvent,
     type ChartPointFocusEvent,
-    type ChartSeriesVisibilityEvent
+    type ChartPolarLabelContent,
+    type ChartPolarLabelPosition,
+    type ChartSeriesVisibilityEvent,
+    type ChartSliceVisibilityEvent
 } from "@nanahoshi/mona-ui/chart";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui/tabs";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 
 interface DemoLogEntry {
     readonly details: string;
@@ -44,6 +51,12 @@ interface TimePointMetric {
     readonly timestamp: Date;
 }
 
+interface MarketShareDatum {
+    readonly category: string;
+    readonly color?: string;
+    readonly value: number;
+}
+
 @Component({
     imports: [
         ButtonDirective,
@@ -55,12 +68,16 @@ interface TimePointMetric {
         MonaLineSeriesComponent,
         MonaAreaSeriesComponent,
         MonaBarSeriesComponent,
+        MonaPieSeriesComponent,
+        MonaDonutSeriesComponent,
         MonaChartLegendComponent,
         MonaChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
         ChartLegendItemTemplateDirective,
         ChartNoDataTemplateDirective,
         ChartTooltipTemplateDirective,
+        ChartSliceLabelTemplateDirective,
+        ChartCenterTemplateDirective,
         TabsComponent,
         TabComponent,
         TabContentTemplateDirective
@@ -72,7 +89,7 @@ export class ChartDemoComponent {
     readonly #themeService = inject(ThemeService, { optional: true });
     #logId: number = 0;
 
-    protected readonly activeTab = signal<"custom" | "grouped" | "mixed" | "time">("mixed");
+    protected readonly activeTab = signal<"custom" | "donut" | "grouped" | "mixed" | "pie" | "time">("mixed");
     protected readonly areaFillMode = signal<ChartAreaFillMode>("gradient");
     protected readonly areaFillModeOptions: readonly { label: string; value: ChartAreaFillMode }[] = [
         { label: "Gradient (Fade to 0)", value: "gradient" },
@@ -104,9 +121,31 @@ export class ChartDemoComponent {
     protected readonly displayedMonthlyData = computed(() => {
         return this.isDataEmpty() ? [] : this.monthlyData();
     });
+
+    // Polar Data & Controls
+    protected readonly donutCornerRadius = signal<number>(4);
+    protected readonly donutData = signal<readonly MarketShareDatum[]>([
+        { category: "Compute Engine", value: 45000 },
+        { category: "Cloud Storage", value: 28000 },
+        { category: "Cloud SQL & Spanner", value: 22000 },
+        { category: "Kubernetes Engine", value: 35000 },
+        { category: "BigQuery Analytics", value: 19000 },
+        { category: "Networking & CDN", value: 11000 }
+    ]);
+    protected readonly donutInnerRadiusRatio = signal<number>(0.62);
+    protected readonly donutLabelPosition = signal<ChartPolarLabelPosition>("outside");
+    protected readonly donutOuterRatio = signal<number>(0.9);
+    protected readonly donutPadAngle = signal<number>(2);
+    protected readonly donutShowLabels = signal<boolean>(false);
+    protected readonly donutUseCenterSummary = signal<boolean>(true);
+
     public readonly eventLogs = signal<readonly DemoLogEntry[]>([]);
     protected readonly includeNegativeValues = signal<boolean>(false);
     protected readonly isDataEmpty = signal<boolean>(false);
+    protected readonly labelPositionOptions: readonly { label: string; value: ChartPolarLabelPosition }[] = [
+        { label: "Outside (Leader Lines)", value: "outside" },
+        { label: "Inside (Slice Center)", value: "inside" }
+    ];
     protected readonly legendPosition = signal<"bottom" | "left" | "right" | "top">("bottom");
     protected readonly legendPositionOptions: readonly { label: string; value: "bottom" | "left" | "right" | "top" }[] = [
         { label: "Bottom", value: "bottom" },
@@ -123,6 +162,32 @@ export class ChartDemoComponent {
         { actual: 8100, forecast: 7500, month: "Jun", target: 7600 }
     ]);
     protected readonly niceAxes = signal<boolean>(true);
+
+    // Pie series controls
+    protected readonly pieCornerRadius = signal<number>(0);
+    protected readonly pieData = signal<readonly MarketShareDatum[]>([
+        { category: "Chrome", value: 65 },
+        { category: "Safari", value: 18 },
+        { category: "Edge", value: 8 },
+        { category: "Firefox", value: 5 },
+        { category: "Opera", value: 3 },
+        { category: "Other", value: 1 }
+    ]);
+    protected readonly pieEndAngle = signal<number>(360);
+    protected readonly pieLabelContent = signal<ChartPolarLabelContent>("percentage");
+    protected readonly pieLabelContentOptions: readonly { label: string; value: ChartPolarLabelContent }[] = [
+        { label: "Percentage (e.g. 65%)", value: "percentage" },
+        { label: "Category (e.g. Chrome)", value: "category" },
+        { label: "Value (e.g. 65)", value: "value" },
+        { label: "Category & Percentage", value: "category-percentage" }
+    ];
+    protected readonly pieLabelPosition = signal<ChartPolarLabelPosition>("outside");
+    protected readonly pieOuterRatio = signal<number>(0.9);
+    protected readonly piePadAngle = signal<number>(1);
+    protected readonly pieShowLabels = signal<boolean>(true);
+    protected readonly pieStartAngle = signal<number>(0);
+    protected readonly pieUseCustomLabelTemplate = signal<boolean>(false);
+
     protected readonly sharedTooltip = signal<boolean>(true);
     protected readonly showArea = signal<boolean>(true);
     protected readonly showAxisTitles = signal<boolean>(false);
@@ -163,8 +228,29 @@ export class ChartDemoComponent {
             ? Math.round(minVal + Math.random() * range)
             : actual;
 
-        this.monthlyData.update(list => [...list, { actual, forecast, month: `${monthName} ${currentLength + 1}`, target }]);
+        this.monthlyData.update(list => [
+            ...list,
+            { actual, forecast, month: `${monthName} ${currentLength + 1}`, target }
+        ]);
         this.#addLog("dataUpdate", `Appended data point: ${monthName}`);
+    }
+
+    public appendPieSlice(): void {
+        const categories = ["Brave", "Vivaldi", "DuckDuckGo", "Arc", "Samsung Internet"];
+        const currentCount = this.pieData().length;
+        const cat = categories[currentCount % categories.length];
+        const val = Math.round(2 + Math.random() * 15);
+        this.pieData.update(list => [...list, { category: `${cat} ${currentCount + 1}`, value: val }]);
+        this.#addLog("dataUpdate", `Appended pie slice: ${cat}`);
+    }
+
+    public appendDonutSlice(): void {
+        const categories = ["Vertex AI", "Cloud Functions", "API Gateway", "Cloud Armor", "Pub/Sub"];
+        const currentCount = this.donutData().length;
+        const cat = categories[currentCount % categories.length];
+        const val = Math.round(4000 + Math.random() * 25000);
+        this.donutData.update(list => [...list, { category: `${cat} ${currentCount + 1}`, value: val }]);
+        this.#addLog("dataUpdate", `Appended donut service: ${cat}`);
     }
 
     public clearLogs(): void {
@@ -197,6 +283,39 @@ export class ChartDemoComponent {
         }
     }
 
+    public onLabelContentChange(content: ChartPolarLabelContent | null): void {
+        if (content) {
+            this.pieLabelContent.set(content);
+        }
+    }
+
+    public onPieLabelPositionChange(pos: ChartPolarLabelPosition | null): void {
+        if (pos) {
+            this.pieLabelPosition.set(pos);
+        }
+    }
+
+    public onDonutLabelPositionChange(pos: ChartPolarLabelPosition | null): void {
+        if (pos) {
+            this.donutLabelPosition.set(pos);
+        }
+    }
+
+    public loadDensePieData(): void {
+        this.pieData.set([
+            { category: "Chrome", value: 45 },
+            { category: "Safari", value: 20 },
+            { category: "Edge", value: 12 },
+            { category: "Firefox", value: 8 },
+            { category: "Samsung Internet", value: 5 },
+            { category: "Opera", value: 4 },
+            { category: "Brave", value: 3 },
+            { category: "Vivaldi", value: 2 },
+            { category: "DuckDuckGo", value: 1 }
+        ]);
+        this.#addLog("dataUpdate", "Loaded dense 9-slice dataset testing outside leader line collision resolution");
+    }
+
     public onLegendPositionChange(pos: "bottom" | "left" | "right" | "top" | null): void {
         if (pos) {
             this.legendPosition.set(pos);
@@ -204,16 +323,18 @@ export class ChartDemoComponent {
     }
 
     public onPointClick(event: ChartPointEvent): void {
+        const polarDetails = event.category ? ` | Category: "${event.category}"` : "";
         this.#addLog(
             "pointClick",
-            `Series: "${event.seriesName}" | X: ${event.xValue} | Y: ${event.yValue} | Index: ${event.dataIndex}`
+            `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${event.yValue} | Index: ${event.dataIndex}`
         );
     }
 
     public onPointFocusChange(event: ChartPointFocusEvent): void {
+        const polarDetails = event.category ? ` | Category: "${event.category}"` : "";
         this.#addLog(
             "pointFocusChange",
-            `Series: "${event.seriesName}" | X: ${event.xValue} | Y: ${event.yValue} | Index: ${event.dataIndex}`
+            `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${event.yValue} | Index: ${event.dataIndex}`
         );
     }
 
@@ -221,6 +342,13 @@ export class ChartDemoComponent {
         this.#addLog(
             "seriesVisibilityChange",
             `Series: "${event.seriesName}" | Visible: ${event.visible}`
+        );
+    }
+
+    public onSliceVisibilityChange(event: ChartSliceVisibilityEvent): void {
+        this.#addLog(
+            "sliceVisibilityChange",
+            `Slice: "${event.category}" | DataIndex: ${event.dataIndex} | Visible: ${event.visible}`
         );
     }
 
@@ -242,6 +370,16 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Randomized monthly dataset (same data across all series)");
     }
 
+    public randomizeDonutData(): void {
+        this.donutData.update(list =>
+            list.map(item => ({
+                ...item,
+                value: Math.max(5000, Math.round(5000 + Math.random() * 50000))
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized donut cloud revenue dataset");
+    }
+
     public randomizeIndividually(): void {
         this.useIndependentSeriesData.set(true);
         const minVal = this.includeNegativeValues() ? -4000 : 2000;
@@ -255,6 +393,16 @@ export class ChartDemoComponent {
             }))
         );
         this.#addLog("dataUpdate", "Randomized monthly dataset (individual data for each series)");
+    }
+
+    public randomizePieData(): void {
+        this.pieData.update(list =>
+            list.map(item => ({
+                ...item,
+                value: Math.max(2, Math.round(5 + Math.random() * 80))
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized pie chart slice values");
     }
 
     public resetData(): void {
@@ -272,7 +420,7 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Reset dataset to defaults");
     }
 
-    public setTab(tab: "custom" | "grouped" | "mixed" | "time"): void {
+    public setTab(tab: "custom" | "donut" | "grouped" | "mixed" | "pie" | "time"): void {
         this.activeTab.set(tab);
     }
 

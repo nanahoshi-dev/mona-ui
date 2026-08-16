@@ -5,29 +5,29 @@ import { CanvasChartRenderer } from "./canvas-chart-renderer";
 
 function createMockContext(): CanvasRenderingContext2D {
     return {
-        arc: vi.fn(),
         beginPath: vi.fn(),
         clearRect: vi.fn(),
         clip: vi.fn(),
         closePath: vi.fn(),
-        createLinearGradient: vi.fn(() => ({
+        createLinearGradient: vi.fn().mockReturnValue({
             addColorStop: vi.fn()
-        })),
+        }),
         fill: vi.fn(),
-        fillRect: vi.fn(),
         fillStyle: "",
         globalAlpha: 1,
+        arc: vi.fn(),
         lineTo: vi.fn(),
         lineWidth: 1,
         moveTo: vi.fn(),
         quadraticCurveTo: vi.fn(),
         rect: vi.fn(),
         restore: vi.fn(),
+        roundRect: vi.fn(),
         save: vi.fn(),
         setLineDash: vi.fn(),
-        setTransform: vi.fn(),
         stroke: vi.fn(),
-        strokeStyle: ""
+        strokeStyle: "",
+        translate: vi.fn()
     } as unknown as CanvasRenderingContext2D;
 }
 
@@ -39,9 +39,11 @@ describe("CanvasChartRenderer", () => {
         const scene: ChartScene = {
             axes: [],
             coordinateSystem: "cartesian",
+            hasRenderableData: true,
             height: 300,
             hitTargets: [],
             interactionBuckets: [],
+            legendItems: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [],
             width: 500
@@ -63,9 +65,11 @@ describe("CanvasChartRenderer", () => {
         const scene: ChartScene = {
             axes: [],
             coordinateSystem: "cartesian",
+            hasRenderableData: true,
             height: 300,
             hitTargets: [],
             interactionBuckets: [],
+            legendItems: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -113,9 +117,11 @@ describe("CanvasChartRenderer", () => {
         const scene: ChartScene = {
             axes: [],
             coordinateSystem: "cartesian",
+            hasRenderableData: true,
             height: 300,
             hitTargets: [],
             interactionBuckets: [],
+            legendItems: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -161,9 +167,11 @@ describe("CanvasChartRenderer", () => {
         const scene: ChartScene = {
             axes: [],
             coordinateSystem: "cartesian",
+            hasRenderableData: true,
             height: 300,
             hitTargets: [],
             interactionBuckets: [],
+            legendItems: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -208,9 +216,11 @@ describe("CanvasChartRenderer", () => {
         const scene: ChartScene = {
             axes: [],
             coordinateSystem: "cartesian",
+            hasRenderableData: true,
             height: 300,
             hitTargets: [],
             interactionBuckets: [],
+            legendItems: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -268,9 +278,11 @@ describe("CanvasChartRenderer", () => {
                 }
             ],
             coordinateSystem: "cartesian",
+            hasRenderableData: true,
             height: 300,
             hitTargets: [],
             interactionBuckets: [],
+            legendItems: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [],
             width: 500
@@ -278,10 +290,11 @@ describe("CanvasChartRenderer", () => {
 
         CanvasChartRenderer.render(ctx, scene, null, styleResolver);
 
-        // Grid stroke style should be subtle rgba and never black (#000000 or rgb(0, 0, 0))
-        expect(strokeStyles[0]).toBe("rgba(148, 163, 184, 0.2)");
-        expect(strokeStyles[0]).not.toBe("#000000");
-        expect(strokeStyles[0]).not.toBe("rgb(0, 0, 0)");
+        // Fallback grid strokeStyle should be translucent rgba and not solid black
+        const gridStrokeStyle = strokeStyles[0];
+        expect(gridStrokeStyle).toBe("rgba(148, 163, 184, 0.2)");
+        expect(gridStrokeStyle).not.toBe("#000000");
+        expect(gridStrokeStyle).not.toBe("rgb(0, 0, 0)");
     });
 
     it("should render bar hover highlight with rounded drawBarRect and translucent fillStyle", () => {
@@ -295,6 +308,7 @@ describe("CanvasChartRenderer", () => {
         const scene: ChartScene = {
             axes: [],
             coordinateSystem: "cartesian",
+            hasRenderableData: true,
             height: 300,
             hitTargets: [
                 {
@@ -311,6 +325,7 @@ describe("CanvasChartRenderer", () => {
                 }
             ],
             interactionBuckets: [],
+            legendItems: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -347,5 +362,65 @@ describe("CanvasChartRenderer", () => {
         expect(highlightStyle).toBe("rgba(255, 255, 255, 0.25)");
         expect(highlightStyle).not.toBe("#000000");
         expect(highlightStyle).not.toBe("rgb(0, 0, 0)");
+    });
+
+    it("should dispatch polar chart scene to polar renderer", () => {
+        const ctx = createMockContext();
+        const polarScene: ChartScene = {
+            center: { x: 250, y: 150 },
+            coordinateSystem: "polar",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            plotRect: { height: 268, width: 468, x: 16, y: 16 },
+            series: [
+                {
+                    center: { x: 250, y: 150 },
+                    cornerRadius: 0,
+                    formattedTotal: "100",
+                    id: "pie-1",
+                    innerRadius: 0,
+                    name: "Pie",
+                    outerRadius: 100,
+                    padAngle: 0,
+                    slices: [
+                        {
+                            category: "A",
+                            centroid: { x: 250, y: 100 },
+                            color: "#3b82f6",
+                            cornerRadius: 0,
+                            dataIndex: 0,
+                            datum: {},
+                            endAngle: Math.PI,
+                            formattedCategory: "A",
+                            formattedPercentage: "50%",
+                            formattedValue: "50",
+                            innerRadius: 0,
+                            insideLabelPoint: { x: 250, y: 100 },
+                            labelPoint: { x: 250, y: 100 },
+                            outerRadius: 100,
+                            padAngle: 0,
+                            percentage: 0.5,
+                            sliceId: "pie-1:slice:0",
+                            startAngle: 0,
+                            value: 50,
+                            visible: true
+                        }
+                    ],
+                    style: { fillOpacity: 1, strokeColor: "#ffffff", strokeWidth: 1 },
+                    total: 100,
+                    type: "pie"
+                }
+            ],
+            width: 500
+        };
+
+        CanvasChartRenderer.render(ctx, polarScene, null, styleResolver);
+
+        expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 500, 300);
+        expect(ctx.translate).toHaveBeenCalledWith(250, 150);
+        expect(ctx.fill).toHaveBeenCalled();
     });
 });

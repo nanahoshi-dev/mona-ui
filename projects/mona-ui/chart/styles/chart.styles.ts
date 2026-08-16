@@ -1,12 +1,12 @@
 import { cva, type VariantProps } from "class-variance-authority";
 
 export const chartBaseThemeVariants = cva(
-    "relative block select-none h-80 w-full outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:ring-offset-1 focus-visible:ring-offset-surface",
+    "relative block select-none h-80 w-full outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:ring-offset-1 focus-visible:ring-offset-surface cursor-default",
     {
         variants: {
             interactive: {
                 false: "",
-                true: "cursor-crosshair"
+                true: ""
             }
         }
     }
@@ -44,7 +44,7 @@ export const chartLegendItemBaseThemeVariants = cva(
 );
 
 export const chartTooltipBaseThemeVariants = cva(
-    "pointer-events-none absolute z-50 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md transition-opacity duration-100"
+    "pointer-events-none absolute z-50 max-w-[calc(100%-16px)] rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md transition-opacity duration-100"
 );
 
 export const chartNoDataBaseThemeVariants = cva(

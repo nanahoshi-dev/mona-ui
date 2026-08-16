@@ -2795,6 +2795,156 @@
       }
     ]
   },
+  "MonaDonutSeriesComponent": {
+    "name": "MonaDonutSeriesComponent",
+    "selector": "\"mona-donut-series\"",
+    "inputs": [
+      {
+        "name": "categoryField",
+        "type": "ChartField",
+        "description": "Property key or accessor extracting the category label for each slice.",
+        "kind": "input"
+      },
+      {
+        "name": "categoryFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "description": "Formatter callback for slice category labels.",
+        "kind": "input"
+      },
+      {
+        "name": "colorField",
+        "type": "ChartField | undefined",
+        "description": "Accessor function or property key extracting an explicit color for each slice.",
+        "kind": "input"
+      },
+      {
+        "name": "colors",
+        "type": "readonly string[] | undefined",
+        "description": "Explicit array of colors used to fill successive slices.",
+        "kind": "input"
+      },
+      {
+        "name": "cornerRadius",
+        "type": "number | undefined",
+        "description": "Corner radius in pixels applied to slice arc boundaries.",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "description": "Series-specific dataset overriding root chart data.",
+        "kind": "input"
+      },
+      {
+        "name": "endAngle",
+        "type": "number",
+        "description": "Ending angle in degrees (clockwise from 12 o'clock).",
+        "kind": "input"
+      },
+      {
+        "name": "field",
+        "type": "ChartField",
+        "description": "Property key or accessor extracting the numeric slice value.",
+        "kind": "input"
+      },
+      {
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "description": "Opacity of slice fills (between 0 and 1).",
+        "kind": "input"
+      },
+      {
+        "name": "innerRadiusRatio",
+        "type": "number",
+        "description": "Ratio of the inner hole radius relative to the outer radius (0 to 0.95).",
+        "kind": "input"
+      },
+      {
+        "name": "labelContent",
+        "type": "ChartPolarLabelContent",
+        "description": "Content to display in default slice data labels.",
+        "kind": "input"
+      },
+      {
+        "name": "labelPosition",
+        "type": "ChartPolarLabelPosition",
+        "description": "Placement position for slice data labels (\"outside\" with leader lines or \"inside\" slice bounds).",
+        "kind": "input"
+      },
+      {
+        "name": "minLabelAngle",
+        "type": "number",
+        "description": "Minimum slice arc angle in degrees required to render an inside data label.",
+        "kind": "input"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Series name used in tooltips and accessibility announcements.",
+        "kind": "input"
+      },
+      {
+        "name": "outerRadiusRatio",
+        "type": "number",
+        "description": "Outer radius ratio relative to available plot bounds (0.1 to 1).",
+        "kind": "input"
+      },
+      {
+        "name": "padAngle",
+        "type": "number",
+        "description": "Angular padding in degrees between adjacent slices.",
+        "kind": "input"
+      },
+      {
+        "name": "showLabels",
+        "type": "boolean",
+        "description": "Whether to display inside slice data labels.",
+        "kind": "input"
+      },
+      {
+        "name": "sliceVisibilityChange",
+        "type": "ChartSliceVisibilityEvent",
+        "description": "Emits when an individual slice's visibility is toggled via the legend.",
+        "kind": "output"
+      },
+      {
+        "name": "startAngle",
+        "type": "number",
+        "description": "Starting angle in degrees (0 is 12 o'clock, clockwise).",
+        "kind": "input"
+      },
+      {
+        "name": "strokeColor",
+        "type": "string",
+        "description": "Color of slice separator strokes.",
+        "kind": "input"
+      },
+      {
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "description": "Stroke width in pixels for slice separators.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the series.",
+        "kind": "input"
+      },
+      {
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "description": "Formatter callback for slice numeric values.",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Two-way bindable visibility of the series.",
+        "kind": "model"
+      }
+    ]
+  },
   "MonaLineSeriesComponent": {
     "name": "MonaLineSeriesComponent",
     "selector": "\"mona-line-series\"",
@@ -2869,6 +3019,162 @@
         "name": "xField",
         "type": "ChartField | undefined",
         "description": "Property key or accessor extracting the X value, overriding the root chart X field.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonaPieSeriesComponent": {
+    "name": "MonaPieSeriesComponent",
+    "selector": "\"mona-pie-series\"",
+    "inputs": [
+      {
+        "name": "categoryField",
+        "type": "ChartField",
+        "description": "Property key or accessor extracting the category label for each slice.",
+        "kind": "input"
+      },
+      {
+        "name": "categoryFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "description": "Formatter callback for slice category labels.",
+        "kind": "input"
+      },
+      {
+        "name": "colorField",
+        "type": "ChartField | undefined",
+        "description": "Accessor function or property key extracting an explicit color for each slice.",
+        "kind": "input"
+      },
+      {
+        "name": "colors",
+        "type": "readonly string[] | undefined",
+        "description": "Explicit array of colors used to fill successive slices.",
+        "kind": "input"
+      },
+      {
+        "name": "cornerRadius",
+        "type": "number | undefined",
+        "description": "Corner radius in pixels applied to slice arc boundaries.",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "description": "Series-specific dataset overriding root chart data.",
+        "kind": "input"
+      },
+      {
+        "name": "endAngle",
+        "type": "number",
+        "description": "Ending angle in degrees (clockwise from 12 o'clock).",
+        "kind": "input"
+      },
+      {
+        "name": "field",
+        "type": "ChartField",
+        "description": "Property key or accessor extracting the numeric slice value.",
+        "kind": "input"
+      },
+      {
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "description": "Opacity of slice fills (between 0 and 1).",
+        "kind": "input"
+      },
+      {
+        "name": "labelContent",
+        "type": "ChartPolarLabelContent",
+        "description": "Content to display in default slice data labels.",
+        "kind": "input"
+      },
+      {
+        "name": "labelPosition",
+        "type": "ChartPolarLabelPosition",
+        "description": "Placement position for slice data labels (\"outside\" with leader lines or \"inside\" slice bounds).",
+        "kind": "input"
+      },
+      {
+        "name": "minLabelAngle",
+        "type": "number",
+        "description": "Minimum slice arc angle in degrees required to render an inside data label.",
+        "kind": "input"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Series name used in tooltips and accessibility announcements.",
+        "kind": "input"
+      },
+      {
+        "name": "outerRadiusRatio",
+        "type": "number",
+        "description": "Outer radius ratio relative to available plot bounds (0.1 to 1).",
+        "kind": "input"
+      },
+      {
+        "name": "padAngle",
+        "type": "number",
+        "description": "Angular padding in degrees between adjacent slices.",
+        "kind": "input"
+      },
+      {
+        "name": "showLabels",
+        "type": "boolean",
+        "description": "Whether to display inside slice data labels.",
+        "kind": "input"
+      },
+      {
+        "name": "sliceVisibilityChange",
+        "type": "ChartSliceVisibilityEvent",
+        "description": "Emits when an individual slice's visibility is toggled via the legend.",
+        "kind": "output"
+      },
+      {
+        "name": "startAngle",
+        "type": "number",
+        "description": "Starting angle in degrees (0 is 12 o'clock, clockwise).",
+        "kind": "input"
+      },
+      {
+        "name": "strokeColor",
+        "type": "string",
+        "description": "Color of slice separator strokes.",
+        "kind": "input"
+      },
+      {
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "description": "Stroke width in pixels for slice separators.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the series.",
+        "kind": "input"
+      },
+      {
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "description": "Formatter callback for slice numeric values.",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Two-way bindable visibility of the series.",
+        "kind": "model"
+      }
+    ]
+  },
+  "ChartLabelMeasureDirective": {
+    "name": "ChartLabelMeasureDirective",
+    "selector": "\"[monaChartLabelMeasure]\"",
+    "inputs": [
+      {
+        "name": "sliceId",
+        "type": "string",
+        "description": "",
         "kind": "input"
       }
     ]

@@ -1,11 +1,16 @@
 import type { ChartAxisTick, ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartField, ChartPadding, ChartRect } from "../../models/chart.models";
-import type { ChartAxisRegistration, ChartSeriesRegistration } from "../context/chart-registration-context";
+import type { ChartLegendItem } from "../../models/chart-series.models";
+import type {
+    ChartAxisRegistration,
+    ChartCartesianSeriesRegistration
+} from "../context/chart-registration-context";
 import {
     calculateCategoryDomain,
     calculateContinuousYDomain,
     calculateLinearXDomain,
     calculateTimeDomain,
+    hasRenderableData,
     inferXAxisType
 } from "../data/chart-domain";
 import { resolveData, resolveValue } from "../data/chart-value-resolver";
@@ -23,7 +28,7 @@ import type {
     ChartLineSeriesScene,
     ChartSeriesScene
 } from "../scene/cartesian-scene";
-import type { ChartScene } from "../scene/chart-scene";
+import type { CartesianChartScene } from "../scene/chart-scene";
 import type {
     ChartInteractionBucket,
     ChartInteractionXKey,
@@ -47,14 +52,14 @@ export interface CartesianLayoutOptions {
     containerWidth: number;
     rootData: readonly unknown[];
     rootXField?: ChartField;
-    series: readonly ChartSeriesRegistration[];
+    series: readonly ChartCartesianSeriesRegistration[];
     styleResolver: ChartStyleResolver;
     xAxis?: ChartAxisRegistration;
     yAxis?: ChartAxisRegistration;
 }
 
 export class CartesianLayoutEngine {
-    public static computeScene(options: CartesianLayoutOptions): ChartScene {
+    public static computeScene(options: CartesianLayoutOptions): CartesianChartScene {
         const {
             containerHeight,
             containerWidth,
@@ -126,9 +131,11 @@ export class CartesianLayoutEngine {
             return {
                 axes: [],
                 coordinateSystem: "cartesian",
+                hasRenderableData: false,
                 height: containerHeight,
                 hitTargets: [],
                 interactionBuckets: [],
+                legendItems: [],
                 plotRect,
                 series: [],
                 width: containerWidth
@@ -400,7 +407,7 @@ export class CartesianLayoutEngine {
 
                     let xPos = plotRect.x;
                     let isXValid = false;
-                    let normalizedXKey: string | number = dIdx;
+                    let normalizedXKey: number | string = dIdx;
 
                     if (bandScale) {
                         const catKey = xVal !== undefined && xVal !== null ? String(xVal) : String(dIdx);
@@ -539,16 +546,34 @@ export class CartesianLayoutEngine {
             interactionBuckets.push(...sortedBuckets);
         }
 
+        const hasData =
+            hasRenderableData(series, rootData, xAxisType) &&
+            seriesScenes.some(s => (s.type === "bar" ? s.bars.length > 0 : s.points.some(p => p.defined)));
+
+        const legendItems: ChartLegendItem[] = series.map((s, idx) => {
+            const sStyle = styleResolver.resolveSeriesStyle(s, idx);
+            return {
+                color: sStyle.color,
+                itemId: s.id,
+                kind: "series",
+                name: s.name(),
+                seriesId: s.id,
+                seriesType: s.type,
+                visible: s.visible()
+            };
+        });
+
         return {
             axes: axisScenes,
             coordinateSystem: "cartesian",
+            hasRenderableData: hasData,
             height: containerHeight,
             hitTargets,
             interactionBuckets,
+            legendItems,
             plotRect,
             series: seriesScenes,
             width: containerWidth
         };
     }
 }
-

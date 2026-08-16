@@ -92,6 +92,6 @@ export class MonaChartLegendComponent implements OnInit {
         if (!this.interactive() || !this.#chartContext) {
             return;
         }
-        this.#chartContext.toggleSeriesVisibility(item.seriesId);
+        this.#chartContext.toggleLegendItem(item);
     }
 }

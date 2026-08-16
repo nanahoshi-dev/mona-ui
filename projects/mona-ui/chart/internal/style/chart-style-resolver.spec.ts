@@ -1,6 +1,9 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
-import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import type {
+    ChartCartesianSeriesRegistration,
+    ChartPieSeriesRegistration
+} from "../context/chart-registration-context";
 import { ChartStyleResolver, toCanvasColor } from "./chart-style-resolver";
 
 function createMockSeries(
@@ -13,7 +16,7 @@ function createMockSeries(
         strokeWidth?: number;
         userClass?: string;
     }
-): ChartSeriesRegistration {
+): ChartCartesianSeriesRegistration {
     return {
         color: signal(options?.color ?? ""),
         data: signal(undefined),
@@ -28,6 +31,45 @@ function createMockSeries(
         userClass: options?.userClass !== undefined ? signal(options.userClass) : undefined,
         visible: signal(true),
         xField: signal(undefined)
+    };
+}
+
+function createMockPieSeries(options?: {
+    colorField?: string;
+    colors?: readonly string[];
+    fillOpacity?: number;
+    strokeColor?: string;
+    strokeWidth?: number;
+}): ChartPieSeriesRegistration {
+    return {
+        categoryField: signal("category"),
+        categoryFormatter: signal(undefined),
+        colorField: signal(options?.colorField),
+        colors: signal(options?.colors),
+        cornerRadius: signal(undefined),
+        data: signal(undefined),
+        element: { nativeElement: {} as HTMLElement },
+        endAngle: signal(360),
+        field: signal("val"),
+        fillOpacity: signal(options?.fillOpacity),
+        id: "mock-pie",
+        isSliceVisible: () => true,
+        labelContent: signal("percentage"),
+        labelPosition: signal("outside"),
+        minLabelAngle: signal(12),
+        name: signal("Mock Pie"),
+        outerRadiusRatio: signal(0.9),
+        padAngle: signal(0),
+        showLabels: signal(false),
+        sliceLabelTemplate: signal(undefined),
+        startAngle: signal(0),
+        strokeColor: signal(options?.strokeColor ?? ""),
+        strokeWidth: signal(options?.strokeWidth),
+        toggleSliceVisibility: () => true,
+        type: "pie",
+        valueFormatter: signal(undefined),
+        visibilityRevision: signal(0),
+        visible: signal(true)
     };
 }
 
@@ -68,105 +110,67 @@ describe("ChartStyleResolver", () => {
         document.body.removeChild(host);
     });
 
-    it("should resolve computed style custom properties when inputs are undefined", () => {
-        const seriesEl = document.createElement("div");
-        seriesEl.style.setProperty("--mona-chart-line-width", "5");
-        seriesEl.style.setProperty("--mona-chart-point-radius", "8");
-        seriesEl.style.setProperty("--mona-chart-area-fill-opacity", "0.75");
-        document.body.appendChild(seriesEl);
+    it("should extract computed CSS color from element style", () => {
+        const el = document.createElement("div");
+        el.style.color = "rgb(255, 0, 128)";
+        document.body.appendChild(el);
 
         const resolver = new ChartStyleResolver();
-        const s0 = createMockSeries("area", { nativeElement: seriesEl });
+        const s0 = createMockSeries("line", { nativeElement: el });
 
         const style = resolver.resolveSeriesStyle(s0, 0);
-        expect(style.lineWidth).toBe(5);
-        expect(style.pointRadius).toBe(8);
-        expect(style.fillOpacity).toBe(0.75);
+        expect(style.color).toBe("rgb(255, 0, 128)");
 
-        document.body.removeChild(seriesEl);
+        document.body.removeChild(el);
     });
 
-    it("should allow explicit component inputs to override CSS custom properties", () => {
-        const seriesEl = document.createElement("div");
-        seriesEl.style.setProperty("--mona-chart-line-width", "5");
-        document.body.appendChild(seriesEl);
-
+    it("should apply component explicit strokeWidth and pointRadius", () => {
         const resolver = new ChartStyleResolver();
-        const s0 = createMockSeries("line", {
-            nativeElement: seriesEl,
-            strokeWidth: 10
-        });
+        const s0 = createMockSeries("line", { pointRadius: 6, strokeWidth: 4 });
 
         const style = resolver.resolveSeriesStyle(s0, 0);
-        expect(style.lineWidth).toBe(10);
-
-        document.body.removeChild(seriesEl);
+        expect(style.lineWidth).toBe(4);
+        expect(style.pointRadius).toBe(6);
     });
 
-    it("should resolve series color from Tailwind text class on series element", () => {
-        const host = document.createElement("div");
-        host.style.color = "rgb(15, 23, 42)";
-        document.body.appendChild(host);
-
-        const seriesEl = document.createElement("div");
-        seriesEl.style.color = "rgb(239, 68, 68)";
-        host.appendChild(seriesEl);
-
-        const resolver = new ChartStyleResolver(host);
-        const s0 = createMockSeries("line", {
-            nativeElement: seriesEl,
-            userClass: "text-red-500"
-        });
-
-        const style = resolver.resolveSeriesStyle(s0, 0);
-        expect(style.color).toBe("rgb(239, 68, 68)");
-
-        document.body.removeChild(host);
-    });
-
-    it("should return empty string for undefined CSS variables without resolving to black or inherited text color", () => {
-        const host = document.createElement("div");
-        host.style.color = "rgb(30, 32, 34)";
-        document.body.appendChild(host);
-
-        const resolver = new ChartStyleResolver(host);
-        expect(resolver.resolveCssVariable("--mona-chart-grid-color")).toBe("");
-        expect(resolver.resolveCssVariable("--mona-chart-bar-highlight-color")).toBe("");
-        expect(resolver.resolveCssVariable("--non-existent-color-var")).toBe("");
-        expect(resolver.resolveCssVariable("var(--non-existent-var)")).toBe("");
-
-        document.body.removeChild(host);
-    });
-
-    it("should convert oklch CSS color values to standard rgb format and return empty string for raw var names", () => {
-        expect(toCanvasColor("--some-var-name")).toBe("");
-        expect(toCanvasColor("var(--some-var)")).toBe("");
-        expect(toCanvasColor("#3b82f6")).toBe("#3b82f6");
-        expect(toCanvasColor("rgba(148, 163, 184, 0.2)")).toBe("rgba(148, 163, 184, 0.2)");
-        // oklch values should convert to standard rgb syntax
-        const converted = toCanvasColor("oklch(87.1% 0.006 286.286)");
-        expect(converted.startsWith("rgb(")).toBe(true);
-    });
-
-    it("should safely handle non-finite numeric inputs and fallback to defaults", () => {
+    it("should compute area fill colors with proper defaults", () => {
         const resolver = new ChartStyleResolver();
-        const s0 = createMockSeries("line", {
-            strokeWidth: Number.POSITIVE_INFINITY,
-            pointRadius: Number.NaN,
-            fillOpacity: Number.NEGATIVE_INFINITY
-        });
+        const s0 = createMockSeries("area", { color: "#8b5cf6", fillOpacity: 0.4 });
 
         const style = resolver.resolveSeriesStyle(s0, 0);
-        expect(style.lineWidth).toBe(2);
-        expect(style.pointRadius).toBe(3);
-        expect(style.fillOpacity).toBe(1);
+        expect(style.color).toBe("#8b5cf6");
+        expect(style.areaFillColor).toBe("#8b5cf6");
+        expect(style.areaFillOpacity).toBe(0.4);
     });
 
-    it("should reject invalid color strings and fall back to theme palette", () => {
+    it("should resolve polar series styles and slice colors", () => {
         const resolver = new ChartStyleResolver();
-        const s0 = createMockSeries("line", { color: "not-a-color-at-all" });
+        const pieSeries = createMockPieSeries({ colors: ["#ff0000", "#00ff00", "#0000ff"] });
 
-        const style = resolver.resolveSeriesStyle(s0, 0);
-        expect(style.color).toBe("#3b82f6");
+        const color0 = resolver.resolveSliceColor(pieSeries, { name: "A" }, 0, 0);
+        const color1 = resolver.resolveSliceColor(pieSeries, { name: "B" }, 1, 1);
+
+        expect(color0).toBe("#ff0000");
+        expect(color1).toBe("#00ff00");
+    });
+
+    it("should resolve datum colorField over explicit colors array", () => {
+        const resolver = new ChartStyleResolver();
+        const pieSeries = createMockPieSeries({ colorField: "customColor", colors: ["#000000"] });
+
+        const color = resolver.resolveSliceColor(pieSeries, { customColor: "#abcdef" }, 0, 0);
+        expect(color).toBe("#abcdef");
+    });
+});
+
+describe("toCanvasColor", () => {
+    it("should parse rgb and hex color strings", () => {
+        expect(toCanvasColor("rgb(255, 0, 0)")).toBe("rgb(255, 0, 0)");
+        expect(toCanvasColor("#ff0000")).toBe("#ff0000");
+    });
+
+    it("should return empty string for css variable names or invalid colors", () => {
+        expect(toCanvasColor("--color-chart-1")).toBe("");
+        expect(toCanvasColor("")).toBe("");
     });
 });

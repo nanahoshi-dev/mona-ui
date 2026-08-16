@@ -1,6 +1,6 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
-import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import type { ChartCartesianSeriesRegistration } from "../context/chart-registration-context";
 import type { ChartField } from "../../models/chart.models";
 import {
     calculateCategoryDomain,
@@ -18,7 +18,7 @@ function createMockSeries(
     data?: readonly unknown[],
     visible: boolean = true,
     xField?: ChartField
-): ChartSeriesRegistration {
+): ChartCartesianSeriesRegistration {
     return {
         color: signal("#000000"),
         data: signal(data),

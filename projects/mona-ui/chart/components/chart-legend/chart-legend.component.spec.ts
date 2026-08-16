@@ -29,22 +29,23 @@ class TestHostComponent {
 describe("MonaChartLegendComponent", () => {
     let fixture: ComponentFixture<TestHostComponent>;
     let host: TestHostComponent;
-    const toggleSeriesVisibilitySpy = vi.fn((_id: string) => {});
+    const toggleLegendItemSpy = vi.fn((_item: ChartLegendItem) => {});
 
     const mockLegendItems = signal<readonly ChartLegendItem[]>([
-        { color: "#3b82f6", name: "Series A", seriesId: "s1", seriesType: "line", visible: true },
-        { color: "#10b981", name: "Series B", seriesId: "s2", seriesType: "bar", visible: false }
+        { color: "#3b82f6", itemId: "s1", kind: "series", name: "Series A", seriesId: "s1", seriesType: "line", visible: true },
+        { color: "#10b981", itemId: "s2", kind: "series", name: "Series B", seriesId: "s2", seriesType: "bar", visible: false }
     ]);
 
     const mockChartContext: Partial<ChartRegistrationContext> = {
         invalidate: () => {},
         legendItems: mockLegendItems,
         registerLegend: () => () => {},
-        toggleSeriesVisibility: toggleSeriesVisibilitySpy
+        toggleLegendItem: toggleLegendItemSpy,
+        toggleSeriesVisibility: () => {}
     };
 
     beforeEach(async () => {
-        toggleSeriesVisibilitySpy.mockClear();
+        toggleLegendItemSpy.mockClear();
         await TestBed.configureTestingModule({
             imports: [TestHostComponent],
             providers: [{ provide: CHART_CONTEXT, useValue: mockChartContext }]
@@ -55,27 +56,29 @@ describe("MonaChartLegendComponent", () => {
         fixture.detectChanges();
     });
 
-    it("should render default legend buttons for all items", () => {
+    it("should render default legend buttons for all items when interactive", () => {
         const buttons = fixture.debugElement.queryAll(By.css("button"));
         expect(buttons.length).toBe(2);
         expect(buttons[0].nativeElement.textContent.trim()).toBe("Series A");
         expect(buttons[1].nativeElement.textContent.trim()).toBe("Series B");
     });
 
-    it("should toggle series visibility on button click when interactive", () => {
+    it("should toggle legend item on button click when interactive", () => {
         const buttons = fixture.debugElement.queryAll(By.css("button"));
         buttons[0].nativeElement.click();
-        expect(toggleSeriesVisibilitySpy).toHaveBeenCalledWith("s1");
+        expect(toggleLegendItemSpy).toHaveBeenCalledWith(mockLegendItems()[0]);
     });
 
-    it("should not toggle series visibility when interactive is false", () => {
+    it("should render inert elements when interactive is false", () => {
         host.interactive.set(false);
         fixture.detectChanges();
 
         const buttons = fixture.debugElement.queryAll(By.css("button"));
-        expect(buttons[0].nativeElement.disabled).toBe(true);
-        buttons[0].nativeElement.click();
-        expect(toggleSeriesVisibilitySpy).not.toHaveBeenCalled();
+        expect(buttons.length).toBe(0);
+
+        const items = fixture.debugElement.queryAll(By.css("mona-chart-legend > div > div"));
+        expect(items.length).toBe(2);
+        expect(items[0].nativeElement.textContent.trim()).toBe("Series A");
     });
 
     it("should render custom template with seriesType and handle keyboard interaction", () => {
@@ -92,6 +95,6 @@ describe("MonaChartLegendComponent", () => {
 
         // Test enter key
         containerDivs[1].nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-        expect(toggleSeriesVisibilitySpy).toHaveBeenCalledWith("s2");
+        expect(toggleLegendItemSpy).toHaveBeenCalledWith(mockLegendItems()[1]);
     });
 });
