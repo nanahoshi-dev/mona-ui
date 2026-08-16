@@ -7,21 +7,23 @@ describe("PolarSeriesRenderer", () => {
     const styleResolver = new ChartStyleResolver();
 
     function createMockContext(): CanvasRenderingContext2D {
+        const mockGradient = { addColorStop: vi.fn() };
         return {
+            arc: vi.fn(),
             beginPath: vi.fn(),
             closePath: vi.fn(),
+            createRadialGradient: vi.fn(() => mockGradient),
             fill: vi.fn(),
             fillStyle: "",
             globalAlpha: 1,
             lineWidth: 1,
+            lineTo: vi.fn(),
+            moveTo: vi.fn(),
             restore: vi.fn(),
             save: vi.fn(),
             stroke: vi.fn(),
             strokeStyle: "",
-            translate: vi.fn(),
-            arc: vi.fn(),
-            moveTo: vi.fn(),
-            lineTo: vi.fn()
+            translate: vi.fn()
         } as unknown as CanvasRenderingContext2D;
     }
 
@@ -124,6 +126,20 @@ describe("PolarSeriesRenderer", () => {
         // 2 slice fills + 1 interaction overlay fill = 3 fills
         expect(ctx.fill).toHaveBeenCalledTimes(3);
         // 2 slice strokes (no hover border stroke) = 2 strokes
+        expect(ctx.stroke).toHaveBeenCalledTimes(2);
+    });
+
+    it("should render radial gradient fills when fillMode is gradient", () => {
+        const ctx = createMockContext();
+        const gradientSeries: ChartPolarSeriesScene = {
+            ...mockSeriesScene,
+            fillMode: "gradient"
+        };
+        PolarSeriesRenderer.render(ctx, gradientSeries, null, styleResolver);
+
+        expect(ctx.createRadialGradient).toHaveBeenCalledTimes(2);
+        expect(ctx.createRadialGradient).toHaveBeenCalledWith(0, 0, 0, 0, 0, 100);
+        expect(ctx.fill).toHaveBeenCalledTimes(2);
         expect(ctx.stroke).toHaveBeenCalledTimes(2);
     });
 

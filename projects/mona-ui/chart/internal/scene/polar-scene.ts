@@ -1,5 +1,5 @@
 import type { ChartPoint } from "../../models/chart.models";
-import type { ChartPolarLabelPosition, ChartPolarLabelSide } from "../../models/chart-polar.models";
+import type { ChartPolarFillMode, ChartPolarLabelPosition, ChartPolarLabelSide } from "../../models/chart-polar.models";
 
 export interface ChartPolarSeriesStyle {
     fillOpacity: number;
@@ -46,6 +46,7 @@ export interface ScenePolarSlice {
 export interface ChartPolarSeriesScene {
     center: ChartPoint;
     cornerRadius: number;
+    fillMode?: ChartPolarFillMode;
     formattedTotal: string;
     id: string;
     innerRadius: number;

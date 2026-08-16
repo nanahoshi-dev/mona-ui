@@ -107,6 +107,7 @@ Renders a pie chart with configurable start/end angle, pad angle, corner radius,
 | `data` | `readonly unknown[]` | `undefined` | Series-specific data overriding root chart data. |
 | `name` | `string` | `"Pie"` | Series name for tooltips and accessibility. |
 | `outerRadiusRatio` | `number` | `0.9` | Outer radius ratio relative to plot bounds (0.1 to 1). |
+| `fillMode` | `ChartPolarFillMode` | `"solid"` | Fill styling: `"solid"` or radial `"gradient"` (center to arc). |
 | `startAngle` / `endAngle` | `number` | `0` / `360` | Angles in degrees (clockwise from 12 o'clock). |
 | `padAngle` | `number` | `0` | Angular gap in degrees between adjacent slices. |
 | `cornerRadius` | `number` | `undefined` | Pixel corner radius on arc boundaries. |

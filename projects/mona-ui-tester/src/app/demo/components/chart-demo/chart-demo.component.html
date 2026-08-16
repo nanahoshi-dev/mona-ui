@@ -64,6 +64,18 @@
                                 <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Polar Slices & Labels</span>
                                 <div class="flex flex-wrap items-center gap-4">
                                     @if (activeTab() === 'pie') {
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-muted-foreground">Fill Mode:</span>
+                                            <mona-dropdown-list
+                                                [data]="fillModeOptions"
+                                                [value]="pieFillMode()"
+                                                (valueChange)="onPieFillModeChange($event)"
+                                                textField="label"
+                                                valueField="value"
+                                                [valuePrimitive]="true"
+                                                size="small"
+                                                class="w-48" />
+                                        </div>
                                         <mona-check-box [checked]="pieShowLabels()" (checkedChange)="pieShowLabels.set($event)">
                                             Data Labels
                                         </mona-check-box>
@@ -95,6 +107,18 @@
                                             Custom Template
                                         </mona-check-box>
                                     } @else {
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-muted-foreground">Fill Mode:</span>
+                                            <mona-dropdown-list
+                                                [data]="fillModeOptions"
+                                                [value]="donutFillMode()"
+                                                (valueChange)="onDonutFillModeChange($event)"
+                                                textField="label"
+                                                valueField="value"
+                                                [valuePrimitive]="true"
+                                                size="small"
+                                                class="w-48" />
+                                        </div>
                                         <mona-check-box [checked]="donutUseCenterSummary()" (checkedChange)="donutUseCenterSummary.set($event)">
                                             Custom Center Summary
                                         </mona-check-box>
@@ -298,6 +322,7 @@
                             field="value"
                             categoryField="category"
                             name="Browser Market Share"
+                            [fillMode]="pieFillMode()"
                             [outerRadiusRatio]="pieOuterRatio()"
                             [startAngle]="pieStartAngle()"
                             [endAngle]="pieEndAngle()"
@@ -334,6 +359,7 @@
                             field="value"
                             categoryField="category"
                             name="Cloud Service"
+                            [fillMode]="donutFillMode()"
                             [innerRadiusRatio]="donutInnerRadiusRatio()"
                             [outerRadiusRatio]="donutOuterRatio()"
                             [padAngle]="donutPadAngle()"

@@ -21,6 +21,7 @@ import {
     type ChartCurve,
     type ChartPointEvent,
     type ChartPointFocusEvent,
+    type ChartPolarFillMode,
     type ChartPolarLabelContent,
     type ChartPolarLabelPosition,
     type ChartSeriesVisibilityEvent,
@@ -132,6 +133,7 @@ export class ChartDemoComponent {
         { category: "BigQuery Analytics", value: 19000 },
         { category: "Networking & CDN", value: 11000 }
     ]);
+    protected readonly donutFillMode = signal<ChartPolarFillMode>("solid");
     protected readonly donutInnerRadiusRatio = signal<number>(0.62);
     protected readonly donutLabelPosition = signal<ChartPolarLabelPosition>("outside");
     protected readonly donutOuterRatio = signal<number>(0.9);
@@ -140,6 +142,10 @@ export class ChartDemoComponent {
     protected readonly donutUseCenterSummary = signal<boolean>(true);
 
     public readonly eventLogs = signal<readonly DemoLogEntry[]>([]);
+    protected readonly fillModeOptions: readonly { label: string; value: ChartPolarFillMode }[] = [
+        { label: "Solid", value: "solid" },
+        { label: "Gradient (Center to Arc)", value: "gradient" }
+    ];
     protected readonly includeNegativeValues = signal<boolean>(false);
     protected readonly isDataEmpty = signal<boolean>(false);
     protected readonly labelPositionOptions: readonly { label: string; value: ChartPolarLabelPosition }[] = [
@@ -174,6 +180,7 @@ export class ChartDemoComponent {
         { category: "Other", value: 1 }
     ]);
     protected readonly pieEndAngle = signal<number>(360);
+    protected readonly pieFillMode = signal<ChartPolarFillMode>("solid");
     protected readonly pieLabelContent = signal<ChartPolarLabelContent>("percentage");
     protected readonly pieLabelContentOptions: readonly { label: string; value: ChartPolarLabelContent }[] = [
         { label: "Percentage (e.g. 65%)", value: "percentage" },
@@ -295,9 +302,23 @@ export class ChartDemoComponent {
         }
     }
 
+    public onPieFillModeChange(mode: ChartPolarFillMode | null): void {
+        if (mode) {
+            this.pieFillMode.set(mode);
+            this.#addLog("fillModeUpdate", `Set Pie fill mode: ${mode}`);
+        }
+    }
+
     public onDonutLabelPositionChange(pos: ChartPolarLabelPosition | null): void {
         if (pos) {
             this.donutLabelPosition.set(pos);
+        }
+    }
+
+    public onDonutFillModeChange(mode: ChartPolarFillMode | null): void {
+        if (mode) {
+            this.donutFillMode.set(mode);
+            this.#addLog("fillModeUpdate", `Set Donut fill mode: ${mode}`);
         }
     }
 

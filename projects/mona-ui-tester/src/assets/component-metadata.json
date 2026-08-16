@@ -2848,6 +2848,12 @@
         "kind": "input"
       },
       {
+        "name": "fillMode",
+        "type": "ChartPolarFillMode",
+        "description": "Fill style applied to slices (\"solid\" or radial \"gradient\" from center to arc).",
+        "kind": "input"
+      },
+      {
         "name": "fillOpacity",
         "type": "number | undefined",
         "description": "Opacity of slice fills (between 0 and 1).",
@@ -3073,6 +3079,12 @@
         "name": "field",
         "type": "ChartField",
         "description": "Property key or accessor extracting the numeric slice value.",
+        "kind": "input"
+      },
+      {
+        "name": "fillMode",
+        "type": "ChartPolarFillMode",
+        "description": "Fill style applied to slices (\"solid\" or radial \"gradient\" from center to arc).",
         "kind": "input"
       },
       {

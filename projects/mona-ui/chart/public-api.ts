@@ -59,6 +59,7 @@ export type {
 export type {
     ChartCenterTemplateContext,
     ChartLabelMeasurement,
+    ChartPolarFillMode,
     ChartPolarLabelContent,
     ChartPolarLabelPosition,
     ChartPolarLabelSide,
