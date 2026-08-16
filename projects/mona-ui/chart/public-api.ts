@@ -14,6 +14,7 @@ export { ChartNoDataTemplateDirective } from "./directives/chart-no-data-templat
 
 export type {
     ChartCoordinateSystem,
+    ChartField,
     ChartPadding,
     ChartPoint,
     ChartRect,
@@ -26,7 +27,9 @@ export type {
     ChartAxisLabelTemplateContext,
     ChartAxisPosition,
     ChartAxisTick,
-    ChartXAxisType
+    ChartXAxisPosition,
+    ChartXAxisType,
+    ChartYAxisPosition
 } from "./models/chart-axis.models";
 
 export type {

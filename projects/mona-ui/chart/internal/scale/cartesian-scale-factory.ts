@@ -29,6 +29,11 @@ export class LinearScale implements ChartContinuousScale<number> {
         return this.#scale.range() as [number, number];
     }
 
+    public setDomain(domain: readonly [number, number]): this {
+        this.#scale.domain(domain);
+        return this;
+    }
+
     public ticks(count: number = 5): readonly number[] {
         return this.#scale.ticks(count);
     }
@@ -62,6 +67,11 @@ export class TimeScale implements ChartContinuousScale<Date> {
         return this.#scale.range() as [number, number];
     }
 
+    public setDomain(domain: readonly [Date, Date]): this {
+        this.#scale.domain(domain);
+        return this;
+    }
+
     public ticks(count: number = 5): readonly Date[] {
         return this.#scale.ticks(count);
     }
@@ -93,6 +103,11 @@ export class UtcScale implements ChartContinuousScale<Date> {
 
     public range(): readonly [number, number] {
         return this.#scale.range() as [number, number];
+    }
+
+    public setDomain(domain: readonly [Date, Date]): this {
+        this.#scale.domain(domain);
+        return this;
     }
 
     public ticks(count: number = 5): readonly Date[] {
@@ -147,11 +162,24 @@ export class CartesianScaleFactory {
         domain: readonly [number, number],
         range: readonly [number, number],
         nice: boolean = true,
-        tickCount?: number
+        tickCount?: number,
+        explicitMin?: number,
+        explicitMax?: number
     ): LinearScale {
         const scale = new LinearScale(domain, range);
         if (nice) {
             scale.nice(tickCount);
+            if (explicitMin !== undefined || explicitMax !== undefined) {
+                const current = scale.domain();
+                let min = explicitMin !== undefined ? explicitMin : current[0];
+                let max = explicitMax !== undefined ? explicitMax : current[1];
+                if (min === max) {
+                    const pad = min === 0 ? 1 : Math.abs(min) * 0.1;
+                    min -= pad;
+                    max += pad;
+                }
+                scale.setDomain([min, max]);
+            }
         }
         return scale;
     }
@@ -160,11 +188,23 @@ export class CartesianScaleFactory {
         domain: readonly [Date, Date],
         range: readonly [number, number],
         nice: boolean = true,
-        tickCount?: number
+        tickCount?: number,
+        explicitMin?: Date | number,
+        explicitMax?: Date | number
     ): TimeScale {
         const scale = new TimeScale(domain, range);
         if (nice) {
             scale.nice(tickCount);
+            if (explicitMin !== undefined || explicitMax !== undefined) {
+                const current = scale.domain();
+                let minD = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin : new Date(explicitMin)) : current[0];
+                let maxD = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax : new Date(explicitMax)) : current[1];
+                if (minD.getTime() === maxD.getTime()) {
+                    minD = new Date(minD.getTime() - 3600000);
+                    maxD = new Date(maxD.getTime() + 3600000);
+                }
+                scale.setDomain([minD, maxD]);
+            }
         }
         return scale;
     }
@@ -173,12 +213,25 @@ export class CartesianScaleFactory {
         domain: readonly [Date, Date],
         range: readonly [number, number],
         nice: boolean = true,
-        tickCount?: number
+        tickCount?: number,
+        explicitMin?: Date | number,
+        explicitMax?: Date | number
     ): UtcScale {
         const scale = new UtcScale(domain, range);
         if (nice) {
             scale.nice(tickCount);
+            if (explicitMin !== undefined || explicitMax !== undefined) {
+                const current = scale.domain();
+                let minD = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin : new Date(explicitMin)) : current[0];
+                let maxD = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax : new Date(explicitMax)) : current[1];
+                if (minD.getTime() === maxD.getTime()) {
+                    minD = new Date(minD.getTime() - 3600000);
+                    maxD = new Date(maxD.getTime() + 3600000);
+                }
+                scale.setDomain([minD, maxD]);
+            }
         }
         return scale;
     }
 }
+

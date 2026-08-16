@@ -11,7 +11,7 @@ export class ChartHitTestEngine {
         shared: boolean = false,
         maxHoverDistance: number = 32
     ): ChartInteractionState {
-        const { hitTargets, plotRect } = scene;
+        const { hitTargets, interactionBuckets, plotRect } = scene;
 
         if (
             pointer.x < plotRect.x - 5 ||
@@ -26,50 +26,84 @@ export class ChartHitTestEngine {
             };
         }
 
+        if (shared) {
+            // 1. Direct bar hit test
+            for (const target of hitTargets) {
+                if (target.bounds && isPointInRect(pointer, target.bounds)) {
+                    const bucket = interactionBuckets?.find(b => b.xKey === target.xKey);
+                    const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === target.xKey);
+                    return {
+                        activeHitTarget: target,
+                        activeHits: sameXHits,
+                        pointerPosition: pointer
+                    };
+                }
+            }
+
+            // 2. Nearest X bucket
+            if (interactionBuckets && interactionBuckets.length > 0) {
+                let nearestBucket = interactionBuckets[0];
+                let minBucketDist = Math.abs(pointer.x - nearestBucket.centerX);
+                for (let i = 1; i < interactionBuckets.length; i++) {
+                    const bucket = interactionBuckets[i];
+                    const d = Math.abs(pointer.x - bucket.centerX);
+                    if (d < minBucketDist) {
+                        minBucketDist = d;
+                        nearestBucket = bucket;
+                    }
+                }
+
+                if (minBucketDist <= maxHoverDistance) {
+                    let nearestHit = nearestBucket.hits[0];
+                    let minHitDist = Number.POSITIVE_INFINITY;
+                    for (const hit of nearestBucket.hits) {
+                        const hx = hit.point?.x ?? (hit.bounds ? hit.bounds.x + hit.bounds.width / 2 : nearestBucket.centerX);
+                        const hy = hit.point?.y ?? (hit.bounds ? hit.bounds.y + hit.bounds.height / 2 : pointer.y);
+                        const d = distance(pointer.x, pointer.y, hx, hy);
+                        if (d < minHitDist) {
+                            minHitDist = d;
+                            nearestHit = hit;
+                        }
+                    }
+                    return {
+                        activeHitTarget: nearestHit ?? null,
+                        activeHits: nearestBucket.hits,
+                        pointerPosition: pointer
+                    };
+                }
+            }
+
+            return {
+                activeHitTarget: null,
+                activeHits: [],
+                pointerPosition: pointer
+            };
+        }
+
+        // Non-shared mode: single nearest target
         // 1. Direct bar hit test
         for (const target of hitTargets) {
             if (target.bounds && isPointInRect(pointer, target.bounds)) {
-                const sameIndexHits = shared
-                    ? hitTargets.filter(t => t.index === target.index)
-                    : [target];
                 return {
                     activeHitTarget: target,
-                    activeHits: sameIndexHits,
+                    activeHits: [target],
                     pointerPosition: pointer
                 };
             }
         }
 
-        // 2. Line/area nearest X or nearest Euclidean point
+        // 2. Line/area nearest point
         let nearestTarget: SceneHitTarget | null = null;
         let minDistance = Number.POSITIVE_INFINITY;
-        let minXDistance = Number.POSITIVE_INFINITY;
-        let bestIndex = -1;
 
         for (const target of hitTargets) {
             if (target.point) {
                 const dist = distance(pointer.x, pointer.y, target.point.x, target.point.y);
-                const xDist = Math.abs(pointer.x - target.point.x);
-
                 if (dist < minDistance && dist <= (target.radius ?? maxHoverDistance)) {
                     minDistance = dist;
                     nearestTarget = target;
                 }
-
-                if (xDist < minXDistance) {
-                    minXDistance = xDist;
-                    bestIndex = target.index;
-                }
             }
-        }
-
-        if (shared && bestIndex !== -1 && minXDistance <= maxHoverDistance) {
-            const indexHits = hitTargets.filter(t => t.index === bestIndex);
-            return {
-                activeHitTarget: nearestTarget ?? indexHits[0] ?? null,
-                activeHits: indexHits,
-                pointerPosition: pointer
-            };
         }
 
         if (nearestTarget) {
@@ -87,3 +121,4 @@ export class ChartHitTestEngine {
         };
     }
 }
+

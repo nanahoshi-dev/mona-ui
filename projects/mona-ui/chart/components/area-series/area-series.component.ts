@@ -2,6 +2,7 @@ import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartAreaFillMode, ChartCurve } from "../../models/chart-series.models";
+import type { ChartField } from "../../models/chart.models";
 
 let nextSeriesId = 0;
 
@@ -10,7 +11,8 @@ let nextSeriesId = 0;
     template: "",
     host: {
         "[class]": "userClass()",
-        "aria-hidden": "true"
+        "aria-hidden": "true",
+        style: "display: none !important;"
     }
 })
 export class MonaAreaSeriesComponent implements OnInit {
@@ -47,7 +49,7 @@ export class MonaAreaSeriesComponent implements OnInit {
      * @description Property key or accessor extracting the Y value for each data item.
      * @default ""
      */
-    public readonly field = input("");
+    public readonly field = input<ChartField>("");
 
     /**
      * @description Area fill style (`"gradient"` fading to zero baseline, or uniform `"solid"`).
@@ -57,9 +59,9 @@ export class MonaAreaSeriesComponent implements OnInit {
 
     /**
      * @description Maximum opacity applied to the area fill.
-     * @default 0.15
+     * @default undefined
      */
-    public readonly fillOpacity = input(0.15);
+    public readonly fillOpacity = input<number | undefined>(undefined);
 
     /**
      * @description Name of the series displayed in legends and tooltips.
@@ -69,9 +71,9 @@ export class MonaAreaSeriesComponent implements OnInit {
 
     /**
      * @description Radius in pixels for point markers.
-     * @default 3
+     * @default undefined
      */
-    public readonly pointRadius = input(3);
+    public readonly pointRadius = input<number | undefined>(undefined);
 
     /**
      * @description Whether to draw point markers at each data coordinate along the top boundary line.
@@ -81,9 +83,9 @@ export class MonaAreaSeriesComponent implements OnInit {
 
     /**
      * @description Stroke width in pixels for the area boundary line.
-     * @default 2
+     * @default undefined
      */
-    public readonly strokeWidth = input(2);
+    public readonly strokeWidth = input<number | undefined>(undefined);
 
     /**
      * @description Additional CSS classes applied to the series host element.
@@ -98,10 +100,10 @@ export class MonaAreaSeriesComponent implements OnInit {
     public readonly visible = model(true);
 
     /**
-     * @description Property key extracting the X value, overriding the root chart X field.
+     * @description Property key or accessor extracting the X value, overriding the root chart X field.
      * @default undefined
      */
-    public readonly xField = input<string | undefined>(undefined);
+    public readonly xField = input<ChartField | undefined>(undefined);
 
     public constructor() {
         effect(() => {
@@ -116,6 +118,7 @@ export class MonaAreaSeriesComponent implements OnInit {
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
+            this.userClass();
             this.visible();
             this.xField();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
@@ -147,6 +150,7 @@ export class MonaAreaSeriesComponent implements OnInit {
                 return next;
             },
             type: "area",
+            userClass: this.userClass,
             visible: this.visible,
             xField: this.xField
         });

@@ -3,7 +3,7 @@ import type { ChartAxisLabelTemplateDirective } from "../../directives/chart-axi
 import type { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
 import type { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
 import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
-import type { ChartPoint } from "../../models/chart.models";
+import type { ChartField, ChartPoint } from "../../models/chart.models";
 import type {
     ChartAreaFillMode,
     ChartCurve,
@@ -11,6 +11,7 @@ import type {
     ChartSeriesType
 } from "../../models/chart-series.models";
 import type { ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
+import type { ChartScene } from "../scene/chart-scene";
 
 export const enum ChartInvalidationReason {
     Data = 1 << 0,
@@ -48,25 +49,26 @@ export interface ChartTooltipRegistration {
 }
 
 export interface ChartSeriesRegistration {
-    borderRadius?: Signal<number>;
+    borderRadius?: Signal<number | undefined>;
     color: Signal<string>;
     connectNulls?: Signal<boolean>;
     curve?: Signal<ChartCurve>;
     data: Signal<readonly unknown[] | undefined>;
     element: ElementRef<HTMLElement>;
-    field: Signal<string>;
+    field: Signal<ChartField>;
     fillMode?: Signal<ChartAreaFillMode>;
-    fillOpacity?: Signal<number>;
+    fillOpacity?: Signal<number | undefined>;
     id: string;
     maxBarWidth?: Signal<number | undefined>;
     name: Signal<string>;
-    pointRadius?: Signal<number>;
+    pointRadius?: Signal<number | undefined>;
     showPoints?: Signal<boolean>;
-    strokeWidth?: Signal<number>;
+    strokeWidth?: Signal<number | undefined>;
     toggleVisibility?: () => boolean;
     type: ChartSeriesType;
+    userClass?: Signal<string>;
     visible: Signal<boolean>;
-    xField: Signal<string | undefined>;
+    xField: Signal<ChartField | undefined>;
 }
 
 export interface ChartRegistrationContext {
@@ -77,6 +79,7 @@ export interface ChartRegistrationContext {
     registerTooltip(registration: ChartTooltipRegistration): () => void;
     registerXAxis(registration: ChartAxisRegistration): () => void;
     registerYAxis(registration: ChartAxisRegistration): () => void;
+    scene: Signal<ChartScene | null>;
     toggleSeriesVisibility(seriesId: string): void;
     tooltipContext: Signal<ChartTooltipTemplateContext | null>;
     tooltipPosition: Signal<ChartPoint | null>;

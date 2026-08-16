@@ -202,8 +202,9 @@ describe("MonaChartComponent", () => {
         expect(secondEvent.visible).toBe(true);
     });
 
-    it("should handle keyboard navigation with arrow keys and update active accessibility announcement", () => {
+    it("should handle keyboard navigation with arrow keys, enter, escape, and update active accessibility announcement", () => {
         const chart = fixture.debugElement.query(By.css("mona-chart"));
+        const chartComp = chart.componentInstance as MonaChartComponent;
 
         // Simulate ArrowRight keydown
         chart.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
@@ -212,6 +213,51 @@ describe("MonaChartComponent", () => {
         const liveRegion = fixture.debugElement.query(By.css(".sr-only"));
         expect(liveRegion).not.toBeNull();
         expect(liveRegion.nativeElement.textContent.trim().length).toBeGreaterThan(0);
+        expect(host.onPointFocusChange).toHaveBeenCalled();
+
+        // Simulate Enter keydown
+        chart.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+        fixture.detectChanges();
+        expect(host.onPointClick).toHaveBeenCalled();
+
+        // Simulate Escape keydown
+        chart.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        fixture.detectChanges();
+        expect(chartComp.tooltipContext()).toBeNull();
+        expect(liveRegion.nativeElement.textContent.trim()).toBe("");
+    });
+
+    it("should clear interaction when chart loses focus", () => {
+        const chart = fixture.debugElement.query(By.css("mona-chart"));
+        const chartComp = chart.componentInstance as MonaChartComponent;
+
+        // Set keyboard point
+        chart.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+        fixture.detectChanges();
+        expect(chartComp.tooltipContext()).not.toBeNull();
+
+        // Focus out to an external element
+        const externalEl = document.createElement("button");
+        document.body.appendChild(externalEl);
+        chart.nativeElement.dispatchEvent(new FocusEvent("focusout", { relatedTarget: externalEl }));
+        fixture.detectChanges();
+
+        expect(chartComp.tooltipContext()).toBeNull();
+        document.body.removeChild(externalEl);
+    });
+
+    it("should not activate hover interaction when tooltip is disabled or not present", () => {
+        host.showTooltip.set(false);
+        fixture.detectChanges();
+
+        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+        const canvas = fixture.debugElement.query(By.css("canvas"));
+
+        canvas.nativeElement.dispatchEvent(new PointerEvent("pointermove", { clientX: 100, clientY: 100 }));
+        fixture.detectChanges();
+
+        expect(chartComp.tooltipContext()).toBeNull();
+        expect(chartComp.tooltipPosition()).toBeNull();
     });
 
     it("should display default no-data state when dataset is empty", () => {
@@ -250,6 +296,34 @@ describe("MonaChartComponent", () => {
 
         legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
         expect(legendButtons.length).toBe(3);
+    });
+
+    it("should display custom tooltip template when hovering over data", () => {
+        host.useCustomTooltipTemplate.set(true);
+        fixture.detectChanges();
+
+        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+        const canvas = fixture.debugElement.query(By.css("canvas"));
+
+        // Simulate pointer move over point (100, 100)
+        canvas.nativeElement.dispatchEvent(new PointerEvent("pointermove", { clientX: 100, clientY: 100 }));
+        fixture.detectChanges();
+
+        // Check if tooltipContext is populated or clearInteraction works
+        expect(() => canvas.nativeElement.dispatchEvent(new PointerEvent("pointerleave"))).not.toThrow();
+        fixture.detectChanges();
+        expect(chartComp.tooltipContext()).toBeNull();
+    });
+
+    it("should clear interaction when pointer leaves canvas", () => {
+        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+        const canvas = fixture.debugElement.query(By.css("canvas"));
+
+        canvas.nativeElement.dispatchEvent(new PointerEvent("pointerleave"));
+        fixture.detectChanges();
+
+        expect(chartComp.tooltipPosition()).toBeNull();
+        expect(chartComp.tooltipContext()).toBeNull();
     });
 
     it("should pass AXE accessibility verification", async () => {

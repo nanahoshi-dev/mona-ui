@@ -1,44 +1,65 @@
 import { describe, expect, it } from "vitest";
 import type { ChartScene } from "../scene/chart-scene";
+import type { SceneHitTarget } from "../scene/scene-geometry";
 import { ChartHitTestEngine } from "./chart-hit-test-engine";
 
 describe("ChartHitTestEngine", () => {
+    const hitTarget1: SceneHitTarget = {
+        bounds: { height: 100, width: 30, x: 50, y: 100 },
+        datum: { id: 1, val: 50 },
+        index: 0,
+        seriesId: "s1",
+        seriesName: "Bar Series",
+        seriesType: "bar",
+        visualBounds: { height: 100, width: 30, x: 50, y: 100 },
+        xKey: "Jan",
+        xValue: "Jan",
+        yValue: 50
+    };
+
+    const hitTarget2: SceneHitTarget = {
+        datum: { id: 2, val: 80 },
+        index: 0,
+        point: { x: 65, y: 50 },
+        radius: 16,
+        seriesId: "s2",
+        seriesName: "Line Series",
+        seriesType: "line",
+        xKey: "Jan",
+        xValue: "Jan",
+        yValue: 80
+    };
+
+    const hitTarget3: SceneHitTarget = {
+        datum: { id: 3, val: 90 },
+        index: 1,
+        point: { x: 150, y: 40 },
+        radius: 16,
+        seriesId: "s2",
+        seriesName: "Line Series",
+        seriesType: "line",
+        xKey: "Feb",
+        xValue: "Feb",
+        yValue: 90
+    };
+
     const mockScene: ChartScene = {
         axes: [],
         coordinateSystem: "cartesian",
         height: 300,
-        hitTargets: [
+        hitTargets: [hitTarget1, hitTarget2, hitTarget3],
+        interactionBuckets: [
             {
-                bounds: { height: 100, width: 30, x: 50, y: 100 },
-                datum: { id: 1, val: 50 },
-                index: 0,
-                seriesId: "s1",
-                seriesName: "Bar Series",
-                seriesType: "bar",
-                xValue: "Jan",
-                yValue: 50
+                centerX: 65,
+                hits: [hitTarget1, hitTarget2],
+                xKey: "Jan",
+                xValue: "Jan"
             },
             {
-                datum: { id: 2, val: 80 },
-                index: 0,
-                point: { x: 65, y: 50 },
-                radius: 16,
-                seriesId: "s2",
-                seriesName: "Line Series",
-                seriesType: "line",
-                xValue: "Jan",
-                yValue: 80
-            },
-            {
-                datum: { id: 3, val: 90 },
-                index: 1,
-                point: { x: 150, y: 40 },
-                radius: 16,
-                seriesId: "s2",
-                seriesName: "Line Series",
-                seriesType: "line",
-                xValue: "Feb",
-                yValue: 90
+                centerX: 150,
+                hits: [hitTarget3],
+                xKey: "Feb",
+                xValue: "Feb"
             }
         ],
         plotRect: { height: 260, width: 400, x: 40, y: 20 },
@@ -70,3 +91,4 @@ describe("ChartHitTestEngine", () => {
         expect(hit.activeHitTarget).toBeNull();
     });
 });
+

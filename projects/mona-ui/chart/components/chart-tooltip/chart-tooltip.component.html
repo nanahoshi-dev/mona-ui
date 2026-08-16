@@ -1,9 +1,10 @@
 @if (enabled() && tooltipContext(); as context) {
     <div
+        #tooltipContainer
         [class]="tooltipClasses()"
-        [style.left.px]="tooltipPosition()?.x ?? 0"
-        [style.top.px]="tooltipPosition()?.y ?? 0"
-        [style.transform]="'translate(-50%, -100%) translateY(-10px)'">
+        [style.left.px]="placement().left"
+        [style.top.px]="placement().top"
+        [attr.data-placement]="placement().placement">
         @if (customTemplate(); as template) {
             <ng-container
                 [ngTemplateOutlet]="template.templateRef"
@@ -39,3 +40,4 @@
         }
     </div>
 }
+

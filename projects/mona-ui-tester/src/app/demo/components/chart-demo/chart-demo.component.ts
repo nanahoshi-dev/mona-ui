@@ -1,5 +1,6 @@
-import { Component, computed, signal } from "@angular/core";
+import { Component, computed, inject, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     ChartAxisLabelTemplateDirective,
     ChartLegendItemTemplateDirective,
@@ -68,6 +69,7 @@ interface TimePointMetric {
     templateUrl: "./chart-demo.component.html"
 })
 export class ChartDemoComponent {
+    readonly #themeService = inject(ThemeService, { optional: true });
     #logId: number = 0;
 
     protected readonly activeTab = signal<"custom" | "grouped" | "mixed" | "time">("mixed");
@@ -77,7 +79,11 @@ export class ChartDemoComponent {
         { label: "Solid Fill", value: "solid" }
     ];
     protected readonly currencyFormatter = (value: unknown): string => {
-        return typeof value === "number" ? `$${value.toLocaleString()}` : String(value);
+        if (typeof value === "number") {
+            const formatted = Math.abs(value).toLocaleString();
+            return value < 0 ? `-$${formatted}` : `$${formatted}`;
+        }
+        return String(value);
     };
     protected readonly curveOptions: readonly { label: string; value: ChartCurve }[] = [
         { label: "Linear", value: "linear" },
@@ -99,6 +105,7 @@ export class ChartDemoComponent {
         return this.isDataEmpty() ? [] : this.monthlyData();
     });
     public readonly eventLogs = signal<readonly DemoLogEntry[]>([]);
+    protected readonly includeNegativeValues = signal<boolean>(false);
     protected readonly isDataEmpty = signal<boolean>(false);
     protected readonly legendPosition = signal<"bottom" | "left" | "right" | "top">("bottom");
     protected readonly legendPositionOptions: readonly { label: string; value: "bottom" | "left" | "right" | "top" }[] = [
@@ -117,10 +124,11 @@ export class ChartDemoComponent {
     ]);
     protected readonly niceAxes = signal<boolean>(true);
     protected readonly sharedTooltip = signal<boolean>(true);
-    protected readonly showActualArea = signal<boolean>(true);
-    protected readonly showForecastLine = signal<boolean>(true);
+    protected readonly showArea = signal<boolean>(true);
+    protected readonly showAxisTitles = signal<boolean>(false);
+    protected readonly showBars = signal<boolean>(true);
+    protected readonly showLine = signal<boolean>(true);
     protected readonly showPoints = signal<boolean>(true);
-    protected readonly showTargetBars = signal<boolean>(true);
     protected readonly timeFormatter = (value: unknown): string => {
         if (value instanceof Date) {
             return `${value.getHours().toString().padStart(2, "0")}:${value.getMinutes().toString().padStart(2, "0")}`;
@@ -128,18 +136,32 @@ export class ChartDemoComponent {
         return String(value);
     };
     protected readonly useCustomNoData = signal<boolean>(false);
+    protected readonly useIndependentSeriesData = signal<boolean>(false);
     protected readonly xAxisLine = signal<boolean>(true);
+    protected readonly xAxisPosition = signal<"bottom" | "top">("bottom");
     protected readonly xGridLines = signal<boolean>(false);
     protected readonly yAxisLine = signal<boolean>(true);
+    protected readonly yAxisPosition = signal<"left" | "right">("left");
     protected readonly yGridLines = signal<boolean>(true);
+
+    public changeThemeColor(color: string): void {
+        this.#themeService?.setPrimaryColor(color);
+        this.#addLog("themeUpdate", `Applied primary theme color: ${color}`);
+    }
 
     public appendDataPoint(): void {
         const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const currentLength = this.monthlyData().length;
         const monthName = months[currentLength % months.length];
-        const target = Math.round(5000 + Math.random() * 4000);
-        const actual = Math.round(target * (0.85 + Math.random() * 0.3));
-        const forecast = Math.round(target * 0.95);
+        const minVal = this.includeNegativeValues() ? -4000 : 2000;
+        const range = this.includeNegativeValues() ? 12000 : 6000;
+        const actual = Math.round(minVal + Math.random() * range);
+        const forecast = this.useIndependentSeriesData()
+            ? Math.round(minVal + Math.random() * range)
+            : actual;
+        const target = this.useIndependentSeriesData()
+            ? Math.round(minVal + Math.random() * range)
+            : actual;
 
         this.monthlyData.update(list => [...list, { actual, forecast, month: `${monthName} ${currentLength + 1}`, target }]);
         this.#addLog("dataUpdate", `Appended data point: ${monthName}`);
@@ -147,6 +169,20 @@ export class ChartDemoComponent {
 
     public clearLogs(): void {
         this.eventLogs.set([]);
+    }
+
+    public loadProfitLossData(): void {
+        this.includeNegativeValues.set(true);
+        this.monthlyData.set([
+            { actual: 4800, forecast: 4500, month: "Jan", target: 5000 },
+            { actual: 2600, forecast: 3000, month: "Feb", target: 2800 },
+            { actual: -3200, forecast: -3000, month: "Mar", target: -3500 },
+            { actual: -1800, forecast: -1500, month: "Apr", target: -2000 },
+            { actual: 3900, forecast: 3600, month: "May", target: 4200 },
+            { actual: 6400, forecast: 6100, month: "Jun", target: 6700 }
+        ]);
+        this.isDataEmpty.set(false);
+        this.#addLog("dataUpdate", "Loaded preset dataset with mixed positive and negative values");
     }
 
     public onAreaFillModeChange(mode: ChartAreaFillMode | null): void {
@@ -189,15 +225,36 @@ export class ChartDemoComponent {
     }
 
     public randomizeData(): void {
+        this.useIndependentSeriesData.set(false);
+        const minVal = this.includeNegativeValues() ? -4000 : 2000;
+        const range = this.includeNegativeValues() ? 12000 : 6000;
+        this.monthlyData.update(list =>
+            list.map(item => {
+                const actual = Math.round(minVal + Math.random() * range);
+                return {
+                    actual,
+                    forecast: actual,
+                    month: item.month,
+                    target: actual
+                };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized monthly dataset (same data across all series)");
+    }
+
+    public randomizeIndividually(): void {
+        this.useIndependentSeriesData.set(true);
+        const minVal = this.includeNegativeValues() ? -4000 : 2000;
+        const range = this.includeNegativeValues() ? 12000 : 6000;
         this.monthlyData.update(list =>
             list.map(item => ({
-                actual: Math.round(3000 + Math.random() * 6000),
-                forecast: Math.round(3000 + Math.random() * 6000),
+                actual: Math.round(minVal + Math.random() * range),
+                forecast: Math.round(minVal + Math.random() * range),
                 month: item.month,
-                target: Math.round(3000 + Math.random() * 6000)
+                target: Math.round(minVal + Math.random() * range)
             }))
         );
-        this.#addLog("dataUpdate", "Randomized monthly dataset values");
+        this.#addLog("dataUpdate", "Randomized monthly dataset (individual data for each series)");
     }
 
     public resetData(): void {
@@ -209,6 +266,8 @@ export class ChartDemoComponent {
             { actual: 7200, forecast: 6800, month: "May", target: 6700 },
             { actual: 8100, forecast: 7500, month: "Jun", target: 7600 }
         ]);
+        this.useIndependentSeriesData.set(false);
+        this.includeNegativeValues.set(false);
         this.isDataEmpty.set(false);
         this.#addLog("dataUpdate", "Reset dataset to defaults");
     }

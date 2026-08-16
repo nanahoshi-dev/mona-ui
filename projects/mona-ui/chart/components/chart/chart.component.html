@@ -7,7 +7,7 @@
             (pointerleave)="onPointerLeave()"
             (click)="onCanvasClick($event)"></canvas>
 
-        <!-- DOM Axis Labels -->
+        <!-- DOM Axis Labels & Titles -->
         @for (axisScene of scene()?.axes ?? []; track axisScene.axis) {
             @if (axisScene.visible) {
                 @for (tick of axisScene.ticks; track tick.index) {
@@ -15,8 +15,8 @@
                         <div
                             [class]="axisLabelClasses()"
                             [style.left.px]="tick.coordinate"
-                            [style.top.px]="(scene()?.plotRect?.y ?? 0) + (scene()?.plotRect?.height ?? 0) + 6"
-                            [style.transform]="'translateX(-50%)'">
+                            [style.top.px]="axisScene.position === 'top' ? (scene()?.plotRect?.y ?? 0) - 6 : (scene()?.plotRect?.y ?? 0) + (scene()?.plotRect?.height ?? 0) + 6"
+                            [style.transform]="axisScene.position === 'top' ? 'translate(-50%, -100%)' : 'translateX(-50%)'">
                             @if (xAxisRegistration()?.labelTemplate?.(); as template) {
                                 <ng-container
                                     [ngTemplateOutlet]="template.templateRef"
@@ -33,9 +33,9 @@
                     } @else if (axisScene.axis === "y") {
                         <div
                             [class]="axisLabelClasses()"
-                            [style.left.px]="(scene()?.plotRect?.x ?? 0) - 8"
+                            [style.left.px]="axisScene.position === 'right' ? (scene()?.plotRect?.x ?? 0) + (scene()?.plotRect?.width ?? 0) + 8 : (scene()?.plotRect?.x ?? 0) - 8"
                             [style.top.px]="tick.coordinate"
-                            [style.transform]="'translate(-100%, -50%)'">
+                            [style.transform]="axisScene.position === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
                             @if (yAxisRegistration()?.labelTemplate?.(); as template) {
                                 <ng-container
                                     [ngTemplateOutlet]="template.templateRef"
@@ -51,8 +51,32 @@
                         </div>
                     }
                 }
+
+                <!-- Axis Title -->
+                @if (axisScene.title) {
+                    @if (axisScene.axis === "x") {
+                        <div
+                            class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+                            [style.left.px]="(scene()?.plotRect?.x ?? 0) + (scene()?.plotRect?.width ?? 0) / 2"
+                            [style.top.px]="axisScene.position === 'top' ? 6 : (scene()?.plotRect?.y ?? 0) + (scene()?.plotRect?.height ?? 0) + 24"
+                            [style.transform]="'translateX(-50%)'">
+                            {{ axisScene.title }}
+                        </div>
+                    } @else if (axisScene.axis === "y") {
+                        <div
+                            class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+                            [style.left.px]="axisScene.position === 'right' ? (scene()?.width ?? 0) - 12 : 12"
+                            [style.top.px]="(scene()?.plotRect?.y ?? 0) + (scene()?.plotRect?.height ?? 0) / 2"
+                            [style.transform]="axisScene.position === 'right' ? 'translate(-50%, -50%) rotate(90deg)' : 'translate(-50%, -50%) rotate(-90deg)'">
+                            {{ axisScene.title }}
+                        </div>
+                    }
+                }
             }
         }
+
+        <!-- Tooltip overlay in plot-local coordinates -->
+        <ng-content select="mona-chart-tooltip"></ng-content>
 
         <!-- No Data Placeholder -->
         @if (hasNoData()) {
@@ -71,6 +95,10 @@
         </div>
     </div>
 
-    <!-- Projected Content (Series, Axes, Legend, Tooltip) -->
+    <!-- Projected Legend Outside Plot Container -->
+    <ng-content select="mona-chart-legend"></ng-content>
+
+    <!-- Other Projected Content (Series, Axes, Templates) -->
     <ng-content></ng-content>
 </div>
+

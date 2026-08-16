@@ -1,25 +1,22 @@
-import type { ChartValueAccessor } from "../../models/chart.models";
+import type { ChartField, ChartValueAccessor } from "../../models/chart.models";
 
 export function resolveData(
     seriesData: readonly unknown[] | undefined,
     rootData: readonly unknown[] | undefined
 ): readonly unknown[] {
-    if (seriesData && seriesData.length > 0) {
-        return seriesData;
-    }
-    return rootData ?? [];
+    return seriesData === undefined ? (rootData ?? []) : seriesData;
 }
 
 export function resolveValue<T = unknown>(
     datum: unknown,
-    fieldOrAccessor: string | ChartValueAccessor | undefined,
+    fieldOrAccessor: ChartField | undefined,
     index: number = 0
 ): T | undefined {
     if (datum === null || datum === undefined) {
         return undefined;
     }
     if (typeof fieldOrAccessor === "function") {
-        return fieldOrAccessor(datum, index) as T;
+        return (fieldOrAccessor as ChartValueAccessor<unknown, T>)(datum, index);
     }
     if (typeof fieldOrAccessor === "string" && fieldOrAccessor.length > 0) {
         if (typeof datum === "object") {
@@ -32,3 +29,4 @@ export function resolveValue<T = unknown>(
     }
     return undefined;
 }
+

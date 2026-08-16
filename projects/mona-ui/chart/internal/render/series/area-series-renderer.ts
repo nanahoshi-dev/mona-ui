@@ -12,6 +12,7 @@ import type { ChartCurve } from "../../../models/chart-series.models";
 import type { ChartAreaSeriesScene } from "../../scene/cartesian-scene";
 import type { ScenePoint } from "../../scene/scene-geometry";
 import { drawPointMarker } from "../../utils/canvas-utils";
+import { createAreaGradientSpec, withAlpha } from "./area-gradient";
 
 function getCurveFactory(curve: ChartCurve): CurveFactory {
     switch (curve) {
@@ -56,25 +57,27 @@ export class AreaSeriesRenderer {
         areaGenerator(validPoints);
 
         const definedPoints = validPoints.filter(p => p.defined);
-        let minY = baselineY;
-        let maxY = baselineY;
-        for (const p of definedPoints) {
-            if (p.y < minY) minY = p.y;
-            if (p.y > maxY) maxY = p.y;
+        if (definedPoints.length === 0) {
+            context.restore();
+            return;
         }
 
-        if (fillMode === "gradient" && Math.abs(maxY - minY) > 1) {
-            const gradient = context.createLinearGradient(0, minY, 0, Math.max(maxY, baselineY));
-            context.globalAlpha = fillOpacity;
-            gradient.addColorStop(0, style.areaFillColor);
-            gradient.addColorStop(1, "transparent");
-            context.fillStyle = gradient;
+        if (fillMode === "solid") {
+            context.globalAlpha = 1;
+            context.fillStyle = withAlpha(style.areaFillColor, fillOpacity);
+            context.fill();
         } else {
-            context.globalAlpha = fillOpacity;
-            context.fillStyle = style.areaFillColor;
+            const spec = createAreaGradientSpec(baselineY, definedPoints, style.areaFillColor, fillOpacity);
+            if (spec) {
+                const gradient = context.createLinearGradient(0, spec.startY, 0, spec.endY);
+                for (const stop of spec.stops) {
+                    gradient.addColorStop(stop.offset, stop.color);
+                }
+                context.globalAlpha = 1;
+                context.fillStyle = gradient;
+                context.fill();
+            }
         }
-
-        context.fill();
 
         // 2. Draw Stroke Line
         context.globalAlpha = 1;
@@ -107,3 +110,4 @@ export class AreaSeriesRenderer {
         context.restore();
     }
 }
+
