@@ -63,6 +63,7 @@ export interface ChartSeriesRegistration {
     pointRadius?: Signal<number>;
     showPoints?: Signal<boolean>;
     strokeWidth?: Signal<number>;
+    toggleVisibility?: () => boolean;
     type: ChartSeriesType;
     visible: Signal<boolean>;
     xField: Signal<string | undefined>;

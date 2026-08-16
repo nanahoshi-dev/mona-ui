@@ -20,6 +20,7 @@ import {
     type ChartSeriesVisibilityEvent
 } from "@nanahoshi/mona-ui/chart";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
+import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui/tabs";
 
 interface DemoLogEntry {
@@ -46,6 +47,7 @@ interface TimePointMetric {
     imports: [
         ButtonDirective,
         CheckBoxComponent,
+        DropdownListComponent,
         MonaChartComponent,
         MonaChartXAxisComponent,
         MonaChartYAxisComponent,
@@ -70,9 +72,19 @@ export class ChartDemoComponent {
 
     protected readonly activeTab = signal<"custom" | "grouped" | "mixed" | "time">("mixed");
     protected readonly areaFillMode = signal<ChartAreaFillMode>("gradient");
+    protected readonly areaFillModeOptions: readonly { label: string; value: ChartAreaFillMode }[] = [
+        { label: "Gradient (Fade to 0)", value: "gradient" },
+        { label: "Solid Fill", value: "solid" }
+    ];
     protected readonly currencyFormatter = (value: unknown): string => {
         return typeof value === "number" ? `$${value.toLocaleString()}` : String(value);
     };
+    protected readonly curveOptions: readonly { label: string; value: ChartCurve }[] = [
+        { label: "Linear", value: "linear" },
+        { label: "Monotone X (Smooth)", value: "monotone-x" },
+        { label: "Natural (Spline)", value: "natural" },
+        { label: "Step After", value: "step-after" }
+    ];
     protected readonly curveType = signal<ChartCurve>("monotone-x");
     protected readonly dateData = signal<readonly TimePointMetric[]>([
         { cpu: 32, memory: 48, timestamp: new Date(2026, 0, 1, 8, 0) },
@@ -89,6 +101,12 @@ export class ChartDemoComponent {
     public readonly eventLogs = signal<readonly DemoLogEntry[]>([]);
     protected readonly isDataEmpty = signal<boolean>(false);
     protected readonly legendPosition = signal<"bottom" | "left" | "right" | "top">("bottom");
+    protected readonly legendPositionOptions: readonly { label: string; value: "bottom" | "left" | "right" | "top" }[] = [
+        { label: "Bottom", value: "bottom" },
+        { label: "Top", value: "top" },
+        { label: "Left", value: "left" },
+        { label: "Right", value: "right" }
+    ];
     protected readonly monthlyData = signal<readonly MonthlyMetric[]>([
         { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
         { actual: 5100, forecast: 4800, month: "Feb", target: 5000 },
@@ -129,6 +147,24 @@ export class ChartDemoComponent {
 
     public clearLogs(): void {
         this.eventLogs.set([]);
+    }
+
+    public onAreaFillModeChange(mode: ChartAreaFillMode | null): void {
+        if (mode) {
+            this.areaFillMode.set(mode);
+        }
+    }
+
+    public onCurveTypeChange(curve: ChartCurve | null): void {
+        if (curve) {
+            this.curveType.set(curve);
+        }
+    }
+
+    public onLegendPositionChange(pos: "bottom" | "left" | "right" | "top" | null): void {
+        if (pos) {
+            this.legendPosition.set(pos);
+        }
     }
 
     public onPointClick(event: ChartPointEvent): void {

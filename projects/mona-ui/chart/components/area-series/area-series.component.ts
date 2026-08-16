@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, ElementRef, inject, input, OnInit } from "@angular/core";
+import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartAreaFillMode, ChartCurve } from "../../models/chart-series.models";
@@ -95,7 +95,7 @@ export class MonaAreaSeriesComponent implements OnInit {
      * @description Whether the series is currently visible on the chart and in calculations.
      * @default true
      */
-    public readonly visible = input(true);
+    public readonly visible = model(true);
 
     /**
      * @description Property key extracting the X value, overriding the root chart X field.
@@ -141,6 +141,11 @@ export class MonaAreaSeriesComponent implements OnInit {
             pointRadius: this.pointRadius,
             showPoints: this.showPoints,
             strokeWidth: this.strokeWidth,
+            toggleVisibility: () => {
+                const next = !this.visible();
+                this.visible.set(next);
+                return next;
+            },
             type: "area",
             visible: this.visible,
             xField: this.xField

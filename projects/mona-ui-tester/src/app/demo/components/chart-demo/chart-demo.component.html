@@ -63,26 +63,28 @@
 
                         <div class="flex flex-col gap-2">
                             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Curve & Interpolation</span>
-                            <select
-                                class="bg-background text-foreground border border-input rounded-md px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-ring outline-none"
+                            <mona-dropdown-list
+                                [data]="curveOptions"
                                 [value]="curveType()"
-                                (change)="curveType.set($any($event.target).value)">
-                                <option value="linear">Linear</option>
-                                <option value="monotone-x">Monotone X (Smooth)</option>
-                                <option value="natural">Natural (Spline)</option>
-                                <option value="step-after">Step After</option>
-                            </select>
+                                (valueChange)="onCurveTypeChange($event)"
+                                textField="label"
+                                valueField="value"
+                                [valuePrimitive]="true"
+                                size="small"
+                                class="w-48" />
                         </div>
 
                         <div class="flex flex-col gap-2">
                             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Area Fill Mode</span>
-                            <select
-                                class="bg-background text-foreground border border-input rounded-md px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-ring outline-none"
+                            <mona-dropdown-list
+                                [data]="areaFillModeOptions"
                                 [value]="areaFillMode()"
-                                (change)="areaFillMode.set($any($event.target).value)">
-                                <option value="gradient">Gradient (Fade to 0)</option>
-                                <option value="solid">Solid Fill</option>
-                            </select>
+                                (valueChange)="onAreaFillModeChange($event)"
+                                textField="label"
+                                valueField="value"
+                                [valuePrimitive]="true"
+                                size="small"
+                                class="w-48" />
                         </div>
 
                         <div class="flex flex-col gap-2">
@@ -150,15 +152,15 @@
 
                         <div class="flex flex-col gap-2">
                             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Legend Position</span>
-                            <select
-                                class="bg-background text-foreground border border-input rounded-md px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-ring outline-none"
+                            <mona-dropdown-list
+                                [data]="legendPositionOptions"
                                 [value]="legendPosition()"
-                                (change)="legendPosition.set($any($event.target).value)">
-                                <option value="bottom">Bottom</option>
-                                <option value="top">Top</option>
-                                <option value="left">Left</option>
-                                <option value="right">Right</option>
-                            </select>
+                                (valueChange)="onLegendPositionChange($event)"
+                                textField="label"
+                                valueField="value"
+                                [valuePrimitive]="true"
+                                size="small"
+                                class="w-36" />
                         </div>
 
                         <div class="h-8 w-px bg-border hidden md:block"></div>

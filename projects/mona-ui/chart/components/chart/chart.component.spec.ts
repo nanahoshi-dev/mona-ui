@@ -194,6 +194,12 @@ describe("MonaChartComponent", () => {
         const event = host.onSeriesVisibilityChange.mock.calls[0][0];
         expect(event.seriesName).toBe("Target");
         expect(event.visible).toBe(false);
+
+        // Toggle back to visible
+        legendButtons[0].nativeElement.click();
+        fixture.detectChanges();
+        const secondEvent = host.onSeriesVisibilityChange.mock.calls[1][0];
+        expect(secondEvent.visible).toBe(true);
     });
 
     it("should handle keyboard navigation with arrow keys and update active accessibility announcement", () => {

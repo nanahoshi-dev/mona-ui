@@ -425,9 +425,14 @@ export class MonaChartComponent implements ChartRegistrationContext {
     public toggleSeriesVisibility(seriesId: string): void {
         const s = this.#registeredSeries().find(item => item.id === seriesId);
         if (s) {
-            const nextVisibility = !s.visible();
-            if ("set" in s.visible && typeof (s.visible as { set: (v: boolean) => void }).set === "function") {
+            let nextVisibility: boolean;
+            if (s.toggleVisibility) {
+                nextVisibility = s.toggleVisibility();
+            } else if ("set" in s.visible && typeof (s.visible as { set: (v: boolean) => void }).set === "function") {
+                nextVisibility = !s.visible();
                 (s.visible as { set: (v: boolean) => void }).set(nextVisibility);
+            } else {
+                nextVisibility = !s.visible();
             }
             this.seriesVisibilityChange.emit({
                 seriesId,

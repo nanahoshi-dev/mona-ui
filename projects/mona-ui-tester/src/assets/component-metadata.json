@@ -2479,7 +2479,7 @@
         "name": "visible",
         "type": "boolean",
         "description": "Whether the series is currently visible on the chart and in calculations.",
-        "kind": "input"
+        "kind": "model"
       },
       {
         "name": "xField",
@@ -2545,7 +2545,7 @@
         "name": "visible",
         "type": "boolean",
         "description": "Whether the series is currently visible on the chart and in calculations.",
-        "kind": "input"
+        "kind": "model"
       },
       {
         "name": "xField",
@@ -2863,7 +2863,7 @@
         "name": "visible",
         "type": "boolean",
         "description": "Whether the series is currently visible on the chart and in calculations.",
-        "kind": "input"
+        "kind": "model"
       },
       {
         "name": "xField",

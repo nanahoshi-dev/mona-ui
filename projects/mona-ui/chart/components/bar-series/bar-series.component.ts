@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, ElementRef, inject, input, OnInit } from "@angular/core";
+import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 
@@ -70,7 +70,7 @@ export class MonaBarSeriesComponent implements OnInit {
      * @description Whether the series is currently visible on the chart and in calculations.
      * @default true
      */
-    public readonly visible = input(true);
+    public readonly visible = model(true);
 
     /**
      * @description Property key extracting the X/category value, overriding the root chart X field.
@@ -108,6 +108,11 @@ export class MonaBarSeriesComponent implements OnInit {
             id: this.#id,
             maxBarWidth: this.maxBarWidth,
             name: this.name,
+            toggleVisibility: () => {
+                const next = !this.visible();
+                this.visible.set(next);
+                return next;
+            },
             type: "bar",
             visible: this.visible,
             xField: this.xField
