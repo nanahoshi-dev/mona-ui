@@ -2,7 +2,7 @@ import { Component, contentChild, DestroyRef, effect, inject, input, OnInit } fr
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
-import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
+import type { ChartAxisFormatter, ChartXAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
 
 @Component({
     selector: "mona-chart-x-axis",
@@ -59,7 +59,7 @@ export class MonaChartXAxisComponent implements OnInit {
      * @description Position of the X axis relative to the plot area.
      * @default "bottom"
      */
-    public readonly position = input<ChartAxisPosition>("bottom");
+    public readonly position = input<ChartXAxisPosition>("bottom");
 
     /**
      * @description Suggested number of ticks to display along the axis.

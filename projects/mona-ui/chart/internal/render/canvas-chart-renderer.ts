@@ -109,8 +109,13 @@ export class CanvasChartRenderer {
             context.stroke();
         }
 
-        // 4. Draw Interaction Overlays
+        // 4. Draw Interaction Overlays clipped to plotRect
         if (interactionState && (interactionState.activeHitTarget || interactionState.activeHits.length > 0)) {
+            context.save();
+            context.beginPath();
+            context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
+            context.clip();
+
             const hits =
                 interactionState.activeHits.length > 0
                     ? interactionState.activeHits
@@ -153,14 +158,20 @@ export class CanvasChartRenderer {
                     const matchingSeries = series.find(s => s.id === hit.seriesId);
                     const color = matchingSeries?.style.color ?? "#3b82f6";
                     drawPointMarker(context, hit.point.x, hit.point.y, 5, color, markerStrokeColor, 2);
-                } else if (hit.bounds) {
-                    // Bar highlight overlay with rounded top corners
-                    context.save();
-                    context.fillStyle = barHighlightColor;
-                    drawBarRect(context, hit.bounds.x, hit.bounds.y, hit.bounds.width, hit.bounds.height, 4, true);
-                    context.restore();
+                } else if (hit.bounds || hit.visualBounds) {
+                    const barRect = hit.visualBounds ?? hit.bounds;
+                    if (barRect && barRect.height > 0) {
+                        const radius = hit.borderRadius ?? 4;
+                        const isPos = hit.isPositive ?? true;
+                        context.save();
+                        context.fillStyle = barHighlightColor;
+                        drawBarRect(context, barRect.x, barRect.y, barRect.width, barRect.height, radius, isPos);
+                        context.restore();
+                    }
                 }
             }
+
+            context.restore();
         }
 
         context.restore();

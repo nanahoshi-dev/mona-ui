@@ -1,4 +1,6 @@
-export type ChartAxisPosition = "bottom" | "left" | "right" | "top";
+export type ChartXAxisPosition = "bottom" | "top";
+export type ChartYAxisPosition = "left" | "right";
+export type ChartAxisPosition = ChartXAxisPosition | ChartYAxisPosition;
 
 export type ChartXAxisType = "auto" | "category" | "linear" | "time" | "utc";
 
@@ -17,3 +19,4 @@ export interface ChartAxisTick<T = unknown> {
     index: number;
     value: T;
 }
+

@@ -2,7 +2,7 @@ import { Component, contentChild, DestroyRef, effect, inject, input, OnInit, sig
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
-import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
+import type { ChartAxisFormatter, ChartXAxisType, ChartYAxisPosition } from "../../models/chart-axis.models";
 
 @Component({
     selector: "mona-chart-y-axis",
@@ -60,7 +60,7 @@ export class MonaChartYAxisComponent implements OnInit {
      * @description Position of the Y axis relative to the plot area.
      * @default "left"
      */
-    public readonly position = input<ChartAxisPosition>("left");
+    public readonly position = input<ChartYAxisPosition>("left");
 
     /**
      * @description Suggested number of ticks to display along the axis.

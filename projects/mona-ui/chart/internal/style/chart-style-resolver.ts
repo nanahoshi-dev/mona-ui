@@ -1,6 +1,7 @@
 import { formatRgb, parse } from "culori";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import { isFiniteNumber } from "../utils/number-utils";
 
 const DEFAULT_CHART_COLORS = [
     "#3b82f6", // Blue (shadcn Chart 1)
@@ -18,9 +19,7 @@ const DEFAULT_CHART_PALETTE_VARIABLES = [
     "--color-chart-5"
 ];
 
-let colorTestElement: HTMLElement | null = null;
-
-export function toCanvasColor(colorStr: string): string {
+export function toCanvasColor(colorStr: string, documentRef?: Document | null): string {
     if (!colorStr) {
         return "";
     }
@@ -35,21 +34,28 @@ export function toCanvasColor(colorStr: string): string {
         trimmed.startsWith("hsl(") ||
         trimmed.startsWith("hsla(")
     ) {
-        return trimmed;
+        try {
+            const parsed = parse(trimmed);
+            if (parsed) {
+                return trimmed;
+            }
+        } catch {
+            return "";
+        }
+        return "";
     }
 
-    if (typeof document !== "undefined" && document.body) {
+    const doc = documentRef ?? (typeof document !== "undefined" ? document : null);
+    if (doc && doc.body) {
         try {
-            if (!colorTestElement) {
-                colorTestElement = document.createElement("span");
-                colorTestElement.style.display = "none";
-                colorTestElement.setAttribute("aria-hidden", "true");
-                document.body.appendChild(colorTestElement);
-            }
-            colorTestElement.style.color = "";
-            colorTestElement.style.color = trimmed;
-            if (colorTestElement.style.color) {
-                const computed = window.getComputedStyle(colorTestElement).color;
+            const testEl = doc.createElement("span");
+            testEl.style.display = "none";
+            testEl.setAttribute("aria-hidden", "true");
+            testEl.style.color = trimmed;
+            if (testEl.style.color) {
+                doc.body.appendChild(testEl);
+                const computed = (doc.defaultView ?? window).getComputedStyle(testEl).color;
+                testEl.remove();
                 if (
                     computed &&
                     (computed.startsWith("rgb(") ||
@@ -73,12 +79,12 @@ export function toCanvasColor(colorStr: string): string {
         }
         const parsed = parse(parseTarget);
         if (parsed) {
-            return formatRgb(parsed) || trimmed;
+            return formatRgb(parsed) || "";
         }
     } catch {
-        // Return trimmed if culori cannot parse
+        return "";
     }
-    return trimmed;
+    return "";
 }
 
 export class ChartStyleResolver {
@@ -117,18 +123,18 @@ export class ChartStyleResolver {
                 if (nativeEl.style?.color) {
                     elementColor = this.resolveCssVariable(nativeEl.style.color);
                 } else if (computed.color && (hasTextClass || (rootColor !== "" && computed.color !== rootColor))) {
-                    elementColor = toCanvasColor(computed.color);
+                    elementColor = toCanvasColor(computed.color, this.#rootElement?.ownerDocument);
                 }
 
                 const customWidth = computed.getPropertyValue("--mona-chart-line-width");
                 if (customWidth) {
                     const parsed = parseFloat(customWidth);
-                    if (!Number.isNaN(parsed) && parsed >= 0) cssLineWidth = parsed;
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssLineWidth = parsed;
                 }
                 const customRadius = computed.getPropertyValue("--mona-chart-point-radius");
                 if (customRadius) {
                     const parsed = parseFloat(customRadius);
-                    if (!Number.isNaN(parsed) && parsed >= 0) cssPointRadius = parsed;
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssPointRadius = parsed;
                 }
                 const customFill = computed.getPropertyValue("--mona-chart-area-fill-color");
                 if (customFill) {
@@ -139,7 +145,7 @@ export class ChartStyleResolver {
                     computed.getPropertyValue("--mona-chart-area-fill-opacity");
                 if (customOpacity) {
                     const parsed = parseFloat(customOpacity);
-                    if (!Number.isNaN(parsed)) cssAreaFillOpacity = Math.max(0, Math.min(1, parsed));
+                    if (isFiniteNumber(parsed)) cssAreaFillOpacity = Math.max(0, Math.min(1, parsed));
                 }
             } catch {
                 // Ignore style resolution errors in non-standard environments
@@ -152,14 +158,14 @@ export class ChartStyleResolver {
         const defaultColor = themeVarColor && themeVarColor !== paletteVar ? themeVarColor : fallbackColor;
 
         const resolvedColor = explicitColor || elementColor || defaultColor;
-        const resolvedLineWidth = explicitStrokeWidth !== undefined && explicitStrokeWidth >= 0
+        const resolvedLineWidth = explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
             ? explicitStrokeWidth
             : (cssLineWidth ?? (series.type === "line" || series.type === "area" ? 2 : 1));
-        const resolvedPointRadius = explicitPointRadius !== undefined && explicitPointRadius >= 0
+        const resolvedPointRadius = explicitPointRadius !== undefined && isFiniteNumber(explicitPointRadius) && explicitPointRadius >= 0
             ? explicitPointRadius
             : (cssPointRadius ?? 3);
         const defaultFillOpacity = series.type === "area" ? 0.15 : 1;
-        const resolvedFillOpacity = explicitFillOpacity !== undefined
+        const resolvedFillOpacity = explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
             ? Math.max(0, Math.min(1, explicitFillOpacity))
             : (cssAreaFillOpacity ?? defaultFillOpacity);
         const resolvedAreaFillColor = cssAreaFillColor ? this.resolveCssVariable(cssAreaFillColor) : resolvedColor;
@@ -182,7 +188,7 @@ export class ChartStyleResolver {
         const trimmed = varNameOrColor.trim();
         const isVariable = trimmed.startsWith("var(") || trimmed.startsWith("--");
         if (!isVariable) {
-            return toCanvasColor(trimmed);
+            return toCanvasColor(trimmed, this.#rootElement?.ownerDocument);
         }
         if (typeof window === "undefined" || !this.#rootElement) {
             return "";
@@ -206,7 +212,7 @@ export class ChartStyleResolver {
             if (current.startsWith("var(") || current.startsWith("--")) {
                 return "";
             }
-            return toCanvasColor(current);
+            return toCanvasColor(current, this.#rootElement?.ownerDocument);
         } catch {
             return "";
         }

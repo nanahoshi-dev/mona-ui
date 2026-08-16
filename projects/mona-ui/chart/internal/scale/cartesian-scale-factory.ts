@@ -171,10 +171,14 @@ export class CartesianScaleFactory {
             scale.nice(tickCount);
             if (explicitMin !== undefined || explicitMax !== undefined) {
                 const current = scale.domain();
-                scale.setDomain([
-                    explicitMin !== undefined ? explicitMin : current[0],
-                    explicitMax !== undefined ? explicitMax : current[1]
-                ]);
+                let min = explicitMin !== undefined ? explicitMin : current[0];
+                let max = explicitMax !== undefined ? explicitMax : current[1];
+                if (min === max) {
+                    const pad = min === 0 ? 1 : Math.abs(min) * 0.1;
+                    min -= pad;
+                    max += pad;
+                }
+                scale.setDomain([min, max]);
             }
         }
         return scale;
@@ -193,8 +197,12 @@ export class CartesianScaleFactory {
             scale.nice(tickCount);
             if (explicitMin !== undefined || explicitMax !== undefined) {
                 const current = scale.domain();
-                const minD = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin : new Date(explicitMin)) : current[0];
-                const maxD = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax : new Date(explicitMax)) : current[1];
+                let minD = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin : new Date(explicitMin)) : current[0];
+                let maxD = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax : new Date(explicitMax)) : current[1];
+                if (minD.getTime() === maxD.getTime()) {
+                    minD = new Date(minD.getTime() - 3600000);
+                    maxD = new Date(maxD.getTime() + 3600000);
+                }
                 scale.setDomain([minD, maxD]);
             }
         }
@@ -214,8 +222,12 @@ export class CartesianScaleFactory {
             scale.nice(tickCount);
             if (explicitMin !== undefined || explicitMax !== undefined) {
                 const current = scale.domain();
-                const minD = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin : new Date(explicitMin)) : current[0];
-                const maxD = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax : new Date(explicitMax)) : current[1];
+                let minD = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin : new Date(explicitMin)) : current[0];
+                let maxD = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax : new Date(explicitMax)) : current[1];
+                if (minD.getTime() === maxD.getTime()) {
+                    minD = new Date(minD.getTime() - 3600000);
+                    maxD = new Date(maxD.getTime() + 3600000);
+                }
                 scale.setDomain([minD, maxD]);
             }
         }

@@ -27,7 +27,9 @@ export type {
     ChartAxisLabelTemplateContext,
     ChartAxisPosition,
     ChartAxisTick,
-    ChartXAxisType
+    ChartXAxisPosition,
+    ChartXAxisType,
+    ChartYAxisPosition
 } from "./models/chart-axis.models";
 
 export type {

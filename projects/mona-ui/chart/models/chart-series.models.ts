@@ -18,5 +18,7 @@ export interface ChartLegendItemTemplateContext {
     name: string;
     series: ChartLegendItem;
     seriesId: string;
+    seriesType: ChartSeriesType;
     visible: boolean;
 }
+

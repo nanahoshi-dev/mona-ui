@@ -147,4 +147,26 @@ describe("ChartStyleResolver", () => {
         const converted = toCanvasColor("oklch(87.1% 0.006 286.286)");
         expect(converted.startsWith("rgb(")).toBe(true);
     });
+
+    it("should safely handle non-finite numeric inputs and fallback to defaults", () => {
+        const resolver = new ChartStyleResolver();
+        const s0 = createMockSeries("line", {
+            strokeWidth: Number.POSITIVE_INFINITY,
+            pointRadius: Number.NaN,
+            fillOpacity: Number.NEGATIVE_INFINITY
+        });
+
+        const style = resolver.resolveSeriesStyle(s0, 0);
+        expect(style.lineWidth).toBe(2);
+        expect(style.pointRadius).toBe(3);
+        expect(style.fillOpacity).toBe(1);
+    });
+
+    it("should reject invalid color strings and fall back to theme palette", () => {
+        const resolver = new ChartStyleResolver();
+        const s0 = createMockSeries("line", { color: "not-a-color-at-all" });
+
+        const style = resolver.resolveSeriesStyle(s0, 0);
+        expect(style.color).toBe("#3b82f6");
+    });
 });

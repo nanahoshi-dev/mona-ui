@@ -2699,7 +2699,7 @@
       },
       {
         "name": "position",
-        "type": "ChartAxisPosition",
+        "type": "ChartXAxisPosition",
         "description": "Position of the X axis relative to the plot area.",
         "kind": "input"
       },
@@ -2771,7 +2771,7 @@
       },
       {
         "name": "position",
-        "type": "ChartAxisPosition",
+        "type": "ChartYAxisPosition",
         "description": "Position of the Y axis relative to the plot area.",
         "kind": "input"
       },

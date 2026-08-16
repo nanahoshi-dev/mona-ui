@@ -73,7 +73,7 @@ describe("chart-domain", () => {
     });
 
     describe("calculateContinuousYDomain", () => {
-        it("should compute range for positive line series", () => {
+        it("should compute range for positive line series without forcing zero", () => {
             const series = [createMockSeries("line", "val")];
             const data = [{ val: 10 }, { val: 50 }, { val: 30 }];
             const domain = calculateContinuousYDomain(series, data);
@@ -94,14 +94,41 @@ describe("chart-domain", () => {
             expect(domain).toEqual([0, 50]);
         });
 
-        it("should match continuous scaling between line and area series", () => {
-            const lineSeries = [createMockSeries("line", "val")];
+        it("should include zero baseline for positive-only area series", () => {
             const areaSeries = [createMockSeries("area", "val")];
             const data = [{ val: 20 }, { val: 80 }];
-            const lineDomain = calculateContinuousYDomain(lineSeries, data);
             const areaDomain = calculateContinuousYDomain(areaSeries, data);
-            expect(areaDomain).toEqual([20, 80]);
-            expect(areaDomain).toEqual(lineDomain);
+            expect(areaDomain).toEqual([0, 80]);
+        });
+
+        it("should include zero baseline for negative-only area series", () => {
+            const areaSeries = [createMockSeries("area", "val")];
+            const data = [{ val: -20 }, { val: -80 }];
+            const areaDomain = calculateContinuousYDomain(areaSeries, data);
+            expect(areaDomain).toEqual([-80, 0]);
+        });
+
+        it("should compute mixed positive and negative area domain", () => {
+            const areaSeries = [createMockSeries("area", "val")];
+            const data = [{ val: -20 }, { val: 80 }];
+            const areaDomain = calculateContinuousYDomain(areaSeries, data);
+            expect(areaDomain).toEqual([-20, 80]);
+        });
+
+        it("should include zero baseline when mixed line and area series exist", () => {
+            const lineSeries = createMockSeries("line", "val1");
+            const areaSeries = createMockSeries("area", "val2");
+            const data = [{ val1: 20, val2: 40 }, { val1: 60, val2: 80 }];
+            const domain = calculateContinuousYDomain([lineSeries, areaSeries], data);
+            expect(domain).toEqual([0, 80]);
+        });
+
+        it("should recalculate domain without zero baseline when area series is hidden", () => {
+            const lineSeries = createMockSeries("line", "val1", undefined, true);
+            const areaSeries = createMockSeries("area", "val2", undefined, false);
+            const data = [{ val1: 20, val2: 40 }, { val1: 60, val2: 80 }];
+            const domain = calculateContinuousYDomain([lineSeries, areaSeries], data);
+            expect(domain).toEqual([20, 60]);
         });
 
         it("should include zero baseline for negative-only bar series", () => {
@@ -132,6 +159,30 @@ describe("chart-domain", () => {
             expect(domain).toEqual([0, 100]);
         });
 
+        it("should expand domain safely when one-sided explicit min exceeds observed max", () => {
+            const series = [createMockSeries("line", "val")];
+            const data = [{ val: 10 }, { val: 20 }];
+            const domain = calculateContinuousYDomain(series, data, 100, undefined);
+            expect(domain[0]).toBe(100);
+            expect(domain[1]).toBeGreaterThan(100);
+        });
+
+        it("should expand domain safely when one-sided explicit max is below observed min", () => {
+            const series = [createMockSeries("line", "val")];
+            const data = [{ val: 10 }, { val: 20 }];
+            const domain = calculateContinuousYDomain(series, data, undefined, 0);
+            expect(domain[0]).toBeLessThan(0);
+            expect(domain[1]).toBe(0);
+        });
+
+        it("should handle equal explicit min and max without collapsing", () => {
+            const series = [createMockSeries("line", "val")];
+            const data = [{ val: 10 }, { val: 20 }];
+            const domain = calculateContinuousYDomain(series, data, 100, 100);
+            expect(domain[0]).toBeLessThan(100);
+            expect(domain[1]).toBeGreaterThan(100);
+        });
+
         it("should handle degenerate single positive value", () => {
             const lineSeries = [createMockSeries("line", "val")];
             const lineDomain = calculateContinuousYDomain(lineSeries, [{ val: 100 }]);
@@ -152,6 +203,13 @@ describe("chart-domain", () => {
             const series = [createMockSeries("line", "val")];
             const domain = calculateContinuousYDomain(series, []);
             expect(domain).toEqual([0, 1]);
+        });
+
+        it("should handle empty data with one explicit bound safely", () => {
+            const series = [createMockSeries("line", "val")];
+            const domain = calculateContinuousYDomain(series, [], 50, undefined);
+            expect(domain[0]).toBe(50);
+            expect(domain[1]).toBeGreaterThan(50);
         });
 
         it("should ignore invalid non-numeric values", () => {
@@ -191,6 +249,14 @@ describe("chart-domain", () => {
             expect(domain).toEqual([0, 50]);
         });
 
+        it("should expand domain safely when one-sided explicit min exceeds observed max", () => {
+            const series = [createMockSeries("line", "val", undefined, true, "x")];
+            const data = [{ x: 5, val: 1 }, { x: 25, val: 2 }];
+            const domain = calculateLinearXDomain(series, data, "x", 100, undefined);
+            expect(domain[0]).toBe(100);
+            expect(domain[1]).toBeGreaterThan(100);
+        });
+
         it("should handle single value expansion", () => {
             const series = [createMockSeries("line", "val", undefined, true, "x")];
             const data = [{ x: 50, val: 1 }];
@@ -227,6 +293,17 @@ describe("chart-domain", () => {
             expect(domain[0].getTime()).toBe(d1.getTime());
             expect(domain[1].getTime()).toBe(d2.getTime());
         });
+
+        it("should handle one-sided explicit min crossing observed max for time", () => {
+            const d1 = new Date("2026-01-01T00:00:00Z");
+            const d2 = new Date("2026-01-10T00:00:00Z");
+            const explicitMin = new Date("2026-02-01T00:00:00Z");
+            const series = [createMockSeries("line", "val", undefined, true, "date")];
+            const data = [{ date: d1, val: 1 }, { date: d2, val: 2 }];
+            const domain = calculateTimeDomain(series, data, "date", explicitMin, undefined);
+            expect(domain[0].getTime()).toBe(explicitMin.getTime());
+            expect(domain[1].getTime()).toBeGreaterThan(explicitMin.getTime());
+        });
     });
 
     describe("calculateCategoryDomain", () => {
@@ -249,6 +326,18 @@ describe("chart-domain", () => {
             const series = [createMockSeries("line", "val")];
             const data = [{ x: new Date(), val: 10 }];
             expect(inferXAxisType(series, data, "x")).toBe("time");
+        });
+
+        it("should infer time for ISO datetime strings without seconds", () => {
+            const series = [createMockSeries("line", "val")];
+            const data = [{ x: "2026-01-01T08:30", val: 10 }];
+            expect(inferXAxisType(series, data, "x")).toBe("time");
+        });
+
+        it("should infer category for non-ISO hyphenated strings", () => {
+            const series = [createMockSeries("line", "val")];
+            const data = [{ x: "PROD-1234", val: 10 }];
+            expect(inferXAxisType(series, data, "x")).toBe("category");
         });
 
         it("should infer linear when numbers are present with no bar series", () => {

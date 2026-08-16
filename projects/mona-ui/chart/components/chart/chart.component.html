@@ -75,6 +75,9 @@
             }
         }
 
+        <!-- Tooltip overlay in plot-local coordinates -->
+        <ng-content select="mona-chart-tooltip"></ng-content>
+
         <!-- No Data Placeholder -->
         @if (hasNoData()) {
             <div [class]="noDataClasses()">
@@ -92,6 +95,10 @@
         </div>
     </div>
 
-    <!-- Projected Content (Series, Axes, Legend, Tooltip) -->
+    <!-- Projected Legend Outside Plot Container -->
+    <ng-content select="mona-chart-legend"></ng-content>
+
+    <!-- Other Projected Content (Series, Axes, Templates) -->
     <ng-content></ng-content>
 </div>
+

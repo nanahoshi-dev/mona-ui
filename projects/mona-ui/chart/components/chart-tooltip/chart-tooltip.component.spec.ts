@@ -51,6 +51,7 @@ describe("MonaChartTooltipComponent", () => {
         coordinateSystem: "cartesian",
         height: 400,
         hitTargets: [],
+        interactionBuckets: [],
         plotRect: { height: 300, width: 700, x: 50, y: 50 },
         series: [],
         width: 800
@@ -78,6 +79,7 @@ describe("MonaChartTooltipComponent", () => {
             coordinateSystem: "cartesian",
             height: 400,
             hitTargets: [],
+            interactionBuckets: [],
             plotRect: { height: 300, width: 700, x: 50, y: 50 },
             series: [],
             width: 800
@@ -96,56 +98,60 @@ describe("MonaChartTooltipComponent", () => {
         fixture.detectChanges();
     });
 
-    it("should flip downwards with translateY(16px) when hovering near the top boundary (y < 140)", () => {
-        tooltipPositionSignal.set({ x: 400, y: 50 });
+    it("should place tooltip on bottom when hovering near top boundary", () => {
+        tooltipPositionSignal.set({ x: 400, y: 20 });
         tooltipContextSignal.set(createMockTemplateContext(createMockPointContext("Jan", "50", 50)));
         fixture.detectChanges();
 
         const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
         expect(tooltipEl).not.toBeNull();
-        expect(tooltipEl.nativeElement.style.transform).toContain("translateY(16px)");
+        expect(tooltipEl.attributes["data-placement"]).toBe("bottom");
+        expect(parseFloat(tooltipEl.nativeElement.style.top)).toBeGreaterThan(20);
     });
 
-    it("should position upwards with translateY(-100%) when hovering with ample vertical clearance (y >= 140)", () => {
+    it("should place tooltip on top with gap when hovering with ample vertical clearance", () => {
         tooltipPositionSignal.set({ x: 400, y: 200 });
         tooltipContextSignal.set(createMockTemplateContext(createMockPointContext("Jan", "50", 50)));
         fixture.detectChanges();
 
         const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
         expect(tooltipEl).not.toBeNull();
-        expect(tooltipEl.nativeElement.style.transform).toContain("translateY(-100%) translateY(-10px)");
+        expect(tooltipEl.attributes["data-placement"]).toBe("top");
+        expect(parseFloat(tooltipEl.nativeElement.style.top)).toBeLessThan(200);
     });
 
-    it("should align right with translateX(-100%) when hovering near the right chart boundary", () => {
-        // Chart width is 800, point x is 750 (> 800 - 140)
-        tooltipPositionSignal.set({ x: 750, y: 200 });
+    it("should clamp horizontal position when hovering near right chart boundary", () => {
+        tooltipPositionSignal.set({ x: 790, y: 200 });
         tooltipContextSignal.set(createMockTemplateContext(createMockPointContext("Nov 23", "100", 100)));
         fixture.detectChanges();
 
         const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
         expect(tooltipEl).not.toBeNull();
-        expect(tooltipEl.nativeElement.style.transform).toContain("translateX(-100%)");
+        const left = parseFloat(tooltipEl.nativeElement.style.left);
+        expect(left).toBeLessThanOrEqual(800 - 8);
     });
 
-    it("should align left with translateX(0%) when hovering near the left chart boundary", () => {
-        // Point x is 50 (< 100)
-        tooltipPositionSignal.set({ x: 50, y: 200 });
+    it("should clamp horizontal position when hovering near left chart boundary", () => {
+        tooltipPositionSignal.set({ x: 10, y: 200 });
         tooltipContextSignal.set(createMockTemplateContext(createMockPointContext("Jan", "10", 10)));
         fixture.detectChanges();
 
         const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
         expect(tooltipEl).not.toBeNull();
-        expect(tooltipEl.nativeElement.style.transform).toContain("translateX(0%)");
+        const left = parseFloat(tooltipEl.nativeElement.style.left);
+        expect(left).toBeGreaterThanOrEqual(8);
     });
 
-    it("should center horizontally with translateX(-50%) when in the middle of the chart", () => {
-        // Point x is 400 (between 100 and 660)
+    it("should center horizontally when in the middle of the chart", () => {
         tooltipPositionSignal.set({ x: 400, y: 200 });
         tooltipContextSignal.set(createMockTemplateContext(createMockPointContext("May", "50", 50)));
         fixture.detectChanges();
 
         const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
         expect(tooltipEl).not.toBeNull();
-        expect(tooltipEl.nativeElement.style.transform).toContain("translateX(-50%)");
+        const left = parseFloat(tooltipEl.nativeElement.style.left);
+        expect(left).toBeGreaterThan(200);
+        expect(left).toBeLessThan(400);
     });
 });
+

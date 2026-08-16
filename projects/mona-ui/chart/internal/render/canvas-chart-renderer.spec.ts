@@ -41,6 +41,7 @@ describe("CanvasChartRenderer", () => {
             coordinateSystem: "cartesian",
             height: 300,
             hitTargets: [],
+            interactionBuckets: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [],
             width: 500
@@ -54,13 +55,17 @@ describe("CanvasChartRenderer", () => {
         expect(ctx.restore).toHaveBeenCalled();
     });
 
-    it("should render gradient for gradient area series", () => {
+    it("should render gradient for positive area series", () => {
         const ctx = createMockContext();
+        const addColorStop = vi.fn();
+        (ctx.createLinearGradient as ReturnType<typeof vi.fn>).mockReturnValue({ addColorStop });
+
         const scene: ChartScene = {
             axes: [],
             coordinateSystem: "cartesian",
             height: 300,
             hitTargets: [],
+            interactionBuckets: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -93,9 +98,109 @@ describe("CanvasChartRenderer", () => {
 
         CanvasChartRenderer.render(ctx, scene, null, styleResolver);
 
-        expect(ctx.createLinearGradient).toHaveBeenCalled();
+        expect(ctx.createLinearGradient).toHaveBeenCalledWith(0, 80, 0, 250);
+        expect(addColorStop).toHaveBeenCalledWith(0, "rgba(63, 107, 226, 0.2)");
+        expect(addColorStop).toHaveBeenCalledWith(1, "rgba(63, 107, 226, 0)");
         expect(ctx.fill).toHaveBeenCalled();
         expect(ctx.stroke).toHaveBeenCalled();
+    });
+
+    it("should render gradient for negative area series", () => {
+        const ctx = createMockContext();
+        const addColorStop = vi.fn();
+        (ctx.createLinearGradient as ReturnType<typeof vi.fn>).mockReturnValue({ addColorStop });
+
+        const scene: ChartScene = {
+            axes: [],
+            coordinateSystem: "cartesian",
+            height: 300,
+            hitTargets: [],
+            interactionBuckets: [],
+            plotRect: { height: 200, width: 400, x: 50, y: 50 },
+            series: [
+                {
+                    baselineY: 100,
+                    connectNulls: false,
+                    curve: "linear",
+                    fillMode: "gradient",
+                    fillOpacity: 0.2,
+                    id: "area-neg",
+                    name: "Area Neg",
+                    points: [
+                        { datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 150, yValue: -20 },
+                        { datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 220, yValue: -50 }
+                    ],
+                    showPoints: false,
+                    style: {
+                        areaFillColor: "#ef4444",
+                        areaFillOpacity: 0.2,
+                        color: "#ef4444",
+                        fillOpacity: 0.2,
+                        lineWidth: 2,
+                        opacity: 1,
+                        pointRadius: 3
+                    },
+                    type: "area"
+                }
+            ],
+            width: 500
+        };
+
+        CanvasChartRenderer.render(ctx, scene, null, styleResolver);
+
+        expect(ctx.createLinearGradient).toHaveBeenCalledWith(0, 100, 0, 220);
+        expect(addColorStop).toHaveBeenCalledWith(0, "rgba(239, 68, 68, 0)");
+        expect(addColorStop).toHaveBeenCalledWith(1, "rgba(239, 68, 68, 0.2)");
+    });
+
+    it("should render mirrored gradient for mixed-sign area series with non-zero residual baseline opacity", () => {
+        const ctx = createMockContext();
+        const addColorStop = vi.fn();
+        (ctx.createLinearGradient as ReturnType<typeof vi.fn>).mockReturnValue({ addColorStop });
+
+        const scene: ChartScene = {
+            axes: [],
+            coordinateSystem: "cartesian",
+            height: 300,
+            hitTargets: [],
+            interactionBuckets: [],
+            plotRect: { height: 200, width: 400, x: 50, y: 50 },
+            series: [
+                {
+                    baselineY: 150,
+                    connectNulls: false,
+                    curve: "linear",
+                    fillMode: "gradient",
+                    fillOpacity: 0.2,
+                    id: "area-mixed",
+                    name: "Area Mixed",
+                    points: [
+                        { datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 50, yValue: 40 },
+                        { datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 250, yValue: -40 }
+                    ],
+                    showPoints: false,
+                    style: {
+                        areaFillColor: "#10b981",
+                        areaFillOpacity: 0.2,
+                        color: "#10b981",
+                        fillOpacity: 0.2,
+                        lineWidth: 2,
+                        opacity: 1,
+                        pointRadius: 3
+                    },
+                    type: "area"
+                }
+            ],
+            width: 500
+        };
+
+        CanvasChartRenderer.render(ctx, scene, null, styleResolver);
+
+        expect(ctx.createLinearGradient).toHaveBeenCalledWith(0, 50, 0, 250);
+        expect(addColorStop).toHaveBeenCalledWith(0, "rgba(16, 185, 129, 0.2)");
+        // Baseline offset is 0.5, residual opacity is 0.2 * 0.25 = 0.05
+        expect(addColorStop).toHaveBeenCalledWith(0.5, "rgba(16, 185, 129, 0.05)");
+        expect(addColorStop).toHaveBeenCalledWith(1, "rgba(16, 185, 129, 0.2)");
     });
 
     it("should render solid fill without gradient for solid area series", () => {
@@ -105,6 +210,7 @@ describe("CanvasChartRenderer", () => {
             coordinateSystem: "cartesian",
             height: 300,
             hitTargets: [],
+            interactionBuckets: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -164,6 +270,7 @@ describe("CanvasChartRenderer", () => {
             coordinateSystem: "cartesian",
             height: 300,
             hitTargets: [],
+            interactionBuckets: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [],
             width: 500
@@ -197,10 +304,13 @@ describe("CanvasChartRenderer", () => {
                     seriesId: "bar-1",
                     seriesName: "Bars",
                     seriesType: "bar",
+                    visualBounds: { height: 100, width: 30, x: 100, y: 150 },
+                    xKey: "Jan",
                     xValue: "Jan",
                     yValue: 50
                 }
             ],
+            interactionBuckets: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
