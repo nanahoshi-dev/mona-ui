@@ -93,6 +93,24 @@
                                 Point Markers
                             </mona-check-box>
                         </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Series Mode</span>
+                            <mona-check-box [checked]="useIndependentSeriesData()" (checkedChange)="useIndependentSeriesData.set($event)">
+                                Independent Metrics
+                            </mona-check-box>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Values & Range</span>
+                            <mona-check-box [checked]="includeNegativeValues()" (checkedChange)="includeNegativeValues.set($event)">
+                                Allow Negative Values
+                            </mona-check-box>
+                        </div>
                     </div>
                 </ng-template>
             </mona-tab>
@@ -218,7 +236,9 @@
                 <ng-template monaTabContentTemplate>
                     <div class="flex flex-wrap items-center gap-3 p-4">
                         <button monaButton size="small" (click)="appendDataPoint()">+ Add Point</button>
-                        <button monaButton size="small" (click)="randomizeData()">Randomize Values</button>
+                        <button monaButton size="small" (click)="randomizeData()">Randomize Together</button>
+                        <button monaButton size="small" (click)="randomizeIndividually()">Randomize Individually</button>
+                        <button monaButton size="small" (click)="loadProfitLossData()">Load +/- Preset</button>
                         <button monaButton size="small" (click)="resetData()">Reset Dataset</button>
                         <button
                             monaButton
@@ -263,20 +283,23 @@
                             [title]="showAxisTitles() ? 'Performance ($)' : ''" />
 
                         @if (showBars()) {
-                            <mona-bar-series field="actual" name="Bar Series" [borderRadius]="6" />
+                            <mona-bar-series
+                                [field]="useIndependentSeriesData() ? 'target' : 'actual'"
+                                [name]="useIndependentSeriesData() ? 'Target Budget (Bar)' : 'Bar Series'"
+                                [borderRadius]="6" />
                         }
                         @if (showArea()) {
                             <mona-area-series
                                 field="actual"
-                                name="Area Series"
+                                [name]="useIndependentSeriesData() ? 'Actual Revenue (Area)' : 'Area Series'"
                                 [curve]="curveType()"
                                 [fillMode]="areaFillMode()"
                                 [showPoints]="showPoints()" />
                         }
                         @if (showLine()) {
                             <mona-line-series
-                                field="actual"
-                                name="Line Series"
+                                [field]="useIndependentSeriesData() ? 'forecast' : 'actual'"
+                                [name]="useIndependentSeriesData() ? 'Forecast Trend (Line)' : 'Line Series'"
                                 [curve]="curveType()"
                                 [showPoints]="showPoints()" />
                         }
