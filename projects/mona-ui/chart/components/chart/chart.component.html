@@ -1,0 +1,76 @@
+<div [class]="layoutClasses()">
+    <div class="relative flex-1 min-h-0 min-w-0 w-full h-full overflow-hidden" [style.order]="plotOrder()">
+        <canvas
+            #canvas
+            class="absolute inset-0 block h-full w-full"
+            (pointermove)="onPointerMove($event)"
+            (pointerleave)="onPointerLeave()"
+            (click)="onCanvasClick($event)"></canvas>
+
+        <!-- DOM Axis Labels -->
+        @for (axisScene of scene()?.axes ?? []; track axisScene.axis) {
+            @if (axisScene.visible) {
+                @for (tick of axisScene.ticks; track tick.index) {
+                    @if (axisScene.axis === "x") {
+                        <div
+                            [class]="axisLabelClasses()"
+                            [style.left.px]="tick.coordinate"
+                            [style.top.px]="(scene()?.plotRect?.y ?? 0) + (scene()?.plotRect?.height ?? 0) + 6"
+                            [style.transform]="'translateX(-50%)'">
+                            @if (xAxisRegistration()?.labelTemplate?.(); as template) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: tick.value,
+                                        axis: 'x',
+                                        index: tick.index,
+                                        value: tick.value
+                                    }" />
+                            } @else {
+                                {{ tick.formattedValue }}
+                            }
+                        </div>
+                    } @else if (axisScene.axis === "y") {
+                        <div
+                            [class]="axisLabelClasses()"
+                            [style.left.px]="(scene()?.plotRect?.x ?? 0) - 8"
+                            [style.top.px]="tick.coordinate"
+                            [style.transform]="'translate(-100%, -50%)'">
+                            @if (yAxisRegistration()?.labelTemplate?.(); as template) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: tick.value,
+                                        axis: 'y',
+                                        index: tick.index,
+                                        value: tick.value
+                                    }" />
+                            } @else {
+                                {{ tick.formattedValue }}
+                            }
+                        </div>
+                    }
+                }
+            }
+        }
+
+        <!-- No Data Placeholder -->
+        @if (hasNoData()) {
+            <div [class]="noDataClasses()">
+                @if (noDataTemplate(); as template) {
+                    <ng-container [ngTemplateOutlet]="template.templateRef" />
+                } @else {
+                    <span>No data available</span>
+                }
+            </div>
+        }
+
+        <!-- Off-screen Accessible Live Region for Keyboard/Screen-reader Exploration -->
+        <div class="sr-only" aria-live="polite" aria-atomic="true">
+            {{ activeAccessibilityText() }}
+        </div>
+    </div>
+
+    <!-- Projected Content (Series, Axes, Legend, Tooltip) -->
+    <ng-content></ng-content>
+</div>

@@ -1,0 +1,37 @@
+<div [class]="containerClasses()">
+    @for (item of legendItems(); track item.seriesId) {
+        @if (itemTemplate(); as template) {
+            <div
+                (click)="onItemClick(item)"
+                (keydown.enter)="onItemClick(item)"
+                (keydown.space)="onItemClick(item); $event.preventDefault()"
+                [class]="itemClasses(item)"
+                [attr.role]="interactive() ? 'button' : null"
+                [attr.tabindex]="interactive() ? 0 : null"
+                [attr.aria-pressed]="interactive() ? item.visible : null">
+                <ng-container
+                    [ngTemplateOutlet]="template.templateRef"
+                    [ngTemplateOutletContext]="{
+                        $implicit: item,
+                        color: item.color,
+                        name: item.name,
+                        series: item,
+                        seriesId: item.seriesId,
+                        visible: item.visible
+                    }" />
+            </div>
+        } @else {
+            <button
+                type="button"
+                (click)="onItemClick(item)"
+                [class]="itemClasses(item)"
+                [attr.aria-pressed]="item.visible"
+                [disabled]="!interactive()">
+                <span
+                    class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
+                    [style.background-color]="item.color"></span>
+                <span class="text-xs font-medium">{{ item.name }}</span>
+            </button>
+        }
+    }
+</div>

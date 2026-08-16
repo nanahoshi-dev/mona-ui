@@ -1,0 +1,417 @@
+<div class="flex flex-col gap-6 w-full max-w-6xl mx-auto py-6">
+    <!-- Header & Navigation -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-border pb-4">
+        <div>
+            <h2 class="text-xl font-bold tracking-tight text-foreground">Interactive Chart Explorer</h2>
+            <p class="text-sm text-muted-foreground">High-performance Canvas 2D Cartesian chart visualizations with declarative Angular composition.</p>
+        </div>
+
+        <div class="flex items-center gap-2 bg-muted/40 p-1 rounded-lg border border-border">
+            <button
+                monaButton
+                [look]="activeTab() === 'mixed' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('mixed')">
+                Mixed Studio
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'time' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('time')">
+                Time Series
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'grouped' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('grouped')">
+                Grouped Bars
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('custom')">
+                Custom Templates
+            </button>
+        </div>
+    </div>
+
+    <!-- Configuration Area in Tabs -->
+    <div class="rounded-xl border border-border bg-card shadow-xs overflow-hidden">
+        <mona-tabs class="w-full">
+            <mona-tab title="Series & Curves" [selected]="true">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex flex-wrap items-center gap-6 p-4">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Series Visibility</span>
+                            <div class="flex flex-wrap gap-4">
+                                <mona-check-box [checked]="showTargetBars()" (checkedChange)="showTargetBars.set($event)">
+                                    Bars (Target)
+                                </mona-check-box>
+                                <mona-check-box [checked]="showActualArea()" (checkedChange)="showActualArea.set($event)">
+                                    Area (Actual)
+                                </mona-check-box>
+                                <mona-check-box [checked]="showForecastLine()" (checkedChange)="showForecastLine.set($event)">
+                                    Line (Forecast)
+                                </mona-check-box>
+                            </div>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Curve & Interpolation</span>
+                            <select
+                                class="bg-background text-foreground border border-input rounded-md px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-ring outline-none"
+                                [value]="curveType()"
+                                (change)="curveType.set($any($event.target).value)">
+                                <option value="linear">Linear</option>
+                                <option value="monotone-x">Monotone X (Smooth)</option>
+                                <option value="natural">Natural (Spline)</option>
+                                <option value="step-after">Step After</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Area Fill Mode</span>
+                            <select
+                                class="bg-background text-foreground border border-input rounded-md px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-ring outline-none"
+                                [value]="areaFillMode()"
+                                (change)="areaFillMode.set($any($event.target).value)">
+                                <option value="gradient">Gradient (Fade to 0)</option>
+                                <option value="solid">Solid Fill</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Points</span>
+                            <mona-check-box [checked]="showPoints()" (checkedChange)="showPoints.set($event)">
+                                Point Markers
+                            </mona-check-box>
+                        </div>
+                    </div>
+                </ng-template>
+            </mona-tab>
+
+            <mona-tab title="Axes & Grid">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex flex-wrap items-center gap-6 p-4">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Axis Lines</span>
+                            <div class="flex flex-wrap gap-4">
+                                <mona-check-box [checked]="xAxisLine()" (checkedChange)="xAxisLine.set($event)">
+                                    X-Axis Line
+                                </mona-check-box>
+                                <mona-check-box [checked]="yAxisLine()" (checkedChange)="yAxisLine.set($event)">
+                                    Y-Axis Line
+                                </mona-check-box>
+                            </div>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Grid Lines</span>
+                            <div class="flex flex-wrap gap-4">
+                                <mona-check-box [checked]="yGridLines()" (checkedChange)="yGridLines.set($event)">
+                                    Horizontal Grid Lines
+                                </mona-check-box>
+                                <mona-check-box [checked]="xGridLines()" (checkedChange)="xGridLines.set($event)">
+                                    Vertical Grid Lines
+                                </mona-check-box>
+                            </div>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Scale Bounds</span>
+                            <mona-check-box [checked]="niceAxes()" (checkedChange)="niceAxes.set($event)">
+                                Nice Bounds & Zero Baseline
+                            </mona-check-box>
+                        </div>
+                    </div>
+                </ng-template>
+            </mona-tab>
+
+            <mona-tab title="Interactivity & Legend">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex flex-wrap items-center gap-6 p-4">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tooltip Behavior</span>
+                            <mona-check-box [checked]="sharedTooltip()" (checkedChange)="sharedTooltip.set($event)">
+                                Shared Crosshair Tooltip
+                            </mona-check-box>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Legend Position</span>
+                            <select
+                                class="bg-background text-foreground border border-input rounded-md px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-ring outline-none"
+                                [value]="legendPosition()"
+                                (change)="legendPosition.set($any($event.target).value)">
+                                <option value="bottom">Bottom</option>
+                                <option value="top">Top</option>
+                                <option value="left">Left</option>
+                                <option value="right">Right</option>
+                            </select>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Empty State</span>
+                            <mona-check-box [checked]="useCustomNoData()" (checkedChange)="useCustomNoData.set($event)">
+                                Custom No-Data Template
+                            </mona-check-box>
+                        </div>
+                    </div>
+                </ng-template>
+            </mona-tab>
+
+            <mona-tab title="Dataset Actions">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex flex-wrap items-center gap-3 p-4">
+                        <button monaButton size="small" (click)="appendDataPoint()">+ Add Point</button>
+                        <button monaButton size="small" (click)="randomizeData()">Randomize Values</button>
+                        <button monaButton size="small" (click)="resetData()">Reset Dataset</button>
+                        <button
+                            monaButton
+                            size="small"
+                            [look]="isDataEmpty() ? 'primary' : 'default'"
+                            (click)="isDataEmpty.set(!isDataEmpty())">
+                            {{ isDataEmpty() ? 'Restore Data' : 'Set Empty' }}
+                        </button>
+                    </div>
+                </ng-template>
+            </mona-tab>
+        </mona-tabs>
+    </div>
+
+    <!-- Main Chart Viewports -->
+    <div class="p-6 rounded-xl border border-border bg-card shadow-xs min-h-[420px] flex flex-col justify-center">
+        @switch (activeTab()) {
+            @case ("mixed") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Combined Performance Metrics (Bar + Area + Line)</h3>
+                    <mona-chart
+                        [data]="displayedMonthlyData()"
+                        xField="month"
+                        class="h-96 w-full"
+                        aria-label="Monthly Performance Metrics"
+                        aria-description="Interactive chart illustrating Target Bars, Actual Area, and Forecast Line."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [gridLines]="xGridLines()" [nice]="niceAxes()" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [formatter]="currencyFormatter" [gridLines]="yGridLines()" [nice]="niceAxes()" />
+
+                        @if (showTargetBars()) {
+                            <mona-bar-series field="target" name="Target Budget" [borderRadius]="6" />
+                        }
+                        @if (showActualArea()) {
+                            <mona-area-series
+                                field="actual"
+                                name="Actual Revenue"
+                                [curve]="curveType()"
+                                [fillMode]="areaFillMode()"
+                                [showPoints]="showPoints()" />
+                        }
+                        @if (showForecastLine()) {
+                            <mona-line-series
+                                field="forecast"
+                                name="Forecast Trend"
+                                [curve]="curveType()"
+                                [showPoints]="showPoints()" />
+                        }
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="sharedTooltip()" />
+
+                        @if (useCustomNoData()) {
+                            <ng-template monaChartNoDataTemplate>
+                                <div class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+                                    <p class="font-medium">No sales metrics found.</p>
+                                    <p class="text-xs mt-1">Click "Restore" to re-populate the dataset.</p>
+                                </div>
+                            </ng-template>
+                        }
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("time") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Continuous System Telemetry (Temporal Scale)</h3>
+                    <mona-chart
+                        [data]="dateData()"
+                        xField="timestamp"
+                        class="h-96 w-full"
+                        aria-label="System Telemetry Over Time"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis type="time" [axisLine]="xAxisLine()" [formatter]="timeFormatter" [nice]="true" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" title="Utilization (%)" />
+
+                        <mona-area-series
+                            field="cpu"
+                            name="CPU Load"
+                            curve="monotone-x"
+                            fillMode="gradient"
+                            [showPoints]="true" />
+                        <mona-line-series
+                            field="memory"
+                            name="Memory Usage"
+                            curve="monotone-x"
+                            [showPoints]="true" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("grouped") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Multi-Series Grouped Bar Comparison</h3>
+                    <mona-chart
+                        [data]="displayedMonthlyData()"
+                        xField="month"
+                        class="h-96 w-full"
+                        aria-label="Grouped Budget Comparison"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [formatter]="currencyFormatter" [gridLines]="yGridLines()" [nice]="true" />
+
+                        <mona-bar-series field="target" name="Target" [borderRadius]="4" [maxBarWidth]="36" />
+                        <mona-bar-series field="forecast" name="Forecast" [borderRadius]="4" [maxBarWidth]="36" />
+                        <mona-bar-series field="actual" name="Actual" [borderRadius]="4" [maxBarWidth]="36" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("custom") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Custom Angular Templates (Axis Labels, Legend Items, Tooltip & No-Data)</h3>
+                    <mona-chart
+                        [data]="displayedMonthlyData()"
+                        xField="month"
+                        class="h-96 w-full"
+                        aria-label="Custom Templates Demo"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true">
+                            <ng-template monaChartAxisLabelTemplate let-val>
+                                <span class="font-bold text-primary">🗓️ {{ val }}</span>
+                            </ng-template>
+                        </mona-chart-x-axis>
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [formatter]="currencyFormatter" [gridLines]="yGridLines()" [nice]="true" />
+
+                        <mona-bar-series field="target" name="Target Plan" [borderRadius]="4" />
+                        <mona-line-series field="actual" name="Actual Revenue" curve="natural" [showPoints]="true" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true">
+                            <ng-template monaChartLegendItemTemplate let-series>
+                                <div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-muted/60 border border-border text-xs">
+                                    <span class="h-2 w-2 rounded-full" [style.background-color]="series.color"></span>
+                                    <span class="font-semibold">{{ series.name }}</span>
+                                    <span class="text-[10px] text-muted-foreground">({{ series.type }})</span>
+                                </div>
+                            </ng-template>
+                        </mona-chart-legend>
+
+                        <mona-chart-tooltip [shared]="true">
+                            <ng-template monaChartTooltipTemplate let-points="points">
+                                <div class="bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-2.5 min-w-[160px]">
+                                    <div class="text-xs font-bold border-b border-border pb-1 mb-1.5 text-primary">
+                                        Period: {{ points[0]?.xValue }}
+                                    </div>
+                                    @for (p of points; track p.seriesId) {
+                                        <div class="flex items-center justify-between text-xs py-0.5">
+                                            <span class="flex items-center gap-1.5">
+                                                <span class="h-2 w-2 rounded-full" [style.background-color]="p.color"></span>
+                                                <span>{{ p.seriesName }}</span>
+                                            </span>
+                                            <span class="font-mono font-semibold">{{ p.formattedY }}</span>
+                                        </div>
+                                    }
+                                </div>
+                            </ng-template>
+                        </mona-chart-tooltip>
+
+                        <ng-template monaChartNoDataTemplate>
+                            <div class="flex flex-col items-center justify-center p-12 text-center">
+                                <div class="text-2xl mb-2">📊</div>
+                                <h4 class="font-semibold text-foreground">No Chart Data Present</h4>
+                                <p class="text-xs text-muted-foreground mt-1">This is a custom projected template via [monaChartNoDataTemplate].</p>
+                            </div>
+                        </ng-template>
+                    </mona-chart>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Real-time Event Logger -->
+    <div class="flex flex-col gap-3 p-4 rounded-xl border border-border bg-card shadow-xs">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <h3 class="text-sm font-semibold text-foreground">Interactive Event Stream</h3>
+                <span class="text-xs text-muted-foreground">({{ eventLogs().length }} events)</span>
+            </div>
+            <button monaButton size="small" look="ghost" (click)="clearLogs()">Clear Log</button>
+        </div>
+
+        <div class="overflow-x-auto max-h-48 overflow-y-auto border border-border/60 rounded-lg bg-background/50 font-mono text-xs">
+            <table class="w-full text-left">
+                <thead class="bg-muted/60 text-muted-foreground border-b border-border sticky top-0">
+                    <tr>
+                        <th class="py-1.5 px-3 w-24">Time</th>
+                        <th class="py-1.5 px-3 w-48">Event</th>
+                        <th class="py-1.5 px-3">Payload Details</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border/40">
+                    @for (log of eventLogs(); track log.id) {
+                        <tr class="hover:bg-muted/30 transition-colors">
+                            <td class="py-1 px-3 text-muted-foreground">{{ log.timestamp }}</td>
+                            <td class="py-1 px-3">
+                                <span
+                                    class="px-1.5 py-0.5 rounded text-[11px] font-medium"
+                                    [class.bg-blue-500/10]="log.eventType === 'pointClick'"
+                                    [class.text-blue-500]="log.eventType === 'pointClick'"
+                                    [class.bg-emerald-500/10]="log.eventType === 'pointFocusChange'"
+                                    [class.text-emerald-500]="log.eventType === 'pointFocusChange'"
+                                    [class.bg-amber-500/10]="log.eventType === 'seriesVisibilityChange'"
+                                    [class.text-amber-500]="log.eventType === 'seriesVisibilityChange'"
+                                    [class.bg-purple-500/10]="log.eventType === 'dataUpdate'"
+                                    [class.text-purple-500]="log.eventType === 'dataUpdate'">
+                                    {{ log.eventType }}
+                                </span>
+                            </td>
+                            <td class="py-1 px-3 text-foreground/90">{{ log.details }}</td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="3" class="py-4 text-center text-muted-foreground font-sans italic">
+                                Hover over the chart, use arrow keys, or click legend entries to observe live events.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

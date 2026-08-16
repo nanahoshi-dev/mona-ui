@@ -2399,6 +2399,480 @@
       }
     ]
   },
+  "MonaAreaSeriesComponent": {
+    "name": "MonaAreaSeriesComponent",
+    "selector": "\"mona-area-series\"",
+    "inputs": [
+      {
+        "name": "color",
+        "type": "string",
+        "description": "Explicit stroke and fill color override for the area series.",
+        "kind": "input"
+      },
+      {
+        "name": "connectNulls",
+        "type": "boolean",
+        "description": "Whether to connect points across null or invalid values without gaps.",
+        "kind": "input"
+      },
+      {
+        "name": "curve",
+        "type": "ChartCurve",
+        "description": "Curve interpolation style (`\"linear\"`, `\"monotone-x\"`, `\"natural\"`, `\"step\"`, or `\"step-after\"`).",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "description": "Series-specific dataset overriding the root chart data.",
+        "kind": "input"
+      },
+      {
+        "name": "field",
+        "type": "string",
+        "description": "Property key or accessor extracting the Y value for each data item.",
+        "kind": "input"
+      },
+      {
+        "name": "fillMode",
+        "type": "ChartAreaFillMode",
+        "description": "Area fill style (`\"gradient\"` fading to zero baseline, or uniform `\"solid\"`).",
+        "kind": "input"
+      },
+      {
+        "name": "fillOpacity",
+        "type": "number",
+        "description": "Maximum opacity applied to the area fill.",
+        "kind": "input"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Name of the series displayed in legends and tooltips.",
+        "kind": "input"
+      },
+      {
+        "name": "pointRadius",
+        "type": "number",
+        "description": "Radius in pixels for point markers.",
+        "kind": "input"
+      },
+      {
+        "name": "showPoints",
+        "type": "boolean",
+        "description": "Whether to draw point markers at each data coordinate along the top boundary line.",
+        "kind": "input"
+      },
+      {
+        "name": "strokeWidth",
+        "type": "number",
+        "description": "Stroke width in pixels for the area boundary line.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the series host element.",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Whether the series is currently visible on the chart and in calculations.",
+        "kind": "input"
+      },
+      {
+        "name": "xField",
+        "type": "string | undefined",
+        "description": "Property key extracting the X value, overriding the root chart X field.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonaBarSeriesComponent": {
+    "name": "MonaBarSeriesComponent",
+    "selector": "\"mona-bar-series\"",
+    "inputs": [
+      {
+        "name": "borderRadius",
+        "type": "number",
+        "description": "Corner radius in pixels for the bar caps.",
+        "kind": "input"
+      },
+      {
+        "name": "color",
+        "type": "string",
+        "description": "Explicit fill color override for the series bars.",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "description": "Series-specific dataset overriding the root chart data.",
+        "kind": "input"
+      },
+      {
+        "name": "field",
+        "type": "string",
+        "description": "Property key or accessor extracting the Y/value for each bar.",
+        "kind": "input"
+      },
+      {
+        "name": "fillOpacity",
+        "type": "number",
+        "description": "Fill opacity applied to the bars.",
+        "kind": "input"
+      },
+      {
+        "name": "maxBarWidth",
+        "type": "number | undefined",
+        "description": "Maximum width in pixels for each individual bar.",
+        "kind": "input"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Name of the series displayed in legends and tooltips.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the series host element.",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Whether the series is currently visible on the chart and in calculations.",
+        "kind": "input"
+      },
+      {
+        "name": "xField",
+        "type": "string | undefined",
+        "description": "Property key extracting the X/category value, overriding the root chart X field.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonaChartComponent": {
+    "name": "MonaChartComponent",
+    "selector": "\"mona-chart\"",
+    "inputs": [
+      {
+        "name": "ariaDescription",
+        "type": "string",
+        "description": "Detailed accessible description explaining the chart's purpose and trends.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible name for the chart container.",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "readonly unknown[]",
+        "description": "Primary dataset shared across all child series.",
+        "kind": "input"
+      },
+      {
+        "name": "pointClick",
+        "type": "ChartPointEvent",
+        "description": "Emits when a data point or bar in the chart is clicked.",
+        "kind": "output"
+      },
+      {
+        "name": "pointFocusChange",
+        "type": "ChartPointFocusEvent",
+        "description": "Emits when the keyboard focus moves to a new data point or series.",
+        "kind": "output"
+      },
+      {
+        "name": "seriesVisibilityChange",
+        "type": "ChartSeriesVisibilityEvent",
+        "description": "Emits when a series visibility state is toggled via legend interaction.",
+        "kind": "output"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the chart container via `tailwind-merge`.",
+        "kind": "input"
+      },
+      {
+        "name": "xField",
+        "type": "string",
+        "description": "Property key or accessor extracting the X-axis coordinate for each data item.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonaChartLegendComponent": {
+    "name": "MonaChartLegendComponent",
+    "selector": "\"mona-chart-legend\"",
+    "inputs": [
+      {
+        "name": "interactive",
+        "type": "boolean",
+        "description": "Whether clicking or pressing Enter/Space on legend items toggles series visibility.",
+        "kind": "input"
+      },
+      {
+        "name": "position",
+        "type": "\"bottom\" | \"left\" | \"right\" | \"top\"",
+        "description": "Layout position of the legend (`\"top\"`, `\"bottom\"`, `\"left\"`, or `\"right\"`).",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the legend container.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonaChartTooltipComponent": {
+    "name": "MonaChartTooltipComponent",
+    "selector": "\"mona-chart-tooltip\"",
+    "inputs": [
+      {
+        "name": "enabled",
+        "type": "boolean",
+        "description": "Whether the tooltip is enabled and will appear during interaction.",
+        "kind": "input"
+      },
+      {
+        "name": "shared",
+        "type": "boolean",
+        "description": "In shared mode, displays values for all visible series matching the active X coordinate.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the tooltip popup container.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonaChartXAxisComponent": {
+    "name": "MonaChartXAxisComponent",
+    "selector": "\"mona-chart-x-axis\"",
+    "inputs": [
+      {
+        "name": "axisLine",
+        "type": "boolean",
+        "description": "Whether the solid baseline axis border line is rendered.",
+        "kind": "input"
+      },
+      {
+        "name": "formatter",
+        "type": "ChartAxisFormatter | undefined",
+        "description": "Custom formatter function for axis tick labels.",
+        "kind": "input"
+      },
+      {
+        "name": "gridLines",
+        "type": "boolean",
+        "description": "Whether vertical grid lines aligned with X-axis ticks are visible.",
+        "kind": "input"
+      },
+      {
+        "name": "max",
+        "type": "number | Date | undefined",
+        "description": "Explicit upper bound for the axis range.",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "number | Date | undefined",
+        "description": "Explicit lower bound for the axis range.",
+        "kind": "input"
+      },
+      {
+        "name": "nice",
+        "type": "boolean",
+        "description": "Automatically extends the axis domain to round, pleasant values.",
+        "kind": "input"
+      },
+      {
+        "name": "position",
+        "type": "ChartAxisPosition",
+        "description": "Position of the X axis relative to the plot area.",
+        "kind": "input"
+      },
+      {
+        "name": "tickCount",
+        "type": "number | undefined",
+        "description": "Suggested number of ticks to display along the axis.",
+        "kind": "input"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Title text rendered alongside the axis.",
+        "kind": "input"
+      },
+      {
+        "name": "type",
+        "type": "ChartXAxisType",
+        "description": "Scale type for the X axis (`\"auto\"`, `\"category\"`, `\"linear\"`, `\"time\"`, or `\"utc\"`).",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Whether the axis and its labels are visible.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonaChartYAxisComponent": {
+    "name": "MonaChartYAxisComponent",
+    "selector": "\"mona-chart-y-axis\"",
+    "inputs": [
+      {
+        "name": "axisLine",
+        "type": "boolean",
+        "description": "Whether the solid baseline axis border line is rendered.",
+        "kind": "input"
+      },
+      {
+        "name": "formatter",
+        "type": "ChartAxisFormatter | undefined",
+        "description": "Custom formatter function for axis tick labels.",
+        "kind": "input"
+      },
+      {
+        "name": "gridLines",
+        "type": "boolean",
+        "description": "Whether horizontal grid lines aligned with Y-axis ticks are visible.",
+        "kind": "input"
+      },
+      {
+        "name": "max",
+        "type": "number | undefined",
+        "description": "Explicit upper bound for the numeric value range.",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "number | undefined",
+        "description": "Explicit lower bound for the numeric value range.",
+        "kind": "input"
+      },
+      {
+        "name": "nice",
+        "type": "boolean",
+        "description": "Automatically extends the axis domain to round, pleasant values.",
+        "kind": "input"
+      },
+      {
+        "name": "position",
+        "type": "ChartAxisPosition",
+        "description": "Position of the Y axis relative to the plot area.",
+        "kind": "input"
+      },
+      {
+        "name": "tickCount",
+        "type": "number | undefined",
+        "description": "Suggested number of ticks to display along the axis.",
+        "kind": "input"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Title text rendered alongside the axis.",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Whether the axis and its labels are visible.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonaLineSeriesComponent": {
+    "name": "MonaLineSeriesComponent",
+    "selector": "\"mona-line-series\"",
+    "inputs": [
+      {
+        "name": "color",
+        "type": "string",
+        "description": "Explicit stroke color override for the series line.",
+        "kind": "input"
+      },
+      {
+        "name": "connectNulls",
+        "type": "boolean",
+        "description": "Whether to connect points across null or invalid values without gaps.",
+        "kind": "input"
+      },
+      {
+        "name": "curve",
+        "type": "ChartCurve",
+        "description": "Curve interpolation style (`\"linear\"`, `\"monotone-x\"`, `\"natural\"`, `\"step\"`, or `\"step-after\"`).",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "description": "Series-specific dataset overriding the root chart data.",
+        "kind": "input"
+      },
+      {
+        "name": "field",
+        "type": "string",
+        "description": "Property key or accessor extracting the Y value for each data item.",
+        "kind": "input"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Name of the series displayed in legends and tooltips.",
+        "kind": "input"
+      },
+      {
+        "name": "pointRadius",
+        "type": "number",
+        "description": "Radius in pixels for point markers.",
+        "kind": "input"
+      },
+      {
+        "name": "showPoints",
+        "type": "boolean",
+        "description": "Whether to draw point markers at each data coordinate along the line.",
+        "kind": "input"
+      },
+      {
+        "name": "strokeWidth",
+        "type": "number",
+        "description": "Stroke width in pixels for the series line.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the series host element.",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Whether the series is currently visible on the chart and in calculations.",
+        "kind": "input"
+      },
+      {
+        "name": "xField",
+        "type": "string | undefined",
+        "description": "Property key extracting the X value, overriding the root chart X field.",
+        "kind": "input"
+      }
+    ]
+  },
   "CheckBoxComponent": {
     "name": "CheckBoxComponent",
     "selector": "\"mona-check-box\"",

@@ -25,6 +25,7 @@
             "@nanahoshi/mona-ui/button-group": ["./projects/mona-ui/button-group/public-api.ts"],
             "@nanahoshi/mona-ui/calendar": ["./projects/mona-ui/calendar/public-api.ts"],
             "@nanahoshi/mona-ui/card": ["./projects/mona-ui/card/public-api.ts"],
+            "@nanahoshi/mona-ui/chart": ["./projects/mona-ui/chart/public-api.ts"],
             "@nanahoshi/mona-ui/check-box": ["./projects/mona-ui/check-box/public-api.ts"],
             "@nanahoshi/mona-ui/chip": ["./projects/mona-ui/chip/public-api.ts"],
             "@nanahoshi/mona-ui/circular-progress-bar": ["./projects/mona-ui/circular-progress-bar/public-api.ts"],
