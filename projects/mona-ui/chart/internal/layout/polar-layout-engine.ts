@@ -268,6 +268,7 @@ export class PolarLayoutEngine {
         const polarSeriesScene: ChartPolarSeriesScene = {
             center,
             cornerRadius,
+            fillMode: targetSeries.fillMode ? targetSeries.fillMode() : "solid",
             formattedTotal,
             id: targetSeries.id,
             innerRadius,

@@ -21,6 +21,7 @@ import {
 } from "../../internal/context/chart-registration-context";
 import { resolveData } from "../../internal/data/chart-value-resolver";
 import type {
+    ChartPolarFillMode,
     ChartPolarLabelContent,
     ChartPolarLabelPosition,
     ChartSliceVisibilityEvent,
@@ -93,6 +94,12 @@ export class MonaDonutSeriesComponent implements OnInit {
      * @default "value"
      */
     public readonly field = input<ChartField>("value");
+
+    /**
+     * @description Fill style applied to slices ("solid" or radial "gradient" from center to arc).
+     * @default "solid"
+     */
+    public readonly fillMode = input<ChartPolarFillMode>("solid");
 
     /**
      * @description Opacity of slice fills (between 0 and 1).
@@ -223,6 +230,7 @@ export class MonaDonutSeriesComponent implements OnInit {
         });
 
         effect(() => {
+            this.fillMode();
             this.fillOpacity();
             this.strokeColor();
             this.strokeWidth();
@@ -247,6 +255,7 @@ export class MonaDonutSeriesComponent implements OnInit {
             element: this.#elementRef,
             endAngle: this.endAngle,
             field: this.field,
+            fillMode: this.fillMode,
             fillOpacity: this.fillOpacity,
             id: this.#seriesId,
             innerRadiusRatio: this.innerRadiusRatio,

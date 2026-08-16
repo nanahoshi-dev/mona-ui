@@ -1,3 +1,5 @@
+export type ChartPolarFillMode = "gradient" | "solid";
+
 export type ChartPolarLabelPosition = "inside" | "outside";
 
 export type ChartPolarLabelSide = "left" | "right";

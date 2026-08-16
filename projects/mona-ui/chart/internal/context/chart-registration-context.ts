@@ -5,7 +5,12 @@ import type { ChartLegendItemTemplateDirective } from "../../directives/chart-le
 import type { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import type { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
 import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
-import type { ChartPolarLabelContent, ChartPolarLabelPosition, ChartValueFormatter } from "../../models/chart-polar.models";
+import type {
+    ChartPolarFillMode,
+    ChartPolarLabelContent,
+    ChartPolarLabelPosition,
+    ChartValueFormatter
+} from "../../models/chart-polar.models";
 import type { ChartField, ChartPoint } from "../../models/chart.models";
 import type {
     ChartAreaFillMode,
@@ -102,6 +107,7 @@ export interface ChartPolarSeriesRegistrationBase extends ChartSeriesRegistratio
     colors: Signal<readonly string[] | undefined>;
     cornerRadius: Signal<number | undefined>;
     endAngle: Signal<number>;
+    fillMode?: Signal<ChartPolarFillMode>;
     fillOpacity: Signal<number | undefined>;
     isSliceVisible: (dataIndex: number) => boolean;
     labelContent: Signal<ChartPolarLabelContent>;

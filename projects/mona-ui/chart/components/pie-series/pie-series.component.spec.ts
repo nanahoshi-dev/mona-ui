@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
-import type { ChartPolarLabelPosition, ChartSliceVisibilityEvent } from "../../models/chart-polar.models";
+import type { ChartPolarFillMode, ChartPolarLabelPosition, ChartSliceVisibilityEvent } from "../../models/chart-polar.models";
 import { MonaChartComponent } from "../chart/chart.component";
 import { MonaPieSeriesComponent } from "./pie-series.component";
 
@@ -15,6 +15,7 @@ import { MonaPieSeriesComponent } from "./pie-series.component";
                 [field]="field()"
                 [categoryField]="categoryField()"
                 [name]="name()"
+                [fillMode]="fillMode()"
                 [outerRadiusRatio]="outerRadiusRatio()"
                 [startAngle]="startAngle()"
                 [endAngle]="endAngle()"
@@ -42,6 +43,7 @@ class TestHostComponent {
     ]);
     public readonly endAngle = signal(360);
     public readonly field = signal("share");
+    public readonly fillMode = signal<ChartPolarFillMode>("solid");
     public readonly labelPosition = signal<ChartPolarLabelPosition>("outside");
     public readonly name = signal("Browser Market Share");
     public readonly outerRadiusRatio = signal(0.9);
@@ -131,6 +133,25 @@ describe("MonaPieSeriesComponent", () => {
 
         if (insideScene && insideScene.coordinateSystem === "polar") {
             expect(insideScene.series[0].labelPosition).toBe("inside");
+        }
+    });
+
+    it("should support solid and gradient fillMode", () => {
+        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        chart.recomputeScene();
+        let scene = chart.scene();
+
+        if (scene && scene.coordinateSystem === "polar") {
+            expect(scene.series[0].fillMode).toBe("solid");
+        }
+
+        host.fillMode.set("gradient");
+        fixture.detectChanges();
+        chart.recomputeScene();
+        scene = chart.scene();
+
+        if (scene && scene.coordinateSystem === "polar") {
+            expect(scene.series[0].fillMode).toBe("gradient");
         }
     });
 

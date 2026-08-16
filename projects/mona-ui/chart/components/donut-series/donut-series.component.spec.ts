@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
+import type { ChartPolarFillMode } from "../../models/chart-polar.models";
 import { MonaChartComponent } from "../chart/chart.component";
 import { MonaDonutSeriesComponent } from "./donut-series.component";
 
@@ -13,6 +14,7 @@ import { MonaDonutSeriesComponent } from "./donut-series.component";
             <mona-donut-series
                 [field]="field()"
                 [categoryField]="categoryField()"
+                [fillMode]="fillMode()"
                 [innerRadiusRatio]="innerRadiusRatio()">
                 @if (useCustomCenter()) {
                     <ng-template monaChartCenterTemplate let-total let-formattedTotal="formattedTotal">
@@ -33,6 +35,7 @@ class TestHostComponent {
         { category: "Services", revenue: 200 }
     ]);
     public readonly field = signal("revenue");
+    public readonly fillMode = signal<ChartPolarFillMode>("solid");
     public readonly innerRadiusRatio = signal(0.6);
     public readonly useCustomCenter = signal(true);
 }
@@ -81,5 +84,24 @@ describe("MonaDonutSeriesComponent", () => {
         fixture.detectChanges();
 
         expect(centerEl.textContent).toContain("800");
+    });
+
+    it("should support solid and gradient fillMode", () => {
+        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        chart.recomputeScene();
+        let scene = chart.scene();
+
+        if (scene && scene.coordinateSystem === "polar") {
+            expect(scene.series[0].fillMode).toBe("solid");
+        }
+
+        host.fillMode.set("gradient");
+        fixture.detectChanges();
+        chart.recomputeScene();
+        scene = chart.scene();
+
+        if (scene && scene.coordinateSystem === "polar") {
+            expect(scene.series[0].fillMode).toBe("gradient");
+        }
     });
 });
