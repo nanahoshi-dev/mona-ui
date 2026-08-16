@@ -1,8 +1,11 @@
 import type { ElementRef, Signal } from "@angular/core";
 import type { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
+import type { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
 import type { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
+import type { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import type { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
 import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
+import type { ChartPolarLabelContent, ChartPolarLabelPosition, ChartValueFormatter } from "../../models/chart-polar.models";
 import type { ChartField, ChartPoint } from "../../models/chart.models";
 import type {
     ChartAreaFillMode,
@@ -26,8 +29,8 @@ export interface ChartAxisRegistration {
     formatter: Signal<ChartAxisFormatter | undefined>;
     gridLines: Signal<boolean>;
     labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
-    max: Signal<number | Date | undefined>;
-    min: Signal<number | Date | undefined>;
+    max: Signal<Date | number | undefined>;
+    min: Signal<Date | number | undefined>;
     nice: Signal<boolean>;
     position: Signal<ChartAxisPosition>;
     tickCount: Signal<number | undefined>;
@@ -48,39 +51,106 @@ export interface ChartTooltipRegistration {
     template: Signal<ChartTooltipTemplateDirective | undefined>;
 }
 
-export interface ChartSeriesRegistration {
-    borderRadius?: Signal<number | undefined>;
-    color: Signal<string>;
-    connectNulls?: Signal<boolean>;
-    curve?: Signal<ChartCurve>;
+export interface ChartSeriesRegistrationBase {
     data: Signal<readonly unknown[] | undefined>;
     element: ElementRef<HTMLElement>;
     field: Signal<ChartField>;
-    fillMode?: Signal<ChartAreaFillMode>;
-    fillOpacity?: Signal<number | undefined>;
     id: string;
-    maxBarWidth?: Signal<number | undefined>;
     name: Signal<string>;
-    pointRadius?: Signal<number | undefined>;
-    showPoints?: Signal<boolean>;
-    strokeWidth?: Signal<number | undefined>;
-    toggleVisibility?: () => boolean;
     type: ChartSeriesType;
     userClass?: Signal<string>;
     visible: Signal<boolean>;
+}
+
+export interface ChartCartesianSeriesRegistrationBase extends ChartSeriesRegistrationBase {
+    color: Signal<string>;
+    toggleVisibility?: () => boolean;
     xField: Signal<ChartField | undefined>;
 }
 
+export interface ChartLineSeriesRegistration extends ChartCartesianSeriesRegistrationBase {
+    connectNulls?: Signal<boolean>;
+    curve?: Signal<ChartCurve>;
+    pointRadius?: Signal<number | undefined>;
+    showPoints?: Signal<boolean>;
+    strokeWidth?: Signal<number | undefined>;
+    type: "line";
+}
+
+export interface ChartAreaSeriesRegistration extends ChartCartesianSeriesRegistrationBase {
+    connectNulls?: Signal<boolean>;
+    curve?: Signal<ChartCurve>;
+    fillMode?: Signal<ChartAreaFillMode>;
+    fillOpacity?: Signal<number | undefined>;
+    pointRadius?: Signal<number | undefined>;
+    showPoints?: Signal<boolean>;
+    strokeWidth?: Signal<number | undefined>;
+    type: "area";
+}
+
+export interface ChartBarSeriesRegistration extends ChartCartesianSeriesRegistrationBase {
+    borderRadius?: Signal<number | undefined>;
+    fillOpacity?: Signal<number | undefined>;
+    maxBarWidth?: Signal<number | undefined>;
+    type: "bar";
+}
+
+export interface ChartPolarSeriesRegistrationBase extends ChartSeriesRegistrationBase {
+    categoryField: Signal<ChartField>;
+    categoryFormatter: Signal<ChartValueFormatter | undefined>;
+    colorField: Signal<ChartField | undefined>;
+    colors: Signal<readonly string[] | undefined>;
+    cornerRadius: Signal<number | undefined>;
+    endAngle: Signal<number>;
+    fillOpacity: Signal<number | undefined>;
+    isSliceVisible: (dataIndex: number) => boolean;
+    labelContent: Signal<ChartPolarLabelContent>;
+    labelPosition: Signal<ChartPolarLabelPosition>;
+    minLabelAngle: Signal<number>;
+    outerRadiusRatio: Signal<number>;
+    padAngle: Signal<number>;
+    showLabels: Signal<boolean>;
+    sliceLabelTemplate: Signal<ChartSliceLabelTemplateDirective | undefined>;
+    startAngle: Signal<number>;
+    strokeColor: Signal<string>;
+    strokeWidth: Signal<number | undefined>;
+    toggleSliceVisibility: (dataIndex: number) => boolean;
+    valueFormatter: Signal<ChartValueFormatter | undefined>;
+    visibilityRevision: Signal<number>;
+}
+
+export interface ChartPieSeriesRegistration extends ChartPolarSeriesRegistrationBase {
+    type: "pie";
+}
+
+export interface ChartDonutSeriesRegistration extends ChartPolarSeriesRegistrationBase {
+    centerTemplate: Signal<ChartCenterTemplateDirective | undefined>;
+    innerRadiusRatio: Signal<number>;
+    type: "donut";
+}
+
+export type ChartCartesianSeriesRegistration =
+    | ChartAreaSeriesRegistration
+    | ChartBarSeriesRegistration
+    | ChartLineSeriesRegistration;
+
+export type ChartPolarSeriesRegistration = ChartDonutSeriesRegistration | ChartPieSeriesRegistration;
+
+export type ChartSeriesRegistration = ChartCartesianSeriesRegistration | ChartPolarSeriesRegistration;
+
 export interface ChartRegistrationContext {
-    invalidate(reason: ChartInvalidationReason): void;
+    invalidate(reason?: ChartInvalidationReason): void;
     legendItems: Signal<readonly ChartLegendItem[]>;
+    observeLabelElement?(element: HTMLElement, sliceId: string): void;
     registerLegend(registration: ChartLegendRegistration): () => void;
     registerSeries(registration: ChartSeriesRegistration): () => void;
     registerTooltip(registration: ChartTooltipRegistration): () => void;
     registerXAxis(registration: ChartAxisRegistration): () => void;
     registerYAxis(registration: ChartAxisRegistration): () => void;
     scene: Signal<ChartScene | null>;
+    toggleLegendItem(item: ChartLegendItem): void;
     toggleSeriesVisibility(seriesId: string): void;
     tooltipContext: Signal<ChartTooltipTemplateContext | null>;
     tooltipPosition: Signal<ChartPoint | null>;
+    unobserveLabelElement?(element: HTMLElement, sliceId: string): void;
 }

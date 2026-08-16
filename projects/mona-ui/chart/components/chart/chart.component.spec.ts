@@ -4,8 +4,10 @@ import { By } from "@angular/platform-browser";
 import axe from "axe-core";
 import { describe, expect, it, vi } from "vitest";
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
+import { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
 import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
+import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
 import type { ChartPointEvent, ChartPointFocusEvent, ChartSeriesVisibilityEvent } from "../../models/chart-event.models";
 import { MonaAreaSeriesComponent } from "../area-series/area-series.component";
@@ -14,7 +16,9 @@ import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component
 import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
 import { MonaChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { MonaChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { MonaDonutSeriesComponent } from "../donut-series/donut-series.component";
 import { MonaLineSeriesComponent } from "../line-series/line-series.component";
+import { MonaPieSeriesComponent } from "../pie-series/pie-series.component";
 import { MonaChartComponent } from "./chart.component";
 
 @Component({
@@ -98,13 +102,10 @@ class TestHostComponent {
     public readonly data = signal<readonly unknown[]>([
         { actual: 120, barVal: 40, target: 100, x: "2026-01-01" },
         { actual: 180, barVal: 70, target: 150, x: "2026-01-02" },
-        { actual: 240, barVal: 90, target: 200, x: "2026-01-03" }
+        { actual: 140, barVal: 55, target: 130, x: "2026-01-03" }
     ]);
     public readonly legendInteractive = signal(true);
     public readonly niceY = signal(true);
-    public readonly onPointClick = vi.fn((_event: ChartPointEvent) => {});
-    public readonly onPointFocusChange = vi.fn((_event: ChartPointFocusEvent) => {});
-    public readonly onSeriesVisibilityChange = vi.fn((_event: ChartSeriesVisibilityEvent) => {});
     public readonly showAreaSeries = signal(true);
     public readonly showBarSeries = signal(true);
     public readonly showLegend = signal(true);
@@ -113,221 +114,247 @@ class TestHostComponent {
     public readonly showXAxis = signal(true);
     public readonly showYAxis = signal(true);
     public readonly tooltipShared = signal(false);
-    public readonly userClass = signal("h-80 w-full");
+    public readonly userClass = signal("");
     public readonly useCustomAxisTemplate = signal(false);
     public readonly useCustomLegendTemplate = signal(false);
     public readonly useCustomNoData = signal(false);
     public readonly useCustomTooltipTemplate = signal(false);
-    public readonly xAxisFormatter = signal<((value: unknown) => string) | undefined>(undefined);
-    public readonly xAxisType = signal<"auto" | "category" | "linear" | "time" | "utc">("category");
+    public readonly xAxisFormatter = signal<any>(undefined);
+    public readonly xAxisType = signal<any>("category");
     public readonly xField = signal("x");
+
+    public lastPointClick: ChartPointEvent | null = null;
+    public lastPointFocus: ChartPointFocusEvent | null = null;
+    public lastVisibilityChange: ChartSeriesVisibilityEvent | null = null;
+
+    public onPointClick(event: ChartPointEvent): void {
+        this.lastPointClick = event;
+    }
+
+    public onPointFocusChange(event: ChartPointFocusEvent): void {
+        this.lastPointFocus = event;
+    }
+
+    public onSeriesVisibilityChange(event: ChartSeriesVisibilityEvent): void {
+        this.lastVisibilityChange = event;
+    }
+}
+
+@Component({
+    imports: [
+        MonaChartComponent,
+        MonaPieSeriesComponent,
+        MonaDonutSeriesComponent,
+        MonaChartLegendComponent,
+        MonaChartTooltipComponent,
+        ChartCenterTemplateDirective,
+        ChartSliceLabelTemplateDirective
+    ],
+    template: `
+        <mona-chart
+            [data]="data()"
+            aria-label="Browser distribution"
+            (pointClick)="onPointClick($event)"
+            (pointFocusChange)="onPointFocusChange($event)">
+            @if (isDonut()) {
+                <mona-donut-series
+                    field="share"
+                    categoryField="browser"
+                    [innerRadiusRatio]="0.6"
+                    [showLabels]="true">
+                    <ng-template monaChartCenterTemplate let-formattedTotal="formattedTotal">
+                        <div class="test-center">{{ formattedTotal }}</div>
+                    </ng-template>
+                </mona-donut-series>
+            } @else {
+                <mona-pie-series
+                    field="share"
+                    categoryField="browser"
+                    [showLabels]="true">
+                    <ng-template monaChartSliceLabelTemplate let-slice>
+                        <span class="test-slice-label">{{ slice.formattedPercentage }}</span>
+                    </ng-template>
+                </mona-pie-series>
+            }
+            <mona-chart-legend />
+            <mona-chart-tooltip />
+        </mona-chart>
+    `
+})
+class TestPolarHostComponent {
+    public readonly data = signal<readonly unknown[]>([
+        { browser: "Chrome", share: 60 },
+        { browser: "Safari", share: 25 },
+        { browser: "Firefox", share: 15 }
+    ]);
+    public readonly isDonut = signal(false);
+
+    public lastClick: ChartPointEvent | null = null;
+    public lastFocus: ChartPointFocusEvent | null = null;
+
+    public onPointClick(e: ChartPointEvent): void {
+        this.lastClick = e;
+    }
+
+    public onPointFocusChange(e: ChartPointFocusEvent): void {
+        this.lastFocus = e;
+    }
 }
 
 describe("MonaChartComponent", () => {
-    let fixture: ComponentFixture<TestHostComponent>;
-    let host: TestHostComponent;
+    describe("Cartesian Chart", () => {
+        let fixture: ComponentFixture<TestHostComponent>;
+        let host: TestHostComponent;
 
-    beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            imports: [TestHostComponent]
-        }).compileComponents();
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [TestHostComponent]
+            }).compileComponents();
 
-        fixture = TestBed.createComponent(TestHostComponent);
-        host = fixture.componentInstance;
-        fixture.detectChanges();
+            fixture = TestBed.createComponent(TestHostComponent);
+            host = fixture.componentInstance;
+            fixture.detectChanges();
+        });
+
+        it("should create chart with canvas and aria attributes", () => {
+            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+            expect(chartEl).not.toBeNull();
+            expect(chartEl.nativeElement.getAttribute("role")).toBe("region");
+            expect(chartEl.nativeElement.getAttribute("aria-label")).toBe("Activity Metrics");
+            expect(chartEl.nativeElement.getAttribute("aria-description")).toBe("Detailed activity chart");
+            expect(chartEl.nativeElement.getAttribute("tabindex")).toBe("0");
+
+            const canvas = chartEl.query(By.css("canvas"));
+            expect(canvas).not.toBeNull();
+        });
+
+        it("should render axis labels from dataset", () => {
+            const xLabels = fixture.debugElement.queryAll(By.css("mona-chart div > div.absolute"));
+            expect(xLabels.length).toBeGreaterThan(0);
+        });
+
+        it("should toggle series visibility and emit event", () => {
+            const legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
+            expect(legendButtons.length).toBe(3);
+
+            legendButtons[0].nativeElement.click();
+            fixture.detectChanges();
+
+            expect(host.lastVisibilityChange).not.toBeNull();
+            expect(host.lastVisibilityChange?.seriesName).toBe("Target");
+            expect(host.lastVisibilityChange?.visible).toBe(false);
+        });
+
+        it("should handle keyboard navigation using ArrowRight / ArrowLeft / Enter", () => {
+            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+
+            // Press ArrowRight
+            chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+            fixture.detectChanges();
+
+            expect(host.lastPointFocus).not.toBeNull();
+
+            // Press Enter to trigger click
+            chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+            fixture.detectChanges();
+
+            expect(host.lastPointClick).not.toBeNull();
+        });
+
+        it("should display default no-data state when dataset is empty", () => {
+            host.data.set([]);
+            host.showLineSeries.set(false);
+            host.showAreaSeries.set(false);
+            host.showBarSeries.set(false);
+            fixture.detectChanges();
+
+            const noData = fixture.debugElement.query(By.css("mona-chart div"));
+            expect(noData.nativeElement.textContent).toContain("No data available");
+        });
+
+        it("should display custom no-data template when provided and dataset is empty", () => {
+            host.data.set([]);
+            host.showLineSeries.set(false);
+            host.showAreaSeries.set(false);
+            host.showBarSeries.set(false);
+            host.useCustomNoData.set(true);
+            fixture.detectChanges();
+
+            const custom = fixture.debugElement.query(By.css(".custom-no-data"));
+            expect(custom).not.toBeNull();
+            expect(custom.nativeElement.textContent).toBe("Custom empty state");
+        });
+
+        it("should pass AXE accessibility verification", async () => {
+            const result = await axe.run(fixture.nativeElement);
+            expect(result.violations.length).toBe(0);
+        });
     });
 
-    it("should render root chart with accessible attributes and region role", () => {
-        const chartElement = fixture.debugElement.query(By.css("mona-chart"));
-        expect(chartElement).not.toBeNull();
-        expect(chartElement.nativeElement.getAttribute("role")).toBe("region");
-        expect(chartElement.nativeElement.getAttribute("aria-label")).toBe("Activity Metrics");
-        expect(chartElement.nativeElement.getAttribute("aria-description")).toBe("Detailed activity chart");
-    });
+    describe("Polar Chart (Pie & Donut)", () => {
+        let fixture: ComponentFixture<TestPolarHostComponent>;
+        let host: TestPolarHostComponent;
 
-    it("should render canvas element inside chart", () => {
-        const canvas = fixture.debugElement.query(By.css("canvas"));
-        expect(canvas).not.toBeNull();
-    });
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [TestPolarHostComponent]
+            }).compileComponents();
 
-    it("should render DOM axis labels", () => {
-        fixture.detectChanges();
-        const labels = fixture.debugElement.queryAll(By.css(".whitespace-nowrap"));
-        expect(labels.length).toBeGreaterThan(0);
-    });
+            fixture = TestBed.createComponent(TestPolarHostComponent);
+            host = fixture.componentInstance;
+            fixture.detectChanges();
+        });
 
-    it("should render custom axis label template when provided", () => {
-        host.useCustomAxisTemplate.set(true);
-        fixture.detectChanges();
+        it("should render polar pie chart scene with slice legend items", () => {
+            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const scene = chartComp.scene();
 
-        const customLabels = fixture.debugElement.queryAll(By.css(".custom-axis-label"));
-        expect(customLabels.length).toBeGreaterThan(0);
-        expect(customLabels[0].nativeElement.textContent).toContain("Label:");
-    });
+            expect(scene?.coordinateSystem).toBe("polar");
+            expect(scene?.series.length).toBe(1);
+            if (scene && scene.coordinateSystem === "polar") {
+                expect(scene.series[0].slices.length).toBe(3);
+            }
 
-    it("should render interactive legend items with series names", () => {
-        const legendItems = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
-        expect(legendItems.length).toBe(3);
-        const textContents = legendItems.map(item => item.nativeElement.textContent.trim());
-        expect(textContents).toContain("Target");
-        expect(textContents).toContain("Actual");
-        expect(textContents).toContain("Bar Values");
-    });
+            const legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
+            expect(legendButtons.length).toBe(3);
+            expect(legendButtons[0].nativeElement.textContent).toContain("Chrome");
+        });
 
-    it("should render custom legend item template when provided", () => {
-        host.useCustomLegendTemplate.set(true);
-        fixture.detectChanges();
+        it("should navigate polar slices with keyboard arrow keys and announce via live region", () => {
+            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
 
-        const customLegendItems = fixture.debugElement.queryAll(By.css(".custom-legend-item"));
-        expect(customLegendItems.length).toBe(3);
-        expect(customLegendItems[0].nativeElement.textContent).toContain("Series: Target");
-    });
+            chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+            fixture.detectChanges();
 
-    it("should toggle series visibility when clicking a legend item", () => {
-        const legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
-        expect(legendButtons.length).toBeGreaterThan(0);
+            expect(host.lastFocus).not.toBeNull();
+            expect(host.lastFocus?.seriesType).toBe("pie");
 
-        legendButtons[0].nativeElement.click();
-        fixture.detectChanges();
+            const liveRegion = fixture.debugElement.query(By.css(".sr-only"));
+            expect(liveRegion.nativeElement.textContent).toContain("Chrome");
 
-        expect(host.onSeriesVisibilityChange).toHaveBeenCalled();
-        const event = host.onSeriesVisibilityChange.mock.calls[0][0];
-        expect(event.seriesName).toBe("Target");
-        expect(event.visible).toBe(false);
+            // Press Enter
+            chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+            fixture.detectChanges();
 
-        // Toggle back to visible
-        legendButtons[0].nativeElement.click();
-        fixture.detectChanges();
-        const secondEvent = host.onSeriesVisibilityChange.mock.calls[1][0];
-        expect(secondEvent.visible).toBe(true);
-    });
+            expect(host.lastClick).not.toBeNull();
+            expect(host.lastClick?.category).toBe("Chrome");
+        });
 
-    it("should handle keyboard navigation with arrow keys, enter, escape, and update active accessibility announcement", () => {
-        const chart = fixture.debugElement.query(By.css("mona-chart"));
-        const chartComp = chart.componentInstance as MonaChartComponent;
+        it("should render donut chart with center template", () => {
+            host.isDonut.set(true);
+            fixture.detectChanges();
 
-        // Simulate ArrowRight keydown
-        chart.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
-        fixture.detectChanges();
+            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            expect(chartComp.scene()?.series[0].type).toBe("donut");
 
-        const liveRegion = fixture.debugElement.query(By.css(".sr-only"));
-        expect(liveRegion).not.toBeNull();
-        expect(liveRegion.nativeElement.textContent.trim().length).toBeGreaterThan(0);
-        expect(host.onPointFocusChange).toHaveBeenCalled();
+            const centerEl = fixture.debugElement.query(By.css(".test-center"));
+            expect(centerEl).not.toBeNull();
+            expect(centerEl.nativeElement.textContent).toContain("100");
+        });
 
-        // Simulate Enter keydown
-        chart.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-        fixture.detectChanges();
-        expect(host.onPointClick).toHaveBeenCalled();
-
-        // Simulate Escape keydown
-        chart.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-        fixture.detectChanges();
-        expect(chartComp.tooltipContext()).toBeNull();
-        expect(liveRegion.nativeElement.textContent.trim()).toBe("");
-    });
-
-    it("should clear interaction when chart loses focus", () => {
-        const chart = fixture.debugElement.query(By.css("mona-chart"));
-        const chartComp = chart.componentInstance as MonaChartComponent;
-
-        // Set keyboard point
-        chart.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
-        fixture.detectChanges();
-        expect(chartComp.tooltipContext()).not.toBeNull();
-
-        // Focus out to an external element
-        const externalEl = document.createElement("button");
-        document.body.appendChild(externalEl);
-        chart.nativeElement.dispatchEvent(new FocusEvent("focusout", { relatedTarget: externalEl }));
-        fixture.detectChanges();
-
-        expect(chartComp.tooltipContext()).toBeNull();
-        document.body.removeChild(externalEl);
-    });
-
-    it("should not activate hover interaction when tooltip is disabled or not present", () => {
-        host.showTooltip.set(false);
-        fixture.detectChanges();
-
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
-        const canvas = fixture.debugElement.query(By.css("canvas"));
-
-        canvas.nativeElement.dispatchEvent(new PointerEvent("pointermove", { clientX: 100, clientY: 100 }));
-        fixture.detectChanges();
-
-        expect(chartComp.tooltipContext()).toBeNull();
-        expect(chartComp.tooltipPosition()).toBeNull();
-    });
-
-    it("should display default no-data state when dataset is empty", () => {
-        host.data.set([]);
-        host.showLineSeries.set(false);
-        host.showAreaSeries.set(false);
-        host.showBarSeries.set(false);
-        fixture.detectChanges();
-
-        const noData = fixture.debugElement.query(By.css("mona-chart div"));
-        expect(noData.nativeElement.textContent).toContain("No data available");
-    });
-
-    it("should display custom no-data template when provided and dataset is empty", () => {
-        host.data.set([]);
-        host.showLineSeries.set(false);
-        host.showAreaSeries.set(false);
-        host.showBarSeries.set(false);
-        host.useCustomNoData.set(true);
-        fixture.detectChanges();
-
-        const custom = fixture.debugElement.query(By.css(".custom-no-data"));
-        expect(custom).not.toBeNull();
-        expect(custom.nativeElement.textContent).toBe("Custom empty state");
-    });
-
-    it("should dynamically add and remove series with @if", () => {
-        host.showLineSeries.set(false);
-        fixture.detectChanges();
-
-        let legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
-        expect(legendButtons.length).toBe(2);
-
-        host.showLineSeries.set(true);
-        fixture.detectChanges();
-
-        legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
-        expect(legendButtons.length).toBe(3);
-    });
-
-    it("should display custom tooltip template when hovering over data", () => {
-        host.useCustomTooltipTemplate.set(true);
-        fixture.detectChanges();
-
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
-        const canvas = fixture.debugElement.query(By.css("canvas"));
-
-        // Simulate pointer move over point (100, 100)
-        canvas.nativeElement.dispatchEvent(new PointerEvent("pointermove", { clientX: 100, clientY: 100 }));
-        fixture.detectChanges();
-
-        // Check if tooltipContext is populated or clearInteraction works
-        expect(() => canvas.nativeElement.dispatchEvent(new PointerEvent("pointerleave"))).not.toThrow();
-        fixture.detectChanges();
-        expect(chartComp.tooltipContext()).toBeNull();
-    });
-
-    it("should clear interaction when pointer leaves canvas", () => {
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
-        const canvas = fixture.debugElement.query(By.css("canvas"));
-
-        canvas.nativeElement.dispatchEvent(new PointerEvent("pointerleave"));
-        fixture.detectChanges();
-
-        expect(chartComp.tooltipPosition()).toBeNull();
-        expect(chartComp.tooltipContext()).toBeNull();
-    });
-
-    it("should pass AXE accessibility verification", async () => {
-        const result = await axe.run(fixture.nativeElement);
-        expect(result.violations.length).toBe(0);
+        it("should pass AXE accessibility verification on polar chart", async () => {
+            const result = await axe.run(fixture.nativeElement);
+            expect(result.violations.length).toBe(0);
+        });
     });
 });

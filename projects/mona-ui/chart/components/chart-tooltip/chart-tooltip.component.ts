@@ -20,7 +20,7 @@ import { chartTooltipBaseThemeVariants } from "../../styles/chart.styles";
 
 export interface ChartTooltipPlacement {
     readonly left: number;
-    readonly placement: "top" | "bottom";
+    readonly placement: "bottom" | "top";
     readonly top: number;
 }
 
@@ -36,7 +36,7 @@ export class MonaChartTooltipComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #measuredHeight = signal<number>(60);
-    readonly #measuredWidth = signal<number>(140);
+    readonly #measuredWidth = signal<number>(180);
     #tooltipResizeObserver: ResizeObserver | null = null;
 
     protected readonly customTemplate = contentChild(ChartTooltipTemplateDirective);
@@ -53,9 +53,10 @@ export class MonaChartTooltipComponent implements OnInit {
         const tipHeight = this.#measuredHeight();
 
         // Horizontal: center over anchor and clamp within container
+        const margin = 8;
         const rawLeft = pos.x - tipWidth / 2;
-        const maxLeft = Math.max(8, containerWidth - tipWidth - 8);
-        const left = Math.max(8, Math.min(maxLeft, rawLeft));
+        const maxLeft = Math.max(margin, containerWidth - tipWidth - margin);
+        const left = Math.max(margin, Math.min(maxLeft, rawLeft));
 
         // Vertical: check space above vs below
         const gap = 10;
@@ -63,7 +64,7 @@ export class MonaChartTooltipComponent implements OnInit {
         const placeTop = spaceAbove >= tipHeight;
 
         let top: number;
-        let placementDirection: "top" | "bottom";
+        let placementDirection: "bottom" | "top";
 
         if (placeTop) {
             top = pos.y - tipHeight - gap;
@@ -73,8 +74,8 @@ export class MonaChartTooltipComponent implements OnInit {
             placementDirection = "bottom";
         }
 
-        const maxTop = Math.max(8, containerHeight - tipHeight - 8);
-        const clampTop = Math.max(8, Math.min(maxTop, top));
+        const maxTop = Math.max(margin, containerHeight - tipHeight - margin);
+        const clampTop = Math.max(margin, Math.min(maxTop, top));
 
         return {
             left,
@@ -114,27 +115,41 @@ export class MonaChartTooltipComponent implements OnInit {
             this.#chartContext?.invalidate(ChartInvalidationReason.Interaction);
         });
 
-        effect(() => {
+        effect(onCleanup => {
             const containerRef = this.tooltipContainer();
+            this.tooltipContext();
+
             if (containerRef) {
                 const el = containerRef.nativeElement;
+                const updateDimensions = (target: HTMLElement, inlineSize?: number, blockSize?: number) => {
+                    const width = inlineSize ?? target.offsetWidth ?? target.getBoundingClientRect().width;
+                    const height = blockSize ?? target.offsetHeight ?? target.getBoundingClientRect().height;
+                    if (width > 0 && height > 0) {
+                        if (Math.abs(this.#measuredWidth() - width) > 0.5) {
+                            this.#measuredWidth.set(width);
+                        }
+                        if (Math.abs(this.#measuredHeight() - height) > 0.5) {
+                            this.#measuredHeight.set(height);
+                        }
+                    }
+                };
+
                 if (!this.#tooltipResizeObserver && typeof ResizeObserver !== "undefined") {
                     this.#tooltipResizeObserver = new ResizeObserver(entries => {
                         for (const entry of entries) {
-                            const { height, width } = entry.contentRect;
-                            if (width > 0 && height > 0) {
-                                this.#measuredWidth.set(width);
-                                this.#measuredHeight.set(height);
-                            }
+                            const target = entry.target as HTMLElement;
+                            const boxSize = entry.borderBoxSize?.[0];
+                            updateDimensions(target, boxSize?.inlineSize, boxSize?.blockSize);
                         }
                     });
                 }
+
                 this.#tooltipResizeObserver?.observe(el);
-                const rect = el.getBoundingClientRect();
-                if (rect.width > 0 && rect.height > 0) {
-                    this.#measuredWidth.set(rect.width);
-                    this.#measuredHeight.set(rect.height);
-                }
+                updateDimensions(el);
+
+                onCleanup(() => {
+                    this.#tooltipResizeObserver?.unobserve(el);
+                });
             }
         });
 
@@ -160,4 +175,3 @@ export class MonaChartTooltipComponent implements OnInit {
         this.#destroyRef.onDestroy(unregister);
     }
 }
-

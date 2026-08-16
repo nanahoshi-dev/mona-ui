@@ -1,6 +1,7 @@
 import type { ChartPoint } from "../../models/chart.models";
 import type { ChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
+import { isAngleInsideArc, normalizeAngle } from "../utils/angle-utils";
 import { distance, isPointInRect } from "../utils/geometry-utils";
 import type { ChartInteractionState } from "./chart-interaction-state";
 
@@ -26,6 +27,42 @@ export class ChartHitTestEngine {
             };
         }
 
+        // Polar hit testing
+        if (scene.coordinateSystem === "polar") {
+            for (const target of hitTargets) {
+                if (target.arc) {
+                    const { center, endAngle, innerRadius, outerRadius, padAngle, startAngle } = target.arc;
+                    const dx = pointer.x - center.x;
+                    const dy = pointer.y - center.y;
+                    const radius = Math.hypot(dx, dy);
+
+                    // Donut hole or outside ring
+                    if (radius < innerRadius || radius > outerRadius) {
+                        continue;
+                    }
+
+                    // Clockwise angle from 12 o'clock (-Y)
+                    const rawAngle = Math.atan2(dx, -dy);
+                    const pointerAngle = normalizeAngle(rawAngle);
+
+                    if (isAngleInsideArc(pointerAngle, startAngle, endAngle, padAngle)) {
+                        return {
+                            activeHitTarget: target,
+                            activeHits: [target],
+                            pointerPosition: pointer
+                        };
+                    }
+                }
+            }
+
+            return {
+                activeHitTarget: null,
+                activeHits: [],
+                pointerPosition: pointer
+            };
+        }
+
+        // Cartesian shared mode
         if (shared) {
             // 1. Direct bar hit test
             for (const target of hitTargets) {
@@ -57,7 +94,9 @@ export class ChartHitTestEngine {
                     let nearestHit = nearestBucket.hits[0];
                     let minHitDist = Number.POSITIVE_INFINITY;
                     for (const hit of nearestBucket.hits) {
-                        const hx = hit.point?.x ?? (hit.bounds ? hit.bounds.x + hit.bounds.width / 2 : nearestBucket.centerX);
+                        const hx =
+                            hit.point?.x ??
+                            (hit.bounds ? hit.bounds.x + hit.bounds.width / 2 : nearestBucket.centerX);
                         const hy = hit.point?.y ?? (hit.bounds ? hit.bounds.y + hit.bounds.height / 2 : pointer.y);
                         const d = distance(pointer.x, pointer.y, hx, hy);
                         if (d < minHitDist) {
@@ -80,7 +119,7 @@ export class ChartHitTestEngine {
             };
         }
 
-        // Non-shared mode: single nearest target
+        // Cartesian non-shared mode: single nearest target
         // 1. Direct bar hit test
         for (const target of hitTargets) {
             if (target.bounds && isPointInRect(pointer, target.bounds)) {
@@ -121,4 +160,3 @@ export class ChartHitTestEngine {
         };
     }
 }
-

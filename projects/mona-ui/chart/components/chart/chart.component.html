@@ -7,70 +7,138 @@
             (pointerleave)="onPointerLeave()"
             (click)="onCanvasClick($event)"></canvas>
 
-        <!-- DOM Axis Labels & Titles -->
-        @for (axisScene of scene()?.axes ?? []; track axisScene.axis) {
-            @if (axisScene.visible) {
-                @for (tick of axisScene.ticks; track tick.index) {
-                    @if (axisScene.axis === "x") {
-                        <div
-                            [class]="axisLabelClasses()"
-                            [style.left.px]="tick.coordinate"
-                            [style.top.px]="axisScene.position === 'top' ? (scene()?.plotRect?.y ?? 0) - 6 : (scene()?.plotRect?.y ?? 0) + (scene()?.plotRect?.height ?? 0) + 6"
-                            [style.transform]="axisScene.position === 'top' ? 'translate(-50%, -100%)' : 'translateX(-50%)'">
-                            @if (xAxisRegistration()?.labelTemplate?.(); as template) {
-                                <ng-container
-                                    [ngTemplateOutlet]="template.templateRef"
-                                    [ngTemplateOutletContext]="{
-                                        $implicit: tick.value,
-                                        axis: 'x',
-                                        index: tick.index,
-                                        value: tick.value
-                                    }" />
-                            } @else {
-                                {{ tick.formattedValue }}
-                            }
-                        </div>
-                    } @else if (axisScene.axis === "y") {
-                        <div
-                            [class]="axisLabelClasses()"
-                            [style.left.px]="axisScene.position === 'right' ? (scene()?.plotRect?.x ?? 0) + (scene()?.plotRect?.width ?? 0) + 8 : (scene()?.plotRect?.x ?? 0) - 8"
-                            [style.top.px]="tick.coordinate"
-                            [style.transform]="axisScene.position === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
-                            @if (yAxisRegistration()?.labelTemplate?.(); as template) {
-                                <ng-container
-                                    [ngTemplateOutlet]="template.templateRef"
-                                    [ngTemplateOutletContext]="{
-                                        $implicit: tick.value,
-                                        axis: 'y',
-                                        index: tick.index,
-                                        value: tick.value
-                                    }" />
-                            } @else {
-                                {{ tick.formattedValue }}
-                            }
-                        </div>
+        <!-- DOM Cartesian Axis Labels & Titles -->
+        @if (cartesianScene(); as cart) {
+            @for (axisScene of cart.axes; track axisScene.axis) {
+                @if (axisScene.visible) {
+                    @for (tick of axisScene.ticks; track tick.index) {
+                        @if (axisScene.axis === "x") {
+                            <div
+                                [class]="axisLabelClasses()"
+                                [style.left.px]="tick.coordinate"
+                                [style.top.px]="axisScene.position === 'top' ? cart.plotRect.y - 6 : cart.plotRect.y + cart.plotRect.height + 6"
+                                [style.transform]="axisScene.position === 'top' ? 'translate(-50%, -100%)' : 'translateX(-50%)'">
+                                @if (xAxisRegistration()?.labelTemplate?.(); as template) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="template.templateRef"
+                                        [ngTemplateOutletContext]="{
+                                            $implicit: tick.value,
+                                            axis: 'x',
+                                            index: tick.index,
+                                            value: tick.value
+                                        }" />
+                                } @else {
+                                    {{ tick.formattedValue }}
+                                }
+                            </div>
+                        } @else if (axisScene.axis === "y") {
+                            <div
+                                [class]="axisLabelClasses()"
+                                [style.left.px]="axisScene.position === 'right' ? cart.plotRect.x + cart.plotRect.width + 8 : cart.plotRect.x - 8"
+                                [style.top.px]="tick.coordinate"
+                                [style.transform]="axisScene.position === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
+                                @if (yAxisRegistration()?.labelTemplate?.(); as template) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="template.templateRef"
+                                        [ngTemplateOutletContext]="{
+                                            $implicit: tick.value,
+                                            axis: 'y',
+                                            index: tick.index,
+                                            value: tick.value
+                                        }" />
+                                } @else {
+                                    {{ tick.formattedValue }}
+                                }
+                            </div>
+                        }
+                    }
+
+                    <!-- Axis Title -->
+                    @if (axisScene.title) {
+                        @if (axisScene.axis === "x") {
+                            <div
+                                class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+                                [style.left.px]="cart.plotRect.x + cart.plotRect.width / 2"
+                                [style.top.px]="axisScene.position === 'top' ? 6 : cart.plotRect.y + cart.plotRect.height + 24"
+                                [style.transform]="'translateX(-50%)'">
+                                {{ axisScene.title }}
+                            </div>
+                        } @else if (axisScene.axis === "y") {
+                            <div
+                                class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+                                [style.left.px]="axisScene.position === 'right' ? cart.width - 12 : 12"
+                                [style.top.px]="cart.plotRect.y + cart.plotRect.height / 2"
+                                [style.transform]="axisScene.position === 'right' ? 'translate(-50%, -50%) rotate(90deg)' : 'translate(-50%, -50%) rotate(-90deg)'">
+                                {{ axisScene.title }}
+                            </div>
+                        }
+                    }
+                }
+            }
+        }
+
+        <!-- DOM Polar Data Labels and Donut Center Overlay -->
+        @if (polarScene(); as pol) {
+            @for (seriesScene of pol.series; track seriesScene.id) {
+                @for (slice of seriesScene.slices; track slice.sliceId) {
+                    @if (shouldShowSliceLabel(slice)) {
+                        @if (isOutsideLabel() && slice.label) {
+                            <div
+                                aria-hidden="true"
+                                class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
+                                [monaChartLabelMeasure]="slice.sliceId"
+                                [style.left.px]="slice.label.position.x"
+                                [style.top.px]="slice.label.position.y"
+                                [style.transform]="slice.label.side === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
+                                @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="labelTemplate.templateRef"
+                                        [ngTemplateOutletContext]="sliceLabelContext(slice)" />
+                                } @else {
+                                    {{ sliceLabelText(slice) }}
+                                }
+                            </div>
+                        } @else {
+                            <div
+                                aria-hidden="true"
+                                class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center"
+                                [monaChartLabelMeasure]="slice.sliceId"
+                                [style.left.px]="slice.insideLabelPoint.x"
+                                [style.top.px]="slice.insideLabelPoint.y"
+                                [style.transform]="'translate(-50%, -50%)'"
+                                [style.color]="sliceContrastColor(slice)">
+                                @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="labelTemplate.templateRef"
+                                        [ngTemplateOutletContext]="sliceLabelContext(slice)" />
+                                } @else {
+                                    {{ sliceLabelText(slice) }}
+                                }
+                            </div>
+                        }
                     }
                 }
 
-                <!-- Axis Title -->
-                @if (axisScene.title) {
-                    @if (axisScene.axis === "x") {
-                        <div
-                            class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
-                            [style.left.px]="(scene()?.plotRect?.x ?? 0) + (scene()?.plotRect?.width ?? 0) / 2"
-                            [style.top.px]="axisScene.position === 'top' ? 6 : (scene()?.plotRect?.y ?? 0) + (scene()?.plotRect?.height ?? 0) + 24"
-                            [style.transform]="'translateX(-50%)'">
-                            {{ axisScene.title }}
-                        </div>
-                    } @else if (axisScene.axis === "y") {
-                        <div
-                            class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
-                            [style.left.px]="axisScene.position === 'right' ? (scene()?.width ?? 0) - 12 : 12"
-                            [style.top.px]="(scene()?.plotRect?.y ?? 0) + (scene()?.plotRect?.height ?? 0) / 2"
-                            [style.transform]="axisScene.position === 'right' ? 'translate(-50%, -50%) rotate(90deg)' : 'translate(-50%, -50%) rotate(-90deg)'">
-                            {{ axisScene.title }}
-                        </div>
-                    }
+                <!-- Donut Center Template -->
+                @if (seriesScene.type === 'donut' && donutSeriesRegistration()?.centerTemplate?.(); as centerTemplate) {
+                    <div
+                        class="absolute pointer-events-none flex flex-col items-center justify-center text-center overflow-hidden"
+                        [style.left.px]="pol.center.x"
+                        [style.top.px]="pol.center.y"
+                        [style.transform]="'translate(-50%, -50%)'"
+                        [style.max-width.px]="seriesScene.innerRadius * 1.6"
+                        [style.max-height.px]="seriesScene.innerRadius * 1.6">
+                        <ng-container
+                            [ngTemplateOutlet]="centerTemplate.templateRef"
+                            [ngTemplateOutletContext]="{
+                                $implicit: seriesScene.total,
+                                total: seriesScene.total,
+                                formattedTotal: seriesScene.formattedTotal,
+                                visibleSliceCount: seriesScene.slices.length,
+                                seriesId: seriesScene.id,
+                                seriesName: seriesScene.name
+                            }" />
+                    </div>
                 }
             }
         }
@@ -101,4 +169,3 @@
     <!-- Other Projected Content (Series, Axes, Templates) -->
     <ng-content></ng-content>
 </div>
-

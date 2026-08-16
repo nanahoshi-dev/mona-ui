@@ -1,6 +1,6 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
-import type { ChartAxisRegistration, ChartSeriesRegistration } from "../context/chart-registration-context";
+import type { ChartAxisRegistration, ChartCartesianSeriesRegistration } from "../context/chart-registration-context";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianLayoutEngine } from "./cartesian-layout-engine";
 import type { ChartField } from "../../models/chart.models";
@@ -19,7 +19,7 @@ function createMockSeries(
         pointRadius?: number;
         strokeWidth?: number;
     }
-): ChartSeriesRegistration {
+): ChartCartesianSeriesRegistration {
     return {
         borderRadius: options?.borderRadius !== undefined ? signal(options.borderRadius) : undefined,
         color: signal("#3f6be2"),

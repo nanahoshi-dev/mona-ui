@@ -3,16 +3,30 @@
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
             <h2 class="text-xl font-bold tracking-tight text-foreground">Interactive Chart Explorer</h2>
-            <p class="text-sm text-muted-foreground">High-performance Canvas 2D Cartesian chart visualizations with declarative Angular composition.</p>
+            <p class="text-sm text-muted-foreground">High-performance Canvas 2D Cartesian and Polar chart visualizations with declarative Angular composition.</p>
         </div>
 
-        <div class="flex items-center gap-2 bg-muted/40 p-1 rounded-lg border border-border">
+        <div class="flex items-center flex-wrap gap-2 bg-muted/40 p-1 rounded-lg border border-border">
             <button
                 monaButton
                 [look]="activeTab() === 'mixed' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('mixed')">
                 Mixed Studio
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'pie' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('pie')">
+                Pie Chart
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'donut' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('donut')">
+                Donut Chart
             </button>
             <button
                 monaButton
@@ -41,174 +55,150 @@
     <!-- Configuration Area in Tabs -->
     <div class="rounded-xl border border-border bg-card shadow-xs overflow-hidden">
         <mona-tabs class="w-full">
-            <mona-tab title="Series & Curves" [selected]="true">
+            <mona-tab title="Series & Layout" [selected]="true">
                 <ng-template monaTabContentTemplate>
                     <div class="flex flex-wrap items-center gap-6 p-4">
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Series Visibility</span>
-                            <div class="flex flex-wrap gap-4">
-                                <mona-check-box [checked]="showBars()" (checkedChange)="showBars.set($event)">
-                                    Bar Series
-                                </mona-check-box>
-                                <mona-check-box [checked]="showArea()" (checkedChange)="showArea.set($event)">
-                                    Area Series
-                                </mona-check-box>
-                                <mona-check-box [checked]="showLine()" (checkedChange)="showLine.set($event)">
-                                    Line Series
-                                </mona-check-box>
+                        @if (activeTab() === 'pie' || activeTab() === 'donut') {
+                            <!-- Polar Settings -->
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Polar Slices & Labels</span>
+                                <div class="flex flex-wrap items-center gap-4">
+                                    @if (activeTab() === 'pie') {
+                                        <mona-check-box [checked]="pieShowLabels()" (checkedChange)="pieShowLabels.set($event)">
+                                            Data Labels
+                                        </mona-check-box>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-muted-foreground">Placement:</span>
+                                            <mona-dropdown-list
+                                                [data]="labelPositionOptions"
+                                                [value]="pieLabelPosition()"
+                                                (valueChange)="onPieLabelPositionChange($event)"
+                                                textField="label"
+                                                valueField="value"
+                                                [valuePrimitive]="true"
+                                                size="small"
+                                                class="w-48" />
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-muted-foreground">Label Format:</span>
+                                            <mona-dropdown-list
+                                                [data]="pieLabelContentOptions"
+                                                [value]="pieLabelContent()"
+                                                (valueChange)="onLabelContentChange($event)"
+                                                textField="label"
+                                                valueField="value"
+                                                [valuePrimitive]="true"
+                                                size="small"
+                                                class="w-52" />
+                                        </div>
+                                        <mona-check-box [checked]="pieUseCustomLabelTemplate()" (checkedChange)="pieUseCustomLabelTemplate.set($event)">
+                                            Custom Template
+                                        </mona-check-box>
+                                    } @else {
+                                        <mona-check-box [checked]="donutUseCenterSummary()" (checkedChange)="donutUseCenterSummary.set($event)">
+                                            Custom Center Summary
+                                        </mona-check-box>
+                                        <mona-check-box [checked]="donutShowLabels()" (checkedChange)="donutShowLabels.set($event)">
+                                            Data Labels
+                                        </mona-check-box>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-muted-foreground">Placement:</span>
+                                            <mona-dropdown-list
+                                                [data]="labelPositionOptions"
+                                                [value]="donutLabelPosition()"
+                                                (valueChange)="onDonutLabelPositionChange($event)"
+                                                textField="label"
+                                                valueField="value"
+                                                [valuePrimitive]="true"
+                                                size="small"
+                                                class="w-48" />
+                                        </div>
+                                    }
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="h-8 w-px bg-border hidden md:block"></div>
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
 
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Curve & Interpolation</span>
-                            <mona-dropdown-list
-                                [data]="curveOptions"
-                                [value]="curveType()"
-                                (valueChange)="onCurveTypeChange($event)"
-                                textField="label"
-                                valueField="value"
-                                [valuePrimitive]="true"
-                                size="small"
-                                class="w-48" />
-                        </div>
-
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Area Fill Mode</span>
-                            <mona-dropdown-list
-                                [data]="areaFillModeOptions"
-                                [value]="areaFillMode()"
-                                (valueChange)="onAreaFillModeChange($event)"
-                                textField="label"
-                                valueField="value"
-                                [valuePrimitive]="true"
-                                size="small"
-                                class="w-48" />
-                        </div>
-
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Points</span>
-                            <mona-check-box [checked]="showPoints()" (checkedChange)="showPoints.set($event)">
-                                Point Markers
-                            </mona-check-box>
-                        </div>
-
-                        <div class="h-8 w-px bg-border hidden md:block"></div>
-
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Series Mode</span>
-                            <mona-check-box [checked]="useIndependentSeriesData()" (checkedChange)="useIndependentSeriesData.set($event)">
-                                Independent Metrics
-                            </mona-check-box>
-                        </div>
-
-                        <div class="h-8 w-px bg-border hidden md:block"></div>
-
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Values & Range</span>
-                            <mona-check-box [checked]="includeNegativeValues()" (checkedChange)="includeNegativeValues.set($event)">
-                                Allow Negative Values
-                            </mona-check-box>
-                        </div>
-                    </div>
-                </ng-template>
-            </mona-tab>
-
-            <mona-tab title="Axes & Grid">
-                <ng-template monaTabContentTemplate>
-                    <div class="flex flex-wrap items-center gap-6 p-4">
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Axis Lines & Titles</span>
-                            <div class="flex flex-wrap gap-4">
-                                <mona-check-box [checked]="xAxisLine()" (checkedChange)="xAxisLine.set($event)">
-                                    X-Axis Line
-                                </mona-check-box>
-                                <mona-check-box [checked]="yAxisLine()" (checkedChange)="yAxisLine.set($event)">
-                                    Y-Axis Line
-                                </mona-check-box>
-                                <mona-check-box [checked]="showAxisTitles()" (checkedChange)="showAxisTitles.set($event)">
-                                    Axis Titles
-                                </mona-check-box>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Polar Datasets</span>
+                                <div class="flex flex-wrap gap-2">
+                                    @if (activeTab() === 'pie') {
+                                        <button monaButton size="small" look="secondary" (click)="randomizePieData()">
+                                            Randomize Slices
+                                        </button>
+                                        <button monaButton size="small" look="secondary" (click)="loadDensePieData()">
+                                            Dense Dataset (9 Slices)
+                                        </button>
+                                        <button monaButton size="small" look="secondary" (click)="appendPieSlice()">
+                                            + Add Browser
+                                        </button>
+                                    } @else {
+                                        <button monaButton size="small" look="secondary" (click)="randomizeDonutData()">
+                                            Randomize Cloud Revenue
+                                        </button>
+                                        <button monaButton size="small" look="secondary" (click)="appendDonutSlice()">
+                                            + Add Cloud Service
+                                        </button>
+                                    }
+                                </div>
                             </div>
-                        </div>
+                        } @else {
+                            <!-- Cartesian Settings -->
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Series Visibility</span>
+                                <div class="flex flex-wrap gap-4">
+                                    <mona-check-box [checked]="showBars()" (checkedChange)="showBars.set($event)">
+                                        Bar Series
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="showArea()" (checkedChange)="showArea.set($event)">
+                                        Area Series
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="showLine()" (checkedChange)="showLine.set($event)">
+                                        Line Series
+                                    </mona-check-box>
+                                </div>
+                            </div>
 
-                        <div class="h-8 w-px bg-border hidden md:block"></div>
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
 
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Axis Positions</span>
-                            <div class="flex flex-wrap gap-4">
-                                <button
-                                    monaButton
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Curve & Interpolation</span>
+                                <mona-dropdown-list
+                                    [data]="curveOptions"
+                                    [value]="curveType()"
+                                    (valueChange)="onCurveTypeChange($event)"
+                                    textField="label"
+                                    valueField="value"
+                                    [valuePrimitive]="true"
                                     size="small"
-                                    [look]="xAxisPosition() === 'bottom' ? 'primary' : 'ghost'"
-                                    (click)="xAxisPosition.set(xAxisPosition() === 'bottom' ? 'top' : 'bottom')">
-                                    X: {{ xAxisPosition() === 'bottom' ? 'Bottom' : 'Top' }}
-                                </button>
-                                <button
-                                    monaButton
+                                    class="w-48" />
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Area Fill Mode</span>
+                                <mona-dropdown-list
+                                    [data]="areaFillModeOptions"
+                                    [value]="areaFillMode()"
+                                    (valueChange)="onAreaFillModeChange($event)"
+                                    textField="label"
+                                    valueField="value"
+                                    [valuePrimitive]="true"
                                     size="small"
-                                    [look]="yAxisPosition() === 'left' ? 'primary' : 'ghost'"
-                                    (click)="yAxisPosition.set(yAxisPosition() === 'left' ? 'right' : 'left')">
-                                    Y: {{ yAxisPosition() === 'left' ? 'Left' : 'Right' }}
-                                </button>
+                                    class="w-48" />
                             </div>
-                        </div>
 
-                        <div class="h-8 w-px bg-border hidden md:block"></div>
-
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Grid Lines</span>
-                            <div class="flex flex-wrap gap-4">
-                                <mona-check-box [checked]="yGridLines()" (checkedChange)="yGridLines.set($event)">
-                                    Horizontal Grid Lines
-                                </mona-check-box>
-                                <mona-check-box [checked]="xGridLines()" (checkedChange)="xGridLines.set($event)">
-                                    Vertical Grid Lines
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Points</span>
+                                <mona-check-box [checked]="showPoints()" (checkedChange)="showPoints.set($event)">
+                                    Point Markers
                                 </mona-check-box>
                             </div>
-                        </div>
+                        }
 
                         <div class="h-8 w-px bg-border hidden md:block"></div>
 
                         <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Scale Bounds</span>
-                            <mona-check-box [checked]="niceAxes()" (checkedChange)="niceAxes.set($event)">
-                                Nice Bounds & Zero Baseline
-                            </mona-check-box>
-                        </div>
-                    </div>
-                </ng-template>
-            </mona-tab>
-
-            <mona-tab title="Theme Synchronization">
-                <ng-template monaTabContentTemplate>
-                    <div class="flex flex-wrap items-center gap-4 p-4">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Switch Theme Palette:</span>
-                        <button monaButton size="small" class="bg-blue-600 text-white" (click)="changeThemeColor('blue')">Blue</button>
-                        <button monaButton size="small" class="bg-indigo-600 text-white" (click)="changeThemeColor('indigo')">Indigo</button>
-                        <button monaButton size="small" class="bg-emerald-600 text-white" (click)="changeThemeColor('emerald')">Emerald</button>
-                        <button monaButton size="small" class="bg-violet-600 text-white" (click)="changeThemeColor('violet')">Violet</button>
-                        <button monaButton size="small" class="bg-rose-600 text-white" (click)="changeThemeColor('rose')">Rose</button>
-                        <button monaButton size="small" class="bg-amber-600 text-white" (click)="changeThemeColor('amber')">Amber</button>
-                    </div>
-                </ng-template>
-            </mona-tab>
-
-            <mona-tab title="Interactivity & Legend">
-                <ng-template monaTabContentTemplate>
-                    <div class="flex flex-wrap items-center gap-6 p-4">
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tooltip Behavior</span>
-                            <mona-check-box [checked]="sharedTooltip()" (checkedChange)="sharedTooltip.set($event)">
-                                Shared Crosshair Tooltip
-                            </mona-check-box>
-                        </div>
-
-                        <div class="h-8 w-px bg-border hidden md:block"></div>
-
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Legend Position</span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Legend Placement</span>
                             <mona-dropdown-list
                                 [data]="legendPositionOptions"
                                 [value]="legendPosition()"
@@ -219,43 +209,156 @@
                                 size="small"
                                 class="w-36" />
                         </div>
+                    </div>
+                </ng-template>
+            </mona-tab>
 
-                        <div class="h-8 w-px bg-border hidden md:block"></div>
+            @if (activeTab() !== 'pie' && activeTab() !== 'donut') {
+                <mona-tab title="Axes & Grid">
+                    <ng-template monaTabContentTemplate>
+                        <div class="flex flex-wrap items-center gap-6 p-4">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">X Axis Config</span>
+                                <div class="flex flex-wrap gap-4">
+                                    <mona-check-box [checked]="xAxisLine()" (checkedChange)="xAxisLine.set($event)">
+                                        Axis Line
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="xGridLines()" (checkedChange)="xGridLines.set($event)">
+                                        Grid Lines
+                                    </mona-check-box>
+                                </div>
+                            </div>
 
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Empty State</span>
-                            <mona-check-box [checked]="useCustomNoData()" (checkedChange)="useCustomNoData.set($event)">
-                                Custom No-Data Template
-                            </mona-check-box>
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Y Axis Config</span>
+                                <div class="flex flex-wrap gap-4">
+                                    <mona-check-box [checked]="yAxisLine()" (checkedChange)="yAxisLine.set($event)">
+                                        Axis Line
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="yGridLines()" (checkedChange)="yGridLines.set($event)">
+                                        Grid Lines
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="niceAxes()" (checkedChange)="niceAxes.set($event)">
+                                        Nice Numbers (Auto Range)
+                                    </mona-check-box>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </ng-template>
-            </mona-tab>
+                    </ng-template>
+                </mona-tab>
 
-            <mona-tab title="Dataset Actions">
-                <ng-template monaTabContentTemplate>
-                    <div class="flex flex-wrap items-center gap-3 p-4">
-                        <button monaButton size="small" (click)="appendDataPoint()">+ Add Point</button>
-                        <button monaButton size="small" (click)="randomizeData()">Randomize Together</button>
-                        <button monaButton size="small" (click)="randomizeIndividually()">Randomize Individually</button>
-                        <button monaButton size="small" (click)="loadProfitLossData()">Load +/- Preset</button>
-                        <button monaButton size="small" (click)="resetData()">Reset Dataset</button>
-                        <button
-                            monaButton
-                            size="small"
-                            [look]="isDataEmpty() ? 'primary' : 'default'"
-                            (click)="isDataEmpty.set(!isDataEmpty())">
-                            {{ isDataEmpty() ? 'Restore Data' : 'Set Empty' }}
-                        </button>
-                    </div>
-                </ng-template>
-            </mona-tab>
+                <mona-tab title="Dataset Controls">
+                    <ng-template monaTabContentTemplate>
+                        <div class="flex flex-wrap items-center gap-4 p-4">
+                            <button monaButton size="small" look="secondary" (click)="randomizeData()">
+                                Randomize (Unified)
+                            </button>
+                            <button monaButton size="small" look="secondary" (click)="randomizeIndividually()">
+                                Randomize (Independent)
+                            </button>
+                            <button monaButton size="small" look="secondary" (click)="loadProfitLossData()">
+                                Profit/Loss (Negative Values)
+                            </button>
+                            <button monaButton size="small" look="secondary" (click)="appendDataPoint()">
+                                + Append Month
+                            </button>
+                            <button monaButton size="small" look="outline" (click)="resetData()">
+                                Reset
+                            </button>
+                            <button
+                                monaButton
+                                size="small"
+                                [look]="isDataEmpty() ? 'primary' : 'error'"
+                                (click)="isDataEmpty.set(!isDataEmpty())">
+                                {{ isDataEmpty() ? 'Restore Data' : 'Clear Data (Test Empty State)' }}
+                            </button>
+                        </div>
+                    </ng-template>
+                </mona-tab>
+            }
         </mona-tabs>
     </div>
 
     <!-- Main Chart Viewports -->
     <div class="p-6 rounded-xl border border-border bg-card shadow-xs min-h-[420px] flex flex-col justify-center">
         @switch (activeTab()) {
+            @case ("pie") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Desktop Browser Usage Distribution (Polar Pie Series)</h3>
+                    <mona-chart
+                        [data]="pieData()"
+                        class="h-96 w-full"
+                        aria-label="Browser Usage Share"
+                        aria-description="Interactive pie chart displaying global desktop browser market share with slice toggling."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-pie-series
+                            field="value"
+                            categoryField="category"
+                            name="Browser Market Share"
+                            [outerRadiusRatio]="pieOuterRatio()"
+                            [startAngle]="pieStartAngle()"
+                            [endAngle]="pieEndAngle()"
+                            [padAngle]="piePadAngle()"
+                            [cornerRadius]="pieCornerRadius()"
+                            [showLabels]="pieShowLabels()"
+                            [labelPosition]="pieLabelPosition()"
+                            [labelContent]="pieLabelContent()"
+                            (sliceVisibilityChange)="onSliceVisibilityChange($event)">
+                            @if (pieUseCustomLabelTemplate()) {
+                                <ng-template monaChartSliceLabelTemplate let-slice>
+                                    <span class="font-medium text-[11px] drop-shadow-xs">🎯 {{ slice.formattedPercentage }}</span>
+                                </ng-template>
+                            }
+                        </mona-pie-series>
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("donut") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Cloud Infrastructure Revenue by Category (Polar Donut Series)</h3>
+                    <mona-chart
+                        [data]="donutData()"
+                        class="h-96 w-full"
+                        aria-label="Cloud Revenue Breakdown"
+                        aria-description="Interactive donut chart showing cloud revenue allocation across infrastructure services with dynamic center total summary."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-donut-series
+                            field="value"
+                            categoryField="category"
+                            name="Cloud Service"
+                            [innerRadiusRatio]="donutInnerRadiusRatio()"
+                            [outerRadiusRatio]="donutOuterRatio()"
+                            [padAngle]="donutPadAngle()"
+                            [cornerRadius]="donutCornerRadius()"
+                            [showLabels]="donutShowLabels()"
+                            [labelPosition]="donutLabelPosition()"
+                            [valueFormatter]="currencyFormatter"
+                            (sliceVisibilityChange)="onSliceVisibilityChange($event)">
+                            @if (donutUseCenterSummary()) {
+                                <ng-template monaChartCenterTemplate let-total let-formattedTotal="formattedTotal" let-visibleCount="visibleSliceCount">
+                                    <div class="flex flex-col items-center justify-center p-2 select-none">
+                                        <span class="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Cloud Revenue</span>
+                                        <strong class="text-xl font-bold text-foreground tracking-tight">{{ formattedTotal }}</strong>
+                                        <span class="text-[10px] text-muted-foreground mt-0.5">{{ visibleCount }} active services</span>
+                                    </div>
+                                </ng-template>
+                            }
+                        </mona-donut-series>
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
+                    </mona-chart>
+                </div>
+            }
+
             @case ("mixed") {
                 <div>
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Mixed Series Comparison (Same Metric Across Series Types)</h3>
@@ -471,6 +574,8 @@
                                     [class.text-emerald-500]="log.eventType === 'pointFocusChange'"
                                     [class.bg-amber-500/10]="log.eventType === 'seriesVisibilityChange'"
                                     [class.text-amber-500]="log.eventType === 'seriesVisibilityChange'"
+                                    [class.bg-teal-500/10]="log.eventType === 'sliceVisibilityChange'"
+                                    [class.text-teal-500]="log.eventType === 'sliceVisibilityChange'"
                                     [class.bg-purple-500/10]="log.eventType === 'dataUpdate'"
                                     [class.text-purple-500]="log.eventType === 'dataUpdate'">
                                     {{ log.eventType }}

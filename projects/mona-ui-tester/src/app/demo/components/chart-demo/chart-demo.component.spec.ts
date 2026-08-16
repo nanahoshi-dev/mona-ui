@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { ChartDemoComponent } from "./chart-demo.component";
 
 describe("ChartDemoComponent", () => {
@@ -20,7 +20,15 @@ describe("ChartDemoComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("should switch tabs", () => {
+    it("should switch tabs including pie and donut", () => {
+        component.setTab("pie");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Desktop Browser Usage Distribution");
+
+        component.setTab("donut");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Cloud Infrastructure Revenue");
+
         component.setTab("time");
         fixture.detectChanges();
         expect(fixture.nativeElement.textContent).toContain("Continuous System Telemetry");
@@ -34,13 +42,22 @@ describe("ChartDemoComponent", () => {
         expect(fixture.nativeElement.textContent).toContain("Custom Angular Templates");
     });
 
-    it("should append and randomize data", () => {
+    it("should append and randomize data for Cartesian and Polar series", () => {
         component.appendDataPoint();
         expect(component.eventLogs().length).toBeGreaterThan(0);
         expect(component.eventLogs()[0].eventType).toBe("dataUpdate");
 
-        component.randomizeData();
-        expect(component.eventLogs()[0].details).toContain("Randomized");
+        component.appendPieSlice();
+        expect(component.eventLogs()[0].details).toContain("pie slice");
+
+        component.appendDonutSlice();
+        expect(component.eventLogs()[0].details).toContain("donut service");
+
+        component.randomizePieData();
+        expect(component.eventLogs()[0].details).toContain("pie chart");
+
+        component.randomizeDonutData();
+        expect(component.eventLogs()[0].details).toContain("donut");
 
         component.clearLogs();
         expect(component.eventLogs().length).toBe(0);

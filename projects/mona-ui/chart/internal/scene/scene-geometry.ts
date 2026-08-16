@@ -1,7 +1,16 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartSeriesType } from "../../models/chart-series.models";
 
-export type ChartInteractionXKey = string | number;
+export type ChartInteractionXKey = number | string;
+
+export interface SceneArcHitGeometry {
+    center: ChartPoint;
+    endAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    padAngle: number;
+    startAngle: number;
+}
 
 export interface SceneBar {
     datum: unknown;
@@ -17,16 +26,23 @@ export interface SceneBar {
 }
 
 export interface SceneHitTarget {
+    arc?: SceneArcHitGeometry;
     borderRadius?: number;
     bounds?: ChartRect;
+    category?: unknown;
+    color?: string;
     datum: unknown;
+    formattedCategory?: string;
+    formattedPercentage?: string;
     index: number;
     isPositive?: boolean;
+    percentage?: number;
     point?: ChartPoint;
     radius?: number;
     seriesId: string;
     seriesName: string;
     seriesType: ChartSeriesType;
+    sliceId?: string;
     visualBounds?: ChartRect;
     xKey: ChartInteractionXKey;
     xValue: unknown;
@@ -49,4 +65,3 @@ export interface ScenePoint {
     y: number;
     yValue: number;
 }
-

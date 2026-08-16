@@ -1,5 +1,5 @@
 <div [class]="containerClasses()">
-    @for (item of legendItems(); track item.seriesId) {
+    @for (item of legendItems(); track item.itemId) {
         @if (itemTemplate(); as template) {
             <div
                 (click)="onItemClick(item)"
@@ -14,25 +14,39 @@
                     [ngTemplateOutletContext]="{
                         $implicit: item,
                         color: item.color,
+                        dataIndex: item.dataIndex,
+                        datum: item.datum,
+                        itemId: item.itemId,
+                        kind: item.kind,
                         name: item.name,
+                        percentage: item.percentage,
                         series: item,
                         seriesId: item.seriesId,
                         seriesType: item.seriesType,
+                        value: item.value,
                         visible: item.visible
                     }" />
             </div>
         } @else {
-            <button
-                type="button"
-                (click)="onItemClick(item)"
-                [class]="itemClasses(item)"
-                [attr.aria-pressed]="item.visible"
-                [disabled]="!interactive()">
-                <span
-                    class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                    [style.background-color]="item.color"></span>
-                <span class="text-xs font-medium">{{ item.name }}</span>
-            </button>
+            @if (interactive()) {
+                <button
+                    type="button"
+                    (click)="onItemClick(item)"
+                    [class]="itemClasses(item)"
+                    [attr.aria-pressed]="item.visible">
+                    <span
+                        class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
+                        [style.background-color]="item.color"></span>
+                    <span class="text-xs font-medium">{{ item.name }}</span>
+                </button>
+            } @else {
+                <div [class]="itemClasses(item)">
+                    <span
+                        class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
+                        [style.background-color]="item.color"></span>
+                    <span class="text-xs font-medium">{{ item.name }}</span>
+                </div>
+            }
         }
     }
 </div>

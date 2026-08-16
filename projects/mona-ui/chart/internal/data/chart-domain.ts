@@ -1,6 +1,9 @@
 import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartField } from "../../models/chart.models";
-import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import type {
+    ChartCartesianSeriesRegistration,
+    ChartSeriesRegistration
+} from "../context/chart-registration-context";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
 
@@ -41,39 +44,39 @@ export function normalizeContinuousNumericDomain(
             const temp = min;
             min = max;
             max = temp;
+        } else if (min === max) {
+            const delta = Math.abs(min) === 0 ? 1 : Math.abs(min) * 0.1;
+            min -= delta;
+            max += delta;
         }
     } else if (hasExplicitMin && !hasExplicitMax) {
         if (!Number.isFinite(max)) {
             max = min === 0 ? 1 : (min > 0 ? min * 1.1 : min * 0.9);
-        } else if (min > max) {
+        } else if (min >= max) {
             max = min === 0 ? 1 : (min > 0 ? min * 1.1 : min * 0.9);
         }
     } else if (!hasExplicitMin && hasExplicitMax) {
         if (!Number.isFinite(min)) {
-            min = max === 0 ? -1 : (max > 0 ? max * 0.9 : max * 1.1);
-        } else if (min > max) {
-            min = max === 0 ? -1 : (max > 0 ? max * 0.9 : max * 1.1);
+            min = max === 0 ? -1 : (max > 0 ? 0 : max * 1.1);
+        } else if (min >= max) {
+            min = max === 0 ? -1 : (max > 0 ? (max <= 0 ? max * 1.1 : 0) : max * 1.1);
         }
     }
 
-    if (!Number.isFinite(min)) min = 0;
-    if (!Number.isFinite(max)) max = min + 1;
-
     if (min === max) {
-        if (hasExplicitMin && hasExplicitMax) {
-            const pad = min === 0 ? 1 : Math.abs(min) * 0.1;
-            min = min - pad;
-            max = max + pad;
-        } else if (min === 0) {
-            min = 0;
-            max = 1;
-        } else if (min > 0) {
-            min = Number((min * 0.9).toFixed(8));
-            max = Number((max * 1.1).toFixed(8));
-        } else {
-            min = Number((min * 1.1).toFixed(8));
-            max = Number((max * 0.9).toFixed(8));
+        if (min === 0) {
+            return {
+                domain: [0, 1],
+                explicitMax: hasExplicitMax,
+                explicitMin: hasExplicitMin
+            };
         }
+        const delta = Math.abs(min) * 0.1;
+        return {
+            domain: [min - delta, max + delta],
+            explicitMax: hasExplicitMax,
+            explicitMin: hasExplicitMin
+        };
     }
 
     return {
@@ -84,7 +87,7 @@ export function normalizeContinuousNumericDomain(
 }
 
 export function inferXAxisType(
-    seriesList: readonly ChartSeriesRegistration[],
+    seriesList: readonly ChartCartesianSeriesRegistration[],
     rootData: readonly unknown[],
     rootXField: ChartField | undefined
 ): ChartXAxisType {
@@ -126,7 +129,7 @@ export function inferXAxisType(
 }
 
 export function calculateCategoryDomain(
-    seriesList: readonly ChartSeriesRegistration[],
+    seriesList: readonly ChartCartesianSeriesRegistration[],
     rootData: readonly unknown[],
     rootXField: ChartField | undefined
 ): readonly string[] {
@@ -153,7 +156,7 @@ export function calculateCategoryDomain(
 }
 
 export function calculateTimeDomain(
-    seriesList: readonly ChartSeriesRegistration[],
+    seriesList: readonly ChartCartesianSeriesRegistration[],
     rootData: readonly unknown[],
     rootXField: ChartField | undefined,
     explicitMin?: Date | number,
@@ -188,26 +191,40 @@ export function calculateTimeDomain(
         }
     }
 
-    let parsedMin = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin.getTime() : (typeof explicitMin === "number" && Number.isFinite(explicitMin) ? explicitMin : undefined)) : undefined;
-    let parsedMax = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax.getTime() : (typeof explicitMax === "number" && Number.isFinite(explicitMax) ? explicitMax : undefined)) : undefined;
+    let expMinNum = explicitMin instanceof Date ? explicitMin.getTime() : explicitMin;
+    let expMaxNum = explicitMax instanceof Date ? explicitMax.getTime() : explicitMax;
 
-    const normalized = normalizeContinuousNumericDomain(minTime, maxTime, parsedMin, parsedMax);
-    let [finalMin, finalMax] = normalized.domain;
-
-    if (!Number.isFinite(finalMin) || !Number.isFinite(finalMax) || (finalMin === 0 && finalMax === 1 && !normalized.explicitMin && !normalized.explicitMax)) {
-        const now = Date.now();
-        return [new Date(now - 86400000), new Date(now)];
+    if (isFiniteNumber(expMinNum) && isFiniteNumber(expMaxNum) && expMinNum > expMaxNum) {
+        const temp = expMinNum;
+        expMinNum = expMaxNum;
+        expMaxNum = temp;
     }
 
-    if (finalMin === finalMax) {
-        return [new Date(finalMin - 3600000), new Date(finalMax + 3600000)];
+    if (!Number.isFinite(minTime) && !Number.isFinite(maxTime)) {
+        const defaultMin = isFiniteNumber(expMinNum) ? expMinNum : Date.now() - 86400000;
+        const defaultMax = isFiniteNumber(expMaxNum) ? expMaxNum : Date.now();
+        return [new Date(defaultMin), new Date(defaultMax)];
     }
 
-    return [new Date(finalMin), new Date(finalMax)];
+    let resMin = isFiniteNumber(expMinNum) ? expMinNum : minTime;
+    let resMax = isFiniteNumber(expMaxNum) ? expMaxNum : maxTime;
+
+    if (isFiniteNumber(expMinNum) && !isFiniteNumber(expMaxNum) && expMinNum >= maxTime) {
+        resMax = expMinNum + 3600000;
+    }
+    if (!isFiniteNumber(expMinNum) && isFiniteNumber(expMaxNum) && expMaxNum <= minTime) {
+        resMin = expMaxNum - 3600000;
+    }
+
+    if (resMin === resMax) {
+        return [new Date(resMin - 3600000), new Date(resMax + 3600000)];
+    }
+
+    return [new Date(resMin), new Date(resMax)];
 }
 
 export function calculateLinearXDomain(
-    seriesList: readonly ChartSeriesRegistration[],
+    seriesList: readonly ChartCartesianSeriesRegistration[],
     rootData: readonly unknown[],
     rootXField: ChartField | undefined,
     explicitMin?: number,
@@ -236,7 +253,7 @@ export function calculateLinearXDomain(
 }
 
 export function calculateContinuousYDomain(
-    seriesList: readonly ChartSeriesRegistration[],
+    seriesList: readonly ChartCartesianSeriesRegistration[],
     rootData: readonly unknown[],
     explicitMin?: number,
     explicitMax?: number
@@ -244,19 +261,23 @@ export function calculateContinuousYDomain(
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
 
+    let normalizedExpMin = explicitMin;
+    let normalizedExpMax = explicitMax;
+    if (isFiniteNumber(normalizedExpMin) && isFiniteNumber(normalizedExpMax)) {
+        if (normalizedExpMin > normalizedExpMax) {
+            const temp = normalizedExpMin;
+            normalizedExpMin = normalizedExpMax;
+            normalizedExpMax = temp;
+        }
+    }
+
     const visibleSeries = seriesList.filter(s => s.visible());
-    if (visibleSeries.length === 0) {
-        const normalized = normalizeContinuousNumericDomain(0, 1, explicitMin, explicitMax);
-        return [normalized.domain[0], normalized.domain[1]];
-    }
+    const seriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
 
-    const requiresZeroBaseline = visibleSeries.some(s => s.type === "bar" || s.type === "area");
-    if (requiresZeroBaseline) {
-        min = 0;
-        max = 0;
-    }
+    // Check if zero baseline is required (Area or Bar series)
+    const requiresZeroBaseline = seriesToScan.some(s => s.type === "area" || s.type === "bar");
 
-    for (const s of visibleSeries) {
+    for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const field = s.field();
         for (let i = 0; i < data.length; i++) {
@@ -268,15 +289,62 @@ export function calculateContinuousYDomain(
         }
     }
 
-    if (requiresZeroBaseline) {
-        if (min > 0) min = 0;
-        if (max < 0) max = 0;
+    const hasObservedData = Number.isFinite(min) && Number.isFinite(max);
+    const hasExplicitMin = isFiniteNumber(normalizedExpMin);
+    const hasExplicitMax = isFiniteNumber(normalizedExpMax);
+
+    if (!hasObservedData) {
+        if (!hasExplicitMin && !hasExplicitMax) {
+            return [0, 1];
+        }
+        if (hasExplicitMin && !hasExplicitMax) {
+            const expMin = normalizedExpMin as number;
+            const expMax = expMin === 0 ? 1 : expMin > 0 ? expMin * 1.1 : 0;
+            return [expMin, expMax];
+        }
+        if (!hasExplicitMin && hasExplicitMax) {
+            const expMax = normalizedExpMax as number;
+            const expMin = expMax === 0 ? -1 : expMax > 0 ? 0 : expMax * 1.1;
+            return [expMin, expMax];
+        }
+        if (hasExplicitMin && hasExplicitMax) {
+            let expMin = normalizedExpMin as number;
+            let expMax = normalizedExpMax as number;
+            if (expMin === expMax) {
+                const delta = Math.abs(expMin) === 0 ? 1 : Math.abs(expMin) * 0.1;
+                expMin -= delta;
+                expMax += delta;
+            }
+            return [expMin, expMax];
+        }
     }
 
-    const normalized = normalizeContinuousNumericDomain(min, max, explicitMin, explicitMax);
-    let [resMin, resMax] = normalized.domain;
+    if (hasExplicitMin && hasExplicitMax && (normalizedExpMin as number) === (normalizedExpMax as number)) {
+        const val = normalizedExpMin as number;
+        const delta = Math.abs(val) === 0 ? 1 : Math.abs(val) * 0.1;
+        return [val - delta, val + delta];
+    }
 
-    if (min === max && !normalized.explicitMin && !normalized.explicitMax) {
+    let resMin = hasExplicitMin ? (normalizedExpMin as number) : min;
+    let resMax = hasExplicitMax ? (normalizedExpMax as number) : max;
+
+    if (hasExplicitMin && !hasExplicitMax && (normalizedExpMin as number) >= max) {
+        resMax = (normalizedExpMin as number) === 0 ? 1 : (normalizedExpMin as number) * 1.1;
+    }
+    if (!hasExplicitMin && hasExplicitMax && (normalizedExpMax as number) <= min) {
+        resMin = (normalizedExpMax as number) === 0 ? -1 : (normalizedExpMax as number) < 0 ? (normalizedExpMax as number) * 1.1 : 0;
+    }
+
+    if (requiresZeroBaseline) {
+        if (!hasExplicitMin && resMin > 0) {
+            resMin = 0;
+        }
+        if (!hasExplicitMax && resMax < 0) {
+            resMax = 0;
+        }
+    }
+
+    if (resMin === resMax) {
         if (min === 0) {
             return [0, 1];
         }
@@ -314,7 +382,7 @@ export function hasRenderableData(
         const field = s.field();
         for (let i = 0; i < data.length; i++) {
             const val = resolveValue(data[i], field, i);
-            if (isFiniteNumber(val)) {
+            if (isFiniteNumber(val) && (s.type === "pie" || s.type === "donut" ? val > 0 : true)) {
                 return true;
             }
         }
@@ -322,5 +390,3 @@ export function hasRenderableData(
 
     return false;
 }
-
-

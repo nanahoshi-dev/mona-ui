@@ -4,6 +4,8 @@ export { MonaChartYAxisComponent } from "./components/chart-y-axis/chart-y-axis.
 export { MonaLineSeriesComponent } from "./components/line-series/line-series.component";
 export { MonaAreaSeriesComponent } from "./components/area-series/area-series.component";
 export { MonaBarSeriesComponent } from "./components/bar-series/bar-series.component";
+export { MonaPieSeriesComponent } from "./components/pie-series/pie-series.component";
+export { MonaDonutSeriesComponent } from "./components/donut-series/donut-series.component";
 export { MonaChartLegendComponent } from "./components/chart-legend/chart-legend.component";
 export { MonaChartTooltipComponent } from "./components/chart-tooltip/chart-tooltip.component";
 
@@ -11,6 +13,8 @@ export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-t
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
 export { ChartTooltipTemplateDirective } from "./directives/chart-tooltip-template.directive";
 export { ChartNoDataTemplateDirective } from "./directives/chart-no-data-template.directive";
+export { ChartSliceLabelTemplateDirective } from "./directives/chart-slice-label-template.directive";
+export { ChartCenterTemplateDirective } from "./directives/chart-center-template.directive";
 
 export type {
     ChartCoordinateSystem,
@@ -36,6 +40,7 @@ export type {
     ChartAreaFillMode,
     ChartCurve,
     ChartLegendItem,
+    ChartLegendItemKind,
     ChartLegendItemTemplateContext,
     ChartSeriesType
 } from "./models/chart-series.models";
@@ -50,5 +55,17 @@ export type {
     ChartTooltipPointContext,
     ChartTooltipTemplateContext
 } from "./models/chart-tooltip.models";
+
+export type {
+    ChartCenterTemplateContext,
+    ChartLabelMeasurement,
+    ChartPolarLabelContent,
+    ChartPolarLabelPosition,
+    ChartPolarLabelSide,
+    ChartSliceContext,
+    ChartSliceLabelTemplateContext,
+    ChartSliceVisibilityEvent,
+    ChartValueFormatter
+} from "./models/chart-polar.models";
 
 export type { ChartSeriesStyle } from "./models/chart-style.models";

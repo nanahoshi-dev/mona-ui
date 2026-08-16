@@ -49,9 +49,11 @@ describe("MonaChartTooltipComponent", () => {
     let sceneSignal = signal<ChartScene | null>({
         axes: [],
         coordinateSystem: "cartesian",
+        hasRenderableData: true,
         height: 400,
         hitTargets: [],
         interactionBuckets: [],
+        legendItems: [],
         plotRect: { height: 300, width: 700, x: 50, y: 50 },
         series: [],
         width: 800
@@ -77,9 +79,11 @@ describe("MonaChartTooltipComponent", () => {
         sceneSignal = signal<ChartScene | null>({
             axes: [],
             coordinateSystem: "cartesian",
+            hasRenderableData: true,
             height: 400,
             hitTargets: [],
             interactionBuckets: [],
+            legendItems: [],
             plotRect: { height: 300, width: 700, x: 50, y: 50 },
             series: [],
             width: 800
