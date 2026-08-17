@@ -4,13 +4,13 @@ import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
     ChartHeatmapCategory,
     ChartHeatmapColorScaleScene,
-    ChartHeatmapSeriesScene,
-    HeatmapCellIndex
+    ChartHeatmapSeriesScene
 } from "../../models/chart-heatmap.models";
 import type { ChartAxisScene, ChartSeriesScene } from "./cartesian-scene";
 import type { ChartAngularAxisScene, ChartRadialAxisScene, ChartRadialSeriesScene } from "./polar-axis-scene";
 import type { ChartSectorSeriesScene } from "./polar-scene";
 import type { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
+import type { HeatmapCellIndex } from "../interaction/heatmap-cell-index";
 import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "./scene-geometry";
 import type { ChartStackMode } from "../../models/chart-stack.models";
 
