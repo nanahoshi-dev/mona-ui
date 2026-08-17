@@ -134,19 +134,21 @@ export interface ChartAreaSeriesRegistration extends ChartCartesianSeriesRegistr
     fillOpacity?: Signal<number | undefined>;
     pointRadius?: Signal<number | undefined>;
     showPoints?: Signal<boolean>;
-    stack?: Signal<string | undefined>;
-    stackMode?: Signal<ChartStackMode>;
+    stack: Signal<string | undefined>;
+    stackMode: Signal<ChartStackMode>;
     strokeWidth?: Signal<number | undefined>;
     type: "area";
+    valueFormatter?: Signal<ChartValueFormatter | undefined>;
 }
 
 export interface ChartBarSeriesRegistration extends ChartCartesianSeriesRegistrationBase {
     borderRadius?: Signal<number | undefined>;
     fillOpacity?: Signal<number | undefined>;
     maxBarWidth?: Signal<number | undefined>;
-    stack?: Signal<string | undefined>;
-    stackMode?: Signal<ChartStackMode>;
+    stack: Signal<string | undefined>;
+    stackMode: Signal<ChartStackMode>;
     type: "bar";
+    valueFormatter?: Signal<ChartValueFormatter | undefined>;
 }
 
 export interface ChartCartesianMarkerSeriesRegistrationBase extends ChartCartesianSeriesRegistrationBase {
