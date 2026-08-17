@@ -113,6 +113,59 @@ export function drawBarRect(
     context.fill();
 }
 
+export function drawBarRectOutline(
+    context: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number = 0,
+    isPositive: boolean = true,
+    cornerRadii?: ChartCornerRadii
+): void {
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    const maxRadius = Math.min(width / 2, height / 2);
+    const tl = cornerRadii ? clamp(cornerRadii.topLeft, 0, maxRadius) : (isPositive ? clamp(radius, 0, maxRadius) : 0);
+    const tr = cornerRadii ? clamp(cornerRadii.topRight, 0, maxRadius) : (isPositive ? clamp(radius, 0, maxRadius) : 0);
+    const br = cornerRadii ? clamp(cornerRadii.bottomRight, 0, maxRadius) : (!isPositive ? clamp(radius, 0, maxRadius) : 0);
+    const bl = cornerRadii ? clamp(cornerRadii.bottomLeft, 0, maxRadius) : (!isPositive ? clamp(radius, 0, maxRadius) : 0);
+
+    context.beginPath();
+    if (tl <= 0 && tr <= 0 && br <= 0 && bl <= 0) {
+        context.rect(x, y, width, height);
+    } else {
+        context.moveTo(x + tl, y);
+        context.lineTo(x + width - tr, y);
+        if (tr > 0) {
+            context.quadraticCurveTo(x + width, y, x + width, y + tr);
+        } else {
+            context.lineTo(x + width, y);
+        }
+        context.lineTo(x + width, y + height - br);
+        if (br > 0) {
+            context.quadraticCurveTo(x + width, y + height, x + width - br, y + height);
+        } else {
+            context.lineTo(x + width, y + height);
+        }
+        context.lineTo(x + bl, y + height);
+        if (bl > 0) {
+            context.quadraticCurveTo(x, y + height, x, y + height - bl);
+        } else {
+            context.lineTo(x, y + height);
+        }
+        context.lineTo(x, y + tl);
+        if (tl > 0) {
+            context.quadraticCurveTo(x, y, x + tl, y);
+        } else {
+            context.lineTo(x, y);
+        }
+        context.closePath();
+    }
+    context.stroke();
+}
+
 export function drawPointMarker(
     context: CanvasRenderingContext2D,
     x: number,
