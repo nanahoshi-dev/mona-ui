@@ -18,6 +18,18 @@ export function normalizePositiveNumber(value: unknown, fallback?: number): numb
     return isFiniteNumber(value) && value > 0 ? value : fallback;
 }
 
+export function normalizeMarkerRadius(
+    value: unknown,
+    fallback: number = 4,
+    min: number = 1,
+    max: number = 100
+): number {
+    if (isFiniteNumber(value)) {
+        return clamp(value, min, max);
+    }
+    return clamp(fallback, min, max);
+}
+
 export function normalizeRatio(value: unknown, fallback: number = 0.5, min: number = 0, max: number = 1): number {
     return isFiniteNumber(value) ? clamp(value, min, max) : clamp(fallback, min, max);
 }
