@@ -184,6 +184,24 @@ export class ChartTransitionPlanner {
             if (previous.coordinateSystem === "cartesian" && target.coordinateSystem === "cartesian") {
                 const prevCartesian = previous as CartesianChartScene;
                 const targetCartesian = target as CartesianChartScene;
+
+                if (
+                    prevCartesian.xAxisType &&
+                    targetCartesian.xAxisType &&
+                    prevCartesian.xAxisType !== targetCartesian.xAxisType
+                ) {
+                    return {
+                        complexity,
+                        duration: options.duration,
+                        easing: options.easing,
+                        fromScene: previous,
+                        mode: "crossfade",
+                        seriesPlans: [],
+                        toScene: target,
+                        trigger
+                    };
+                }
+
                 const prevSeriesById = new Map(prevCartesian.series.map(s => [s.id, s]));
 
                 for (const targetSeries of targetCartesian.series) {
