@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ChartPolarSeriesScene, ScenePolarSlice } from "../../scene/polar-scene";
+import type { ChartContinuousPolarSeriesScene, SceneRadialPoint } from "../../scene/polar-axis-scene";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
 import { PolarSeriesRenderer } from "./polar-series-renderer";
 
@@ -27,184 +27,108 @@ describe("PolarSeriesRenderer", () => {
         } as unknown as CanvasRenderingContext2D;
     }
 
-    const mockSlice1: ScenePolarSlice = {
-        category: "Chrome",
-        centroid: { x: 200, y: 150 },
-        color: "#3b82f6",
-        cornerRadius: 0,
-        dataIndex: 0,
-        datum: { browser: "Chrome", share: 60 },
-        endAngle: Math.PI,
-        formattedCategory: "Chrome",
-        formattedPercentage: "60%",
-        formattedValue: "60",
-        innerRadius: 0,
-        insideLabelBackgroundColor: "#3b82f6",
-        insideLabelPoint: { x: 200, y: 150 },
-        outerRadius: 100,
-        padAngle: 0,
-        percentage: 0.6,
-        sliceId: "pie-1:slice:0",
-        startAngle: 0,
-        value: 60,
-        visible: true
-    };
-
-    const mockSlice2: ScenePolarSlice = {
-        category: "Safari",
-        centroid: { x: 200, y: 250 },
-        color: "#10b981",
-        cornerRadius: 0,
-        dataIndex: 1,
-        datum: { browser: "Safari", share: 40 },
-        endAngle: 2 * Math.PI,
-        formattedCategory: "Safari",
-        formattedPercentage: "40%",
-        formattedValue: "40",
-        innerRadius: 0,
-        insideLabelBackgroundColor: "#10b981",
-        insideLabelPoint: { x: 200, y: 250 },
-        outerRadius: 100,
-        padAngle: 0,
-        percentage: 0.4,
-        sliceId: "pie-1:slice:1",
-        startAngle: Math.PI,
-        value: 40,
-        visible: true
-    };
-
-    const mockSeriesScene: ChartPolarSeriesScene = {
-        center: { x: 200, y: 200 },
-        cornerRadius: 0,
-        fillMode: "solid",
-        formattedTotal: "100",
-        id: "pie-1",
-        innerRadius: 0,
-        labelPosition: "outside",
-        name: "Pie",
-        outerRadius: 100,
-        padAngle: 0,
-        showLabels: true,
-        slices: [mockSlice1, mockSlice2],
-        style: {
-            fillOpacity: 1,
-            strokeColor: "#ffffff",
-            strokeSource: "default",
-            strokeWidth: 1
+    const mockPoints: SceneRadialPoint[] = [
+        {
+            angle: 0,
+            dataIndex: 0,
+            datum: { angle: 0, val: 50 },
+            defined: true,
+            formattedAngle: "0°",
+            formattedValue: "50",
+            normalizedAngle: 0,
+            point: { x: 200, y: 150 },
+            radius: 50,
+            rawAngle: 0,
+            value: 50
         },
-        total: 100,
-        type: "pie"
+        {
+            angle: Math.PI / 2,
+            dataIndex: 1,
+            datum: { angle: 90, val: 80 },
+            defined: true,
+            formattedAngle: "90°",
+            formattedValue: "80",
+            normalizedAngle: 90,
+            point: { x: 280, y: 200 },
+            radius: 80,
+            rawAngle: 90,
+            value: 80
+        },
+        {
+            angle: Math.PI,
+            dataIndex: 2,
+            datum: { angle: 180, val: 40 },
+            defined: true,
+            formattedAngle: "180°",
+            formattedValue: "40",
+            normalizedAngle: 180,
+            point: { x: 200, y: 240 },
+            radius: 40,
+            rawAngle: 180,
+            value: 40
+        }
+    ];
+
+    const mockPolarSeriesScene: ChartContinuousPolarSeriesScene = {
+        color: "#3b82f6",
+        connectNulls: false,
+        curve: "linear",
+        fillMode: "solid",
+        fillOpacity: 0.2,
+        id: "polar-1",
+        maxRenderedRadius: 80,
+        name: "Antenna Signal",
+        pointRadius: 3,
+        points: mockPoints,
+        showPoints: true,
+        strokeWidth: 2,
+        type: "polar"
     };
 
-    it("should translate context to center and fill each visible slice", () => {
+    it("should render solid area fill, stroke line, and markers", () => {
         const ctx = createMockContext();
-        PolarSeriesRenderer.render(ctx, mockSeriesScene, null, styleResolver);
+        PolarSeriesRenderer.render(ctx, mockPolarSeriesScene, { x: 200, y: 200 }, styleResolver);
 
         expect(ctx.save).toHaveBeenCalled();
         expect(ctx.translate).toHaveBeenCalledWith(200, 200);
-        expect(ctx.fill).toHaveBeenCalledTimes(2);
-        expect(ctx.stroke).toHaveBeenCalledTimes(2);
+        expect(ctx.beginPath).toHaveBeenCalled();
+        expect(ctx.fill).toHaveBeenCalled();
+        expect(ctx.stroke).toHaveBeenCalled();
         expect(ctx.restore).toHaveBeenCalled();
     });
 
-    it("should render interaction overlay when a slice is active via pointer hover", () => {
+    it("should create radial gradient when fillMode is gradient", () => {
         const ctx = createMockContext();
-        const interactionState = {
-            activeHitTarget: {
-                datum: mockSlice1.datum,
-                index: 0,
-                seriesId: "pie-1",
-                seriesName: "Pie",
-                seriesType: "pie" as const,
-                sliceId: "pie-1:slice:0",
-                xKey: "pie-1:slice:0",
-                xValue: "Chrome",
-                yValue: 60
-            },
-            activeHits: [],
-            pointerPosition: { x: 200, y: 150 },
-            source: "pointer" as const
+        const gradientSeries: ChartContinuousPolarSeriesScene = {
+            ...mockPolarSeriesScene,
+            fillMode: "gradient"
         };
 
-        PolarSeriesRenderer.render(ctx, mockSeriesScene, interactionState, styleResolver);
-
-        // 2 slice fills + 1 interaction overlay fill = 3 fills
-        expect(ctx.fill).toHaveBeenCalledTimes(3);
-        // 2 slice strokes (no hover border stroke) = 2 strokes
-        expect(ctx.stroke).toHaveBeenCalledTimes(2);
+        PolarSeriesRenderer.render(ctx, gradientSeries, { x: 200, y: 200 }, styleResolver);
+        expect(ctx.createRadialGradient).toHaveBeenCalled();
     });
 
-    it("should render distinct focus stroke when a slice is active via keyboard", () => {
+    it("should not render fill when fillMode is none", () => {
         const ctx = createMockContext();
-        const interactionState = {
-            activeHitTarget: {
-                datum: mockSlice1.datum,
-                index: 0,
-                seriesId: "pie-1",
-                seriesName: "Pie",
-                seriesType: "pie" as const,
-                sliceId: "pie-1:slice:0",
-                xKey: "pie-1:slice:0",
-                xValue: "Chrome",
-                yValue: 60
-            },
-            activeHits: [],
-            pointerPosition: { x: 200, y: 150 },
-            source: "keyboard" as const
+        const noFillSeries: ChartContinuousPolarSeriesScene = {
+            ...mockPolarSeriesScene,
+            fillMode: "none",
+            showPoints: false
         };
 
-        PolarSeriesRenderer.render(ctx, mockSeriesScene, interactionState, styleResolver);
-
-        // 2 slice fills + 1 keyboard highlight fill = 3 fills
-        expect(ctx.fill).toHaveBeenCalledTimes(3);
-        // 2 slice strokes + 1 keyboard focus outline stroke = 3 strokes
-        expect(ctx.stroke).toHaveBeenCalledTimes(3);
+        PolarSeriesRenderer.render(ctx, noFillSeries, { x: 200, y: 200 }, styleResolver);
+        expect(ctx.fill).not.toHaveBeenCalled();
+        expect(ctx.stroke).toHaveBeenCalled();
     });
 
-    it("should render radial gradient fills and use slice color as stroke for default strokeSource", () => {
+    it("should handle empty points gracefully", () => {
         const ctx = createMockContext();
-        const gradientSeries: ChartPolarSeriesScene = {
-            ...mockSeriesScene,
-            fillMode: "gradient",
-            style: {
-                fillOpacity: 1,
-                strokeColor: "#ffffff",
-                strokeSource: "default",
-                strokeWidth: 1
-            }
+        const emptySeries: ChartContinuousPolarSeriesScene = {
+            ...mockPolarSeriesScene,
+            points: []
         };
-        PolarSeriesRenderer.render(ctx, gradientSeries, null, styleResolver);
 
-        expect(ctx.createRadialGradient).toHaveBeenCalledTimes(2);
-        expect(ctx.createRadialGradient).toHaveBeenCalledWith(0, 0, 0, 0, 0, 100);
-        expect(ctx.fill).toHaveBeenCalledTimes(2);
-        expect(ctx.stroke).toHaveBeenCalledTimes(2);
-    });
-
-    it("should honor explicit stroke color in gradient mode", () => {
-        const ctx = createMockContext();
-        const gradientSeries: ChartPolarSeriesScene = {
-            ...mockSeriesScene,
-            fillMode: "gradient",
-            style: {
-                fillOpacity: 1,
-                strokeColor: "#ff0000",
-                strokeSource: "explicit",
-                strokeWidth: 2
-            }
-        };
-        PolarSeriesRenderer.render(ctx, gradientSeries, null, styleResolver);
-
-        expect(ctx.stroke).toHaveBeenCalledTimes(2);
-    });
-
-    it("should handle empty slices gracefully", () => {
-        const ctx = createMockContext();
-        const emptySeries: ChartPolarSeriesScene = {
-            ...mockSeriesScene,
-            slices: []
-        };
-        PolarSeriesRenderer.render(ctx, emptySeries, null, styleResolver);
-        expect(ctx.translate).not.toHaveBeenCalled();
+        PolarSeriesRenderer.render(ctx, emptySeries, { x: 200, y: 200 }, styleResolver);
+        expect(ctx.beginPath).not.toHaveBeenCalled();
     });
 });

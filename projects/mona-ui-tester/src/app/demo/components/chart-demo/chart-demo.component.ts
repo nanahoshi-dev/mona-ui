@@ -9,14 +9,18 @@ import {
     ChartTooltipTemplateDirective,
     MonaAreaSeriesComponent,
     MonaBarSeriesComponent,
+    MonaChartAngularAxisComponent,
     MonaChartComponent,
     MonaChartLegendComponent,
+    MonaChartRadialAxisComponent,
     MonaChartTooltipComponent,
     MonaChartXAxisComponent,
     MonaChartYAxisComponent,
     MonaDonutSeriesComponent,
     MonaLineSeriesComponent,
     MonaPieSeriesComponent,
+    MonaPolarSeriesComponent,
+    MonaRadarSeriesComponent,
     type ChartAreaFillMode,
     type ChartCurve,
     type ChartPointEvent,
@@ -24,6 +28,9 @@ import {
     type ChartPolarFillMode,
     type ChartPolarLabelContent,
     type ChartPolarLabelPosition,
+    type ChartRadialCurve,
+    type ChartRadialFillMode,
+    type ChartRadialGridShape,
     type ChartSeriesVisibilityEvent,
     type ChartSliceVisibilityEvent
 } from "@nanahoshi/mona-ui/chart";
@@ -58,6 +65,19 @@ interface MarketShareDatum {
     readonly value: number;
 }
 
+interface SkillMetric {
+    readonly mage: number;
+    readonly metric: string;
+    readonly rogue: number;
+    readonly warrior: number;
+}
+
+interface SignalDataPoint {
+    readonly angle: number;
+    readonly gain: number | null;
+    readonly noise: number | null;
+}
+
 @Component({
     imports: [
         ButtonDirective,
@@ -66,11 +86,15 @@ interface MarketShareDatum {
         MonaChartComponent,
         MonaChartXAxisComponent,
         MonaChartYAxisComponent,
+        MonaChartAngularAxisComponent,
+        MonaChartRadialAxisComponent,
         MonaLineSeriesComponent,
         MonaAreaSeriesComponent,
         MonaBarSeriesComponent,
         MonaPieSeriesComponent,
         MonaDonutSeriesComponent,
+        MonaRadarSeriesComponent,
+        MonaPolarSeriesComponent,
         MonaChartLegendComponent,
         MonaChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
@@ -90,7 +114,7 @@ export class ChartDemoComponent {
     readonly #themeService = inject(ThemeService, { optional: true });
     #logId: number = 0;
 
-    protected readonly activeTab = signal<"custom" | "donut" | "grouped" | "mixed" | "pie" | "time">("mixed");
+    protected readonly activeTab = signal<"custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "time">("mixed");
     protected readonly areaFillMode = signal<ChartAreaFillMode>("gradient");
     protected readonly areaFillModeOptions: readonly { label: string; value: ChartAreaFillMode }[] = [
         { label: "Gradient (Fade to 0)", value: "gradient" },
@@ -123,7 +147,7 @@ export class ChartDemoComponent {
         return this.isDataEmpty() ? [] : this.monthlyData();
     });
 
-    // Polar Data & Controls
+    // Polar Sector (Pie & Donut) Data & Controls
     protected readonly donutCornerRadius = signal<number>(4);
     protected readonly donutData = signal<readonly MarketShareDatum[]>([
         { category: "Compute Engine", value: 45000 },
@@ -195,18 +219,70 @@ export class ChartDemoComponent {
     protected readonly pieStartAngle = signal<number>(0);
     protected readonly pieUseCustomLabelTemplate = signal<boolean>(false);
 
+    // Radar Series Data & Controls
+    protected readonly radarData = signal<readonly SkillMetric[]>([
+        { mage: 30, metric: "Strength", rogue: 65, warrior: 95 },
+        { mage: 98, metric: "Intelligence", rogue: 70, warrior: 35 },
+        { mage: 55, metric: "Agility", rogue: 95, warrior: 60 },
+        { mage: 40, metric: "Defense", rogue: 50, warrior: 90 },
+        { mage: 100, metric: "Mana", rogue: 45, warrior: 20 },
+        { mage: 60, metric: "Stealth", rogue: 98, warrior: 15 }
+    ]);
+    protected readonly radarFillMode = signal<ChartRadialFillMode>("gradient");
+    protected readonly radialFillModeOptions: readonly { label: string; value: ChartRadialFillMode }[] = [
+        { label: "Gradient (Center to Max)", value: "gradient" },
+        { label: "Solid Wash", value: "solid" },
+        { label: "None (Outline Only)", value: "none" }
+    ];
+    protected readonly radialCurveOptions: readonly { label: string; value: ChartRadialCurve }[] = [
+        { label: "Linear", value: "linear" },
+        { label: "Smooth (Catmull-Rom)", value: "smooth" }
+    ];
+    protected readonly radialGridShapeOptions: readonly { label: string; value: ChartRadialGridShape }[] = [
+        { label: "Auto (Default)", value: "auto" },
+        { label: "Polygon", value: "polygon" },
+        { label: "Circle", value: "circle" }
+    ];
+    protected readonly radarCurve = signal<ChartRadialCurve>("linear");
+    protected readonly radarShowPoints = signal<boolean>(true);
+    protected readonly radarGridShape = signal<ChartRadialGridShape>("auto");
+    protected readonly radarRotation = signal<number>(0);
+    protected readonly radarShowWarrior = signal<boolean>(true);
+    protected readonly radarShowMage = signal<boolean>(true);
+    protected readonly radarShowRogue = signal<boolean>(true);
+
+    // Continuous Polar Data & Controls
+    protected readonly polarData = signal<readonly SignalDataPoint[]>([
+        { angle: 0, gain: 85, noise: 20 },
+        { angle: 30, gain: 70, noise: 25 },
+        { angle: 60, gain: 45, noise: 30 },
+        { angle: 90, gain: 20, noise: 35 },
+        { angle: 120, gain: 30, noise: 25 },
+        { angle: 150, gain: 60, noise: 20 },
+        { angle: 180, gain: 90, noise: 15 },
+        { angle: 210, gain: 65, noise: 20 },
+        { angle: 240, gain: 35, noise: 25 },
+        { angle: 270, gain: 15, noise: 30 },
+        { angle: 300, gain: 40, noise: 25 },
+        { angle: 330, gain: 75, noise: 20 }
+    ]);
+    protected readonly continuousPolarFillMode = signal<ChartRadialFillMode>("gradient");
+    protected readonly continuousPolarCurve = signal<ChartRadialCurve>("smooth");
+    protected readonly continuousPolarConnectNulls = signal<boolean>(false);
+    protected readonly continuousPolarShowPoints = signal<boolean>(true);
+    protected readonly continuousPolarGridShape = signal<ChartRadialGridShape>("circle");
+    protected readonly continuousPolarTickCount = signal<number>(12);
+
     protected readonly sharedTooltip = signal<boolean>(true);
     protected readonly showArea = signal<boolean>(true);
     protected readonly showAxisTitles = signal<boolean>(false);
     protected readonly showBars = signal<boolean>(true);
     protected readonly showLine = signal<boolean>(true);
     protected readonly showPoints = signal<boolean>(true);
-    protected readonly timeFormatter = (value: unknown): string => {
-        if (value instanceof Date) {
-            return `${value.getHours().toString().padStart(2, "0")}:${value.getMinutes().toString().padStart(2, "0")}`;
-        }
-        return String(value);
-    };
+    protected readonly timeFormatter = (value: unknown): string =>
+        value instanceof Date
+            ? `${value.getHours().toString().padStart(2, "0")}:${value.getMinutes().toString().padStart(2, "0")}`
+            : String(value);
     protected readonly useCustomNoData = signal<boolean>(false);
     protected readonly useIndependentSeriesData = signal<boolean>(false);
     protected readonly xAxisLine = signal<boolean>(true);
@@ -216,135 +292,119 @@ export class ChartDemoComponent {
     protected readonly yAxisPosition = signal<"left" | "right">("left");
     protected readonly yGridLines = signal<boolean>(true);
 
-    public changeThemeColor(color: string): void {
-        this.#themeService?.setPrimaryColor(color);
-        this.#addLog("themeUpdate", `Applied primary theme color: ${color}`);
-    }
-
-    public appendDataPoint(): void {
-        const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const currentLength = this.monthlyData().length;
-        const monthName = months[currentLength % months.length];
-        const minVal = this.includeNegativeValues() ? -4000 : 2000;
-        const range = this.includeNegativeValues() ? 12000 : 6000;
-        const actual = Math.round(minVal + Math.random() * range);
-        const forecast = this.useIndependentSeriesData()
-            ? Math.round(minVal + Math.random() * range)
-            : actual;
-        const target = this.useIndependentSeriesData()
-            ? Math.round(minVal + Math.random() * range)
-            : actual;
-
-        this.monthlyData.update(list => [
-            ...list,
-            { actual, forecast, month: `${monthName} ${currentLength + 1}`, target }
-        ]);
-        this.#addLog("dataUpdate", `Appended data point: ${monthName}`);
-    }
-
-    public appendPieSlice(): void {
-        const categories = ["Brave", "Vivaldi", "DuckDuckGo", "Arc", "Samsung Internet"];
-        const currentCount = this.pieData().length;
-        const cat = categories[currentCount % categories.length];
-        const val = Math.round(2 + Math.random() * 15);
-        this.pieData.update(list => [...list, { category: `${cat} ${currentCount + 1}`, value: val }]);
-        this.#addLog("dataUpdate", `Appended pie slice: ${cat}`);
-    }
-
-    public appendDonutSlice(): void {
-        const categories = ["Vertex AI", "Cloud Functions", "API Gateway", "Cloud Armor", "Pub/Sub"];
-        const currentCount = this.donutData().length;
-        const cat = categories[currentCount % categories.length];
-        const val = Math.round(4000 + Math.random() * 25000);
-        this.donutData.update(list => [...list, { category: `${cat} ${currentCount + 1}`, value: val }]);
-        this.#addLog("dataUpdate", `Appended donut service: ${cat}`);
-    }
-
     public clearLogs(): void {
         this.eventLogs.set([]);
     }
 
-    public loadProfitLossData(): void {
-        this.includeNegativeValues.set(true);
-        this.monthlyData.set([
-            { actual: 4800, forecast: 4500, month: "Jan", target: 5000 },
-            { actual: 2600, forecast: 3000, month: "Feb", target: 2800 },
-            { actual: -3200, forecast: -3000, month: "Mar", target: -3500 },
-            { actual: -1800, forecast: -1500, month: "Apr", target: -2000 },
-            { actual: 3900, forecast: 3600, month: "May", target: 4200 },
-            { actual: 6400, forecast: 6100, month: "Jun", target: 6700 }
-        ]);
-        this.isDataEmpty.set(false);
-        this.#addLog("dataUpdate", "Loaded preset dataset with mixed positive and negative values");
-    }
-
-    public onAreaFillModeChange(mode: ChartAreaFillMode | null): void {
-        if (mode) {
+    public onAreaFillModeChange(mode: unknown): void {
+        if (mode === "gradient" || mode === "solid") {
             this.areaFillMode.set(mode);
+            this.#addLog("settingChange", `Area Fill Mode: ${mode}`);
         }
     }
 
-    public onCurveTypeChange(curve: ChartCurve | null): void {
-        if (curve) {
-            this.curveType.set(curve);
+    public onRadarFillModeChange(mode: unknown): void {
+        if (mode === "gradient" || mode === "solid" || mode === "none") {
+            this.radarFillMode.set(mode);
+            this.#addLog("settingChange", `Radar Fill Mode: ${mode}`);
         }
     }
 
-    public onLabelContentChange(content: ChartPolarLabelContent | null): void {
-        if (content) {
-            this.pieLabelContent.set(content);
+    public onRadarCurveChange(curve: unknown): void {
+        if (curve === "linear" || curve === "smooth") {
+            this.radarCurve.set(curve);
+            this.#addLog("settingChange", `Radar Curve: ${curve}`);
         }
     }
 
-    public onPieLabelPositionChange(pos: ChartPolarLabelPosition | null): void {
-        if (pos) {
-            this.pieLabelPosition.set(pos);
+    public onRadarGridShapeChange(shape: unknown): void {
+        if (shape === "auto" || shape === "polygon" || shape === "circle") {
+            this.radarGridShape.set(shape);
+            this.#addLog("settingChange", `Radar Grid Shape: ${shape}`);
         }
     }
 
-    public onPieFillModeChange(mode: ChartPolarFillMode | null): void {
-        if (mode) {
-            this.pieFillMode.set(mode);
-            this.#addLog("fillModeUpdate", `Set Pie fill mode: ${mode}`);
+    public onContinuousPolarFillModeChange(mode: unknown): void {
+        if (mode === "gradient" || mode === "solid" || mode === "none") {
+            this.continuousPolarFillMode.set(mode);
+            this.#addLog("settingChange", `Polar Fill Mode: ${mode}`);
         }
     }
 
-    public onDonutLabelPositionChange(pos: ChartPolarLabelPosition | null): void {
-        if (pos) {
-            this.donutLabelPosition.set(pos);
+    public onContinuousPolarCurveChange(curve: unknown): void {
+        if (curve === "linear" || curve === "smooth") {
+            this.continuousPolarCurve.set(curve);
+            this.#addLog("settingChange", `Polar Curve: ${curve}`);
         }
     }
 
-    public onDonutFillModeChange(mode: ChartPolarFillMode | null): void {
-        if (mode) {
+    public onContinuousPolarGridShapeChange(shape: unknown): void {
+        if (shape === "auto" || shape === "polygon" || shape === "circle") {
+            this.continuousPolarGridShape.set(shape);
+            this.#addLog("settingChange", `Polar Grid Shape: ${shape}`);
+        }
+    }
+
+    public onCurveTypeChange(curve: unknown): void {
+        if (typeof curve === "string") {
+            this.curveType.set(curve as ChartCurve);
+            this.#addLog("settingChange", `Line Curve: ${curve}`);
+        }
+    }
+
+    public onDonutFillModeChange(mode: unknown): void {
+        if (mode === "solid" || mode === "gradient") {
             this.donutFillMode.set(mode);
-            this.#addLog("fillModeUpdate", `Set Donut fill mode: ${mode}`);
+            this.#addLog("settingChange", `Donut Fill Mode: ${mode}`);
         }
     }
 
-    public loadDensePieData(): void {
-        this.pieData.set([
-            { category: "Chrome", value: 45 },
-            { category: "Safari", value: 20 },
-            { category: "Edge", value: 12 },
-            { category: "Firefox", value: 8 },
-            { category: "Samsung Internet", value: 5 },
-            { category: "Opera", value: 4 },
-            { category: "Brave", value: 3 },
-            { category: "Vivaldi", value: 2 },
-            { category: "DuckDuckGo", value: 1 }
-        ]);
-        this.#addLog("dataUpdate", "Loaded dense 9-slice dataset testing outside leader line collision resolution");
+    public onDonutLabelPositionChange(pos: unknown): void {
+        if (pos === "outside" || pos === "inside") {
+            this.donutLabelPosition.set(pos);
+            this.#addLog("settingChange", `Donut Label Position: ${pos}`);
+        }
     }
 
-    public onLegendPositionChange(pos: "bottom" | "left" | "right" | "top" | null): void {
-        if (pos) {
+    public onLabelContentChange(content: unknown): void {
+        this.onPieLabelContentChange(content);
+    }
+
+    public onLegendPositionChange(pos: unknown): void {
+        if (pos === "bottom" || pos === "top" || pos === "left" || pos === "right") {
             this.legendPosition.set(pos);
+            this.#addLog("settingChange", `Legend Position: ${pos}`);
+        }
+    }
+
+    public onPieFillModeChange(mode: unknown): void {
+        if (mode === "solid" || mode === "gradient") {
+            this.pieFillMode.set(mode);
+            this.#addLog("settingChange", `Pie Fill Mode: ${mode}`);
+        }
+    }
+
+    public onPieLabelContentChange(content: unknown): void {
+        if (typeof content === "string") {
+            this.pieLabelContent.set(content as ChartPolarLabelContent);
+            this.#addLog("settingChange", `Pie Label Content: ${content}`);
+        }
+    }
+
+    public onPieLabelPositionChange(pos: unknown): void {
+        if (pos === "outside" || pos === "inside") {
+            this.pieLabelPosition.set(pos);
+            this.#addLog("settingChange", `Pie Label Position: ${pos}`);
         }
     }
 
     public onPointClick(event: ChartPointEvent): void {
-        const polarDetails = event.category ? ` | Category: "${event.category}"` : "";
+        const polarDetails =
+            event.percentage !== undefined
+                ? ` | (${(event.percentage * 100).toFixed(1)}%)`
+                : event.category
+                  ? ` | Category: "${event.category}"`
+                  : "";
         this.#addLog(
             "pointClick",
             `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${event.yValue} | Index: ${event.dataIndex}`
@@ -426,6 +486,87 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Randomized pie chart slice values");
     }
 
+    public randomizeRadarData(): void {
+        this.radarData.update(list =>
+            list.map(item => ({
+                mage: Math.round(20 + Math.random() * 80),
+                metric: item.metric,
+                rogue: Math.round(20 + Math.random() * 80),
+                warrior: Math.round(20 + Math.random() * 80)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized radar skill matrix");
+    }
+
+    public appendDataPoint(): void {
+        const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const currLen = this.monthlyData().length;
+        const nextMonth = months[currLen % months.length];
+        const val = Math.round(3000 + Math.random() * 6000);
+        this.monthlyData.update(list => [
+            ...list,
+            { actual: val, forecast: val - 200, month: `${nextMonth}*`, target: val + 500 }
+        ]);
+        this.#addLog("dataUpdate", `Appended data point for ${nextMonth}`);
+    }
+
+    public appendDonutSlice(): void {
+        const services = ["Cloud Functions", "Cloud Spanner", "Vertex AI", "Cloud Run", "Memorystore"];
+        const currLen = this.donutData().length;
+        const nextService = services[currLen % services.length];
+        const val = Math.round(5000 + Math.random() * 25000);
+        this.donutData.update(list => [...list, { category: nextService, value: val }]);
+        this.#addLog("dataUpdate", `Appended donut service "${nextService}" ($${val.toLocaleString()})`);
+    }
+
+    public appendPieSlice(): void {
+        const browsers = ["Brave", "Vivaldi", "Tor", "Samsung Internet", "UC Browser"];
+        const currLen = this.pieData().length;
+        const nextBrowser = browsers[currLen % browsers.length];
+        const val = Math.round(2 + Math.random() * 10);
+        this.pieData.update(list => [...list, { category: nextBrowser, value: val }]);
+        this.#addLog("dataUpdate", `Appended pie slice "${nextBrowser}" (${val}%)`);
+    }
+
+    public loadDensePieData(): void {
+        this.pieData.set([
+            { category: "Chrome", value: 62 },
+            { category: "Safari", value: 16 },
+            { category: "Edge", value: 7 },
+            { category: "Firefox", value: 4 },
+            { category: "Opera", value: 3 },
+            { category: "Brave", value: 3 },
+            { category: "Vivaldi", value: 2 },
+            { category: "Tor", value: 1 },
+            { category: "Other", value: 2 }
+        ]);
+        this.#addLog("dataUpdate", "Loaded dense browser market share dataset (9 slices)");
+    }
+
+    public loadProfitLossData(): void {
+        this.monthlyData.set([
+            { actual: 3500, forecast: 4000, month: "Jan", target: 4500 },
+            { actual: -1200, forecast: 2000, month: "Feb", target: 3000 },
+            { actual: 5400, forecast: 4800, month: "Mar", target: 5000 },
+            { actual: -2800, forecast: -1000, month: "Apr", target: 2000 },
+            { actual: 6100, forecast: 5500, month: "May", target: 6000 },
+            { actual: 4800, forecast: 4500, month: "Jun", target: 5000 }
+        ]);
+        this.includeNegativeValues.set(true);
+        this.#addLog("dataUpdate", "Loaded dataset with negative profit/loss values");
+    }
+
+    public randomizePolarData(): void {
+        this.polarData.update(list =>
+            list.map(item => ({
+                angle: item.angle,
+                gain: Math.round(10 + Math.random() * 90),
+                noise: Math.round(5 + Math.random() * 30)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized continuous polar radiation pattern");
+    }
+
     public resetData(): void {
         this.monthlyData.set([
             { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
@@ -441,7 +582,7 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Reset dataset to defaults");
     }
 
-    public setTab(tab: "custom" | "donut" | "grouped" | "mixed" | "pie" | "time"): void {
+    public setTab(tab: "custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "time"): void {
         this.activeTab.set(tab);
     }
 

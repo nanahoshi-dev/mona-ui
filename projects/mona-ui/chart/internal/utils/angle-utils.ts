@@ -38,6 +38,16 @@ export function normalizeDegrees(degrees: number): number {
     return norm;
 }
 
+export function circularAngleDistance(aRad: number, bRad: number): number {
+    if (!isFiniteNumber(aRad) || !isFiniteNumber(bRad)) {
+        return 0;
+    }
+    const normA = normalizeAngle(aRad);
+    const normB = normalizeAngle(bRad);
+    const delta = Math.abs(normA - normB);
+    return Math.min(delta, TWO_PI - delta);
+}
+
 export function normalizeAngleSpan(
     startDegrees: number | undefined,
     endDegrees: number | undefined

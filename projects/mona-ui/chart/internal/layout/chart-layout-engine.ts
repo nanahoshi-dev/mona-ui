@@ -1,9 +1,13 @@
 import { isDevMode } from "@angular/core";
 import type { ChartCoordinateSystem, ChartField } from "../../models/chart.models";
+import { getChartSeriesFamily, type ChartSeriesFamily } from "../../models/chart-series.models";
 import type {
+    ChartAngularAxisRegistration,
     ChartAxisRegistration,
     ChartCartesianSeriesRegistration,
-    ChartPolarSeriesRegistration,
+    ChartRadialAxisRegistration,
+    ChartRadialSeriesRegistration,
+    ChartSectorSeriesRegistration,
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
 import type { ChartScene } from "../scene/chart-scene";
@@ -23,9 +27,11 @@ function warnOnce(signature: string, message: string): void {
 }
 
 export interface ChartLayoutOptions {
+    angularAxis?: ChartAngularAxisRegistration;
     containerHeight: number;
     containerWidth: number;
     measurements?: ReadonlyMap<string, ChartLabelMeasurement>;
+    radialAxis?: ChartRadialAxisRegistration;
     rootData: readonly unknown[];
     rootXField?: ChartField;
     series: readonly ChartSeriesRegistration[];
@@ -37,28 +43,20 @@ export interface ChartLayoutOptions {
 export function resolveChartCoordinateSystem(series: readonly ChartSeriesRegistration[]): ChartCoordinateSystem {
     let hasPolar = false;
     let hasCartesian = false;
-    let polarCount = 0;
 
     for (const s of series) {
-        if (s.type === "pie" || s.type === "donut") {
-            hasPolar = true;
-            polarCount++;
-        } else {
+        const family = getChartSeriesFamily(s.type);
+        if (family === "cartesian") {
             hasCartesian = true;
+        } else {
+            hasPolar = true;
         }
     }
 
     if (hasPolar && hasCartesian) {
         warnOnce(
             "mixed-cartesian-polar",
-            "[MonaChart] Mixing Cartesian series (line, area, bar) with polar series (pie, donut) in the same chart is unsupported."
-        );
-    }
-
-    if (polarCount > 1) {
-        warnOnce(
-            `multi-polar-${polarCount}`,
-            "[MonaChart] Only a single polar series (pie or donut) is supported per chart."
+            "[MonaChart] Mixing Cartesian series (line, area, bar) with radial series (pie, donut, radar, polar) in the same chart is unsupported."
         );
     }
 
@@ -70,49 +68,141 @@ export class ChartLayoutEngine {
         const { series } = options;
         const coordinateSystem = resolveChartCoordinateSystem(series);
 
-        const hasPolar = series.some(s => s.type === "pie" || s.type === "donut");
-        const hasCartesian = series.some(s => s.type === "line" || s.type === "area" || s.type === "bar");
+        // Classify series families
+        const families = new Set<ChartSeriesFamily>();
+        let sectorCount = 0;
 
-        if (hasPolar && hasCartesian) {
-            // Mixed coordinate system unsupported: fail-soft with empty scene
-            return {
-                axes: [],
-                coordinateSystem: "cartesian",
-                hasRenderableData: false,
-                height: options.containerHeight,
-                hitTargets: [],
-                interactionBuckets: [],
-                legendItems: [],
-                plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                series: [],
-                width: options.containerWidth
-            };
+        for (const s of series) {
+            const fam = getChartSeriesFamily(s.type);
+            families.add(fam);
+            if (fam === "sector") {
+                sectorCount++;
+            }
+        }
+
+        if (sectorCount > 1) {
+            warnOnce(
+                `multi-sector-${sectorCount}`,
+                "[MonaChart] Only a single sector series (pie or donut) is supported per chart."
+            );
+        }
+
+        if (families.size > 1) {
+            const famArray = Array.from(families);
+            if (famArray.includes("cartesian") && (famArray.includes("sector") || famArray.includes("radar") || famArray.includes("polar"))) {
+                return {
+                    axes: [],
+                    coordinateSystem: "cartesian",
+                    hasRenderableData: false,
+                    height: options.containerHeight,
+                    hitTargets: [],
+                    interactionBuckets: [],
+                    legendItems: [],
+                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                    series: [],
+                    width: options.containerWidth
+                };
+            }
+            if (famArray.includes("sector") && (famArray.includes("radar") || famArray.includes("polar"))) {
+                warnOnce(
+                    "mixed-sector-radial-axis",
+                    "[MonaChart] Mixing sector series (pie, donut) with axis-based radial series (radar, polar) in the same chart is unsupported."
+                );
+                return {
+                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                    coordinateSystem: "polar",
+                    hasRenderableData: false,
+                    height: options.containerHeight,
+                    hitTargets: [],
+                    interactionBuckets: [],
+                    legendItems: [],
+                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                    polarKind: "sector",
+                    series: [],
+                    width: options.containerWidth
+                };
+            }
+            if (famArray.includes("radar") && famArray.includes("polar")) {
+                warnOnce(
+                    "mixed-radar-polar",
+                    "[MonaChart] Mixing radar series with continuous polar series in the same chart is unsupported."
+                );
+                return {
+                    angularAxis: {
+                        axisLine: true,
+                        gridLines: true,
+                        labelOffset: 10,
+                        labels: true,
+                        mode: "category",
+                        rotation: 0,
+                        ticks: [],
+                        visible: true
+                    },
+                    axisMode: "radar",
+                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                    coordinateSystem: "polar",
+                    hasRenderableData: false,
+                    height: options.containerHeight,
+                    hitTargets: [],
+                    interactionBuckets: [],
+                    legendItems: [],
+                    outerRadius: 0,
+                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                    polarKind: "axis",
+                    radialAxis: {
+                        axisLine: true,
+                        domain: [0, 1],
+                        gridLines: true,
+                        gridShape: "polygon",
+                        labelAngle: 0,
+                        labelOffset: 6,
+                        labels: true,
+                        ticks: [],
+                        visible: true
+                    },
+                    series: [],
+                    width: options.containerWidth
+                };
+            }
         }
 
         if (coordinateSystem === "polar") {
             if (options.xAxis || options.yAxis) {
                 warnOnce(
                     "polar-projected-axes",
-                    "[MonaChart] Projected Cartesian axes (<mona-chart-x-axis>, <mona-chart-y-axis>) are ignored in polar charts (pie/donut)."
+                    "[MonaChart] Projected Cartesian axes (<mona-chart-x-axis>, <mona-chart-y-axis>) are ignored in radial charts."
                 );
             }
 
-            const polarSeries = series.filter(
-                (s): s is ChartPolarSeriesRegistration => s.type === "pie" || s.type === "donut"
+            const radialOrSectorSeries = series.filter(
+                (s): s is ChartRadialSeriesRegistration | ChartSectorSeriesRegistration =>
+                    s.type === "pie" || s.type === "donut" || s.type === "radar" || s.type === "polar"
             );
+
             return PolarLayoutEngine.computeScene({
+                angularAxis: options.angularAxis,
                 containerHeight: options.containerHeight,
                 containerWidth: options.containerWidth,
                 measurements: options.measurements,
+                radialAxis: options.radialAxis,
                 rootData: options.rootData,
-                series: polarSeries,
+                series: radialOrSectorSeries,
                 styleResolver: options.styleResolver
             });
         }
 
+        if (options.angularAxis || options.radialAxis) {
+            warnOnce(
+                "cartesian-projected-radial-axes",
+                "[MonaChart] Projected radial axes (<mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Cartesian charts."
+            );
+        }
+
         const cartesianSeries = series.filter(
-            (s): s is ChartCartesianSeriesRegistration => s.type !== "pie" && s.type !== "donut"
+            (s): s is ChartCartesianSeriesRegistration =>
+                s.type === "line" || s.type === "area" || s.type === "bar"
         );
+
         return CartesianLayoutEngine.computeScene({
             containerHeight: options.containerHeight,
             containerWidth: options.containerWidth,

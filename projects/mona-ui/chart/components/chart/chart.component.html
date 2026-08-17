@@ -77,8 +77,8 @@
             }
         }
 
-        <!-- DOM Polar Data Labels and Donut Center Overlay -->
-        @if (polarScene(); as pol) {
+        <!-- DOM Sector Slice Labels and Donut Center Overlay -->
+        @if (polarSectorScene(); as pol) {
             @for (seriesScene of pol.series; track seriesScene.id) {
                 @for (slice of seriesScene.slices; track slice.sliceId) {
                     @if (shouldShowSliceLabel(slice)) {
@@ -137,6 +137,60 @@
                                 seriesId: seriesScene.id,
                                 seriesName: seriesScene.name
                             }" />
+                    </div>
+                }
+            }
+        }
+
+        <!-- DOM Radial Axis Labels (Angular Categories/Degrees and Radial Values) -->
+        @if (polarAxisScene(); as radScene) {
+            <!-- Angular Spoke Labels -->
+            @if (radScene.angularAxis.visible && radScene.angularAxis.labels) {
+                @for (tick of radScene.angularAxis.ticks; track tick.index) {
+                    <div
+                        aria-hidden="true"
+                        class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
+                        [monaChartLabelMeasure]="'angular:' + tick.value"
+                        [style.left.px]="tick.labelPoint.x"
+                        [style.top.px]="tick.labelPoint.y"
+                        [style.transform]="angularLabelTransform(tick)">
+                        @if (angularAxisRegistration()?.labelTemplate?.(); as template) {
+                            <ng-container
+                                [ngTemplateOutlet]="template.templateRef"
+                                [ngTemplateOutletContext]="{
+                                    $implicit: tick.value,
+                                    axis: 'angular',
+                                    index: tick.index,
+                                    value: tick.value
+                                }" />
+                        } @else {
+                            {{ tick.formattedValue }}
+                        }
+                    </div>
+                }
+            }
+
+            <!-- Radial Numeric Tick Labels -->
+            @if (radScene.radialAxis.visible && radScene.radialAxis.labels) {
+                @for (tick of radScene.radialAxis.ticks; track tick.index) {
+                    <div
+                        aria-hidden="true"
+                        class="absolute pointer-events-none text-xs text-muted-foreground select-none whitespace-nowrap"
+                        [style.left.px]="tick.labelPoint.x"
+                        [style.top.px]="tick.labelPoint.y"
+                        [style.transform]="'translate(0, -50%)'">
+                        @if (radialAxisRegistration()?.labelTemplate?.(); as template) {
+                            <ng-container
+                                [ngTemplateOutlet]="template.templateRef"
+                                [ngTemplateOutletContext]="{
+                                    $implicit: tick.value,
+                                    axis: 'radial',
+                                    index: tick.index,
+                                    value: tick.value
+                                }" />
+                        } @else {
+                            {{ tick.formattedValue }}
+                        }
                     </div>
                 }
             }

@@ -1,4 +1,9 @@
 export type ChartPolarFillMode = "gradient" | "solid";
+export type ChartRadialFillMode = "gradient" | "none" | "solid";
+
+export type ChartRadialCurve = "linear" | "smooth";
+
+export type ChartRadialGridShape = "auto" | "circle" | "polygon";
 
 export type ChartPolarLabelPosition = "inside" | "outside";
 

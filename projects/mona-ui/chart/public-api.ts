@@ -1,11 +1,15 @@
 export { MonaChartComponent } from "./components/chart/chart.component";
 export { MonaChartXAxisComponent } from "./components/chart-x-axis/chart-x-axis.component";
 export { MonaChartYAxisComponent } from "./components/chart-y-axis/chart-y-axis.component";
+export { MonaChartAngularAxisComponent } from "./components/chart-angular-axis/chart-angular-axis.component";
+export { MonaChartRadialAxisComponent } from "./components/chart-radial-axis/chart-radial-axis.component";
 export { MonaLineSeriesComponent } from "./components/line-series/line-series.component";
 export { MonaAreaSeriesComponent } from "./components/area-series/area-series.component";
 export { MonaBarSeriesComponent } from "./components/bar-series/bar-series.component";
 export { MonaPieSeriesComponent } from "./components/pie-series/pie-series.component";
 export { MonaDonutSeriesComponent } from "./components/donut-series/donut-series.component";
+export { MonaRadarSeriesComponent } from "./components/radar-series/radar-series.component";
+export { MonaPolarSeriesComponent } from "./components/polar-series/polar-series.component";
 export { MonaChartLegendComponent } from "./components/chart-legend/chart-legend.component";
 export { MonaChartTooltipComponent } from "./components/chart-tooltip/chart-tooltip.component";
 
@@ -42,8 +46,11 @@ export type {
     ChartLegendItem,
     ChartLegendItemKind,
     ChartLegendItemTemplateContext,
+    ChartSeriesFamily,
     ChartSeriesType
 } from "./models/chart-series.models";
+
+export { getChartSeriesFamily } from "./models/chart-series.models";
 
 export type {
     ChartPointEvent,
@@ -63,6 +70,9 @@ export type {
     ChartPolarLabelContent,
     ChartPolarLabelPosition,
     ChartPolarLabelSide,
+    ChartRadialCurve,
+    ChartRadialFillMode,
+    ChartRadialGridShape,
     ChartSliceContext,
     ChartSliceLabelTemplateContext,
     ChartSliceVisibilityEvent,

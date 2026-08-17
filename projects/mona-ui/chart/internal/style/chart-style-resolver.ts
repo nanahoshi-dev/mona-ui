@@ -3,6 +3,7 @@ import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {
     ChartCartesianSeriesRegistration,
     ChartPolarSeriesRegistration,
+    ChartRadialSeriesRegistration,
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
 import { resolveValue } from "../data/chart-value-resolver";
@@ -248,6 +249,88 @@ export class ChartStyleResolver {
             lineWidth: resolvedLineWidth,
             opacity: 1,
             pointRadius: resolvedPointRadius
+        };
+    }
+
+    public resolveRadialSeriesStyle(
+        series: ChartRadialSeriesRegistration,
+        seriesIndex: number,
+        colorPalette: readonly string[] = DEFAULT_CHART_PALETTE_VARIABLES
+    ): {
+        color: string;
+        fillOpacity: number;
+        pointRadius: number;
+        strokeWidth: number;
+    } {
+        const rawExplicitColor = series.color();
+        const explicitColor = rawExplicitColor ? this.resolveCssVariable(rawExplicitColor) : "";
+        const explicitStrokeWidth = series.strokeWidth?.();
+        const explicitPointRadius = series.pointRadius?.();
+        const explicitFillOpacity = series.fillOpacity?.();
+
+        let elementColor = "";
+        let cssStrokeWidth: number | undefined;
+        let cssPointRadius: number | undefined;
+        let cssFillOpacity: number | undefined;
+
+        if (typeof window !== "undefined" && series.element?.nativeElement) {
+            try {
+                const nativeEl = series.element.nativeElement;
+                const computed = window.getComputedStyle(nativeEl);
+                const rootComputed = this.#rootElement ? window.getComputedStyle(this.#rootElement) : null;
+                const rootColor = rootComputed?.color ?? "";
+                const userClass = (series as { userClass?: () => string }).userClass?.() ?? "";
+                const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+
+                if (nativeEl.style?.color) {
+                    elementColor = this.resolveCssVariable(nativeEl.style.color);
+                } else if (computed.color && (hasTextClass || (rootColor !== "" && computed.color !== rootColor))) {
+                    elementColor = toCanvasColor(computed.color, this.#rootElement?.ownerDocument);
+                }
+
+                const customWidth = computed.getPropertyValue("--mona-chart-radial-stroke-width");
+                if (customWidth) {
+                    const parsed = parseFloat(customWidth);
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+                }
+                const customRadius = computed.getPropertyValue("--mona-chart-radial-point-radius");
+                if (customRadius) {
+                    const parsed = parseFloat(customRadius);
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssPointRadius = parsed;
+                }
+                const customOpacity = computed.getPropertyValue("--mona-chart-radial-fill-opacity");
+                if (customOpacity) {
+                    const parsed = parseFloat(customOpacity);
+                    if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                }
+            } catch {
+                // Ignore style resolution errors
+            }
+        }
+
+        const defaultColor = this.resolvePaletteColor(seriesIndex, colorPalette);
+        const resolvedColor = explicitColor || elementColor || defaultColor;
+        const defaultStrokeWidth = 2;
+        const resolvedStrokeWidth =
+            explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
+                ? explicitStrokeWidth
+                : (cssStrokeWidth ?? defaultStrokeWidth);
+        const defaultPointRadius = series.type === "radar" ? 3.5 : 3;
+        const resolvedPointRadius =
+            explicitPointRadius !== undefined && isFiniteNumber(explicitPointRadius) && explicitPointRadius >= 0
+                ? explicitPointRadius
+                : (cssPointRadius ?? defaultPointRadius);
+        const defaultFillOpacity = 0.18;
+        const resolvedFillOpacity =
+            explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
+                ? Math.max(0, Math.min(1, explicitFillOpacity))
+                : (cssFillOpacity ?? defaultFillOpacity);
+
+        return {
+            color: resolvedColor,
+            fillOpacity: resolvedFillOpacity,
+            pointRadius: resolvedPointRadius,
+            strokeWidth: resolvedStrokeWidth
         };
     }
 
