@@ -13,9 +13,10 @@ import type {
 } from "../scene/cartesian-scene";
 import type { ChartSectorSeriesScene } from "../scene/polar-scene";
 import type { ChartContinuousPolarSeriesScene, ChartRadarSeriesScene } from "../scene/polar-axis-scene";
-import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
+import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "../scene/scene-geometry";
 import type { CartesianAxisTransitionPlan, PolarAxisTransitionPlan } from "./adapters/axis-animation-adapter";
 import type { ChartAnimationRenderFrame, ChartTransitionPlan } from "./chart-transition-types";
+import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
 
 export class SceneTransitionSampler {
     public static sampleFrame(plan: ChartTransitionPlan, progress: number): ChartAnimationRenderFrame {
@@ -136,6 +137,10 @@ export class SceneTransitionSampler {
 
         // Derive sampled hit targets directly from sampled series geometry
         const sampledHitTargets: SceneHitTarget[] = [];
+        const sampledBarHitTargets: SceneHitTarget[] = [];
+        const sampledPointHitTargets: SceneHitTarget[] = [];
+        const sampledHitsByX = new Map<ChartInteractionXKey, SceneHitTarget[]>();
+
         for (const targetHit of toScene.hitTargets) {
             const key = targetHit.animationKey ?? `${targetHit.seriesId}:${targetHit.xKey}`;
 
@@ -152,6 +157,9 @@ export class SceneTransitionSampler {
                 }
                 const sampledMarker = sampledMarkersByKey.get(key);
                 if (sampledMarker) {
+                    if (sampledMarker.radius <= 0) {
+                        continue;
+                    }
                     pt = { x: sampledMarker.x, y: sampledMarker.y };
                     visualRadius = sampledMarker.radius;
                     radius =
@@ -174,21 +182,38 @@ export class SceneTransitionSampler {
                 }
             }
 
-            sampledHitTargets.push({
+            const hit: SceneHitTarget = {
                 ...targetHit,
                 bounds,
                 point: pt,
                 radius,
                 visualBounds,
                 visualRadius
-            });
+            };
+            sampledHitTargets.push(hit);
+
+            if (hit.bounds) {
+                sampledBarHitTargets.push(hit);
+            }
+            if (hit.point) {
+                sampledPointHitTargets.push(hit);
+            }
+
+            let xList = sampledHitsByX.get(targetHit.xKey);
+            if (!xList) {
+                xList = [];
+                sampledHitsByX.set(targetHit.xKey, xList);
+            }
+            xList.push(hit);
         }
 
-        // Interpolate interaction buckets with sampled hit geometry
-        const sampledBuckets: ChartInteractionBucket[] = toScene.interactionBuckets.map(targetBucket => {
-            const bucketHits = sampledHitTargets.filter(h =>
-                targetBucket.hits.some(th => th.seriesId === h.seriesId && th.index === h.index)
-            );
+        // Interpolate interaction buckets with sampled hit geometry in linear O(H+B) time
+        const sampledBuckets: ChartInteractionBucket[] = [];
+        for (const targetBucket of toScene.interactionBuckets) {
+            const bucketHits = sampledHitsByX.get(targetBucket.xKey) ?? [];
+            if (bucketHits.length === 0) {
+                continue;
+            }
             const primaryHit = bucketHits[0];
             const anchor = primaryHit
                 ? {
@@ -199,28 +224,45 @@ export class SceneTransitionSampler {
                   }
                 : targetBucket.anchor;
 
-            return {
+            sampledBuckets.push({
                 anchor,
                 hits: bucketHits,
                 order: targetBucket.order,
                 xKey: targetBucket.xKey,
                 xValue: targetBucket.xValue
-            };
-        });
+            });
+        }
+
+        const interactionBucketLookup = new Map<ChartInteractionXKey, ChartInteractionBucket>();
+        for (const b of sampledBuckets) {
+            interactionBucketLookup.set(b.xKey, b);
+        }
+
+        let pointSpatialIndex: CartesianPointSpatialIndex | undefined;
+        if (sampledPointHitTargets.length >= 100) {
+            pointSpatialIndex = new CartesianPointSpatialIndex(32);
+            pointSpatialIndex.insertAll(sampledPointHitTargets);
+        }
 
         const axes = axisPlan ? axisPlan.sample(progress) : toScene.axes;
 
         return {
             axes,
+            barHitTargets: sampledBarHitTargets,
             coordinateSystem: "cartesian",
             hasRenderableData: toScene.hasRenderableData,
             height: toScene.height,
             hitTargets: sampledHitTargets,
+            interactionBucketLookup,
             interactionBuckets: sampledBuckets,
             legendItems: toScene.legendItems,
+            markerSpatialIndex: pointSpatialIndex,
             plotRect: toScene.plotRect,
+            pointSpatialIndex,
             series: sampledSeries,
-            width: toScene.width
+            width: toScene.width,
+            xAxisType: toScene.xAxisType,
+            xTimeSpanMs: toScene.xTimeSpanMs
         };
     }
 
@@ -241,6 +283,7 @@ export class SceneTransitionSampler {
 
         const primarySeries = sampledSeries[0];
         const sampledHitTargets: SceneHitTarget[] = [];
+        const sampledHitsByX = new Map<ChartInteractionXKey, SceneHitTarget[]>();
 
         // Build target keys set so exiting slices are excluded from interaction
         const targetKeys = new Set(toScene.hitTargets.map(th => th.animationKey ?? th.sliceId ?? String(th.index)));
@@ -249,7 +292,7 @@ export class SceneTransitionSampler {
             for (const slice of primarySeries.slices) {
                 const key = slice.animationKey ?? slice.sliceId ?? String(slice.dataIndex);
                 if (slice.visible && targetKeys.has(key)) {
-                    sampledHitTargets.push({
+                    const hit: SceneHitTarget = {
                         animationKey: slice.animationKey,
                         arc: {
                             center: primarySeries.center,
@@ -276,17 +319,23 @@ export class SceneTransitionSampler {
                         xKey: slice.sliceId,
                         xValue: slice.category,
                         yValue: slice.value
-                    });
+                    };
+                    sampledHitTargets.push(hit);
+
+                    let xList = sampledHitsByX.get(hit.xKey);
+                    if (!xList) {
+                        xList = [];
+                        sampledHitsByX.set(hit.xKey, xList);
+                    }
+                    xList.push(hit);
                 }
             }
         }
 
-        // Reconstruct Sector interaction buckets from sampled surviving hits with sampled centroid anchors
+        // Reconstruct Sector interaction buckets in linear O(H+B) time
         const sampledBuckets: readonly ChartInteractionBucket[] = toScene.interactionBuckets
             .map(targetBucket => {
-                const bucketHits: readonly SceneHitTarget[] = sampledHitTargets.filter(h =>
-                    targetBucket.hits.some(th => th.seriesId === h.seriesId && (th.sliceId === h.sliceId || th.index === h.index))
-                );
+                const bucketHits = sampledHitsByX.get(targetBucket.xKey) ?? [];
                 if (bucketHits.length === 0) {
                     return null;
                 }
@@ -338,6 +387,7 @@ export class SceneTransitionSampler {
         }
 
         const sampledHitTargets: SceneHitTarget[] = [];
+        const sampledHitsByX = new Map<ChartInteractionXKey, SceneHitTarget[]>();
 
         for (const s of sampledSeries) {
             for (const pt of s.points) {
@@ -346,7 +396,7 @@ export class SceneTransitionSampler {
                     const targetHit = targetHitsByKey.get(key);
                     // Only marks belonging to the target scene are included in interaction
                     if (targetHit) {
-                        sampledHitTargets.push({
+                        const hit: SceneHitTarget = {
                             angle: pt.angle,
                             animationKey: pt.animationKey,
                             category: targetHit.category ?? pt.category ?? pt.formattedAngle,
@@ -363,7 +413,15 @@ export class SceneTransitionSampler {
                             xKey: targetHit.xKey ?? pt.categoryKey ?? String(pt.dataIndex),
                             xValue: targetHit.xValue ?? pt.category ?? pt.formattedAngle,
                             yValue: pt.value
-                        });
+                        };
+                        sampledHitTargets.push(hit);
+
+                        let xList = sampledHitsByX.get(hit.xKey);
+                        if (!xList) {
+                            xList = [];
+                            sampledHitsByX.set(hit.xKey, xList);
+                        }
+                        xList.push(hit);
                     }
                 }
             }
@@ -371,9 +429,7 @@ export class SceneTransitionSampler {
 
         const sampledBuckets: readonly ChartInteractionBucket[] = toScene.interactionBuckets
             .map(targetBucket => {
-                const bucketHits: readonly SceneHitTarget[] = sampledHitTargets.filter(h =>
-                    targetBucket.hits.some(th => th.seriesId === h.seriesId && (th.animationKey === h.animationKey || th.index === h.index))
-                );
+                const bucketHits = sampledHitsByX.get(targetBucket.xKey) ?? [];
                 if (bucketHits.length === 0) {
                     return null;
                 }
@@ -412,4 +468,3 @@ export class SceneTransitionSampler {
         };
     }
 }
-

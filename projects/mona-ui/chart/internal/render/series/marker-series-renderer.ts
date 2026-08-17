@@ -16,9 +16,10 @@ export class MarkerSeriesRenderer {
         const hasPerMarkerOpacity = markers.some(
             m => m.renderOpacity !== undefined && m.renderOpacity < 1
         );
+        const isTranslucentBubble = scene.type === "bubble" && style.fillOpacity < 0.99;
 
-        if (!hasPerMarkerOpacity) {
-            // Uniform Alpha Fast Path: Batch all circle arcs into one path for fill and stroke
+        if (!hasPerMarkerOpacity && !isTranslucentBubble) {
+            // Opaque or Scatter Fast Path: Batch all circle arcs into one path for fill and stroke
             context.save();
             const fillAlpha = Math.max(0, Math.min(1, style.fillOpacity * renderOpacity));
             context.fillStyle = style.color;
@@ -42,8 +43,14 @@ export class MarkerSeriesRenderer {
             }
             context.restore();
         } else {
-            // Animated per-marker alpha path
+            // Translucent Bubble or Animated per-marker alpha path: Individual circle fills for correct alpha overlap compositing
             context.save();
+            context.fillStyle = style.color;
+            if (style.strokeWidth > 0 && style.strokeColor) {
+                context.strokeStyle = style.strokeColor;
+                context.lineWidth = style.strokeWidth;
+            }
+
             for (let i = 0; i < markers.length; i++) {
                 const m = markers[i];
                 const markerOpacity = (m.renderOpacity ?? 1) * renderOpacity;
@@ -54,13 +61,10 @@ export class MarkerSeriesRenderer {
                 context.beginPath();
                 context.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
 
-                context.fillStyle = style.color;
                 context.globalAlpha = Math.max(0, Math.min(1, style.fillOpacity * markerOpacity));
                 context.fill();
 
                 if (style.strokeWidth > 0 && style.strokeColor) {
-                    context.strokeStyle = style.strokeColor;
-                    context.lineWidth = style.strokeWidth;
                     context.globalAlpha = Math.max(0, Math.min(1, markerOpacity));
                     context.stroke();
                 }

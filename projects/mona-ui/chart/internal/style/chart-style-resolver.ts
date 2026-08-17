@@ -346,6 +346,47 @@ export class ChartStyleResolver {
         };
     }
 
+    public resolveMarkerSeriesGeometry(
+        series: ChartCartesianSeriesRegistration
+    ): {
+        bubbleMaxRadius?: number;
+        bubbleMinRadius?: number;
+        pointRadius?: number;
+    } {
+        let cssPointRadius: number | undefined;
+        let cssBubbleMinRadius: number | undefined;
+        let cssBubbleMaxRadius: number | undefined;
+
+        if (typeof window !== "undefined" && series.element?.nativeElement) {
+            try {
+                const computed = window.getComputedStyle(series.element.nativeElement);
+                const pr = computed.getPropertyValue("--mona-chart-point-radius");
+                if (pr) {
+                    const parsed = parseFloat(pr);
+                    if (isFiniteNumber(parsed)) cssPointRadius = parsed;
+                }
+                const minR = computed.getPropertyValue("--mona-chart-bubble-min-radius");
+                if (minR) {
+                    const parsed = parseFloat(minR);
+                    if (isFiniteNumber(parsed)) cssBubbleMinRadius = parsed;
+                }
+                const maxR = computed.getPropertyValue("--mona-chart-bubble-max-radius");
+                if (maxR) {
+                    const parsed = parseFloat(maxR);
+                    if (isFiniteNumber(parsed)) cssBubbleMaxRadius = parsed;
+                }
+            } catch {
+                // Ignore style resolution errors
+            }
+        }
+
+        return {
+            bubbleMaxRadius: cssBubbleMaxRadius,
+            bubbleMinRadius: cssBubbleMinRadius,
+            pointRadius: cssPointRadius
+        };
+    }
+
     public resolveRadialSeriesStyle(
         series: ChartRadialSeriesRegistration,
         seriesIndex: number,

@@ -56,7 +56,7 @@ export function resolveChartCoordinateSystem(series: readonly ChartSeriesRegistr
     if (hasPolar && hasCartesian) {
         warnOnce(
             "mixed-cartesian-polar",
-            "[MonaChart] Mixing Cartesian series (line, area, bar) with radial series (pie, donut, radar, polar) in the same chart is unsupported."
+            "[MonaChart] Mixing Cartesian series (line, area, bar, scatter, bubble) with radial series (pie, donut, radar, polar) in the same chart is unsupported."
         );
     }
 
@@ -92,6 +92,7 @@ export class ChartLayoutEngine {
             if (famArray.includes("cartesian") && (famArray.includes("sector") || famArray.includes("radar") || famArray.includes("polar"))) {
                 return {
                     axes: [],
+                    barHitTargets: [],
                     coordinateSystem: "cartesian",
                     hasRenderableData: false,
                     height: options.containerHeight,
@@ -100,7 +101,8 @@ export class ChartLayoutEngine {
                     legendItems: [],
                     plotRect: { height: 0, width: 0, x: 0, y: 0 },
                     series: [],
-                    width: options.containerWidth
+                    width: options.containerWidth,
+                    xAxisType: "category"
                 };
             }
             if (famArray.includes("sector") && (famArray.includes("radar") || famArray.includes("polar"))) {

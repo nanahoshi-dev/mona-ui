@@ -69,7 +69,12 @@ export class MarkerSeriesAnimationAdapter {
         progress: number
     ): ChartBubbleSeriesScene | ChartScatterSeriesScene {
         const p = Math.max(0, Math.min(1, progress));
-        const sampledMarkers = MarkerTransition.sample(state.markers, p);
+        const isWholeSeriesFade = state.fromOpacity === 0 || state.toOpacity === 0;
+        const sampledMarkers = MarkerTransition.sample(
+            state.markers,
+            p,
+            isWholeSeriesFade ? "radius" : "both"
+        );
 
         const renderOpacity = lerpOpacity(state.fromOpacity, state.toOpacity, p);
         const fillOpacity = lerp(state.fromStyle.fillOpacity, state.toStyle.fillOpacity, p);

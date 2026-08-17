@@ -29,7 +29,8 @@ export type {
     ChartPoint,
     ChartRect,
     ChartSize,
-    ChartValueAccessor
+    ChartValueAccessor,
+    ChartValueFormatter
 } from "./models/chart.models";
 
 export type {
@@ -83,8 +84,7 @@ export type {
     ChartRadialGridShape,
     ChartSliceContext,
     ChartSliceLabelTemplateContext,
-    ChartSliceVisibilityEvent,
-    ChartValueFormatter
+    ChartSliceVisibilityEvent
 } from "./models/chart-polar.models";
 
 export type { ChartSeriesStyle } from "./models/chart-style.models";

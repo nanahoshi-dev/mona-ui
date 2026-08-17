@@ -112,4 +112,49 @@ describe("MarkerSeriesRenderer", () => {
         expect(ctx.beginPath).toHaveBeenCalledTimes(2);
         expect(ctx.fill).toHaveBeenCalledTimes(2);
     });
+
+    it("should render individual circle fills for translucent bubble series (SB-020)", () => {
+        const ctx = createMockContext();
+        const bubbleScene: any = {
+            id: "b1",
+            markers: [
+                {
+                    animationKey: "k1",
+                    datum: {},
+                    index: 0,
+                    radius: 10,
+                    x: 100,
+                    xValue: 1,
+                    y: 150,
+                    yValue: 10
+                },
+                {
+                    animationKey: "k2",
+                    datum: {},
+                    index: 1,
+                    radius: 20,
+                    x: 120,
+                    xValue: 2,
+                    y: 150,
+                    yValue: 10
+                }
+            ],
+            maxRadius: 25,
+            minRadius: 5,
+            name: "Bubble 1",
+            style: {
+                color: "#10b981",
+                fillOpacity: 0.55, // Translucent bubble
+                strokeColor: "#ffffff",
+                strokeWidth: 1.5
+            },
+            type: "bubble"
+        };
+
+        MarkerSeriesRenderer.render(ctx, bubbleScene);
+
+        // Individual circle path for overlap alpha compositing
+        expect(ctx.beginPath).toHaveBeenCalledTimes(2);
+        expect(ctx.fill).toHaveBeenCalledTimes(2);
+    });
 });

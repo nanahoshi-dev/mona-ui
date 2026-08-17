@@ -1,10 +1,11 @@
+import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartCoordinateSystem, ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartAxisScene, ChartSeriesScene } from "./cartesian-scene";
 import type { ChartAngularAxisScene, ChartRadialAxisScene, ChartRadialSeriesScene } from "./polar-axis-scene";
 import type { ChartSectorSeriesScene } from "./polar-scene";
-import type { CartesianMarkerSpatialIndex } from "../interaction/cartesian-marker-spatial-index";
-import type { ChartInteractionBucket, SceneHitTarget } from "./scene-geometry";
+import type { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
+import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "./scene-geometry";
 
 export interface ChartSceneBase {
     coordinateSystem: ChartCoordinateSystem;
@@ -19,9 +20,14 @@ export interface ChartSceneBase {
 
 export interface CartesianChartScene extends ChartSceneBase {
     axes: readonly ChartAxisScene[];
+    barHitTargets?: readonly SceneHitTarget[];
     coordinateSystem: "cartesian";
-    markerSpatialIndex?: CartesianMarkerSpatialIndex;
+    interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
+    markerSpatialIndex?: CartesianPointSpatialIndex;
+    pointSpatialIndex?: CartesianPointSpatialIndex;
     series: readonly ChartSeriesScene[];
+    xAxisType?: ChartXAxisType;
+    xTimeSpanMs?: number;
 }
 
 export interface PolarSceneBase extends ChartSceneBase {

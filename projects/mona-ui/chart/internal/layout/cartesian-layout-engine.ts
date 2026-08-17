@@ -3,6 +3,7 @@ import type { ChartField, ChartPadding, ChartPoint, ChartRect } from "../../mode
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
     ChartAxisRegistration,
+    ChartBubbleSeriesRegistration,
     ChartCartesianSeriesRegistration
 } from "../context/chart-registration-context";
 import {
@@ -39,7 +40,7 @@ import type {
 } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatXValue, formatYValue } from "../utils/chart-formatter";
-import { CartesianMarkerSpatialIndex } from "../interaction/cartesian-marker-spatial-index";
+import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
 import { CartesianMarkerLayout } from "./cartesian-marker-layout";
 import {
     clamp,
@@ -82,13 +83,27 @@ export class CartesianLayoutEngine {
         const yTitle = yAxis?.title() ?? "";
         const yFormatter = yAxis?.formatter();
 
+        // Determine X axis type
+        const configuredXType = xAxis?.type();
+        const xAxisType: ChartXAxisType =
+            configuredXType && configuredXType !== "auto"
+                ? configuredXType
+                : inferXAxisType(series, rootData, rootXField);
+
         // Calculate continuous Y domain
         const rawYMin = yAxis?.min();
         const rawYMax = yAxis?.max();
         const explicitYMin = isFiniteNumber(rawYMin) ? rawYMin : undefined;
         const explicitYMax = isFiniteNumber(rawYMax) ? rawYMax : undefined;
-        const yDomain = calculateContinuousYDomain(series, rootData, explicitYMin, explicitYMax);
         const niceY = yAxis?.nice() ?? true;
+        const yDomain = calculateContinuousYDomain(
+            series,
+            rootData,
+            explicitYMin,
+            explicitYMax,
+            rootXField,
+            xAxisType
+        );
         const yTickCount = normalizeTickCount(yAxis?.tickCount(), 5);
 
         // Pass 1: Estimate required Y-axis gutter from tentative ticks
@@ -127,12 +142,15 @@ export class CartesianLayoutEngine {
         };
 
         const hitTargets: SceneHitTarget[] = [];
+        const barHitTargets: SceneHitTarget[] = [];
+        const pointHitTargets: SceneHitTarget[] = [];
         const seriesScenes: ChartSeriesScene[] = [];
         const axisScenes: ChartAxisScene[] = [];
 
         if (plotWidth <= 0 || plotHeight <= 0) {
             return {
                 axes: [],
+                barHitTargets: [],
                 coordinateSystem: "cartesian",
                 hasRenderableData: false,
                 height: containerHeight,
@@ -141,16 +159,10 @@ export class CartesianLayoutEngine {
                 legendItems: [],
                 plotRect,
                 series: [],
-                width: containerWidth
+                width: containerWidth,
+                xAxisType
             };
         }
-
-        // Determine X axis type
-        const configuredXType = xAxis?.type();
-        const xAxisType: ChartXAxisType =
-            configuredXType && configuredXType !== "auto"
-                ? configuredXType
-                : inferXAxisType(series, rootData, rootXField);
 
         // Pass 2: Finalize Y scale and ticks for exact plotRect
         const yScale = CartesianScaleFactory.createLinearScale(
@@ -185,6 +197,7 @@ export class CartesianLayoutEngine {
         let bandScale: BandScale<string> | undefined;
         let linearXScale: LinearScale | undefined;
         let timeScale: TimeScale | UtcScale | undefined;
+        let timeSpanMs: number | undefined;
 
         const xTicks: ChartAxisTick[] = [];
         const xFormatter = xAxis?.formatter();
@@ -247,8 +260,15 @@ export class CartesianLayoutEngine {
             const rawXMax = xAxis?.max();
             const explicitXMin = rawXMin instanceof Date || isFiniteNumber(rawXMin) ? rawXMin : undefined;
             const explicitXMax = rawXMax instanceof Date || isFiniteNumber(rawXMax) ? rawXMax : undefined;
-            const tDomain = calculateTimeDomain(series, rootData, rootXField, explicitXMin, explicitXMax);
-            const timeSpanMs = tDomain[1].getTime() - tDomain[0].getTime();
+            const tDomain = calculateTimeDomain(
+                series,
+                rootData,
+                rootXField,
+                explicitXMin,
+                explicitXMax,
+                xAxisType === "utc" ? "utc" : "time"
+            );
+            timeSpanMs = tDomain[1].getTime() - tDomain[0].getTime();
             const xTickCount = normalizeTickCount(xAxis?.tickCount(), 5);
             timeScale =
                 xAxisType === "utc"
@@ -294,6 +314,17 @@ export class CartesianLayoutEngine {
         // Visible series processing
         const visibleSeries = series.filter(s => s.visible());
         const visibleBarSeries = visibleSeries.filter(s => s.type === "bar");
+        const visibleBubbleSeries = visibleSeries.filter(
+            (s): s is ChartBubbleSeriesRegistration => s.type === "bubble"
+        );
+
+        // Precompute global bubble size domain
+        const bubbleSizeDomain = CartesianMarkerLayout.calculateBubbleSizeDomain(
+            visibleBubbleSeries,
+            rootData,
+            rootXField,
+            xAxisType
+        );
 
         // Nested band scale for grouped bar series
         let nestedBarScale: BandScale<string> | undefined;
@@ -303,12 +334,43 @@ export class CartesianLayoutEngine {
         }
 
         const baselineY = clamp(yScale.map(0), plotRect.y, plotRect.y + plotRect.height);
+        const renderOrderCounter = { value: 0 };
+        let validMarkerCount = 0;
 
         for (let sIdx = 0; sIdx < series.length; sIdx++) {
             const s = series[sIdx];
             if (!s.visible()) {
                 continue;
             }
+
+            if (s.type === "scatter" || s.type === "bubble") {
+                const markerRes = CartesianMarkerLayout.computeSeries({
+                    bubbleSizeDomain,
+                    linearXScale,
+                    plotRect,
+                    renderOrderCounter,
+                    rootData,
+                    rootXField,
+                    series: s,
+                    seriesIndex: sIdx,
+                    styleResolver,
+                    timeScale,
+                    xAxisFormatter: xAxis?.formatter?.(),
+                    xAxisType,
+                    xTimeSpanMs: timeSpanMs,
+                    yAxisFormatter: yAxis?.formatter?.(),
+                    yScale
+                });
+
+                if (markerRes) {
+                    seriesScenes.push(markerRes.scene);
+                    hitTargets.push(...markerRes.hitTargets);
+                    pointHitTargets.push(...markerRes.hitTargets);
+                    validMarkerCount += markerRes.validDatumCount;
+                }
+                continue;
+            }
+
             const sStyle = styleResolver.resolveSeriesStyle(s, sIdx);
             const seriesDisplayName = resolveSeriesDisplayName(s, sIdx);
             const sData = resolveData(s.data(), rootData);
@@ -316,14 +378,8 @@ export class CartesianLayoutEngine {
             const sField = s.field();
             const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
 
-            if (s.type === "scatter" || s.type === "bubble") {
-                continue;
-            }
-
             if (s.type === "bar") {
-                // In Phase 1, bars require a category scale
                 if (!bandScale || !nestedBarScale) {
-                    // Continuous scale requested with a bar series -> fail-soft by skipping bar geometry
                     continue;
                 }
 
@@ -371,7 +427,8 @@ export class CartesianLayoutEngine {
                     };
                     bars.push(bar);
 
-                    hitTargets.push({
+                    const currentRenderOrder = ++renderOrderCounter.value;
+                    const barTarget: SceneHitTarget = {
                         animationKey,
                         borderRadius: radius,
                         bounds: {
@@ -383,6 +440,7 @@ export class CartesianLayoutEngine {
                         datum,
                         index: dIdx,
                         isPositive,
+                        renderOrder: currentRenderOrder,
                         seriesId: s.id,
                         seriesName: seriesDisplayName,
                         seriesType: "bar",
@@ -395,7 +453,9 @@ export class CartesianLayoutEngine {
                         xKey: catKey,
                         xValue: xVal,
                         yValue: yVal
-                    });
+                    };
+                    hitTargets.push(barTarget);
+                    barHitTargets.push(barTarget);
                 }
 
                 const barScene: ChartBarSeriesScene = {
@@ -472,19 +532,23 @@ export class CartesianLayoutEngine {
                     points.push(point);
 
                     if (defined) {
-                        hitTargets.push({
+                        const currentRenderOrder = ++renderOrderCounter.value;
+                        const pointTarget: SceneHitTarget = {
                             animationKey,
                             datum,
                             index: dIdx,
                             point: { x: xPos, y: yPos },
                             radius: 16,
+                            renderOrder: currentRenderOrder,
                             seriesId: s.id,
                             seriesName: seriesDisplayName,
                             seriesType: s.type,
                             xKey: normalizedXKey,
                             xValue: xVal,
                             yValue: yVal
-                        });
+                        };
+                        hitTargets.push(pointTarget);
+                        pointHitTargets.push(pointTarget);
                     }
                 }
 
@@ -519,29 +583,10 @@ export class CartesianLayoutEngine {
             }
         }
 
-        // Marker series (Scatter and Bubble) layout
-        const markerResult = CartesianMarkerLayout.compute({
-            linearXScale,
-            plotRect,
-            rootData,
-            rootXField,
-            series,
-            startingRenderOrder: hitTargets.length,
-            styleResolver,
-            timeScale,
-            xAxisFormatter: xAxis?.formatter?.(),
-            xAxisType,
-            yAxisFormatter: yAxis?.formatter?.(),
-            yScale
-        });
-
-        seriesScenes.push(...markerResult.seriesScenes);
-        hitTargets.push(...markerResult.hitTargets);
-
-        let markerSpatialIndex: CartesianMarkerSpatialIndex | undefined;
-        if (markerResult.hitTargets.length >= 100) {
-            markerSpatialIndex = new CartesianMarkerSpatialIndex(32);
-            markerSpatialIndex.insertAll(markerResult.hitTargets);
+        let pointSpatialIndex: CartesianPointSpatialIndex | undefined;
+        if (pointHitTargets.length > 0) {
+            pointSpatialIndex = new CartesianPointSpatialIndex(32);
+            pointSpatialIndex.insertAll(pointHitTargets);
         }
 
         const interactionBuckets: ChartInteractionBucket[] = [];
@@ -562,11 +607,20 @@ export class CartesianLayoutEngine {
                 }
             }
         } else {
-            const bucketMap = new Map<ChartInteractionXKey, { anchor: ChartPoint; centerX: number; hits: SceneHitTarget[]; xValue: unknown }>();
+            const bucketMap = new Map<
+                ChartInteractionXKey,
+                { anchor: ChartPoint; centerX: number; hits: SceneHitTarget[]; xValue: unknown }
+            >();
             for (const target of hitTargets) {
                 const key = target.xKey;
-                const targetX = target.point?.x ?? (target.bounds ? target.bounds.x + target.bounds.width / 2 : plotRect.x);
-                const targetY = target.point?.y ?? (target.bounds ? target.bounds.y + target.bounds.height / 2 : plotRect.y + plotRect.height / 2);
+                const targetX =
+                    target.point?.x ??
+                    (target.bounds ? target.bounds.x + target.bounds.width / 2 : plotRect.x);
+                const targetY =
+                    target.point?.y ??
+                    (target.bounds
+                        ? target.bounds.y + target.bounds.height / 2
+                        : plotRect.y + plotRect.height / 2);
                 let bucket = bucketMap.get(key);
                 if (!bucket) {
                     bucket = {
@@ -591,13 +645,19 @@ export class CartesianLayoutEngine {
             interactionBuckets.push(...sortedBuckets);
         }
 
+        const interactionBucketLookup = new Map<ChartInteractionXKey, ChartInteractionBucket>();
+        for (const bucket of interactionBuckets) {
+            interactionBucketLookup.set(bucket.xKey, bucket);
+        }
+
         const hasData =
-            hasRenderableData(series, rootData, xAxisType) &&
-            seriesScenes.some(s => {
+            hasRenderableData(series, rootData, xAxisType, rootXField) &&
+            (seriesScenes.some(s => {
                 if (s.type === "bar") return s.bars.length > 0;
                 if (s.type === "scatter" || s.type === "bubble") return s.markers.length > 0;
                 return s.points.some(p => p.defined);
-            });
+            }) ||
+                validMarkerCount > 0);
 
         const legendItems: ChartLegendItem[] = series.map((s, idx) => {
             const color =
@@ -617,16 +677,21 @@ export class CartesianLayoutEngine {
 
         return {
             axes: axisScenes,
+            barHitTargets,
             coordinateSystem: "cartesian",
             hasRenderableData: hasData,
             height: containerHeight,
             hitTargets,
+            interactionBucketLookup,
             interactionBuckets,
             legendItems,
-            markerSpatialIndex,
+            markerSpatialIndex: pointSpatialIndex,
             plotRect,
+            pointSpatialIndex,
             series: seriesScenes,
-            width: containerWidth
+            width: containerWidth,
+            xAxisType,
+            xTimeSpanMs: timeSpanMs
         };
     }
 }

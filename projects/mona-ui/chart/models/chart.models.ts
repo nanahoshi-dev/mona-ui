@@ -6,6 +6,8 @@ export type ChartValueAccessor<T = any, TResult = any> = (item: T, index: number
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ChartField<T = any, TResult = any> = string | ChartValueAccessor<T, TResult>;
 
+export type ChartValueFormatter<T = unknown> = (value: T, index: number) => string;
+
 
 export interface ChartPadding {
     bottom: number;

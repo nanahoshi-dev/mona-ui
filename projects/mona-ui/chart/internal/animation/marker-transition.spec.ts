@@ -66,4 +66,34 @@ describe("MarkerTransition", () => {
         expect(exitSample?.radius).toBe(5); // 10 * (1 - 0.5)
         expect(exitSample?.renderOpacity).toBe(0.5);
     });
+
+    it("should preserve targetSlots array ordering for morphing and entering markers (SB-015)", () => {
+        const from: SceneMarker[] = [
+            { animationKey: "k2", datum: {}, index: 0, radius: 10, x: 100, xValue: 2, y: 100, yValue: 10 }
+        ];
+        const to: SceneMarker[] = [
+            { animationKey: "k1", datum: {}, index: 0, radius: 20, x: 100, xValue: 1, y: 100, yValue: 20 },
+            { animationKey: "k2", datum: {}, index: 1, radius: 20, x: 200, xValue: 2, y: 200, yValue: 20 },
+            { animationKey: "k3", datum: {}, index: 2, radius: 20, x: 300, xValue: 3, y: 300, yValue: 20 }
+        ];
+
+        const plan = MarkerTransition.plan("test", from, to);
+        const mid = MarkerTransition.sample(plan, 0.5);
+
+        // Resulting target markers must match to[] ordering: k1, k2, k3
+        expect(mid[0].animationKey).toBe("k1");
+        expect(mid[1].animationKey).toBe("k2");
+        expect(mid[2].animationKey).toBe("k3");
+    });
+
+    it("should support mode = radius for whole-series fade without double opacity (SB-013)", () => {
+        const to: SceneMarker[] = [
+            { animationKey: "k1", datum: {}, index: 0, radius: 20, x: 100, xValue: 1, y: 100, yValue: 20 }
+        ];
+        const plan = MarkerTransition.plan("test", [], to);
+        const mid = MarkerTransition.sample(plan, 0.5, "radius");
+
+        expect(mid[0].radius).toBe(10); // 20 * 0.5
+        expect(mid[0].renderOpacity).toBe(1); // Full opacity, unmultiplied by p
+    });
 });

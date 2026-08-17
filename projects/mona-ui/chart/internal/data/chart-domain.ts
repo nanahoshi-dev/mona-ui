@@ -20,6 +20,34 @@ export interface ResolvedContinuousDomain<T = number> {
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
 
+export function isCartesianSeriesCompatibleWithXAxisType(
+    seriesType: string,
+    xAxisType: ChartXAxisType
+): boolean {
+    if (xAxisType === "category") {
+        return seriesType === "bar" || seriesType === "line" || seriesType === "area";
+    }
+    return seriesType === "line" || seriesType === "area" || seriesType === "scatter" || seriesType === "bubble";
+}
+
+export function isContinuousXValid(val: unknown, xAxisType: ChartXAxisType): boolean {
+    if (xAxisType === "linear") {
+        return isFiniteNumber(val);
+    }
+    if (xAxisType === "time" || xAxisType === "utc") {
+        if (val instanceof Date) {
+            return !Number.isNaN(val.getTime());
+        }
+        if (typeof val === "number") {
+            return Number.isFinite(val);
+        }
+        if (typeof val === "string") {
+            return !Number.isNaN(Date.parse(val));
+        }
+    }
+    return false;
+}
+
 export function normalizeContinuousNumericDomain(
     observedMin: number,
     observedMax: number,
@@ -92,22 +120,27 @@ export function inferXAxisType(
     rootXField: ChartField | undefined
 ): ChartXAxisType {
     const visibleSeries = seriesList.filter(s => s.visible());
-    if (visibleSeries.length === 0 && rootData.length === 0) {
+    const seriesToInspect = visibleSeries.length > 0 ? visibleSeries : seriesList;
+
+    if (seriesToInspect.length === 0 && rootData.length === 0) {
         return "category";
     }
 
-    const hasBarSeries = visibleSeries.some(s => s.type === "bar");
+    const hasBarSeries = seriesToInspect.some(s => s.type === "bar");
     if (hasBarSeries) {
         return "category";
     }
 
-    // Inspect representative items
-    for (const s of visibleSeries) {
+    // Inspect series data
+    for (const s of seriesToInspect) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
-        for (let i = 0; i < Math.min(data.length, 10); i++) {
+        for (let i = 0; i < data.length; i++) {
             const val = resolveValue(data[i], xField, i);
-            if (val instanceof Date) {
+            if (val === undefined || val === null) {
+                continue;
+            }
+            if (val instanceof Date && !Number.isNaN(val.getTime())) {
                 return "time";
             }
             if (typeof val === "string") {
@@ -125,6 +158,27 @@ export function inferXAxisType(
         }
     }
 
+    // If series had no definitive rows, inspect rootData
+    for (let i = 0; i < rootData.length; i++) {
+        const val = resolveValue(rootData[i], rootXField, i);
+        if (val === undefined || val === null) continue;
+        if (val instanceof Date && !Number.isNaN(val.getTime())) {
+            return "time";
+        }
+        if (typeof val === "string") {
+            if (ISO_DATE_REGEX.test(val)) {
+                const parsed = Date.parse(val);
+                if (!Number.isNaN(parsed)) return "time";
+            }
+            return "category";
+        }
+        if (isFiniteNumber(val)) return "linear";
+    }
+
+    if (seriesToInspect.some(s => s.type === "scatter" || s.type === "bubble")) {
+        return "linear";
+    }
+
     return "category";
 }
 
@@ -137,13 +191,11 @@ export function calculateCategoryDomain(
     const orderedKeys: string[] = [];
 
     const visibleSeries = seriesList.filter(s => s.visible());
-    const seriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
+    const seriesToScan = (visibleSeries.length > 0 ? visibleSeries : seriesList).filter(
+        s => isCartesianSeriesCompatibleWithXAxisType(s.type, "category")
+    );
 
     if (seriesToScan.length === 0) {
-        // No series are registered at all (e.g. every series was removed
-        // from the chart), so there's no per-series data to scan. Fall back
-        // to the root dataset so the X axis still shows its categories
-        // instead of collapsing to an empty domain.
         for (let i = 0; i < rootData.length; i++) {
             const val = resolveValue(rootData[i], rootXField, i);
             const strVal = val !== undefined && val !== null ? String(val) : String(i);
@@ -176,34 +228,54 @@ export function calculateTimeDomain(
     rootData: readonly unknown[],
     rootXField: ChartField | undefined,
     explicitMin?: Date | number,
-    explicitMax?: Date | number
+    explicitMax?: Date | number,
+    xAxisType: "time" | "utc" = "time"
 ): [Date, Date] {
     let minTime = Number.POSITIVE_INFINITY;
     let maxTime = Number.NEGATIVE_INFINITY;
 
     const visibleSeries = seriesList.filter(s => s.visible());
-    const seriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
+    const seriesToScan = (visibleSeries.length > 0 ? visibleSeries : seriesList).filter(
+        s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType)
+    );
 
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
+        const field = s.field();
+        const isBubble = s.type === "bubble";
+        const isScatter = s.type === "scatter";
+        const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
+
         for (let i = 0; i < data.length; i++) {
-            const val = resolveValue(data[i], xField, i);
+            const xVal = resolveValue(data[i], xField, i);
             let timeVal: number | undefined;
-            if (val instanceof Date) {
-                timeVal = val.getTime();
-            } else if (typeof val === "number" && Number.isFinite(val)) {
-                timeVal = val;
-            } else if (typeof val === "string") {
-                const parsed = Date.parse(val);
+            if (xVal instanceof Date && !Number.isNaN(xVal.getTime())) {
+                timeVal = xVal.getTime();
+            } else if (typeof xVal === "number" && Number.isFinite(xVal)) {
+                timeVal = xVal;
+            } else if (typeof xVal === "string") {
+                const parsed = Date.parse(xVal);
                 if (!Number.isNaN(parsed)) {
                     timeVal = parsed;
                 }
             }
-            if (timeVal !== undefined && Number.isFinite(timeVal)) {
-                if (timeVal < minTime) minTime = timeVal;
-                if (timeVal > maxTime) maxTime = timeVal;
+            if (timeVal === undefined || !Number.isFinite(timeVal)) {
+                continue;
             }
+
+            if (isScatter || isBubble) {
+                const yVal = resolveValue(data[i], field, i);
+                if (!isFiniteNumber(yVal)) continue;
+
+                if (isBubble && sizeField) {
+                    const sVal = resolveValue(data[i], sizeField, i);
+                    if (!isFiniteNumber(sVal) || (sVal as number) <= 0) continue;
+                }
+            }
+
+            if (timeVal < minTime) minTime = timeVal;
+            if (timeVal > maxTime) maxTime = timeVal;
         }
     }
 
@@ -250,17 +322,36 @@ export function calculateLinearXDomain(
     let max = Number.NEGATIVE_INFINITY;
 
     const visibleSeries = seriesList.filter(s => s.visible());
-    const seriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
+    const seriesToScan = (visibleSeries.length > 0 ? visibleSeries : seriesList).filter(
+        s => isCartesianSeriesCompatibleWithXAxisType(s.type, "linear")
+    );
 
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
+        const field = s.field();
+        const isBubble = s.type === "bubble";
+        const isScatter = s.type === "scatter";
+        const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
+
         for (let i = 0; i < data.length; i++) {
-            const val = resolveValue(data[i], xField, i);
-            if (isFiniteNumber(val)) {
-                if (val < min) min = val;
-                if (val > max) max = val;
+            const xVal = resolveValue(data[i], xField, i);
+            if (!isFiniteNumber(xVal)) {
+                continue;
             }
+
+            if (isScatter || isBubble) {
+                const yVal = resolveValue(data[i], field, i);
+                if (!isFiniteNumber(yVal)) continue;
+
+                if (isBubble && sizeField) {
+                    const sVal = resolveValue(data[i], sizeField, i);
+                    if (!isFiniteNumber(sVal) || (sVal as number) <= 0) continue;
+                }
+            }
+
+            if (xVal < min) min = xVal;
+            if (xVal > max) max = xVal;
         }
     }
 
@@ -272,7 +363,9 @@ export function calculateContinuousYDomain(
     seriesList: readonly ChartCartesianSeriesRegistration[],
     rootData: readonly unknown[],
     explicitMin?: number,
-    explicitMax?: number
+    explicitMax?: number,
+    rootXField?: ChartField,
+    xAxisType?: ChartXAxisType
 ): [number, number] {
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
@@ -288,7 +381,10 @@ export function calculateContinuousYDomain(
     }
 
     const visibleSeries = seriesList.filter(s => s.visible());
-    const seriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
+    const allSeriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
+    const seriesToScan = xAxisType
+        ? allSeriesToScan.filter(s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType))
+        : allSeriesToScan;
 
     // Check if zero baseline is required (Area or Bar series)
     const requiresZeroBaseline = seriesToScan.some(s => s.type === "area" || s.type === "bar");
@@ -296,12 +392,33 @@ export function calculateContinuousYDomain(
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const field = s.field();
+        const xField = s.xField() ?? rootXField;
+        const isBubble = s.type === "bubble";
+        const isScatter = s.type === "scatter";
+        const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
+
         for (let i = 0; i < data.length; i++) {
-            const val = resolveValue(data[i], field, i);
-            if (isFiniteNumber(val)) {
-                if (val < min) min = val;
-                if (val > max) max = val;
+            const yVal = resolveValue(data[i], field, i);
+            if (!isFiniteNumber(yVal)) {
+                continue;
             }
+
+            if (isScatter || isBubble) {
+                const xVal = resolveValue(data[i], xField, i);
+                if (!isContinuousXValid(xVal, xAxisType ?? "linear")) {
+                    continue;
+                }
+
+                if (isBubble && sizeField) {
+                    const sVal = resolveValue(data[i], sizeField, i);
+                    if (!isFiniteNumber(sVal) || (sVal as number) <= 0) {
+                        continue;
+                    }
+                }
+            }
+
+            if (yVal < min) min = yVal;
+            if (yVal > max) max = yVal;
         }
     }
 
@@ -380,19 +497,15 @@ export function calculateContinuousYDomain(
 export function hasRenderableData(
     seriesList: readonly ChartSeriesRegistration[],
     rootData: readonly unknown[],
-    xAxisType?: ChartXAxisType
+    xAxisType?: ChartXAxisType,
+    rootXField?: ChartField
 ): boolean {
     if (seriesList.length === 0) {
         return rootData.length > 0;
     }
 
     for (const s of seriesList) {
-        if (s.type === "bar" && (xAxisType === "time" || xAxisType === "utc" || xAxisType === "linear")) {
-            // Incompatible bar on continuous axes
-            continue;
-        }
-        if ((s.type === "scatter" || s.type === "bubble") && xAxisType === "category") {
-            // Incompatible scatter/bubble on category axes
+        if (xAxisType && !isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType)) {
             continue;
         }
         const data = resolveData(s.data(), rootData);
@@ -400,19 +513,32 @@ export function hasRenderableData(
             continue;
         }
         const field = s.field();
+        const xField =
+            "xField" in s
+                ? ((s as { xField: () => ChartField | undefined }).xField?.() ?? rootXField)
+                : rootXField;
+
         for (let i = 0; i < data.length; i++) {
             const val = resolveValue(data[i], field, i);
-            if (isFiniteNumber(val)) {
-                if (s.type === "pie" || s.type === "donut") {
-                    if (val > 0) return true;
-                } else if (s.type === "bubble") {
-                    const sizeVal = resolveValue(data[i], (s as { sizeField: () => ChartField }).sizeField(), i);
-                    if (isFiniteNumber(sizeVal) && sizeVal > 0) {
-                        return true;
-                    }
-                } else {
+            if (!isFiniteNumber(val)) {
+                continue;
+            }
+            if (s.type === "pie" || s.type === "donut") {
+                if (val > 0) return true;
+            } else if (s.type === "bubble") {
+                const xVal = resolveValue(data[i], xField, i);
+                if (!isContinuousXValid(xVal, xAxisType ?? "linear")) continue;
+                const sizeVal = resolveValue(data[i], (s as { sizeField: () => ChartField }).sizeField(), i);
+                if (isFiniteNumber(sizeVal) && sizeVal > 0) {
                     return true;
                 }
+            } else if (s.type === "scatter") {
+                const xVal = resolveValue(data[i], xField, i);
+                if (isContinuousXValid(xVal, xAxisType ?? "linear")) {
+                    return true;
+                }
+            } else {
+                return true;
             }
         }
     }
