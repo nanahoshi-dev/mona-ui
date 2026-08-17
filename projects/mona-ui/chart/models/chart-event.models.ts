@@ -8,6 +8,7 @@ export interface ChartPointEvent<T = unknown> {
     seriesId: string;
     seriesName: string;
     seriesType: ChartSeriesType;
+    sizeValue?: number;
     sliceId?: string;
     xValue: unknown;
     yValue: number;
@@ -21,6 +22,7 @@ export interface ChartPointFocusEvent<T = unknown> {
     seriesId: string;
     seriesName: string;
     seriesType: ChartSeriesType;
+    sizeValue?: number;
     sliceId?: string;
     xValue: unknown;
     yValue: number;

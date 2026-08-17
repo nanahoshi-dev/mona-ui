@@ -200,7 +200,7 @@ export class ChartLayoutEngine {
 
         const cartesianSeries = series.filter(
             (s): s is ChartCartesianSeriesRegistration =>
-                s.type === "line" || s.type === "area" || s.type === "bar"
+                s.type === "line" || s.type === "area" || s.type === "bar" || s.type === "scatter" || s.type === "bubble"
         );
 
         return CartesianLayoutEngine.computeScene({

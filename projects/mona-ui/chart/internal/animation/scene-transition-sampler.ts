@@ -4,7 +4,13 @@ import type {
     PolarAxisChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
-import type { ChartBarSeriesScene, ChartLineSeriesScene, ChartAreaSeriesScene } from "../scene/cartesian-scene";
+import type {
+    ChartBarSeriesScene,
+    ChartLineSeriesScene,
+    ChartAreaSeriesScene,
+    ChartBubbleSeriesScene,
+    ChartScatterSeriesScene
+} from "../scene/cartesian-scene";
 import type { ChartSectorSeriesScene } from "../scene/polar-scene";
 import type { ChartContinuousPolarSeriesScene, ChartRadarSeriesScene } from "../scene/polar-axis-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
@@ -104,6 +110,7 @@ export class SceneTransitionSampler {
         // Build lookup maps from sampled series marks
         const sampledBarsByKey = new Map<string, { height: number; isPositive: boolean; width: number; x: number; y: number }>();
         const sampledPointsByKey = new Map<string, { defined: boolean; x: number; y: number }>();
+        const sampledMarkersByKey = new Map<string, { radius: number; x: number; y: number }>();
 
         for (const s of sampledSeries) {
             if (s.type === "bar") {
@@ -118,6 +125,12 @@ export class SceneTransitionSampler {
                     const key = pt.animationKey ?? `${s.id}:${pt.index}`;
                     sampledPointsByKey.set(key, pt);
                 }
+            } else if (s.type === "scatter" || s.type === "bubble") {
+                const markerSeries = s as ChartScatterSeriesScene | ChartBubbleSeriesScene;
+                for (const m of markerSeries.markers) {
+                    const key = m.animationKey ?? `${s.id}:${m.index}`;
+                    sampledMarkersByKey.set(key, m);
+                }
             }
         }
 
@@ -129,11 +142,22 @@ export class SceneTransitionSampler {
             let pt = targetHit.point;
             let bounds = targetHit.bounds;
             let visualBounds = targetHit.visualBounds;
+            let radius = targetHit.radius;
+            let visualRadius = targetHit.visualRadius;
 
             if (targetHit.point) {
                 const sampledPt = sampledPointsByKey.get(key);
                 if (sampledPt) {
                     pt = { x: sampledPt.x, y: sampledPt.y };
+                }
+                const sampledMarker = sampledMarkersByKey.get(key);
+                if (sampledMarker) {
+                    pt = { x: sampledMarker.x, y: sampledMarker.y };
+                    visualRadius = sampledMarker.radius;
+                    radius =
+                        targetHit.seriesType === "bubble"
+                            ? sampledMarker.radius + 4
+                            : Math.max(sampledMarker.radius + 6, 10);
                 }
             }
 
@@ -154,7 +178,9 @@ export class SceneTransitionSampler {
                 ...targetHit,
                 bounds,
                 point: pt,
-                visualBounds
+                radius,
+                visualBounds,
+                visualRadius
             });
         }
 

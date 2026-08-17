@@ -144,6 +144,25 @@ export interface ChartBarSeriesRegistration extends ChartCartesianSeriesRegistra
     type: "bar";
 }
 
+export interface ChartCartesianMarkerSeriesRegistrationBase extends ChartCartesianSeriesRegistrationBase {
+    fillOpacity?: Signal<number | undefined>;
+    strokeColor?: Signal<string>;
+    strokeWidth?: Signal<number | undefined>;
+}
+
+export interface ChartScatterSeriesRegistration extends ChartCartesianMarkerSeriesRegistrationBase {
+    pointRadius?: Signal<number | undefined>;
+    type: "scatter";
+}
+
+export interface ChartBubbleSeriesRegistration extends ChartCartesianMarkerSeriesRegistrationBase {
+    maxRadius: Signal<number>;
+    minRadius: Signal<number>;
+    sizeField: Signal<ChartField>;
+    sizeFormatter?: Signal<ChartValueFormatter | undefined>;
+    type: "bubble";
+}
+
 export interface ChartSectorSeriesRegistrationBase extends ChartSeriesRegistrationBase {
     categoryField: Signal<ChartField>;
     categoryFormatter: Signal<ChartValueFormatter | undefined>;
@@ -206,7 +225,9 @@ export interface ChartContinuousPolarSeriesRegistration extends ChartRadialSerie
 export type ChartCartesianSeriesRegistration =
     | ChartAreaSeriesRegistration
     | ChartBarSeriesRegistration
-    | ChartLineSeriesRegistration;
+    | ChartBubbleSeriesRegistration
+    | ChartLineSeriesRegistration
+    | ChartScatterSeriesRegistration;
 
 export type ChartSectorSeriesRegistration = ChartDonutSeriesRegistration | ChartPieSeriesRegistration;
 export type ChartPolarSeriesRegistration = ChartSectorSeriesRegistration;

@@ -133,6 +133,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     readonly #yAxis = signal<ChartAxisRegistration | null>(null);
 
     #activeKeyboardBucketIndex: number = -1;
+    #activeKeyboardHitKey: string | null = null;
     #activeKeyboardSeriesId: string | null = null;
     #canvasContext: CanvasRenderingContext2D | null = null;
     #canvasReady: boolean = false;
@@ -410,6 +411,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 seriesId: target.seriesId,
                 seriesName: target.seriesName,
                 seriesType: target.seriesType,
+                sizeValue: target.sizeValue,
                 sliceId: target.sliceId,
                 xValue: target.xValue,
                 yValue: target.yValue
@@ -448,11 +450,12 @@ export class MonaChartComponent implements ChartRegistrationContext {
             event,
             currentScene,
             this.#activeKeyboardBucketIndex,
-            this.#activeKeyboardSeriesId
+            this.#activeKeyboardSeriesId,
+            this.#activeKeyboardHitKey
         );
 
         if (navResult) {
-            this.#setKeyboardSelection(navResult.bucketIndex, navResult.seriesId);
+            this.#setKeyboardSelection(navResult.bucketIndex, navResult.seriesId, navResult.hitKey);
             return;
         }
 
@@ -460,7 +463,16 @@ export class MonaChartComponent implements ChartRegistrationContext {
             event.preventDefault();
             if (this.#activeKeyboardBucketIndex >= 0) {
                 const bucket = buckets[this.#activeKeyboardBucketIndex];
-                const hit = bucket?.hits.find(h => h.seriesId === this.#activeKeyboardSeriesId) ?? bucket?.hits[0];
+                const hit =
+                    (this.#activeKeyboardHitKey
+                        ? bucket?.hits.find(
+                              h =>
+                                  (h.animationKey ?? h.sliceId ?? `${h.seriesId}:${h.index}`) ===
+                                  this.#activeKeyboardHitKey
+                          )
+                        : undefined) ??
+                    bucket?.hits.find(h => h.seriesId === this.#activeKeyboardSeriesId) ??
+                    bucket?.hits[0];
                 if (hit) {
                     this.pointClick.emit({
                         category: hit.category,
@@ -470,6 +482,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         seriesId: hit.seriesId,
                         seriesName: hit.seriesName,
                         seriesType: hit.seriesType,
+                        sizeValue: hit.sizeValue,
                         sliceId: hit.sliceId,
                         xValue: hit.xValue,
                         yValue: hit.yValue
@@ -678,8 +691,6 @@ export class MonaChartComponent implements ChartRegistrationContext {
                     this.tooltipContext.set(this.#buildTooltipContext(activeHits, this.#tooltip()?.shared() ?? false));
                 }
             }
-
-            this.invalidate(ChartInvalidationReason.Layout);
         }
     }
 
@@ -696,6 +707,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             const color = hit.color ?? seriesItem?.color ?? "#3b82f6";
             const xStr = hit.formattedCategory ?? formatXValue(hit.xValue, hit.index, xFormatter, xAxisType);
             const yStr = hit.formattedValue ?? formatYValue(hit.yValue, hit.index, yFormatter);
+            const markId = hit.animationKey ?? hit.sliceId ?? `${hit.seriesId}:${hit.index}`;
 
             return {
                 category: hit.category,
@@ -704,12 +716,15 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 datum: hit.datum,
                 formattedCategory: hit.formattedCategory,
                 formattedPercentage: hit.formattedPercentage,
+                formattedSize: hit.formattedSize,
                 formattedX: xStr,
                 formattedY: yStr,
+                markId,
                 percentage: hit.percentage,
                 seriesId: hit.seriesId,
                 seriesName: hit.seriesName,
                 seriesType: hit.seriesType,
+                sizeValue: hit.sizeValue,
                 sliceId: hit.sliceId,
                 xValue: hit.xValue,
                 yValue: hit.yValue
@@ -822,6 +837,11 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     #recomputeAndPaint(reason: ChartInvalidationReason): void {
+        if (reason === ChartInvalidationReason.Interaction) {
+            this.#paint();
+            return;
+        }
+
         if (this.#currentWidth <= 0 || this.#currentHeight <= 0) {
             const canvasRef = this.canvasElement();
             const plotEl = canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
@@ -844,19 +864,34 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.activeAccessibilityText.set("");
         }
 
-        const newScene = ChartLayoutEngine.computeScene({
-            angularAxis: this.#angularAxis() ?? undefined,
-            containerHeight: this.#currentHeight,
-            containerWidth: this.#currentWidth,
-            measurements: this.#labelMeasurements,
-            radialAxis: this.#radialAxis() ?? undefined,
-            rootData: this.data(),
-            rootXField: this.xField(),
-            series: this.#registeredSeries(),
-            styleResolver: this.#styleResolver,
-            xAxis: this.#xAxis() ?? undefined,
-            yAxis: this.#yAxis() ?? undefined
-        });
+        const newScene = isStructural
+            ? ChartLayoutEngine.computeScene({
+                  angularAxis: this.#angularAxis() ?? undefined,
+                  containerHeight: this.#currentHeight,
+                  containerWidth: this.#currentWidth,
+                  measurements: this.#labelMeasurements,
+                  radialAxis: this.#radialAxis() ?? undefined,
+                  rootData: this.data(),
+                  rootXField: this.xField(),
+                  series: this.#registeredSeries(),
+                  styleResolver: this.#styleResolver,
+                  xAxis: this.#xAxis() ?? undefined,
+                  yAxis: this.#yAxis() ?? undefined
+              })
+            : (this.scene() ??
+              ChartLayoutEngine.computeScene({
+                  angularAxis: this.#angularAxis() ?? undefined,
+                  containerHeight: this.#currentHeight,
+                  containerWidth: this.#currentWidth,
+                  measurements: this.#labelMeasurements,
+                  radialAxis: this.#radialAxis() ?? undefined,
+                  rootData: this.data(),
+                  rootXField: this.xField(),
+                  series: this.#registeredSeries(),
+                  styleResolver: this.#styleResolver,
+                  xAxis: this.#xAxis() ?? undefined,
+                  yAxis: this.#yAxis() ?? undefined
+              }));
 
         // Prune measurements
         if (newScene.coordinateSystem === "polar") {
@@ -926,7 +961,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
         }
 
         if (trigger === "layout" || effectiveOptions.duration === 0) {
-            this.#animationController.cancel("finish-target");
+            this.#animationController.cancel("keep-current");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
             this.#isAnimating.set(false);
@@ -945,7 +980,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const plan = ChartTransitionPlanner.plan(fromVisual, newScene, trigger, effectiveOptions);
 
         if (plan.mode === "immediate" || plan.duration === 0) {
-            this.#animationController.cancel("finish-target");
+            this.#animationController.cancel("keep-current");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
             this.#isAnimating.set(false);
@@ -1000,7 +1035,11 @@ export class MonaChartComponent implements ChartRegistrationContext {
         }
     }
 
-    #setKeyboardSelection(bucketIndex: number, preferredSeriesId: string | null): void {
+    #setKeyboardSelection(
+        bucketIndex: number,
+        preferredSeriesId: string | null,
+        preferredHitKey: string | null = null
+    ): void {
         const currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) return;
 
@@ -1011,8 +1050,19 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const bucket = buckets[this.#activeKeyboardBucketIndex];
         if (!bucket || bucket.hits.length === 0) return;
 
-        const matchingHit = bucket.hits.find(h => h.seriesId === preferredSeriesId) ?? bucket.hits[0];
+        const matchingHit =
+            (preferredHitKey
+                ? bucket.hits.find(
+                      h =>
+                          (h.animationKey ?? h.sliceId ?? `${h.seriesId}:${h.index}`) ===
+                          preferredHitKey
+                  )
+                : undefined) ??
+            bucket.hits.find(h => h.seriesId === preferredSeriesId) ??
+            bucket.hits[0];
         this.#activeKeyboardSeriesId = matchingHit.seriesId;
+        this.#activeKeyboardHitKey =
+            matchingHit.animationKey ?? matchingHit.sliceId ?? `${matchingHit.seriesId}:${matchingHit.index}`;
 
         const pointPos: ChartPoint = {
             x:
@@ -1043,6 +1093,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             seriesId: matchingHit.seriesId,
             seriesName: matchingHit.seriesName,
             seriesType: matchingHit.seriesType,
+            sizeValue: matchingHit.sizeValue,
             sliceId: matchingHit.sliceId,
             xValue: matchingHit.xValue,
             yValue: matchingHit.yValue
@@ -1059,7 +1110,14 @@ export class MonaChartComponent implements ChartRegistrationContext {
             const yAxis = this.#yAxis();
             const xStr = formatXValue(matchingHit.xValue, matchingHit.index, xAxis?.formatter(), xAxis?.type());
             const yStr = formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter());
-            this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}`);
+            const sizeStr =
+                matchingHit.formattedSize ??
+                (matchingHit.sizeValue !== undefined ? String(matchingHit.sizeValue) : "");
+            if (matchingHit.seriesType === "bubble" && sizeStr) {
+                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}, size ${sizeStr}`);
+            } else {
+                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}`);
+            }
         }
 
         this.#paint();

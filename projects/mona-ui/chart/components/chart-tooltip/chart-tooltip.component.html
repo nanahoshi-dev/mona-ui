@@ -27,7 +27,7 @@
             } @else if (context.shared) {
                 <div class="mb-1 font-semibold text-foreground">{{ context.point.formattedX }}</div>
                 <div class="flex flex-col gap-1">
-                    @for (pt of context.points; track pt.seriesId) {
+                    @for (pt of context.points; track pt.markId) {
                         <div class="flex items-center justify-between gap-3">
                             <div class="flex items-center gap-1.5">
                                 <span
@@ -35,7 +35,12 @@
                                     [style.background-color]="pt.color"></span>
                                 <span class="text-muted-foreground">{{ pt.seriesName }}</span>
                             </div>
-                            <span class="font-medium text-foreground">{{ pt.formattedY }}</span>
+                            <div class="flex items-center gap-1">
+                                <span class="font-medium text-foreground">{{ pt.formattedY }}</span>
+                                @if (pt.formattedSize) {
+                                    <span class="text-xs text-muted-foreground">({{ pt.formattedSize }})</span>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
@@ -49,6 +54,9 @@
                 <div class="text-muted-foreground">
                     {{ context.point.formattedX }}:
                     <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                    @if (context.point.formattedSize) {
+                        <span class="ml-1.5">(size: <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span>)</span>
+                    }
                 </div>
             }
         }

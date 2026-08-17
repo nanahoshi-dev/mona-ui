@@ -12,6 +12,8 @@ export { MonaRadarSeriesComponent } from "./components/radar-series/radar-series
 export { MonaPolarSeriesComponent } from "./components/polar-series/polar-series.component";
 export { MonaChartLegendComponent } from "./components/chart-legend/chart-legend.component";
 export { MonaChartTooltipComponent } from "./components/chart-tooltip/chart-tooltip.component";
+export { MonaScatterSeriesComponent } from "./components/scatter-series/scatter-series.component";
+export { MonaBubbleSeriesComponent } from "./components/bubble-series/bubble-series.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";

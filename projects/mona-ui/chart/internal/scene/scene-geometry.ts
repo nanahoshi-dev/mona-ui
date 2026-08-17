@@ -38,17 +38,21 @@ export interface SceneHitTarget {
     datum: unknown;
     formattedCategory?: string;
     formattedPercentage?: string;
+    formattedSize?: string;
     formattedValue?: string;
     index: number;
     isPositive?: boolean;
     percentage?: number;
     point?: ChartPoint;
     radius?: number;
+    renderOrder?: number;
     seriesId: string;
     seriesName: string;
     seriesType: ChartSeriesType;
+    sizeValue?: number;
     sliceId?: string;
     visualBounds?: ChartRect;
+    visualRadius?: number;
     xKey: ChartInteractionXKey;
     xValue: unknown;
     yValue: number;
@@ -72,4 +76,18 @@ export interface ScenePoint {
     xValue: unknown;
     y: number;
     yValue: number;
+}
+
+export interface SceneMarker {
+    readonly animationKey: string;
+    readonly datum: unknown;
+    readonly formattedSize?: string;
+    readonly index: number;
+    readonly radius: number;
+    readonly renderOpacity?: number;
+    readonly sizeValue?: number;
+    readonly x: number;
+    readonly xValue: unknown;
+    readonly y: number;
+    readonly yValue: number;
 }

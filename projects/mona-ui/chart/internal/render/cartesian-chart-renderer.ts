@@ -5,6 +5,7 @@ import { crispPixel, drawBarRect, drawPointMarker } from "../utils/canvas-utils"
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
 import { LineSeriesRenderer } from "./series/line-series-renderer";
+import { MarkerSeriesRenderer } from "./series/marker-series-renderer";
 
 export class CartesianChartRenderer {
     public static render(
@@ -66,6 +67,10 @@ export class CartesianChartRenderer {
                 case "bar":
                     BarSeriesRenderer.render(context, s);
                     break;
+                case "bubble":
+                case "scatter":
+                    MarkerSeriesRenderer.render(context, s);
+                    break;
                 case "line":
                     LineSeriesRenderer.render(context, s);
                     break;
@@ -120,10 +125,13 @@ export class CartesianChartRenderer {
                       : [];
 
             const primaryHit = hits[0];
+            const hasConnectedOrBarSeries = series.some(
+                s => s.type === "line" || s.type === "area" || s.type === "bar"
+            );
             const crosshairX = primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : null);
 
-            // Vertical crosshair
-            if (crosshairX !== null) {
+            // Vertical crosshair (suppressed when chart only has scatter / bubble series)
+            if (crosshairX !== null && hasConnectedOrBarSeries) {
                 const crosshairColor =
                     styleResolver.resolveCssVariable("--mona-chart-crosshair-color") ||
                     styleResolver.resolveCssVariable("--color-focus-indicator") ||
@@ -151,9 +159,21 @@ export class CartesianChartRenderer {
 
             for (const hit of hits) {
                 if (hit.point) {
-                    const matchingSeries = series.find(s => s.id === hit.seriesId);
-                    const color = matchingSeries?.style.color ?? "#3b82f6";
-                    drawPointMarker(context, hit.point.x, hit.point.y, 5, color, markerStrokeColor, 2);
+                    const isMarkerSeries = hit.seriesType === "scatter" || hit.seriesType === "bubble";
+                    if (isMarkerSeries) {
+                        const matchingSeries = series.find(s => s.id === hit.seriesId);
+                        const seriesColor = matchingSeries?.style.color ?? hit.color ?? "#3b82f6";
+                        const activeRadius = (hit.visualRadius ?? hit.radius ?? 5) + 3;
+                        context.beginPath();
+                        context.arc(hit.point.x, hit.point.y, activeRadius, 0, Math.PI * 2);
+                        context.strokeStyle = seriesColor;
+                        context.lineWidth = 2;
+                        context.stroke();
+                    } else {
+                        const matchingSeries = series.find(s => s.id === hit.seriesId);
+                        const color = matchingSeries?.style.color ?? "#3b82f6";
+                        drawPointMarker(context, hit.point.x, hit.point.y, 5, color, markerStrokeColor, 2);
+                    }
                 } else if (hit.bounds || hit.visualBounds) {
                     const barRect = hit.visualBounds ?? hit.bounds;
                     if (barRect && barRect.height > 0) {

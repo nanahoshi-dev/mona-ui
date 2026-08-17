@@ -39,6 +39,8 @@ import type {
 } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatXValue, formatYValue } from "../utils/chart-formatter";
+import { CartesianMarkerSpatialIndex } from "../interaction/cartesian-marker-spatial-index";
+import { CartesianMarkerLayout } from "./cartesian-marker-layout";
 import {
     clamp,
     isFiniteNumber,
@@ -314,6 +316,10 @@ export class CartesianLayoutEngine {
             const sField = s.field();
             const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
 
+            if (s.type === "scatter" || s.type === "bubble") {
+                continue;
+            }
+
             if (s.type === "bar") {
                 // In Phase 1, bars require a category scale
                 if (!bandScale || !nestedBarScale) {
@@ -513,6 +519,31 @@ export class CartesianLayoutEngine {
             }
         }
 
+        // Marker series (Scatter and Bubble) layout
+        const markerResult = CartesianMarkerLayout.compute({
+            linearXScale,
+            plotRect,
+            rootData,
+            rootXField,
+            series,
+            startingRenderOrder: hitTargets.length,
+            styleResolver,
+            timeScale,
+            xAxisFormatter: xAxis?.formatter?.(),
+            xAxisType,
+            yAxisFormatter: yAxis?.formatter?.(),
+            yScale
+        });
+
+        seriesScenes.push(...markerResult.seriesScenes);
+        hitTargets.push(...markerResult.hitTargets);
+
+        let markerSpatialIndex: CartesianMarkerSpatialIndex | undefined;
+        if (markerResult.hitTargets.length >= 100) {
+            markerSpatialIndex = new CartesianMarkerSpatialIndex(32);
+            markerSpatialIndex.insertAll(markerResult.hitTargets);
+        }
+
         const interactionBuckets: ChartInteractionBucket[] = [];
         if (xAxisType === "category" && bandScale) {
             let bucketIdx = 0;
@@ -562,12 +593,19 @@ export class CartesianLayoutEngine {
 
         const hasData =
             hasRenderableData(series, rootData, xAxisType) &&
-            seriesScenes.some(s => (s.type === "bar" ? s.bars.length > 0 : s.points.some(p => p.defined)));
+            seriesScenes.some(s => {
+                if (s.type === "bar") return s.bars.length > 0;
+                if (s.type === "scatter" || s.type === "bubble") return s.markers.length > 0;
+                return s.points.some(p => p.defined);
+            });
 
         const legendItems: ChartLegendItem[] = series.map((s, idx) => {
-            const sStyle = styleResolver.resolveSeriesStyle(s, idx);
+            const color =
+                s.type === "scatter" || s.type === "bubble"
+                    ? styleResolver.resolveMarkerSeriesStyle(s, idx).color
+                    : styleResolver.resolveSeriesStyle(s, idx).color;
             return {
-                color: sStyle.color,
+                color,
                 itemId: s.id,
                 kind: "series",
                 name: resolveSeriesDisplayName(s, idx),
@@ -585,6 +623,7 @@ export class CartesianLayoutEngine {
             hitTargets,
             interactionBuckets,
             legendItems,
+            markerSpatialIndex,
             plotRect,
             series: seriesScenes,
             width: containerWidth

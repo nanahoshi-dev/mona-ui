@@ -8,6 +8,7 @@ import { AreaSeriesAnimationAdapter } from "./adapters/area-animation-adapter";
 import { AxisAnimationAdapter } from "./adapters/axis-animation-adapter";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
 import { LineSeriesAnimationAdapter } from "./adapters/line-animation-adapter";
+import { MarkerSeriesAnimationAdapter } from "./marker-series-animation-adapter";
 import { PolarSeriesAnimationAdapter } from "./adapters/polar-animation-adapter";
 import { RadarSeriesAnimationAdapter } from "./adapters/radar-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
@@ -307,6 +308,8 @@ export class ChartTransitionPlanner {
                         pathCount += 1;
                     } else if (s.type === "bar") {
                         independentMarks += s.bars.length;
+                    } else if (s.type === "scatter" || s.type === "bubble") {
+                        independentMarks += s.markers.length;
                     }
                 }
             } else if (sc.coordinateSystem === "polar") {
@@ -388,6 +391,21 @@ export class ChartTransitionPlanner {
                             context
                         )
                     );
+                } else if (targetSeries.type === "scatter" || targetSeries.type === "bubble") {
+                    const prevMarkerSeries =
+                        prevSeries && (prevSeries.type === "scatter" || prevSeries.type === "bubble")
+                            ? prevSeries
+                            : undefined;
+                    const markerPlan = MarkerSeriesAnimationAdapter.planSeries(prevMarkerSeries, targetSeries);
+                    if (markerPlan) {
+                        plans.push({
+                            adapterType: targetSeries.type,
+                            fromSeries: prevMarkerSeries ?? null,
+                            id: targetSeries.id,
+                            sample: (p: number) => MarkerSeriesAnimationAdapter.sampleSeries(markerPlan, p),
+                            toSeries: targetSeries
+                        });
+                    }
                 }
             }
 
@@ -401,6 +419,17 @@ export class ChartTransitionPlanner {
                             plans.push(lineAdapter.createPlan(prevSeries, null, context));
                         } else if (prevSeries.type === "area") {
                             plans.push(areaAdapter.createPlan(prevSeries, null, context));
+                        } else if (prevSeries.type === "scatter" || prevSeries.type === "bubble") {
+                            const markerPlan = MarkerSeriesAnimationAdapter.planSeries(prevSeries, undefined);
+                            if (markerPlan) {
+                                plans.push({
+                                    adapterType: prevSeries.type,
+                                    fromSeries: prevSeries,
+                                    id: prevSeries.id,
+                                    sample: (p: number) => MarkerSeriesAnimationAdapter.sampleSeries(markerPlan, p),
+                                    toSeries: null
+                                });
+                            }
                         }
                     }
                 }
