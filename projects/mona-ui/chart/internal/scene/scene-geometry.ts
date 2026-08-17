@@ -44,8 +44,14 @@ export interface SceneBar {
     yValue: number;
 }
 
+export interface SceneRangeBandGeometry {
+    readonly fromPoint: ChartPoint;
+    readonly toPoint: ChartPoint;
+}
+
 export interface SceneRangeBar {
     readonly animationKey?: string;
+    readonly cornerRadii?: ChartCornerRadii;
     readonly datum: unknown;
     readonly formattedFrom?: string;
     readonly formattedTo?: string;
@@ -101,6 +107,7 @@ export interface SceneHitTarget {
     point?: ChartPoint;
     radius?: number;
     range?: SceneRangeHitValue;
+    rangeBand?: SceneRangeBandGeometry;
     renderOrder?: number;
     seriesId: string;
     seriesName: string;
