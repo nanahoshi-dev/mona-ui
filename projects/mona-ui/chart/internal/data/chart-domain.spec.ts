@@ -32,6 +32,49 @@ function createMockSeries(
     };
 }
 
+function createMockScatterSeries(
+    field: ChartField,
+    data?: readonly unknown[],
+    visible: boolean = true,
+    xField?: ChartField
+): ChartCartesianSeriesRegistration {
+    return {
+        color: signal("#3b82f6"),
+        data: signal(data),
+        element: { nativeElement: {} as HTMLElement },
+        field: signal(field),
+        id: `mock-scatter-${Math.random()}`,
+        name: signal("Mock Scatter"),
+        pointRadius: signal(5),
+        type: "scatter",
+        visible: signal(visible),
+        xField: signal(xField)
+    };
+}
+
+function createMockBubbleSeries(
+    field: ChartField,
+    sizeField: ChartField,
+    data?: readonly unknown[],
+    visible: boolean = true,
+    xField?: ChartField
+): ChartCartesianSeriesRegistration {
+    return {
+        color: signal("#10b981"),
+        data: signal(data),
+        element: { nativeElement: {} as HTMLElement },
+        field: signal(field),
+        id: `mock-bubble-${Math.random()}`,
+        maxRadius: signal(25),
+        minRadius: signal(5),
+        name: signal("Mock Bubble"),
+        sizeField: signal(sizeField),
+        type: "bubble",
+        visible: signal(visible),
+        xField: signal(xField)
+    };
+}
+
 describe("chart-domain", () => {
     describe("resolveData", () => {
         it("should return root data when series data is undefined", () => {
@@ -357,6 +400,85 @@ describe("chart-domain", () => {
             const data = [{ x: "Item A", val: 10 }];
             expect(inferXAxisType(series, data, "x")).toBe("category");
         });
+        it("should scan entire dataset beyond 10 rows to infer linear X axis (SB-003)", () => {
+            const series = [createMockScatterSeries("y")];
+            // 15 rows with undefined/null or empty values in first 10, then number at index 12
+            const data = [
+                { x: undefined, y: 10 },
+                { x: null, y: 10 },
+                { x: undefined, y: 10 },
+                { x: undefined, y: 10 },
+                { x: undefined, y: 10 },
+                { x: undefined, y: 10 },
+                { x: undefined, y: 10 },
+                { x: undefined, y: 10 },
+                { x: undefined, y: 10 },
+                { x: undefined, y: 10 },
+                { x: undefined, y: 10 },
+                { x: 42, y: 10 },
+                { x: 50, y: 20 }
+            ];
+            expect(inferXAxisType(series, data, "x")).toBe("linear");
+        });
+    });
+
+    describe("calculateContinuousYDomain with Scatter and Bubble (SB-002, SB-010, SB-016)", () => {
+        it("should exclude non-positive bubble size rows from Y domain", () => {
+            const series = [createMockBubbleSeries("y", "size")];
+            const data = [
+                { size: 10, x: 1, y: 20 },
+                { size: 0, x: 2, y: 100 }, // Ignored because size is 0
+                { size: -5, x: 3, y: 200 }, // Ignored because size is negative
+                { size: 5, x: 4, y: 50 }
+            ];
+            const domain = calculateContinuousYDomain(series, data, undefined, undefined, "x", "linear");
+            // Only y: 20 and y: 50 should contribute
+            expect(domain[0]).toBe(20);
+            expect(domain[1]).toBe(50);
+        });
+
+        it("should filter out incompatible Bar series when calculating Y domain on linear axis (SB-002)", () => {
+            const series = [
+                createMockSeries("bar", "barY"),
+                createMockScatterSeries("scatterY")
+            ];
+            const data = [
+                { barY: 1000, scatterY: 50, x: 10 },
+                { barY: 2000, scatterY: 80, x: 20 }
+            ];
+            const domain = calculateContinuousYDomain(series, data, undefined, undefined, "x", "linear");
+            // Bar series is ignored on linear axis, so domain is 50..80 (no zero baseline forced by Bar)
+            expect(domain[0]).toBe(50);
+            expect(domain[1]).toBe(80);
+        });
+    });
+
+    describe("calculateLinearXDomain with Scatter and Bubble (SB-002, SB-010)", () => {
+        it("should exclude non-positive bubble size rows from X domain", () => {
+            const series = [createMockBubbleSeries("y", "size")];
+            const data = [
+                { size: 10, x: 10, y: 20 },
+                { size: 0, x: 100, y: 30 }, // Ignored
+                { size: 5, x: 40, y: 50 }
+            ];
+            const domain = calculateLinearXDomain(series, data, "x");
+            expect(domain[0]).toBe(10);
+            expect(domain[1]).toBe(40);
+        });
+
+        it("should ignore Bar series on linear X axis", () => {
+            const series = [
+                createMockSeries("bar", "barY"),
+                createMockScatterSeries("scatterY")
+            ];
+            const data = [
+                { barY: 10, scatterY: 20, x: 5 },
+                { barY: 20, scatterY: 30, x: 15 }
+            ];
+            const domain = calculateLinearXDomain(series, data, "x");
+            expect(domain[0]).toBe(5);
+            expect(domain[1]).toBe(15);
+        });
     });
 
     describe("hasRenderableData", () => {
@@ -388,6 +510,15 @@ describe("chart-domain", () => {
             const series = [createMockSeries("bar", "val")];
             const data = [{ val: 50 }];
             expect(hasRenderableData(series, data, "category")).toBe(true);
+        });
+
+        it("should return false for bubble series when all bubble sizes are non-positive", () => {
+            const series = [createMockBubbleSeries("y", "size")];
+            const data = [
+                { size: 0, x: 1, y: 10 },
+                { size: -2, x: 2, y: 20 }
+            ];
+            expect(hasRenderableData(series, data, "linear", "x")).toBe(false);
         });
     });
 });
