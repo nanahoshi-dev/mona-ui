@@ -1,6 +1,6 @@
+import type { ChartPointValueKind } from "./chart-point-value.models";
 import type { ChartSeriesType } from "./chart-series.models";
 import type { ChartStackMode } from "./chart-stack.models";
-import type { ChartPointValueKind } from "./chart-tooltip.models";
 
 export interface ChartPointEvent<T = unknown> {
     category?: unknown;
