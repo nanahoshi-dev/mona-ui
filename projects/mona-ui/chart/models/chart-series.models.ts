@@ -40,6 +40,15 @@ export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
     }
 }
 
+export function isCartesianCoordinateFamily(family: ChartSeriesFamily): boolean {
+    return family === "cartesian" || family === "heatmap";
+}
+
+export function isPolarCoordinateFamily(family: ChartSeriesFamily): boolean {
+    return family === "sector" || family === "radar" || family === "polar";
+}
+
+
 export type ChartLegendItemKind = "datum" | "series";
 
 export interface ChartLegendItem {

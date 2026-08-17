@@ -10,6 +10,8 @@ export interface ChartPointEvent<T = unknown> {
     datum: T;
     formattedFrom?: string;
     formattedTo?: string;
+    formattedXValue?: string;
+    formattedYCategory?: string;
     fromValue?: number;
     percentage?: number;
     rawValue?: unknown;
@@ -28,6 +30,7 @@ export interface ChartPointEvent<T = unknown> {
     toValue?: number;
     valueKind?: ChartPointValueKind;
     xValue: unknown;
+    yCategory?: unknown;
     yValue?: number;
 }
 
@@ -39,6 +42,8 @@ export interface ChartPointFocusEvent<T = unknown> {
     datum: T;
     formattedFrom?: string;
     formattedTo?: string;
+    formattedXValue?: string;
+    formattedYCategory?: string;
     fromValue?: number;
     percentage?: number;
     rawValue?: unknown;
@@ -57,6 +62,7 @@ export interface ChartPointFocusEvent<T = unknown> {
     toValue?: number;
     valueKind?: ChartPointValueKind;
     xValue: unknown;
+    yCategory?: unknown;
     yValue?: number;
 }
 
