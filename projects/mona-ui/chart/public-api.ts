@@ -63,7 +63,11 @@ export type {
     ChartSeriesType
 } from "./models/chart-series.models";
 
-export { getChartSeriesFamily } from "./models/chart-series.models";
+export {
+    getChartSeriesFamily,
+    isCartesianCoordinateFamily,
+    isPolarCoordinateFamily
+} from "./models/chart-series.models";
 
 export type {
     ChartPointEvent,
