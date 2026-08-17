@@ -313,6 +313,12 @@ describe("chart-domain", () => {
             const domain = calculateCategoryDomain(series, data, "category");
             expect(domain).toEqual(["Q1", "Q2"]);
         });
+
+        it("should fall back to root data when no series are registered", () => {
+            const data = [{ category: "Jan", val: 10 }, { category: "Feb", val: 20 }, { category: "Mar", val: 30 }];
+            const domain = calculateCategoryDomain([], data, "category");
+            expect(domain).toEqual(["Jan", "Feb", "Mar"]);
+        });
     });
 
     describe("inferXAxisType", () => {
