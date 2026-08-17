@@ -179,13 +179,20 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "donut") as ChartDonutSeriesRegistration) ?? null;
     });
-    public readonly isAnimating = signal(false);
-    public readonly isStructuralAnimation = signal(false);
-    public readonly isExitingData = signal(false);
+    readonly #isAnimating = signal(false);
+    readonly #isStructuralAnimation = signal(false);
+    readonly #isExitingData = signal(false);
+    #hasPendingLabelMeasurementLayout: boolean = false;
+    #hasPendingSizeReflow: boolean = false;
+
+    public readonly isAnimating = this.#isAnimating.asReadonly();
+    public readonly isStructuralAnimation = this.#isStructuralAnimation.asReadonly();
+    public readonly isExitingData = this.#isExitingData.asReadonly();
+
     protected readonly hasNoData = computed(() => {
         const sc = this.scene();
         if (!sc) return false;
-        if (this.isExitingData()) return false;
+        if (this.#isExitingData()) return false;
         return !sc.hasRenderableData;
     });
     protected readonly layoutClasses = computed(() => {
@@ -340,9 +347,13 @@ export class MonaChartComponent implements ChartRegistrationContext {
             if (animOptions.duration === 0 && this.#animationController.isRunning()) {
                 this.#animationController.cancel("finish-target");
                 this.#renderScene = this.scene();
-                this.isAnimating.set(false);
-                this.isStructuralAnimation.set(false);
-                this.isExitingData.set(false);
+                this.#isAnimating.set(false);
+                this.#isStructuralAnimation.set(false);
+                this.#isExitingData.set(false);
+                if (this.#hasPendingLabelMeasurementLayout) {
+                    this.#hasPendingLabelMeasurementLayout = false;
+                    this.invalidate(ChartInvalidationReason.Layout);
+                }
                 this.#paint();
             }
         });
@@ -372,6 +383,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     public onCanvasClick(event: MouseEvent): void {
+        if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+            return;
+        }
+
         const pointer = this.#normalizePointer(event);
         let currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
@@ -411,6 +426,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     public onKeyDown(event: KeyboardEvent): void {
+        if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+            return;
+        }
+
         let currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
             this.#recomputeAndPaint(ChartInvalidationReason.Data);
@@ -471,7 +490,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     public onPointerMove(event: PointerEvent): void {
         const tooltip = this.#tooltip();
         const hoverEnabled = tooltip ? tooltip.enabled() !== false : false;
-        if (!hoverEnabled) {
+        if (!hoverEnabled || (this.#isAnimating() && !this.#isStructuralAnimation())) {
             if (this.#interactionState !== null) {
                 this.#clearInteraction();
             }
@@ -490,6 +509,11 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     #processPointerMove(event: PointerEvent): void {
+        if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+            this.#clearInteraction();
+            return;
+        }
+
         const pointer = this.#normalizePointer(event);
         let currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
@@ -897,13 +921,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
         const isPassiveSizeReflow = trigger === "layout" && hasInvalidationReason(reason, ChartInvalidationReason.Size);
         if (isPassiveSizeReflow && this.#animationController.isRunning()) {
-            // A passive container reflow (e.g. the legend collapsing or
-            // reappearing as the series count crosses 0, which resizes the
-            // plot area via ResizeObserver) shouldn't cut off a structural
-            // animation that's already in flight. Defer it until the running
-            // animation completes, at which point it will be reapplied with
-            // the up-to-date container dimensions.
-            this.invalidate(reason);
+            this.#hasPendingSizeReflow = true;
             return;
         }
 
@@ -911,9 +929,14 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.#animationController.cancel("finish-target");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
-            this.isAnimating.set(false);
-            this.isStructuralAnimation.set(false);
-            this.isExitingData.set(false);
+            this.#isAnimating.set(false);
+            this.#isStructuralAnimation.set(false);
+            this.#isExitingData.set(false);
+            if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
+                this.#hasPendingLabelMeasurementLayout = false;
+                this.#hasPendingSizeReflow = false;
+                this.invalidate(ChartInvalidationReason.Layout);
+            }
             this.#paint();
             return;
         }
@@ -925,27 +948,37 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.#animationController.cancel("finish-target");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
-            this.isAnimating.set(false);
-            this.isStructuralAnimation.set(false);
-            this.isExitingData.set(false);
+            this.#isAnimating.set(false);
+            this.#isStructuralAnimation.set(false);
+            this.#isExitingData.set(false);
+            if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
+                this.#hasPendingLabelMeasurementLayout = false;
+                this.#hasPendingSizeReflow = false;
+                this.invalidate(ChartInvalidationReason.Layout);
+            }
             this.#paint();
         } else {
             const isExitingDataTransition =
                 (trigger === "data" || trigger === "visibility") &&
                 Boolean(fromVisual && fromVisual.hasRenderableData && !newScene.hasRenderableData);
             if (isExitingDataTransition) {
-                this.isExitingData.set(true);
+                this.#isExitingData.set(true);
             }
-            this.isAnimating.set(true);
-            this.isStructuralAnimation.set(plan.mode !== "crossfade");
+            this.#isAnimating.set(true);
+            this.#isStructuralAnimation.set(plan.mode !== "crossfade");
 
             this.#animationController.start(plan, {
                 onComplete: () => {
                     this.#renderScene = newScene;
                     this.#hasCommittedVisualScene = true;
-                    this.isAnimating.set(false);
-                    this.isStructuralAnimation.set(false);
-                    this.isExitingData.set(false);
+                    this.#isAnimating.set(false);
+                    this.#isStructuralAnimation.set(false);
+                    this.#isExitingData.set(false);
+                    if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
+                        this.#hasPendingLabelMeasurementLayout = false;
+                        this.#hasPendingSizeReflow = false;
+                        this.invalidate(ChartInvalidationReason.Layout);
+                    }
                     this.#paint();
                 },
                 onFrame: (frame: ChartAnimationRenderFrame) => {
@@ -1106,8 +1139,12 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         }
                     }
                 }
-                if (hasChanged && !this.#animationController.isRunning()) {
-                    this.invalidate(ChartInvalidationReason.Layout);
+                if (hasChanged) {
+                    if (this.#animationController.isRunning()) {
+                        this.#hasPendingLabelMeasurementLayout = true;
+                    } else {
+                        this.invalidate(ChartInvalidationReason.Layout);
+                    }
                 }
             });
         }

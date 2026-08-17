@@ -85,7 +85,8 @@
                         @if (isOutsideLabel() && slice.label) {
                             <div
                                 aria-hidden="true"
-                                class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
+                                class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                                [class.opacity-0]="isAnimating() && isStructuralAnimation()"
                                 [monaChartLabelMeasure]="'sector:' + slice.sliceId"
                                 [style.left.px]="slice.label.position.x"
                                 [style.top.px]="slice.label.position.y"
@@ -101,7 +102,8 @@
                         } @else {
                             <div
                                 aria-hidden="true"
-                                class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center"
+                                class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                                [class.opacity-0]="isAnimating() && isStructuralAnimation()"
                                 [style.left.px]="slice.insideLabelPoint.x"
                                 [style.top.px]="slice.insideLabelPoint.y"
                                 [style.transform]="'translate(-50%, -50%)'"
