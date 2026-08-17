@@ -8,16 +8,18 @@ The Mona UI Chart library combines declarative Angular template composition with
 
 ## Key Features
 
-- **Declarative Composition:** Compose charts using intuitive child components for axes, series, legends, tooltips, inside labels, and donut center templates.
+- **Declarative Composition:** Compose charts using intuitive child components for Cartesian axes (`<mona-chart-x-axis>`, `<mona-chart-y-axis>`), Radial axes (`<mona-chart-angular-axis>`, `<mona-chart-radial-axis>`), series, legends, tooltips, inside labels, and donut center templates.
 - **Series Types:**
   - **Cartesian:** Line (with multiple interpolation curves), Area (gradient fade or solid fill), and Grouped Bar series.
-  - **Polar:** Pie (full or partial circles) and Donut (configurable hole radius ratio and custom center templates).
+  - **Polar Sector:** Pie (full or partial circles) and Donut (configurable hole radius ratio and custom center templates).
+  - **Polar Axis:** Radar charts (closed polygon series comparing categorical attributes across angular spokes) and Continuous Polar charts (directional signals and curves with continuous angular coordinates from 0° to 360°).
 - **Dynamic & Responsive:** Built-in `ResizeObserver` support with automatic canvas backing store scaling for crisp rendering on HiDPI/Retina screens.
+- **Radial Fill Modes & Gradients:** Solid wash, radial gradient fading from center pole to outer radius, or outline only.
 - **Full Keyboard & Screen Reader Accessibility:** 
-  - `ArrowRight` / `ArrowLeft`: Navigate through X-axis interaction buckets or polar slices.
-  - `ArrowUp` / `ArrowDown`: Cycle through visible Cartesian series at the focused data point, or navigate slices in polar mode.
+  - `ArrowRight` / `ArrowLeft`: Navigate through X-axis interaction buckets, polar slices, or angular spokes.
+  - `ArrowUp` / `ArrowDown`: Cycle through visible series at the focused data point, or navigate slices in sector mode.
   - `Home` / `End`: Jump to first or last data point/slice.
-  - `Enter` / `Space`: Emit click events for the selected data point or slice.
+  - `Enter` / `Space`: Emit click events for the selected data point, spoke, or slice.
   - `Escape`: Dismiss active interaction and announcements.
   - Live ARIA announcements and 100% AXE-compliant accessibility.
 - **Interactive Legend:** Clickable legend items that toggle series or individual slice visibility with stable palette coloring.
@@ -26,6 +28,53 @@ The Mona UI Chart library combines declarative Angular template composition with
 ---
 
 ## Basic Usage
+
+### Radar Chart
+
+```html
+<mona-chart [data]="characterStats" aria-label="Character Skill Matrix" class="h-80 w-full">
+    <mona-chart-angular-axis />
+    <mona-chart-radial-axis gridShape="polygon" [nice]="true" />
+
+    <mona-radar-series
+        field="warrior"
+        categoryField="metric"
+        name="Warrior"
+        fillMode="gradient"
+        curve="linear"
+        [showPoints]="true" />
+    <mona-radar-series
+        field="mage"
+        categoryField="metric"
+        name="Mage"
+        fillMode="gradient"
+        curve="linear"
+        [showPoints]="true" />
+
+    <mona-chart-legend position="bottom" [interactive]="true" />
+    <mona-chart-tooltip [shared]="true" />
+</mona-chart>
+```
+
+### Continuous Polar Chart
+
+```html
+<mona-chart [data]="radiationData" aria-label="Antenna Radiation Pattern" class="h-80 w-full">
+    <mona-chart-angular-axis [tickCount]="12" />
+    <mona-chart-radial-axis gridShape="circle" [nice]="true" />
+
+    <mona-polar-series
+        field="gain"
+        angleField="angle"
+        name="Gain (dBi)"
+        fillMode="gradient"
+        curve="smooth"
+        [showPoints]="true" />
+
+    <mona-chart-legend position="bottom" [interactive]="true" />
+    <mona-chart-tooltip [shared]="true" />
+</mona-chart>
+```
 
 ### Cartesian Chart
 
@@ -43,7 +92,7 @@ The Mona UI Chart library combines declarative Angular template composition with
 </mona-chart>
 ```
 
-### Pie Chart
+### Pie & Donut Charts
 
 ```html
 <mona-chart [data]="browserShare" aria-label="Browser Usage Share" class="h-80 w-full">
@@ -58,27 +107,6 @@ The Mona UI Chart library combines declarative Angular template composition with
 </mona-chart>
 ```
 
-### Donut Chart with Center Template
-
-```html
-<mona-chart [data]="revenueByCategory" aria-label="Revenue by Category" class="h-80 w-full">
-    <mona-donut-series
-        field="revenue"
-        categoryField="category"
-        [innerRadiusRatio]="0.62">
-        <ng-template monaChartCenterTemplate let-total let-formattedTotal="formattedTotal">
-            <div class="flex flex-col items-center justify-center">
-                <span class="text-xs text-muted-foreground">Total Revenue</span>
-                <strong class="text-lg font-semibold">{{ formattedTotal }}</strong>
-            </div>
-        </ng-template>
-    </mona-donut-series>
-
-    <mona-chart-legend position="bottom" [interactive]="true" />
-    <mona-chart-tooltip />
-</mona-chart>
-```
-
 ---
 
 ## Components & Directives
@@ -86,59 +114,56 @@ The Mona UI Chart library combines declarative Angular template composition with
 ### `<mona-chart>`
 The root container that coordinates layout measurement, data domains, rendering schedules, and interaction.
 
-| Input / Output | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `data` | `readonly unknown[]` | `[]` | Primary dataset shared across child series. |
-| `xField` | `ChartField` | `""` | Property key or accessor function extracting X coordinate. |
-| `aria-label` | `string` | `"Chart"` | Accessible label for screen readers. |
-| `aria-description` | `string` | `""` | Extended description for screen readers. |
-| `class` | `string` | `""` | CSS classes applied to chart root container. |
-| `pointClick` | `output<ChartPointEvent>` | — | Emits when a point, bar, or slice is clicked or activated with Enter/Space. |
-| `pointFocusChange` | `output<ChartPointFocusEvent>` | — | Emits when keyboard focus moves to a point, series, or slice. |
-| `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | — | Emits when series visibility is toggled via legend. |
-
-### `<mona-pie-series>`
-Renders a pie chart with configurable start/end angle, pad angle, corner radius, and inside data labels.
-
-| Input / Output | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric slice value. |
-| `categoryField` | `ChartField` | `"category"` | Property key or accessor extracting slice category. |
-| `data` | `readonly unknown[]` | `undefined` | Series-specific data overriding root chart data. |
-| `name` | `string` | `"Pie"` | Series name for tooltips and accessibility. |
-| `outerRadiusRatio` | `number` | `0.9` | Outer radius ratio relative to plot bounds (0.1 to 1). |
-| `fillMode` | `ChartPolarFillMode` | `"solid"` | Fill styling: `"solid"` or radial `"gradient"` (center to arc). |
-| `startAngle` / `endAngle` | `number` | `0` / `360` | Angles in degrees (clockwise from 12 o'clock). |
-| `padAngle` | `number` | `0` | Angular gap in degrees between adjacent slices. |
-| `cornerRadius` | `number` | `undefined` | Pixel corner radius on arc boundaries. |
-| `colors` | `readonly string[]` | `undefined` | Explicit array of slice colors. |
-| `colorField` | `ChartField` | `undefined` | Accessor function or property key for datum color. |
-| `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom numeric formatter for values and totals. |
-| `categoryFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter for category labels. |
-| `showLabels` | `boolean` | `false` | Whether slice data labels are displayed. |
-| `labelPosition` | `ChartPolarLabelPosition` | `"outside"` | Placement of data labels: `"outside"` (with leader lines and collision resolution) or `"inside"` (slice centroid). |
-| `labelContent` | `ChartPolarLabelContent` | `"percentage"` | Default data label format (`"percentage"`, `"value"`, `"category"`, `"category-percentage"`). |
-| `minLabelAngle` | `number` | `12` | Minimum slice angle in degrees required to render label (applies to `inside` labels). |
-| `sliceVisibilityChange` | `output<ChartSliceVisibilityEvent>` | — | Emits when an individual slice is hidden or shown. |
-
-### `<mona-donut-series>`
-Renders a donut chart with all `<mona-pie-series>` inputs plus:
+### `<mona-chart-angular-axis>`
+Configures the angular (spoke / degree) dimension in Polar and Radar charts.
 
 | Input | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `innerRadiusRatio` | `number` | `0.6` | Ratio of inner hole radius relative to outer radius (0 to 0.95). |
+| `axisLine` | `boolean` | `true` | Whether to render the outer circular/polygonal border axis line. |
+| `gridLines` | `boolean` | `true` | Whether to render radiating spoke lines from the pole to the outer boundary. |
+| `labels` | `boolean` | `true` | Whether to render angular category/degree labels. |
+| `rotation` | `number` | `0` | Angle rotation in degrees (clockwise) of the 0° reference position. |
+| `tickCount` | `number` | `12` | Desired number of angular ticks for continuous polar charts. |
+| `visible` | `boolean` | `true` | Whether the angular axis is visible. |
 
-### `<mona-line-series>`
-Renders continuous line graphs with optional markers and curve smoothing.
+### `<mona-chart-radial-axis>`
+Configures the radial (distance from center pole) dimension in Polar and Radar charts.
 
-### `<mona-area-series>`
-Renders area fill charts with zero-baseline gradients or solid fills.
+| Input | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `axisLine` | `boolean` | `true` | Whether to render the zero center tick indicator. |
+| `gridLines` | `boolean` | `true` | Whether to render concentric radial grid rings. |
+| `gridShape` | `ChartRadialGridShape` | `"auto"` | Concentric grid ring geometry: `"auto"` (polygon for radar, circle for polar), `"polygon"`, or `"circle"`. |
+| `labels` | `boolean` | `true` | Whether to render numeric radial tick labels along the primary reference spoke. |
+| `min` / `max` | `number` | `undefined` | Explicit radial domain bounds. |
+| `nice` | `boolean` | `true` | Rounds radial min/max bounds to human-friendly tick increments. |
+| `visible` | `boolean` | `true` | Whether the radial axis is visible. |
 
-### `<mona-bar-series>`
-Renders vertical grouped bars with configurable corner radii and widths.
+### `<mona-radar-series>`
+Renders a closed polygonal series comparing categorical metrics across angular spokes.
 
-### `<mona-chart-legend>`
-Renders interactive series or slice legend indicators with visibility toggling.
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric metric value. |
+| `categoryField` | `ChartField` | `"category"` | Property key or accessor extracting spoke category. |
+| `name` | `string` | `"Radar"` | Series name for tooltips, legend, and accessibility. |
+| `fillMode` | `ChartRadialFillMode` | `"solid"` | Fill styling: `"solid"` wash, radial `"gradient"`, or `"none"`. |
+| `curve` | `ChartRadialCurve` | `"linear"` | Curve interpolation: `"linear"` or `"smooth"` (closed Catmull-Rom spline). |
+| `showPoints` | `boolean` | `true` | Whether vertex point markers are rendered. |
+| `pointRadius` | `number` | `undefined` | Vertex marker radius in pixels. |
+| `strokeWidth` | `number` | `undefined` | Polygon outline stroke width in pixels. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
-### `<mona-chart-tooltip>`
-Renders smart popover tooltips with automated boundary detection, clamping, and polar category/percentage presentation.
+### `<mona-polar-series>`
+Renders a continuous polar series plotting values over continuous angular degrees (0° to 360°).
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric radial magnitude. |
+| `angleField` | `ChartField` | `"angle"` | Property key or accessor extracting angle in degrees. |
+| `name` | `string` | `"Polar"` | Series name for tooltips, legend, and accessibility. |
+| `fillMode` | `ChartRadialFillMode` | `"none"` | Fill styling: `"solid"` wash, radial `"gradient"` (to pole), or `"none"`. |
+| `curve` | `ChartRadialCurve` | `"linear"` | Curve interpolation: `"linear"` or `"smooth"`. |
+| `connectNulls` | `boolean` | `false` | Whether to interpolate across null/undefined values. |
+| `showPoints` | `boolean` | `false` | Whether data point markers are rendered. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |

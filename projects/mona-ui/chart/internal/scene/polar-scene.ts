@@ -1,12 +1,13 @@
 import type { ChartPoint } from "../../models/chart.models";
 import type { ChartPolarFillMode, ChartPolarLabelPosition, ChartPolarLabelSide } from "../../models/chart-polar.models";
 
-export interface ChartPolarSeriesStyle {
+export interface ChartSectorSeriesStyle {
     fillOpacity: number;
     strokeColor: string;
     strokeSource: "default" | "explicit";
     strokeWidth: number;
 }
+export type ChartPolarSeriesStyle = ChartSectorSeriesStyle;
 
 export interface ScenePolarLabel {
     readonly arcAnchor: ChartPoint;
@@ -20,7 +21,7 @@ export interface ScenePolarLabel {
     readonly widthEstimate: number;
 }
 
-export interface ScenePolarSlice {
+export interface SceneSectorSlice {
     category: unknown;
     centroid: ChartPoint;
     color: string;
@@ -43,8 +44,9 @@ export interface ScenePolarSlice {
     value: number;
     visible: boolean;
 }
+export type ScenePolarSlice = SceneSectorSlice;
 
-export interface ChartPolarSeriesScene {
+export interface ChartSectorSeriesScene {
     center: ChartPoint;
     cornerRadius: number;
     fillMode: ChartPolarFillMode;
@@ -56,8 +58,9 @@ export interface ChartPolarSeriesScene {
     outerRadius: number;
     padAngle: number;
     showLabels: boolean;
-    slices: readonly ScenePolarSlice[];
-    style: ChartPolarSeriesStyle;
+    slices: readonly SceneSectorSlice[];
+    style: ChartSectorSeriesStyle;
     total: number;
     type: "donut" | "pie";
 }
+export type ChartPolarSeriesScene = ChartSectorSeriesScene;

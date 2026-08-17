@@ -26,6 +26,7 @@ export interface SceneBar {
 }
 
 export interface SceneHitTarget {
+    angle?: number;
     arc?: SceneArcHitGeometry;
     borderRadius?: number;
     bounds?: ChartRect;
@@ -51,8 +52,10 @@ export interface SceneHitTarget {
 }
 
 export interface ChartInteractionBucket {
-    readonly centerX: number;
+    readonly anchor?: ChartPoint;
+    readonly centerX?: number;
     readonly hits: readonly SceneHitTarget[];
+    readonly order?: number;
     readonly xKey: ChartInteractionXKey;
     readonly xValue: unknown;
 }

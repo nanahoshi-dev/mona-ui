@@ -1,107 +1,98 @@
-import { arc } from "d3-shape";
-import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
-import type { ChartPolarSeriesScene, ScenePolarSlice } from "../../scene/polar-scene";
+import { areaRadial, curveCatmullRom, curveLinear, lineRadial } from "d3-shape";
+import type { ChartContinuousPolarSeriesScene, SceneRadialPoint } from "../../scene/polar-axis-scene";
 import type { ChartStyleResolver } from "../../style/chart-style-resolver";
-import { createPolarGradientSpec } from "./polar-gradient";
+import { withAlpha } from "./area-gradient";
+import { createRadialSeriesGradientSpec } from "./radial-series-gradient";
 
 export class PolarSeriesRenderer {
     public static render(
         context: CanvasRenderingContext2D,
-        series: ChartPolarSeriesScene,
-        interactionState: ChartInteractionState | null,
+        series: ChartContinuousPolarSeriesScene,
+        center: { x: number; y: number },
         styleResolver: ChartStyleResolver
     ): void {
-        const { center, fillMode, slices, style } = series;
-        if (!slices || slices.length === 0) {
+        const { color, connectNulls, curve, fillMode, fillOpacity, maxRenderedRadius, pointRadius, points, showPoints, strokeWidth } =
+            series;
+
+        const definedPoints = points.filter(p => p.defined);
+        if (definedPoints.length === 0) {
             return;
         }
 
-        const arcGenerator = arc<ScenePolarSlice>()
-            .innerRadius(d => d.innerRadius)
-            .outerRadius(d => d.outerRadius)
-            .startAngle(d => d.startAngle)
-            .endAngle(d => d.endAngle)
-            .padAngle(d => d.padAngle)
-            .cornerRadius(d => d.cornerRadius)
-            .context(context);
+        const d3Curve = curve === "smooth" ? curveCatmullRom : curveLinear;
+        const renderPoints = connectNulls ? definedPoints : points;
 
         context.save();
         context.translate(center.x, center.y);
 
-        // 1. Draw slice fills and separator strokes
-        for (const slice of slices) {
-            if (!slice.visible) {
-                continue;
-            }
+        // 1. Draw Polar Area Fill (Solid or Gradient) from innerRadius 0 to outer data line
+        if (fillMode !== "none" && definedPoints.length >= 2) {
+            const areaGenerator = areaRadial<SceneRadialPoint>()
+                .angle(d => d.angle)
+                .innerRadius(0)
+                .outerRadius(d => d.radius)
+                .curve(d3Curve)
+                .defined(d => d.defined)
+                .context(context);
 
             context.save();
             context.beginPath();
-            arcGenerator(slice);
+            areaGenerator(renderPoints as SceneRadialPoint[]);
 
             if (fillMode === "gradient") {
-                const spec = createPolarGradientSpec(
-                    slice.innerRadius,
-                    slice.outerRadius,
-                    slice.color,
-                    style.fillOpacity
-                );
-                const gradient = context.createRadialGradient(0, 0, spec.innerRadius, 0, 0, spec.outerRadius);
+                const spec = createRadialSeriesGradientSpec(maxRenderedRadius, color, fillOpacity);
+                const gradient = context.createRadialGradient(0, 0, 0, 0, 0, spec.outerRadius);
                 for (const stop of spec.stops) {
                     gradient.addColorStop(stop.offset, stop.color);
                 }
-
-                context.globalAlpha = 1;
                 context.fillStyle = gradient;
-                context.fill();
             } else {
-                context.fillStyle = slice.color;
-                context.globalAlpha = style.fillOpacity;
-                context.fill();
+                context.fillStyle = withAlpha(color, fillOpacity);
             }
 
-            // Stroke solid slice border independently from fill
-            const strokeColor = style.strokeSource === "explicit" ? style.strokeColor : slice.color;
-            if (style.strokeWidth > 0 && strokeColor) {
-                context.globalAlpha = 1;
-                context.strokeStyle = strokeColor;
-                context.lineWidth = style.strokeWidth;
-                context.stroke();
-            }
-
+            context.fill();
             context.restore();
         }
 
-        // 2. Draw Interaction Overlay for active slice
-        const activeHit = interactionState?.activeHitTarget;
-        if (activeHit && activeHit.seriesId === series.id) {
-            const activeSlice = slices.find(s => s.sliceId === activeHit.sliceId || s.dataIndex === activeHit.index);
-            if (activeSlice && activeSlice.visible) {
-                context.save();
+        // 2. Draw Solid Data Line Stroke (without stroking pole closure edges)
+        if (strokeWidth > 0 && definedPoints.length >= 2) {
+            const lineGenerator = lineRadial<SceneRadialPoint>()
+                .angle(d => d.angle)
+                .radius(d => d.radius)
+                .curve(d3Curve)
+                .defined(d => d.defined)
+                .context(context);
+
+            context.save();
+            context.beginPath();
+            lineGenerator(renderPoints as SceneRadialPoint[]);
+            context.strokeStyle = color;
+            context.lineWidth = strokeWidth;
+            context.stroke();
+            context.restore();
+        }
+
+        // 3. Draw Point Markers
+        if (showPoints && pointRadius > 0) {
+            const surfaceColor =
+                styleResolver.resolveCssVariable("--color-surface") ||
+                styleResolver.resolveCssVariable("--color-card") ||
+                "#ffffff";
+
+            context.save();
+            for (const pt of definedPoints) {
+                const px = Math.sin(pt.angle) * pt.radius;
+                const py = -Math.cos(pt.angle) * pt.radius;
+
                 context.beginPath();
-                arcGenerator(activeSlice);
-
-                if (interactionState.source === "keyboard") {
-                    const focusIndicatorColor =
-                        styleResolver.resolveCssVariable("--color-focus-indicator") ||
-                        styleResolver.resolveCssVariable("--color-primary") ||
-                        "#3b82f6";
-                    context.strokeStyle = focusIndicatorColor;
-                    context.lineWidth = 3;
-                    context.globalAlpha = 1;
-                    context.stroke();
-
-                    context.fillStyle = "rgba(255, 255, 255, 0.15)";
-                    context.fill();
-                } else {
-                    // Hover overlay (translucent fill only, no border)
-                    const hoverOverlayColor =
-                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
-                    context.fillStyle = hoverOverlayColor;
-                    context.fill();
-                }
-
-                context.restore();
+                context.arc(px, py, pointRadius, 0, Math.PI * 2);
+                context.fillStyle = color;
+                context.fill();
+                context.strokeStyle = surfaceColor;
+                context.lineWidth = 1.5;
+                context.stroke();
             }
+            context.restore();
         }
 
         context.restore();

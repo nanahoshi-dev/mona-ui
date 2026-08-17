@@ -149,6 +149,7 @@ describe("ChartHitTestEngine", () => {
             interactionBuckets: [],
             legendItems: [],
             plotRect: { height: 400, width: 400, x: 0, y: 0 },
+            polarKind: "sector",
             series: [],
             width: 400
         };

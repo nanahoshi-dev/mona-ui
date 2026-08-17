@@ -8,7 +8,7 @@ export type ChartAxisFormatter<T = unknown> = (value: T, index: number) => strin
 
 export interface ChartAxisLabelTemplateContext<T = unknown> {
     $implicit: T;
-    axis: "x" | "y";
+    axis: "angular" | "radial" | "x" | "y";
     index: number;
     value: T;
 }

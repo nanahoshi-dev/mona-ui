@@ -312,7 +312,7 @@ describe("MonaChartComponent", () => {
 
             expect(scene?.coordinateSystem).toBe("polar");
             expect(scene?.series.length).toBe(1);
-            if (scene && scene.coordinateSystem === "polar") {
+            if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
                 expect(scene.series[0].slices.length).toBe(3);
             }
 

@@ -9,6 +9,9 @@ import type {
     ChartPolarFillMode,
     ChartPolarLabelContent,
     ChartPolarLabelPosition,
+    ChartRadialCurve,
+    ChartRadialFillMode,
+    ChartRadialGridShape,
     ChartValueFormatter
 } from "../../models/chart-polar.models";
 import type { ChartField, ChartPoint } from "../../models/chart.models";
@@ -48,6 +51,38 @@ export interface ChartAxisRegistration {
     tickCount: Signal<number | undefined>;
     title: Signal<string>;
     type: Signal<ChartXAxisType>;
+    userClass?: Signal<string>;
+    visible: Signal<boolean>;
+}
+export type ChartCartesianAxisRegistration = ChartAxisRegistration;
+
+export interface ChartAngularAxisRegistration {
+    axisLine: Signal<boolean>;
+    formatter: Signal<ChartAxisFormatter | undefined>;
+    gridLines: Signal<boolean>;
+    labelOffset: Signal<number>;
+    labels: Signal<boolean>;
+    labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
+    rotation: Signal<number>;
+    tickCount: Signal<number | undefined>;
+    userClass?: Signal<string>;
+    visible: Signal<boolean>;
+}
+
+export interface ChartRadialAxisRegistration {
+    axisLine: Signal<boolean>;
+    formatter: Signal<ChartAxisFormatter | undefined>;
+    gridLines: Signal<boolean>;
+    gridShape: Signal<ChartRadialGridShape>;
+    labelAngle: Signal<number>;
+    labelOffset: Signal<number>;
+    labels: Signal<boolean>;
+    labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
+    max: Signal<number | undefined>;
+    min: Signal<number | undefined>;
+    nice: Signal<boolean>;
+    tickCount: Signal<number | undefined>;
+    userClass?: Signal<string>;
     visible: Signal<boolean>;
 }
 
@@ -107,7 +142,7 @@ export interface ChartBarSeriesRegistration extends ChartCartesianSeriesRegistra
     type: "bar";
 }
 
-export interface ChartPolarSeriesRegistrationBase extends ChartSeriesRegistrationBase {
+export interface ChartSectorSeriesRegistrationBase extends ChartSeriesRegistrationBase {
     categoryField: Signal<ChartField>;
     categoryFormatter: Signal<ChartValueFormatter | undefined>;
     colorField: Signal<ChartField | undefined>;
@@ -131,15 +166,39 @@ export interface ChartPolarSeriesRegistrationBase extends ChartSeriesRegistratio
     valueFormatter: Signal<ChartValueFormatter | undefined>;
     visibilityRevision: Signal<number>;
 }
+export type ChartPolarSeriesRegistrationBase = ChartSectorSeriesRegistrationBase;
 
-export interface ChartPieSeriesRegistration extends ChartPolarSeriesRegistrationBase {
+export interface ChartPieSeriesRegistration extends ChartSectorSeriesRegistrationBase {
     type: "pie";
 }
 
-export interface ChartDonutSeriesRegistration extends ChartPolarSeriesRegistrationBase {
+export interface ChartDonutSeriesRegistration extends ChartSectorSeriesRegistrationBase {
     centerTemplate: Signal<ChartCenterTemplateDirective | undefined>;
     innerRadiusRatio: Signal<number>;
     type: "donut";
+}
+
+export interface ChartRadialSeriesRegistrationBase extends ChartSeriesRegistrationBase {
+    color: Signal<string>;
+    connectNulls: Signal<boolean>;
+    curve: Signal<ChartRadialCurve>;
+    fillMode: Signal<ChartRadialFillMode>;
+    fillOpacity: Signal<number | undefined>;
+    pointRadius: Signal<number | undefined>;
+    showPoints: Signal<boolean>;
+    strokeWidth: Signal<number | undefined>;
+    toggleVisibility?: () => boolean;
+    valueFormatter: Signal<ChartValueFormatter | undefined>;
+}
+
+export interface ChartRadarSeriesRegistration extends ChartRadialSeriesRegistrationBase {
+    categoryField: Signal<ChartField>;
+    type: "radar";
+}
+
+export interface ChartContinuousPolarSeriesRegistration extends ChartRadialSeriesRegistrationBase {
+    angleField: Signal<ChartField>;
+    type: "polar";
 }
 
 export type ChartCartesianSeriesRegistration =
@@ -147,15 +206,23 @@ export type ChartCartesianSeriesRegistration =
     | ChartBarSeriesRegistration
     | ChartLineSeriesRegistration;
 
-export type ChartPolarSeriesRegistration = ChartDonutSeriesRegistration | ChartPieSeriesRegistration;
+export type ChartSectorSeriesRegistration = ChartDonutSeriesRegistration | ChartPieSeriesRegistration;
+export type ChartPolarSeriesRegistration = ChartSectorSeriesRegistration;
 
-export type ChartSeriesRegistration = ChartCartesianSeriesRegistration | ChartPolarSeriesRegistration;
+export type ChartRadialSeriesRegistration = ChartContinuousPolarSeriesRegistration | ChartRadarSeriesRegistration;
+
+export type ChartSeriesRegistration =
+    | ChartCartesianSeriesRegistration
+    | ChartRadialSeriesRegistration
+    | ChartSectorSeriesRegistration;
 
 export interface ChartRegistrationContext {
     invalidate(reason?: ChartInvalidationReason): void;
     legendItems: Signal<readonly ChartLegendItem[]>;
-    observeLabelElement?(element: HTMLElement, sliceId: string): void;
+    observeLabelElement?(element: HTMLElement, labelId: string): void;
+    registerAngularAxis(registration: ChartAngularAxisRegistration): () => void;
     registerLegend(registration: ChartLegendRegistration): () => void;
+    registerRadialAxis(registration: ChartRadialAxisRegistration): () => void;
     registerSeries(registration: ChartSeriesRegistration): () => void;
     registerTooltip(registration: ChartTooltipRegistration): () => void;
     registerXAxis(registration: ChartAxisRegistration): () => void;
@@ -166,5 +233,5 @@ export interface ChartRegistrationContext {
     toggleSeriesVisibility(seriesId: string): void;
     tooltipContext: Signal<ChartTooltipTemplateContext | null>;
     tooltipPosition: Signal<ChartPoint | null>;
-    unobserveLabelElement?(element: HTMLElement, sliceId: string): void;
+    unobserveLabelElement?(element: HTMLElement, labelId: string): void;
 }

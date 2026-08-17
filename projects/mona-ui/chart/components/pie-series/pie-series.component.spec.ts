@@ -82,7 +82,7 @@ describe("MonaPieSeriesComponent", () => {
         expect(scene?.coordinateSystem).toBe("polar");
         expect(scene?.series.length).toBe(1);
         expect(scene?.series[0].type).toBe("pie");
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].slices.length).toBe(3);
         }
     });
@@ -106,7 +106,7 @@ describe("MonaPieSeriesComponent", () => {
         chart.recomputeScene();
         const scene = chart.scene();
         // Slices visible in geometry should now be 2
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].slices.length).toBe(2);
         }
     });
@@ -120,7 +120,7 @@ describe("MonaPieSeriesComponent", () => {
         chart.recomputeScene();
         const scene = chart.scene();
 
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].labelPosition).toBe("outside");
             expect(scene.series[0].slices[0].label).toBeDefined();
             expect(scene.series[0].slices[0].label?.visible).toBe(true);
@@ -132,7 +132,7 @@ describe("MonaPieSeriesComponent", () => {
         chart.recomputeScene();
         const insideScene = chart.scene();
 
-        if (insideScene && insideScene.coordinateSystem === "polar") {
+        if (insideScene && insideScene.coordinateSystem === "polar" && insideScene.polarKind === "sector") {
             expect(insideScene.series[0].labelPosition).toBe("inside");
         }
     });
@@ -142,7 +142,7 @@ describe("MonaPieSeriesComponent", () => {
         chart.recomputeScene();
         let scene = chart.scene();
 
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].fillMode).toBe("solid");
         }
 
@@ -151,7 +151,7 @@ describe("MonaPieSeriesComponent", () => {
         chart.recomputeScene();
         scene = chart.scene();
 
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].fillMode).toBe("gradient");
         }
     });
@@ -189,7 +189,7 @@ describe("MonaPieSeriesComponent", () => {
         const scene = chart.scene();
 
         // All 2 remaining slices should be visible
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].slices.length).toBe(2);
         }
     });

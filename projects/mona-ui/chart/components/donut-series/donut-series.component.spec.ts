@@ -62,7 +62,7 @@ describe("MonaDonutSeriesComponent", () => {
         expect(scene?.coordinateSystem).toBe("polar");
         expect(scene?.series.length).toBe(1);
         expect(scene?.series[0].type).toBe("donut");
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].innerRadius).toBeGreaterThan(0);
             expect(scene.series[0].total).toBe(1000);
         }
@@ -91,7 +91,7 @@ describe("MonaDonutSeriesComponent", () => {
         chart.recomputeScene();
         let scene = chart.scene();
 
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].fillMode).toBe("solid");
         }
 
@@ -100,7 +100,7 @@ describe("MonaDonutSeriesComponent", () => {
         chart.recomputeScene();
         scene = chart.scene();
 
-        if (scene && scene.coordinateSystem === "polar") {
+        if (scene && scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
             expect(scene.series[0].fillMode).toBe("gradient");
         }
     });

@@ -3,7 +3,7 @@
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
             <h2 class="text-xl font-bold tracking-tight text-foreground">Interactive Chart Explorer</h2>
-            <p class="text-sm text-muted-foreground">High-performance Canvas 2D Cartesian and Polar chart visualizations with declarative Angular composition.</p>
+            <p class="text-sm text-muted-foreground">High-performance Canvas 2D Cartesian, Sector, Radar, and Continuous Polar chart visualizations.</p>
         </div>
 
         <div class="flex items-center flex-wrap gap-2 bg-muted/40 p-1 rounded-lg border border-border">
@@ -13,6 +13,20 @@
                 size="small"
                 (click)="setTab('mixed')">
                 Mixed Studio
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'radar' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('radar')">
+                Radar Chart
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'polar' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('polar')">
+                Polar Chart
             </button>
             <button
                 monaButton
@@ -58,10 +72,127 @@
             <mona-tab title="Series & Layout" [selected]="true">
                 <ng-template monaTabContentTemplate>
                     <div class="flex flex-wrap items-center gap-6 p-4">
-                        @if (activeTab() === 'pie' || activeTab() === 'donut') {
-                            <!-- Polar Settings -->
+                        @if (activeTab() === 'radar') {
+                            <!-- Radar Settings -->
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Polar Slices & Labels</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Radar Styles</span>
+                                <div class="flex flex-wrap items-center gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-muted-foreground">Fill Mode:</span>
+                                        <mona-dropdown-list
+                                            [data]="radialFillModeOptions"
+                                            [value]="radarFillMode()"
+                                            (valueChange)="onRadarFillModeChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-48" />
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-muted-foreground">Curve:</span>
+                                        <mona-dropdown-list
+                                            [data]="radialCurveOptions"
+                                            [value]="radarCurve()"
+                                            (valueChange)="onRadarCurveChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-40" />
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-muted-foreground">Grid:</span>
+                                        <mona-dropdown-list
+                                            [data]="radialGridShapeOptions"
+                                            [value]="radarGridShape()"
+                                            (valueChange)="onRadarGridShapeChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-36" />
+                                    </div>
+                                    <mona-check-box [checked]="radarShowPoints()" (checkedChange)="radarShowPoints.set($event)">
+                                        Vertex Points
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Radar Datasets</span>
+                                <div class="flex flex-wrap gap-2">
+                                    <button monaButton size="small" look="secondary" (click)="randomizeRadarData()">
+                                        Randomize Matrix
+                                    </button>
+                                </div>
+                            </div>
+                        } @else if (activeTab() === 'polar') {
+                            <!-- Continuous Polar Settings -->
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Continuous Polar Styles</span>
+                                <div class="flex flex-wrap items-center gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-muted-foreground">Fill Mode:</span>
+                                        <mona-dropdown-list
+                                            [data]="radialFillModeOptions"
+                                            [value]="continuousPolarFillMode()"
+                                            (valueChange)="onContinuousPolarFillModeChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-48" />
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-muted-foreground">Curve:</span>
+                                        <mona-dropdown-list
+                                            [data]="radialCurveOptions"
+                                            [value]="continuousPolarCurve()"
+                                            (valueChange)="onContinuousPolarCurveChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-40" />
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-muted-foreground">Grid:</span>
+                                        <mona-dropdown-list
+                                            [data]="radialGridShapeOptions"
+                                            [value]="continuousPolarGridShape()"
+                                            (valueChange)="onContinuousPolarGridShapeChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-36" />
+                                    </div>
+                                    <mona-check-box [checked]="continuousPolarConnectNulls()" (checkedChange)="continuousPolarConnectNulls.set($event)">
+                                        Connect Nulls
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="continuousPolarShowPoints()" (checkedChange)="continuousPolarShowPoints.set($event)">
+                                        Points
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Polar Datasets</span>
+                                <div class="flex flex-wrap gap-2">
+                                    <button monaButton size="small" look="secondary" (click)="randomizePolarData()">
+                                        Randomize Radiation Pattern
+                                    </button>
+                                </div>
+                            </div>
+                        } @else if (activeTab() === 'pie' || activeTab() === 'donut') {
+                            <!-- Polar Sector Settings -->
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sector Slices & Labels</span>
                                 <div class="flex flex-wrap items-center gap-4">
                                     @if (activeTab() === 'pie') {
                                         <div class="flex items-center gap-2">
@@ -96,7 +227,7 @@
                                             <mona-dropdown-list
                                                 [data]="pieLabelContentOptions"
                                                 [value]="pieLabelContent()"
-                                                (valueChange)="onLabelContentChange($event)"
+                                                (valueChange)="onPieLabelContentChange($event)"
                                                 textField="label"
                                                 valueField="value"
                                                 [valuePrimitive]="true"
@@ -218,96 +349,97 @@
                                 </mona-check-box>
                             </div>
                         }
-
-                        <div class="h-8 w-px bg-border hidden md:block"></div>
-
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Legend Placement</span>
-                            <mona-dropdown-list
-                                [data]="legendPositionOptions"
-                                [value]="legendPosition()"
-                                (valueChange)="onLegendPositionChange($event)"
-                                textField="label"
-                                valueField="value"
-                                [valuePrimitive]="true"
-                                size="small"
-                                class="w-36" />
-                        </div>
                     </div>
                 </ng-template>
             </mona-tab>
-
-            @if (activeTab() !== 'pie' && activeTab() !== 'donut') {
-                <mona-tab title="Axes & Grid">
-                    <ng-template monaTabContentTemplate>
-                        <div class="flex flex-wrap items-center gap-6 p-4">
-                            <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">X Axis Config</span>
-                                <div class="flex flex-wrap gap-4">
-                                    <mona-check-box [checked]="xAxisLine()" (checkedChange)="xAxisLine.set($event)">
-                                        Axis Line
-                                    </mona-check-box>
-                                    <mona-check-box [checked]="xGridLines()" (checkedChange)="xGridLines.set($event)">
-                                        Grid Lines
-                                    </mona-check-box>
-                                </div>
-                            </div>
-
-                            <div class="h-8 w-px bg-border hidden md:block"></div>
-
-                            <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Y Axis Config</span>
-                                <div class="flex flex-wrap gap-4">
-                                    <mona-check-box [checked]="yAxisLine()" (checkedChange)="yAxisLine.set($event)">
-                                        Axis Line
-                                    </mona-check-box>
-                                    <mona-check-box [checked]="yGridLines()" (checkedChange)="yGridLines.set($event)">
-                                        Grid Lines
-                                    </mona-check-box>
-                                    <mona-check-box [checked]="niceAxes()" (checkedChange)="niceAxes.set($event)">
-                                        Nice Numbers (Auto Range)
-                                    </mona-check-box>
-                                </div>
-                            </div>
-                        </div>
-                    </ng-template>
-                </mona-tab>
-
-                <mona-tab title="Dataset Controls">
-                    <ng-template monaTabContentTemplate>
-                        <div class="flex flex-wrap items-center gap-4 p-4">
-                            <button monaButton size="small" look="secondary" (click)="randomizeData()">
-                                Randomize (Unified)
-                            </button>
-                            <button monaButton size="small" look="secondary" (click)="randomizeIndividually()">
-                                Randomize (Independent)
-                            </button>
-                            <button monaButton size="small" look="secondary" (click)="loadProfitLossData()">
-                                Profit/Loss (Negative Values)
-                            </button>
-                            <button monaButton size="small" look="secondary" (click)="appendDataPoint()">
-                                + Append Month
-                            </button>
-                            <button monaButton size="small" look="outline" (click)="resetData()">
-                                Reset
-                            </button>
-                            <button
-                                monaButton
-                                size="small"
-                                [look]="isDataEmpty() ? 'primary' : 'error'"
-                                (click)="isDataEmpty.set(!isDataEmpty())">
-                                {{ isDataEmpty() ? 'Restore Data' : 'Clear Data (Test Empty State)' }}
-                            </button>
-                        </div>
-                    </ng-template>
-                </mona-tab>
-            }
         </mona-tabs>
     </div>
 
     <!-- Main Chart Viewports -->
     <div class="p-6 rounded-xl border border-border bg-card shadow-xs min-h-[420px] flex flex-col justify-center">
         @switch (activeTab()) {
+            @case ("radar") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">RPG Character Skill Matrix (Axis-Based Radar Chart)</h3>
+                    <mona-chart
+                        [data]="radarData()"
+                        class="h-96 w-full"
+                        aria-label="Character Skill Matrix"
+                        aria-description="Interactive radar chart comparing RPG class attributes across multiple axes."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-angular-axis [rotation]="radarRotation()" />
+                        <mona-chart-radial-axis [gridShape]="radarGridShape()" [nice]="true" />
+
+                        <mona-radar-series
+                            field="warrior"
+                            categoryField="metric"
+                            name="Warrior"
+                            [fillMode]="radarFillMode()"
+                            [curve]="radarCurve()"
+                            [showPoints]="radarShowPoints()" />
+
+                        <mona-radar-series
+                            field="mage"
+                            categoryField="metric"
+                            name="Mage"
+                            [fillMode]="radarFillMode()"
+                            [curve]="radarCurve()"
+                            [showPoints]="radarShowPoints()" />
+
+                        <mona-radar-series
+                            field="rogue"
+                            categoryField="metric"
+                            name="Rogue"
+                            [fillMode]="radarFillMode()"
+                            [curve]="radarCurve()"
+                            [showPoints]="radarShowPoints()" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("polar") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Continuous Antenna Radiation & Signal Quality (Continuous Polar Chart)</h3>
+                    <mona-chart
+                        [data]="polarData()"
+                        class="h-96 w-full"
+                        aria-label="Antenna Radiation Pattern"
+                        aria-description="Continuous polar chart plotting directional signal gain and noise floor across 360 degrees."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-angular-axis [tickCount]="continuousPolarTickCount()" />
+                        <mona-chart-radial-axis [gridShape]="continuousPolarGridShape()" [nice]="true" />
+
+                        <mona-polar-series
+                            field="gain"
+                            angleField="angle"
+                            name="Signal Gain (dBi)"
+                            [fillMode]="continuousPolarFillMode()"
+                            [curve]="continuousPolarCurve()"
+                            [connectNulls]="continuousPolarConnectNulls()"
+                            [showPoints]="continuousPolarShowPoints()" />
+
+                        <mona-polar-series
+                            field="noise"
+                            angleField="angle"
+                            name="Noise Floor (dBm)"
+                            fillMode="none"
+                            [curve]="continuousPolarCurve()"
+                            [connectNulls]="continuousPolarConnectNulls()"
+                            [showPoints]="continuousPolarShowPoints()" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
             @case ("pie") {
                 <div>
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Desktop Browser Usage Distribution (Polar Pie Series)</h3>

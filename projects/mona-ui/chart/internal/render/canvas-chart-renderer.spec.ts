@@ -375,6 +375,7 @@ describe("CanvasChartRenderer", () => {
             interactionBuckets: [],
             legendItems: [],
             plotRect: { height: 268, width: 468, x: 16, y: 16 },
+            polarKind: "sector",
             series: [
                 {
                     center: { x: 250, y: 150 },

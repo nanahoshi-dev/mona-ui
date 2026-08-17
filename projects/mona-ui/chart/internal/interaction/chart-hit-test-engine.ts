@@ -1,9 +1,10 @@
 import type { ChartPoint } from "../../models/chart.models";
-import type { ChartScene } from "../scene/chart-scene";
+import type { CartesianChartScene, ChartScene, PolarAxisChartScene, PolarSectorChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
-import { isAngleInsideArc, normalizeAngle } from "../utils/angle-utils";
 import { distance, isPointInRect } from "../utils/geometry-utils";
 import type { ChartInteractionState } from "./chart-interaction-state";
+import { PolarAxisHitTester } from "./polar-axis-hit-tester";
+import { PolarSectorHitTester } from "./polar-sector-hit-tester";
 
 export class ChartHitTestEngine {
     public static testHit(
@@ -29,37 +30,10 @@ export class ChartHitTestEngine {
 
         // Polar hit testing
         if (scene.coordinateSystem === "polar") {
-            for (const target of hitTargets) {
-                if (target.arc) {
-                    const { center, endAngle, innerRadius, outerRadius, padAngle, startAngle } = target.arc;
-                    const dx = pointer.x - center.x;
-                    const dy = pointer.y - center.y;
-                    const radius = Math.hypot(dx, dy);
-
-                    // Donut hole or outside ring
-                    if (radius < innerRadius || radius > outerRadius) {
-                        continue;
-                    }
-
-                    // Clockwise angle from 12 o'clock (-Y)
-                    const rawAngle = Math.atan2(dx, -dy);
-                    const pointerAngle = normalizeAngle(rawAngle);
-
-                    if (isAngleInsideArc(pointerAngle, startAngle, endAngle, padAngle)) {
-                        return {
-                            activeHitTarget: target,
-                            activeHits: [target],
-                            pointerPosition: pointer
-                        };
-                    }
-                }
+            if (scene.polarKind === "sector") {
+                return PolarSectorHitTester.testHit(pointer, scene as PolarSectorChartScene);
             }
-
-            return {
-                activeHitTarget: null,
-                activeHits: [],
-                pointerPosition: pointer
-            };
+            return PolarAxisHitTester.testHit(pointer, scene as PolarAxisChartScene, shared, maxHoverDistance);
         }
 
         // Cartesian shared mode
@@ -80,10 +54,11 @@ export class ChartHitTestEngine {
             // 2. Nearest X bucket
             if (interactionBuckets && interactionBuckets.length > 0) {
                 let nearestBucket = interactionBuckets[0];
-                let minBucketDist = Math.abs(pointer.x - nearestBucket.centerX);
+                const getBucketX = (b: typeof nearestBucket) => b.centerX ?? b.anchor?.x ?? 0;
+                let minBucketDist = Math.abs(pointer.x - getBucketX(nearestBucket));
                 for (let i = 1; i < interactionBuckets.length; i++) {
                     const bucket = interactionBuckets[i];
-                    const d = Math.abs(pointer.x - bucket.centerX);
+                    const d = Math.abs(pointer.x - getBucketX(bucket));
                     if (d < minBucketDist) {
                         minBucketDist = d;
                         nearestBucket = bucket;
@@ -96,7 +71,7 @@ export class ChartHitTestEngine {
                     for (const hit of nearestBucket.hits) {
                         const hx =
                             hit.point?.x ??
-                            (hit.bounds ? hit.bounds.x + hit.bounds.width / 2 : nearestBucket.centerX);
+                            (hit.bounds ? hit.bounds.x + hit.bounds.width / 2 : getBucketX(nearestBucket));
                         const hy = hit.point?.y ?? (hit.bounds ? hit.bounds.y + hit.bounds.height / 2 : pointer.y);
                         const d = distance(pointer.x, pointer.y, hx, hy);
                         if (d < minHitDist) {

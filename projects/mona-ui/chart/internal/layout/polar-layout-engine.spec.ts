@@ -4,6 +4,7 @@ import type {
     ChartDonutSeriesRegistration,
     ChartPieSeriesRegistration
 } from "../context/chart-registration-context";
+import type { PolarSectorChartScene } from "../scene/chart-scene";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { PolarLayoutEngine } from "./polar-layout-engine";
 
@@ -80,9 +81,10 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         expect(scene.coordinateSystem).toBe("polar");
+        expect(scene.polarKind).toBe("sector");
         expect(scene.hasRenderableData).toBe(true);
         expect(scene.center.x).toBeCloseTo(250);
         expect(scene.center.y).toBeCloseTo(150);
@@ -108,7 +110,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         const seriesScene = scene.series[0];
         expect(seriesScene.type).toBe("donut");
@@ -133,7 +135,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         const s0 = scene.series[0].slices[0];
         const s1 = scene.series[0].slices[1];
@@ -165,7 +167,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         const s0 = scene.series[0].slices[0];
         const s1 = scene.series[0].slices[1];
@@ -189,7 +191,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         expect(scene.hitTargets.length).toBe(2);
         expect(scene.interactionBuckets.length).toBe(2);
@@ -216,7 +218,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         expect(scene.legendItems.length).toBe(2);
         expect(scene.legendItems[0].visible).toBe(false);
@@ -246,7 +248,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         const seriesScene = scene.series[0];
         expect(seriesScene.slices[0].startAngle).toBeCloseTo(0);
@@ -270,7 +272,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         expect(Number.isFinite(scene.center.x)).toBe(true);
         expect(Number.isFinite(scene.center.y)).toBe(true);
@@ -300,7 +302,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         // Total source = 100
         expect(scene.legendItems[0].percentage).toBeCloseTo(0.6);
@@ -322,7 +324,7 @@ describe("polar-layout-engine", () => {
             rootData,
             series: [series],
             styleResolver
-        });
+        }) as PolarSectorChartScene;
 
         expect(scene.hitTargets[0].formattedValue).toBe("$125.00");
     });
