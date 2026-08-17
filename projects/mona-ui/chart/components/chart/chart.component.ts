@@ -334,12 +334,23 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.invalidate(ChartInvalidationReason.Style);
         });
 
+        // Cancel running animation if animation is dynamically disabled
+        effect(() => {
+            const animOptions = this.normalizedAnimationOptions();
+            if (animOptions.duration === 0 && this.#animationController.isRunning()) {
+                this.#animationController.cancel("finish-target");
+                this.#renderScene = this.scene();
+                this.isAnimating.set(false);
+                this.isStructuralAnimation.set(false);
+                this.isExitingData.set(false);
+                this.#paint();
+            }
+        });
+
         afterNextRender(() => {
             this.#initCanvasAndObserver();
             this.#canvasReady = true;
-            if (!this.#hasCommittedVisualScene && this.scene()) {
-                this.#recomputeAndPaint(ChartInvalidationReason.Data);
-            }
+            this.#recomputeAndPaint(ChartInvalidationReason.Data);
         });
 
         this.#recomputeAndPaint(ChartInvalidationReason.Data);
@@ -594,7 +605,6 @@ export class MonaChartComponent implements ChartRegistrationContext {
             const polarSeries = this.polarSeriesRegistration();
             if (polarSeries) {
                 polarSeries.toggleSliceVisibility(item.dataIndex);
-                this.invalidate(ChartInvalidationReason.Layout);
             }
         } else {
             this.toggleSeriesVisibility(item.seriesId);
@@ -715,7 +725,11 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.#resizeObserver = new ResizeObserver(entries => {
                 for (const entry of entries) {
                     const { height, width } = entry.contentRect;
-                    if (width > 0 && height > 0) {
+                    if (
+                        width > 0 &&
+                        height > 0 &&
+                        (Math.abs(width - this.#currentWidth) >= 0.5 || Math.abs(height - this.#currentHeight) >= 0.5)
+                    ) {
                         this.#currentWidth = width;
                         this.#currentHeight = height;
                         this.#updateCanvasBackingStore(width, height);
@@ -752,7 +766,6 @@ export class MonaChartComponent implements ChartRegistrationContext {
         this.#currentWidth = initialWidth;
         this.#currentHeight = initialHeight;
         this.#updateCanvasBackingStore(initialWidth, initialHeight);
-        this.invalidate(ChartInvalidationReason.Size);
     }
 
     #normalizePointer(event: MouseEvent | PointerEvent): ChartPoint | null {
@@ -871,7 +884,17 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
         const effectiveOptions = prefersReducedMotion ? { ...animOptions, duration: 0 } : animOptions;
 
-        if (!this.#canvasReady || trigger === "layout" || effectiveOptions.duration === 0) {
+        if (!this.#canvasReady) {
+            const canvasRef = this.canvasElement();
+            if (canvasRef?.nativeElement) {
+                this.#initCanvasAndObserver();
+                this.#canvasReady = true;
+            } else {
+                return;
+            }
+        }
+
+        if (trigger === "layout" || effectiveOptions.duration === 0) {
             this.#animationController.cancel("finish-target");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
@@ -1069,7 +1092,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         }
                     }
                 }
-                if (hasChanged) {
+                if (hasChanged && !this.#animationController.isRunning()) {
                     this.invalidate(ChartInvalidationReason.Layout);
                 }
             });

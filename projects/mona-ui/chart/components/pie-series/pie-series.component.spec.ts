@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import type { ChartPolarFillMode, ChartPolarLabelPosition, ChartSliceVisibilityEvent } from "../../models/chart-polar.models";
 import type { ChartField } from "../../models/chart.models";
+import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import { MonaChartComponent } from "../chart/chart.component";
 import { MonaPieSeriesComponent } from "./pie-series.component";
 
@@ -210,5 +211,19 @@ describe("MonaPieSeriesComponent", () => {
         fixture.detectChanges();
 
         expect(host.lastVisibilityEvent?.category).toBe("Browser: Chrome");
+    });
+
+    it("should trigger animation when toggling slice visibility", () => {
+        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        chart.recomputeScene();
+
+        const pieDebugEl = fixture.debugElement.query(By.directive(MonaPieSeriesComponent));
+        const pieComponent = pieDebugEl?.componentInstance as MonaPieSeriesComponent;
+
+        pieComponent.toggleSlice(1);
+        fixture.detectChanges();
+        chart.recomputeScene(ChartInvalidationReason.Visibility);
+
+        expect(chart.isAnimating()).toBe(true);
     });
 });

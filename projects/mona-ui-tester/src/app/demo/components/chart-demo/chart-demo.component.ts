@@ -115,6 +115,7 @@ export class ChartDemoComponent {
     #logId: number = 0;
 
     protected readonly activeTab = signal<"custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "time">("mixed");
+    protected readonly animationEnabled = signal<boolean>(true);
     protected readonly areaFillMode = signal<ChartAreaFillMode>("gradient");
     protected readonly areaFillModeOptions: readonly { label: string; value: ChartAreaFillMode }[] = [
         { label: "Gradient (Fade to 0)", value: "gradient" },

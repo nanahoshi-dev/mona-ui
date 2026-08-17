@@ -4,6 +4,7 @@ import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChartPointEvent, ChartPointFocusEvent } from "../../models/chart-event.models";
 import type { ChartRadialCurve, ChartRadialFillMode, ChartRadialGridShape } from "../../models/chart-polar.models";
+import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { PolarAxisChartScene } from "../../internal/scene/chart-scene";
 import { MonaChartAngularAxisComponent } from "../chart-angular-axis/chart-angular-axis.component";
 import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
@@ -202,5 +203,49 @@ describe("Radar Chart Integration", () => {
         expect(host.lastPointClick?.category).toBe("Intelligence");
         expect(host.lastPointClick?.seriesName).toBe("Mage");
         expect(host.lastPointClick?.yValue).toBe(95);
+    });
+
+    it("should trigger animation when there is only one radar series and data updates", () => {
+        // Leave only warrior series visible
+        host.mageVisible.set(false);
+        fixture.detectChanges();
+
+        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
+            .componentInstance as MonaChartComponent;
+        chartComp.recomputeScene();
+
+        const sceneBefore = chartComp.scene() as PolarAxisChartScene;
+        expect(sceneBefore.series.length).toBe(1);
+
+        // Update data
+        host.data.set([
+            { metric: "Strength", warrior: 100, mage: 0 },
+            { metric: "Intelligence", warrior: 60, mage: 0 },
+            { metric: "Agility", warrior: 80, mage: 0 },
+            { metric: "Defense", warrior: 90, mage: 0 },
+            { metric: "Mana", warrior: 50, mage: 0 }
+        ]);
+        fixture.detectChanges();
+        chartComp.recomputeScene(ChartInvalidationReason.Data);
+
+        expect(chartComp.isAnimating()).toBe(true);
+    });
+
+    it("should trigger animation when toggling legend items", () => {
+        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
+            .componentInstance as MonaChartComponent;
+        chartComp.recomputeScene();
+
+        const scene = chartComp.scene() as PolarAxisChartScene;
+        expect(scene.series.length).toBe(2);
+
+        const legendItem = scene.legendItems.find(l => l.name === "Mage");
+        expect(legendItem).toBeDefined();
+
+        chartComp.toggleLegendItem(legendItem!);
+        fixture.detectChanges();
+        chartComp.recomputeScene(ChartInvalidationReason.Visibility);
+
+        expect(chartComp.isAnimating()).toBe(true);
     });
 });

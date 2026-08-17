@@ -271,22 +271,25 @@ export class SceneTransitionSampler {
         for (const s of sampledSeries) {
             for (const pt of s.points) {
                 if (pt.defined) {
+                    const targetHit = toScene.hitTargets.find(
+                        th => th.seriesId === s.id && th.index === pt.dataIndex
+                    );
                     sampledHitTargets.push({
                         angle: pt.angle,
                         animationKey: pt.animationKey,
-                        category: pt.category,
+                        category: targetHit?.category ?? pt.category ?? pt.formattedAngle,
                         color: s.color,
                         datum: pt.datum,
-                        formattedCategory: pt.formattedCategory,
+                        formattedCategory: targetHit?.formattedCategory ?? pt.formattedCategory ?? pt.formattedAngle,
                         formattedValue: pt.formattedValue,
                         index: pt.dataIndex,
                         point: pt.point,
-                        radius: pt.radius,
+                        radius: targetHit?.radius ?? (pt.radius + 4),
                         seriesId: s.id,
                         seriesName: s.name,
                         seriesType: s.type,
-                        xKey: pt.categoryKey ?? String(pt.dataIndex),
-                        xValue: pt.category,
+                        xKey: targetHit?.xKey ?? pt.categoryKey ?? String(pt.dataIndex),
+                        xValue: targetHit?.xValue ?? pt.category ?? pt.formattedAngle,
                         yValue: pt.value
                     });
                 }

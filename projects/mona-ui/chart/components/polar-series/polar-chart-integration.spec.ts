@@ -4,6 +4,7 @@ import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChartPointEvent, ChartPointFocusEvent } from "../../models/chart-event.models";
 import type { ChartRadialCurve, ChartRadialFillMode, ChartRadialGridShape } from "../../models/chart-polar.models";
+import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { PolarAxisChartScene } from "../../internal/scene/chart-scene";
 import { MonaChartAngularAxisComponent } from "../chart-angular-axis/chart-angular-axis.component";
 import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
@@ -177,5 +178,20 @@ describe("Continuous Polar Chart Integration", () => {
         expect(sceneAfter.series.length).toBe(1);
         expect(sceneAfter.hitTargets.length).toBe(4);
         expect(sceneAfter.legendItems[0].visible).toBe(true);
+    });
+
+    it("should trigger visibility animation when toggling continuous polar series from legend", () => {
+        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
+            .componentInstance as MonaChartComponent;
+        chartComp.recomputeScene();
+
+        const legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
+        expect(legendButtons.length).toBe(1);
+
+        legendButtons[0].nativeElement.click();
+        fixture.detectChanges();
+        chartComp.recomputeScene(ChartInvalidationReason.Visibility);
+
+        expect(chartComp.isAnimating()).toBe(true);
     });
 });

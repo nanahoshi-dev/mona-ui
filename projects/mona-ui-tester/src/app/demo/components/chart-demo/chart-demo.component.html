@@ -63,6 +63,10 @@
                 (click)="setTab('custom')">
                 Custom Templates
             </button>
+            <div class="h-6 w-px bg-border mx-1"></div>
+            <mona-check-box [checked]="animationEnabled()" (checkedChange)="animationEnabled.set($event)">
+                Animate
+            </mona-check-box>
         </div>
     </div>
 
@@ -363,6 +367,7 @@
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">RPG Character Skill Matrix (Axis-Based Radar Chart)</h3>
                     <mona-chart
                         [data]="radarData()"
+                        [animation]="animationEnabled()"
                         class="h-96 w-full"
                         aria-label="Character Skill Matrix"
                         aria-description="Interactive radar chart comparing RPG class attributes across multiple axes."
@@ -407,6 +412,7 @@
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Continuous Antenna Radiation & Signal Quality (Continuous Polar Chart)</h3>
                     <mona-chart
                         [data]="polarData()"
+                        [animation]="animationEnabled()"
                         class="h-96 w-full"
                         aria-label="Antenna Radiation Pattern"
                         aria-description="Continuous polar chart plotting directional signal gain and noise floor across 360 degrees."
@@ -445,6 +451,7 @@
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Desktop Browser Usage Distribution (Polar Pie Series)</h3>
                     <mona-chart
                         [data]="pieData()"
+                        [animation]="animationEnabled()"
                         class="h-96 w-full"
                         aria-label="Browser Usage Share"
                         aria-description="Interactive pie chart displaying global desktop browser market share with slice toggling."
@@ -482,6 +489,7 @@
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Cloud Infrastructure Revenue by Category (Polar Donut Series)</h3>
                     <mona-chart
                         [data]="donutData()"
+                        [animation]="animationEnabled()"
                         class="h-96 w-full"
                         aria-label="Cloud Revenue Breakdown"
                         aria-description="Interactive donut chart showing cloud revenue allocation across infrastructure services with dynamic center total summary."
@@ -522,6 +530,7 @@
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Mixed Series Comparison (Same Metric Across Series Types)</h3>
                     <mona-chart
                         [data]="displayedMonthlyData()"
+                        [animation]="animationEnabled()"
                         xField="month"
                         class="h-96 w-full"
                         aria-label="Monthly Performance Metrics"
@@ -585,6 +594,7 @@
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Continuous System Telemetry (Temporal Scale)</h3>
                     <mona-chart
                         [data]="dateData()"
+                        [animation]="animationEnabled()"
                         xField="timestamp"
                         class="h-96 w-full"
                         aria-label="System Telemetry Over Time"
@@ -617,6 +627,7 @@
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Multi-Series Grouped Bar Comparison</h3>
                     <mona-chart
                         [data]="displayedMonthlyData()"
+                        [animation]="animationEnabled()"
                         xField="month"
                         class="h-96 w-full"
                         aria-label="Grouped Budget Comparison"
@@ -641,6 +652,7 @@
                     <h3 class="text-sm font-semibold text-muted-foreground mb-4">Custom Angular Templates (Axis Labels, Legend Items, Tooltip & No-Data)</h3>
                     <mona-chart
                         [data]="displayedMonthlyData()"
+                        [animation]="animationEnabled()"
                         xField="month"
                         class="h-96 w-full"
                         aria-label="Custom Templates Demo"
