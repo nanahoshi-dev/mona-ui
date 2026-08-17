@@ -409,6 +409,11 @@ export function calculateContinuousYDomain(
     const stackAnalysis = stackLayoutOrAnalysis && "configuration" in stackLayoutOrAnalysis
         ? stackLayoutOrAnalysis
         : undefined;
+
+    if (stackAnalysis?.visibleYUnitMode === "invalid") {
+        return normalizeContinuousNumericDomain(0, 1, normalizedExpMin, normalizedExpMax).domain as [number, number];
+    }
+
     const stackLayout = stackAnalysis
         ? stackAnalysis.visibleLayout
         : (stackLayoutOrAnalysis as CartesianStackLayout | undefined);
