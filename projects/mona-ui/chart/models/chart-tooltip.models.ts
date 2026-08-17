@@ -1,7 +1,8 @@
+import type { ChartPointValueKind } from "./chart-point-value.models";
 import type { ChartSeriesType } from "./chart-series.models";
 import type { ChartStackMode } from "./chart-stack.models";
 
-export type ChartPointValueKind = "range" | "scalar";
+export type { ChartPointValueKind } from "./chart-point-value.models";
 
 export interface ChartTooltipPointContext<T = unknown> {
     category?: unknown;

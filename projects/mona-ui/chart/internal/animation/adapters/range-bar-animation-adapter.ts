@@ -1,11 +1,12 @@
 import type { ChartRangeBarSeriesScene } from "../../scene/cartesian-scene";
-import type { SceneRangeBar } from "../../scene/scene-geometry";
+import type { ChartCornerRadii, SceneRangeBar } from "../../scene/scene-geometry";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";
 
 interface RangeBarMarkState {
     readonly animationKey?: string;
+    readonly cornerRadii?: ChartCornerRadii;
     readonly datum: unknown;
     readonly formattedFrom?: string;
     readonly formattedTo?: string;
@@ -33,6 +34,7 @@ interface RangeBarMarkPlan {
 function toRangeBarState(bar: SceneRangeBar, opacity = 1): RangeBarMarkState {
     return {
         animationKey: bar.animationKey,
+        cornerRadii: bar.cornerRadii,
         datum: bar.datum,
         formattedFrom: bar.formattedFrom,
         formattedTo: bar.formattedTo,
@@ -55,6 +57,7 @@ function createCollapsedRangeBarState(bar: SceneRangeBar, opacity = 0): RangeBar
     const midY = bar.y + bar.height / 2;
     return {
         animationKey: bar.animationKey,
+        cornerRadii: bar.cornerRadii,
         datum: bar.datum,
         formattedFrom: bar.formattedFrom,
         formattedTo: bar.formattedTo,
@@ -77,6 +80,7 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
     if (progress <= 0) {
         return {
             animationKey: plan.from.animationKey,
+            cornerRadii: plan.from.cornerRadii,
             datum: plan.from.datum,
             formattedFrom: plan.from.formattedFrom,
             formattedTo: plan.from.formattedTo,
@@ -97,6 +101,7 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
     if (progress >= 1) {
         return {
             animationKey: plan.to.animationKey,
+            cornerRadii: plan.to.cornerRadii,
             datum: plan.to.datum,
             formattedFrom: plan.to.formattedFrom,
             formattedTo: plan.to.formattedTo,
@@ -125,9 +130,11 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
     const highValue = Math.max(fromValue, toValue);
     const renderOpacity = lerpOpacity(plan.from.opacity, plan.to.opacity, progress);
     const radius = plan.to.radius ?? plan.from.radius ?? 4;
+    const cornerRadii = plan.to.cornerRadii ?? plan.from.cornerRadii;
 
     return {
         animationKey: plan.to.animationKey,
+        cornerRadii,
         datum: plan.to.datum,
         formattedFrom: plan.to.formattedFrom ?? plan.from.formattedFrom,
         formattedTo: plan.to.formattedTo ?? plan.from.formattedTo,

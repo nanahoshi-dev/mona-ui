@@ -3,16 +3,18 @@ import * as path from "path";
 import { CallExpression, JSDocTag, Node, Project } from "ts-morph";
 
 interface ComponentInputMetadata {
-    name: string;
-    type: string;
+    defaultValue?: string;
     description: string;
     kind: "input" | "model" | "output";
+    name: string;
+    required?: boolean;
+    type: string;
 }
 
 interface ComponentMetadata {
+    inputs: ComponentInputMetadata[];
     name: string;
     selector: string;
-    inputs: ComponentInputMetadata[];
 }
 
 const outputPath = path.resolve(__dirname, "../src/assets/component-metadata.json");
@@ -86,11 +88,18 @@ function extractInputsFromInheritanceChain(
             const functionName = callExpression.getExpression().getText();
 
             let kind: "input" | "model" | "output" | null = null;
+            let isRequired = false;
 
             if (functionName.startsWith("input")) {
                 kind = "input";
+                if (functionName === "input.required" || functionName.startsWith("input.required")) {
+                    isRequired = true;
+                }
             } else if (functionName.startsWith("model")) {
                 kind = "model";
+                if (functionName === "model.required" || functionName.startsWith("model.required")) {
+                    isRequired = true;
+                }
             } else if (functionName === "output") {
                 kind = "output";
             }
@@ -109,6 +118,7 @@ function extractInputsFromInheritanceChain(
                 }
 
                 let description = "";
+                let defaultValue: string | undefined;
                 const jsDocs = property.getJsDocs();
                 if (jsDocs.length > 0) {
                     const mainDoc = jsDocs[0];
@@ -118,14 +128,28 @@ function extractInputsFromInheritanceChain(
                     if (descriptionTag) {
                         description = descriptionTag.getCommentText()?.toString().trim() || "";
                     }
+                    const defaultTag = mainDoc
+                        .getTags()
+                        .find((tag: JSDocTag) => tag.getTagName() === "default");
+                    if (defaultTag) {
+                        defaultValue = defaultTag.getCommentText()?.toString().trim();
+                    }
                 }
 
-                inputs.push({
+                const item: ComponentInputMetadata = {
+                    description,
+                    kind,
                     name: inputName,
-                    type: inputType,
-                    description: description,
-                    kind: kind
-                });
+                    type: inputType
+                };
+                if (isRequired) {
+                    item.required = true;
+                }
+                if (defaultValue !== undefined) {
+                    item.defaultValue = defaultValue;
+                }
+
+                inputs.push(item);
             }
         }
     }

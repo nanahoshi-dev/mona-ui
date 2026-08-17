@@ -147,10 +147,19 @@ export class ChartHitTestEngine {
                         let nearestHit = nearestBucket.hits[0];
                         let minHitDist = Number.POSITIVE_INFINITY;
                         for (const hit of nearestBucket.hits) {
-                            const hx =
-                                hit.point?.x ??
-                                (hit.bounds ? hit.bounds.x + hit.bounds.width / 2 : nearestBucket.anchor.x);
-                            const hy = hit.point?.y ?? (hit.bounds ? hit.bounds.y + hit.bounds.height / 2 : pointer.y);
+                            let hx = hit.point?.x;
+                            let hy = hit.point?.y;
+                            if (hit.seriesType === "rangeArea" && hit.rangeBand) {
+                                hx = hit.rangeBand.fromPoint.x;
+                                const minY = Math.min(hit.rangeBand.fromPoint.y, hit.rangeBand.toPoint.y);
+                                const maxY = Math.max(hit.rangeBand.fromPoint.y, hit.rangeBand.toPoint.y);
+                                hy = Math.max(minY, Math.min(maxY, pointer.y));
+                            } else if (hit.bounds) {
+                                hx = hit.bounds.x + hit.bounds.width / 2;
+                                hy = hit.bounds.y + hit.bounds.height / 2;
+                            }
+                            hx = hx ?? nearestBucket.anchor.x;
+                            hy = hy ?? pointer.y;
                             const d = distance(pointer.x, pointer.y, hx, hy);
                             if (d < minHitDist) {
                                 minHitDist = d;
@@ -211,7 +220,45 @@ export class ChartHitTestEngine {
             };
         }
 
-        // 3. Line/area/marker nearest point fallback
+        // 3. Range Area band containment test
+        if (interactionBuckets && interactionBuckets.length > 0) {
+            const nearestBucket = findNearestInteractionBucketByX(interactionBuckets, pointer.x);
+            if (nearestBucket) {
+                const minBucketDist = Math.abs(pointer.x - nearestBucket.anchor.x);
+                if (minBucketDist <= maxHoverDistance) {
+                    const rangeCandidates = nearestBucket.hits.filter(
+                        h => h.seriesType === "rangeArea" && h.rangeBand
+                    );
+                    let selectedRangeHit: SceneHitTarget | null = null;
+                    let selectedRenderOrder = Number.NEGATIVE_INFINITY;
+
+                    for (const hit of rangeCandidates) {
+                        const band = hit.rangeBand!;
+                        const minY = Math.min(band.fromPoint.y, band.toPoint.y);
+                        const maxY = Math.max(band.fromPoint.y, band.toPoint.y);
+                        const tolerance = Math.max(6, hit.radius ?? 6);
+
+                        if (pointer.y >= minY - tolerance && pointer.y <= maxY + tolerance) {
+                            const order = hit.renderOrder ?? 0;
+                            if (order >= selectedRenderOrder) {
+                                selectedRenderOrder = order;
+                                selectedRangeHit = hit;
+                            }
+                        }
+                    }
+
+                    if (selectedRangeHit) {
+                        return {
+                            activeHitTarget: selectedRangeHit,
+                            activeHits: [selectedRangeHit],
+                            pointerPosition: pointer
+                        };
+                    }
+                }
+            }
+        }
+
+        // 4. Line/area/marker nearest point fallback
         let nearestTarget: SceneHitTarget | null = null;
         let minDistance = Number.POSITIVE_INFINITY;
 

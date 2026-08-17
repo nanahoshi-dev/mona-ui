@@ -15,7 +15,16 @@ import type {
 } from "../scene/cartesian-scene";
 import type { ChartSectorSeriesScene } from "../scene/polar-scene";
 import type { ChartContinuousPolarSeriesScene, ChartRadarSeriesScene } from "../scene/polar-axis-scene";
-import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "../scene/scene-geometry";
+import type {
+    ChartInteractionBucket,
+    ChartInteractionXKey,
+    SceneBar,
+    SceneHitTarget,
+    SceneMarker,
+    ScenePoint,
+    SceneRangeAreaPoint,
+    SceneRangeBar
+} from "../scene/scene-geometry";
 import type { CartesianAxisTransitionPlan, PolarAxisTransitionPlan } from "./adapters/axis-animation-adapter";
 import type { ChartAnimationRenderFrame, ChartTransitionPlan } from "./chart-transition-types";
 import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
@@ -111,13 +120,10 @@ export class SceneTransitionSampler {
             .filter((s): s is any => s !== null);
 
         // Build lookup maps from sampled series marks
-        const sampledBarsByKey = new Map<string, { height: number; isPositive?: boolean; width: number; x: number; y: number }>();
-        const sampledPointsByKey = new Map<string, { defined: boolean; x: number; y: number }>();
-        const sampledMarkersByKey = new Map<string, { radius: number; x: number; y: number }>();
-        const sampledRangeAreaPointsByKey = new Map<
-            string,
-            { defined: boolean; fromPoint?: { x: number; y: number }; highPoint?: { x: number; y: number }; lowPoint?: { x: number; y: number }; toPoint?: { x: number; y: number }; x: number }
-        >();
+        const sampledBarsByKey = new Map<string, SceneBar | SceneRangeBar>();
+        const sampledPointsByKey = new Map<string, ScenePoint>();
+        const sampledMarkersByKey = new Map<string, SceneMarker>();
+        const sampledRangeAreaPointsByKey = new Map<string, SceneRangeAreaPoint>();
 
         for (const s of sampledSeries) {
             if (s.type === "bar") {
@@ -170,14 +176,45 @@ export class SceneTransitionSampler {
             let radius = targetHit.radius;
             let visualRadius = targetHit.visualRadius;
 
+            let rangeBand = targetHit.rangeBand;
+            let range = targetHit.range;
+
             if (targetHit.seriesType === "rangeArea") {
                 const sampledRangeAreaPt = sampledRangeAreaPointsByKey.get(key);
-                if (sampledRangeAreaPt && sampledRangeAreaPt.defined) {
+                if (sampledRangeAreaPt && sampledRangeAreaPt.defined && sampledRangeAreaPt.fromPoint && sampledRangeAreaPt.toPoint) {
                     highPoint = sampledRangeAreaPt.highPoint;
                     lowPoint = sampledRangeAreaPt.lowPoint;
-                    if (highPoint && lowPoint) {
-                        pt = { x: sampledRangeAreaPt.x, y: (highPoint.y + lowPoint.y) / 2 };
+                    rangeBand = {
+                        fromPoint: sampledRangeAreaPt.fromPoint,
+                        toPoint: sampledRangeAreaPt.toPoint
+                    };
+                    pt = {
+                        x: sampledRangeAreaPt.x,
+                        y: (sampledRangeAreaPt.fromPoint.y + sampledRangeAreaPt.toPoint.y) / 2
+                    };
+                    if (sampledRangeAreaPt.fromValue !== undefined && sampledRangeAreaPt.toValue !== undefined) {
+                        range = {
+                            formattedFrom: sampledRangeAreaPt.formattedFrom ?? targetHit.formattedFrom ?? "",
+                            formattedTo: sampledRangeAreaPt.formattedTo ?? targetHit.formattedTo ?? "",
+                            fromValue: sampledRangeAreaPt.fromValue,
+                            highValue: sampledRangeAreaPt.highValue ?? Math.max(sampledRangeAreaPt.fromValue, sampledRangeAreaPt.toValue),
+                            lowValue: sampledRangeAreaPt.lowValue ?? Math.min(sampledRangeAreaPt.fromValue, sampledRangeAreaPt.toValue),
+                            toValue: sampledRangeAreaPt.toValue
+                        };
                     }
+                }
+            } else if (targetHit.seriesType === "rangeBar") {
+                const sampledBar = sampledBarsByKey.get(key);
+                if (sampledBar && "fromValue" in sampledBar && "toValue" in sampledBar) {
+                    const sb = sampledBar as SceneRangeBar;
+                    range = {
+                        formattedFrom: sb.formattedFrom ?? targetHit.formattedFrom ?? "",
+                        formattedTo: sb.formattedTo ?? targetHit.formattedTo ?? "",
+                        fromValue: sb.fromValue,
+                        highValue: sb.highValue,
+                        lowValue: sb.lowValue,
+                        toValue: sb.toValue
+                    };
                 }
             } else if (targetHit.point) {
                 if (targetHit.seriesType === "scatter" || targetHit.seriesType === "bubble") {
@@ -232,6 +269,8 @@ export class SceneTransitionSampler {
                 lowPoint,
                 point: pt,
                 radius,
+                range,
+                rangeBand,
                 visualBounds,
                 visualRadius
             };

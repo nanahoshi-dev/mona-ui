@@ -141,7 +141,6 @@ export class MonaRangeAreaSeriesComponent implements OnInit {
         effect(() => {
             this.connectNulls();
             this.curve();
-            this.fillOpacity();
             this.name();
             this.pointRadius();
             this.showPoints();
@@ -154,6 +153,7 @@ export class MonaRangeAreaSeriesComponent implements OnInit {
 
         effect(() => {
             this.color();
+            this.fillOpacity();
             this.userClass();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Style);

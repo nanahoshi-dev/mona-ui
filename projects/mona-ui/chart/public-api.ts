@@ -70,7 +70,13 @@ export type {
 } from "./models/chart-event.models";
 
 export type {
+    ChartPointValue,
     ChartPointValueKind,
+    ChartRangePointValue,
+    ChartScalarPointValue
+} from "./models/chart-point-value.models";
+
+export type {
     ChartTooltipPointContext,
     ChartTooltipTemplateContext
 } from "./models/chart-tooltip.models";

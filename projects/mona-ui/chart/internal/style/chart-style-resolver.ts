@@ -229,13 +229,20 @@ export class ChartStyleResolver {
 
         const defaultColor = this.resolvePaletteColor(seriesIndex, colorPalette);
         const resolvedColor = explicitColor || elementColor || defaultColor;
+        const isAreaLike = series.type === "area" || series.type === "rangeArea";
+        const isLineLike = series.type === "line" || series.type === "area" || series.type === "rangeArea";
+
+        const defaultLineWidth = isLineLike ? 2 : 1;
         const resolvedLineWidth = explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
             ? explicitStrokeWidth
-            : (cssLineWidth ?? (series.type === "line" || series.type === "area" ? 2 : 1));
+            : (cssLineWidth ?? defaultLineWidth);
+
+        const defaultPointRadius = isAreaLike ? 4 : 3;
         const resolvedPointRadius = explicitPointRadius !== undefined && isFiniteNumber(explicitPointRadius) && explicitPointRadius >= 0
             ? explicitPointRadius
-            : (cssPointRadius ?? 3);
-        const defaultFillOpacity = series.type === "area" ? 0.15 : 1;
+            : (cssPointRadius ?? defaultPointRadius);
+
+        const defaultFillOpacity = isAreaLike ? 0.18 : 1;
         const resolvedFillOpacity = explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
             ? Math.max(0, Math.min(1, explicitFillOpacity))
             : (cssAreaFillOpacity ?? defaultFillOpacity);

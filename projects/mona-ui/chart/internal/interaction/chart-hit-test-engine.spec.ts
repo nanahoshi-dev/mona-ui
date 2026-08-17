@@ -298,4 +298,126 @@ describe("ChartHitTestEngine", () => {
             expect(hit.activeHits[1].seriesId).toBe("top-series");
         });
     });
+
+    describe("Range Area & Range Bar Hit Testing", () => {
+        const rangeBandHit: SceneHitTarget = {
+            datum: { id: 1 },
+            index: 0,
+            point: { x: 100, y: 80 },
+            radius: 6,
+            range: {
+                formattedFrom: "10",
+                formattedTo: "30",
+                fromValue: 10,
+                highValue: 30,
+                lowValue: 10,
+                toValue: 30
+            },
+            rangeBand: {
+                fromPoint: { x: 100, y: 130 },
+                toPoint: { x: 100, y: 30 }
+            },
+            renderOrder: 0,
+            seriesId: "range-area-1",
+            seriesName: "Range Area 1",
+            seriesType: "rangeArea",
+            valueKind: "range",
+            xKey: "Jan",
+            xValue: "Jan"
+        };
+
+        const topRangeBandHit: SceneHitTarget = {
+            datum: { id: 2 },
+            index: 0,
+            point: { x: 100, y: 80 },
+            radius: 6,
+            range: {
+                formattedFrom: "15",
+                formattedTo: "25",
+                fromValue: 15,
+                highValue: 25,
+                lowValue: 15,
+                toValue: 25
+            },
+            rangeBand: {
+                fromPoint: { x: 100, y: 90 },
+                toPoint: { x: 100, y: 70 }
+            },
+            renderOrder: 1,
+            seriesId: "range-area-2",
+            seriesName: "Range Area 2",
+            seriesType: "rangeArea",
+            valueKind: "range",
+            xKey: "Jan",
+            xValue: "Jan"
+        };
+
+        const zeroHeightBarHit: SceneHitTarget = {
+            borderRadius: 4,
+            bounds: { height: 4, width: 30, x: 85, y: 148 },
+            datum: { id: 3 },
+            index: 0,
+            range: {
+                formattedFrom: "20",
+                formattedTo: "20",
+                fromValue: 20,
+                highValue: 20,
+                lowValue: 20,
+                toValue: 20
+            },
+            renderOrder: 2,
+            seriesId: "range-bar-1",
+            seriesName: "Range Bar 1",
+            seriesType: "rangeBar",
+            valueKind: "range",
+            visualBounds: { height: 0, width: 30, x: 85, y: 150 },
+            xKey: "Jan",
+            xValue: "Jan"
+        };
+
+        const rangeScene: ChartScene = {
+            axes: [],
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [rangeBandHit, topRangeBandHit, zeroHeightBarHit],
+            interactionBuckets: [
+                {
+                    anchor: { x: 100, y: 80 },
+                    hits: [rangeBandHit, topRangeBandHit, zeroHeightBarHit],
+                    order: 0,
+                    xKey: "Jan",
+                    xValue: "Jan"
+                }
+            ],
+            legendItems: [],
+            plotRect: { height: 260, width: 400, x: 40, y: 20 },
+            series: [],
+            width: 500
+        };
+
+        it("should hit test Range Area band interior in non-shared mode (RNG-003)", () => {
+            // Pointer at (100, 45) is inside rangeBand [30, 130] but outside topRangeBand [70, 90]
+            const hit = ChartHitTestEngine.testHit({ x: 100, y: 45 }, rangeScene, false);
+            expect(hit.activeHitTarget?.seriesId).toBe("range-area-1");
+        });
+
+        it("should prioritize top renderOrder on overlapping Range Area bands (RNG-006)", () => {
+            // Pointer at (100, 80) is inside both bands; topRangeBand has renderOrder 1 > 0
+            const hit = ChartHitTestEngine.testHit({ x: 100, y: 80 }, rangeScene, false);
+            expect(hit.activeHitTarget?.seriesId).toBe("range-area-2");
+        });
+
+        it("should hit test zero-height Range Bar within expanded tolerance bounds (RNG-004)", () => {
+            // Pointer at (95, 149) hits zero-height bar with bounds height: 4, y: 148
+            const hit = ChartHitTestEngine.testHit({ x: 95, y: 149 }, rangeScene, false);
+            expect(hit.activeHitTarget?.seriesId).toBe("range-bar-1");
+        });
+
+        it("should return all bucket hits with clamped vertical distance in shared mode", () => {
+            const hit = ChartHitTestEngine.testHit({ x: 100, y: 70 }, rangeScene, true);
+            expect(hit.activeHits.length).toBe(3);
+            expect(hit.activeHitTarget).not.toBeNull();
+        });
+    });
 });

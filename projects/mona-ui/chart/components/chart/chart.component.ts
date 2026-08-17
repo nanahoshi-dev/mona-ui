@@ -184,6 +184,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     readonly #isStructuralAnimation = signal(false);
     readonly #animationMode = signal<"crossfade" | "morph" | null>(null);
     readonly #isExitingData = signal(false);
+    readonly #warnedDiagnosticSignatures = new Set<string>();
     #hasPendingLabelMeasurementLayout: boolean = false;
     #hasPendingSizeReflow: boolean = false;
 
@@ -603,44 +604,44 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public registerAngularAxis(registration: ChartAngularAxisRegistration): () => void {
         this.#angularAxis.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+        this.#recomputeAndPaint(ChartInvalidationReason.Data);
         return () => {
             if (this.#angularAxis() === registration) {
                 this.#angularAxis.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+                this.#recomputeAndPaint(ChartInvalidationReason.Data);
             }
         };
     }
 
     public registerRadialAxis(registration: ChartRadialAxisRegistration): () => void {
         this.#radialAxis.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+        this.#recomputeAndPaint(ChartInvalidationReason.Data);
         return () => {
             if (this.#radialAxis() === registration) {
                 this.#radialAxis.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+                this.#recomputeAndPaint(ChartInvalidationReason.Data);
             }
         };
     }
 
     public registerLegend(registration: ChartLegendRegistration): () => void {
         this.#legend.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+        this.#recomputeAndPaint(ChartInvalidationReason.Data);
         return () => {
             if (this.#legend() === registration) {
                 this.#legend.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+                this.#recomputeAndPaint(ChartInvalidationReason.Data);
             }
         };
     }
 
     public registerSeries(registration: ChartSeriesRegistration): () => void {
         this.#registeredSeries.update(list => [...list, registration]);
-        this.#recomputeAndPaint(ChartInvalidationReason.Visibility);
+        this.#recomputeAndPaint(ChartInvalidationReason.Data);
 
         return () => {
             this.#registeredSeries.update(list => list.filter(s => s.id !== registration.id));
-            this.#recomputeAndPaint(ChartInvalidationReason.Visibility);
+            this.#recomputeAndPaint(ChartInvalidationReason.Data);
         };
     }
 
@@ -655,22 +656,22 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public registerXAxis(registration: ChartAxisRegistration): () => void {
         this.#xAxis.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+        this.#recomputeAndPaint(ChartInvalidationReason.Data);
         return () => {
             if (this.#xAxis() === registration) {
                 this.#xAxis.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+                this.#recomputeAndPaint(ChartInvalidationReason.Data);
             }
         };
     }
 
     public registerYAxis(registration: ChartAxisRegistration): () => void {
         this.#yAxis.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+        this.#recomputeAndPaint(ChartInvalidationReason.Data);
         return () => {
             if (this.#yAxis() === registration) {
                 this.#yAxis.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+                this.#recomputeAndPaint(ChartInvalidationReason.Data);
             }
         };
     }
@@ -948,6 +949,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                   rootXField: this.xField(),
                   series: this.#registeredSeries(),
                   styleResolver: this.#styleResolver,
+                  warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures,
                   xAxis: this.#xAxis() ?? undefined,
                   yAxis: this.#yAxis() ?? undefined
               })

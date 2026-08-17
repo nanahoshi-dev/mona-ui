@@ -17,11 +17,11 @@ import { PolarLayoutEngine } from "./polar-layout-engine";
 
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
 
-const warnedSignatures = new Set<string>();
+const globalWarnedSignatures = new Set<string>();
 
-function warnOnce(signature: string, message: string): void {
-    if (isDevMode() && !warnedSignatures.has(signature)) {
-        warnedSignatures.add(signature);
+function warnOnce(signature: string, message: string, warnedSet: Set<string> = globalWarnedSignatures): void {
+    if (isDevMode() && !warnedSet.has(signature)) {
+        warnedSet.add(signature);
         console.warn(message);
     }
 }
@@ -36,11 +36,15 @@ export interface ChartLayoutOptions {
     rootXField?: ChartField;
     series: readonly ChartSeriesRegistration[];
     styleResolver: ChartStyleResolver;
+    warnedDiagnosticSignatures?: Set<string>;
     xAxis?: ChartAxisRegistration;
     yAxis?: ChartAxisRegistration;
 }
 
-export function resolveChartCoordinateSystem(series: readonly ChartSeriesRegistration[]): ChartCoordinateSystem {
+export function resolveChartCoordinateSystem(
+    series: readonly ChartSeriesRegistration[],
+    warnedSet: Set<string> = globalWarnedSignatures
+): ChartCoordinateSystem {
     let hasPolar = false;
     let hasCartesian = false;
 
@@ -56,7 +60,8 @@ export function resolveChartCoordinateSystem(series: readonly ChartSeriesRegistr
     if (hasPolar && hasCartesian) {
         warnOnce(
             "mixed-cartesian-polar",
-            "[MonaChart] Mixing Cartesian series (line, area, bar, scatter, bubble) with radial series (pie, donut, radar, polar) in the same chart is unsupported."
+            "[MonaChart] Mixing Cartesian series (line, area, bar, scatter, bubble) with radial series (pie, donut, radar, polar) in the same chart is unsupported.",
+            warnedSet
         );
     }
 
@@ -66,7 +71,8 @@ export function resolveChartCoordinateSystem(series: readonly ChartSeriesRegistr
 export class ChartLayoutEngine {
     public static computeScene(options: ChartLayoutOptions): ChartScene {
         const { series } = options;
-        const coordinateSystem = resolveChartCoordinateSystem(series);
+        const warnedSet = options.warnedDiagnosticSignatures ?? globalWarnedSignatures;
+        const coordinateSystem = resolveChartCoordinateSystem(series, warnedSet);
 
         // Classify series families
         const families = new Set<ChartSeriesFamily>();
@@ -83,7 +89,8 @@ export class ChartLayoutEngine {
         if (sectorCount > 1) {
             warnOnce(
                 `multi-sector-${sectorCount}`,
-                "[MonaChart] Only a single sector series (pie or donut) is supported per chart."
+                "[MonaChart] Only a single sector series (pie or donut) is supported per chart.",
+                warnedSet
             );
         }
 
@@ -108,7 +115,8 @@ export class ChartLayoutEngine {
             if (famArray.includes("sector") && (famArray.includes("radar") || famArray.includes("polar"))) {
                 warnOnce(
                     "mixed-sector-radial-axis",
-                    "[MonaChart] Mixing sector series (pie, donut) with axis-based radial series (radar, polar) in the same chart is unsupported."
+                    "[MonaChart] Mixing sector series (pie, donut) with axis-based radial series (radar, polar) in the same chart is unsupported.",
+                    warnedSet
                 );
                 return {
                     center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
@@ -127,7 +135,8 @@ export class ChartLayoutEngine {
             if (famArray.includes("radar") && famArray.includes("polar")) {
                 warnOnce(
                     "mixed-radar-polar",
-                    "[MonaChart] Mixing radar series with continuous polar series in the same chart is unsupported."
+                    "[MonaChart] Mixing radar series with continuous polar series in the same chart is unsupported.",
+                    warnedSet
                 );
                 return {
                     angularAxis: {
@@ -172,7 +181,8 @@ export class ChartLayoutEngine {
             if (options.xAxis || options.yAxis) {
                 warnOnce(
                     "polar-projected-axes",
-                    "[MonaChart] Projected Cartesian axes (<mona-chart-x-axis>, <mona-chart-y-axis>) are ignored in radial charts."
+                    "[MonaChart] Projected Cartesian axes (<mona-chart-x-axis>, <mona-chart-y-axis>) are ignored in radial charts.",
+                    warnedSet
                 );
             }
 
@@ -196,7 +206,8 @@ export class ChartLayoutEngine {
         if (options.angularAxis || options.radialAxis) {
             warnOnce(
                 "cartesian-projected-radial-axes",
-                "[MonaChart] Projected radial axes (<mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Cartesian charts."
+                "[MonaChart] Projected radial axes (<mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Cartesian charts.",
+                warnedSet
             );
         }
 
@@ -211,7 +222,7 @@ export class ChartLayoutEngine {
             rootXField: options.rootXField,
             series: cartesianSeries,
             styleResolver: options.styleResolver,
-            warnedDiagnosticSignatures: warnedSignatures,
+            warnedDiagnosticSignatures: warnedSet,
             xAxis: options.xAxis,
             yAxis: options.yAxis
         });

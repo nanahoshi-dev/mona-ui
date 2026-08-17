@@ -10,7 +10,7 @@ The Mona UI Chart library combines declarative Angular template composition with
 
 - **Declarative Composition:** Compose charts using intuitive child components for Cartesian axes (`<mona-chart-x-axis>`, `<mona-chart-y-axis>`), Radial axes (`<mona-chart-angular-axis>`, `<mona-chart-radial-axis>`), series, legends, tooltips, inside labels, and donut center templates.
 - **Series Types:**
-  - **Cartesian:** Line (with multiple interpolation curves), Area (gradient fade or solid fill), Grouped Bar series, Scatter (point distribution with customizable marker sizes), and Bubble series (3-variable mapping with area-proportional square-root radius scaling).
+  - **Cartesian:** Line (with multiple interpolation curves), Area (gradient fade or solid fill), Grouped and Stacked Bar series, Range Bar series (floating min-max interval bars with 4-corner rounded rects), Range Area series (continuous min-max confidence bands and cross-over boundaries), Scatter (point distribution with customizable marker sizes), and Bubble series (3-variable mapping with area-proportional square-root radius scaling).
   - **Polar Sector:** Pie (full or partial circles) and Donut (configurable hole radius ratio and custom center templates).
   - **Polar Axis:** Radar charts (closed polygon series comparing categorical attributes across angular spokes) and Continuous Polar charts (directional signals and curves with continuous angular coordinates from 0° to 360°).
 - **Dynamic & Responsive:** Built-in `ResizeObserver` support with automatic canvas backing store scaling for crisp rendering on HiDPI/Retina screens.
@@ -211,6 +211,46 @@ Mona UI Charts feature a high-performance, renderer-agnostic animation system:
 - **CSS Custom Properties:** Exposes `--mona-chart-animation-duration` and `--mona-chart-animation-easing` on the chart host element for synchronized CSS transitions.
 - **Reduced Motion:** Automatically respects `prefers-reduced-motion: reduce` by completing transitions immediately without motion.
 
+### Range Bar Chart
+
+```html
+<mona-chart [data]="temperatureRanges" xField="day" aria-label="Daily Temperature Ranges" class="h-80 w-full">
+    <mona-chart-x-axis type="category" />
+    <mona-chart-y-axis [nice]="true" />
+
+    <mona-range-bar-series
+        fromField="minTemp"
+        toField="maxTemp"
+        name="Daily Range"
+        [borderRadius]="4"
+        color="#3b82f6" />
+
+    <mona-chart-legend position="bottom" [interactive]="true" />
+    <mona-chart-tooltip [shared]="false" />
+</mona-chart>
+```
+
+### Range Area Chart
+
+```html
+<mona-chart [data]="sensorConfidence" xField="timestamp" aria-label="Sensor Confidence Interval" class="h-80 w-full">
+    <mona-chart-x-axis type="time" />
+    <mona-chart-y-axis [nice]="true" />
+
+    <mona-range-area-series
+        fromField="lowerBound"
+        toField="upperBound"
+        name="95% Confidence Band"
+        curve="smooth"
+        [showPoints]="true"
+        color="#10b981"
+        [fillOpacity]="0.25" />
+
+    <mona-chart-legend position="bottom" [interactive]="true" />
+    <mona-chart-tooltip [shared]="true" />
+</mona-chart>
+```
+
 ### `<mona-bar-series>`
 Renders a Cartesian bar series supporting standalone bars, grouped slots, stacked segments, and 100% normalized stacks.
 
@@ -227,6 +267,23 @@ Renders a Cartesian bar series supporting standalone bars, grouped slots, stacke
 | `color` | `string` | `undefined` | Bar fill color. Defaults to palette token. |
 | `fillOpacity` | `number` | `1.0` | Bar fill opacity between 0.0 and 1.0. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter callback for bar raw values and stack totals in tooltips and live region. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+
+### `<mona-range-bar-series>`
+Renders a Cartesian floating range bar series plotting discrete min-max intervals with 4-corner rounded rects and zero-length hairlines.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `fromField` | `ChartField` | (required) | Property key or accessor extracting the range starting/lower value. |
+| `toField` | `ChartField` | (required) | Property key or accessor extracting the range ending/upper value. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
+| `name` | `string` | `"Range Bar"` | Series name for tooltips, legend, and accessibility. |
+| `borderRadius` | `number` | `4` | Corner radius applied to all 4 corners of floating bars. |
+| `maxBarWidth` | `number` | `undefined` | Maximum width of the bar in pixels. |
+| `color` | `string` | `undefined` | Bar fill color. Defaults to palette token. |
+| `fillOpacity` | `number` | `1.0` | Bar fill opacity between 0.0 and 1.0. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter callback for formatting range bounds in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
 ### `<mona-area-series>`
@@ -247,6 +304,26 @@ Renders a continuous Cartesian area series supporting gradient fades, solid fill
 | `showPoints` | `boolean` | `false` | Whether to render point markers at data coordinates. |
 | `color` | `string` | `undefined` | Area line and fill color. Defaults to palette token. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter callback for area raw values and stack totals in tooltips and live region. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+
+### `<mona-range-area-series>`
+Renders a continuous Cartesian range area series enclosing a confidence or variance band between two continuous boundary lines.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `fromField` | `ChartField` | (required) | Property key or accessor extracting the range starting boundary value. |
+| `toField` | `ChartField` | (required) | Property key or accessor extracting the range ending boundary value. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
+| `name` | `string` | `"Range Area"` | Series name for tooltips, legend, and accessibility. |
+| `fillOpacity` | `number` | `0.18` | Range band fill opacity between 0.0 and 1.0. |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"smooth"`, `"step"`, `"monotone-x"`). |
+| `connectNulls` | `boolean` | `false` | Whether to interpolate across null/missing data points. |
+| `showPoints` | `boolean` | `false` | Whether to render point markers at boundary coordinates. |
+| `pointRadius` | `number` | `4` | Boundary marker radius in pixels when `showPoints` is true. |
+| `strokeWidth` | `number` | `2` | Boundary outline stroke width in pixels. |
+| `color` | `string` | `undefined` | Range band line and fill color. Defaults to palette token. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter callback for formatting range bounds in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
 ### `<mona-scatter-series>`
