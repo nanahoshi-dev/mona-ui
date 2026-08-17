@@ -361,6 +361,13 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     public recomputeScene(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
+        if (!this.#canvasReady) {
+            const canvasRef = this.canvasElement();
+            if (canvasRef?.nativeElement) {
+                this.#initCanvasAndObserver();
+                this.#canvasReady = true;
+            }
+        }
         this.#recomputeAndPaint(reason);
     }
 
@@ -561,11 +568,11 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public registerSeries(registration: ChartSeriesRegistration): () => void {
         this.#registeredSeries.update(list => [...list, registration]);
-        this.#recomputeAndPaint(ChartInvalidationReason.Data);
+        this.#recomputeAndPaint(ChartInvalidationReason.Visibility);
 
         return () => {
             this.#registeredSeries.update(list => list.filter(s => s.id !== registration.id));
-            this.#recomputeAndPaint(ChartInvalidationReason.Data);
+            this.#recomputeAndPaint(ChartInvalidationReason.Visibility);
         };
     }
 
@@ -885,13 +892,19 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const effectiveOptions = prefersReducedMotion ? { ...animOptions, duration: 0 } : animOptions;
 
         if (!this.#canvasReady) {
-            const canvasRef = this.canvasElement();
-            if (canvasRef?.nativeElement) {
-                this.#initCanvasAndObserver();
-                this.#canvasReady = true;
-            } else {
-                return;
-            }
+            return;
+        }
+
+        const isPassiveSizeReflow = trigger === "layout" && hasInvalidationReason(reason, ChartInvalidationReason.Size);
+        if (isPassiveSizeReflow && this.#animationController.isRunning()) {
+            // A passive container reflow (e.g. the legend collapsing or
+            // reappearing as the series count crosses 0, which resizes the
+            // plot area via ResizeObserver) shouldn't cut off a structural
+            // animation that's already in flight. Defer it until the running
+            // animation completes, at which point it will be reapplied with
+            // the up-to-date container dimensions.
+            this.invalidate(reason);
+            return;
         }
 
         if (trigger === "layout" || effectiveOptions.duration === 0) {
@@ -918,7 +931,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.#paint();
         } else {
             const isExitingDataTransition =
-                trigger === "data" && fromVisual && fromVisual.hasRenderableData && !newScene.hasRenderableData;
+                (trigger === "data" || trigger === "visibility") &&
+                Boolean(fromVisual && fromVisual.hasRenderableData && !newScene.hasRenderableData);
             if (isExitingDataTransition) {
                 this.isExitingData.set(true);
             }

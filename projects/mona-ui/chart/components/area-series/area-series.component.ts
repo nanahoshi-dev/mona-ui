@@ -111,10 +111,14 @@ export class MonaAreaSeriesComponent implements OnInit {
      */
     public readonly xField = input<ChartField | undefined>(undefined);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
             this.visible();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            }
         });
 
         effect(() => {
@@ -122,7 +126,9 @@ export class MonaAreaSeriesComponent implements OnInit {
             this.field();
             this.keyField();
             this.xField();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            }
         });
 
         effect(() => {
@@ -133,14 +139,18 @@ export class MonaAreaSeriesComponent implements OnInit {
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
         });
 
         effect(() => {
             this.color();
             this.fillMode();
             this.userClass();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            }
         });
     }
 
@@ -148,6 +158,8 @@ export class MonaAreaSeriesComponent implements OnInit {
         if (!this.#chartContext) {
             return;
         }
+
+        this.#registered = true;
 
         const unregister = this.#chartContext.registerSeries({
             color: this.color,

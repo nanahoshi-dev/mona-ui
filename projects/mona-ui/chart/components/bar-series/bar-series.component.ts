@@ -86,10 +86,14 @@ export class MonaBarSeriesComponent implements OnInit {
      */
     public readonly xField = input<ChartField | undefined>(undefined);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
             this.visible();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            }
         });
 
         effect(() => {
@@ -97,7 +101,9 @@ export class MonaBarSeriesComponent implements OnInit {
             this.field();
             this.keyField();
             this.xField();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            }
         });
 
         effect(() => {
@@ -105,13 +111,17 @@ export class MonaBarSeriesComponent implements OnInit {
             this.fillOpacity();
             this.maxBarWidth();
             this.name();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
         });
 
         effect(() => {
             this.color();
             this.userClass();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            }
         });
     }
 
@@ -119,6 +129,8 @@ export class MonaBarSeriesComponent implements OnInit {
         if (!this.#chartContext) {
             return;
         }
+
+        this.#registered = true;
 
         const unregister = this.#chartContext.registerSeries({
             borderRadius: this.borderRadius,
