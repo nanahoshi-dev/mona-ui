@@ -25,6 +25,7 @@ export class PolarSeriesRenderer {
 
         context.save();
         context.translate(center.x, center.y);
+        context.globalAlpha *= series.renderOpacity ?? 1;
 
         // 1. Draw Polar Area Fill (Solid or Gradient) from innerRadius 0 to outer data line
         if (fillMode !== "none" && definedPoints.length >= 2) {

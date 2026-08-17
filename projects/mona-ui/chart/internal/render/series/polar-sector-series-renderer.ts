@@ -38,6 +38,7 @@ export class PolarSectorSeriesRenderer {
             context.beginPath();
             arcGenerator(slice);
 
+            const opacity = series.renderOpacity ?? 1;
             if (fillMode === "gradient") {
                 const spec = createPolarGradientSpec(
                     slice.innerRadius,
@@ -50,19 +51,19 @@ export class PolarSectorSeriesRenderer {
                     gradient.addColorStop(stop.offset, stop.color);
                 }
 
-                context.globalAlpha = 1;
+                context.globalAlpha = opacity;
                 context.fillStyle = gradient;
                 context.fill();
             } else {
                 context.fillStyle = slice.color;
-                context.globalAlpha = style.fillOpacity;
+                context.globalAlpha = style.fillOpacity * opacity;
                 context.fill();
             }
 
             // Stroke solid slice border independently from fill
             const strokeColor = style.strokeSource === "explicit" ? style.strokeColor : slice.color;
             if (style.strokeWidth > 0 && strokeColor) {
-                context.globalAlpha = 1;
+                context.globalAlpha = opacity;
                 context.strokeStyle = strokeColor;
                 context.lineWidth = style.strokeWidth;
                 context.stroke();

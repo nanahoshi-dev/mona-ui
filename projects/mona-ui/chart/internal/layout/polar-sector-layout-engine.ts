@@ -11,6 +11,7 @@ import type { PolarSectorChartScene } from "../scene/chart-scene";
 import type { ChartSectorSeriesScene, SceneSectorSlice } from "../scene/polar-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { degreesToRadians, normalizeAngleSpan, radiansToDegrees } from "../utils/angle-utils";
 import { clamp, normalizeFiniteNumber, normalizeNonNegativeNumber, normalizeRatio } from "../utils/number-utils";
 import {
@@ -186,6 +187,7 @@ export class PolarSectorLayoutEngine {
 
             const pieArcs = pieGen(dataResult.visibleData as PolarDatum[]);
             const labelRadius = innerRadius + (outerRadius - innerRadius) * 0.55;
+            const keyResolver = new ChartMarkKeyResolver(targetSeries.id, targetSeries.keyField?.());
 
             for (const arc of pieArcs) {
                 const d = arc.data;
@@ -206,8 +208,10 @@ export class PolarSectorLayoutEngine {
                 const formattedPct = formatPolarPercentage(ratio);
 
                 const insideLabelBackgroundColor = d.color;
+                const animationKey = keyResolver.resolveKey(d.datum, d.sliceId, d.dataIndex);
 
                 const slice: SceneSectorSlice = {
+                    animationKey,
                     category: d.category,
                     centroid,
                     color: d.color,
@@ -232,6 +236,7 @@ export class PolarSectorLayoutEngine {
                 slices.push(slice);
 
                 const hitTarget: SceneHitTarget = {
+                    animationKey,
                     arc: {
                         center,
                         endAngle: arc.endAngle,

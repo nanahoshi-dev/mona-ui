@@ -13,6 +13,7 @@ export interface SceneArcHitGeometry {
 }
 
 export interface SceneBar {
+    animationKey?: string;
     datum: unknown;
     height: number;
     index: number;
@@ -27,6 +28,7 @@ export interface SceneBar {
 
 export interface SceneHitTarget {
     angle?: number;
+    animationKey?: string;
     arc?: SceneArcHitGeometry;
     borderRadius?: number;
     bounds?: ChartRect;
@@ -60,6 +62,7 @@ export interface ChartInteractionBucket {
 }
 
 export interface ScenePoint {
+    animationKey?: string;
     datum: unknown;
     defined: boolean;
     index: number;

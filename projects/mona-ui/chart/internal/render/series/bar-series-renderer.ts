@@ -10,7 +10,7 @@ export class BarSeriesRenderer {
         }
 
         context.save();
-        context.globalAlpha = fillOpacity;
+        context.globalAlpha = fillOpacity * (scene.renderOpacity ?? 1);
         context.fillStyle = style.color;
 
         for (const bar of bars) {

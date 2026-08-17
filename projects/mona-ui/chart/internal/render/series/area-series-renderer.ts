@@ -62,8 +62,9 @@ export class AreaSeriesRenderer {
             return;
         }
 
+        const opacity = scene.renderOpacity ?? 1;
         if (fillMode === "solid") {
-            context.globalAlpha = 1;
+            context.globalAlpha = opacity;
             context.fillStyle = withAlpha(style.areaFillColor, fillOpacity);
             context.fill();
         } else {
@@ -73,14 +74,14 @@ export class AreaSeriesRenderer {
                 for (const stop of spec.stops) {
                     gradient.addColorStop(stop.offset, stop.color);
                 }
-                context.globalAlpha = 1;
+                context.globalAlpha = opacity;
                 context.fillStyle = gradient;
                 context.fill();
             }
         }
 
         // 2. Draw Stroke Line
-        context.globalAlpha = 1;
+        context.globalAlpha = opacity;
         context.beginPath();
         const lineGenerator = line<ScenePoint>()
             .x(p => p.x)

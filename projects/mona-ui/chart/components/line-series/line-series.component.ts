@@ -52,6 +52,12 @@ export class MonaLineSeriesComponent implements OnInit {
     public readonly field = input<ChartField>("");
 
     /**
+     * @description Property key or accessor extracting a stable datum identity across updates.
+     * @default undefined
+     */
+    public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
      * @description Name of the series displayed in legends and tooltips.
      * @default ""
      */
@@ -95,17 +101,22 @@ export class MonaLineSeriesComponent implements OnInit {
 
     public constructor() {
         effect(() => {
+            this.visible();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+        });
+
+        effect(() => {
             this.color();
             this.connectNulls();
             this.curve();
             this.data();
             this.field();
+            this.keyField();
             this.name();
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
             this.userClass();
-            this.visible();
             this.xField();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
         });
@@ -124,6 +135,7 @@ export class MonaLineSeriesComponent implements OnInit {
             element: this.#elementRef,
             field: this.field,
             id: this.#id,
+            keyField: this.keyField,
             name: this.name,
             pointRadius: this.pointRadius,
             showPoints: this.showPoints,

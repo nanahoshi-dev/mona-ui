@@ -51,6 +51,12 @@ export class MonaBarSeriesComponent implements OnInit {
     public readonly fillOpacity = input<number | undefined>(undefined);
 
     /**
+     * @description Property key or accessor extracting a stable datum identity across updates.
+     * @default undefined
+     */
+    public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
      * @description Maximum width in pixels for each individual bar.
      * @default undefined
      */
@@ -82,15 +88,20 @@ export class MonaBarSeriesComponent implements OnInit {
 
     public constructor() {
         effect(() => {
+            this.visible();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+        });
+
+        effect(() => {
             this.borderRadius();
             this.color();
             this.data();
             this.field();
             this.fillOpacity();
+            this.keyField();
             this.maxBarWidth();
             this.name();
             this.userClass();
-            this.visible();
             this.xField();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
         });
@@ -109,6 +120,7 @@ export class MonaBarSeriesComponent implements OnInit {
             field: this.field,
             fillOpacity: this.fillOpacity,
             id: this.#id,
+            keyField: this.keyField,
             maxBarWidth: this.maxBarWidth,
             name: this.name,
             toggleVisibility: () => {

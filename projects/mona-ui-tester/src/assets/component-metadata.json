@@ -2446,6 +2446,12 @@
         "kind": "input"
       },
       {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input"
+      },
+      {
         "name": "name",
         "type": "string",
         "description": "Name of the series displayed in legends and tooltips.",
@@ -2524,6 +2530,12 @@
         "kind": "input"
       },
       {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input"
+      },
+      {
         "name": "maxBarWidth",
         "type": "number | undefined",
         "description": "Maximum width in pixels for each individual bar.",
@@ -2559,6 +2571,12 @@
     "name": "MonaChartComponent",
     "selector": "\"mona-chart\"",
     "inputs": [
+      {
+        "name": "animation",
+        "type": "ChartAnimationInput",
+        "description": "Animation settings for initial render and subsequent data or visibility transitions.",
+        "kind": "input"
+      },
       {
         "name": "ariaDescription",
         "type": "string",
@@ -3010,6 +3028,12 @@
         "kind": "input"
       },
       {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input"
+      },
+      {
         "name": "labelContent",
         "type": "ChartPolarLabelContent",
         "description": "Content to display in default slice data labels.",
@@ -3130,6 +3154,12 @@
         "kind": "input"
       },
       {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input"
+      },
+      {
         "name": "name",
         "type": "string",
         "description": "Name of the series displayed in legends and tooltips.",
@@ -3235,6 +3265,12 @@
         "name": "fillOpacity",
         "type": "number | undefined",
         "description": "Opacity of slice fills (between 0 and 1).",
+        "kind": "input"
+      },
+      {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
         "kind": "input"
       },
       {
@@ -3376,6 +3412,12 @@
         "kind": "input"
       },
       {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input"
+      },
+      {
         "name": "name",
         "type": "string",
         "description": "Series name displayed in legends, tooltips, and accessibility regions.",
@@ -3469,6 +3511,12 @@
         "name": "fillOpacity",
         "type": "number | undefined",
         "description": "Opacity ratio for polygon interior fills (0 to 1).",
+        "kind": "input"
+      },
+      {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
         "kind": "input"
       },
       {
