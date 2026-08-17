@@ -6,14 +6,21 @@ export interface ChartDiagnostic {
 }
 
 export class ChartDiagnostics {
-    public static warnOnce(warnedSignatures: Set<string>, diagnostic: ChartDiagnostic): void {
+    public static warnOnce(
+        warnedSignatures: Set<string>,
+        diagnostic: ChartDiagnostic | string,
+        signature?: string
+    ): void {
         if (typeof ngDevMode !== "undefined" && !ngDevMode) {
             return;
         }
-        if (!warnedSignatures.has(diagnostic.signature)) {
-            warnedSignatures.add(diagnostic.signature);
+        const sig = typeof diagnostic === "string" ? (signature ?? diagnostic) : diagnostic.signature;
+        const msg = typeof diagnostic === "string" ? diagnostic : diagnostic.message;
+        if (!warnedSignatures.has(sig)) {
+            warnedSignatures.add(sig);
+            const outputMsg = msg.startsWith("[MonaChart]") ? msg : `[MonaChart] ${msg}`;
             // eslint-disable-next-line no-console
-            console.warn(`[MonaChart] ${diagnostic.message}`);
+            console.warn(outputMsg);
         }
     }
 }
