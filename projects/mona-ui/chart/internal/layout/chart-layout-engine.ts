@@ -3,16 +3,19 @@ import type { ChartCoordinateSystem, ChartField } from "../../models/chart.model
 import { getChartSeriesFamily, type ChartSeriesFamily } from "../../models/chart-series.models";
 import type {
     ChartAngularAxisRegistration,
-    ChartAxisRegistration,
     ChartCartesianSeriesRegistration,
+    ChartHeatmapSeriesRegistration,
     ChartRadialAxisRegistration,
     ChartRadialSeriesRegistration,
     ChartSectorSeriesRegistration,
-    ChartSeriesRegistration
+    ChartSeriesRegistration,
+    ChartXAxisRegistration,
+    ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import type { ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianLayoutEngine } from "./cartesian-layout-engine";
+import { HeatmapLayoutEngine } from "./heatmap-layout-engine";
 import { PolarLayoutEngine } from "./polar-layout-engine";
 
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
@@ -37,8 +40,8 @@ export interface ChartLayoutOptions {
     series: readonly ChartSeriesRegistration[];
     styleResolver: ChartStyleResolver;
     warnedDiagnosticSignatures?: Set<string>;
-    xAxis?: ChartAxisRegistration;
-    yAxis?: ChartAxisRegistration;
+    xAxis?: ChartXAxisRegistration;
+    yAxis?: ChartYAxisRegistration;
 }
 
 export function resolveChartCoordinateSystem(
@@ -100,6 +103,7 @@ export class ChartLayoutEngine {
                 return {
                     axes: [],
                     barHitTargets: [],
+                    cartesianKind: "xy",
                     coordinateSystem: "cartesian",
                     hasRenderableData: false,
                     height: options.containerHeight,
@@ -175,6 +179,39 @@ export class ChartLayoutEngine {
                     width: options.containerWidth
                 };
             }
+        }
+
+        const heatmapSeries = series.filter(
+            (s): s is ChartHeatmapSeriesRegistration => s.type === "heatmap"
+        );
+
+        if (heatmapSeries.length > 0) {
+            if (heatmapSeries.length > 1) {
+                warnOnce(
+                    `multi-heatmap-${heatmapSeries.length}`,
+                    "[MonaChart] Only a single heatmap series is supported per chart. Using first heatmap series.",
+                    warnedSet
+                );
+            }
+            if (series.length > heatmapSeries.length) {
+                warnOnce(
+                    "mixed-heatmap-series",
+                    "[MonaChart] Heatmap series cannot be mixed with other series types in the same chart.",
+                    warnedSet
+                );
+            }
+
+            return HeatmapLayoutEngine.computeScene({
+                containerHeight: options.containerHeight,
+                containerWidth: options.containerWidth,
+                rootData: options.rootData,
+                rootXField: options.rootXField,
+                series: heatmapSeries[0],
+                styleResolver: options.styleResolver,
+                warnedDiagnosticSignatures: warnedSet,
+                xAxis: options.xAxis,
+                yAxis: options.yAxis
+            });
         }
 
         if (coordinateSystem === "polar") {

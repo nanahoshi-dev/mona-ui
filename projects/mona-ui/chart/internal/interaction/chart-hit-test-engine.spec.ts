@@ -45,6 +45,7 @@ describe("ChartHitTestEngine", () => {
 
     const mockCartesianScene: ChartScene = {
         axes: [],
+        cartesianKind: "xy",
         coordinateSystem: "cartesian",
         hasRenderableData: true,
         height: 300,
@@ -260,7 +261,8 @@ describe("ChartHitTestEngine", () => {
 
         const markerScene: ChartScene = {
             axes: [],
-            coordinateSystem: "cartesian",
+            cartesianKind: "xy",
+        coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
             hitTargets: [bottomMarker, topMarker],
@@ -377,7 +379,8 @@ describe("ChartHitTestEngine", () => {
 
         const rangeScene: ChartScene = {
             axes: [],
-            coordinateSystem: "cartesian",
+            cartesianKind: "xy",
+        coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
             hitTargets: [rangeBandHit, topRangeBandHit, zeroHeightBarHit],

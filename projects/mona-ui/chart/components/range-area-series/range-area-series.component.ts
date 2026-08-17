@@ -53,7 +53,6 @@ export class MonaRangeAreaSeriesComponent implements OnInit {
 
     /**
      * @description Property key or accessor extracting the starting range value for each data item.
-     * @default ""
      */
     public readonly fromField = input.required<ChartField>();
 
@@ -89,7 +88,6 @@ export class MonaRangeAreaSeriesComponent implements OnInit {
 
     /**
      * @description Property key or accessor extracting the ending range value for each data item.
-     * @default ""
      */
     public readonly toField = input.required<ChartField>();
 

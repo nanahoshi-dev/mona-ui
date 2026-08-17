@@ -1,5 +1,6 @@
 import type {
     CartesianChartScene,
+    CartesianHeatmapChartScene,
     ChartScene,
     PolarAxisChartScene,
     PolarSectorChartScene
@@ -7,6 +8,7 @@ import type {
 import { AreaSeriesAnimationAdapter } from "./adapters/area-animation-adapter";
 import { AxisAnimationAdapter } from "./adapters/axis-animation-adapter";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
+import { HeatmapAnimationAdapter } from "./adapters/heatmap-animation-adapter";
 import { LineSeriesAnimationAdapter } from "./adapters/line-animation-adapter";
 import { MarkerSeriesAnimationAdapter } from "./marker-series-animation-adapter";
 import { PolarSeriesAnimationAdapter } from "./adapters/polar-animation-adapter";
@@ -190,7 +192,39 @@ export class ChartTransitionPlanner {
                 const prevCartesian = previous as CartesianChartScene;
                 const targetCartesian = target as CartesianChartScene;
 
+                if (prevCartesian.cartesianKind !== targetCartesian.cartesianKind) {
+                    return {
+                        complexity,
+                        duration: options.duration,
+                        easing: options.easing,
+                        fromScene: previous,
+                        mode: "crossfade",
+                        seriesPlans: [],
+                        toScene: target,
+                        trigger
+                    };
+                }
+
+                if (prevCartesian.cartesianKind === "heatmap" && targetCartesian.cartesianKind === "heatmap") {
+                    const prevHeatmap = prevCartesian as CartesianHeatmapChartScene;
+                    const targetHeatmap = targetCartesian as CartesianHeatmapChartScene;
+                    if (prevHeatmap.gridSignature !== targetHeatmap.gridSignature) {
+                        return {
+                            complexity,
+                            duration: options.duration,
+                            easing: options.easing,
+                            fromScene: previous,
+                            mode: "crossfade",
+                            seriesPlans: [],
+                            toScene: target,
+                            trigger
+                        };
+                    }
+                }
+
                 if (
+                    prevCartesian.cartesianKind === "xy" &&
+                    targetCartesian.cartesianKind === "xy" &&
                     prevCartesian.xAxisType &&
                     targetCartesian.xAxisType &&
                     prevCartesian.xAxisType !== targetCartesian.xAxisType
@@ -208,6 +242,8 @@ export class ChartTransitionPlanner {
                 }
 
                 if (
+                    prevCartesian.cartesianKind === "xy" &&
+                    targetCartesian.cartesianKind === "xy" &&
                     prevCartesian.stackSignature !== undefined &&
                     targetCartesian.stackSignature !== undefined &&
                     prevCartesian.stackSignature !== targetCartesian.stackSignature
@@ -350,6 +386,8 @@ export class ChartTransitionPlanner {
                         independentMarks += s.bars.length;
                     } else if (s.type === "scatter" || s.type === "bubble") {
                         independentMarks += s.markers.length;
+                    } else if (s.type === "heatmap") {
+                        independentMarks += s.cells.length;
                     }
                 }
             } else if (sc.coordinateSystem === "polar") {
@@ -464,6 +502,14 @@ export class ChartTransitionPlanner {
                             toSeries: targetSeries
                         });
                     }
+                } else if (targetSeries.type === "heatmap") {
+                    plans.push(
+                        HeatmapAnimationAdapter.createPlan(
+                            prevSeries?.type === "heatmap" ? prevSeries : null,
+                            targetSeries,
+                            context
+                        )
+                    );
                 }
             }
 
@@ -481,6 +527,8 @@ export class ChartTransitionPlanner {
                             plans.push(rangeBarAdapter.createPlan(prevSeries, null, context));
                         } else if (prevSeries.type === "rangeArea") {
                             plans.push(rangeAreaAdapter.createPlan(prevSeries, null, context));
+                        } else if (prevSeries.type === "heatmap") {
+                            plans.push(HeatmapAnimationAdapter.createPlan(prevSeries, null, context));
                         } else if (prevSeries.type === "scatter" || prevSeries.type === "bubble") {
                             const markerPlan = MarkerSeriesAnimationAdapter.planSeries(prevSeries, undefined);
                             if (markerPlan) {

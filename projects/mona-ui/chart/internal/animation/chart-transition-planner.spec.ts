@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { CartesianChartScene, PolarSectorChartScene } from "../scene/chart-scene";
+import type { CartesianXYChartScene, PolarSectorChartScene } from "../scene/chart-scene";
 import type { ChartLineSeriesScene } from "../scene/cartesian-scene";
 import { normalizeChartAnimationOptions } from "./chart-animation-options";
 import { ChartTransitionPlanner } from "./chart-transition-planner";
 
-function createMockCartesianSceneWithBars(): CartesianChartScene {
+function createMockCartesianSceneWithBars(): CartesianXYChartScene {
     return {
         axes: [],
+        cartesianKind: "xy",
         coordinateSystem: "cartesian",
         hasRenderableData: true,
         height: 300,
@@ -159,8 +160,9 @@ describe("ChartTransitionPlanner", () => {
             type: "line"
         };
 
-        const prev: CartesianChartScene = {
+        const prev: CartesianXYChartScene = {
             axes: [],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
@@ -181,7 +183,7 @@ describe("ChartTransitionPlanner", () => {
             ]
         };
 
-        const next: CartesianChartScene = {
+        const next: CartesianXYChartScene = {
             ...prev,
             series: [lineSeriesNext]
         };

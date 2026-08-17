@@ -241,7 +241,7 @@ Mona UI Charts feature a high-performance, renderer-agnostic animation system:
         fromField="lowerBound"
         toField="upperBound"
         name="95% Confidence Band"
-        curve="smooth"
+        curve="monotone-x"
         [showPoints]="true"
         color="#10b981"
         [fillOpacity]="0.25" />
@@ -299,7 +299,7 @@ Renders a continuous Cartesian area series supporting gradient fades, solid fill
 | `stackMode` | `ChartStackMode` | `"normal"` | Stacking calculation mode: `"normal"` (raw cumulative sum) or `"percent"` (normalized to 100%). |
 | `fillMode` | `ChartAreaFillMode` | `"gradient"` | Area fill style: `"gradient"`, `"solid"`, or `"none"`. |
 | `fillOpacity` | `number` | `0.2` | Area fill opacity between 0.0 and 1.0. |
-| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"smooth"`, `"step"`, `"monotone-x"`). |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`). |
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across null/missing data points. |
 | `showPoints` | `boolean` | `false` | Whether to render point markers at data coordinates. |
 | `color` | `string` | `undefined` | Area line and fill color. Defaults to palette token. |
@@ -317,7 +317,7 @@ Renders a continuous Cartesian range area series enclosing a confidence or varia
 | `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
 | `name` | `string` | `"Range Area"` | Series name for tooltips, legend, and accessibility. |
 | `fillOpacity` | `number` | `0.18` | Range band fill opacity between 0.0 and 1.0. |
-| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"smooth"`, `"step"`, `"monotone-x"`). |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`). |
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across null/missing data points. |
 | `showPoints` | `boolean` | `false` | Whether to render point markers at boundary coordinates. |
 | `pointRadius` | `number` | `4` | Boundary marker radius in pixels when `showPoints` is true. |
@@ -430,3 +430,31 @@ Renders a continuous polar series plotting values over continuous angular degree
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across null/undefined values. |
 | `showPoints` | `boolean` | `false` | Whether data point markers are rendered. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+
+### `<mona-heatmap-series>`
+Renders a 2D matrix heatmap visualization with perceptual Culori color scale interpolation and keyboard navigation.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `data` | `readonly unknown[]` | `undefined` | Matrix cell dataset or sparse records. |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric heat value. |
+| `xField` | `ChartField` | `"x"` | Property key or accessor extracting X category column. |
+| `yField` | `ChartField` | `"y"` | Property key or accessor extracting Y category row. |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable cell mark tracking across animation transitions. |
+| `color` | `string` | `undefined` | Custom single base color for sequential ramp generation. |
+| `colors` | `readonly string[]` | `undefined` | Custom palette stops for color interpolation. |
+| `colorMode` | `ChartHeatmapColorMode` | `"sequential"` | Color scale mode: `"sequential"` or `"diverging"`. |
+| `min` | `number` | `undefined` | Explicit minimum domain value for color scale. |
+| `max` | `number` | `undefined` | Explicit maximum domain value for color scale. |
+| `midpoint` | `number` | `undefined` | Explicit midpoint value for diverging color scales (defaults to `(min + max) / 2`). |
+| `cellGap` | `number` | `1` | Pixel gap between matrix cells. |
+| `borderRadius` | `number` | `0` | Corner border radius in pixels for each cell rectangle. |
+| `strokeColor` | `string` | `undefined` | Optional cell border outline color. |
+| `strokeWidth` | `number` | `0` | Optional cell border outline width in pixels. |
+| `showValues` | `boolean` | `false` | Whether to render numeric text labels inside cells with high-contrast text color calculation. |
+| `xCategories` | `readonly unknown[]` | `undefined` | Explicit X-axis category order. |
+| `yCategories` | `readonly unknown[]` | `undefined` | Explicit Y-axis category order. |
+| `name` | `string` | `"Heatmap"` | Series name for tooltips, legends, and accessibility. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter function for cell numeric values. |
+

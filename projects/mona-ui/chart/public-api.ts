@@ -16,6 +16,7 @@ export { MonaScatterSeriesComponent } from "./components/scatter-series/scatter-
 export { MonaBubbleSeriesComponent } from "./components/bubble-series/bubble-series.component";
 export { MonaRangeBarSeriesComponent } from "./components/range-bar-series/range-bar-series.component";
 export { MonaRangeAreaSeriesComponent } from "./components/range-area-series/range-area-series.component";
+export { MonaHeatmapSeriesComponent } from "./components/heatmap-series/heatmap-series.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -48,7 +49,8 @@ export type {
     ChartAxisTick,
     ChartXAxisPosition,
     ChartXAxisType,
-    ChartYAxisPosition
+    ChartYAxisPosition,
+    ChartYAxisType
 } from "./models/chart-axis.models";
 
 export type {
@@ -98,3 +100,25 @@ export type {
 
 export type { ChartSeriesStyle } from "./models/chart-style.models";
 export type { ChartStackMode } from "./models/chart-stack.models";
+
+export type {
+    ChartColorLegendScale,
+    ChartColorLegendStop,
+    ChartColorLegendTick,
+    ChartHeatmapCategory,
+    ChartHeatmapCellColorResolver,
+    ChartHeatmapCellData,
+    ChartHeatmapColorMode,
+    ChartHeatmapColorScaleScene,
+    ChartHeatmapLabelFormatter,
+    ChartHeatmapSeriesScene,
+    ChartHeatmapSeriesStyle,
+    ChartLegendMode,
+    HeatmapCellClickEvent,
+    HeatmapCellIndex,
+    HeatmapColorScaleType,
+    HeatmapColorStop,
+    HeatmapScale,
+    HeatmapThresholdInterval,
+    SceneHeatmapCell
+} from "./models/chart-heatmap.models";

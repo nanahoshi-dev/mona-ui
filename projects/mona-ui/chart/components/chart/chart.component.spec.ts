@@ -2,7 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import axe from "axe-core";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
 import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";

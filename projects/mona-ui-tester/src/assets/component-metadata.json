@@ -3105,6 +3105,13 @@
         "defaultValue": "true"
       },
       {
+        "description": "Legend display mode: 'auto' (series items for standard charts, color scale for heatmap), 'series' (always series items), or 'color' (color gradient scale).",
+        "kind": "input",
+        "name": "mode",
+        "type": "ChartLegendMode",
+        "defaultValue": "\"auto\""
+      },
+      {
         "description": "Layout position of the legend (`\"top\"`, `\"bottom\"`, `\"left\"`, or `\"right\"`).",
         "kind": "input",
         "name": "position",
@@ -3395,6 +3402,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Scale type for the Y axis (`\"auto\"`, `\"category\"`, or `\"linear\"`).",
+        "kind": "input",
+        "name": "type",
+        "type": "ChartYAxisType",
+        "defaultValue": "\"auto\""
+      },
+      {
         "description": "Whether the axis and its labels are visible.",
         "kind": "input",
         "name": "visible",
@@ -3587,6 +3601,173 @@
         "name": "visible",
         "type": "boolean",
         "defaultValue": "true"
+      }
+    ]
+  },
+  "MonaHeatmapSeriesComponent": {
+    "name": "MonaHeatmapSeriesComponent",
+    "selector": "\"mona-heatmap-series\"",
+    "inputs": [
+      {
+        "description": "Corner radius in pixels for each individual heat cell.",
+        "kind": "input",
+        "name": "borderRadius",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Spacing gap in pixels between adjacent cells.",
+        "kind": "input",
+        "name": "cellGap",
+        "type": "number",
+        "defaultValue": "1"
+      },
+      {
+        "description": "Explicit primary base color used to derive the heat palette.",
+        "kind": "input",
+        "name": "color",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Color scale mapping mode: 'sequential' for continuous single-hue intensity or 'diverging' for dual-pole deviations.",
+        "kind": "input",
+        "name": "colorMode",
+        "type": "ChartHeatmapColorMode",
+        "defaultValue": "\"sequential\""
+      },
+      {
+        "description": "Explicit array of color stops defining the gradient palette.",
+        "kind": "input",
+        "name": "colors",
+        "type": "readonly string[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series-specific dataset overriding root chart data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the numeric heat value for each cell.",
+        "kind": "input",
+        "name": "field",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Fill opacity applied to the heat cells (0 to 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit upper bound for the numeric value color domain.",
+        "kind": "input",
+        "name": "max",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit central midpoint for diverging color scales.",
+        "kind": "input",
+        "name": "midpoint",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit lower bound for the numeric value color domain.",
+        "kind": "input",
+        "name": "min",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Name of the series displayed in legends, tooltips, and live region announcements.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Heatmap\""
+      },
+      {
+        "description": "Whether to render numeric value labels inside individual heat cells on Canvas.",
+        "kind": "input",
+        "name": "showValues",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Explicit border stroke color for individual heat cells.",
+        "kind": "input",
+        "name": "strokeColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Stroke width in pixels for cell borders.",
+        "kind": "input",
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Additional CSS classes applied to the series host element.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Custom formatter for raw cell values in labels, tooltips, and live regions.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Whether the series is currently visible on the chart and in calculations.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Explicit category ordering for the X axis columns.",
+        "kind": "input",
+        "name": "xCategories",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the X column category for each cell.",
+        "kind": "input",
+        "name": "xField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit category ordering for the Y axis rows.",
+        "kind": "input",
+        "name": "yCategories",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the Y row category for each cell.",
+        "kind": "input",
+        "name": "yField",
+        "type": "ChartField",
+        "required": true
       }
     ]
   },
@@ -4147,8 +4328,7 @@
         "kind": "input",
         "name": "fromField",
         "type": "ChartField",
-        "required": true,
-        "defaultValue": "\"\""
+        "required": true
       },
       {
         "description": "Property key or accessor extracting a stable datum identity across updates.",
@@ -4190,8 +4370,7 @@
         "kind": "input",
         "name": "toField",
         "type": "ChartField",
-        "required": true,
-        "defaultValue": "\"\""
+        "required": true
       },
       {
         "description": "Additional CSS classes applied to the series host element.",
@@ -4260,8 +4439,7 @@
         "kind": "input",
         "name": "fromField",
         "type": "ChartField",
-        "required": true,
-        "defaultValue": "\"\""
+        "required": true
       },
       {
         "description": "Property key or accessor extracting a stable datum identity across updates.",
@@ -4289,8 +4467,7 @@
         "kind": "input",
         "name": "toField",
         "type": "ChartField",
-        "required": true,
-        "defaultValue": "\"\""
+        "required": true
       },
       {
         "description": "Additional CSS classes applied to the series host element.",

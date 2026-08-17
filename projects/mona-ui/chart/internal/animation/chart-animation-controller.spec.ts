@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CartesianChartScene } from "../scene/chart-scene";
+import type { CartesianXYChartScene } from "../scene/chart-scene";
 import { FakeAnimationClock } from "./chart-animation-clock";
 import { ChartAnimationController } from "./chart-animation-controller";
 import type { ChartAnimationRenderFrame, ChartTransitionPlan } from "./chart-transition-types";
 
-function createMockCartesianScene(width = 500, height = 300): CartesianChartScene {
+function createMockCartesianScene(width = 500, height = 300): CartesianXYChartScene {
     return {
         axes: [],
+        cartesianKind: "xy",
         coordinateSystem: "cartesian",
         hasRenderableData: true,
         height,

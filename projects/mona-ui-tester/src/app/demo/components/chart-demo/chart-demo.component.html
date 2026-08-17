@@ -114,6 +114,13 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'heatmap' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('heatmap')">
+                Heatmap
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('custom')">
@@ -452,6 +459,51 @@
                                 <mona-check-box [checked]="showPoints()" (checkedChange)="showPoints.set($event)">
                                     Point Markers
                                 </mona-check-box>
+                            </div>
+                        }
+
+                        @if (activeTab() === 'heatmap') {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Color Palette</span>
+                                <div class="flex gap-2">
+                                    <button
+                                        monaButton
+                                        [look]="heatmapColorPreset() === 'emerald' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="heatmapColorPreset.set('emerald')">
+                                        Emerald
+                                    </button>
+                                    <button
+                                        monaButton
+                                        [look]="heatmapColorPreset() === 'sunset' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="heatmapColorPreset.set('sunset')">
+                                        Sunset
+                                    </button>
+                                    <button
+                                        monaButton
+                                        [look]="heatmapColorPreset() === 'blue' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="heatmapColorPreset.set('blue')">
+                                        Theme Blue
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cell Style</span>
+                                <div class="flex items-center gap-4">
+                                    <mona-check-box [checked]="heatmapShowValues()" (checkedChange)="heatmapShowValues.set($event)">
+                                        Show Numbers
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
+                                <button monaButton size="small" look="outline" (click)="randomizeHeatmapData()">
+                                    Randomize Heatmap Data
+                                </button>
                             </div>
                         }
                     </div>
@@ -1056,6 +1108,35 @@
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("heatmap") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Server Activity & Load Matrix (2D Heatmap)</h3>
+                    <mona-chart
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Server Activity Heatmap"
+                        aria-description="Interactive 2D heatmap matrix showing weekly server activity and load patterns."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-chart-x-axis [type]="'category'" title="Day of Week" />
+                        <mona-chart-y-axis [type]="'category'" title="Time Block" />
+                        <mona-heatmap-series
+                            [data]="heatmapData()"
+                            xField="day"
+                            yField="time"
+                            field="value"
+                            [colorMode]="heatmapColorMode()"
+                            [colors]="heatmapColors()"
+                            [showValues]="heatmapShowValues()"
+                            [borderRadius]="heatmapBorderRadius()"
+                            [cellGap]="heatmapCellGap()"
+                            name="Server Load" />
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
                     </mona-chart>
                 </div>
             }

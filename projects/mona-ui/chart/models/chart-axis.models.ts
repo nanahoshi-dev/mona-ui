@@ -3,6 +3,7 @@ export type ChartYAxisPosition = "left" | "right";
 export type ChartAxisPosition = ChartXAxisPosition | ChartYAxisPosition;
 
 export type ChartXAxisType = "auto" | "category" | "linear" | "time" | "utc";
+export type ChartYAxisType = "auto" | "category" | "linear";
 
 export type ChartAxisFormatter<T = unknown> = (value: T, index: number) => string;
 

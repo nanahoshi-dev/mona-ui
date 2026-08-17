@@ -6,6 +6,8 @@ export type { ChartPointValueKind } from "./chart-point-value.models";
 
 export interface ChartTooltipPointContext<T = unknown> {
     category?: unknown;
+    categoryX?: string;
+    categoryY?: string;
     color: string;
     dataIndex: number;
     datum: T;
@@ -17,10 +19,13 @@ export interface ChartTooltipPointContext<T = unknown> {
     formattedStackTotal?: string;
     formattedTo?: string;
     formattedX: string;
+    formattedXValue?: string;
     formattedY: string;
+    formattedYCategory?: string;
     fromValue?: number;
     markId: string;
     percentage?: number;
+    rawValue?: unknown;
     seriesId: string;
     seriesName: string;
     seriesType: ChartSeriesType;

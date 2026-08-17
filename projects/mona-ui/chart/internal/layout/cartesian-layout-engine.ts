@@ -3,13 +3,14 @@ import type { ChartField, ChartPadding, ChartPoint, ChartRect } from "../../mode
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
     ChartAreaSeriesRegistration,
-    ChartAxisRegistration,
     ChartBarSeriesRegistration,
     ChartBubbleSeriesRegistration,
     ChartCartesianSeriesRegistration,
     ChartRangeAreaSeriesRegistration,
     ChartRangeBarSeriesRegistration,
-    ChartScalarSeriesRegistrationBase
+    ChartScalarSeriesRegistrationBase,
+    ChartXAxisRegistration,
+    ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import {
     calculateCategoryDomain,
@@ -40,7 +41,7 @@ import type {
     ChartSeriesScene
 } from "../scene/cartesian-scene";
 import { computeRangeAreaLayout, computeRangeBarLayout } from "./cartesian-range-layout";
-import type { CartesianChartScene } from "../scene/chart-scene";
+import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type {
     ChartCornerRadii,
     ChartInteractionBucket,
@@ -76,12 +77,12 @@ export interface CartesianLayoutOptions {
     series: readonly ChartCartesianSeriesRegistration[];
     styleResolver: ChartStyleResolver;
     warnedDiagnosticSignatures?: Set<string>;
-    xAxis?: ChartAxisRegistration;
-    yAxis?: ChartAxisRegistration;
+    xAxis?: ChartXAxisRegistration;
+    yAxis?: ChartYAxisRegistration;
 }
 
 export class CartesianLayoutEngine {
-    public static computeScene(options: CartesianLayoutOptions): CartesianChartScene {
+    public static computeScene(options: CartesianLayoutOptions): CartesianXYChartScene {
         const {
             containerHeight,
             containerWidth,
@@ -217,6 +218,7 @@ export class CartesianLayoutEngine {
             return {
                 axes: [],
                 barHitTargets: [],
+                cartesianKind: "xy",
                 coordinateSystem: "cartesian",
                 hasRenderableData: false,
                 height: containerHeight,
@@ -1153,6 +1155,7 @@ export class CartesianLayoutEngine {
         return {
             axes: axisScenes,
             barHitTargets,
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: hasData,
             height: containerHeight,

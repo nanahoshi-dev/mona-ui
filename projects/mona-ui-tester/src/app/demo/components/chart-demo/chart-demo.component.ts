@@ -25,8 +25,10 @@ import {
     MonaBubbleSeriesComponent,
     MonaRangeBarSeriesComponent,
     MonaRangeAreaSeriesComponent,
+    MonaHeatmapSeriesComponent,
     type ChartAreaFillMode,
     type ChartCurve,
+    type ChartHeatmapColorMode,
     type ChartPointEvent,
     type ChartPointFocusEvent,
     type ChartPolarFillMode,
@@ -118,6 +120,7 @@ interface BubbleDataPoint {
         MonaBubbleSeriesComponent,
         MonaRangeBarSeriesComponent,
         MonaRangeAreaSeriesComponent,
+        MonaHeatmapSeriesComponent,
         MonaChartLegendComponent,
         MonaChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
@@ -142,6 +145,7 @@ export class ChartDemoComponent {
         | "custom"
         | "donut"
         | "grouped"
+        | "heatmap"
         | "mixed"
         | "percent-area"
         | "percent-bar"
@@ -156,6 +160,76 @@ export class ChartDemoComponent {
         | "time"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
+
+    // Heatmap Chart Data & Controls
+    protected readonly heatmapDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    protected readonly heatmapTimes = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"];
+    protected readonly heatmapData = signal<readonly { day: string; time: string; value: number }[]>([
+        { day: "Mon", time: "00:00", value: 12 },
+        { day: "Mon", time: "04:00", value: 5 },
+        { day: "Mon", time: "08:00", value: 45 },
+        { day: "Mon", time: "12:00", value: 85 },
+        { day: "Mon", time: "16:00", value: 92 },
+        { day: "Mon", time: "20:00", value: 64 },
+
+        { day: "Tue", time: "00:00", value: 8 },
+        { day: "Tue", time: "04:00", value: 3 },
+        { day: "Tue", time: "08:00", value: 52 },
+        { day: "Tue", time: "12:00", value: 88 },
+        { day: "Tue", time: "16:00", value: 95 },
+        { day: "Tue", time: "20:00", value: 70 },
+
+        { day: "Wed", time: "00:00", value: 15 },
+        { day: "Wed", time: "04:00", value: 7 },
+        { day: "Wed", time: "08:00", value: 60 },
+        { day: "Wed", time: "12:00", value: 96 },
+        { day: "Wed", time: "16:00", value: 100 },
+        { day: "Wed", time: "20:00", value: 75 },
+
+        { day: "Thu", time: "00:00", value: 10 },
+        { day: "Thu", time: "04:00", value: 4 },
+        { day: "Thu", time: "08:00", value: 48 },
+        { day: "Thu", time: "12:00", value: 82 },
+        { day: "Thu", time: "16:00", value: 90 },
+        { day: "Thu", time: "20:00", value: 68 },
+
+        { day: "Fri", time: "00:00", value: 18 },
+        { day: "Fri", time: "04:00", value: 9 },
+        { day: "Fri", time: "08:00", value: 40 },
+        { day: "Fri", time: "12:00", value: 76 },
+        { day: "Fri", time: "16:00", value: 84 },
+        { day: "Fri", time: "20:00", value: 80 },
+
+        { day: "Sat", time: "00:00", value: 30 },
+        { day: "Sat", time: "04:00", value: 15 },
+        { day: "Sat", time: "08:00", value: 22 },
+        { day: "Sat", time: "12:00", value: 50 },
+        { day: "Sat", time: "16:00", value: 62 },
+        { day: "Sat", time: "20:00", value: 55 },
+
+        { day: "Sun", time: "00:00", value: 25 },
+        { day: "Sun", time: "04:00", value: 12 },
+        { day: "Sun", time: "08:00", value: 18 },
+        { day: "Sun", time: "12:00", value: 42 },
+        { day: "Sun", time: "16:00", value: 58 },
+        { day: "Sun", time: "20:00", value: 48 }
+    ]);
+    protected readonly heatmapColorMode = signal<ChartHeatmapColorMode>("sequential");
+    protected readonly heatmapBorderRadius = signal<number>(4);
+    protected readonly heatmapCellGap = signal<number>(2);
+    protected readonly heatmapShowValues = signal<boolean>(false);
+    protected readonly heatmapColorPreset = signal<"blue" | "emerald" | "sunset">("emerald");
+
+    protected readonly heatmapColors = computed<readonly string[] | undefined>(() => {
+        const preset = this.heatmapColorPreset();
+        if (preset === "emerald") {
+            return ["#ecfdf5", "#a7f3d0", "#34d399", "#059669", "#064e3b"];
+        }
+        if (preset === "sunset") {
+            return ["#fef3c7", "#f97316", "#dc2626", "#7f1d1d"];
+        }
+        return undefined; // fallback to theme palette
+    });
 
     // Range Chart Data & Controls
     protected readonly rangeBarData = signal<readonly { high: number; low: number; month: string }[]>([
@@ -734,6 +808,17 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Randomized range area confidence band dataset");
     }
 
+    public randomizeHeatmapData(): void {
+        this.heatmapData.update(list =>
+            list.map(item => ({
+                day: item.day,
+                time: item.time,
+                value: Math.round(Math.random() * 100)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized heatmap 2D server activity matrix");
+    }
+
     public resetData(): void {
         this.monthlyData.set([
             { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
@@ -755,6 +840,7 @@ export class ChartDemoComponent {
             | "custom"
             | "donut"
             | "grouped"
+            | "heatmap"
             | "mixed"
             | "percent-area"
             | "percent-bar"

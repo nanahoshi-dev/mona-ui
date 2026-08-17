@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ChartTransitionPlanner } from "./chart-transition-planner";
 import { SceneTransitionSampler } from "./scene-transition-sampler";
 import { normalizeChartAnimationOptions } from "./chart-animation-options";
-import type { CartesianChartScene } from "../scene/chart-scene";
+import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { SceneAreaPoint, SceneHitTarget } from "../scene/scene-geometry";
 
 describe("Cartesian Stack Animation Planning & Sampling", () => {
@@ -38,8 +38,9 @@ describe("Cartesian Stack Animation Planning & Sampling", () => {
         const dummyPlotRect = { height: 200, width: 400, x: 50, y: 50 };
 
         it("should plan crossfade transition when stackSignature changes", () => {
-            const fromScene: CartesianChartScene = {
+            const fromScene: CartesianXYChartScene = {
                 axes: [],
+                cartesianKind: "xy",
                 coordinateSystem: "cartesian",
                 hasRenderableData: true,
                 height: 300,
@@ -53,8 +54,9 @@ describe("Cartesian Stack Animation Planning & Sampling", () => {
                 xAxisType: "category"
             };
 
-            const toScene: CartesianChartScene = {
+            const toScene: CartesianXYChartScene = {
                 axes: [],
+                cartesianKind: "xy",
                 coordinateSystem: "cartesian",
                 hasRenderableData: true,
                 height: 300,
@@ -95,8 +97,9 @@ describe("Cartesian Stack Animation Planning & Sampling", () => {
                 yValue: 0
             };
 
-            const toScene: CartesianChartScene = {
+            const toScene: CartesianXYChartScene = {
                 axes: [],
+                cartesianKind: "xy",
                 coordinateSystem: "cartesian",
                 hasRenderableData: true,
                 height: 300,
@@ -134,7 +137,7 @@ describe("Cartesian Stack Animation Planning & Sampling", () => {
             const plan = ChartTransitionPlanner.plan(null, toScene, "initial", options);
 
             const frame = SceneTransitionSampler.sampleFrame(plan, 0.5);
-            const sampledCartesian = frame.scene as CartesianChartScene;
+            const sampledCartesian = frame.scene as CartesianXYChartScene;
             expect(sampledCartesian.hitTargets.length).toBe(1);
             expect(sampledCartesian.hitTargets[0].bounds).toBeUndefined();
             expect(sampledCartesian.barHitTargets?.length).toBe(0);

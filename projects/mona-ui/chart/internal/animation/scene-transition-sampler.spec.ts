@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CartesianChartScene, PolarSectorChartScene } from "../scene/chart-scene";
+import type { CartesianXYChartScene, PolarSectorChartScene } from "../scene/chart-scene";
 import type { ChartBarSeriesScene } from "../scene/cartesian-scene";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
@@ -8,8 +8,9 @@ import type { ChartTransitionPlan } from "./chart-transition-types";
 
 describe("SceneTransitionSampler", () => {
     it("should sample cartesian bar scene at progress 0, 0.5, and 1", () => {
-        const toScene: CartesianChartScene = {
+        const toScene: CartesianXYChartScene = {
             axes: [],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
@@ -87,19 +88,19 @@ describe("SceneTransitionSampler", () => {
         };
 
         const frame0 = SceneTransitionSampler.sampleFrame(plan, 0);
-        const sampledCartesian0 = frame0.scene as CartesianChartScene;
+        const sampledCartesian0 = frame0.scene as CartesianXYChartScene;
         expect((sampledCartesian0.series[0] as ChartBarSeriesScene).bars[0].height).toBe(0);
         expect(sampledCartesian0.stackConfiguration).toEqual(toScene.stackConfiguration);
         expect(sampledCartesian0.stackSignature).toBe(toScene.stackSignature);
 
         const frameMid = SceneTransitionSampler.sampleFrame(plan, 0.5);
-        const sampledCartesianMid = frameMid.scene as CartesianChartScene;
+        const sampledCartesianMid = frameMid.scene as CartesianXYChartScene;
         expect(((sampledCartesianMid.series[0] as ChartBarSeriesScene).bars[0]).height).toBeCloseTo(50, 1);
         expect(sampledCartesianMid.stackConfiguration).toEqual(toScene.stackConfiguration);
         expect(sampledCartesianMid.stackSignature).toBe(toScene.stackSignature);
 
         const frame1 = SceneTransitionSampler.sampleFrame(plan, 1);
-        const sampledCartesian1 = frame1.scene as CartesianChartScene;
+        const sampledCartesian1 = frame1.scene as CartesianXYChartScene;
         expect((sampledCartesian1.series[0] as ChartBarSeriesScene).bars[0].height).toBe(100);
         expect(sampledCartesian1.stackConfiguration).toEqual(toScene.stackConfiguration);
         expect(sampledCartesian1.stackSignature).toBe(toScene.stackSignature);

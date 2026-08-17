@@ -26,7 +26,6 @@ import {
     ChartInvalidationReason,
     hasInvalidationReason,
     type ChartAngularAxisRegistration,
-    type ChartAxisRegistration,
     type ChartDonutSeriesRegistration,
     type ChartLegendRegistration,
     type ChartPolarSeriesRegistration,
@@ -34,7 +33,10 @@ import {
     type ChartRegistrationContext,
     type ChartSectorSeriesRegistration,
     type ChartSeriesRegistration,
-    type ChartTooltipRegistration
+    type ChartTooltipRegistration,
+    type ChartXAxisRegistration,
+    type ChartYAxisRegistration,
+    type ChartHeatmapSeriesRegistration
 } from "../../internal/context/chart-registration-context";
 import { ChartLabelMeasureDirective } from "../../internal/directives/chart-label-measure.directive";
 import { ChartHitTestEngine } from "../../internal/interaction/chart-hit-test-engine";
@@ -46,11 +48,14 @@ import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer
 import { ChartRenderScheduler } from "../../internal/render/chart-render-scheduler";
 import type {
     CartesianChartScene,
+    CartesianHeatmapChartScene,
+    CartesianXYChartScene,
     ChartScene,
     PolarAxisChartScene,
     PolarChartScene,
     PolarSectorChartScene
 } from "../../internal/scene/chart-scene";
+import type { ChartColorLegendScale } from "../../models/chart-heatmap.models";
 import type { ChartAngularAxisTick, ChartRadialAxisTick } from "../../internal/scene/polar-axis-scene";
 import type { SceneSectorSlice } from "../../internal/scene/polar-scene";
 import type { SceneHitTarget } from "../../internal/scene/scene-geometry";
@@ -129,8 +134,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
     readonly #renderScheduler: ChartRenderScheduler;
     readonly #styleResolver: ChartStyleResolver;
     readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
-    readonly #xAxis = signal<ChartAxisRegistration | null>(null);
-    readonly #yAxis = signal<ChartAxisRegistration | null>(null);
+    readonly #xAxis = signal<ChartXAxisRegistration | null>(null);
+    readonly #yAxis = signal<ChartYAxisRegistration | null>(null);
 
     #activeKeyboardBucketIndex: number = -1;
     #activeKeyboardHitKey: string | null = null;
@@ -159,6 +164,23 @@ export class MonaChartComponent implements ChartRegistrationContext {
     protected readonly cartesianScene = computed<CartesianChartScene | null>(() => {
         const sc = this.scene();
         return sc?.coordinateSystem === "cartesian" ? (sc as CartesianChartScene) : null;
+    });
+    protected readonly cartesianXYScene = computed<CartesianXYChartScene | null>(() => {
+        const sc = this.scene();
+        return sc?.coordinateSystem === "cartesian" && sc.cartesianKind === "xy" ? (sc as CartesianXYChartScene) : null;
+    });
+    protected readonly heatmapScene = computed<CartesianHeatmapChartScene | null>(() => {
+        const sc = this.scene();
+        return sc?.coordinateSystem === "cartesian" && sc.cartesianKind === "heatmap" ? (sc as CartesianHeatmapChartScene) : null;
+    });
+    protected readonly heatmapSeriesRegistration = computed<ChartHeatmapSeriesRegistration | null>(() => {
+        const list = this.#registeredSeries();
+        return (list.find(s => s.type === "heatmap") as ChartHeatmapSeriesRegistration) ?? null;
+    });
+    public readonly legendScale = computed<ChartColorLegendScale | null>(() => {
+        const hm = this.heatmapScene();
+        if (!hm) return null;
+        return (hm.colorScale as unknown as ChartColorLegendScale) ?? null;
     });
     protected readonly polarSectorScene = computed<PolarSectorChartScene | null>(() => {
         const sc = this.scene();
@@ -285,8 +307,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
         this.#angularAxis.asReadonly();
     public readonly radialAxisRegistration: Signal<ChartRadialAxisRegistration | null> =
         this.#radialAxis.asReadonly();
-    public readonly xAxisRegistration: Signal<ChartAxisRegistration | null> = this.#xAxis.asReadonly();
-    public readonly yAxisRegistration: Signal<ChartAxisRegistration | null> = this.#yAxis.asReadonly();
+    public readonly xAxisRegistration: Signal<ChartXAxisRegistration | null> = this.#xAxis.asReadonly();
+    public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = this.#yAxis.asReadonly();
 
     public constructor() {
         this.#styleResolver = new ChartStyleResolver(this.#elementRef.nativeElement);
@@ -403,18 +425,22 @@ export class MonaChartComponent implements ChartRegistrationContext {
         }
 
         const isSector = currentScene.coordinateSystem === "polar" && currentScene.polarKind === "sector";
-        const shared = isSector ? false : (this.#tooltip()?.shared() ?? false);
+        const isHeatmap = currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap";
+        const shared = isSector || isHeatmap ? false : (this.#tooltip()?.shared() ?? false);
         const hitState = ChartHitTestEngine.testHit(pointer, currentScene, shared);
         if (hitState.activeHitTarget) {
             const target = hitState.activeHitTarget;
             this.pointClick.emit({
                 category: target.category,
+                categoryX: target.categoryX,
+                categoryY: target.categoryY,
                 dataIndex: target.index,
                 datum: target.datum,
                 formattedFrom: target.formattedFrom ?? target.range?.formattedFrom,
                 formattedTo: target.formattedTo ?? target.range?.formattedTo,
                 fromValue: target.fromValue ?? target.range?.fromValue,
                 percentage: target.percentage,
+                rawValue: target.rawValue,
                 seriesId: target.seriesId,
                 seriesName: target.seriesName,
                 seriesType: target.seriesType,
@@ -492,12 +518,15 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 if (hit) {
                     this.pointClick.emit({
                         category: hit.category,
+                        categoryX: hit.categoryX,
+                        categoryY: hit.categoryY,
                         dataIndex: hit.index,
                         datum: hit.datum,
                         formattedFrom: hit.formattedFrom ?? hit.range?.formattedFrom,
                         formattedTo: hit.formattedTo ?? hit.range?.formattedTo,
                         fromValue: hit.fromValue ?? hit.range?.fromValue,
                         percentage: hit.percentage,
+                        rawValue: hit.rawValue,
                         seriesId: hit.seriesId,
                         seriesName: hit.seriesName,
                         seriesType: hit.seriesType,
@@ -654,7 +683,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
         };
     }
 
-    public registerXAxis(registration: ChartAxisRegistration): () => void {
+    public registerXAxis(registration: ChartXAxisRegistration): () => void {
         this.#xAxis.set(registration);
         this.#recomputeAndPaint(ChartInvalidationReason.Data);
         return () => {
@@ -665,7 +694,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
         };
     }
 
-    public registerYAxis(registration: ChartAxisRegistration): () => void {
+    public registerYAxis(registration: ChartYAxisRegistration): () => void {
         this.#yAxis.set(registration);
         this.#recomputeAndPaint(ChartInvalidationReason.Data);
         return () => {
@@ -756,6 +785,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
             return {
                 category: hit.category,
+                categoryX: hit.categoryX,
+                categoryY: hit.categoryY,
                 color,
                 dataIndex: hit.index,
                 datum: hit.datum,
@@ -768,9 +799,11 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 formattedTo,
                 formattedX: xStr,
                 formattedY: yStr,
+                formattedYCategory: hit.formattedYCategory,
                 fromValue,
                 markId,
                 percentage: hit.percentage,
+                rawValue: hit.rawValue,
                 seriesId: hit.seriesId,
                 seriesName: hit.seriesName,
                 seriesType: hit.seriesType,
@@ -1153,12 +1186,15 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
         this.pointFocusChange.emit({
             category: matchingHit.category,
+            categoryX: matchingHit.categoryX,
+            categoryY: matchingHit.categoryY,
             dataIndex: matchingHit.index,
             datum: matchingHit.datum,
             formattedFrom: matchingHit.formattedFrom ?? matchingHit.range?.formattedFrom,
             formattedTo: matchingHit.formattedTo ?? matchingHit.range?.formattedTo,
             fromValue: matchingHit.fromValue ?? matchingHit.range?.fromValue,
             percentage: matchingHit.percentage,
+            rawValue: matchingHit.rawValue,
             seriesId: matchingHit.seriesId,
             seriesName: matchingHit.seriesName,
             seriesType: matchingHit.seriesType,
@@ -1182,6 +1218,15 @@ export class MonaChartComponent implements ChartRegistrationContext {
             const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
             this.activeAccessibilityText.set(
                 `${matchingHit.seriesName}, ${matchingHit.formattedCategory ?? matchingHit.category}: ${valStr}${pctStr}`
+            );
+        } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap") {
+            const xTitle = this.#xAxis()?.title() ? `${this.#xAxis()?.title()} ` : "";
+            const yTitle = this.#yAxis()?.title() ? `${this.#yAxis()?.title()} ` : "";
+            const xStr = `${xTitle}${matchingHit.formattedXValue ?? matchingHit.formattedCategory ?? matchingHit.categoryX ?? matchingHit.xValue}`;
+            const yStr = `${yTitle}${matchingHit.formattedYCategory ?? matchingHit.categoryY ?? matchingHit.category}`;
+            const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
+            this.activeAccessibilityText.set(
+                `${matchingHit.seriesName}: ${xStr}, ${yStr}, ${valStr}`
             );
         } else {
             const xAxis = this.#xAxis();

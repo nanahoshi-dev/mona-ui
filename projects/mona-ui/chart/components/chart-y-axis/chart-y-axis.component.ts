@@ -1,8 +1,8 @@
-import { Component, contentChild, DestroyRef, effect, inject, input, OnInit, signal } from "@angular/core";
+import { Component, contentChild, DestroyRef, effect, inject, input, OnInit } from "@angular/core";
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
-import type { ChartAxisFormatter, ChartXAxisType, ChartYAxisPosition } from "../../models/chart-axis.models";
+import type { ChartAxisFormatter, ChartYAxisPosition, ChartYAxisType } from "../../models/chart-axis.models";
 
 @Component({
     selector: "mona-chart-y-axis",
@@ -16,7 +16,6 @@ import type { ChartAxisFormatter, ChartXAxisType, ChartYAxisPosition } from "../
 export class MonaChartYAxisComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
-    readonly #type = signal<ChartXAxisType>("linear");
 
     protected readonly labelTemplate = contentChild(ChartAxisLabelTemplateDirective);
 
@@ -75,6 +74,12 @@ export class MonaChartYAxisComponent implements OnInit {
     public readonly title = input("");
 
     /**
+     * @description Scale type for the Y axis (`"auto"`, `"category"`, or `"linear"`).
+     * @default "auto"
+     */
+    public readonly type = input<ChartYAxisType>("auto");
+
+    /**
      * @description Whether the axis and its labels are visible.
      * @default true
      */
@@ -91,6 +96,7 @@ export class MonaChartYAxisComponent implements OnInit {
             this.position();
             this.tickCount();
             this.title();
+            this.type();
             this.visible();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
         });
@@ -112,7 +118,7 @@ export class MonaChartYAxisComponent implements OnInit {
             position: this.position,
             tickCount: this.tickCount,
             title: this.title,
-            type: this.#type,
+            type: this.type,
             visible: this.visible
         });
 

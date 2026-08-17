@@ -7,6 +7,7 @@ export type ChartSeriesType =
     | "bar"
     | "bubble"
     | "donut"
+    | "heatmap"
     | "line"
     | "pie"
     | "polar"
@@ -15,7 +16,7 @@ export type ChartSeriesType =
     | "rangeBar"
     | "scatter";
 
-export type ChartSeriesFamily = "cartesian" | "polar" | "radar" | "sector";
+export type ChartSeriesFamily = "cartesian" | "heatmap" | "polar" | "radar" | "sector";
 
 export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
     switch (type) {
@@ -27,6 +28,8 @@ export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
         case "rangeBar":
         case "scatter":
             return "cartesian";
+        case "heatmap":
+            return "heatmap";
         case "pie":
         case "donut":
             return "sector";

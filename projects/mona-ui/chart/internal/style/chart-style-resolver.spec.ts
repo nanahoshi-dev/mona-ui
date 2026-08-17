@@ -177,18 +177,42 @@ describe("ChartStyleResolver", () => {
         expect(explicitStyle.strokeColor).toBe("#ff0000");
     });
 
-    it("should determine high-contrast readable foreground text using WCAG contrast", () => {
+    it("should resolve heatmap series style with fallbacks and custom properties", () => {
         const resolver = new ChartStyleResolver();
+        const mockHeatmap = {
+            borderRadius: signal(4),
+            cellGap: signal(2),
+            color: signal("#10b981"),
+            colorMode: signal("sequential"),
+            colors: signal(undefined),
+            data: signal(undefined),
+            field: signal("val"),
+            fillOpacity: signal(0.85),
+            id: "mock-hm",
+            keyField: signal(undefined),
+            max: signal(undefined),
+            midpoint: signal(undefined),
+            min: signal(undefined),
+            name: signal("Heatmap"),
+            showValues: signal(false),
+            strokeColor: signal("#047857"),
+            strokeWidth: signal(1.5),
+            type: "heatmap" as const,
+            valueFormatter: signal(undefined),
+            visible: signal(true),
+            xCategories: signal(undefined),
+            xField: signal("x"),
+            yCategories: signal(undefined),
+            yField: signal("y")
+        };
 
-        // Dark colors should choose light foreground (#ffffff)
-        expect(resolver.getReadableForeground("#0f172a")).toBe("#ffffff");
-        expect(resolver.getReadableForeground("#1e293b")).toBe("#ffffff");
-        expect(resolver.getReadableForeground("#1e3a8a")).toBe("#ffffff");
+        const style = resolver.resolveHeatmapSeriesStyle(mockHeatmap as any, 0);
 
-        // Light colors should choose dark foreground (#0f172a)
-        expect(resolver.getReadableForeground("#ffffff")).toBe("#0f172a");
-        expect(resolver.getReadableForeground("#fef08a")).toBe("#0f172a");
-        expect(resolver.getReadableForeground("#f8fafc")).toBe("#0f172a");
+        expect(style.baseColor).toBe("#10b981");
+        expect(style.borderRadius).toBe(4);
+        expect(style.fillOpacity).toBe(0.85);
+        expect(style.strokeColor).toBe("#047857");
+        expect(style.strokeWidth).toBe(1.5);
     });
 });
 

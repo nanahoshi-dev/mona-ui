@@ -4,7 +4,14 @@ import type { ChartCenterTemplateDirective } from "../../directives/chart-center
 import type { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
 import type { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import type { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
-import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
+import type {
+    ChartAxisFormatter,
+    ChartAxisPosition,
+    ChartXAxisPosition,
+    ChartXAxisType,
+    ChartYAxisPosition,
+    ChartYAxisType
+} from "../../models/chart-axis.models";
 import type {
     ChartPolarFillMode,
     ChartPolarLabelContent,
@@ -15,6 +22,7 @@ import type {
     ChartValueFormatter
 } from "../../models/chart-polar.models";
 import type { ChartField, ChartPoint } from "../../models/chart.models";
+import type { ChartColorLegendScale, ChartHeatmapColorMode } from "../../models/chart-heatmap.models";
 import type {
     ChartAreaFillMode,
     ChartCurve,
@@ -41,21 +49,33 @@ export function hasInvalidationReason(
     return (accumulatedReason & flag) !== 0;
 }
 
-export interface ChartAxisRegistration {
+export interface ChartAxisRegistrationBase {
     axisLine: Signal<boolean>;
     formatter: Signal<ChartAxisFormatter | undefined>;
     gridLines: Signal<boolean>;
     labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
-    max: Signal<Date | number | undefined>;
-    min: Signal<Date | number | undefined>;
     nice: Signal<boolean>;
-    position: Signal<ChartAxisPosition>;
     tickCount: Signal<number | undefined>;
     title: Signal<string>;
-    type: Signal<ChartXAxisType>;
     userClass?: Signal<string>;
     visible: Signal<boolean>;
 }
+
+export interface ChartXAxisRegistration extends ChartAxisRegistrationBase {
+    max: Signal<Date | number | undefined>;
+    min: Signal<Date | number | undefined>;
+    position: Signal<ChartXAxisPosition>;
+    type: Signal<ChartXAxisType>;
+}
+
+export interface ChartYAxisRegistration extends ChartAxisRegistrationBase {
+    max: Signal<number | undefined>;
+    min: Signal<number | undefined>;
+    position: Signal<ChartYAxisPosition>;
+    type: Signal<ChartYAxisType>;
+}
+
+export type ChartAxisRegistration = ChartXAxisRegistration | ChartYAxisRegistration;
 export type ChartCartesianAxisRegistration = ChartAxisRegistration;
 
 export interface ChartAngularAxisRegistration {
@@ -259,6 +279,34 @@ export interface ChartContinuousPolarSeriesRegistration extends ChartRadialSerie
     type: "polar";
 }
 
+export interface ChartHeatmapSeriesRegistration {
+    readonly borderRadius: Signal<number | undefined>;
+    readonly cellGap: Signal<number>;
+    readonly color: Signal<string>;
+    readonly colorMode: Signal<ChartHeatmapColorMode>;
+    readonly colors: Signal<readonly string[] | undefined>;
+    readonly data: Signal<readonly unknown[] | undefined>;
+    readonly field: Signal<ChartField>;
+    readonly fillOpacity: Signal<number | undefined>;
+    readonly id: string;
+    readonly keyField: Signal<ChartField | undefined>;
+    readonly max: Signal<number | undefined>;
+    readonly midpoint: Signal<number | undefined>;
+    readonly min: Signal<number | undefined>;
+    readonly name: Signal<string>;
+    readonly showValues: Signal<boolean>;
+    readonly strokeColor: Signal<string>;
+    readonly strokeWidth: Signal<number | undefined>;
+    readonly type: "heatmap";
+    readonly userClass?: Signal<string>;
+    readonly valueFormatter: Signal<ChartValueFormatter | undefined>;
+    readonly visible: Signal<boolean>;
+    readonly xCategories: Signal<readonly unknown[] | undefined>;
+    readonly xField: Signal<ChartField | undefined>;
+    readonly yCategories: Signal<readonly unknown[] | undefined>;
+    readonly yField: Signal<ChartField>;
+}
+
 export type ChartCartesianSeriesRegistration =
     | ChartAreaSeriesRegistration
     | ChartBarSeriesRegistration
@@ -275,20 +323,22 @@ export type ChartRadialSeriesRegistration = ChartContinuousPolarSeriesRegistrati
 
 export type ChartSeriesRegistration =
     | ChartCartesianSeriesRegistration
+    | ChartHeatmapSeriesRegistration
     | ChartRadialSeriesRegistration
     | ChartSectorSeriesRegistration;
 
 export interface ChartRegistrationContext {
     invalidate(reason?: ChartInvalidationReason): void;
     legendItems: Signal<readonly ChartLegendItem[]>;
+    readonly legendScale?: Signal<ChartColorLegendScale | null>;
     observeLabelElement?(element: HTMLElement, labelId: string): void;
     registerAngularAxis(registration: ChartAngularAxisRegistration): () => void;
     registerLegend(registration: ChartLegendRegistration): () => void;
     registerRadialAxis(registration: ChartRadialAxisRegistration): () => void;
     registerSeries(registration: ChartSeriesRegistration): () => void;
     registerTooltip(registration: ChartTooltipRegistration): () => void;
-    registerXAxis(registration: ChartAxisRegistration): () => void;
-    registerYAxis(registration: ChartAxisRegistration): () => void;
+    registerXAxis(registration: ChartXAxisRegistration): () => void;
+    registerYAxis(registration: ChartYAxisRegistration): () => void;
     readonly rootData: Signal<readonly unknown[]>;
     scene: Signal<ChartScene | null>;
     toggleLegendItem(item: ChartLegendItem): void;

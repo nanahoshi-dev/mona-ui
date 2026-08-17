@@ -97,4 +97,42 @@ describe("MonaChartLegendComponent", () => {
         containerDivs[1].nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
         expect(toggleLegendItemSpy).toHaveBeenCalledWith(mockLegendItems()[1]);
     });
+
+    it("should render color scale gradient bar when legendScale is present in auto mode", async () => {
+        const mockScale = signal({
+            formattedMax: "100",
+            formattedMin: "0",
+            kind: "color" as const,
+            mode: "sequential" as const,
+            stops: [
+                { color: "#eff6ff", offset: 0, value: 0 },
+                { color: "#3b82f6", offset: 1, value: 100 }
+            ],
+            ticks: [],
+            title: "Intensity"
+        });
+
+        const colorChartContext: Partial<ChartRegistrationContext> = {
+            invalidate: () => {},
+            legendItems: mockLegendItems,
+            legendScale: mockScale,
+            registerLegend: () => () => {},
+            toggleLegendItem: () => {},
+            toggleSeriesVisibility: () => {}
+        };
+
+        TestBed.resetTestingModule();
+        await TestBed.configureTestingModule({
+            imports: [TestHostComponent],
+            providers: [{ provide: CHART_CONTEXT, useValue: colorChartContext }]
+        }).compileComponents();
+
+        const colorFixture = TestBed.createComponent(TestHostComponent);
+        colorFixture.detectChanges();
+
+        const textContent = colorFixture.nativeElement.textContent;
+        expect(textContent).toContain("Intensity");
+        expect(textContent).toContain("0");
+        expect(textContent).toContain("100");
+    });
 });

@@ -38,6 +38,7 @@ describe("CanvasChartRenderer", () => {
         const ctx = createMockContext();
         const scene: ChartScene = {
             axes: [],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
@@ -64,6 +65,7 @@ describe("CanvasChartRenderer", () => {
 
         const scene: ChartScene = {
             axes: [],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
@@ -116,6 +118,7 @@ describe("CanvasChartRenderer", () => {
 
         const scene: ChartScene = {
             axes: [],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
@@ -168,6 +171,7 @@ describe("CanvasChartRenderer", () => {
 
         const scene: ChartScene = {
             axes: [],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
@@ -217,6 +221,7 @@ describe("CanvasChartRenderer", () => {
         const ctx = createMockContext();
         const scene: ChartScene = {
             axes: [],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
@@ -279,6 +284,7 @@ describe("CanvasChartRenderer", () => {
                     visible: true
                 }
             ],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
@@ -309,6 +315,7 @@ describe("CanvasChartRenderer", () => {
 
         const scene: ChartScene = {
             axes: [],
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,

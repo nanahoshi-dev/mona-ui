@@ -1,5 +1,5 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
-import type { CartesianChartScene } from "../scene/chart-scene";
+import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { crispPixel, drawBarRect, drawBarRectOutline, drawPointMarker } from "../utils/canvas-utils";
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
@@ -12,7 +12,7 @@ import { RangeBarSeriesRenderer } from "./series/range-bar-series-renderer";
 export class CartesianChartRenderer {
     public static render(
         context: CanvasRenderingContext2D,
-        scene: CartesianChartScene,
+        scene: CartesianXYChartScene,
         interactionState: ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {

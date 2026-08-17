@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
+import type { ChartColorLegendScale, ChartLegendMode } from "../../models/chart-heatmap.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import {
     chartLegendBaseThemeVariants,
@@ -38,12 +39,41 @@ export class MonaChartLegendComponent implements OnInit {
     });
     protected readonly itemTemplate = contentChild(ChartLegendItemTemplateDirective);
     protected readonly legendItems = computed(() => this.#chartContext?.legendItems() ?? []);
+    protected readonly legendScale = computed<ChartColorLegendScale | null>(() => this.#chartContext?.legendScale?.() ?? null);
+
+    protected readonly isColorScaleMode = computed(() => {
+        const m = this.mode();
+        if (m === "color") return true;
+        if (m === "series") return false;
+        return Boolean(this.legendScale());
+    });
+
+    protected readonly gradientCss = computed(() => {
+        const scale = this.legendScale();
+        if (!scale || !scale.stops || scale.stops.length === 0) return "";
+        const isVertical = this.position() === "left" || this.position() === "right";
+        const dir = isVertical ? "to top" : "to right";
+        const stopStrs = scale.stops.map(s => `${s.color} ${Math.round(s.offset * 100)}%`).join(", ");
+        return `linear-gradient(${dir}, ${stopStrs})`;
+    });
+
+    protected readonly legendAriaLabel = computed(() => {
+        const scale = this.legendScale();
+        if (!scale) return "Chart legend";
+        return `${scale.title || "Color scale"}, ${scale.formattedMin} to ${scale.formattedMax}`;
+    });
 
     /**
      * @description Whether clicking or pressing Enter/Space on legend items toggles series visibility.
      * @default true
      */
     public readonly interactive = input(true);
+
+    /**
+     * @description Legend display mode: 'auto' (series items for standard charts, color scale for heatmap), 'series' (always series items), or 'color' (color gradient scale).
+     * @default "auto"
+     */
+    public readonly mode = input<ChartLegendMode>("auto");
 
     /**
      * @description Layout position of the legend (`"top"`, `"bottom"`, `"left"`, or `"right"`).
