@@ -17,7 +17,10 @@ function createMockSeries(
         fillOpacity?: number;
         maxBarWidth?: number;
         pointRadius?: number;
+        stack?: string;
+        stackMode?: "normal" | "percent";
         strokeWidth?: number;
+        valueFormatter?: (val: unknown) => string;
     }
 ): ChartCartesianSeriesRegistration {
     return {
@@ -29,10 +32,13 @@ function createMockSeries(
         fillOpacity: options?.fillOpacity !== undefined ? signal(options.fillOpacity) : undefined,
         id,
         maxBarWidth: options?.maxBarWidth !== undefined ? signal(options.maxBarWidth) : undefined,
-        name: signal("Series 1"),
+        name: signal(id),
         pointRadius: options?.pointRadius !== undefined ? signal(options.pointRadius) : undefined,
+        stack: signal(options?.stack),
+        stackMode: signal(options?.stackMode ?? "normal"),
         strokeWidth: options?.strokeWidth !== undefined ? signal(options.strokeWidth) : undefined,
         type,
+        valueFormatter: signal(options?.valueFormatter),
         visible: signal(visible),
         xField: signal(xField)
     };
@@ -420,5 +426,114 @@ describe("CartesianLayoutEngine", () => {
             expect(bubbleScene.markers[1].radius).toBe(25);
         }
     });
+
+    describe("Stacking Layout Integration", () => {
+        it("should omit direct bounds for zero-height stacked bar segment (STK-011)", () => {
+            const s1 = createMockSeries("bar", "v1", "s1", true, undefined, undefined, { stack: "sales" });
+            const s2 = createMockSeries("bar", "v2", "s2", true, undefined, undefined, { stack: "sales" });
+            const data = [
+                { month: "Jan", v1: 50, v2: 0 }, // s2 has zero height
+                { month: "Feb", v1: 30, v2: 20 }
+            ];
+
+            const scene = CartesianLayoutEngine.computeScene({
+                containerHeight: 300,
+                containerWidth: 500,
+                rootData: data,
+                rootXField: "month",
+                series: [s1, s2],
+                styleResolver,
+                xAxis: createMockAxis({ type: "category" })
+            });
+
+            const s2JanHit = scene.hitTargets.find(h => h.seriesId === "s2" && h.xKey === "Jan");
+            expect(s2JanHit).toBeDefined();
+            expect(s2JanHit?.bounds).toBeUndefined(); // Omitted bounds for zero-height bar
+            expect(scene.barHitTargets?.some(h => h.seriesId === "s2" && h.xKey === "Jan")).toBe(false);
+
+            // But it is present in the category interaction bucket for keyboard / shared tooltips
+            const janBucket = scene.interactionBucketLookup?.get("Jan");
+            expect(janBucket?.hits.some(h => h.seriesId === "s2")).toBe(true);
+        });
+
+        it("should not clamp stacked Area baseY and topY to plotRect (STK-012)", () => {
+            const a1 = createMockSeries("area", "v1", "a1", true, undefined, undefined, { stack: "flow" });
+            const a2 = createMockSeries("area", "v2", "a2", true, undefined, undefined, { stack: "flow" });
+            const data = [
+                { x: 10, v1: 50, v2: 60 } // Total is 110. With y-axis max 100, topY should extend beyond plotRect
+            ];
+
+            const scene = CartesianLayoutEngine.computeScene({
+                containerHeight: 300,
+                containerWidth: 500,
+                rootData: data,
+                rootXField: "x",
+                series: [a1, a2],
+                styleResolver,
+                xAxis: createMockAxis({ type: "linear" }),
+                yAxis: createMockAxis({ max: 100, min: 0 })
+            });
+
+            const a2Scene = scene.series.find(s => s.id === "a2");
+            if (a2Scene && a2Scene.type === "area") {
+                const pt = a2Scene.points[0];
+                expect(pt.y).toBeLessThan(scene.plotRect.y); // Extends above plotRect without clamping
+            }
+        });
+
+        it("should format raw value and stack total using series valueFormatter (STK-009, STK-010, STK-034)", () => {
+            const customFormatter = (v: unknown) => `$${Number(v).toFixed(2)}`;
+            const s1 = createMockSeries("bar", "v1", "s1", true, undefined, undefined, {
+                stack: "sales",
+                valueFormatter: customFormatter
+            });
+            const s2 = createMockSeries("bar", "v2", "s2", true, undefined, undefined, {
+                stack: "sales",
+                valueFormatter: customFormatter
+            });
+
+            const data = [{ month: "Jan", v1: 100, v2: 200 }];
+
+            const scene = CartesianLayoutEngine.computeScene({
+                containerHeight: 300,
+                containerWidth: 500,
+                rootData: data,
+                rootXField: "month",
+                series: [s1, s2],
+                styleResolver,
+                xAxis: createMockAxis({ type: "category" })
+            });
+
+            const s1Hit = scene.hitTargets.find(h => h.seriesId === "s1");
+            expect(s1Hit?.formattedValue).toBe("$100.00");
+            expect(s1Hit?.formattedStackTotal).toBe("$300.00");
+            expect(s1Hit?.formattedPercentage).toBeUndefined(); // Generic percentage omitted for Cartesian stacks
+        });
+
+        it("should emit stackConfiguration and stable stackSignature on scene (STK-013)", () => {
+            const s1 = createMockSeries("bar", "v1", "s1", true, undefined, undefined, {
+                stack: "rev",
+                stackMode: "percent"
+            });
+            const data = [{ month: "Jan", v1: 100 }];
+
+            const scene = CartesianLayoutEngine.computeScene({
+                containerHeight: 300,
+                containerWidth: 500,
+                rootData: data,
+                rootXField: "month",
+                series: [s1],
+                styleResolver,
+                xAxis: createMockAxis({ type: "category" })
+            });
+
+            expect(scene.stackConfiguration).toBeDefined();
+            expect(scene.stackConfiguration?.length).toBe(1);
+            expect(scene.stackConfiguration?.[0].groupId).toBe("bar:rev");
+            expect(scene.stackConfiguration?.[0].mode).toBe("percent");
+            expect(scene.stackSignature).toBeDefined();
+        });
+    });
 });
+
 

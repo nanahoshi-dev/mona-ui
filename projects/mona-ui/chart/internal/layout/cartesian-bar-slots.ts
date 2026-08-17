@@ -13,16 +13,23 @@ export interface CartesianBarSlot {
     readonly stackGroup?: string;
 }
 
+export interface CartesianBarSlotLayout {
+    readonly bySeriesId: ReadonlyMap<string, CartesianBarSlot>;
+    readonly slots: readonly CartesianBarSlot[];
+}
+
 export class CartesianBarSlots {
-    public static computeSlots(
+    public static computeSlotLayout(
         series: readonly ChartCartesianSeriesRegistration[],
-        stackLayout?: CartesianStackLayout
-    ): readonly CartesianBarSlot[] {
+        stackLayout?: CartesianStackLayout,
+        invalidSeriesIds?: ReadonlySet<string>
+    ): CartesianBarSlotLayout {
         const visibleBarSeries = series.filter(
-            (s): s is ChartBarSeriesRegistration => s.visible() && s.type === "bar"
+            (s): s is ChartBarSeriesRegistration => s.visible() && s.type === "bar" && !invalidSeriesIds?.has(s.id)
         );
 
         const slots: CartesianBarSlot[] = [];
+        const bySeriesId = new Map<string, CartesianBarSlot>();
         const seenStackGroups = new Set<string>();
 
         for (const s of visibleBarSeries) {
@@ -32,37 +39,55 @@ export class CartesianBarSlots {
                 ? stackLayout.groups.find(g => g.id === groupKey)
                 : undefined;
 
-            if (stackGroup) {
-                if (!seenStackGroups.has(stackGroup.id)) {
-                    seenStackGroups.add(stackGroup.id);
-                    const groupMembers = visibleBarSeries.filter(
-                        member => member.stack?.()?.trim() === stackGroup.name
-                    );
-                    let minMaxBarWidth: number | undefined;
-                    for (const member of groupMembers) {
-                        const w = normalizePositiveNumber(member.maxBarWidth?.());
-                        if (w !== undefined) {
-                            minMaxBarWidth = minMaxBarWidth !== undefined ? Math.min(minMaxBarWidth, w) : w;
+            if (rawStack) {
+                // If series specifies a stack group, only create a slot if it is a valid stack group
+                if (stackGroup) {
+                    if (!seenStackGroups.has(stackGroup.id)) {
+                        seenStackGroups.add(stackGroup.id);
+                        const groupMembers = visibleBarSeries.filter(
+                            member => member.stack?.()?.trim() === stackGroup.name
+                        );
+                        let minMaxBarWidth: number | undefined;
+                        for (const member of groupMembers) {
+                            const w = normalizePositiveNumber(member.maxBarWidth?.());
+                            if (w !== undefined) {
+                                minMaxBarWidth = minMaxBarWidth !== undefined ? Math.min(minMaxBarWidth, w) : w;
+                            }
+                        }
+                        const slot: CartesianBarSlot = {
+                            id: stackGroup.id,
+                            kind: "stack",
+                            maxBarWidth: minMaxBarWidth,
+                            seriesIds: groupMembers.map(m => m.id),
+                            stackGroup: stackGroup.name
+                        };
+                        slots.push(slot);
+                        for (const member of groupMembers) {
+                            bySeriesId.set(member.id, slot);
                         }
                     }
-                    slots.push({
-                        id: stackGroup.id,
-                        kind: "stack",
-                        maxBarWidth: minMaxBarWidth,
-                        seriesIds: groupMembers.map(m => m.id),
-                        stackGroup: stackGroup.name
-                    });
                 }
+                // If configured with a stack but no valid group found (e.g. conflicting modes), do NOT create unstacked fallback
             } else {
-                slots.push({
+                const slot: CartesianBarSlot = {
                     id: `series:${s.id}`,
                     kind: "series",
                     maxBarWidth: normalizePositiveNumber(s.maxBarWidth?.()),
                     seriesIds: [s.id]
-                });
+                };
+                slots.push(slot);
+                bySeriesId.set(s.id, slot);
             }
         }
 
-        return slots;
+        return { bySeriesId, slots };
+    }
+
+    public static computeSlots(
+        series: readonly ChartCartesianSeriesRegistration[],
+        stackLayout?: CartesianStackLayout,
+        invalidSeriesIds?: ReadonlySet<string>
+    ): readonly CartesianBarSlot[] {
+        return this.computeSlotLayout(series, stackLayout, invalidSeriesIds).slots;
     }
 }
