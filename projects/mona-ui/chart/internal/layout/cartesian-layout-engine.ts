@@ -39,6 +39,7 @@ import type {
     ChartRangeBarSeriesScene,
     ChartSeriesScene
 } from "../scene/cartesian-scene";
+import { computeRangeAreaLayout, computeRangeBarLayout } from "./cartesian-range-layout";
 import type { CartesianChartScene } from "../scene/chart-scene";
 import type {
     ChartCornerRadii,
@@ -450,330 +451,48 @@ export class CartesianLayoutEngine {
             const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
 
             if (s.type === "rangeBar") {
-                const slot = barSlotLayout.bySeriesId.get(s.id);
-                if (!slot || !bandScale || !nestedBarScale) {
-                    continue;
-                }
-
-                const bars: SceneRangeBar[] = [];
-                const radius = normalizeNonNegativeNumber(s.borderRadius?.(), 4);
-                const slotWidth = nestedBarScale.bandwidth();
-                const barWidth = Math.min(slotWidth, slot.maxBarWidth ?? Number.POSITIVE_INFINITY);
-                const centerOffset = (slotWidth - barWidth) / 2;
-                const subX = nestedBarScale.map(slot.id) ?? 0;
-                const seriesRawFormatter = (s as ChartRangeBarSeriesRegistration).valueFormatter?.();
-                const effectiveRawFormatter = seriesRawFormatter ?? yFormatter;
-
-                for (let dIdx = 0; dIdx < sData.length; dIdx++) {
-                    const datum = sData[dIdx];
-                    const xVal = resolveValue(datum, sXField, dIdx);
-                    const catKey = xVal !== undefined && xVal !== null ? String(xVal) : String(dIdx);
-                    const bandOuterX = bandScale.map(catKey);
-                    if (bandOuterX === undefined) continue;
-
-                    const range = resolveFiniteRangeValues(datum, s.fromField(), s.toField(), dIdx);
-                    if (!range) continue;
-
-                    const fromY = yScale.map(range.fromValue);
-                    const toY = yScale.map(range.toValue);
-                    const topY = Math.min(fromY, toY);
-                    const barHeight = Math.abs(fromY - toY);
-                    const barX = bandOuterX + subX + centerOffset;
-
-                    const animationKey = keyResolver.resolveKey(datum, catKey, dIdx);
-                    const formattedFrom = formatYValue(range.fromValue, dIdx, effectiveRawFormatter);
-                    const formattedTo = formatYValue(range.toValue, dIdx, effectiveRawFormatter);
-                    const formattedValue = `${formattedFrom} – ${formattedTo}`;
-
-                    const bar: SceneRangeBar = {
-                        animationKey,
-                        datum,
-                        formattedFrom,
-                        formattedTo,
-                        fromValue: range.fromValue,
-                        height: barHeight,
-                        highValue: range.highValue,
-                        index: dIdx,
-                        lowValue: range.lowValue,
-                        radius,
-                        toValue: range.toValue,
-                        width: barWidth,
-                        x: barX,
-                        xValue: xVal,
-                        y: topY
-                    };
-                    bars.push(bar);
-
-                    const currentRenderOrder = ++renderOrderCounter.value;
-                    const barTarget: SceneHitTarget = {
-                        animationKey,
-                        borderRadius: radius,
-                        bounds: {
-                            height: Math.max(4, barHeight),
-                            width: barWidth,
-                            x: barX,
-                            y: barHeight === 0 ? topY - 2 : topY
-                        },
-                        datum,
-                        formattedCategory: formatXValue(catKey, dIdx, xAxis?.formatter?.(), "category"),
-                        formattedFrom,
-                        formattedTo,
-                        formattedValue,
-                        fromValue: range.fromValue,
-                        highValue: range.highValue,
-                        index: dIdx,
-                        lowValue: range.lowValue,
-                        range: {
-                            formattedFrom,
-                            formattedTo,
-                            fromValue: range.fromValue,
-                            highValue: range.highValue,
-                            lowValue: range.lowValue,
-                            toValue: range.toValue
-                        },
-                        renderOrder: currentRenderOrder,
-                        seriesId: s.id,
-                        seriesName: seriesDisplayName,
-                        seriesType: "rangeBar",
-                        toValue: range.toValue,
-                        valueKind: "range",
-                        visualBounds: {
-                            height: barHeight,
-                            width: barWidth,
-                            x: barX,
-                            y: topY
-                        },
-                        xKey: catKey,
-                        xValue: xVal
-                    };
-                    recordHitTarget(barTarget, true, false);
-                }
-
-                const rangeBarScene: ChartRangeBarSeriesScene = {
-                    bars,
-                    borderRadius: radius,
-                    fillOpacity: normalizeOpacity(s.fillOpacity?.(), 1),
-                    id: s.id,
-                    name: seriesDisplayName,
+                const rangeBarScene = computeRangeBarLayout({
+                    bandScale,
+                    barSlotLayout,
+                    nestedBarScale,
+                    recordHitTarget,
+                    renderOrderCounter,
+                    rootData,
+                    rootXField,
+                    series: s as ChartRangeBarSeriesRegistration,
+                    seriesDisplayName,
                     style: sStyle,
-                    type: "rangeBar"
-                };
-                seriesScenes.push(rangeBarScene);
+                    xAxis,
+                    yAxis,
+                    yFormatter,
+                    yScale
+                });
+                if (rangeBarScene) {
+                    seriesScenes.push(rangeBarScene);
+                }
                 continue;
             }
 
             if (s.type === "rangeArea") {
-                const points: SceneRangeAreaPoint[] = [];
-                const seriesRawFormatter = (s as ChartRangeAreaSeriesRegistration).valueFormatter?.();
-                const effectiveRawFormatter = seriesRawFormatter ?? yFormatter;
-                const showPoints = s.showPoints?.() ?? false;
-                const pointRadius = normalizeNonNegativeNumber(s.pointRadius?.(), 4);
-                const strokeWidth = normalizeNonNegativeNumber(s.strokeWidth?.(), 2);
-
-                for (let dIdx = 0; dIdx < sData.length; dIdx++) {
-                    const datum = sData[dIdx];
-                    const xVal = resolveValue(datum, sXField, dIdx);
-
-                    let xPos = plotRect.x;
-                    let isXValid = false;
-                    let normalizedXKey: number | string = dIdx;
-
-                    if (bandScale) {
-                        const catKey = xVal !== undefined && xVal !== null ? String(xVal) : String(dIdx);
-                        normalizedXKey = catKey;
-                        const bPos = bandScale.map(catKey);
-                        if (bPos !== undefined) {
-                            xPos = bPos + bandScale.bandwidth() / 2;
-                            isXValid = true;
-                        }
-                    } else if (linearXScale) {
-                        if (isFiniteNumber(xVal)) {
-                            normalizedXKey = Number(xVal);
-                            xPos = linearXScale.map(xVal);
-                            isXValid = true;
-                        }
-                    } else if (timeScale) {
-                        let dateVal: Date | undefined;
-                        if (xVal instanceof Date && !Number.isNaN(xVal.getTime())) {
-                            dateVal = xVal;
-                        } else if (typeof xVal === "number" && Number.isFinite(xVal)) {
-                            dateVal = new Date(xVal);
-                        } else if (typeof xVal === "string") {
-                            const parsed = Date.parse(xVal);
-                            if (!Number.isNaN(parsed)) {
-                                dateVal = new Date(parsed);
-                            }
-                        }
-                        if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
-                            normalizedXKey = dateVal.getTime();
-                            xPos = timeScale.map(dateVal);
-                            isXValid = true;
-                        }
-                    }
-
-                    const range = resolveFiniteRangeValues(datum, s.fromField(), s.toField(), dIdx);
-                    const defined = isXValid && range !== null;
-                    const animationKey = keyResolver.resolveKey(datum, normalizedXKey, dIdx);
-
-                    if (!defined || !range) {
-                        points.push({
-                            animationKey,
-                            datum,
-                            defined: false,
-                            index: dIdx,
-                            x: xPos,
-                            xValue: xVal
-                        });
-                        continue;
-                    }
-
-                    const fromY = yScale.map(range.fromValue);
-                    const toY = yScale.map(range.toValue);
-                    const lowY = Math.max(fromY, toY);
-                    const highY = Math.min(fromY, toY);
-                    const fromPoint = { x: xPos, y: fromY };
-                    const toPoint = { x: xPos, y: toY };
-                    const lowPoint = { x: xPos, y: lowY };
-                    const highPoint = { x: xPos, y: highY };
-
-                    const formattedFrom = formatYValue(range.fromValue, dIdx, effectiveRawFormatter);
-                    const formattedTo = formatYValue(range.toValue, dIdx, effectiveRawFormatter);
-                    const formattedValue = `${formattedFrom} – ${formattedTo}`;
-
-                    const point: SceneRangeAreaPoint = {
-                        animationKey,
-                        datum,
-                        defined: true,
-                        formattedFrom,
-                        formattedTo,
-                        fromPoint,
-                        fromValue: range.fromValue,
-                        highPoint,
-                        highValue: range.highValue,
-                        index: dIdx,
-                        lowPoint,
-                        lowValue: range.lowValue,
-                        toPoint,
-                        toValue: range.toValue,
-                        x: xPos,
-                        xValue: xVal
-                    };
-                    points.push(point);
-
-                    const currentRenderOrder = ++renderOrderCounter.value;
-                    const formattedCategory = formatXValue(
-                        normalizedXKey,
-                        dIdx,
-                        xAxis?.formatter?.(),
-                        xAxisType,
-                        timeSpanMs
-                    );
-
-                    const rangeTarget: SceneHitTarget = {
-                        animationKey,
-                        datum,
-                        formattedCategory,
-                        formattedFrom,
-                        formattedTo,
-                        formattedValue,
-                        fromValue: range.fromValue,
-                        highPoint,
-                        highValue: range.highValue,
-                        index: dIdx,
-                        lowPoint,
-                        lowValue: range.lowValue,
-                        point: { x: xPos, y: (fromY + toY) / 2 },
-                        radius: 16,
-                        range: {
-                            formattedFrom,
-                            formattedTo,
-                            fromValue: range.fromValue,
-                            highValue: range.highValue,
-                            lowValue: range.lowValue,
-                            toValue: range.toValue
-                        },
-                        renderOrder: currentRenderOrder,
-                        seriesId: s.id,
-                        seriesName: seriesDisplayName,
-                        seriesType: "rangeArea",
-                        toValue: range.toValue,
-                        valueKind: "range",
-                        xKey: normalizedXKey,
-                        xValue: xVal
-                    };
-                    recordHitTarget(rangeTarget, false, true);
-
-                    if (showPoints) {
-                        const highPointTarget: SceneHitTarget = {
-                            animationKey: `${animationKey}:high`,
-                            datum,
-                            formattedCategory,
-                            formattedFrom,
-                            formattedTo,
-                            formattedValue,
-                            fromValue: range.fromValue,
-                            highPoint,
-                            highValue: range.highValue,
-                            index: dIdx,
-                            lowPoint,
-                            lowValue: range.lowValue,
-                            point: highPoint,
-                            radius: pointRadius,
-                            range: rangeTarget.range,
-                            renderOrder: currentRenderOrder,
-                            seriesId: s.id,
-                            seriesName: seriesDisplayName,
-                            seriesType: "rangeArea",
-                            toValue: range.toValue,
-                            valueKind: "range",
-                            visualRadius: pointRadius,
-                            xKey: normalizedXKey,
-                            xValue: xVal
-                        };
-                        const lowPointTarget: SceneHitTarget = {
-                            animationKey: `${animationKey}:low`,
-                            datum,
-                            formattedCategory,
-                            formattedFrom,
-                            formattedTo,
-                            formattedValue,
-                            fromValue: range.fromValue,
-                            highPoint,
-                            highValue: range.highValue,
-                            index: dIdx,
-                            lowPoint,
-                            lowValue: range.lowValue,
-                            point: lowPoint,
-                            radius: pointRadius,
-                            range: rangeTarget.range,
-                            renderOrder: currentRenderOrder,
-                            seriesId: s.id,
-                            seriesName: seriesDisplayName,
-                            seriesType: "rangeArea",
-                            toValue: range.toValue,
-                            valueKind: "range",
-                            visualRadius: pointRadius,
-                            xKey: normalizedXKey,
-                            xValue: xVal
-                        };
-                        pointHitTargets.push(highPointTarget);
-                        pointHitTargets.push(lowPointTarget);
-                    }
-                }
-
-                const rangeAreaScene: ChartRangeAreaSeriesScene = {
-                    connectNulls: s.connectNulls?.() ?? false,
-                    curve: s.curve?.() ?? "linear",
-                    fillOpacity: normalizeOpacity(s.fillOpacity?.(), 0.25),
-                    id: s.id,
-                    name: seriesDisplayName,
-                    pointRadius,
-                    points,
-                    showPoints,
-                    strokeWidth,
+                const rangeAreaScene = computeRangeAreaLayout({
+                    bandScale,
+                    linearXScale,
+                    plotRect,
+                    recordHitTarget,
+                    renderOrderCounter,
+                    rootData,
+                    rootXField,
+                    series: s as ChartRangeAreaSeriesRegistration,
+                    seriesDisplayName,
                     style: sStyle,
-                    type: "rangeArea"
-                };
+                    timeScale,
+                    timeSpanMs,
+                    xAxis,
+                    xAxisType,
+                    yAxis,
+                    yFormatter,
+                    yScale
+                });
                 seriesScenes.push(rangeAreaScene);
                 continue;
             }
@@ -857,7 +576,7 @@ export class CartesianLayoutEngine {
                         const formattedStackTotal =
                             stackEntry.stackTotal !== undefined
                                 ? (seriesRawFormatter
-                                    ? formatYValue(stackEntry.stackTotal, -1, seriesRawFormatter)
+                                    ? formatYValue(stackEntry.stackTotal, stackEntry.dataIndex, seriesRawFormatter)
                                     : formatCompactNumber(stackEntry.stackTotal))
                                 : undefined;
                         const formattedStackPercentage =
@@ -1173,7 +892,7 @@ export class CartesianLayoutEngine {
                             const formattedStackTotal =
                                 entry.stackTotal !== undefined
                                     ? (seriesRawFormatter
-                                        ? formatYValue(entry.stackTotal, -1, seriesRawFormatter)
+                                        ? formatYValue(entry.stackTotal, entry.dataIndex, seriesRawFormatter)
                                         : formatCompactNumber(entry.stackTotal))
                                     : undefined;
                             const formattedStackPercentage =
