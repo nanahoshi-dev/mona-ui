@@ -7,6 +7,15 @@ import type { ChartSectorSeriesScene } from "./polar-scene";
 import type { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
 import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "./scene-geometry";
 
+import type { ChartStackMode } from "../../models/chart-stack.models";
+
+export interface CartesianStackSceneConfig {
+    readonly geometryType: "area" | "bar";
+    readonly groupId: string;
+    readonly mode: ChartStackMode;
+    readonly registeredSeriesIds: readonly string[];
+}
+
 export interface ChartSceneBase {
     coordinateSystem: ChartCoordinateSystem;
     hasRenderableData: boolean;
@@ -26,6 +35,8 @@ export interface CartesianChartScene extends ChartSceneBase {
     markerSpatialIndex?: CartesianPointSpatialIndex;
     pointSpatialIndex?: CartesianPointSpatialIndex;
     series: readonly ChartSeriesScene[];
+    stackConfiguration?: readonly CartesianStackSceneConfig[];
+    stackSignature?: string;
     xAxisType?: ChartXAxisType;
     xTimeSpanMs?: number;
 }
