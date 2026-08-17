@@ -123,4 +123,22 @@ describe("CartesianBarSlots", () => {
         expect(slots.length).toBe(1);
         expect(slots[0].maxBarWidth).toBe(30);
     });
+
+    it("should omit slots for invalid series and provide bySeriesId lookup", () => {
+        const series = [
+            createMockBarSeries({ field: "a", id: "s1", stack: "sales" }),
+            createMockBarSeries({ field: "b", id: "s2", stack: "sales" }),
+            createMockBarSeries({ field: "c", id: "s3" })
+        ];
+
+        const invalidIds = new Set(["s1", "s2"]);
+        const layout = CartesianBarSlots.computeSlotLayout(series, undefined, invalidIds);
+
+        expect(layout.slots.length).toBe(1);
+        expect(layout.slots[0].id).toBe("series:s3");
+        expect(layout.bySeriesId.has("s1")).toBe(false);
+        expect(layout.bySeriesId.has("s2")).toBe(false);
+        expect(layout.bySeriesId.get("s3")?.id).toBe("series:s3");
+    });
 });
+

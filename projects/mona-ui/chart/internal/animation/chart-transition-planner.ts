@@ -23,8 +23,8 @@ import type {
 
 export class ChartTransitionPlanner {
     public static isPathTopologyCompatible(
-        prevPoints: readonly { readonly animationKey?: string; readonly defined?: boolean }[],
-        targetPoints: readonly { readonly animationKey?: string; readonly defined?: boolean }[]
+        prevPoints: readonly { readonly animationKey?: string; readonly defined?: boolean; readonly synthetic?: boolean }[],
+        targetPoints: readonly { readonly animationKey?: string; readonly defined?: boolean; readonly synthetic?: boolean }[]
     ): boolean {
         if (prevPoints.length !== targetPoints.length) {
             return false;
@@ -38,6 +38,9 @@ export class ChartTransitionPlanner {
                 return false;
             }
             if (Boolean(p.defined) !== Boolean(t.defined)) {
+                return false;
+            }
+            if (Boolean(p.synthetic) !== Boolean(t.synthetic)) {
                 return false;
             }
         }
@@ -189,6 +192,23 @@ export class ChartTransitionPlanner {
                     prevCartesian.xAxisType &&
                     targetCartesian.xAxisType &&
                     prevCartesian.xAxisType !== targetCartesian.xAxisType
+                ) {
+                    return {
+                        complexity,
+                        duration: options.duration,
+                        easing: options.easing,
+                        fromScene: previous,
+                        mode: "crossfade",
+                        seriesPlans: [],
+                        toScene: target,
+                        trigger
+                    };
+                }
+
+                if (
+                    prevCartesian.stackSignature !== undefined &&
+                    targetCartesian.stackSignature !== undefined &&
+                    prevCartesian.stackSignature !== targetCartesian.stackSignature
                 ) {
                     return {
                         complexity,

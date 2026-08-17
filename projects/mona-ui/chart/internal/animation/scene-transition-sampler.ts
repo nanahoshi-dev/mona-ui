@@ -173,12 +173,20 @@ export class SceneTransitionSampler {
             if (targetHit.bounds || targetHit.visualBounds) {
                 const sampledBar = sampledBarsByKey.get(key);
                 if (sampledBar) {
-                    bounds = {
-                        height: Math.max(4, sampledBar.height),
-                        width: sampledBar.width,
-                        x: sampledBar.x,
-                        y: sampledBar.height === 0 ? sampledBar.y - 2 : sampledBar.y
-                    };
+                    const isStackedBar = targetHit.stackGroup !== undefined;
+                    const hasPositiveHeight = sampledBar.height > 0;
+                    if (isStackedBar && !hasPositiveHeight) {
+                        bounds = undefined;
+                    } else if (targetHit.bounds !== undefined || !isStackedBar) {
+                        bounds = {
+                            height: Math.max(4, sampledBar.height),
+                            width: sampledBar.width,
+                            x: sampledBar.x,
+                            y: sampledBar.height === 0 ? sampledBar.y - 2 : sampledBar.y
+                        };
+                    } else {
+                        bounds = undefined;
+                    }
                     visualBounds = {
                         height: sampledBar.height,
                         width: sampledBar.width,

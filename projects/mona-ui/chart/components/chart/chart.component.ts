@@ -182,12 +182,14 @@ export class MonaChartComponent implements ChartRegistrationContext {
     });
     readonly #isAnimating = signal(false);
     readonly #isStructuralAnimation = signal(false);
+    readonly #animationMode = signal<"crossfade" | "morph" | null>(null);
     readonly #isExitingData = signal(false);
     #hasPendingLabelMeasurementLayout: boolean = false;
     #hasPendingSizeReflow: boolean = false;
 
     public readonly isAnimating = this.#isAnimating.asReadonly();
     public readonly isStructuralAnimation = this.#isStructuralAnimation.asReadonly();
+    public readonly animationMode = this.#animationMode.asReadonly();
     public readonly isExitingData = this.#isExitingData.asReadonly();
 
     protected readonly hasNoData = computed(() => {
@@ -350,6 +352,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 this.#renderScene = this.scene();
                 this.#isAnimating.set(false);
                 this.#isStructuralAnimation.set(false);
+                this.#animationMode.set(null);
                 this.#isExitingData.set(false);
                 if (this.#hasPendingLabelMeasurementLayout) {
                     this.#hasPendingLabelMeasurementLayout = false;
@@ -999,6 +1002,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.#hasCommittedVisualScene = true;
             this.#isAnimating.set(false);
             this.#isStructuralAnimation.set(false);
+            this.#animationMode.set(null);
             this.#isExitingData.set(false);
             if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
                 this.#hasPendingLabelMeasurementLayout = false;
@@ -1018,6 +1022,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.#hasCommittedVisualScene = true;
             this.#isAnimating.set(false);
             this.#isStructuralAnimation.set(false);
+            this.#animationMode.set(null);
             this.#isExitingData.set(false);
             if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
                 this.#hasPendingLabelMeasurementLayout = false;
@@ -1034,6 +1039,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             }
             this.#isAnimating.set(true);
             this.#isStructuralAnimation.set(plan.mode !== "crossfade");
+            this.#animationMode.set(plan.mode === "crossfade" ? "crossfade" : "morph");
 
             this.#animationController.start(plan, {
                 onComplete: () => {
@@ -1041,6 +1047,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                     this.#hasCommittedVisualScene = true;
                     this.#isAnimating.set(false);
                     this.#isStructuralAnimation.set(false);
+                    this.#animationMode.set(null);
                     this.#isExitingData.set(false);
                     if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
                         this.#hasPendingLabelMeasurementLayout = false;
@@ -1148,15 +1155,25 @@ export class MonaChartComponent implements ChartRegistrationContext {
         } else {
             const xAxis = this.#xAxis();
             const yAxis = this.#yAxis();
-            const xStr = formatXValue(matchingHit.xValue, matchingHit.index, xAxis?.formatter(), xAxis?.type());
-            const yStr = formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter());
+            const xStr =
+                matchingHit.formattedCategory ??
+                formatXValue(matchingHit.xValue, matchingHit.index, xAxis?.formatter(), xAxis?.type());
+            const yStr = matchingHit.formattedValue ?? formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter());
             const sizeStr =
                 matchingHit.formattedSize ??
                 (matchingHit.sizeValue !== undefined ? String(matchingHit.sizeValue) : "");
+            const isPercent = matchingHit.stackMode === "percent";
+            const shareStr =
+                isPercent && matchingHit.formattedStackPercentage
+                    ? `, stack share ${matchingHit.formattedStackPercentage}`
+                    : "";
+
             if (matchingHit.seriesType === "bubble" && sizeStr) {
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}, size ${sizeStr}`);
+                this.activeAccessibilityText.set(
+                    `${matchingHit.seriesName}: ${xStr}, ${yStr}, size ${sizeStr}${shareStr}`
+                );
             } else {
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}`);
+                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}${shareStr}`);
             }
         }
 

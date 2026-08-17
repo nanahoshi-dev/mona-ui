@@ -1,8 +1,10 @@
+import { provideHttpClient, withXhr } from "@angular/common/http";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { of } from "rxjs";
-import { DemoService } from "../../../demo/services/demo.service";
-
+import { provideRouter } from "@angular/router";
+import { provideMarkdown } from "ngx-markdown";
+import { beforeEach, describe, expect, it } from "vitest";
 import { LabelDocComponent } from "./label-doc.component";
+import { PageService } from "../../../layout/services/page.service";
 
 describe("LabelDocComponent", () => {
     let component: LabelDocComponent;
@@ -11,7 +13,7 @@ describe("LabelDocComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [LabelDocComponent],
-            providers: [{ provide: DemoService, useValue: { metadata$: of({}) } }]
+            providers: [PageService, provideHttpClient(withXhr()), provideMarkdown(), provideRouter([])]
         }).compileComponents();
 
         fixture = TestBed.createComponent(LabelDocComponent);

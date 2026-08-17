@@ -2,7 +2,7 @@ import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartAreaFillMode, ChartCurve } from "../../models/chart-series.models";
-import type { ChartField } from "../../models/chart.models";
+import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
 import type { ChartStackMode } from "../../models/chart-stack.models";
 
 let nextSeriesId = 0;
@@ -113,6 +113,12 @@ export class MonaAreaSeriesComponent implements OnInit {
     public readonly userClass = input("", { alias: "class" });
 
     /**
+     * @description Custom formatter for raw Y/data values in tooltips and live region announcements.
+     * @default undefined
+     */
+    public readonly valueFormatter = input<ChartValueFormatter | undefined>(undefined);
+
+    /**
      * @description Whether the series is currently visible on the chart and in calculations.
      * @default true
      */
@@ -154,6 +160,7 @@ export class MonaAreaSeriesComponent implements OnInit {
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
+            this.valueFormatter();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
             }
@@ -200,6 +207,7 @@ export class MonaAreaSeriesComponent implements OnInit {
             },
             type: "area",
             userClass: this.userClass,
+            valueFormatter: this.valueFormatter,
             visible: this.visible,
             xField: this.xField
         });

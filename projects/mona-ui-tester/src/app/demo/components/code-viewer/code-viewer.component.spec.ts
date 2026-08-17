@@ -1,23 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { beforeEach, describe, expect, it } from "vitest";
+import { CodeViewerComponent } from "./code-viewer.component";
 
-import { CodeViewerComponent } from './code-viewer.component';
+describe("CodeViewerComponent", () => {
+    let component: CodeViewerComponent;
+    let fixture: ComponentFixture<CodeViewerComponent>;
 
-describe('CodeViewerComponent', () => {
-  let component: CodeViewerComponent;
-  let fixture: ComponentFixture<CodeViewerComponent>;
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [CodeViewerComponent]
+        }).compileComponents();
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CodeViewerComponent]
-    })
-    .compileComponents();
+        fixture = TestBed.createComponent(CodeViewerComponent);
+        component = fixture.componentInstance;
+        fixture.componentRef.setInput("code", "const x = 1;");
+        fixture.detectChanges();
+    });
 
-    fixture = TestBed.createComponent(CodeViewerComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it("should create", () => {
+        expect(component).toBeTruthy();
+    });
 });

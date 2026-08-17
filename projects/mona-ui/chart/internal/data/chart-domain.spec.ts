@@ -26,10 +26,12 @@ function createMockSeries(
         field: signal(field),
         id: `mock-${type}-${Math.random()}`,
         name: signal("Mock Series"),
+        stack: signal(undefined),
+        stackMode: signal("normal"),
         type,
         visible: signal(visible),
         xField: signal(xField)
-    };
+    } as ChartCartesianSeriesRegistration;
 }
 
 function createMockScatterSeries(

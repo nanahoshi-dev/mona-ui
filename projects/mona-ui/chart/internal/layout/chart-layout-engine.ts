@@ -212,6 +212,7 @@ export class ChartLayoutEngine {
             rootXField: options.rootXField,
             series: cartesianSeries,
             styleResolver: options.styleResolver,
+            warnedDiagnosticSignatures: warnedSignatures,
             xAxis: options.xAxis,
             yAxis: options.yAxis
         });

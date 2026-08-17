@@ -26,12 +26,14 @@ function createMockSeries(
         id: `mock-${type}`,
         name: signal("Mock Series"),
         pointRadius: signal(options?.pointRadius),
+        stack: signal(undefined),
+        stackMode: signal("normal"),
         strokeWidth: signal(options?.strokeWidth),
         type,
         userClass: options?.userClass !== undefined ? signal(options.userClass) : undefined,
         visible: signal(true),
         xField: signal(undefined)
-    };
+    } as ChartCartesianSeriesRegistration;
 }
 
 function createMockPieSeries(options?: {

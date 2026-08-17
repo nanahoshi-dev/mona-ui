@@ -3,7 +3,15 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import axe from "axe-core";
 import { ThemeColorsDocComponent } from "./theme-colors-doc.component";
 
+import { PageService } from "../../layout/services/page.service";
+
 describe("ThemeColorsDocComponent", () => {
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [PageService]
+        });
+    });
+
     afterEach(() => TestBed.resetTestingModule());
 
     it("renders the palette review surface and contrast labels", () => {

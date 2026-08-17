@@ -6,7 +6,7 @@ import type {
 } from "../context/chart-registration-context";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
-import type { CartesianStackLayout } from "./cartesian-stack-engine";
+import type { CartesianStackAnalysis, CartesianStackLayout } from "./cartesian-stack-engine";
 
 export interface ContinuousDomain {
     max: number;
@@ -151,9 +151,8 @@ export function inferXAxisType(
                         return "time";
                     }
                 }
-                return "category";
             }
-            if (isFiniteNumber(val)) {
+            if (typeof val === "number" && Number.isFinite(val)) {
                 return "linear";
             }
         }
@@ -188,21 +187,19 @@ export function calculateCategoryDomain(
     rootData: readonly unknown[],
     rootXField: ChartField | undefined
 ): readonly string[] {
-    const keys = new Set<string>();
     const orderedKeys: string[] = [];
+    const seen = new Set<string>();
 
     const visibleSeries = seriesList.filter(s => s.visible());
-    const seriesToScan = (visibleSeries.length > 0 ? visibleSeries : seriesList).filter(
-        s => isCartesianSeriesCompatibleWithXAxisType(s.type, "category")
-    );
+    const seriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
 
-    if (seriesToScan.length === 0) {
+    if (seriesToScan.length === 0 && rootData.length > 0) {
         for (let i = 0; i < rootData.length; i++) {
             const val = resolveValue(rootData[i], rootXField, i);
-            const strVal = val !== undefined && val !== null ? String(val) : String(i);
-            if (!keys.has(strVal)) {
-                keys.add(strVal);
-                orderedKeys.push(strVal);
+            const key = val !== undefined && val !== null ? String(val) : String(i);
+            if (!seen.has(key)) {
+                seen.add(key);
+                orderedKeys.push(key);
             }
         }
         return orderedKeys;
@@ -213,10 +210,10 @@ export function calculateCategoryDomain(
         const xField = s.xField() ?? rootXField;
         for (let i = 0; i < data.length; i++) {
             const val = resolveValue(data[i], xField, i);
-            const strVal = val !== undefined && val !== null ? String(val) : String(i);
-            if (!keys.has(strVal)) {
-                keys.add(strVal);
-                orderedKeys.push(strVal);
+            const key = val !== undefined && val !== null ? String(val) : String(i);
+            if (!seen.has(key)) {
+                seen.add(key);
+                orderedKeys.push(key);
             }
         }
     }
@@ -367,7 +364,7 @@ export function calculateContinuousYDomain(
     explicitMax?: number,
     rootXField?: ChartField,
     xAxisType?: ChartXAxisType,
-    stackLayout?: CartesianStackLayout
+    stackLayoutOrAnalysis?: CartesianStackAnalysis | CartesianStackLayout
 ): [number, number] {
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
@@ -382,8 +379,19 @@ export function calculateContinuousYDomain(
         }
     }
 
-    const visibleSeries = seriesList.filter(s => s.visible());
-    const allSeriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
+    const stackAnalysis = stackLayoutOrAnalysis && "configuration" in stackLayoutOrAnalysis
+        ? stackLayoutOrAnalysis
+        : undefined;
+    const stackLayout = stackAnalysis
+        ? stackAnalysis.visibleLayout
+        : (stackLayoutOrAnalysis as CartesianStackLayout | undefined);
+
+    const invalidSeriesIds = stackAnalysis?.invalidSeriesIds;
+
+    const visibleSeries = seriesList.filter(s => s.visible() && !invalidSeriesIds?.has(s.id));
+    const allSeriesToScan = visibleSeries.length > 0
+        ? visibleSeries
+        : seriesList.filter(s => !invalidSeriesIds?.has(s.id));
     const seriesToScan = xAxisType
         ? allSeriesToScan.filter(s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType))
         : allSeriesToScan;
@@ -393,9 +401,18 @@ export function calculateContinuousYDomain(
         seriesToScan.some(s => s.type === "area" || s.type === "bar") ||
         Boolean(stackLayout && stackLayout.groups.length > 0);
 
-    if (stackLayout && stackLayout.hasPercentStacks) {
-        const hasPos = stackLayout.groups.some(g => g.mode === "percent" && g.hasPositive);
-        const hasNeg = stackLayout.groups.some(g => g.mode === "percent" && g.hasNegative);
+    const hasPercentStacks = Boolean(stackLayout?.hasPercentStacks || stackAnalysis?.yUnitMode === "percent");
+    const regPercentGroup = stackAnalysis?.configuration.groups.find(g => g.mode === "percent" && g.valid);
+
+    if (hasPercentStacks || regPercentGroup) {
+        let hasPos = stackLayout?.groups.some(g => g.mode === "percent" && g.hasPositive);
+        let hasNeg = stackLayout?.groups.some(g => g.mode === "percent" && g.hasNegative);
+
+        if (!hasPos && !hasNeg && regPercentGroup) {
+            hasPos = regPercentGroup.registeredHasPositive;
+            hasNeg = regPercentGroup.registeredHasNegative;
+        }
+
         if (hasPos && hasNeg) {
             min = -100;
             max = 100;

@@ -9,7 +9,9 @@ import type { ChartStackMode } from "../../models/chart-stack.models";
 import type { ChartInteractionXKey } from "../scene/scene-geometry";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { isFiniteNumber } from "../utils/number-utils";
+import type { ChartDiagnostic } from "../utils/chart-diagnostics";
 import { resolveData, resolveValue } from "./chart-value-resolver";
+import { isCartesianSeriesCompatibleWithXAxisType } from "./chart-domain";
 
 export type StackableCartesianSeriesRegistration = ChartAreaSeriesRegistration | ChartBarSeriesRegistration;
 
@@ -41,13 +43,52 @@ export interface CartesianStackGroup {
     readonly xKeys: readonly ChartInteractionXKey[];
 }
 
+export interface RegisteredStackMembership {
+    readonly geometryType: "area" | "bar";
+    readonly groupId: string;
+    readonly groupName: string;
+    readonly mode: ChartStackMode;
+    readonly seriesId: string;
+    readonly valid: boolean;
+}
+
+export interface RegisteredCartesianStackGroup {
+    readonly geometryType: "area" | "bar";
+    readonly id: string;
+    readonly mode: ChartStackMode;
+    readonly name: string;
+    readonly registeredHasNegative: boolean;
+    readonly registeredHasPositive: boolean;
+    readonly registeredSeriesIds: readonly string[];
+    readonly valid: boolean;
+}
+
+export interface CartesianStackConfiguration {
+    readonly groups: readonly RegisteredCartesianStackGroup[];
+    readonly membershipBySeriesId: ReadonlyMap<string, RegisteredStackMembership>;
+    readonly signature: string;
+}
+
 export interface CartesianStackLayout {
     readonly bySeriesId: ReadonlyMap<string, ReadonlyMap<ChartInteractionXKey, CartesianStackEntry>>;
+    readonly groupBySeriesId: ReadonlyMap<string, CartesianStackGroup>;
     readonly groups: readonly CartesianStackGroup[];
     readonly hasNormalStacks: boolean;
     readonly hasPercentStacks: boolean;
     readonly orderedBySeriesId: ReadonlyMap<string, readonly CartesianStackEntry[]>;
+    readonly visibleHasNegative: boolean;
+    readonly visibleHasPositive: boolean;
     readonly yExtent: readonly [number, number];
+}
+
+export interface CartesianStackAnalysis {
+    readonly configuration: CartesianStackConfiguration;
+    readonly diagnostics: readonly ChartDiagnostic[];
+    readonly invalidGroupIds: ReadonlySet<string>;
+    readonly invalidSeriesIds: ReadonlySet<string>;
+    readonly layout: CartesianStackLayout;
+    readonly visibleLayout: CartesianStackLayout;
+    readonly yUnitMode: "invalid" | "normal" | "percent" | "raw";
 }
 
 export interface CartesianStackEngineOptions {
@@ -58,88 +99,196 @@ export interface CartesianStackEngineOptions {
 }
 
 interface RawDatumRecord {
+    readonly animationKey: string;
     readonly dataIndex: number;
     readonly datum: unknown;
-    readonly rawValue: number | undefined;
+    readonly rawValue: number;
     readonly xKey: ChartInteractionXKey;
     readonly xValue: unknown;
 }
 
 export class CartesianStackEngine {
-    public static computeLayout(options: CartesianStackEngineOptions): CartesianStackLayout {
+    public static computeAnalysis(options: CartesianStackEngineOptions): CartesianStackAnalysis {
         const { rootData, rootXField, series, xAxisType } = options;
+        const diagnostics: ChartDiagnostic[] = [];
 
-        const visibleSeries = series.filter(s => s.visible());
-        const stackGroupMap = new Map<
+        // 1. Filter series by X-axis compatibility (STK-002)
+        const compatibleSeries = series.filter(s =>
+            isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType)
+        );
+
+        // 2. Discover registered stack groups across ALL compatible series (visible + hidden) (STK-007, STK-016)
+        const registeredGroupMap = new Map<
             string,
-            { geometryType: "area" | "bar"; name: string; seriesList: StackableCartesianSeriesRegistration[] }
+            {
+                geometryType: "area" | "bar";
+                name: string;
+                seriesList: StackableCartesianSeriesRegistration[];
+            }
         >();
 
-        for (const s of visibleSeries) {
+        for (const s of compatibleSeries) {
             if (s.type !== "bar" && s.type !== "area") {
                 continue;
             }
             const stackable = s as StackableCartesianSeriesRegistration;
-            const rawStack = stackable.stack?.()?.trim();
-            if (!rawStack) {
+            const rawStackInput = stackable.stack?.();
+            const rawModeInput = stackable.stackMode?.();
+
+            if (typeof rawStackInput === "string" && rawStackInput.length > 0 && !rawStackInput.trim()) {
+                diagnostics.push({
+                    code: "empty-stack-group",
+                    message: `Series "${s.name()}" specifies a whitespace-only stack name. It will be treated as unstacked.`,
+                    severity: "warning",
+                    signature: `empty-group:${s.id}`
+                });
+            }
+
+            const trimmedStack = rawStackInput?.trim();
+            if (!trimmedStack) {
+                if (rawModeInput && rawModeInput !== "normal") {
+                    diagnostics.push({
+                        code: "stack-mode-without-group",
+                        message: `Series "${s.name()}" specifies stackMode="${rawModeInput}" without a valid stack group name. Stacking mode will have no effect.`,
+                        severity: "warning",
+                        signature: `mode-without-group:${s.id}`
+                    });
+                }
                 continue;
             }
-            const groupKey = `${stackable.type}:${rawStack}`;
-            let groupRecord = stackGroupMap.get(groupKey);
+
+            const groupKey = `${stackable.type}:${trimmedStack}`;
+            let groupRecord = registeredGroupMap.get(groupKey);
             if (!groupRecord) {
                 groupRecord = {
                     geometryType: stackable.type,
-                    name: rawStack,
+                    name: trimmedStack,
                     seriesList: []
                 };
-                stackGroupMap.set(groupKey, groupRecord);
+                registeredGroupMap.set(groupKey, groupRecord);
             }
             groupRecord.seriesList.push(stackable);
         }
 
-        const validGroups: CartesianStackGroup[] = [];
+        const registeredGroups: RegisteredCartesianStackGroup[] = [];
+        const membershipBySeriesId = new Map<string, RegisteredStackMembership>();
+        const invalidGroupIds = new Set<string>();
+        const invalidSeriesIds = new Set<string>();
+
+        for (const [groupKey, groupInfo] of registeredGroupMap) {
+            const { geometryType, name, seriesList } = groupInfo;
+            const firstMode: ChartStackMode = seriesList[0]?.stackMode?.() ?? "normal";
+            const hasConflict = seriesList.some(s => (s.stackMode?.() ?? "normal") !== firstMode);
+
+            if (hasConflict) {
+                invalidGroupIds.add(groupKey);
+                for (const s of seriesList) {
+                    invalidSeriesIds.add(s.id);
+                }
+                diagnostics.push({
+                    code: "conflicting-stack-mode",
+                    message: `Stack group "${name}" (${geometryType}) contains conflicting stackMode values among series [${seriesList.map(s => s.name()).join(", ")}]. Stack geometry for this group was omitted.`,
+                    severity: "warning",
+                    signature: `conflicting-mode:${groupKey}`
+                });
+            }
+
+            let regHasPos = false;
+            let regHasNeg = false;
+            for (const s of seriesList) {
+                const sData = resolveData(s.data(), rootData);
+                const sField = s.field();
+                for (let i = 0; i < sData.length; i++) {
+                    const y = resolveValue(sData[i], sField, i);
+                    if (isFiniteNumber(y)) {
+                        if (y > 0) regHasPos = true;
+                        if (y < 0) regHasNeg = true;
+                    }
+                }
+            }
+
+            const regGroup: RegisteredCartesianStackGroup = {
+                geometryType,
+                id: groupKey,
+                mode: firstMode,
+                name,
+                registeredHasNegative: regHasNeg,
+                registeredHasPositive: regHasPos,
+                registeredSeriesIds: seriesList.map(s => s.id),
+                valid: !hasConflict
+            };
+            registeredGroups.push(regGroup);
+
+            for (const s of seriesList) {
+                membershipBySeriesId.set(s.id, {
+                    geometryType,
+                    groupId: groupKey,
+                    groupName: name,
+                    mode: firstMode,
+                    seriesId: s.id,
+                    valid: !hasConflict
+                });
+            }
+        }
+
+        const configSignature = JSON.stringify(
+            registeredGroups.map(g => ({
+                id: g.id,
+                mode: g.mode,
+                series: g.registeredSeriesIds,
+                valid: g.valid
+            }))
+        );
+
+        const configuration: CartesianStackConfiguration = {
+            groups: registeredGroups,
+            membershipBySeriesId,
+            signature: configSignature
+        };
+
+        // 3. Process visible layout for valid groups
+        const visibleGroups: CartesianStackGroup[] = [];
         const bySeriesId = new Map<string, Map<ChartInteractionXKey, CartesianStackEntry>>();
         const orderedBySeriesId = new Map<string, CartesianStackEntry[]>();
+        const groupBySeriesId = new Map<string, CartesianStackGroup>();
 
         let globalMinY = 0;
         let globalMaxY = 0;
+        let visibleHasPositive = false;
+        let visibleHasNegative = false;
         let hasNormalStacks = false;
         let hasPercentStacks = false;
 
         const warnedDuplicateKeys = new Set<string>();
 
-        for (const [groupKey, groupInfo] of stackGroupMap) {
+        for (const [groupKey, groupInfo] of registeredGroupMap) {
+            if (invalidGroupIds.has(groupKey)) {
+                continue;
+            }
+
             const { geometryType, name, seriesList } = groupInfo;
-            if (seriesList.length === 0) {
+            const visibleMembers = seriesList.filter(s => s.visible());
+            if (visibleMembers.length === 0) {
                 continue;
             }
 
-            // Validate stack mode consistency across group members
-            const firstMode: ChartStackMode = seriesList[0].stackMode?.() ?? "normal";
-            const hasConflict = seriesList.some(s => (s.stackMode?.() ?? "normal") !== firstMode);
-            if (hasConflict) {
-                console.warn(
-                    `[MonaChart] Stack group "${name}" (${geometryType}) contains conflicting stackMode values among series [${seriesList.map(s => s.name()).join(", ")}]. Stack geometry for this group was omitted.`
-                );
-                continue;
-            }
-
-            const groupMode = firstMode;
+            const groupMode: ChartStackMode = seriesList[0]?.stackMode?.() ?? "normal";
             if (groupMode === "percent") {
                 hasPercentStacks = true;
             } else {
                 hasNormalStacks = true;
             }
 
-            // Extract per-series records with duplicate-X filtering
+            // Extract records per series with 1 resolver per series (STK-005) & first-valid duplicate (STK-006)
             const seriesRecordsMap = new Map<string, Map<ChartInteractionXKey, RawDatumRecord>>();
             const groupXKeyOrder: ChartInteractionXKey[] = [];
             const groupXKeySet = new Set<ChartInteractionXKey>();
 
-            for (const s of seriesList) {
+            for (const s of visibleMembers) {
                 const sData = resolveData(s.data(), rootData);
                 const sXField = s.xField() ?? rootXField;
                 const sField = s.field();
+                const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
                 const sRecords = new Map<ChartInteractionXKey, RawDatumRecord>();
 
                 for (let dIdx = 0; dIdx < sData.length; dIdx++) {
@@ -152,40 +301,45 @@ export class CartesianStackEngine {
                         continue;
                     }
 
-                    if (sRecords.has(xKey)) {
-                        const warnId = `${s.id}:${String(xKey)}`;
-                        if (!warnedDuplicateKeys.has(warnId)) {
-                            warnedDuplicateKeys.add(warnId);
-                            console.warn(
-                                `[MonaChart] Series "${s.name()}" has duplicate X coordinate "${String(xKey)}". Later duplicates are skipped for stack layout.`
-                            );
-                        }
-                        continue;
-                    }
-
-                    const numY = isFiniteNumber(yVal) ? yVal : undefined;
-                    const record: RawDatumRecord = {
-                        dataIndex: dIdx,
-                        datum,
-                        rawValue: numY,
-                        xKey,
-                        xValue: xVal
-                    };
-                    sRecords.set(xKey, record);
-
+                    // Add to group X lattice
                     if (!groupXKeySet.has(xKey)) {
                         groupXKeySet.add(xKey);
                         groupXKeyOrder.push(xKey);
                     }
+
+                    if (!isFiniteNumber(yVal)) {
+                        continue;
+                    }
+
+                    if (sRecords.has(xKey)) {
+                        const warnId = `${s.id}:${String(xKey)}`;
+                        if (!warnedDuplicateKeys.has(warnId)) {
+                            warnedDuplicateKeys.add(warnId);
+                            diagnostics.push({
+                                code: "duplicate-x-mark",
+                                message: `Series "${s.name()}" has duplicate valid X coordinate "${String(xKey)}". Later duplicates are skipped for stack layout.`,
+                                severity: "warning",
+                                signature: `duplicate-x:${warnId}`
+                            });
+                        }
+                        continue;
+                    }
+
+                    const animationKey = keyResolver.resolveKey(datum, xKey, dIdx);
+                    sRecords.set(xKey, {
+                        animationKey,
+                        dataIndex: dIdx,
+                        datum,
+                        rawValue: yVal as number,
+                        xKey,
+                        xValue: xVal
+                    });
                 }
                 seriesRecordsMap.set(s.id, sRecords);
             }
 
-            // Sort X lattice if continuous
             let sortedXKeys: readonly ChartInteractionXKey[];
-            if (xAxisType === "linear") {
-                sortedXKeys = [...groupXKeyOrder].sort((a, b) => Number(a) - Number(b));
-            } else if (xAxisType === "time" || xAxisType === "utc") {
+            if (xAxisType === "linear" || xAxisType === "time" || xAxisType === "utc") {
                 sortedXKeys = [...groupXKeyOrder].sort((a, b) => Number(a) - Number(b));
             } else {
                 sortedXKeys = groupXKeyOrder;
@@ -194,8 +348,7 @@ export class CartesianStackEngine {
             let groupHasPositive = false;
             let groupHasNegative = false;
 
-            // Initialize entries map for each series
-            for (const s of seriesList) {
+            for (const s of visibleMembers) {
                 if (!bySeriesId.has(s.id)) {
                     bySeriesId.set(s.id, new Map());
                 }
@@ -205,36 +358,33 @@ export class CartesianStackEngine {
             }
 
             for (const xKey of sortedXKeys) {
-                // Calculate denominators for percent mode if applicable
                 let positiveSum = 0;
                 let negativeAbsSum = 0;
 
-                for (const s of seriesList) {
+                for (const s of visibleMembers) {
                     const record = seriesRecordsMap.get(s.id)?.get(xKey);
-                    if (record?.rawValue !== undefined) {
+                    if (record) {
                         if (record.rawValue > 0) {
                             positiveSum += record.rawValue;
                             groupHasPositive = true;
+                            visibleHasPositive = true;
                         } else if (record.rawValue < 0) {
                             negativeAbsSum += Math.abs(record.rawValue);
                             groupHasNegative = true;
+                            visibleHasNegative = true;
                         }
                     }
                 }
 
                 let posAccum = 0;
                 let negAccum = 0;
-
-                // Temporary list for assigning corner / cap positions at this X coordinate
                 const segmentEntriesAtX: { entry: CartesianStackEntry; isPositive: boolean; seriesId: string }[] = [];
 
-                for (const s of seriesList) {
-                    const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
+                for (const s of visibleMembers) {
                     const record = seriesRecordsMap.get(s.id)?.get(xKey);
-
                     let entry: CartesianStackEntry;
 
-                    if (record && record.rawValue !== undefined) {
+                    if (record) {
                         const rawVal = record.rawValue;
                         const isPositive = rawVal >= 0;
                         let stackStart = 0;
@@ -245,6 +395,7 @@ export class CartesianStackEngine {
 
                         if (groupMode === "normal") {
                             visualVal = rawVal;
+                            stackTotal = isPositive ? positiveSum : -negativeAbsSum;
                             if (isPositive) {
                                 stackStart = posAccum;
                                 stackEnd = posAccum + rawVal;
@@ -279,9 +430,8 @@ export class CartesianStackEngine {
                             }
                         }
 
-                        const animationKey = keyResolver.resolveKey(record.datum, String(xKey), record.dataIndex);
                         entry = {
-                            animationKey,
+                            animationKey: record.animationKey,
                             dataIndex: record.dataIndex,
                             datum: record.datum,
                             defined: true,
@@ -298,17 +448,16 @@ export class CartesianStackEngine {
 
                         segmentEntriesAtX.push({ entry, isPositive, seriesId: s.id });
                     } else {
-                        // Missing datum or non-finite value
                         if (geometryType === "area") {
                             const stackStart = posAccum;
                             const stackEnd = posAccum;
-                            const animationKey = `${s.id}:${String(xKey)}:stack-synthetic`;
+                            const animationKey = JSON.stringify([s.id, "stack-synthetic", typeof xKey, xKey]);
 
                             entry = {
                                 animationKey,
                                 dataIndex: -1,
                                 datum: undefined,
-                                defined: false,
+                                defined: true,
                                 rawValue: 0,
                                 stackEnd,
                                 stackPercentage: groupMode === "percent" ? 0 : undefined,
@@ -317,10 +466,9 @@ export class CartesianStackEngine {
                                 synthetic: true,
                                 visualValue: 0,
                                 xKey,
-                                xValue: record?.xValue ?? xKey
+                                xValue: xKey
                             };
                         } else {
-                            // Bar series without datum at this category
                             continue;
                         }
                     }
@@ -332,7 +480,7 @@ export class CartesianStackEngine {
                     orderedBySeriesId.get(s.id)!.push(entry);
                 }
 
-                // Determine stackPosition (inner/outer/single) for bar segments at this X
+                // Corner caps assignment for bar segments (STK-004, STK-011)
                 if (geometryType === "bar" && segmentEntriesAtX.length > 0) {
                     const posSegments = segmentEntriesAtX.filter(s => s.isPositive && s.entry.rawValue > 0);
                     const negSegments = segmentEntriesAtX.filter(s => !s.isPositive && s.entry.rawValue < 0);
@@ -357,26 +505,81 @@ export class CartesianStackEngine {
                 }
             }
 
-            validGroups.push({
+            const visibleGroup: CartesianStackGroup = {
                 geometryType,
                 hasNegative: groupHasNegative,
                 hasPositive: groupHasPositive,
                 id: groupKey,
                 mode: groupMode,
                 name,
-                seriesIds: seriesList.map(s => s.id),
+                seriesIds: visibleMembers.map(s => s.id),
                 xKeys: sortedXKeys
-            });
+            };
+            visibleGroups.push(visibleGroup);
+
+            for (const s of visibleMembers) {
+                groupBySeriesId.set(s.id, visibleGroup);
+            }
         }
 
-        return {
+        // 4. Validate Single-Y-Axis Percent vs Raw Unit Integrity (STK-001)
+        let yUnitMode: "invalid" | "normal" | "percent" | "raw" = "raw";
+
+        if (hasPercentStacks) {
+            const conflictingRawSeries = compatibleSeries.filter(s => {
+                if (!s.visible()) return false;
+                if (s.type === "bar" || s.type === "area") {
+                    const stackable = s as StackableCartesianSeriesRegistration;
+                    const groupKey = `${stackable.type}:${stackable.stack?.()?.trim()}`;
+                    const group = visibleGroups.find(g => g.id === groupKey);
+                    return !group || group.mode !== "percent";
+                }
+                return s.type === "line" || s.type === "scatter" || s.type === "bubble";
+            });
+
+            if (conflictingRawSeries.length > 0) {
+                yUnitMode = "invalid";
+                for (const s of conflictingRawSeries) {
+                    invalidSeriesIds.add(s.id);
+                }
+                diagnostics.push({
+                    code: "mixed-y-axis-units",
+                    message: `Percent stacked series and raw value series cannot share the same Y axis. Conflicting raw series [${conflictingRawSeries.map(s => s.name()).join(", ")}] geometry was omitted.`,
+                    severity: "warning",
+                    signature: "unit-mix:percent-raw"
+                });
+            } else {
+                yUnitMode = "percent";
+            }
+        } else if (hasNormalStacks) {
+            yUnitMode = "normal";
+        }
+
+        const layout: CartesianStackLayout = {
             bySeriesId,
-            groups: validGroups,
+            groupBySeriesId,
+            groups: visibleGroups,
             hasNormalStacks,
             hasPercentStacks,
             orderedBySeriesId,
+            visibleHasNegative,
+            visibleHasPositive,
             yExtent: [globalMinY, globalMaxY]
         };
+
+        return {
+            configuration,
+            diagnostics,
+            invalidGroupIds,
+            invalidSeriesIds,
+            layout,
+            visibleLayout: layout,
+            yUnitMode
+        };
+    }
+
+    public static computeLayout(options: CartesianStackEngineOptions): CartesianStackLayout {
+        return this.computeAnalysis(options).layout;
     }
 
     public static resolveNormalizedXKey(
