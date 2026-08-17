@@ -23,6 +23,8 @@ import {
     MonaRadarSeriesComponent,
     MonaScatterSeriesComponent,
     MonaBubbleSeriesComponent,
+    MonaRangeBarSeriesComponent,
+    MonaRangeAreaSeriesComponent,
     type ChartAreaFillMode,
     type ChartCurve,
     type ChartPointEvent,
@@ -114,6 +116,8 @@ interface BubbleDataPoint {
         MonaPolarSeriesComponent,
         MonaScatterSeriesComponent,
         MonaBubbleSeriesComponent,
+        MonaRangeBarSeriesComponent,
+        MonaRangeAreaSeriesComponent,
         MonaChartLegendComponent,
         MonaChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
@@ -144,12 +148,41 @@ export class ChartDemoComponent {
         | "pie"
         | "polar"
         | "radar"
+        | "range-area"
+        | "range-bar"
         | "scatter"
         | "stacked-area"
         | "stacked-bar"
         | "time"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
+
+    // Range Chart Data & Controls
+    protected readonly rangeBarData = signal<readonly { high: number; low: number; month: string }[]>([
+        { high: 28, low: 14, month: "Jan" },
+        { high: 32, low: 16, month: "Feb" },
+        { high: 38, low: 22, month: "Mar" },
+        { high: 45, low: 28, month: "Apr" },
+        { high: 52, low: 35, month: "May" },
+        { high: 58, low: 42, month: "Jun" }
+    ]);
+    protected readonly rangeBarRadius = signal<number>(6);
+    protected readonly rangeBarMaxBarWidth = signal<number>(36);
+    protected readonly rangeBarOpacity = signal<number>(0.85);
+
+    protected readonly rangeAreaData = signal<
+        readonly { actual: number; high: number; low: number; month: string }[]
+    >([
+        { actual: 38, high: 48, low: 28, month: "Jan" },
+        { actual: 44, high: 56, low: 32, month: "Feb" },
+        { actual: 52, high: 65, low: 40, month: "Mar" },
+        { actual: 61, high: 74, low: 48, month: "Apr" },
+        { actual: 70, high: 85, low: 55, month: "May" },
+        { actual: 78, high: 92, low: 64, month: "Jun" }
+    ]);
+    protected readonly rangeAreaOpacity = signal<number>(0.25);
+    protected readonly rangeAreaShowPoints = signal<boolean>(true);
+    protected readonly rangeAreaCurve = signal<ChartCurve>("monotone-x");
     protected readonly areaFillMode = signal<ChartAreaFillMode>("gradient");
     protected readonly areaFillModeOptions: readonly { label: string; value: ChartAreaFillMode }[] = [
         { label: "Gradient (Fade to 0)", value: "gradient" },
@@ -678,6 +711,29 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Randomized bubble global socioeconomic dataset");
     }
 
+    public randomizeRangeBarData(): void {
+        this.rangeBarData.update(list =>
+            list.map(item => {
+                const low = Math.round(10 + Math.random() * 20);
+                const high = Math.round(low + 10 + Math.random() * 30);
+                return { high, low, month: item.month };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized temperature range bars dataset");
+    }
+
+    public randomizeRangeAreaData(): void {
+        this.rangeAreaData.update(list =>
+            list.map(item => {
+                const low = Math.round(20 + Math.random() * 30);
+                const high = Math.round(low + 20 + Math.random() * 40);
+                const actual = Math.round(low + (high - low) * (0.3 + Math.random() * 0.4));
+                return { actual, high, low, month: item.month };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized range area confidence band dataset");
+    }
+
     public resetData(): void {
         this.monthlyData.set([
             { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
@@ -705,6 +761,8 @@ export class ChartDemoComponent {
             | "pie"
             | "polar"
             | "radar"
+            | "range-area"
+            | "range-bar"
             | "scatter"
             | "stacked-area"
             | "stacked-bar"

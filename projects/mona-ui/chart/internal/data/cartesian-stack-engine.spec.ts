@@ -467,7 +467,7 @@ describe("CartesianStackEngine", () => {
     });
 
     describe("Single-Y-Axis Unit Validation", () => {
-        it("should detect unit conflicts between percent stacks and raw unstacked series", () => {
+        it("should detect unit conflicts between percent stacks and raw unstacked series and invalidate both", () => {
             const rootData = [{ month: "Jan", s1: 20, raw: 100 }];
             const series: readonly ChartCartesianSeriesRegistration[] = [
                 createMockBarSeries({ field: "s1", id: "s1", stack: "pct", stackMode: "percent" }),
@@ -482,8 +482,47 @@ describe("CartesianStackEngine", () => {
             });
 
             expect(analysis.yUnitMode).toBe("invalid");
+            expect(analysis.visibleYUnitMode).toBe("invalid");
+            expect(analysis.axisUnitMode).toBe("raw");
             expect(analysis.diagnostics.some(d => d.code === "mixed-y-axis-units")).toBe(true);
             expect(analysis.invalidSeriesIds.has("raw")).toBe(true);
+            expect(analysis.invalidSeriesIds.has("s1")).toBe(true);
+        });
+
+        it("should set axisUnitMode to raw when all percent members are hidden and a raw series is visible", () => {
+            const rootData = [{ month: "Jan", s1: 20, raw: 500 }];
+            const series: readonly ChartCartesianSeriesRegistration[] = [
+                createMockBarSeries({ field: "s1", id: "s1", stack: "pct", stackMode: "percent", visible: false }),
+                createMockBarSeries({ field: "raw", id: "raw", visible: true })
+            ];
+
+            const analysis = CartesianStackEngine.computeAnalysis({
+                rootData,
+                rootXField: "month",
+                series,
+                xAxisType: "category"
+            });
+
+            expect(analysis.visibleYUnitMode).toBe("raw");
+            expect(analysis.axisUnitMode).toBe("raw");
+            expect(analysis.invalidSeriesIds.size).toBe(0);
+        });
+
+        it("should set axisUnitMode to percent when all percent members are hidden and no raw series is visible", () => {
+            const rootData = [{ month: "Jan", s1: 20 }];
+            const series: readonly ChartCartesianSeriesRegistration[] = [
+                createMockBarSeries({ field: "s1", id: "s1", stack: "pct", stackMode: "percent", visible: false })
+            ];
+
+            const analysis = CartesianStackEngine.computeAnalysis({
+                rootData,
+                rootXField: "month",
+                series,
+                xAxisType: "category"
+            });
+
+            expect(analysis.visibleYUnitMode).toBe("none");
+            expect(analysis.axisUnitMode).toBe("percent");
         });
     });
 });

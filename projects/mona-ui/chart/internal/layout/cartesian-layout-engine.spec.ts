@@ -4,6 +4,8 @@ import type { ChartAxisRegistration, ChartCartesianSeriesRegistration } from "..
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianLayoutEngine } from "./cartesian-layout-engine";
 import type { ChartField } from "../../models/chart.models";
+import type { SceneHitTarget } from "../scene/scene-geometry";
+import type { ChartSeriesScene } from "../scene/cartesian-scene";
 
 function createMockSeries(
     type: "area" | "bar" | "line",
@@ -446,14 +448,14 @@ describe("CartesianLayoutEngine", () => {
                 xAxis: createMockAxis({ type: "category" })
             });
 
-            const s2JanHit = scene.hitTargets.find(h => h.seriesId === "s2" && h.xKey === "Jan");
+            const s2JanHit = scene.hitTargets.find((h: SceneHitTarget) => h.seriesId === "s2" && h.xKey === "Jan");
             expect(s2JanHit).toBeDefined();
             expect(s2JanHit?.bounds).toBeUndefined(); // Omitted bounds for zero-height bar
-            expect(scene.barHitTargets?.some(h => h.seriesId === "s2" && h.xKey === "Jan")).toBe(false);
+            expect(scene.barHitTargets?.some((h: SceneHitTarget) => h.seriesId === "s2" && h.xKey === "Jan")).toBe(false);
 
             // But it is present in the category interaction bucket for keyboard / shared tooltips
             const janBucket = scene.interactionBucketLookup?.get("Jan");
-            expect(janBucket?.hits.some(h => h.seriesId === "s2")).toBe(true);
+            expect(janBucket?.hits.some((h: SceneHitTarget) => h.seriesId === "s2")).toBe(true);
         });
 
         it("should not clamp stacked Area baseY and topY to plotRect (STK-012)", () => {
@@ -474,7 +476,7 @@ describe("CartesianLayoutEngine", () => {
                 yAxis: createMockAxis({ max: 100, min: 0 })
             });
 
-            const a2Scene = scene.series.find(s => s.id === "a2");
+            const a2Scene = scene.series.find((s: ChartSeriesScene) => s.id === "a2");
             if (a2Scene && a2Scene.type === "area") {
                 const pt = a2Scene.points[0];
                 expect(pt.y).toBeLessThan(scene.plotRect.y); // Extends above plotRect without clamping
@@ -504,7 +506,7 @@ describe("CartesianLayoutEngine", () => {
                 xAxis: createMockAxis({ type: "category" })
             });
 
-            const s1Hit = scene.hitTargets.find(h => h.seriesId === "s1");
+            const s1Hit = scene.hitTargets.find((h: SceneHitTarget) => h.seriesId === "s1");
             expect(s1Hit?.formattedValue).toBe("$100.00");
             expect(s1Hit?.formattedStackTotal).toBe("$300.00");
             expect(s1Hit?.formattedPercentage).toBeUndefined(); // Generic percentage omitted for Cartesian stacks

@@ -2,7 +2,18 @@ export type ChartAreaFillMode = "gradient" | "solid";
 
 export type ChartCurve = "linear" | "monotone-x" | "natural" | "step" | "step-after";
 
-export type ChartSeriesType = "area" | "bar" | "bubble" | "donut" | "line" | "pie" | "polar" | "radar" | "scatter";
+export type ChartSeriesType =
+    | "area"
+    | "bar"
+    | "bubble"
+    | "donut"
+    | "line"
+    | "pie"
+    | "polar"
+    | "radar"
+    | "rangeArea"
+    | "rangeBar"
+    | "scatter";
 
 export type ChartSeriesFamily = "cartesian" | "polar" | "radar" | "sector";
 
@@ -12,6 +23,8 @@ export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
         case "area":
         case "bar":
         case "bubble":
+        case "rangeArea":
+        case "rangeBar":
         case "scatter":
             return "cartesian";
         case "pie":

@@ -6,6 +6,8 @@ import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
 import { LineSeriesRenderer } from "./series/line-series-renderer";
 import { MarkerSeriesRenderer } from "./series/marker-series-renderer";
+import { RangeAreaSeriesRenderer } from "./series/range-area-series-renderer";
+import { RangeBarSeriesRenderer } from "./series/range-bar-series-renderer";
 
 export class CartesianChartRenderer {
     public static render(
@@ -74,6 +76,12 @@ export class CartesianChartRenderer {
                 case "line":
                     LineSeriesRenderer.render(context, s);
                     break;
+                case "rangeArea":
+                    RangeAreaSeriesRenderer.render(context, s);
+                    break;
+                case "rangeBar":
+                    RangeBarSeriesRenderer.render(context, s);
+                    break;
             }
         }
         context.restore();
@@ -126,7 +134,12 @@ export class CartesianChartRenderer {
 
             const primaryHit = hits[0];
             const hasConnectedOrBarHit = hits.some(
-                h => h.seriesType === "line" || h.seriesType === "area" || h.seriesType === "bar"
+                h =>
+                    h.seriesType === "line" ||
+                    h.seriesType === "area" ||
+                    h.seriesType === "bar" ||
+                    h.seriesType === "rangeArea" ||
+                    h.seriesType === "rangeBar"
             );
             const crosshairX =
                 primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : null);
@@ -164,7 +177,16 @@ export class CartesianChartRenderer {
             const isKeyboardSource = interactionState.source === "keyboard";
 
             for (const hit of hits) {
-                if (hit.point) {
+                if (hit.seriesType === "rangeArea" && hit.highPoint && hit.lowPoint) {
+                    const matchingSeries = series.find(s => s.id === hit.seriesId);
+                    const color = isKeyboardSource
+                        ? focusIndicatorColor
+                        : (matchingSeries?.style.color ?? "#3b82f6");
+                    drawPointMarker(context, hit.highPoint.x, hit.highPoint.y, 5, color, markerStrokeColor, 2);
+                    if (hit.lowPoint.y !== hit.highPoint.y) {
+                        drawPointMarker(context, hit.lowPoint.x, hit.lowPoint.y, 5, color, markerStrokeColor, 2);
+                    }
+                } else if (hit.point) {
                     const isMarkerSeries = hit.seriesType === "scatter" || hit.seriesType === "bubble";
                     if (isMarkerSeries) {
                         const matchingSeries = series.find(s => s.id === hit.seriesId);

@@ -103,7 +103,6 @@ export interface ChartTooltipRegistration {
 export interface ChartSeriesRegistrationBase {
     data: Signal<readonly unknown[] | undefined>;
     element: ElementRef<HTMLElement>;
-    field: Signal<ChartField>;
     id: string;
     keyField?: Signal<ChartField | undefined>;
     name: Signal<string>;
@@ -112,13 +111,27 @@ export interface ChartSeriesRegistrationBase {
     visible: Signal<boolean>;
 }
 
+export interface ChartScalarSeriesRegistrationBase extends ChartSeriesRegistrationBase {
+    field: Signal<ChartField>;
+}
+
 export interface ChartCartesianSeriesRegistrationBase extends ChartSeriesRegistrationBase {
     color: Signal<string>;
     toggleVisibility?: () => boolean;
     xField: Signal<ChartField | undefined>;
 }
 
-export interface ChartLineSeriesRegistration extends ChartCartesianSeriesRegistrationBase {
+export interface ChartCartesianScalarSeriesRegistrationBase
+    extends ChartCartesianSeriesRegistrationBase,
+        ChartScalarSeriesRegistrationBase {}
+
+export interface ChartCartesianRangeSeriesRegistrationBase extends ChartCartesianSeriesRegistrationBase {
+    fromField: Signal<ChartField>;
+    toField: Signal<ChartField>;
+    valueFormatter: Signal<ChartValueFormatter | undefined>;
+}
+
+export interface ChartLineSeriesRegistration extends ChartCartesianScalarSeriesRegistrationBase {
     connectNulls?: Signal<boolean>;
     curve?: Signal<ChartCurve>;
     pointRadius?: Signal<number | undefined>;
@@ -127,7 +140,7 @@ export interface ChartLineSeriesRegistration extends ChartCartesianSeriesRegistr
     type: "line";
 }
 
-export interface ChartAreaSeriesRegistration extends ChartCartesianSeriesRegistrationBase {
+export interface ChartAreaSeriesRegistration extends ChartCartesianScalarSeriesRegistrationBase {
     connectNulls?: Signal<boolean>;
     curve?: Signal<ChartCurve>;
     fillMode?: Signal<ChartAreaFillMode>;
@@ -141,7 +154,7 @@ export interface ChartAreaSeriesRegistration extends ChartCartesianSeriesRegistr
     valueFormatter?: Signal<ChartValueFormatter | undefined>;
 }
 
-export interface ChartBarSeriesRegistration extends ChartCartesianSeriesRegistrationBase {
+export interface ChartBarSeriesRegistration extends ChartCartesianScalarSeriesRegistrationBase {
     borderRadius?: Signal<number | undefined>;
     fillOpacity?: Signal<number | undefined>;
     maxBarWidth?: Signal<number | undefined>;
@@ -151,7 +164,24 @@ export interface ChartBarSeriesRegistration extends ChartCartesianSeriesRegistra
     valueFormatter?: Signal<ChartValueFormatter | undefined>;
 }
 
-export interface ChartCartesianMarkerSeriesRegistrationBase extends ChartCartesianSeriesRegistrationBase {
+export interface ChartRangeBarSeriesRegistration extends ChartCartesianRangeSeriesRegistrationBase {
+    borderRadius?: Signal<number | undefined>;
+    fillOpacity?: Signal<number | undefined>;
+    maxBarWidth?: Signal<number | undefined>;
+    type: "rangeBar";
+}
+
+export interface ChartRangeAreaSeriesRegistration extends ChartCartesianRangeSeriesRegistrationBase {
+    connectNulls?: Signal<boolean>;
+    curve?: Signal<ChartCurve>;
+    fillOpacity?: Signal<number | undefined>;
+    pointRadius?: Signal<number | undefined>;
+    showPoints?: Signal<boolean>;
+    strokeWidth?: Signal<number | undefined>;
+    type: "rangeArea";
+}
+
+export interface ChartCartesianMarkerSeriesRegistrationBase extends ChartCartesianScalarSeriesRegistrationBase {
     fillOpacity?: Signal<number | undefined>;
     strokeColor?: Signal<string>;
     strokeWidth?: Signal<number | undefined>;
@@ -170,7 +200,7 @@ export interface ChartBubbleSeriesRegistration extends ChartCartesianMarkerSerie
     type: "bubble";
 }
 
-export interface ChartSectorSeriesRegistrationBase extends ChartSeriesRegistrationBase {
+export interface ChartSectorSeriesRegistrationBase extends ChartScalarSeriesRegistrationBase {
     categoryField: Signal<ChartField>;
     categoryFormatter: Signal<ChartValueFormatter | undefined>;
     colorField: Signal<ChartField | undefined>;
@@ -206,7 +236,7 @@ export interface ChartDonutSeriesRegistration extends ChartSectorSeriesRegistrat
     type: "donut";
 }
 
-export interface ChartRadialSeriesRegistrationBase extends ChartSeriesRegistrationBase {
+export interface ChartRadialSeriesRegistrationBase extends ChartScalarSeriesRegistrationBase {
     color: Signal<string>;
     connectNulls: Signal<boolean>;
     curve: Signal<ChartRadialCurve>;
@@ -234,6 +264,8 @@ export type ChartCartesianSeriesRegistration =
     | ChartBarSeriesRegistration
     | ChartBubbleSeriesRegistration
     | ChartLineSeriesRegistration
+    | ChartRangeAreaSeriesRegistration
+    | ChartRangeBarSeriesRegistration
     | ChartScatterSeriesRegistration;
 
 export type ChartSectorSeriesRegistration = ChartDonutSeriesRegistration | ChartPieSeriesRegistration;

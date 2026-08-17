@@ -1,6 +1,7 @@
 import type {
     ChartBarSeriesRegistration,
-    ChartCartesianSeriesRegistration
+    ChartCartesianSeriesRegistration,
+    ChartRangeBarSeriesRegistration
 } from "../context/chart-registration-context";
 import type { CartesianStackLayout } from "../data/cartesian-stack-engine";
 import { normalizePositiveNumber } from "../utils/number-utils";
@@ -25,7 +26,8 @@ export class CartesianBarSlots {
         invalidSeriesIds?: ReadonlySet<string>
     ): CartesianBarSlotLayout {
         const visibleBarSeries = series.filter(
-            (s): s is ChartBarSeriesRegistration => s.visible() && s.type === "bar" && !invalidSeriesIds?.has(s.id)
+            (s): s is ChartBarSeriesRegistration | ChartRangeBarSeriesRegistration =>
+                s.visible() && (s.type === "bar" || s.type === "rangeBar") && !invalidSeriesIds?.has(s.id)
         );
 
         const slots: CartesianBarSlot[] = [];
@@ -33,6 +35,18 @@ export class CartesianBarSlots {
         const seenStackGroups = new Set<string>();
 
         for (const s of visibleBarSeries) {
+            if (s.type === "rangeBar") {
+                const slot: CartesianBarSlot = {
+                    id: `series:${s.id}`,
+                    kind: "series",
+                    maxBarWidth: normalizePositiveNumber(s.maxBarWidth?.()),
+                    seriesIds: [s.id]
+                };
+                slots.push(slot);
+                bySeriesId.set(s.id, slot);
+                continue;
+            }
+
             const rawStack = s.stack?.()?.trim();
             const groupKey = rawStack ? `bar:${rawStack}` : undefined;
             const stackGroup = groupKey && stackLayout
@@ -45,7 +59,7 @@ export class CartesianBarSlots {
                     if (!seenStackGroups.has(stackGroup.id)) {
                         seenStackGroups.add(stackGroup.id);
                         const groupMembers = visibleBarSeries.filter(
-                            member => member.stack?.()?.trim() === stackGroup.name
+                            member => "stack" in member && (member as ChartBarSeriesRegistration).stack?.()?.trim() === stackGroup.name
                         );
                         let minMaxBarWidth: number | undefined;
                         for (const member of groupMembers) {

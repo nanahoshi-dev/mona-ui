@@ -81,13 +81,24 @@ export interface CartesianStackLayout {
     readonly yExtent: readonly [number, number];
 }
 
+export type CartesianVisibleYUnitMode =
+    | "invalid"
+    | "none"
+    | "normal-stack"
+    | "percent-stack"
+    | "raw";
+
+export type CartesianAxisUnitMode = "percent" | "raw";
+
 export interface CartesianStackAnalysis {
+    readonly axisUnitMode: CartesianAxisUnitMode;
     readonly configuration: CartesianStackConfiguration;
     readonly diagnostics: readonly ChartDiagnostic[];
     readonly invalidGroupIds: ReadonlySet<string>;
     readonly invalidSeriesIds: ReadonlySet<string>;
     readonly layout: CartesianStackLayout;
     readonly visibleLayout: CartesianStackLayout;
+    readonly visibleYUnitMode: CartesianVisibleYUnitMode;
     readonly yUnitMode: "invalid" | "normal" | "percent" | "raw";
 }
 
@@ -522,38 +533,61 @@ export class CartesianStackEngine {
             }
         }
 
-        // 4. Validate Single-Y-Axis Percent vs Raw Unit Integrity (STK-001)
-        let yUnitMode: "invalid" | "normal" | "percent" | "raw" = "raw";
+        // 4. Validate Single-Y-Axis Percent vs Raw Unit Integrity (STK-001, PRE-001, PRE-002, PRE-003, PRE-004)
+        const visibleCompatibleSeries = compatibleSeries.filter(s => s.visible());
+        let visibleYUnitMode: CartesianVisibleYUnitMode = "none";
+        let axisUnitMode: CartesianAxisUnitMode = "raw";
 
-        if (hasPercentStacks) {
-            const conflictingRawSeries = compatibleSeries.filter(s => {
-                if (!s.visible()) return false;
-                if (s.type === "bar" || s.type === "area") {
-                    const stackable = s as StackableCartesianSeriesRegistration;
-                    const groupKey = `${stackable.type}:${stackable.stack?.()?.trim()}`;
-                    const group = visibleGroups.find(g => g.id === groupKey);
-                    return !group || group.mode !== "percent";
-                }
-                return s.type === "line" || s.type === "scatter" || s.type === "bubble";
+        if (visibleCompatibleSeries.length === 0) {
+            visibleYUnitMode = "none";
+            const regPercentGroups = registeredGroups.filter(g => g.valid && g.mode === "percent");
+            if (regPercentGroups.length > 0) {
+                axisUnitMode = "percent";
+            } else {
+                axisUnitMode = "raw";
+            }
+        } else {
+            const visiblePercentSeries = visibleCompatibleSeries.filter(s => {
+                const membership = membershipBySeriesId.get(s.id);
+                return membership?.valid && membership.mode === "percent";
+            });
+            const visibleRawSeries = visibleCompatibleSeries.filter(s => {
+                const membership = membershipBySeriesId.get(s.id);
+                return !membership || !membership.valid || membership.mode !== "percent";
             });
 
-            if (conflictingRawSeries.length > 0) {
-                yUnitMode = "invalid";
-                for (const s of conflictingRawSeries) {
+            if (visiblePercentSeries.length > 0 && visibleRawSeries.length > 0) {
+                visibleYUnitMode = "invalid";
+                axisUnitMode = "raw";
+                for (const s of visibleCompatibleSeries) {
                     invalidSeriesIds.add(s.id);
                 }
                 diagnostics.push({
                     code: "mixed-y-axis-units",
-                    message: `Percent stacked series and raw value series cannot share the same Y axis. Conflicting raw series [${conflictingRawSeries.map(s => s.name()).join(", ")}] geometry was omitted.`,
+                    message: `Percent stacked series and raw value series cannot share the same Y axis. Conflicting series geometry was omitted.`,
                     severity: "warning",
                     signature: "unit-mix:percent-raw"
                 });
+            } else if (visiblePercentSeries.length > 0) {
+                visibleYUnitMode = "percent-stack";
+                axisUnitMode = "percent";
+            } else if (hasNormalStacks) {
+                visibleYUnitMode = "normal-stack";
+                axisUnitMode = "raw";
             } else {
-                yUnitMode = "percent";
+                visibleYUnitMode = "raw";
+                axisUnitMode = "raw";
             }
-        } else if (hasNormalStacks) {
-            yUnitMode = "normal";
         }
+
+        const yUnitMode: "invalid" | "normal" | "percent" | "raw" =
+            visibleYUnitMode === "percent-stack"
+                ? "percent"
+                : visibleYUnitMode === "normal-stack"
+                  ? "normal"
+                  : visibleYUnitMode === "invalid"
+                    ? "invalid"
+                    : "raw";
 
         const layout: CartesianStackLayout = {
             bySeriesId,
@@ -568,12 +602,14 @@ export class CartesianStackEngine {
         };
 
         return {
+            axisUnitMode,
             configuration,
             diagnostics,
             invalidGroupIds,
             invalidSeriesIds,
             layout,
             visibleLayout: layout,
+            visibleYUnitMode,
             yUnitMode
         };
     }

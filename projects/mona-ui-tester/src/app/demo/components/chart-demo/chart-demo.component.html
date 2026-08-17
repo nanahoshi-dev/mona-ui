@@ -100,6 +100,20 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'range-bar' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('range-bar')">
+                Range Bar
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'range-area' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('range-area')">
+                Range Area
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('custom')">
@@ -960,6 +974,85 @@
                         <mona-area-series field="direct" name="Direct Visitors" stack="traffic" stackMode="percent" fillMode="gradient" />
                         <mona-area-series field="referral" name="Referrals" stack="traffic" stackMode="percent" fillMode="gradient" />
                         <mona-area-series field="organic" name="Organic Search" stack="traffic" stackMode="percent" fillMode="gradient" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("range-bar") {
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-muted-foreground">Range Bar Chart (Monthly Temperature Extremes Min / Max)</h3>
+                        <div class="flex items-center gap-2">
+                            <button monaButton size="small" look="secondary" (click)="randomizeRangeBarData()">Randomize Data</button>
+                        </div>
+                    </div>
+
+                    <mona-chart
+                        [data]="rangeBarData()"
+                        [animation]="animationEnabled()"
+                        xField="month"
+                        class="h-96 w-full"
+                        aria-label="Monthly Temperature Range"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [gridLines]="xGridLines()" [nice]="true" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" />
+
+                        <mona-range-bar-series
+                            fromField="low"
+                            toField="high"
+                            name="Temperature Range (°C)"
+                            color="#8b5cf6"
+                            [borderRadius]="rangeBarRadius()"
+                            [maxBarWidth]="rangeBarMaxBarWidth()"
+                            [fillOpacity]="rangeBarOpacity()" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("range-area") {
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-muted-foreground">Range Area Chart (Confidence Interval Band with Actuals)</h3>
+                        <div class="flex items-center gap-2">
+                            <button monaButton size="small" look="secondary" (click)="randomizeRangeAreaData()">Randomize Data</button>
+                        </div>
+                    </div>
+
+                    <mona-chart
+                        [data]="rangeAreaData()"
+                        [animation]="animationEnabled()"
+                        xField="month"
+                        class="h-96 w-full"
+                        aria-label="Confidence Interval Band"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [gridLines]="xGridLines()" [nice]="true" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" />
+
+                        <mona-range-area-series
+                            fromField="low"
+                            toField="high"
+                            name="Confidence Interval"
+                            color="#ec4899"
+                            [curve]="rangeAreaCurve()"
+                            [showPoints]="rangeAreaShowPoints()"
+                            [fillOpacity]="rangeAreaOpacity()" />
+
+                        <mona-line-series
+                            field="actual"
+                            name="Observed Value"
+                            color="#06b6d4"
+                            [strokeWidth]="3"
+                            [showPoints]="true" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />
