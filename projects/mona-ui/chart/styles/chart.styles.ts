@@ -13,7 +13,7 @@ export const chartBaseThemeVariants = cva(
 );
 
 export const chartAxisLabelBaseThemeVariants = cva(
-    "absolute text-xs text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+    "absolute text-xs text-muted-foreground select-none pointer-events-none whitespace-nowrap transition-[left,top,opacity] motion-reduce:transition-none duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
 );
 
 export const chartLegendBaseThemeVariants = cva("flex flex-wrap items-center gap-4 text-xs select-none", {
