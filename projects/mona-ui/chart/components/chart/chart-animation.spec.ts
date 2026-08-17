@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { MonaBarSeriesComponent } from "../bar-series/bar-series.component";
 import { MonaLineSeriesComponent } from "../line-series/line-series.component";
 import { MonaChartComponent } from "./chart.component";
+import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartAnimationInput } from "../../models/chart-animation.models";
 
 @Component({
@@ -79,5 +80,21 @@ describe("MonaChartComponent Animation Integration", () => {
         fixture.detectChanges();
 
         expect(chart.isAnimating()).toBe(false);
+    });
+
+    it("should trigger animation when only one series is present", () => {
+        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        expect(chart).toBeTruthy();
+
+        // Trigger data update with animation enabled
+        host.animation.set(true);
+        host.data.set([
+            { category: "A", id: "k1", val1: 80, val2: 90 },
+            { category: "B", id: "k2", val1: 100, val2: 110 }
+        ]);
+        fixture.detectChanges();
+        chart.recomputeScene(ChartInvalidationReason.Data);
+
+        expect(chart.isAnimating()).toBe(true);
     });
 });

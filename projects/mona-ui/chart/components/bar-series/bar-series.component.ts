@@ -93,17 +93,25 @@ export class MonaBarSeriesComponent implements OnInit {
         });
 
         effect(() => {
-            this.borderRadius();
-            this.color();
             this.data();
             this.field();
-            this.fillOpacity();
             this.keyField();
+            this.xField();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+        });
+
+        effect(() => {
+            this.borderRadius();
+            this.fillOpacity();
             this.maxBarWidth();
             this.name();
-            this.userClass();
-            this.xField();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+        });
+
+        effect(() => {
+            this.color();
+            this.userClass();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
         });
     }
 

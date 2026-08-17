@@ -106,19 +106,27 @@ export class MonaLineSeriesComponent implements OnInit {
         });
 
         effect(() => {
-            this.color();
-            this.connectNulls();
-            this.curve();
             this.data();
             this.field();
             this.keyField();
+            this.xField();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+        });
+
+        effect(() => {
+            this.connectNulls();
+            this.curve();
             this.name();
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
-            this.userClass();
-            this.xField();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+        });
+
+        effect(() => {
+            this.color();
+            this.userClass();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
         });
     }
 

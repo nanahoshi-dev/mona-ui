@@ -148,8 +148,8 @@ export class RadarSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<
         const fromOpacity = previous ? 1 : 0;
         const toOpacity = target ? 1 : 0;
         const baseScene = target ?? previous;
-        const fromMaxRadius = previous?.maxRenderedRadius ?? target?.maxRenderedRadius ?? 0;
-        const toMaxRadius = target?.maxRenderedRadius ?? previous?.maxRenderedRadius ?? 0;
+        const fromMaxRadius = previous ? previous.maxRenderedRadius : 0;
+        const toMaxRadius = target ? target.maxRenderedRadius : 0;
 
         return {
             adapterType: "radar",

@@ -79,43 +79,41 @@
 
         <!-- DOM Sector Slice Labels and Donut Center Overlay -->
         @if (polarSectorScene(); as pol) {
-            @if (!isStructuralAnimation()) {
-                @for (seriesScene of pol.series; track seriesScene.id) {
-                    @for (slice of seriesScene.slices; track slice.sliceId) {
-                        @if (shouldShowSliceLabel(slice)) {
-                            @if (isOutsideLabel() && slice.label) {
-                                <div
-                                    aria-hidden="true"
-                                    class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
-                                    [monaChartLabelMeasure]="'sector:' + slice.sliceId"
-                                    [style.left.px]="slice.label.position.x"
-                                    [style.top.px]="slice.label.position.y"
-                                    [style.transform]="slice.label.side === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
-                                    @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
-                                        <ng-container
-                                            [ngTemplateOutlet]="labelTemplate.templateRef"
-                                            [ngTemplateOutletContext]="sliceLabelContext(slice)" />
-                                    } @else {
-                                        {{ sliceLabelText(slice) }}
-                                    }
-                                </div>
-                            } @else {
-                                <div
-                                    aria-hidden="true"
-                                    class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center"
-                                    [style.left.px]="slice.insideLabelPoint.x"
-                                    [style.top.px]="slice.insideLabelPoint.y"
-                                    [style.transform]="'translate(-50%, -50%)'"
-                                    [style.color]="sliceContrastColor(slice)">
-                                    @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
-                                        <ng-container
-                                            [ngTemplateOutlet]="labelTemplate.templateRef"
-                                            [ngTemplateOutletContext]="sliceLabelContext(slice)" />
-                                    } @else {
-                                        {{ sliceLabelText(slice) }}
-                                    }
-                                </div>
-                            }
+            @for (seriesScene of pol.series; track seriesScene.id) {
+                @for (slice of seriesScene.slices; track slice.sliceId) {
+                    @if (shouldShowSliceLabel(slice)) {
+                        @if (isOutsideLabel() && slice.label) {
+                            <div
+                                aria-hidden="true"
+                                class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
+                                [monaChartLabelMeasure]="'sector:' + slice.sliceId"
+                                [style.left.px]="slice.label.position.x"
+                                [style.top.px]="slice.label.position.y"
+                                [style.transform]="slice.label.side === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
+                                @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="labelTemplate.templateRef"
+                                        [ngTemplateOutletContext]="sliceLabelContext(slice)" />
+                                } @else {
+                                    {{ sliceLabelText(slice) }}
+                                }
+                            </div>
+                        } @else {
+                            <div
+                                aria-hidden="true"
+                                class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center"
+                                [style.left.px]="slice.insideLabelPoint.x"
+                                [style.top.px]="slice.insideLabelPoint.y"
+                                [style.transform]="'translate(-50%, -50%)'"
+                                [style.color]="sliceContrastColor(slice)">
+                                @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="labelTemplate.templateRef"
+                                        [ngTemplateOutletContext]="sliceLabelContext(slice)" />
+                                } @else {
+                                    {{ sliceLabelText(slice) }}
+                                }
+                            </div>
                         }
                     }
                 }
