@@ -56,6 +56,7 @@ export interface SceneRangeBar {
     readonly formattedFrom?: string;
     readonly formattedTo?: string;
     readonly fromValue: number;
+    readonly fromY: number;
     readonly height: number;
     readonly highValue: number;
     readonly index: number;
@@ -63,6 +64,7 @@ export interface SceneRangeBar {
     readonly radius: number;
     readonly renderOpacity?: number;
     readonly toValue: number;
+    readonly toY: number;
     readonly width: number;
     readonly x: number;
     readonly xValue: unknown;
@@ -85,6 +87,8 @@ export interface SceneHitTarget {
     borderRadius?: number;
     bounds?: ChartRect;
     category?: unknown;
+    categoryX?: string;
+    categoryY?: string;
     color?: string;
     cornerRadii?: ChartCornerRadii;
     datum: unknown;
@@ -96,6 +100,8 @@ export interface SceneHitTarget {
     formattedStackTotal?: string;
     formattedTo?: string;
     formattedValue?: string;
+    formattedXValue?: string;
+    formattedYCategory?: string;
     fromValue?: number;
     highPoint?: ChartPoint;
     highValue?: number;
@@ -108,6 +114,7 @@ export interface SceneHitTarget {
     radius?: number;
     range?: SceneRangeHitValue;
     rangeBand?: SceneRangeBandGeometry;
+    rawValue?: unknown;
     renderOrder?: number;
     seriesId: string;
     seriesName: string;
@@ -125,8 +132,10 @@ export interface SceneHitTarget {
     valueKind?: ChartPointValueKind;
     visualBounds?: ChartRect;
     visualRadius?: number;
+    xIndex?: number;
     xKey: ChartInteractionXKey;
     xValue: unknown;
+    yIndex?: number;
     yValue?: number;
 }
 

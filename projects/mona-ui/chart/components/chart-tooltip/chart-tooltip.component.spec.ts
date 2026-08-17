@@ -49,6 +49,7 @@ describe("MonaChartTooltipComponent", () => {
     let tooltipContextSignal = signal<ChartTooltipTemplateContext | null>(null);
     let sceneSignal = signal<ChartScene | null>({
         axes: [],
+        cartesianKind: "xy",
         coordinateSystem: "cartesian",
         hasRenderableData: true,
         height: 400,
@@ -79,7 +80,8 @@ describe("MonaChartTooltipComponent", () => {
         tooltipContextSignal = signal<ChartTooltipTemplateContext | null>(null);
         sceneSignal = signal<ChartScene | null>({
             axes: [],
-            coordinateSystem: "cartesian",
+            cartesianKind: "xy",
+        coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 400,
             hitTargets: [],

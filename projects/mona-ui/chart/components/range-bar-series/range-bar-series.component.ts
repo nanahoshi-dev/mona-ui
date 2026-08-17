@@ -46,7 +46,6 @@ export class MonaRangeBarSeriesComponent implements OnInit {
 
     /**
      * @description Property key or accessor extracting the starting range value for each bar.
-     * @default ""
      */
     public readonly fromField = input.required<ChartField>();
 
@@ -70,7 +69,6 @@ export class MonaRangeBarSeriesComponent implements OnInit {
 
     /**
      * @description Property key or accessor extracting the ending range value for each bar.
-     * @default ""
      */
     public readonly toField = input.required<ChartField>();
 

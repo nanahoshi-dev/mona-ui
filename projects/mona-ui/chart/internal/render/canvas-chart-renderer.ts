@@ -2,6 +2,7 @@ import type { ChartInteractionState } from "../interaction/chart-interaction-sta
 import type { ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianChartRenderer } from "./cartesian-chart-renderer";
+import { HeatmapChartRenderer } from "./heatmap-chart-renderer";
 import { PolarChartRenderer } from "./polar-chart-renderer";
 
 export class CanvasChartRenderer {
@@ -27,7 +28,14 @@ export class CanvasChartRenderer {
     ): void {
         switch (scene.coordinateSystem) {
             case "cartesian":
-                CartesianChartRenderer.render(context, scene, interactionState, styleResolver);
+                if (scene.cartesianKind === "xy") {
+                    CartesianChartRenderer.render(context, scene, interactionState, styleResolver);
+                    return;
+                }
+                if (scene.cartesianKind === "heatmap") {
+                    HeatmapChartRenderer.render(context, scene, interactionState, styleResolver);
+                    return;
+                }
                 return;
             case "polar":
                 PolarChartRenderer.render(context, scene, interactionState, styleResolver);

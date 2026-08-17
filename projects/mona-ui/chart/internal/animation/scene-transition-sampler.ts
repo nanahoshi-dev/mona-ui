@@ -1,9 +1,12 @@
 import type {
     CartesianChartScene,
+    CartesianHeatmapChartScene,
+    CartesianXYChartScene,
     ChartScene,
     PolarAxisChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
+import type { SceneHeatmapCell } from "../../models/chart-heatmap.models";
 import type {
     ChartBarSeriesScene,
     ChartLineSeriesScene,
@@ -54,19 +57,36 @@ export class SceneTransitionSampler {
 
         // Morph mode
         if (toScene.coordinateSystem === "cartesian") {
-            const sampledCartesian = this.#sampleCartesianScene(
-                toScene as CartesianChartScene,
-                seriesPlans,
-                plan.axisPlan as CartesianAxisTransitionPlan | null | undefined,
-                progress
-            );
-            return {
-                fromScene,
-                mode: "morph",
-                progress,
-                scene: sampledCartesian,
-                toScene
-            };
+            if (toScene.cartesianKind === "xy") {
+                const sampledCartesian = this.#sampleCartesianXYScene(
+                    toScene as CartesianXYChartScene,
+                    seriesPlans,
+                    plan.axisPlan as CartesianAxisTransitionPlan | null | undefined,
+                    progress
+                );
+                return {
+                    fromScene,
+                    mode: "morph",
+                    progress,
+                    scene: sampledCartesian,
+                    toScene
+                };
+            }
+            if (toScene.cartesianKind === "heatmap") {
+                const sampledHeatmap = this.#sampleCartesianHeatmapScene(
+                    toScene as CartesianHeatmapChartScene,
+                    seriesPlans,
+                    plan.axisPlan as CartesianAxisTransitionPlan | null | undefined,
+                    progress
+                );
+                return {
+                    fromScene,
+                    mode: "morph",
+                    progress,
+                    scene: sampledHeatmap,
+                    toScene
+                };
+            }
         }
 
         if (toScene.coordinateSystem === "polar" && toScene.polarKind === "sector") {
@@ -108,12 +128,12 @@ export class SceneTransitionSampler {
         };
     }
 
-    static #sampleCartesianScene(
-        toScene: CartesianChartScene,
+    static #sampleCartesianXYScene(
+        toScene: CartesianXYChartScene,
         seriesPlans: ChartTransitionPlan["seriesPlans"],
         axisPlan: CartesianAxisTransitionPlan | null | undefined,
         progress: number
-    ): CartesianChartScene {
+    ): CartesianXYChartScene {
         const sampledSeries = seriesPlans
             .map(p => p.sample(progress))
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -333,6 +353,7 @@ export class SceneTransitionSampler {
         return {
             axes,
             barHitTargets: sampledBarHitTargets,
+            cartesianKind: "xy",
             coordinateSystem: "cartesian",
             hasRenderableData: toScene.hasRenderableData,
             height: toScene.height,
@@ -551,6 +572,50 @@ export class SceneTransitionSampler {
             radialAxis: sampledAxes.radialAxis,
             series: sampledSeries,
             width: toScene.width
+        };
+    }
+
+    static #sampleCartesianHeatmapScene(
+        toScene: CartesianHeatmapChartScene,
+        seriesPlans: ChartTransitionPlan["seriesPlans"],
+        axisPlan: CartesianAxisTransitionPlan | null | undefined,
+        progress: number
+    ): CartesianHeatmapChartScene {
+        const sampledSeries = seriesPlans
+            .map(p => p.sample(progress))
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .filter((s): s is any => s !== null);
+
+        const sampledCellsByKey = new Map<string, SceneHeatmapCell>();
+        for (const s of sampledSeries) {
+            if (s && "cells" in s) {
+                for (const c of s.cells) {
+                    sampledCellsByKey.set(c.animationKey, c);
+                }
+            }
+        }
+
+        const sampledHitTargets: SceneHitTarget[] = toScene.hitTargets.map(target => {
+            const cell = target.animationKey ? sampledCellsByKey.get(target.animationKey) : undefined;
+            if (!cell) {
+                return target;
+            }
+            return {
+                ...target,
+                bounds: { height: cell.height, width: cell.width, x: cell.x, y: cell.y },
+                color: cell.backgroundColor,
+                point: { x: cell.x + cell.width / 2, y: cell.y + cell.height / 2 },
+                visualBounds: { height: cell.height, width: cell.width, x: cell.x, y: cell.y }
+            };
+        });
+
+        const sampledAxes = axisPlan ? axisPlan.sample(progress) : toScene.axes;
+
+        return {
+            ...toScene,
+            axes: sampledAxes,
+            hitTargets: sampledHitTargets,
+            series: sampledSeries
         };
     }
 }

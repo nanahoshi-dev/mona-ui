@@ -11,6 +11,7 @@ interface RangeBarMarkState {
     readonly formattedFrom?: string;
     readonly formattedTo?: string;
     readonly fromValue: number;
+    readonly fromY: number;
     readonly height: number;
     readonly highValue: number;
     readonly index: number;
@@ -18,6 +19,7 @@ interface RangeBarMarkState {
     readonly opacity: number;
     readonly radius: number;
     readonly toValue: number;
+    readonly toY: number;
     readonly width: number;
     readonly x: number;
     readonly xValue?: unknown;
@@ -32,6 +34,8 @@ interface RangeBarMarkPlan {
 }
 
 function toRangeBarState(bar: SceneRangeBar, opacity = 1): RangeBarMarkState {
+    const fromY = bar.fromY ?? bar.y;
+    const toY = bar.toY ?? (bar.y + bar.height);
     return {
         animationKey: bar.animationKey,
         cornerRadii: bar.cornerRadii,
@@ -39,6 +43,7 @@ function toRangeBarState(bar: SceneRangeBar, opacity = 1): RangeBarMarkState {
         formattedFrom: bar.formattedFrom,
         formattedTo: bar.formattedTo,
         fromValue: bar.fromValue,
+        fromY,
         height: bar.height,
         highValue: bar.highValue,
         index: bar.index,
@@ -46,6 +51,7 @@ function toRangeBarState(bar: SceneRangeBar, opacity = 1): RangeBarMarkState {
         opacity,
         radius: bar.radius ?? 4,
         toValue: bar.toValue,
+        toY,
         width: bar.width,
         x: bar.x,
         xValue: bar.xValue,
@@ -54,7 +60,9 @@ function toRangeBarState(bar: SceneRangeBar, opacity = 1): RangeBarMarkState {
 }
 
 function createCollapsedRangeBarState(bar: SceneRangeBar, opacity = 0): RangeBarMarkState {
-    const midY = bar.y + bar.height / 2;
+    const fromY = bar.fromY ?? bar.y;
+    const toY = bar.toY ?? (bar.y + bar.height);
+    const midY = (fromY + toY) / 2;
     return {
         animationKey: bar.animationKey,
         cornerRadii: bar.cornerRadii,
@@ -62,6 +70,7 @@ function createCollapsedRangeBarState(bar: SceneRangeBar, opacity = 0): RangeBar
         formattedFrom: bar.formattedFrom,
         formattedTo: bar.formattedTo,
         fromValue: bar.fromValue,
+        fromY: midY,
         height: 0,
         highValue: bar.highValue,
         index: bar.index,
@@ -69,6 +78,7 @@ function createCollapsedRangeBarState(bar: SceneRangeBar, opacity = 0): RangeBar
         opacity,
         radius: bar.radius ?? 4,
         toValue: bar.toValue,
+        toY: midY,
         width: bar.width,
         x: bar.x,
         xValue: bar.xValue,
@@ -85,6 +95,7 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
             formattedFrom: plan.from.formattedFrom,
             formattedTo: plan.from.formattedTo,
             fromValue: plan.from.fromValue,
+            fromY: plan.from.fromY,
             height: plan.from.height,
             highValue: plan.from.highValue,
             index: plan.from.index,
@@ -92,6 +103,7 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
             radius: plan.from.radius,
             renderOpacity: plan.from.opacity,
             toValue: plan.from.toValue,
+            toY: plan.from.toY,
             width: plan.from.width,
             x: plan.from.x,
             xValue: plan.from.xValue,
@@ -106,6 +118,7 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
             formattedFrom: plan.to.formattedFrom,
             formattedTo: plan.to.formattedTo,
             fromValue: plan.to.fromValue,
+            fromY: plan.to.fromY,
             height: plan.to.height,
             highValue: plan.to.highValue,
             index: plan.to.index,
@@ -113,6 +126,7 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
             radius: plan.to.radius,
             renderOpacity: plan.to.opacity,
             toValue: plan.to.toValue,
+            toY: plan.to.toY,
             width: plan.to.width,
             x: plan.to.x,
             xValue: plan.to.xValue,
@@ -121,9 +135,11 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
     }
 
     const x = lerp(plan.from.x, plan.to.x, progress);
-    const y = lerp(plan.from.y, plan.to.y, progress);
+    const fromY = lerp(plan.from.fromY, plan.to.fromY, progress);
+    const toY = lerp(plan.from.toY, plan.to.toY, progress);
+    const y = Math.min(fromY, toY);
+    const height = Math.abs(fromY - toY);
     const width = lerp(plan.from.width, plan.to.width, progress);
-    const height = lerp(plan.from.height, plan.to.height, progress);
     const fromValue = lerp(plan.from.fromValue, plan.to.fromValue, progress);
     const toValue = lerp(plan.from.toValue, plan.to.toValue, progress);
     const lowValue = Math.min(fromValue, toValue);
@@ -139,6 +155,7 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
         formattedFrom: plan.to.formattedFrom ?? plan.from.formattedFrom,
         formattedTo: plan.to.formattedTo ?? plan.from.formattedTo,
         fromValue,
+        fromY,
         height,
         highValue,
         index: plan.to.index,
@@ -146,6 +163,7 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
         radius,
         renderOpacity,
         toValue,
+        toY,
         width,
         x,
         xValue: plan.to.xValue ?? plan.from.xValue,

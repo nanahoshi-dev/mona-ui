@@ -1,6 +1,7 @@
-import type { ChartScene } from "../scene/chart-scene";
+import type { CartesianHeatmapChartScene, ChartScene } from "../scene/chart-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { clamp } from "../utils/number-utils";
+import { HeatmapKeyboardNavigation } from "./heatmap-keyboard-navigation";
 
 export function getHitTargetKey(hit: SceneHitTarget): string {
     return hit.animationKey ?? hit.sliceId ?? `${hit.seriesId}:${hit.index}`;
@@ -21,6 +22,22 @@ export class ChartKeyboardNavigation {
         activeSeriesId: string | null,
         activeHitKey?: string | null
     ): KeyboardNavigationResult | null {
+        if (scene.coordinateSystem === "cartesian" && scene.cartesianKind === "heatmap") {
+            const currentHit = activeHitKey ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null : null;
+            const nextHit = HeatmapKeyboardNavigation.handleKey(event, scene as CartesianHeatmapChartScene, currentHit);
+            if (!nextHit) {
+                return null;
+            }
+            event.preventDefault();
+            const bucketIdx = scene.interactionBuckets?.findIndex(b => b.xKey === nextHit.xKey) ?? 0;
+            return {
+                bucketIndex: Math.max(0, bucketIdx),
+                hitKey: getHitTargetKey(nextHit),
+                hitTarget: nextHit,
+                seriesId: nextHit.seriesId
+            };
+        }
+
         const buckets = scene.interactionBuckets;
         if (!buckets || buckets.length === 0) {
             return null;

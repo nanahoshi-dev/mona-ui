@@ -229,7 +229,7 @@ Renders continuous Cartesian vertical range bands/areas bounded between lower an
 | :--- | :--- | :--- | :--- |
 | `color` | `string` | `undefined` | Explicit fill color for the range band and point markers. |
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across non-finite or missing data points. |
-| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm applied to boundary paths (`"linear"`, `"smooth"`, `"step"`, `"monotone-x"`). |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm applied to boundary paths (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`). |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
 | `fillOpacity` | `number` | `0.18` | Fill opacity for the range area band (0 to 1). |
 | `fromField` | `ChartField` | (required) | Property key or accessor extracting the starting boundary numeric value. |

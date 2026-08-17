@@ -1,6 +1,10 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
-import type { ChartAxisRegistration, ChartCartesianSeriesRegistration } from "../context/chart-registration-context";
+import type {
+    ChartCartesianSeriesRegistration,
+    ChartXAxisRegistration,
+    ChartYAxisRegistration
+} from "../context/chart-registration-context";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianLayoutEngine } from "./cartesian-layout-engine";
 import type { ChartField } from "../../models/chart.models";
@@ -94,15 +98,15 @@ function createMockBubble(
     };
 }
 
-function createMockAxis(options?: Partial<{
+function createMockXAxis(options?: Partial<{
     max: number | Date;
     min: number | Date;
     nice: boolean;
-    position: "bottom" | "left" | "right" | "top";
+    position: "bottom" | "top";
     tickCount: number;
     title: string;
     type: "auto" | "category" | "linear" | "time" | "utc";
-}>): ChartAxisRegistration {
+}>): ChartXAxisRegistration {
     return {
         axisLine: signal(true),
         formatter: signal(undefined),
@@ -112,6 +116,31 @@ function createMockAxis(options?: Partial<{
         min: signal(options?.min),
         nice: signal(options?.nice ?? true),
         position: signal(options?.position ?? "bottom"),
+        tickCount: signal(options?.tickCount),
+        title: signal(options?.title ?? ""),
+        type: signal(options?.type ?? "auto"),
+        visible: signal(true)
+    };
+}
+
+function createMockYAxis(options?: Partial<{
+    max: number;
+    min: number;
+    nice: boolean;
+    position: "left" | "right";
+    tickCount: number;
+    title: string;
+    type: "auto" | "category" | "linear";
+}>): ChartYAxisRegistration {
+    return {
+        axisLine: signal(true),
+        formatter: signal(undefined),
+        gridLines: signal(true),
+        labelTemplate: signal(undefined),
+        max: signal(options?.max),
+        min: signal(options?.min),
+        nice: signal(options?.nice ?? true),
+        position: signal(options?.position ?? "left"),
         tickCount: signal(options?.tickCount),
         title: signal(options?.title ?? ""),
         type: signal(options?.type ?? "auto"),
@@ -200,7 +229,7 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "x",
             series: [s1],
             styleResolver,
-            xAxis: createMockAxis({ type: "linear" })
+            xAxis: createMockXAxis({ type: "linear" })
         });
 
         const lineScene = scene.series[0];
@@ -229,7 +258,7 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "date",
             series: [s1],
             styleResolver,
-            xAxis: createMockAxis({ type: "time" })
+            xAxis: createMockXAxis({ type: "time" })
         });
 
         const lineScene = scene.series[0];
@@ -253,7 +282,7 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "date",
             series: [barSeries, lineSeries],
             styleResolver,
-            xAxis: createMockAxis({ type: "time" })
+            xAxis: createMockXAxis({ type: "time" })
         });
 
         expect(scene.series.length).toBe(1);
@@ -295,8 +324,8 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "x",
             series: [s1],
             styleResolver,
-            xAxis: createMockAxis({ position: "bottom" }),
-            yAxis: createMockAxis({ position: "left" })
+            xAxis: createMockXAxis({ position: "bottom" }),
+            yAxis: createMockYAxis({ position: "left" })
         });
 
         const invertedScene = CartesianLayoutEngine.computeScene({
@@ -306,8 +335,8 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "x",
             series: [s1],
             styleResolver,
-            xAxis: createMockAxis({ position: "top" }),
-            yAxis: createMockAxis({ position: "right" })
+            xAxis: createMockXAxis({ position: "top" }),
+            yAxis: createMockYAxis({ position: "right" })
         });
 
         // Top X axis moves plotRect.y down
@@ -329,11 +358,11 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "x",
             series: [s1],
             styleResolver,
-            xAxis: createMockAxis({ position: "bottom" }),
-            yAxis: createMockAxis({ position: "left" })
+            xAxis: createMockXAxis({ position: "bottom" }),
+            yAxis: createMockYAxis({ position: "left" })
         });
 
-        const withTitleAxis = createMockAxis({ position: "bottom" });
+        const withTitleAxis = createMockXAxis({ position: "bottom" });
         (withTitleAxis.title as any).set("Monthly Trend");
 
         const withTitleScene = CartesianLayoutEngine.computeScene({
@@ -344,7 +373,7 @@ describe("CartesianLayoutEngine", () => {
             series: [s1],
             styleResolver,
             xAxis: withTitleAxis,
-            yAxis: createMockAxis({ position: "left" })
+            yAxis: createMockYAxis({ position: "left" })
         });
 
         // With X axis title, bottom padding increases from 32 to 44, making plot height smaller
@@ -368,7 +397,7 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "x",
             series: [scatter, line, bubble],
             styleResolver,
-            xAxis: createMockAxis({ type: "linear" })
+            xAxis: createMockXAxis({ type: "linear" })
         });
 
         expect(scene.series.length).toBe(3);
@@ -395,7 +424,7 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "x",
             series: [scatter],
             styleResolver,
-            xAxis: createMockAxis({ type: "linear" })
+            xAxis: createMockXAxis({ type: "linear" })
         });
 
         expect(scene.pointSpatialIndex).toBeDefined();
@@ -419,7 +448,7 @@ describe("CartesianLayoutEngine", () => {
             rootXField: "x",
             series: [bubble],
             styleResolver,
-            xAxis: createMockAxis({ type: "linear" })
+            xAxis: createMockXAxis({ type: "linear" })
         });
 
         const bubbleScene = scene.series[0];
@@ -445,7 +474,7 @@ describe("CartesianLayoutEngine", () => {
                 rootXField: "month",
                 series: [s1, s2],
                 styleResolver,
-                xAxis: createMockAxis({ type: "category" })
+                xAxis: createMockXAxis({ type: "category" })
             });
 
             const s2JanHit = scene.hitTargets.find((h: SceneHitTarget) => h.seriesId === "s2" && h.xKey === "Jan");
@@ -472,8 +501,8 @@ describe("CartesianLayoutEngine", () => {
                 rootXField: "x",
                 series: [a1, a2],
                 styleResolver,
-                xAxis: createMockAxis({ type: "linear" }),
-                yAxis: createMockAxis({ max: 100, min: 0 })
+                xAxis: createMockXAxis({ type: "linear" }),
+                yAxis: createMockYAxis({ max: 100, min: 0 })
             });
 
             const a2Scene = scene.series.find((s: ChartSeriesScene) => s.id === "a2");
@@ -503,7 +532,7 @@ describe("CartesianLayoutEngine", () => {
                 rootXField: "month",
                 series: [s1, s2],
                 styleResolver,
-                xAxis: createMockAxis({ type: "category" })
+                xAxis: createMockXAxis({ type: "category" })
             });
 
             const s1Hit = scene.hitTargets.find((h: SceneHitTarget) => h.seriesId === "s1");
@@ -526,7 +555,7 @@ describe("CartesianLayoutEngine", () => {
                 rootXField: "month",
                 series: [s1],
                 styleResolver,
-                xAxis: createMockAxis({ type: "category" })
+                xAxis: createMockXAxis({ type: "category" })
             });
 
             expect(scene.stackConfiguration).toBeDefined();

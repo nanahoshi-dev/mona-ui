@@ -2,10 +2,12 @@ import { formatRgb, parse, wcagContrast } from "culori";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {
     ChartCartesianSeriesRegistration,
+    ChartHeatmapSeriesRegistration,
     ChartPolarSeriesRegistration,
     ChartRadialSeriesRegistration,
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
+import type { ChartHeatmapSeriesStyle } from "../../models/chart-heatmap.models";
 import { resolveValue } from "../data/chart-value-resolver";
 import type { ChartPolarSeriesStyle } from "../scene/polar-scene";
 import { isFiniteNumber } from "../utils/number-utils";
@@ -560,5 +562,90 @@ export class ChartStyleResolver {
             // Fallback
         }
         return "#ffffff";
+    }
+
+    public resolveHeatmapSeriesStyle(
+        series: ChartHeatmapSeriesRegistration,
+        seriesIndex: number = 0
+    ): ChartHeatmapSeriesStyle {
+        const explicitColor = series.color();
+        const explicitStrokeColor = series.strokeColor();
+        const explicitStrokeWidth = series.strokeWidth();
+        const explicitBorderRadius = series.borderRadius();
+        const explicitFillOpacity = series.fillOpacity();
+
+        let cssLowColor = this.resolveCssVariable("--mona-chart-heatmap-low-color");
+        let cssMidColor = this.resolveCssVariable("--mona-chart-heatmap-mid-color");
+        let cssHighColor = this.resolveCssVariable("--mona-chart-heatmap-high-color");
+        let cssBorderColor = this.resolveCssVariable("--mona-chart-heatmap-cell-border-color");
+
+        let cssStrokeWidth: number | undefined;
+        let cssBorderRadius: number | undefined;
+        let cssFillOpacity: number | undefined;
+
+        if (typeof window !== "undefined" && this.#rootElement) {
+            try {
+                const computed = window.getComputedStyle(this.#rootElement);
+                const sw = computed.getPropertyValue("--mona-chart-heatmap-cell-border-width");
+                if (sw) {
+                    const parsed = parseFloat(sw);
+                    if (isFiniteNumber(parsed)) cssStrokeWidth = parsed;
+                }
+                const br = computed.getPropertyValue("--mona-chart-heatmap-cell-radius");
+                if (br) {
+                    const parsed = parseFloat(br);
+                    if (isFiniteNumber(parsed)) cssBorderRadius = parsed;
+                }
+                const fo = computed.getPropertyValue("--mona-chart-heatmap-fill-opacity");
+                if (fo) {
+                    const parsed = parseFloat(fo);
+                    if (isFiniteNumber(parsed)) cssFillOpacity = parsed;
+                }
+            } catch {
+                // Ignore style resolution errors
+            }
+        }
+
+        const resolvedBaseColor =
+            (explicitColor ? this.resolveCssVariable(explicitColor) : "") ||
+            cssHighColor ||
+            this.resolvePaletteColor(seriesIndex);
+
+        const resolvedStrokeColor =
+            (explicitStrokeColor ? this.resolveCssVariable(explicitStrokeColor) : "") ||
+            cssBorderColor ||
+            "";
+
+        const resolvedStrokeWidth =
+            explicitStrokeWidth !== undefined
+                ? explicitStrokeWidth
+                : cssStrokeWidth !== undefined
+                    ? cssStrokeWidth
+                    : 0;
+
+        const resolvedBorderRadius =
+            explicitBorderRadius !== undefined
+                ? explicitBorderRadius
+                : cssBorderRadius !== undefined
+                    ? cssBorderRadius
+                    : 2;
+
+        const resolvedFillOpacity =
+            explicitFillOpacity !== undefined
+                ? explicitFillOpacity
+                : cssFillOpacity !== undefined
+                    ? cssFillOpacity
+                    : 1;
+
+        return {
+            baseColor: resolvedBaseColor,
+            borderRadius: Math.max(0, resolvedBorderRadius),
+            fillOpacity: Math.max(0, Math.min(1, resolvedFillOpacity)),
+            highColor: cssHighColor || undefined,
+            lowColor: cssLowColor || undefined,
+            midColor: cssMidColor || undefined,
+            strokeColor: resolvedStrokeColor,
+            strokeWidth: Math.max(0, resolvedStrokeWidth)
+        };
     }
 }

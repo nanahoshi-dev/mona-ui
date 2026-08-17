@@ -4,12 +4,15 @@ import type { ChartStackMode } from "./chart-stack.models";
 
 export interface ChartPointEvent<T = unknown> {
     category?: unknown;
+    categoryX?: string;
+    categoryY?: string;
     dataIndex: number;
     datum: T;
     formattedFrom?: string;
     formattedTo?: string;
     fromValue?: number;
     percentage?: number;
+    rawValue?: unknown;
     seriesId: string;
     seriesName: string;
     seriesType: ChartSeriesType;
@@ -30,12 +33,15 @@ export interface ChartPointEvent<T = unknown> {
 
 export interface ChartPointFocusEvent<T = unknown> {
     category?: unknown;
+    categoryX?: string;
+    categoryY?: string;
     dataIndex: number;
     datum: T;
     formattedFrom?: string;
     formattedTo?: string;
     fromValue?: number;
     percentage?: number;
+    rawValue?: unknown;
     seriesId: string;
     seriesName: string;
     seriesType: ChartSeriesType;

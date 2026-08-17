@@ -10,7 +10,23 @@
                 [ngTemplateOutlet]="template.templateRef"
                 [ngTemplateOutletContext]="context" />
         } @else {
-            @if (context.point.seriesType === "pie" || context.point.seriesType === "donut") {
+            @if (context.point.seriesType === "heatmap") {
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span
+                        class="inline-block h-2 w-2 rounded-full flex-shrink-0"
+                        [style.background-color]="context.point.color"></span>
+                    <span class="font-semibold text-foreground">{{ context.point.seriesName }}</span>
+                </div>
+                <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                    <div>
+                        <span class="font-medium text-foreground">{{ context.point.formattedX }}</span>,
+                        <span class="font-medium text-foreground">{{ context.point.formattedYCategory || context.point.categoryY }}</span>
+                    </div>
+                    <div>
+                        Value: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                    </div>
+                </div>
+            } @else if (context.point.seriesType === "pie" || context.point.seriesType === "donut") {
                 <div class="flex items-center gap-1.5 mb-1">
                     <span
                         class="inline-block h-2 w-2 rounded-full flex-shrink-0"

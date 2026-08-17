@@ -1,12 +1,17 @@
 import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartCoordinateSystem, ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
+import type {
+    ChartHeatmapCategory,
+    ChartHeatmapColorScaleScene,
+    ChartHeatmapSeriesScene,
+    HeatmapCellIndex
+} from "../../models/chart-heatmap.models";
 import type { ChartAxisScene, ChartSeriesScene } from "./cartesian-scene";
 import type { ChartAngularAxisScene, ChartRadialAxisScene, ChartRadialSeriesScene } from "./polar-axis-scene";
 import type { ChartSectorSeriesScene } from "./polar-scene";
 import type { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
 import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "./scene-geometry";
-
 import type { ChartStackMode } from "../../models/chart-stack.models";
 
 export interface CartesianStackSceneConfig {
@@ -27,10 +32,17 @@ export interface ChartSceneBase {
     width: number;
 }
 
-export interface CartesianChartScene extends ChartSceneBase {
+export type ChartCartesianKind = "xy" | "heatmap";
+
+export interface CartesianSceneBase extends ChartSceneBase {
     axes: readonly ChartAxisScene[];
-    barHitTargets?: readonly SceneHitTarget[];
+    cartesianKind: ChartCartesianKind;
     coordinateSystem: "cartesian";
+}
+
+export interface CartesianXYChartScene extends CartesianSceneBase {
+    barHitTargets?: readonly SceneHitTarget[];
+    cartesianKind: "xy";
     interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
     markerSpatialIndex?: CartesianPointSpatialIndex;
     pointSpatialIndex?: CartesianPointSpatialIndex;
@@ -40,6 +52,18 @@ export interface CartesianChartScene extends ChartSceneBase {
     xAxisType?: ChartXAxisType;
     xTimeSpanMs?: number;
 }
+
+export interface CartesianHeatmapChartScene extends CartesianSceneBase {
+    cartesianKind: "heatmap";
+    cellIndex: HeatmapCellIndex;
+    colorScale: ChartHeatmapColorScaleScene;
+    gridSignature: string;
+    series: readonly ChartHeatmapSeriesScene[];
+    xCategories: readonly ChartHeatmapCategory[];
+    yCategories: readonly ChartHeatmapCategory[];
+}
+
+export type CartesianChartScene = CartesianXYChartScene | CartesianHeatmapChartScene;
 
 export interface PolarSceneBase extends ChartSceneBase {
     center: ChartPoint;

@@ -1,8 +1,9 @@
 import type { ChartPoint } from "../../models/chart.models";
-import type { CartesianChartScene, ChartScene, PolarAxisChartScene, PolarSectorChartScene } from "../scene/chart-scene";
+import type { CartesianHeatmapChartScene, CartesianXYChartScene, ChartScene, PolarAxisChartScene, PolarSectorChartScene } from "../scene/chart-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { distance, isPointInRect } from "../utils/geometry-utils";
 import type { ChartInteractionState } from "./chart-interaction-state";
+import { HeatmapHitTester } from "./heatmap-hit-tester";
 import { PolarAxisHitTester } from "./polar-axis-hit-tester";
 import { PolarSectorHitTester } from "./polar-sector-hit-tester";
 
@@ -69,7 +70,11 @@ export class ChartHitTestEngine {
             return PolarAxisHitTester.testHit(pointer, scene as PolarAxisChartScene, shared, maxHoverDistance);
         }
 
-        const cartesianScene = scene as CartesianChartScene;
+        if (scene.coordinateSystem === "cartesian" && scene.cartesianKind === "heatmap") {
+            return HeatmapHitTester.testHit(pointer, scene as CartesianHeatmapChartScene);
+        }
+
+        const cartesianScene = scene as CartesianXYChartScene;
         const barTargets = cartesianScene.barHitTargets ?? hitTargets;
         const pointSpatialIndex = cartesianScene.pointSpatialIndex ?? cartesianScene.markerSpatialIndex;
         const candidates = pointSpatialIndex

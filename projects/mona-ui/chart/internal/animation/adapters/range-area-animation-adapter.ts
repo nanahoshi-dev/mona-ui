@@ -125,7 +125,7 @@ export class RangeAreaSeriesAnimationAdapter implements ChartSeriesAnimationAdap
                     } else if (!prevPt.defined && pt.defined) {
                         markPlans.push({
                             animationKey: key,
-                            from: createCollapsedRangeAreaPointState(prevPt, 0),
+                            from: createCollapsedRangeAreaPointState(pt, 0),
                             to: toRangeAreaPointState(pt, 1),
                             type: "enter"
                         });
