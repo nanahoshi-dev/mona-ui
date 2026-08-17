@@ -8,6 +8,8 @@ export class BrowserAnimationClock implements ChartAnimationClock {
     public cancelFrame(id: number): void {
         if (typeof cancelAnimationFrame !== "undefined") {
             cancelAnimationFrame(id);
+        } else {
+            clearTimeout(id);
         }
     }
 

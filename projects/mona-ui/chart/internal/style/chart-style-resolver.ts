@@ -252,6 +252,100 @@ export class ChartStyleResolver {
         };
     }
 
+    public resolveMarkerSeriesStyle(
+        series: ChartCartesianSeriesRegistration,
+        seriesIndex: number,
+        colorPalette: readonly string[] = DEFAULT_CHART_PALETTE_VARIABLES
+    ): {
+        color: string;
+        fillOpacity: number;
+        strokeColor: string;
+        strokeWidth: number;
+    } {
+        const rawExplicitColor = series.color();
+        const explicitColor = rawExplicitColor ? this.resolveCssVariable(rawExplicitColor) : "";
+        const explicitFillOpacity = "fillOpacity" in series ? series.fillOpacity?.() : undefined;
+        const explicitStrokeColor = "strokeColor" in series ? series.strokeColor?.() : undefined;
+        const explicitStrokeWidth = "strokeWidth" in series ? series.strokeWidth?.() : undefined;
+
+        let elementColor = "";
+        let cssFillOpacity: number | undefined;
+        let cssStrokeColor: string | undefined;
+        let cssStrokeWidth: number | undefined;
+
+        if (typeof window !== "undefined" && series.element?.nativeElement) {
+            try {
+                const nativeEl = series.element.nativeElement;
+                const computed = window.getComputedStyle(nativeEl);
+                const rootComputed = this.#rootElement ? window.getComputedStyle(this.#rootElement) : null;
+                const rootColor = rootComputed?.color ?? "";
+                const userClass = (series as { userClass?: () => string }).userClass?.() ?? "";
+                const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+
+                if (nativeEl.style?.color) {
+                    elementColor = this.resolveCssVariable(nativeEl.style.color);
+                } else if (computed.color && (hasTextClass || (rootColor !== "" && computed.color !== rootColor))) {
+                    elementColor = toCanvasColor(computed.color, this.#rootElement?.ownerDocument);
+                }
+
+                const customOpacity =
+                    computed.getPropertyValue("--mona-chart-marker-fill-opacity") ||
+                    computed.getPropertyValue("--mona-chart-fill-opacity");
+                if (customOpacity) {
+                    const parsed = parseFloat(customOpacity);
+                    if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                }
+
+                const customStroke = computed.getPropertyValue("--mona-chart-marker-stroke-color");
+                if (customStroke) {
+                    cssStrokeColor = customStroke.trim();
+                }
+
+                const customStrokeWidth = computed.getPropertyValue("--mona-chart-marker-stroke-width");
+                if (customStrokeWidth) {
+                    const parsed = parseFloat(customStrokeWidth);
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+                }
+            } catch {
+                // Ignore style resolution errors
+            }
+        }
+
+        const defaultColor = this.resolvePaletteColor(seriesIndex, colorPalette);
+        const resolvedColor = explicitColor || elementColor || defaultColor;
+
+        const defaultOpacity = series.type === "bubble" ? 0.55 : 0.9;
+        const resolvedFillOpacity =
+            explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
+                ? Math.max(0, Math.min(1, explicitFillOpacity))
+                : (cssFillOpacity ?? defaultOpacity);
+
+        const defaultStrokeWidth = 1.5;
+        const resolvedStrokeWidth =
+            explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
+                ? explicitStrokeWidth
+                : (cssStrokeWidth ?? defaultStrokeWidth);
+
+        let defaultStrokeColor = resolvedColor;
+        if (series.type === "scatter") {
+            defaultStrokeColor =
+                this.resolveCssVariable("--color-surface") ||
+                this.resolveCssVariable("--color-card") ||
+                "#ffffff";
+        }
+
+        const resolvedStrokeColor = explicitStrokeColor
+            ? this.resolveCssVariable(explicitStrokeColor)
+            : (cssStrokeColor ? this.resolveCssVariable(cssStrokeColor) : defaultStrokeColor);
+
+        return {
+            color: resolvedColor,
+            fillOpacity: resolvedFillOpacity,
+            strokeColor: resolvedStrokeColor,
+            strokeWidth: resolvedStrokeWidth
+        };
+    }
+
     public resolveRadialSeriesStyle(
         series: ChartRadialSeriesRegistration,
         seriesIndex: number,

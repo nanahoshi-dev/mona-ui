@@ -3,7 +3,7 @@
 The chart component renders high-performance Canvas 2D visualizations composed of declarative child series and axis components. It supports Cartesian, Sector, and Polar Axis coordinates.
 
 **Series Types:**
-- **Cartesian**: `<mona-line-series>`, `<mona-area-series>`, `<mona-bar-series>`
+- **Cartesian**: `<mona-line-series>`, `<mona-area-series>`, `<mona-bar-series>`, `<mona-scatter-series>`, `<mona-bubble-series>`
 - **Sector**: `<mona-pie-series>`, `<mona-donut-series>`
 - **Polar Axis**: `<mona-radar-series>`, `<mona-polar-series>`
 
@@ -121,6 +121,45 @@ Renders continuous polar series mapping magnitude over continuous degree angles 
 | `strokeWidth` | `number` | `undefined` | Outer data line stroke width in pixels. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter for numeric values in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+
+### `<mona-scatter-series>`
+
+Renders individual point markers across continuous numeric (linear) or temporal (time/utc) Cartesian coordinates.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `string` | `""` | Explicit fill color for scatter point markers. |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y value. |
+| `fillOpacity` | `number` | `undefined` | Fill opacity for scatter markers (0 to 1). |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity. |
+| `name` | `string` | `"Scatter"` | Series name for tooltips, legend, and accessibility. |
+| `pointRadius` | `number` | `undefined` | Radius in pixels for scatter point markers. |
+| `strokeColor` | `string` | `""` | Outline stroke color for markers. |
+| `strokeWidth` | `number` | `undefined` | Outline stroke width in pixels. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate value. |
+
+### `<mona-bubble-series>`
+
+Renders 3-dimensional data points with position (X, Y) and proportionally-scaled circle areas (Size).
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `string` | `""` | Explicit fill color for bubble markers. |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y value. |
+| `fillOpacity` | `number` | `undefined` | Fill opacity for bubble markers (0 to 1). |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity. |
+| `maxRadius` | `number` | `24` | Maximum bubble radius in pixels for the largest observed size. |
+| `minRadius` | `number` | `4` | Minimum bubble radius in pixels for the smallest observed size. |
+| `name` | `string` | `"Bubble"` | Series name for tooltips, legend, and accessibility. |
+| `sizeField` | `ChartField` | `"size"` | Property key or accessor extracting positive numeric size value. |
+| `sizeFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for bubble size in tooltips and live region. |
+| `strokeColor` | `string` | `""` | Outline stroke color for bubble circles. |
+| `strokeWidth` | `number` | `undefined` | Outline stroke width in pixels. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate value. |
 
 ## Template Directives
 

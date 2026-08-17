@@ -2567,6 +2567,102 @@
       }
     ]
   },
+  "MonaBubbleSeriesComponent": {
+    "name": "MonaBubbleSeriesComponent",
+    "selector": "\"mona-bubble-series\"",
+    "inputs": [
+      {
+        "name": "color",
+        "type": "string",
+        "description": "Explicit fill color for the bubbles.",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "description": "Series-specific dataset overriding the root chart data.",
+        "kind": "input"
+      },
+      {
+        "name": "field",
+        "type": "ChartField",
+        "description": "Property key or accessor extracting the Y value for each data item.",
+        "kind": "input"
+      },
+      {
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "description": "Fill opacity for bubbles between 0 and 1.",
+        "kind": "input"
+      },
+      {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input"
+      },
+      {
+        "name": "maxRadius",
+        "type": "number",
+        "description": "Maximum rendered pixel radius for the largest data size value.",
+        "kind": "input"
+      },
+      {
+        "name": "minRadius",
+        "type": "number",
+        "description": "Minimum rendered pixel radius for the smallest data size value.",
+        "kind": "input"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Name of the series displayed in legends and tooltips.",
+        "kind": "input"
+      },
+      {
+        "name": "sizeField",
+        "type": "ChartField",
+        "description": "Property key or accessor extracting the size magnitude for each bubble.",
+        "kind": "input"
+      },
+      {
+        "name": "sizeFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "description": "Optional custom formatter for displaying bubble size values in tooltips.",
+        "kind": "input"
+      },
+      {
+        "name": "strokeColor",
+        "type": "string",
+        "description": "Stroke outline color for bubble markers.",
+        "kind": "input"
+      },
+      {
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "description": "Stroke width in pixels for bubble marker outlines.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the series host element.",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Whether the series is currently visible on the chart and in calculations.",
+        "kind": "model"
+      },
+      {
+        "name": "xField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting the X value, overriding the root chart X field.",
+        "kind": "input"
+      }
+    ]
+  },
   "MonaChartComponent": {
     "name": "MonaChartComponent",
     "selector": "\"mona-chart\"",
@@ -3560,6 +3656,84 @@
         "type": "boolean",
         "description": "Whether the radar series is visible on the chart.",
         "kind": "model"
+      }
+    ]
+  },
+  "MonaScatterSeriesComponent": {
+    "name": "MonaScatterSeriesComponent",
+    "selector": "\"mona-scatter-series\"",
+    "inputs": [
+      {
+        "name": "color",
+        "type": "string",
+        "description": "Explicit fill color for the scatter points.",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "description": "Series-specific dataset overriding the root chart data.",
+        "kind": "input"
+      },
+      {
+        "name": "field",
+        "type": "ChartField",
+        "description": "Property key or accessor extracting the Y value for each data item.",
+        "kind": "input"
+      },
+      {
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "description": "Fill opacity for scatter points between 0 and 1.",
+        "kind": "input"
+      },
+      {
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Name of the series displayed in legends and tooltips.",
+        "kind": "input"
+      },
+      {
+        "name": "pointRadius",
+        "type": "number | undefined",
+        "description": "Radius in pixels for scatter point markers.",
+        "kind": "input"
+      },
+      {
+        "name": "strokeColor",
+        "type": "string",
+        "description": "Stroke outline color for scatter point markers.",
+        "kind": "input"
+      },
+      {
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "description": "Stroke width in pixels for scatter point markers.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the series host element.",
+        "kind": "input"
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "description": "Whether the series is currently visible on the chart and in calculations.",
+        "kind": "model"
+      },
+      {
+        "name": "xField",
+        "type": "ChartField | undefined",
+        "description": "Property key or accessor extracting the X value, overriding the root chart X field.",
+        "kind": "input"
       }
     ]
   },

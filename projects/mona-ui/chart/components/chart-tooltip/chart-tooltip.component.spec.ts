@@ -16,6 +16,7 @@ function createMockPointContext(x: string, y: string, yVal: number = 50): ChartT
         datum: {},
         formattedX: x,
         formattedY: y,
+        markId: "s1:0",
         seriesId: "s1",
         seriesName: "Target",
         seriesType: "bar",

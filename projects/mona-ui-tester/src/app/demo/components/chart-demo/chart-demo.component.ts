@@ -21,6 +21,8 @@ import {
     MonaPieSeriesComponent,
     MonaPolarSeriesComponent,
     MonaRadarSeriesComponent,
+    MonaScatterSeriesComponent,
+    MonaBubbleSeriesComponent,
     type ChartAreaFillMode,
     type ChartCurve,
     type ChartPointEvent,
@@ -78,6 +80,21 @@ interface SignalDataPoint {
     readonly noise: number | null;
 }
 
+interface ScatterDataPoint {
+    readonly height: number;
+    readonly id?: string;
+    readonly weight: number;
+    readonly wingspan: number;
+}
+
+interface BubbleDataPoint {
+    readonly country: string;
+    readonly gdp: number;
+    readonly id?: string;
+    readonly lifeExp: number;
+    readonly population: number;
+}
+
 @Component({
     imports: [
         ButtonDirective,
@@ -95,6 +112,8 @@ interface SignalDataPoint {
         MonaDonutSeriesComponent,
         MonaRadarSeriesComponent,
         MonaPolarSeriesComponent,
+        MonaScatterSeriesComponent,
+        MonaBubbleSeriesComponent,
         MonaChartLegendComponent,
         MonaChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
@@ -114,7 +133,9 @@ export class ChartDemoComponent {
     readonly #themeService = inject(ThemeService, { optional: true });
     #logId: number = 0;
 
-    protected readonly activeTab = signal<"custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "time">("mixed");
+    protected readonly activeTab = signal<
+        "bubble" | "custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "scatter" | "time"
+    >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
     protected readonly areaFillMode = signal<ChartAreaFillMode>("gradient");
     protected readonly areaFillModeOptions: readonly { label: string; value: ChartAreaFillMode }[] = [
@@ -178,12 +199,13 @@ export class ChartDemoComponent {
         { label: "Inside (Slice Center)", value: "inside" }
     ];
     protected readonly legendPosition = signal<"bottom" | "left" | "right" | "top">("bottom");
-    protected readonly legendPositionOptions: readonly { label: string; value: "bottom" | "left" | "right" | "top" }[] = [
-        { label: "Bottom", value: "bottom" },
-        { label: "Top", value: "top" },
-        { label: "Left", value: "left" },
-        { label: "Right", value: "right" }
-    ];
+    protected readonly legendPositionOptions: readonly { label: string; value: "bottom" | "left" | "right" | "top" }[] =
+        [
+            { label: "Bottom", value: "bottom" },
+            { label: "Top", value: "top" },
+            { label: "Left", value: "left" },
+            { label: "Right", value: "right" }
+        ];
     protected readonly monthlyData = signal<readonly MonthlyMetric[]>([
         { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
         { actual: 5100, forecast: 4800, month: "Feb", target: 5000 },
@@ -274,7 +296,44 @@ export class ChartDemoComponent {
     protected readonly continuousPolarGridShape = signal<ChartRadialGridShape>("circle");
     protected readonly continuousPolarTickCount = signal<number>(12);
 
-    protected readonly sharedTooltip = signal<boolean>(true);
+    // Scatter Plot Data & Controls
+    protected readonly scatterData = signal<readonly ScatterDataPoint[]>([
+        { height: 165, id: "p1", weight: 60, wingspan: 168 },
+        { height: 170, id: "p2", weight: 68, wingspan: 172 },
+        { height: 172, id: "p3", weight: 65, wingspan: 175 },
+        { height: 175, id: "p4", weight: 72, wingspan: 180 },
+        { height: 178, id: "p5", weight: 78, wingspan: 182 },
+        { height: 180, id: "p6", weight: 75, wingspan: 185 },
+        { height: 182, id: "p7", weight: 82, wingspan: 188 },
+        { height: 185, id: "p8", weight: 88, wingspan: 192 },
+        { height: 188, id: "p9", weight: 90, wingspan: 194 },
+        { height: 192, id: "p10", weight: 96, wingspan: 200 }
+    ]);
+    protected readonly scatterPointRadius = signal<number>(6);
+    protected readonly scatterFillOpacity = signal<number>(0.85);
+    protected readonly showScatterWeight = signal<boolean>(true);
+    protected readonly showScatterWingspan = signal<boolean>(true);
+
+    // Bubble Chart Data & Controls
+    protected readonly bubbleData = signal<readonly BubbleDataPoint[]>([
+        { country: "Japan", gdp: 39000, id: "jp", lifeExp: 84.6, population: 125 },
+        { country: "United States", gdp: 70000, id: "us", lifeExp: 77.3, population: 335 },
+        { country: "Germany", gdp: 51000, id: "de", lifeExp: 81.0, population: 84 },
+        { country: "Brazil", gdp: 8900, id: "br", lifeExp: 75.9, population: 215 },
+        { country: "India", gdp: 2400, id: "in", lifeExp: 70.4, population: 1420 },
+        { country: "Nigeria", gdp: 2100, id: "ng", lifeExp: 54.0, population: 218 },
+        { country: "Australia", gdp: 56000, id: "au", lifeExp: 83.2, population: 26 },
+        { country: "South Korea", gdp: 35000, id: "kr", lifeExp: 83.5, population: 52 },
+        { country: "Canada", gdp: 52000, id: "ca", lifeExp: 82.5, population: 39 },
+        { country: "France", gdp: 44000, id: "fr", lifeExp: 82.7, population: 68 }
+    ]);
+    protected readonly bubbleMinRadius = signal<number>(5);
+    protected readonly bubbleMaxRadius = signal<number>(30);
+    protected readonly bubbleFillOpacity = signal<number>(0.6);
+    protected readonly bubbleSizeFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value.toLocaleString()}M` : String(value);
+
+    protected readonly sharedTooltip = signal<boolean>(false);
     protected readonly showArea = signal<boolean>(true);
     protected readonly showAxisTitles = signal<boolean>(false);
     protected readonly showBars = signal<boolean>(true);
@@ -421,10 +480,7 @@ export class ChartDemoComponent {
     }
 
     public onSeriesVisibilityChange(event: ChartSeriesVisibilityEvent): void {
-        this.#addLog(
-            "seriesVisibilityChange",
-            `Series: "${event.seriesName}" | Visible: ${event.visible}`
-        );
+        this.#addLog("seriesVisibilityChange", `Series: "${event.seriesName}" | Visible: ${event.visible}`);
     }
 
     public onSliceVisibilityChange(event: ChartSliceVisibilityEvent): void {
@@ -568,6 +624,31 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Randomized continuous polar radiation pattern");
     }
 
+    public randomizeScatterData(): void {
+        this.scatterData.update(list =>
+            list.map(item => ({
+                height: item.height,
+                id: item.id,
+                weight: Math.round(55 + Math.random() * 45),
+                wingspan: Math.round(item.height - 5 + Math.random() * 15)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized scatter plot biometric distribution");
+    }
+
+    public randomizeBubbleData(): void {
+        this.bubbleData.update(list =>
+            list.map(item => ({
+                country: item.country,
+                gdp: Math.round(1500 + Math.random() * 75000),
+                id: item.id,
+                lifeExp: Number((50 + Math.random() * 35).toFixed(1)),
+                population: Math.round(10 + Math.random() * 1400)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized bubble global socioeconomic dataset");
+    }
+
     public resetData(): void {
         this.monthlyData.set([
             { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
@@ -583,7 +664,9 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Reset dataset to defaults");
     }
 
-    public setTab(tab: "custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "time"): void {
+    public setTab(
+        tab: "bubble" | "custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "scatter" | "time"
+    ): void {
         this.activeTab.set(tab);
     }
 

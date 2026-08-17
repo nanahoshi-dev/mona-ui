@@ -388,7 +388,11 @@ export function hasRenderableData(
 
     for (const s of seriesList) {
         if (s.type === "bar" && (xAxisType === "time" || xAxisType === "utc" || xAxisType === "linear")) {
-            // Incompatible bar in Phase 1
+            // Incompatible bar on continuous axes
+            continue;
+        }
+        if ((s.type === "scatter" || s.type === "bubble") && xAxisType === "category") {
+            // Incompatible scatter/bubble on category axes
             continue;
         }
         const data = resolveData(s.data(), rootData);
@@ -398,8 +402,17 @@ export function hasRenderableData(
         const field = s.field();
         for (let i = 0; i < data.length; i++) {
             const val = resolveValue(data[i], field, i);
-            if (isFiniteNumber(val) && (s.type === "pie" || s.type === "donut" ? val > 0 : true)) {
-                return true;
+            if (isFiniteNumber(val)) {
+                if (s.type === "pie" || s.type === "donut") {
+                    if (val > 0) return true;
+                } else if (s.type === "bubble") {
+                    const sizeVal = resolveValue(data[i], (s as { sizeField: () => ChartField }).sizeField(), i);
+                    if (isFiniteNumber(sizeVal) && sizeVal > 0) {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
             }
         }
     }
