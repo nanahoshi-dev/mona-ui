@@ -1,8 +1,7 @@
 import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
-import type { ChartValueFormatter } from "../../models/chart-polar.models";
-import type { ChartField } from "../../models/chart.models";
+import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
 
 let nextSeriesId = 0;
 
@@ -126,7 +125,6 @@ export class MonaBubbleSeriesComponent implements OnInit {
             this.field();
             this.keyField();
             this.sizeField();
-            this.sizeFormatter();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -137,6 +135,7 @@ export class MonaBubbleSeriesComponent implements OnInit {
             this.maxRadius();
             this.minRadius();
             this.name();
+            this.sizeFormatter();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
             }
