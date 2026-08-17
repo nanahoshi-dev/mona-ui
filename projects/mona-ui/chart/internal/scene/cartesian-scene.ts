@@ -1,7 +1,7 @@
 import type { ChartAxisPosition, ChartAxisTick } from "../../models/chart-axis.models";
 import type { ChartAreaFillMode, ChartCurve } from "../../models/chart-series.models";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
-import type { SceneBar, SceneMarker, ScenePoint } from "./scene-geometry";
+import type { SceneAreaPoint, SceneBar, SceneMarker, ScenePoint } from "./scene-geometry";
 
 export interface ChartAxisScene {
     axis: "x" | "y";
@@ -61,7 +61,7 @@ export interface ChartAreaSeriesScene {
     fillOpacity: number;
     id: string;
     name: string;
-    points: readonly ScenePoint[];
+    points: readonly SceneAreaPoint[];
     renderOpacity?: number;
     showPoints: boolean;
     style: ChartSeriesStyle;

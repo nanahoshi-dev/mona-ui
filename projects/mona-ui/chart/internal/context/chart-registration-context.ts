@@ -22,6 +22,7 @@ import type {
     ChartSeriesType
 } from "../../models/chart-series.models";
 import type { ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
+import type { ChartStackMode } from "../../models/chart-stack.models";
 import type { ChartScene } from "../scene/chart-scene";
 
 export const enum ChartInvalidationReason {
@@ -133,6 +134,8 @@ export interface ChartAreaSeriesRegistration extends ChartCartesianSeriesRegistr
     fillOpacity?: Signal<number | undefined>;
     pointRadius?: Signal<number | undefined>;
     showPoints?: Signal<boolean>;
+    stack?: Signal<string | undefined>;
+    stackMode?: Signal<ChartStackMode>;
     strokeWidth?: Signal<number | undefined>;
     type: "area";
 }
@@ -141,6 +144,8 @@ export interface ChartBarSeriesRegistration extends ChartCartesianSeriesRegistra
     borderRadius?: Signal<number | undefined>;
     fillOpacity?: Signal<number | undefined>;
     maxBarWidth?: Signal<number | undefined>;
+    stack?: Signal<string | undefined>;
+    stackMode?: Signal<ChartStackMode>;
     type: "bar";
 }
 

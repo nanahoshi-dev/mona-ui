@@ -3,6 +3,7 @@ import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartAreaFillMode, ChartCurve } from "../../models/chart-series.models";
 import type { ChartField } from "../../models/chart.models";
+import type { ChartStackMode } from "../../models/chart-stack.models";
 
 let nextSeriesId = 0;
 
@@ -88,6 +89,18 @@ export class MonaAreaSeriesComponent implements OnInit {
     public readonly showPoints = input(false);
 
     /**
+     * @description Named stack group to participate in. Series with matching trimmed stack names stack together.
+     * @default undefined
+     */
+    public readonly stack = input<string | undefined>(undefined);
+
+    /**
+     * @description Stacking mode used when stack is specified: 'normal' for raw cumulative values, or 'percent' for 100% normalized segments.
+     * @default "normal"
+     */
+    public readonly stackMode = input<ChartStackMode>("normal");
+
+    /**
      * @description Stroke width in pixels for the area boundary line.
      * @default undefined
      */
@@ -125,6 +138,8 @@ export class MonaAreaSeriesComponent implements OnInit {
             this.data();
             this.field();
             this.keyField();
+            this.stack();
+            this.stackMode();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -175,6 +190,8 @@ export class MonaAreaSeriesComponent implements OnInit {
             name: this.name,
             pointRadius: this.pointRadius,
             showPoints: this.showPoints,
+            stack: this.stack,
+            stackMode: this.stackMode,
             strokeWidth: this.strokeWidth,
             toggleVisibility: () => {
                 const next = !this.visible();

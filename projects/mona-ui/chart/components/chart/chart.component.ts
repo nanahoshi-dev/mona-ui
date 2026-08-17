@@ -413,6 +413,13 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 seriesType: target.seriesType,
                 sizeValue: target.sizeValue,
                 sliceId: target.sliceId,
+                stackEnd: target.stackEnd,
+                stackGroup: target.stackGroup,
+                stackMode: target.stackMode,
+                stackPercentage: target.stackPercentage,
+                stackPosition: target.stackPosition,
+                stackStart: target.stackStart,
+                stackTotal: target.stackTotal,
                 xValue: target.xValue,
                 yValue: target.yValue
             });
@@ -484,6 +491,13 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         seriesType: hit.seriesType,
                         sizeValue: hit.sizeValue,
                         sliceId: hit.sliceId,
+                        stackEnd: hit.stackEnd,
+                        stackGroup: hit.stackGroup,
+                        stackMode: hit.stackMode,
+                        stackPercentage: hit.stackPercentage,
+                        stackPosition: hit.stackPosition,
+                        stackStart: hit.stackStart,
+                        stackTotal: hit.stackTotal,
                         xValue: hit.xValue,
                         yValue: hit.yValue
                     });
@@ -561,7 +575,11 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 };
                 this.tooltipPosition.set(tooltipPos);
                 this.tooltipContext.set(
-                    this.#buildTooltipContext(hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit], shared)
+                    this.#buildTooltipContext(
+                        hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit],
+                        shared,
+                        primaryHit
+                    )
                 );
             }
             this.#paint();
@@ -688,13 +706,17 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         pointerPosition: this.#interactionState.pointerPosition,
                         source: this.#interactionState.source
                     };
-                    this.tooltipContext.set(this.#buildTooltipContext(activeHits, this.#tooltip()?.shared() ?? false));
+                    this.tooltipContext.set(this.#buildTooltipContext(activeHits, this.#tooltip()?.shared() ?? false, primary));
                 }
             }
         }
     }
 
-    #buildTooltipContext(hits: readonly SceneHitTarget[], shared: boolean): ChartTooltipTemplateContext {
+    #buildTooltipContext(
+        hits: readonly SceneHitTarget[],
+        shared: boolean,
+        primaryHit?: SceneHitTarget
+    ): ChartTooltipTemplateContext {
         const seriesItems = this.legendItems();
         const xAxis = this.#xAxis();
         const yAxis = this.#yAxis();
@@ -717,6 +739,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 formattedCategory: hit.formattedCategory,
                 formattedPercentage: hit.formattedPercentage,
                 formattedSize: hit.formattedSize,
+                formattedStackPercentage: hit.formattedStackPercentage,
+                formattedStackTotal: hit.formattedStackTotal,
                 formattedX: xStr,
                 formattedY: yStr,
                 markId,
@@ -726,12 +750,28 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 seriesType: hit.seriesType,
                 sizeValue: hit.sizeValue,
                 sliceId: hit.sliceId,
+                stackEnd: hit.stackEnd,
+                stackGroup: hit.stackGroup,
+                stackMode: hit.stackMode,
+                stackPercentage: hit.stackPercentage,
+                stackPosition: hit.stackPosition,
+                stackStart: hit.stackStart,
+                stackTotal: hit.stackTotal,
                 xValue: hit.xValue,
                 yValue: hit.yValue
             };
         });
 
-        const primaryContext = pointContexts[0];
+        const effectivePrimaryHit = primaryHit ?? hits[0];
+        const primaryContext =
+            (effectivePrimaryHit
+                ? pointContexts.find(
+                      p =>
+                          p.seriesId === effectivePrimaryHit.seriesId &&
+                          p.dataIndex === effectivePrimaryHit.index &&
+                          (effectivePrimaryHit.sliceId ? p.sliceId === effectivePrimaryHit.sliceId : true)
+                  )
+                : undefined) ?? pointContexts[0];
         return {
             $implicit: primaryContext,
             point: primaryContext,
@@ -1076,7 +1116,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
         };
 
         this.tooltipPosition.set(pointPos);
-        this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared));
+        this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, matchingHit));
 
         this.pointFocusChange.emit({
             category: matchingHit.category,
@@ -1088,6 +1128,13 @@ export class MonaChartComponent implements ChartRegistrationContext {
             seriesType: matchingHit.seriesType,
             sizeValue: matchingHit.sizeValue,
             sliceId: matchingHit.sliceId,
+            stackEnd: matchingHit.stackEnd,
+            stackGroup: matchingHit.stackGroup,
+            stackMode: matchingHit.stackMode,
+            stackPercentage: matchingHit.stackPercentage,
+            stackPosition: matchingHit.stackPosition,
+            stackStart: matchingHit.stackStart,
+            stackTotal: matchingHit.stackTotal,
             xValue: matchingHit.xValue,
             yValue: matchingHit.yValue
         });

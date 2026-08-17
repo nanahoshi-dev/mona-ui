@@ -88,3 +88,4 @@ export type {
 } from "./models/chart-polar.models";
 
 export type { ChartSeriesStyle } from "./models/chart-style.models";
+export type { ChartStackMode } from "./models/chart-stack.models";

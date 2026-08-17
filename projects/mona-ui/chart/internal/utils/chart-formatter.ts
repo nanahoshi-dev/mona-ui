@@ -87,3 +87,11 @@ export function formatYValue(
     }
     return value !== undefined && value !== null ? String(value) : "";
 }
+
+export function formatPercentagePoint(value: number, digits: number = 1): string {
+    if (!isFiniteNumber(value)) {
+        return "";
+    }
+    const fixed = Number(value.toFixed(digits));
+    return `${fixed}%`;
+}

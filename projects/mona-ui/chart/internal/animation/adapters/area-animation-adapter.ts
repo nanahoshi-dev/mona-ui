@@ -1,21 +1,27 @@
 import type { ChartAreaSeriesScene } from "../../scene/cartesian-scene";
-import type { ScenePoint } from "../../scene/scene-geometry";
+import type { SceneAreaPoint } from "../../scene/scene-geometry";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
 import {
-    type PointMarkTransitionPlan,
-    type PointMarkTransitionState,
-    samplePointTransition
-} from "../primitives/point-transition";
+    type AreaPointMarkTransitionPlan,
+    type AreaPointMarkTransitionState,
+    sampleAreaPointTransition
+} from "../primitives/area-point-transition";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";
 
-function toPointState(pt: ScenePoint, opacity = 1): PointMarkTransitionState {
+function toAreaPointState(pt: SceneAreaPoint, opacity = 1): AreaPointMarkTransitionState {
     return {
         animationKey: pt.animationKey,
+        baseY: pt.baseY,
         datum: pt.datum,
         defined: pt.defined,
         index: pt.index,
         opacity,
+        stackEndValue: pt.stackEndValue,
+        stackPercentage: pt.stackPercentage,
+        stackStartValue: pt.stackStartValue,
+        stackTotal: pt.stackTotal,
+        synthetic: pt.synthetic,
         x: pt.x,
         xValue: pt.xValue,
         y: pt.y,
@@ -23,16 +29,27 @@ function toPointState(pt: ScenePoint, opacity = 1): PointMarkTransitionState {
     };
 }
 
-function createBaselinePointState(pt: ScenePoint, baselineY: number, opacity = 0): PointMarkTransitionState {
+function createBaselineAreaPointState(
+    pt: SceneAreaPoint,
+    fallbackBaselineY: number,
+    opacity = 0
+): AreaPointMarkTransitionState {
+    const bY = pt.baseY !== undefined ? pt.baseY : fallbackBaselineY;
     return {
         animationKey: pt.animationKey,
+        baseY: bY,
         datum: pt.datum,
         defined: pt.defined,
         index: pt.index,
         opacity,
+        stackEndValue: pt.stackEndValue,
+        stackPercentage: pt.stackPercentage,
+        stackStartValue: pt.stackStartValue,
+        stackTotal: pt.stackTotal,
+        synthetic: pt.synthetic,
         x: pt.x,
         xValue: pt.xValue,
-        y: baselineY,
+        y: bY,
         yValue: pt.yValue
     };
 }
@@ -61,15 +78,15 @@ export class AreaSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<C
         const fromBaselineY = previous?.baselineY ?? target?.baselineY ?? fallbackBaselineY;
         const toBaselineY = target?.baselineY ?? previous?.baselineY ?? fallbackBaselineY;
 
-        const markPlans: PointMarkTransitionPlan[] = [];
+        const markPlans: AreaPointMarkTransitionPlan[] = [];
 
         if (!previous && target) {
             // Series enter: all points expand from baseline
             for (const pt of target.points) {
                 markPlans.push({
                     animationKey: pt.animationKey,
-                    from: createBaselinePointState(pt, toBaselineY, 0),
-                    to: toPointState(pt, 1),
+                    from: createBaselineAreaPointState(pt, toBaselineY, 0),
+                    to: toAreaPointState(pt, 1),
                     type: "enter"
                 });
             }
@@ -78,14 +95,14 @@ export class AreaSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<C
             for (const pt of previous.points) {
                 markPlans.push({
                     animationKey: pt.animationKey,
-                    from: toPointState(pt, 1),
-                    to: createBaselinePointState(pt, fromBaselineY, 0),
+                    from: toAreaPointState(pt, 1),
+                    to: createBaselineAreaPointState(pt, fromBaselineY, 0),
                     type: "exit"
                 });
             }
         } else if (previous && target) {
             // Series update
-            const prevByKey = new Map<string, ScenePoint>();
+            const prevByKey = new Map<string, SceneAreaPoint>();
             for (const pt of previous.points) {
                 const key = pt.animationKey ?? String(pt.index);
                 prevByKey.set(key, pt);
@@ -102,30 +119,30 @@ export class AreaSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<C
                     if (prevPt.defined && !pt.defined) {
                         markPlans.push({
                             animationKey: key,
-                            from: toPointState(prevPt, 1),
-                            to: createBaselinePointState(prevPt, toBaselineY, 0),
+                            from: toAreaPointState(prevPt, 1),
+                            to: createBaselineAreaPointState(prevPt, toBaselineY, 0),
                             type: "exit"
                         });
                     } else if (!prevPt.defined && pt.defined) {
                         markPlans.push({
                             animationKey: key,
-                            from: createBaselinePointState(pt, fromBaselineY, 0),
-                            to: toPointState(pt, 1),
+                            from: createBaselineAreaPointState(pt, fromBaselineY, 0),
+                            to: toAreaPointState(pt, 1),
                             type: "enter"
                         });
                     } else {
                         markPlans.push({
                             animationKey: key,
-                            from: toPointState(prevPt, 1),
-                            to: toPointState(pt, 1),
+                            from: toAreaPointState(prevPt, 1),
+                            to: toAreaPointState(pt, 1),
                             type: "update"
                         });
                     }
                 } else {
                     markPlans.push({
                         animationKey: key,
-                        from: createBaselinePointState(pt, toBaselineY, 0),
-                        to: toPointState(pt, 1),
+                        from: createBaselineAreaPointState(pt, toBaselineY, 0),
+                        to: toAreaPointState(pt, 1),
                         type: "enter"
                     });
                 }
@@ -137,8 +154,8 @@ export class AreaSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<C
                 if (!targetKeys.has(key)) {
                     markPlans.push({
                         animationKey: key,
-                        from: toPointState(prevPt, 1),
-                        to: createBaselinePointState(prevPt, toBaselineY, 0),
+                        from: toAreaPointState(prevPt, 1),
+                        to: createBaselineAreaPointState(prevPt, toBaselineY, 0),
                         type: "exit"
                     });
                 }
@@ -161,12 +178,12 @@ export class AreaSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<C
                     return null;
                 }
 
-                const points: ScenePoint[] = [];
+                const points: SceneAreaPoint[] = [];
                 for (const plan of markPlans) {
                     if (progress >= 1 && plan.type === "exit") {
                         continue;
                     }
-                    points.push(samplePointTransition(plan, progress));
+                    points.push(sampleAreaPointTransition(plan, progress));
                 }
 
                 const renderOpacity = lerpOpacity(fromOpacity, toOpacity, progress);

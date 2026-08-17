@@ -19,7 +19,7 @@ export class MarkerSeriesRenderer {
         const isTranslucentBubble = scene.type === "bubble" && style.fillOpacity < 0.99;
 
         if (!hasPerMarkerOpacity && !isTranslucentBubble) {
-            // Opaque or Scatter Fast Path: Batch all circle arcs into one path for fill and stroke
+            // Opaque Fast Path: Batch all circle arcs into one path for fill and stroke
             context.save();
             const fillAlpha = Math.max(0, Math.min(1, style.fillOpacity * renderOpacity));
             context.fillStyle = style.color;

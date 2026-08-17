@@ -1,67 +1,54 @@
-import type { ChartCornerRadii, SceneBar } from "../../scene/scene-geometry";
-import type { ChartStackMode } from "../../../models/chart-stack.models";
+import type { SceneAreaPoint } from "../../scene/scene-geometry";
 import { lerp, lerpOpacity } from "../animation-math";
 
-export interface RectMarkTransitionState {
+export interface AreaPointMarkTransitionState {
     readonly animationKey?: string;
-    readonly cornerRadii?: ChartCornerRadii;
+    readonly baseY: number;
     readonly datum: unknown;
-    readonly height: number;
+    readonly defined: boolean;
     readonly index: number;
-    readonly isPositive: boolean;
     readonly opacity: number;
-    readonly radius: number;
     readonly stackEndValue?: number;
-    readonly stackGroup?: string;
-    readonly stackMode?: ChartStackMode;
     readonly stackPercentage?: number;
-    readonly stackPosition?: "inner" | "outer" | "single";
     readonly stackStartValue?: number;
     readonly stackTotal?: number;
-    readonly width: number;
+    readonly synthetic?: boolean;
     readonly x: number;
     readonly xValue: unknown;
     readonly y: number;
     readonly yValue: number;
 }
 
-export interface RectMarkTransitionPlan {
+export interface AreaPointMarkTransitionPlan {
     readonly animationKey?: string;
-    readonly from: RectMarkTransitionState;
-    readonly to: RectMarkTransitionState;
+    readonly from: AreaPointMarkTransitionState;
+    readonly to: AreaPointMarkTransitionState;
     readonly type: "enter" | "exit" | "update";
 }
 
-export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: number): SceneBar {
+export function sampleAreaPointTransition(plan: AreaPointMarkTransitionPlan, progress: number): SceneAreaPoint {
     const { from, to } = plan;
     const x = lerp(from.x, to.x, progress);
     const y = lerp(from.y, to.y, progress);
-    const width = lerp(from.width, to.width, progress);
-    const height = Math.max(0, lerp(from.height, to.height, progress));
-    const radius = lerp(from.radius, to.radius, progress);
+    const baseY = lerp(from.baseY, to.baseY, progress);
+    const defined = plan.type === "exit" ? from.defined : to.defined;
     const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
 
     return {
         animationKey: to.animationKey ?? from.animationKey,
-        cornerRadii: to.cornerRadii ?? from.cornerRadii,
+        baseY,
         datum: to.datum ?? from.datum,
-        height,
+        defined,
         index: to.index,
-        isPositive: to.isPositive,
-        radius,
         renderOpacity,
         stackEndValue: to.stackEndValue ?? from.stackEndValue,
-        stackGroup: to.stackGroup ?? from.stackGroup,
-        stackMode: to.stackMode ?? from.stackMode,
         stackPercentage: to.stackPercentage ?? from.stackPercentage,
-        stackPosition: to.stackPosition ?? from.stackPosition,
         stackStartValue: to.stackStartValue ?? from.stackStartValue,
         stackTotal: to.stackTotal ?? from.stackTotal,
-        width,
+        synthetic: to.synthetic ?? from.synthetic,
         x,
         xValue: to.xValue ?? from.xValue,
         y,
         yValue: to.yValue ?? from.yValue
     };
 }
-

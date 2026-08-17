@@ -2,6 +2,7 @@ import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartField } from "../../models/chart.models";
+import type { ChartStackMode } from "../../models/chart-stack.models";
 
 let nextSeriesId = 0;
 
@@ -69,6 +70,18 @@ export class MonaBarSeriesComponent implements OnInit {
     public readonly name = input("");
 
     /**
+     * @description Named stack group to participate in. Series with matching trimmed stack names stack together.
+     * @default undefined
+     */
+    public readonly stack = input<string | undefined>(undefined);
+
+    /**
+     * @description Stacking mode used when stack is specified: 'normal' for raw cumulative values, or 'percent' for 100% normalized segments.
+     * @default "normal"
+     */
+    public readonly stackMode = input<ChartStackMode>("normal");
+
+    /**
      * @description Additional CSS classes applied to the series host element.
      * @default ""
      */
@@ -100,6 +113,8 @@ export class MonaBarSeriesComponent implements OnInit {
             this.data();
             this.field();
             this.keyField();
+            this.stack();
+            this.stackMode();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -143,6 +158,8 @@ export class MonaBarSeriesComponent implements OnInit {
             keyField: this.keyField,
             maxBarWidth: this.maxBarWidth,
             name: this.name,
+            stack: this.stack,
+            stackMode: this.stackMode,
             toggleVisibility: () => {
                 const next = !this.visible();
                 this.visible.set(next);

@@ -19,7 +19,16 @@ export class BarSeriesRenderer {
                 continue;
             }
             context.globalAlpha = barAlpha;
-            drawBarRect(context, bar.x, bar.y, bar.width, bar.height, borderRadius, bar.isPositive);
+            drawBarRect(
+                context,
+                bar.x,
+                bar.y,
+                bar.width,
+                bar.height,
+                bar.radius ?? borderRadius,
+                bar.isPositive,
+                bar.cornerRadii
+            );
         }
 
         context.restore();

@@ -2470,6 +2470,18 @@
         "kind": "input"
       },
       {
+        "name": "stack",
+        "type": "string | undefined",
+        "description": "Named stack group to participate in. Series with matching trimmed stack names stack together.",
+        "kind": "input"
+      },
+      {
+        "name": "stackMode",
+        "type": "ChartStackMode",
+        "description": "Stacking mode used when stack is specified: 'normal' for raw cumulative values, or 'percent' for 100% normalized segments.",
+        "kind": "input"
+      },
+      {
         "name": "strokeWidth",
         "type": "number | undefined",
         "description": "Stroke width in pixels for the area boundary line.",
@@ -2545,6 +2557,18 @@
         "name": "name",
         "type": "string",
         "description": "Name of the series displayed in legends and tooltips.",
+        "kind": "input"
+      },
+      {
+        "name": "stack",
+        "type": "string | undefined",
+        "description": "Named stack group to participate in. Series with matching trimmed stack names stack together.",
+        "kind": "input"
+      },
+      {
+        "name": "stackMode",
+        "type": "ChartStackMode",
+        "description": "Stacking mode used when stack is specified: 'normal' for raw cumulative values, or 'percent' for 100% normalized segments.",
         "kind": "input"
       },
       {

@@ -151,13 +151,9 @@ export class SceneTransitionSampler {
             let visualRadius = targetHit.visualRadius;
 
             if (targetHit.point) {
-                const sampledPt = sampledPointsByKey.get(key);
-                if (sampledPt) {
-                    pt = { x: sampledPt.x, y: sampledPt.y };
-                }
-                const sampledMarker = sampledMarkersByKey.get(key);
-                if (sampledMarker) {
-                    if (sampledMarker.radius <= 0) {
+                if (targetHit.seriesType === "scatter" || targetHit.seriesType === "bubble") {
+                    const sampledMarker = sampledMarkersByKey.get(key);
+                    if (!sampledMarker || sampledMarker.radius <= 0) {
                         continue;
                     }
                     pt = { x: sampledMarker.x, y: sampledMarker.y };
@@ -166,6 +162,11 @@ export class SceneTransitionSampler {
                         targetHit.seriesType === "bubble"
                             ? sampledMarker.radius + 4
                             : Math.max(sampledMarker.radius + 6, 10);
+                } else {
+                    const sampledPt = sampledPointsByKey.get(key);
+                    if (sampledPt) {
+                        pt = { x: sampledPt.x, y: sampledPt.y };
+                    }
                 }
             }
 
@@ -173,12 +174,17 @@ export class SceneTransitionSampler {
                 const sampledBar = sampledBarsByKey.get(key);
                 if (sampledBar) {
                     bounds = {
+                        height: Math.max(4, sampledBar.height),
+                        width: sampledBar.width,
+                        x: sampledBar.x,
+                        y: sampledBar.height === 0 ? sampledBar.y - 2 : sampledBar.y
+                    };
+                    visualBounds = {
                         height: sampledBar.height,
                         width: sampledBar.width,
                         x: sampledBar.x,
                         y: sampledBar.y
                     };
-                    visualBounds = bounds;
                 }
             }
 
