@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    AfterContentChecked,
     Component,
     computed,
     contentChild,
@@ -12,6 +13,7 @@ import {
     output,
     Signal,
     signal,
+    untracked,
     viewChild
 } from "@angular/core";
 import { twMerge } from "tailwind-merge";
@@ -121,7 +123,7 @@ function easingToCss(easing: string): string {
         "(focusout)": "onFocusOut($event)"
     }
 })
-export class MonaChartComponent implements ChartRegistrationContext {
+export class MonaChartComponent implements ChartRegistrationContext, AfterContentChecked {
     readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
     readonly #animationController: ChartAnimationController;
     readonly #destroyRef = inject(DestroyRef);
@@ -136,6 +138,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
     readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
     readonly #xAxis = signal<ChartXAxisRegistration | null>(null);
     readonly #yAxis = signal<ChartYAxisRegistration | null>(null);
+
+    public ngAfterContentChecked(): void {
+        this.#renderScheduler.flush();
+    }
 
     #activeKeyboardBucketIndex: number = -1;
     #activeKeyboardHitKey: string | null = null;
@@ -402,6 +408,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     public recomputeScene(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
+        this.#renderScheduler.cancel();
         if (!this.#canvasReady) {
             const canvasRef = this.canvasElement();
             if (canvasRef?.nativeElement) {
@@ -432,35 +439,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const shared = isSector || isHeatmap ? false : (this.#tooltip()?.shared() ?? false);
         const hitState = ChartHitTestEngine.testHit(pointer, currentScene, shared);
         if (hitState.activeHitTarget) {
-            const target = hitState.activeHitTarget;
-            this.pointClick.emit({
-                category: target.category,
-                categoryX: target.categoryX,
-                categoryY: target.categoryY,
-                dataIndex: target.index,
-                datum: target.datum,
-                formattedFrom: target.formattedFrom ?? target.range?.formattedFrom,
-                formattedTo: target.formattedTo ?? target.range?.formattedTo,
-                fromValue: target.fromValue ?? target.range?.fromValue,
-                percentage: target.percentage,
-                rawValue: target.rawValue,
-                seriesId: target.seriesId,
-                seriesName: target.seriesName,
-                seriesType: target.seriesType,
-                sizeValue: target.sizeValue,
-                sliceId: target.sliceId,
-                stackEnd: target.stackEnd,
-                stackGroup: target.stackGroup,
-                stackMode: target.stackMode,
-                stackPercentage: target.stackPercentage,
-                stackPosition: target.stackPosition,
-                stackStart: target.stackStart,
-                stackTotal: target.stackTotal,
-                toValue: target.toValue ?? target.range?.toValue,
-                valueKind: target.valueKind ?? (target.range ? "range" : "scalar"),
-                xValue: target.xValue,
-                yValue: target.yValue
-            });
+            this.pointClick.emit(this.#toPointEvent(hitState.activeHitTarget));
         }
     }
 
@@ -519,37 +498,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                     bucket?.hits.find(h => h.seriesId === this.#activeKeyboardSeriesId) ??
                     bucket?.hits[0];
                 if (hit) {
-                    this.pointClick.emit({
-                        category: hit.category,
-                        categoryX: hit.categoryX,
-                        categoryY: hit.categoryY,
-                        dataIndex: hit.index,
-                        datum: hit.datum,
-                        formattedFrom: hit.formattedFrom ?? hit.range?.formattedFrom,
-                        formattedTo: hit.formattedTo ?? hit.range?.formattedTo,
-                        formattedXValue: hit.formattedXValue ?? hit.formattedCategory,
-                        formattedYCategory: hit.formattedYCategory,
-                        fromValue: hit.fromValue ?? hit.range?.fromValue,
-                        percentage: hit.percentage,
-                        rawValue: hit.rawValue,
-                        seriesId: hit.seriesId,
-                        seriesName: hit.seriesName,
-                        seriesType: hit.seriesType,
-                        sizeValue: hit.sizeValue,
-                        sliceId: hit.sliceId,
-                        stackEnd: hit.stackEnd,
-                        stackGroup: hit.stackGroup,
-                        stackMode: hit.stackMode,
-                        stackPercentage: hit.stackPercentage,
-                        stackPosition: hit.stackPosition,
-                        stackStart: hit.stackStart,
-                        stackTotal: hit.stackTotal,
-                        toValue: hit.toValue ?? hit.range?.toValue,
-                        valueKind: hit.valueKind ?? (hit.range ? "range" : "scalar"),
-                        xValue: hit.xValue,
-                        yCategory: hit.yCategory,
-                        yValue: hit.yValue
-                    });
+                    this.pointClick.emit(this.#toPointEvent(hit));
                 }
             }
         } else if (event.key === "Escape") {
@@ -648,44 +597,44 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public registerAngularAxis(registration: ChartAngularAxisRegistration): () => void {
         this.#angularAxis.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Data);
+        this.invalidate(ChartInvalidationReason.Data);
         return () => {
             if (this.#angularAxis() === registration) {
                 this.#angularAxis.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Data);
+                this.invalidate(ChartInvalidationReason.Data);
             }
         };
     }
 
     public registerRadialAxis(registration: ChartRadialAxisRegistration): () => void {
         this.#radialAxis.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Data);
+        this.invalidate(ChartInvalidationReason.Data);
         return () => {
             if (this.#radialAxis() === registration) {
                 this.#radialAxis.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Data);
+                this.invalidate(ChartInvalidationReason.Data);
             }
         };
     }
 
     public registerLegend(registration: ChartLegendRegistration): () => void {
         this.#legend.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Data);
+        this.invalidate(ChartInvalidationReason.Data);
         return () => {
             if (this.#legend() === registration) {
                 this.#legend.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Data);
+                this.invalidate(ChartInvalidationReason.Data);
             }
         };
     }
 
     public registerSeries(registration: ChartSeriesRegistration): () => void {
         this.#registeredSeries.update(list => [...list, registration]);
-        this.#recomputeAndPaint(ChartInvalidationReason.Data);
+        this.invalidate(ChartInvalidationReason.Data);
 
         return () => {
             this.#registeredSeries.update(list => list.filter(s => s.id !== registration.id));
-            this.#recomputeAndPaint(ChartInvalidationReason.Data);
+            this.invalidate(ChartInvalidationReason.Data);
         };
     }
 
@@ -700,22 +649,22 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public registerXAxis(registration: ChartXAxisRegistration): () => void {
         this.#xAxis.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Data);
+        this.invalidate(ChartInvalidationReason.Data);
         return () => {
             if (this.#xAxis() === registration) {
                 this.#xAxis.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Data);
+                this.invalidate(ChartInvalidationReason.Data);
             }
         };
     }
 
     public registerYAxis(registration: ChartYAxisRegistration): () => void {
         this.#yAxis.set(registration);
-        this.#recomputeAndPaint(ChartInvalidationReason.Data);
+        this.invalidate(ChartInvalidationReason.Data);
         return () => {
             if (this.#yAxis() === registration) {
                 this.#yAxis.set(null);
-                this.#recomputeAndPaint(ChartInvalidationReason.Data);
+                this.invalidate(ChartInvalidationReason.Data);
             }
         };
     }
@@ -804,11 +753,18 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 category: hit.category,
                 categoryX: hit.categoryX,
                 categoryY: hit.categoryY,
+                close: hit.close ?? hit.financial?.close,
                 color,
                 dataIndex: hit.index,
                 datum: hit.datum,
+                financial: hit.financial,
+                financialDirection: hit.financialDirection ?? hit.financial?.direction,
                 formattedCategory: hit.formattedCategory,
+                formattedClose: hit.formattedClose ?? hit.financial?.formattedClose,
                 formattedFrom,
+                formattedHigh: hit.formattedHigh ?? hit.financial?.formattedHigh,
+                formattedLow: hit.formattedLow ?? hit.financial?.formattedLow,
+                formattedOpen: hit.formattedOpen ?? hit.financial?.formattedOpen,
                 formattedPercentage: hit.formattedPercentage,
                 formattedSize: hit.formattedSize,
                 formattedStackPercentage: hit.formattedStackPercentage,
@@ -819,7 +775,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 formattedY: yStr,
                 formattedYCategory: hit.formattedYCategory,
                 fromValue,
+                high: hit.high ?? hit.financial?.high,
+                low: hit.low ?? hit.financial?.low,
                 markId,
+                open: hit.open ?? hit.financial?.open,
                 percentage: hit.percentage,
                 rawValue: hit.rawValue,
                 seriesId: hit.seriesId,
@@ -835,7 +794,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 stackStart: hit.stackStart,
                 stackTotal: hit.stackTotal,
                 toValue,
-                valueKind: hit.valueKind ?? (isRange ? "range" : "scalar"),
+                valueKind: hit.valueKind ?? (isRange ? "range" : hit.financial ? "ohlc" : "scalar"),
                 xValue: hit.xValue,
                 yCategory: hit.yCategory,
                 yValue: hit.yValue
@@ -1202,37 +1161,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
         this.tooltipPosition.set(pointPos);
         this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, matchingHit));
 
-        this.pointFocusChange.emit({
-            category: matchingHit.category,
-            categoryX: matchingHit.categoryX,
-            categoryY: matchingHit.categoryY,
-            dataIndex: matchingHit.index,
-            datum: matchingHit.datum,
-            formattedFrom: matchingHit.formattedFrom ?? matchingHit.range?.formattedFrom,
-            formattedTo: matchingHit.formattedTo ?? matchingHit.range?.formattedTo,
-            formattedXValue: matchingHit.formattedXValue ?? matchingHit.formattedCategory,
-            formattedYCategory: matchingHit.formattedYCategory,
-            fromValue: matchingHit.fromValue ?? matchingHit.range?.fromValue,
-            percentage: matchingHit.percentage,
-            rawValue: matchingHit.rawValue,
-            seriesId: matchingHit.seriesId,
-            seriesName: matchingHit.seriesName,
-            seriesType: matchingHit.seriesType,
-            sizeValue: matchingHit.sizeValue,
-            sliceId: matchingHit.sliceId,
-            stackEnd: matchingHit.stackEnd,
-            stackGroup: matchingHit.stackGroup,
-            stackMode: matchingHit.stackMode,
-            stackPercentage: matchingHit.stackPercentage,
-            stackPosition: matchingHit.stackPosition,
-            stackStart: matchingHit.stackStart,
-            stackTotal: matchingHit.stackTotal,
-            toValue: matchingHit.toValue ?? matchingHit.range?.toValue,
-            valueKind: matchingHit.valueKind ?? (matchingHit.range ? "range" : "scalar"),
-            xValue: matchingHit.xValue,
-            yCategory: matchingHit.yCategory,
-            yValue: matchingHit.yValue
-        });
+        this.pointFocusChange.emit(this.#toPointFocusEvent(matchingHit));
 
         if (currentScene.coordinateSystem === "polar") {
             const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
@@ -1409,6 +1338,54 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     protected sliceContrastColor(slice: SceneSectorSlice): string {
         return this.#styleResolver.getReadableForeground(slice.insideLabelBackgroundColor || slice.color);
+    }
+
+    #toPointEvent(target: SceneHitTarget): ChartPointEvent {
+        return {
+            category: target.category,
+            categoryX: target.categoryX,
+            categoryY: target.categoryY,
+            close: target.close ?? target.financial?.close,
+            dataIndex: target.index,
+            datum: target.datum,
+            financial: target.financial,
+            financialDirection: target.financialDirection ?? target.financial?.direction,
+            formattedClose: target.formattedClose ?? target.financial?.formattedClose,
+            formattedFrom: target.formattedFrom ?? target.range?.formattedFrom,
+            formattedHigh: target.formattedHigh ?? target.financial?.formattedHigh,
+            formattedLow: target.formattedLow ?? target.financial?.formattedLow,
+            formattedOpen: target.formattedOpen ?? target.financial?.formattedOpen,
+            formattedTo: target.formattedTo ?? target.range?.formattedTo,
+            formattedXValue: target.formattedXValue ?? target.formattedCategory,
+            formattedYCategory: target.formattedYCategory,
+            fromValue: target.fromValue ?? target.range?.fromValue,
+            high: target.high ?? target.financial?.high,
+            low: target.low ?? target.financial?.low,
+            open: target.open ?? target.financial?.open,
+            percentage: target.percentage,
+            rawValue: target.rawValue,
+            seriesId: target.seriesId,
+            seriesName: target.seriesName,
+            seriesType: target.seriesType,
+            sizeValue: target.sizeValue,
+            sliceId: target.sliceId,
+            stackEnd: target.stackEnd,
+            stackGroup: target.stackGroup,
+            stackMode: target.stackMode,
+            stackPercentage: target.stackPercentage,
+            stackPosition: target.stackPosition,
+            stackStart: target.stackStart,
+            stackTotal: target.stackTotal,
+            toValue: target.toValue ?? target.range?.toValue,
+            valueKind: target.valueKind ?? (target.range ? "range" : target.financial ? "ohlc" : "scalar"),
+            xValue: target.xValue,
+            yCategory: target.yCategory,
+            yValue: target.yValue
+        };
+    }
+
+    #toPointFocusEvent(target: SceneHitTarget): ChartPointFocusEvent {
+        return this.#toPointEvent(target);
     }
 
     #updateCanvasBackingStore(width: number, height: number): void {

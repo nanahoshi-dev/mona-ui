@@ -9,9 +9,11 @@ import type {
 import type { SceneHeatmapCell } from "../../models/chart-heatmap.models";
 import type {
     ChartBarSeriesScene,
+    ChartCandlestickSeriesScene,
     ChartLineSeriesScene,
     ChartAreaSeriesScene,
     ChartBubbleSeriesScene,
+    ChartOhlcSeriesScene,
     ChartRangeAreaSeriesScene,
     ChartRangeBarSeriesScene,
     ChartScatterSeriesScene
@@ -22,8 +24,10 @@ import type {
     ChartInteractionBucket,
     ChartInteractionXKey,
     SceneBar,
+    SceneCandlestickMark,
     SceneHitTarget,
     SceneMarker,
+    SceneOhlcMark,
     ScenePoint,
     SceneRangeAreaPoint,
     SceneRangeBar
@@ -141,12 +145,26 @@ export class SceneTransitionSampler {
 
         // Build lookup maps from sampled series marks
         const sampledBarsByKey = new Map<string, SceneBar | SceneRangeBar>();
+        const sampledCandlesByKey = new Map<string, SceneCandlestickMark>();
+        const sampledOhlcByKey = new Map<string, SceneOhlcMark>();
         const sampledPointsByKey = new Map<string, ScenePoint>();
         const sampledMarkersByKey = new Map<string, SceneMarker>();
         const sampledRangeAreaPointsByKey = new Map<string, SceneRangeAreaPoint>();
 
         for (const s of sampledSeries) {
-            if (s.type === "bar") {
+            if (s.type === "candlestick") {
+                const candleSeries = s as ChartCandlestickSeriesScene;
+                for (const m of candleSeries.marks) {
+                    const key = m.animationKey ?? `${s.id}:${m.index}`;
+                    sampledCandlesByKey.set(key, m);
+                }
+            } else if (s.type === "ohlc") {
+                const ohlcSeries = s as ChartOhlcSeriesScene;
+                for (const m of ohlcSeries.marks) {
+                    const key = m.animationKey ?? `${s.id}:${m.index}`;
+                    sampledOhlcByKey.set(key, m);
+                }
+            } else if (s.type === "bar") {
                 const barSeries = s as ChartBarSeriesScene;
                 for (const b of barSeries.bars) {
                     const key = b.animationKey ?? `${s.id}:${b.index}`;
@@ -199,7 +217,30 @@ export class SceneTransitionSampler {
             let rangeBand = targetHit.rangeBand;
             let range = targetHit.range;
 
-            if (targetHit.seriesType === "rangeArea") {
+            if (targetHit.seriesType === "candlestick") {
+                const sampledCandle = sampledCandlesByKey.get(key);
+                if (sampledCandle) {
+                    pt = { x: sampledCandle.centerX, y: sampledCandle.closeY };
+                    highPoint = { x: sampledCandle.centerX, y: sampledCandle.highY };
+                    lowPoint = { x: sampledCandle.centerX, y: sampledCandle.lowY };
+                    bounds = sampledCandle.bodyBounds;
+                    visualBounds = sampledCandle.bodyBounds;
+                }
+            } else if (targetHit.seriesType === "ohlc") {
+                const sampledOhlc = sampledOhlcByKey.get(key);
+                if (sampledOhlc) {
+                    pt = { x: sampledOhlc.centerX, y: sampledOhlc.closeY };
+                    highPoint = { x: sampledOhlc.centerX, y: sampledOhlc.highY };
+                    lowPoint = { x: sampledOhlc.centerX, y: sampledOhlc.lowY };
+                    bounds = {
+                        height: Math.max(1, sampledOhlc.lowY - sampledOhlc.highY),
+                        width: sampledOhlc.totalWidth,
+                        x: sampledOhlc.centerX - sampledOhlc.tickWidth,
+                        y: sampledOhlc.highY
+                    };
+                    visualBounds = bounds;
+                }
+            } else if (targetHit.seriesType === "rangeArea") {
                 const sampledRangeAreaPt = sampledRangeAreaPointsByKey.get(key);
                 if (sampledRangeAreaPt && sampledRangeAreaPt.defined && sampledRangeAreaPt.fromPoint && sampledRangeAreaPt.toPoint) {
                     highPoint = sampledRangeAreaPt.highPoint;

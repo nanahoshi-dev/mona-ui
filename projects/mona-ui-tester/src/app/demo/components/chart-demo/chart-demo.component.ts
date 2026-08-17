@@ -23,11 +23,14 @@ import {
     MonaRadarSeriesComponent,
     MonaScatterSeriesComponent,
     MonaBubbleSeriesComponent,
-    MonaRangeBarSeriesComponent,
-    MonaRangeAreaSeriesComponent,
+    MonaCandlestickSeriesComponent,
     MonaHeatmapSeriesComponent,
+    MonaOhlcSeriesComponent,
+    MonaRangeAreaSeriesComponent,
+    MonaRangeBarSeriesComponent,
     type ChartAreaFillMode,
     type ChartCurve,
+    type ChartFinancialFillMode,
     type ChartHeatmapColorMode,
     type ChartPointEvent,
     type ChartPointFocusEvent,
@@ -118,6 +121,8 @@ interface BubbleDataPoint {
         MonaPolarSeriesComponent,
         MonaScatterSeriesComponent,
         MonaBubbleSeriesComponent,
+        MonaCandlestickSeriesComponent,
+        MonaOhlcSeriesComponent,
         MonaRangeBarSeriesComponent,
         MonaRangeAreaSeriesComponent,
         MonaHeatmapSeriesComponent,
@@ -142,11 +147,13 @@ export class ChartDemoComponent {
 
     protected readonly activeTab = signal<
         | "bubble"
+        | "candlestick"
         | "custom"
         | "donut"
         | "grouped"
         | "heatmap"
         | "mixed"
+        | "ohlc"
         | "percent-area"
         | "percent-bar"
         | "pie"
@@ -160,6 +167,33 @@ export class ChartDemoComponent {
         | "time"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
+
+    // Candlestick & OHLC Chart Data & Controls
+    protected readonly candlestickData = signal<readonly { close: number; date: string; high: number; low: number; open: number }[]>([
+        { close: 104, date: "2026-03-01", high: 108, low: 98, open: 100 },
+        { close: 102, date: "2026-03-02", high: 107, low: 100, open: 105 },
+        { close: 112, date: "2026-03-03", high: 115, low: 101, open: 102 },
+        { close: 110, date: "2026-03-04", high: 116, low: 108, open: 112 },
+        { close: 118, date: "2026-03-05", high: 122, low: 109, open: 110 },
+        { close: 118, date: "2026-03-06", high: 121, low: 114, open: 118 },
+        { close: 114, date: "2026-03-07", high: 120, low: 112, open: 119 },
+        { close: 125, date: "2026-03-08", high: 128, low: 113, open: 114 }
+    ]);
+    protected readonly candlestickFillMode = signal<ChartFinancialFillMode>("filled");
+    protected readonly candlestickWickWidth = signal<number>(1);
+    protected readonly candlestickBodyWidthRatio = signal<number>(0.7);
+
+    protected readonly ohlcData = signal<readonly { close: number; date: string; high: number; low: number; open: number }[]>([
+        { close: 1850, date: "2026-03-01", high: 1880, low: 1820, open: 1830 },
+        { close: 1820, date: "2026-03-02", high: 1860, low: 1810, open: 1850 },
+        { close: 1910, date: "2026-03-03", high: 1930, low: 1815, open: 1820 },
+        { close: 1890, date: "2026-03-04", high: 1920, low: 1870, open: 1905 },
+        { close: 1960, date: "2026-03-05", high: 1980, low: 1880, open: 1890 },
+        { close: 1960, date: "2026-03-06", high: 1990, low: 1940, open: 1960 },
+        { close: 1920, date: "2026-03-07", high: 1970, low: 1910, open: 1965 },
+        { close: 2010, date: "2026-03-08", high: 2040, low: 1915, open: 1920 }
+    ]);
+    protected readonly ohlcWickWidth = signal<number>(1);
 
     // Heatmap Chart Data & Controls
     protected readonly heatmapDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -815,6 +849,32 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Randomized range area confidence band dataset");
     }
 
+    public randomizeCandlestickData(): void {
+        this.candlestickData.update(list =>
+            list.map(item => {
+                const open = Math.round(90 + Math.random() * 40);
+                const close = Math.round(90 + Math.random() * 40);
+                const high = Math.round(Math.max(open, close) + Math.random() * 15);
+                const low = Math.round(Math.min(open, close) - Math.random() * 15);
+                return { close, date: item.date, high, low, open };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized candlestick daily OHLC session dataset");
+    }
+
+    public randomizeOhlcData(): void {
+        this.ohlcData.update(list =>
+            list.map(item => {
+                const open = Math.round(1800 + Math.random() * 300);
+                const close = Math.round(1800 + Math.random() * 300);
+                const high = Math.round(Math.max(open, close) + Math.random() * 80);
+                const low = Math.round(Math.min(open, close) - Math.random() * 80);
+                return { close, date: item.date, high, low, open };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized OHLC tick and spine session dataset");
+    }
+
     public randomizeHeatmapData(): void {
         this.heatmapData.update(list =>
             list.map(item => ({
@@ -844,11 +904,13 @@ export class ChartDemoComponent {
     public setTab(
         tab:
             | "bubble"
+            | "candlestick"
             | "custom"
             | "donut"
             | "grouped"
             | "heatmap"
             | "mixed"
+            | "ohlc"
             | "percent-area"
             | "percent-bar"
             | "pie"

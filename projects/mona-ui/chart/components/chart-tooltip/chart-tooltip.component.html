@@ -10,7 +10,45 @@
                 [ngTemplateOutlet]="template.templateRef"
                 [ngTemplateOutletContext]="context" />
         } @else {
-            @if (context.point.seriesType === "heatmap") {
+            @if (context.point.seriesType === "candlestick" || context.point.seriesType === "ohlc" || context.point.valueKind === "ohlc") {
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <div class="flex items-center gap-1.5">
+                        <span
+                            class="inline-block h-2 w-2 rounded-full flex-shrink-0"
+                            [style.background-color]="context.point.color"></span>
+                        <span class="font-semibold text-foreground">{{ context.point.seriesName }}</span>
+                    </div>
+                    @if (context.point.financialDirection; as dir) {
+                        <span
+                            class="text-[10px] font-medium px-1 py-0.5 rounded capitalize"
+                            [style.background-color]="dir === 'rising' ? 'rgba(34, 197, 94, 0.15)' : dir === 'falling' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(107, 114, 128, 0.15)'"
+                            [style.color]="context.point.color">
+                            {{ dir }}
+                        </span>
+                    }
+                </div>
+                <div class="text-xs text-muted-foreground mb-1.5">
+                    <span class="font-medium text-foreground">{{ context.point.formattedX }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs">
+                    <div class="flex items-center justify-between gap-1.5">
+                        <span class="text-muted-foreground">Open:</span>
+                        <span class="font-medium text-foreground">{{ context.point.formattedOpen || context.point.open }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-1.5">
+                        <span class="text-muted-foreground">High:</span>
+                        <span class="font-medium text-foreground">{{ context.point.formattedHigh || context.point.high }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-1.5">
+                        <span class="text-muted-foreground">Low:</span>
+                        <span class="font-medium text-foreground">{{ context.point.formattedLow || context.point.low }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-1.5">
+                        <span class="text-muted-foreground">Close:</span>
+                        <span class="font-medium text-foreground">{{ context.point.formattedClose || context.point.close }}</span>
+                    </div>
+                </div>
+            } @else if (context.point.seriesType === "heatmap") {
                 <div class="flex items-center gap-1.5 mb-1">
                     <span
                         class="inline-block h-2 w-2 rounded-full flex-shrink-0"

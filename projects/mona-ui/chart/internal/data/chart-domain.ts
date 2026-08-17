@@ -2,10 +2,12 @@ import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartField } from "../../models/chart.models";
 import type {
     ChartCartesianSeriesRegistration,
+    ChartFinancialSeriesRegistration,
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 import { resolveFiniteRangeValues } from "./chart-range-resolver";
+import { FinancialDataResolver } from "./financial-data-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
 import type { CartesianStackAnalysis, CartesianStackLayout } from "./cartesian-stack-engine";
 
@@ -31,6 +33,8 @@ export function isCartesianSeriesCompatibleWithXAxisType(
             seriesType === "bar" ||
             seriesType === "line" ||
             seriesType === "area" ||
+            seriesType === "candlestick" ||
+            seriesType === "ohlc" ||
             seriesType === "rangeBar" ||
             seriesType === "rangeArea"
         );
@@ -38,6 +42,8 @@ export function isCartesianSeriesCompatibleWithXAxisType(
     return (
         seriesType === "line" ||
         seriesType === "area" ||
+        seriesType === "candlestick" ||
+        seriesType === "ohlc" ||
         seriesType === "scatter" ||
         seriesType === "bubble" ||
         seriesType === "rangeArea"
@@ -250,16 +256,53 @@ export function calculateTimeDomain(
         s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType)
     );
 
+    const financialTimes: number[] = [];
+
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
         const isRangeArea = s.type === "rangeArea";
         const isBubble = s.type === "bubble";
         const isScatter = s.type === "scatter";
+        const isFinancial = s.type === "candlestick" || s.type === "ohlc";
         const field = "field" in s ? (s as { field: () => ChartField }).field() : undefined;
         const fromField = isRangeArea ? (s as { fromField: () => ChartField }).fromField() : undefined;
         const toField = isRangeArea ? (s as { toField: () => ChartField }).toField() : undefined;
         const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
+
+        if (isFinancial) {
+            const finReg = s as ChartFinancialSeriesRegistration;
+            const resolved = FinancialDataResolver.resolve({
+                closeField: finReg.closeField(),
+                data,
+                highField: finReg.highField(),
+                keyField: finReg.keyField?.(),
+                lowField: finReg.lowField(),
+                openField: finReg.openField(),
+                seriesId: finReg.id,
+                seriesName: finReg.name(),
+                xField
+            });
+            for (const mark of resolved.marks) {
+                let timeVal: number | undefined;
+                if (mark.xRaw instanceof Date && !Number.isNaN(mark.xRaw.getTime())) {
+                    timeVal = mark.xRaw.getTime();
+                } else if (typeof mark.xRaw === "number" && Number.isFinite(mark.xRaw)) {
+                    timeVal = mark.xRaw;
+                } else if (typeof mark.xRaw === "string") {
+                    const parsed = Date.parse(mark.xRaw);
+                    if (!Number.isNaN(parsed)) {
+                        timeVal = parsed;
+                    }
+                }
+                if (timeVal !== undefined && Number.isFinite(timeVal)) {
+                    if (timeVal < minTime) minTime = timeVal;
+                    if (timeVal > maxTime) maxTime = timeVal;
+                    financialTimes.push(timeVal);
+                }
+            }
+            continue;
+        }
 
         for (let i = 0; i < data.length; i++) {
             const xVal = resolveValue(data[i], xField, i);
@@ -312,6 +355,29 @@ export function calculateTimeDomain(
         return [new Date(defaultMin), new Date(defaultMax)];
     }
 
+    if (financialTimes.length > 0) {
+        const uniqueTimes = Array.from(new Set(financialTimes)).sort((a, b) => a - b);
+        let halfInterval = 1800000;
+        if (uniqueTimes.length > 1) {
+            let minDiff = Number.POSITIVE_INFINITY;
+            for (let i = 1; i < uniqueTimes.length; i++) {
+                const diff = uniqueTimes[i] - uniqueTimes[i - 1];
+                if (diff > 0 && diff < minDiff) {
+                    minDiff = diff;
+                }
+            }
+            if (Number.isFinite(minDiff) && minDiff > 0) {
+                halfInterval = minDiff / 2;
+            }
+        }
+        if (!isFiniteNumber(expMinNum)) {
+            minTime -= halfInterval;
+        }
+        if (!isFiniteNumber(expMaxNum)) {
+            maxTime += halfInterval;
+        }
+    }
+
     let resMin = isFiniteNumber(expMinNum) ? expMinNum : minTime;
     let resMax = isFiniteNumber(expMaxNum) ? expMaxNum : maxTime;
 
@@ -344,16 +410,42 @@ export function calculateLinearXDomain(
         s => isCartesianSeriesCompatibleWithXAxisType(s.type, "linear")
     );
 
+    const financialX: number[] = [];
+
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
         const isRangeArea = s.type === "rangeArea";
         const isBubble = s.type === "bubble";
         const isScatter = s.type === "scatter";
+        const isFinancial = s.type === "candlestick" || s.type === "ohlc";
         const field = "field" in s ? (s as { field: () => ChartField }).field() : undefined;
         const fromField = isRangeArea ? (s as { fromField: () => ChartField }).fromField() : undefined;
         const toField = isRangeArea ? (s as { toField: () => ChartField }).toField() : undefined;
         const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
+
+        if (isFinancial) {
+            const finReg = s as ChartFinancialSeriesRegistration;
+            const resolved = FinancialDataResolver.resolve({
+                closeField: finReg.closeField(),
+                data,
+                highField: finReg.highField(),
+                keyField: finReg.keyField?.(),
+                lowField: finReg.lowField(),
+                openField: finReg.openField(),
+                seriesId: finReg.id,
+                seriesName: finReg.name(),
+                xField
+            });
+            for (const mark of resolved.marks) {
+                if (typeof mark.xRaw === "number" && Number.isFinite(mark.xRaw)) {
+                    if (mark.xRaw < min) min = mark.xRaw;
+                    if (mark.xRaw > max) max = mark.xRaw;
+                    financialX.push(mark.xRaw);
+                }
+            }
+            continue;
+        }
 
         for (let i = 0; i < data.length; i++) {
             const xVal = resolveValue(data[i], xField, i);
@@ -377,6 +469,29 @@ export function calculateLinearXDomain(
 
             if (xVal < min) min = xVal;
             if (xVal > max) max = xVal;
+        }
+    }
+
+    if (financialX.length > 0) {
+        const uniqueX = Array.from(new Set(financialX)).sort((a, b) => a - b);
+        let halfInterval = 0.5;
+        if (uniqueX.length > 1) {
+            let minDiff = Number.POSITIVE_INFINITY;
+            for (let i = 1; i < uniqueX.length; i++) {
+                const diff = uniqueX[i] - uniqueX[i - 1];
+                if (diff > 0 && diff < minDiff) {
+                    minDiff = diff;
+                }
+            }
+            if (Number.isFinite(minDiff) && minDiff > 0) {
+                halfInterval = minDiff / 2;
+            }
+        }
+        if (!isFiniteNumber(explicitMin)) {
+            min -= halfInterval;
+        }
+        if (!isFiniteNumber(explicitMax)) {
+            max += halfInterval;
         }
     }
 
@@ -481,6 +596,31 @@ export function calculateContinuousYDomain(
 
             const data = resolveData(s.data(), rootData);
             const xField = s.xField() ?? rootXField;
+
+            if (s.type === "candlestick" || s.type === "ohlc") {
+                const finReg = s as ChartFinancialSeriesRegistration;
+                const resolved = FinancialDataResolver.resolve({
+                    closeField: finReg.closeField(),
+                    data,
+                    highField: finReg.highField(),
+                    keyField: finReg.keyField?.(),
+                    lowField: finReg.lowField(),
+                    openField: finReg.openField(),
+                    seriesId: finReg.id,
+                    seriesName: finReg.name(),
+                    xField
+                });
+                for (const mark of resolved.marks) {
+                    if (xAxisType === "linear" || xAxisType === "time" || xAxisType === "utc") {
+                        if (!isContinuousXValid(mark.xRaw, xAxisType)) {
+                            continue;
+                        }
+                    }
+                    if (mark.low < min) min = mark.low;
+                    if (mark.high > max) max = mark.high;
+                }
+                continue;
+            }
 
             if (s.type === "rangeBar" || s.type === "rangeArea") {
                 const fromField = (s as { fromField: () => ChartField }).fromField();
@@ -630,6 +770,30 @@ export function hasRenderableData(
             "xField" in s
                 ? ((s as { xField: () => ChartField | undefined }).xField?.() ?? rootXField)
                 : rootXField;
+
+        if (s.type === "candlestick" || s.type === "ohlc") {
+            const finReg = s as ChartFinancialSeriesRegistration;
+            const resolved = FinancialDataResolver.resolve({
+                closeField: finReg.closeField(),
+                data,
+                highField: finReg.highField(),
+                keyField: finReg.keyField?.(),
+                lowField: finReg.lowField(),
+                openField: finReg.openField(),
+                seriesId: finReg.id,
+                seriesName: finReg.name(),
+                xField
+            });
+            for (const mark of resolved.marks) {
+                if (xAxisType === "linear" || xAxisType === "time" || xAxisType === "utc") {
+                    if (!isContinuousXValid(mark.xRaw, xAxisType)) {
+                        continue;
+                    }
+                }
+                return true;
+            }
+            continue;
+        }
 
         if (s.type === "rangeBar" || s.type === "rangeArea") {
             const fromField = (s as { fromField: () => ChartField }).fromField();

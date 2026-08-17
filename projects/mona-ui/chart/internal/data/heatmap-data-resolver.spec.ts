@@ -106,9 +106,10 @@ describe("HeatmapDataResolver", () => {
         warnSpy.mockRestore();
     });
 
-    it("should use custom keyField for animationKey when provided", () => {
+    it("should use coordinate-safe custom keyField for animationKey when provided", () => {
         const data = [
-            { customId: "cell-alpha", day: "Mon", hour: 10, val: 20 }
+            { customId: "cell-alpha", day: "Mon", hour: 10, val: 20 },
+            { customId: "cell-alpha", day: "Tue", hour: 11, val: 30 }
         ];
 
         const res = HeatmapDataResolver.resolve({
@@ -121,7 +122,25 @@ describe("HeatmapDataResolver", () => {
             yField: "hour"
         });
 
-        expect(res.cells[0].animationKey).toBe("cell-alpha");
+        expect(res.cells[0].animationKey).toBe("hm-1:heat:cell-alpha:s:Mon:n:10");
+        expect(res.cells[1].animationKey).toBe("hm-1:heat:cell-alpha:s:Tue:n:11");
+    });
+
+    it("should use fallback coordinate animation key when keyField is absent", () => {
+        const data = [
+            { day: "Mon", hour: 10, val: 20 }
+        ];
+
+        const res = HeatmapDataResolver.resolve({
+            data,
+            field: "val",
+            seriesId: "hm-1",
+            seriesName: "Heatmap",
+            xField: "day",
+            yField: "hour"
+        });
+
+        expect(res.cells[0].animationKey).toBe("hm-1:heat:s:Mon:n:10");
     });
 
     it("should swap inverted explicit min and max bounds", () => {

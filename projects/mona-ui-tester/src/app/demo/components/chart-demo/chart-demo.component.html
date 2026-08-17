@@ -114,6 +114,20 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'candlestick' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('candlestick')">
+                Candlestick
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'ohlc' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('ohlc')">
+                OHLC
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'heatmap' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('heatmap')">
@@ -1105,6 +1119,83 @@
                             color="#06b6d4"
                             [strokeWidth]="3"
                             [showPoints]="true" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("candlestick") {
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-muted-foreground">Financial Candlestick Daily Stock Trading Session</h3>
+                        <div class="flex items-center gap-2">
+                            <button monaButton size="small" look="outline" (click)="candlestickFillMode.set(candlestickFillMode() === 'filled' ? 'hollow' : 'filled')">
+                                Toggle Mode: {{ candlestickFillMode() }}
+                            </button>
+                            <button monaButton size="small" look="primary" (click)="randomizeCandlestickData()">
+                                Randomize Prices
+                            </button>
+                        </div>
+                    </div>
+                    <mona-chart
+                        [data]="candlestickData()"
+                        [animation]="animationEnabled()"
+                        xField="date"
+                        class="h-96 w-full"
+                        aria-label="Stock Price Candlestick Chart"
+                        aria-description="Interactive candlestick chart tracking daily open, high, low, and close equity prices."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" title="Share Price ($)" />
+
+                        <mona-candlestick-series
+                            openField="open"
+                            highField="high"
+                            lowField="low"
+                            closeField="close"
+                            name="ACME Corp"
+                            [fillMode]="candlestickFillMode()"
+                            [wickWidth]="candlestickWickWidth()"
+                            [bodyWidthRatio]="candlestickBodyWidthRatio()" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("ohlc") {
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-muted-foreground">High-Frequency Equity OHLC Bars (Open, High, Low, Close)</h3>
+                        <button monaButton size="small" look="primary" (click)="randomizeOhlcData()">
+                            Randomize OHLC
+                        </button>
+                    </div>
+                    <mona-chart
+                        [data]="ohlcData()"
+                        [animation]="animationEnabled()"
+                        xField="date"
+                        class="h-96 w-full"
+                        aria-label="High Frequency OHLC Chart"
+                        aria-description="Interactive OHLC bar chart rendering left open tick and right close tick across trading intervals."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" title="Index Level (pts)" />
+
+                        <mona-ohlc-series
+                            openField="open"
+                            highField="high"
+                            lowField="low"
+                            closeField="close"
+                            name="Global Index"
+                            [wickWidth]="ohlcWickWidth()" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />

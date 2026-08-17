@@ -4,8 +4,10 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { crispPixel, drawBarRect, drawBarRectOutline, drawPointMarker } from "../utils/canvas-utils";
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
+import { CandlestickSeriesRenderer } from "./series/candlestick-series-renderer";
 import { LineSeriesRenderer } from "./series/line-series-renderer";
 import { MarkerSeriesRenderer } from "./series/marker-series-renderer";
+import { OhlcSeriesRenderer } from "./series/ohlc-series-renderer";
 import { RangeAreaSeriesRenderer } from "./series/range-area-series-renderer";
 import { RangeBarSeriesRenderer } from "./series/range-bar-series-renderer";
 
@@ -73,8 +75,14 @@ export class CartesianChartRenderer {
                 case "scatter":
                     MarkerSeriesRenderer.render(context, s);
                     break;
+                case "candlestick":
+                    CandlestickSeriesRenderer.render(context, s);
+                    break;
                 case "line":
                     LineSeriesRenderer.render(context, s);
+                    break;
+                case "ohlc":
+                    OhlcSeriesRenderer.render(context, s);
                     break;
                 case "rangeArea":
                     RangeAreaSeriesRenderer.render(context, s);
@@ -138,6 +146,8 @@ export class CartesianChartRenderer {
                     h.seriesType === "line" ||
                     h.seriesType === "area" ||
                     h.seriesType === "bar" ||
+                    h.seriesType === "candlestick" ||
+                    h.seriesType === "ohlc" ||
                     h.seriesType === "rangeArea" ||
                     h.seriesType === "rangeBar"
             );

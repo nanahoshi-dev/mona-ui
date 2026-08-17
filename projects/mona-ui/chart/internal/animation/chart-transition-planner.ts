@@ -8,6 +8,7 @@ import type {
 import { AreaSeriesAnimationAdapter } from "./adapters/area-animation-adapter";
 import { AxisAnimationAdapter } from "./adapters/axis-animation-adapter";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
+import { FinancialSeriesAnimationAdapter } from "./adapters/financial-animation-adapter";
 import { HeatmapAnimationAdapter } from "./adapters/heatmap-animation-adapter";
 import { LineSeriesAnimationAdapter } from "./adapters/line-animation-adapter";
 import { MarkerSeriesAnimationAdapter } from "./marker-series-animation-adapter";
@@ -442,12 +443,23 @@ export class ChartTransitionPlanner {
             const areaAdapter = new AreaSeriesAnimationAdapter();
             const rangeBarAdapter = new RangeBarSeriesAnimationAdapter();
             const rangeAreaAdapter = new RangeAreaSeriesAnimationAdapter();
+            const financialAdapter = new FinancialSeriesAnimationAdapter();
 
             for (const targetSeries of targetCartesian.series) {
                 targetIds.add(targetSeries.id);
                 const prevSeries = prevSeriesById.get(targetSeries.id);
 
-                if (targetSeries.type === "bar") {
+                if (targetSeries.type === "candlestick" || targetSeries.type === "ohlc") {
+                    plans.push(
+                        financialAdapter.createPlan(
+                            prevSeries && (prevSeries.type === "candlestick" || prevSeries.type === "ohlc")
+                                ? prevSeries
+                                : null,
+                            targetSeries,
+                            context
+                        )
+                    );
+                } else if (targetSeries.type === "bar") {
                     plans.push(
                         barAdapter.createPlan(
                             prevSeries?.type === "bar" ? prevSeries : null,
@@ -517,7 +529,9 @@ export class ChartTransitionPlanner {
             if (prevCartesian) {
                 for (const prevSeries of prevCartesian.series) {
                     if (!targetIds.has(prevSeries.id)) {
-                        if (prevSeries.type === "bar") {
+                        if (prevSeries.type === "candlestick" || prevSeries.type === "ohlc") {
+                            plans.push(financialAdapter.createPlan(prevSeries, null, context));
+                        } else if (prevSeries.type === "bar") {
                             plans.push(barAdapter.createPlan(prevSeries, null, context));
                         } else if (prevSeries.type === "line") {
                             plans.push(lineAdapter.createPlan(prevSeries, null, context));

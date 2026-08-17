@@ -2,7 +2,7 @@ import { ChartInvalidationReason } from "../context/chart-registration-context";
 
 export class ChartRenderScheduler {
     readonly #callback: (reason: ChartInvalidationReason) => void;
-    #frameId: number | null = null;
+    #scheduled: boolean = false;
     #pendingReason: number = 0;
 
     public constructor(callback: (reason: ChartInvalidationReason) => void) {
@@ -10,33 +10,47 @@ export class ChartRenderScheduler {
     }
 
     public cancel(): void {
-        if (this.#frameId !== null && typeof window !== "undefined") {
-            window.cancelAnimationFrame(this.#frameId);
-            this.#frameId = null;
-        }
+        this.#scheduled = false;
         this.#pendingReason = 0;
+    }
+
+    public flush(): void {
+        if (this.#scheduled || this.#pendingReason !== 0) {
+            this.#scheduled = false;
+            const accumulatedReason = this.#pendingReason;
+            this.#pendingReason = 0;
+            this.#callback(accumulatedReason as ChartInvalidationReason);
+        }
     }
 
     public schedule(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         this.#pendingReason |= reason;
 
-        if (typeof window === "undefined") {
-            // SSR or non-browser environment
-            const accumulatedReason = this.#pendingReason;
-            this.#pendingReason = 0;
-            this.#callback(accumulatedReason as ChartInvalidationReason);
+        if (this.#scheduled) {
             return;
         }
 
-        if (this.#frameId !== null) {
-            return;
+        this.#scheduled = true;
+        if (typeof queueMicrotask === "function") {
+            queueMicrotask(() => {
+                if (!this.#scheduled) {
+                    return;
+                }
+                this.#scheduled = false;
+                const accumulatedReason = this.#pendingReason;
+                this.#pendingReason = 0;
+                this.#callback(accumulatedReason as ChartInvalidationReason);
+            });
+        } else {
+            Promise.resolve().then(() => {
+                if (!this.#scheduled) {
+                    return;
+                }
+                this.#scheduled = false;
+                const accumulatedReason = this.#pendingReason;
+                this.#pendingReason = 0;
+                this.#callback(accumulatedReason as ChartInvalidationReason);
+            });
         }
-
-        this.#frameId = window.requestAnimationFrame(() => {
-            this.#frameId = null;
-            const accumulatedReason = this.#pendingReason;
-            this.#pendingReason = 0;
-            this.#callback(accumulatedReason as ChartInvalidationReason);
-        });
     }
 }

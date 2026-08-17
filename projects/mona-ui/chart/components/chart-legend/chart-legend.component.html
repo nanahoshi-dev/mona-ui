@@ -87,14 +87,14 @@
                         [attr.aria-pressed]="item.visible">
                         <span
                             class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                            [style.background-color]="item.color"></span>
+                            [style.background]="item.secondaryColor ? ('linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)') : item.color"></span>
                         <span class="text-xs font-medium">{{ item.name }}</span>
                     </button>
                 } @else {
                     <div [class]="itemClasses(item)">
                         <span
                             class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                            [style.background-color]="item.color"></span>
+                            [style.background]="item.secondaryColor ? ('linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)') : item.color"></span>
                         <span class="text-xs font-medium">{{ item.name }}</span>
                     </div>
                 }

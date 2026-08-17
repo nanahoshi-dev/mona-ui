@@ -6,9 +6,11 @@ export type ChartSeriesType =
     | "area"
     | "bar"
     | "bubble"
+    | "candlestick"
     | "donut"
     | "heatmap"
     | "line"
+    | "ohlc"
     | "pie"
     | "polar"
     | "radar"
@@ -24,6 +26,8 @@ export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
         case "area":
         case "bar":
         case "bubble":
+        case "candlestick":
+        case "ohlc":
         case "rangeArea":
         case "rangeBar":
         case "scatter":
@@ -59,6 +63,7 @@ export interface ChartLegendItem {
     kind?: ChartLegendItemKind;
     name: string;
     percentage?: number;
+    secondaryColor?: string;
     seriesId: string;
     seriesType: ChartSeriesType;
     value?: number;

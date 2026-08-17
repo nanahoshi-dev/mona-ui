@@ -1,3 +1,4 @@
+import type { ChartFinancialDirection, ChartFinancialFillMode } from "../../models/chart-financial.models";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartSeriesType } from "../../models/chart-series.models";
 import type { ChartStackMode } from "../../models/chart-stack.models";
@@ -80,6 +81,69 @@ export interface SceneRangeHitValue {
     readonly toValue: number;
 }
 
+export interface SceneFinancialHitValue {
+    readonly close: number;
+    readonly direction: ChartFinancialDirection;
+    readonly formattedClose?: string;
+    readonly formattedHigh?: string;
+    readonly formattedLow?: string;
+    readonly formattedOpen?: string;
+    readonly high: number;
+    readonly low: number;
+    readonly open: number;
+}
+
+export interface SceneCandlestickMark {
+    readonly animationKey?: string;
+    readonly bodyBounds: ChartRect;
+    readonly bodyWidth: number;
+    readonly centerX: number;
+    readonly close: number;
+    readonly closeY: number;
+    readonly datum: unknown;
+    readonly direction: ChartFinancialDirection;
+    readonly fillMode: ChartFinancialFillMode;
+    readonly formattedClose?: string;
+    readonly formattedHigh?: string;
+    readonly formattedLow?: string;
+    readonly formattedOpen?: string;
+    readonly high: number;
+    readonly highY: number;
+    readonly index: number;
+    readonly low: number;
+    readonly lowY: number;
+    readonly open: number;
+    readonly openY: number;
+    readonly renderOpacity?: number;
+    readonly wickWidth: number;
+    readonly xValue: unknown;
+}
+
+export interface SceneOhlcMark {
+    readonly animationKey?: string;
+    readonly centerX: number;
+    readonly close: number;
+    readonly closeY: number;
+    readonly datum: unknown;
+    readonly direction: ChartFinancialDirection;
+    readonly formattedClose?: string;
+    readonly formattedHigh?: string;
+    readonly formattedLow?: string;
+    readonly formattedOpen?: string;
+    readonly high: number;
+    readonly highY: number;
+    readonly index: number;
+    readonly low: number;
+    readonly lowY: number;
+    readonly open: number;
+    readonly openY: number;
+    readonly renderOpacity?: number;
+    readonly tickWidth: number;
+    readonly totalWidth: number;
+    readonly wickWidth: number;
+    readonly xValue: unknown;
+}
+
 export interface SceneHitTarget {
     angle?: number;
     animationKey?: string;
@@ -89,11 +153,18 @@ export interface SceneHitTarget {
     category?: unknown;
     categoryX?: string;
     categoryY?: string;
+    close?: number;
     color?: string;
     cornerRadii?: ChartCornerRadii;
     datum: unknown;
+    financial?: SceneFinancialHitValue;
+    financialDirection?: ChartFinancialDirection;
     formattedCategory?: string;
+    formattedClose?: string;
     formattedFrom?: string;
+    formattedHigh?: string;
+    formattedLow?: string;
+    formattedOpen?: string;
     formattedPercentage?: string;
     formattedSize?: string;
     formattedStackPercentage?: string;
@@ -103,12 +174,15 @@ export interface SceneHitTarget {
     formattedXValue?: string;
     formattedYCategory?: string;
     fromValue?: number;
+    high?: number;
     highPoint?: ChartPoint;
     highValue?: number;
     index: number;
     isPositive?: boolean;
+    low?: number;
     lowPoint?: ChartPoint;
     lowValue?: number;
+    open?: number;
     percentage?: number;
     point?: ChartPoint;
     radius?: number;

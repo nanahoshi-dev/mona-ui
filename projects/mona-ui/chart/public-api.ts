@@ -17,6 +17,8 @@ export { MonaBubbleSeriesComponent } from "./components/bubble-series/bubble-ser
 export { MonaRangeBarSeriesComponent } from "./components/range-bar-series/range-bar-series.component";
 export { MonaRangeAreaSeriesComponent } from "./components/range-area-series/range-area-series.component";
 export { MonaHeatmapSeriesComponent } from "./components/heatmap-series/heatmap-series.component";
+export { MonaCandlestickSeriesComponent } from "./components/candlestick-series/candlestick-series.component";
+export { MonaOhlcSeriesComponent } from "./components/ohlc-series/ohlc-series.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -110,19 +112,20 @@ export type {
     ChartColorLegendStop,
     ChartColorLegendTick,
     ChartHeatmapCategory,
-    ChartHeatmapCellColorResolver,
     ChartHeatmapCellData,
     ChartHeatmapColorMode,
-    ChartHeatmapColorScaleScene,
-    ChartHeatmapLabelFormatter,
-    ChartHeatmapSeriesScene,
-    ChartHeatmapSeriesStyle,
     ChartLegendMode,
     HeatmapCellClickEvent,
-    HeatmapCellIndex,
-    HeatmapColorScaleType,
-    HeatmapColorStop,
-    HeatmapScale,
-    HeatmapThresholdInterval,
-    SceneHeatmapCell
+    HeatmapColorStop
 } from "./models/chart-heatmap.models";
+
+export type {
+    ChartFinancialDirection,
+    ChartFinancialFillMode,
+    ChartOhlcPointValue
+} from "./models/chart-financial.models";
+
+export type {
+    ChartFinancialPointValue
+} from "./models/chart-point-value.models";
+

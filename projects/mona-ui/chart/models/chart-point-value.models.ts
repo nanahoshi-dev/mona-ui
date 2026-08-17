@@ -1,4 +1,6 @@
-export type ChartPointValueKind = "range" | "scalar";
+import type { ChartFinancialDirection } from "./chart-financial.models";
+
+export type ChartPointValueKind = "ohlc" | "range" | "scalar";
 
 export interface ChartScalarPointValue {
     readonly valueKind: "scalar";
@@ -13,4 +15,17 @@ export interface ChartRangePointValue {
     readonly valueKind: "range";
 }
 
-export type ChartPointValue = ChartScalarPointValue | ChartRangePointValue;
+export interface ChartFinancialPointValue {
+    readonly close: number;
+    readonly financialDirection: ChartFinancialDirection;
+    readonly formattedClose?: string;
+    readonly formattedHigh?: string;
+    readonly formattedLow?: string;
+    readonly formattedOpen?: string;
+    readonly high: number;
+    readonly low: number;
+    readonly open: number;
+    readonly valueKind: "ohlc";
+}
+
+export type ChartPointValue = ChartFinancialPointValue | ChartRangePointValue | ChartScalarPointValue;
