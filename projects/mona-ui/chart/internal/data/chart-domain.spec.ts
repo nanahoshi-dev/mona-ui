@@ -10,6 +10,7 @@ import {
     hasRenderableData,
     inferXAxisType
 } from "./chart-domain";
+import { CartesianStackEngine } from "./cartesian-stack-engine";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 
 function createMockSeries(
@@ -74,7 +75,51 @@ function createMockBubbleSeries(
         type: "bubble",
         visible: signal(visible),
         xField: signal(xField)
-    };
+    } as ChartCartesianSeriesRegistration;
+}
+
+function createMockRangeBarSeries(
+    fromField: ChartField,
+    toField: ChartField,
+    data?: readonly unknown[],
+    visible: boolean = true,
+    xField?: ChartField
+): ChartCartesianSeriesRegistration {
+    return {
+        color: signal("#8b5cf6"),
+        data: signal(data),
+        element: { nativeElement: {} as HTMLElement },
+        fromField: signal(fromField),
+        id: `mock-range-bar-${Math.random()}`,
+        name: signal("Mock Range Bar"),
+        toField: signal(toField),
+        type: "rangeBar",
+        valueFormatter: signal(undefined),
+        visible: signal(visible),
+        xField: signal(xField)
+    } as ChartCartesianSeriesRegistration;
+}
+
+function createMockRangeAreaSeries(
+    fromField: ChartField,
+    toField: ChartField,
+    data?: readonly unknown[],
+    visible: boolean = true,
+    xField?: ChartField
+): ChartCartesianSeriesRegistration {
+    return {
+        color: signal("#ec4899"),
+        data: signal(data),
+        element: { nativeElement: {} as HTMLElement },
+        fromField: signal(fromField),
+        id: `mock-range-area-${Math.random()}`,
+        name: signal("Mock Range Area"),
+        toField: signal(toField),
+        type: "rangeArea",
+        valueFormatter: signal(undefined),
+        visible: signal(visible),
+        xField: signal(xField)
+    } as ChartCartesianSeriesRegistration;
 }
 
 describe("chart-domain", () => {
@@ -453,6 +498,139 @@ describe("chart-domain", () => {
             expect(domain[0]).toBe(50);
             expect(domain[1]).toBe(80);
         });
+
+        it("should calculate raw Y domain from visible Line series when all registered percent stack members are hidden (PRE-001)", () => {
+            const data = [
+                { month: "Jan", pct1: 20, pct2: 80, rawVal: 500 },
+                { month: "Feb", pct1: 40, pct2: 60, rawVal: 800 }
+            ];
+            const series: readonly ChartCartesianSeriesRegistration[] = [
+                {
+                    ...createMockSeries("bar", "pct1", undefined, false, "month"),
+                    id: "pct1",
+                    stack: signal("s"),
+                    stackMode: signal("percent")
+                } as ChartCartesianSeriesRegistration,
+                {
+                    ...createMockSeries("bar", "pct2", undefined, false, "month"),
+                    id: "pct2",
+                    stack: signal("s"),
+                    stackMode: signal("percent")
+                } as ChartCartesianSeriesRegistration,
+                {
+                    ...createMockSeries("line", "rawVal", undefined, true, "month"),
+                    id: "line1"
+                } as ChartCartesianSeriesRegistration
+            ];
+
+            const stackAnalysis = CartesianStackEngine.computeAnalysis({
+                rootData: data,
+                rootXField: "month",
+                series,
+                xAxisType: "category"
+            });
+
+            expect(stackAnalysis.axisUnitMode).toBe("raw");
+
+            const domain = calculateContinuousYDomain(
+                series,
+                data,
+                undefined,
+                undefined,
+                "month",
+                "category",
+                stackAnalysis
+            );
+
+            // Raw line is 500..800 (not 0..100)
+            expect(domain[0]).toBe(500);
+            expect(domain[1]).toBe(800);
+        });
+
+        it("should preserve 0..100 percent domain when all percent members are hidden and no raw series is visible (PRE-003)", () => {
+            const data = [
+                { month: "Jan", pct1: 20, pct2: 80 },
+                { month: "Feb", pct1: 40, pct2: 60 }
+            ];
+            const series: readonly ChartCartesianSeriesRegistration[] = [
+                {
+                    ...createMockSeries("bar", "pct1", undefined, false, "month"),
+                    id: "pct1",
+                    stack: signal("s"),
+                    stackMode: signal("percent")
+                } as ChartCartesianSeriesRegistration,
+                {
+                    ...createMockSeries("bar", "pct2", undefined, false, "month"),
+                    id: "pct2",
+                    stack: signal("s"),
+                    stackMode: signal("percent")
+                } as ChartCartesianSeriesRegistration
+            ];
+
+            const stackAnalysis = CartesianStackEngine.computeAnalysis({
+                rootData: data,
+                rootXField: "month",
+                series,
+                xAxisType: "category"
+            });
+
+            expect(stackAnalysis.axisUnitMode).toBe("percent");
+
+            const domain = calculateContinuousYDomain(
+                series,
+                data,
+                undefined,
+                undefined,
+                "month",
+                "category",
+                stackAnalysis
+            );
+
+            expect(domain[0]).toBe(0);
+            expect(domain[1]).toBe(100);
+        });
+
+        it("should aggregate all registered percent groups to determine sign fallback (PRE-004)", () => {
+            const data = [
+                { month: "Jan", neg: -30, pos: 50 }
+            ];
+            const series: readonly ChartCartesianSeriesRegistration[] = [
+                {
+                    ...createMockSeries("bar", "pos", undefined, false, "month"),
+                    id: "pos-series",
+                    stack: signal("posGroup"),
+                    stackMode: signal("percent")
+                } as ChartCartesianSeriesRegistration,
+                {
+                    ...createMockSeries("bar", "neg", undefined, false, "month"),
+                    id: "neg-series",
+                    stack: signal("negGroup"),
+                    stackMode: signal("percent")
+                } as ChartCartesianSeriesRegistration
+            ];
+
+            const stackAnalysis = CartesianStackEngine.computeAnalysis({
+                rootData: data,
+                rootXField: "month",
+                series,
+                xAxisType: "category"
+            });
+
+            expect(stackAnalysis.axisUnitMode).toBe("percent");
+
+            const domain = calculateContinuousYDomain(
+                series,
+                data,
+                undefined,
+                undefined,
+                "month",
+                "category",
+                stackAnalysis
+            );
+
+            expect(domain[0]).toBe(-100);
+            expect(domain[1]).toBe(100);
+        });
     });
 
     describe("calculateLinearXDomain with Scatter and Bubble (SB-002, SB-010)", () => {
@@ -481,6 +659,71 @@ describe("chart-domain", () => {
             expect(domain[0]).toBe(5);
             expect(domain[1]).toBe(15);
         });
+
+        it("should calculate continuous X domain for Range Area series", () => {
+            const series = [createMockRangeAreaSeries("low", "high")];
+            const data = [
+                { high: 30, low: 10, x: 5 },
+                { high: 40, low: 20, x: 25 },
+                { high: null, low: 10, x: 50 } // Invalid range row omitted from X domain
+            ];
+            const domain = calculateLinearXDomain(series, data, "x");
+            expect(domain[0]).toBe(5);
+            expect(domain[1]).toBe(25);
+        });
+
+        it("should ignore Range Bar series on linear X axis", () => {
+            const series = [
+                createMockRangeBarSeries("low", "high"),
+                createMockSeries("line", "val")
+            ];
+            const data = [
+                { high: 50, low: 10, val: 30, x: 10 },
+                { high: 60, low: 20, val: 40, x: 50 }
+            ];
+            const domain = calculateLinearXDomain(series, data, "x");
+            expect(domain[0]).toBe(10);
+            expect(domain[1]).toBe(50);
+        });
+    });
+
+    describe("Range Series Y Domain Resolution", () => {
+        it("should calculate Y domain encompassing both from and to values across Range Bar and Range Area", () => {
+            const series = [
+                createMockRangeBarSeries("minTemp", "maxTemp"),
+                createMockRangeAreaSeries("q1", "q3")
+            ];
+            const data = [
+                { maxTemp: 35, minTemp: 15, q1: 18, q3: 30 },
+                { maxTemp: 42, minTemp: 22, q1: 25, q3: 38 }
+            ];
+            const domain = calculateContinuousYDomain(series, data, undefined, undefined, "month", "category");
+            expect(domain[0]).toBe(15);
+            expect(domain[1]).toBe(42);
+        });
+
+        it("should NOT force zero baseline for Range Bar or Range Area series", () => {
+            const series = [createMockRangeBarSeries("low", "high")];
+            const data = [
+                { high: 150, low: 100 },
+                { high: 180, low: 120 }
+            ];
+            const domain = calculateContinuousYDomain(series, data, undefined, undefined, "cat", "category");
+            // Baseline 0 should NOT be forced
+            expect(domain[0]).toBe(100);
+            expect(domain[1]).toBe(180);
+        });
+
+        it("should correctly handle inverted range endpoints where from > to", () => {
+            const series = [createMockRangeBarSeries("from", "to")];
+            const data = [
+                { from: 80, to: 20 },
+                { from: 95, to: 45 }
+            ];
+            const domain = calculateContinuousYDomain(series, data, undefined, undefined, "cat", "category");
+            expect(domain[0]).toBe(20);
+            expect(domain[1]).toBe(95);
+        });
     });
 
     describe("hasRenderableData", () => {
@@ -488,6 +731,29 @@ describe("chart-domain", () => {
             const series = [createMockSeries("line", "val")];
             const data = [{ val: 10 }, { val: 20 }];
             expect(hasRenderableData(series, data)).toBe(true);
+        });
+
+        it("should return true for Range Bar when at least one row has finite from and to values", () => {
+            const series = [createMockRangeBarSeries("low", "high")];
+            const data = [
+                { high: null, low: 10 },
+                { high: 30, low: 15 }
+            ];
+            expect(hasRenderableData(series, data, "category")).toBe(true);
+        });
+
+        it("should return false for Range Bar on incompatible linear/time X axes", () => {
+            const series = [createMockRangeBarSeries("low", "high")];
+            const data = [{ high: 30, low: 10 }];
+            expect(hasRenderableData(series, data, "linear")).toBe(false);
+            expect(hasRenderableData(series, data, "time")).toBe(false);
+        });
+
+        it("should return true for Range Area on category, linear, and time axes", () => {
+            const series = [createMockRangeAreaSeries("low", "high")];
+            const data = [{ high: 30, low: 10, x: 5 }];
+            expect(hasRenderableData(series, data, "category")).toBe(true);
+            expect(hasRenderableData(series, data, "linear", "x")).toBe(true);
         });
 
         it("should return false when series data has no finite numbers", () => {

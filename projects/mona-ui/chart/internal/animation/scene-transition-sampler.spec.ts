@@ -55,6 +55,15 @@ describe("SceneTransitionSampler", () => {
                     type: "bar"
                 }
             ],
+            stackConfiguration: [
+                {
+                    geometryType: "bar",
+                    groupId: "bar:sales",
+                    mode: "normal",
+                    registeredSeriesIds: ["b1"]
+                }
+            ],
+            stackSignature: '["bar:sales"]',
             width: 500
         };
 
@@ -80,14 +89,20 @@ describe("SceneTransitionSampler", () => {
         const frame0 = SceneTransitionSampler.sampleFrame(plan, 0);
         const sampledCartesian0 = frame0.scene as CartesianChartScene;
         expect((sampledCartesian0.series[0] as ChartBarSeriesScene).bars[0].height).toBe(0);
+        expect(sampledCartesian0.stackConfiguration).toEqual(toScene.stackConfiguration);
+        expect(sampledCartesian0.stackSignature).toBe(toScene.stackSignature);
 
         const frameMid = SceneTransitionSampler.sampleFrame(plan, 0.5);
         const sampledCartesianMid = frameMid.scene as CartesianChartScene;
         expect(((sampledCartesianMid.series[0] as ChartBarSeriesScene).bars[0]).height).toBeCloseTo(50, 1);
+        expect(sampledCartesianMid.stackConfiguration).toEqual(toScene.stackConfiguration);
+        expect(sampledCartesianMid.stackSignature).toBe(toScene.stackSignature);
 
         const frame1 = SceneTransitionSampler.sampleFrame(plan, 1);
         const sampledCartesian1 = frame1.scene as CartesianChartScene;
         expect((sampledCartesian1.series[0] as ChartBarSeriesScene).bars[0].height).toBe(100);
+        expect(sampledCartesian1.stackConfiguration).toEqual(toScene.stackConfiguration);
+        expect(sampledCartesian1.stackSignature).toBe(toScene.stackSignature);
     });
 
     it("should sample polar sector slice scene correctly", () => {

@@ -9,6 +9,8 @@ import type {
     ChartLineSeriesScene,
     ChartAreaSeriesScene,
     ChartBubbleSeriesScene,
+    ChartRangeAreaSeriesScene,
+    ChartRangeBarSeriesScene,
     ChartScatterSeriesScene
 } from "../scene/cartesian-scene";
 import type { ChartSectorSeriesScene } from "../scene/polar-scene";
@@ -109,9 +111,13 @@ export class SceneTransitionSampler {
             .filter((s): s is any => s !== null);
 
         // Build lookup maps from sampled series marks
-        const sampledBarsByKey = new Map<string, { height: number; isPositive: boolean; width: number; x: number; y: number }>();
+        const sampledBarsByKey = new Map<string, { height: number; isPositive?: boolean; width: number; x: number; y: number }>();
         const sampledPointsByKey = new Map<string, { defined: boolean; x: number; y: number }>();
         const sampledMarkersByKey = new Map<string, { radius: number; x: number; y: number }>();
+        const sampledRangeAreaPointsByKey = new Map<
+            string,
+            { defined: boolean; fromPoint?: { x: number; y: number }; highPoint?: { x: number; y: number }; lowPoint?: { x: number; y: number }; toPoint?: { x: number; y: number }; x: number }
+        >();
 
         for (const s of sampledSeries) {
             if (s.type === "bar") {
@@ -120,11 +126,23 @@ export class SceneTransitionSampler {
                     const key = b.animationKey ?? `${s.id}:${b.index}`;
                     sampledBarsByKey.set(key, b);
                 }
+            } else if (s.type === "rangeBar") {
+                const rangeBarSeries = s as ChartRangeBarSeriesScene;
+                for (const b of rangeBarSeries.bars) {
+                    const key = b.animationKey ?? `${s.id}:${b.index}`;
+                    sampledBarsByKey.set(key, b);
+                }
             } else if (s.type === "line" || s.type === "area") {
                 const pathSeries = s as ChartLineSeriesScene | ChartAreaSeriesScene;
                 for (const pt of pathSeries.points) {
                     const key = pt.animationKey ?? `${s.id}:${pt.index}`;
                     sampledPointsByKey.set(key, pt);
+                }
+            } else if (s.type === "rangeArea") {
+                const rangeAreaSeries = s as ChartRangeAreaSeriesScene;
+                for (const pt of rangeAreaSeries.points) {
+                    const key = pt.animationKey ?? `${s.id}:${pt.index}`;
+                    sampledRangeAreaPointsByKey.set(key, pt);
                 }
             } else if (s.type === "scatter" || s.type === "bubble") {
                 const markerSeries = s as ChartScatterSeriesScene | ChartBubbleSeriesScene;
@@ -145,12 +163,23 @@ export class SceneTransitionSampler {
             const key = targetHit.animationKey ?? `${targetHit.seriesId}:${targetHit.xKey}`;
 
             let pt = targetHit.point;
+            let highPoint = targetHit.highPoint;
+            let lowPoint = targetHit.lowPoint;
             let bounds = targetHit.bounds;
             let visualBounds = targetHit.visualBounds;
             let radius = targetHit.radius;
             let visualRadius = targetHit.visualRadius;
 
-            if (targetHit.point) {
+            if (targetHit.seriesType === "rangeArea") {
+                const sampledRangeAreaPt = sampledRangeAreaPointsByKey.get(key);
+                if (sampledRangeAreaPt && sampledRangeAreaPt.defined) {
+                    highPoint = sampledRangeAreaPt.highPoint;
+                    lowPoint = sampledRangeAreaPt.lowPoint;
+                    if (highPoint && lowPoint) {
+                        pt = { x: sampledRangeAreaPt.x, y: (highPoint.y + lowPoint.y) / 2 };
+                    }
+                }
+            } else if (targetHit.point) {
                 if (targetHit.seriesType === "scatter" || targetHit.seriesType === "bubble") {
                     const sampledMarker = sampledMarkersByKey.get(key);
                     if (!sampledMarker || sampledMarker.radius <= 0) {
@@ -199,6 +228,8 @@ export class SceneTransitionSampler {
             const hit: SceneHitTarget = {
                 ...targetHit,
                 bounds,
+                highPoint,
+                lowPoint,
                 point: pt,
                 radius,
                 visualBounds,
@@ -274,6 +305,8 @@ export class SceneTransitionSampler {
             plotRect: toScene.plotRect,
             pointSpatialIndex,
             series: sampledSeries,
+            stackConfiguration: toScene.stackConfiguration,
+            stackSignature: toScene.stackSignature,
             width: toScene.width,
             xAxisType: toScene.xAxisType,
             xTimeSpanMs: toScene.xTimeSpanMs

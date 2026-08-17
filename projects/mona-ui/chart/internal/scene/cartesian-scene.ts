@@ -1,7 +1,14 @@
 import type { ChartAxisPosition, ChartAxisTick } from "../../models/chart-axis.models";
 import type { ChartAreaFillMode, ChartCurve } from "../../models/chart-series.models";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
-import type { SceneAreaPoint, SceneBar, SceneMarker, ScenePoint } from "./scene-geometry";
+import type {
+    SceneAreaPoint,
+    SceneBar,
+    SceneMarker,
+    ScenePoint,
+    SceneRangeAreaPoint,
+    SceneRangeBar
+} from "./scene-geometry";
 
 export interface ChartAxisScene {
     axis: "x" | "y";
@@ -79,10 +86,38 @@ export interface ChartBarSeriesScene {
     type: "bar";
 }
 
+export interface ChartRangeBarSeriesScene {
+    readonly bars: readonly SceneRangeBar[];
+    readonly borderRadius: number;
+    readonly fillOpacity: number;
+    readonly id: string;
+    readonly name: string;
+    readonly renderOpacity?: number;
+    readonly style: ChartSeriesStyle;
+    readonly type: "rangeBar";
+}
+
+export interface ChartRangeAreaSeriesScene {
+    readonly connectNulls: boolean;
+    readonly curve: ChartCurve;
+    readonly fillOpacity: number;
+    readonly id: string;
+    readonly name: string;
+    readonly pointRadius: number;
+    readonly points: readonly SceneRangeAreaPoint[];
+    readonly renderOpacity?: number;
+    readonly showPoints: boolean;
+    readonly strokeWidth: number;
+    readonly style: ChartSeriesStyle;
+    readonly type: "rangeArea";
+}
+
 export type ChartSeriesScene =
     | ChartAreaSeriesScene
     | ChartBarSeriesScene
     | ChartBubbleSeriesScene
     | ChartLineSeriesScene
+    | ChartRangeAreaSeriesScene
+    | ChartRangeBarSeriesScene
     | ChartScatterSeriesScene;
 

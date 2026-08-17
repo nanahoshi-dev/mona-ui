@@ -14,6 +14,8 @@ export { MonaChartLegendComponent } from "./components/chart-legend/chart-legend
 export { MonaChartTooltipComponent } from "./components/chart-tooltip/chart-tooltip.component";
 export { MonaScatterSeriesComponent } from "./components/scatter-series/scatter-series.component";
 export { MonaBubbleSeriesComponent } from "./components/bubble-series/bubble-series.component";
+export { MonaRangeBarSeriesComponent } from "./components/range-bar-series/range-bar-series.component";
+export { MonaRangeAreaSeriesComponent } from "./components/range-area-series/range-area-series.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -68,6 +70,7 @@ export type {
 } from "./models/chart-event.models";
 
 export type {
+    ChartPointValueKind,
     ChartTooltipPointContext,
     ChartTooltipTemplateContext
 } from "./models/chart-tooltip.models";

@@ -410,6 +410,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 category: target.category,
                 dataIndex: target.index,
                 datum: target.datum,
+                formattedFrom: target.formattedFrom ?? target.range?.formattedFrom,
+                formattedTo: target.formattedTo ?? target.range?.formattedTo,
+                fromValue: target.fromValue ?? target.range?.fromValue,
                 percentage: target.percentage,
                 seriesId: target.seriesId,
                 seriesName: target.seriesName,
@@ -423,6 +426,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 stackPosition: target.stackPosition,
                 stackStart: target.stackStart,
                 stackTotal: target.stackTotal,
+                toValue: target.toValue ?? target.range?.toValue,
+                valueKind: target.valueKind ?? (target.range ? "range" : "scalar"),
                 xValue: target.xValue,
                 yValue: target.yValue
             });
@@ -488,6 +493,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         category: hit.category,
                         dataIndex: hit.index,
                         datum: hit.datum,
+                        formattedFrom: hit.formattedFrom ?? hit.range?.formattedFrom,
+                        formattedTo: hit.formattedTo ?? hit.range?.formattedTo,
+                        fromValue: hit.fromValue ?? hit.range?.fromValue,
                         percentage: hit.percentage,
                         seriesId: hit.seriesId,
                         seriesName: hit.seriesName,
@@ -501,6 +509,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         stackPosition: hit.stackPosition,
                         stackStart: hit.stackStart,
                         stackTotal: hit.stackTotal,
+                        toValue: hit.toValue ?? hit.range?.toValue,
+                        valueKind: hit.valueKind ?? (hit.range ? "range" : "scalar"),
                         xValue: hit.xValue,
                         yValue: hit.yValue
                     });
@@ -731,7 +741,16 @@ export class MonaChartComponent implements ChartRegistrationContext {
             const seriesItem = seriesItems.find(s => s.itemId === hit.sliceId || s.seriesId === hit.seriesId);
             const color = hit.color ?? seriesItem?.color ?? "#3b82f6";
             const xStr = hit.formattedCategory ?? formatXValue(hit.xValue, hit.index, xFormatter, xAxisType);
-            const yStr = hit.formattedValue ?? formatYValue(hit.yValue, hit.index, yFormatter);
+            const isRange = hit.valueKind === "range" || hit.range !== undefined;
+            const fromValue = hit.fromValue ?? hit.range?.fromValue;
+            const toValue = hit.toValue ?? hit.range?.toValue;
+            const formattedFrom = hit.formattedFrom ?? hit.range?.formattedFrom;
+            const formattedTo = hit.formattedTo ?? hit.range?.formattedTo;
+            const yStr =
+                hit.formattedValue ??
+                (isRange && formattedFrom && formattedTo
+                    ? `${formattedFrom} – ${formattedTo}`
+                    : formatYValue(hit.yValue, hit.index, yFormatter));
             const markId = hit.animationKey ?? hit.sliceId ?? `${hit.seriesId}:${hit.index}`;
 
             return {
@@ -740,12 +759,15 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 dataIndex: hit.index,
                 datum: hit.datum,
                 formattedCategory: hit.formattedCategory,
+                formattedFrom,
                 formattedPercentage: hit.formattedPercentage,
                 formattedSize: hit.formattedSize,
                 formattedStackPercentage: hit.formattedStackPercentage,
                 formattedStackTotal: hit.formattedStackTotal,
+                formattedTo,
                 formattedX: xStr,
                 formattedY: yStr,
+                fromValue,
                 markId,
                 percentage: hit.percentage,
                 seriesId: hit.seriesId,
@@ -760,6 +782,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 stackPosition: hit.stackPosition,
                 stackStart: hit.stackStart,
                 stackTotal: hit.stackTotal,
+                toValue,
+                valueKind: hit.valueKind ?? (isRange ? "range" : "scalar"),
                 xValue: hit.xValue,
                 yValue: hit.yValue
             };
@@ -1129,6 +1153,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
             category: matchingHit.category,
             dataIndex: matchingHit.index,
             datum: matchingHit.datum,
+            formattedFrom: matchingHit.formattedFrom ?? matchingHit.range?.formattedFrom,
+            formattedTo: matchingHit.formattedTo ?? matchingHit.range?.formattedTo,
+            fromValue: matchingHit.fromValue ?? matchingHit.range?.fromValue,
             percentage: matchingHit.percentage,
             seriesId: matchingHit.seriesId,
             seriesName: matchingHit.seriesName,
@@ -1142,6 +1169,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
             stackPosition: matchingHit.stackPosition,
             stackStart: matchingHit.stackStart,
             stackTotal: matchingHit.stackTotal,
+            toValue: matchingHit.toValue ?? matchingHit.range?.toValue,
+            valueKind: matchingHit.valueKind ?? (matchingHit.range ? "range" : "scalar"),
             xValue: matchingHit.xValue,
             yValue: matchingHit.yValue
         });
@@ -1158,7 +1187,14 @@ export class MonaChartComponent implements ChartRegistrationContext {
             const xStr =
                 matchingHit.formattedCategory ??
                 formatXValue(matchingHit.xValue, matchingHit.index, xAxis?.formatter(), xAxis?.type());
-            const yStr = matchingHit.formattedValue ?? formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter());
+            const isRange = matchingHit.valueKind === "range" || matchingHit.range !== undefined;
+            const fromStr = matchingHit.formattedFrom ?? matchingHit.range?.formattedFrom;
+            const toStr = matchingHit.formattedTo ?? matchingHit.range?.formattedTo;
+            const yStr =
+                matchingHit.formattedValue ??
+                (isRange && fromStr && toStr
+                    ? `${fromStr} – ${toStr}`
+                    : formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter()));
             const sizeStr =
                 matchingHit.formattedSize ??
                 (matchingHit.sizeValue !== undefined ? String(matchingHit.sizeValue) : "");
@@ -1168,7 +1204,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
                     ? `, stack share ${matchingHit.formattedStackPercentage}`
                     : "";
 
-            if (matchingHit.seriesType === "bubble" && sizeStr) {
+            if (isRange && fromStr && toStr) {
+                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${fromStr} to ${toStr}`);
+            } else if (matchingHit.seriesType === "bubble" && sizeStr) {
                 this.activeAccessibilityText.set(
                     `${matchingHit.seriesName}: ${xStr}, ${yStr}, size ${sizeStr}${shareStr}`
                 );

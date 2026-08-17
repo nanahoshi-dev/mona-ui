@@ -5,6 +5,7 @@ import type {
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
 import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveFiniteRangeValues } from "./chart-range-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
 import type { CartesianStackAnalysis, CartesianStackLayout } from "./cartesian-stack-engine";
 
@@ -26,9 +27,21 @@ export function isCartesianSeriesCompatibleWithXAxisType(
     xAxisType: ChartXAxisType
 ): boolean {
     if (xAxisType === "category") {
-        return seriesType === "bar" || seriesType === "line" || seriesType === "area";
+        return (
+            seriesType === "bar" ||
+            seriesType === "line" ||
+            seriesType === "area" ||
+            seriesType === "rangeBar" ||
+            seriesType === "rangeArea"
+        );
     }
-    return seriesType === "line" || seriesType === "area" || seriesType === "scatter" || seriesType === "bubble";
+    return (
+        seriesType === "line" ||
+        seriesType === "area" ||
+        seriesType === "scatter" ||
+        seriesType === "bubble" ||
+        seriesType === "rangeArea"
+    );
 }
 
 export function isContinuousXValid(val: unknown, xAxisType: ChartXAxisType): boolean {
@@ -127,7 +140,7 @@ export function inferXAxisType(
         return "category";
     }
 
-    const hasBarSeries = seriesToInspect.some(s => s.type === "bar");
+    const hasBarSeries = seriesToInspect.some(s => s.type === "bar" || s.type === "rangeBar");
     if (hasBarSeries) {
         return "category";
     }
@@ -240,9 +253,12 @@ export function calculateTimeDomain(
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
-        const field = s.field();
+        const isRangeArea = s.type === "rangeArea";
         const isBubble = s.type === "bubble";
         const isScatter = s.type === "scatter";
+        const field = "field" in s ? (s as { field: () => ChartField }).field() : undefined;
+        const fromField = isRangeArea ? (s as { fromField: () => ChartField }).fromField() : undefined;
+        const toField = isRangeArea ? (s as { toField: () => ChartField }).toField() : undefined;
         const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
 
         for (let i = 0; i < data.length; i++) {
@@ -262,7 +278,11 @@ export function calculateTimeDomain(
                 continue;
             }
 
-            if (isScatter || isBubble) {
+            if (isRangeArea && fromField && toField) {
+                const range = resolveFiniteRangeValues(data[i], fromField, toField, i);
+                if (!range) continue;
+            } else if (isScatter || isBubble) {
+                if (!field) continue;
                 const yVal = resolveValue(data[i], field, i);
                 if (!isFiniteNumber(yVal)) continue;
 
@@ -327,9 +347,12 @@ export function calculateLinearXDomain(
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
-        const field = s.field();
+        const isRangeArea = s.type === "rangeArea";
         const isBubble = s.type === "bubble";
         const isScatter = s.type === "scatter";
+        const field = "field" in s ? (s as { field: () => ChartField }).field() : undefined;
+        const fromField = isRangeArea ? (s as { fromField: () => ChartField }).fromField() : undefined;
+        const toField = isRangeArea ? (s as { toField: () => ChartField }).toField() : undefined;
         const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
 
         for (let i = 0; i < data.length; i++) {
@@ -338,7 +361,11 @@ export function calculateLinearXDomain(
                 continue;
             }
 
-            if (isScatter || isBubble) {
+            if (isRangeArea && fromField && toField) {
+                const range = resolveFiniteRangeValues(data[i], fromField, toField, i);
+                if (!range) continue;
+            } else if (isScatter || isBubble) {
+                if (!field) continue;
                 const yVal = resolveValue(data[i], field, i);
                 if (!isFiniteNumber(yVal)) continue;
 
@@ -401,16 +428,20 @@ export function calculateContinuousYDomain(
         seriesToScan.some(s => s.type === "area" || s.type === "bar") ||
         Boolean(stackLayout && stackLayout.groups.length > 0);
 
-    const hasPercentStacks = Boolean(stackLayout?.hasPercentStacks || stackAnalysis?.yUnitMode === "percent");
-    const regPercentGroup = stackAnalysis?.configuration.groups.find(g => g.mode === "percent" && g.valid);
+    const hasPercentStacks = Boolean(
+        stackAnalysis
+            ? stackAnalysis.axisUnitMode === "percent"
+            : stackLayout?.hasPercentStacks
+    );
+    const regPercentGroups = stackAnalysis?.configuration.groups.filter(g => g.mode === "percent" && g.valid) ?? [];
 
-    if (hasPercentStacks || regPercentGroup) {
+    if (hasPercentStacks) {
         let hasPos = stackLayout?.groups.some(g => g.mode === "percent" && g.hasPositive);
         let hasNeg = stackLayout?.groups.some(g => g.mode === "percent" && g.hasNegative);
 
-        if (!hasPos && !hasNeg && regPercentGroup) {
-            hasPos = regPercentGroup.registeredHasPositive;
-            hasNeg = regPercentGroup.registeredHasNegative;
+        if (!hasPos && !hasNeg && regPercentGroups.length > 0) {
+            hasPos = regPercentGroups.some(g => g.registeredHasPositive);
+            hasNeg = regPercentGroups.some(g => g.registeredHasNegative);
         }
 
         if (hasPos && hasNeg) {
@@ -444,8 +475,32 @@ export function calculateContinuousYDomain(
             }
 
             const data = resolveData(s.data(), rootData);
-            const field = s.field();
             const xField = s.xField() ?? rootXField;
+
+            if (s.type === "rangeBar" || s.type === "rangeArea") {
+                const fromField = (s as { fromField: () => ChartField }).fromField();
+                const toField = (s as { toField: () => ChartField }).toField();
+                for (let i = 0; i < data.length; i++) {
+                    const xVal = resolveValue(data[i], xField, i);
+                    if (s.type === "rangeArea" && (xAxisType === "linear" || xAxisType === "time" || xAxisType === "utc")) {
+                        if (!isContinuousXValid(xVal, xAxisType)) {
+                            continue;
+                        }
+                    }
+                    const range = resolveFiniteRangeValues(data[i], fromField, toField, i);
+                    if (!range) {
+                        continue;
+                    }
+                    if (range.lowValue < min) min = range.lowValue;
+                    if (range.highValue > max) max = range.highValue;
+                }
+                continue;
+            }
+
+            const field = "field" in s ? (s as { field: () => ChartField }).field() : undefined;
+            if (!field) {
+                continue;
+            }
             const isBubble = s.type === "bubble";
             const isScatter = s.type === "scatter";
             const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
@@ -566,11 +621,33 @@ export function hasRenderableData(
         if (data.length === 0) {
             continue;
         }
-        const field = s.field();
         const xField =
             "xField" in s
                 ? ((s as { xField: () => ChartField | undefined }).xField?.() ?? rootXField)
                 : rootXField;
+
+        if (s.type === "rangeBar" || s.type === "rangeArea") {
+            const fromField = (s as { fromField: () => ChartField }).fromField();
+            const toField = (s as { toField: () => ChartField }).toField();
+            for (let i = 0; i < data.length; i++) {
+                const xVal = resolveValue(data[i], xField, i);
+                if (s.type === "rangeArea" && (xAxisType === "linear" || xAxisType === "time" || xAxisType === "utc")) {
+                    if (!isContinuousXValid(xVal, xAxisType)) {
+                        continue;
+                    }
+                }
+                const range = resolveFiniteRangeValues(data[i], fromField, toField, i);
+                if (range !== null) {
+                    return true;
+                }
+            }
+            continue;
+        }
+
+        const field = "field" in s ? (s as { field: () => ChartField }).field() : undefined;
+        if (!field) {
+            continue;
+        }
 
         for (let i = 0; i < data.length; i++) {
             const val = resolveValue(data[i], field, i);

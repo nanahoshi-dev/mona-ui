@@ -149,10 +149,10 @@ Renders a continuous Cartesian area series supporting gradient fades, solid fill
 | :--- | :--- | :--- | :--- |
 | `color` | `string` | `""` | Line and area fill color override. |
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across null/missing data points. |
-| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"smooth"`, `"step"`, `"monotone-x"`). |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`). |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y value. |
-| `fillMode` | `ChartAreaFillMode` | `"gradient"` | Area fill style: `"gradient"`, `"solid"`, or `"none"`. |
+| `fillMode` | `ChartAreaFillMode` | `"gradient"` | Area fill style: `"gradient"` or `"solid"`. |
 | `fillOpacity` | `number` | `undefined` | Opacity ratio for area fill (0 to 1). |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity. |
 | `name` | `string` | `"Area"` | Series name for tooltips, legend, and accessibility. |
@@ -201,6 +201,52 @@ Renders 3-dimensional data points with position (X, Y) and proportionally-scaled
 | `strokeWidth` | `number` | `undefined` | Outline stroke width in pixels. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate value. |
+
+### `<mona-range-bar-series>`
+
+Renders floating Cartesian range bars spanning between a lower value and an upper value (e.g. min/max temperatures, price spans, or SLA tolerances).
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `borderRadius` | `number` | `undefined` | Uniform corner radius in pixels applied to all 4 bar corners. |
+| `color` | `string` | `""` | Explicit fill color for the range bars. |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `fillOpacity` | `number` | `undefined` | Fill opacity for the range bars (0 to 1). |
+| `fromField` | `ChartField` | `"from"` | Property key or accessor extracting the starting numeric value. |
+| `fromFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for the starting value. |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
+| `maxBarWidth` | `number` | `undefined` | Maximum width constraint in pixels for range bars. |
+| `name` | `string` | `"Range Bar"` | Series name for tooltips, legend, and accessibility. |
+| `toField` | `ChartField` | `"to"` | Property key or accessor extracting the ending numeric value. |
+| `toFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for the ending value. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Fallback formatting function for range values. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate/category value. |
+
+### `<mona-range-area-series>`
+
+Renders continuous Cartesian vertical range bands/areas bounded between lower and upper values (e.g. confidence intervals, forecast envelopes, or high/low bands).
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `string` | `""` | Explicit fill color for the range band and point markers. |
+| `connectNulls` | `boolean` | `false` | Whether to interpolate across non-finite or missing data points. |
+| `curve` | `ChartCurve` | `"monotone-x"` | D3 interpolation curve applied to upper and lower boundary paths. |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `fillOpacity` | `number` | `undefined` | Fill opacity for the range area band (0 to 1). |
+| `fromField` | `ChartField` | `"from"` | Property key or accessor extracting the lower boundary numeric value. |
+| `fromFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for the lower boundary value. |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
+| `name` | `string` | `"Range Area"` | Series name for tooltips, legend, and accessibility. |
+| `pointRadius` | `number` | `undefined` | Radius in pixels for dual high/low point markers when enabled. |
+| `showPoints` | `boolean` | `false` | Whether to render point markers at low and high boundaries. |
+| `strokeColor` | `string` | `""` | Boundary stroke outline color. |
+| `strokeWidth` | `number` | `undefined` | Boundary stroke outline width in pixels. |
+| `toField` | `ChartField` | `"to"` | Property key or accessor extracting the upper boundary numeric value. |
+| `toFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for the upper boundary value. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Fallback formatting function for range values. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate/category value. |
 
 ## Template Directives
 

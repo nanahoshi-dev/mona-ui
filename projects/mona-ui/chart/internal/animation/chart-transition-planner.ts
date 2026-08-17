@@ -11,6 +11,8 @@ import { LineSeriesAnimationAdapter } from "./adapters/line-animation-adapter";
 import { MarkerSeriesAnimationAdapter } from "./marker-series-animation-adapter";
 import { PolarSeriesAnimationAdapter } from "./adapters/polar-animation-adapter";
 import { RadarSeriesAnimationAdapter } from "./adapters/radar-animation-adapter";
+import { RangeAreaSeriesAnimationAdapter } from "./adapters/range-area-animation-adapter";
+import { RangeBarSeriesAnimationAdapter } from "./adapters/range-bar-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
 import type { NormalizedChartAnimationOptions } from "./chart-animation-options";
 import type {
@@ -225,7 +227,7 @@ export class ChartTransitionPlanner {
                 const prevSeriesById = new Map(prevCartesian.series.map(s => [s.id, s]));
 
                 for (const targetSeries of targetCartesian.series) {
-                    if (targetSeries.type === "line" || targetSeries.type === "area") {
+                    if (targetSeries.type === "line" || targetSeries.type === "area" || targetSeries.type === "rangeArea") {
                         const prevSeries = prevSeriesById.get(targetSeries.id);
                         if (prevSeries && prevSeries.type === targetSeries.type) {
                             if (!this.isPathTopologyCompatible(prevSeries.points, targetSeries.points)) {
@@ -341,10 +343,10 @@ export class ChartTransitionPlanner {
             if (sc.coordinateSystem === "cartesian") {
                 const cartesian = sc as CartesianChartScene;
                 for (const s of cartesian.series) {
-                    if (s.type === "line" || s.type === "area") {
+                    if (s.type === "line" || s.type === "area" || s.type === "rangeArea") {
                         pathPoints += s.points.length;
                         pathCount += 1;
-                    } else if (s.type === "bar") {
+                    } else if (s.type === "bar" || s.type === "rangeBar") {
                         independentMarks += s.bars.length;
                     } else if (s.type === "scatter" || s.type === "bubble") {
                         independentMarks += s.markers.length;
@@ -400,6 +402,8 @@ export class ChartTransitionPlanner {
             const barAdapter = new BarSeriesAnimationAdapter();
             const lineAdapter = new LineSeriesAnimationAdapter();
             const areaAdapter = new AreaSeriesAnimationAdapter();
+            const rangeBarAdapter = new RangeBarSeriesAnimationAdapter();
+            const rangeAreaAdapter = new RangeAreaSeriesAnimationAdapter();
 
             for (const targetSeries of targetCartesian.series) {
                 targetIds.add(targetSeries.id);
@@ -425,6 +429,22 @@ export class ChartTransitionPlanner {
                     plans.push(
                         areaAdapter.createPlan(
                             prevSeries?.type === "area" ? prevSeries : null,
+                            targetSeries,
+                            context
+                        )
+                    );
+                } else if (targetSeries.type === "rangeBar") {
+                    plans.push(
+                        rangeBarAdapter.createPlan(
+                            prevSeries?.type === "rangeBar" ? prevSeries : null,
+                            targetSeries,
+                            context
+                        )
+                    );
+                } else if (targetSeries.type === "rangeArea") {
+                    plans.push(
+                        rangeAreaAdapter.createPlan(
+                            prevSeries?.type === "rangeArea" ? prevSeries : null,
                             targetSeries,
                             context
                         )
@@ -457,6 +477,10 @@ export class ChartTransitionPlanner {
                             plans.push(lineAdapter.createPlan(prevSeries, null, context));
                         } else if (prevSeries.type === "area") {
                             plans.push(areaAdapter.createPlan(prevSeries, null, context));
+                        } else if (prevSeries.type === "rangeBar") {
+                            plans.push(rangeBarAdapter.createPlan(prevSeries, null, context));
+                        } else if (prevSeries.type === "rangeArea") {
+                            plans.push(rangeAreaAdapter.createPlan(prevSeries, null, context));
                         } else if (prevSeries.type === "scatter" || prevSeries.type === "bubble") {
                             const markerPlan = MarkerSeriesAnimationAdapter.planSeries(prevSeries, undefined);
                             if (markerPlan) {

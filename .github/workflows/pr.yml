@@ -29,8 +29,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build Metadata
+        run: npm run build:metadata
+
+      - name: Build Library
         run: npm run build:prod
 
-      - name: Test
+      - name: Test Library
         run: npm run test:lib
+
+      - name: Build Tester
+        run: npm run build:tester
+
+      - name: Test Tester
+        run: npm run test:app
+
+      - name: Check Theme Color Parity
+        run: npm run test:theme-colors
