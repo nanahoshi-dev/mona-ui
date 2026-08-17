@@ -103,7 +103,14 @@ export class AreaSeriesRenderer {
         if (showPoints) {
             for (const p of validPoints) {
                 if (p.defined) {
+                    const pointAlpha = opacity * (p.renderOpacity ?? 1);
+                    if (pointAlpha <= 0) {
+                        continue;
+                    }
+                    context.save();
+                    context.globalAlpha = pointAlpha;
                     drawPointMarker(context, p.x, p.y, style.pointRadius, style.color, "#ffffff", 1.5);
+                    context.restore();
                 }
             }
         }

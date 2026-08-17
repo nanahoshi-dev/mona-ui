@@ -38,7 +38,12 @@ export class PolarSectorSeriesRenderer {
             context.beginPath();
             arcGenerator(slice);
 
-            const opacity = series.renderOpacity ?? 1;
+            const opacity = (series.renderOpacity ?? 1) * (slice.renderOpacity ?? 1);
+            if (opacity <= 0) {
+                context.restore();
+                continue;
+            }
+
             if (fillMode === "gradient") {
                 const spec = createPolarGradientSpec(
                     slice.innerRadius,

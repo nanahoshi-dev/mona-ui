@@ -83,9 +83,15 @@ export class PolarSeriesRenderer {
 
             context.save();
             for (const pt of definedPoints) {
+                const pointAlpha = pt.renderOpacity ?? 1;
+                if (pointAlpha <= 0) {
+                    continue;
+                }
                 const px = Math.sin(pt.angle) * pt.radius;
                 const py = -Math.cos(pt.angle) * pt.radius;
 
+                context.save();
+                context.globalAlpha = (series.renderOpacity ?? 1) * pointAlpha;
                 context.beginPath();
                 context.arc(px, py, pointRadius, 0, Math.PI * 2);
                 context.fillStyle = color;
@@ -93,6 +99,7 @@ export class PolarSeriesRenderer {
                 context.strokeStyle = surfaceColor;
                 context.lineWidth = 1.5;
                 context.stroke();
+                context.restore();
             }
             context.restore();
         }
