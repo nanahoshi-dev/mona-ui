@@ -231,11 +231,13 @@ export class PolarAxisLayoutEngine {
 
         // 6. Radial Axis Scene
         const labelAngleRad = degreesToRadians(radialLabelAngle);
+        const cosLabelAngle = Math.cos(labelAngleRad);
+        const sinLabelAngle = Math.sin(labelAngleRad);
         const radialTicks: ChartRadialAxisTick[] = domainResult.ticks.map((val, idx) => {
             const r = clamp(radialScale(val), 0, outerRadius);
             const labelPoint: ChartPoint = {
-                x: center.x + Math.sin(labelAngleRad) * (r + radialLabelOffset),
-                y: center.y - Math.cos(labelAngleRad) * (r + radialLabelOffset)
+                x: center.x + sinLabelAngle * r + cosLabelAngle * radialLabelOffset,
+                y: center.y - cosLabelAngle * r + sinLabelAngle * radialLabelOffset
             };
             const formattedValue = radialFormatter
                 ? radialFormatter(val, idx)

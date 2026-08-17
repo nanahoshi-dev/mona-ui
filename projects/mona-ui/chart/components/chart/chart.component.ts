@@ -1043,12 +1043,12 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     protected radialLabelTransform(tick: ChartRadialAxisTick, labelAngle: number): string {
         const rad = degreesToRadians(labelAngle);
-        const sin = Math.sin(rad);
         const cos = Math.cos(rad);
-        if (Math.abs(sin) < 0.15) {
-            return cos > 0 ? "translate(-50%, -100%)" : "translate(-50%, 0%)";
+        const sin = Math.sin(rad);
+        if (Math.abs(cos) < 0.15) {
+            return sin > 0 ? "translate(-50%, 0)" : "translate(-50%, -100%)";
         }
-        return sin > 0 ? "translate(0, -50%)" : "translate(-100%, -50%)";
+        return cos > 0 ? "translate(0, -50%)" : "translate(-100%, -50%)";
     }
 
     protected sliceLabelContext(slice: SceneSectorSlice): ChartSliceLabelTemplateContext {
