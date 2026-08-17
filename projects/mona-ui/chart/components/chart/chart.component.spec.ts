@@ -9,6 +9,7 @@ import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
 import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
+import type { ChartAxisFormatter, ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartPointEvent, ChartPointFocusEvent, ChartSeriesVisibilityEvent } from "../../models/chart-event.models";
 import { MonaAreaSeriesComponent } from "../area-series/area-series.component";
 import { MonaBarSeriesComponent } from "../bar-series/bar-series.component";
@@ -119,8 +120,8 @@ class TestHostComponent {
     public readonly useCustomLegendTemplate = signal(false);
     public readonly useCustomNoData = signal(false);
     public readonly useCustomTooltipTemplate = signal(false);
-    public readonly xAxisFormatter = signal<any>(undefined);
-    public readonly xAxisType = signal<any>("category");
+    public readonly xAxisFormatter = signal<ChartAxisFormatter | undefined>(undefined);
+    public readonly xAxisType = signal<ChartXAxisType>("category");
     public readonly xField = signal("x");
 
     public lastPointClick: ChartPointEvent | null = null;
@@ -338,6 +339,16 @@ describe("MonaChartComponent", () => {
 
             expect(host.lastClick).not.toBeNull();
             expect(host.lastClick?.category).toBe("Chrome");
+        });
+
+        it("should select last slice on initial ArrowLeft or ArrowUp in polar mode", () => {
+            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+
+            chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
+            fixture.detectChanges();
+
+            expect(host.lastFocus).not.toBeNull();
+            expect(host.lastFocus?.category).toBe("Firefox");
         });
 
         it("should render donut chart with center template", () => {

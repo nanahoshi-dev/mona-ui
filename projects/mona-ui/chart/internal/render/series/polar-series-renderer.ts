@@ -53,33 +53,21 @@ export class PolarSeriesRenderer {
                 context.globalAlpha = 1;
                 context.fillStyle = gradient;
                 context.fill();
-
-                // Stroke slice outline with static solid slice color
-                const strokeColor =
-                    style.strokeColor &&
-                    style.strokeColor !== "#ffffff" &&
-                    style.strokeColor !== "var(--color-surface)"
-                        ? style.strokeColor
-                        : slice.color;
-
-                if (style.strokeWidth > 0 && strokeColor) {
-                    context.globalAlpha = 1;
-                    context.strokeStyle = strokeColor;
-                    context.lineWidth = style.strokeWidth;
-                    context.stroke();
-                }
             } else {
                 context.fillStyle = slice.color;
                 context.globalAlpha = style.fillOpacity;
                 context.fill();
-
-                if (style.strokeWidth > 0 && style.strokeColor) {
-                    context.globalAlpha = 1;
-                    context.strokeStyle = style.strokeColor;
-                    context.lineWidth = style.strokeWidth;
-                    context.stroke();
-                }
             }
+
+            // Stroke solid slice border independently from fill
+            const strokeColor = style.strokeSource === "explicit" ? style.strokeColor : slice.color;
+            if (style.strokeWidth > 0 && strokeColor) {
+                context.globalAlpha = 1;
+                context.strokeStyle = strokeColor;
+                context.lineWidth = style.strokeWidth;
+                context.stroke();
+            }
+
             context.restore();
         }
 
@@ -92,11 +80,25 @@ export class PolarSeriesRenderer {
                 context.beginPath();
                 arcGenerator(activeSlice);
 
-                // Hover overlay (translucent fill only, no border)
-                const hoverOverlayColor =
-                    styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
-                context.fillStyle = hoverOverlayColor;
-                context.fill();
+                if (interactionState.source === "keyboard") {
+                    const focusIndicatorColor =
+                        styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                        styleResolver.resolveCssVariable("--color-primary") ||
+                        "#3b82f6";
+                    context.strokeStyle = focusIndicatorColor;
+                    context.lineWidth = 3;
+                    context.globalAlpha = 1;
+                    context.stroke();
+
+                    context.fillStyle = "rgba(255, 255, 255, 0.15)";
+                    context.fill();
+                } else {
+                    // Hover overlay (translucent fill only, no border)
+                    const hoverOverlayColor =
+                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
+                    context.fillStyle = hoverOverlayColor;
+                    context.fill();
+                }
 
                 context.restore();
             }

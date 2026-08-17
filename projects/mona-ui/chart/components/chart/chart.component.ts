@@ -10,17 +10,18 @@ import {
     inject,
     input,
     output,
+    Signal,
     signal,
-    viewChild,
-    type Signal
+    viewChild
 } from "@angular/core";
 import { twMerge } from "tailwind-merge";
+import { ChartLabelMeasureDirective } from "../../internal/directives/chart-label-measure.directive";
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
     ChartInvalidationReason,
+    hasInvalidationReason,
     type ChartAxisRegistration,
-    type ChartCartesianSeriesRegistration,
     type ChartDonutSeriesRegistration,
     type ChartLegendRegistration,
     type ChartPolarSeriesRegistration,
@@ -28,33 +29,30 @@ import {
     type ChartSeriesRegistration,
     type ChartTooltipRegistration
 } from "../../internal/context/chart-registration-context";
+import { formatXValue, formatYValue } from "../../internal/utils/chart-formatter";
 import { ChartHitTestEngine } from "../../internal/interaction/chart-hit-test-engine";
 import type { ChartInteractionState } from "../../internal/interaction/chart-interaction-state";
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
+import { formatPolarLabelText } from "../../internal/layout/polar-label-layout";
 import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer";
 import { ChartRenderScheduler } from "../../internal/render/chart-render-scheduler";
 import type { CartesianChartScene, ChartScene, PolarChartScene } from "../../internal/scene/chart-scene";
 import type { ScenePolarSlice } from "../../internal/scene/polar-scene";
 import type { SceneHitTarget } from "../../internal/scene/scene-geometry";
 import { ChartStyleResolver } from "../../internal/style/chart-style-resolver";
-import { formatXValue, formatYValue } from "../../internal/utils/chart-formatter";
 import { clamp } from "../../internal/utils/number-utils";
-import type {
-    ChartPointEvent,
-    ChartPointFocusEvent,
-    ChartSeriesVisibilityEvent
-} from "../../models/chart-event.models";
-import { ChartLabelMeasureDirective } from "../../internal/directives/chart-label-measure.directive";
 import type {
     ChartLabelMeasurement,
     ChartSliceContext,
     ChartSliceLabelTemplateContext
 } from "../../models/chart-polar.models";
-import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
-    ChartTooltipPointContext,
-    ChartTooltipTemplateContext
-} from "../../models/chart-tooltip.models";
+    ChartPointEvent,
+    ChartPointFocusEvent,
+    ChartSeriesVisibilityEvent
+} from "../../models/chart-event.models";
+import type { ChartLegendItem } from "../../models/chart-series.models";
+import type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
 import type { ChartField, ChartPoint } from "../../models/chart.models";
 import {
     chartAxisLabelBaseThemeVariants,
@@ -169,6 +167,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
      */
     public readonly data = input<readonly unknown[]>([]);
 
+    public readonly rootData: Signal<readonly unknown[]> = this.data;
+
     public readonly legendItems = computed<readonly ChartLegendItem[]>(() => {
         this.styleRevision();
         return this.scene()?.legendItems ?? [];
@@ -265,7 +265,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     public onCanvasClick(event: MouseEvent): void {
         const pointer = this.#normalizePointer(event);
         let currentScene = this.scene();
-        if (!currentScene || currentScene.hitTargets.length === 0) {
+        if (!currentScene) {
             this.#recomputeAndPaint(ChartInvalidationReason.Data);
             currentScene = this.scene();
         }
@@ -302,7 +302,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public onKeyDown(event: KeyboardEvent): void {
         let currentScene = this.scene();
-        if (!currentScene || currentScene.hitTargets.length === 0) {
+        if (!currentScene) {
             this.#recomputeAndPaint(ChartInvalidationReason.Data);
             currentScene = this.scene();
         }
@@ -316,22 +316,70 @@ export class MonaChartComponent implements ChartRegistrationContext {
         }
 
         switch (event.key) {
-            case "ArrowRight": {
+            case "ArrowRight":
+            case "ArrowDown": {
                 event.preventDefault();
-                const nextBucketIdx =
-                    this.#activeKeyboardBucketIndex < buckets.length - 1
-                        ? this.#activeKeyboardBucketIndex + 1
-                        : 0;
-                this.#setKeyboardSelection(nextBucketIdx, this.#activeKeyboardSeriesId);
+                if (currentScene.coordinateSystem === "polar") {
+                    const nextBucketIdx =
+                        this.#activeKeyboardBucketIndex < 0
+                            ? 0
+                            : (this.#activeKeyboardBucketIndex + 1) % buckets.length;
+                    this.#setKeyboardSelection(nextBucketIdx, this.#activeKeyboardSeriesId);
+                    break;
+                }
+                if (event.key === "ArrowRight") {
+                    const nextBucketIdx =
+                        this.#activeKeyboardBucketIndex < buckets.length - 1
+                            ? this.#activeKeyboardBucketIndex + 1
+                            : 0;
+                    this.#setKeyboardSelection(nextBucketIdx, this.#activeKeyboardSeriesId);
+                } else {
+                    // Cartesian ArrowDown: switch series within bucket
+                    if (this.#activeKeyboardBucketIndex < 0) {
+                        this.#activeKeyboardBucketIndex = 0;
+                    }
+                    const bucket = buckets[this.#activeKeyboardBucketIndex];
+                    if (!bucket || bucket.hits.length === 0) return;
+                    const currentHitIdx = bucket.hits.findIndex(h => h.seriesId === this.#activeKeyboardSeriesId);
+                    const nextHitIdx =
+                        currentHitIdx >= 0
+                            ? (currentHitIdx + 1) % bucket.hits.length
+                            : 0;
+                    this.#setKeyboardSelection(this.#activeKeyboardBucketIndex, bucket.hits[nextHitIdx].seriesId);
+                }
                 break;
             }
-            case "ArrowLeft": {
+            case "ArrowLeft":
+            case "ArrowUp": {
                 event.preventDefault();
-                const prevBucketIdx =
-                    this.#activeKeyboardBucketIndex > 0
-                        ? this.#activeKeyboardBucketIndex - 1
-                        : buckets.length - 1;
-                this.#setKeyboardSelection(prevBucketIdx, this.#activeKeyboardSeriesId);
+                if (currentScene.coordinateSystem === "polar") {
+                    const prevBucketIdx =
+                        this.#activeKeyboardBucketIndex < 0
+                            ? buckets.length - 1
+                            : (this.#activeKeyboardBucketIndex - 1 + buckets.length) % buckets.length;
+                    this.#setKeyboardSelection(prevBucketIdx, this.#activeKeyboardSeriesId);
+                    break;
+                }
+                if (event.key === "ArrowLeft") {
+                    const prevBucketIdx =
+                        this.#activeKeyboardBucketIndex > 0
+                            ? this.#activeKeyboardBucketIndex - 1
+                            : buckets.length - 1;
+                    this.#setKeyboardSelection(prevBucketIdx, this.#activeKeyboardSeriesId);
+                } else {
+                    // Cartesian ArrowUp: switch series within bucket
+                    if (this.#activeKeyboardBucketIndex < 0) {
+                        this.#activeKeyboardBucketIndex = 0;
+                    }
+                    const bucket = buckets[this.#activeKeyboardBucketIndex];
+                    if (!bucket || bucket.hits.length === 0) return;
+                    const currentHitIdx = bucket.hits.findIndex(h => h.seriesId === this.#activeKeyboardSeriesId);
+                    const prevHitIdx =
+                        currentHitIdx >= 0
+                            ? (currentHitIdx - 1 + bucket.hits.length) % bucket.hits.length
+                            : 0;
+                    this.#setKeyboardSelection(this.#activeKeyboardBucketIndex, bucket.hits[prevHitIdx].seriesId);
+                }
                 break;
             }
             case "Home": {
@@ -342,33 +390,6 @@ export class MonaChartComponent implements ChartRegistrationContext {
             case "End": {
                 event.preventDefault();
                 this.#setKeyboardSelection(buckets.length - 1, this.#activeKeyboardSeriesId);
-                break;
-            }
-            case "ArrowDown":
-            case "ArrowUp": {
-                event.preventDefault();
-                if (currentScene.coordinateSystem === "polar") {
-                    // In polar mode, up/down aliases previous/next slice
-                    const step = event.key === "ArrowDown" ? 1 : -1;
-                    const nextBucketIdx =
-                        (this.#activeKeyboardBucketIndex + step + buckets.length) % buckets.length;
-                    this.#setKeyboardSelection(nextBucketIdx, this.#activeKeyboardSeriesId);
-                    break;
-                }
-                if (this.#activeKeyboardBucketIndex < 0) {
-                    this.#activeKeyboardBucketIndex = 0;
-                }
-                const bucket = buckets[this.#activeKeyboardBucketIndex];
-                if (!bucket || bucket.hits.length === 0) return;
-
-                const currentHitIdx = bucket.hits.findIndex(h => h.seriesId === this.#activeKeyboardSeriesId);
-                const step = event.key === "ArrowDown" ? 1 : -1;
-                const nextHitIdx =
-                    currentHitIdx >= 0
-                        ? (currentHitIdx + step + bucket.hits.length) % bucket.hits.length
-                        : 0;
-                const nextSeriesId = bucket.hits[nextHitIdx].seriesId;
-                this.#setKeyboardSelection(this.#activeKeyboardBucketIndex, nextSeriesId);
                 break;
             }
             case "Enter":
@@ -411,7 +432,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const tooltip = this.#tooltip();
         const hoverEnabled = tooltip ? tooltip.enabled() !== false : false;
         if (!hoverEnabled) {
-            this.#clearInteraction();
+            if (this.#interactionState !== null) {
+                this.#clearInteraction();
+            }
             return;
         }
 
@@ -429,7 +452,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     #processPointerMove(event: PointerEvent): void {
         const pointer = this.#normalizePointer(event);
         let currentScene = this.scene();
-        if (!currentScene || currentScene.hitTargets.length === 0) {
+        if (!currentScene) {
             this.#recomputeAndPaint(ChartInvalidationReason.Data);
             currentScene = this.scene();
         }
@@ -442,7 +465,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const hitState = ChartHitTestEngine.testHit(pointer, currentScene, shared);
 
         if (hitState.activeHitTarget || hitState.activeHits.length > 0) {
-            this.#interactionState = hitState;
+            this.#interactionState = {
+                ...hitState,
+                source: "pointer"
+            };
             const primaryHit = hitState.activeHitTarget ?? hitState.activeHits[0];
             if (primaryHit) {
                 const rawX =
@@ -460,11 +486,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
                     this.#buildTooltipContext(hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit], shared)
                 );
             }
+            this.#paint();
         } else {
             this.#clearInteraction();
         }
-
-        this.#paint();
     }
 
     public registerLegend(registration: ChartLegendRegistration): () => void {
@@ -473,19 +498,17 @@ export class MonaChartComponent implements ChartRegistrationContext {
         return () => {
             if (this.#legend() === registration) {
                 this.#legend.set(null);
-                this.invalidate(ChartInvalidationReason.Layout);
+                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
             }
         };
     }
 
     public registerSeries(registration: ChartSeriesRegistration): () => void {
         this.#registeredSeries.update(list => [...list, registration]);
-        this.invalidate(ChartInvalidationReason.Data);
         this.#recomputeAndPaint(ChartInvalidationReason.Data);
 
         return () => {
             this.#registeredSeries.update(list => list.filter(s => s.id !== registration.id));
-            this.invalidate(ChartInvalidationReason.Data);
             this.#recomputeAndPaint(ChartInvalidationReason.Data);
         };
     }
@@ -501,22 +524,22 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public registerXAxis(registration: ChartAxisRegistration): () => void {
         this.#xAxis.set(registration);
-        this.invalidate(ChartInvalidationReason.Layout);
+        this.#recomputeAndPaint(ChartInvalidationReason.Layout);
         return () => {
             if (this.#xAxis() === registration) {
                 this.#xAxis.set(null);
-                this.invalidate(ChartInvalidationReason.Layout);
+                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
             }
         };
     }
 
     public registerYAxis(registration: ChartAxisRegistration): () => void {
         this.#yAxis.set(registration);
-        this.invalidate(ChartInvalidationReason.Layout);
+        this.#recomputeAndPaint(ChartInvalidationReason.Layout);
         return () => {
             if (this.#yAxis() === registration) {
                 this.#yAxis.set(null);
-                this.invalidate(ChartInvalidationReason.Layout);
+                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
             }
         };
     }
@@ -526,7 +549,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             const polarSeries = this.polarSeriesRegistration();
             if (polarSeries) {
                 polarSeries.toggleSliceVisibility(item.dataIndex);
-                this.#recomputeAndPaint(ChartInvalidationReason.Layout);
+                this.invalidate(ChartInvalidationReason.Layout);
             }
         } else {
             this.toggleSeriesVisibility(item.seriesId);
@@ -570,7 +593,6 @@ export class MonaChartComponent implements ChartRegistrationContext {
             }
 
             this.invalidate(ChartInvalidationReason.Layout);
-            this.#recomputeAndPaint(ChartInvalidationReason.Layout);
         }
     }
 
@@ -586,7 +608,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             const seriesItem = seriesItems.find(s => s.itemId === hit.sliceId || s.seriesId === hit.seriesId);
             const color = hit.color ?? seriesItem?.color ?? "#3b82f6";
             const xStr = hit.formattedCategory ?? formatXValue(hit.xValue, hit.index, xFormatter, xAxisType);
-            const yStr = formatYValue(hit.yValue, hit.index, yFormatter);
+            const yStr = hit.formattedValue ?? formatYValue(hit.yValue, hit.index, yFormatter);
 
             return {
                 category: hit.category,
@@ -617,13 +639,19 @@ export class MonaChartComponent implements ChartRegistrationContext {
         };
     }
 
-    #clearInteraction(): void {
+    #clearInteractionState(): void {
         this.#activeKeyboardBucketIndex = -1;
         this.#activeKeyboardSeriesId = null;
         this.#interactionState = null;
         this.tooltipContext.set(null);
         this.tooltipPosition.set(null);
-        this.#paint();
+    }
+
+    #clearInteraction(): void {
+        if (this.#interactionState !== null || this.tooltipPosition() !== null || this.tooltipContext() !== null) {
+            this.#clearInteractionState();
+            this.#paint();
+        }
     }
 
     #initCanvasAndObserver(): void {
@@ -656,7 +684,6 @@ export class MonaChartComponent implements ChartRegistrationContext {
             this.#themeObserver = new MutationObserver(() => {
                 this.styleRevision.update(v => v + 1);
                 this.invalidate(ChartInvalidationReason.Style);
-                this.#recomputeAndPaint(ChartInvalidationReason.Style);
             });
             if (typeof document !== "undefined" && document.documentElement) {
                 this.#themeObserver.observe(document.documentElement, {
@@ -716,8 +743,13 @@ export class MonaChartComponent implements ChartRegistrationContext {
             }
         }
 
-        if (reason !== ChartInvalidationReason.Interaction && reason !== ChartInvalidationReason.Style) {
-            this.#clearInteraction();
+        const isStructural =
+            hasInvalidationReason(reason, ChartInvalidationReason.Data) ||
+            hasInvalidationReason(reason, ChartInvalidationReason.Layout) ||
+            hasInvalidationReason(reason, ChartInvalidationReason.Size);
+
+        if (isStructural) {
+            this.#clearInteractionState();
             this.activeAccessibilityText.set("");
         }
 
@@ -732,6 +764,22 @@ export class MonaChartComponent implements ChartRegistrationContext {
             xAxis: this.#xAxis() ?? undefined,
             yAxis: this.#yAxis() ?? undefined
         });
+
+        // Prune measurements for slices that no longer exist in the polar scene
+        if (newScene.coordinateSystem === "polar") {
+            const polarScene = newScene as PolarChartScene;
+            const validSliceIds = new Set<string>();
+            for (const s of polarScene.series) {
+                for (const sl of s.slices) {
+                    validSliceIds.add(sl.sliceId);
+                }
+            }
+            for (const key of Array.from(this.#labelMeasurements.keys())) {
+                if (!validSliceIds.has(key)) {
+                    this.#labelMeasurements.delete(key);
+                }
+            }
+        }
 
         this.scene.set(newScene);
         this.#paint();
@@ -764,7 +812,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
         this.#interactionState = {
             activeHitTarget: matchingHit,
             activeHits,
-            pointerPosition: pointPos
+            pointerPosition: pointPos,
+            source: "keyboard"
         };
 
         this.tooltipPosition.set(pointPos);
@@ -785,8 +834,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
         if (currentScene.coordinateSystem === "polar") {
             const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
+            const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
             this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}, ${matchingHit.formattedCategory ?? matchingHit.category}: ${matchingHit.yValue}${pctStr}`
+                `${matchingHit.seriesName}, ${matchingHit.formattedCategory ?? matchingHit.category}: ${valStr}${pctStr}`
             );
         } else {
             const xAxis = this.#xAxis();
@@ -835,7 +885,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     public observeLabelElement(element: HTMLElement, sliceId: string): void {
-        if (typeof ResizeObserver === "undefined") {
+        if (typeof ResizeObserver === "undefined" || !this.isOutsideLabel()) {
             return;
         }
         if (!this.#labelResizeObserver) {
@@ -874,17 +924,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     protected sliceLabelText(slice: ScenePolarSlice): string {
         const polarSeries = this.polarSeriesRegistration();
         const content = polarSeries?.labelContent() ?? "percentage";
-        switch (content) {
-            case "category":
-                return slice.formattedCategory;
-            case "value":
-                return slice.formattedValue;
-            case "category-percentage":
-                return `${slice.formattedCategory} (${slice.formattedPercentage})`;
-            case "percentage":
-            default:
-                return slice.formattedPercentage;
-        }
+        return formatPolarLabelText(slice, content);
     }
 
     protected shouldShowSliceLabel(slice: ScenePolarSlice): boolean {
@@ -908,7 +948,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     protected sliceContrastColor(slice: ScenePolarSlice): string {
-        return this.#styleResolver.getReadableForeground(slice.color);
+        return this.#styleResolver.getReadableForeground(slice.insideLabelBackgroundColor || slice.color);
     }
 
     #updateCanvasBackingStore(width: number, height: number): void {

@@ -35,6 +35,7 @@ describe("PolarLabelLineRenderer", () => {
         formattedPercentage: "50%",
         formattedValue: "50",
         innerRadius: 0,
+        insideLabelBackgroundColor: "#3b82f6",
         insideLabelPoint: { x: 200, y: 150 },
         label: {
             arcAnchor: { x: 250, y: 100 },
@@ -47,7 +48,6 @@ describe("PolarLabelLineRenderer", () => {
             visible: true,
             widthEstimate: 40
         },
-        labelPoint: { x: 200, y: 150 },
         outerRadius: 100,
         padAngle: 0,
         percentage: 0.5,
@@ -60,6 +60,7 @@ describe("PolarLabelLineRenderer", () => {
     const mockSeriesScene: ChartPolarSeriesScene = {
         center: { x: 200, y: 200 },
         cornerRadius: 0,
+        fillMode: "solid",
         formattedTotal: "100",
         id: "pie-1",
         innerRadius: 0,
@@ -72,6 +73,7 @@ describe("PolarLabelLineRenderer", () => {
         style: {
             fillOpacity: 1,
             strokeColor: "#ffffff",
+            strokeSource: "default",
             strokeWidth: 1
         },
         total: 100,

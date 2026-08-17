@@ -28,11 +28,9 @@ export class MonaChartLegendComponent implements OnInit {
     );
     protected readonly hostClasses = computed(() => {
         const pos = this.position();
-        if (pos === "top") return "block w-full flex-shrink-0 mb-2";
-        if (pos === "bottom") return "block w-full flex-shrink-0 mt-3";
-        if (pos === "left") return "flex flex-col justify-center flex-shrink-0 mr-4";
-        if (pos === "right") return "flex flex-col justify-center flex-shrink-0 ml-4";
-        return "block w-full flex-shrink-0 mt-3";
+        if (pos === "top" || pos === "bottom") return "block w-full flex-shrink-0";
+        if (pos === "left" || pos === "right") return "flex flex-col justify-center flex-shrink-0";
+        return "block w-full flex-shrink-0";
     });
     protected readonly hostOrder = computed(() => {
         const pos = this.position();

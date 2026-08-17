@@ -34,6 +34,7 @@ export interface SceneHitTarget {
     datum: unknown;
     formattedCategory?: string;
     formattedPercentage?: string;
+    formattedValue?: string;
     index: number;
     isPositive?: boolean;
     percentage?: number;

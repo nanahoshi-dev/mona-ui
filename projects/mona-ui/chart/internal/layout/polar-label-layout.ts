@@ -1,20 +1,38 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
-import type { ChartLabelMeasurement, ChartPolarLabelSide } from "../../models/chart-polar.models";
+import type { ChartLabelMeasurement, ChartPolarLabelContent, ChartPolarLabelSide } from "../../models/chart-polar.models";
 import type { ScenePolarLabel, ScenePolarSlice } from "../scene/polar-scene";
 
-export const OUTSIDE_LABEL_RADIAL_GAP = 8;
-export const OUTSIDE_LABEL_ELBOW_LENGTH = 12;
+export const OUTSIDE_LABEL_RADIAL_SEGMENT_LENGTH = 12;
 export const OUTSIDE_LABEL_HORIZONTAL_LENGTH = 18;
 export const DEFAULT_LABEL_HEIGHT = 18;
 export const DEFAULT_LABEL_WIDTH = 48;
 export const MIN_LABEL_VERTICAL_GAP = 4;
 
+export function formatPolarLabelText(
+    slice: { formattedCategory?: string; formattedPercentage?: string; formattedValue?: string },
+    labelContent: ChartPolarLabelContent = "percentage"
+): string {
+    switch (labelContent) {
+        case "value":
+            return slice.formattedValue ?? "";
+        case "category":
+            return slice.formattedCategory ?? "";
+        case "category-percentage":
+            return `${slice.formattedCategory ?? ""}: ${slice.formattedPercentage ?? ""}`;
+        case "percentage":
+        default:
+            return slice.formattedPercentage ?? "";
+    }
+}
+
 export interface PolarLabelLayoutOptions {
     center: ChartPoint;
+    labelContent?: ChartPolarLabelContent;
     measurements?: ReadonlyMap<string, ChartLabelMeasurement>;
     outerRadius: number;
     plotRect: ChartRect;
     slices: readonly ScenePolarSlice[];
+    strokeWidth?: number;
 }
 
 interface RawLabelCandidate {
@@ -33,15 +51,15 @@ interface RawLabelCandidate {
 export function layoutOutsidePolarLabels(
     options: PolarLabelLayoutOptions
 ): Map<string, ScenePolarLabel> {
-    const { center, measurements, outerRadius, plotRect, slices } = options;
+    const { center, labelContent = "percentage", measurements, outerRadius, plotRect, slices, strokeWidth = 1 } = options;
     const result = new Map<string, ScenePolarLabel>();
 
     if (!slices || slices.length === 0 || outerRadius <= 0) {
         return result;
     }
 
-    const arcAnchorRadius = outerRadius + OUTSIDE_LABEL_RADIAL_GAP;
-    const elbowRadius = arcAnchorRadius + OUTSIDE_LABEL_ELBOW_LENGTH;
+    const arcAnchorRadius = outerRadius + Math.max(0, strokeWidth) / 2;
+    const elbowRadius = arcAnchorRadius + OUTSIDE_LABEL_RADIAL_SEGMENT_LENGTH;
 
     const candidates: RawLabelCandidate[] = [];
 
@@ -77,11 +95,10 @@ export function layoutOutsidePolarLabels(
 
         const measured = measurements?.get(slice.sliceId);
         const height = measured?.height ?? DEFAULT_LABEL_HEIGHT;
+        const defaultText = formatPolarLabelText(slice, labelContent);
         const width =
             measured?.width ??
-            (slice.formattedPercentage
-                ? Math.max(24, slice.formattedPercentage.length * 7)
-                : DEFAULT_LABEL_WIDTH);
+            (defaultText ? Math.max(24, defaultText.length * 7.5 + 8) : DEFAULT_LABEL_WIDTH);
 
         candidates.push({
             arcAnchor,
@@ -100,12 +117,12 @@ export function layoutOutsidePolarLabels(
     const leftCandidates = candidates.filter(c => c.side === "left");
     const rightCandidates = candidates.filter(c => c.side === "right");
 
-    const topBound = plotRect.y + 8;
-    const bottomBound = plotRect.y + plotRect.height - 8;
+    const topBound = plotRect.y + 4;
+    const bottomBound = plotRect.y + plotRect.height - 4;
     const availableHeight = Math.max(0, bottomBound - topBound);
 
-    layoutHemisphere(leftCandidates, topBound, bottomBound, availableHeight, result);
-    layoutHemisphere(rightCandidates, topBound, bottomBound, availableHeight, result);
+    layoutHemisphere(leftCandidates, topBound, bottomBound, availableHeight, plotRect, result);
+    layoutHemisphere(rightCandidates, topBound, bottomBound, availableHeight, plotRect, result);
 
     return result;
 }
@@ -115,6 +132,7 @@ function layoutHemisphere(
     topBound: number,
     bottomBound: number,
     availableHeight: number,
+    plotRect: ChartRect,
     result: Map<string, ScenePolarLabel>
 ): void {
     if (candidates.length === 0) {
@@ -204,7 +222,10 @@ function layoutHemisphere(
         }
     }
 
-    // Build final ScenePolarLabel for active candidates
+    const plotLeft = plotRect.x;
+    const plotRight = plotRect.x + plotRect.width;
+
+    // Build final ScenePolarLabel for active candidates and check horizontal boundaries
     for (let i = 0; i < activeCandidates.length; i++) {
         const c = activeCandidates[i];
         const finalY = positionsY[i];
@@ -219,6 +240,14 @@ function layoutHemisphere(
             y: finalY
         };
 
+        // Check horizontal bounds
+        let fitsHorizontally = true;
+        if (c.side === "right" && labelPosition.x + c.width > plotRight) {
+            fitsHorizontally = false;
+        } else if (c.side === "left" && labelPosition.x - c.width < plotLeft) {
+            fitsHorizontally = false;
+        }
+
         result.set(c.slice.sliceId, {
             arcAnchor: c.arcAnchor,
             elbow: c.elbow,
@@ -227,7 +256,7 @@ function layoutHemisphere(
             naturalPosition: c.naturalPosition,
             position: labelPosition,
             side: c.side,
-            visible: true,
+            visible: fitsHorizontally,
             widthEstimate: c.width
         });
     }

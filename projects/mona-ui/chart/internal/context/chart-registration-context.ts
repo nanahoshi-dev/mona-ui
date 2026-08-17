@@ -29,6 +29,13 @@ export const enum ChartInvalidationReason {
     Size = 1 << 4
 }
 
+export function hasInvalidationReason(
+    accumulatedReason: ChartInvalidationReason,
+    flag: ChartInvalidationReason
+): boolean {
+    return (accumulatedReason & flag) !== 0;
+}
+
 export interface ChartAxisRegistration {
     axisLine: Signal<boolean>;
     formatter: Signal<ChartAxisFormatter | undefined>;
@@ -153,6 +160,7 @@ export interface ChartRegistrationContext {
     registerTooltip(registration: ChartTooltipRegistration): () => void;
     registerXAxis(registration: ChartAxisRegistration): () => void;
     registerYAxis(registration: ChartAxisRegistration): () => void;
+    readonly rootData: Signal<readonly unknown[]>;
     scene: Signal<ChartScene | null>;
     toggleLegendItem(item: ChartLegendItem): void;
     toggleSeriesVisibility(seriesId: string): void;

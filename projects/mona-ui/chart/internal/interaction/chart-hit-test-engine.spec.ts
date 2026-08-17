@@ -180,5 +180,43 @@ describe("ChartHitTestEngine", () => {
             const hitOutside = ChartHitTestEngine.testHit({ x: 320, y: 200 }, mockPolarScene, false);
             expect(hitOutside.activeHitTarget).toBeNull();
         });
+
+        it("should respect pad angle boundaries", () => {
+            // Create an arc with significant pad angle
+            const paddedHit: SceneHitTarget = {
+                arc: {
+                    center,
+                    endAngle: Math.PI,
+                    innerRadius: 50,
+                    outerRadius: 100,
+                    padAngle: 0.2, // ~11.5 degrees padding (5.7 deg on each edge)
+                    startAngle: 0
+                },
+                category: "Padded",
+                datum: {},
+                index: 0,
+                seriesId: "polar-pad",
+                seriesName: "Donut",
+                seriesType: "donut",
+                sliceId: "pad:0",
+                xKey: "pad:0",
+                xValue: "Padded",
+                yValue: 50
+            };
+            const sceneWithPad: ChartScene = {
+                ...mockPolarScene,
+                hitTargets: [paddedHit]
+            };
+
+            // Mid angle (3 o'clock, angle = PI/2) -> Hit
+            const hitMid = ChartHitTestEngine.testHit({ x: 275, y: 200 }, sceneWithPad, false);
+            expect(hitMid.activeHitTarget?.category).toBe("Padded");
+
+            // Very close to 12 o'clock boundary (angle ~ 0.02 rad < halfPad 0.1 rad) -> inside pad dead zone -> No hit
+            const nearEdgeX = 200 + 75 * Math.sin(0.02);
+            const nearEdgeY = 200 - 75 * Math.cos(0.02);
+            const hitEdge = ChartHitTestEngine.testHit({ x: nearEdgeX, y: nearEdgeY }, sceneWithPad, false);
+            expect(hitEdge.activeHitTarget).toBeNull();
+        });
     });
 });

@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ScenePolarSlice } from "../scene/polar-scene";
 import {
+    formatPolarLabelText,
     layoutOutsidePolarLabels,
-    OUTSIDE_LABEL_ELBOW_LENGTH,
     OUTSIDE_LABEL_HORIZONTAL_LENGTH,
-    OUTSIDE_LABEL_RADIAL_GAP
+    OUTSIDE_LABEL_RADIAL_SEGMENT_LENGTH
 } from "./polar-label-layout";
 
 function createSlice(id: string, startAngle: number, endAngle: number, value: number): ScenePolarSlice {
@@ -21,8 +21,8 @@ function createSlice(id: string, startAngle: number, endAngle: number, value: nu
         formattedPercentage: `${value}%`,
         formattedValue: `${value}`,
         innerRadius: 0,
+        insideLabelBackgroundColor: "#3b82f6",
         insideLabelPoint: { x: 200, y: 200 },
-        labelPoint: { x: 200, y: 200 },
         outerRadius: 100,
         padAngle: 0,
         percentage: value / 100,
@@ -38,17 +38,32 @@ describe("polar-label-layout", () => {
     const plotRect: ChartRect = { height: 400, width: 400, x: 0, y: 0 };
     const outerRadius = 100;
 
-    it("should compute natural outside connector coordinates for right and left slices", () => {
+    it("should format polar label text based on labelContent", () => {
+        const slice = {
+            formattedCategory: "Desktop",
+            formattedPercentage: "65%",
+            formattedValue: "1,300"
+        };
+
+        expect(formatPolarLabelText(slice, "percentage")).toBe("65%");
+        expect(formatPolarLabelText(slice, "value")).toBe("1,300");
+        expect(formatPolarLabelText(slice, "category")).toBe("Desktop");
+        expect(formatPolarLabelText(slice, "category-percentage")).toBe("Desktop: 65%");
+    });
+
+    it("should compute natural outside connector coordinates starting directly from the visible arc edge", () => {
         // Slice 1: 0 to Math.PI (right hemisphere, midAngle Math.PI / 2 -> 3 o'clock)
         const sliceRight = createSlice("right-slice", 0, Math.PI, 50);
         // Slice 2: Math.PI to 2*Math.PI (left hemisphere, midAngle 3*Math.PI / 2 -> 9 o'clock)
         const sliceLeft = createSlice("left-slice", Math.PI, 2 * Math.PI, 50);
 
+        const strokeWidth = 2;
         const labelMap = layoutOutsidePolarLabels({
             center,
             outerRadius,
             plotRect,
-            slices: [sliceRight, sliceLeft]
+            slices: [sliceRight, sliceLeft],
+            strokeWidth
         });
 
         const labelRight = labelMap.get("right-slice");
@@ -60,28 +75,23 @@ describe("polar-label-layout", () => {
         expect(labelLeft?.side).toBe("left");
 
         // Right side: 3 o'clock (sin=1, cos=0)
-        // arcAnchor radius = 100 + 8 = 108 -> x: 200 + 108 = 308, y: 200
-        expect(labelRight?.arcAnchor.x).toBeCloseTo(308, 1);
+        // arcAnchor radius = 100 + strokeWidth/2 = 101 -> x: 200 + 101 = 301, y: 200
+        expect(labelRight?.arcAnchor.x).toBeCloseTo(301, 1);
         expect(labelRight?.arcAnchor.y).toBeCloseTo(200, 1);
-        // elbow radius = 108 + 12 = 120 -> x: 200 + 120 = 320, y: 200
-        expect(labelRight?.elbow.x).toBeCloseTo(320, 1);
+        // elbow radius = 101 + 12 = 113 -> x: 200 + 113 = 313, y: 200
+        expect(labelRight?.elbow.x).toBeCloseTo(313, 1);
         expect(labelRight?.elbow.y).toBeCloseTo(200, 1);
-        // lineEnd = x: 320 + 18 = 338, y: 200
-        expect(labelRight?.lineEnd.x).toBeCloseTo(338, 1);
+        // lineEnd = x: 313 + 18 = 331, y: 200
+        expect(labelRight?.lineEnd.x).toBeCloseTo(331, 1);
         expect(labelRight?.lineEnd.y).toBeCloseTo(200, 1);
-        // label position = x: 338 + 4 = 342, y: 200
-        expect(labelRight?.position.x).toBeCloseTo(342, 1);
-        expect(labelRight?.position.y).toBeCloseTo(200, 1);
 
         // Left side: 9 o'clock (sin=-1, cos=0)
-        // arcAnchor radius = 108 -> x: 200 - 108 = 92, y: 200
-        expect(labelLeft?.arcAnchor.x).toBeCloseTo(92, 1);
-        // elbow radius = 120 -> x: 200 - 120 = 80, y: 200
-        expect(labelLeft?.elbow.x).toBeCloseTo(80, 1);
-        // lineEnd = x: 80 - 18 = 62, y: 200
-        expect(labelLeft?.lineEnd.x).toBeCloseTo(62, 1);
-        // label position = x: 62 - 4 = 58, y: 200
-        expect(labelLeft?.position.x).toBeCloseTo(58, 1);
+        // arcAnchor radius = 101 -> x: 200 - 101 = 99, y: 200
+        expect(labelLeft?.arcAnchor.x).toBeCloseTo(99, 1);
+        // elbow radius = 113 -> x: 200 - 113 = 87, y: 200
+        expect(labelLeft?.elbow.x).toBeCloseTo(87, 1);
+        // lineEnd = x: 87 - 18 = 69, y: 200
+        expect(labelLeft?.lineEnd.x).toBeCloseTo(69, 1);
     });
 
     it("should resolve vertical collisions and preserve monotonic Y order on the same hemisphere", () => {
@@ -132,15 +142,15 @@ describe("polar-label-layout", () => {
         const topLabel = labelMap.get("top")!;
         const bottomLabel = labelMap.get("bottom")!;
 
-        const topBound = plotRect.y + 8;
-        const bottomBound = plotRect.y + plotRect.height - 8;
+        const topBound = plotRect.y + 4;
+        const bottomBound = plotRect.y + plotRect.height - 4;
 
         expect(topLabel.position.y - topLabel.heightEstimate / 2).toBeGreaterThanOrEqual(topBound);
         expect(bottomLabel.position.y + bottomLabel.heightEstimate / 2).toBeLessThanOrEqual(bottomBound);
     });
 
     it("should suppress smallest slices when vertical space is constrained rather than overlapping", () => {
-        // Small plot height with 10 slices on the right hemisphere
+        // Small plot height with 6 slices on the right hemisphere
         const tightPlotRect: ChartRect = { height: 60, width: 400, x: 0, y: 0 };
         const slices: ScenePolarSlice[] = [];
         const values = [50, 20, 15, 10, 3, 2];
