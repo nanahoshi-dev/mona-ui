@@ -5,6 +5,7 @@ import type {
     PolarSectorChartScene
 } from "../scene/chart-scene";
 import { AreaSeriesAnimationAdapter } from "./adapters/area-animation-adapter";
+import { AxisAnimationAdapter } from "./adapters/axis-animation-adapter";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
 import { LineSeriesAnimationAdapter } from "./adapters/line-animation-adapter";
 import { PolarSeriesAnimationAdapter } from "./adapters/polar-animation-adapter";
@@ -20,6 +21,28 @@ import type {
 } from "./chart-transition-types";
 
 export class ChartTransitionPlanner {
+    public static isPathTopologyCompatible(
+        prevPoints: readonly { readonly animationKey?: string; readonly defined?: boolean }[],
+        targetPoints: readonly { readonly animationKey?: string; readonly defined?: boolean }[]
+    ): boolean {
+        if (prevPoints.length !== targetPoints.length) {
+            return false;
+        }
+        for (let i = 0; i < prevPoints.length; i++) {
+            const p = prevPoints[i];
+            const t = targetPoints[i];
+            const pKey = p.animationKey ?? String(i);
+            const tKey = t.animationKey ?? String(i);
+            if (pKey !== tKey) {
+                return false;
+            }
+            if (Boolean(p.defined) !== Boolean(t.defined)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static plan(
         previous: ChartScene | null,
         target: ChartScene,
@@ -80,7 +103,7 @@ export class ChartTransitionPlanner {
             };
         }
 
-        if (complexity.markCount > 10000) {
+        if (complexity.totalWeightedCost > 10000) {
             return {
                 complexity,
                 duration: 0,
@@ -93,7 +116,7 @@ export class ChartTransitionPlanner {
             };
         }
 
-        if (complexity.markCount > 2000) {
+        if (complexity.totalWeightedCost > 2000) {
             return {
                 complexity,
                 duration: options.duration,
@@ -136,6 +159,83 @@ export class ChartTransitionPlanner {
                         trigger
                     };
                 }
+
+                // Incompatible axis mode (radar vs continuous polar)
+                if (
+                    prevPolar.polarKind === "axis" &&
+                    targetPolar.polarKind === "axis" &&
+                    prevPolar.axisMode !== targetPolar.axisMode
+                ) {
+                    return {
+                        complexity,
+                        duration: options.duration,
+                        easing: options.easing,
+                        fromScene: previous,
+                        mode: "crossfade",
+                        seriesPlans: [],
+                        toScene: target,
+                        trigger
+                    };
+                }
+            }
+
+            // Path topology check for connected Cartesian paths (Line & Area)
+            if (previous.coordinateSystem === "cartesian" && target.coordinateSystem === "cartesian") {
+                const prevCartesian = previous as CartesianChartScene;
+                const targetCartesian = target as CartesianChartScene;
+                const prevSeriesById = new Map(prevCartesian.series.map(s => [s.id, s]));
+
+                for (const targetSeries of targetCartesian.series) {
+                    if (targetSeries.type === "line" || targetSeries.type === "area") {
+                        const prevSeries = prevSeriesById.get(targetSeries.id);
+                        if (prevSeries && prevSeries.type === targetSeries.type) {
+                            if (!this.isPathTopologyCompatible(prevSeries.points, targetSeries.points)) {
+                                return {
+                                    complexity,
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    fromScene: previous,
+                                    mode: "crossfade",
+                                    seriesPlans: [],
+                                    toScene: target,
+                                    trigger
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Path topology check for connected Polar paths (Radar & Continuous Polar)
+            if (
+                previous.coordinateSystem === "polar" &&
+                previous.polarKind === "axis" &&
+                target.coordinateSystem === "polar" &&
+                target.polarKind === "axis"
+            ) {
+                const prevPolarAxis = previous as PolarAxisChartScene;
+                const targetPolarAxis = target as PolarAxisChartScene;
+                const prevSeriesById = new Map(prevPolarAxis.series.map(s => [s.id, s]));
+
+                for (const targetSeries of targetPolarAxis.series) {
+                    if (targetSeries.type === "radar" || targetSeries.type === "polar") {
+                        const prevSeries = prevSeriesById.get(targetSeries.id);
+                        if (prevSeries && prevSeries.type === targetSeries.type) {
+                            if (!this.isPathTopologyCompatible(prevSeries.points, targetSeries.points)) {
+                                return {
+                                    complexity,
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    fromScene: previous,
+                                    mode: "crossfade",
+                                    seriesPlans: [],
+                                    toScene: target,
+                                    trigger
+                                };
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -159,7 +259,28 @@ export class ChartTransitionPlanner {
             };
         }
 
+        let axisPlan: ChartTransitionPlan["axisPlan"] = null;
+        if (target.coordinateSystem === "cartesian") {
+            const prevCartesian =
+                previous?.coordinateSystem === "cartesian" ? (previous as CartesianChartScene) : null;
+            const targetCartesian = target as CartesianChartScene;
+            axisPlan = AxisAnimationAdapter.createCartesianAxisPlan(prevCartesian?.axes, targetCartesian.axes);
+        } else if (target.coordinateSystem === "polar" && target.polarKind === "axis") {
+            const prevPolarAxis =
+                previous?.coordinateSystem === "polar" && previous.polarKind === "axis"
+                    ? (previous as PolarAxisChartScene)
+                    : null;
+            const targetPolarAxis = target as PolarAxisChartScene;
+            axisPlan = AxisAnimationAdapter.createPolarAxisPlan(
+                prevPolarAxis
+                    ? { angularAxis: prevPolarAxis.angularAxis, radialAxis: prevPolarAxis.radialAxis }
+                    : undefined,
+                { angularAxis: targetPolarAxis.angularAxis, radialAxis: targetPolarAxis.radialAxis }
+            );
+        }
+
         return {
+            axisPlan,
             complexity,
             duration: options.duration,
             easing: options.easing,
@@ -172,36 +293,52 @@ export class ChartTransitionPlanner {
     }
 
     static #calculateComplexity(target: ChartScene, previous: ChartScene | null): ChartAnimationComplexity {
-        let markCount = target.hitTargets.length + (previous?.hitTargets.length ?? 0);
-        let pointCount = 0;
+        let independentMarks = 0;
+        let pathPoints = 0;
         let pathCount = 0;
 
-        if (target.coordinateSystem === "cartesian") {
-            const cartesian = target as CartesianChartScene;
-            for (const s of cartesian.series) {
-                if (s.type === "line" || s.type === "area") {
-                    pointCount += s.points.length;
-                    pathCount += 1;
-                } else if (s.type === "bar") {
-                    markCount += s.bars.length;
+        const countScene = (sc: ChartScene | null) => {
+            if (!sc) return;
+            if (sc.coordinateSystem === "cartesian") {
+                const cartesian = sc as CartesianChartScene;
+                for (const s of cartesian.series) {
+                    if (s.type === "line" || s.type === "area") {
+                        pathPoints += s.points.length;
+                        pathCount += 1;
+                    } else if (s.type === "bar") {
+                        independentMarks += s.bars.length;
+                    }
+                }
+            } else if (sc.coordinateSystem === "polar") {
+                if (sc.polarKind === "sector") {
+                    const sector = sc as PolarSectorChartScene;
+                    for (const s of sector.series) {
+                        independentMarks += s.slices.length;
+                    }
+                } else if (sc.polarKind === "axis") {
+                    const polarAxis = sc as PolarAxisChartScene;
+                    for (const s of polarAxis.series) {
+                        pathPoints += s.points.length;
+                        pathCount += 1;
+                    }
                 }
             }
-        } else if (target.coordinateSystem === "polar") {
-            if (target.polarKind === "sector") {
-                const sector = target as PolarSectorChartScene;
-                for (const s of sector.series) {
-                    markCount += s.slices.length;
-                }
-            } else if (target.polarKind === "axis") {
-                const polarAxis = target as PolarAxisChartScene;
-                for (const s of polarAxis.series) {
-                    pointCount += s.points.length;
-                    pathCount += 1;
-                }
-            }
-        }
+        };
 
-        return { markCount, pathCount, pointCount };
+        countScene(target);
+        countScene(previous);
+
+        const markCount = independentMarks + pathPoints;
+        const totalWeightedCost = independentMarks + pathPoints + pathCount * 5;
+
+        return {
+            independentMarks,
+            markCount,
+            pathCount,
+            pathPoints,
+            pointCount: pathPoints,
+            totalWeightedCost
+        };
     }
 
     static #buildSeriesPlans(
@@ -335,3 +472,4 @@ export class ChartTransitionPlanner {
         return plans;
     }
 }
+

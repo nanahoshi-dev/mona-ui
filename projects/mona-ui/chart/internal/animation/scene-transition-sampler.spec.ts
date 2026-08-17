@@ -67,7 +67,7 @@ describe("SceneTransitionSampler", () => {
         });
 
         const plan: ChartTransitionPlan = {
-            complexity: { markCount: 1, pathCount: 0, pointCount: 0 },
+            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
             duration: 400,
             easing: "linear",
             fromScene: null,
@@ -155,7 +155,7 @@ describe("SceneTransitionSampler", () => {
         });
 
         const plan: ChartTransitionPlan = {
-            complexity: { markCount: 1, pathCount: 0, pointCount: 0 },
+            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
             duration: 400,
             easing: "linear",
             fromScene: null,

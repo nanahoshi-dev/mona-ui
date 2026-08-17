@@ -2,6 +2,7 @@ import type { ChartAnimationEasing } from "../../models/chart-animation.models";
 import type { ChartRect } from "../../models/chart.models";
 import type { ChartSeriesType } from "../../models/chart-series.models";
 import type { ChartScene } from "../scene/chart-scene";
+import type { CartesianAxisTransitionPlan, PolarAxisTransitionPlan } from "./adapters/axis-animation-adapter";
 import type { NormalizedChartAnimationOptions } from "./chart-animation-options";
 
 export type ChartAnimationTrigger = "data" | "initial" | "layout" | "none" | "visibility";
@@ -11,9 +12,12 @@ export type ChartTransitionMode = "crossfade" | "immediate" | "morph";
 export type ChartAnimationCancelMode = "finish-target" | "keep-current";
 
 export interface ChartAnimationComplexity {
+    readonly independentMarks: number;
     readonly markCount: number;
     readonly pathCount: number;
+    readonly pathPoints: number;
     readonly pointCount: number;
+    readonly totalWeightedCost: number;
 }
 
 export interface ChartAnimationPlanningContext {
@@ -31,6 +35,7 @@ export interface ChartSeriesTransitionPlan<TScene = unknown> {
 }
 
 export interface ChartTransitionPlan {
+    readonly axisPlan?: CartesianAxisTransitionPlan | PolarAxisTransitionPlan | null;
     readonly complexity: ChartAnimationComplexity;
     readonly duration: number;
     readonly easing: ChartAnimationEasing;
@@ -48,3 +53,4 @@ export interface ChartAnimationRenderFrame {
     readonly scene: ChartScene;
     readonly toScene?: ChartScene;
 }
+

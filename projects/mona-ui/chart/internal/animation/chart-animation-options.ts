@@ -46,12 +46,14 @@ export function normalizeChartAnimationOptions(
     const enabled = input.enabled ?? DEFAULT_CHART_ANIMATION_OPTIONS.enabled;
 
     let duration: number;
-    if (input.duration === undefined) {
+    if (!enabled) {
+        duration = 0;
+    } else if (input.duration === undefined) {
         duration = DEFAULT_CHART_ANIMATION_OPTIONS.duration;
     } else if (typeof input.duration !== "number" || !Number.isFinite(input.duration) || input.duration < 0) {
-        duration = 0;
+        duration = DEFAULT_CHART_ANIMATION_OPTIONS.duration;
     } else {
-        duration = Math.min(2000, input.duration);
+        duration = Math.min(10000, input.duration);
     }
 
     const easing: ChartAnimationEasing =

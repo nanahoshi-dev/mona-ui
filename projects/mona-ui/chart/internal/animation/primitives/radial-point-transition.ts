@@ -1,6 +1,6 @@
 import type { ChartPoint } from "../../../models/chart.models";
 import type { SceneRadialPoint } from "../../scene/polar-axis-scene";
-import { lerp, lerpCircularAngle, lerpPoint } from "../animation-math";
+import { lerp, lerpCircularAngle, lerpOpacity, lerpPoint } from "../animation-math";
 
 export interface RadialPointTransitionState {
     readonly angle: number;
@@ -52,6 +52,7 @@ export function sampleRadialPointTransition(
     }
 
     const defined = plan.type === "exit" ? from.defined : to.defined;
+    const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
 
     return {
         angle,
@@ -68,6 +69,8 @@ export function sampleRadialPointTransition(
         point: pt,
         radius,
         rawAngle: to.rawAngle ?? from.rawAngle,
+        renderOpacity,
         value: to.value ?? from.value
     };
 }
+

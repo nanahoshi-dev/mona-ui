@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CartesianChartScene, PolarSectorChartScene } from "../scene/chart-scene";
+import type { ChartLineSeriesScene } from "../scene/cartesian-scene";
 import { normalizeChartAnimationOptions } from "./chart-animation-options";
 import { ChartTransitionPlanner } from "./chart-transition-planner";
 
@@ -141,5 +142,53 @@ describe("ChartTransitionPlanner", () => {
 
         expect(plan.mode).toBe("crossfade");
         expect(plan.duration).toBe(300);
+    });
+
+    it("should fallback to crossfade when line series path topology is incompatible (e.g. point count change)", () => {
+        const lineSeriesPrev: ChartLineSeriesScene = {
+            connectNulls: false,
+            curve: "linear",
+            id: "line1",
+            name: "Line",
+            points: [
+                { animationKey: "line1:p0", datum: {}, defined: true, index: 0, x: 10, xValue: 0, y: 50, yValue: 50 },
+                { animationKey: "line1:p1", datum: {}, defined: true, index: 1, x: 20, xValue: 1, y: 60, yValue: 60 }
+            ],
+            showPoints: true,
+            style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+            type: "line"
+        };
+
+        const prev: CartesianChartScene = {
+            axes: [],
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            plotRect: { height: 260, width: 460, x: 20, y: 20 },
+            series: [lineSeriesPrev],
+            width: 500
+        };
+
+        const lineSeriesNext: ChartLineSeriesScene = {
+            ...lineSeriesPrev,
+            points: [
+                { animationKey: "line1:p0", datum: {}, defined: true, index: 0, x: 10, xValue: 0, y: 50, yValue: 50 },
+                { animationKey: "line1:p1", datum: {}, defined: true, index: 1, x: 20, xValue: 1, y: 60, yValue: 60 },
+                { animationKey: "line1:p2", datum: {}, defined: true, index: 2, x: 30, xValue: 2, y: 70, yValue: 70 }
+            ]
+        };
+
+        const next: CartesianChartScene = {
+            ...prev,
+            series: [lineSeriesNext]
+        };
+
+        const options = normalizeChartAnimationOptions(true);
+        const plan = ChartTransitionPlanner.plan(prev, next, "data", options);
+
+        expect(plan.mode).toBe("crossfade");
     });
 });

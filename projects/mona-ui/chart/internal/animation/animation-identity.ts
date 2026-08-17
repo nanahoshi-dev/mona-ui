@@ -3,29 +3,36 @@ import { resolveValue } from "../data/chart-value-resolver";
 
 export type ChartAnimationMarkKey = string;
 
-const warnedDuplicateKeyFields = new Set<string>();
+export type KeyPartType = "b" | "d" | "i" | "n" | "s";
 
-export function serializeKeyPart(value: unknown): string | null {
+export interface TypedKeyPart {
+    readonly type: KeyPartType;
+    readonly value: boolean | number | string;
+}
+
+export function serializeKeyPart(value: unknown): TypedKeyPart | null {
     if (value === null || value === undefined) {
         return null;
     }
     if (typeof value === "string") {
-        return value;
+        return { type: "s", value };
     }
     if (typeof value === "number") {
-        return Number.isFinite(value) ? String(value) : null;
+        return Number.isFinite(value) ? { type: "n", value } : null;
     }
     if (typeof value === "boolean") {
-        return value ? "true" : "false";
+        return { type: "b", value };
     }
     if (value instanceof Date) {
-        return Number.isNaN(value.getTime()) ? null : String(value.getTime());
+        const time = value.getTime();
+        return Number.isNaN(time) ? null : { type: "d", value: time };
     }
     return null;
 }
 
 export class ChartMarkKeyResolver {
     readonly #occurrenceTracker = new Map<string, number>();
+    readonly #warnedDuplicateKeys = new Set<string>();
     readonly #seriesId: string;
     readonly #keyField?: ChartField;
 
@@ -35,43 +42,39 @@ export class ChartMarkKeyResolver {
     }
 
     public resolveKey(datum: unknown, naturalKey: unknown, dataIndex: number): ChartAnimationMarkKey {
-        let baseKey: string | null = null;
+        let part: TypedKeyPart | null = null;
         let isExplicit = false;
 
         if (this.#keyField) {
             const explicitVal = resolveValue(datum, this.#keyField, dataIndex);
-            baseKey = serializeKeyPart(explicitVal);
-            if (baseKey !== null) {
+            part = serializeKeyPart(explicitVal);
+            if (part !== null) {
                 isExplicit = true;
             }
         }
 
-        if (baseKey === null) {
-            baseKey = serializeKeyPart(naturalKey);
+        if (part === null) {
+            part = serializeKeyPart(naturalKey);
         }
 
-        if (baseKey === null) {
-            baseKey = String(dataIndex);
+        if (part === null) {
+            part = { type: "i", value: dataIndex };
         }
 
-        const rawPrefixedKey = `${this.#seriesId}:${baseKey}`;
-        const count = this.#occurrenceTracker.get(rawPrefixedKey) ?? 0;
-        this.#occurrenceTracker.set(rawPrefixedKey, count + 1);
+        const baseKey = `${part.type}:${part.value}`;
+        const count = this.#occurrenceTracker.get(baseKey) ?? 0;
+        this.#occurrenceTracker.set(baseKey, count + 1);
 
-        if (count > 0) {
-            if (isExplicit && typeof ngDevMode !== "undefined" && ngDevMode) {
-                const warningId = `${this.#seriesId}:${baseKey}`;
-                if (!warnedDuplicateKeyFields.has(warningId)) {
-                    warnedDuplicateKeyFields.add(warningId);
-                    // eslint-disable-next-line no-console
-                    console.warn(
-                        `[Mona Chart] Duplicate explicit keyField value "${baseKey}" encountered in series "${this.#seriesId}". Suffixing occurrence to maintain unique identity.`
-                    );
-                }
+        if (count > 0 && isExplicit && typeof ngDevMode !== "undefined" && ngDevMode) {
+            if (!this.#warnedDuplicateKeys.has(baseKey)) {
+                this.#warnedDuplicateKeys.add(baseKey);
+                // eslint-disable-next-line no-console
+                console.warn(
+                    `[Mona Chart] Duplicate explicit keyField value "${part.value}" encountered in series "${this.#seriesId}". Suffixing occurrence to maintain unique identity.`
+                );
             }
-            return `${rawPrefixedKey}:${count}`;
         }
 
-        return rawPrefixedKey;
+        return JSON.stringify([this.#seriesId, part.type, part.value, count]);
     }
 }

@@ -7,6 +7,7 @@ export interface PointMarkTransitionState {
     readonly defined: boolean;
     readonly index: number;
     readonly opacity: number;
+    readonly radius?: number;
     readonly x: number;
     readonly xValue: unknown;
     readonly y: number;
@@ -25,15 +26,18 @@ export function samplePointTransition(plan: PointMarkTransitionPlan, progress: n
     const x = lerp(from.x, to.x, progress);
     const y = lerp(from.y, to.y, progress);
     const defined = plan.type === "exit" ? from.defined : to.defined;
+    const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
 
     return {
         animationKey: to.animationKey ?? from.animationKey,
         datum: to.datum ?? from.datum,
         defined,
         index: to.index,
+        renderOpacity,
         x,
         xValue: to.xValue ?? from.xValue,
         y,
         yValue: to.yValue ?? from.yValue
     };
 }
+

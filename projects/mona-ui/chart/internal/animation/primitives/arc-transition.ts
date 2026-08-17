@@ -1,6 +1,6 @@
 import type { ChartPoint } from "../../../models/chart.models";
 import type { SceneSectorSlice } from "../../scene/polar-scene";
-import { lerp } from "../animation-math";
+import { lerp, lerpOpacity } from "../animation-math";
 
 export interface ArcMarkTransitionState {
     readonly animationKey?: string;
@@ -44,6 +44,7 @@ export function sampleArcTransition(
     const outerRadius = lerp(from.outerRadius, to.outerRadius, progress);
     const padAngle = lerp(from.padAngle, to.padAngle, progress);
     const cornerRadius = lerp(from.cornerRadius, to.cornerRadius, progress);
+    const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
 
     const midAngle = (startAngle + endAngle) / 2;
     const midRadius = (innerRadius + outerRadius) / 2;
@@ -77,9 +78,11 @@ export function sampleArcTransition(
         outerRadius,
         padAngle,
         percentage: to.percentage,
+        renderOpacity,
         sliceId: to.sliceId,
         startAngle,
         value: to.value,
         visible: to.visible
     };
 }
+
