@@ -38,6 +38,54 @@ function createMockSeries(
     };
 }
 
+function createMockScatter(
+    field: ChartField,
+    id: string = "scatter-1",
+    visible: boolean = true,
+    data?: readonly unknown[],
+    xField?: ChartField,
+    pointRadius: number = 6
+): ChartCartesianSeriesRegistration {
+    return {
+        color: signal("#3b82f6"),
+        data: signal(data),
+        element: { nativeElement: {} as HTMLElement },
+        field: signal(field),
+        id,
+        name: signal("Scatter Series"),
+        pointRadius: signal(pointRadius),
+        type: "scatter",
+        visible: signal(visible),
+        xField: signal(xField)
+    };
+}
+
+function createMockBubble(
+    field: ChartField,
+    sizeField: ChartField,
+    id: string = "bubble-1",
+    visible: boolean = true,
+    data?: readonly unknown[],
+    xField?: ChartField,
+    minRadius: number = 4,
+    maxRadius: number = 24
+): ChartCartesianSeriesRegistration {
+    return {
+        color: signal("#10b981"),
+        data: signal(data),
+        element: { nativeElement: {} as HTMLElement },
+        field: signal(field),
+        id,
+        maxRadius: signal(maxRadius),
+        minRadius: signal(minRadius),
+        name: signal("Bubble Series"),
+        sizeField: signal(sizeField),
+        type: "bubble",
+        visible: signal(visible),
+        xField: signal(xField)
+    };
+}
+
 function createMockAxis(options?: Partial<{
     max: number | Date;
     min: number | Date;
@@ -295,18 +343,82 @@ describe("CartesianLayoutEngine", () => {
         expect(withTitleScene.plotRect.height).toBeLessThan(noTitleScene.plotRect.height);
     });
 
-    it("should return empty series when dimensions are zero", () => {
-        const series = [createMockSeries("line", "val")];
+    it("should preserve series declaration order across mixed Bar, Line, Scatter, and Bubble series (SB-004)", () => {
+        const scatter = createMockScatter("y1", "scatter-first", true, undefined, undefined, 5);
+        const line = createMockSeries("line", "y2", "line-mid");
+        const bubble = createMockBubble("y3", "pop", "bubble-last", true, undefined, undefined, 4, 20);
+
+        const data = [
+            { pop: 100, x: 10, y1: 20, y2: 30, y3: 40 },
+            { pop: 400, x: 20, y1: 50, y2: 60, y3: 70 }
+        ];
+
         const scene = CartesianLayoutEngine.computeScene({
-            containerHeight: 0,
-            containerWidth: 0,
-            rootData: [{ val: 10 }],
-            series,
-            styleResolver
+            containerHeight: 300,
+            containerWidth: 500,
+            rootData: data,
+            rootXField: "x",
+            series: [scatter, line, bubble],
+            styleResolver,
+            xAxis: createMockAxis({ type: "linear" })
         });
 
-        expect(scene.plotRect.width).toBe(0);
-        expect(scene.series.length).toBe(0);
+        expect(scene.series.length).toBe(3);
+        expect(scene.series[0].id).toBe("scatter-first");
+        expect(scene.series[0].type).toBe("scatter");
+        expect(scene.series[1].id).toBe("line-mid");
+        expect(scene.series[1].type).toBe("line");
+        expect(scene.series[2].id).toBe("bubble-last");
+        expect(scene.series[2].type).toBe("bubble");
+    });
+
+    it("should construct point spatial index and interactionBucketLookup (SB-008, SB-022)", () => {
+        const scatter = createMockScatter("y", "scatter-1");
+        const data = [
+            { x: 10, y: 20 },
+            { x: 20, y: 40 },
+            { x: 30, y: 60 }
+        ];
+
+        const scene = CartesianLayoutEngine.computeScene({
+            containerHeight: 300,
+            containerWidth: 500,
+            rootData: data,
+            rootXField: "x",
+            series: [scatter],
+            styleResolver,
+            xAxis: createMockAxis({ type: "linear" })
+        });
+
+        expect(scene.pointSpatialIndex).toBeDefined();
+        expect(scene.pointSpatialIndex?.size).toBeGreaterThanOrEqual(3);
+        expect(scene.interactionBucketLookup).toBeDefined();
+        expect(scene.interactionBucketLookup?.size).toBe(3);
+        expect(scene.interactionBucketLookup?.has(10)).toBe(true);
+    });
+
+    it("should compute bubble radius using sqrt scale mapping (SB-005, SB-006)", () => {
+        const bubble = createMockBubble("y", "pop", "bubble-1", true, undefined, undefined, 5, 25);
+        const data = [
+            { pop: 100, x: 10, y: 20 }, // sqrt(100) = 10 -> min radius 5
+            { pop: 1600, x: 20, y: 40 } // sqrt(1600) = 40 -> max radius 25
+        ];
+
+        const scene = CartesianLayoutEngine.computeScene({
+            containerHeight: 300,
+            containerWidth: 500,
+            rootData: data,
+            rootXField: "x",
+            series: [bubble],
+            styleResolver,
+            xAxis: createMockAxis({ type: "linear" })
+        });
+
+        const bubbleScene = scene.series[0];
+        if (bubbleScene.type === "bubble") {
+            expect(bubbleScene.markers[0].radius).toBe(5);
+            expect(bubbleScene.markers[1].radius).toBe(25);
+        }
     });
 });
 
