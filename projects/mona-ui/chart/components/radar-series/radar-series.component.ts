@@ -117,10 +117,14 @@ export class MonaRadarSeriesComponent implements OnInit {
      */
     public readonly visible = model(true);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
             this.visible();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            }
         });
 
         effect(() => {
@@ -129,7 +133,9 @@ export class MonaRadarSeriesComponent implements OnInit {
             this.field();
             this.keyField();
             this.valueFormatter();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            }
         });
 
         effect(() => {
@@ -139,7 +145,9 @@ export class MonaRadarSeriesComponent implements OnInit {
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
         });
 
         effect(() => {
@@ -147,7 +155,9 @@ export class MonaRadarSeriesComponent implements OnInit {
             this.fillMode();
             this.fillOpacity();
             this.userClass();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            }
         });
     }
 
@@ -155,6 +165,8 @@ export class MonaRadarSeriesComponent implements OnInit {
         if (!this.#chartContext) {
             return;
         }
+
+        this.#registered = true;
 
         const unregister = this.#chartContext.registerSeries({
             categoryField: this.categoryField,

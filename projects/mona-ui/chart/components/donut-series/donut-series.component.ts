@@ -206,10 +206,14 @@ export class MonaDonutSeriesComponent implements OnInit {
      */
     public readonly visible = model<boolean>(true);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
             this.visible();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            }
         });
 
         effect(() => {
@@ -228,7 +232,9 @@ export class MonaDonutSeriesComponent implements OnInit {
             const maxLen = raw.length;
             this.#hiddenIndices.update(set => set.where((idx: number) => idx < maxLen).toImmutableSet());
 
-            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            }
         });
 
         effect(() => {
@@ -242,7 +248,9 @@ export class MonaDonutSeriesComponent implements OnInit {
             this.labelContent();
             this.labelPosition();
             this.minLabelAngle();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
         });
 
         effect(() => {
@@ -251,7 +259,9 @@ export class MonaDonutSeriesComponent implements OnInit {
             this.strokeColor();
             this.strokeWidth();
             this.userClass();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            }
         });
     }
 
@@ -259,6 +269,8 @@ export class MonaDonutSeriesComponent implements OnInit {
         if (!this.#chartContext) {
             return;
         }
+
+        this.#registered = true;
 
         const registration: ChartDonutSeriesRegistration = {
             categoryField: this.categoryField,

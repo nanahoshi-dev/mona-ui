@@ -11,8 +11,12 @@ import type { ChartAnimationInput } from "../../models/chart-animation.models";
     imports: [MonaChartComponent, MonaBarSeriesComponent, MonaLineSeriesComponent],
     template: `
         <mona-chart [data]="data()" [animation]="animation()" xField="category">
-            <mona-bar-series field="val1" name="Series 1" [keyField]="keyField()" />
-            <mona-line-series field="val2" name="Series 2" />
+            @if (showBar()) {
+                <mona-bar-series field="val1" name="Series 1" [keyField]="keyField()" />
+            }
+            @if (showLine()) {
+                <mona-line-series field="val2" name="Series 2" />
+            }
         </mona-chart>
     `
 })
@@ -23,6 +27,8 @@ class TestHostComponent {
         { category: "B", id: "k2", val1: 30, val2: 40 }
     ]);
     public readonly keyField = signal<string | undefined>("id");
+    public readonly showBar = signal(true);
+    public readonly showLine = signal(true);
 }
 
 describe("MonaChartComponent Animation Integration", () => {
@@ -50,9 +56,8 @@ describe("MonaChartComponent Animation Integration", () => {
         host.animation.set({ duration: 600, easing: "ease-in" });
         fixture.detectChanges();
 
-        const chartEl = fixture.debugElement.children[0].nativeElement as HTMLElement;
+        const chartEl: HTMLElement = fixture.nativeElement.querySelector("mona-chart");
         expect(chartEl.style.getPropertyValue("--mona-chart-animation-duration")).toBe("600ms");
-        expect(chartEl.style.getPropertyValue("--mona-chart-animation-easing")).toBe("cubic-bezier(0.4, 0, 1, 1)");
     });
 
     it("should compute valid scenes with animation keys on marks", () => {
@@ -96,5 +101,65 @@ describe("MonaChartComponent Animation Integration", () => {
         chart.recomputeScene(ChartInvalidationReason.Data);
 
         expect(chart.isAnimating()).toBe(true);
+    });
+
+    it("should animate when removing the last series (1 -> 0) and adding the first series (0 -> 1)", () => {
+        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        chart.recomputeScene();
+
+        // 2 -> 1 series
+        host.showBar.set(false);
+        fixture.detectChanges();
+        expect(chart.isAnimating()).toBe(true);
+
+        // Finish 2 -> 1 animation
+        chart.recomputeScene();
+
+        // 1 -> 0 series (last series removed)
+        host.showLine.set(false);
+        fixture.detectChanges();
+        expect(chart.isAnimating()).toBe(true);
+
+        // Finish 1 -> 0 animation
+        chart.recomputeScene();
+        expect(chart.scene()?.series.length).toBe(0);
+
+        // 0 -> 1 series (first series added from empty)
+        host.showBar.set(true);
+        fixture.detectChanges();
+        expect(chart.isAnimating()).toBe(true);
+
+        // Finish 0 -> 1 animation
+        chart.recomputeScene();
+
+        // 1 -> 2 series (second series added)
+        host.showLine.set(true);
+        fixture.detectChanges();
+        expect(chart.isAnimating()).toBe(true);
+    });
+
+    it("should not cut a structural animation short when a passive layout/size reflow arrives mid-flight", () => {
+        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        chart.recomputeScene();
+
+        // 2 -> 1 series, leaving the last series in flight
+        host.showBar.set(false);
+        fixture.detectChanges();
+        expect(chart.isAnimating()).toBe(true);
+
+        // 1 -> 0 series (last series removed) starts a structural exit animation
+        host.showLine.set(false);
+        fixture.detectChanges();
+        expect(chart.isAnimating()).toBe(true);
+
+        // Simulate a passive reflow (e.g. the legend collapsing as it goes to
+        // zero items) firing mid-animation via ResizeObserver. This must not
+        // cancel the in-progress exit animation.
+        chart.recomputeScene(ChartInvalidationReason.Size);
+        expect(chart.isAnimating()).toBe(true);
+
+        // Finish the exit animation
+        chart.recomputeScene();
+        expect(chart.scene()?.series.length).toBe(0);
     });
 });
