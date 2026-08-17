@@ -21,11 +21,11 @@ export class HeatmapKeyboardNavigation {
                 case "ArrowDown":
                 case "ArrowRight":
                 case "Home":
-                    return hitTargets[0] ?? null;
+                    return cellIndex.firstHit() ?? hitTargets[0] ?? null;
                 case "ArrowLeft":
                 case "ArrowUp":
                 case "End":
-                    return hitTargets[hitTargets.length - 1] ?? null;
+                    return cellIndex.lastHit() ?? hitTargets[hitTargets.length - 1] ?? null;
                 default:
                     return null;
             }
@@ -77,7 +77,7 @@ export class HeatmapKeyboardNavigation {
 
             case "Home": {
                 if (event.ctrlKey || event.metaKey) {
-                    return hitTargets[0] ?? currentSelection;
+                    return cellIndex.firstHit() ?? currentSelection;
                 }
                 for (let c = 0; c < xCount; c++) {
                     const hit = cellIndex.get(c, row);
@@ -90,7 +90,7 @@ export class HeatmapKeyboardNavigation {
 
             case "End": {
                 if (event.ctrlKey || event.metaKey) {
-                    return hitTargets[hitTargets.length - 1] ?? currentSelection;
+                    return cellIndex.lastHit() ?? currentSelection;
                 }
                 for (let c = xCount - 1; c >= 0; c--) {
                     const hit = cellIndex.get(c, row);
@@ -102,7 +102,7 @@ export class HeatmapKeyboardNavigation {
             }
 
             default:
-                return currentSelection;
+                return null;
         }
     }
 }

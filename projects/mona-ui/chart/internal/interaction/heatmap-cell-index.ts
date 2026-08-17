@@ -66,6 +66,30 @@ export class HeatmapCellIndex {
         return this.#yCount;
     }
 
+    public firstHit(): SceneHitTarget | undefined {
+        for (let r = 0; r < this.#yCount; r++) {
+            for (let c = 0; c < this.#xCount; c++) {
+                const hit = this.get(c, r);
+                if (hit) {
+                    return hit;
+                }
+            }
+        }
+        return undefined;
+    }
+
+    public lastHit(): SceneHitTarget | undefined {
+        for (let r = this.#yCount - 1; r >= 0; r--) {
+            for (let c = this.#xCount - 1; c >= 0; c--) {
+                const hit = this.get(c, r);
+                if (hit) {
+                    return hit;
+                }
+            }
+        }
+        return undefined;
+    }
+
     public get(columnIndex: number, rowIndex: number): SceneHitTarget | undefined {
         return this.#byCoordinate.get(`${columnIndex}:${rowIndex}`);
     }
@@ -102,3 +126,4 @@ export class HeatmapCellIndex {
         return null;
     }
 }
+
