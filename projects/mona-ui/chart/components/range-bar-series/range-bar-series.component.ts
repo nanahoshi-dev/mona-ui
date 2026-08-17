@@ -121,7 +121,6 @@ export class MonaRangeBarSeriesComponent implements OnInit {
 
         effect(() => {
             this.borderRadius();
-            this.fillOpacity();
             this.maxBarWidth();
             this.name();
             this.valueFormatter();
@@ -132,6 +131,7 @@ export class MonaRangeBarSeriesComponent implements OnInit {
 
         effect(() => {
             this.color();
+            this.fillOpacity();
             this.userClass();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Style);
