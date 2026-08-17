@@ -19,6 +19,7 @@ export interface SceneBar {
     index: number;
     isPositive: boolean;
     radius: number;
+    renderOpacity?: number;
     width: number;
     x: number;
     xValue: unknown;
@@ -66,6 +67,7 @@ export interface ScenePoint {
     datum: unknown;
     defined: boolean;
     index: number;
+    renderOpacity?: number;
     x: number;
     xValue: unknown;
     y: number;

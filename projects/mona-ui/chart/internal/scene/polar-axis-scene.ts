@@ -16,6 +16,7 @@ export interface SceneRadialPoint {
     point: ChartPoint;
     radius: number;
     rawAngle?: number;
+    renderOpacity?: number;
     value: number;
 }
 
