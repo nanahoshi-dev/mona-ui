@@ -183,4 +183,87 @@ describe("PolarAxisLayoutEngine", () => {
         expect(scene.radialAxis.domain[0]).toBe(-50);
         expect(scene.radialAxis.domain[1]).toBe(100);
     });
+
+    it("should reserve visual extent for large pointRadius and strokeWidth", () => {
+        const series = createMockRadarSeries({
+            pointRadius: signal(12),
+            showPoints: signal(true),
+            strokeWidth: signal(6)
+        });
+        const rootData = [
+            { metric: "A", score: 10 },
+            { metric: "B", score: 20 },
+            { metric: "C", score: 30 }
+        ];
+
+        const sceneWithLargeMarkers = PolarAxisLayoutEngine.computeScene({
+            angularAxis: createMockAngularAxis(),
+            containerHeight: 400,
+            containerWidth: 400,
+            radialAxis: createMockRadialAxis(),
+            rootData,
+            series: [series],
+            styleResolver
+        });
+
+        const seriesSmall = createMockRadarSeries({
+            pointRadius: signal(2),
+            showPoints: signal(true),
+            strokeWidth: signal(1)
+        });
+
+        const sceneWithSmallMarkers = PolarAxisLayoutEngine.computeScene({
+            angularAxis: createMockAngularAxis(),
+            containerHeight: 400,
+            containerWidth: 400,
+            radialAxis: createMockRadialAxis(),
+            rootData,
+            series: [seriesSmall],
+            styleResolver
+        });
+
+        expect(sceneWithLargeMarkers.outerRadius).toBeLessThan(sceneWithSmallMarkers.outerRadius);
+    });
+
+    it("should apply auto-skip to angular tick label visibility when angular tick count is high", () => {
+        const series = createMockPolarSeries();
+        const rootData = [{ angle: 0, gain: 10 }];
+
+        const scene = PolarAxisLayoutEngine.computeScene({
+            angularAxis: createMockAngularAxis({ tickCount: signal(24) }),
+            containerHeight: 400,
+            containerWidth: 400,
+            radialAxis: createMockRadialAxis(),
+            rootData,
+            series: [series],
+            styleResolver
+        });
+
+        expect(scene.angularAxis.ticks.length).toBe(24);
+        const visibleTicks = scene.angularAxis.ticks.filter(t => t.visible);
+        // Step of 2 when tickCount <= 24 -> 12 visible
+        expect(visibleTicks.length).toBe(12);
+    });
+
+    it("should generate stable tick keys for angular and radial ticks", () => {
+        const series = createMockRadarSeries();
+        const rootData = [
+            { metric: "Strength", score: 80 },
+            { metric: "Agility", score: 90 }
+        ];
+
+        const scene = PolarAxisLayoutEngine.computeScene({
+            angularAxis: createMockAngularAxis(),
+            containerHeight: 400,
+            containerWidth: 400,
+            radialAxis: createMockRadialAxis(),
+            rootData,
+            series: [series],
+            styleResolver
+        });
+
+        expect(scene.angularAxis.ticks[0].tickKey).toBe("cat:Strength");
+        expect(scene.radialAxis.ticks[0].tickKey).toContain("val:");
+        expect(scene.radialAxis.ticks[0].visible).toBe(true);
+    });
 });

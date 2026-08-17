@@ -114,21 +114,29 @@ export class MonaPolarSeriesComponent implements OnInit {
     public constructor() {
         effect(() => {
             this.angleField();
-            this.color();
-            this.connectNulls();
-            this.curve();
             this.data();
             this.field();
-            this.fillMode();
-            this.fillOpacity();
+            this.valueFormatter();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+        });
+
+        effect(() => {
+            this.connectNulls();
+            this.curve();
             this.name();
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
-            this.userClass();
-            this.valueFormatter();
             this.visible();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+        });
+
+        effect(() => {
+            this.color();
+            this.fillMode();
+            this.fillOpacity();
+            this.userClass();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
         });
     }
 

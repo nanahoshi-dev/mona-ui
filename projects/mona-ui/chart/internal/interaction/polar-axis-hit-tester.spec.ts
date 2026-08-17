@@ -60,7 +60,6 @@ describe("PolarAxisHitTester", () => {
         interactionBuckets: [
             {
                 anchor: { x: 200, y: 100 },
-                centerX: 200,
                 hits: [hitPower],
                 order: 0,
                 xKey: "Power",
@@ -68,7 +67,6 @@ describe("PolarAxisHitTester", () => {
             },
             {
                 anchor: { x: 300, y: 200 },
-                centerX: 300,
                 hits: [hitSpeed],
                 order: 1,
                 xKey: "Speed",
@@ -114,6 +112,57 @@ describe("PolarAxisHitTester", () => {
     it("should return empty result when pointer is outside radius envelope", () => {
         const pointer = { x: 380, y: 380 };
         const res = PolarAxisHitTester.testHit(pointer, mockScene, true);
+
+        expect(res.activeHitTarget).toBeNull();
+        expect(res.activeHits.length).toBe(0);
+    });
+
+    it("should return empty result when pointer is inside center dead zone", () => {
+        // Center is at 200, 200. Radius 2px is inside deadZone (max(8, 5))
+        const pointer = { x: 202, y: 201 };
+        const res = PolarAxisHitTester.testHit(pointer, mockScene, true);
+
+        expect(res.activeHitTarget).toBeNull();
+        expect(res.activeHits.length).toBe(0);
+    });
+
+    it("should reject hits in continuous polar shared mode when angular distance exceeds maxHoverDistance", () => {
+        const polarHit: SceneHitTarget = {
+            angle: 0,
+            category: "0°",
+            color: "#3b82f6",
+            datum: { angle: 0, gain: 50 },
+            formattedCategory: "0°",
+            formattedValue: "50",
+            index: 0,
+            point: { x: 200, y: 150 },
+            radius: 6,
+            seriesId: "polar-1",
+            seriesName: "Polar",
+            seriesType: "polar",
+            xKey: "0",
+            xValue: 0,
+            yValue: 50
+        };
+
+        const polarScene: PolarAxisChartScene = {
+            ...mockScene,
+            axisMode: "polar",
+            hitTargets: [polarHit],
+            interactionBuckets: [
+                {
+                    anchor: { x: 200, y: 100 },
+                    hits: [polarHit],
+                    order: 0,
+                    xKey: "0",
+                    xValue: 0
+                }
+            ]
+        };
+
+        // Pointer at 180° (far from 0° spoke)
+        const farPointer = { x: 200, y: 280 };
+        const res = PolarAxisHitTester.testHit(farPointer, polarScene, true, 16);
 
         expect(res.activeHitTarget).toBeNull();
         expect(res.activeHits.length).toBe(0);

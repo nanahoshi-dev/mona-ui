@@ -61,7 +61,6 @@ describe("ChartKeyboardNavigation", () => {
         interactionBuckets: [
             {
                 anchor: { x: 200, y: 100 },
-                centerX: 200,
                 hits: [hitA1, hitA2],
                 order: 0,
                 xKey: "A",
@@ -69,7 +68,6 @@ describe("ChartKeyboardNavigation", () => {
             },
             {
                 anchor: { x: 300, y: 200 },
-                centerX: 300,
                 hits: [hitB1],
                 order: 1,
                 xKey: "B",

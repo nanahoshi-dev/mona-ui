@@ -122,14 +122,28 @@ describe("RadarSeriesRenderer", () => {
         expect(ctx.stroke).toHaveBeenCalled();
     });
 
-    it("should handle empty or fewer than 2 points gracefully", () => {
+    it("should handle empty points gracefully", () => {
         const ctx = createMockContext();
         const emptySeries: ChartRadarSeriesScene = {
             ...mockRadarSeriesScene,
-            points: [mockPoints[0]]
+            points: []
         };
 
         RadarSeriesRenderer.render(ctx, emptySeries, { x: 200, y: 200 }, styleResolver);
         expect(ctx.beginPath).not.toHaveBeenCalled();
+    });
+
+    it("should render point marker for single valid point without fill or stroke", () => {
+        const ctx = createMockContext();
+        const singlePointSeries: ChartRadarSeriesScene = {
+            ...mockRadarSeriesScene,
+            points: [mockPoints[0]],
+            showPoints: true
+        };
+
+        RadarSeriesRenderer.render(ctx, singlePointSeries, { x: 200, y: 200 }, styleResolver);
+        expect(ctx.beginPath).toHaveBeenCalled();
+        expect(ctx.fill).toHaveBeenCalled(); // marker circle fill
+        expect(ctx.stroke).toHaveBeenCalled(); // marker circle border stroke
     });
 });

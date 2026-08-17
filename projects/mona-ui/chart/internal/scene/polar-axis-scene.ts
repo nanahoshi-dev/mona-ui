@@ -57,6 +57,7 @@ export interface ChartAngularAxisTick {
     formattedValue: string;
     index: number;
     labelPoint: ChartPoint;
+    tickKey: string;
     value: unknown;
     visible: boolean;
 }
@@ -78,7 +79,9 @@ export interface ChartRadialAxisTick {
     isZero: boolean;
     labelPoint: ChartPoint;
     radius: number;
+    tickKey: string;
     value: number;
+    visible: boolean;
 }
 
 export interface ChartRadialAxisScene {

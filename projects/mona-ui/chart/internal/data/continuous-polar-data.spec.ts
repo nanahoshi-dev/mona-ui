@@ -74,17 +74,55 @@ describe("ContinuousPolarData", () => {
         expect(result.seriesList[0].points[1].rawAngle).toBe(270);
     });
 
-    it("should handle missing or invalid angle/value pairs", () => {
+    it("should handle missing or invalid angle/value pairs with proper angular gap ordering", () => {
         const rawData = [
             { angle: 0, value: 10 },
-            { angle: NaN, value: 20 },
-            { angle: 90, value: NaN },
+            { angle: NaN, value: 20 }, // invalid angle -> excluded completely
+            { angle: 90, value: NaN }, // valid angle, invalid value -> gap in order
             { angle: 180, value: 30 }
         ];
         const series = createPolarSeries({ data: rawData });
         const result = prepareContinuousPolarData([series], []);
 
+        expect(result.seriesList[0].points.length).toBe(3);
+        expect(result.seriesList[0].points.map(p => p.normalizedAngle)).toEqual([0, 90, 180]);
+        expect(result.seriesList[0].points.map(p => p.defined)).toEqual([true, false, true]);
         expect(result.seriesList[0].definedPoints.length).toBe(2);
         expect(result.seriesList[0].definedPoints.map(p => p.normalizedAngle)).toEqual([0, 180]);
+    });
+
+    it("should resolve duplicate canonical angles by first valid occurrence", () => {
+        const rawData = [
+            { angle: 90, value: 10 },
+            { angle: 450, value: 20 }, // 450 % 360 = 90 (duplicate)
+            { angle: 180, value: 30 }
+        ];
+        const series = createPolarSeries({ data: rawData });
+        const result = prepareContinuousPolarData([series], []);
+
+        expect(result.seriesList[0].points.length).toBe(2);
+        expect(result.seriesList[0].points[0].normalizedAngle).toBe(90);
+        expect(result.seriesList[0].points[0].value).toBe(10);
+        expect(result.seriesList[0].points[1].normalizedAngle).toBe(180);
+    });
+
+    it("should pass index parameter to angularFormatter", () => {
+        const rawData = [
+            { angle: 180, value: 20 },
+            { angle: 0, value: 10 }
+        ];
+        const indices: number[] = [];
+        const formatter = (angle: unknown, index?: number) => {
+            if (index !== undefined) {
+                indices.push(index);
+            }
+            return `${angle}° (#${index})`;
+        };
+        const series = createPolarSeries({ data: rawData });
+        const result = prepareContinuousPolarData([series], [], formatter);
+
+        expect(result.seriesList[0].points[0].formattedAngle).toBe("0° (#0)");
+        expect(result.seriesList[0].points[1].formattedAngle).toBe("180° (#1)");
+        expect(indices).toEqual([0, 1]);
     });
 });

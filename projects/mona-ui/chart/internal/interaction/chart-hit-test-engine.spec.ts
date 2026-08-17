@@ -51,14 +51,16 @@ describe("ChartHitTestEngine", () => {
         hitTargets: [hitTarget1, hitTarget2, hitTarget3],
         interactionBuckets: [
             {
-                centerX: 65,
+                anchor: { x: 65, y: 150 },
                 hits: [hitTarget1, hitTarget2],
+                order: 0,
                 xKey: "Jan",
                 xValue: "Jan"
             },
             {
-                centerX: 150,
+                anchor: { x: 150, y: 150 },
                 hits: [hitTarget3],
+                order: 1,
                 xKey: "Feb",
                 xValue: "Feb"
             }

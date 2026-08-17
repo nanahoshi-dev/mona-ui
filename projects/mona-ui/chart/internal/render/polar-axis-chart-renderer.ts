@@ -18,8 +18,8 @@ export class PolarAxisChartRenderer {
             return;
         }
 
-        // 1. Grid, Spokes, and Boundary
-        PolarAxisGridRenderer.render(context, scene, styleResolver);
+        // 1. Background Grid and Spokes
+        PolarAxisGridRenderer.renderBackground(context, scene, styleResolver);
 
         // 2. Series (Fills, Outlines, Markers) in registration order
         for (const s of series) {
@@ -30,7 +30,10 @@ export class PolarAxisChartRenderer {
             }
         }
 
-        // 3. Interaction Overlay
+        // 3. Foreground Axes (Outer Boundary, Radial Reference Spoke)
+        PolarAxisGridRenderer.renderForeground(context, scene, styleResolver);
+
+        // 4. Interaction Overlay
         RadialInteractionRenderer.render(context, scene, interactionState, styleResolver);
     }
 }

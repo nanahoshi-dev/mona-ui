@@ -2,9 +2,6 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
-import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
-import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
-import { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
 import type { ChartPointEvent, ChartPointFocusEvent } from "../../models/chart-event.models";
 import type { ChartRadialCurve, ChartRadialFillMode, ChartRadialGridShape } from "../../models/chart-polar.models";
 import type { PolarAxisChartScene } from "../../internal/scene/chart-scene";
@@ -28,10 +25,7 @@ interface CharacterStat {
         MonaChartAngularAxisComponent,
         MonaChartRadialAxisComponent,
         MonaChartLegendComponent,
-        MonaChartTooltipComponent,
-        ChartAxisLabelTemplateDirective,
-        ChartLegendItemTemplateDirective,
-        ChartTooltipTemplateDirective
+        MonaChartTooltipComponent
     ],
     template: `
         <mona-chart

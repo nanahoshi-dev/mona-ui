@@ -54,6 +54,8 @@ export function formatRadarValue(value: number): string {
     return DEFAULT_NUMBER_FORMATTER.format(value);
 }
 
+export const formatRadialValue = formatRadarValue;
+
 export function prepareRadarData(
     seriesList: readonly ChartRadarSeriesRegistration[],
     rootData: readonly unknown[],
@@ -61,22 +63,12 @@ export function prepareRadarData(
 ): RadarDataResult {
     // 1. Build unified category domain in first-seen order across visible series (fallback to all series if none visible)
     const categoryMap = new Map<string, { formatted: string; index: number; raw: unknown }>();
-    const seriesDataEntries: {
-        allValues: number[];
-        pointsByCategory: Map<string, RadarDatumPoint>;
-        series: ChartRadarSeriesRegistration;
-    }[] = [];
+    const visibleSeriesList = seriesList.filter(s => s.visible());
+    const domainSeriesList = visibleSeriesList.length > 0 ? visibleSeriesList : seriesList;
 
-    const targetSeriesList = seriesList;
-
-    for (const series of targetSeriesList) {
+    for (const series of domainSeriesList) {
         const rawData = resolveData(series.data(), rootData);
-        const valueField = series.field();
         const categoryField = series.categoryField();
-        const valueFormatter = series.valueFormatter();
-        const pointsByCategory = new Map<string, RadarDatumPoint>();
-        const allValues: number[] = [];
-        const seenCategories = new Set<string>();
 
         for (let dataIndex = 0; dataIndex < rawData.length; dataIndex++) {
             const item = rawData[dataIndex];
@@ -85,15 +77,6 @@ export function prepareRadarData(
                 rawCat = `Category ${dataIndex + 1}`;
             }
             const categoryKey = String(rawCat);
-
-            if (seenCategories.has(categoryKey)) {
-                warnOnce(
-                    `radar-duplicate-category:${series.id}:${categoryKey}`,
-                    `[MonaChart] Duplicate category "${categoryKey}" detected in radar series "${series.name()}". The first occurrence was used.`
-                );
-                continue;
-            }
-            seenCategories.add(categoryKey);
 
             if (!categoryMap.has(categoryKey)) {
                 const formatted = angularFormatter
@@ -105,6 +88,36 @@ export function prepareRadarData(
                     raw: rawCat
                 });
             }
+        }
+    }
+
+    const categories: RadarCategoryItem[] = Array.from(categoryMap.entries()).map(([key, info]) => ({
+        formatted: info.formatted,
+        key,
+        raw: info.raw
+    }));
+
+    // 2. Extract series points with first-valid duplicate category resolution
+    const seriesDataEntries: {
+        pointsByCategory: Map<string, RadarDatumPoint>;
+        series: ChartRadarSeriesRegistration;
+    }[] = [];
+
+    for (const series of seriesList) {
+        const rawData = resolveData(series.data(), rootData);
+        const valueField = series.field();
+        const categoryField = series.categoryField();
+        const valueFormatter = series.valueFormatter();
+        const pointsByCategory = new Map<string, RadarDatumPoint>();
+        const seenCategories = new Set<string>();
+
+        for (let dataIndex = 0; dataIndex < rawData.length; dataIndex++) {
+            const item = rawData[dataIndex];
+            let rawCat = resolveValue(item, categoryField, dataIndex);
+            if (rawCat === undefined || rawCat === null || rawCat === "") {
+                rawCat = `Category ${dataIndex + 1}`;
+            }
+            const categoryKey = String(rawCat);
 
             let val = resolveValue(item, valueField, dataIndex);
             if (val === undefined && isFiniteNumber(item)) {
@@ -113,11 +126,10 @@ export function prepareRadarData(
 
             const defined = isFiniteNumber(val);
             const numVal = defined ? (val as number) : 0;
-            if (defined) {
-                allValues.push(numVal);
-            }
 
-            const catInfo = categoryMap.get(categoryKey)!;
+            const catInfo = categoryMap.get(categoryKey);
+            const formattedCat = catInfo ? catInfo.formatted : (angularFormatter ? angularFormatter(rawCat, 0) : String(rawCat));
+
             const formattedVal = defined
                 ? valueFormatter
                     ? valueFormatter(numVal, dataIndex)
@@ -130,32 +142,37 @@ export function prepareRadarData(
                 dataIndex,
                 datum: item,
                 defined,
-                formattedCategory: catInfo.formatted,
+                formattedCategory: formattedCat,
                 formattedValue: formattedVal,
                 value: numVal
             };
 
-            pointsByCategory.set(categoryKey, point);
+            if (seenCategories.has(categoryKey)) {
+                warnOnce(
+                    `radar-duplicate-category:${series.id}:${categoryKey}`,
+                    `[MonaChart] Duplicate category "${categoryKey}" detected in radar series "${series.name()}".`
+                );
+                const existing = pointsByCategory.get(categoryKey);
+                if (existing && !existing.defined && defined) {
+                    pointsByCategory.set(categoryKey, point);
+                }
+            } else {
+                seenCategories.add(categoryKey);
+                pointsByCategory.set(categoryKey, point);
+            }
         }
 
         seriesDataEntries.push({
-            allValues,
             pointsByCategory,
             series
         });
     }
 
-    const categories: RadarCategoryItem[] = Array.from(categoryMap.entries()).map(([key, info]) => ({
-        formatted: info.formatted,
-        key,
-        raw: info.raw
-    }));
-
     const allValuesAcrossAllSeries: number[] = [];
     const preparedSeriesList: RadarSeriesData[] = [];
 
     for (const entry of seriesDataEntries) {
-        const { series, pointsByCategory, allValues } = entry;
+        const { series, pointsByCategory } = entry;
         const isVisible = series.visible();
         const points: RadarDatumPoint[] = [];
         const definedPoints: RadarDatumPoint[] = [];
@@ -179,14 +196,15 @@ export function prepareRadarData(
             }
         }
 
+        const seriesValues = definedPoints.map(p => p.value);
         if (isVisible) {
-            allValuesAcrossAllSeries.push(...allValues);
+            allValuesAcrossAllSeries.push(...seriesValues);
         }
 
-        const hasRenderable = isVisible && definedPoints.length >= 2;
+        const hasRenderable = isVisible && definedPoints.length >= 1;
 
         preparedSeriesList.push({
-            allValues,
+            allValues: seriesValues,
             definedPoints,
             hasRenderableData: hasRenderable,
             points,

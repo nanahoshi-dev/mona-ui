@@ -54,7 +54,7 @@ export class ChartHitTestEngine {
             // 2. Nearest X bucket
             if (interactionBuckets && interactionBuckets.length > 0) {
                 let nearestBucket = interactionBuckets[0];
-                const getBucketX = (b: typeof nearestBucket) => b.centerX ?? b.anchor?.x ?? 0;
+                const getBucketX = (b: typeof nearestBucket) => b.anchor.x;
                 let minBucketDist = Math.abs(pointer.x - getBucketX(nearestBucket));
                 for (let i = 1; i < interactionBuckets.length; i++) {
                     const bucket = interactionBuckets[i];

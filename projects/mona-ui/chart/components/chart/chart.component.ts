@@ -46,10 +46,11 @@ import type {
     PolarChartScene,
     PolarSectorChartScene
 } from "../../internal/scene/chart-scene";
-import type { ChartAngularAxisTick } from "../../internal/scene/polar-axis-scene";
+import type { ChartAngularAxisTick, ChartRadialAxisTick } from "../../internal/scene/polar-axis-scene";
 import type { SceneSectorSlice } from "../../internal/scene/polar-scene";
 import type { SceneHitTarget } from "../../internal/scene/scene-geometry";
 import { ChartStyleResolver } from "../../internal/style/chart-style-resolver";
+import { degreesToRadians } from "../../internal/utils/angle-utils";
 import { formatXValue, formatYValue } from "../../internal/utils/chart-formatter";
 import { clamp } from "../../internal/utils/number-utils";
 import type {
@@ -473,7 +474,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public registerLegend(registration: ChartLegendRegistration): () => void {
         this.#legend.set(registration);
-        this.invalidate(ChartInvalidationReason.Layout);
+        this.#recomputeAndPaint(ChartInvalidationReason.Layout);
         return () => {
             if (this.#legend() === registration) {
                 this.#legend.set(null);
@@ -565,7 +566,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
                     this.#interactionState = {
                         activeHitTarget: primary,
                         activeHits,
-                        pointerPosition: this.#interactionState.pointerPosition
+                        pointerPosition: this.#interactionState.pointerPosition,
+                        source: this.#interactionState.source
                     };
                     this.tooltipContext.set(this.#buildTooltipContext(activeHits, this.#tooltip()?.shared() ?? false));
                 }
@@ -753,11 +755,12 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 const validSliceIds = new Set<string>();
                 for (const s of sectorScene.series) {
                     for (const sl of s.slices) {
+                        validSliceIds.add(`sector:${sl.sliceId}`);
                         validSliceIds.add(sl.sliceId);
                     }
                 }
                 for (const key of Array.from(this.#labelMeasurements.keys())) {
-                    if (key.startsWith("slice:") && !validSliceIds.has(key)) {
+                    if ((key.startsWith("sector:") || key.startsWith("slice:")) && !validSliceIds.has(key)) {
                         this.#labelMeasurements.delete(key);
                     }
                 }
@@ -765,10 +768,15 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 const axisScene = newScene as PolarAxisChartScene;
                 const validKeys = new Set<string>();
                 for (const tick of axisScene.angularAxis.ticks) {
+                    validKeys.add(`angular:${tick.tickKey}`);
                     validKeys.add(`angular:${tick.value}`);
                 }
+                for (const tick of axisScene.radialAxis.ticks) {
+                    validKeys.add(`radial:${tick.tickKey}`);
+                    validKeys.add(`radial:${tick.value}`);
+                }
                 for (const key of Array.from(this.#labelMeasurements.keys())) {
-                    if (key.startsWith("angular:") && !validKeys.has(key)) {
+                    if ((key.startsWith("angular:") || key.startsWith("radial:")) && !validKeys.has(key)) {
                         this.#labelMeasurements.delete(key);
                     }
                 }
@@ -796,8 +804,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const pointPos: ChartPoint = {
             x:
                 matchingHit.point?.x ??
-                (matchingHit.bounds ? matchingHit.bounds.x + matchingHit.bounds.width / 2 : bucket.centerX ?? 0),
-            y: matchingHit.point?.y ?? (matchingHit.bounds ? matchingHit.bounds.y : 0)
+                (matchingHit.bounds ? matchingHit.bounds.x + matchingHit.bounds.width / 2 : bucket.anchor?.x ?? 0),
+            y: matchingHit.point?.y ?? (matchingHit.bounds ? matchingHit.bounds.y : bucket.anchor?.y ?? 0)
         };
 
         const isSector = currentScene.coordinateSystem === "polar" && currentScene.polarKind === "sector";
@@ -847,6 +855,16 @@ export class MonaChartComponent implements ChartRegistrationContext {
     protected angularLabelTransform(tick: ChartAngularAxisTick): string {
         const sin = Math.sin(tick.angle);
         const cos = Math.cos(tick.angle);
+        if (Math.abs(sin) < 0.15) {
+            return cos > 0 ? "translate(-50%, -100%)" : "translate(-50%, 0%)";
+        }
+        return sin > 0 ? "translate(0, -50%)" : "translate(-100%, -50%)";
+    }
+
+    protected radialLabelTransform(tick: ChartRadialAxisTick, labelAngle: number): string {
+        const rad = degreesToRadians(labelAngle);
+        const sin = Math.sin(rad);
+        const cos = Math.cos(rad);
         if (Math.abs(sin) < 0.15) {
             return cos > 0 ? "translate(-50%, -100%)" : "translate(-50%, 0%)";
         }

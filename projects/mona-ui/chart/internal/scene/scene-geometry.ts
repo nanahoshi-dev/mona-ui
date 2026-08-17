@@ -52,10 +52,9 @@ export interface SceneHitTarget {
 }
 
 export interface ChartInteractionBucket {
-    readonly anchor?: ChartPoint;
-    readonly centerX?: number;
+    readonly anchor: ChartPoint;
     readonly hits: readonly SceneHitTarget[];
-    readonly order?: number;
+    readonly order: number;
     readonly xKey: ChartInteractionXKey;
     readonly xValue: unknown;
 }
