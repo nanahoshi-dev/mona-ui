@@ -222,4 +222,80 @@ describe("ChartHitTestEngine", () => {
             expect(hitEdge.activeHitTarget).toBeNull();
         });
     });
+
+    describe("dense marker hit testing and two-phase selection (SB-008, SB-019, SB-022)", () => {
+        const bottomMarker: SceneHitTarget = {
+            datum: { id: 1 },
+            index: 0,
+            point: { x: 100, y: 100 },
+            radius: 20, // visual radius 20
+            renderOrder: 0, // bottom mark
+            seriesId: "bottom-series",
+            seriesName: "Bottom Bubble",
+            seriesType: "bubble",
+            visualRadius: 20,
+            xKey: "10",
+            xValue: 10,
+            yValue: 20
+        };
+
+        const topMarker: SceneHitTarget = {
+            datum: { id: 2 },
+            index: 1,
+            point: { x: 105, y: 100 },
+            radius: 15, // visual radius 15
+            renderOrder: 1, // top mark (rendered later)
+            seriesId: "top-series",
+            seriesName: "Top Bubble",
+            seriesType: "bubble",
+            visualRadius: 15,
+            xKey: "10",
+            xValue: 10,
+            yValue: 25
+        };
+
+        const bucketLookup = new Map<string, any>([
+            ["10", { anchor: { x: 100, y: 100 }, hits: [bottomMarker, topMarker], order: 0, xKey: "10", xValue: 10 }]
+        ]);
+
+        const markerScene: ChartScene = {
+            axes: [],
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [bottomMarker, topMarker],
+            interactionBucketLookup: bucketLookup,
+            interactionBuckets: [
+                { anchor: { x: 100, y: 100 }, hits: [bottomMarker, topMarker], order: 0, xKey: "10", xValue: 10 }
+            ],
+            legendItems: [],
+            plotRect: { height: 260, width: 400, x: 40, y: 20 },
+            series: [],
+            width: 500
+        };
+
+        it("should prioritize top rendered mark when pointer is inside both visual radii (SB-019)", () => {
+            // Pointer at (102, 100) is inside both markers:
+            // dist to bottom (100, 100) = 2 < 20
+            // dist to top (105, 100) = 3 < 15
+            // Top mark has renderOrder 1 > 0, so top mark must win
+            const hit = ChartHitTestEngine.testHit({ x: 102, y: 100 }, markerScene, false);
+            expect(hit.activeHitTarget?.seriesId).toBe("top-series");
+        });
+
+        it("should select marker with direct visual radius hit over closer center proximity without containment", () => {
+            // Pointer at (85, 100):
+            // dist to bottom (100, 100) = 15 < visualRadius 20 -> inside bottom visual radius
+            // dist to top (105, 100) = 20 > visualRadius 15 -> outside top visual radius
+            const hit = ChartHitTestEngine.testHit({ x: 85, y: 100 }, markerScene, false);
+            expect(hit.activeHitTarget?.seriesId).toBe("bottom-series");
+        });
+
+        it("should perform O(1) shared bucket lookup from interactionBucketLookup (SB-022)", () => {
+            const hit = ChartHitTestEngine.testHit({ x: 102, y: 100 }, markerScene, true);
+            expect(hit.activeHits.length).toBe(2);
+            expect(hit.activeHits[0].seriesId).toBe("bottom-series");
+            expect(hit.activeHits[1].seriesId).toBe("top-series");
+        });
+    });
 });

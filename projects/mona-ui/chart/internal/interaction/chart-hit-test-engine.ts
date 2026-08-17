@@ -69,12 +69,20 @@ export class ChartHitTestEngine {
             return PolarAxisHitTester.testHit(pointer, scene as PolarAxisChartScene, shared, maxHoverDistance);
         }
 
+        const cartesianScene = scene as CartesianChartScene;
+        const barTargets = cartesianScene.barHitTargets ?? hitTargets;
+        const pointSpatialIndex = cartesianScene.pointSpatialIndex ?? cartesianScene.markerSpatialIndex;
+        const candidates = pointSpatialIndex
+            ? pointSpatialIndex.query(pointer, maxHoverDistance)
+            : hitTargets;
+
         // Cartesian shared mode
         if (shared) {
             // 1. Direct bar hit test
-            for (const target of hitTargets) {
+            for (const target of barTargets) {
                 if (target.bounds && isPointInRect(pointer, target.bounds)) {
-                    const bucket = interactionBuckets?.find(b => b.xKey === target.xKey);
+                    const bucket = cartesianScene.interactionBucketLookup?.get(target.xKey) ??
+                        interactionBuckets?.find(b => b.xKey === target.xKey);
                     const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === target.xKey);
                     return {
                         activeHitTarget: target,
@@ -84,20 +92,15 @@ export class ChartHitTestEngine {
                 }
             }
 
-            // 2. Direct marker circle containment test
-            const cartesianScene = scene as CartesianChartScene;
-            const candidates = cartesianScene.markerSpatialIndex
-                ? cartesianScene.markerSpatialIndex.query(pointer, maxHoverDistance)
-                : hitTargets;
-
+            // 2. Direct marker circle containment test (visual radius)
             let topContainedMarker: SceneHitTarget | null = null;
             let topRenderOrder = Number.NEGATIVE_INFINITY;
 
             for (const target of candidates) {
                 if (target.point && (target.seriesType === "scatter" || target.seriesType === "bubble")) {
-                    const effectiveRadius = target.radius ?? target.visualRadius ?? 10;
+                    const visualRadius = target.visualRadius ?? target.radius ?? 4;
                     const d = distance(pointer.x, pointer.y, target.point.x, target.point.y);
-                    if (d <= effectiveRadius) {
+                    if (d <= visualRadius) {
                         const order = target.renderOrder ?? 0;
                         if (order >= topRenderOrder) {
                             topRenderOrder = order;
@@ -107,8 +110,26 @@ export class ChartHitTestEngine {
                 }
             }
 
+            if (!topContainedMarker) {
+                // Forgiving proximity containment
+                for (const target of candidates) {
+                    if (target.point && (target.seriesType === "scatter" || target.seriesType === "bubble")) {
+                        const hitRadius = target.radius ?? 10;
+                        const d = distance(pointer.x, pointer.y, target.point.x, target.point.y);
+                        if (d <= hitRadius) {
+                            const order = target.renderOrder ?? 0;
+                            if (order >= topRenderOrder) {
+                                topRenderOrder = order;
+                                topContainedMarker = target;
+                            }
+                        }
+                    }
+                }
+            }
+
             if (topContainedMarker) {
-                const bucket = interactionBuckets?.find(b => b.xKey === topContainedMarker?.xKey);
+                const bucket = cartesianScene.interactionBucketLookup?.get(topContainedMarker.xKey) ??
+                    interactionBuckets?.find(b => b.xKey === topContainedMarker?.xKey);
                 const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === topContainedMarker?.xKey);
                 return {
                     activeHitTarget: topContainedMarker,
@@ -154,7 +175,7 @@ export class ChartHitTestEngine {
 
         // Cartesian non-shared mode: single nearest target
         // 1. Direct bar hit test
-        for (const target of hitTargets) {
+        for (const target of barTargets) {
             if (target.bounds && isPointInRect(pointer, target.bounds)) {
                 return {
                     activeHitTarget: target,
@@ -165,19 +186,14 @@ export class ChartHitTestEngine {
         }
 
         // 2. Direct marker circle containment test (with top renderOrder selection for overlapping markers)
-        const cartesianScene = scene as CartesianChartScene;
-        const candidates = cartesianScene.markerSpatialIndex
-            ? cartesianScene.markerSpatialIndex.query(pointer, maxHoverDistance)
-            : hitTargets;
-
         let topContainedMarker: SceneHitTarget | null = null;
         let topRenderOrder = Number.NEGATIVE_INFINITY;
 
         for (const target of candidates) {
             if (target.point && (target.seriesType === "scatter" || target.seriesType === "bubble")) {
-                const effectiveRadius = target.radius ?? target.visualRadius ?? 10;
+                const visualRadius = target.visualRadius ?? target.radius ?? 4;
                 const d = distance(pointer.x, pointer.y, target.point.x, target.point.y);
-                if (d <= effectiveRadius) {
+                if (d <= visualRadius) {
                     const order = target.renderOrder ?? 0;
                     if (order >= topRenderOrder) {
                         topRenderOrder = order;

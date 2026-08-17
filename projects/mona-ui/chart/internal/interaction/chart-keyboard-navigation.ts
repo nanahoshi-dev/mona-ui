@@ -68,9 +68,14 @@ export class ChartKeyboardNavigation {
                 const bucket = buckets[currIdx];
                 if (!bucket || bucket.hits.length === 0) return null;
 
-                const currentHitIdx = bucket.hits.findIndex(
-                    h => (activeHitKey && getHitTargetKey(h) === activeHitKey) || h.seriesId === activeSeriesId
-                );
+                let currentHitIdx = -1;
+                if (activeHitKey) {
+                    currentHitIdx = bucket.hits.findIndex(h => getHitTargetKey(h) === activeHitKey);
+                }
+                if (currentHitIdx < 0 && activeSeriesId) {
+                    currentHitIdx = bucket.hits.findIndex(h => h.seriesId === activeSeriesId);
+                }
+
                 const nextHitIdx = currentHitIdx >= 0 ? (currentHitIdx + 1) % bucket.hits.length : 0;
                 const hit = bucket.hits[nextHitIdx];
                 return {
@@ -97,9 +102,14 @@ export class ChartKeyboardNavigation {
                 const bucket = buckets[currIdx];
                 if (!bucket || bucket.hits.length === 0) return null;
 
-                const currentHitIdx = bucket.hits.findIndex(
-                    h => (activeHitKey && getHitTargetKey(h) === activeHitKey) || h.seriesId === activeSeriesId
-                );
+                let currentHitIdx = -1;
+                if (activeHitKey) {
+                    currentHitIdx = bucket.hits.findIndex(h => getHitTargetKey(h) === activeHitKey);
+                }
+                if (currentHitIdx < 0 && activeSeriesId) {
+                    currentHitIdx = bucket.hits.findIndex(h => h.seriesId === activeSeriesId);
+                }
+
                 const prevHitIdx =
                     currentHitIdx >= 0 ? (currentHitIdx - 1 + bucket.hits.length) % bucket.hits.length : 0;
                 const hit = bucket.hits[prevHitIdx];
