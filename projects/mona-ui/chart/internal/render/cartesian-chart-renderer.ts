@@ -125,13 +125,14 @@ export class CartesianChartRenderer {
                       : [];
 
             const primaryHit = hits[0];
-            const hasConnectedOrBarSeries = series.some(
-                s => s.type === "line" || s.type === "area" || s.type === "bar"
+            const hasConnectedOrBarHit = hits.some(
+                h => h.seriesType === "line" || h.seriesType === "area" || h.seriesType === "bar"
             );
-            const crosshairX = primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : null);
+            const crosshairX =
+                primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : null);
 
-            // Vertical crosshair (suppressed when chart only has scatter / bubble series)
-            if (crosshairX !== null && hasConnectedOrBarSeries) {
+            // Vertical crosshair (suppressed when active hits are only scatter / bubble)
+            if (crosshairX !== null && hasConnectedOrBarHit) {
                 const crosshairColor =
                     styleResolver.resolveCssVariable("--mona-chart-crosshair-color") ||
                     styleResolver.resolveCssVariable("--color-focus-indicator") ||
@@ -156,6 +157,11 @@ export class CartesianChartRenderer {
             const barHighlightColor =
                 styleResolver.resolveCssVariable("--mona-chart-bar-highlight-color") ||
                 "rgba(255, 255, 255, 0.25)";
+            const focusIndicatorColor =
+                styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                styleResolver.resolveCssVariable("--color-ring") ||
+                "#3b82f6";
+            const isKeyboardSource = interactionState.source === "keyboard";
 
             for (const hit of hits) {
                 if (hit.point) {
@@ -166,12 +172,14 @@ export class CartesianChartRenderer {
                         const activeRadius = (hit.visualRadius ?? hit.radius ?? 5) + 3;
                         context.beginPath();
                         context.arc(hit.point.x, hit.point.y, activeRadius, 0, Math.PI * 2);
-                        context.strokeStyle = seriesColor;
-                        context.lineWidth = 2;
+                        context.strokeStyle = isKeyboardSource ? focusIndicatorColor : seriesColor;
+                        context.lineWidth = isKeyboardSource ? 2.5 : 2;
                         context.stroke();
                     } else {
                         const matchingSeries = series.find(s => s.id === hit.seriesId);
-                        const color = matchingSeries?.style.color ?? "#3b82f6";
+                        const color = isKeyboardSource
+                            ? focusIndicatorColor
+                            : (matchingSeries?.style.color ?? "#3b82f6");
                         drawPointMarker(context, hit.point.x, hit.point.y, 5, color, markerStrokeColor, 2);
                     }
                 } else if (hit.bounds || hit.visualBounds) {
