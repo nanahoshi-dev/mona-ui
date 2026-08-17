@@ -744,6 +744,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
     #clearInteractionState(): void {
         this.#activeKeyboardBucketIndex = -1;
         this.#activeKeyboardSeriesId = null;
+        this.#activeKeyboardHitKey = null;
         this.#interactionState = null;
         this.tooltipContext.set(null);
         this.tooltipPosition.set(null);
@@ -859,12 +860,17 @@ export class MonaChartComponent implements ChartRegistrationContext {
             hasInvalidationReason(reason, ChartInvalidationReason.Size) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
 
+        const requiresSceneRefresh =
+            isStructural ||
+            hasInvalidationReason(reason, ChartInvalidationReason.Style) ||
+            !this.scene();
+
         if (isStructural) {
             this.#clearInteractionState();
             this.activeAccessibilityText.set("");
         }
 
-        const newScene = isStructural
+        const newScene = requiresSceneRefresh
             ? ChartLayoutEngine.computeScene({
                   angularAxis: this.#angularAxis() ?? undefined,
                   containerHeight: this.#currentHeight,
@@ -878,20 +884,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                   xAxis: this.#xAxis() ?? undefined,
                   yAxis: this.#yAxis() ?? undefined
               })
-            : (this.scene() ??
-              ChartLayoutEngine.computeScene({
-                  angularAxis: this.#angularAxis() ?? undefined,
-                  containerHeight: this.#currentHeight,
-                  containerWidth: this.#currentWidth,
-                  measurements: this.#labelMeasurements,
-                  radialAxis: this.#radialAxis() ?? undefined,
-                  rootData: this.data(),
-                  rootXField: this.xField(),
-                  series: this.#registeredSeries(),
-                  styleResolver: this.#styleResolver,
-                  xAxis: this.#xAxis() ?? undefined,
-                  yAxis: this.#yAxis() ?? undefined
-              }));
+            : this.scene()!;
 
         // Prune measurements
         if (newScene.coordinateSystem === "polar") {
