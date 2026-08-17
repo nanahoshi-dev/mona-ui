@@ -226,6 +226,7 @@ Renders a Cartesian bar series supporting standalone bars, grouped slots, stacke
 | `maxBarWidth` | `number` | `undefined` | Maximum width of the bar in pixels. |
 | `color` | `string` | `undefined` | Bar fill color. Defaults to palette token. |
 | `fillOpacity` | `number` | `1.0` | Bar fill opacity between 0.0 and 1.0. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter callback for bar raw values and stack totals in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
 ### `<mona-area-series>`
@@ -245,6 +246,7 @@ Renders a continuous Cartesian area series supporting gradient fades, solid fill
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across null/missing data points. |
 | `showPoints` | `boolean` | `false` | Whether to render point markers at data coordinates. |
 | `color` | `string` | `undefined` | Area line and fill color. Defaults to palette token. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter callback for area raw values and stack totals in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
 ### `<mona-scatter-series>`
