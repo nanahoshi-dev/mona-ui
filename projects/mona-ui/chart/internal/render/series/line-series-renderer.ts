@@ -60,7 +60,14 @@ export class LineSeriesRenderer {
         if (showPoints) {
             for (const p of validPoints) {
                 if (p.defined) {
+                    const pointAlpha = (scene.renderOpacity ?? 1) * (p.renderOpacity ?? 1);
+                    if (pointAlpha <= 0) {
+                        continue;
+                    }
+                    context.save();
+                    context.globalAlpha = pointAlpha;
                     drawPointMarker(context, p.x, p.y, style.pointRadius, style.color, "#ffffff", 1.5);
+                    context.restore();
                 }
             }
         }

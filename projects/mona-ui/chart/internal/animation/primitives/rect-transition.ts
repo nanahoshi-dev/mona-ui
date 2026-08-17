@@ -1,5 +1,5 @@
 import type { SceneBar } from "../../scene/scene-geometry";
-import { lerp } from "../animation-math";
+import { lerp, lerpOpacity } from "../animation-math";
 
 export interface RectMarkTransitionState {
     readonly animationKey?: string;
@@ -30,6 +30,7 @@ export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: num
     const width = lerp(from.width, to.width, progress);
     const height = Math.max(0, lerp(from.height, to.height, progress));
     const radius = lerp(from.radius, to.radius, progress);
+    const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
 
     return {
         animationKey: to.animationKey ?? from.animationKey,
@@ -38,6 +39,7 @@ export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: num
         index: to.index,
         isPositive: to.isPositive,
         radius,
+        renderOpacity,
         width,
         x,
         xValue: to.xValue ?? from.xValue,
@@ -45,3 +47,4 @@ export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: num
         yValue: to.yValue ?? from.yValue
     };
 }
+

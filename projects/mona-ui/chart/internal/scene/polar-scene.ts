@@ -40,6 +40,7 @@ export interface SceneSectorSlice {
     outerRadius: number;
     padAngle: number;
     percentage: number;
+    renderOpacity?: number;
     sliceId: string;
     startAngle: number;
     value: number;

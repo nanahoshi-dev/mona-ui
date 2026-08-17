@@ -10,10 +10,15 @@ export class BarSeriesRenderer {
         }
 
         context.save();
-        context.globalAlpha = fillOpacity * (scene.renderOpacity ?? 1);
+        const baseAlpha = fillOpacity * (scene.renderOpacity ?? 1);
         context.fillStyle = style.color;
 
         for (const bar of bars) {
+            const barAlpha = baseAlpha * (bar.renderOpacity ?? 1);
+            if (barAlpha <= 0) {
+                continue;
+            }
+            context.globalAlpha = barAlpha;
             drawBarRect(context, bar.x, bar.y, bar.width, bar.height, borderRadius, bar.isPositive);
         }
 
