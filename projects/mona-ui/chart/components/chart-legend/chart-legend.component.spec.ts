@@ -108,7 +108,10 @@ describe("MonaChartLegendComponent", () => {
                 { color: "#eff6ff", offset: 0, value: 0 },
                 { color: "#3b82f6", offset: 1, value: 100 }
             ],
-            ticks: [],
+            ticks: [
+                { formattedValue: "0", offset: 0, value: 0 },
+                { formattedValue: "100", offset: 1, value: 100 }
+            ],
             title: "Intensity"
         });
 

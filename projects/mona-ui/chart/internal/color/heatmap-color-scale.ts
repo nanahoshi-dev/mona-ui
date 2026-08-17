@@ -61,6 +61,15 @@ export class HeatmapColorScale {
         let resolvedStops: string[] = [];
         let midpoint: number | undefined;
 
+        const isStopValid = (c: string): boolean => {
+            if (!c || typeof c !== "string") return false;
+            try {
+                return Boolean(parse(c.trim()));
+            } catch {
+                return false;
+            }
+        };
+
         if (mode === "diverging") {
             const derivedMidpoint = min < 0 && max > 0 ? 0 : (min + max) / 2;
             if (explicitMidpoint !== undefined && isFiniteNumber(explicitMidpoint)) {
@@ -79,7 +88,7 @@ export class HeatmapColorScale {
             }
             this.#midpoint = midpoint;
 
-            if (colors && colors.length === 3) {
+            if (colors && colors.length === 3 && colors.every(isStopValid)) {
                 resolvedStops = [...colors];
             } else {
                 if (colors && colors.length !== 3) {
@@ -88,15 +97,21 @@ export class HeatmapColorScale {
                         `[MonaChart] Diverging colorMode requires exactly 3 colors ([low, midpoint, high]). Found ${colors.length}. Falling back to theme diverging colors.`,
                         warnedDiagnosticSignatures
                     );
+                } else if (colors && !colors.every(isStopValid)) {
+                    warnOnce(
+                        "invalid-diverging-color-stops",
+                        "[MonaChart] One or more diverging color stops are invalid CSS colors. Falling back to theme diverging colors.",
+                        warnedDiagnosticSignatures
+                    );
                 }
-                const low = style.lowColor || "#3b82f6";
-                const mid = style.midColor || "#f8fafc";
-                const high = style.highColor || "#ef4444";
+                const low = (style.lowColor && isStopValid(style.lowColor)) ? style.lowColor : "#3b82f6";
+                const mid = (style.midColor && isStopValid(style.midColor)) ? style.midColor : "#f8fafc";
+                const high = (style.highColor && isStopValid(style.highColor)) ? style.highColor : "#ef4444";
                 resolvedStops = [low, mid, high];
             }
         } else {
             // Sequential mode
-            if (colors && colors.length >= 2) {
+            if (colors && colors.length >= 2 && colors.every(isStopValid)) {
                 resolvedStops = [...colors];
             } else {
                 if (colors && colors.length === 1) {
@@ -105,9 +120,19 @@ export class HeatmapColorScale {
                         "[MonaChart] Sequential colorMode requires at least 2 colors. Falling back to default sequential scale.",
                         warnedDiagnosticSignatures
                     );
+                } else if (colors && !colors.every(isStopValid)) {
+                    warnOnce(
+                        "invalid-sequential-color-stops",
+                        "[MonaChart] One or more sequential color stops are invalid CSS colors. Falling back to default sequential scale.",
+                        warnedDiagnosticSignatures
+                    );
                 }
-                const low = style.lowColor || "#eff6ff";
-                const high = style.highColor || style.baseColor || "#3b82f6";
+                const low = (style.lowColor && isStopValid(style.lowColor)) ? style.lowColor : "#eff6ff";
+                const high = (style.highColor && isStopValid(style.highColor))
+                    ? style.highColor
+                    : (style.baseColor && isStopValid(style.baseColor))
+                        ? style.baseColor
+                        : "#3b82f6";
                 resolvedStops = [low, high];
             }
         }

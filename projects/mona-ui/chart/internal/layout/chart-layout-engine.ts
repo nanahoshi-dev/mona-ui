@@ -1,6 +1,11 @@
 import { isDevMode } from "@angular/core";
 import type { ChartCoordinateSystem, ChartField } from "../../models/chart.models";
-import { getChartSeriesFamily, type ChartSeriesFamily } from "../../models/chart-series.models";
+import {
+    getChartSeriesFamily,
+    isCartesianCoordinateFamily,
+    isPolarCoordinateFamily,
+    type ChartSeriesFamily
+} from "../../models/chart-series.models";
 import type {
     ChartAngularAxisRegistration,
     ChartCartesianSeriesRegistration,
@@ -53,9 +58,9 @@ export function resolveChartCoordinateSystem(
 
     for (const s of series) {
         const family = getChartSeriesFamily(s.type);
-        if (family === "cartesian") {
+        if (isCartesianCoordinateFamily(family)) {
             hasCartesian = true;
-        } else {
+        } else if (isPolarCoordinateFamily(family)) {
             hasPolar = true;
         }
     }
@@ -63,7 +68,7 @@ export function resolveChartCoordinateSystem(
     if (hasPolar && hasCartesian) {
         warnOnce(
             "mixed-cartesian-polar",
-            "[MonaChart] Mixing Cartesian series (line, area, bar, scatter, bubble) with radial series (pie, donut, radar, polar) in the same chart is unsupported.",
+            "[MonaChart] Mixing Cartesian and polar chart families in the same chart is unsupported.",
             warnedSet
         );
     }
@@ -95,6 +100,60 @@ export class ChartLayoutEngine {
                 "[MonaChart] Only a single sector series (pie or donut) is supported per chart.",
                 warnedSet
             );
+        }
+
+        if (options.angularAxis || options.radialAxis) {
+            if (coordinateSystem === "cartesian") {
+                warnOnce(
+                    "cartesian-projected-radial-axes",
+                    "[MonaChart] Projected radial axes (<mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Cartesian charts.",
+                    warnedSet
+                );
+            }
+        }
+
+        const heatmapSeries = series.filter(
+            (s): s is ChartHeatmapSeriesRegistration => s.type === "heatmap"
+        );
+
+        if (heatmapSeries.length > 0) {
+            if (heatmapSeries.length > 1) {
+                warnOnce(
+                    "multi-heatmap-series",
+                    "[MonaChart] Multiple heatmap series in the same chart are unsupported.",
+                    warnedSet
+                );
+                return HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight);
+            }
+            if (series.length > heatmapSeries.length) {
+                const hasPolar = series.some(s => isPolarCoordinateFamily(getChartSeriesFamily(s.type)));
+                if (hasPolar) {
+                    warnOnce(
+                        "mixed-heatmap-polar",
+                        "[MonaChart] Heatmap cannot be combined with polar series in the same chart.",
+                        warnedSet
+                    );
+                } else {
+                    warnOnce(
+                        "mixed-xy-heatmap",
+                        "[MonaChart] Heatmap cannot be combined with XY Cartesian series in the same chart.",
+                        warnedSet
+                    );
+                }
+                return HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight);
+            }
+
+            return HeatmapLayoutEngine.computeScene({
+                containerHeight: options.containerHeight,
+                containerWidth: options.containerWidth,
+                rootData: options.rootData,
+                rootXField: options.rootXField,
+                series: heatmapSeries[0],
+                styleResolver: options.styleResolver,
+                warnedDiagnosticSignatures: warnedSet,
+                xAxis: options.xAxis,
+                yAxis: options.yAxis
+            });
         }
 
         if (families.size > 1) {
@@ -181,39 +240,6 @@ export class ChartLayoutEngine {
             }
         }
 
-        const heatmapSeries = series.filter(
-            (s): s is ChartHeatmapSeriesRegistration => s.type === "heatmap"
-        );
-
-        if (heatmapSeries.length > 0) {
-            if (heatmapSeries.length > 1) {
-                warnOnce(
-                    `multi-heatmap-${heatmapSeries.length}`,
-                    "[MonaChart] Only a single heatmap series is supported per chart. Using first heatmap series.",
-                    warnedSet
-                );
-            }
-            if (series.length > heatmapSeries.length) {
-                warnOnce(
-                    "mixed-heatmap-series",
-                    "[MonaChart] Heatmap series cannot be mixed with other series types in the same chart.",
-                    warnedSet
-                );
-            }
-
-            return HeatmapLayoutEngine.computeScene({
-                containerHeight: options.containerHeight,
-                containerWidth: options.containerWidth,
-                rootData: options.rootData,
-                rootXField: options.rootXField,
-                series: heatmapSeries[0],
-                styleResolver: options.styleResolver,
-                warnedDiagnosticSignatures: warnedSet,
-                xAxis: options.xAxis,
-                yAxis: options.yAxis
-            });
-        }
-
         if (coordinateSystem === "polar") {
             if (options.xAxis || options.yAxis) {
                 warnOnce(
@@ -240,14 +266,6 @@ export class ChartLayoutEngine {
             });
         }
 
-        if (options.angularAxis || options.radialAxis) {
-            warnOnce(
-                "cartesian-projected-radial-axes",
-                "[MonaChart] Projected radial axes (<mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Cartesian charts.",
-                warnedSet
-            );
-        }
-
         const cartesianSeries = series.filter(
             (s): s is ChartCartesianSeriesRegistration => getChartSeriesFamily(s.type) === "cartesian"
         );
@@ -265,3 +283,4 @@ export class ChartLayoutEngine {
         });
     }
 }
+

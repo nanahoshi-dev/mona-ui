@@ -135,6 +135,7 @@ export interface SceneHitTarget {
     xIndex?: number;
     xKey: ChartInteractionXKey;
     xValue: unknown;
+    yCategory?: unknown;
     yIndex?: number;
     yValue?: number;
 }

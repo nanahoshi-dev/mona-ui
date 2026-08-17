@@ -85,19 +85,73 @@ describe("HeatmapKeyboardNavigation", () => {
         ]
     };
 
-    it("should initialize selection on ArrowRight or ArrowDown when current selection is null", () => {
+    const createKeyEvent = (key: string, ctrlKey = false, metaKey = false): KeyboardEvent =>
+        ({ ctrlKey, key, metaKey } as unknown as KeyboardEvent);
+
+    it("should initialize selection on ArrowRight, ArrowDown, or Home when current selection is null", () => {
         const res = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { key: "ArrowRight" }),
+            createKeyEvent("ArrowRight"),
             mockScene,
             null
         );
         expect(res).toBe(c00);
+
+        const resDown = HeatmapKeyboardNavigation.handleKey(
+            createKeyEvent("ArrowDown"),
+            mockScene,
+            null
+        );
+        expect(resDown).toBe(c00);
+
+        const resHome = HeatmapKeyboardNavigation.handleKey(
+            createKeyEvent("Home"),
+            mockScene,
+            null
+        );
+        expect(resHome).toBe(c00);
+    });
+
+    it("should initialize selection on ArrowLeft, ArrowUp, or End when current selection is null", () => {
+        const resLeft = HeatmapKeyboardNavigation.handleKey(
+            createKeyEvent("ArrowLeft"),
+            mockScene,
+            null
+        );
+        expect(resLeft).toBe(c21);
+
+        const resUp = HeatmapKeyboardNavigation.handleKey(
+            createKeyEvent("ArrowUp"),
+            mockScene,
+            null
+        );
+        expect(resUp).toBe(c21);
+
+        const resEnd = HeatmapKeyboardNavigation.handleKey(
+            createKeyEvent("End"),
+            mockScene,
+            null
+        );
+        expect(resEnd).toBe(c21);
+    });
+
+    it("should return null for non-navigation keys", () => {
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("Enter"), mockScene, null)).toBeNull();
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent(" "), mockScene, null)).toBeNull();
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("Escape"), mockScene, null)).toBeNull();
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("Tab"), mockScene, null)).toBeNull();
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("a"), mockScene, null)).toBeNull();
+
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("Enter"), mockScene, c00)).toBeNull();
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent(" "), mockScene, c00)).toBeNull();
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("Escape"), mockScene, c00)).toBeNull();
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("Tab"), mockScene, c00)).toBeNull();
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("a"), mockScene, c00)).toBeNull();
     });
 
     it("should navigate 2D grid: ArrowRight, ArrowLeft, ArrowDown, ArrowUp", () => {
         // From c00 -> ArrowRight -> c10
         const r1 = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { key: "ArrowRight" }),
+            createKeyEvent("ArrowRight"),
             mockScene,
             c00
         );
@@ -105,7 +159,7 @@ describe("HeatmapKeyboardNavigation", () => {
 
         // From c10 -> ArrowLeft -> c00
         const r2 = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { key: "ArrowLeft" }),
+            createKeyEvent("ArrowLeft"),
             mockScene,
             c10
         );
@@ -113,7 +167,7 @@ describe("HeatmapKeyboardNavigation", () => {
 
         // From c00 -> ArrowDown -> c01
         const r3 = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { key: "ArrowDown" }),
+            createKeyEvent("ArrowDown"),
             mockScene,
             c00
         );
@@ -121,28 +175,51 @@ describe("HeatmapKeyboardNavigation", () => {
 
         // From c01 -> ArrowUp -> c00
         const r4 = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { key: "ArrowUp" }),
+            createKeyEvent("ArrowUp"),
             mockScene,
             c01
         );
         expect(r4).toBe(c00);
     });
 
-    it("should skip missing sparse cells when navigating horizontally", () => {
+    it("should stay on current selection at boundaries when navigating recognized keys", () => {
+        // c20 -> ArrowRight (right edge) -> stays c20
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("ArrowRight"), mockScene, c20)).toBe(c20);
+
+        // c00 -> ArrowLeft (left edge) -> stays c00
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("ArrowLeft"), mockScene, c00)).toBe(c00);
+
+        // c00 -> ArrowUp (top edge) -> stays c00
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("ArrowUp"), mockScene, c00)).toBe(c00);
+
+        // c01 -> ArrowDown (bottom edge) -> stays c01
+        expect(HeatmapKeyboardNavigation.handleKey(createKeyEvent("ArrowDown"), mockScene, c01)).toBe(c01);
+    });
+
+    it("should skip missing sparse cells when navigating horizontally and vertically", () => {
         // At row 1: c01 (col 0), c11 is missing, c21 (col 2)
         // From c01 -> ArrowRight -> should jump to c21
         const r = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { key: "ArrowRight" }),
+            createKeyEvent("ArrowRight"),
             mockScene,
             c01
         );
         expect(r).toBe(c21);
+
+        // At col 1: c10 (row 0), c11 missing (row 1)
+        // From c10 -> ArrowDown -> should stay c10 because row 1 is missing
+        const rDown = HeatmapKeyboardNavigation.handleKey(
+            createKeyEvent("ArrowDown"),
+            mockScene,
+            c10
+        );
+        expect(rDown).toBe(c10);
     });
 
     it("should handle Home, End, Ctrl+Home, Ctrl+End", () => {
         // Home in row 0
         const homeRow = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { key: "Home" }),
+            createKeyEvent("Home"),
             mockScene,
             c20
         );
@@ -150,7 +227,7 @@ describe("HeatmapKeyboardNavigation", () => {
 
         // End in row 0
         const endRow = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { key: "End" }),
+            createKeyEvent("End"),
             mockScene,
             c00
         );
@@ -158,7 +235,7 @@ describe("HeatmapKeyboardNavigation", () => {
 
         // Ctrl+Home -> first cell in matrix
         const ctrlHome = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { ctrlKey: true, key: "Home" }),
+            createKeyEvent("Home", true),
             mockScene,
             c21
         );
@@ -166,10 +243,11 @@ describe("HeatmapKeyboardNavigation", () => {
 
         // Ctrl+End -> last cell in matrix
         const ctrlEnd = HeatmapKeyboardNavigation.handleKey(
-            new KeyboardEvent("keydown", { ctrlKey: true, key: "End" }),
+            createKeyEvent("End", true),
             mockScene,
             c00
         );
         expect(ctrlEnd).toBe(c21);
     });
 });
+

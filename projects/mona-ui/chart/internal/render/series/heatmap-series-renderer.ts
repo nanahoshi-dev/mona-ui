@@ -54,7 +54,7 @@ export class HeatmapSeriesRenderer {
 
                     const textMetrics = context.measureText(cell.formattedValue);
                     if (cell.width >= textMetrics.width + 4 && cell.height >= 12) {
-                        context.globalAlpha = 1;
+                        context.globalAlpha = alpha;
                         context.fillStyle = cell.labelColor || "#ffffff";
                         context.fillText(
                             cell.formattedValue,

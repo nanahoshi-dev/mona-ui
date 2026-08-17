@@ -41,6 +41,7 @@ export interface ChartTooltipPointContext<T = unknown> {
     toValue?: number;
     valueKind?: ChartPointValueKind;
     xValue: unknown;
+    yCategory?: unknown;
     yValue?: number;
 }
 

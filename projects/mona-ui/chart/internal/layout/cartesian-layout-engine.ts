@@ -124,6 +124,12 @@ export class CartesianLayoutEngine {
             for (const diag of stackAnalysis.diagnostics) {
                 ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, diag);
             }
+            if (yAxis?.type() === "category") {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    "[MonaChart] Categorical Y axis is not supported for Cartesian XY charts and will be treated as linear."
+                );
+            }
         }
 
         const effectiveYFormatter =

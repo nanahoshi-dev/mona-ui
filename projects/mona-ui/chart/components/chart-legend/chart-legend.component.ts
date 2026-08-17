@@ -60,7 +60,11 @@ export class MonaChartLegendComponent implements OnInit {
     protected readonly legendAriaLabel = computed(() => {
         const scale = this.legendScale();
         if (!scale) return "Chart legend";
-        return `${scale.title || "Color scale"}, ${scale.formattedMin} to ${scale.formattedMax}`;
+        const title = scale.title || "Color scale";
+        if (scale.mode === "diverging" && scale.formattedMidpoint) {
+            return `${title}, ${scale.formattedMin} to ${scale.formattedMidpoint} to ${scale.formattedMax}`;
+        }
+        return `${title}, ${scale.formattedMin} to ${scale.formattedMax}`;
     });
 
     /**

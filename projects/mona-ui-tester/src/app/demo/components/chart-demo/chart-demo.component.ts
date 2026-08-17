@@ -598,9 +598,11 @@ export class ChartDemoComponent {
         const polarDetails =
             event.percentage !== undefined
                 ? ` | (${(event.percentage * 100).toFixed(1)}%)`
-                : event.category
-                  ? ` | Category: "${event.category}"`
-                  : "";
+                : event.yCategory !== undefined
+                  ? ` | Cell: [${event.formattedXValue ?? event.category}, ${event.formattedYCategory ?? event.yCategory}]`
+                  : event.category
+                    ? ` | Category: "${event.category}"`
+                    : "";
         this.#addLog(
             "pointClick",
             `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${event.yValue} | Index: ${event.dataIndex}`
@@ -608,7 +610,12 @@ export class ChartDemoComponent {
     }
 
     public onPointFocusChange(event: ChartPointFocusEvent): void {
-        const polarDetails = event.category ? ` | Category: "${event.category}"` : "";
+        const polarDetails =
+            event.yCategory !== undefined
+                ? ` | Cell: [${event.formattedXValue ?? event.category}, ${event.formattedYCategory ?? event.yCategory}]`
+                : event.category
+                  ? ` | Category: "${event.category}"`
+                  : "";
         this.#addLog(
             "pointFocusChange",
             `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${event.yValue} | Index: ${event.dataIndex}`

@@ -1,7 +1,7 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { CartesianHeatmapChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { crispPixel, drawBarRectOutline } from "../utils/canvas-utils";
+import { crispPixel, drawCellRectOutline } from "../utils/canvas-utils";
 import { HeatmapSeriesRenderer } from "./series/heatmap-series-renderer";
 
 export class HeatmapChartRenderer {
@@ -11,7 +11,7 @@ export class HeatmapChartRenderer {
         interactionState: ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        const { axes, plotRect, series } = scene;
+        const { axes, plotRect, series, xCategories, yCategories } = scene;
 
         if (plotRect.width <= 0 || plotRect.height <= 0) {
             return;
@@ -27,26 +27,28 @@ export class HeatmapChartRenderer {
         context.strokeStyle = gridColor;
         context.lineWidth = 1;
 
-        for (const axisScene of axes) {
-            if (!axisScene.visible || !axisScene.gridLines) {
-                continue;
+        const xAxisScene = axes.find(a => a.axis === "x");
+        const yAxisScene = axes.find(a => a.axis === "y");
+
+        if (yAxisScene?.visible && yAxisScene.gridLines && yCategories.length > 0) {
+            const bandHeight = plotRect.height / yCategories.length;
+            for (let i = 0; i <= yCategories.length; i++) {
+                const y = crispPixel(plotRect.y + i * bandHeight, 1);
+                context.beginPath();
+                context.moveTo(plotRect.x, y);
+                context.lineTo(plotRect.x + plotRect.width, y);
+                context.stroke();
             }
-            if (axisScene.axis === "y") {
-                for (const tick of axisScene.ticks) {
-                    const y = crispPixel(tick.coordinate, 1);
-                    context.beginPath();
-                    context.moveTo(plotRect.x, y);
-                    context.lineTo(plotRect.x + plotRect.width, y);
-                    context.stroke();
-                }
-            } else if (axisScene.axis === "x") {
-                for (const tick of axisScene.ticks) {
-                    const x = crispPixel(tick.coordinate, 1);
-                    context.beginPath();
-                    context.moveTo(x, plotRect.y);
-                    context.lineTo(x, plotRect.y + plotRect.height);
-                    context.stroke();
-                }
+        }
+
+        if (xAxisScene?.visible && xAxisScene.gridLines && xCategories.length > 0) {
+            const bandWidth = plotRect.width / xCategories.length;
+            for (let i = 0; i <= xCategories.length; i++) {
+                const x = crispPixel(plotRect.x + i * bandWidth, 1);
+                context.beginPath();
+                context.moveTo(x, plotRect.y);
+                context.lineTo(x, plotRect.y + plotRect.height);
+                context.stroke();
             }
         }
 
@@ -99,6 +101,7 @@ export class HeatmapChartRenderer {
             const hit = interactionState.activeHitTarget ?? interactionState.activeHits[0];
             if (hit && hit.seriesType === "heatmap" && hit.bounds) {
                 const b = hit.visualBounds ?? hit.bounds;
+                const radius = hit.borderRadius ?? 2;
                 if (isKeyboard) {
                     const focusColor =
                         styleResolver.resolveCssVariable("--color-ring") ||
@@ -107,11 +110,15 @@ export class HeatmapChartRenderer {
                         "#3b82f6";
                     context.strokeStyle = focusColor;
                     context.lineWidth = 2.5;
-                    drawBarRectOutline(context, b.x, b.y, b.width, b.height, 2, true);
+                    drawCellRectOutline(context, b.x, b.y, b.width, b.height, radius);
                 } else {
-                    context.strokeStyle = "rgba(255, 255, 255, 0.85)";
+                    const hoverColor =
+                        styleResolver.resolveCssVariable("--mona-chart-heatmap-hover-outline-color") ||
+                        styleResolver.resolveCssVariable("--color-border-control") ||
+                        "rgba(255, 255, 255, 0.85)";
+                    context.strokeStyle = hoverColor;
                     context.lineWidth = 1.5;
-                    drawBarRectOutline(context, b.x, b.y, b.width, b.height, 2, true);
+                    drawCellRectOutline(context, b.x, b.y, b.width, b.height, radius);
                 }
             }
         }
@@ -119,3 +126,4 @@ export class HeatmapChartRenderer {
         context.restore();
     }
 }
+

@@ -32,6 +32,7 @@ import type {
     SceneHitTarget
 } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { clamp, formatCompactNumber } from "../utils/number-utils";
 
 export interface HeatmapLayoutOptions {
@@ -47,6 +48,47 @@ export interface HeatmapLayoutOptions {
 }
 
 export class HeatmapLayoutEngine {
+    public static computeEmptyScene(containerWidth: number, containerHeight: number): CartesianHeatmapChartScene {
+        const plotRect: ChartRect = { height: 0, width: 0, x: 0, y: 0 };
+        return {
+            axes: [],
+            cartesianKind: "heatmap",
+            cellIndex: new HeatmapCellIndex({
+                cellGap: 0,
+                cells: [],
+                hitTargets: [],
+                plotRect,
+                xBandWidth: 0,
+                xCount: 0,
+                yBandHeight: 0,
+                yCount: 0
+            }),
+            colorScale: {
+                domain: [0, 1],
+                emptyCellColor: "rgba(0, 0, 0, 0)",
+                formattedMax: "1",
+                formattedMin: "0",
+                kind: "color",
+                mode: "sequential",
+                stops: [],
+                ticks: [],
+                title: ""
+            },
+            coordinateSystem: "cartesian",
+            gridSignature: "{}",
+            hasRenderableData: false,
+            height: containerHeight,
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            plotRect,
+            series: [],
+            width: containerWidth,
+            xCategories: [],
+            yCategories: []
+        };
+    }
+
     public static computeScene(options: HeatmapLayoutOptions): CartesianHeatmapChartScene {
         const {
             containerHeight,
@@ -59,6 +101,23 @@ export class HeatmapLayoutEngine {
             xAxis,
             yAxis
         } = options;
+
+        if (warnedDiagnosticSignatures) {
+            const xType = xAxis?.type();
+            if (xType && xType !== "auto" && xType !== "category") {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `[MonaChart] Heatmap requires categorical X axis. Type '${xType}' is not supported and will be treated as category.`
+                );
+            }
+            const yType = yAxis?.type();
+            if (yType && yType !== "auto" && yType !== "category") {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `[MonaChart] Heatmap requires categorical Y axis. Type '${yType}' is not supported and will be treated as category.`
+                );
+            }
+        }
 
         const seriesData = resolveData(series.data(), rootData);
 
@@ -272,12 +331,14 @@ export class HeatmapLayoutEngine {
 
             const hitTarget: SceneHitTarget = {
                 animationKey: cell.animationKey,
+                borderRadius,
                 bounds: { height: cellHeight, width: cellWidth, x: cellX, y: cellY },
-                category: formattedX,
+                category: cell.xValue,
                 categoryX: formattedX,
                 categoryY: formattedY,
                 color: fillColor,
                 datum: cell.datum,
+                formattedCategory: formattedX,
                 formattedValue: formattedVal,
                 formattedXValue: formattedX,
                 formattedYCategory: formattedY,
@@ -292,6 +353,7 @@ export class HeatmapLayoutEngine {
                 xIndex: xCatIndex,
                 xKey: cell.xKey,
                 xValue: cell.xValue,
+                yCategory: cell.yValue,
                 yIndex: yCatIndex,
                 yValue: cell.value
             };
@@ -309,16 +371,36 @@ export class HeatmapLayoutEngine {
             yCount: matrix.yCategories.length
         });
 
-        // 11. Generate Axis Scenes with skipped labels if dense
+        // 11. Generate Axis Scenes with geometry-aware label thinning retaining endpoints
         const axisScenes: ChartAxisScene[] = [];
 
         // X Axis
         if (isXAxisVisible) {
-            const xTickStep = Math.max(1, Math.ceil(matrix.xCategories.length / 100));
-            const xTicks: ChartAxisTick[] = [];
-
-            for (let i = 0; i < matrix.xCategories.length; i += xTickStep) {
+            let maxXCategoryLen = 0;
+            for (let i = 0; i < matrix.xCategories.length; i++) {
                 const cat = matrix.xCategories[i];
+                const formatted = xFormatter ? xFormatter(cat.value, cat.index) : cat.formattedValue;
+                if (formatted.length > maxXCategoryLen) {
+                    maxXCategoryLen = formatted.length;
+                }
+            }
+            const estXLabelWidth = Math.max(36, maxXCategoryLen * 7.5 + 12);
+            const xStepFromGeometry = bandWidth < estXLabelWidth ? Math.ceil(estXLabelWidth / Math.max(1, bandWidth)) : 1;
+            const xStepFromCount = Math.ceil(matrix.xCategories.length / 100);
+            const xTickStep = Math.max(1, xStepFromGeometry, xStepFromCount);
+
+            const selectedXIndices = new Set<number>();
+            for (let i = 0; i < matrix.xCategories.length; i += xTickStep) {
+                selectedXIndices.add(i);
+            }
+            if (matrix.xCategories.length > 0) {
+                selectedXIndices.add(matrix.xCategories.length - 1);
+            }
+            const sortedXIndices = Array.from(selectedXIndices).sort((a, b) => a - b);
+
+            const xTicks: ChartAxisTick[] = [];
+            for (const idx of sortedXIndices) {
+                const cat = matrix.xCategories[idx];
                 const bandCoord = xBand.map(cat.key);
                 if (bandCoord !== undefined) {
                     const formatted = xFormatter ? xFormatter(cat.value, cat.index) : cat.formattedValue;
@@ -344,11 +426,23 @@ export class HeatmapLayoutEngine {
 
         // Y Axis
         if (isYAxisVisible) {
-            const yTickStep = Math.max(1, Math.ceil(matrix.yCategories.length / 100));
-            const yTicks: ChartAxisTick[] = [];
+            const estYLabelHeight = 20;
+            const yStepFromGeometry = bandHeight < estYLabelHeight ? Math.ceil(estYLabelHeight / Math.max(1, bandHeight)) : 1;
+            const yStepFromCount = Math.ceil(matrix.yCategories.length / 100);
+            const yTickStep = Math.max(1, yStepFromGeometry, yStepFromCount);
 
+            const selectedYIndices = new Set<number>();
             for (let i = 0; i < matrix.yCategories.length; i += yTickStep) {
-                const cat = matrix.yCategories[i];
+                selectedYIndices.add(i);
+            }
+            if (matrix.yCategories.length > 0) {
+                selectedYIndices.add(matrix.yCategories.length - 1);
+            }
+            const sortedYIndices = Array.from(selectedYIndices).sort((a, b) => a - b);
+
+            const yTicks: ChartAxisTick[] = [];
+            for (const idx of sortedYIndices) {
+                const cat = matrix.yCategories[idx];
                 const bandCoord = yBand.map(cat.key);
                 if (bandCoord !== undefined) {
                     const formatted = yFormatter ? yFormatter(cat.value, cat.index) : cat.formattedValue;
@@ -428,3 +522,4 @@ export class HeatmapLayoutEngine {
         };
     }
 }
+

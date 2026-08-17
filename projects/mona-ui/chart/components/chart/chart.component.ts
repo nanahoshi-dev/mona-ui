@@ -178,8 +178,11 @@ export class MonaChartComponent implements ChartRegistrationContext {
         return (list.find(s => s.type === "heatmap") as ChartHeatmapSeriesRegistration) ?? null;
     });
     public readonly legendScale = computed<ChartColorLegendScale | null>(() => {
-        const hm = this.heatmapScene();
-        if (!hm) return null;
+        const s = this.scene();
+        if (!s || !s.hasRenderableData || s.coordinateSystem !== "cartesian" || s.cartesianKind !== "heatmap") {
+            return null;
+        }
+        const hm = s as CartesianHeatmapChartScene;
         return (hm.colorScale as unknown as ChartColorLegendScale) ?? null;
     });
     protected readonly polarSectorScene = computed<PolarSectorChartScene | null>(() => {
@@ -524,6 +527,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         datum: hit.datum,
                         formattedFrom: hit.formattedFrom ?? hit.range?.formattedFrom,
                         formattedTo: hit.formattedTo ?? hit.range?.formattedTo,
+                        formattedXValue: hit.formattedXValue ?? hit.formattedCategory,
+                        formattedYCategory: hit.formattedYCategory,
                         fromValue: hit.fromValue ?? hit.range?.fromValue,
                         percentage: hit.percentage,
                         rawValue: hit.rawValue,
@@ -542,6 +547,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         toValue: hit.toValue ?? hit.range?.toValue,
                         valueKind: hit.valueKind ?? (hit.range ? "range" : "scalar"),
                         xValue: hit.xValue,
+                        yCategory: hit.yCategory,
                         yValue: hit.yValue
                     });
                 }
@@ -578,6 +584,16 @@ export class MonaChartComponent implements ChartRegistrationContext {
         }
     }
 
+    #resolveSharedTooltip(scene: ChartScene): boolean {
+        if (scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
+            return false;
+        }
+        if (scene.coordinateSystem === "cartesian" && scene.cartesianKind === "heatmap") {
+            return false;
+        }
+        return this.#tooltip()?.shared() ?? false;
+    }
+
     #processPointerMove(event: PointerEvent): void {
         if (this.#isAnimating() && !this.#isStructuralAnimation()) {
             this.#clearInteraction();
@@ -595,8 +611,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             return;
         }
 
-        const isSector = currentScene.coordinateSystem === "polar" && currentScene.polarKind === "sector";
-        const shared = isSector ? false : (this.#tooltip()?.shared() ?? false);
+        const shared = this.#resolveSharedTooltip(currentScene);
         const hitState = ChartHitTestEngine.testHit(pointer, currentScene, shared);
 
         if (hitState.activeHitTarget || hitState.activeHits.length > 0) {
@@ -749,7 +764,9 @@ export class MonaChartComponent implements ChartRegistrationContext {
                         pointerPosition: this.#interactionState.pointerPosition,
                         source: this.#interactionState.source
                     };
-                    this.tooltipContext.set(this.#buildTooltipContext(activeHits, this.#tooltip()?.shared() ?? false, primary));
+                    const currentScene = this.#renderScene ?? this.scene();
+                    const shared = currentScene ? this.#resolveSharedTooltip(currentScene) : false;
+                    this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, primary));
                 }
             }
         }
@@ -798,6 +815,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 formattedStackTotal: hit.formattedStackTotal,
                 formattedTo,
                 formattedX: xStr,
+                formattedXValue: hit.formattedXValue ?? hit.formattedCategory,
                 formattedY: yStr,
                 formattedYCategory: hit.formattedYCategory,
                 fromValue,
@@ -819,6 +837,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
                 toValue,
                 valueKind: hit.valueKind ?? (isRange ? "range" : "scalar"),
                 xValue: hit.xValue,
+                yCategory: hit.yCategory,
                 yValue: hit.yValue
             };
         });
@@ -1170,8 +1189,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             y: matchingHit.point?.y ?? (matchingHit.bounds ? matchingHit.bounds.y : bucket.anchor?.y ?? 0)
         };
 
-        const isSector = currentScene.coordinateSystem === "polar" && currentScene.polarKind === "sector";
-        const shared = isSector ? false : (this.#tooltip()?.shared() ?? false);
+        const shared = this.#resolveSharedTooltip(currentScene);
         const activeHits = shared ? bucket.hits : [matchingHit];
 
         this.#interactionState = {
@@ -1192,6 +1210,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
             datum: matchingHit.datum,
             formattedFrom: matchingHit.formattedFrom ?? matchingHit.range?.formattedFrom,
             formattedTo: matchingHit.formattedTo ?? matchingHit.range?.formattedTo,
+            formattedXValue: matchingHit.formattedXValue ?? matchingHit.formattedCategory,
+            formattedYCategory: matchingHit.formattedYCategory,
             fromValue: matchingHit.fromValue ?? matchingHit.range?.fromValue,
             percentage: matchingHit.percentage,
             rawValue: matchingHit.rawValue,
@@ -1210,6 +1230,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
             toValue: matchingHit.toValue ?? matchingHit.range?.toValue,
             valueKind: matchingHit.valueKind ?? (matchingHit.range ? "range" : "scalar"),
             xValue: matchingHit.xValue,
+            yCategory: matchingHit.yCategory,
             yValue: matchingHit.yValue
         });
 
