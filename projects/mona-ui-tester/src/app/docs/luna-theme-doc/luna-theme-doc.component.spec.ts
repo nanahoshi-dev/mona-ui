@@ -3,7 +3,15 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import axe from "axe-core";
 import { LunaThemeDocComponent } from "./luna-theme-doc.component";
 
+import { PageService } from "../../layout/services/page.service";
+
 describe("LunaThemeDocComponent", () => {
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [PageService]
+        });
+    });
+
     afterEach(() => TestBed.resetTestingModule());
 
     it("renders the dedicated neutral glass workspace", () => {

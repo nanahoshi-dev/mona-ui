@@ -1,23 +1,27 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from "@angular/common/http";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { provideRouter } from "@angular/router";
+import { provideMarkdown } from "ngx-markdown";
+import { beforeEach, describe, expect, it } from "vitest";
+import { MultiSelectDocComponent } from "./multi-select-doc.component";
+import { PageService } from "../../../layout/services/page.service";
 
-import { MultiSelectDocComponent } from './multi-select-doc.component';
+describe("MultiSelectDocComponent", () => {
+    let component: MultiSelectDocComponent;
+    let fixture: ComponentFixture<MultiSelectDocComponent>;
 
-describe('MultiSelectDocComponent', () => {
-  let component: MultiSelectDocComponent;
-  let fixture: ComponentFixture<MultiSelectDocComponent>;
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [MultiSelectDocComponent],
+            providers: [PageService, provideHttpClient(withXhr()), provideMarkdown(), provideRouter([])]
+        }).compileComponents();
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MultiSelectDocComponent]
-    })
-    .compileComponents();
+        fixture = TestBed.createComponent(MultiSelectDocComponent);
+        component = fixture.componentInstance;
+        await fixture.whenStable();
+    });
 
-    fixture = TestBed.createComponent(MultiSelectDocComponent);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it("should create", () => {
+        expect(component).toBeTruthy();
+    });
 });
