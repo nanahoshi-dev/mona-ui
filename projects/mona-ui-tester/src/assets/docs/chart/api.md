@@ -208,18 +208,16 @@ Renders floating Cartesian range bars spanning between a lower value and an uppe
 
 | Input / Output | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `borderRadius` | `number` | `undefined` | Uniform corner radius in pixels applied to all 4 bar corners. |
-| `color` | `string` | `""` | Explicit fill color for the range bars. |
+| `borderRadius` | `number` | `4` | Uniform corner radius in pixels applied to all 4 bar corners. |
+| `color` | `string` | `undefined` | Explicit fill color override for the range bars. |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
-| `fillOpacity` | `number` | `undefined` | Fill opacity for the range bars (0 to 1). |
-| `fromField` | `ChartField` | `"from"` | Property key or accessor extracting the starting numeric value. |
-| `fromFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for the starting value. |
+| `fillOpacity` | `number` | `1.0` | Fill opacity for the range bars (0 to 1). |
+| `fromField` | `ChartField` | (required) | Property key or accessor extracting the starting numeric value. |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
 | `maxBarWidth` | `number` | `undefined` | Maximum width constraint in pixels for range bars. |
 | `name` | `string` | `"Range Bar"` | Series name for tooltips, legend, and accessibility. |
-| `toField` | `ChartField` | `"to"` | Property key or accessor extracting the ending numeric value. |
-| `toFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for the ending value. |
-| `valueFormatter` | `ChartValueFormatter` | `undefined` | Fallback formatting function for range values. |
+| `toField` | `ChartField` | (required) | Property key or accessor extracting the ending numeric value. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter function for range values in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate/category value. |
 
@@ -229,22 +227,19 @@ Renders continuous Cartesian vertical range bands/areas bounded between lower an
 
 | Input / Output | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `color` | `string` | `""` | Explicit fill color for the range band and point markers. |
+| `color` | `string` | `undefined` | Explicit fill color for the range band and point markers. |
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across non-finite or missing data points. |
-| `curve` | `ChartCurve` | `"monotone-x"` | D3 interpolation curve applied to upper and lower boundary paths. |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm applied to boundary paths (`"linear"`, `"smooth"`, `"step"`, `"monotone-x"`). |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
-| `fillOpacity` | `number` | `undefined` | Fill opacity for the range area band (0 to 1). |
-| `fromField` | `ChartField` | `"from"` | Property key or accessor extracting the lower boundary numeric value. |
-| `fromFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for the lower boundary value. |
+| `fillOpacity` | `number` | `0.18` | Fill opacity for the range area band (0 to 1). |
+| `fromField` | `ChartField` | (required) | Property key or accessor extracting the starting boundary numeric value. |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
 | `name` | `string` | `"Range Area"` | Series name for tooltips, legend, and accessibility. |
-| `pointRadius` | `number` | `undefined` | Radius in pixels for dual high/low point markers when enabled. |
+| `pointRadius` | `number` | `4` | Radius in pixels for dual boundary point markers when enabled. |
 | `showPoints` | `boolean` | `false` | Whether to render point markers at low and high boundaries. |
-| `strokeColor` | `string` | `""` | Boundary stroke outline color. |
-| `strokeWidth` | `number` | `undefined` | Boundary stroke outline width in pixels. |
-| `toField` | `ChartField` | `"to"` | Property key or accessor extracting the upper boundary numeric value. |
-| `toFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for the upper boundary value. |
-| `valueFormatter` | `ChartValueFormatter` | `undefined` | Fallback formatting function for range values. |
+| `strokeWidth` | `number` | `2` | Boundary stroke outline width in pixels. |
+| `toField` | `ChartField` | (required) | Property key or accessor extracting the ending boundary numeric value. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter function for range values in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate/category value. |
 
