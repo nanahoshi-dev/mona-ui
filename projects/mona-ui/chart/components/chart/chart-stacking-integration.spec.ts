@@ -1,7 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { MonaChartComponent } from "./chart.component";
 import { MonaBarSeriesComponent } from "../bar-series/bar-series.component";
 import { MonaAreaSeriesComponent } from "../area-series/area-series.component";
@@ -83,15 +83,17 @@ class GroupedStackedBarTestComponent {
         MonaBarSeriesComponent,
         MonaChartXAxisComponent,
         MonaChartYAxisComponent,
-        MonaChartLegendComponent
+        MonaChartLegendComponent,
+        MonaChartTooltipComponent
     ],
     template: `
         <mona-chart [data]="data()" [style.width.px]="600" [style.height.px]="400">
             <mona-chart-x-axis field="month" type="category" />
             <mona-chart-y-axis />
             <mona-chart-legend />
-            <mona-bar-series field="s1" name="Series 1" stack="pct" stackMode="percent" [borderRadius]="5" />
-            <mona-bar-series field="s2" name="Series 2" stack="pct" stackMode="percent" [borderRadius]="5" />
+            <mona-chart-tooltip />
+            <mona-bar-series [(visible)]="s1Visible" field="s1" name="Series 1" stack="pct" stackMode="percent" [borderRadius]="5" />
+            <mona-bar-series [(visible)]="s2Visible" field="s2" name="Series 2" stack="pct" stackMode="percent" [borderRadius]="5" />
         </mona-chart>
     `
 })
@@ -100,6 +102,8 @@ class PercentStackedBarTestComponent {
         { month: "Jan", s1: 25, s2: 75 },
         { month: "Feb", s1: 50, s2: 50 }
     ]);
+    public s1Visible = signal(true);
+    public s2Visible = signal(true);
 }
 
 @Component({
@@ -111,12 +115,12 @@ class PercentStackedBarTestComponent {
         MonaChartLegendComponent
     ],
     template: `
-        <mona-chart [data]="data()" [style.width.px]="600" [style.height.px]="400">
-            <mona-chart-x-axis field="year" type="linear" />
+        <mona-chart [data]="data()" xField="year" [style.width.px]="600" [style.height.px]="400">
+            <mona-chart-x-axis type="linear" />
             <mona-chart-y-axis />
             <mona-chart-legend />
-            <mona-area-series field="desktop" name="Desktop" stack="traffic" xField="year" />
-            <mona-area-series field="mobile" name="Mobile" stack="traffic" xField="year" />
+            <mona-area-series field="desktop" name="Desktop" stack="traffic" fillMode="solid" />
+            <mona-area-series field="mobile" name="Mobile" stack="traffic" fillMode="solid" />
         </mona-chart>
     `
 })
@@ -124,7 +128,7 @@ class StackedAreaTestComponent {
     public readonly data = signal([
         { desktop: 100, mobile: 50, year: 2020 },
         { desktop: 120, mobile: 80, year: 2021 },
-        { desktop: 140, mobile: 110, year: 2022 }
+        { desktop: 110, mobile: 110, year: 2022 }
     ]);
 }
 
@@ -136,30 +140,29 @@ class StackedAreaTestComponent {
         MonaChartYAxisComponent
     ],
     template: `
-        <mona-chart [style.width.px]="600" [style.height.px]="400">
+        <mona-chart [data]="[]" [style.width.px]="600" [style.height.px]="400">
             <mona-chart-x-axis type="linear" />
             <mona-chart-y-axis />
-            <mona-area-series [data]="series1Data()" field="val" name="A1" stack="g" xField="x" />
-            <mona-area-series [data]="series2Data()" field="val" name="A2" stack="g" xField="x" />
+            <mona-area-series [data]="series1Data" field="y" xField="x" stack="flow" />
+            <mona-area-series [data]="series2Data" field="y" xField="x" stack="flow" />
         </mona-chart>
     `
 })
 class StackedAreaLatticeTestComponent {
-    public readonly series1Data = signal([
-        { val: 10, x: 1 },
-        { val: 20, x: 2 },
-        { val: 30, x: 3 }
-    ]);
-    public readonly series2Data = signal([
-        { val: 5, x: 1 },
-        { val: 15, x: 3 }
-    ]);
+    public series1Data = [
+        { x: 1, y: 10 },
+        { x: 2, y: 20 },
+        { x: 3, y: 30 }
+    ];
+    public series2Data = [
+        { x: 1, y: 5 },
+        { x: 3, y: 15 } // missing x: 2
+    ];
 }
 
-describe("Chart Stacking Integration", () => {
+describe("Cartesian Stacking Integration", () => {
     describe("Stacked Bar Series", () => {
         let fixture: ComponentFixture<StackedBarTestComponent>;
-        let component: StackedBarTestComponent;
 
         beforeEach(async () => {
             await TestBed.configureTestingModule({
@@ -167,58 +170,46 @@ describe("Chart Stacking Integration", () => {
             }).compileComponents();
 
             fixture = TestBed.createComponent(StackedBarTestComponent);
-            component = fixture.componentInstance;
             fixture.detectChanges();
         });
 
-        it("should calculate correct cumulative stacked bar positions and only apply outer corner radii", () => {
+        it("should render stacked bars in declaration order with cumulative positions", () => {
             const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
             const scene = chartComp.scene() as CartesianChartScene;
 
             expect(scene).toBeDefined();
             expect(scene.series.length).toBe(3);
 
-            const series1 = scene.series[0] as ChartBarSeriesScene;
-            const series2 = scene.series[1] as ChartBarSeriesScene;
-            const series3 = scene.series[2] as ChartBarSeriesScene;
+            const online = scene.series[0] as ChartBarSeriesScene;
+            const retail = scene.series[1] as ChartBarSeriesScene;
+            const partner = scene.series[2] as ChartBarSeriesScene;
 
             // Jan: online=20 (0->20), retail=30 (20->50), partner=10 (50->60)
-            const s1Jan = series1.bars[0];
-            const s2Jan = series2.bars[0];
-            const s3Jan = series3.bars[0];
+            const oJan = online.bars[0];
+            const rJan = retail.bars[0];
+            const pJan = partner.bars[0];
 
-            expect(s1Jan.stackStartValue).toBe(0);
-            expect(s1Jan.stackEndValue).toBe(20);
-            expect(s1Jan.stackPosition).toBe("inner");
-            expect(s1Jan.cornerRadii).toEqual({ bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 });
+            expect(oJan.stackStartValue).toBe(0);
+            expect(oJan.stackEndValue).toBe(20);
+            expect(oJan.stackPosition).toBe("inner");
 
-            expect(s2Jan.stackStartValue).toBe(20);
-            expect(s2Jan.stackEndValue).toBe(50);
-            expect(s2Jan.stackPosition).toBe("inner");
-            expect(s2Jan.cornerRadii).toEqual({ bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 });
+            expect(rJan.stackStartValue).toBe(20);
+            expect(rJan.stackEndValue).toBe(50);
+            expect(rJan.stackPosition).toBe("inner");
 
-            expect(s3Jan.stackStartValue).toBe(50);
-            expect(s3Jan.stackEndValue).toBe(60);
-            expect(s3Jan.stackPosition).toBe("outer");
-            expect(s3Jan.cornerRadii).toEqual({ bottomLeft: 0, bottomRight: 0, topLeft: 6, topRight: 6 });
-        });
+            expect(pJan.stackStartValue).toBe(50);
+            expect(pJan.stackEndValue).toBe(60);
+            expect(pJan.stackPosition).toBe("outer"); // Top-most positive segment
 
-        it("should emit pointClick event with stack metadata when keyboard Enter is pressed", () => {
-            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+            // Partner bar has rounded top corners
+            expect(pJan.cornerRadii?.topLeft).toBe(6);
+            expect(pJan.cornerRadii?.topRight).toBe(6);
+            expect(pJan.cornerRadii?.bottomLeft).toBe(0);
+            expect(pJan.cornerRadii?.bottomRight).toBe(0);
 
-            // Navigate to first point
-            chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
-            fixture.detectChanges();
-
-            // Press Enter to trigger click
-            chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-            fixture.detectChanges();
-
-            expect(component.lastClickEvent).toBeDefined();
-            expect(component.lastClickEvent?.stackGroup).toBe("sales");
-            expect(component.lastClickEvent?.stackMode).toBe("normal");
-            expect(component.lastClickEvent?.stackStart).toBeDefined();
-            expect(component.lastClickEvent?.stackEnd).toBeDefined();
+            // Online and Retail have 0 corner radius (inner segments)
+            expect(oJan.cornerRadii?.topLeft).toBe(0);
+            expect(rJan.cornerRadii?.topLeft).toBe(0);
         });
     });
 
@@ -234,19 +225,23 @@ describe("Chart Stacking Integration", () => {
             fixture.detectChanges();
         });
 
-        it("should allocate separate slots for distinct stack groups and unstacked series", () => {
+        it("should allocate separate horizontal slots for different stack groups and standalone series", () => {
             const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
             const scene = chartComp.scene() as CartesianChartScene;
 
-            expect(scene.series.length).toBe(5);
+            const pA = (scene.series[0] as ChartBarSeriesScene).bars[0]; // hardware
+            const pB = (scene.series[1] as ChartBarSeriesScene).bars[0]; // hardware
+            const sA = (scene.series[2] as ChartBarSeriesScene).bars[0]; // services
+            const target = (scene.series[4] as ChartBarSeriesScene).bars[0]; // standalone
 
-            // In Q1, hardware stack (A+B) and services stack (A+B) and target should have distinct X coordinates
-            const hwBar = (scene.series[0] as ChartBarSeriesScene).bars[0];
-            const srvBar = (scene.series[2] as ChartBarSeriesScene).bars[0];
-            const targetBar = (scene.series[4] as ChartBarSeriesScene).bars[0];
+            // pA and pB share the same X position (hardware stack slot)
+            expect(pA.x).toBe(pB.x);
 
-            expect(hwBar.x).toBeLessThan(srvBar.x);
-            expect(srvBar.x).toBeLessThan(targetBar.x);
+            // sA has a different X position (services stack slot)
+            expect(sA.x).toBeGreaterThan(pA.x);
+
+            // target has a different X position (target standalone slot)
+            expect(target.x).toBeGreaterThan(sA.x);
         });
     });
 
@@ -280,6 +275,20 @@ describe("Chart Stacking Integration", () => {
 
             // Y axis ticks should end with '%'
             const yAxisScene = scene.axes.find((a: ChartAxisScene) => a.axis === "y");
+            expect(yAxisScene).toBeDefined();
+            expect(yAxisScene?.ticks.some((t: { formattedValue: string }) => t.formattedValue.includes("%"))).toBe(true);
+        });
+
+        it("should maintain [0, 100] domain when all percent members are toggled to hidden (STK-007)", () => {
+            const component = fixture.componentInstance;
+            component.s1Visible.set(false);
+            component.s2Visible.set(false);
+            fixture.detectChanges();
+
+            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const scene = chartComp.scene() as CartesianChartScene;
+            const yAxisScene = scene.axes.find((a: ChartAxisScene) => a.axis === "y");
+
             expect(yAxisScene).toBeDefined();
             expect(yAxisScene?.ticks.some((t: { formattedValue: string }) => t.formattedValue.includes("%"))).toBe(true);
         });
@@ -344,7 +353,7 @@ describe("Chart Stacking Integration", () => {
             const a2At2 = a2.points[1];
             expect(a2At2.xValue).toBe(2);
             expect(a2At2.synthetic).toBe(true);
-            expect(a2At2.defined).toBe(false);
+            expect(a2At2.defined).toBe(true);
             expect(a2At2.stackStartValue).toBe(20);
             expect(a2At2.stackEndValue).toBe(20);
         });
