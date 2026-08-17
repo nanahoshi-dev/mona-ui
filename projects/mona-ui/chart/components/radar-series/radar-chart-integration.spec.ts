@@ -248,4 +248,28 @@ describe("Radar Chart Integration", () => {
 
         expect(chartComp.isAnimating()).toBe(true);
     });
+
+    it("should render distinct positions for top angular category label and outer radial tick label", () => {
+        fixture.detectChanges();
+        const angularLabels = fixture.debugElement.queryAll(By.css("div.text-foreground"));
+        const radialLabels = fixture.debugElement.queryAll(By.css("div.text-muted-foreground"));
+
+        const strengthLabel = angularLabels.find(el => el.nativeElement.textContent.trim() === "Strength");
+        const maxRadialLabel = radialLabels.find(el => el.nativeElement.textContent.trim() === "100");
+
+        expect(strengthLabel).toBeDefined();
+        expect(maxRadialLabel).toBeDefined();
+
+        const strengthLeft = parseFloat(strengthLabel!.nativeElement.style.left);
+        const strengthTop = parseFloat(strengthLabel!.nativeElement.style.top);
+        const maxRadialLeft = parseFloat(maxRadialLabel!.nativeElement.style.left);
+        const maxRadialTop = parseFloat(maxRadialLabel!.nativeElement.style.top);
+
+        // Max radial label is offset horizontally to the right of the vertical spoke on the ring,
+        // while Strength is centered horizontally above the vertex
+        expect(maxRadialLeft).toBeGreaterThan(strengthLeft);
+        expect(maxRadialTop).toBeGreaterThan(strengthTop);
+        expect(strengthLabel!.nativeElement.style.transform).toBe("translate(-50%, -100%)");
+        expect(maxRadialLabel!.nativeElement.style.transform).toBe("translate(0, -50%)");
+    });
 });

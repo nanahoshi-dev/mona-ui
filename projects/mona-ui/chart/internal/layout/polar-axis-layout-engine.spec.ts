@@ -266,4 +266,38 @@ describe("PolarAxisLayoutEngine", () => {
         expect(scene.radialAxis.ticks[0].tickKey).toContain("val:");
         expect(scene.radialAxis.ticks[0].visible).toBe(true);
     });
+
+    it("should position radial tick labels with perpendicular offset to avoid overlapping with angular labels", () => {
+        const series = createMockRadarSeries();
+        const rootData = [
+            { metric: "Strength", score: 100 },
+            { metric: "Agility", score: 50 },
+            { metric: "Defense", score: 80 }
+        ];
+
+        const scene = PolarAxisLayoutEngine.computeScene({
+            angularAxis: createMockAngularAxis({ labelOffset: signal(10), rotation: signal(0) }),
+            containerHeight: 400,
+            containerWidth: 400,
+            radialAxis: createMockRadialAxis({ labelAngle: signal(0), labelOffset: signal(6), max: signal(100), min: signal(0) }),
+            rootData,
+            series: [series],
+            styleResolver
+        });
+
+        const angularTopTick = scene.angularAxis.ticks[0]; // Strength at angle 0 (top)
+        const outerRadialTick = scene.radialAxis.ticks[scene.radialAxis.ticks.length - 1]; // 100 at outerRadius
+
+        // Angular label is outside the outer boundary (10px above the top vertex)
+        expect(angularTopTick.labelPoint.x).toBeCloseTo(scene.center.x);
+        expect(angularTopTick.labelPoint.y).toBeCloseTo(scene.center.y - scene.outerRadius - 10);
+
+        // Radial numeric label is offset to the right of the vertical spoke, on the outer grid ring
+        expect(outerRadialTick.labelPoint.x).toBeCloseTo(scene.center.x + 6);
+        expect(outerRadialTick.labelPoint.y).toBeCloseTo(scene.center.y - scene.outerRadius);
+
+        // They must not share the same coordinates
+        expect(outerRadialTick.labelPoint.x).not.toBe(angularTopTick.labelPoint.x);
+        expect(outerRadialTick.labelPoint.y).not.toBe(angularTopTick.labelPoint.y);
+    });
 });
