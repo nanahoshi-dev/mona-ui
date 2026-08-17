@@ -286,6 +286,7 @@ export interface ChartHeatmapSeriesRegistration {
     readonly colorMode: Signal<ChartHeatmapColorMode>;
     readonly colors: Signal<readonly string[] | undefined>;
     readonly data: Signal<readonly unknown[] | undefined>;
+    readonly element?: ElementRef<HTMLElement>;
     readonly field: Signal<ChartField>;
     readonly fillOpacity: Signal<number | undefined>;
     readonly id: string;
