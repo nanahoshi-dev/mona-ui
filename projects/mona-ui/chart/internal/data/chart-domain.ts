@@ -6,6 +6,7 @@ import type {
 } from "../context/chart-registration-context";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
+import type { CartesianStackLayout } from "./cartesian-stack-engine";
 
 export interface ContinuousDomain {
     max: number;
@@ -365,7 +366,8 @@ export function calculateContinuousYDomain(
     explicitMin?: number,
     explicitMax?: number,
     rootXField?: ChartField,
-    xAxisType?: ChartXAxisType
+    xAxisType?: ChartXAxisType,
+    stackLayout?: CartesianStackLayout
 ): [number, number] {
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
@@ -386,39 +388,74 @@ export function calculateContinuousYDomain(
         ? allSeriesToScan.filter(s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType))
         : allSeriesToScan;
 
-    // Check if zero baseline is required (Area or Bar series)
-    const requiresZeroBaseline = seriesToScan.some(s => s.type === "area" || s.type === "bar");
+    // Check if zero baseline is required (Area, Bar, or any stack group)
+    const requiresZeroBaseline =
+        seriesToScan.some(s => s.type === "area" || s.type === "bar") ||
+        Boolean(stackLayout && stackLayout.groups.length > 0);
 
-    for (const s of seriesToScan) {
-        const data = resolveData(s.data(), rootData);
-        const field = s.field();
-        const xField = s.xField() ?? rootXField;
-        const isBubble = s.type === "bubble";
-        const isScatter = s.type === "scatter";
-        const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
+    if (stackLayout && stackLayout.hasPercentStacks) {
+        const hasPos = stackLayout.groups.some(g => g.mode === "percent" && g.hasPositive);
+        const hasNeg = stackLayout.groups.some(g => g.mode === "percent" && g.hasNegative);
+        if (hasPos && hasNeg) {
+            min = -100;
+            max = 100;
+        } else if (hasNeg) {
+            min = -100;
+            max = 0;
+        } else {
+            min = 0;
+            max = 100;
+        }
+    } else {
+        if (stackLayout && stackLayout.hasNormalStacks) {
+            min = Math.min(min, stackLayout.yExtent[0]);
+            max = Math.max(max, stackLayout.yExtent[1]);
+        }
 
-        for (let i = 0; i < data.length; i++) {
-            const yVal = resolveValue(data[i], field, i);
-            if (!isFiniteNumber(yVal)) {
+        const stackedSeriesIds = new Set<string>();
+        if (stackLayout) {
+            for (const group of stackLayout.groups) {
+                for (const id of group.seriesIds) {
+                    stackedSeriesIds.add(id);
+                }
+            }
+        }
+
+        for (const s of seriesToScan) {
+            if (stackedSeriesIds.has(s.id)) {
                 continue;
             }
 
-            if (isScatter || isBubble) {
-                const xVal = resolveValue(data[i], xField, i);
-                if (!isContinuousXValid(xVal, xAxisType ?? "linear")) {
+            const data = resolveData(s.data(), rootData);
+            const field = s.field();
+            const xField = s.xField() ?? rootXField;
+            const isBubble = s.type === "bubble";
+            const isScatter = s.type === "scatter";
+            const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
+
+            for (let i = 0; i < data.length; i++) {
+                const yVal = resolveValue(data[i], field, i);
+                if (!isFiniteNumber(yVal)) {
                     continue;
                 }
 
-                if (isBubble && sizeField) {
-                    const sVal = resolveValue(data[i], sizeField, i);
-                    if (!isFiniteNumber(sVal) || (sVal as number) <= 0) {
+                if (isScatter || isBubble) {
+                    const xVal = resolveValue(data[i], xField, i);
+                    if (!isContinuousXValid(xVal, xAxisType ?? "linear")) {
                         continue;
                     }
-                }
-            }
 
-            if (yVal < min) min = yVal;
-            if (yVal > max) max = yVal;
+                    if (isBubble && sizeField) {
+                        const sVal = resolveValue(data[i], sizeField, i);
+                        if (!isFiniteNumber(sVal) || (sVal as number) <= 0) {
+                            continue;
+                        }
+                    }
+                }
+
+                if (yVal < min) min = yVal;
+                if (yVal > max) max = yVal;
+            }
         }
     }
 

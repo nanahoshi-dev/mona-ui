@@ -122,6 +122,47 @@ Renders continuous polar series mapping magnitude over continuous degree angles 
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter for numeric values in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
+### `<mona-bar-series>`
+
+Renders a Cartesian bar series supporting standalone bars, grouped slots, stacked segments, and 100% normalized stacks.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `borderRadius` | `number` | `0` | Corner radius for the outer cap of the bar or stack. |
+| `color` | `string` | `""` | Bar fill color override. |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric bar height. |
+| `fillOpacity` | `number` | `undefined` | Bar fill opacity (0 to 1). |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity. |
+| `maxBarWidth` | `number` | `undefined` | Maximum width of the bar in pixels. |
+| `name` | `string` | `"Bar"` | Series name for tooltips, legend, and accessibility. |
+| `stack` | `string` | `undefined` | Stack group name. Series sharing the same stack identifier are stacked cumulatively. |
+| `stackMode` | `ChartStackMode` | `"normal"` | Stacking calculation mode: `"normal"` or `"percent"`. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate value. |
+
+### `<mona-area-series>`
+
+Renders a continuous Cartesian area series supporting gradient fades, solid fills, cumulative stacking, and 100% normalized bands.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `string` | `""` | Line and area fill color override. |
+| `connectNulls` | `boolean` | `false` | Whether to interpolate across null/missing data points. |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"smooth"`, `"step"`, `"monotone-x"`). |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y value. |
+| `fillMode` | `ChartAreaFillMode` | `"gradient"` | Area fill style: `"gradient"`, `"solid"`, or `"none"`. |
+| `fillOpacity` | `number` | `undefined` | Opacity ratio for area fill (0 to 1). |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity. |
+| `name` | `string` | `"Area"` | Series name for tooltips, legend, and accessibility. |
+| `showPoints` | `boolean` | `false` | Whether to render point markers at data coordinates. |
+| `stack` | `string` | `undefined` | Stack group name. Series sharing the same stack identifier are stacked into bands. |
+| `stackMode` | `ChartStackMode` | `"normal"` | Stacking calculation mode: `"normal"` or `"percent"`. |
+| `strokeWidth` | `number` | `undefined` | Top line stroke width in pixels. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate value. |
+
 ### `<mona-scatter-series>`
 
 Renders individual point markers across continuous numeric (linear) or temporal (time/utc) Cartesian coordinates.

@@ -137,6 +137,39 @@ The Mona UI Chart library combines declarative Angular template composition with
 </mona-chart>
 ```
 
+### Stacked Bar Chart & 100% Stacked Bar Chart
+
+```html
+<mona-chart [data]="salesData" xField="quarter" aria-label="Quarterly Revenue by Region" class="h-80 w-full">
+    <mona-chart-x-axis type="category" />
+    <mona-chart-y-axis [nice]="true" />
+
+    <!-- Grouped or 100% Stacked: assign the same stack group identifier -->
+    <mona-bar-series field="north" name="North America" stack="sales" [borderRadius]="4" />
+    <mona-bar-series field="europe" name="Europe" stack="sales" [borderRadius]="4" />
+    <mona-bar-series field="asia" name="Asia Pacific" stack="sales" [borderRadius]="4" />
+
+    <mona-chart-legend position="bottom" [interactive]="true" />
+    <mona-chart-tooltip [shared]="true" />
+</mona-chart>
+```
+
+### Stacked Area Chart & 100% Stacked Area Chart
+
+```html
+<mona-chart [data]="trafficData" xField="year" aria-label="Web Traffic Composition" class="h-80 w-full">
+    <mona-chart-x-axis type="linear" />
+    <mona-chart-y-axis [nice]="true" />
+
+    <mona-area-series field="organic" name="Organic Search" stack="traffic" fillMode="gradient" />
+    <mona-area-series field="referral" name="Referral" stack="traffic" fillMode="gradient" />
+    <mona-area-series field="direct" name="Direct" stack="traffic" fillMode="gradient" />
+
+    <mona-chart-legend position="bottom" [interactive]="true" />
+    <mona-chart-tooltip [shared]="true" />
+</mona-chart>
+```
+
 ### Pie & Donut Charts
 
 ```html
@@ -177,6 +210,42 @@ Mona UI Charts feature a high-performance, renderer-agnostic animation system:
 - **Stable Identity:** Use the `keyField` input on series components to track items across reorders, additions, and deletions.
 - **CSS Custom Properties:** Exposes `--mona-chart-animation-duration` and `--mona-chart-animation-easing` on the chart host element for synchronized CSS transitions.
 - **Reduced Motion:** Automatically respects `prefers-reduced-motion: reduce` by completing transitions immediately without motion.
+
+### `<mona-bar-series>`
+Renders a Cartesian bar series supporting standalone bars, grouped slots, stacked segments, and 100% normalized stacks.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric bar height/value. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
+| `name` | `string` | `"Bar"` | Series name for tooltips, legend, and accessibility. |
+| `stack` | `string` | `undefined` | Stack group name. Series sharing the same stack identifier are stacked cumulatively into a single bar slot. |
+| `stackMode` | `ChartStackMode` | `"normal"` | Stacking calculation mode: `"normal"` (raw cumulative sum) or `"percent"` (normalized to 100%). |
+| `borderRadius` | `number` | `0` | Corner radius for the outer cap of the bar/stack. |
+| `maxBarWidth` | `number` | `undefined` | Maximum width of the bar in pixels. |
+| `color` | `string` | `undefined` | Bar fill color. Defaults to palette token. |
+| `fillOpacity` | `number` | `1.0` | Bar fill opacity between 0.0 and 1.0. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+
+### `<mona-area-series>`
+Renders a continuous Cartesian area series supporting gradient fades, solid fills, cumulative stacking, and 100% normalized area bands.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y value. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
+| `name` | `string` | `"Area"` | Series name for tooltips, legend, and accessibility. |
+| `stack` | `string` | `undefined` | Stack group name. Series sharing the same stack identifier are stacked into cumulative bands. |
+| `stackMode` | `ChartStackMode` | `"normal"` | Stacking calculation mode: `"normal"` (raw cumulative sum) or `"percent"` (normalized to 100%). |
+| `fillMode` | `ChartAreaFillMode` | `"gradient"` | Area fill style: `"gradient"`, `"solid"`, or `"none"`. |
+| `fillOpacity` | `number` | `0.2` | Area fill opacity between 0.0 and 1.0. |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"smooth"`, `"step"`, `"monotone-x"`). |
+| `connectNulls` | `boolean` | `false` | Whether to interpolate across null/missing data points. |
+| `showPoints` | `boolean` | `false` | Whether to render point markers at data coordinates. |
+| `color` | `string` | `undefined` | Area line and fill color. Defaults to palette token. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
 ### `<mona-scatter-series>`
 Renders a Cartesian scatter series representing individual points along continuous linear or temporal X and Y dimensions.

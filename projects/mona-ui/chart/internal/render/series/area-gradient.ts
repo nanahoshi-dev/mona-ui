@@ -1,5 +1,5 @@
 import { formatRgb, parse } from "culori";
-import type { ScenePoint } from "../../scene/scene-geometry";
+import type { SceneAreaPoint, ScenePoint } from "../../scene/scene-geometry";
 import { clamp } from "../../utils/number-utils";
 
 export interface AreaGradientStop {
@@ -29,7 +29,7 @@ export function withAlpha(color: string, alpha: number): string {
 
 export function createAreaGradientSpec(
     baselineY: number,
-    definedPoints: readonly ScenePoint[],
+    definedPoints: readonly (SceneAreaPoint | ScenePoint)[],
     fillColor: string,
     fillOpacity: number
 ): AreaGradientSpec | null {
@@ -39,22 +39,23 @@ export function createAreaGradientSpec(
 
     let minY = definedPoints[0].y;
     let maxY = definedPoints[0].y;
+    let minBaseY = (definedPoints[0] as SceneAreaPoint).baseY ?? baselineY;
+    let maxBaseY = minBaseY;
+
     for (let i = 1; i < definedPoints.length; i++) {
         const py = definedPoints[i].y;
+        const by = (definedPoints[i] as SceneAreaPoint).baseY ?? baselineY;
         if (py < minY) minY = py;
         if (py > maxY) maxY = py;
-    }
-
-    // Degenerate nearly-zero gradient height
-    if (Math.abs(maxY - minY) <= 1) {
-        return null;
+        if (by < minBaseY) minBaseY = by;
+        if (by > maxBaseY) maxBaseY = by;
     }
 
     // In Canvas pixel space, Y grows downward:
-    // point.y < baselineY => visually above zero baseline (positive value)
-    // point.y > baselineY => visually below zero baseline (negative value)
-    const hasPositiveRegion = definedPoints.some(p => p.y < baselineY - 0.5);
-    const hasNegativeRegion = definedPoints.some(p => p.y > baselineY + 0.5);
+    // point.y < baseY => visually above zero/band baseline (positive value)
+    // point.y > baseY => visually below zero/band baseline (negative value)
+    const hasPositiveRegion = definedPoints.some(p => p.y < ((p as SceneAreaPoint).baseY ?? baselineY) - 0.5);
+    const hasNegativeRegion = definedPoints.some(p => p.y > ((p as SceneAreaPoint).baseY ?? baselineY) + 0.5);
 
     // All points are on the baseline
     if (!hasPositiveRegion && !hasNegativeRegion) {
@@ -65,9 +66,14 @@ export function createAreaGradientSpec(
 
     // Case 1: Positive-only data (all points at or above baseline)
     if (hasPositiveRegion && !hasNegativeRegion) {
+        const startY = minY;
+        const endY = maxBaseY;
+        if (Math.abs(endY - startY) <= 1) {
+            return null;
+        }
         return {
-            startY: minY,
-            endY: baselineY,
+            startY,
+            endY,
             stops: [
                 { offset: 0, color: withAlpha(fillColor, normalizedOpacity) },
                 { offset: 1, color: withAlpha(fillColor, 0) }
@@ -77,9 +83,14 @@ export function createAreaGradientSpec(
 
     // Case 2: Negative-only data (all points at or below baseline)
     if (!hasPositiveRegion && hasNegativeRegion) {
+        const startY = minBaseY;
+        const endY = maxY;
+        if (Math.abs(endY - startY) <= 1) {
+            return null;
+        }
         return {
-            startY: baselineY,
-            endY: maxY,
+            startY,
+            endY,
             stops: [
                 { offset: 0, color: withAlpha(fillColor, 0) },
                 { offset: 1, color: withAlpha(fillColor, normalizedOpacity) }
@@ -88,13 +99,18 @@ export function createAreaGradientSpec(
     }
 
     // Case 3: Mixed-sign data (points exist both above and below baseline)
-    const span = maxY - minY;
-    const baselineOffset = span > 0 ? clamp((baselineY - minY) / span, 0, 1) : 0.5;
+    const overallMinY = Math.min(minY, minBaseY);
+    const overallMaxY = Math.max(maxY, maxBaseY);
+    const span = overallMaxY - overallMinY;
+    if (span <= 1) {
+        return null;
+    }
+    const baselineOffset = span > 0 ? clamp((baselineY - overallMinY) / span, 0, 1) : 0.5;
     const baselineAlpha = normalizedOpacity * MIXED_BASELINE_OPACITY_RATIO;
 
     return {
-        startY: minY,
-        endY: maxY,
+        startY: overallMinY,
+        endY: overallMaxY,
         stops: [
             { offset: 0, color: withAlpha(fillColor, normalizedOpacity) },
             { offset: baselineOffset, color: withAlpha(fillColor, baselineAlpha) },

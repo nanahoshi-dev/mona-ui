@@ -134,7 +134,20 @@ export class ChartDemoComponent {
     #logId: number = 0;
 
     protected readonly activeTab = signal<
-        "bubble" | "custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "scatter" | "time"
+        | "bubble"
+        | "custom"
+        | "donut"
+        | "grouped"
+        | "mixed"
+        | "percent-area"
+        | "percent-bar"
+        | "pie"
+        | "polar"
+        | "radar"
+        | "scatter"
+        | "stacked-area"
+        | "stacked-bar"
+        | "time"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
     protected readonly areaFillMode = signal<ChartAreaFillMode>("gradient");
@@ -142,6 +155,22 @@ export class ChartDemoComponent {
         { label: "Gradient (Fade to 0)", value: "gradient" },
         { label: "Solid Fill", value: "solid" }
     ];
+    protected readonly stackedBarData = signal<readonly { month: string; online: number; partner: number; retail: number }[]>([
+        { month: "Jan", online: 1200, partner: 600, retail: 2400 },
+        { month: "Feb", online: 1800, partner: 800, retail: 2100 },
+        { month: "Mar", online: 2200, partner: 1100, retail: 2900 },
+        { month: "Apr", online: 2600, partner: 1300, retail: 2700 },
+        { month: "May", online: 3100, partner: 1600, retail: 3400 },
+        { month: "Jun", online: 3800, partner: 1900, retail: 3200 }
+    ]);
+    protected readonly stackedAreaData = signal<readonly { direct: number; organic: number; referral: number; year: number }[]>([
+        { direct: 240, organic: 520, referral: 180, year: 2019 },
+        { direct: 310, organic: 680, referral: 240, year: 2020 },
+        { direct: 420, organic: 890, referral: 310, year: 2021 },
+        { direct: 560, organic: 1150, referral: 430, year: 2022 },
+        { direct: 720, organic: 1480, referral: 590, year: 2023 },
+        { direct: 910, organic: 1820, referral: 780, year: 2024 }
+    ]);
     protected readonly currencyFormatter = (value: unknown): string => {
         if (typeof value === "number") {
             const formatted = Math.abs(value).toLocaleString();
@@ -665,7 +694,21 @@ export class ChartDemoComponent {
     }
 
     public setTab(
-        tab: "bubble" | "custom" | "donut" | "grouped" | "mixed" | "pie" | "polar" | "radar" | "scatter" | "time"
+        tab:
+            | "bubble"
+            | "custom"
+            | "donut"
+            | "grouped"
+            | "mixed"
+            | "percent-area"
+            | "percent-bar"
+            | "pie"
+            | "polar"
+            | "radar"
+            | "scatter"
+            | "stacked-area"
+            | "stacked-bar"
+            | "time"
     ): void {
         this.activeTab.set(tab);
     }

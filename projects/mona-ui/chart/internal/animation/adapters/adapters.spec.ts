@@ -101,7 +101,7 @@ describe("Series Animation Adapters", () => {
                 id: "a",
                 name: "Area",
                 points: [
-                    { animationKey: "a:0", datum: {}, defined: true, index: 0, x: 50, xValue: 0, y: 100, yValue: 10 }
+                    { animationKey: "a:0", baseY: 280, datum: {}, defined: true, index: 0, x: 50, xValue: 0, y: 100, yValue: 10 }
                 ],
                 showPoints: false,
                 style: mockStyle,

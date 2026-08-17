@@ -10,7 +10,7 @@ import {
 } from "d3-shape";
 import type { ChartCurve } from "../../../models/chart-series.models";
 import type { ChartAreaSeriesScene } from "../../scene/cartesian-scene";
-import type { ScenePoint } from "../../scene/scene-geometry";
+import type { SceneAreaPoint, ScenePoint } from "../../scene/scene-geometry";
 import { drawPointMarker } from "../../utils/canvas-utils";
 import { createAreaGradientSpec, withAlpha } from "./area-gradient";
 
@@ -43,9 +43,9 @@ export class AreaSeriesRenderer {
 
         // 1. Draw Area Fill
         context.beginPath();
-        const areaGenerator = area<ScenePoint>()
+        const areaGenerator = area<SceneAreaPoint>()
             .x(p => p.x)
-            .y0(baselineY)
+            .y0(p => p.baseY ?? baselineY)
             .y1(p => p.y)
             .curve(getCurveFactory(curve))
             .context(context);
@@ -77,13 +77,17 @@ export class AreaSeriesRenderer {
                 context.globalAlpha = opacity;
                 context.fillStyle = gradient;
                 context.fill();
+            } else {
+                context.globalAlpha = opacity;
+                context.fillStyle = withAlpha(style.areaFillColor, fillOpacity);
+                context.fill();
             }
         }
 
         // 2. Draw Stroke Line
         context.globalAlpha = opacity;
         context.beginPath();
-        const lineGenerator = line<ScenePoint>()
+        const lineGenerator = line<SceneAreaPoint>()
             .x(p => p.x)
             .y(p => p.y)
             .curve(getCurveFactory(curve))

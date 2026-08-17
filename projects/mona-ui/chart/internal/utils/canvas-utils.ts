@@ -1,3 +1,4 @@
+import type { ChartCornerRadii } from "../scene/scene-geometry";
 import { clamp } from "./number-utils";
 
 export function crispPixel(pixel: number, lineWidth: number = 1): number {
@@ -7,6 +8,60 @@ export function crispPixel(pixel: number, lineWidth: number = 1): number {
     return Math.round(pixel);
 }
 
+export function drawRoundedRectCorners(
+    context: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radii: ChartCornerRadii
+): void {
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    const maxRadius = Math.min(width / 2, height / 2);
+    const tl = clamp(radii.topLeft, 0, maxRadius);
+    const tr = clamp(radii.topRight, 0, maxRadius);
+    const br = clamp(radii.bottomRight, 0, maxRadius);
+    const bl = clamp(radii.bottomLeft, 0, maxRadius);
+
+    if (tl <= 0 && tr <= 0 && br <= 0 && bl <= 0) {
+        context.beginPath();
+        context.rect(x, y, width, height);
+        context.fill();
+        return;
+    }
+
+    context.beginPath();
+    context.moveTo(x + tl, y);
+    context.lineTo(x + width - tr, y);
+    if (tr > 0) {
+        context.quadraticCurveTo(x + width, y, x + width, y + tr);
+    } else {
+        context.lineTo(x + width, y);
+    }
+    context.lineTo(x + width, y + height - br);
+    if (br > 0) {
+        context.quadraticCurveTo(x + width, y + height, x + width - br, y + height);
+    } else {
+        context.lineTo(x + width, y + height);
+    }
+    context.lineTo(x + bl, y + height);
+    if (bl > 0) {
+        context.quadraticCurveTo(x, y + height, x, y + height - bl);
+    } else {
+        context.lineTo(x, y + height);
+    }
+    context.lineTo(x, y + tl);
+    if (tl > 0) {
+        context.quadraticCurveTo(x, y, x + tl, y);
+    } else {
+        context.lineTo(x, y);
+    }
+    context.closePath();
+    context.fill();
+}
+
 export function drawBarRect(
     context: CanvasRenderingContext2D,
     x: number,
@@ -14,11 +69,18 @@ export function drawBarRect(
     width: number,
     height: number,
     radius: number = 0,
-    isPositive: boolean = true
+    isPositive: boolean = true,
+    cornerRadii?: ChartCornerRadii
 ): void {
     if (width <= 0 || height <= 0) {
         return;
     }
+
+    if (cornerRadii) {
+        drawRoundedRectCorners(context, x, y, width, height, cornerRadii);
+        return;
+    }
+
     const maxRadius = Math.min(width / 2, height / 2);
     const clampedRadius = clamp(radius, 0, maxRadius);
 

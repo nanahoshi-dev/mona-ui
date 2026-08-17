@@ -81,8 +81,8 @@ describe("CanvasChartRenderer", () => {
                     id: "area-1",
                     name: "Area",
                     points: [
-                        { datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 100, yValue: 50 },
-                        { datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 80, yValue: 70 }
+                        { baseY: 250, datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 100, yValue: 50 },
+                        { baseY: 250, datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 80, yValue: 70 }
                     ],
                     showPoints: false,
                     style: {
@@ -133,8 +133,8 @@ describe("CanvasChartRenderer", () => {
                     id: "area-neg",
                     name: "Area Neg",
                     points: [
-                        { datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 150, yValue: -20 },
-                        { datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 220, yValue: -50 }
+                        { baseY: 100, datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 150, yValue: -20 },
+                        { baseY: 100, datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 220, yValue: -50 }
                     ],
                     showPoints: false,
                     style: {
@@ -157,6 +157,8 @@ describe("CanvasChartRenderer", () => {
         expect(ctx.createLinearGradient).toHaveBeenCalledWith(0, 100, 0, 220);
         expect(addColorStop).toHaveBeenCalledWith(0, "rgba(239, 68, 68, 0)");
         expect(addColorStop).toHaveBeenCalledWith(1, "rgba(239, 68, 68, 0.2)");
+        expect(ctx.fill).toHaveBeenCalled();
+        expect(ctx.stroke).toHaveBeenCalled();
     });
 
     it("should render mirrored gradient for mixed-sign area series with non-zero residual baseline opacity", () => {
@@ -183,8 +185,8 @@ describe("CanvasChartRenderer", () => {
                     id: "area-mixed",
                     name: "Area Mixed",
                     points: [
-                        { datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 50, yValue: 40 },
-                        { datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 250, yValue: -40 }
+                        { baseY: 150, datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 50, yValue: 40 },
+                        { baseY: 150, datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 250, yValue: -40 }
                     ],
                     showPoints: false,
                     style: {
@@ -232,8 +234,8 @@ describe("CanvasChartRenderer", () => {
                     id: "area-1",
                     name: "Area",
                     points: [
-                        { datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 100, yValue: 50 },
-                        { datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 80, yValue: 70 }
+                        { baseY: 250, datum: {}, defined: true, index: 0, x: 60, xValue: 0, y: 100, yValue: 50 },
+                        { baseY: 250, datum: {}, defined: true, index: 1, x: 120, xValue: 1, y: 80, yValue: 70 }
                     ],
                     showPoints: false,
                     style: {

@@ -72,6 +72,34 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'stacked-bar' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('stacked-bar')">
+                Stacked Bar
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'percent-bar' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('percent-bar')">
+                100% Bar
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'stacked-area' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('stacked-area')">
+                Stacked Area
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'percent-area' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('percent-area')">
+                100% Area
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('custom')">
@@ -836,6 +864,105 @@
                                 <p class="text-xs text-muted-foreground mt-1">This is a custom projected template via [monaChartNoDataTemplate].</p>
                             </div>
                         </ng-template>
+                    </mona-chart>
+                </div>
+            }
+            @case ("stacked-bar") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Cumulative Stacked Bar Chart (Sales by Channel)</h3>
+                    <mona-chart
+                        [data]="stackedBarData()"
+                        [animation]="animationEnabled()"
+                        xField="month"
+                        class="h-96 w-full"
+                        aria-label="Stacked Bar Sales"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [formatter]="currencyFormatter" [gridLines]="yGridLines()" [nice]="true" />
+
+                        <mona-bar-series field="online" name="Online Store" stack="sales" [borderRadius]="6" [maxBarWidth]="40" />
+                        <mona-bar-series field="retail" name="Retail Outlets" stack="sales" [borderRadius]="6" [maxBarWidth]="40" />
+                        <mona-bar-series field="partner" name="Partner Direct" stack="sales" [borderRadius]="6" [maxBarWidth]="40" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("percent-bar") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">100% Stacked Bar Chart (Channel Composition)</h3>
+                    <mona-chart
+                        [data]="stackedBarData()"
+                        [animation]="animationEnabled()"
+                        xField="month"
+                        class="h-96 w-full"
+                        aria-label="100% Stacked Bar Sales"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" />
+
+                        <mona-bar-series field="online" name="Online Store" stack="sales" stackMode="percent" [borderRadius]="5" [maxBarWidth]="40" />
+                        <mona-bar-series field="retail" name="Retail Outlets" stack="sales" stackMode="percent" [borderRadius]="5" [maxBarWidth]="40" />
+                        <mona-bar-series field="partner" name="Partner Direct" stack="sales" stackMode="percent" [borderRadius]="5" [maxBarWidth]="40" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("stacked-area") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Cumulative Stacked Area Chart (Traffic Sources Growth)</h3>
+                    <mona-chart
+                        [data]="stackedAreaData()"
+                        [animation]="animationEnabled()"
+                        xField="year"
+                        class="h-96 w-full"
+                        aria-label="Stacked Area Traffic"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" type="linear" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" />
+
+                        <mona-area-series field="direct" name="Direct Visitors" stack="traffic" fillMode="gradient" />
+                        <mona-area-series field="referral" name="Referrals" stack="traffic" fillMode="gradient" />
+                        <mona-area-series field="organic" name="Organic Search" stack="traffic" fillMode="gradient" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("percent-area") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">100% Stacked Area Chart (Traffic Channel Share)</h3>
+                    <mona-chart
+                        [data]="stackedAreaData()"
+                        [animation]="animationEnabled()"
+                        xField="year"
+                        class="h-96 w-full"
+                        aria-label="100% Stacked Area Traffic"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" type="linear" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" />
+
+                        <mona-area-series field="direct" name="Direct Visitors" stack="traffic" stackMode="percent" fillMode="gradient" />
+                        <mona-area-series field="referral" name="Referrals" stack="traffic" stackMode="percent" fillMode="gradient" />
+                        <mona-area-series field="organic" name="Organic Search" stack="traffic" stackMode="percent" fillMode="gradient" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
                     </mona-chart>
                 </div>
             }

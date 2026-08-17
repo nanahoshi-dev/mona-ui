@@ -37,6 +37,22 @@ describe("ChartDemoComponent", () => {
         fixture.detectChanges();
         expect(fixture.nativeElement.textContent).toContain("Multi-Series Grouped Bar Comparison");
 
+        component.setTab("stacked-bar");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Cumulative Stacked Bar Chart");
+
+        component.setTab("percent-bar");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("100% Stacked Bar Chart");
+
+        component.setTab("stacked-area");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Cumulative Stacked Area Chart");
+
+        component.setTab("percent-area");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("100% Stacked Area Chart");
+
         component.setTab("custom");
         fixture.detectChanges();
         expect(fixture.nativeElement.textContent).toContain("Custom Angular Templates");

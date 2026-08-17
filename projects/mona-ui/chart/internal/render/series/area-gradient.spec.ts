@@ -49,9 +49,21 @@ describe("area-gradient", () => {
         });
 
         it("should return null if vertical span is 1px or less", () => {
-            const points = [createPoint(50, 100), createPoint(100, 100.5)];
+            const points = [createPoint(50, 200), createPoint(100, 199.5)];
             const spec = createAreaGradientSpec(200, points, "#3b82f6", 0.2);
             expect(spec).toBeNull();
+        });
+
+        it("should generate gradient for stacked area series with flat top line (100% stacked)", () => {
+            const points = [
+                { ...createPoint(50, 20), baseY: 150 },
+                { ...createPoint(100, 20), baseY: 180 }
+            ];
+            const spec = createAreaGradientSpec(300, points, "#10b981", 0.2);
+            expect(spec).not.toBeNull();
+            expect(spec?.startY).toBe(20);
+            expect(spec?.endY).toBe(180);
+            expect(spec?.stops.length).toBe(2);
         });
 
         it("should return null if all points lie exactly on baseline", () => {
