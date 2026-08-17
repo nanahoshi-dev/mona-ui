@@ -10,14 +10,15 @@ The Mona UI Chart library combines declarative Angular template composition with
 
 - **Declarative Composition:** Compose charts using intuitive child components for Cartesian axes (`<mona-chart-x-axis>`, `<mona-chart-y-axis>`), Radial axes (`<mona-chart-angular-axis>`, `<mona-chart-radial-axis>`), series, legends, tooltips, inside labels, and donut center templates.
 - **Series Types:**
-  - **Cartesian:** Line (with multiple interpolation curves), Area (gradient fade or solid fill), and Grouped Bar series.
+  - **Cartesian:** Line (with multiple interpolation curves), Area (gradient fade or solid fill), Grouped Bar series, Scatter (point distribution with customizable marker sizes), and Bubble series (3-variable mapping with area-proportional square-root radius scaling).
   - **Polar Sector:** Pie (full or partial circles) and Donut (configurable hole radius ratio and custom center templates).
   - **Polar Axis:** Radar charts (closed polygon series comparing categorical attributes across angular spokes) and Continuous Polar charts (directional signals and curves with continuous angular coordinates from 0° to 360°).
 - **Dynamic & Responsive:** Built-in `ResizeObserver` support with automatic canvas backing store scaling for crisp rendering on HiDPI/Retina screens.
+- **Layering & Composition:** Preserves exact declaration order for mixed series (e.g. Scatter below Bar, or Bubble above Area) with individual circle fills for accurate translucent alpha compositing.
 - **Radial Fill Modes & Gradients:** Solid wash, radial gradient fading from center pole to outer radius, or outline only.
 - **Full Keyboard & Screen Reader Accessibility:** 
   - `ArrowRight` / `ArrowLeft`: Navigate through X-axis interaction buckets, polar slices, or angular spokes.
-  - `ArrowUp` / `ArrowDown`: Cycle through visible series at the focused data point, or navigate slices in sector mode.
+  - `ArrowUp` / `ArrowDown`: Cycle through visible series at the focused data point or duplicate X coordinates, or navigate slices in sector mode.
   - `Home` / `End`: Jump to first or last data point/slice.
   - `Enter` / `Space`: Emit click events for the selected data point, spoke, or slice.
   - `Escape`: Dismiss active interaction and announcements.
@@ -28,6 +29,50 @@ The Mona UI Chart library combines declarative Angular template composition with
 ---
 
 ## Basic Usage
+
+### Scatter Chart
+
+```html
+<mona-chart [data]="experimentalData" xField="temperature" aria-label="Temperature vs Pressure" class="h-80 w-full">
+    <mona-chart-x-axis type="linear" [nice]="true" />
+    <mona-chart-y-axis [nice]="true" />
+
+    <mona-scatter-series
+        field="pressure"
+        name="Sample A"
+        [pointRadius]="6"
+        color="#3b82f6" />
+    <mona-scatter-series
+        field="controlPressure"
+        name="Control"
+        [pointRadius]="4"
+        color="#94a3b8" />
+
+    <mona-chart-legend position="bottom" [interactive]="true" />
+    <mona-chart-tooltip [shared]="false" />
+</mona-chart>
+```
+
+### Bubble Chart
+
+```html
+<mona-chart [data]="marketData" xField="growthRate" aria-label="Market Capitalization vs Growth" class="h-80 w-full">
+    <mona-chart-x-axis type="linear" [nice]="true" />
+    <mona-chart-y-axis [nice]="true" />
+
+    <mona-bubble-series
+        field="revenue"
+        sizeField="marketCap"
+        name="Tech Enterprises"
+        [minRadius]="4"
+        [maxRadius]="28"
+        color="#10b981"
+        [fillOpacity]="0.5" />
+
+    <mona-chart-legend position="bottom" [interactive]="true" />
+    <mona-chart-tooltip [shared]="false" />
+</mona-chart>
+```
 
 ### Radar Chart
 
@@ -76,7 +121,7 @@ The Mona UI Chart library combines declarative Angular template composition with
 </mona-chart>
 ```
 
-### Cartesian Chart
+### Cartesian Mixed Chart (Bar, Line, Area, Scatter)
 
 ```html
 <mona-chart [data]="salesData" xField="month" aria-label="Monthly Sales Performance" class="h-80 w-full">
@@ -121,17 +166,66 @@ The root container that coordinates layout measurement, data domains, rendering 
 | `animation` | `ChartAnimationInput` | `true` | Animation settings (`boolean` or `Partial<ChartAnimationOptions>`) for initial render, data transitions, and series visibility toggles. |
 | `ariaLabel` | `string` | `"Chart"` | Accessible name for the chart container. |
 | `ariaDescription` | `string` | `""` | Detailed accessible description explaining the chart's purpose and trends. |
-| `pointClick` | `output<ChartPointEvent>` | — | Emits when a data point, vertex, bar, or sector slice is clicked. |
-| `pointFocusChange` | `output<ChartPointFocusEvent>` | — | Emits when keyboard focus moves to a new data point, spoke, or slice. |
+| `pointClick` | `output<ChartPointEvent>` | — | Emits when a data point, vertex, bar, marker, or sector slice is clicked. |
+| `pointFocusChange` | `output<ChartPointFocusEvent>` | — | Emits when keyboard focus moves to a new data point, marker, spoke, or slice. |
 | `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | — | Emits when a series visibility state is toggled via legend interaction. |
 
 ### Animation & Transitions
 
 Mona UI Charts feature a high-performance, renderer-agnostic animation system:
-- **Geometry Morphing:** Smoothly interpolates Cartesian bars from baselines, line/area paths, sector arcs, and radial polygons.
+- **Geometry Morphing:** Smoothly interpolates Cartesian bars from baselines, line/area paths, sector arcs, radial polygons, and markers (interpolating positions, radii, and opacities).
 - **Stable Identity:** Use the `keyField` input on series components to track items across reorders, additions, and deletions.
 - **CSS Custom Properties:** Exposes `--mona-chart-animation-duration` and `--mona-chart-animation-easing` on the chart host element for synchronized CSS transitions.
 - **Reduced Motion:** Automatically respects `prefers-reduced-motion: reduce` by completing transitions immediately without motion.
+
+### `<mona-scatter-series>`
+Renders a Cartesian scatter series representing individual points along continuous linear or temporal X and Y dimensions.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y-axis coordinate. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
+| `name` | `string` | `"Scatter"` | Series name for tooltips, legend, and accessibility. |
+| `color` | `string` | `undefined` | Series mark color. Defaults to palette token. |
+| `pointRadius` | `number` | `undefined` | Marker circle radius in pixels. Defaults to `--mona-chart-point-radius` (4px). |
+| `fillOpacity` | `number` | `0.9` | Fill opacity between 0.0 and 1.0. |
+| `strokeColor` | `string` | `"#ffffff"` | Border stroke color. |
+| `strokeWidth` | `number` | `1.5` | Border stroke width in pixels. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+
+### `<mona-bubble-series>`
+Renders a Cartesian bubble series encoding a 3rd quantitative dimension into mark area using area-proportional square-root radius mapping.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y-axis coordinate. |
+| `sizeField` | `ChartField` | `"size"` | Property key or accessor extracting quantitative magnitude for bubble area. |
+| `sizeFormatter` | `ChartValueFormatter<number>` | `undefined` | Formatter callback generating formatted size strings for tooltips and accessibility announcements. |
+| `minRadius` | `number` | `undefined` | Minimum bubble radius in pixels for the minimum size value. Defaults to `--mona-chart-bubble-min-radius` (4px). |
+| `maxRadius` | `number` | `undefined` | Maximum bubble radius in pixels for the maximum size value. Defaults to `--mona-chart-bubble-max-radius` (24px). |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
+| `name` | `string` | `"Bubble"` | Series name for tooltips, legend, and accessibility. |
+| `color` | `string` | `undefined` | Series mark color. Defaults to palette token. |
+| `fillOpacity` | `number` | `0.55` | Fill opacity between 0.0 and 1.0. |
+| `strokeColor` | `string` | `"#ffffff"` | Border stroke color. |
+| `strokeWidth` | `number` | `1.5` | Border stroke width in pixels. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+
+### CSS Variables for Styling
+
+Mona UI Charts support theme customization via standard CSS custom properties:
+
+```css
+:root {
+    --mona-chart-point-radius: 5px;
+    --mona-chart-bubble-min-radius: 4px;
+    --mona-chart-bubble-max-radius: 28px;
+    --mona-chart-focus-indicator-color: #3b82f6;
+    --mona-chart-focus-indicator-width: 2px;
+}
+```
 
 ### `<mona-chart-angular-axis>`
 Configures the angular (spoke / degree) dimension in Polar and Radar charts.
