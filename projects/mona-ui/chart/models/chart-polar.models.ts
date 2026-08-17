@@ -11,7 +11,7 @@ export type ChartPolarLabelSide = "left" | "right";
 
 export type ChartPolarLabelContent = "category" | "category-percentage" | "percentage" | "value";
 
-export type ChartValueFormatter<T = unknown> = (value: T, index: number) => string;
+export type { ChartValueFormatter } from "./chart.models";
 
 export interface ChartLabelMeasurement {
     height: number;
