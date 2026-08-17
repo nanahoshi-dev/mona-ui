@@ -40,7 +40,7 @@ export class RangeAreaSeriesRenderer {
         }
 
         const definedPoints = validPoints.filter(
-            p => p.defined && p.lowPoint !== undefined && p.highPoint !== undefined
+            p => p.defined && p.fromPoint !== undefined && p.toPoint !== undefined
         );
         if (definedPoints.length === 0) {
             return;
@@ -49,17 +49,17 @@ export class RangeAreaSeriesRenderer {
         context.save();
         const opacity = scene.renderOpacity ?? 1;
 
-        // 1. Draw Range Area Fill Band
+        // 1. Draw Range Area Fill Band using semantic fromPoint/toPoint
         context.beginPath();
         const areaGenerator = area<SceneRangeAreaPoint>()
             .x(p => p.x)
-            .y0(p => p.lowPoint?.y ?? p.highPoint?.y ?? 0)
-            .y1(p => p.highPoint?.y ?? p.lowPoint?.y ?? 0)
+            .y0(p => (p.defined && p.fromPoint ? p.fromPoint.y : 0))
+            .y1(p => (p.defined && p.toPoint ? p.toPoint.y : 0))
             .curve(getCurveFactory(curve))
             .context(context);
 
         if (!connectNulls) {
-            areaGenerator.defined(p => p.defined && p.lowPoint !== undefined && p.highPoint !== undefined);
+            areaGenerator.defined(p => p.defined && p.fromPoint !== undefined && p.toPoint !== undefined);
         }
 
         areaGenerator(validPoints);
@@ -68,39 +68,39 @@ export class RangeAreaSeriesRenderer {
         context.fillStyle = withAlpha(style.areaFillColor, fillOpacity);
         context.fill();
 
-        // 2. Draw Top and Bottom Boundary Lines
+        // 2. Draw From and To Boundary Lines
         if (strokeWidth > 0) {
             context.lineWidth = strokeWidth;
             context.strokeStyle = style.color;
 
-            // Top boundary line
+            // From boundary line
             context.beginPath();
-            const topLineGenerator = line<SceneRangeAreaPoint>()
+            const fromLineGenerator = line<SceneRangeAreaPoint>()
                 .x(p => p.x)
-                .y(p => p.highPoint?.y ?? 0)
+                .y(p => (p.defined && p.fromPoint ? p.fromPoint.y : 0))
                 .curve(getCurveFactory(curve))
                 .context(context);
 
             if (!connectNulls) {
-                topLineGenerator.defined(p => p.defined && p.highPoint !== undefined);
+                fromLineGenerator.defined(p => p.defined && p.fromPoint !== undefined);
             }
 
-            topLineGenerator(validPoints);
+            fromLineGenerator(validPoints);
             context.stroke();
 
-            // Bottom boundary line
+            // To boundary line
             context.beginPath();
-            const bottomLineGenerator = line<SceneRangeAreaPoint>()
+            const toLineGenerator = line<SceneRangeAreaPoint>()
                 .x(p => p.x)
-                .y(p => p.lowPoint?.y ?? 0)
+                .y(p => (p.defined && p.toPoint ? p.toPoint.y : 0))
                 .curve(getCurveFactory(curve))
                 .context(context);
 
             if (!connectNulls) {
-                bottomLineGenerator.defined(p => p.defined && p.lowPoint !== undefined);
+                toLineGenerator.defined(p => p.defined && p.toPoint !== undefined);
             }
 
-            bottomLineGenerator(validPoints);
+            toLineGenerator(validPoints);
             context.stroke();
         }
 
@@ -108,18 +108,18 @@ export class RangeAreaSeriesRenderer {
         if (showPoints) {
             const markerRadius = pointRadius > 0 ? pointRadius : style.pointRadius;
             for (const p of validPoints) {
-                if (p.defined && p.highPoint && p.lowPoint) {
+                if (p.defined && p.fromPoint && p.toPoint) {
                     const pointAlpha = opacity * (p.renderOpacity ?? 1);
                     if (pointAlpha <= 0) {
                         continue;
                     }
                     context.save();
                     context.globalAlpha = pointAlpha;
-                    // Draw high marker
-                    drawPointMarker(context, p.highPoint.x, p.highPoint.y, markerRadius, style.color, "#ffffff", 1.5);
-                    // Draw low marker (if different from high marker)
-                    if (p.lowPoint.y !== p.highPoint.y) {
-                        drawPointMarker(context, p.lowPoint.x, p.lowPoint.y, markerRadius, style.color, "#ffffff", 1.5);
+                    // Draw from marker
+                    drawPointMarker(context, p.fromPoint.x, p.fromPoint.y, markerRadius, style.color, "#ffffff", 1.5);
+                    // Draw to marker (if distinct from from marker)
+                    if (p.fromPoint.y !== p.toPoint.y || p.fromPoint.x !== p.toPoint.x) {
+                        drawPointMarker(context, p.toPoint.x, p.toPoint.y, markerRadius, style.color, "#ffffff", 1.5);
                     }
                     context.restore();
                 }

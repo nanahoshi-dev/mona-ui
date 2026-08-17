@@ -1,7 +1,7 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { CartesianChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { crispPixel, drawBarRect, drawPointMarker } from "../utils/canvas-utils";
+import { crispPixel, drawBarRect, drawBarRectOutline, drawPointMarker } from "../utils/canvas-utils";
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
 import { LineSeriesRenderer } from "./series/line-series-renderer";
@@ -177,14 +177,29 @@ export class CartesianChartRenderer {
             const isKeyboardSource = interactionState.source === "keyboard";
 
             for (const hit of hits) {
-                if (hit.seriesType === "rangeArea" && hit.highPoint && hit.lowPoint) {
+                if (hit.seriesType === "rangeArea" && (hit.rangeBand || (hit.highPoint && hit.lowPoint))) {
                     const matchingSeries = series.find(s => s.id === hit.seriesId);
                     const color = isKeyboardSource
                         ? focusIndicatorColor
                         : (matchingSeries?.style.color ?? "#3b82f6");
-                    drawPointMarker(context, hit.highPoint.x, hit.highPoint.y, 5, color, markerStrokeColor, 2);
-                    if (hit.lowPoint.y !== hit.highPoint.y) {
-                        drawPointMarker(context, hit.lowPoint.x, hit.lowPoint.y, 5, color, markerStrokeColor, 2);
+                    const fromP = hit.rangeBand?.fromPoint ?? hit.highPoint!;
+                    const toP = hit.rangeBand?.toPoint ?? hit.lowPoint!;
+
+                    // Interval connector line
+                    context.save();
+                    context.beginPath();
+                    context.moveTo(fromP.x, fromP.y);
+                    context.lineTo(toP.x, toP.y);
+                    context.strokeStyle = color;
+                    context.lineWidth = isKeyboardSource ? 2 : 1.5;
+                    context.stroke();
+                    context.restore();
+
+                    // From marker
+                    drawPointMarker(context, fromP.x, fromP.y, 5, color, markerStrokeColor, 2);
+                    // To marker (if distinct)
+                    if (fromP.y !== toP.y || fromP.x !== toP.x) {
+                        drawPointMarker(context, toP.x, toP.y, 5, color, markerStrokeColor, 2);
                     }
                 } else if (hit.point) {
                     const isMarkerSeries = hit.seriesType === "scatter" || hit.seriesType === "bubble";
@@ -206,13 +221,39 @@ export class CartesianChartRenderer {
                     }
                 } else if (hit.bounds || hit.visualBounds) {
                     const barRect = hit.visualBounds ?? hit.bounds;
-                    if (barRect && barRect.height > 0) {
-                        const radius = hit.borderRadius ?? 4;
-                        const isPos = hit.isPositive ?? true;
-                        context.save();
-                        context.fillStyle = barHighlightColor;
-                        drawBarRect(context, barRect.x, barRect.y, barRect.width, barRect.height, radius, isPos);
-                        context.restore();
+                    if (barRect) {
+                        const isZeroHeight = barRect.height <= 0.001;
+                        if (isZeroHeight) {
+                            context.save();
+                            context.beginPath();
+                            const y = crispPixel(barRect.y, 1);
+                            context.moveTo(barRect.x, y);
+                            context.lineTo(barRect.x + barRect.width, y);
+                            context.lineWidth = isKeyboardSource ? 2.5 : 2;
+                            context.strokeStyle = isKeyboardSource ? focusIndicatorColor : barHighlightColor;
+                            context.stroke();
+                            context.restore();
+                        } else {
+                            const radius = hit.borderRadius ?? 4;
+                            const cornerRadii = hit.cornerRadii ?? (hit.seriesType === "rangeBar" && radius > 0 ? {
+                                bottomLeft: radius,
+                                bottomRight: radius,
+                                topLeft: radius,
+                                topRight: radius
+                            } : undefined);
+                            const isPos = hit.isPositive ?? true;
+
+                            context.save();
+                            if (isKeyboardSource) {
+                                context.strokeStyle = focusIndicatorColor;
+                                context.lineWidth = 2;
+                                drawBarRectOutline(context, barRect.x, barRect.y, barRect.width, barRect.height, radius, isPos, cornerRadii);
+                            } else {
+                                context.fillStyle = barHighlightColor;
+                                drawBarRect(context, barRect.x, barRect.y, barRect.width, barRect.height, radius, isPos, cornerRadii);
+                            }
+                            context.restore();
+                        }
                     }
                 }
             }
