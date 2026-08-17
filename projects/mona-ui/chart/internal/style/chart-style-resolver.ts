@@ -574,40 +574,84 @@ export class ChartStyleResolver {
         const explicitBorderRadius = series.borderRadius();
         const explicitFillOpacity = series.fillOpacity();
 
-        let cssLowColor = this.resolveCssVariable("--mona-chart-heatmap-low-color");
-        let cssMidColor = this.resolveCssVariable("--mona-chart-heatmap-mid-color");
-        let cssHighColor = this.resolveCssVariable("--mona-chart-heatmap-high-color");
-        let cssBorderColor = this.resolveCssVariable("--mona-chart-heatmap-cell-border-color");
+        let elementColor = "";
+        let cssLowColor: string | undefined;
+        let cssMidColor: string | undefined;
+        let cssHighColor: string | undefined;
+        let cssBorderColor: string | undefined;
 
         let cssStrokeWidth: number | undefined;
         let cssBorderRadius: number | undefined;
         let cssFillOpacity: number | undefined;
 
-        if (typeof window !== "undefined" && this.#rootElement) {
-            try {
-                const computed = window.getComputedStyle(this.#rootElement);
-                const sw = computed.getPropertyValue("--mona-chart-heatmap-cell-border-width");
-                if (sw) {
-                    const parsed = parseFloat(sw);
-                    if (isFiniteNumber(parsed)) cssStrokeWidth = parsed;
+        const targetElements = [
+            series.element?.nativeElement,
+            this.#rootElement
+        ].filter((el): el is HTMLElement => Boolean(el));
+
+        if (typeof window !== "undefined") {
+            for (const el of targetElements) {
+                try {
+                    const computed = window.getComputedStyle(el);
+                    if (!elementColor && el === series.element?.nativeElement) {
+                        const rootComputed = this.#rootElement ? window.getComputedStyle(this.#rootElement) : null;
+                        const rootColor = rootComputed?.color ?? "";
+                        const userClass = series.userClass?.() ?? "";
+                        const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+
+                        if (el.style?.color) {
+                            elementColor = this.resolveCssVariable(el.style.color);
+                        } else if (computed.color && (hasTextClass || (rootColor !== "" && computed.color !== rootColor))) {
+                            elementColor = toCanvasColor(computed.color, this.#rootElement?.ownerDocument);
+                        }
+                    }
+
+                    if (!cssLowColor) {
+                        const val = computed.getPropertyValue("--mona-chart-heatmap-low-color").trim();
+                        if (val) cssLowColor = this.resolveCssVariable(val);
+                    }
+                    if (!cssMidColor) {
+                        const val = computed.getPropertyValue("--mona-chart-heatmap-mid-color").trim();
+                        if (val) cssMidColor = this.resolveCssVariable(val);
+                    }
+                    if (!cssHighColor) {
+                        const val = computed.getPropertyValue("--mona-chart-heatmap-high-color").trim();
+                        if (val) cssHighColor = this.resolveCssVariable(val);
+                    }
+                    if (!cssBorderColor) {
+                        const val = computed.getPropertyValue("--mona-chart-heatmap-cell-border-color").trim();
+                        if (val) cssBorderColor = this.resolveCssVariable(val);
+                    }
+                    if (cssStrokeWidth === undefined) {
+                        const sw = computed.getPropertyValue("--mona-chart-heatmap-cell-border-width");
+                        if (sw) {
+                            const parsed = parseFloat(sw);
+                            if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+                        }
+                    }
+                    if (cssBorderRadius === undefined) {
+                        const br = computed.getPropertyValue("--mona-chart-heatmap-cell-radius");
+                        if (br) {
+                            const parsed = parseFloat(br);
+                            if (isFiniteNumber(parsed) && parsed >= 0) cssBorderRadius = parsed;
+                        }
+                    }
+                    if (cssFillOpacity === undefined) {
+                        const fo = computed.getPropertyValue("--mona-chart-heatmap-fill-opacity");
+                        if (fo) {
+                            const parsed = parseFloat(fo);
+                            if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                        }
+                    }
+                } catch {
+                    // Ignore style resolution errors
                 }
-                const br = computed.getPropertyValue("--mona-chart-heatmap-cell-radius");
-                if (br) {
-                    const parsed = parseFloat(br);
-                    if (isFiniteNumber(parsed)) cssBorderRadius = parsed;
-                }
-                const fo = computed.getPropertyValue("--mona-chart-heatmap-fill-opacity");
-                if (fo) {
-                    const parsed = parseFloat(fo);
-                    if (isFiniteNumber(parsed)) cssFillOpacity = parsed;
-                }
-            } catch {
-                // Ignore style resolution errors
             }
         }
 
         const resolvedBaseColor =
             (explicitColor ? this.resolveCssVariable(explicitColor) : "") ||
+            elementColor ||
             cssHighColor ||
             this.resolvePaletteColor(seriesIndex);
 
@@ -617,24 +661,24 @@ export class ChartStyleResolver {
             "";
 
         const resolvedStrokeWidth =
-            explicitStrokeWidth !== undefined
+            explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
                 ? explicitStrokeWidth
                 : cssStrokeWidth !== undefined
                     ? cssStrokeWidth
                     : 0;
 
         const resolvedBorderRadius =
-            explicitBorderRadius !== undefined
+            explicitBorderRadius !== undefined && isFiniteNumber(explicitBorderRadius) && explicitBorderRadius >= 0
                 ? explicitBorderRadius
                 : cssBorderRadius !== undefined
                     ? cssBorderRadius
                     : 2;
 
         const resolvedFillOpacity =
-            explicitFillOpacity !== undefined
-                ? explicitFillOpacity
+            explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
+                ? Math.max(0, Math.min(1, explicitFillOpacity))
                 : cssFillOpacity !== undefined
-                    ? cssFillOpacity
+                    ? Math.max(0, Math.min(1, cssFillOpacity))
                     : 1;
 
         return {
