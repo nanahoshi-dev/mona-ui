@@ -222,6 +222,7 @@ export class MonaHeatmapSeriesComponent implements OnInit {
             colorMode: this.colorMode,
             colors: this.colors,
             data: this.data,
+            element: this.#elementRef,
             field: this.field,
             fillOpacity: this.fillOpacity,
             id: this.#id,
