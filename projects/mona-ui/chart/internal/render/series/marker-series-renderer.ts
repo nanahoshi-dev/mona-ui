@@ -16,9 +16,10 @@ export class MarkerSeriesRenderer {
         const hasPerMarkerOpacity = markers.some(
             m => m.renderOpacity !== undefined && m.renderOpacity < 1
         );
-        const isTranslucentBubble = scene.type === "bubble" && style.fillOpacity < 0.99;
+        const requiresIndependentFill =
+            hasPerMarkerOpacity || (scene.type === "bubble" && style.fillOpacity < 0.99);
 
-        if (!hasPerMarkerOpacity && !isTranslucentBubble) {
+        if (!requiresIndependentFill) {
             // Opaque Fast Path: Batch all circle arcs into one path for fill and stroke
             context.save();
             const fillAlpha = Math.max(0, Math.min(1, style.fillOpacity * renderOpacity));
