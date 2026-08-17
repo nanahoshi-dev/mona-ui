@@ -102,7 +102,6 @@
                             <div
                                 aria-hidden="true"
                                 class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center"
-                                [monaChartLabelMeasure]="slice.sliceId"
                                 [style.left.px]="slice.insideLabelPoint.x"
                                 [style.top.px]="slice.insideLabelPoint.y"
                                 [style.transform]="'translate(-50%, -50%)'"
@@ -120,7 +119,7 @@
                 }
 
                 <!-- Donut Center Template -->
-                @if (seriesScene.type === 'donut' && donutSeriesRegistration()?.centerTemplate?.(); as centerTemplate) {
+                @if (seriesScene.type === 'donut' && pol.hasRenderableData && seriesScene.slices.length > 0 && donutSeriesRegistration()?.centerTemplate?.(); as centerTemplate) {
                     <div
                         class="absolute pointer-events-none flex flex-col items-center justify-center text-center overflow-hidden"
                         [style.left.px]="pol.center.x"

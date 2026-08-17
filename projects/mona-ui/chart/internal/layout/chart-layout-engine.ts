@@ -13,6 +13,15 @@ import { PolarLayoutEngine } from "./polar-layout-engine";
 
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
 
+const warnedSignatures = new Set<string>();
+
+function warnOnce(signature: string, message: string): void {
+    if (isDevMode() && !warnedSignatures.has(signature)) {
+        warnedSignatures.add(signature);
+        console.warn(message);
+    }
+}
+
 export interface ChartLayoutOptions {
     containerHeight: number;
     containerWidth: number;
@@ -40,15 +49,17 @@ export function resolveChartCoordinateSystem(series: readonly ChartSeriesRegistr
     }
 
     if (hasPolar && hasCartesian) {
-        if (isDevMode()) {
-            console.warn(
-                "[MonaChart] Mixing Cartesian series (line, area, bar) with polar series (pie, donut) in the same chart is unsupported."
-            );
-        }
+        warnOnce(
+            "mixed-cartesian-polar",
+            "[MonaChart] Mixing Cartesian series (line, area, bar) with polar series (pie, donut) in the same chart is unsupported."
+        );
     }
 
-    if (polarCount > 1 && isDevMode()) {
-        console.warn("[MonaChart] Only a single polar series (pie or donut) is supported per chart.");
+    if (polarCount > 1) {
+        warnOnce(
+            `multi-polar-${polarCount}`,
+            "[MonaChart] Only a single polar series (pie or donut) is supported per chart."
+        );
     }
 
     return hasPolar ? "polar" : "cartesian";
@@ -79,6 +90,13 @@ export class ChartLayoutEngine {
         }
 
         if (coordinateSystem === "polar") {
+            if (options.xAxis || options.yAxis) {
+                warnOnce(
+                    "polar-projected-axes",
+                    "[MonaChart] Projected Cartesian axes (<mona-chart-x-axis>, <mona-chart-y-axis>) are ignored in polar charts (pie/donut)."
+                );
+            }
+
             const polarSeries = series.filter(
                 (s): s is ChartPolarSeriesRegistration => s.type === "pie" || s.type === "donut"
             );

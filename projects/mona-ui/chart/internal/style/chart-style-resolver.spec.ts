@@ -161,6 +161,33 @@ describe("ChartStyleResolver", () => {
         const color = resolver.resolveSliceColor(pieSeries, { customColor: "#abcdef" }, 0, 0);
         expect(color).toBe("#abcdef");
     });
+
+    it("should distinguish default vs explicit strokeSource in polar series style", () => {
+        const resolver = new ChartStyleResolver();
+        const defaultPie = createMockPieSeries();
+        const explicitPie = createMockPieSeries({ strokeColor: "#ff0000" });
+
+        const defaultStyle = resolver.resolvePolarSeriesStyle(defaultPie);
+        const explicitStyle = resolver.resolvePolarSeriesStyle(explicitPie);
+
+        expect(defaultStyle.strokeSource).toBe("default");
+        expect(explicitStyle.strokeSource).toBe("explicit");
+        expect(explicitStyle.strokeColor).toBe("#ff0000");
+    });
+
+    it("should determine high-contrast readable foreground text using WCAG contrast", () => {
+        const resolver = new ChartStyleResolver();
+
+        // Dark colors should choose light foreground (#ffffff)
+        expect(resolver.getReadableForeground("#0f172a")).toBe("#ffffff");
+        expect(resolver.getReadableForeground("#1e293b")).toBe("#ffffff");
+        expect(resolver.getReadableForeground("#1e3a8a")).toBe("#ffffff");
+
+        // Light colors should choose dark foreground (#0f172a)
+        expect(resolver.getReadableForeground("#ffffff")).toBe("#0f172a");
+        expect(resolver.getReadableForeground("#fef08a")).toBe("#0f172a");
+        expect(resolver.getReadableForeground("#f8fafc")).toBe("#0f172a");
+    });
 });
 
 describe("toCanvasColor", () => {

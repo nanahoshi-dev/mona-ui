@@ -19,9 +19,9 @@ export const chartAxisLabelBaseThemeVariants = cva(
 export const chartLegendBaseThemeVariants = cva("flex flex-wrap items-center gap-4 text-xs select-none", {
     variants: {
         position: {
-            bottom: "justify-center mt-2",
-            left: "flex-col justify-center mr-2",
-            right: "flex-col justify-center ml-2",
+            bottom: "justify-center mt-3",
+            left: "flex-col justify-center mr-4",
+            right: "flex-col justify-center ml-4",
             top: "justify-center mb-2"
         }
     }
@@ -50,8 +50,6 @@ export const chartTooltipBaseThemeVariants = cva(
 export const chartNoDataBaseThemeVariants = cva(
     "absolute inset-0 flex items-center justify-center text-sm text-muted-foreground select-none"
 );
-
-export const chartSeriesHostBaseThemeVariants = cva("hidden");
 
 export type ChartBaseVariantProps = VariantProps<typeof chartBaseThemeVariants>;
 export type ChartLegendBaseVariantProps = VariantProps<typeof chartLegendBaseThemeVariants>;

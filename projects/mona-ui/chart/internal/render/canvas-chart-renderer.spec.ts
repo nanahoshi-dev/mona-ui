@@ -398,8 +398,8 @@ describe("CanvasChartRenderer", () => {
                             formattedPercentage: "50%",
                             formattedValue: "50",
                             innerRadius: 0,
+                            insideLabelBackgroundColor: "#3b82f6",
                             insideLabelPoint: { x: 250, y: 100 },
-                            labelPoint: { x: 250, y: 100 },
                             outerRadius: 100,
                             padAngle: 0,
                             percentage: 0.5,
@@ -409,7 +409,10 @@ describe("CanvasChartRenderer", () => {
                             visible: true
                         }
                     ],
-                    style: { fillOpacity: 1, strokeColor: "#ffffff", strokeWidth: 1 },
+                    fillMode: "solid",
+                    labelPosition: "outside",
+                    showLabels: false,
+                    style: { fillOpacity: 1, strokeColor: "#ffffff", strokeSource: "default", strokeWidth: 1 },
                     total: 100,
                     type: "pie"
                 }

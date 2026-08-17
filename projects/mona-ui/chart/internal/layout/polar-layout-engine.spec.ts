@@ -90,8 +90,8 @@ describe("polar-layout-engine", () => {
         const seriesScene = scene.series[0];
         expect(seriesScene.type).toBe("pie");
         expect(seriesScene.innerRadius).toBe(0);
-        // availableRadius = 268 / 2 = 134, outerRadius = 134 * 0.9 = 120.6
-        expect(seriesScene.outerRadius).toBeCloseTo(120.6);
+        // availableRadius = 268 / 2 = 134, requestedOuterRadius = 134 * 0.9 = 120.6, strokeInset = 0.5 -> 120.1
+        expect(seriesScene.outerRadius).toBeCloseTo(120.1);
         expect(seriesScene.slices.length).toBe(2);
     });
 
@@ -112,9 +112,9 @@ describe("polar-layout-engine", () => {
 
         const seriesScene = scene.series[0];
         expect(seriesScene.type).toBe("donut");
-        // availableRadius = (200 - 32) / 2 = 84
-        expect(seriesScene.outerRadius).toBeCloseTo(84);
-        expect(seriesScene.innerRadius).toBeCloseTo(42);
+        // availableRadius = (200 - 32) / 2 = 84, strokeInset = 0.5 -> 83.5
+        expect(seriesScene.outerRadius).toBeCloseTo(83.5);
+        expect(seriesScene.innerRadius).toBeCloseTo(41.75);
     });
 
     it("should reserve gutters and compute outside labels when showLabels is true and labelPosition is outside", () => {
@@ -251,5 +251,79 @@ describe("polar-layout-engine", () => {
         const seriesScene = scene.series[0];
         expect(seriesScene.slices[0].startAngle).toBeCloseTo(0);
         expect(seriesScene.slices[1].endAngle).toBeCloseTo(Math.PI);
+    });
+
+    it("should fail safe to finite geometry when non-finite or extreme values are passed", () => {
+        const series = createMockPieSeries({
+            cornerRadius: signal(Number.NaN),
+            endAngle: signal(Number.POSITIVE_INFINITY),
+            minLabelAngle: signal(Number.NaN),
+            outerRadiusRatio: signal(Number.NaN),
+            padAngle: signal(Number.NaN),
+            startAngle: signal(Number.NaN)
+        });
+        const rootData = [{ category: "A", value: 100 }];
+
+        const scene = PolarLayoutEngine.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            rootData,
+            series: [series],
+            styleResolver
+        });
+
+        expect(Number.isFinite(scene.center.x)).toBe(true);
+        expect(Number.isFinite(scene.center.y)).toBe(true);
+        const s = scene.series[0];
+        expect(Number.isFinite(s.outerRadius)).toBe(true);
+        expect(Number.isFinite(s.innerRadius)).toBe(true);
+        expect(Number.isFinite(s.cornerRadius)).toBe(true);
+        expect(Number.isFinite(s.padAngle)).toBe(true);
+        expect(s.slices.length).toBe(1);
+        expect(Number.isFinite(s.slices[0].startAngle)).toBe(true);
+        expect(Number.isFinite(s.slices[0].endAngle)).toBe(true);
+    });
+
+    it("should keep legend item percentages stable based on source total when slices are hidden", () => {
+        const hiddenSet = new Set<number>([0]);
+        const series = createMockPieSeries({
+            isSliceVisible: (idx: number) => !hiddenSet.has(idx)
+        });
+        const rootData = [
+            { category: "Hidden", value: 60 },
+            { category: "Visible", value: 40 }
+        ];
+
+        const scene = PolarLayoutEngine.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            rootData,
+            series: [series],
+            styleResolver
+        });
+
+        // Total source = 100
+        expect(scene.legendItems[0].percentage).toBeCloseTo(0.6);
+        expect(scene.legendItems[1].percentage).toBeCloseTo(0.4);
+
+        // Visible slice takes 100% of visible rendering
+        expect(scene.series[0].slices[0].percentage).toBe(1.0);
+    });
+
+    it("should pass formattedValue from valueFormatter to hit targets", () => {
+        const series = createMockPieSeries({
+            valueFormatter: signal((val: unknown) => `$${Number(val).toFixed(2)}`)
+        });
+        const rootData = [{ category: "Sales", value: 125 }];
+
+        const scene = PolarLayoutEngine.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            rootData,
+            series: [series],
+            styleResolver
+        });
+
+        expect(scene.hitTargets[0].formattedValue).toBe("$125.00");
     });
 });

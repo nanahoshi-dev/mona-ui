@@ -6,12 +6,20 @@ export function isFiniteNumber(value: unknown): value is number {
     return typeof value === "number" && Number.isFinite(value);
 }
 
+export function normalizeFiniteNumber(value: unknown, fallback: number): number {
+    return isFiniteNumber(value) ? value : fallback;
+}
+
 export function normalizeNonNegativeNumber(value: unknown, fallback: number): number {
     return isFiniteNumber(value) && value >= 0 ? value : fallback;
 }
 
 export function normalizePositiveNumber(value: unknown, fallback?: number): number | undefined {
     return isFiniteNumber(value) && value > 0 ? value : fallback;
+}
+
+export function normalizeRatio(value: unknown, fallback: number = 0.5, min: number = 0, max: number = 1): number {
+    return isFiniteNumber(value) ? clamp(value, min, max) : clamp(fallback, min, max);
 }
 
 export function normalizeOpacity(value: unknown, fallback: number = 1): number {
@@ -40,4 +48,3 @@ export function formatCompactNumber(value: number): string {
     }
     return String(value);
 }
-

@@ -30,3 +30,17 @@ export function resolveValue<T = unknown>(
     return undefined;
 }
 
+export function resolveSeriesDisplayName(
+    series: { field?: () => ChartField; name?: () => string },
+    seriesIndex: number = 0
+): string {
+    const rawName = series.name?.()?.trim();
+    if (rawName) {
+        return rawName;
+    }
+    const field = series.field?.();
+    if (typeof field === "string" && field.trim().length > 0) {
+        return field.trim();
+    }
+    return `Series ${seriesIndex + 1}`;
+}

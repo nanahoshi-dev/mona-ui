@@ -13,7 +13,7 @@ import {
     hasRenderableData,
     inferXAxisType
 } from "../data/chart-domain";
-import { resolveData, resolveValue } from "../data/chart-value-resolver";
+import { resolveData, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
 import {
     BandScale,
     CartesianScaleFactory,
@@ -307,6 +307,7 @@ export class CartesianLayoutEngine {
                 continue;
             }
             const sStyle = styleResolver.resolveSeriesStyle(s, sIdx);
+            const seriesDisplayName = resolveSeriesDisplayName(s, sIdx);
             const sData = resolveData(s.data(), rootData);
             const sXField = s.xField() ?? rootXField;
             const sField = s.field();
@@ -343,8 +344,8 @@ export class CartesianLayoutEngine {
 
                     const yPos = yScale.map(yVal);
                     const isPositive = yVal >= 0;
-                    const topY = Math.min(baselineY, yPos);
-                    const barHeight = Math.abs(baselineY - yPos);
+                    const topY = isPositive ? yPos : baselineY;
+                    const barHeight = Math.abs(yPos - baselineY);
 
                     const bar: SceneBar = {
                         datum,
@@ -372,7 +373,7 @@ export class CartesianLayoutEngine {
                         index: dIdx,
                         isPositive,
                         seriesId: s.id,
-                        seriesName: s.name(),
+                        seriesName: seriesDisplayName,
                         seriesType: "bar",
                         visualBounds: {
                             height: barHeight,
@@ -391,7 +392,7 @@ export class CartesianLayoutEngine {
                     borderRadius: radius,
                     fillOpacity: normalizeOpacity(s.fillOpacity?.(), 1),
                     id: s.id,
-                    name: s.name(),
+                    name: seriesDisplayName,
                     style: sStyle,
                     type: "bar"
                 };
@@ -464,7 +465,7 @@ export class CartesianLayoutEngine {
                             point: { x: xPos, y: yPos },
                             radius: 16,
                             seriesId: s.id,
-                            seriesName: s.name(),
+                            seriesName: seriesDisplayName,
                             seriesType: s.type,
                             xKey: normalizedXKey,
                             xValue: xVal,
@@ -478,7 +479,7 @@ export class CartesianLayoutEngine {
                         connectNulls: s.connectNulls?.() ?? false,
                         curve: s.curve?.() ?? "linear",
                         id: s.id,
-                        name: s.name(),
+                        name: seriesDisplayName,
                         points,
                         showPoints: s.showPoints?.() ?? false,
                         style: sStyle,
@@ -493,7 +494,7 @@ export class CartesianLayoutEngine {
                         fillMode: s.fillMode?.() ?? "gradient",
                         fillOpacity: normalizeOpacity(s.fillOpacity?.(), 0.18),
                         id: s.id,
-                        name: s.name(),
+                        name: seriesDisplayName,
                         points,
                         showPoints: s.showPoints?.() ?? false,
                         style: sStyle,
@@ -556,7 +557,7 @@ export class CartesianLayoutEngine {
                 color: sStyle.color,
                 itemId: s.id,
                 kind: "series",
-                name: s.name(),
+                name: resolveSeriesDisplayName(s, idx),
                 seriesId: s.id,
                 seriesType: s.type,
                 visible: s.visible()

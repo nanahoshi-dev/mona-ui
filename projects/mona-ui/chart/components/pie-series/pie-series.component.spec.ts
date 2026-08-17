@@ -4,6 +4,7 @@ import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import type { ChartPolarFillMode, ChartPolarLabelPosition, ChartSliceVisibilityEvent } from "../../models/chart-polar.models";
+import type { ChartField } from "../../models/chart.models";
 import { MonaChartComponent } from "../chart/chart.component";
 import { MonaPieSeriesComponent } from "./pie-series.component";
 
@@ -34,7 +35,7 @@ import { MonaPieSeriesComponent } from "./pie-series.component";
     `
 })
 class TestHostComponent {
-    public readonly categoryField = signal("browser");
+    public readonly categoryField = signal<ChartField>("browser");
     public readonly cornerRadius = signal<number | undefined>(undefined);
     public readonly data = signal<readonly unknown[]>([
         { browser: "Chrome", share: 60 },
@@ -166,5 +167,48 @@ describe("MonaPieSeriesComponent", () => {
 
         const customLabels = fixture.nativeElement.querySelectorAll(".custom-slice-label");
         expect(customLabels.length).toBe(3);
+    });
+
+    it("should prune hidden indices when dataset shrinks", () => {
+        const pieDebugEl = fixture.debugElement.query(By.directive(MonaPieSeriesComponent));
+        const pieComponent = pieDebugEl?.componentInstance as MonaPieSeriesComponent;
+
+        // Hide index 2 (Firefox)
+        pieComponent.toggleSlice(2);
+        fixture.detectChanges();
+
+        // Shrink data to length 2
+        host.data.set([
+            { browser: "Chrome", share: 70 },
+            { browser: "Safari", share: 30 }
+        ]);
+        fixture.detectChanges();
+
+        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        chart.recomputeScene();
+        const scene = chart.scene();
+
+        // All 2 remaining slices should be visible
+        if (scene && scene.coordinateSystem === "polar") {
+            expect(scene.series[0].slices.length).toBe(2);
+        }
+    });
+
+    it("should resolve category and emit sliceVisibilityChange with function accessor", () => {
+        host.categoryField.set(
+            (d: unknown) =>
+                typeof d === "object" && d !== null && "browser" in d
+                    ? `Browser: ${(d as { browser: string }).browser}`
+                    : ""
+        );
+        fixture.detectChanges();
+
+        const pieDebugEl = fixture.debugElement.query(By.directive(MonaPieSeriesComponent));
+        const pieComponent = pieDebugEl?.componentInstance as MonaPieSeriesComponent;
+
+        pieComponent.toggleSlice(0);
+        fixture.detectChanges();
+
+        expect(host.lastVisibilityEvent?.category).toBe("Browser: Chrome");
     });
 });

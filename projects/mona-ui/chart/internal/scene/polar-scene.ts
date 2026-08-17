@@ -4,6 +4,7 @@ import type { ChartPolarFillMode, ChartPolarLabelPosition, ChartPolarLabelSide }
 export interface ChartPolarSeriesStyle {
     fillOpacity: number;
     strokeColor: string;
+    strokeSource: "default" | "explicit";
     strokeWidth: number;
 }
 
@@ -31,9 +32,9 @@ export interface ScenePolarSlice {
     formattedPercentage: string;
     formattedValue: string;
     innerRadius: number;
+    insideLabelBackgroundColor: string;
     insideLabelPoint: ChartPoint;
     label?: ScenePolarLabel;
-    labelPoint: ChartPoint;
     outerRadius: number;
     padAngle: number;
     percentage: number;
@@ -46,15 +47,15 @@ export interface ScenePolarSlice {
 export interface ChartPolarSeriesScene {
     center: ChartPoint;
     cornerRadius: number;
-    fillMode?: ChartPolarFillMode;
+    fillMode: ChartPolarFillMode;
     formattedTotal: string;
     id: string;
     innerRadius: number;
-    labelPosition?: ChartPolarLabelPosition;
+    labelPosition: ChartPolarLabelPosition;
     name: string;
     outerRadius: number;
     padAngle: number;
-    showLabels?: boolean;
+    showLabels: boolean;
     slices: readonly ScenePolarSlice[];
     style: ChartPolarSeriesStyle;
     total: number;

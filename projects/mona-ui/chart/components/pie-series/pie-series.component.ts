@@ -18,7 +18,7 @@ import {
     ChartInvalidationReason,
     type ChartPieSeriesRegistration
 } from "../../internal/context/chart-registration-context";
-import { resolveData } from "../../internal/data/chart-value-resolver";
+import { resolveData, resolveValue } from "../../internal/data/chart-value-resolver";
 import type {
     ChartPolarFillMode,
     ChartPolarLabelContent,
@@ -33,7 +33,11 @@ let nextPieSeriesId = 0;
 @Component({
     selector: "mona-pie-series",
     template: "",
-    styles: ":host { display: none; }"
+    host: {
+        "[class]": "userClass()",
+        "aria-hidden": "true",
+        style: "display: none !important;"
+    }
 })
 export class MonaPieSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
@@ -190,6 +194,7 @@ export class MonaPieSeriesComponent implements OnInit {
 
     public constructor() {
         effect(() => {
+            this.name();
             this.data();
             this.field();
             this.categoryField();
@@ -199,7 +204,7 @@ export class MonaPieSeriesComponent implements OnInit {
             this.colorField();
 
             // Prune hidden indices that no longer exist
-            const raw = resolveData(this.data(), this.#chartContext ? (this.#chartContext as any).data?.() : []);
+            const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
             const maxLen = raw.length;
             this.#hiddenIndices.update(set => set.where((idx: number) => idx < maxLen).toImmutableSet());
 
@@ -285,9 +290,9 @@ export class MonaPieSeriesComponent implements OnInit {
 
         this.#visibilityRevision.update(v => v + 1);
 
-        const raw = resolveData(this.data(), this.#chartContext ? (this.#chartContext as any).data?.() : []);
+        const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
         const datum = raw[dataIndex];
-        const category = datum ? (datum as any)[this.categoryField() as string] ?? `Item ${dataIndex + 1}` : undefined;
+        const category = datum ? resolveValue(datum, this.categoryField(), dataIndex) ?? `Item ${dataIndex + 1}` : undefined;
 
         this.sliceVisibilityChange.emit({
             category,

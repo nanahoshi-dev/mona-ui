@@ -1,4 +1,4 @@
-import { formatRgb, parse } from "culori";
+import { formatRgb, parse, wcagContrast } from "culori";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {
     ChartCartesianSeriesRegistration,
@@ -141,6 +141,9 @@ export class ChartStyleResolver {
             }
         }
 
+        const hasExplicitStroke = Boolean(rawStrokeColor || cssStrokeColor);
+        const strokeSource: "default" | "explicit" = hasExplicitStroke ? "explicit" : "default";
+
         const strokeColor = rawStrokeColor
             ? this.resolveCssVariable(rawStrokeColor)
             : (cssStrokeColor
@@ -160,6 +163,7 @@ export class ChartStyleResolver {
         return {
             fillOpacity,
             strokeColor,
+            strokeSource,
             strokeWidth
         };
     }
@@ -323,15 +327,9 @@ export class ChartStyleResolver {
             const canvasColor = toCanvasColor(backgroundColor, this.#rootElement?.ownerDocument) || backgroundColor;
             const parsed = parse(canvasColor);
             if (parsed) {
-                const rgb = formatRgb(parsed);
-                const match = rgb ? rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/) : null;
-                if (match) {
-                    const r = parseInt(match[1], 10) / 255;
-                    const g = parseInt(match[2], 10) / 255;
-                    const b = parseInt(match[3], 10) / 255;
-                    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                    return lum > 0.55 ? "#0f172a" : "#ffffff";
-                }
+                const whiteContrast = wcagContrast(parsed, "#ffffff");
+                const darkContrast = wcagContrast(parsed, "#0f172a");
+                return darkContrast > whiteContrast ? "#0f172a" : "#ffffff";
             }
         } catch {
             // Fallback
