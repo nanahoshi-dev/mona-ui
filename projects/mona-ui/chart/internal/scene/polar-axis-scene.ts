@@ -3,6 +3,7 @@ import type { ChartRadialCurve, ChartRadialFillMode, ChartRadialGridShape } from
 
 export interface SceneRadialPoint {
     angle: number;
+    animationKey?: string;
     category?: unknown;
     categoryKey?: string;
     dataIndex: number;
@@ -29,6 +30,7 @@ export interface ChartRadarSeriesScene {
     name: string;
     pointRadius: number;
     points: readonly SceneRadialPoint[];
+    renderOpacity?: number;
     showPoints: boolean;
     strokeWidth: number;
     type: "radar";
@@ -45,6 +47,7 @@ export interface ChartContinuousPolarSeriesScene {
     name: string;
     pointRadius: number;
     points: readonly SceneRadialPoint[];
+    renderOpacity?: number;
     showPoints: boolean;
     strokeWidth: number;
     type: "polar";

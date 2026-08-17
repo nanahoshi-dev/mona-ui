@@ -9,6 +9,7 @@ import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
 import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
+import type { ChartAnimationInput } from "../../models/chart-animation.models";
 import type { ChartAxisFormatter, ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartPointEvent, ChartPointFocusEvent, ChartSeriesVisibilityEvent } from "../../models/chart-event.models";
 import { MonaAreaSeriesComponent } from "../area-series/area-series.component";
@@ -39,6 +40,7 @@ import { MonaChartComponent } from "./chart.component";
     ],
     template: `
         <mona-chart
+            [animation]="animation()"
             [data]="data()"
             [xField]="xField()"
             [aria-label]="ariaLabel()"
@@ -98,6 +100,7 @@ import { MonaChartComponent } from "./chart.component";
     `
 })
 class TestHostComponent {
+    public readonly animation = signal<ChartAnimationInput>(false);
     public readonly ariaDescription = signal("Detailed activity chart");
     public readonly ariaLabel = signal("Activity Metrics");
     public readonly data = signal<readonly unknown[]>([

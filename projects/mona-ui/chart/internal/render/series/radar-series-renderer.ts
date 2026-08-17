@@ -29,6 +29,7 @@ export class RadarSeriesRenderer {
 
         context.save();
         context.translate(center.x, center.y);
+        context.globalAlpha *= series.renderOpacity ?? 1;
 
         // 1. Draw Interior Fill (Solid or Gradient)
         if (fillMode !== "none" && canFill) {

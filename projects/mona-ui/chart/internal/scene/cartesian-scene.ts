@@ -19,6 +19,7 @@ export interface ChartLineSeriesScene {
     id: string;
     name: string;
     points: readonly ScenePoint[];
+    renderOpacity?: number;
     showPoints: boolean;
     style: ChartSeriesStyle;
     type: "line";
@@ -33,6 +34,7 @@ export interface ChartAreaSeriesScene {
     id: string;
     name: string;
     points: readonly ScenePoint[];
+    renderOpacity?: number;
     showPoints: boolean;
     style: ChartSeriesStyle;
     type: "area";
@@ -44,6 +46,7 @@ export interface ChartBarSeriesScene {
     fillOpacity: number;
     id: string;
     name: string;
+    renderOpacity?: number;
     style: ChartSeriesStyle;
     type: "bar";
 }

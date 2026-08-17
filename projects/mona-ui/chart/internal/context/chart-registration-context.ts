@@ -29,7 +29,8 @@ export const enum ChartInvalidationReason {
     Layout = 1 << 1,
     Style = 1 << 2,
     Interaction = 1 << 3,
-    Size = 1 << 4
+    Size = 1 << 4,
+    Visibility = 1 << 5
 }
 
 export function hasInvalidationReason(
@@ -103,6 +104,7 @@ export interface ChartSeriesRegistrationBase {
     element: ElementRef<HTMLElement>;
     field: Signal<ChartField>;
     id: string;
+    keyField?: Signal<ChartField | undefined>;
     name: Signal<string>;
     type: ChartSeriesType;
     userClass?: Signal<string>;

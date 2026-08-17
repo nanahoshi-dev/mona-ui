@@ -31,6 +31,12 @@ export type {
 } from "./models/chart.models";
 
 export type {
+    ChartAnimationEasing,
+    ChartAnimationInput,
+    ChartAnimationOptions
+} from "./models/chart-animation.models";
+
+export type {
     ChartAxisFormatter,
     ChartAxisLabelTemplateContext,
     ChartAxisPosition,

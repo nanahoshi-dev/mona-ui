@@ -64,6 +64,12 @@ export class MonaAreaSeriesComponent implements OnInit {
     public readonly fillOpacity = input<number | undefined>(undefined);
 
     /**
+     * @description Property key or accessor extracting a stable datum identity across updates.
+     * @default undefined
+     */
+    public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
      * @description Name of the series displayed in legends and tooltips.
      * @default ""
      */
@@ -107,6 +113,11 @@ export class MonaAreaSeriesComponent implements OnInit {
 
     public constructor() {
         effect(() => {
+            this.visible();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+        });
+
+        effect(() => {
             this.color();
             this.connectNulls();
             this.curve();
@@ -114,12 +125,12 @@ export class MonaAreaSeriesComponent implements OnInit {
             this.field();
             this.fillMode();
             this.fillOpacity();
+            this.keyField();
             this.name();
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
             this.userClass();
-            this.visible();
             this.xField();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
         });
@@ -140,6 +151,7 @@ export class MonaAreaSeriesComponent implements OnInit {
             fillMode: this.fillMode,
             fillOpacity: this.fillOpacity,
             id: this.#id,
+            keyField: this.keyField,
             name: this.name,
             pointRadius: this.pointRadius,
             showPoints: this.showPoints,

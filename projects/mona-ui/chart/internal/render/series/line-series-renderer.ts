@@ -38,6 +38,7 @@ export class LineSeriesRenderer {
         }
 
         context.save();
+        context.globalAlpha *= scene.renderOpacity ?? 1;
         context.beginPath();
 
         const lineGenerator = line<ScenePoint>()

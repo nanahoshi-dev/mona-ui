@@ -5,16 +5,26 @@ import { CartesianChartRenderer } from "./cartesian-chart-renderer";
 import { PolarChartRenderer } from "./polar-chart-renderer";
 
 export class CanvasChartRenderer {
+    public static clear(context: CanvasRenderingContext2D, width: number, height: number): void {
+        context.clearRect(0, 0, width, height);
+    }
+
     public static render(
         context: CanvasRenderingContext2D,
         scene: ChartScene,
         interactionState: ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        const { height, width } = scene;
+        this.clear(context, scene.width, scene.height);
+        this.renderContent(context, scene, interactionState, styleResolver);
+    }
 
-        context.clearRect(0, 0, width, height);
-
+    public static renderContent(
+        context: CanvasRenderingContext2D,
+        scene: ChartScene,
+        interactionState: ChartInteractionState | null,
+        styleResolver: ChartStyleResolver
+    ): void {
         switch (scene.coordinateSystem) {
             case "cartesian":
                 CartesianChartRenderer.render(context, scene, interactionState, styleResolver);
@@ -22,6 +32,31 @@ export class CanvasChartRenderer {
             case "polar":
                 PolarChartRenderer.render(context, scene, interactionState, styleResolver);
                 return;
+        }
+    }
+
+    public static renderCrossfade(
+        context: CanvasRenderingContext2D,
+        fromScene: ChartScene | null,
+        toScene: ChartScene,
+        progress: number,
+        interactionState: ChartInteractionState | null,
+        styleResolver: ChartStyleResolver
+    ): void {
+        this.clear(context, toScene.width, toScene.height);
+
+        if (fromScene && progress < 1) {
+            context.save();
+            context.globalAlpha = Math.max(0, Math.min(1, 1 - progress));
+            this.renderContent(context, fromScene, null, styleResolver);
+            context.restore();
+        }
+
+        if (progress > 0) {
+            context.save();
+            context.globalAlpha = Math.max(0, Math.min(1, progress));
+            this.renderContent(context, toScene, interactionState, styleResolver);
+            context.restore();
         }
     }
 }

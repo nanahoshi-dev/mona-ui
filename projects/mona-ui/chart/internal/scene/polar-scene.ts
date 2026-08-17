@@ -22,6 +22,7 @@ export interface ScenePolarLabel {
 }
 
 export interface SceneSectorSlice {
+    animationKey?: string;
     category: unknown;
     centroid: ChartPoint;
     color: string;
@@ -57,6 +58,7 @@ export interface ChartSectorSeriesScene {
     name: string;
     outerRadius: number;
     padAngle: number;
+    renderOpacity?: number;
     showLabels: boolean;
     slices: readonly SceneSectorSlice[];
     style: ChartSectorSeriesStyle;

@@ -25,6 +25,7 @@ import type {
 } from "../scene/polar-axis-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { canonicalPolarAngle, degreesToRadians, normalizeDegrees } from "../utils/angle-utils";
 import { clamp, isFiniteNumber, normalizeNonNegativeNumber, normalizeTickCount } from "../utils/number-utils";
 
@@ -285,6 +286,7 @@ export class PolarAxisLayoutEngine {
             if (reg.type === "radar" && radarDataResult) {
                 const sData = radarDataResult.seriesList.find(s => s.series.id === reg.id);
                 const points: SceneRadialPoint[] = [];
+                const keyResolver = new ChartMarkKeyResolver(reg.id, reg.keyField?.());
 
                 if (sData) {
                     for (let i = 0; i < sData.points.length; i++) {
@@ -296,9 +298,11 @@ export class PolarAxisLayoutEngine {
                             x: center.x + Math.sin(angle) * r,
                             y: center.y - Math.cos(angle) * r
                         };
+                        const animationKey = keyResolver.resolveKey(dp.datum, dp.categoryKey, dp.dataIndex);
 
                         const scenePt: SceneRadialPoint = {
                             angle,
+                            animationKey,
                             category: dp.category,
                             categoryKey: dp.categoryKey,
                             dataIndex: dp.dataIndex,
@@ -315,6 +319,7 @@ export class PolarAxisLayoutEngine {
                         if (isVisible && dp.defined) {
                             const hit: SceneHitTarget = {
                                 angle,
+                                animationKey,
                                 category: dp.category,
                                 color: style.color,
                                 datum: dp.datum,
@@ -379,6 +384,7 @@ export class PolarAxisLayoutEngine {
             } else if (reg.type === "polar" && polarDataResult) {
                 const sData = polarDataResult.seriesList.find(s => s.series.id === reg.id);
                 const points: SceneRadialPoint[] = [];
+                const keyResolver = new ChartMarkKeyResolver(reg.id, reg.keyField?.());
 
                 if (sData) {
                     for (let i = 0; i < sData.points.length; i++) {
@@ -389,9 +395,11 @@ export class PolarAxisLayoutEngine {
                             x: center.x + Math.sin(angle) * r,
                             y: center.y - Math.cos(angle) * r
                         };
+                        const animationKey = keyResolver.resolveKey(dp.datum, dp.normalizedAngle, dp.dataIndex);
 
                         const scenePt: SceneRadialPoint = {
                             angle,
+                            animationKey,
                             dataIndex: dp.dataIndex,
                             datum: dp.datum,
                             defined: dp.defined,
@@ -410,6 +418,7 @@ export class PolarAxisLayoutEngine {
                             const bucketKey = String(canonicalDeg);
                             const hit: SceneHitTarget = {
                                 angle,
+                                animationKey,
                                 category: dp.formattedAngle,
                                 color: style.color,
                                 datum: dp.datum,
@@ -422,7 +431,7 @@ export class PolarAxisLayoutEngine {
                                 seriesName: reg.name(),
                                 seriesType: "polar",
                                 xKey: bucketKey,
-                                xValue: dp.rawAngle,
+                                xValue: dp.formattedAngle,
                                 yValue: dp.value
                             };
                             hitTargets.push(hit);

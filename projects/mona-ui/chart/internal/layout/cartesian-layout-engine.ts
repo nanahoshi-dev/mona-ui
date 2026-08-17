@@ -14,6 +14,7 @@ import {
     inferXAxisType
 } from "../data/chart-domain";
 import { resolveData, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
+import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import {
     BandScale,
     CartesianScaleFactory,
@@ -311,6 +312,7 @@ export class CartesianLayoutEngine {
             const sData = resolveData(s.data(), rootData);
             const sXField = s.xField() ?? rootXField;
             const sField = s.field();
+            const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
 
             if (s.type === "bar") {
                 // In Phase 1, bars require a category scale
@@ -346,8 +348,10 @@ export class CartesianLayoutEngine {
                     const isPositive = yVal >= 0;
                     const topY = isPositive ? yPos : baselineY;
                     const barHeight = Math.abs(yPos - baselineY);
+                    const animationKey = keyResolver.resolveKey(datum, catKey, dIdx);
 
                     const bar: SceneBar = {
+                        animationKey,
                         datum,
                         height: barHeight,
                         index: dIdx,
@@ -362,6 +366,7 @@ export class CartesianLayoutEngine {
                     bars.push(bar);
 
                     hitTargets.push({
+                        animationKey,
                         borderRadius: radius,
                         bounds: {
                             height: Math.max(4, barHeight),
@@ -446,8 +451,10 @@ export class CartesianLayoutEngine {
                     const isYValid = isFiniteNumber(yVal);
                     const defined = isXValid && isYValid;
                     const yPos = isYValid ? yScale.map(yVal) : baselineY;
+                    const animationKey = keyResolver.resolveKey(datum, normalizedXKey, dIdx);
 
                     const point: ScenePoint = {
+                        animationKey,
                         datum,
                         defined,
                         index: dIdx,
@@ -460,6 +467,7 @@ export class CartesianLayoutEngine {
 
                     if (defined) {
                         hitTargets.push({
+                            animationKey,
                             datum,
                             index: dIdx,
                             point: { x: xPos, y: yPos },

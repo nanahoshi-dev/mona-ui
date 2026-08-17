@@ -70,6 +70,12 @@ export class MonaPolarSeriesComponent implements OnInit {
     public readonly fillOpacity = input<number | undefined>(undefined);
 
     /**
+     * @description Property key or accessor extracting a stable datum identity across updates.
+     * @default undefined
+     */
+    public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
      * @description Series name displayed in legends, tooltips, and accessibility regions.
      * @default "Polar"
      */
@@ -113,9 +119,15 @@ export class MonaPolarSeriesComponent implements OnInit {
 
     public constructor() {
         effect(() => {
+            this.visible();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+        });
+
+        effect(() => {
             this.angleField();
             this.data();
             this.field();
+            this.keyField();
             this.valueFormatter();
             this.#chartContext?.invalidate(ChartInvalidationReason.Data);
         });
@@ -127,7 +139,6 @@ export class MonaPolarSeriesComponent implements OnInit {
             this.pointRadius();
             this.showPoints();
             this.strokeWidth();
-            this.visible();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
         });
 
@@ -156,6 +167,7 @@ export class MonaPolarSeriesComponent implements OnInit {
             fillMode: this.fillMode,
             fillOpacity: this.fillOpacity,
             id: this.#id,
+            keyField: this.keyField,
             name: this.name,
             pointRadius: this.pointRadius,
             showPoints: this.showPoints,

@@ -16,6 +16,11 @@ import {
 } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
+import { BrowserAnimationClock } from "../../internal/animation/chart-animation-clock";
+import { ChartAnimationController } from "../../internal/animation/chart-animation-controller";
+import { normalizeChartAnimationOptions } from "../../internal/animation/chart-animation-options";
+import { ChartTransitionPlanner } from "../../internal/animation/chart-transition-planner";
+import type { ChartAnimationRenderFrame, ChartAnimationTrigger } from "../../internal/animation/chart-transition-types";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
     ChartInvalidationReason,
@@ -53,6 +58,7 @@ import { ChartStyleResolver } from "../../internal/style/chart-style-resolver";
 import { degreesToRadians } from "../../internal/utils/angle-utils";
 import { formatXValue, formatYValue } from "../../internal/utils/chart-formatter";
 import { clamp } from "../../internal/utils/number-utils";
+import type { ChartAnimationInput } from "../../models/chart-animation.models";
 import type {
     ChartPointEvent,
     ChartPointFocusEvent,
@@ -72,6 +78,22 @@ import {
     chartNoDataBaseThemeVariants
 } from "../../styles/chart.styles";
 
+function easingToCss(easing: string): string {
+    switch (easing) {
+        case "linear":
+            return "linear";
+        case "ease-in":
+            return "cubic-bezier(0.4, 0, 1, 1)";
+        case "easeInOut":
+        case "ease-in-out":
+            return "cubic-bezier(0.4, 0, 0.2, 1)";
+        case "easeOut":
+        case "ease-out":
+        default:
+            return "cubic-bezier(0, 0, 0.2, 1)";
+    }
+}
+
 @Component({
     selector: "mona-chart",
     templateUrl: "./chart.component.html",
@@ -88,12 +110,15 @@ import {
         role: "region",
         "[attr.aria-label]": "ariaLabel() || 'Chart'",
         "[attr.aria-description]": "ariaDescription() || null",
+        "[style.--mona-chart-animation-duration]": "animationDurationCss()",
+        "[style.--mona-chart-animation-easing]": "animationEasingCss()",
         "(keydown)": "onKeyDown($event)",
         "(focusout)": "onFocusOut($event)"
     }
 })
 export class MonaChartComponent implements ChartRegistrationContext {
     readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
+    readonly #animationController: ChartAnimationController;
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #labelMeasurements = new Map<string, ChartLabelMeasurement>();
@@ -110,12 +135,17 @@ export class MonaChartComponent implements ChartRegistrationContext {
     #activeKeyboardBucketIndex: number = -1;
     #activeKeyboardSeriesId: string | null = null;
     #canvasContext: CanvasRenderingContext2D | null = null;
+    #canvasReady: boolean = false;
     #currentHeight: number = 300;
     #currentWidth: number = 500;
+    #hasCommittedVisualScene: boolean = false;
     #interactionState: ChartInteractionState | null = null;
     #labelResizeObserver: ResizeObserver | null = null;
+    #mediaQueryList: MediaQueryList | null = null;
+    #mediaQueryListener: ((e: MediaQueryListEvent) => void) | null = null;
     #pendingPointerEvent: PointerEvent | null = null;
     #pointerFrameId: number | null = null;
+    #renderScene: ChartScene | null = null;
     #resizeObserver: ResizeObserver | null = null;
     #themeObserver: MutationObserver | null = null;
 
@@ -149,9 +179,14 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "donut") as ChartDonutSeriesRegistration) ?? null;
     });
+    public readonly isAnimating = signal(false);
+    public readonly isStructuralAnimation = signal(false);
+    public readonly isExitingData = signal(false);
     protected readonly hasNoData = computed(() => {
         const sc = this.scene();
-        return sc ? !sc.hasRenderableData : false;
+        if (!sc) return false;
+        if (this.isExitingData()) return false;
+        return !sc.hasRenderableData;
     });
     protected readonly layoutClasses = computed(() => {
         const pos = this.legendPosition();
@@ -170,6 +205,15 @@ export class MonaChartComponent implements ChartRegistrationContext {
     });
     public readonly scene = signal<ChartScene | null>(null);
     protected readonly styleRevision = signal(0);
+
+    /**
+     * @description Animation settings for initial render and subsequent data or visibility transitions.
+     * @default true
+     */
+    public readonly animation = input<ChartAnimationInput>(true);
+    protected readonly normalizedAnimationOptions = computed(() => normalizeChartAnimationOptions(this.animation()));
+    protected readonly animationDurationCss = computed(() => `${this.normalizedAnimationOptions().duration}ms`);
+    protected readonly animationEasingCss = computed(() => easingToCss(this.normalizedAnimationOptions().easing));
 
     /**
      * @description Detailed accessible description explaining the chart's purpose and trends.
@@ -235,10 +279,27 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public constructor() {
         this.#styleResolver = new ChartStyleResolver(this.#elementRef.nativeElement);
+        this.#animationController = new ChartAnimationController(new BrowserAnimationClock());
         this.#renderScheduler = new ChartRenderScheduler(reason => this.#recomputeAndPaint(reason));
+
+        if (typeof window !== "undefined" && window.matchMedia) {
+            this.#mediaQueryList = window.matchMedia("(prefers-reduced-motion: reduce)");
+            this.#mediaQueryListener = (e: MediaQueryListEvent) => {
+                if (e.matches && this.#animationController.isRunning()) {
+                    this.#animationController.cancel("finish-target");
+                }
+            };
+            this.#mediaQueryList.addEventListener("change", this.#mediaQueryListener);
+        }
 
         this.#destroyRef.onDestroy(() => {
             this.#renderScheduler.cancel();
+            this.#animationController.destroy();
+            if (this.#mediaQueryList && this.#mediaQueryListener) {
+                this.#mediaQueryList.removeEventListener("change", this.#mediaQueryListener);
+                this.#mediaQueryList = null;
+                this.#mediaQueryListener = null;
+            }
             if (this.#pointerFrameId !== null) {
                 cancelAnimationFrame(this.#pointerFrameId);
                 this.#pointerFrameId = null;
@@ -275,6 +336,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
         afterNextRender(() => {
             this.#initCanvasAndObserver();
+            this.#canvasReady = true;
+            if (!this.#hasCommittedVisualScene && this.scene()) {
+                this.#recomputeAndPaint(ChartInvalidationReason.Data);
+            }
         });
 
         this.#recomputeAndPaint(ChartInvalidationReason.Data);
@@ -290,10 +355,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     public onCanvasClick(event: MouseEvent): void {
         const pointer = this.#normalizePointer(event);
-        let currentScene = this.scene();
+        let currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
             this.#recomputeAndPaint(ChartInvalidationReason.Data);
-            currentScene = this.scene();
+            currentScene = this.#renderScene ?? this.scene();
         }
         if (!pointer || !currentScene) {
             return;
@@ -328,10 +393,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
     }
 
     public onKeyDown(event: KeyboardEvent): void {
-        let currentScene = this.scene();
+        let currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
             this.#recomputeAndPaint(ChartInvalidationReason.Data);
-            currentScene = this.scene();
+            currentScene = this.#renderScene ?? this.scene();
         }
         if (!currentScene) {
             return;
@@ -408,10 +473,10 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     #processPointerMove(event: PointerEvent): void {
         const pointer = this.#normalizePointer(event);
-        let currentScene = this.scene();
+        let currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
             this.#recomputeAndPaint(ChartInvalidationReason.Data);
-            currentScene = this.scene();
+            currentScene = this.#renderScene ?? this.scene();
         }
         if (!pointer || !currentScene) {
             this.#clearInteraction();
@@ -704,7 +769,7 @@ export class MonaChartComponent implements ChartRegistrationContext {
 
     #paint(): void {
         const context = this.#canvasContext;
-        const currentScene = this.scene();
+        const currentScene = this.#renderScene ?? this.scene();
         if (!context || !currentScene) {
             return;
         }
@@ -727,7 +792,8 @@ export class MonaChartComponent implements ChartRegistrationContext {
         const isStructural =
             hasInvalidationReason(reason, ChartInvalidationReason.Data) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Layout) ||
-            hasInvalidationReason(reason, ChartInvalidationReason.Size);
+            hasInvalidationReason(reason, ChartInvalidationReason.Size) ||
+            hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
 
         if (isStructural) {
             this.#clearInteractionState();
@@ -783,12 +849,89 @@ export class MonaChartComponent implements ChartRegistrationContext {
             }
         }
 
+        // Commit semantic target scene immediately
         this.scene.set(newScene);
-        this.#paint();
+
+        const isInitial = !this.#hasCommittedVisualScene;
+        const isVisibility = hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
+        const isData = hasInvalidationReason(reason, ChartInvalidationReason.Data);
+        const trigger: ChartAnimationTrigger = isInitial
+            ? "initial"
+            : isVisibility
+              ? "visibility"
+              : isData
+                ? "data"
+                : "layout";
+
+        const animOptions = this.normalizedAnimationOptions();
+        const prefersReducedMotion =
+            typeof window !== "undefined" && window.matchMedia
+                ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                : false;
+
+        const effectiveOptions = prefersReducedMotion ? { ...animOptions, duration: 0 } : animOptions;
+
+        if (!this.#canvasReady || trigger === "layout" || effectiveOptions.duration === 0) {
+            this.#animationController.cancel("finish-target");
+            this.#renderScene = newScene;
+            this.#hasCommittedVisualScene = true;
+            this.isAnimating.set(false);
+            this.isStructuralAnimation.set(false);
+            this.isExitingData.set(false);
+            this.#paint();
+            return;
+        }
+
+        const fromVisual = this.#renderScene;
+        const plan = ChartTransitionPlanner.plan(fromVisual, newScene, trigger, effectiveOptions);
+
+        if (plan.mode === "immediate" || plan.duration === 0) {
+            this.#animationController.cancel("finish-target");
+            this.#renderScene = newScene;
+            this.#hasCommittedVisualScene = true;
+            this.isAnimating.set(false);
+            this.isStructuralAnimation.set(false);
+            this.isExitingData.set(false);
+            this.#paint();
+        } else {
+            const isExitingDataTransition =
+                trigger === "data" && fromVisual && fromVisual.hasRenderableData && !newScene.hasRenderableData;
+            if (isExitingDataTransition) {
+                this.isExitingData.set(true);
+            }
+            this.isAnimating.set(true);
+            this.isStructuralAnimation.set(plan.mode !== "crossfade");
+
+            this.#animationController.start(plan, {
+                onComplete: () => {
+                    this.#renderScene = newScene;
+                    this.#hasCommittedVisualScene = true;
+                    this.isAnimating.set(false);
+                    this.isStructuralAnimation.set(false);
+                    this.isExitingData.set(false);
+                    this.#paint();
+                },
+                onFrame: (frame: ChartAnimationRenderFrame) => {
+                    this.#renderScene = frame.scene;
+                    if (frame.mode === "crossfade" && this.#canvasContext) {
+                        CanvasChartRenderer.renderCrossfade(
+                            this.#canvasContext,
+                            frame.fromScene ?? null,
+                            frame.toScene ?? newScene,
+                            frame.progress,
+                            this.#interactionState,
+                            this.#styleResolver
+                        );
+                    } else {
+                        this.#paint();
+                    }
+                }
+            });
+        }
     }
 
     #setKeyboardSelection(bucketIndex: number, preferredSeriesId: string | null): void {
-        const currentScene = this.scene();
+        const currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) return;
 
         const buckets = currentScene.interactionBuckets;

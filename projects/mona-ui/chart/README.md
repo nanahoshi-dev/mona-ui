@@ -112,7 +112,26 @@ The Mona UI Chart library combines declarative Angular template composition with
 ## Components & Directives
 
 ### `<mona-chart>`
-The root container that coordinates layout measurement, data domains, rendering schedules, and interaction.
+The root container that coordinates layout measurement, data domains, rendering schedules, animation transitions, and interaction.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `data` | `readonly unknown[]` | `[]` | Primary dataset shared across all child series. |
+| `xField` | `ChartField` | `""` | Property key or accessor extracting the X-axis coordinate for each data item. |
+| `animation` | `ChartAnimationInput` | `true` | Animation settings (`boolean` or `Partial<ChartAnimationOptions>`) for initial render, data transitions, and series visibility toggles. |
+| `ariaLabel` | `string` | `"Chart"` | Accessible name for the chart container. |
+| `ariaDescription` | `string` | `""` | Detailed accessible description explaining the chart's purpose and trends. |
+| `pointClick` | `output<ChartPointEvent>` | — | Emits when a data point, vertex, bar, or sector slice is clicked. |
+| `pointFocusChange` | `output<ChartPointFocusEvent>` | — | Emits when keyboard focus moves to a new data point, spoke, or slice. |
+| `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | — | Emits when a series visibility state is toggled via legend interaction. |
+
+### Animation & Transitions
+
+Mona UI Charts feature a high-performance, renderer-agnostic animation system:
+- **Geometry Morphing:** Smoothly interpolates Cartesian bars from baselines, line/area paths, sector arcs, and radial polygons.
+- **Stable Identity:** Use the `keyField` input on series components to track items across reorders, additions, and deletions.
+- **CSS Custom Properties:** Exposes `--mona-chart-animation-duration` and `--mona-chart-animation-easing` on the chart host element for synchronized CSS transitions.
+- **Reduced Motion:** Automatically respects `prefers-reduced-motion: reduce` by completing transitions immediately without motion.
 
 ### `<mona-chart-angular-axis>`
 Configures the angular (spoke / degree) dimension in Polar and Radar charts.
@@ -146,6 +165,7 @@ Renders a closed polygonal series comparing categorical metrics across angular s
 | :--- | :--- | :--- | :--- |
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric metric value. |
 | `categoryField` | `ChartField` | `"category"` | Property key or accessor extracting spoke category. |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
 | `name` | `string` | `"Radar"` | Series name for tooltips, legend, and accessibility. |
 | `fillMode` | `ChartRadialFillMode` | `"solid"` | Fill styling: `"solid"` wash, radial `"gradient"`, or `"none"`. |
 | `curve` | `ChartRadialCurve` | `"linear"` | Curve interpolation: `"linear"` or `"smooth"` (closed Catmull-Rom spline). |
@@ -161,6 +181,7 @@ Renders a continuous polar series plotting values over continuous angular degree
 | :--- | :--- | :--- | :--- |
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric radial magnitude. |
 | `angleField` | `ChartField` | `"angle"` | Property key or accessor extracting angle in degrees. |
+| `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
 | `name` | `string` | `"Polar"` | Series name for tooltips, legend, and accessibility. |
 | `fillMode` | `ChartRadialFillMode` | `"none"` | Fill styling: `"solid"` wash, radial `"gradient"` (to pole), or `"none"`. |
 | `curve` | `ChartRadialCurve` | `"linear"` | Curve interpolation: `"linear"` or `"smooth"`. |

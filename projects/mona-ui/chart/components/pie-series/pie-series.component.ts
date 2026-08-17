@@ -110,6 +110,12 @@ export class MonaPieSeriesComponent implements OnInit {
     public readonly fillOpacity = input<number | undefined>(undefined);
 
     /**
+     * @description Property key or accessor extracting a stable datum identity across updates.
+     * @default undefined
+     */
+    public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
      * @description Content to display in default slice data labels.
      * @default "percentage"
      */
@@ -194,6 +200,11 @@ export class MonaPieSeriesComponent implements OnInit {
 
     public constructor() {
         effect(() => {
+            this.visible();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+        });
+
+        effect(() => {
             this.name();
             this.data();
             this.field();
@@ -202,6 +213,7 @@ export class MonaPieSeriesComponent implements OnInit {
             this.valueFormatter();
             this.colors();
             this.colorField();
+            this.keyField();
 
             // Prune hidden indices that no longer exist
             const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
@@ -221,7 +233,6 @@ export class MonaPieSeriesComponent implements OnInit {
             this.labelContent();
             this.labelPosition();
             this.minLabelAngle();
-            this.visible();
             this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
         });
 
@@ -254,6 +265,7 @@ export class MonaPieSeriesComponent implements OnInit {
             fillOpacity: this.fillOpacity,
             id: this.#seriesId,
             isSliceVisible: (idx: number) => !this.#hiddenIndices().contains(idx),
+            keyField: this.keyField,
             labelContent: this.labelContent,
             labelPosition: this.labelPosition,
             minLabelAngle: this.minLabelAngle,
@@ -304,7 +316,7 @@ export class MonaPieSeriesComponent implements OnInit {
             visible: isNowVisible
         });
 
-        this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+        this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
         return isNowVisible;
     }
 }
