@@ -19,10 +19,15 @@ export const chartAxisLabelBaseThemeVariants = cva(
 export const chartLegendBaseThemeVariants = cva("flex flex-wrap items-center gap-4 text-xs select-none", {
     variants: {
         position: {
-            bottom: "justify-center mt-3",
+            // min-h-5 reserves a single item row (matches
+            // chartLegendItemBaseThemeVariants' text-xs + py-0.5 height) so
+            // the plot area doesn't resize when the legend goes from empty
+            // to non-empty (or vice versa), which would otherwise shift the
+            // X axis vertically as the last/first series is toggled.
+            bottom: "justify-center mt-3 min-h-5",
             left: "flex-col justify-center mr-4",
             right: "flex-col justify-center ml-4",
-            top: "justify-center mb-2"
+            top: "justify-center mb-2 min-h-5"
         }
     }
 });

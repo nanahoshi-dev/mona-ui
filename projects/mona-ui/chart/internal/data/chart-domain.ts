@@ -139,6 +139,22 @@ export function calculateCategoryDomain(
     const visibleSeries = seriesList.filter(s => s.visible());
     const seriesToScan = visibleSeries.length > 0 ? visibleSeries : seriesList;
 
+    if (seriesToScan.length === 0) {
+        // No series are registered at all (e.g. every series was removed
+        // from the chart), so there's no per-series data to scan. Fall back
+        // to the root dataset so the X axis still shows its categories
+        // instead of collapsing to an empty domain.
+        for (let i = 0; i < rootData.length; i++) {
+            const val = resolveValue(rootData[i], rootXField, i);
+            const strVal = val !== undefined && val !== null ? String(val) : String(i);
+            if (!keys.has(strVal)) {
+                keys.add(strVal);
+                orderedKeys.push(strVal);
+            }
+        }
+        return orderedKeys;
+    }
+
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
