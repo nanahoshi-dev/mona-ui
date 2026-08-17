@@ -22,6 +22,7 @@ import type {
     ChartValueFormatter
 } from "../../models/chart-polar.models";
 import type { ChartField, ChartPoint } from "../../models/chart.models";
+import type { ChartFinancialFillMode } from "../../models/chart-financial.models";
 import type { ChartColorLegendScale, ChartHeatmapColorMode } from "../../models/chart-heatmap.models";
 import type {
     ChartAreaFillMode,
@@ -308,11 +309,51 @@ export interface ChartHeatmapSeriesRegistration {
     readonly yField: Signal<ChartField>;
 }
 
+export interface ChartFinancialSeriesRegistrationBase {
+    readonly bodyWidth: Signal<number | undefined>;
+    readonly bodyWidthRatio: Signal<number>;
+    readonly closeField: Signal<ChartField>;
+    readonly color?: Signal<string | undefined>;
+    readonly data: Signal<readonly unknown[] | undefined>;
+    readonly element?: ElementRef<HTMLElement>;
+    readonly fallingColor: Signal<string>;
+    readonly highField: Signal<ChartField>;
+    readonly id: string;
+    readonly keyField: Signal<ChartField | undefined>;
+    readonly lowField: Signal<ChartField>;
+    readonly maxBodyWidth: Signal<number>;
+    readonly name: Signal<string>;
+    readonly neutralColor: Signal<string>;
+    readonly opacity: Signal<number | undefined>;
+    readonly openField: Signal<ChartField>;
+    readonly risingColor: Signal<string>;
+    readonly userClass?: Signal<string>;
+    readonly valueFormatter: Signal<ChartAxisFormatter | undefined>;
+    readonly visible: Signal<boolean>;
+    readonly wickColor: Signal<string | undefined>;
+    readonly wickWidth: Signal<number>;
+    readonly xField: Signal<ChartField | undefined>;
+}
+
+export interface ChartCandlestickSeriesRegistration extends ChartFinancialSeriesRegistrationBase {
+    readonly fillMode: Signal<ChartFinancialFillMode>;
+    readonly type: "candlestick";
+}
+
+export interface ChartOhlcSeriesRegistration extends ChartFinancialSeriesRegistrationBase {
+    readonly tickWidth: Signal<number | undefined>;
+    readonly type: "ohlc";
+}
+
+export type ChartFinancialSeriesRegistration = ChartCandlestickSeriesRegistration | ChartOhlcSeriesRegistration;
+
 export type ChartCartesianSeriesRegistration =
     | ChartAreaSeriesRegistration
     | ChartBarSeriesRegistration
     | ChartBubbleSeriesRegistration
+    | ChartCandlestickSeriesRegistration
     | ChartLineSeriesRegistration
+    | ChartOhlcSeriesRegistration
     | ChartRangeAreaSeriesRegistration
     | ChartRangeBarSeriesRegistration
     | ChartScatterSeriesRegistration;

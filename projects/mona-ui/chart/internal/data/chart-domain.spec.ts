@@ -122,6 +122,80 @@ function createMockRangeAreaSeries(
     } as ChartCartesianSeriesRegistration;
 }
 
+function createMockCandlestickSeries(
+    openField: ChartField,
+    highField: ChartField,
+    lowField: ChartField,
+    closeField: ChartField,
+    data?: readonly unknown[],
+    visible: boolean = true,
+    xField?: ChartField
+): ChartCartesianSeriesRegistration {
+    return {
+        bodyWidth: signal(undefined),
+        bodyWidthRatio: signal(0.7),
+        closeField: signal(closeField),
+        color: signal(undefined),
+        data: signal(data),
+        element: { nativeElement: {} as HTMLElement },
+        fallingColor: signal("#ef4444"),
+        fillMode: signal("filled"),
+        highField: signal(highField),
+        id: `mock-candlestick-${Math.random()}`,
+        keyField: signal(undefined),
+        lowField: signal(lowField),
+        maxBodyWidth: signal(32),
+        name: signal("Mock Candlestick"),
+        neutralColor: signal("#6b7280"),
+        opacity: signal(undefined),
+        openField: signal(openField),
+        risingColor: signal("#22c55e"),
+        type: "candlestick",
+        valueFormatter: signal(undefined),
+        visible: signal(visible),
+        wickColor: signal(undefined),
+        wickWidth: signal(1),
+        xField: signal(xField)
+    } as unknown as ChartCartesianSeriesRegistration;
+}
+
+function createMockOhlcSeries(
+    openField: ChartField,
+    highField: ChartField,
+    lowField: ChartField,
+    closeField: ChartField,
+    data?: readonly unknown[],
+    visible: boolean = true,
+    xField?: ChartField
+): ChartCartesianSeriesRegistration {
+    return {
+        bodyWidth: signal(undefined),
+        bodyWidthRatio: signal(0.7),
+        closeField: signal(closeField),
+        color: signal(undefined),
+        data: signal(data),
+        element: { nativeElement: {} as HTMLElement },
+        fallingColor: signal("#ef4444"),
+        highField: signal(highField),
+        id: `mock-ohlc-${Math.random()}`,
+        keyField: signal(undefined),
+        lowField: signal(lowField),
+        maxBodyWidth: signal(32),
+        name: signal("Mock OHLC"),
+        neutralColor: signal("#6b7280"),
+        opacity: signal(undefined),
+        openField: signal(openField),
+        risingColor: signal("#22c55e"),
+        tickWidth: signal(undefined),
+        type: "ohlc",
+        valueFormatter: signal(undefined),
+        visible: signal(visible),
+        wickColor: signal(undefined),
+        wickWidth: signal(1),
+        xField: signal(xField)
+    } as unknown as ChartCartesianSeriesRegistration;
+}
+
 describe("chart-domain", () => {
     describe("resolveData", () => {
         it("should return root data when series data is undefined", () => {
@@ -787,6 +861,52 @@ describe("chart-domain", () => {
                 { size: -2, x: 2, y: 20 }
             ];
             expect(hasRenderableData(series, data, "linear", "x")).toBe(false);
+        });
+
+        it("should return true for candlestick and ohlc series with valid OHLC envelope", () => {
+            const series = [createMockCandlestickSeries("o", "h", "l", "c")];
+            const data = [{ c: 110, h: 120, l: 90, o: 100, x: "2026-01-01" }];
+            expect(hasRenderableData(series, data, "category")).toBe(true);
+            expect(hasRenderableData(series, data, "time", "x")).toBe(true);
+        });
+    });
+
+    describe("Financial Series Domains", () => {
+        const ohlcData = [
+            { c: 110, date: "2026-01-01", h: 125, l: 95, o: 100, x: 10 },
+            { c: 130, date: "2026-01-02", h: 140, l: 105, o: 115, x: 20 },
+            { c: 120, date: "2026-01-03", h: 135, l: 110, o: 125, x: 30 }
+        ];
+
+        it("should calculate continuous Y domain from min(low) and max(high) without forcing zero baseline", () => {
+            const series = [createMockCandlestickSeries("o", "h", "l", "c")];
+            const [minY, maxY] = calculateContinuousYDomain(series, ohlcData);
+
+            // Min low = 95, Max high = 140. Zero baseline is NOT forced.
+            expect(minY).toBe(95);
+            expect(maxY).toBe(140);
+        });
+
+        it("should pad linear X domain by half local interval for financial series", () => {
+            const series = [createMockCandlestickSeries("o", "h", "l", "c", undefined, true, "x")];
+            const [minX, maxX] = calculateLinearXDomain(series, ohlcData, "x");
+
+            // x values are [10, 20, 30]. Spacing = 10, half-interval = 5.
+            // Padded domain: [10 - 5, 30 + 5] = [5, 35]
+            expect(minX).toBe(5);
+            expect(maxX).toBe(35);
+        });
+
+        it("should pad time X domain by half local interval for financial series", () => {
+            const series = [createMockOhlcSeries("o", "h", "l", "c", undefined, true, "date")];
+            const [minTime, maxTime] = calculateTimeDomain(series, ohlcData, "date");
+
+            // 1 day spacing = 86,400,000 ms. Half interval = 43,200,000 ms.
+            const t0 = Date.parse("2026-01-01");
+            const t2 = Date.parse("2026-01-03");
+
+            expect(minTime.getTime()).toBe(t0 - 43200000);
+            expect(maxTime.getTime()).toBe(t2 + 43200000);
         });
     });
 });

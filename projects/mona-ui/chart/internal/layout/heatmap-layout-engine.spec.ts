@@ -150,4 +150,34 @@ describe("HeatmapLayoutEngine", () => {
         expect(scene.hasRenderableData).toBe(false);
         expect(scene.series.length).toBe(0);
     });
+
+    it("should safely normalize cellGap when non-finite, negative, zero or very large", () => {
+        const testGaps = [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, -5, 0, 10000];
+        const rootData = [
+            { day: "Mon", hour: "10am", val: 10 },
+            { day: "Tue", hour: "11am", val: 20 }
+        ];
+
+        for (const gap of testGaps) {
+            const series = createMockSeries({
+                cellGap: signal(gap)
+            });
+
+            const scene = HeatmapLayoutEngine.computeScene({
+                containerHeight: 400,
+                containerWidth: 600,
+                rootData,
+                series,
+                styleResolver
+            });
+
+            const cell = scene.series[0].cells[0];
+            expect(Number.isFinite(cell.x)).toBe(true);
+            expect(Number.isFinite(cell.y)).toBe(true);
+            expect(Number.isFinite(cell.width)).toBe(true);
+            expect(Number.isFinite(cell.height)).toBe(true);
+            expect(cell.width).toBeGreaterThanOrEqual(0);
+            expect(cell.height).toBeGreaterThanOrEqual(0);
+        }
+    });
 });

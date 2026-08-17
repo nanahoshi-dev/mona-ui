@@ -2958,6 +2958,166 @@
       }
     ]
   },
+  "MonaCandlestickSeriesComponent": {
+    "name": "MonaCandlestickSeriesComponent",
+    "selector": "\"mona-candlestick-series\"",
+    "inputs": [
+      {
+        "description": "Explicit body width in pixels for candlestick candles.",
+        "kind": "input",
+        "name": "bodyWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Ratio of available category slot or mark spacing allocated to candle bodies (0.0 to 1.0).",
+        "kind": "input",
+        "name": "bodyWidthRatio",
+        "type": "number",
+        "defaultValue": "0.7"
+      },
+      {
+        "description": "Property key or accessor extracting the closing price for each data item.",
+        "kind": "input",
+        "name": "closeField",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Optional color override applied uniformly across all candle bodies.",
+        "kind": "input",
+        "name": "color",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series-specific dataset overriding the root chart data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Color for falling / bearish candles (close < open).",
+        "kind": "input",
+        "name": "fallingColor",
+        "type": "string",
+        "defaultValue": "\"var(--mona-chart-color-falling, #ef4444)\""
+      },
+      {
+        "description": "Visual fill mode for candle bodies: 'filled' (solid fill) or 'hollow' (rising hollow, falling filled).",
+        "kind": "input",
+        "name": "fillMode",
+        "type": "ChartFinancialFillMode",
+        "defaultValue": "\"filled\""
+      },
+      {
+        "description": "Property key or accessor extracting the highest price for each data item.",
+        "kind": "input",
+        "name": "highField",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the lowest price for each data item.",
+        "kind": "input",
+        "name": "lowField",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Maximum candle body width in pixels.",
+        "kind": "input",
+        "name": "maxBodyWidth",
+        "type": "number",
+        "defaultValue": "32"
+      },
+      {
+        "description": "Name of the series displayed in legends, tooltips, and live region announcements.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Candlestick\""
+      },
+      {
+        "description": "Color for neutral / flat candles (close === open).",
+        "kind": "input",
+        "name": "neutralColor",
+        "type": "string",
+        "defaultValue": "\"var(--mona-chart-color-neutral, #6b7280)\""
+      },
+      {
+        "description": "Overall opacity multiplier applied to candle wicks and bodies.",
+        "kind": "input",
+        "name": "opacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the opening price for each data item.",
+        "kind": "input",
+        "name": "openField",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Color for rising / bullish candles (close > open).",
+        "kind": "input",
+        "name": "risingColor",
+        "type": "string",
+        "defaultValue": "\"var(--mona-chart-color-rising, #22c55e)\""
+      },
+      {
+        "description": "Additional CSS classes applied to the series host element.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Formatter callback transforming financial numeric values into custom display strings.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartAxisFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Whether the series is currently visible.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Optional color override for the upper and lower wicks.",
+        "kind": "input",
+        "name": "wickColor",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Stroke width in pixels for the upper and lower wicks.",
+        "kind": "input",
+        "name": "wickWidth",
+        "type": "number",
+        "defaultValue": "1"
+      },
+      {
+        "description": "Property key or accessor extracting the X-axis coordinate or timestamp for each data item.",
+        "kind": "input",
+        "name": "xField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      }
+    ]
+  },
   "MonaChartComponent": {
     "name": "MonaChartComponent",
     "selector": "\"mona-chart\"",
@@ -3861,6 +4021,166 @@
       },
       {
         "description": "Property key or accessor extracting the X value, overriding the root chart X field.",
+        "kind": "input",
+        "name": "xField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      }
+    ]
+  },
+  "MonaOhlcSeriesComponent": {
+    "name": "MonaOhlcSeriesComponent",
+    "selector": "\"mona-ohlc-series\"",
+    "inputs": [
+      {
+        "description": "Explicit total width in pixels for open/close tick arms.",
+        "kind": "input",
+        "name": "bodyWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Ratio of available category slot or mark spacing allocated to open/close tick arms (0.0 to 1.0).",
+        "kind": "input",
+        "name": "bodyWidthRatio",
+        "type": "number",
+        "defaultValue": "0.7"
+      },
+      {
+        "description": "Property key or accessor extracting the closing price for each data item.",
+        "kind": "input",
+        "name": "closeField",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Optional color override applied uniformly across all OHLC ticks and stems.",
+        "kind": "input",
+        "name": "color",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series-specific dataset overriding the root chart data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Color for falling / bearish bars (close < open).",
+        "kind": "input",
+        "name": "fallingColor",
+        "type": "string",
+        "defaultValue": "\"var(--mona-chart-color-falling, #ef4444)\""
+      },
+      {
+        "description": "Property key or accessor extracting the highest price for each data item.",
+        "kind": "input",
+        "name": "highField",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the lowest price for each data item.",
+        "kind": "input",
+        "name": "lowField",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Maximum total tick width in pixels.",
+        "kind": "input",
+        "name": "maxBodyWidth",
+        "type": "number",
+        "defaultValue": "32"
+      },
+      {
+        "description": "Name of the series displayed in legends, tooltips, and live region announcements.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"OHLC\""
+      },
+      {
+        "description": "Color for neutral / flat bars (close === open).",
+        "kind": "input",
+        "name": "neutralColor",
+        "type": "string",
+        "defaultValue": "\"var(--mona-chart-color-neutral, #6b7280)\""
+      },
+      {
+        "description": "Overall opacity multiplier applied to OHLC stems and tick arms.",
+        "kind": "input",
+        "name": "opacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the opening price for each data item.",
+        "kind": "input",
+        "name": "openField",
+        "type": "ChartField",
+        "required": true
+      },
+      {
+        "description": "Color for rising / bullish bars (close > open).",
+        "kind": "input",
+        "name": "risingColor",
+        "type": "string",
+        "defaultValue": "\"var(--mona-chart-color-rising, #22c55e)\""
+      },
+      {
+        "description": "Stroke width in pixels for horizontal open and close tick arms.",
+        "kind": "input",
+        "name": "tickWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Additional CSS classes applied to the series host element.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Formatter callback transforming financial numeric values into custom display strings.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartAxisFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Whether the series is currently visible.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Optional color override for the vertical high-low stem.",
+        "kind": "input",
+        "name": "wickColor",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Stroke width in pixels for the vertical high-low stem.",
+        "kind": "input",
+        "name": "wickWidth",
+        "type": "number",
+        "defaultValue": "1"
+      },
+      {
+        "description": "Property key or accessor extracting the X-axis coordinate or timestamp for each data item.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",

@@ -1,3 +1,4 @@
+import type { ChartFinancialDirection } from "./chart-financial.models";
 import type { ChartPointValueKind } from "./chart-point-value.models";
 import type { ChartSeriesType } from "./chart-series.models";
 import type { ChartStackMode } from "./chart-stack.models";
@@ -8,11 +9,17 @@ export interface ChartTooltipPointContext<T = unknown> {
     category?: unknown;
     categoryX?: string;
     categoryY?: string;
+    close?: number;
     color: string;
     dataIndex: number;
     datum: T;
+    financialDirection?: ChartFinancialDirection;
     formattedCategory?: string;
+    formattedClose?: string;
     formattedFrom?: string;
+    formattedHigh?: string;
+    formattedLow?: string;
+    formattedOpen?: string;
     formattedPercentage?: string;
     formattedSize?: string;
     formattedStackPercentage?: string;
@@ -23,7 +30,10 @@ export interface ChartTooltipPointContext<T = unknown> {
     formattedY: string;
     formattedYCategory?: string;
     fromValue?: number;
+    high?: number;
+    low?: number;
     markId: string;
+    open?: number;
     percentage?: number;
     rawValue?: unknown;
     seriesId: string;

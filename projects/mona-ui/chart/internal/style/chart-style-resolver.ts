@@ -2,6 +2,7 @@ import { formatRgb, parse, wcagContrast } from "culori";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {
     ChartCartesianSeriesRegistration,
+    ChartFinancialSeriesRegistration,
     ChartHeatmapSeriesRegistration,
     ChartPolarSeriesRegistration,
     ChartRadialSeriesRegistration,
@@ -9,6 +10,7 @@ import type {
 } from "../context/chart-registration-context";
 import type { ChartHeatmapSeriesStyle } from "../../models/chart-heatmap.models";
 import { resolveValue } from "../data/chart-value-resolver";
+import type { ChartFinancialSeriesStyle } from "../scene/cartesian-scene";
 import type { ChartPolarSeriesStyle } from "../scene/polar-scene";
 import { isFiniteNumber } from "../utils/number-utils";
 
@@ -176,7 +178,7 @@ export class ChartStyleResolver {
         seriesIndex: number,
         colorPalette: readonly string[] = DEFAULT_CHART_PALETTE_VARIABLES
     ): ChartSeriesStyle {
-        const rawExplicitColor = series.color();
+        const rawExplicitColor = series.color?.();
         const explicitColor = rawExplicitColor ? this.resolveCssVariable(rawExplicitColor) : "";
         const explicitStrokeWidth = "strokeWidth" in series ? series.strokeWidth?.() : undefined;
         const explicitPointRadius = "pointRadius" in series ? series.pointRadius?.() : undefined;
@@ -261,6 +263,82 @@ export class ChartStyleResolver {
         };
     }
 
+    public resolveFinancialSeriesStyle(
+        series: ChartFinancialSeriesRegistration
+    ): ChartFinancialSeriesStyle {
+        const rawExplicitRising = series.risingColor?.();
+        const rawExplicitFalling = series.fallingColor?.();
+        const rawExplicitNeutral = series.neutralColor?.();
+        const rawExplicitWickColor = series.wickColor?.();
+        const rawExplicitColor = series.color?.();
+        const explicitWickWidth = series.wickWidth?.();
+        const explicitOpacity = series.opacity?.();
+
+        let cssRisingColor: string | undefined;
+        let cssFallingColor: string | undefined;
+        let cssNeutralColor: string | undefined;
+        let cssWickColor: string | undefined;
+        let cssWickWidth: number | undefined;
+        let cssOpacity: number | undefined;
+
+        if (typeof window !== "undefined" && series.element?.nativeElement) {
+            try {
+                const nativeEl = series.element.nativeElement;
+                const computed = window.getComputedStyle(nativeEl);
+
+                const risingVal = computed.getPropertyValue("--mona-chart-financial-rising-color");
+                if (risingVal) cssRisingColor = risingVal.trim();
+
+                const fallingVal = computed.getPropertyValue("--mona-chart-financial-falling-color");
+                if (fallingVal) cssFallingColor = fallingVal.trim();
+
+                const neutralVal = computed.getPropertyValue("--mona-chart-financial-neutral-color");
+                if (neutralVal) cssNeutralColor = neutralVal.trim();
+
+                const wickColVal = computed.getPropertyValue("--mona-chart-financial-wick-color");
+                if (wickColVal) cssWickColor = wickColVal.trim();
+
+                const wickWVal = computed.getPropertyValue("--mona-chart-financial-wick-width");
+                if (wickWVal) {
+                    const parsed = parseFloat(wickWVal);
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssWickWidth = parsed;
+                }
+
+                const opVal = computed.getPropertyValue("--mona-chart-fill-opacity");
+                if (opVal) {
+                    const parsed = parseFloat(opVal);
+                    if (isFiniteNumber(parsed)) cssOpacity = Math.max(0, Math.min(1, parsed));
+                }
+            } catch {
+                // Ignore style resolution errors
+            }
+        }
+
+        const risingColor = this.resolveCssVariable(rawExplicitRising || cssRisingColor || "#22c55e");
+        const fallingColor = this.resolveCssVariable(rawExplicitFalling || cssFallingColor || "#ef4444");
+        const neutralColor = this.resolveCssVariable(rawExplicitNeutral || cssNeutralColor || "#6b7280");
+        const wickColor = (rawExplicitWickColor || cssWickColor)
+            ? this.resolveCssVariable((rawExplicitWickColor || cssWickColor)!)
+            : undefined;
+        const color = rawExplicitColor ? this.resolveCssVariable(rawExplicitColor) : undefined;
+        const wickWidth = explicitWickWidth !== undefined && isFiniteNumber(explicitWickWidth) && explicitWickWidth >= 0
+            ? explicitWickWidth
+            : (cssWickWidth ?? 1);
+        const opacity = explicitOpacity !== undefined && isFiniteNumber(explicitOpacity)
+            ? Math.max(0, Math.min(1, explicitOpacity))
+            : (cssOpacity !== undefined ? cssOpacity : undefined);
+
+        return {
+            color,
+            fallingColor: fallingColor || "#ef4444",
+            neutralColor: neutralColor || "#6b7280",
+            opacity,
+            risingColor: risingColor || "#22c55e",
+            wickColor,
+            wickWidth
+        };
+    }
+
     public resolveMarkerSeriesStyle(
         series: ChartCartesianSeriesRegistration,
         seriesIndex: number,
@@ -271,7 +349,7 @@ export class ChartStyleResolver {
         strokeColor: string;
         strokeWidth: number;
     } {
-        const rawExplicitColor = series.color();
+        const rawExplicitColor = series.color?.();
         const explicitColor = rawExplicitColor ? this.resolveCssVariable(rawExplicitColor) : "";
         const explicitFillOpacity = "fillOpacity" in series ? series.fillOpacity?.() : undefined;
         const explicitStrokeColor = "strokeColor" in series ? series.strokeColor?.() : undefined;
@@ -509,21 +587,21 @@ export class ChartStyleResolver {
         return this.resolvePaletteColor(paletteIndex);
     }
 
-    public resolveCssVariable(varNameOrColor: string): string {
+    public resolveCssVariable(varNameOrColor: string, targetElement?: HTMLElement | null): string {
         if (!varNameOrColor) {
             return "";
         }
         const trimmed = varNameOrColor.trim();
         const isVariable = trimmed.startsWith("var(") || trimmed.startsWith("--");
         if (!isVariable) {
-            return toCanvasColor(trimmed, this.#rootElement?.ownerDocument);
+            return toCanvasColor(trimmed, (targetElement ?? this.#rootElement)?.ownerDocument);
         }
-        if (typeof window === "undefined" || !this.#rootElement) {
+        if (typeof window === "undefined" || (!targetElement && !this.#rootElement)) {
             return "";
         }
         try {
             let current = trimmed;
-            const computed = window.getComputedStyle(this.#rootElement);
+            const primaryEl = targetElement ?? this.#rootElement!;
             for (let i = 0; i < 5; i++) {
                 if (!current.startsWith("var(") && !current.startsWith("--")) {
                     break;
@@ -531,7 +609,10 @@ export class ChartStyleResolver {
                 const rawVar = current.startsWith("var(")
                     ? current.replace(/^var\(\s*/, "").replace(/\s*\)$/, "").split(",")[0].trim()
                     : current;
-                const resolved = computed.getPropertyValue(rawVar).trim();
+                let resolved = window.getComputedStyle(primaryEl).getPropertyValue(rawVar).trim();
+                if (!resolved && targetElement && this.#rootElement && targetElement !== this.#rootElement) {
+                    resolved = window.getComputedStyle(this.#rootElement).getPropertyValue(rawVar).trim();
+                }
                 if (!resolved) {
                     return "";
                 }
@@ -540,7 +621,7 @@ export class ChartStyleResolver {
             if (current.startsWith("var(") || current.startsWith("--")) {
                 return "";
             }
-            return toCanvasColor(current, this.#rootElement?.ownerDocument);
+            return toCanvasColor(current, (targetElement ?? this.#rootElement)?.ownerDocument);
         } catch {
             return "";
         }

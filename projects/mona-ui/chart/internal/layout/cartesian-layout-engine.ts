@@ -6,6 +6,7 @@ import type {
     ChartBarSeriesRegistration,
     ChartBubbleSeriesRegistration,
     ChartCartesianSeriesRegistration,
+    ChartFinancialSeriesRegistration,
     ChartRangeAreaSeriesRegistration,
     ChartRangeBarSeriesRegistration,
     ChartScalarSeriesRegistrationBase,
@@ -35,12 +36,15 @@ import type {
     ChartAreaSeriesScene,
     ChartAxisScene,
     ChartBarSeriesScene,
+    ChartCandlestickSeriesScene,
     ChartLineSeriesScene,
+    ChartOhlcSeriesScene,
     ChartRangeAreaSeriesScene,
     ChartRangeBarSeriesScene,
     ChartSeriesScene
 } from "../scene/cartesian-scene";
 import { computeRangeAreaLayout, computeRangeBarLayout } from "./cartesian-range-layout";
+import { computeFinancialLayout } from "./cartesian-financial-layout";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type {
     ChartCornerRadii,
@@ -411,6 +415,7 @@ export class CartesianLayoutEngine {
         const baselineY = clamp(yScale.map(0), plotRect.y, plotRect.y + plotRect.height);
         const renderOrderCounter = { value: 0 };
         let validMarkerCount = 0;
+        let activeFinancialSeriesId: string | null = null;
 
         for (let sIdx = 0; sIdx < series.length; sIdx++) {
             const s = series[sIdx];
@@ -420,6 +425,46 @@ export class CartesianLayoutEngine {
 
             // Omit geometry if series was invalidated due to conflicting stack configuration or percent/raw unit mix (STK-001, STK-003)
             if (invalidSeriesIds.has(s.id)) {
+                continue;
+            }
+
+            if (s.type === "candlestick" || s.type === "ohlc") {
+                const seriesDisplayName = resolveSeriesDisplayName(s, sIdx);
+                if (activeFinancialSeriesId !== null && activeFinancialSeriesId !== s.id) {
+                    if (warnedDiagnosticSignatures) {
+                        ChartDiagnostics.warnOnce(
+                            warnedDiagnosticSignatures,
+                            `Only one financial series (candlestick or ohlc) can be active per cartesian chart. Series "${seriesDisplayName}" will be ignored.`,
+                            `${s.id}:multiple-financial-series`
+                        );
+                    }
+                    continue;
+                }
+                activeFinancialSeriesId = s.id;
+
+                const financialScene = computeFinancialLayout({
+                    bandScale,
+                    linearXScale,
+                    plotRect,
+                    recordHitTarget,
+                    renderOrderCounter,
+                    rootData,
+                    rootXField,
+                    series: s as ChartFinancialSeriesRegistration,
+                    seriesDisplayName,
+                    styleResolver,
+                    timeScale,
+                    timeSpanMs,
+                    warnedDiagnosticSignatures,
+                    xAxis,
+                    xAxisType,
+                    yAxis,
+                    yFormatter,
+                    yScale
+                });
+                if (financialScene) {
+                    seriesScenes.push(financialScene);
+                }
                 continue;
             }
 
@@ -1135,6 +1180,7 @@ export class CartesianLayoutEngine {
             (seriesScenes.some(s => {
                 if (s.type === "bar" || s.type === "rangeBar") return s.bars.length > 0;
                 if (s.type === "scatter" || s.type === "bubble") return s.markers.length > 0;
+                if (s.type === "candlestick" || s.type === "ohlc") return s.marks.length > 0;
                 if (s.type === "line" || s.type === "area" || s.type === "rangeArea") {
                     return s.points.some((p: { defined: boolean }) => p.defined);
                 }
@@ -1143,6 +1189,22 @@ export class CartesianLayoutEngine {
                 validMarkerCount > 0);
 
         const legendItems: ChartLegendItem[] = series.map((s, idx) => {
+            if (s.type === "candlestick" || s.type === "ohlc") {
+                const finStyle = styleResolver.resolveFinancialSeriesStyle(s as ChartFinancialSeriesRegistration);
+                const color = finStyle.color || finStyle.risingColor;
+                const secondaryColor = finStyle.color ? undefined : finStyle.fallingColor;
+                return {
+                    color,
+                    itemId: s.id,
+                    kind: "series",
+                    name: resolveSeriesDisplayName(s, idx),
+                    secondaryColor,
+                    seriesId: s.id,
+                    seriesType: s.type,
+                    visible: s.visible()
+                };
+            }
+
             const color =
                 s.type === "scatter" || s.type === "bubble"
                     ? styleResolver.resolveMarkerSeriesStyle(s, idx).color

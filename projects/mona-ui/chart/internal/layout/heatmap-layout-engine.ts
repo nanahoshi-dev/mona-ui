@@ -33,7 +33,7 @@ import type {
 } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
-import { clamp, formatCompactNumber } from "../utils/number-utils";
+import { clamp, formatCompactNumber, normalizeNonNegativeNumber } from "../utils/number-utils";
 
 export interface HeatmapLayoutOptions {
     readonly containerHeight: number;
@@ -139,8 +139,14 @@ export class HeatmapLayoutEngine {
 
         const style = styleResolver.resolveHeatmapSeriesStyle(series, 0);
 
+        const rawColors = series.colors();
+        const seriesEl = series.element?.nativeElement;
+        const resolvedColors = rawColors
+            ? rawColors.map(c => (typeof c === "string" ? styleResolver.resolveCssVariable(c, seriesEl) || c : c))
+            : undefined;
+
         const colorScale = new HeatmapColorScale({
-            colors: series.colors(),
+            colors: resolvedColors,
             domain: matrix.valueDomain,
             explicitMidpoint: series.midpoint(),
             mode: series.colorMode(),
@@ -254,7 +260,8 @@ export class HeatmapLayoutEngine {
         const bandHeight = yBand.bandwidth();
 
         const rawCellGap = series.cellGap();
-        const cellGap = clamp(rawCellGap, 0, Math.min(bandWidth, bandHeight) * 0.8);
+        const normalizedGap = normalizeNonNegativeNumber(rawCellGap, 1);
+        const cellGap = clamp(normalizedGap, 0, Math.min(bandWidth, bandHeight) * 0.8);
         const halfGap = cellGap / 2;
 
         const cellWidth = Math.max(0, bandWidth - cellGap);
