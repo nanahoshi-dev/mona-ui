@@ -10,7 +10,7 @@ import type {
     ChartRadialSeriesRegistration
 } from "../context/chart-registration-context";
 import { formatContinuousPolarAngle, prepareContinuousPolarData } from "../data/continuous-polar-data";
-import { formatRadarValue, prepareRadarData } from "../data/radar-data";
+import { formatRadialValue, prepareRadarData } from "../data/radar-data";
 import { computeRadialDomain } from "../data/radial-domain";
 import type { PolarAxisChartScene } from "../scene/chart-scene";
 import type {
@@ -25,8 +25,8 @@ import type {
 } from "../scene/polar-axis-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { degreesToRadians, normalizeDegrees } from "../utils/angle-utils";
-import { clamp, isFiniteNumber, normalizeNonNegativeNumber } from "../utils/number-utils";
+import { canonicalPolarAngle, degreesToRadians, normalizeDegrees } from "../utils/angle-utils";
+import { clamp, isFiniteNumber, normalizeNonNegativeNumber, normalizeTickCount } from "../utils/number-utils";
 
 export interface PolarAxisLayoutOptions {
     angularAxis?: ChartAngularAxisRegistration;
@@ -62,16 +62,12 @@ export class PolarAxisLayoutEngine {
             y: padding.top
         };
 
-        const initialCenter: ChartPoint = {
-            x: plotRect.x + plotWidth / 2,
-            y: plotRect.y + plotHeight / 2
-        };
-
         const showAngularLabels = angularAxis ? angularAxis.visible() && angularAxis.labels() : true;
         const angularRotation = angularAxis ? normalizeDegrees(angularAxis.rotation()) : 0;
         const angularRotationRad = degreesToRadians(angularRotation);
         const angularLabelOffset = normalizeNonNegativeNumber(angularAxis?.labelOffset?.(), 10);
         const angularFormatter = angularAxis?.formatter?.();
+        const angularTickCount = normalizeTickCount(angularAxis?.tickCount?.(), 12, 2, 72);
 
         const showRadialLabels = radialAxis ? radialAxis.visible() && radialAxis.labels() : true;
         const radialLabelAngle = radialAxis ? normalizeDegrees(radialAxis.labelAngle()) : 0;
@@ -85,25 +81,22 @@ export class PolarAxisLayoutEngine {
         let radarDataResult: ReturnType<typeof prepareRadarData> | null = null;
         let polarDataResult: ReturnType<typeof prepareContinuousPolarData> | null = null;
         let allValues: readonly number[] = [];
-        let hasRenderableData = false;
 
         if (isRadar) {
             const radarSeriesList = series.filter((s): s is ChartRadarSeriesRegistration => s.type === "radar");
             radarDataResult = prepareRadarData(radarSeriesList, rootData, angularFormatter);
             allValues = radarDataResult.allValues;
-            hasRenderableData = radarDataResult.hasRenderableData;
         } else {
             const polarSeriesList = series.filter((s): s is ChartContinuousPolarSeriesRegistration => s.type === "polar");
             polarDataResult = prepareContinuousPolarData(polarSeriesList, rootData, angularFormatter);
             allValues = polarDataResult.allValues;
-            hasRenderableData = polarDataResult.hasRenderableData;
         }
 
         // 2. Radial Domain
         const explicitMin = radialAxis?.min?.();
         const explicitMax = radialAxis?.max?.();
         const nice = radialAxis?.nice?.() ?? true;
-        const radialTickCount = radialAxis?.tickCount?.() ?? 5;
+        const radialTickCount = normalizeTickCount(radialAxis?.tickCount?.(), 5, 1, 20);
 
         const domainResult = computeRadialDomain(allValues, {
             explicitMax,
@@ -112,7 +105,7 @@ export class PolarAxisLayoutEngine {
             tickCount: radialTickCount
         });
 
-        // 3. Label Gutter Estimation
+        // 3. Label Gutter & Radius Inset Estimation
         let leftGutter = 16;
         let rightGutter = 16;
         let topGutter = 16;
@@ -124,7 +117,7 @@ export class PolarAxisLayoutEngine {
 
             if (isRadar && radarDataResult) {
                 for (const cat of radarDataResult.categories) {
-                    const m = measurements?.get(`angular:${cat.key}`);
+                    const m = measurements?.get(`angular:cat:${cat.key}`) ?? measurements?.get(`angular:${cat.key}`);
                     const text = cat.formatted;
                     const w = m?.width ?? Math.max(24, text.length * 7.5 + 8);
                     const h = m?.height ?? 16;
@@ -132,12 +125,11 @@ export class PolarAxisLayoutEngine {
                     maxLabelHeight = Math.max(maxLabelHeight, h);
                 }
             } else if (polarDataResult) {
-                const tickCount = angularAxis?.tickCount?.() ?? 12;
-                const step = 360 / Math.max(1, tickCount);
-                for (let i = 0; i < tickCount; i++) {
+                const step = 360 / Math.max(1, angularTickCount);
+                for (let i = 0; i < angularTickCount; i++) {
                     const deg = i * step;
-                    const m = measurements?.get(`angular:${deg}`);
-                    const text = formatContinuousPolarAngle(deg, angularFormatter);
+                    const m = measurements?.get(`angular:deg:${deg}`) ?? measurements?.get(`angular:${deg}`);
+                    const text = formatContinuousPolarAngle(deg, angularFormatter, i);
                     const w = m?.width ?? Math.max(24, text.length * 7.5 + 8);
                     const h = m?.height ?? 16;
                     maxLabelWidth = Math.max(maxLabelWidth, w);
@@ -153,10 +145,22 @@ export class PolarAxisLayoutEngine {
             bottomGutter = clamp(maxLabelHeight + angularLabelOffset, 16, Math.max(16, maxGutterY));
         }
 
+        // Calculate max visual extent across visible series
+        let maxVisualExtent = 0;
+        for (const reg of series) {
+            if (reg.visible()) {
+                const style = styleResolver.resolveRadialSeriesStyle(reg, 0);
+                const strokeW = normalizeNonNegativeNumber(style.strokeWidth, 0);
+                const showPts = reg.showPoints ? reg.showPoints() : isRadar;
+                const ptR = showPts ? normalizeNonNegativeNumber(style.pointRadius, 4) + 2 : 0;
+                maxVisualExtent = Math.max(maxVisualExtent, Math.max(strokeW / 2, ptR));
+            }
+        }
+
         const usableWidth = Math.max(0, plotWidth - leftGutter - rightGutter);
         const usableHeight = Math.max(0, plotHeight - topGutter - bottomGutter);
         const availableRadius = Math.max(0, Math.min(usableWidth, usableHeight) / 2);
-        const outerRadius = availableRadius;
+        const outerRadius = Math.max(0, availableRadius - maxVisualExtent);
 
         const center: ChartPoint = {
             x: plotRect.x + leftGutter + usableWidth / 2,
@@ -183,27 +187,32 @@ export class PolarAxisLayoutEngine {
                     formattedValue: cat.formatted,
                     index: i,
                     labelPoint,
+                    tickKey: `cat:${cat.key}`,
                     value: cat.raw,
                     visible: true
                 });
             }
         } else {
-            const tickCount = angularAxis?.tickCount?.() ?? 12;
-            const step = 360 / Math.max(1, tickCount);
-            for (let i = 0; i < tickCount; i++) {
+            const step = 360 / Math.max(1, angularTickCount);
+            for (let i = 0; i < angularTickCount; i++) {
                 const deg = i * step;
                 const angle = angularRotationRad + degreesToRadians(deg);
                 const labelPoint: ChartPoint = {
                     x: center.x + Math.sin(angle) * (outerRadius + angularLabelOffset),
                     y: center.y - Math.cos(angle) * (outerRadius + angularLabelOffset)
                 };
+                const isTickVisible =
+                    angularTickCount <= 12 ||
+                    (angularTickCount <= 24 ? i % 2 === 0 : i % 4 === 0);
+
                 angularTicks.push({
                     angle,
-                    formattedValue: formatContinuousPolarAngle(deg, angularFormatter),
+                    formattedValue: formatContinuousPolarAngle(deg, angularFormatter, i),
                     index: i,
                     labelPoint,
+                    tickKey: `deg:${deg}`,
                     value: deg,
-                    visible: true
+                    visible: isTickVisible
                 });
             }
         }
@@ -220,26 +229,26 @@ export class PolarAxisLayoutEngine {
         };
 
         // 6. Radial Axis Scene
+        const labelAngleRad = degreesToRadians(radialLabelAngle);
         const radialTicks: ChartRadialAxisTick[] = domainResult.ticks.map((val, idx) => {
             const r = clamp(radialScale(val), 0, outerRadius);
-            const labelAngleRad = degreesToRadians(radialLabelAngle);
             const labelPoint: ChartPoint = {
-                x: center.x + Math.sin(labelAngleRad) * r + radialLabelOffset,
-                y: center.y - Math.cos(labelAngleRad) * r
+                x: center.x + Math.sin(labelAngleRad) * (r + radialLabelOffset),
+                y: center.y - Math.cos(labelAngleRad) * (r + radialLabelOffset)
             };
             const formattedValue = radialFormatter
                 ? radialFormatter(val, idx)
-                : isRadar
-                  ? formatRadarValue(val)
-                  : formatContinuousPolarAngle(val);
+                : formatRadialValue(val);
 
             return {
-                formattedValue: radialFormatter ? radialFormatter(val, idx) : formatRadarValue(val),
+                formattedValue,
                 index: idx,
-                isZero: val === 0,
+                isZero: Math.abs(val) < 1e-9,
                 labelPoint,
                 radius: r,
-                value: val
+                tickKey: `val:${val}`,
+                value: val,
+                visible: true
             };
         });
 
@@ -259,6 +268,7 @@ export class PolarAxisLayoutEngine {
         const seriesScenes: ChartRadialSeriesScene[] = [];
         const hitTargets: SceneHitTarget[] = [];
         const bucketMap = new Map<string, { anchor: ChartPoint; hits: SceneHitTarget[]; order: number; value: unknown }>();
+        let hasVisualRenderableSeries = false;
 
         let seriesIndex = 0;
         for (const reg of series) {
@@ -335,6 +345,16 @@ export class PolarAxisLayoutEngine {
                     }
                 }
 
+                const definedCount = points.filter(p => p.defined).length;
+                const isSeriesRenderable = isVisible && (
+                    (showPoints && (pointRadius ?? 4) > 0 && definedCount >= 1) ||
+                    (strokeWidth > 0 && definedCount >= 2) ||
+                    (fillMode !== "none" && definedCount >= 3)
+                );
+                if (isSeriesRenderable) {
+                    hasVisualRenderableSeries = true;
+                }
+
                 const definedRadii = points.filter(p => p.defined).map(p => p.radius);
                 const maxRenderedRadius = definedRadii.length > 0 ? Math.max(...definedRadii) : outerRadius;
 
@@ -386,7 +406,8 @@ export class PolarAxisLayoutEngine {
                         points.push(scenePt);
 
                         if (isVisible && dp.defined) {
-                            const bucketKey = String(dp.normalizedAngle);
+                            const canonicalDeg = canonicalPolarAngle(dp.normalizedAngle);
+                            const bucketKey = String(canonicalDeg);
                             const hit: SceneHitTarget = {
                                 angle,
                                 category: dp.formattedAngle,
@@ -419,6 +440,16 @@ export class PolarAxisLayoutEngine {
                     }
                 }
 
+                const definedCount = points.filter(p => p.defined).length;
+                const isSeriesRenderable = isVisible && (
+                    (showPoints && (pointRadius ?? 4) > 0 && definedCount >= 1) ||
+                    (strokeWidth > 0 && definedCount >= 2) ||
+                    (fillMode !== "none" && definedCount >= 2)
+                );
+                if (isSeriesRenderable) {
+                    hasVisualRenderableSeries = true;
+                }
+
                 const definedRadii = points.filter(p => p.defined).map(p => p.radius);
                 const maxRenderedRadius = definedRadii.length > 0 ? Math.max(...definedRadii) : outerRadius;
 
@@ -448,7 +479,6 @@ export class PolarAxisLayoutEngine {
             .sort((a, b) => a[1].order - b[1].order)
             .map(([xKey, entry]) => ({
                 anchor: entry.anchor,
-                centerX: entry.anchor.x,
                 hits: entry.hits,
                 order: entry.order,
                 xKey,
@@ -474,7 +504,7 @@ export class PolarAxisLayoutEngine {
             axisMode,
             center,
             coordinateSystem: "polar",
-            hasRenderableData,
+            hasRenderableData: hasVisualRenderableSeries,
             height: containerHeight,
             hitTargets,
             interactionBuckets,

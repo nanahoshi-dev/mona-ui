@@ -1,5 +1,5 @@
 import { scaleLinear } from "d3-scale";
-import { isFiniteNumber } from "../utils/number-utils";
+import { isFiniteNumber, normalizeTickCount } from "../utils/number-utils";
 import { normalizeContinuousNumericDomain } from "./chart-domain";
 
 export interface ResolvedRadialDomain {
@@ -20,7 +20,7 @@ export function computeRadialDomain(
     const explicitMin = isFiniteNumber(options?.explicitMin) ? (options!.explicitMin as number) : undefined;
     const explicitMax = isFiniteNumber(options?.explicitMax) ? (options!.explicitMax as number) : undefined;
     const shouldNice = options?.nice ?? true;
-    const tickCount = options?.tickCount ?? 5;
+    const tickCount = normalizeTickCount(options?.tickCount, 5, 1, 20);
 
     const finiteValues = values.filter(v => isFiniteNumber(v));
 
@@ -47,13 +47,17 @@ export function computeRadialDomain(
         scale = scaleLinear().domain([min, max]);
     }
 
-    const ticks = scale.ticks(tickCount);
-    // Ensure min and max ticks or relevant ticks are available
+    const rawTicks = scale.ticks(tickCount);
+    let ticks = [...rawTicks];
     if (ticks.length === 0) {
         ticks.push(min, max);
     }
 
     const isZeroCrossed = min < 0 && max > 0;
+    if (isZeroCrossed && !ticks.some(t => Math.abs(t) < 1e-9)) {
+        ticks.push(0);
+        ticks.sort((a, b) => a - b);
+    }
 
     return {
         domain: [min, max],

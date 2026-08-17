@@ -262,7 +262,6 @@ export class PolarSectorLayoutEngine {
 
                 interactionBuckets.push({
                     anchor: centroid,
-                    centerX: centroid.x,
                     hits: [hitTarget],
                     order: interactionBuckets.length,
                     xKey: d.sliceId,

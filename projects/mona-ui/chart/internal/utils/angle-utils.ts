@@ -38,6 +38,12 @@ export function normalizeDegrees(degrees: number): number {
     return norm;
 }
 
+export function canonicalPolarAngle(degrees: number): number {
+    const normalized = normalizeDegrees(degrees);
+    const rounded = Math.round(normalized * 1e9) / 1e9;
+    return Object.is(rounded, -0) ? 0 : rounded;
+}
+
 export function circularAngleDistance(aRad: number, bRad: number): number {
     if (!isFiniteNumber(aRad) || !isFiniteNumber(bRad)) {
         return 0;

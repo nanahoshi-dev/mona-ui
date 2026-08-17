@@ -86,7 +86,7 @@
                             <div
                                 aria-hidden="true"
                                 class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
-                                [monaChartLabelMeasure]="slice.sliceId"
+                                [monaChartLabelMeasure]="'sector:' + slice.sliceId"
                                 [style.left.px]="slice.label.position.x"
                                 [style.top.px]="slice.label.position.y"
                                 [style.transform]="slice.label.side === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
@@ -147,51 +147,56 @@
             <!-- Angular Spoke Labels -->
             @if (radScene.angularAxis.visible && radScene.angularAxis.labels) {
                 @for (tick of radScene.angularAxis.ticks; track tick.index) {
-                    <div
-                        aria-hidden="true"
-                        class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
-                        [monaChartLabelMeasure]="'angular:' + tick.value"
-                        [style.left.px]="tick.labelPoint.x"
-                        [style.top.px]="tick.labelPoint.y"
-                        [style.transform]="angularLabelTransform(tick)">
-                        @if (angularAxisRegistration()?.labelTemplate?.(); as template) {
-                            <ng-container
-                                [ngTemplateOutlet]="template.templateRef"
-                                [ngTemplateOutletContext]="{
-                                    $implicit: tick.value,
-                                    axis: 'angular',
-                                    index: tick.index,
-                                    value: tick.value
-                                }" />
-                        } @else {
-                            {{ tick.formattedValue }}
-                        }
-                    </div>
+                    @if (tick.visible) {
+                        <div
+                            aria-hidden="true"
+                            class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
+                            [monaChartLabelMeasure]="'angular:' + tick.tickKey"
+                            [style.left.px]="tick.labelPoint.x"
+                            [style.top.px]="tick.labelPoint.y"
+                            [style.transform]="angularLabelTransform(tick)">
+                            @if (angularAxisRegistration()?.labelTemplate?.(); as template) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: tick.value,
+                                        axis: 'angular',
+                                        index: tick.index,
+                                        value: tick.value
+                                    }" />
+                            } @else {
+                                {{ tick.formattedValue }}
+                            }
+                        </div>
+                    }
                 }
             }
 
             <!-- Radial Numeric Tick Labels -->
             @if (radScene.radialAxis.visible && radScene.radialAxis.labels) {
                 @for (tick of radScene.radialAxis.ticks; track tick.index) {
-                    <div
-                        aria-hidden="true"
-                        class="absolute pointer-events-none text-xs text-muted-foreground select-none whitespace-nowrap"
-                        [style.left.px]="tick.labelPoint.x"
-                        [style.top.px]="tick.labelPoint.y"
-                        [style.transform]="'translate(0, -50%)'">
-                        @if (radialAxisRegistration()?.labelTemplate?.(); as template) {
-                            <ng-container
-                                [ngTemplateOutlet]="template.templateRef"
-                                [ngTemplateOutletContext]="{
-                                    $implicit: tick.value,
-                                    axis: 'radial',
-                                    index: tick.index,
-                                    value: tick.value
-                                }" />
-                        } @else {
-                            {{ tick.formattedValue }}
-                        }
-                    </div>
+                    @if (tick.visible) {
+                        <div
+                            aria-hidden="true"
+                            class="absolute pointer-events-none text-xs text-muted-foreground select-none whitespace-nowrap"
+                            [monaChartLabelMeasure]="'radial:' + tick.tickKey"
+                            [style.left.px]="tick.labelPoint.x"
+                            [style.top.px]="tick.labelPoint.y"
+                            [style.transform]="radialLabelTransform(tick, radScene.radialAxis.labelAngle)">
+                            @if (radialAxisRegistration()?.labelTemplate?.(); as template) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: tick.value,
+                                        axis: 'radial',
+                                        index: tick.index,
+                                        value: tick.value
+                                    }" />
+                            } @else {
+                                {{ tick.formattedValue }}
+                            }
+                        </div>
+                    }
                 }
             }
         }

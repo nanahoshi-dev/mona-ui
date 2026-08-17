@@ -1,7 +1,7 @@
 import { isDevMode } from "@angular/core";
 import type { ChartContinuousPolarSeriesRegistration } from "../context/chart-registration-context";
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
-import { normalizeDegrees } from "../utils/angle-utils";
+import { canonicalPolarAngle, normalizeDegrees } from "../utils/angle-utils";
 import { isFiniteNumber } from "../utils/number-utils";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 
@@ -49,9 +49,13 @@ export function formatContinuousPolarValue(value: number): string {
     return DEFAULT_NUMBER_FORMATTER.format(value);
 }
 
-export function formatContinuousPolarAngle(angleDeg: number, angularFormatter?: ChartAxisFormatter): string {
+export function formatContinuousPolarAngle(
+    angleDeg: number,
+    angularFormatter?: ChartAxisFormatter,
+    index: number = 0
+): string {
     if (angularFormatter) {
-        return angularFormatter(angleDeg, 0);
+        return angularFormatter(angleDeg, index);
     }
     return `${Math.round(angleDeg * 10) / 10}°`;
 }
@@ -72,12 +76,11 @@ export function prepareContinuousPolarData(
         const valueFormatter = series.valueFormatter();
         const isVisible = series.visible();
 
-        const rawPoints: PolarDatumPoint[] = [];
-        const seenAngles = new Set<number>();
+        const canonicalPoints = new Map<number, PolarDatumPoint>();
 
         for (let dataIndex = 0; dataIndex < rawData.length; dataIndex++) {
             const item = rawData[dataIndex];
-            let rawAngleVal = resolveValue(item, angleField, dataIndex);
+            const rawAngleVal = resolveValue(item, angleField, dataIndex);
             let rawNumVal = resolveValue(item, valueField, dataIndex);
 
             if (rawNumVal === undefined && isFiniteNumber(item)) {
@@ -85,53 +88,61 @@ export function prepareContinuousPolarData(
             }
 
             const isAngleFinite = isFiniteNumber(rawAngleVal);
-            const isValFinite = isFiniteNumber(rawNumVal);
-            const defined = isAngleFinite && isValFinite;
-
-            const rawAngle = isAngleFinite ? (rawAngleVal as number) : 0;
-            const normalizedAngle = isAngleFinite ? normalizeDegrees(rawAngle) : 0;
-            const numVal = isValFinite ? (rawNumVal as number) : 0;
-
-            if (defined) {
-                if (seenAngles.has(normalizedAngle)) {
-                    warnOnce(
-                        `polar-duplicate-angle:${series.id}:${normalizedAngle}`,
-                        `[MonaChart] Duplicate normalized angle ${normalizedAngle}° detected in polar series "${series.name()}".`
-                    );
-                }
-                seenAngles.add(normalizedAngle);
+            if (!isAngleFinite) {
+                continue;
             }
 
-            const formattedAngle = defined
-                ? formatContinuousPolarAngle(normalizedAngle, angularFormatter)
-                : "";
-            const formattedVal = defined
-                ? valueFormatter
-                    ? valueFormatter(numVal, dataIndex)
-                    : formatContinuousPolarValue(numVal)
-                : "";
+            const isValFinite = isFiniteNumber(rawNumVal);
+            const defined = isValFinite;
 
-            rawPoints.push({
+            const rawAngle = rawAngleVal as number;
+            const normalizedAngle = normalizeDegrees(rawAngle);
+            const canonicalAngle = canonicalPolarAngle(rawAngle);
+            const numVal = isValFinite ? (rawNumVal as number) : 0;
+
+            const newPoint: PolarDatumPoint = {
                 dataIndex,
                 datum: item,
                 defined,
-                formattedAngle,
-                formattedValue: formattedVal,
+                formattedAngle: "",
+                formattedValue: "",
                 normalizedAngle,
                 rawAngle,
                 value: numVal
-            });
+            };
+
+            const existing = canonicalPoints.get(canonicalAngle);
+            if (existing !== undefined) {
+                warnOnce(
+                    `polar-duplicate-angle:${series.id}:${canonicalAngle}`,
+                    `[MonaChart] Duplicate normalized angle ${normalizedAngle}° detected in polar series "${series.name()}".`
+                );
+                if (!existing.defined && defined) {
+                    canonicalPoints.set(canonicalAngle, newPoint);
+                }
+            } else {
+                canonicalPoints.set(canonicalAngle, newPoint);
+            }
         }
 
-        // Stable sort ascending by normalizedAngle
-        const sortedPoints = [...rawPoints].sort((a, b) => {
-            if (a.defined && !b.defined) return -1;
-            if (!a.defined && b.defined) return 1;
+        // Stable sort ascending by normalizedAngle, then dataIndex (never sort by defined)
+        const sortedPoints = Array.from(canonicalPoints.values()).sort((a, b) => {
             if (a.normalizedAngle !== b.normalizedAngle) {
                 return a.normalizedAngle - b.normalizedAngle;
             }
             return a.dataIndex - b.dataIndex;
         });
+
+        // Format points after angular sorting
+        for (let idx = 0; idx < sortedPoints.length; idx++) {
+            const p = sortedPoints[idx];
+            if (p.defined) {
+                p.formattedAngle = formatContinuousPolarAngle(p.normalizedAngle, angularFormatter, idx);
+                p.formattedValue = valueFormatter
+                    ? valueFormatter(p.value, p.dataIndex)
+                    : formatContinuousPolarValue(p.value);
+            }
+        }
 
         const definedPoints = sortedPoints.filter(p => p.defined);
         const allValues = definedPoints.map(p => p.value);

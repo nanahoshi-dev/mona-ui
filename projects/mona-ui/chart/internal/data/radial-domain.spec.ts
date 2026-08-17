@@ -44,4 +44,21 @@ describe("RadialDomain", () => {
         expect(result.ticks.length).toBeGreaterThan(0);
         expect(result.domain[0]).toBeLessThan(result.domain[1]);
     });
+
+    it("should guarantee deterministic zero tick when domain crosses zero", () => {
+        const result = computeRadialDomain([-35, 65], { nice: false });
+        expect(result.isZeroCrossed).toBe(true);
+        expect(result.ticks).toContain(0);
+    });
+
+    it("should clamp and normalize invalid tickCount values", () => {
+        const resultZero = computeRadialDomain([0, 100], { tickCount: 0 }); // clamped to min (1)
+        expect(resultZero.ticks.length).toBeGreaterThan(0);
+
+        const resultHuge = computeRadialDomain([0, 100], { tickCount: 999 }); // clamped to max (20)
+        expect(resultHuge.ticks.length).toBeLessThanOrEqual(25);
+
+        const resultNaN = computeRadialDomain([0, 100], { tickCount: NaN }); // falls back to 5
+        expect(resultNaN.ticks.length).toBeGreaterThan(0);
+    });
 });

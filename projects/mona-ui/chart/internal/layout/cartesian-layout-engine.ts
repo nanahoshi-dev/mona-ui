@@ -1,5 +1,5 @@
 import type { ChartAxisTick, ChartXAxisType } from "../../models/chart-axis.models";
-import type { ChartField, ChartPadding, ChartRect } from "../../models/chart.models";
+import type { ChartField, ChartPadding, ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
     ChartAxisRegistration,
@@ -507,27 +507,31 @@ export class CartesianLayoutEngine {
 
         const interactionBuckets: ChartInteractionBucket[] = [];
         if (xAxisType === "category" && bandScale) {
+            let bucketIdx = 0;
             for (const cat of categoryDomain) {
                 const bPos = bandScale.map(cat);
                 const centerX = (bPos ?? plotRect.x) + bandScale.bandwidth() / 2;
                 const hits = hitTargets.filter(t => t.xKey === cat);
                 if (hits.length > 0) {
                     interactionBuckets.push({
-                        centerX,
+                        anchor: { x: centerX, y: plotRect.y + plotRect.height / 2 },
                         hits,
+                        order: bucketIdx++,
                         xKey: cat,
                         xValue: hits[0].xValue
                     });
                 }
             }
         } else {
-            const bucketMap = new Map<ChartInteractionXKey, { centerX: number; hits: SceneHitTarget[]; xValue: unknown }>();
+            const bucketMap = new Map<ChartInteractionXKey, { anchor: ChartPoint; centerX: number; hits: SceneHitTarget[]; xValue: unknown }>();
             for (const target of hitTargets) {
                 const key = target.xKey;
                 const targetX = target.point?.x ?? (target.bounds ? target.bounds.x + target.bounds.width / 2 : plotRect.x);
+                const targetY = target.point?.y ?? (target.bounds ? target.bounds.y + target.bounds.height / 2 : plotRect.y + plotRect.height / 2);
                 let bucket = bucketMap.get(key);
                 if (!bucket) {
                     bucket = {
+                        anchor: { x: targetX, y: targetY },
                         centerX: targetX,
                         hits: [],
                         xValue: target.xValue
@@ -537,13 +541,14 @@ export class CartesianLayoutEngine {
                 bucket.hits.push(target);
             }
             const sortedBuckets = Array.from(bucketMap.entries())
-                .map(([xKey, val]) => ({
-                    centerX: val.centerX,
+                .sort((a, b) => a[1].centerX - b[1].centerX)
+                .map(([xKey, val], idx) => ({
+                    anchor: val.anchor,
                     hits: val.hits,
+                    order: idx,
                     xKey,
                     xValue: val.xValue
-                }))
-                .sort((a, b) => a.centerX - b.centerX);
+                }));
             interactionBuckets.push(...sortedBuckets);
         }
 

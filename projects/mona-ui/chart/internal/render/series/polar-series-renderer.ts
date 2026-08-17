@@ -19,7 +19,8 @@ export class PolarSeriesRenderer {
             return;
         }
 
-        const d3Curve = curve === "smooth" ? curveCatmullRom : curveLinear;
+        const isSmooth = curve === "smooth" && (connectNulls ? definedPoints.length >= 3 : points.length >= 3);
+        const d3Curve = isSmooth ? curveCatmullRom : curveLinear;
         const renderPoints = connectNulls ? definedPoints : points;
 
         context.save();

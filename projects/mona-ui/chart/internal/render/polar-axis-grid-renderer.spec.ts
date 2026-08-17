@@ -30,12 +30,13 @@ describe("PolarAxisGridRenderer", () => {
             mode: "category",
             rotation: 0,
             ticks: [
-                { angle: 0, formattedValue: "A", index: 0, labelPoint: { x: 200, y: 90 }, value: "A", visible: true },
+                { angle: 0, formattedValue: "A", index: 0, labelPoint: { x: 200, y: 90 }, tickKey: "cat:A", value: "A", visible: true },
                 {
                     angle: (2 * Math.PI) / 3,
                     formattedValue: "B",
                     index: 1,
                     labelPoint: { x: 286, y: 250 },
+                    tickKey: "cat:B",
                     value: "B",
                     visible: true
                 },
@@ -44,6 +45,7 @@ describe("PolarAxisGridRenderer", () => {
                     formattedValue: "C",
                     index: 2,
                     labelPoint: { x: 114, y: 250 },
+                    tickKey: "cat:C",
                     value: "C",
                     visible: true
                 }
@@ -70,9 +72,9 @@ describe("PolarAxisGridRenderer", () => {
             labelOffset: 6,
             labels: true,
             ticks: [
-                { formattedValue: "0", index: 0, isZero: true, labelPoint: { x: 206, y: 200 }, radius: 0, value: 0 },
-                { formattedValue: "50", index: 1, isZero: false, labelPoint: { x: 206, y: 150 }, radius: 50, value: 50 },
-                { formattedValue: "100", index: 2, isZero: false, labelPoint: { x: 206, y: 100 }, radius: 100, value: 100 }
+                { formattedValue: "0", index: 0, isZero: true, labelPoint: { x: 206, y: 200 }, radius: 0, tickKey: "val:0", value: 0, visible: true },
+                { formattedValue: "50", index: 1, isZero: false, labelPoint: { x: 206, y: 150 }, radius: 50, tickKey: "val:50", value: 50, visible: true },
+                { formattedValue: "100", index: 2, isZero: false, labelPoint: { x: 206, y: 100 }, radius: 100, tickKey: "val:100", value: 100, visible: true }
             ],
             visible: true
         },
@@ -117,6 +119,7 @@ describe("PolarAxisGridRenderer", () => {
             },
             radialAxis: {
                 ...mockScene.radialAxis,
+                axisLine: false,
                 gridLines: false
             }
         };

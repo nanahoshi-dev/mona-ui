@@ -1,4 +1,4 @@
-import { curveCatmullRomClosed, curveLinearClosed, lineRadial } from "d3-shape";
+import { curveCatmullRom, curveCatmullRomClosed, curveLinear, curveLinearClosed, lineRadial } from "d3-shape";
 import type { ChartRadarSeriesScene, SceneRadialPoint } from "../../scene/polar-axis-scene";
 import type { ChartStyleResolver } from "../../style/chart-style-resolver";
 import { withAlpha } from "./area-gradient";
@@ -15,30 +15,35 @@ export class RadarSeriesRenderer {
             series;
 
         const definedPoints = points.filter(p => p.defined);
-        if (definedPoints.length < 2) {
+        if (definedPoints.length === 0) {
             return;
         }
 
-        // Radar fill requires at least 3 usable vertices
-        const canFill = (connectNulls ? definedPoints.length >= 3 : points.every(p => p.defined) && points.length >= 3);
-        const renderPoints = connectNulls ? definedPoints : points;
+        const allDefined = points.length > 0 && points.every(p => p.defined);
+        const hasGaps = !allDefined;
+        const isClosed = connectNulls || !hasGaps;
 
-        const d3Curve = curve === "smooth" ? curveCatmullRomClosed : curveLinearClosed;
-        const lineGenerator = lineRadial<SceneRadialPoint>()
-            .angle(d => d.angle)
-            .radius(d => d.radius)
-            .curve(d3Curve)
-            .defined(d => d.defined)
-            .context(context);
+        // Radar fill requires at least 3 usable vertices and closed polygon
+        const canFill = isClosed && (connectNulls ? definedPoints.length >= 3 : allDefined && points.length >= 3);
+        const renderPoints = connectNulls ? definedPoints : points;
 
         context.save();
         context.translate(center.x, center.y);
 
         // 1. Draw Interior Fill (Solid or Gradient)
         if (fillMode !== "none" && canFill) {
+            const isSmooth = curve === "smooth" && (connectNulls ? definedPoints.length >= 3 : points.length >= 3);
+            const fillCurve = isSmooth ? curveCatmullRomClosed : curveLinearClosed;
+            const fillGenerator = lineRadial<SceneRadialPoint>()
+                .angle(d => d.angle)
+                .radius(d => d.radius)
+                .curve(fillCurve)
+                .defined(d => d.defined)
+                .context(context);
+
             context.save();
             context.beginPath();
-            lineGenerator(renderPoints as SceneRadialPoint[]);
+            fillGenerator(renderPoints as SceneRadialPoint[]);
             context.closePath();
 
             if (fillMode === "gradient") {
@@ -56,20 +61,34 @@ export class RadarSeriesRenderer {
             context.restore();
         }
 
-        // 2. Draw Solid Boundary Outline
-        if (strokeWidth > 0) {
+        // 2. Draw Boundary Outline
+        if (strokeWidth > 0 && definedPoints.length >= 2) {
+            const isSmooth = curve === "smooth" && (connectNulls ? definedPoints.length >= 3 : points.length >= 3);
+            const lineCurve = isClosed
+                ? (isSmooth ? curveCatmullRomClosed : curveLinearClosed)
+                : (isSmooth ? curveCatmullRom : curveLinear);
+
+            const lineGenerator = lineRadial<SceneRadialPoint>()
+                .angle(d => d.angle)
+                .radius(d => d.radius)
+                .curve(lineCurve)
+                .defined(d => d.defined)
+                .context(context);
+
             context.save();
             context.beginPath();
             lineGenerator(renderPoints as SceneRadialPoint[]);
-            context.closePath();
+            if (isClosed) {
+                context.closePath();
+            }
             context.strokeStyle = color;
             context.lineWidth = strokeWidth;
             context.stroke();
             context.restore();
         }
 
-        // 3. Draw Vertex Point Markers
-        if (showPoints && pointRadius > 0) {
+        // 3. Draw Vertex Point Markers (at least 1 defined point)
+        if (showPoints && pointRadius > 0 && definedPoints.length >= 1) {
             const surfaceColor =
                 styleResolver.resolveCssVariable("--color-surface") ||
                 styleResolver.resolveCssVariable("--color-card") ||

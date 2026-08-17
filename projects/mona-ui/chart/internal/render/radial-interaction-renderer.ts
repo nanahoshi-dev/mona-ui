@@ -1,6 +1,7 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { PolarAxisChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import { withAlpha } from "./series/area-gradient";
 
 export class RadialInteractionRenderer {
     public static render(
@@ -54,6 +55,12 @@ export class RadialInteractionRenderer {
             ? interactionState.activeHits
             : [activeHit];
 
+        const surfaceColor =
+            styleResolver.resolveCssVariable("--color-surface") ||
+            styleResolver.resolveCssVariable("--color-card") ||
+            styleResolver.resolveCssVariable("--color-background") ||
+            "#ffffff";
+
         for (const hit of hitsToHighlight) {
             if (!hit.point) continue;
 
@@ -67,13 +74,13 @@ export class RadialInteractionRenderer {
             if (isKeyboard && hit === activeHit) {
                 context.strokeStyle = focusColor;
                 context.lineWidth = 3;
-                context.fillStyle = "rgba(255, 255, 255, 0.8)";
+                context.fillStyle = withAlpha(surfaceColor, 0.85);
                 context.fill();
                 context.stroke();
             } else {
                 context.strokeStyle = markerColor;
                 context.lineWidth = 2;
-                context.fillStyle = "rgba(255, 255, 255, 0.6)";
+                context.fillStyle = withAlpha(surfaceColor, 0.65);
                 context.fill();
                 context.stroke();
             }
