@@ -78,6 +78,7 @@ export type {
 } from "./models/chart-event.models";
 
 export type {
+    ChartOhlcPointValue,
     ChartPointValue,
     ChartPointValueKind,
     ChartRangePointValue,
@@ -121,11 +122,6 @@ export type {
 
 export type {
     ChartFinancialDirection,
-    ChartFinancialFillMode,
-    ChartOhlcPointValue
+    ChartFinancialFillMode
 } from "./models/chart-financial.models";
-
-export type {
-    ChartFinancialPointValue
-} from "./models/chart-point-value.models";
 
