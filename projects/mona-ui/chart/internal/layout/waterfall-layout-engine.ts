@@ -379,8 +379,6 @@ export class WaterfallLayoutEngine {
                     ? (pt.formattedDelta ?? pt.formattedValue)
                     : pt.formattedValue;
 
-                const labelColor = style.labelColor ?? (styleResolver.resolveCssVariable("--color-foreground") || "#1e293b");
-
                 let labelY: number;
                 let isInside = false;
 
@@ -411,6 +409,12 @@ export class WaterfallLayoutEngine {
                     }
                 }
 
+                const labelColor =
+                    style.labelColor ??
+                    (isInside
+                        ? styleResolver.getReadableForeground(pt.color)
+                        : (styleResolver.resolveCssVariable("--color-foreground") || "#1e293b"));
+
                 // Clamp label bounds to plotRect
                 labelY = Math.max(plotRect.y, Math.min(plotRect.y + plotRect.height - 16, labelY));
 
@@ -427,12 +431,12 @@ export class WaterfallLayoutEngine {
                     barStart: pt.barStart,
                     bounds: labelBounds,
                     category: pt.category,
-                    color: labelColor,
                     cumulativeAfter: pt.cumulativeAfter,
                     cumulativeBefore: pt.cumulativeBefore,
                     dataIndex: pt.dataIndex,
                     datum: pt.datum,
                     deltaValue: pt.deltaValue,
+                    fillColor: pt.color,
                     formattedCategory,
                     formattedCumulativeAfter: pt.formattedCumulativeAfter,
                     formattedCumulativeBefore: pt.formattedCumulativeBefore,
@@ -442,6 +446,7 @@ export class WaterfallLayoutEngine {
                     itemId: pt.itemId,
                     kind: pt.kind,
                     text: labelText,
+                    textColor: labelColor,
                     value: pt.value,
                     visualKind: pt.visualKind
                 });
@@ -494,11 +499,11 @@ export class WaterfallLayoutEngine {
                     if (includedIndices.has(idx)) {
                         const pt = preparedData.points[idx];
                         const pos = plotRect.x + (bandScale.map(pt.slotKey) ?? 0) + bandScale.bandwidth() / 2;
-                        const displayVal = pt.category !== undefined ? pt.category : (pt.formattedCategory || `Step ${idx + 1}`);
+                        const displayVal = pt.category !== undefined ? pt.category : pt.formattedCategory;
 
                         xTicks.push({
                             coordinate: pos,
-                            formattedValue: formatXValue(displayVal, idx, xAxis?.formatter(), "category"),
+                            formattedValue: sceneBars[idx].formattedCategory,
                             index: idx,
                             value: displayVal
                         });

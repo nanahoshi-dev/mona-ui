@@ -1389,15 +1389,22 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
             this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}, ${valStr}`);
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "funnel") {
-            const convStr = matchingHit.funnel?.formattedConversionRate
-                ? `, conversion ${matchingHit.funnel.formattedConversionRate}`
-                : "";
-            const dropStr =
-                matchingHit.funnel?.dropOff !== undefined && matchingHit.funnel.dropOff > 0
-                    ? `, drop-off ${matchingHit.funnel.dropOff}`
-                    : "";
+            const totalStages = currentScene.hitTargets.length;
+            const stageNum = (matchingHit.renderOrder ?? 0) + 1;
+            const stagePrefix = totalStages > 0 ? `, stage ${stageNum} of ${totalStages}` : "";
+            const parts: string[] = [];
+            if (matchingHit.funnel?.formattedConversionRate) {
+                parts.push(`Conversion ${matchingHit.funnel.formattedConversionRate} of previous stage.`);
+            }
+            if (matchingHit.funnel?.formattedOverallConversionRate) {
+                parts.push(`Overall conversion ${matchingHit.funnel.formattedOverallConversionRate}.`);
+            }
+            if (matchingHit.funnel?.dropOff !== undefined && matchingHit.funnel.dropOff > 0) {
+                parts.push(`Drop-off ${matchingHit.funnel.dropOff}.`);
+            }
+            const details = parts.length > 0 ? ` ${parts.join(" ")}` : "";
             this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}: ${matchingHit.formattedValue}${convStr}${dropStr}`
+                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}${stagePrefix}: ${matchingHit.formattedValue}.${details}`.trim()
             );
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "waterfall") {
             const wf = matchingHit.waterfall;
@@ -1591,7 +1598,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const stageContext: ChartFunnelStageContext = {
             bounds: lbl.bounds,
             category: lbl.category,
-            color: lbl.color,
+            color: lbl.fillColor,
             conversionRate: lbl.conversionRate,
             dataIndex: lbl.dataIndex,
             datum: lbl.datum,
@@ -1604,7 +1611,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             previousValue: lbl.previousValue,
             stageId: lbl.stageId,
             stageIndex: lbl.stageIndex,
-            textColor: lbl.color,
+            textColor: lbl.textColor,
             value: lbl.value
         };
 
@@ -1612,7 +1619,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             $implicit: stageContext,
             bounds: lbl.bounds,
             category: lbl.category,
-            color: lbl.color,
+            color: lbl.fillColor,
             conversionRate: lbl.conversionRate,
             dataIndex: lbl.dataIndex,
             datum: lbl.datum,
@@ -1626,7 +1633,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             stage: stageContext,
             stageId: lbl.stageId,
             stageIndex: lbl.stageIndex,
-            textColor: lbl.color,
+            textColor: lbl.textColor,
             value: lbl.value
         };
     }
@@ -1640,7 +1647,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             barStart: lbl.barStart,
             bounds: lbl.barBounds,
             category: lbl.category,
-            color: lbl.color,
+            color: lbl.fillColor,
             cumulativeAfter: lbl.cumulativeAfter,
             cumulativeBefore: lbl.cumulativeBefore,
             dataIndex: lbl.dataIndex,
@@ -1652,6 +1659,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             formattedDelta: lbl.formattedDelta,
             formattedValue: lbl.formattedValue,
             kind: lbl.kind,
+            textColor: lbl.textColor,
             value: lbl.value,
             visualKind: lbl.visualKind
         };
@@ -1662,7 +1670,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             barStart: lbl.barStart,
             bounds: lbl.bounds,
             category: lbl.category,
-            color: lbl.color,
+            color: lbl.fillColor,
             cumulativeAfter: lbl.cumulativeAfter,
             cumulativeBefore: lbl.cumulativeBefore,
             dataIndex: lbl.dataIndex,
@@ -1675,6 +1683,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             formattedValue: lbl.formattedValue,
             kind: lbl.kind,
             step: pointContext,
+            textColor: lbl.textColor,
             value: lbl.value,
             visualKind: lbl.visualKind
         };

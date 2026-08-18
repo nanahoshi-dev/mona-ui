@@ -305,11 +305,11 @@ export class FunnelLayoutEngine {
                 sceneLabels.push({
                     bounds: labelBounds,
                     category: stage.category,
-                    color: labelColor,
                     conversionRate: stage.conversionRate,
                     dataIndex: stage.dataIndex,
                     datum: stage.datum,
                     dropOff: stage.dropOff,
+                    fillColor: stage.color,
                     formattedCategory: stage.formattedCategory,
                     formattedConversionRate: stage.formattedConversionRate,
                     formattedOverallConversionRate: stage.formattedOverallConversionRate,
@@ -319,6 +319,7 @@ export class FunnelLayoutEngine {
                     stageId: stage.stageId,
                     stageIndex: stage.stageIndex,
                     text,
+                    textColor: labelColor,
                     value: stage.value
                 });
             }

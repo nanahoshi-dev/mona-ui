@@ -13,13 +13,13 @@ The chart component renders high-performance Canvas 2D visualizations composed o
 
 ```typescript
 import {
-    MonaChartComponent,
-    MonaChartAngularAxisComponent,
-    MonaChartRadialAxisComponent,
-    MonaRadarSeriesComponent,
-    MonaPolarSeriesComponent,
-    MonaChartLegendComponent,
-    MonaChartTooltipComponent
+    ChartComponent,
+    ChartAngularAxisComponent,
+    ChartRadialAxisComponent,
+    RadarSeriesComponent,
+    PolarSeriesComponent,
+    ChartLegendComponent,
+    ChartTooltipComponent
 } from "@nanahoshi/mona-ui/chart";
 ```
 
@@ -436,9 +436,12 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `nodeVisibilityChange` | `output<ChartTreemapNodeVisibilityEvent>` | - | Emitted when a top-level branch visibility is toggled via legend or API. |
 
-### FunnelSeriesComponent
+### `<mona-funnel-series>`
 
-**Selector:** `mona-funnel-series`
+Renders conversion pipeline and sales funnel visualizations using connected trapezoidal stages. Supports vertical and horizontal layouts, custom stage colors, inscribed DOM labels, widening stages (>100% conversion), and dynamic stage visibility toggling.
+
+*Note: Values need not be monotonically decreasing; later stages can exceed preceding stages (resulting in conversion rates > 100%). The default tooltip and accessibility announcements only describe positive stage loss as "Drop-off". Hiding a stage recomputes previous-stage and overall conversion over the visible sequence.*
+*In custom label templates (`monaChartFunnelLabelTemplate`), `color` exposes the stage trapezoid fill color and `textColor` exposes the resolved readable text foreground (respecting `--mona-chart-funnel-label-color` when configured).*
 
 | Input / Output | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
@@ -466,11 +469,17 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 | `widthRatio` | `number` | `0.9` | Maximum width ratio (0.1 to 1) for the funnel's widest stage relative to plot area. |
 | `stageVisibilityChange` | `output<ChartFunnelStageVisibilityEvent>` | - | Emits when a stage's visibility is toggled via legend or API. |
 
-### WaterfallSeriesComponent
+### `<mona-waterfall-series>`
 
-**Selector:** `mona-waterfall-series`
+Renders financial cash-flow and contribution movements with positive delta increases, negative delta decreases, zero-change neutral bars, intermediate subtotals, and cumulative grand totals.
 
-*Note: Legend items for visual kinds (Increase, Decrease, No Change, Subtotal, Total) are presentation-only semantic markers (`kind: "semantic"`, `interactive: false`, `visible: true`). Whole-series `[(visible)]` is the only series visibility toggle.*
+*Note: Legend items for visual kinds (Increase, Decrease, No Change, Subtotal, Total) are presentation-only semantic markers (`kind: "semantic"`, `interactive: false`, `visible: true`). Whole-series `[(visible)]` is the series visibility toggle.*
+*Invalid change rows with non-numeric values are omitted from calculation and rendering.*
+*Subtotal and total rows do not require a numeric field value and reflect the current running balance.*
+*Duplicate category names remain distinct ordered steps.*
+*X-axis category labels fall back to the chart root `xField`, then to canonical `Step N` display labels.*
+*`keyField` is strongly recommended for stable animations when data rows are inserted or removed.*
+*In custom label templates (`monaChartWaterfallLabelTemplate`), `color` exposes the matching bar fill color and `textColor` exposes the resolved label foreground (respecting `--mona-chart-waterfall-label-color` or applying readable contrast when placed inside bars).*
 
 | Input / Output | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
@@ -509,7 +518,7 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 - `ng-template[monaChartGaugeCenterTemplate]`: Customizes central gauge readout template with `{ $implicit, formattedMax, formattedMin, formattedValue, isClamped, max, min, ratio, seriesId, seriesName, value }`.
 - `ng-template[monaChartTreemapLabelTemplate]`: Customizes DOM treemap node labels with `{ $implicit, bounds, color, datum, depth, formattedLabel, formattedPath, formattedValue, isCollapsed, isLeaf, label, node, nodeId, path, percentageOfParent, percentageOfRoot, textColor, value }`.
 - `ng-template[monaChartFunnelLabelTemplate]`: Customizes DOM funnel stage labels with `{ $implicit, bounds, category, color, conversionRate, dataIndex, datum, dropOff, formattedCategory, formattedConversionRate, formattedOverallConversionRate, formattedValue, overallConversionRate, previousValue, stage, stageId, stageIndex, textColor, value }`.
-- `ng-template[monaChartWaterfallLabelTemplate]`: Customizes DOM waterfall step labels with `{ $implicit, barEnd, barStart, bounds, category, color, cumulativeAfter, cumulativeBefore, dataIndex, datum, deltaValue, formattedCategory, formattedCumulativeAfter, formattedCumulativeBefore, formattedDelta, formattedValue, kind, step, value, visualKind }`.
+- `ng-template[monaChartWaterfallLabelTemplate]`: Customizes DOM waterfall step labels with `{ $implicit, barEnd, barStart, bounds, category, color, cumulativeAfter, cumulativeBefore, dataIndex, datum, deltaValue, formattedCategory, formattedCumulativeAfter, formattedCumulativeBefore, formattedDelta, formattedValue, kind, step, textColor, value, visualKind }`.
 
 ## Keyboard Navigation
 

@@ -195,7 +195,7 @@ describe("MonaChartTooltipComponent", () => {
         expect(tooltipEl.nativeElement.textContent).toContain("Drop-off: 600");
     });
 
-    it("should render specialized waterfall tooltip with change delta and running total", () => {
+    it("should render specialized waterfall tooltip with change delta and running total transition", () => {
         tooltipPositionSignal.set({ x: 400, y: 200 });
         const waterfallPoint: ChartTooltipPointContext = {
             ...createMockPointContext("Q1 Sales", "+50", 50),
@@ -220,6 +220,32 @@ describe("MonaChartTooltipComponent", () => {
         const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
         expect(tooltipEl.nativeElement.textContent).toContain("Q1 Sales");
         expect(tooltipEl.nativeElement.textContent).toContain("Change: +50");
-        expect(tooltipEl.nativeElement.textContent).toContain("Running Total: 150");
+        expect(tooltipEl.nativeElement.textContent).toContain("Running Total: 100 → 150");
+    });
+
+    it("should render specialized waterfall tooltip for subtotal and total without duplicate running total", () => {
+        tooltipPositionSignal.set({ x: 400, y: 200 });
+        const subtotalPoint: ChartTooltipPointContext = {
+            ...createMockPointContext("Subtotal", "120", 120),
+            formattedCategory: "Subtotal",
+            seriesType: "waterfall",
+            waterfall: {
+                barEnd: 120,
+                barStart: 0,
+                cumulativeAfter: 120,
+                cumulativeBefore: 120,
+                formattedCumulativeAfter: "120",
+                formattedCumulativeBefore: "120",
+                kind: "subtotal",
+                valueKind: "waterfall"
+            }
+        };
+        tooltipContextSignal.set(createMockTemplateContext(subtotalPoint));
+        fixture.detectChanges();
+
+        const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
+        expect(tooltipEl.nativeElement.textContent).toContain("Subtotal");
+        expect(tooltipEl.nativeElement.textContent).toContain("Value: 120");
+        expect(tooltipEl.nativeElement.textContent).not.toContain("Running Total");
     });
 });

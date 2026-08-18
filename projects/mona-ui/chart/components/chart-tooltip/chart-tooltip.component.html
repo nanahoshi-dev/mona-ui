@@ -121,14 +121,18 @@
                     <div>
                         Change: <span class="font-medium text-foreground">{{ context.point.waterfall?.formattedDelta || context.point.formattedY }}</span>
                     </div>
+                    @if (context.point.waterfall?.formattedCumulativeBefore && context.point.waterfall?.formattedCumulativeAfter) {
+                        <div>
+                            Running Total: <span class="font-medium text-foreground">{{ context.point.waterfall!.formattedCumulativeBefore }} → {{ context.point.waterfall!.formattedCumulativeAfter }}</span>
+                        </div>
+                    } @else if (context.point.waterfall?.formattedCumulativeAfter) {
+                        <div>
+                            Running Total: <span class="font-medium text-foreground">{{ context.point.waterfall!.formattedCumulativeAfter }}</span>
+                        </div>
+                    }
                 } @else {
                     <div>
                         Value: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
-                    </div>
-                }
-                @if (context.point.waterfall?.formattedCumulativeAfter) {
-                    <div>
-                        Running Total: <span class="font-medium text-foreground">{{ context.point.waterfall!.formattedCumulativeAfter }}</span>
                     </div>
                 }
             </div>

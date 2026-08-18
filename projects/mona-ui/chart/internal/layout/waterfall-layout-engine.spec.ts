@@ -358,4 +358,96 @@ describe("WaterfallLayoutEngine", () => {
         expect(scene.series[0].bars[1].renderOpacity).toBe(1);
         expect(scene.series[0].connectors[0].renderOpacity).toBe(1);
     });
+
+    it("uses canonical source-index formattedCategory for X axis ticks when earlier source rows are omitted (FWF-C3)", () => {
+        const data = [
+            { category: "InvalidRow", kind: "change", value: "NaN" }, // omitted
+            { category: "FirstValid", kind: "change", value: 100 },   // dataIndex = 1
+            { category: "SecondValid", kind: "change", value: -20 }   // dataIndex = 2
+        ];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            id: "w-1",
+            kindField: signal("kind"),
+            name: signal("Waterfall"),
+            showLabels: signal(true),
+            type: "waterfall",
+            visible: signal(true),
+            xField: signal("category")
+        };
+
+        const xAxis: ChartXAxisRegistration = {
+            axisLine: signal(true),
+            formatter: signal((val: unknown, idx?: number) => `src-${idx}:${val}`),
+            gridLines: signal(false),
+            labelTemplate: signal(undefined),
+            max: signal(undefined),
+            min: signal(undefined),
+            nice: signal(true),
+            position: signal("bottom"),
+            tickCount: signal(undefined),
+            title: signal(""),
+            type: signal("category"),
+            visible: signal(true)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver,
+            xAxis
+        );
+
+        expect(scene.series[0].bars.length).toBe(2);
+        expect(scene.series[0].bars[0].formattedCategory).toBe("src-1:FirstValid");
+        expect(scene.series[0].bars[1].formattedCategory).toBe("src-2:SecondValid");
+
+        const xAxes = scene.axes.filter(a => a.axis === "x");
+        expect(xAxes[0].ticks[0].formattedValue).toBe("src-1:FirstValid");
+        expect(xAxes[0].ticks[1].formattedValue).toBe("src-2:SecondValid");
+    });
+
+    it("computes contrast-aware textColor and matching bar fillColor for waterfall labels (FWF-C2, FWF-C11)", () => {
+        const data = [
+            { category: "DarkBar", kind: "change", value: 100 },
+            { category: "SmallBar", kind: "change", value: 5 }
+        ];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            increaseColor: signal("#000000"), // dark bar
+            id: "w-1",
+            kindField: signal("kind"),
+            name: signal("Waterfall"),
+            showLabels: signal(true),
+            type: "waterfall",
+            visible: signal(true),
+            xField: signal("category")
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver
+        );
+
+        expect(scene.series[0].labels.length).toBe(2);
+        // Both labels expose matching bar color in fillColor
+        expect(scene.series[0].labels[0].fillColor).toBe("#000000");
+        expect(scene.series[0].labels[1].fillColor).toBe("#000000");
+
+        // If inside bar, textColor should be readable foreground
+        if (scene.series[0].labels[0].isInside) {
+            expect(scene.series[0].labels[0].textColor).toBe("#ffffff");
+        } else {
+            expect(scene.series[0].labels[0].textColor).toBeDefined();
+        }
+    });
 });

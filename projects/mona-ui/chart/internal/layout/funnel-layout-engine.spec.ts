@@ -221,6 +221,7 @@ describe("FunnelLayoutEngine", () => {
 
         // Readable foreground for black background is white/light
         expect(scene.series[0].stages[0].textColor).toBe("#ffffff");
-        expect(scene.series[0].labels[0].color).toBe("#ffffff");
+        expect(scene.series[0].labels[0].fillColor).toBe("#000000");
+        expect(scene.series[0].labels[0].textColor).toBe("#ffffff");
     });
 });
