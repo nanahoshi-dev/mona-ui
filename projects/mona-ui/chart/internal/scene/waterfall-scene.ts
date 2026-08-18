@@ -50,8 +50,10 @@ export interface SceneWaterfallConnector {
     readonly animationKey: string;
     readonly color: string;
     readonly cumulativeValue: number;
+    readonly fromAnimationKey: string;
     readonly fromX: number;
     readonly renderOpacity?: number;
+    readonly toAnimationKey: string;
     readonly toX: number;
     readonly width: number;
     readonly y: number;
@@ -59,20 +61,26 @@ export interface SceneWaterfallConnector {
 
 export interface SceneWaterfallLabel {
     readonly barBounds: ChartRect;
+    readonly barEnd: number;
+    readonly barStart: number;
     readonly bounds: ChartRect;
     readonly category: unknown;
-    readonly color: string;
     readonly cumulativeAfter: number;
     readonly cumulativeBefore: number;
     readonly dataIndex: number;
     readonly datum: unknown;
     readonly deltaValue?: number;
+    readonly fillColor: string;
     readonly formattedCategory: string;
+    readonly formattedCumulativeAfter: string;
+    readonly formattedCumulativeBefore: string;
+    readonly formattedDelta?: string;
     readonly formattedValue: string;
     readonly isInside?: boolean;
     readonly itemId: string;
     readonly kind: ChartWaterfallDatumKind;
     readonly text: string;
+    readonly textColor: string;
     readonly value: number;
     readonly visualKind: ChartWaterfallVisualKind;
 }

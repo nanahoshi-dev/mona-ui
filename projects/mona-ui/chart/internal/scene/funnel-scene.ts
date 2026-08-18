@@ -6,6 +6,7 @@ import type { CartesianSceneBase } from "./chart-scene";
 export interface ChartFunnelSeriesStyle {
     readonly baseColor: string;
     readonly fillOpacity: number;
+    readonly labelColor?: string;
     readonly strokeColor: string;
     readonly strokeWidth: number;
 }
@@ -38,11 +39,11 @@ export interface SceneFunnelStage {
 export interface SceneFunnelLabel {
     readonly bounds: ChartRect;
     readonly category: unknown;
-    readonly color: string;
     readonly conversionRate?: number;
     readonly dataIndex: number;
     readonly datum: unknown;
     readonly dropOff?: number;
+    readonly fillColor: string;
     readonly formattedCategory: string;
     readonly formattedConversionRate?: string;
     readonly formattedOverallConversionRate?: string;
@@ -52,6 +53,7 @@ export interface SceneFunnelLabel {
     readonly stageId: string;
     readonly stageIndex: number;
     readonly text: string;
+    readonly textColor: string;
     readonly value: number;
 }
 
