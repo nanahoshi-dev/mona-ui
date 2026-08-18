@@ -106,3 +106,122 @@ export function extractRadialDatumIds(
 ): readonly string[] {
     return extractRadialDatumIdentities(data, categoryField, keyField).map(item => item.itemId);
 }
+
+export function extractRetainedRadialBarIdentities(
+    data: readonly unknown[],
+    categoryField: ChartField,
+    seriesField: ChartField,
+    keyField?: ChartField
+): readonly RadialRetainedIdentity[] {
+    const results: RadialRetainedIdentity[] = [];
+    const seenCategories = new Set<string>();
+    const seenCustomKeys = new Set<string>();
+
+    for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        const rawVal = resolveValue(row, seriesField, i);
+        if (typeof rawVal !== "number" || !Number.isFinite(rawVal) || rawVal < 0) {
+            continue;
+        }
+
+        const rawCat = resolveValue(row, categoryField, i);
+        const catKey = serializeRadialCategoryKey(rawCat, i);
+
+        if (seenCategories.has(catKey)) {
+            continue;
+        }
+
+        const rawKey = keyField ? resolveValue(row, keyField, i) : undefined;
+        const customKey = serializeRadialExplicitKey(rawKey);
+        if (customKey !== null) {
+            if (seenCustomKeys.has(customKey)) {
+                continue;
+            }
+            seenCustomKeys.add(customKey);
+        }
+
+        seenCategories.add(catKey);
+        const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
+
+        results.push({
+            category: rawCat ?? `Item ${i + 1}`,
+            categoryKey: catKey,
+            dataIndex: i,
+            datum: row,
+            explicitKey: customKey ?? undefined,
+            itemId
+        });
+    }
+
+    return results;
+}
+
+export function extractRetainedRoseIdentities(
+    data: readonly unknown[],
+    categoryField: ChartField,
+    seriesField: ChartField,
+    keyField?: ChartField
+): readonly RadialRetainedIdentity[] {
+    interface Slot {
+        category: unknown;
+        categoryKey: string;
+        dataIndex: number;
+        datum: unknown;
+        explicitKey?: string;
+        itemId: string;
+        validDataIndex?: number;
+        validDatum?: unknown;
+    }
+
+    const slots: Slot[] = [];
+    const slotByKey = new Map<string, Slot>();
+    const seenCustomKeys = new Set<string>();
+
+    for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        const rawCat = resolveValue(row, categoryField, i);
+        const catKey = serializeRadialCategoryKey(rawCat, i);
+        let slot = slotByKey.get(catKey);
+
+        const rawKey = keyField ? resolveValue(row, keyField, i) : undefined;
+        const customKey = serializeRadialExplicitKey(rawKey);
+
+        if (!slot) {
+            if (customKey !== null) {
+                if (seenCustomKeys.has(customKey)) {
+                    continue;
+                }
+                seenCustomKeys.add(customKey);
+            }
+
+            const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
+            slot = {
+                category: rawCat ?? `Item ${i + 1}`,
+                categoryKey: catKey,
+                dataIndex: i,
+                datum: row,
+                explicitKey: customKey ?? undefined,
+                itemId
+            };
+            slots.push(slot);
+            slotByKey.set(catKey, slot);
+        }
+
+        if (slot.validDatum === undefined) {
+            const rawVal = resolveValue(row, seriesField, i);
+            if (typeof rawVal === "number" && Number.isFinite(rawVal) && rawVal >= 0) {
+                slot.validDatum = row;
+                slot.validDataIndex = i;
+            }
+        }
+    }
+
+    return slots.map(s => ({
+        category: s.category,
+        categoryKey: s.categoryKey,
+        dataIndex: s.validDataIndex !== undefined ? s.validDataIndex : s.dataIndex,
+        datum: s.validDatum !== undefined ? s.validDatum : s.datum,
+        explicitKey: s.explicitKey,
+        itemId: s.itemId
+    }));
+}
