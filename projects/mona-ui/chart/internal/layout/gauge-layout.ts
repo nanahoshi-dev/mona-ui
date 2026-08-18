@@ -93,6 +93,8 @@ export class GaugeLayout {
             dataIndex: preparedData.dataIndex,
             datum: preparedData.datum,
             endAngle: markEndAngle,
+            formattedMax: preparedData.formattedMax,
+            formattedMin: preparedData.formattedMin,
             formattedValue: preparedData.formattedValue,
             innerRadius: geom.innerRadius,
             isClamped: preparedData.isClamped,
@@ -132,14 +134,15 @@ export class GaugeLayout {
 
         const hitTargets: SceneHitTarget[] = [];
         const interactionBuckets: ChartInteractionBucket[] = [];
+        let hitTarget: SceneHitTarget | undefined;
 
         if (isVisible && preparedData.hasValidData) {
-            const hitTarget: SceneHitTarget = {
+            hitTarget = {
                 animationKey: preparedData.animationKey,
                 arc: {
                     center,
                     cornerRadius: geom.cornerRadius,
-                    endAngle: indicator === "needle" ? spanInfo.endAngleRad : markEndAngle,
+                    endAngle: markEndAngle,
                     innerRadius: geom.innerRadius,
                     outerRadius: geom.outerRadius,
                     padAngle: 0,
@@ -148,9 +151,15 @@ export class GaugeLayout {
                 color: seriesStyle.color,
                 dataIndex: preparedData.dataIndex,
                 datum: preparedData.datum,
+                formattedRadialMax: preparedData.formattedMax,
+                formattedRadialMin: preparedData.formattedMin,
                 formattedValue: preparedData.formattedValue,
                 index: preparedData.dataIndex >= 0 ? preparedData.dataIndex : 0,
+                isClamped: preparedData.isClamped,
                 itemId: series.id,
+                radialMax: preparedData.max,
+                radialMin: preparedData.min,
+                radialRatio: preparedData.ratio,
                 seriesId: series.id,
                 seriesName: series.name(),
                 seriesType: "gauge",
@@ -163,13 +172,24 @@ export class GaugeLayout {
 
             hitTargets.push(hitTarget);
 
-            const midAngle = (spanInfo.startAngleRad + markEndAngle) / 2;
-            const midRadius = (geom.innerRadius + geom.outerRadius) / 2;
-            interactionBuckets.push({
-                anchor: {
+            let anchor: ChartPoint;
+            if (indicator === "needle" && needle) {
+                const needleMidRadius = geom.needleLength * 0.7;
+                anchor = {
+                    x: center.x + Math.sin(markEndAngle) * needleMidRadius,
+                    y: center.y - Math.cos(markEndAngle) * needleMidRadius
+                };
+            } else {
+                const midAngle = (spanInfo.startAngleRad + markEndAngle) / 2;
+                const midRadius = (geom.innerRadius + geom.outerRadius) / 2;
+                anchor = {
                     x: center.x + Math.sin(midAngle) * midRadius,
                     y: center.y - Math.cos(midAngle) * midRadius
-                },
+                };
+            }
+
+            interactionBuckets.push({
+                anchor,
                 hits: [hitTarget],
                 order: 0,
                 xKey: series.id,
@@ -193,7 +213,24 @@ export class GaugeLayout {
         ];
 
         const hasRenderableData = isVisible && preparedData.hasValidData;
-        const hitIndex = new GaugeHitIndex(center, hitTargets, geom.innerRadius, geom.outerRadius);
+        const hitGeometry = hasRenderableData && hitTarget
+            ? {
+                  center,
+                  indicator,
+                  needle: needle
+                      ? {
+                            angle: needle.angle,
+                            hubRadius: needle.hubRadius,
+                            length: needle.length,
+                            width: needle.width
+                        }
+                      : undefined,
+                  target: hitTarget,
+                  valueArc: hitTarget.arc
+              }
+            : null;
+
+        const hitIndex = new GaugeHitIndex(hitGeometry);
 
         return {
             arcMode: "gauge",

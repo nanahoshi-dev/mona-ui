@@ -97,6 +97,24 @@ export function normalizeRosePadding(
     return Math.min(requestedPadRad, maxPadRad);
 }
 
+export function normalizeArcCornerRadius(
+    value: unknown,
+    maxCorner: number,
+    fallback: number = 0
+): number {
+    if (value === undefined || value === null) {
+        return fallback;
+    }
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+        return fallback;
+    }
+    if (value <= 0) {
+        return 0;
+    }
+    const safeMax = Number.isFinite(maxCorner) && maxCorner >= 0 ? maxCorner : 0;
+    return Math.min(value, safeMax);
+}
+
 export function computeOuterRadiusWithStroke(
     maxAvailableRadius: number,
     outerRatio: number,
@@ -139,15 +157,13 @@ export function normalizeGaugeGeometry(options: {
     const outerRatio = normalizeRatio(options.outerRadiusRatio, 0.9, 0.05, 1);
     const outerRadius = maxAvailableRadius * outerRatio;
 
-    const innerRatio = normalizeRatio(options.innerRadiusRatio, 0.2, 0, 0.99);
+    const innerRatio = normalizeRatio(options.innerRadiusRatio, 0.72, 0, 0.99);
     const innerRadius = outerRadius * innerRatio;
     const arcThickness = Math.max(0, outerRadius - innerRadius);
 
-    const cornerRadius = options.cornerRadius !== undefined && Number.isFinite(options.cornerRadius)
-        ? Math.max(0, Math.min(options.cornerRadius, arcThickness / 2))
-        : 0;
+    const cornerRadius = normalizeArcCornerRadius(options.cornerRadius, arcThickness / 2, 0);
 
-    const needleLengthRatio = normalizeRatio(options.needleLengthRatio, 0.8, 0.1, 1);
+    const needleLengthRatio = normalizeRatio(options.needleLengthRatio, 0.78, 0.1, 1);
     const needleLength = outerRadius * needleLengthRatio;
     const needleWidth = normalizePositiveNumber(options.needleWidth, 2) ?? 2;
     const hubRadius = normalizePositiveNumber(options.hubRadius, 5) ?? 5;

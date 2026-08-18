@@ -1,3 +1,4 @@
+import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
 import type {
     ChartAngularAxisRegistration,
     ChartRadialArcSeriesRegistration,
@@ -13,6 +14,7 @@ export interface PolarArcLayoutEngineOptions {
     readonly angularAxis?: ChartAngularAxisRegistration;
     readonly containerHeight: number;
     readonly containerWidth: number;
+    readonly measurements?: ReadonlyMap<string, ChartLabelMeasurement>;
     readonly radialAxis?: ChartRadialAxisRegistration;
     readonly rootData: readonly unknown[];
     readonly series: ChartRadialArcSeriesRegistration;
@@ -39,6 +41,7 @@ export class PolarArcLayoutEngine {
                     angularAxis: options.angularAxis,
                     containerHeight: options.containerHeight,
                     containerWidth: options.containerWidth,
+                    measurements: options.measurements,
                     radialAxis: options.radialAxis,
                     rootData: options.rootData,
                     series,

@@ -37,6 +37,7 @@ export class PolarLayoutEngine {
                 angularAxis: options.angularAxis,
                 containerHeight: options.containerHeight,
                 containerWidth: options.containerWidth,
+                measurements: options.measurements,
                 radialAxis: options.radialAxis,
                 rootData: options.rootData,
                 series: arcSeries,

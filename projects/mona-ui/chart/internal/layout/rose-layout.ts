@@ -1,4 +1,5 @@
 import type { ChartPoint } from "../../models/chart.models";
+import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
 import type {
     ChartAngularAxisRegistration,
     ChartRadialAxisRegistration,
@@ -7,6 +8,7 @@ import type {
 import { RoseDataProcessor } from "../data/rose-data";
 import { computeRadialDomain } from "../data/radial-domain";
 import { formatRadialValue } from "../data/radar-data";
+import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type {
     ChartRoseSeriesScene,
     PolarArcChartScene,
@@ -25,6 +27,7 @@ import { degreesToRadians, normalizeAngleSpan, normalizeDegrees } from "../utils
 import { RoseHitIndex } from "../interaction/rose-hit-index";
 import {
     computeOuterRadiusWithStroke,
+    normalizeArcCornerRadius,
     normalizeRosePadding
 } from "./radial-geometry-utils";
 import { clamp, normalizeNonNegativeNumber, normalizeRatio, normalizeTickCount } from "../utils/number-utils";
@@ -33,6 +36,7 @@ export interface RoseLayoutOptions {
     readonly angularAxis?: ChartAngularAxisRegistration;
     readonly containerHeight: number;
     readonly containerWidth: number;
+    readonly measurements?: ReadonlyMap<string, ChartLabelMeasurement>;
     readonly radialAxis?: ChartRadialAxisRegistration;
     readonly rootData: readonly unknown[];
     readonly series: ChartRoseSeriesRegistration;
@@ -46,6 +50,7 @@ export class RoseLayout {
             angularAxis,
             containerHeight,
             containerWidth,
+            measurements,
             radialAxis,
             rootData,
             series,
@@ -61,23 +66,14 @@ export class RoseLayout {
         const isVisible = series.visible();
         const seriesStyle = styleResolver.resolveRadialArcSeriesStyle(series);
 
-        const maxAvailableRadius = Math.max(0, Math.min(containerWidth, containerHeight) / 2);
-        const outerRadius = computeOuterRadiusWithStroke(
-            maxAvailableRadius,
-            series.outerRadiusRatio(),
-            seriesStyle.strokeWidth
-        );
-
-        const innerRatio = normalizeRatio(series.innerRadiusRatio(), 0, 0, 0.99);
-        const innerRadius = outerRadius * innerRatio;
-
         const spanInfo = normalizeAngleSpan(series.startAngle(), series.endAngle());
         const totalSpanRad = spanInfo.endAngleRad - spanInfo.startAngleRad;
 
+        const angularRotation = angularAxis ? normalizeDegrees(angularAxis.rotation()) : 0;
+        const angularRotationRad = degreesToRadians(angularRotation);
+        const effectiveStartAngleRad = spanInfo.startAngleRad + angularRotationRad;
+
         const scaleMode = series.scaleMode();
-        const cornerRadius = series.cornerRadius?.() !== undefined
-            ? Math.max(0, series.cornerRadius()!)
-            : 0;
 
         const preparedData = RoseDataProcessor.process({
             categoryField: series.categoryField(),
@@ -104,10 +100,96 @@ export class RoseLayout {
         const deltaTheta = K > 0 ? totalSpanRad / K : 0;
         const padAngleRad = normalizeRosePadding(series.padAngle(), deltaTheta, K);
 
+        // 1. Unified Rose Radial Domain
+        const validValues = preparedData.allItems.map(i => i.rawValue);
+        const radialTickCount = normalizeTickCount(radialAxis?.tickCount?.(), 5, 1, 20);
+        const domainResult = computeRadialDomain(validValues, {
+            explicitMax: radialAxis?.max?.(),
+            explicitMin: radialAxis?.min?.(),
+            nice: radialAxis?.nice?.() ?? true,
+            tickCount: radialTickCount
+        });
+
+        let [dMin, dMax] = domainResult.domain;
+        if (dMin < 0) {
+            if (warnedDiagnosticSignatures) {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `Rose series "${series.name()}" encountered negative radial min (${dMin}). Normalizing to 0.`,
+                    `${series.id}:negative-rose-min`
+                );
+            }
+            dMin = 0;
+        }
+        if (dMax <= dMin) {
+            dMax = dMin + 1;
+        }
+        const dSpan = Math.max(1e-6, dMax - dMin);
+
+        // 2. Gutter / Plot Size Calculations
+        const showAngularLabels = angularAxis ? angularAxis.visible() && angularAxis.labels() : false;
+        let leftGutter = 12;
+        let rightGutter = 12;
+        let topGutter = 12;
+        let bottomGutter = 12;
+
+        if (showAngularLabels && K > 0) {
+            let maxLabelWidth = 24;
+            let maxLabelHeight = 14;
+            for (let k = 0; k < K; k++) {
+                const cat = preparedData.allCategories[k];
+                const meas = measurements?.get(`angular:${cat.categoryKey}`) ?? measurements?.get(`angular:${String(cat.category)}`);
+                if (meas) {
+                    maxLabelWidth = Math.max(maxLabelWidth, meas.width);
+                    maxLabelHeight = Math.max(maxLabelHeight, meas.height);
+                } else {
+                    const textLen = (cat.formattedCategory ?? String(cat.category)).length;
+                    maxLabelWidth = Math.max(maxLabelWidth, Math.min(90, textLen * 6.5 + 8));
+                }
+            }
+            const offset = normalizeNonNegativeNumber(angularAxis?.labelOffset?.(), 10);
+            const maxInset = Math.min(containerWidth, containerHeight) * 0.22;
+            const labelInsetX = Math.min(maxInset, maxLabelWidth + offset);
+            const labelInsetY = Math.min(maxInset, maxLabelHeight + offset);
+            leftGutter = Math.max(leftGutter, labelInsetX);
+            rightGutter = Math.max(rightGutter, labelInsetX);
+            topGutter = Math.max(topGutter, labelInsetY);
+            bottomGutter = Math.max(bottomGutter, labelInsetY);
+        }
+
+        const usableWidth = Math.max(0, containerWidth - leftGutter - rightGutter);
+        const usableHeight = Math.max(0, containerHeight - topGutter - bottomGutter);
+        const maxAvailableRadius = Math.max(0, Math.min(usableWidth, usableHeight) / 2);
+
+        const outerRadius = computeOuterRadiusWithStroke(
+            maxAvailableRadius,
+            series.outerRadiusRatio(),
+            seriesStyle.strokeWidth
+        );
+
+        const innerRatio = normalizeRatio(series.innerRadiusRatio(), 0, 0, 0.99);
+        const innerRadius = outerRadius * innerRatio;
+
+        const rinSq = innerRadius * innerRadius;
+        const routSq = outerRadius * outerRadius;
+        const areaSpanSq = Math.max(0, routSq - rinSq);
+        const radiusSpan = Math.max(0, outerRadius - innerRadius);
+
+        const computePetalRadius = (val: number): { radius: number; ratio: number } => {
+            const ratio = Math.max(0, Math.min(1, (val - dMin) / dSpan));
+            let r: number;
+            if (scaleMode === "area") {
+                r = Math.sqrt(rinSq + ratio * areaSpanSq);
+            } else {
+                r = innerRadius + ratio * radiusSpan;
+            }
+            return { radius: clamp(r, 0, outerRadius), ratio };
+        };
+
         const angularCategories: RoseCategoryScene[] = [];
         for (let k = 0; k < K; k++) {
             const cat = preparedData.allCategories[k];
-            const slotStart = spanInfo.startAngleRad + k * deltaTheta;
+            const slotStart = effectiveStartAngleRad + k * deltaTheta;
             const slotEnd = slotStart + deltaTheta;
             angularCategories.push({
                 category: cat.category,
@@ -124,24 +206,16 @@ export class RoseLayout {
         const hitTargets: SceneHitTarget[] = [];
         const interactionBuckets: ChartInteractionBucket[] = [];
 
-        const rinSq = innerRadius * innerRadius;
-        const routSq = outerRadius * outerRadius;
-        const areaSpanSq = Math.max(0, routSq - rinSq);
-        const radiusSpan = Math.max(0, outerRadius - innerRadius);
-
         if (isVisible) {
             for (let i = 0; i < preparedData.visibleItems.length; i++) {
                 const datum = preparedData.visibleItems[i];
                 const k = datum.categoryIndex;
-                const slotStart = spanInfo.startAngleRad + k * deltaTheta;
+                const slotStart = effectiveStartAngleRad + k * deltaTheta;
                 const slotEnd = slotStart + deltaTheta;
 
-                let petalOuter: number;
-                if (scaleMode === "area") {
-                    petalOuter = Math.sqrt(rinSq + datum.normalizedRatio * areaSpanSq);
-                } else {
-                    petalOuter = innerRadius + datum.normalizedRatio * radiusSpan;
-                }
+                const { radius: petalOuter, ratio: normalizedRatio } = computePetalRadius(datum.rawValue);
+                const maxPetalCorner = Math.max(0, (petalOuter - innerRadius) / 2);
+                const cornerRadius = normalizeArcCornerRadius(series.cornerRadius?.(), maxPetalCorner, 0);
 
                 const mark: SceneRadialArcMark = {
                     animationKey: datum.animationKey,
@@ -155,7 +229,7 @@ export class RoseLayout {
                     formattedValue: datum.formattedValue,
                     innerRadius,
                     itemId: datum.itemId,
-                    normalizedValue: datum.normalizedRatio,
+                    normalizedValue: normalizedRatio,
                     outerRadius: petalOuter,
                     padAngle: padAngleRad,
                     rawValue: datum.rawValue,
@@ -176,13 +250,21 @@ export class RoseLayout {
                         padAngle: padAngleRad,
                         startAngle: slotStart
                     },
+                    category: datum.category,
+                    categoryIndex: k,
                     color: datum.color,
                     dataIndex: datum.dataIndex,
                     datum: datum.datum,
                     formattedCategory: datum.formattedCategory,
+                    formattedRadialMax: String(dMax),
+                    formattedRadialMin: String(dMin),
                     formattedValue: datum.formattedValue,
                     index: datum.dataIndex,
+                    isClamped: datum.rawValue < dMin || datum.rawValue > dMax,
                     itemId: datum.itemId,
+                    radialMax: dMax,
+                    radialMin: dMin,
+                    radialRatio: normalizedRatio,
                     seriesId: series.id,
                     seriesName: series.name(),
                     seriesType: "rose",
@@ -223,18 +305,23 @@ export class RoseLayout {
             type: "rose"
         };
 
-        // 1. Angular Axis Scene
+        // 3. Angular Axis Scene (with label thinning for dense categories)
         let angularAxisScene: ChartAngularAxisScene | undefined;
         if (angularAxis) {
-            const showAngularLabels = angularAxis.visible() && angularAxis.labels();
-            const angularRotation = normalizeDegrees(angularAxis.rotation());
             const angularLabelOffset = normalizeNonNegativeNumber(angularAxis.labelOffset(), 10);
             const angularFormatter = angularAxis.formatter();
 
+            const maxDisplayLabels = 36;
+            const labelStride = K > maxDisplayLabels ? Math.ceil(K / maxDisplayLabels) : 1;
+
             const angularTicks: ChartAngularAxisTick[] = [];
             for (let k = 0; k < K; k++) {
+                if (k % labelStride !== 0 && k !== K - 1) {
+                    continue;
+                }
+
                 const cat = preparedData.allCategories[k];
-                const slotStart = spanInfo.startAngleRad + k * deltaTheta;
+                const slotStart = effectiveStartAngleRad + k * deltaTheta;
                 const slotEnd = slotStart + deltaTheta;
                 const midAngle = (slotStart + slotEnd) / 2;
 
@@ -270,38 +357,30 @@ export class RoseLayout {
             };
         }
 
-        // 2. Radial Axis Scene
+        // 4. Radial Axis Scene (with gridShape polygon normalization)
         let radialAxisScene: ChartRadialAxisScene | undefined;
         if (radialAxis) {
+            if (radialAxis.gridShape?.() === "polygon") {
+                if (warnedDiagnosticSignatures) {
+                    ChartDiagnostics.warnOnce(
+                        warnedDiagnosticSignatures,
+                        `Rose series "${series.name()}" does not support polygon radial grids. Normalizing gridShape to "circle".`,
+                        `${series.id}:rose-grid-shape-polygon`
+                    );
+                }
+            }
+
             const showRadialLabels = radialAxis.visible() && radialAxis.labels();
             const radialLabelAngle = normalizeDegrees(radialAxis.labelAngle());
             const labelAngleRad = degreesToRadians(radialLabelAngle);
             const radialLabelOffset = normalizeNonNegativeNumber(radialAxis.labelOffset(), 6);
             const radialFormatter = radialAxis.formatter();
-            const radialTickCount = normalizeTickCount(radialAxis.tickCount(), 5, 1, 20);
-
-            const domainResult = computeRadialDomain(preparedData.allItems.map(i => i.rawValue), {
-                explicitMax: radialAxis.max(),
-                explicitMin: radialAxis.min(),
-                nice: radialAxis.nice(),
-                tickCount: radialTickCount
-            });
-
-            const [dMin, dMax] = domainResult.domain;
-            const dSpan = Math.max(1e-6, dMax - dMin);
 
             const cosLabel = Math.cos(labelAngleRad);
             const sinLabel = Math.sin(labelAngleRad);
 
             const radialTicks: ChartRadialAxisTick[] = domainResult.ticks.map((val, idx) => {
-                const ratio = Math.max(0, Math.min(1, (val - dMin) / dSpan));
-                let r: number;
-                if (scaleMode === "area") {
-                    r = Math.sqrt(rinSq + ratio * areaSpanSq);
-                } else {
-                    r = innerRadius + ratio * radiusSpan;
-                }
-                r = clamp(r, 0, outerRadius);
+                const { radius: r } = computePetalRadius(val);
 
                 const labelPoint: ChartPoint = {
                     x: center.x + sinLabel * r + cosLabel * radialLabelOffset,
@@ -326,7 +405,7 @@ export class RoseLayout {
 
             radialAxisScene = {
                 axisLine: radialAxis.axisLine(),
-                domain: domainResult.domain,
+                domain: [dMin, dMax],
                 gridLines: radialAxis.gridLines(),
                 gridShape: "circle",
                 labelAngle: radialLabelAngle,
@@ -355,7 +434,7 @@ export class RoseLayout {
         const hitIndex = new RoseHitIndex(
             center,
             hitTargets,
-            spanInfo.startAngleRad,
+            effectiveStartAngleRad,
             totalSpanRad,
             K
         );
