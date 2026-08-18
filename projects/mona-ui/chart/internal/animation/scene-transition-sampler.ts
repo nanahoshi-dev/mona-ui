@@ -524,18 +524,34 @@ export class SceneTransitionSampler {
                 const sampledBar = sampledBarsByKey.get(key);
                 if (sampledBar) {
                     const isStackedBar = targetHit.stackGroup !== undefined;
-                    const hasPositiveHeight = sampledBar.height > 0;
-                    if (isStackedBar && !hasPositiveHeight) {
-                        bounds = undefined;
-                    } else if (hasPositiveHeight || !isStackedBar) {
-                        bounds = {
-                            height: Math.max(4, sampledBar.height),
-                            width: sampledBar.width,
-                            x: sampledBar.x,
-                            y: sampledBar.height === 0 ? sampledBar.y - 2 : sampledBar.y
-                        };
+                    if (toScene.orientation === "horizontal") {
+                        const hasPositiveWidth = sampledBar.width > 0;
+                        if (isStackedBar && !hasPositiveWidth) {
+                            bounds = undefined;
+                        } else if (hasPositiveWidth || !isStackedBar) {
+                            bounds = {
+                                height: sampledBar.height,
+                                width: Math.max(4, sampledBar.width),
+                                x: sampledBar.width === 0 ? sampledBar.x - 2 : sampledBar.x,
+                                y: sampledBar.y
+                            };
+                        } else {
+                            bounds = undefined;
+                        }
                     } else {
-                        bounds = undefined;
+                        const hasPositiveHeight = sampledBar.height > 0;
+                        if (isStackedBar && !hasPositiveHeight) {
+                            bounds = undefined;
+                        } else if (hasPositiveHeight || !isStackedBar) {
+                            bounds = {
+                                height: Math.max(4, sampledBar.height),
+                                width: sampledBar.width,
+                                x: sampledBar.x,
+                                y: sampledBar.height === 0 ? sampledBar.y - 2 : sampledBar.y
+                            };
+                        } else {
+                            bounds = undefined;
+                        }
                     }
                     visualBounds = {
                         height: sampledBar.height,
@@ -600,20 +616,41 @@ export class SceneTransitionSampler {
 
         // Interpolate interaction buckets with sampled hit geometry in linear O(H+B) time
         const sampledBuckets: ChartInteractionBucket[] = [];
+        const isHorizontal = toScene.orientation === "horizontal";
         for (const targetBucket of toScene.interactionBuckets) {
             const bucketHits = sampledHitsByX.get(targetBucket.xKey) ?? [];
             if (bucketHits.length === 0) {
                 continue;
             }
             const primaryHit = bucketHits[0];
-            const anchor = primaryHit
-                ? {
-                      x:
-                          primaryHit.point?.x ??
-                          (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : targetBucket.anchor.x),
-                      y: primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : targetBucket.anchor.y)
-                  }
-                : targetBucket.anchor;
+            let anchor: ChartPoint;
+            if (isHorizontal) {
+                let minCenterY = Number.POSITIVE_INFINITY;
+                let maxCenterY = Number.NEGATIVE_INFINITY;
+                let anchorX = targetBucket.anchor.x;
+                for (const hit of bucketHits) {
+                    if (hit.visualBounds) {
+                        const cy = hit.visualBounds.y + hit.visualBounds.height / 2;
+                        minCenterY = Math.min(minCenterY, cy);
+                        maxCenterY = Math.max(maxCenterY, cy);
+                        anchorX = hit.visualBounds.x + hit.visualBounds.width;
+                    }
+                }
+                const centerY =
+                    Number.isFinite(minCenterY) && Number.isFinite(maxCenterY)
+                        ? (minCenterY + maxCenterY) / 2
+                        : targetBucket.anchor.y;
+                anchor = { x: anchorX, y: centerY };
+            } else {
+                anchor = primaryHit
+                    ? {
+                          x:
+                              primaryHit.point?.x ??
+                              (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : targetBucket.anchor.x),
+                          y: primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : targetBucket.anchor.y)
+                      }
+                    : targetBucket.anchor;
+            }
 
             sampledBuckets.push({
                 anchor,
