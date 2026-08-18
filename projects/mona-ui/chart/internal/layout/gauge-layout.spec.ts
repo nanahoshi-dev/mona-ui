@@ -72,4 +72,42 @@ describe("GaugeLayout", () => {
         expect(seriesScene.needle).toBeDefined();
         expect(seriesScene.track).toBeDefined();
     });
+
+    it("returns empty hit targets and hasRenderableData false when series is invisible", () => {
+        const series = createMockGaugeSeries({
+            value: signal(75),
+            visible: signal(false)
+        });
+
+        const scene = GaugeLayout.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            rootData: [],
+            series,
+            styleResolver
+        });
+
+        expect(scene.hasRenderableData).toBe(false);
+        expect(scene.hitTargets.length).toBe(0);
+        expect(scene.interactionBuckets.length).toBe(0);
+    });
+
+    it("handles no-data and invalid value gracefully", () => {
+        const series = createMockGaugeSeries({
+            data: signal([]),
+            value: signal(undefined)
+        });
+
+        const scene = GaugeLayout.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            rootData: [],
+            series,
+            styleResolver
+        });
+
+        expect(scene.hasRenderableData).toBe(false);
+        expect(scene.hitTargets.length).toBe(0);
+        expect(scene.interactionBuckets.length).toBe(0);
+    });
 });
