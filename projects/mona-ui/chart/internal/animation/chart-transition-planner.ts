@@ -1,6 +1,8 @@
 import type {
     CartesianChartScene,
+    CartesianFunnelChartScene,
     CartesianHeatmapChartScene,
+    CartesianWaterfallChartScene,
     ChartScene,
     PolarArcChartScene,
     PolarAxisChartScene,
@@ -33,6 +35,22 @@ import type {
     ChartSeriesTransitionPlan,
     ChartTransitionPlan
 } from "./chart-transition-types";
+
+function haveSameRelativeOrder(prev: readonly string[], target: readonly string[]): boolean {
+    const targetSet = new Set(target);
+    const commonPrev = prev.filter(k => targetSet.has(k));
+    const prevSet = new Set(prev);
+    const commonTarget = target.filter(k => prevSet.has(k));
+    if (commonPrev.length !== commonTarget.length) {
+        return false;
+    }
+    for (let i = 0; i < commonPrev.length; i++) {
+        if (commonPrev[i] !== commonTarget[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 
 export class ChartTransitionPlanner {
     public static isPathTopologyCompatible(
@@ -342,6 +360,76 @@ export class ChartTransitionPlanner {
                     }
                 }
 
+                if (prevCartesian.cartesianKind === "funnel" && targetCartesian.cartesianKind === "funnel") {
+                    const prevFunnel = prevCartesian as CartesianFunnelChartScene;
+                    const targetFunnel = targetCartesian as CartesianFunnelChartScene;
+                    if (prevFunnel.orientation !== targetFunnel.orientation) {
+                        return {
+                            complexity,
+                            duration: options.duration,
+                            easing: options.easing,
+                            fromScene: previous,
+                            mode: "crossfade",
+                            seriesPlans: [],
+                            toScene: target,
+                            trigger
+                        };
+                    }
+                    const prevStages = prevFunnel.series[0]?.stages ?? [];
+                    const targetStages = targetFunnel.series[0]?.stages ?? [];
+                    const prevKeys = prevStages.map(s => s.animationKey);
+                    const targetKeys = targetStages.map(s => s.animationKey);
+                    if (!haveSameRelativeOrder(prevKeys, targetKeys)) {
+                        return {
+                            complexity,
+                            duration: options.duration,
+                            easing: options.easing,
+                            fromScene: previous,
+                            mode: "crossfade",
+                            seriesPlans: [],
+                            toScene: target,
+                            trigger
+                        };
+                    }
+                }
+
+                if (prevCartesian.cartesianKind === "waterfall" && targetCartesian.cartesianKind === "waterfall") {
+                    const prevWaterfall = prevCartesian as CartesianWaterfallChartScene;
+                    const targetWaterfall = targetCartesian as CartesianWaterfallChartScene;
+                    const prevBars = prevWaterfall.series[0]?.bars ?? [];
+                    const targetBars = targetWaterfall.series[0]?.bars ?? [];
+                    const prevKeys = prevBars.map(b => b.animationKey);
+                    const targetKeys = targetBars.map(b => b.animationKey);
+                    if (!haveSameRelativeOrder(prevKeys, targetKeys)) {
+                        return {
+                            complexity,
+                            duration: options.duration,
+                            easing: options.easing,
+                            fromScene: previous,
+                            mode: "crossfade",
+                            seriesPlans: [],
+                            toScene: target,
+                            trigger
+                        };
+                    }
+                    const prevBarsByKey = new Map(prevBars.map(b => [b.animationKey, b]));
+                    for (const tb of targetBars) {
+                        const pb = prevBarsByKey.get(tb.animationKey);
+                        if (pb && pb.kind !== tb.kind) {
+                            return {
+                                complexity,
+                                duration: options.duration,
+                                easing: options.easing,
+                                fromScene: previous,
+                                mode: "crossfade",
+                                seriesPlans: [],
+                                toScene: target,
+                                trigger
+                            };
+                        }
+                    }
+                }
+
                 if (
                     prevCartesian.cartesianKind === "xy" &&
                     targetCartesian.cartesianKind === "xy" &&
@@ -539,6 +627,10 @@ export class ChartTransitionPlanner {
                         independentMarks += s.marks.length;
                     } else if (s.type === "heatmap") {
                         independentMarks += s.cells.length;
+                    } else if (s.type === "funnel") {
+                        independentMarks += s.stages.length;
+                    } else if (s.type === "waterfall") {
+                        independentMarks += s.bars.length;
                     }
                 }
             } else if (sc.coordinateSystem === "polar") {

@@ -1,10 +1,19 @@
 import { describe, expect, it } from "vitest";
-import type { CartesianXYChartScene, PolarSectorChartScene } from "../scene/chart-scene";
+import type {
+    CartesianFunnelChartScene,
+    CartesianWaterfallChartScene,
+    CartesianXYChartScene,
+    PolarSectorChartScene
+} from "../scene/chart-scene";
 import type { ChartBarSeriesScene } from "../scene/cartesian-scene";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
 import { FinancialSeriesAnimationAdapter } from "./adapters/financial-animation-adapter";
+import { FunnelAnimationAdapter } from "./adapters/funnel-animation-adapter";
 import { RadialArcAnimationAdapter } from "./adapters/radial-arc-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
+import { WaterfallAnimationAdapter } from "./adapters/waterfall-animation-adapter";
+import { FunnelHitIndex } from "../interaction/funnel-hit-index";
+import { WaterfallHitIndex } from "../interaction/waterfall-hit-index";
 import { SceneTransitionSampler } from "./scene-transition-sampler";
 import type { ChartTransitionPlan } from "./chart-transition-types";
 
@@ -358,5 +367,296 @@ describe("SceneTransitionSampler", () => {
         const sampled = frameMid.scene as any;
         expect(sampled.series[0].renderOpacity).toBe(1);
         expect(sampled.series[0].marks[0].renderOpacity).toBeCloseTo(0.5, 2);
+    });
+
+    it("should sample waterfall scene and query sampled geometry without target-slot bias (FWF-C10)", () => {
+        const plotRect = { height: 300, width: 400, x: 50, y: 50 };
+        const fromBarC = {
+            animationKey: "wf:C",
+            barEnd: 150,
+            barStart: 100,
+            borderRadius: 0,
+            bounds: { height: 100, width: 60, x: 270, y: 100 },
+            category: "C",
+            color: "#10b981",
+            cumulativeAfter: 150,
+            cumulativeBefore: 100,
+            dataIndex: 2,
+            datum: {},
+            formattedCategory: "C",
+            formattedCumulativeAfter: "150",
+            formattedCumulativeBefore: "100",
+            formattedValue: "+50",
+            fromY: 200,
+            itemId: "C",
+            kind: "change" as const,
+            renderOpacity: 1,
+            renderOrder: 2,
+            toY: 100,
+            visualKind: "increase" as const
+        };
+
+        const toBarC = {
+            ...fromBarC,
+            bounds: { height: 100, width: 60, x: 170, y: 100 },
+            renderOrder: 1
+        };
+
+        const toHitTargetC = {
+            animationKey: "wf:C",
+            bounds: toBarC.bounds,
+            category: "C",
+            color: "#10b981",
+            dataIndex: 1,
+            datum: {},
+            formattedCategory: "C",
+            formattedValue: "+50",
+            fromValue: 100,
+            index: 1,
+            isPositive: true,
+            itemId: "C",
+            point: { x: 200, y: 150 },
+            renderOrder: 1,
+            seriesId: "wf1",
+            seriesName: "Cashflow",
+            seriesType: "waterfall" as const,
+            toValue: 150,
+            value: 50,
+            valueKind: "waterfall" as const,
+            visualBounds: toBarC.bounds,
+            xKey: "C",
+            xValue: "C",
+            yValue: 150
+        };
+
+        const fromScene: CartesianWaterfallChartScene = {
+            axes: [],
+            cartesianKind: "waterfall",
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 400,
+            hitIndex: new WaterfallHitIndex({ entries: [], plotRect }),
+            hitTargets: [],
+            interactionBuckets: [],
+            kindSignature: "change:increase",
+            legendItems: [],
+            plotRect,
+            sequenceSignature: '["wf:C"]',
+            series: [
+                {
+                    bars: [fromBarC],
+                    connectors: [],
+                    id: "wf1",
+                    kindSignature: "change:increase",
+                    labels: [],
+                    name: "Cashflow",
+                    renderOpacity: 1,
+                    sequenceSignature: '["wf:C"]',
+                    style: {
+                        borderRadius: 0,
+                        connectorColor: "#000",
+                        connectorWidth: 1,
+                        decreaseColor: "#ef4444",
+                        fillOpacity: 1,
+                        increaseColor: "#10b981",
+                        neutralColor: "#6b7280",
+                        strokeColor: "",
+                        strokeWidth: 0,
+                        subtotalColor: "#3b82f6",
+                        totalColor: "#3b82f6"
+                    },
+                    type: "waterfall"
+                }
+            ],
+            width: 500,
+            xAxisType: "category"
+        };
+
+        const toScene: CartesianWaterfallChartScene = {
+            ...fromScene,
+            hitTargets: [toHitTargetC],
+            series: [
+                {
+                    ...fromScene.series[0],
+                    bars: [toBarC]
+                }
+            ]
+        };
+
+        const adapter = new WaterfallAnimationAdapter();
+        const seriesPlan = adapter.createPlan(fromScene.series[0], toScene.series[0], {
+            options: { data: true, duration: 400, easing: "linear", enabled: true, initial: false, visibility: true },
+            plotRect,
+            trigger: "data"
+        });
+
+        const plan: ChartTransitionPlan = {
+            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            duration: 400,
+            easing: "linear",
+            fromScene,
+            mode: "morph",
+            seriesPlans: [seriesPlan],
+            toScene,
+            trigger: "data"
+        };
+
+        const frameMid = SceneTransitionSampler.sampleFrame(plan, 0.5);
+        const sampled = frameMid.scene as CartesianWaterfallChartScene;
+        const sampledBarC = sampled.series[0].bars[0];
+
+        // 1. Sampled C bounds lie between previous (x=270) and target (x=170), so x=220
+        expect(sampledBarC.bounds.x).toBeCloseTo(220, 1);
+
+        // 2. Query sampled C center returns C
+        const sampledCenter = { x: sampledBarC.bounds.x + sampledBarC.bounds.width / 2, y: sampledBarC.bounds.y + sampledBarC.bounds.height / 2 };
+        const nearestAtSampledCenter = sampled.hitIndex.query(sampledCenter);
+        expect(nearestAtSampledCenter).not.toBeNull();
+        expect(nearestAtSampledCenter?.itemId).toBe("C");
+
+        // 3. Query final target location (x=200, outside sampled bounds x=220..280) does NOT hit C
+        const nearestAtTargetLocation = sampled.hitIndex.query({ x: 180, y: 150 });
+        expect(nearestAtTargetLocation).toBeNull();
+    });
+
+    it("should sample funnel scene and query sampled geometry without target-slot bias (FWF-C10)", () => {
+        const plotRect = { height: 300, width: 400, x: 50, y: 50 };
+        const fromStage = {
+            animationKey: "fn:signups",
+            bounds: { height: 80, width: 200, x: 150, y: 200 },
+            category: "Signups",
+            dataIndex: 2,
+            datum: {},
+            fillColor: "#3b82f6",
+            formattedCategory: "Signups",
+            formattedValue: "100",
+            polygon: [
+                { x: 150, y: 200 },
+                { x: 350, y: 200 },
+                { x: 320, y: 280 },
+                { x: 180, y: 280 }
+            ] as const,
+            renderOpacity: 1,
+            renderOrder: 2,
+            sourceIndex: 2,
+            stageId: "signups",
+            stageIndex: 2,
+            textColor: "#ffffff",
+            value: 100
+        };
+
+        const toStage = {
+            ...fromStage,
+            bounds: { height: 80, width: 200, x: 150, y: 100 },
+            polygon: [
+                { x: 150, y: 100 },
+                { x: 350, y: 100 },
+                { x: 320, y: 180 },
+                { x: 180, y: 180 }
+            ] as const,
+            renderOrder: 1,
+            stageIndex: 1
+        };
+
+        const toHitTarget = {
+            animationKey: "fn:signups",
+            bounds: toStage.bounds,
+            category: "Signups",
+            color: "#3b82f6",
+            dataIndex: 1,
+            datum: {},
+            formattedCategory: "Signups",
+            formattedValue: "100",
+            index: 1,
+            isPositive: true,
+            itemId: "signups",
+            point: { x: 250, y: 140 },
+            renderOrder: 1,
+            seriesId: "fn1",
+            seriesName: "Pipeline",
+            seriesType: "funnel" as const,
+            value: 100,
+            valueKind: "scalar" as const,
+            visualBounds: toStage.bounds,
+            xKey: "signups",
+            xValue: "Signups",
+            yValue: 100
+        };
+
+        const fromScene: CartesianFunnelChartScene = {
+            axes: [],
+            cartesianKind: "funnel",
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 400,
+            hitIndex: new FunnelHitIndex({ entries: [], gap: 2, orientation: "vertical", plotRect, slotSpan: 80 }),
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            orientation: "vertical",
+            plotRect,
+            sequenceSignature: '["fn:signups"]',
+            series: [
+                {
+                    id: "fn1",
+                    labels: [],
+                    name: "Pipeline",
+                    orientation: "vertical",
+                    renderOpacity: 1,
+                    sequenceSignature: '["fn:signups"]',
+                    stages: [fromStage],
+                    style: { baseColor: "#3b82f6", fillOpacity: 1, strokeColor: "", strokeWidth: 0 },
+                    type: "funnel"
+                }
+            ],
+            width: 500
+        };
+
+        const toScene: CartesianFunnelChartScene = {
+            ...fromScene,
+            hitTargets: [toHitTarget],
+            series: [
+                {
+                    ...fromScene.series[0],
+                    stages: [toStage]
+                }
+            ]
+        };
+
+        const adapter = new FunnelAnimationAdapter();
+        const seriesPlan = adapter.createPlan(fromScene.series[0], toScene.series[0], {
+            options: { data: true, duration: 400, easing: "linear", enabled: true, initial: false, visibility: true },
+            plotRect,
+            trigger: "data"
+        });
+
+        const plan: ChartTransitionPlan = {
+            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            duration: 400,
+            easing: "linear",
+            fromScene,
+            mode: "morph",
+            seriesPlans: [seriesPlan],
+            toScene,
+            trigger: "data"
+        };
+
+        const frameMid = SceneTransitionSampler.sampleFrame(plan, 0.5);
+        const sampled = frameMid.scene as CartesianFunnelChartScene;
+        const sampledStage = sampled.series[0].stages[0];
+
+        // 1. Sampled polygon y positions lie halfway: y was 200..280, target 100..180 -> sampled is 150..230
+        expect(sampledStage.polygon[0].y).toBeCloseTo(150, 1);
+        expect(sampledStage.polygon[2].y).toBeCloseTo(230, 1);
+
+        // 2. Query sampled center returns stage
+        const sampledCenter = { x: 250, y: 190 };
+        const nearestAtSampledCenter = sampled.hitIndex.query(sampledCenter);
+        expect(nearestAtSampledCenter).not.toBeNull();
+        expect(nearestAtSampledCenter?.itemId).toBe("signups");
+
+        // 3. Query target-only location (y=110, outside sampled polygon y=150..230) does NOT hit
+        const nearestAtTargetLocation = sampled.hitIndex.query({ x: 250, y: 110 });
+        expect(nearestAtTargetLocation).toBeNull();
     });
 });

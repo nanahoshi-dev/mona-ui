@@ -50,8 +50,8 @@ import { RadialBarHitIndex } from "../interaction/radial-bar-hit-index";
 import { RoseHitIndex } from "../interaction/rose-hit-index";
 import { GaugeHitIndex } from "../interaction/gauge-hit-index";
 import { TreemapHitIndex } from "../interaction/treemap-hit-index";
-import { FunnelHitIndex } from "../interaction/funnel-hit-index";
-import { WaterfallHitIndex } from "../interaction/waterfall-hit-index";
+import { FunnelHitIndex, type FunnelHitEntry } from "../interaction/funnel-hit-index";
+import { WaterfallHitIndex, type WaterfallHitEntry } from "../interaction/waterfall-hit-index";
 
 export class SceneTransitionSampler {
     public static sampleFrame(plan: ChartTransitionPlan, progress: number): ChartAnimationRenderFrame {
@@ -1093,11 +1093,19 @@ export class SceneTransitionSampler {
         }
 
         const sampledHitTargets: SceneHitTarget[] = [];
-        for (const stage of sampledSeries.stages) {
+        const sampledEntries: FunnelHitEntry[] = [];
+        const sampledBuckets: ChartInteractionBucket[] = [];
+
+        for (let i = 0; i < sampledSeries.stages.length; i++) {
+            const stage = sampledSeries.stages[i];
             if ((stage.renderOpacity ?? 1) > 0.05 && stage.bounds.width > 0 && stage.bounds.height > 0) {
                 const targetHit = targetHitsByKey.get(stage.animationKey);
                 if (targetHit) {
-                    sampledHitTargets.push({
+                    const centerPoint: ChartPoint = {
+                        x: stage.bounds.x + stage.bounds.width / 2,
+                        y: stage.bounds.y + stage.bounds.height / 2
+                    };
+                    const hitTarget: SceneHitTarget = {
                         ...targetHit,
                         animationKey: stage.animationKey,
                         bounds: stage.bounds,
@@ -1109,10 +1117,7 @@ export class SceneTransitionSampler {
                         funnel: targetHit.funnel,
                         index: targetHit.index ?? stage.dataIndex,
                         itemId: stage.stageId,
-                        point: {
-                            x: stage.bounds.x + stage.bounds.width / 2,
-                            y: stage.bounds.y + stage.bounds.height / 2
-                        },
+                        point: centerPoint,
                         renderOrder: stage.renderOrder,
                         seriesId: sampledSeries.id,
                         seriesName: sampledSeries.name,
@@ -1121,24 +1126,38 @@ export class SceneTransitionSampler {
                         visualBounds: stage.bounds,
                         xKey: stage.stageId,
                         xValue: targetHit.xValue ?? stage.category
+                    };
+                    sampledHitTargets.push(hitTarget);
+                    sampledEntries.push({
+                        animationKey: stage.animationKey,
+                        bounds: stage.bounds,
+                        polygon: stage.polygon,
+                        target: hitTarget
+                    });
+                    sampledBuckets.push({
+                        anchor: centerPoint,
+                        hits: [hitTarget],
+                        order: i,
+                        xKey: stage.stageId,
+                        xValue: targetHit.xValue ?? stage.category
                     });
                 }
             }
         }
 
-        const hitIndex = new FunnelHitIndex(
-            toScene.plotRect,
-            toScene.orientation,
-            toScene.hitIndex.slotSpan,
-            toScene.hitIndex.gap,
-            sampledSeries.stages,
-            sampledHitTargets
-        );
+        const hitIndex = new FunnelHitIndex({
+            entries: sampledEntries,
+            gap: toScene.hitIndex.gap,
+            orientation: toScene.orientation,
+            plotRect: toScene.plotRect,
+            slotSpan: toScene.hitIndex.slotSpan
+        });
 
         return {
             ...toScene,
             hitIndex,
             hitTargets: sampledHitTargets,
+            interactionBuckets: sampledBuckets,
             series: [sampledSeries]
         };
     }
@@ -1167,13 +1186,22 @@ export class SceneTransitionSampler {
         }
 
         const sampledHitTargets: SceneHitTarget[] = [];
-        for (const bar of sampledSeries.bars) {
+        const sampledEntries: WaterfallHitEntry[] = [];
+        const sampledBuckets: ChartInteractionBucket[] = [];
+
+        for (let i = 0; i < sampledSeries.bars.length; i++) {
+            const bar = sampledSeries.bars[i];
             if ((bar.renderOpacity ?? 1) > 0.05 && bar.bounds.width > 0 && bar.bounds.height > 0) {
                 const targetHit = targetHitsByKey.get(bar.animationKey);
                 if (targetHit) {
-                    sampledHitTargets.push({
+                    const centerPoint: ChartPoint = {
+                        x: bar.bounds.x + bar.bounds.width / 2,
+                        y: bar.bounds.y + bar.bounds.height / 2
+                    };
+                    const hitTarget: SceneHitTarget = {
                         ...targetHit,
                         animationKey: bar.animationKey,
+                        borderRadius: bar.borderRadius,
                         bounds: bar.bounds,
                         color: bar.color,
                         dataIndex: targetHit.dataIndex ?? bar.dataIndex,
@@ -1183,10 +1211,7 @@ export class SceneTransitionSampler {
                         fromValue: targetHit.fromValue ?? bar.barStart,
                         index: targetHit.index ?? bar.dataIndex,
                         itemId: bar.itemId,
-                        point: {
-                            x: bar.bounds.x + bar.bounds.width / 2,
-                            y: bar.bounds.y + bar.bounds.height / 2
-                        },
+                        point: centerPoint,
                         renderOrder: bar.renderOrder,
                         seriesId: sampledSeries.id,
                         seriesName: sampledSeries.name,
@@ -1198,16 +1223,31 @@ export class SceneTransitionSampler {
                         xKey: bar.itemId,
                         xValue: targetHit.xValue ?? bar.category,
                         yValue: targetHit.yValue ?? bar.barEnd
+                    };
+                    sampledHitTargets.push(hitTarget);
+                    sampledEntries.push({
+                        animationKey: bar.animationKey,
+                        bounds: bar.bounds,
+                        isZeroChange: bar.isZeroChange ?? false,
+                        target: hitTarget
+                    });
+                    sampledBuckets.push({
+                        anchor: centerPoint,
+                        hits: [hitTarget],
+                        order: i,
+                        xKey: bar.itemId,
+                        xValue: targetHit.xValue ?? bar.category
                     });
                 }
             }
         }
 
-        const hitIndex = new WaterfallHitIndex(
-            toScene.plotRect,
-            sampledSeries.bars,
-            sampledHitTargets
-        );
+        const hitIndex = new WaterfallHitIndex({
+            bandwidth: toScene.hitIndex.bandwidth,
+            entries: sampledEntries,
+            plotRect: toScene.plotRect,
+            step: toScene.hitIndex.step
+        });
 
         let sampledAxes = toScene.axes;
         if (axisPlan) {
@@ -1219,6 +1259,7 @@ export class SceneTransitionSampler {
             axes: sampledAxes,
             hitIndex,
             hitTargets: sampledHitTargets,
+            interactionBuckets: sampledBuckets,
             series: [sampledSeries]
         };
     }
