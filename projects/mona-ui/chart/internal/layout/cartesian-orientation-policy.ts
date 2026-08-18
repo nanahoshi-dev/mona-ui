@@ -11,18 +11,33 @@ export class CartesianOrientationPolicy {
     public static resolve(
         effectiveSeries: readonly ChartCartesianSeriesRegistration[]
     ): CartesianOrientationResolution {
+        const diagnostics: string[] = [];
+
+        const getOrientation = (s: ChartCartesianSeriesRegistration): "horizontal" | "vertical" => {
+            if (s.type === "bar" || s.type === "rangeBar") {
+                const raw = "orientation" in s && s.orientation ? s.orientation() : "vertical";
+                if (raw === "horizontal" || raw === "vertical") {
+                    return raw;
+                }
+                diagnostics.push(
+                    `[MonaChart] Invalid orientation '${String(raw)}'. Falling back to 'vertical'.`
+                );
+                return "vertical";
+            }
+            return "vertical";
+        };
+
         const visibleSeries = effectiveSeries.filter(s => s.visible());
 
         if (visibleSeries.length === 0) {
             const hasHorizontalBarInEffective = effectiveSeries.some(s => {
                 if (s.type === "bar" || s.type === "rangeBar") {
-                    const orientation = "orientation" in s && s.orientation ? s.orientation() : "vertical";
-                    return orientation === "horizontal";
+                    return getOrientation(s) === "horizontal";
                 }
                 return false;
             });
             return {
-                diagnostics: [],
+                diagnostics,
                 orientation: hasHorizontalBarInEffective ? "horizontal" : "vertical",
                 valid: true
             };
@@ -30,27 +45,25 @@ export class CartesianOrientationPolicy {
 
         const hasHorizontalBar = visibleSeries.some(s => {
             if (s.type === "bar" || s.type === "rangeBar") {
-                const orientation = "orientation" in s && s.orientation ? s.orientation() : "vertical";
-                return orientation === "horizontal";
+                return getOrientation(s) === "horizontal";
             }
             return false;
         });
 
         if (!hasHorizontalBar) {
             return {
-                diagnostics: [],
+                diagnostics,
                 orientation: "vertical",
                 valid: true
             };
         }
 
-        const diagnostics: string[] = [];
-
-        // Financial series (Candlestick / OHLC) are strictly vertical
-        const hasFinancialSeries = visibleSeries.some(s => s.type === "candlestick" || s.type === "ohlc");
-        if (hasFinancialSeries) {
+        // Horizontal mode only supports Bar and Range Bar series
+        const incompatibleSeries = visibleSeries.filter(s => s.type !== "bar" && s.type !== "rangeBar");
+        if (incompatibleSeries.length > 0) {
+            const types = Array.from(new Set(incompatibleSeries.map(s => s.type))).join(", ");
             diagnostics.push(
-                "[MonaChart] Horizontal Bar/Range Bar series cannot be combined with Candlestick or OHLC series."
+                `[MonaChart] Horizontal Cartesian charts only support Bar and Range Bar series. Incompatible series type(s): ${types}.`
             );
             return {
                 diagnostics,
@@ -62,8 +75,7 @@ export class CartesianOrientationPolicy {
         // Check if all visible bar-like series use horizontal orientation
         const hasMixedOrientation = visibleSeries.some(s => {
             if (s.type === "bar" || s.type === "rangeBar") {
-                const orientation = "orientation" in s && s.orientation ? s.orientation() : "vertical";
-                return orientation !== "horizontal";
+                return getOrientation(s) !== "horizontal";
             }
             return false;
         });
@@ -80,7 +92,7 @@ export class CartesianOrientationPolicy {
         }
 
         return {
-            diagnostics: [],
+            diagnostics,
             orientation: "horizontal",
             valid: true
         };

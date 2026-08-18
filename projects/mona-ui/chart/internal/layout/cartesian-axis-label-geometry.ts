@@ -55,16 +55,16 @@ export class CartesianAxisLabelGeometry {
     public static createTickKey(axis: "x" | "y", axisType: string, value: unknown, index: number): string {
         if (axisType === "category") {
             const serialized = value !== undefined && value !== null ? String(value) : String(index);
-            return `category:${index}:${serialized}`;
+            return `axis:${axis}:category:${index}:${serialized}`;
         }
         if (axisType === "linear") {
-            return `linear:${value}`;
+            return `axis:${axis}:linear:${value}`;
         }
         if (axisType === "time" || axisType === "utc") {
             const epoch = value instanceof Date ? value.getTime() : String(value);
-            return `time:${epoch}`;
+            return `axis:${axis}:${axisType}:${epoch}`;
         }
-        return `${axis}:${axisType}:${index}:${String(value)}`;
+        return `axis:${axis}:${axisType}:${index}:${String(value)}`;
     }
 
     static #measureCanvas: HTMLCanvasElement | null = null;

@@ -8,7 +8,8 @@ import type {
 } from "../../models/chart-axis.models";
 import type { ChartAxisRegistrationBase } from "../context/chart-registration-context";
 import type { ChartAxisScene, ChartAxisSceneTick } from "../scene/cartesian-scene";
-import { clamp, isFiniteNumber } from "../utils/number-utils";
+import { formatXValue } from "../utils/chart-formatter";
+import { clamp, isFiniteNumber, normalizeNonNegativeNumber, normalizePositiveNumber, normalizeTickCount } from "../utils/number-utils";
 import { CartesianAxisLabelGeometry } from "./cartesian-axis-label-geometry";
 
 export interface CartesianScaleLike {
@@ -60,11 +61,11 @@ export class CartesianAxisLayoutEngine {
         const labelsEnabled = registration?.labels ? (registration.labels() ?? true) : true;
         const axisLine = registration?.axisLine ? registration.axisLine() : true;
         const hasTickMarks = registration?.tickMarks ? (registration.tickMarks() ?? false) : false;
-        const tickSize = registration?.tickSize ? (registration.tickSize() ?? 6) : 6;
-        const labelPadding = registration?.labelPadding ? (registration.labelPadding() ?? 4) : 4;
-        const labelMaxWidth = registration?.labelMaxWidth ? registration.labelMaxWidth() : undefined;
+        const tickSize = normalizeNonNegativeNumber(registration?.tickSize?.(), 6);
+        const labelPadding = normalizeNonNegativeNumber(registration?.labelPadding?.(), 4);
+        const labelMaxWidth = normalizePositiveNumber(registration?.labelMaxWidth?.());
         const title = registration?.title ? registration.title() : "";
-        const titlePadding = registration?.titlePadding ? (registration.titlePadding() ?? 6) : 6;
+        const titlePadding = normalizeNonNegativeNumber(registration?.titlePadding?.(), 6);
         const gridLines = registration?.gridLines?.() !== undefined ? (registration.gridLines() as boolean) : defaultGridLines;
         const userRotation = registration?.labelRotation ? registration.labelRotation() : 0;
 
@@ -116,7 +117,7 @@ export class CartesianAxisLayoutEngine {
                     ? effectiveFormatter(val, i)
                     : (registration?.formatter?.()
                         ? registration.formatter()!(val, i)
-                        : String(val ?? ""));
+                        : (val !== undefined && val !== null ? String(val) : ""));
                 const tickKey = CartesianAxisLabelGeometry.createTickKey(axis, "category", val, i);
                 rawTicks.push({
                     coordinate: coord,
@@ -127,19 +128,16 @@ export class CartesianAxisLayoutEngine {
                 });
             }
         } else {
-            const tickCount = registration?.tickCount?.() ?? 5;
+            const tickCount = normalizeTickCount(registration?.tickCount?.(), 5);
             const generated = typeof scale.ticks === "function" ? scale.ticks(tickCount) : [];
             for (let i = 0; i < generated.length; i++) {
                 const item = generated[i];
                 const val = item !== null && typeof item === "object" && "value" in item ? (item as { value: unknown }).value : item;
-                const formatted = item !== null && typeof item === "object" && "formattedValue" in item
-                    ? (item as { formattedValue: string }).formattedValue
-                    : String(val instanceof Date ? val.toLocaleDateString() : val);
                 const formattedValue = effectiveFormatter
                     ? effectiveFormatter(val, i)
                     : (registration?.formatter?.()
                         ? registration.formatter()!(val, i)
-                        : formatted);
+                        : formatXValue(val, i, undefined, axis === "x" ? (axisType as ChartXAxisType) : undefined));
                 const tickKey = CartesianAxisLabelGeometry.createTickKey(axis, axisType, val, i);
                 rawTicks.push({
                     coordinate: mapValue(val),
@@ -178,15 +176,19 @@ export class CartesianAxisLayoutEngine {
         if (normRotation === "auto") {
             if (axis === "x" && axisType === "category" && intermediateTicks.length > 1) {
                 const maxUnrotatedWidth = intermediateTicks.reduce((max, t) => Math.max(max, t.unrotatedWidth), 12);
-                const categoryStep = bandwidth > 0
-                    ? bandwidth
-                    : Math.abs(intermediateTicks[1].coordinate - intermediateTicks[0].coordinate);
+                const maxUnrotatedHeight = intermediateTicks.reduce((max, t) => Math.max(max, t.unrotatedHeight), 16);
+                const categoryStep = typeof scale.step === "function"
+                    ? scale.step()
+                    : (bandwidth > 0
+                        ? bandwidth
+                        : Math.abs(intermediateTicks[1].coordinate - intermediateTicks[0].coordinate));
                 if (maxUnrotatedWidth > categoryStep - 8) {
-                    const proj45 = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, 16, 45);
+                    const proj45 = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, maxUnrotatedHeight, 45);
+                    const isTop = position === "top";
                     if (proj45.projectedWidth <= categoryStep + 4) {
-                        resolvedRotation = 45;
+                        resolvedRotation = isTop ? 45 : -45;
                     } else {
-                        resolvedRotation = 90;
+                        resolvedRotation = isTop ? 90 : -90;
                     }
                 } else {
                     resolvedRotation = 0;
@@ -217,11 +219,13 @@ export class CartesianAxisLayoutEngine {
         // 5. Category label thinning
         if (labelsEnabled && axisType === "category" && intermediateTicks.length > 0) {
             const maxExtentAlong = intermediateTicks.reduce((max, t) => Math.max(max, t.extentAlongAxis), 12);
-            const categoryStep = bandwidth > 0
-                ? bandwidth
-                : (intermediateTicks.length > 1
-                    ? Math.abs(intermediateTicks[1].coordinate - intermediateTicks[0].coordinate)
-                    : containerSize);
+            const categoryStep = typeof scale.step === "function"
+                ? scale.step()
+                : (bandwidth > 0
+                    ? bandwidth
+                    : (intermediateTicks.length > 1
+                        ? Math.abs(intermediateTicks[1].coordinate - intermediateTicks[0].coordinate)
+                        : containerSize));
             const thinningFlags = CartesianAxisLabelGeometry.resolveCategoryLabelThinning({
                 categoryCount: intermediateTicks.length,
                 categoryStep,

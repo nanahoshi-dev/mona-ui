@@ -113,7 +113,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [barSeries],
-            palette: ["#3b82f6"],
             xAxis,
             yAxis
         });
@@ -153,7 +152,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 400,
             containerWidth: 600,
             effectiveSeries: [barSeries1, barSeries2],
-            palette: ["#3b82f6", "#ef4444"],
             xAxis,
             yAxis
         });
@@ -184,7 +182,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [barSeries1, barSeries2],
-            palette: ["#3b82f6", "#10b981"],
             xAxis,
             yAxis
         });
@@ -221,7 +218,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [barSeries1, barSeries2],
-            palette: ["#3b82f6", "#10b981"],
             xAxis,
             yAxis
         });
@@ -245,7 +241,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [rangeBarSeries],
-            palette: ["#10b981"],
             xAxis,
             yAxis
         });
@@ -273,13 +268,325 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [barSeries],
-            palette: ["#3b82f6"],
             xAxis,
             yAxis
         });
 
         const target = scene.hitTargets[0];
-        expect(target.bounds?.width).toBe(0);
+        expect(target.bounds).toBeUndefined();
         expect(target.visualBounds?.width).toBe(4);
+    });
+
+    it("omits non-finite values in unstacked horizontal bars", () => {
+        const barSeries = createMockBarSeries({
+            data: signal([{ cat: "Q1", val: 100 }, { cat: "Q2", val: Number.NaN }, { cat: "Q3", val: null }])
+        });
+        const xAxis = createMockXAxis();
+        const yAxis = createMockYAxis();
+
+        const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeries],
+            xAxis,
+            yAxis
+        });
+
+        const barScene = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+        expect(barScene.bars.length).toBe(1);
+        expect(barScene.bars[0].yValue).toBe(100);
+        expect(barScene.bars[0].xValue).toBe("Q1");
+    });
+
+    it("emits diagnostics when non-linear X axis or non-category Y axis is configured", () => {
+        const barSeries = createMockBarSeries();
+        const xAxis = createMockXAxis({ type: signal("category" as any) });
+        const yAxis = createMockYAxis({ type: signal("linear" as any) });
+        const warned = new Set<string>();
+
+        CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeries],
+            warnedDiagnosticSignatures: warned,
+            xAxis,
+            yAxis
+        });
+
+        expect(warned.size).toBe(2);
+    });
+
+    it("clamps horizontal baseline to plot left when explicit X domain is positive-only", () => {
+        const barSeries = createMockBarSeries({
+            data: signal([{ cat: "Q1", val: 75 }])
+        });
+        const xAxis = createMockXAxis({
+            min: signal(50),
+            max: signal(100)
+        });
+        const yAxis = createMockYAxis();
+
+        const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeries],
+            xAxis,
+            yAxis
+        });
+
+        const barScene = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+        const bar = barScene.bars[0];
+        // Baseline must be clamped to plot left (plotRect.x), not offscreen left
+        expect(bar.valueStartPixel).toBe(scene.plotRect.x);
+        expect(bar.x).toBe(scene.plotRect.x);
+        expect(bar.width).toBeCloseTo(scene.plotRect.width / 2, 1); // 75 is halfway between 50 and 100
+    });
+
+    it("clamps horizontal baseline to plot right when explicit X domain is negative-only", () => {
+        const barSeries = createMockBarSeries({
+            data: signal([{ cat: "Q1", val: -75 }])
+        });
+        const xAxis = createMockXAxis({
+            min: signal(-100),
+            max: signal(-50)
+        });
+        const yAxis = createMockYAxis();
+
+        const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeries],
+            xAxis,
+            yAxis
+        });
+
+        const barScene = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+        const bar = barScene.bars[0];
+        // Baseline must be clamped to plot right (plotRect.x + plotRect.width)
+        expect(bar.valueStartPixel).toBe(scene.plotRect.x + scene.plotRect.width);
+        expect(bar.x + bar.width).toBeCloseTo(scene.plotRect.x + scene.plotRect.width, 1);
+        expect(bar.width).toBeCloseTo(scene.plotRect.width / 2, 1);
+    });
+
+    it("retains zero marks at plot bounds when explicit domain excludes zero", () => {
+        const barSeriesPos = createMockBarSeries({
+            data: signal([{ cat: "Q1", val: 0 }])
+        });
+        const xAxisPos = createMockXAxis({
+            min: signal(10),
+            max: signal(20)
+        });
+        const scenePos = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeriesPos],
+            xAxis: xAxisPos,
+            yAxis: createMockYAxis()
+        });
+        expect(scenePos.hasRenderableData).toBe(true);
+        const barPos = (scenePos.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene).bars[0];
+        expect(barPos.valueStartPixel).toBe(scenePos.plotRect.x);
+        expect(barPos.valueEndPixel).toBe(scenePos.plotRect.x);
+        expect(barPos.width).toBe(0);
+
+        const barSeriesNeg = createMockBarSeries({
+            data: signal([{ cat: "Q1", val: 0 }])
+        });
+        const xAxisNeg = createMockXAxis({
+            min: signal(-20),
+            max: signal(-10)
+        });
+        const sceneNeg = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeriesNeg],
+            xAxis: xAxisNeg,
+            yAxis: createMockYAxis()
+        });
+        expect(sceneNeg.hasRenderableData).toBe(true);
+        const barNeg = (sceneNeg.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene).bars[0];
+        expect(barNeg.valueStartPixel).toBe(sceneNeg.plotRect.x + sceneNeg.plotRect.width);
+        expect(barNeg.valueEndPixel).toBe(sceneNeg.plotRect.x + sceneNeg.plotRect.width);
+        expect(barNeg.width).toBe(0);
+    });
+
+    it("does NOT widen zero-valued stacked contributions while unstacked zero marks get 4px visual bounds", () => {
+        const stackSeries1 = createMockBarSeries({
+            id: "s1",
+            stack: signal("grp"),
+            data: signal([{ cat: "Q1", val: 0 }])
+        });
+        const stackSeries2 = createMockBarSeries({
+            id: "s2",
+            stack: signal("grp"),
+            data: signal([{ cat: "Q1", val: 50 }])
+        });
+        const unstackedSeries = createMockBarSeries({
+            id: "u1",
+            data: signal([{ cat: "Q1", val: 0 }])
+        });
+
+        const stackedScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [stackSeries1, stackSeries2],
+            xAxis: createMockXAxis(),
+            yAxis: createMockYAxis()
+        });
+
+        const stackedZeroHit = stackedScene.hitTargets.find(h => h.seriesId === "s1");
+        expect(stackedZeroHit).toBeDefined();
+        expect(stackedZeroHit?.bounds).toBeUndefined();
+        // Stacked zero contribution must NOT have fake 4px widened visualBounds
+        expect(stackedZeroHit?.visualBounds?.width).toBe(0);
+
+        const unstackedScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [unstackedSeries],
+            xAxis: createMockXAxis(),
+            yAxis: createMockYAxis()
+        });
+
+        const unstackedZeroHit = unstackedScene.hitTargets[0];
+        expect(unstackedZeroHit.bounds).toBeUndefined();
+        // Unstacked zero mark keeps 4px tolerance
+        expect(unstackedZeroHit.visualBounds?.width).toBe(4);
+    });
+
+    it("respects keyField for unstacked horizontal bar and range bar identity", () => {
+        const barSeries = createMockBarSeries({
+            data: signal([
+                { id: "row-a", cat: "SameCategory", val: 10 },
+                { id: "row-b", cat: "SameCategory", val: 20 }
+            ]),
+            keyField: signal("id")
+        });
+
+        const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeries],
+            xAxis: createMockXAxis(),
+            yAxis: createMockYAxis()
+        });
+
+        const barScene = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+        expect(barScene.bars.length).toBe(2);
+        expect(barScene.bars[0].animationKey).toContain("row-a");
+        expect(barScene.bars[1].animationKey).toContain("row-b");
+        expect(barScene.bars[0].animationKey).not.toBe(barScene.bars[1].animationKey);
+
+        const rangeSeries = createMockRangeBarSeries({
+            data: signal([
+                { id: "range-a", cat: "SameCategory", from: 5, to: 15 },
+                { id: "range-b", cat: "SameCategory", from: 20, to: 30 }
+            ]),
+            keyField: signal("id")
+        });
+
+        const rangeScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [rangeSeries],
+            xAxis: createMockXAxis(),
+            yAxis: createMockYAxis()
+        });
+
+        const rScene = rangeScene.series[0] as import("../scene/cartesian-scene").ChartRangeBarSeriesScene;
+        expect(rScene.bars.length).toBe(2);
+        expect(rScene.bars[0].animationKey).toContain("range-a");
+        expect(rScene.bars[1].animationKey).toContain("range-b");
+        expect(rScene.bars[0].animationKey).not.toBe(rScene.bars[1].animationKey);
+    });
+
+    it("omits invalid Range Bar endpoints and handles equal 0-0 range correctly", () => {
+        const rangeSeries = createMockRangeBarSeries({
+            data: signal([
+                { cat: "Q1", from: 10, to: Number.NaN },
+                { cat: "Q2", from: Number.POSITIVE_INFINITY, to: 50 },
+                { cat: "Q3", from: null, to: null },
+                { cat: "Q4", from: "invalid", to: 100 },
+                { cat: "Q5", from: 0, to: 0 }
+            ])
+        });
+
+        const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [rangeSeries],
+            xAxis: createMockXAxis(),
+            yAxis: createMockYAxis()
+        });
+
+        expect(scene.hasRenderableData).toBe(true);
+        const rScene = scene.series[0] as import("../scene/cartesian-scene").ChartRangeBarSeriesScene;
+        expect(rScene.bars.length).toBe(1);
+        expect(rScene.bars[0].xValue).toBe("Q5");
+        expect(rScene.bars[0].fromValue).toBe(0);
+        expect(rScene.bars[0].toValue).toBe(0);
+    });
+
+    it("evaluates hasRenderableData correctly for all-invalid vs single-valid horizontal datasets", () => {
+        const invalidBar = createMockBarSeries({
+            data: signal([{ cat: "Q1", val: Number.NaN }, { cat: "Q2", val: null }])
+        });
+        const invalidScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [invalidBar],
+            xAxis: createMockXAxis(),
+            yAxis: createMockYAxis()
+        });
+        expect(invalidScene.hasRenderableData).toBe(false);
+
+        const validZeroBar = createMockBarSeries({
+            data: signal([{ cat: "Q1", val: 0 }])
+        });
+        const validScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [validZeroBar],
+            xAxis: createMockXAxis(),
+            yAxis: createMockYAxis()
+        });
+        expect(validScene.hasRenderableData).toBe(true);
+    });
+
+    it("maintains canonical retained stack entry mapping for duplicate categories", () => {
+        const s1 = createMockBarSeries({
+            id: "s1",
+            stack: signal("grp"),
+            data: signal([
+                { cat: "Q1", val: 10 },
+                { cat: "Q1", val: 99 }
+            ])
+        });
+        const s2 = createMockBarSeries({
+            id: "s2",
+            stack: signal("grp"),
+            data: signal([{ cat: "Q1", val: 20 }])
+        });
+
+        const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [s1, s2],
+            xAxis: createMockXAxis(),
+            yAxis: createMockYAxis()
+        });
+
+        const s1Scene = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+        const s2Scene = scene.series[1] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+
+        // Stack engine retains deduplicated canonical category entries
+        expect(s1Scene.bars.length).toBe(1);
+        expect(s2Scene.bars.length).toBe(1);
+        expect(s1Scene.bars[0].yValue).toBe(10);
+        expect(s2Scene.bars[0].yValue).toBe(20);
+        expect(s1Scene.bars[0].stackStartValue).toBe(0);
+        expect(s1Scene.bars[0].stackEndValue).toBe(10);
+        expect(s2Scene.bars[0].stackStartValue).toBe(10);
+        expect(s2Scene.bars[0].stackEndValue).toBe(30);
     });
 });

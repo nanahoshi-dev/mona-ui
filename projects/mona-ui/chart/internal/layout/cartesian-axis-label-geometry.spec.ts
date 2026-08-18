@@ -50,16 +50,16 @@ describe("CartesianAxisLabelGeometry", () => {
 
     describe("createTickKey", () => {
         it("creates category tick key", () => {
-            expect(CartesianAxisLabelGeometry.createTickKey("x", "category", "Q1", 0)).toBe("category:0:Q1");
+            expect(CartesianAxisLabelGeometry.createTickKey("x", "category", "Q1", 0)).toBe("axis:x:category:0:Q1");
         });
 
         it("creates linear tick key", () => {
-            expect(CartesianAxisLabelGeometry.createTickKey("y", "linear", 50, 2)).toBe("linear:50");
+            expect(CartesianAxisLabelGeometry.createTickKey("y", "linear", 50, 2)).toBe("axis:y:linear:50");
         });
 
         it("creates time tick key", () => {
             const date = new Date(2026, 0, 1);
-            expect(CartesianAxisLabelGeometry.createTickKey("x", "time", date, 0)).toBe(`time:${date.getTime()}`);
+            expect(CartesianAxisLabelGeometry.createTickKey("x", "time", date, 0)).toBe(`axis:x:time:${date.getTime()}`);
         });
     });
 

@@ -87,21 +87,21 @@ describe("CartesianAxisLayoutEngine", () => {
         });
 
         expect(result.axisScene.ticks.length).toBe(3);
-        expect(result.axisScene.ticks[0].tickKey).toBe("category:0:Jan");
+        expect(result.axisScene.ticks[0].tickKey).toBe("axis:x:category:0:Jan");
         expect(result.axisScene.ticks[0].labelVisible).toBe(true);
         expect(result.gutter).toBeGreaterThan(15);
     });
 
-    it("auto-rotates dense X category labels when collision is detected", () => {
+    it("auto-rotates dense bottom X category labels to negative angles (-45 or -90)", () => {
         const categories = ["LongCategoryOne", "LongCategoryTwo", "LongCategoryThree", "LongCategoryFour"];
         const reg = createXAxisReg({ labelRotation: signal("auto") });
         const scale = new BandScale(categories, [0, 200]); // tight bandwidth = 50px
 
         const measurements = new Map([
-            ["category:0:LongCategoryOne", { height: 16, width: 120 }],
-            ["category:1:LongCategoryTwo", { height: 16, width: 120 }],
-            ["category:2:LongCategoryThree", { height: 16, width: 120 }],
-            ["category:3:LongCategoryFour", { height: 16, width: 120 }]
+            ["axis:x:category:0:LongCategoryOne", { height: 16, width: 120 }],
+            ["axis:x:category:1:LongCategoryTwo", { height: 16, width: 120 }],
+            ["axis:x:category:2:LongCategoryThree", { height: 16, width: 120 }],
+            ["axis:x:category:3:LongCategoryFour", { height: 16, width: 120 }]
         ]);
 
         const result = CartesianAxisLayoutEngine.computeAxisLayout({
@@ -116,7 +116,36 @@ describe("CartesianAxisLayoutEngine", () => {
             scale
         });
 
-        // 120px unrotated width exceeds 50px bandwidth, auto-rotation should pick 45 or 90
+        // Bottom X outward rotation is negative (-45 or -90)
+        expect(result.resolvedRotation).toBeLessThan(0);
+        expect(result.axisScene.labelRotation).toBe(result.resolvedRotation);
+    });
+
+    it("auto-rotates dense top X category labels to positive angles (+45 or +90)", () => {
+        const categories = ["LongCategoryOne", "LongCategoryTwo", "LongCategoryThree", "LongCategoryFour"];
+        const reg = createXAxisReg({ labelRotation: signal("auto"), position: signal("top") });
+        const scale = new BandScale(categories, [0, 200]);
+
+        const measurements = new Map([
+            ["axis:x:category:0:LongCategoryOne", { height: 16, width: 120 }],
+            ["axis:x:category:1:LongCategoryTwo", { height: 16, width: 120 }],
+            ["axis:x:category:2:LongCategoryThree", { height: 16, width: 120 }],
+            ["axis:x:category:3:LongCategoryFour", { height: 16, width: 120 }]
+        ]);
+
+        const result = CartesianAxisLayoutEngine.computeAxisLayout({
+            axis: "x",
+            axisType: "category",
+            containerSize: 200,
+            defaultGridLines: false,
+            measurements,
+            plotGutterConstraint: 150,
+            position: "top",
+            registration: reg,
+            scale
+        });
+
+        // Top X outward rotation is positive (+45 or +90)
         expect(result.resolvedRotation).toBeGreaterThan(0);
         expect(result.axisScene.labelRotation).toBe(result.resolvedRotation);
     });
@@ -124,7 +153,7 @@ describe("CartesianAxisLayoutEngine", () => {
     it("applies labelMaxWidth to clamp label dimensions before rotation", () => {
         const reg = createXAxisReg({ labelMaxWidth: signal(40) });
         const scale = new BandScale(["A"], [0, 100]);
-        const measurements = new Map([["category:0:A", { height: 16, width: 100 }]]);
+        const measurements = new Map([["axis:x:category:0:A", { height: 16, width: 100 }]]);
 
         const result = CartesianAxisLayoutEngine.computeAxisLayout({
             axis: "x",
@@ -139,6 +168,32 @@ describe("CartesianAxisLayoutEngine", () => {
         });
 
         expect(result.axisScene.ticks[0].unrotatedWidth).toBe(40);
+    });
+
+    it("normalizes NaN, negative, or invalid presentation inputs cleanly", () => {
+        const reg = createXAxisReg({
+            labelPadding: signal(Number.NaN as any),
+            tickCount: signal(-5),
+            tickSize: signal(-10 as any),
+            titlePadding: signal(Number.POSITIVE_INFINITY as any)
+        });
+        const scale = new LinearScale([0, 100], [0, 200]);
+
+        const result = CartesianAxisLayoutEngine.computeAxisLayout({
+            axis: "x",
+            axisType: "linear",
+            containerSize: 200,
+            defaultGridLines: false,
+            plotGutterConstraint: 100,
+            position: "bottom",
+            registration: reg,
+            scale
+        });
+
+        expect(result.axisScene.tickSize).toBe(6);
+        expect(result.axisScene.labelPadding).toBe(4);
+        expect(result.axisScene.titlePadding).toBe(6);
+        expect(result.axisScene.ticks.length).toBeGreaterThan(0);
     });
 
     it("incorporates tickMarks and titlePadding in gutter calculation", () => {
