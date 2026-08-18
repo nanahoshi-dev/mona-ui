@@ -82,6 +82,60 @@
                     }
                 </div>
             </div>
+        } @else if (context.point.seriesType === "funnel") {
+            <div class="flex items-center gap-1.5 mb-1">
+                <span
+                    class="inline-block h-2 w-2 rounded-full flex-shrink-0"
+                    [style.background-color]="context.point.color"></span>
+                <span class="font-semibold text-foreground">{{ context.point.formattedCategory || context.point.formattedX || context.point.seriesName }}</span>
+            </div>
+            <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                <div>
+                    Value: <span class="font-medium text-foreground">{{ context.point.funnel?.formattedValue || context.point.formattedY }}</span>
+                </div>
+                @if (context.point.funnel?.formattedConversionRate) {
+                    <div>
+                        Conversion: <span class="font-medium text-foreground">{{ context.point.funnel!.formattedConversionRate }}</span>
+                    </div>
+                }
+                @if (context.point.funnel?.formattedOverallConversionRate) {
+                    <div>
+                        Overall: <span class="font-medium text-foreground">{{ context.point.funnel!.formattedOverallConversionRate }}</span>
+                    </div>
+                }
+                @if (context.point.funnel?.dropOff !== undefined && context.point.funnel!.dropOff > 0) {
+                    <div>
+                        Drop-off: <span class="font-medium text-foreground">{{ context.point.funnel!.dropOff }}</span>
+                    </div>
+                }
+            </div>
+        } @else if (context.point.seriesType === "waterfall") {
+            <div class="flex items-center gap-1.5 mb-1">
+                <span
+                    class="inline-block h-2 w-2 rounded-full flex-shrink-0"
+                    [style.background-color]="context.point.color"></span>
+                <span class="font-semibold text-foreground">{{ context.point.formattedCategory || context.point.formattedX || context.point.seriesName }}</span>
+            </div>
+            <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                @if (context.point.waterfall?.kind === "change") {
+                    <div>
+                        Change: <span class="font-medium text-foreground">{{ context.point.waterfall?.formattedDelta || context.point.formattedY }}</span>
+                    </div>
+                    @if (context.point.waterfall?.formattedCumulativeBefore && context.point.waterfall?.formattedCumulativeAfter) {
+                        <div>
+                            Running Total: <span class="font-medium text-foreground">{{ context.point.waterfall!.formattedCumulativeBefore }} → {{ context.point.waterfall!.formattedCumulativeAfter }}</span>
+                        </div>
+                    } @else if (context.point.waterfall?.formattedCumulativeAfter) {
+                        <div>
+                            Running Total: <span class="font-medium text-foreground">{{ context.point.waterfall!.formattedCumulativeAfter }}</span>
+                        </div>
+                    }
+                } @else {
+                    <div>
+                        Value: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                    </div>
+                }
+            </div>
         } @else if (context.shared) {
             <div class="mb-1 font-semibold text-foreground">{{ context.point.formattedX }}</div>
             <div class="flex flex-col gap-1.5">
