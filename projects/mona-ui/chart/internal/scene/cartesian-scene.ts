@@ -118,6 +118,7 @@ export interface ChartRangeAreaSeriesScene {
 export interface ChartFinancialSeriesStyle {
     readonly color?: string;
     readonly fallingColor: string;
+    readonly hollowFillColor?: string;
     readonly neutralColor: string;
     readonly opacity?: number;
     readonly risingColor: string;

@@ -82,8 +82,12 @@ export interface SceneRangeHitValue {
 }
 
 export interface SceneFinancialHitValue {
+    readonly change?: number;
+    readonly changePercentage?: number;
     readonly close: number;
     readonly direction: ChartFinancialDirection;
+    readonly formattedChange?: string;
+    readonly formattedChangePercentage?: string;
     readonly formattedClose?: string;
     readonly formattedHigh?: string;
     readonly formattedLow?: string;
@@ -91,6 +95,7 @@ export interface SceneFinancialHitValue {
     readonly high: number;
     readonly low: number;
     readonly open: number;
+    readonly valueKind: "ohlc";
 }
 
 export interface SceneCandlestickMark {
