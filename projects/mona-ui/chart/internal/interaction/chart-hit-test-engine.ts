@@ -75,7 +75,7 @@ export class ChartHitTestEngine {
         }
 
         const cartesianScene = scene as CartesianXYChartScene;
-        const barTargets = cartesianScene.barHitTargets ?? hitTargets;
+        const barTargets = cartesianScene.barHitTargets ?? hitTargets.filter(t => t.bounds && (t.seriesType === "bar" || t.seriesType === "rangeBar"));
         const pointSpatialIndex = cartesianScene.pointSpatialIndex ?? cartesianScene.markerSpatialIndex;
         const candidates = pointSpatialIndex
             ? pointSpatialIndex.query(pointer, maxHoverDistance)
@@ -97,7 +97,32 @@ export class ChartHitTestEngine {
                 }
             }
 
-            // 2. Direct marker circle containment test (visual radius)
+            // 2. Direct Financial indexed hit test
+            if (cartesianScene.financialIndex) {
+                const finHits = cartesianScene.financialIndex.query(pointer);
+                if (finHits.length > 0) {
+                    let topFinHit = finHits[0];
+                    let maxRenderOrder = topFinHit.renderOrder ?? 0;
+                    for (let i = 1; i < finHits.length; i++) {
+                        const candidate = finHits[i];
+                        const order = candidate.renderOrder ?? 0;
+                        if (order >= maxRenderOrder) {
+                            maxRenderOrder = order;
+                            topFinHit = candidate;
+                        }
+                    }
+                    const bucket = cartesianScene.interactionBucketLookup?.get(topFinHit.xKey) ??
+                        interactionBuckets?.find(b => b.xKey === topFinHit.xKey);
+                    const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === topFinHit.xKey);
+                    return {
+                        activeHitTarget: topFinHit,
+                        activeHits: sameXHits,
+                        pointerPosition: pointer
+                    };
+                }
+            }
+
+            // 3. Direct marker circle containment test (visual radius)
             let topContainedMarker: SceneHitTarget | null = null;
             let topRenderOrder = Number.NEGATIVE_INFINITY;
 
@@ -143,7 +168,7 @@ export class ChartHitTestEngine {
                 };
             }
 
-            // 3. Nearest X bucket
+            // 4. Nearest X bucket
             if (interactionBuckets && interactionBuckets.length > 0) {
                 const nearestBucket = findNearestInteractionBucketByX(interactionBuckets, pointer.x);
                 if (nearestBucket) {
@@ -199,7 +224,29 @@ export class ChartHitTestEngine {
             }
         }
 
-        // 2. Direct marker circle containment test (with top renderOrder selection for overlapping markers)
+        // 2. Direct Financial indexed hit test
+        if (cartesianScene.financialIndex) {
+            const finHits = cartesianScene.financialIndex.query(pointer);
+            if (finHits.length > 0) {
+                let topFinHit = finHits[0];
+                let maxRenderOrder = topFinHit.renderOrder ?? 0;
+                for (let i = 1; i < finHits.length; i++) {
+                    const candidate = finHits[i];
+                    const order = candidate.renderOrder ?? 0;
+                    if (order >= maxRenderOrder) {
+                        maxRenderOrder = order;
+                        topFinHit = candidate;
+                    }
+                }
+                return {
+                    activeHitTarget: topFinHit,
+                    activeHits: [topFinHit],
+                    pointerPosition: pointer
+                };
+            }
+        }
+
+        // 3. Direct marker circle containment test (with top renderOrder selection for overlapping markers)
         let topContainedMarker: SceneHitTarget | null = null;
         let topRenderOrder = Number.NEGATIVE_INFINITY;
 
@@ -225,7 +272,7 @@ export class ChartHitTestEngine {
             };
         }
 
-        // 3. Range Area band containment test
+        // 4. Range Area band containment test
         if (interactionBuckets && interactionBuckets.length > 0) {
             const nearestBucket = findNearestInteractionBucketByX(interactionBuckets, pointer.x);
             if (nearestBucket) {
@@ -263,7 +310,7 @@ export class ChartHitTestEngine {
             }
         }
 
-        // 4. Line/area/marker nearest point fallback
+        // 5. Line/area/marker nearest point fallback
         let nearestTarget: SceneHitTarget | null = null;
         let minDistance = Number.POSITIVE_INFINITY;
 

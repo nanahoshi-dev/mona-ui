@@ -423,4 +423,51 @@ describe("ChartHitTestEngine", () => {
             expect(hit.activeHitTarget).not.toBeNull();
         });
     });
+
+    describe("Financial Hit Testing (FIN2-010, FIN2-011)", () => {
+        const createFinTarget = (id: string, renderOrder: number): SceneHitTarget => ({
+            bounds: { height: 100, width: 20, x: 90, y: 50 },
+            close: 105,
+            datum: { id },
+            high: 110,
+            index: 0,
+            low: 90,
+            open: 100,
+            renderOrder,
+            seriesId: id,
+            seriesName: `Series ${id}`,
+            seriesType: "candlestick",
+            valueKind: "ohlc",
+            visualBounds: { height: 100, width: 20, x: 90, y: 50 },
+            xKey: "Jan",
+            xValue: "Jan"
+        });
+
+        it("should select top renderOrder financial mark when financial index matches multiple candidates", () => {
+            const targetBottom = createFinTarget("fin-bottom", 0);
+            const targetTop = createFinTarget("fin-top", 1);
+
+            const financialIndex = {
+                query: () => [targetBottom, targetTop]
+            };
+
+            const scene: ChartScene = {
+                axes: [],
+                cartesianKind: "xy",
+                coordinateSystem: "cartesian",
+                financialIndex: financialIndex as any,
+                hasRenderableData: true,
+                height: 300,
+                hitTargets: [targetBottom, targetTop],
+                interactionBuckets: [],
+                legendItems: [],
+                plotRect: { height: 260, width: 400, x: 40, y: 20 },
+                series: [],
+                width: 500
+            };
+
+            const hit = ChartHitTestEngine.testHit({ x: 100, y: 80 }, scene, false);
+            expect(hit.activeHitTarget?.seriesId).toBe("fin-top");
+        });
+    });
 });
