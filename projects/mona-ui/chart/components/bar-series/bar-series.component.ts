@@ -2,6 +2,7 @@ import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
+import type { ChartBarOrientation } from "../../models/chart-bar.models";
 import type { ChartStackMode } from "../../models/chart-stack.models";
 
 let nextSeriesId = 0;
@@ -70,6 +71,12 @@ export class BarSeriesComponent implements OnInit {
     public readonly name = input("");
 
     /**
+     * @description Orientation of the bars ('vertical' for column bars, 'horizontal' for row bars).
+     * @default "vertical"
+     */
+    public readonly orientation = input<ChartBarOrientation>("vertical");
+
+    /**
      * @description Named stack group to participate in. Series with matching trimmed stack names stack together.
      * @default undefined
      */
@@ -119,6 +126,7 @@ export class BarSeriesComponent implements OnInit {
             this.data();
             this.field();
             this.keyField();
+            this.orientation();
             this.stack();
             this.stackMode();
             this.xField();
@@ -165,6 +173,7 @@ export class BarSeriesComponent implements OnInit {
             keyField: this.keyField,
             maxBarWidth: this.maxBarWidth,
             name: this.name,
+            orientation: this.orientation,
             stack: this.stack,
             stackMode: this.stackMode,
             toggleVisibility: () => {

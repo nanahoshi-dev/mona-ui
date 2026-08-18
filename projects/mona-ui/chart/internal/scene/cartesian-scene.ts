@@ -1,4 +1,5 @@
 import type { ChartAxisPosition, ChartAxisTick } from "../../models/chart-axis.models";
+import type { ChartBarOrientation } from "../../models/chart-bar.models";
 import type { ChartFinancialFillMode } from "../../models/chart-financial.models";
 import type { ChartAreaFillMode, ChartCurve } from "../../models/chart-series.models";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
@@ -13,13 +14,28 @@ import type {
     SceneRangeBar
 } from "./scene-geometry";
 
+export interface ChartAxisSceneTick<T = unknown> extends ChartAxisTick<T> {
+    labelVisible?: boolean;
+    tickKey?: string;
+    unrotatedHeight?: number;
+    unrotatedWidth?: number;
+}
+
 export interface ChartAxisScene {
     axis: "x" | "y";
     axisLine: boolean;
     gridLines: boolean;
+    gutter?: number;
+    labelMaxWidth?: number;
+    labelPadding?: number;
+    labelRotation?: number;
+    labels?: boolean;
     position: ChartAxisPosition;
-    ticks: readonly ChartAxisTick[];
+    tickMarks?: boolean;
+    ticks: readonly ChartAxisSceneTick[];
+    tickSize?: number;
     title: string;
+    titlePadding?: number;
     visible: boolean;
 }
 
@@ -56,6 +72,7 @@ export interface ChartLineSeriesScene {
     curve: ChartCurve;
     id: string;
     name: string;
+    orientation?: ChartBarOrientation;
     points: readonly ScenePoint[];
     renderOpacity?: number;
     showPoints: boolean;
@@ -64,6 +81,7 @@ export interface ChartLineSeriesScene {
 }
 
 export interface ChartAreaSeriesScene {
+    baselineX?: number;
     baselineY: number;
     connectNulls: boolean;
     curve: ChartCurve;
@@ -71,6 +89,7 @@ export interface ChartAreaSeriesScene {
     fillOpacity: number;
     id: string;
     name: string;
+    orientation?: ChartBarOrientation;
     points: readonly SceneAreaPoint[];
     renderOpacity?: number;
     showPoints: boolean;
@@ -84,6 +103,7 @@ export interface ChartBarSeriesScene {
     fillOpacity: number;
     id: string;
     name: string;
+    orientation?: ChartBarOrientation;
     renderOpacity?: number;
     style: ChartSeriesStyle;
     type: "bar";
@@ -95,6 +115,7 @@ export interface ChartRangeBarSeriesScene {
     readonly fillOpacity: number;
     readonly id: string;
     readonly name: string;
+    readonly orientation?: ChartBarOrientation;
     readonly renderOpacity?: number;
     readonly style: ChartSeriesStyle;
     readonly type: "rangeBar";

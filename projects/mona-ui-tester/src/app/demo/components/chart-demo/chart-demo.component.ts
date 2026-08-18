@@ -8,6 +8,8 @@ import {
     ChartLegendItemTemplateDirective,
     ChartNoDataTemplateDirective,
     ChartSliceLabelTemplateDirective,
+    ChartSubtitleTemplateDirective,
+    ChartTitleTemplateDirective,
     ChartTooltipTemplateDirective,
     ChartTreemapLabelTemplateDirective,
     ChartWaterfallLabelTemplateDirective,
@@ -39,12 +41,15 @@ import {
     TreemapSeriesComponent,
     WaterfallSeriesComponent,
     type ChartAreaFillMode,
+    type ChartAxisLabelRotation,
+    type ChartBarOrientation,
     type ChartCurve,
     type ChartFinancialFillMode,
     type ChartFunnelLabelContent,
     type ChartFunnelOrientation,
     type ChartFunnelStageVisibilityEvent,
     type ChartGaugeIndicator,
+    type ChartHeaderAlignment,
     type ChartHeatmapColorMode,
     type ChartPointEvent,
     type ChartPointFocusEvent,
@@ -65,7 +70,9 @@ import {
 } from "@nanahoshi/mona-ui/chart";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
+import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui/tabs";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 
 interface DemoLogEntry {
@@ -127,6 +134,8 @@ interface BubbleDataPoint {
         ButtonDirective,
         CheckBoxComponent,
         DropdownListComponent,
+        TextBoxComponent,
+        NumericTextBoxComponent,
         ChartComponent,
         ChartXAxisComponent,
         ChartYAxisComponent,
@@ -164,6 +173,8 @@ interface BubbleDataPoint {
         ChartTooltipTemplateDirective,
         ChartSliceLabelTemplateDirective,
         ChartCenterTemplateDirective,
+        ChartTitleTemplateDirective,
+        ChartSubtitleTemplateDirective,
         TabsComponent,
         TabComponent,
         TabContentTemplateDirective
@@ -184,6 +195,7 @@ export class ChartDemoComponent {
         | "gauge"
         | "grouped"
         | "heatmap"
+        | "horizontal"
         | "mixed"
         | "ohlc"
         | "percent-area"
@@ -203,6 +215,45 @@ export class ChartDemoComponent {
         | "waterfall"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
+
+    // Chart Title & Subtitle Controls
+    protected readonly chartTitle = signal<string>("Quarterly Revenue & Targets");
+    protected readonly chartSubtitle = signal<string>("Comparison across regional performance metrics");
+    protected readonly chartTitleAlign = signal<ChartHeaderAlignment>("left");
+    protected readonly titleAlignOptions: readonly { label: string; value: ChartHeaderAlignment }[] = [
+        { label: "Left", value: "left" },
+        { label: "Center", value: "center" },
+        { label: "Right", value: "right" }
+    ];
+    protected readonly useCustomTitleTemplate = signal<boolean>(false);
+
+    // Bar Orientation Controls
+    protected readonly barOrientation = signal<ChartBarOrientation>("vertical");
+    protected readonly barOrientationOptions: readonly { label: string; value: ChartBarOrientation }[] = [
+        { label: "Vertical", value: "vertical" },
+        { label: "Horizontal", value: "horizontal" }
+    ];
+
+    // Axis Presentation Controls
+    protected readonly xAxisLabels = signal<boolean>(true);
+    protected readonly yAxisLabels = signal<boolean>(true);
+    protected readonly xAxisLabelRotation = signal<ChartAxisLabelRotation>(0);
+    protected readonly yAxisLabelRotation = signal<ChartAxisLabelRotation>(0);
+    protected readonly labelRotationOptions: readonly { label: string; value: ChartAxisLabelRotation }[] = [
+        { label: "0° (Horizontal)", value: 0 },
+        { label: "45° Angle", value: 45 },
+        { label: "90° (Vertical)", value: 90 },
+        { label: "-45° Angle", value: -45 },
+        { label: "-90° (Vertical)", value: -90 },
+        { label: "Auto Rotation / Thinning", value: "auto" }
+    ];
+    protected readonly xAxisTickMarks = signal<boolean>(false);
+    protected readonly yAxisTickMarks = signal<boolean>(false);
+    protected readonly xAxisTickSize = signal<number>(6);
+    protected readonly yAxisTickSize = signal<number>(6);
+    protected readonly xAxisLabelMaxWidth = signal<number | undefined>(undefined);
+    protected readonly xAxisLabelPadding = signal<number>(4);
+    protected readonly yAxisLabelPadding = signal<number>(6);
 
     // Candlestick & OHLC Chart Data & Controls
     protected readonly candlestickData = signal<
@@ -781,6 +832,14 @@ export class ChartDemoComponent {
         value instanceof Date
             ? `${value.getHours().toString().padStart(2, "0")}:${value.getMinutes().toString().padStart(2, "0")}`
             : String(value);
+    protected readonly percentFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value}%` : String(value);
+    protected readonly heightFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value} cm` : String(value);
+    protected readonly weightFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value} kg` : String(value);
+    protected readonly lifeExpFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value} yrs` : String(value);
     protected readonly useCustomNoData = signal<boolean>(false);
     protected readonly useIndependentSeriesData = signal<boolean>(false);
     protected readonly xAxisLine = signal<boolean>(true);
@@ -1292,6 +1351,38 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Reset dataset to defaults");
     }
 
+    public onBarOrientationChange(val: unknown): void {
+        const v = typeof val === "string" ? val : (val as { value?: string })?.value;
+        if (v === "vertical" || v === "horizontal") {
+            this.barOrientation.set(v);
+            this.#addLog("settingChange", `Bar Orientation: ${v}`);
+        }
+    }
+
+    public onTitleAlignChange(val: unknown): void {
+        const v = typeof val === "string" ? val : (val as { value?: string })?.value;
+        if (v === "left" || v === "center" || v === "right") {
+            this.chartTitleAlign.set(v);
+            this.#addLog("settingChange", `Chart Title Alignment: ${v}`);
+        }
+    }
+
+    public onXAxisLabelRotationChange(val: unknown): void {
+        const v = typeof val === "number" || typeof val === "string" ? val : (val as { value?: ChartAxisLabelRotation })?.value;
+        if (v !== undefined) {
+            this.xAxisLabelRotation.set(v as ChartAxisLabelRotation);
+            this.#addLog("settingChange", `X-Axis Label Rotation: ${v}`);
+        }
+    }
+
+    public onYAxisLabelRotationChange(val: unknown): void {
+        const v = typeof val === "number" || typeof val === "string" ? val : (val as { value?: ChartAxisLabelRotation })?.value;
+        if (v !== undefined) {
+            this.yAxisLabelRotation.set(v as ChartAxisLabelRotation);
+            this.#addLog("settingChange", `Y-Axis Label Rotation: ${v}`);
+        }
+    }
+
     public setTab(
         tab:
             | "bubble"
@@ -1302,6 +1393,7 @@ export class ChartDemoComponent {
             | "gauge"
             | "grouped"
             | "heatmap"
+            | "horizontal"
             | "mixed"
             | "ohlc"
             | "percent-area"

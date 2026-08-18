@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 
 export const chartBaseThemeVariants = cva(
-    "relative block select-none h-80 w-full outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:ring-offset-1 focus-visible:ring-offset-surface cursor-default",
+    "relative flex flex-col select-none h-80 w-full outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:ring-offset-1 focus-visible:ring-offset-surface cursor-default",
     {
         variants: {
             interactive: {
@@ -13,10 +13,10 @@ export const chartBaseThemeVariants = cva(
 );
 
 export const chartAxisLabelBaseThemeVariants = cva(
-    "absolute text-xs text-muted-foreground select-none pointer-events-none whitespace-nowrap transition-[left,top,opacity] motion-reduce:transition-none duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+    "absolute text-xs text-muted-foreground select-none pointer-events-none whitespace-nowrap overflow-hidden text-ellipsis transition-[left,top,opacity] motion-reduce:transition-none duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
 );
 
-export const chartLegendBaseThemeVariants = cva("flex flex-wrap items-center gap-4 text-xs select-none", {
+export const chartLegendBaseThemeVariants = cva("flex flex-wrap items-center gap-4 text-xs select-none flex-none", {
     variants: {
         position: {
             // min-h-5 reserves a single item row (matches
@@ -56,6 +56,25 @@ export const chartNoDataBaseThemeVariants = cva(
     "absolute inset-0 flex items-center justify-center text-sm text-muted-foreground select-none"
 );
 
+export const chartHeaderBaseThemeVariants = cva("flex flex-col gap-1 mb-3 select-none", {
+    variants: {
+        align: {
+            center: "items-center text-center",
+            left: "items-start text-left",
+            right: "items-end text-right"
+        }
+    }
+});
+
+export const chartTitleBaseThemeVariants = cva(
+    "text-sm font-semibold text-foreground tracking-tight select-none"
+);
+
+export const chartSubtitleBaseThemeVariants = cva(
+    "text-xs text-muted-foreground select-none"
+);
+
 export type ChartBaseVariantProps = VariantProps<typeof chartBaseThemeVariants>;
+export type ChartHeaderBaseVariantProps = VariantProps<typeof chartHeaderBaseThemeVariants>;
 export type ChartLegendBaseVariantProps = VariantProps<typeof chartLegendBaseThemeVariants>;
 export type ChartLegendItemBaseVariantProps = VariantProps<typeof chartLegendItemBaseThemeVariants>;

@@ -136,16 +136,38 @@ export class WaterfallLayoutEngine {
             ...tentativeYRawTicks.map((val, idx) => formatYValue(val, idx, yFormatter).length),
             3
         );
-        const yMargin = isYAxisVisible
-            ? Math.max(48, Math.min(120, Math.round(maxLabelLength * 7.5 + (yTitle ? 32 : 16))))
+        const yTitlePadding = yAxis?.titlePadding ? (yAxis.titlePadding() ?? 8) : 8;
+        const xTitlePadding = xAxis?.titlePadding ? (xAxis.titlePadding() ?? 8) : 8;
+        const yLabelPadding = yAxis?.labelPadding ? (yAxis.labelPadding() ?? 4) : 4;
+        const xLabelPadding = xAxis?.labelPadding ? (xAxis.labelPadding() ?? 4) : 4;
+
+        const yHasTitle = Boolean(yTitle.trim());
+        const yTitleExtent = yHasTitle ? 18 : 0;
+        const yActualTitlePadding = yHasTitle ? yTitlePadding : 0;
+        const yLabelsEnabled = yAxis?.labels ? (yAxis.labels() ?? true) : true;
+        const yTickMarks = yAxis?.tickMarks ? (yAxis.tickMarks() ?? false) : false;
+        const yTickSize = yTickMarks ? (yAxis?.tickSize ? (yAxis.tickSize() ?? 6) : 6) : 0;
+        const yLabelOutward = yLabelsEnabled ? Math.max(24, maxLabelLength * 8) + yLabelPadding : 0;
+        const yGutter = isYAxisVisible
+            ? Math.max(48, Math.min(180, Math.round(yTickSize + yLabelOutward + (yHasTitle ? yTitleExtent + yActualTitlePadding : 0) + 8)))
             : 8;
-        const xMargin = isXAxisVisible ? (xTitle ? 44 : 32) : 8;
+
+        const xHasTitle = Boolean(xTitle.trim());
+        const xTitleExtent = xHasTitle ? 18 : 0;
+        const xActualTitlePadding = xHasTitle ? xTitlePadding : 0;
+        const xLabelsEnabled = xAxis?.labels ? (xAxis.labels() ?? true) : true;
+        const xTickMarks = xAxis?.tickMarks ? (xAxis.tickMarks() ?? false) : false;
+        const xTickSize = xTickMarks ? (xAxis?.tickSize ? (xAxis.tickSize() ?? 6) : 6) : 0;
+        const xLabelOutward = xLabelsEnabled ? 16 + xLabelPadding : 0;
+        const xGutter = isXAxisVisible
+            ? Math.max(32, Math.min(160, Math.round(xTickSize + xLabelOutward + (xHasTitle ? xTitleExtent + xActualTitlePadding : 0) + 8)))
+            : 8;
 
         const padding: ChartPadding = {
-            bottom: xAxisPosition === "bottom" ? xMargin : 12,
-            left: yAxisPosition === "left" ? yMargin : 16,
-            right: yAxisPosition === "right" ? yMargin : 16,
-            top: xAxisPosition === "top" ? xMargin : 16
+            bottom: xAxisPosition === "bottom" ? xGutter : 12,
+            left: yAxisPosition === "left" ? yGutter : 16,
+            right: yAxisPosition === "right" ? yGutter : 16,
+            top: xAxisPosition === "top" ? xGutter : 16
         };
 
         const plotWidth = Math.max(0, containerWidth - padding.left - padding.right);
@@ -515,9 +537,15 @@ export class WaterfallLayoutEngine {
                 axis: "x",
                 axisLine: xAxis?.axisLine() ?? true,
                 gridLines: xAxis?.gridLines() ?? false,
+                gutter: xGutter,
+                labelPadding: xLabelPadding,
+                labels: xLabelsEnabled,
                 position: xAxisPosition,
+                tickMarks: xTickMarks,
                 ticks: xTicks,
+                tickSize: xAxis?.tickSize ? (xAxis.tickSize() ?? 6) : 6,
                 title: xTitle,
+                titlePadding: xTitlePadding,
                 visible: isXAxisVisible
             });
         }
@@ -539,9 +567,15 @@ export class WaterfallLayoutEngine {
                 axis: "y",
                 axisLine: yAxis?.axisLine() ?? true,
                 gridLines: yAxis?.gridLines() ?? true,
+                gutter: yGutter,
+                labelPadding: yLabelPadding,
+                labels: yLabelsEnabled,
                 position: yAxisPosition,
+                tickMarks: yTickMarks,
                 ticks: yTicks,
+                tickSize: yAxis?.tickSize ? (yAxis.tickSize() ?? 6) : 6,
                 title: yTitle,
+                titlePadding: yTitlePadding,
                 visible: isYAxisVisible
             });
         }

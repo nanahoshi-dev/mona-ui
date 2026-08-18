@@ -5,6 +5,9 @@ export type ChartAxisPosition = ChartXAxisPosition | ChartYAxisPosition;
 export type ChartXAxisType = "auto" | "category" | "linear" | "time" | "utc";
 export type ChartYAxisType = "auto" | "category" | "linear";
 
+export type ChartAxisLabelRotation = "auto" | number;
+export type ChartHeaderAlignment = "center" | "left" | "right";
+
 export type ChartAxisFormatter<T = unknown> = (value: T, index: number) => string;
 
 export interface ChartAxisLabelTemplateContext<T = unknown> {
@@ -19,5 +22,15 @@ export interface ChartAxisTick<T = unknown> {
     formattedValue: string;
     index: number;
     value: T;
+}
+
+export interface ChartTitleTemplateContext {
+    readonly $implicit: string;
+    readonly title: string;
+}
+
+export interface ChartSubtitleTemplateContext {
+    readonly $implicit: string;
+    readonly subtitle: string;
 }
 

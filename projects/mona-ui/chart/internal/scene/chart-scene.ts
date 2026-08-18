@@ -1,4 +1,4 @@
-import type { ChartXAxisType } from "../../models/chart-axis.models";
+import type { ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
 import type { ChartCoordinateSystem, ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
@@ -40,6 +40,8 @@ export interface ChartSceneBase {
 }
 
 export type ChartCartesianKind = "funnel" | "heatmap" | "waterfall" | "xy";
+export type CartesianXYOrientation = "horizontal" | "vertical";
+export type ChartInteractionAxis = "x" | "y";
 
 export interface CartesianSceneBase extends ChartSceneBase {
     axes: readonly ChartAxisScene[];
@@ -51,14 +53,17 @@ export interface CartesianXYChartScene extends CartesianSceneBase {
     barHitTargets?: readonly SceneHitTarget[];
     cartesianKind: "xy";
     financialIndex?: CartesianFinancialIndex;
+    interactionAxis?: ChartInteractionAxis;
     interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
     markerSpatialIndex?: CartesianPointSpatialIndex;
+    orientation?: CartesianXYOrientation;
     pointSpatialIndex?: CartesianPointSpatialIndex;
     series: readonly ChartSeriesScene[];
     stackConfiguration?: readonly CartesianStackSceneConfig[];
     stackSignature?: string;
     xAxisType?: ChartXAxisType;
     xTimeSpanMs?: number;
+    yAxisType?: ChartYAxisType;
 }
 
 export interface CartesianHeatmapChartScene extends CartesianSceneBase {

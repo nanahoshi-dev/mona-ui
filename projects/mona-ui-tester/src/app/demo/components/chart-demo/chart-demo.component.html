@@ -1,9 +1,12 @@
 <div class="flex flex-col gap-6 w-full max-w-6xl mx-auto py-6">
     <!-- Header & Navigation -->
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-border pb-4">
+    <div
+        class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
             <h2 class="text-xl font-bold tracking-tight text-foreground">Interactive Chart Explorer</h2>
-            <p class="text-sm text-muted-foreground">High-performance Canvas 2D Cartesian, Sector, Radar, and Continuous Polar chart visualizations.</p>
+            <p class="text-sm text-muted-foreground">
+                High-performance Canvas 2D Cartesian, Sector, Radar, and Continuous Polar chart visualizations.
+            </p>
         </div>
 
         <div class="flex items-center flex-wrap gap-2 bg-muted/40 p-1 rounded-lg border border-border">
@@ -69,6 +72,13 @@
                 size="small"
                 (click)="setTab('grouped')">
                 Grouped Bars
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'horizontal' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('horizontal')">
+                Horizontal Bars
             </button>
             <button
                 monaButton
@@ -195,10 +205,12 @@
             <mona-tab title="Series & Layout" [selected]="true">
                 <ng-template monaTabContentTemplate>
                     <div class="flex flex-wrap items-center gap-6 p-4">
-                        @if (activeTab() === 'radar') {
+                        @if (activeTab() === "radar") {
                             <!-- Radar Settings -->
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Radar Styles</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Radar Styles</span
+                                >
                                 <div class="flex flex-wrap items-center gap-4">
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs text-muted-foreground">Fill Mode:</span>
@@ -236,7 +248,9 @@
                                             size="small"
                                             class="w-36" />
                                     </div>
-                                    <mona-check-box [checked]="radarShowPoints()" (checkedChange)="radarShowPoints.set($event)">
+                                    <mona-check-box
+                                        [checked]="radarShowPoints()"
+                                        (checkedChange)="radarShowPoints.set($event)">
                                         Vertex Points
                                     </mona-check-box>
                                 </div>
@@ -245,17 +259,21 @@
                             <div class="h-8 w-px bg-border hidden md:block"></div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Radar Datasets</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Radar Datasets</span
+                                >
                                 <div class="flex flex-wrap gap-2">
                                     <button monaButton size="small" look="secondary" (click)="randomizeRadarData()">
                                         Randomize Matrix
                                     </button>
                                 </div>
                             </div>
-                        } @else if (activeTab() === 'polar') {
+                        } @else if (activeTab() === "polar") {
                             <!-- Continuous Polar Settings -->
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Continuous Polar Styles</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Continuous Polar Styles</span
+                                >
                                 <div class="flex flex-wrap items-center gap-4">
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs text-muted-foreground">Fill Mode:</span>
@@ -293,10 +311,14 @@
                                             size="small"
                                             class="w-36" />
                                     </div>
-                                    <mona-check-box [checked]="continuousPolarConnectNulls()" (checkedChange)="continuousPolarConnectNulls.set($event)">
+                                    <mona-check-box
+                                        [checked]="continuousPolarConnectNulls()"
+                                        (checkedChange)="continuousPolarConnectNulls.set($event)">
                                         Connect Nulls
                                     </mona-check-box>
-                                    <mona-check-box [checked]="continuousPolarShowPoints()" (checkedChange)="continuousPolarShowPoints.set($event)">
+                                    <mona-check-box
+                                        [checked]="continuousPolarShowPoints()"
+                                        (checkedChange)="continuousPolarShowPoints.set($event)">
                                         Points
                                     </mona-check-box>
                                 </div>
@@ -305,19 +327,23 @@
                             <div class="h-8 w-px bg-border hidden md:block"></div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Polar Datasets</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Polar Datasets</span
+                                >
                                 <div class="flex flex-wrap gap-2">
                                     <button monaButton size="small" look="secondary" (click)="randomizePolarData()">
                                         Randomize Radiation Pattern
                                     </button>
                                 </div>
                             </div>
-                        } @else if (activeTab() === 'pie' || activeTab() === 'donut') {
+                        } @else if (activeTab() === "pie" || activeTab() === "donut") {
                             <!-- Polar Sector Settings -->
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sector Slices & Labels</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Sector Slices & Labels</span
+                                >
                                 <div class="flex flex-wrap items-center gap-4">
-                                    @if (activeTab() === 'pie') {
+                                    @if (activeTab() === "pie") {
                                         <div class="flex items-center gap-2">
                                             <span class="text-xs text-muted-foreground">Fill Mode:</span>
                                             <mona-dropdown-list
@@ -330,7 +356,9 @@
                                                 size="small"
                                                 class="w-48" />
                                         </div>
-                                        <mona-check-box [checked]="pieShowLabels()" (checkedChange)="pieShowLabels.set($event)">
+                                        <mona-check-box
+                                            [checked]="pieShowLabels()"
+                                            (checkedChange)="pieShowLabels.set($event)">
                                             Data Labels
                                         </mona-check-box>
                                         <div class="flex items-center gap-2">
@@ -357,7 +385,9 @@
                                                 size="small"
                                                 class="w-52" />
                                         </div>
-                                        <mona-check-box [checked]="pieUseCustomLabelTemplate()" (checkedChange)="pieUseCustomLabelTemplate.set($event)">
+                                        <mona-check-box
+                                            [checked]="pieUseCustomLabelTemplate()"
+                                            (checkedChange)="pieUseCustomLabelTemplate.set($event)">
                                             Custom Template
                                         </mona-check-box>
                                     } @else {
@@ -373,10 +403,14 @@
                                                 size="small"
                                                 class="w-48" />
                                         </div>
-                                        <mona-check-box [checked]="donutUseCenterSummary()" (checkedChange)="donutUseCenterSummary.set($event)">
+                                        <mona-check-box
+                                            [checked]="donutUseCenterSummary()"
+                                            (checkedChange)="donutUseCenterSummary.set($event)">
                                             Custom Center Summary
                                         </mona-check-box>
-                                        <mona-check-box [checked]="donutShowLabels()" (checkedChange)="donutShowLabels.set($event)">
+                                        <mona-check-box
+                                            [checked]="donutShowLabels()"
+                                            (checkedChange)="donutShowLabels.set($event)">
                                             Data Labels
                                         </mona-check-box>
                                         <div class="flex items-center gap-2">
@@ -398,9 +432,11 @@
                             <div class="h-8 w-px bg-border hidden md:block"></div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Polar Datasets</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Polar Datasets</span
+                                >
                                 <div class="flex flex-wrap gap-2">
-                                    @if (activeTab() === 'pie') {
+                                    @if (activeTab() === "pie") {
                                         <button monaButton size="small" look="secondary" (click)="randomizePieData()">
                                             Randomize Slices
                                         </button>
@@ -420,15 +456,21 @@
                                     }
                                 </div>
                             </div>
-                        } @else if (activeTab() === 'scatter') {
+                        } @else if (activeTab() === "scatter") {
                             <!-- Scatter Plot Settings -->
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Scatter Series</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Scatter Series</span
+                                >
                                 <div class="flex flex-wrap gap-4">
-                                    <mona-check-box [checked]="showScatterWeight()" (checkedChange)="showScatterWeight.set($event)">
+                                    <mona-check-box
+                                        [checked]="showScatterWeight()"
+                                        (checkedChange)="showScatterWeight.set($event)">
                                         Weight (kg)
                                     </mona-check-box>
-                                    <mona-check-box [checked]="showScatterWingspan()" (checkedChange)="showScatterWingspan.set($event)">
+                                    <mona-check-box
+                                        [checked]="showScatterWingspan()"
+                                        (checkedChange)="showScatterWingspan.set($event)">
                                         Wingspan (cm)
                                     </mona-check-box>
                                 </div>
@@ -437,17 +479,21 @@
                             <div class="h-8 w-px bg-border hidden md:block"></div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Scatter Datasets</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Scatter Datasets</span
+                                >
                                 <div class="flex flex-wrap gap-2">
                                     <button monaButton size="small" look="secondary" (click)="randomizeScatterData()">
                                         Randomize Biometrics
                                     </button>
                                 </div>
                             </div>
-                        } @else if (activeTab() === 'bubble') {
+                        } @else if (activeTab() === "bubble") {
                             <!-- Bubble Chart Settings -->
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bubble Radii</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Bubble Radii</span
+                                >
                                 <div class="flex items-center gap-4 text-xs text-muted-foreground">
                                     <span>Min: {{ bubbleMinRadius() }}px</span>
                                     <span>Max: {{ bubbleMaxRadius() }}px</span>
@@ -458,7 +504,9 @@
                             <div class="h-8 w-px bg-border hidden md:block"></div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bubble Datasets</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Bubble Datasets</span
+                                >
                                 <div class="flex flex-wrap gap-2">
                                     <button monaButton size="small" look="secondary" (click)="randomizeBubbleData()">
                                         Randomize Demographics
@@ -468,7 +516,9 @@
                         } @else {
                             <!-- Cartesian Settings -->
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Series Visibility</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Series Visibility</span
+                                >
                                 <div class="flex flex-wrap gap-4">
                                     <mona-check-box [checked]="showBars()" (checkedChange)="showBars.set($event)">
                                         Bar Series
@@ -485,7 +535,9 @@
                             <div class="h-8 w-px bg-border hidden md:block"></div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Curve & Interpolation</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Curve & Interpolation</span
+                                >
                                 <mona-dropdown-list
                                     [data]="curveOptions"
                                     [value]="curveType()"
@@ -498,7 +550,9 @@
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Area Fill Mode</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Area Fill Mode</span
+                                >
                                 <mona-dropdown-list
                                     [data]="areaFillModeOptions"
                                     [value]="areaFillMode()"
@@ -511,16 +565,43 @@
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Points</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Points</span
+                                >
                                 <mona-check-box [checked]="showPoints()" (checkedChange)="showPoints.set($event)">
                                     Point Markers
                                 </mona-check-box>
                             </div>
+
+                            @if (
+                                activeTab() === "grouped" ||
+                                activeTab() === "horizontal" ||
+                                activeTab() === "stacked-bar" ||
+                                activeTab() === "percent-bar" ||
+                                activeTab() === "range-bar"
+                            ) {
+                                <div class="flex flex-col gap-2">
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                        >Bar Orientation</span
+                                    >
+                                    <mona-dropdown-list
+                                        [data]="barOrientationOptions"
+                                        [value]="barOrientation()"
+                                        (valueChange)="onBarOrientationChange($event)"
+                                        textField="label"
+                                        valueField="value"
+                                        [valuePrimitive]="true"
+                                        size="small"
+                                        class="w-36" />
+                                </div>
+                            }
                         }
 
-                        @if (activeTab() === 'heatmap') {
+                        @if (activeTab() === "heatmap") {
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Color Palette</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Color Palette</span
+                                >
                                 <div class="flex gap-2">
                                     <button
                                         monaButton
@@ -547,25 +628,192 @@
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cell Style</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Cell Style</span
+                                >
                                 <div class="flex items-center gap-4">
-                                    <mona-check-box [checked]="heatmapShowValues()" (checkedChange)="heatmapShowValues.set($event)">
+                                    <mona-check-box
+                                        [checked]="heatmapShowValues()"
+                                        (checkedChange)="heatmapShowValues.set($event)">
                                         Show Numbers
                                     </mona-check-box>
                                 </div>
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Actions</span
+                                >
                                 <button monaButton size="small" look="outline" (click)="randomizeHeatmapData()">
-                                    Randomize Heatmap Data
+                                    Randomize Traffic
                                 </button>
                             </div>
                         }
 
-                        @if (activeTab() === 'treemap') {
+                        @if (activeTab() === "radial-bar") {
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tiling Algorithm</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Arc Style</span
+                                >
+                                <div class="flex items-center gap-4">
+                                    <mona-check-box
+                                        [checked]="radialBarShowTracks()"
+                                        (checkedChange)="radialBarShowTracks.set($event)">
+                                        Background Tracks
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Fill Mode</span
+                                >
+                                <div class="flex gap-2">
+                                    <button
+                                        monaButton
+                                        [look]="radialBarFillMode() === 'solid' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="radialBarFillMode.set('solid')">
+                                        Solid
+                                    </button>
+                                    <button
+                                        monaButton
+                                        [look]="radialBarFillMode() === 'gradient' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="radialBarFillMode.set('gradient')">
+                                        Gradient
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Actions</span
+                                >
+                                <button monaButton size="small" look="outline" (click)="randomizeRadialBarData()">
+                                    Randomize System Stats
+                                </button>
+                            </div>
+                        }
+
+                        @if (activeTab() === "rose") {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Scale Mode</span
+                                >
+                                <div class="flex gap-2">
+                                    <button
+                                        monaButton
+                                        [look]="roseScaleMode() === 'area' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="roseScaleMode.set('area')">
+                                        Area (Accurate)
+                                    </button>
+                                    <button
+                                        monaButton
+                                        [look]="roseScaleMode() === 'radius' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="roseScaleMode.set('radius')">
+                                        Radius (Linear)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Fill Mode</span
+                                >
+                                <div class="flex gap-2">
+                                    <button
+                                        monaButton
+                                        [look]="roseFillMode() === 'solid' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="roseFillMode.set('solid')">
+                                        Solid
+                                    </button>
+                                    <button
+                                        monaButton
+                                        [look]="roseFillMode() === 'gradient' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="roseFillMode.set('gradient')">
+                                        Gradient
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Actions</span
+                                >
+                                <button monaButton size="small" look="outline" (click)="randomizeRoseData()">
+                                    Randomize Wind Rose
+                                </button>
+                            </div>
+                        }
+
+                        @if (activeTab() === "gauge") {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Indicator Mode</span
+                                >
+                                <div class="flex gap-2">
+                                    <button
+                                        monaButton
+                                        [look]="gaugeIndicator() === 'both' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="gaugeIndicator.set('both')">
+                                        Both
+                                    </button>
+                                    <button
+                                        monaButton
+                                        [look]="gaugeIndicator() === 'arc' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="gaugeIndicator.set('arc')">
+                                        Arc Only
+                                    </button>
+                                    <button
+                                        monaButton
+                                        [look]="gaugeIndicator() === 'needle' ? 'primary' : 'outline'"
+                                        size="small"
+                                        (click)="gaugeIndicator.set('needle')">
+                                        Needle Only
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Display</span
+                                >
+                                <div class="flex items-center gap-4">
+                                    <mona-check-box
+                                        [checked]="gaugeShowValue()"
+                                        (checkedChange)="gaugeShowValue.set($event)">
+                                        Center Value
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="gaugeCustomTemplate()"
+                                        (checkedChange)="gaugeCustomTemplate.set($event)">
+                                        Custom Template
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Actions</span
+                                >
+                                <button monaButton size="small" look="outline" (click)="randomizeData()">
+                                    Randomize Value
+                                </button>
+                            </div>
+                        }
+
+                        @if (activeTab() === "treemap") {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Tiling Algorithm</span
+                                >
                                 <mona-dropdown-list
                                     [data]="treemapTileOptions"
                                     textField="label"
@@ -578,7 +826,9 @@
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sibling Sort</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Sibling Sort</span
+                                >
                                 <mona-dropdown-list
                                     [data]="treemapSortOptions"
                                     textField="label"
@@ -591,31 +841,43 @@
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label Options</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Label Options</span
+                                >
                                 <div class="flex items-center gap-4 flex-wrap">
-                                    <mona-check-box [checked]="treemapShowParentLabels()" (checkedChange)="treemapShowParentLabels.set($event)">
+                                    <mona-check-box
+                                        [checked]="treemapShowParentLabels()"
+                                        (checkedChange)="treemapShowParentLabels.set($event)">
                                         Parent Headers
                                     </mona-check-box>
-                                    <mona-check-box [checked]="treemapShowValues()" (checkedChange)="treemapShowValues.set($event)">
+                                    <mona-check-box
+                                        [checked]="treemapShowValues()"
+                                        (checkedChange)="treemapShowValues.set($event)">
                                         Show Values
                                     </mona-check-box>
-                                    <mona-check-box [checked]="treemapUseCustomTemplate()" (checkedChange)="treemapUseCustomTemplate.set($event)">
+                                    <mona-check-box
+                                        [checked]="treemapUseCustomTemplate()"
+                                        (checkedChange)="treemapUseCustomTemplate.set($event)">
                                         Custom Label Template
                                     </mona-check-box>
                                 </div>
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Actions</span
+                                >
                                 <button monaButton size="small" look="outline" (click)="randomizeTreemapData()">
                                     Randomize Leaf Values
                                 </button>
                             </div>
                         }
 
-                        @if (activeTab() === 'funnel') {
+                        @if (activeTab() === "funnel") {
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Orientation</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Orientation</span
+                                >
                                 <mona-dropdown-list
                                     [data]="funnelOrientationOptions"
                                     textField="label"
@@ -628,7 +890,9 @@
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label Content</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Label Content</span
+                                >
                                 <mona-dropdown-list
                                     [data]="funnelLabelContentOptions"
                                     textField="label"
@@ -641,48 +905,202 @@
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Options</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Options</span
+                                >
                                 <div class="flex items-center gap-4 flex-wrap">
-                                    <mona-check-box [checked]="funnelShowLabels()" (checkedChange)="funnelShowLabels.set($event)">
+                                    <mona-check-box
+                                        [checked]="funnelShowLabels()"
+                                        (checkedChange)="funnelShowLabels.set($event)">
                                         Show Labels
                                     </mona-check-box>
-                                    <mona-check-box [checked]="funnelUseCustomTemplate()" (checkedChange)="funnelUseCustomTemplate.set($event)">
+                                    <mona-check-box
+                                        [checked]="funnelUseCustomTemplate()"
+                                        (checkedChange)="funnelUseCustomTemplate.set($event)">
                                         Custom Label Template
                                     </mona-check-box>
                                 </div>
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Actions</span
+                                >
                                 <button monaButton size="small" look="outline" (click)="randomizeFunnelData()">
                                     Randomize Funnel Stages
                                 </button>
                             </div>
                         }
 
-                        @if (activeTab() === 'waterfall') {
+                        @if (activeTab() === "waterfall") {
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Connectors</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Connectors</span
+                                >
                                 <div class="flex items-center gap-4 flex-wrap">
-                                    <mona-check-box [checked]="waterfallShowConnectors()" (checkedChange)="waterfallShowConnectors.set($event)">
+                                    <mona-check-box
+                                        [checked]="waterfallShowConnectors()"
+                                        (checkedChange)="waterfallShowConnectors.set($event)">
                                         Show Step Connectors
                                     </mona-check-box>
-                                    <mona-check-box [checked]="waterfallShowLabels()" (checkedChange)="waterfallShowLabels.set($event)">
+                                    <mona-check-box
+                                        [checked]="waterfallShowLabels()"
+                                        (checkedChange)="waterfallShowLabels.set($event)">
                                         Show Value Labels
                                     </mona-check-box>
-                                    <mona-check-box [checked]="waterfallUseCustomTemplate()" (checkedChange)="waterfallUseCustomTemplate.set($event)">
+                                    <mona-check-box
+                                        [checked]="waterfallUseCustomTemplate()"
+                                        (checkedChange)="waterfallUseCustomTemplate.set($event)">
                                         Custom Step Label Template
                                     </mona-check-box>
                                 </div>
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Actions</span
+                                >
                                 <button monaButton size="small" look="outline" (click)="randomizeWaterfallData()">
                                     Randomize Cash Flow
                                 </button>
                             </div>
                         }
+                    </div>
+                </ng-template>
+            </mona-tab>
+
+            <mona-tab title="Title & Subtitle">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex flex-wrap items-center gap-6 p-4">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Chart Title</span
+                            >
+                            <mona-text-box
+                                [value]="chartTitle()"
+                                (valueChange)="chartTitle.set($event)"
+                                size="small"
+                                class="w-64" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Chart Subtitle</span
+                            >
+                            <mona-text-box
+                                [value]="chartSubtitle()"
+                                (valueChange)="chartSubtitle.set($event)"
+                                size="small"
+                                class="w-72" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Alignment</span
+                            >
+                            <mona-dropdown-list
+                                [data]="titleAlignOptions"
+                                [value]="chartTitleAlign()"
+                                (valueChange)="onTitleAlignChange($event)"
+                                textField="label"
+                                valueField="value"
+                                [valuePrimitive]="true"
+                                size="small"
+                                class="w-32" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Custom Template</span
+                            >
+                            <mona-check-box
+                                [checked]="useCustomTitleTemplate()"
+                                (checkedChange)="useCustomTitleTemplate.set($event)">
+                                Custom Header Template
+                            </mona-check-box>
+                        </div>
+                    </div>
+                </ng-template>
+            </mona-tab>
+
+            <mona-tab title="Axes & Presentation">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex flex-wrap items-center gap-6 p-4">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Labels Visibility</span
+                            >
+                            <div class="flex flex-wrap gap-4">
+                                <mona-check-box [checked]="xAxisLabels()" (checkedChange)="xAxisLabels.set($event)">
+                                    X-Axis Labels
+                                </mona-check-box>
+                                <mona-check-box [checked]="yAxisLabels()" (checkedChange)="yAxisLabels.set($event)">
+                                    Y-Axis Labels
+                                </mona-check-box>
+                            </div>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >X Label Rotation</span
+                            >
+                            <mona-dropdown-list
+                                [data]="labelRotationOptions"
+                                [value]="xAxisLabelRotation()"
+                                (valueChange)="onXAxisLabelRotationChange($event)"
+                                textField="label"
+                                valueField="value"
+                                [valuePrimitive]="true"
+                                size="small"
+                                class="w-48" />
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Y Label Rotation</span
+                            >
+                            <mona-dropdown-list
+                                [data]="labelRotationOptions"
+                                [value]="yAxisLabelRotation()"
+                                (valueChange)="onYAxisLabelRotationChange($event)"
+                                textField="label"
+                                valueField="value"
+                                [valuePrimitive]="true"
+                                size="small"
+                                class="w-48" />
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Tick Marks</span
+                            >
+                            <div class="flex flex-wrap gap-4">
+                                <mona-check-box
+                                    [checked]="xAxisTickMarks()"
+                                    (checkedChange)="xAxisTickMarks.set($event)">
+                                    X Ticks
+                                </mona-check-box>
+                                <mona-check-box
+                                    [checked]="yAxisTickMarks()"
+                                    (checkedChange)="yAxisTickMarks.set($event)">
+                                    Y Ticks
+                                </mona-check-box>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >X Tick Size</span
+                            >
+                            <mona-numeric-text-box
+                                [value]="xAxisTickSize()"
+                                (valueChange)="xAxisTickSize.set($event ?? 6)"
+                                [minValue]="2"
+                                [maxValue]="20"
+                                size="small"
+                                class="w-24" />
+                        </div>
                     </div>
                 </ng-template>
             </mona-tab>
@@ -694,7 +1112,9 @@
         @switch (activeTab()) {
             @case ("radar") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">RPG Character Skill Matrix (Axis-Based Radar Chart)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        RPG Character Skill Matrix (Axis-Based Radar Chart)
+                    </h3>
                     <mona-chart
                         [data]="radarData()"
                         [animation]="animationEnabled()"
@@ -739,7 +1159,9 @@
 
             @case ("polar") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Continuous Antenna Radiation & Signal Quality (Continuous Polar Chart)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Continuous Antenna Radiation & Signal Quality (Continuous Polar Chart)
+                    </h3>
                     <mona-chart
                         [data]="polarData()"
                         [animation]="animationEnabled()"
@@ -778,7 +1200,9 @@
 
             @case ("pie") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Desktop Browser Usage Distribution (Polar Pie Series)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Desktop Browser Usage Distribution (Polar Pie Series)
+                    </h3>
                     <mona-chart
                         [data]="pieData()"
                         [animation]="animationEnabled()"
@@ -803,7 +1227,9 @@
                             (sliceVisibilityChange)="onSliceVisibilityChange($event)">
                             @if (pieUseCustomLabelTemplate()) {
                                 <ng-template monaChartSliceLabelTemplate let-slice>
-                                    <span class="font-medium text-[11px] drop-shadow-xs">🎯 {{ slice.formattedPercentage }}</span>
+                                    <span class="font-medium text-[11px] drop-shadow-xs"
+                                        >🎯 {{ slice.formattedPercentage }}</span
+                                    >
                                 </ng-template>
                             }
                         </mona-pie-series>
@@ -816,7 +1242,9 @@
 
             @case ("donut") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Cloud Infrastructure Revenue by Category (Polar Donut Series)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Cloud Infrastructure Revenue by Category (Polar Donut Series)
+                    </h3>
                     <mona-chart
                         [data]="donutData()"
                         [animation]="animationEnabled()"
@@ -839,11 +1267,22 @@
                             [valueFormatter]="currencyFormatter"
                             (sliceVisibilityChange)="onSliceVisibilityChange($event)">
                             @if (donutUseCenterSummary()) {
-                                <ng-template monaChartCenterTemplate let-total let-formattedTotal="formattedTotal" let-visibleCount="visibleSliceCount">
+                                <ng-template
+                                    monaChartCenterTemplate
+                                    let-total
+                                    let-formattedTotal="formattedTotal"
+                                    let-visibleCount="visibleSliceCount">
                                     <div class="flex flex-col items-center justify-center p-2 select-none">
-                                        <span class="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Cloud Revenue</span>
-                                        <strong class="text-xl font-bold text-foreground tracking-tight">{{ formattedTotal }}</strong>
-                                        <span class="text-[10px] text-muted-foreground mt-0.5">{{ visibleCount }} active services</span>
+                                        <span
+                                            class="text-[11px] uppercase tracking-wider text-muted-foreground font-medium"
+                                            >Cloud Revenue</span
+                                        >
+                                        <strong class="text-xl font-bold text-foreground tracking-tight">{{
+                                            formattedTotal
+                                        }}</strong>
+                                        <span class="text-[10px] text-muted-foreground mt-0.5"
+                                            >{{ visibleCount }} active services</span
+                                        >
                                     </div>
                                 </ng-template>
                             }
@@ -857,10 +1296,15 @@
 
             @case ("mixed") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Mixed Series Comparison (Same Metric Across Series Types)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Mixed Series Comparison (Same Metric Across Series Types)
+                    </h3>
                     <mona-chart
                         [data]="displayedMonthlyData()"
                         [animation]="animationEnabled()"
+                        [title]="chartTitle()"
+                        [subtitle]="chartSubtitle()"
+                        [titleAlign]="chartTitleAlign()"
                         xField="month"
                         class="h-96 w-full"
                         aria-label="Monthly Performance Metrics"
@@ -868,9 +1312,33 @@
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        @if (useCustomTitleTemplate()) {
+                            <ng-template monaChartTitleTemplate let-title>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+                                    <span class="text-base font-extrabold tracking-tight text-primary">{{
+                                        title
+                                    }}</span>
+                                    <span
+                                        class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary"
+                                        >Live</span
+                                    >
+                                </div>
+                            </ng-template>
+                            <ng-template monaChartSubtitleTemplate let-subtitle>
+                                <span class="text-xs font-medium italic text-muted-foreground">✨ {{ subtitle }}</span>
+                            </ng-template>
+                        }
+
                         <mona-chart-x-axis
                             [axisLine]="xAxisLine()"
                             [gridLines]="xGridLines()"
+                            [labels]="xAxisLabels()"
+                            [labelRotation]="xAxisLabelRotation()"
+                            [tickMarks]="xAxisTickMarks()"
+                            [tickSize]="xAxisTickSize()"
+                            [labelMaxWidth]="xAxisLabelMaxWidth()"
+                            [labelPadding]="xAxisLabelPadding()"
                             [nice]="niceAxes()"
                             [position]="xAxisPosition()"
                             [title]="showAxisTitles() ? 'Fiscal Month' : ''" />
@@ -878,6 +1346,11 @@
                             [axisLine]="yAxisLine()"
                             [formatter]="currencyFormatter"
                             [gridLines]="yGridLines()"
+                            [labels]="yAxisLabels()"
+                            [labelRotation]="yAxisLabelRotation()"
+                            [tickMarks]="yAxisTickMarks()"
+                            [tickSize]="yAxisTickSize()"
+                            [labelPadding]="yAxisLabelPadding()"
                             [nice]="niceAxes()"
                             [position]="yAxisPosition()"
                             [title]="showAxisTitles() ? 'Performance ($)' : ''" />
@@ -909,7 +1382,8 @@
 
                         @if (useCustomNoData()) {
                             <ng-template monaChartNoDataTemplate>
-                                <div class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+                                <div
+                                    class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
                                     <p class="font-medium">No sales metrics found.</p>
                                     <p class="text-xs mt-1">Click "Restore" to re-populate the dataset.</p>
                                 </div>
@@ -921,7 +1395,9 @@
 
             @case ("time") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Continuous System Telemetry (Temporal Scale)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Continuous System Telemetry (Temporal Scale)
+                    </h3>
                     <mona-chart
                         [data]="dateData()"
                         [animation]="animationEnabled()"
@@ -931,20 +1407,23 @@
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis type="time" [axisLine]="xAxisLine()" [formatter]="timeFormatter" [nice]="true" />
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" title="Utilization (%)" />
+                        <mona-chart-x-axis
+                            type="time"
+                            [axisLine]="xAxisLine()"
+                            [formatter]="timeFormatter"
+                            [nice]="true" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [formatter]="percentFormatter"
+                            [gridLines]="yGridLines()"
+                            [nice]="true" />
 
-                        <mona-area-series
-                            field="cpu"
-                            name="CPU Load"
-                            curve="monotone-x"
-                            fillMode="gradient"
-                            [showPoints]="true" />
+                        <mona-line-series field="cpu" name="CPU Utilization" curve="monotone-x" [showPoints]="false" />
                         <mona-line-series
                             field="memory"
-                            name="Memory Usage"
+                            name="Memory Saturation"
                             curve="monotone-x"
-                            [showPoints]="true" />
+                            [showPoints]="false" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />
@@ -954,24 +1433,35 @@
 
             @case ("scatter") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Continuous Biometric Correlation (Scatter Plot)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Athlete Biometrics (Height vs Weight Correlation Scatter Plot)
+                    </h3>
                     <mona-chart
                         [data]="scatterData()"
                         [animation]="animationEnabled()"
                         xField="height"
                         class="h-96 w-full"
-                        aria-label="Biometric Scatter Distribution"
-                        aria-description="Scatter chart showing correlation between height, weight, and wingspan."
+                        aria-label="Athlete Biometrics"
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis type="linear" [axisLine]="xAxisLine()" [nice]="true" title="Height (cm)" />
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" title="Dimension (kg / cm)" />
+                        <mona-chart-x-axis
+                            type="linear"
+                            [axisLine]="xAxisLine()"
+                            [formatter]="heightFormatter"
+                            [nice]="true"
+                            title="Height (cm)" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [formatter]="weightFormatter"
+                            [gridLines]="yGridLines()"
+                            [nice]="true"
+                            title="Weight (kg)" />
 
                         @if (showScatterWeight()) {
                             <mona-scatter-series
                                 field="weight"
-                                name="Weight (kg)"
+                                name="Body Weight (kg)"
                                 [pointRadius]="scatterPointRadius()"
                                 [fillOpacity]="scatterFillOpacity()"
                                 color="#3b82f6" />
@@ -987,26 +1477,37 @@
                         }
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
-                        <mona-chart-tooltip [shared]="sharedTooltip()" />
+                        <mona-chart-tooltip [shared]="false" />
                     </mona-chart>
                 </div>
             }
 
             @case ("bubble") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Global Socioeconomic Indicator (Bubble Chart with Sqrt Radius Scaling)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Global Economics: GDP vs Life Expectancy & Population (3D Bubble Chart)
+                    </h3>
                     <mona-chart
                         [data]="bubbleData()"
                         [animation]="animationEnabled()"
                         xField="gdp"
                         class="h-96 w-full"
-                        aria-label="Global GDP, Life Expectancy, and Population"
-                        aria-description="Bubble chart comparing GDP per capita against Life Expectancy with bubble size proportional to Population."
+                        aria-label="Global Economics Demographics"
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis type="linear" [axisLine]="xAxisLine()" [nice]="true" title="GDP per Capita ($)" />
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" title="Life Expectancy (Years)" />
+                        <mona-chart-x-axis
+                            type="linear"
+                            [axisLine]="xAxisLine()"
+                            [formatter]="currencyFormatter"
+                            [nice]="true"
+                            title="GDP per Capita ($)" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [formatter]="lifeExpFormatter"
+                            [gridLines]="yGridLines()"
+                            [nice]="true"
+                            title="Life Expectancy (Years)" />
 
                         <mona-bubble-series
                             field="lifeExp"
@@ -1026,22 +1527,129 @@
 
             @case ("grouped") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Multi-Series Grouped Bar Comparison</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Multi-Series Grouped Bar Comparison
+                    </h3>
                     <mona-chart
                         [data]="displayedMonthlyData()"
                         [animation]="animationEnabled()"
+                        [title]="chartTitle()"
+                        [subtitle]="chartSubtitle()"
+                        [titleAlign]="chartTitleAlign()"
                         xField="month"
                         class="h-96 w-full"
                         aria-label="Grouped Budget Comparison"
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" />
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [formatter]="currencyFormatter" [gridLines]="yGridLines()" [nice]="true" />
+                        <mona-chart-x-axis
+                            [axisLine]="xAxisLine()"
+                            [labels]="xAxisLabels()"
+                            [labelRotation]="xAxisLabelRotation()"
+                            [tickMarks]="xAxisTickMarks()"
+                            [tickSize]="xAxisTickSize()"
+                            [nice]="true" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [formatter]="currencyFormatter"
+                            [gridLines]="yGridLines()"
+                            [labels]="yAxisLabels()"
+                            [labelRotation]="yAxisLabelRotation()"
+                            [tickMarks]="yAxisTickMarks()"
+                            [tickSize]="yAxisTickSize()"
+                            [nice]="true" />
 
-                        <mona-bar-series field="target" name="Target" [borderRadius]="4" [maxBarWidth]="36" />
-                        <mona-bar-series field="forecast" name="Forecast" [borderRadius]="4" [maxBarWidth]="36" />
-                        <mona-bar-series field="actual" name="Actual" [borderRadius]="4" [maxBarWidth]="36" />
+                        <mona-bar-series
+                            field="target"
+                            name="Target"
+                            [orientation]="barOrientation()"
+                            [borderRadius]="4"
+                            [maxBarWidth]="36" />
+                        <mona-bar-series
+                            field="forecast"
+                            name="Forecast"
+                            [orientation]="barOrientation()"
+                            [borderRadius]="4"
+                            [maxBarWidth]="36" />
+                        <mona-bar-series
+                            field="actual"
+                            name="Actual"
+                            [orientation]="barOrientation()"
+                            [borderRadius]="4"
+                            [maxBarWidth]="36" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("horizontal") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Horizontal Bar Studio (Grouped & Stacked Regional Analytics)
+                    </h3>
+                    <mona-chart
+                        [data]="displayedMonthlyData()"
+                        [animation]="animationEnabled()"
+                        [title]="chartTitle()"
+                        [subtitle]="chartSubtitle()"
+                        [titleAlign]="chartTitleAlign()"
+                        xField="month"
+                        class="h-96 w-full"
+                        aria-label="Horizontal Regional Analytics"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        @if (useCustomTitleTemplate()) {
+                            <ng-template monaChartTitleTemplate let-title>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+                                    <span class="text-base font-extrabold tracking-tight text-primary">{{
+                                        title
+                                    }}</span>
+                                    <span
+                                        class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary"
+                                        >Live</span
+                                    >
+                                </div>
+                            </ng-template>
+                            <ng-template monaChartSubtitleTemplate let-subtitle>
+                                <span class="text-xs font-medium italic text-muted-foreground">✨ {{ subtitle }}</span>
+                            </ng-template>
+                        }
+
+                        <mona-chart-x-axis
+                            [axisLine]="xAxisLine()"
+                            [formatter]="currencyFormatter"
+                            [gridLines]="xGridLines()"
+                            [labels]="xAxisLabels()"
+                            [labelRotation]="xAxisLabelRotation()"
+                            [tickMarks]="xAxisTickMarks()"
+                            [tickSize]="xAxisTickSize()"
+                            [nice]="true"
+                            title="Sales & Revenue ($)" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [gridLines]="yGridLines()"
+                            [labels]="yAxisLabels()"
+                            [labelRotation]="yAxisLabelRotation()"
+                            [tickMarks]="yAxisTickMarks()"
+                            [tickSize]="yAxisTickSize()"
+                            title="Fiscal Period" />
+
+                        <mona-bar-series
+                            field="actual"
+                            name="Actual Sales"
+                            orientation="horizontal"
+                            [borderRadius]="4"
+                            [maxBarWidth]="32" />
+                        <mona-bar-series
+                            field="target"
+                            name="Target Sales"
+                            orientation="horizontal"
+                            [borderRadius]="4"
+                            [maxBarWidth]="32" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />
@@ -1051,7 +1659,9 @@
 
             @case ("custom") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Custom Angular Templates (Axis Labels, Legend Items, Tooltip & No-Data)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Custom Angular Templates (Axis Labels, Legend Items, Tooltip & No-Data)
+                    </h3>
                     <mona-chart
                         [data]="displayedMonthlyData()"
                         [animation]="animationEnabled()"
@@ -1066,14 +1676,19 @@
                                 <span class="font-bold text-primary">🗓️ {{ val }}</span>
                             </ng-template>
                         </mona-chart-x-axis>
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [formatter]="currencyFormatter" [gridLines]="yGridLines()" [nice]="true" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [formatter]="currencyFormatter"
+                            [gridLines]="yGridLines()"
+                            [nice]="true" />
 
                         <mona-bar-series field="target" name="Target Plan" [borderRadius]="4" />
                         <mona-line-series field="actual" name="Actual Revenue" curve="natural" [showPoints]="true" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true">
                             <ng-template monaChartLegendItemTemplate let-series>
-                                <div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-muted/60 border border-border text-xs">
+                                <div
+                                    class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-muted/60 border border-border text-xs">
                                     <span class="h-2 w-2 rounded-full" [style.background-color]="series.color"></span>
                                     <span class="font-semibold">{{ series.name }}</span>
                                     <span class="text-[10px] text-muted-foreground">({{ series.type }})</span>
@@ -1083,14 +1698,17 @@
 
                         <mona-chart-tooltip [shared]="true">
                             <ng-template monaChartTooltipTemplate let-points="points">
-                                <div class="bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-2.5 min-w-[160px]">
+                                <div
+                                    class="bg-popover text-popover-foreground border border-border shadow-xl rounded-lg p-2.5 min-w-[160px]">
                                     <div class="text-xs font-bold border-b border-border pb-1 mb-1.5 text-primary">
                                         Period: {{ points[0]?.xValue }}
                                     </div>
                                     @for (p of points; track p.seriesId) {
                                         <div class="flex items-center justify-between text-xs py-0.5">
                                             <span class="flex items-center gap-1.5">
-                                                <span class="h-2 w-2 rounded-full" [style.background-color]="p.color"></span>
+                                                <span
+                                                    class="h-2 w-2 rounded-full"
+                                                    [style.background-color]="p.color"></span>
                                                 <span>{{ p.seriesName }}</span>
                                             </span>
                                             <span class="font-mono font-semibold">{{ p.formattedY }}</span>
@@ -1104,7 +1722,9 @@
                             <div class="flex flex-col items-center justify-center p-12 text-center">
                                 <div class="text-2xl mb-2">📊</div>
                                 <h4 class="font-semibold text-foreground">No Chart Data Present</h4>
-                                <p class="text-xs text-muted-foreground mt-1">This is a custom projected template via [monaChartNoDataTemplate].</p>
+                                <p class="text-xs text-muted-foreground mt-1">
+                                    This is a custom projected template via [monaChartNoDataTemplate].
+                                </p>
                             </div>
                         </ng-template>
                     </mona-chart>
@@ -1112,7 +1732,9 @@
             }
             @case ("stacked-bar") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Cumulative Stacked Bar Chart (Sales by Channel)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Cumulative Stacked Bar Chart (Sales by Channel)
+                    </h3>
                     <mona-chart
                         [data]="stackedBarData()"
                         [animation]="animationEnabled()"
@@ -1123,11 +1745,30 @@
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
                         <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" />
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [formatter]="currencyFormatter" [gridLines]="yGridLines()" [nice]="true" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [formatter]="currencyFormatter"
+                            [gridLines]="yGridLines()"
+                            [nice]="true" />
 
-                        <mona-bar-series field="online" name="Online Store" stack="sales" [borderRadius]="6" [maxBarWidth]="40" />
-                        <mona-bar-series field="retail" name="Retail Outlets" stack="sales" [borderRadius]="6" [maxBarWidth]="40" />
-                        <mona-bar-series field="partner" name="Partner Direct" stack="sales" [borderRadius]="6" [maxBarWidth]="40" />
+                        <mona-bar-series
+                            field="online"
+                            name="Online Store"
+                            stack="sales"
+                            [borderRadius]="6"
+                            [maxBarWidth]="40" />
+                        <mona-bar-series
+                            field="retail"
+                            name="Retail Outlets"
+                            stack="sales"
+                            [borderRadius]="6"
+                            [maxBarWidth]="40" />
+                        <mona-bar-series
+                            field="partner"
+                            name="Partner Direct"
+                            stack="sales"
+                            [borderRadius]="6"
+                            [maxBarWidth]="40" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />
@@ -1137,7 +1778,9 @@
 
             @case ("percent-bar") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">100% Stacked Bar Chart (Channel Composition)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        100% Stacked Bar Chart (Channel Composition)
+                    </h3>
                     <mona-chart
                         [data]="stackedBarData()"
                         [animation]="animationEnabled()"
@@ -1150,9 +1793,27 @@
                         <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" />
                         <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" />
 
-                        <mona-bar-series field="online" name="Online Store" stack="sales" stackMode="percent" [borderRadius]="5" [maxBarWidth]="40" />
-                        <mona-bar-series field="retail" name="Retail Outlets" stack="sales" stackMode="percent" [borderRadius]="5" [maxBarWidth]="40" />
-                        <mona-bar-series field="partner" name="Partner Direct" stack="sales" stackMode="percent" [borderRadius]="5" [maxBarWidth]="40" />
+                        <mona-bar-series
+                            field="online"
+                            name="Online Store"
+                            stack="sales"
+                            stackMode="percent"
+                            [borderRadius]="5"
+                            [maxBarWidth]="40" />
+                        <mona-bar-series
+                            field="retail"
+                            name="Retail Outlets"
+                            stack="sales"
+                            stackMode="percent"
+                            [borderRadius]="5"
+                            [maxBarWidth]="40" />
+                        <mona-bar-series
+                            field="partner"
+                            name="Partner Direct"
+                            stack="sales"
+                            stackMode="percent"
+                            [borderRadius]="5"
+                            [maxBarWidth]="40" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />
@@ -1162,7 +1823,9 @@
 
             @case ("stacked-area") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Cumulative Stacked Area Chart (Traffic Sources Growth)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Cumulative Stacked Area Chart (Traffic Sources Growth)
+                    </h3>
                     <mona-chart
                         [data]="stackedAreaData()"
                         [animation]="animationEnabled()"
@@ -1187,7 +1850,9 @@
 
             @case ("percent-area") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">100% Stacked Area Chart (Traffic Channel Share)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        100% Stacked Area Chart (Traffic Channel Share)
+                    </h3>
                     <mona-chart
                         [data]="stackedAreaData()"
                         [animation]="animationEnabled()"
@@ -1197,12 +1862,27 @@
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" type="linear" />
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" type="linear" [title]="'Years'" />
                         <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" />
 
-                        <mona-area-series field="direct" name="Direct Visitors" stack="traffic" stackMode="percent" fillMode="gradient" />
-                        <mona-area-series field="referral" name="Referrals" stack="traffic" stackMode="percent" fillMode="gradient" />
-                        <mona-area-series field="organic" name="Organic Search" stack="traffic" stackMode="percent" fillMode="gradient" />
+                        <mona-area-series
+                            field="direct"
+                            name="Direct Visitors"
+                            stack="traffic"
+                            stackMode="percent"
+                            fillMode="gradient" />
+                        <mona-area-series
+                            field="referral"
+                            name="Referrals"
+                            stack="traffic"
+                            stackMode="percent"
+                            fillMode="gradient" />
+                        <mona-area-series
+                            field="organic"
+                            name="Organic Search"
+                            stack="traffic"
+                            stackMode="percent"
+                            fillMode="gradient" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />
@@ -1213,9 +1893,13 @@
             @case ("range-bar") {
                 <div>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-muted-foreground">Range Bar Chart (Monthly Temperature Extremes Min / Max)</h3>
+                        <h3 class="text-sm font-semibold text-muted-foreground">
+                            Range Bar Chart (Monthly Temperature Extremes Min / Max)
+                        </h3>
                         <div class="flex items-center gap-2">
-                            <button monaButton size="small" look="secondary" (click)="randomizeRangeBarData()">Randomize Data</button>
+                            <button monaButton size="small" look="secondary" (click)="randomizeRangeBarData()">
+                                Randomize Data
+                            </button>
                         </div>
                     </div>
 
@@ -1249,9 +1933,13 @@
             @case ("range-area") {
                 <div>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-muted-foreground">Range Area Chart (Confidence Interval Band with Actuals)</h3>
+                        <h3 class="text-sm font-semibold text-muted-foreground">
+                            Range Area Chart (Confidence Interval Band with Actuals)
+                        </h3>
                         <div class="flex items-center gap-2">
-                            <button monaButton size="small" look="secondary" (click)="randomizeRangeAreaData()">Randomize Data</button>
+                            <button monaButton size="small" look="secondary" (click)="randomizeRangeAreaData()">
+                                Randomize Data
+                            </button>
                         </div>
                     </div>
 
@@ -1292,9 +1980,17 @@
             @case ("candlestick") {
                 <div>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-muted-foreground">Financial Candlestick Daily Stock Trading Session</h3>
+                        <h3 class="text-sm font-semibold text-muted-foreground">
+                            Financial Candlestick Daily Stock Trading Session
+                        </h3>
                         <div class="flex items-center gap-2">
-                            <button monaButton size="small" look="outline" (click)="candlestickFillMode.set(candlestickFillMode() === 'filled' ? 'hollow' : 'filled')">
+                            <button
+                                monaButton
+                                size="small"
+                                look="outline"
+                                (click)="
+                                    candlestickFillMode.set(candlestickFillMode() === 'filled' ? 'hollow' : 'filled')
+                                ">
                                 Toggle Mode: {{ candlestickFillMode() }}
                             </button>
                             <button monaButton size="small" look="primary" (click)="randomizeCandlestickData()">
@@ -1313,7 +2009,11 @@
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
                         <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" title="Share Price ($)" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [gridLines]="yGridLines()"
+                            [nice]="true"
+                            title="Share Price ($)" />
 
                         <mona-candlestick-series
                             openField="open"
@@ -1334,7 +2034,9 @@
             @case ("ohlc") {
                 <div>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-muted-foreground">High-Frequency Equity OHLC Bars (Open, High, Low, Close)</h3>
+                        <h3 class="text-sm font-semibold text-muted-foreground">
+                            High-Frequency Equity OHLC Bars (Open, High, Low, Close)
+                        </h3>
                         <button monaButton size="small" look="primary" (click)="randomizeOhlcData()">
                             Randomize OHLC
                         </button>
@@ -1350,7 +2052,11 @@
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
                         <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
-                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" title="Index Level (pts)" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [gridLines]="yGridLines()"
+                            [nice]="true"
+                            title="Index Level (pts)" />
 
                         <mona-ohlc-series
                             openField="open"
@@ -1368,7 +2074,9 @@
 
             @case ("heatmap") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Server Activity & Load Matrix (2D Heatmap)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Server Activity & Load Matrix (2D Heatmap)
+                    </h3>
                     <mona-chart
                         [animation]="animationEnabled()"
                         class="h-96 w-full"
@@ -1398,7 +2106,9 @@
             @case ("radial-bar") {
                 <div>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-muted-foreground">Multi-Ring Radial Bar Progress / Resource Utilization</h3>
+                        <h3 class="text-sm font-semibold text-muted-foreground">
+                            Multi-Ring Radial Bar Progress / Resource Utilization
+                        </h3>
                         <button monaButton size="small" look="primary" (click)="randomizeRadialBarData()">
                             Randomize Values
                         </button>
@@ -1432,9 +2142,15 @@
             @case ("rose") {
                 <div>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-muted-foreground">Wind Rose / Polar Area Directional Velocity</h3>
+                        <h3 class="text-sm font-semibold text-muted-foreground">
+                            Wind Rose / Polar Area Directional Velocity
+                        </h3>
                         <div class="flex items-center gap-2">
-                            <button monaButton size="small" look="outline" (click)="roseScaleMode.set(roseScaleMode() === 'area' ? 'radius' : 'area')">
+                            <button
+                                monaButton
+                                size="small"
+                                look="outline"
+                                (click)="roseScaleMode.set(roseScaleMode() === 'area' ? 'radius' : 'area')">
                                 Scale Mode: {{ roseScaleMode() }}
                             </button>
                             <button monaButton size="small" look="primary" (click)="randomizeRoseData()">
@@ -1467,13 +2183,31 @@
             @case ("gauge") {
                 <div>
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-muted-foreground">Radial Arc Speedometer / Metric Gauge</h3>
+                        <h3 class="text-sm font-semibold text-muted-foreground">
+                            Radial Arc Speedometer / Metric Gauge
+                        </h3>
                         <div class="flex items-center gap-2">
-                            <button monaButton size="small" look="outline" (click)="gaugeIndicator.set(gaugeIndicator() === 'both' ? 'arc' : gaugeIndicator() === 'arc' ? 'needle' : 'both')">
+                            <button
+                                monaButton
+                                size="small"
+                                look="outline"
+                                (click)="
+                                    gaugeIndicator.set(
+                                        gaugeIndicator() === 'both'
+                                            ? 'arc'
+                                            : gaugeIndicator() === 'arc'
+                                              ? 'needle'
+                                              : 'both'
+                                    )
+                                ">
                                 Indicator: {{ gaugeIndicator() }}
                             </button>
-                            <button monaButton size="small" look="outline" (click)="gaugeCustomTemplate.set(!gaugeCustomTemplate())">
-                                Center Template: {{ gaugeCustomTemplate() ? 'Custom' : 'Default' }}
+                            <button
+                                monaButton
+                                size="small"
+                                look="outline"
+                                (click)="gaugeCustomTemplate.set(!gaugeCustomTemplate())">
+                                Center Template: {{ gaugeCustomTemplate() ? "Custom" : "Default" }}
                             </button>
                             <button monaButton size="small" look="primary" (click)="randomizeGaugeValue()">
                                 Randomize Value
@@ -1515,7 +2249,9 @@
 
             @case ("treemap") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Tech Stack & Ecosystem Footprint (Hierarchical Treemap)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Tech Stack & Ecosystem Footprint (Hierarchical Treemap)
+                    </h3>
                     <mona-chart
                         [data]="treemapData()"
                         [animation]="animationEnabled()"
@@ -1546,7 +2282,9 @@
                                     <div class="flex flex-col truncate">
                                         <div class="font-bold text-xs truncate">{{ ctx.formattedLabel }}</div>
                                         @if (ctx.isLeaf) {
-                                            <div class="text-[10px] opacity-75 truncate">{{ ctx.formattedValue }} pts ({{ ctx.percentageOfRoot?.toFixed(1) }}%)</div>
+                                            <div class="text-[10px] opacity-75 truncate">
+                                                {{ ctx.formattedValue }} pts ({{ ctx.percentageOfRoot?.toFixed(1) }}%)
+                                            </div>
                                         }
                                     </div>
                                 </ng-template>
@@ -1559,7 +2297,9 @@
             }
             @case ("funnel") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Conversion Funnel & Drop-off Analysis (Symmetric Trapezoids)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Conversion Funnel & Drop-off Analysis (Symmetric Trapezoids)
+                    </h3>
                     <mona-chart
                         [data]="funnelData()"
                         [animation]="animationEnabled()"
@@ -1583,7 +2323,9 @@
                                         <span class="font-bold text-xs">{{ stage.formattedCategory }}</span>
                                         <span class="text-[11px] opacity-90">{{ stage.formattedValue }}</span>
                                         @if (stage.formattedConversionRate) {
-                                            <span class="text-[10px] opacity-75">({{ stage.formattedConversionRate }} step)</span>
+                                            <span class="text-[10px] opacity-75"
+                                                >({{ stage.formattedConversionRate }} step)</span
+                                            >
                                         }
                                     </div>
                                 </ng-template>
@@ -1596,7 +2338,9 @@
             }
             @case ("waterfall") {
                 <div>
-                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Corporate Cash Flow Breakdown (Waterfall Chart with Subtotals)</h3>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">
+                        Corporate Cash Flow Breakdown (Waterfall Chart with Subtotals)
+                    </h3>
                     <mona-chart
                         [data]="waterfallData()"
                         [animation]="animationEnabled()"
@@ -1616,7 +2360,9 @@
                             name="Cash Flow">
                             @if (waterfallUseCustomTemplate()) {
                                 <ng-template monaChartWaterfallLabelTemplate let-step>
-                                    <div class="text-[11px] font-semibold px-1 py-0.5 rounded shadow-xs" [style.color]="step.color">
+                                    <div
+                                        class="text-[11px] font-semibold px-1 py-0.5 rounded shadow-xs"
+                                        [style.color]="step.color">
                                         {{ step.formattedValue }}
                                     </div>
                                 </ng-template>
@@ -1641,7 +2387,8 @@
             <button monaButton size="small" look="ghost" (click)="clearLogs()">Clear Log</button>
         </div>
 
-        <div class="overflow-x-auto max-h-48 overflow-y-auto border border-border/60 rounded-lg bg-background/50 font-mono text-xs">
+        <div
+            class="overflow-x-auto max-h-48 overflow-y-auto border border-border/60 rounded-lg bg-background/50 font-mono text-xs">
             <table class="w-full text-left">
                 <thead class="bg-muted/60 text-muted-foreground border-b border-border sticky top-0">
                     <tr>

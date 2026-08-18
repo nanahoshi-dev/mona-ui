@@ -2,6 +2,7 @@ import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
+import type { ChartBarOrientation } from "../../models/chart-bar.models";
 
 let nextSeriesId = 0;
 
@@ -68,6 +69,12 @@ export class RangeBarSeriesComponent implements OnInit {
     public readonly name = input("Range Bar");
 
     /**
+     * @description Orientation of the range bars ('vertical' for vertical spans, 'horizontal' for horizontal intervals).
+     * @default "vertical"
+     */
+    public readonly orientation = input<ChartBarOrientation>("vertical");
+
+    /**
      * @description Property key or accessor extracting the ending range value for each bar.
      */
     public readonly toField = input.required<ChartField>();
@@ -109,8 +116,9 @@ export class RangeBarSeriesComponent implements OnInit {
         effect(() => {
             this.data();
             this.fromField();
-            this.toField();
             this.keyField();
+            this.orientation();
+            this.toField();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -155,6 +163,7 @@ export class RangeBarSeriesComponent implements OnInit {
             keyField: this.keyField,
             maxBarWidth: this.maxBarWidth,
             name: this.name,
+            orientation: this.orientation,
             toField: this.toField,
             toggleVisibility: () => {
                 const next = !this.visible();

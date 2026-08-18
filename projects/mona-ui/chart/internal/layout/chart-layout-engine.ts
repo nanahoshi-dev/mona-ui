@@ -372,12 +372,15 @@ export class ChartLayoutEngine {
                     hasRenderableData: false,
                     height: options.containerHeight,
                     hitTargets: [],
+                    interactionAxis: "x",
                     interactionBuckets: [],
                     legendItems: [],
+                    orientation: "vertical",
                     plotRect: { height: 0, width: 0, x: 0, y: 0 },
                     series: [],
                     width: options.containerWidth,
-                    xAxisType: "category"
+                    xAxisType: "category",
+                    yAxisType: "linear"
                 };
             }
             if (famArray.includes("sector") && (famArray.includes("radar") || famArray.includes("polar"))) {
@@ -521,6 +524,7 @@ export class ChartLayoutEngine {
         return CartesianLayoutEngine.computeScene({
             containerHeight: options.containerHeight,
             containerWidth: options.containerWidth,
+            measurements: options.measurements,
             rootData: options.rootData,
             rootXField: options.rootXField,
             series: cartesianSeries,

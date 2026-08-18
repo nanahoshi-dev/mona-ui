@@ -45,8 +45,10 @@ describe("CanvasChartRenderer", () => {
             hasRenderableData: true,
             height: 300,
             hitTargets: [],
+            interactionAxis: "x",
             interactionBuckets: [],
             legendItems: [],
+            orientation: "vertical",
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [],
             width: 500
@@ -72,8 +74,10 @@ describe("CanvasChartRenderer", () => {
             hasRenderableData: true,
             height: 300,
             hitTargets: [],
+            interactionAxis: "x",
             interactionBuckets: [],
             legendItems: [],
+            orientation: "vertical",
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -125,8 +129,10 @@ describe("CanvasChartRenderer", () => {
             hasRenderableData: true,
             height: 300,
             hitTargets: [],
+            interactionAxis: "x",
             interactionBuckets: [],
             legendItems: [],
+            orientation: "vertical",
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -178,8 +184,10 @@ describe("CanvasChartRenderer", () => {
             hasRenderableData: true,
             height: 300,
             hitTargets: [],
+            interactionAxis: "x",
             interactionBuckets: [],
             legendItems: [],
+            orientation: "vertical",
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -228,8 +236,10 @@ describe("CanvasChartRenderer", () => {
             hasRenderableData: true,
             height: 300,
             hitTargets: [],
+            interactionAxis: "x",
             interactionBuckets: [],
             legendItems: [],
+            orientation: "vertical",
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
@@ -291,8 +301,10 @@ describe("CanvasChartRenderer", () => {
             hasRenderableData: true,
             height: 300,
             hitTargets: [],
+            interactionAxis: "x",
             interactionBuckets: [],
             legendItems: [],
+            orientation: "vertical",
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [],
             width: 500
@@ -335,8 +347,10 @@ describe("CanvasChartRenderer", () => {
                     yValue: 50
                 }
             ],
+            interactionAxis: "x",
             interactionBuckets: [],
             legendItems: [],
+            orientation: "vertical",
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {

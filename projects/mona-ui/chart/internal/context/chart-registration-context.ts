@@ -9,12 +9,14 @@ import type { ChartTooltipTemplateDirective } from "../../directives/chart-toolt
 import type { ChartTreemapSort, ChartTreemapTile } from "../../models/chart-treemap.models";
 import type {
     ChartAxisFormatter,
+    ChartAxisLabelRotation,
     ChartAxisPosition,
     ChartXAxisPosition,
     ChartXAxisType,
     ChartYAxisPosition,
     ChartYAxisType
 } from "../../models/chart-axis.models";
+import type { ChartBarOrientation } from "../../models/chart-bar.models";
 import type {
     ChartPolarFillMode,
     ChartPolarLabelContent,
@@ -61,11 +63,18 @@ export function hasInvalidationReason(
 export interface ChartAxisRegistrationBase {
     axisLine: Signal<boolean>;
     formatter: Signal<ChartAxisFormatter | undefined>;
-    gridLines: Signal<boolean>;
+    gridLines: Signal<boolean | undefined>;
+    labelMaxWidth?: Signal<number | undefined>;
+    labelPadding?: Signal<number | undefined>;
+    labelRotation?: Signal<ChartAxisLabelRotation | undefined>;
+    labels?: Signal<boolean | undefined>;
     labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
     nice: Signal<boolean>;
     tickCount: Signal<number | undefined>;
+    tickMarks?: Signal<boolean | undefined>;
+    tickSize?: Signal<number | undefined>;
     title: Signal<string>;
+    titlePadding?: Signal<number | undefined>;
     userClass?: Signal<string>;
     visible: Signal<boolean>;
 }
@@ -187,6 +196,7 @@ export interface ChartBarSeriesRegistration extends ChartCartesianScalarSeriesRe
     borderRadius?: Signal<number | undefined>;
     fillOpacity?: Signal<number | undefined>;
     maxBarWidth?: Signal<number | undefined>;
+    orientation?: Signal<ChartBarOrientation | undefined>;
     stack: Signal<string | undefined>;
     stackMode: Signal<ChartStackMode>;
     type: "bar";
@@ -197,6 +207,7 @@ export interface ChartRangeBarSeriesRegistration extends ChartCartesianRangeSeri
     borderRadius?: Signal<number | undefined>;
     fillOpacity?: Signal<number | undefined>;
     maxBarWidth?: Signal<number | undefined>;
+    orientation?: Signal<ChartBarOrientation | undefined>;
     type: "rangeBar";
 }
 
