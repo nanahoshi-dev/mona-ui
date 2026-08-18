@@ -40,6 +40,7 @@ export interface SceneRadialTrack {
 
 export interface SceneGaugeValue {
     readonly animationKey: string;
+    readonly cornerRadius: number;
     readonly dataIndex: number;
     readonly datum: unknown;
     readonly endAngle: number;
