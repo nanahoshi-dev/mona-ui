@@ -1,3 +1,4 @@
+import type { ChartRect } from "../../../models/chart.models";
 import type { ChartTreemapSeriesScene, SceneTreemapNode } from "../../scene/hierarchical-scene";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
@@ -11,9 +12,38 @@ interface TreemapNodePlan {
     readonly type: "enter" | "exit" | "update";
 }
 
-function createCollapsedTreemapNode(node: SceneTreemapNode, opacity = 0): SceneTreemapNode {
+function createCollapsedTreemapNode(
+    node: SceneTreemapNode,
+    parentNode?: SceneTreemapNode,
+    plotRect?: ChartRect,
+    opacity = 0
+): SceneTreemapNode {
+    let centerX: number;
+    let centerY: number;
+
+    if (parentNode && parentNode.bounds.width > 0 && parentNode.bounds.height > 0) {
+        centerX = parentNode.bounds.x + parentNode.bounds.width / 2;
+        centerY = parentNode.bounds.y + parentNode.bounds.height / 2;
+    } else if (plotRect && plotRect.width > 0 && plotRect.height > 0) {
+        centerX = plotRect.x + plotRect.width / 2;
+        centerY = plotRect.y + plotRect.height / 2;
+    } else {
+        centerX = node.bounds.x + node.bounds.width / 2;
+        centerY = node.bounds.y + node.bounds.height / 2;
+    }
+
+    const collapsedBounds: ChartRect = {
+        height: 0,
+        width: 0,
+        x: centerX,
+        y: centerY
+    };
+
     return {
         ...node,
+        bounds: collapsedBounds,
+        contentBounds: collapsedBounds,
+        headerBounds: node.headerBounds ? collapsedBounds : undefined,
         renderOpacity: opacity
     };
 }
@@ -48,9 +78,10 @@ export class TreemapAnimationAdapter implements ChartSeriesAnimationAdapter<Char
     public createPlan(
         previous: ChartTreemapSeriesScene | null,
         target: ChartTreemapSeriesScene | null,
-        _context: ChartAnimationPlanningContext
+        context: ChartAnimationPlanningContext
     ): ChartSeriesTransitionPlan<ChartTreemapSeriesScene> {
         const id = target?.id ?? previous?.id ?? "treemap";
+        const plotRect = context.plotRect;
 
         if (!target) {
             return {
@@ -63,12 +94,20 @@ export class TreemapAnimationAdapter implements ChartSeriesAnimationAdapter<Char
         }
 
         if (!previous) {
-            const nodePlans: TreemapNodePlan[] = target.nodes.map(n => ({
-                animationKey: n.animationKey,
-                from: createCollapsedTreemapNode(n, 0),
-                to: n,
-                type: "enter"
-            }));
+            const targetParentMap = new Map<string, SceneTreemapNode>();
+            for (const n of target.nodes) {
+                targetParentMap.set(n.nodeId, n);
+            }
+
+            const nodePlans: TreemapNodePlan[] = target.nodes.map(n => {
+                const parent = n.parentId ? targetParentMap.get(n.parentId) : undefined;
+                return {
+                    animationKey: n.animationKey,
+                    from: createCollapsedTreemapNode(n, parent, plotRect, 0),
+                    to: n,
+                    type: "enter"
+                };
+            });
 
             return {
                 adapterType: "treemap",
@@ -90,8 +129,15 @@ export class TreemapAnimationAdapter implements ChartSeriesAnimationAdapter<Char
         }
 
         const prevNodesByKey = new Map<string, SceneTreemapNode>();
+        const prevNodesById = new Map<string, SceneTreemapNode>();
         for (const n of previous.nodes) {
             prevNodesByKey.set(n.animationKey, n);
+            prevNodesById.set(n.nodeId, n);
+        }
+
+        const targetNodesById = new Map<string, SceneTreemapNode>();
+        for (const n of target.nodes) {
+            targetNodesById.set(n.nodeId, n);
         }
 
         const nodePlans: TreemapNodePlan[] = [];
@@ -109,9 +155,13 @@ export class TreemapAnimationAdapter implements ChartSeriesAnimationAdapter<Char
                     type: "update"
                 });
             } else {
+                const targetParent = toNode.parentId ? targetNodesById.get(toNode.parentId) : undefined;
+                const prevParent = toNode.parentId ? prevNodesById.get(toNode.parentId) : undefined;
+                const parentToUse = prevParent ?? targetParent;
+
                 nodePlans.push({
                     animationKey: toNode.animationKey,
-                    from: createCollapsedTreemapNode(toNode, 0),
+                    from: createCollapsedTreemapNode(toNode, parentToUse, plotRect, 0),
                     to: toNode,
                     type: "enter"
                 });
@@ -120,10 +170,14 @@ export class TreemapAnimationAdapter implements ChartSeriesAnimationAdapter<Char
 
         for (const fromNode of previous.nodes) {
             if (!seenKeys.has(fromNode.animationKey)) {
+                const targetParent = fromNode.parentId ? targetNodesById.get(fromNode.parentId) : undefined;
+                const prevParent = fromNode.parentId ? prevNodesById.get(fromNode.parentId) : undefined;
+                const parentToUse = targetParent ?? prevParent;
+
                 nodePlans.push({
                     animationKey: fromNode.animationKey,
                     from: fromNode,
-                    to: createCollapsedTreemapNode(fromNode, 0),
+                    to: createCollapsedTreemapNode(fromNode, parentToUse, plotRect, 0),
                     type: "exit"
                 });
             }
