@@ -10,21 +10,23 @@ The Mona UI Chart library combines declarative Angular template composition with
 
 - **Declarative Composition:** Compose charts using intuitive child components for Cartesian axes (`<mona-chart-x-axis>`, `<mona-chart-y-axis>`), Radial axes (`<mona-chart-angular-axis>`, `<mona-chart-radial-axis>`), series, legends, tooltips, inside labels, and donut center templates.
 - **Series Types:**
-  - **Cartesian:** Line (with multiple interpolation curves), Area (gradient fade or solid fill), Grouped and Stacked Bar series, Range Bar series (floating min-max interval bars with 4-corner rounded rects), Range Area series (continuous min-max confidence bands and cross-over boundaries), Scatter (point distribution with customizable marker sizes), and Bubble series (3-variable mapping with area-proportional square-root radius scaling).
-  - **Polar Sector:** Pie (full or partial circles) and Donut (configurable hole radius ratio and custom center templates).
+  - **Cartesian:** Line (with multiple interpolation curves), Area (gradient fade or solid fill), Grouped and Stacked Bar series, Range Bar series (floating min-max interval bars with 4-corner rounded rects), Range Area series (continuous min-max confidence bands and cross-over boundaries), Scatter (point distribution with customizable marker sizes), Bubble series (3-variable mapping with area-proportional square-root radius scaling), Candlestick & OHLC series (financial price action with rising/falling indicators), Heatmap (matrix cell visualization with color scales), Funnel series (conversion pipeline analytics with inscribed labels), and Waterfall series (cashflow and contribution movements with change, subtotal, and total steps).
+  - **Sector:** Pie (full or partial circles) and Donut (configurable hole radius ratio and custom center templates).
   - **Polar Axis:** Radar charts (closed polygon series comparing categorical attributes across angular spokes) and Continuous Polar charts (directional signals and curves with continuous angular coordinates from 0° to 360°).
+  - **Polar Arc:** Radial Bar series (concentric progress rings), Rose series (Nightingale coxcomb area/radius petals), and Gauge meters (tapered needle and value arc readout).
+  - **Hierarchical:** Treemap series (nested squarify, binary, dice, and slice-dice rectangular tiling).
 - **Dynamic & Responsive:** Built-in `ResizeObserver` support with automatic canvas backing store scaling for crisp rendering on HiDPI/Retina screens.
-- **Layering & Composition:** Preserves exact declaration order for mixed series (e.g. Scatter below Bar, or Bubble above Area) with individual circle fills for accurate translucent alpha compositing.
+- **Layering & Composition:** Preserves exact declaration order for mixed series with accurate translucent alpha compositing.
 - **Radial Fill Modes & Gradients:** Solid wash, radial gradient fading from center pole to outer radius, or outline only.
 - **Full Keyboard & Screen Reader Accessibility:** 
-  - `ArrowRight` / `ArrowLeft`: Navigate through X-axis interaction buckets, polar slices, or angular spokes.
-  - `ArrowUp` / `ArrowDown`: Cycle through visible series at the focused data point or duplicate X coordinates, or navigate slices in sector mode.
-  - `Home` / `End`: Jump to first or last data point/slice.
-  - `Enter` / `Space`: Emit click events for the selected data point, spoke, or slice.
+  - `ArrowRight` / `ArrowLeft`: Navigate through X-axis interaction buckets, polar slices, funnel stages, waterfall steps, or angular spokes.
+  - `ArrowUp` / `ArrowDown`: Cycle through visible series at the focused data point or duplicate X coordinates, or navigate slices/levels.
+  - `Home` / `End`: Jump to first or last data point/slice/stage.
+  - `Enter` / `Space`: Emit click events for the selected data point, spoke, stage, or slice.
   - `Escape`: Dismiss active interaction and announcements.
   - Live ARIA announcements and 100% AXE-compliant accessibility.
-- **Interactive Legend:** Clickable legend items that toggle series or individual slice visibility with stable palette coloring.
-- **Customizable Templates:** Custom Angular templates for tooltips (`monaChartTooltipTemplate`), axis tick labels (`monaChartAxisLabelTemplate`), legend items (`monaChartLegendItemTemplate`), slice data labels (`monaChartSliceLabelTemplate`), donut center content (`monaChartCenterTemplate`), and empty states (`monaChartNoDataTemplate`).
+- **Interactive Legend:** Clickable legend items that toggle series or individual slice/stage/ring visibility with stable palette coloring (and semantic presentation legend markers for Waterfall steps).
+- **Customizable Templates:** Custom Angular templates for tooltips (`monaChartTooltipTemplate`), axis tick labels (`monaChartAxisLabelTemplate`), legend items (`monaChartLegendItemTemplate`), slice data labels (`monaChartSliceLabelTemplate`), donut center content (`monaChartCenterTemplate`), gauge center content (`monaChartGaugeCenterTemplate`), treemap node labels (`monaChartTreemapLabelTemplate`), funnel stage labels (`monaChartFunnelLabelTemplate`), waterfall step labels (`monaChartWaterfallLabelTemplate`), and empty states (`monaChartNoDataTemplate`).
 
 ---
 
