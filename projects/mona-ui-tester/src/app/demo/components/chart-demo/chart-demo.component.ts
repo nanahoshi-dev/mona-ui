@@ -905,9 +905,16 @@ export class ChartDemoComponent {
                   : event.category
                     ? ` | Category: "${event.category}"`
                     : "";
+        const valueDisplay = Array.isArray(event.value)
+            ? `[${event.value.join(", ")}]`
+            : event.value !== undefined
+              ? String(event.value)
+              : event.yValue !== undefined
+                ? String(event.yValue)
+                : "undefined";
         this.#addLog(
             "pointClick",
-            `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${event.yValue} | Index: ${event.dataIndex}`
+            `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${valueDisplay} | Index: ${event.dataIndex}`
         );
     }
 
@@ -918,9 +925,16 @@ export class ChartDemoComponent {
                 : event.category
                   ? ` | Category: "${event.category}"`
                   : "";
+        const valueDisplay = Array.isArray(event.value)
+            ? `[${event.value.join(", ")}]`
+            : event.value !== undefined
+              ? String(event.value)
+              : event.yValue !== undefined
+                ? String(event.yValue)
+                : "undefined";
         this.#addLog(
             "pointFocusChange",
-            `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${event.yValue} | Index: ${event.dataIndex}`
+            `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${valueDisplay} | Index: ${event.dataIndex}`
         );
     }
 

@@ -126,6 +126,7 @@ describe("Chart Range Series Integration", () => {
             expect(rangeBarHits[0].valueKind).toBe("range");
             expect(rangeBarHits[0].fromValue).toBe(14);
             expect(rangeBarHits[0].toValue).toBe(28);
+            expect(rangeBarHits[0].value).toEqual([14, 28]);
             expect(rangeBarHits[0].range).toBeDefined();
             expect(rangeBarHits[0].range?.fromValue).toBe(14);
             expect(rangeBarHits[0].range?.toValue).toBe(28);
@@ -135,6 +136,31 @@ describe("Chart Range Series Integration", () => {
             expect(rangeAreaHits[0].valueKind).toBe("range");
             expect(rangeAreaHits[0].fromValue).toBe(10);
             expect(rangeAreaHits[0].toValue).toBe(32);
+            expect(rangeAreaHits[0].value).toEqual([10, 32]);
+        }
+    });
+
+    it("should emit pointClick with range value tuple when clicked", () => {
+        const scene = chartComponent.scene();
+        expect(scene).toBeDefined();
+        if (scene && scene.coordinateSystem === "cartesian") {
+            const rangeBarHit = scene.hitTargets.find(h => h.seriesType === "rangeBar");
+            expect(rangeBarHit).toBeDefined();
+            if (rangeBarHit) {
+                const canvas = fixture.debugElement.query(By.css("canvas")).nativeElement;
+                const x = rangeBarHit.bounds ? rangeBarHit.bounds.x + rangeBarHit.bounds.width / 2 : 50;
+                const y = rangeBarHit.bounds ? rangeBarHit.bounds.y + rangeBarHit.bounds.height / 2 : 50;
+
+                canvas.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y }));
+                canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+                fixture.detectChanges();
+
+                expect(host.lastPointClick).not.toBeNull();
+                expect(host.lastPointClick?.seriesType).toBe("rangeBar");
+                expect(host.lastPointClick?.fromValue).toBe(14);
+                expect(host.lastPointClick?.toValue).toBe(28);
+                expect(host.lastPointClick?.value).toEqual([14, 28]);
+            }
         }
     });
 
@@ -146,6 +172,10 @@ describe("Chart Range Series Integration", () => {
         expect(host.lastPointFocus).toBeDefined();
         expect(host.lastPointFocus?.fromValue).toBeDefined();
         expect(host.lastPointFocus?.toValue).toBeDefined();
+        expect(host.lastPointFocus?.value).toEqual([
+            host.lastPointFocus?.fromValue,
+            host.lastPointFocus?.toValue
+        ]);
         expect(chartComponent.tooltipContext()).toBeDefined();
     });
 });

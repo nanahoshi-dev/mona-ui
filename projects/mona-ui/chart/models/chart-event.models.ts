@@ -47,6 +47,7 @@ export interface ChartPointEvent<T = unknown> {
     stackStart?: number;
     stackTotal?: number;
     toValue?: number;
+    value?: unknown;
     valueKind?: ChartPointValueKind;
     waterfall?: ChartWaterfallPointValue;
     xValue: unknown;
@@ -96,6 +97,7 @@ export interface ChartPointFocusEvent<T = unknown> {
     stackStart?: number;
     stackTotal?: number;
     toValue?: number;
+    value?: unknown;
     valueKind?: ChartPointValueKind;
     waterfall?: ChartWaterfallPointValue;
     xValue: unknown;

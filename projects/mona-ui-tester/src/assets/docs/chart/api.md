@@ -1,6 +1,6 @@
 ## Overview & Component Selection
 
-The chart component renders high-performance Canvas 2D visualizations composed of declarative child series and axis components. It supports Cartesian, Sector, and Polar Axis coordinates.
+The chart component renders high-performance Canvas 2D visualizations composed of declarative child series and axis components. It supports Cartesian, Sector, Polar Axis, Polar Arc, and Hierarchical chart families, with specialized Cartesian layouts for Heatmap, Funnel, Waterfall, and Financial series.
 
 **Series Types:**
 - **Cartesian**: `<mona-line-series>`, `<mona-area-series>`, `<mona-bar-series>`, `<mona-range-bar-series>`, `<mona-range-area-series>`, `<mona-scatter-series>`, `<mona-bubble-series>`, `<mona-candlestick-series>`, `<mona-ohlc-series>`, `<mona-heatmap-series>`, `<mona-funnel-series>`, `<mona-waterfall-series>`
@@ -440,8 +440,9 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 
 Renders conversion pipeline and sales funnel visualizations using connected trapezoidal stages. Supports vertical and horizontal layouts, custom stage colors, inscribed DOM labels, widening stages (>100% conversion), and dynamic stage visibility toggling.
 
-*Note: Values need not be monotonically decreasing; later stages can exceed preceding stages (resulting in conversion rates > 100%). The default tooltip and accessibility announcements only describe positive stage loss as "Drop-off". Hiding a stage recomputes previous-stage and overall conversion over the visible sequence.*
-*In custom label templates (`monaChartFunnelLabelTemplate`), `color` exposes the stage trapezoid fill color and `textColor` exposes the resolved readable text foreground (respecting `--mona-chart-funnel-label-color` when configured).*
+*Stage order is preserved from source data order. Values need not decrease monotonically; later stages can exceed preceding stages (resulting in conversion rates > 100%). The default tooltip and live region accessibility announcements describe positive stage loss as "Drop-off". Hiding a Funnel stage via the legend removes it from the visible sequence; previous-stage conversion and overall conversion are recalculated across the visible stages, with the first visible stage becoming the overall-conversion baseline.*
+*Providing `keyField` is strongly recommended for stable datum identity across data insertions, deletions, and animations.*
+*In custom label templates (`monaChartFunnelLabelTemplate`), `color` exposes the stage trapezoid fill color and `textColor` exposes the resolved label foreground (respecting `--mona-chart-funnel-label-color` or readable high contrast).*
 
 | Input / Output | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
@@ -473,12 +474,12 @@ Renders conversion pipeline and sales funnel visualizations using connected trap
 
 Renders financial cash-flow and contribution movements with positive delta increases, negative delta decreases, zero-change neutral bars, intermediate subtotals, and cumulative grand totals.
 
-*Note: Legend items for visual kinds (Increase, Decrease, No Change, Subtotal, Total) are presentation-only semantic markers (`kind: "semantic"`, `interactive: false`, `visible: true`). Whole-series `[(visible)]` is the series visibility toggle.*
-*Invalid change rows with non-numeric values are omitted from calculation and rendering.*
-*Subtotal and total rows do not require a numeric field value and reflect the current running balance.*
-*Duplicate category names remain distinct ordered steps.*
-*X-axis category labels fall back to the chart root `xField`, then to canonical `Step N` display labels.*
-*`keyField` is strongly recommended for stable animations when data rows are inserted or removed.*
+*Datum kinds: Supported step kinds are `"change"`, `"subtotal"`, and `"total"`. A `change` step requires a finite numeric value; invalid change rows with non-numeric values are omitted from calculation and rendering rather than treated as zero. Subtotal and total rows do not require a numeric field value and reflect the current running balance against the baseline without resetting the cumulative count.*
+*Zero change: Zero-change delta steps are treated as real neutral datums styled with `neutralColor`.*
+*X-axis resolution & duplicates: Duplicate category names remain distinct ordered steps. X-axis category labels fall back to series `xField`, then to the chart root `xField`, then to canonical `Step N` display labels. The X category formatter receives the original source `dataIndex`.*
+*Baseline: `startValue` defines the cumulative baseline value before the first step; automatic Y-domain geometry scales to the actual rendered bars.*
+*Legend semantics: Legend entries for visual kinds (Increase, Decrease, No Change, Subtotal, Total) are presentation-only semantic markers (`kind: "semantic"`, `interactive: false`, `visible: true`). Semantic-kind hiding is intentionally unsupported to preserve cumulative arithmetic consistency. The entire series visibility is toggled via `[(visible)]`.*
+*Identity & Animations: Providing `keyField` is strongly recommended for stable datum identity across data insertions, deletions, and animations.*
 *In custom label templates (`monaChartWaterfallLabelTemplate`), `color` exposes the matching bar fill color and `textColor` exposes the resolved label foreground (respecting `--mona-chart-waterfall-label-color` or applying readable contrast when placed inside bars).*
 
 | Input / Output | Type | Default | Description |
@@ -491,14 +492,15 @@ Renders financial cash-flow and contribution movements with positive delta incre
 | `field` | `ChartField` | `"value"` | Property key or accessor function extracting the numeric delta/total value. |
 | `fillOpacity` | `number` | `undefined` | Fill opacity applied to waterfall bar rectangles (0 to 1). |
 | `increaseColor` | `string` | `""` | Fill color for positive change steps (increases). |
-| `kindField` | `ChartField` | `undefined` | Property key identifying step classification (`"change"`, `"subtotal"`, or `"total"`). |
+| `keyField` | `ChartField` | `undefined` | Unique identifier key field for datums. |
+| `kindField` | `ChartField` | `"kind"` | Property key identifying step classification (`"change"`, `"subtotal"`, or `"total"`). |
 | `maxBarWidth` | `number` | `undefined` | Maximum width in pixels for waterfall bars. |
 | `maxLabels` | `number` | `100` | Maximum number of visible step labels rendered concurrently. |
 | `minLabelWidth` | `number` | `undefined` | Minimum bar width in pixels required to render a value label (effective default `24`). |
 | `name` | `string` | `"Waterfall"` | Descriptive series name displayed in chart legend and tooltips. |
 | `neutralColor` | `string` | `""` | Fill color for zero-change steps. |
 | `showConnectors` | `boolean` | `true` | Controls whether horizontal connector lines between consecutive bars are rendered. |
-| `showLabels` | `boolean` | `true` | Controls whether step value labels are rendered above/inside bars. |
+| `showLabels` | `boolean` | `false` | Controls whether step value labels are rendered above/inside bars. |
 | `startValue` | `number` | `0` | Base starting value before the first step. |
 | `strokeColor` | `string` | `""` | Border stroke color for bar rectangles. |
 | `strokeWidth` | `number` | `undefined` | Border stroke width in pixels for bar rectangles. |

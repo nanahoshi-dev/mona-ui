@@ -201,6 +201,9 @@ describe("ChartTreemapIntegration", () => {
 
         expect(fixture.componentInstance.lastPointClick).not.toBeNull();
         expect(fixture.componentInstance.lastPointClick!.seriesType).toBe("treemap");
+        expect(fixture.componentInstance.lastPointClick!.value).toBeDefined();
+        expect(typeof fixture.componentInstance.lastPointClick!.value).toBe("number");
+        expect(fixture.componentInstance.lastPointClick!.yValue).toBe(fixture.componentInstance.lastPointClick!.value);
 
         // 6. Escape clears interaction state
         rootDiv.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));

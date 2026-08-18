@@ -64,6 +64,7 @@ export interface ChartTooltipPointContext<T = unknown> {
     stackStart?: number;
     stackTotal?: number;
     toValue?: number;
+    value?: unknown;
     valueKind?: ChartPointValueKind;
     waterfall?: ChartWaterfallPointValue;
     xValue: unknown;

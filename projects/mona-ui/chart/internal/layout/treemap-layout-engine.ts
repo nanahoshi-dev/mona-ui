@@ -429,7 +429,8 @@ export class TreemapLayoutEngine {
                     value: sceneNode.aggregateValue,
                     visualBounds: bounds,
                     xKey: sceneNode.nodeId,
-                    xValue: sceneNode.label
+                    xValue: sceneNode.label,
+                    yValue: sceneNode.aggregateValue
                 };
 
                 hitTargets.push(hitTarget);
