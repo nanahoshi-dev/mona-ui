@@ -16,7 +16,8 @@ import {
     ChartInvalidationReason,
     type ChartRadialBarSeriesRegistration
 } from "../../internal/context/chart-registration-context";
-import { resolveData, resolveValue } from "../../internal/data/chart-value-resolver";
+import { resolveData } from "../../internal/data/chart-value-resolver";
+import { extractRadialDatumIdentities } from "../../internal/data/radial-datum-identity";
 import type { ChartField } from "../../models/chart.models";
 import type {
     ChartRadialArcFillMode,
@@ -40,6 +41,7 @@ export class MonaRadialBarSeriesComponent implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #hiddenItemIds = signal<ImmutableSet<string>>(ImmutableSet.create());
+    readonly #identityMap = new Map<string, { category: unknown; dataIndex: number; datum: unknown }>();
     readonly #seriesId = `mona-radial-bar-series-${++nextRadialBarSeriesId}`;
     readonly #visibilityRevision = signal<number>(0);
 
@@ -221,12 +223,27 @@ export class MonaRadialBarSeriesComponent implements OnInit {
         });
 
         effect(() => {
-            this.name();
             this.data();
             this.field();
             this.categoryField();
             this.keyField();
             this.colorField();
+
+            // Prune hidden item IDs and maintain canonical identity map
+            const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
+            const identities = extractRadialDatumIdentities(raw, this.categoryField(), this.keyField());
+            const retainedIdSet = new Set(identities.map(id => id.itemId));
+
+            this.#identityMap.clear();
+            for (const ident of identities) {
+                this.#identityMap.set(ident.itemId, {
+                    category: ident.category,
+                    dataIndex: ident.dataIndex,
+                    datum: ident.datum
+                });
+            }
+
+            this.#hiddenItemIds.update(set => set.where((id: string) => retainedIdSet.has(id)).toImmutableSet());
 
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -234,6 +251,7 @@ export class MonaRadialBarSeriesComponent implements OnInit {
         });
 
         effect(() => {
+            this.name();
             this.min();
             this.max();
             this.startAngle();
@@ -326,23 +344,10 @@ export class MonaRadialBarSeriesComponent implements OnInit {
 
         this.#visibilityRevision.update(v => v + 1);
 
-        const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
-        let matchedDatum: unknown;
-        let matchedDataIndex = -1;
-        let matchedCategory: unknown;
-
-        for (let i = 0; i < raw.length; i++) {
-            const datum = raw[i];
-            const rawCat = resolveValue(datum, this.categoryField(), i);
-            const rawKey = this.keyField() ? resolveValue(datum, this.keyField(), i) : undefined;
-            const keyStr = rawKey !== undefined && rawKey !== null ? String(rawKey) : rawCat !== undefined && rawCat !== null ? String(rawCat) : String(i);
-            if (keyStr === itemId || `${this.#seriesId}:rb:${keyStr}` === itemId || itemId.endsWith(`:${keyStr}`)) {
-                matchedDatum = datum;
-                matchedDataIndex = i;
-                matchedCategory = rawCat ?? `Item ${i + 1}`;
-                break;
-            }
-        }
+        const match = this.#identityMap.get(itemId);
+        const matchedCategory = match?.category ?? "Item";
+        const matchedDataIndex = match?.dataIndex ?? -1;
+        const matchedDatum = match?.datum;
 
         this.datumVisibilityChange.emit({
             category: matchedCategory,

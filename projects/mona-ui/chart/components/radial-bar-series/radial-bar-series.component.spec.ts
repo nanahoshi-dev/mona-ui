@@ -1,5 +1,5 @@
 import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import type { ChartRegistrationContext, ChartSeriesRegistration } from "../../internal/context/chart-registration-context";
@@ -96,21 +96,51 @@ describe("MonaRadialBarSeriesComponent", () => {
 
         const seriesReg = registeredSeries[0];
         if (seriesReg.type === "radialBar") {
-            expect(seriesReg.isDatumVisible("A")).toBe(true);
-            const isNowVisible = seriesReg.toggleDatumVisibility("A");
+            expect(seriesReg.isDatumVisible("c:s:A")).toBe(true);
+            const isNowVisible = seriesReg.toggleDatumVisibility("c:s:A");
             expect(isNowVisible).toBe(false);
-            expect(seriesReg.isDatumVisible("A")).toBe(false);
+            expect(seriesReg.isDatumVisible("c:s:A")).toBe(false);
 
             fixture.detectChanges();
             expect(fixture.componentInstance.lastVisibilityEvent).toEqual(
                 expect.objectContaining({
                     category: "A",
                     dataIndex: 0,
-                    itemId: "A",
+                    itemId: "c:s:A",
                     seriesType: "radialBar",
                     visible: false
                 })
             );
+        }
+    });
+
+    it("prunes hidden item IDs when dataset changes", () => {
+        TestBed.configureTestingModule({
+            imports: [TestRadialBarHostComponent],
+            providers: [{ provide: CHART_CONTEXT, useValue: mockChartContext }]
+        });
+
+        const fixture = TestBed.createComponent(TestRadialBarHostComponent);
+        fixture.detectChanges();
+
+        const seriesReg = registeredSeries[0];
+        if (seriesReg.type === "radialBar") {
+            seriesReg.toggleDatumVisibility("c:s:A");
+            expect(seriesReg.isDatumVisible("c:s:A")).toBe(false);
+
+            // Change data so "A" no longer exists
+            fixture.componentInstance.data.set([
+                { category: "C", value: 40 }
+            ]);
+            fixture.detectChanges();
+
+            // When "A" comes back in a future update, it should be visible (pruned from hidden set)
+            fixture.componentInstance.data.set([
+                { category: "A", value: 30 }
+            ]);
+            fixture.detectChanges();
+
+            expect(seriesReg.isDatumVisible("c:s:A")).toBe(true);
         }
     });
 });
