@@ -7,8 +7,10 @@ import { TreemapLayoutEngine } from "./treemap-layout-engine";
 function createMockTreemapRegistration(
     data?: readonly unknown[] | unknown,
     overrides: Partial<{
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         [K in keyof ChartTreemapSeriesRegistration]: ChartTreemapSeriesRegistration[K] extends (...args: any[]) => any
             ? ChartTreemapSeriesRegistration[K]
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             : any;
     }> = {}
 ): ChartTreemapSeriesRegistration {
@@ -22,6 +24,7 @@ function createMockTreemapRegistration(
         colors: signal(undefined),
         data: signal(data),
         datumVisibilityRevision: signal(0),
+        field: signal("value"),
         fillOpacity: signal(1),
         id: "tm-series-1",
         isDatumVisible: (itemId: string) => !hiddenSet.has(itemId),
@@ -68,17 +71,17 @@ describe("TreemapLayoutEngine", () => {
     it("lays out nested hierarchy with positive values and squarify tiling", () => {
         const data = [
             {
-                name: "Compute",
                 children: [
                     { name: "API", value: 60 },
                     { name: "Workers", value: 40 }
-                ]
+                ],
+                name: "Compute"
             },
             {
-                name: "Storage",
                 children: [
                     { name: "Database", value: 100 }
-                ]
+                ],
+                name: "Storage"
             }
         ];
 
@@ -127,18 +130,18 @@ describe("TreemapLayoutEngine", () => {
         expect(sceneDice.series[0].tile).toBe("dice");
     });
 
-    it("respects maxDepth property to prune deep levels", () => {
+    it("respects maxDepth property by collapsing nodes at effective max depth into aggregate terminals", () => {
         const data = [
             {
-                name: "Level 1",
                 children: [
                     {
-                        name: "Level 2",
                         children: [
                             { name: "Level 3", value: 100 }
-                        ]
+                        ],
+                        name: "Level 2"
                     }
-                ]
+                ],
+                name: "Level 1"
             }
         ];
 
@@ -147,9 +150,14 @@ describe("TreemapLayoutEngine", () => {
 
         const seriesScene = scene.series[0];
         const depth3Node = seriesScene.nodes.find(n => n.depth === 3);
-        expect(depth3Node).toBeUndefined(); // Pruned
+        expect(depth3Node).toBeUndefined(); // Deep children not passed to layout
+
         const depth2Node = seriesScene.nodes.find(n => n.depth === 2);
         expect(depth2Node).toBeDefined();
+        expect(depth2Node!.isCollapsed).toBe(true);
+        expect(depth2Node!.labelKind).toBe("terminal");
+        expect(depth2Node!.aggregateValue).toBe(100);
+        expect(depth2Node!.headerBounds).toBeUndefined();
     });
 
     it("respects maxLabels cap by prioritizing parent headers then largest terminal areas", () => {
@@ -159,7 +167,7 @@ describe("TreemapLayoutEngine", () => {
         }));
 
         const data = [
-            { name: "Parent Group", children }
+            { children, name: "Parent Group" }
         ];
 
         const reg = createMockTreemapRegistration(data, { maxLabels: signal(5) });
@@ -173,11 +181,11 @@ describe("TreemapLayoutEngine", () => {
     it("builds bidirectional navigation index for keyboard navigation", () => {
         const data = [
             {
-                name: "Compute",
                 children: [
                     { name: "API", value: 60 },
                     { name: "Workers", value: 40 }
-                ]
+                ],
+                name: "Compute"
             }
         ];
 
@@ -205,11 +213,11 @@ describe("TreemapLayoutEngine", () => {
     it("falls back to rootData when series registration has undefined data", () => {
         const rootData = [
             {
-                name: "Platform",
                 children: [
                     { name: "Web", value: 80 },
                     { name: "Mobile", value: 40 }
-                ]
+                ],
+                name: "Platform"
             }
         ];
         const reg = createMockTreemapRegistration(undefined);
@@ -223,12 +231,12 @@ describe("TreemapLayoutEngine", () => {
     it("preserves all legend items with visible=false when a top-level branch is toggled off", () => {
         const data = [
             {
-                name: "Frontend",
-                children: [{ name: "Angular", value: 100 }]
+                children: [{ name: "Angular", value: 100 }],
+                name: "Frontend"
             },
             {
-                name: "Backend",
-                children: [{ name: "Node", value: 100 }]
+                children: [{ name: "Node", value: 100 }],
+                name: "Backend"
             }
         ];
 
@@ -259,12 +267,12 @@ describe("TreemapLayoutEngine", () => {
     it("preserves all legend items with visible=false when all top-level branches are toggled off", () => {
         const data = [
             {
-                name: "Frontend",
-                children: [{ name: "Angular", value: 100 }]
+                children: [{ name: "Angular", value: 100 }],
+                name: "Frontend"
             },
             {
-                name: "Backend",
-                children: [{ name: "Node", value: 100 }]
+                children: [{ name: "Node", value: 100 }],
+                name: "Backend"
             }
         ];
 
@@ -280,5 +288,34 @@ describe("TreemapLayoutEngine", () => {
         expect(scene.legendItems[0].visible).toBe(false);
         expect(scene.legendItems[1].visible).toBe(false);
         expect(scene.series[0].nodes).toHaveLength(0);
+    });
+
+    it("retains parent header labels when showValues is enabled", () => {
+        const data = [
+            {
+                children: [
+                    { name: "Frontend API", value: 40 },
+                    { name: "Backend API", value: 60 }
+                ],
+                name: "Applications"
+            }
+        ];
+
+        const regWithValues = createMockTreemapRegistration(data, {
+            parentHeaderHeight: signal(20),
+            showParentLabels: signal(true),
+            showValues: signal(true)
+        });
+
+        const scene = TreemapLayoutEngine.layout(regWithValues, plotRect, 600, 400, styleResolver);
+        const labels = scene.series[0].labels;
+
+        const parentLabel = labels.find(l => l.kind === "parent" && l.formattedLabel === "Applications");
+        expect(parentLabel).toBeDefined();
+        expect(parentLabel!.showValue).toBe(false);
+
+        const terminalLabel = labels.find(l => l.kind === "terminal" && l.formattedLabel === "Frontend API");
+        expect(terminalLabel).toBeDefined();
+        expect(terminalLabel!.showValue).toBe(true);
     });
 });
