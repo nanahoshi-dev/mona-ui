@@ -177,42 +177,54 @@ describe("ChartStyleResolver", () => {
         expect(explicitStyle.strokeColor).toBe("#ff0000");
     });
 
-    it("should resolve heatmap series style with fallbacks and custom properties", () => {
+    it("should resolve financial series style with series host CSS variables, explicit inputs, and hollow fallback", () => {
+        const seriesEl = document.createElement("div");
+        seriesEl.style.setProperty("--mona-chart-financial-rising-color", "#00ffaa");
+        seriesEl.style.setProperty("--mona-chart-financial-falling-color", "#ff00aa");
+        seriesEl.style.setProperty("--mona-chart-financial-hollow-fill", "#112233");
+        document.body.appendChild(seriesEl);
+
         const resolver = new ChartStyleResolver();
-        const mockHeatmap = {
-            borderRadius: signal(4),
-            cellGap: signal(2),
-            color: signal("#10b981"),
-            colorMode: signal("sequential"),
-            colors: signal(undefined),
+        const mockFinancial = {
+            bodyWidth: signal(undefined),
+            bodyWidthRatio: signal(0.7),
+            closeField: signal("c"),
+            color: signal(undefined),
             data: signal(undefined),
-            field: signal("val"),
-            fillOpacity: signal(0.85),
-            id: "mock-hm",
-            keyField: signal(undefined),
-            max: signal(undefined),
-            midpoint: signal(undefined),
-            min: signal(undefined),
-            name: signal("Heatmap"),
-            showValues: signal(false),
-            strokeColor: signal("#047857"),
-            strokeWidth: signal(1.5),
-            type: "heatmap" as const,
-            valueFormatter: signal(undefined),
+            element: { nativeElement: seriesEl },
+            fallingColor: signal(undefined),
+            fillMode: signal("hollow" as const),
+            highField: signal("h"),
+            id: "mock-fin",
+            lowField: signal("l"),
+            maxBodyWidth: signal(undefined),
+            name: signal("Candles"),
+            neutralColor: signal(undefined),
+            opacity: signal(0.9),
+            openField: signal("o"),
+            risingColor: signal(undefined),
+            type: "candlestick" as const,
             visible: signal(true),
-            xCategories: signal(undefined),
-            xField: signal("x"),
-            yCategories: signal(undefined),
-            yField: signal("y")
+            wickColor: signal(undefined),
+            wickWidth: signal(2),
+            xField: signal("x")
         };
 
-        const style = resolver.resolveHeatmapSeriesStyle(mockHeatmap as any, 0);
+        const style = resolver.resolveFinancialSeriesStyle(mockFinancial as any);
 
-        expect(style.baseColor).toBe("#10b981");
-        expect(style.borderRadius).toBe(4);
-        expect(style.fillOpacity).toBe(0.85);
-        expect(style.strokeColor).toBe("#047857");
-        expect(style.strokeWidth).toBe(1.5);
+        expect(style.risingColor).toBe("#00ffaa");
+        expect(style.fallingColor).toBe("#ff00aa");
+        expect(style.hollowFillColor).toBe("#112233");
+        expect(style.opacity).toBe(0.9);
+        expect(style.wickWidth).toBe(2);
+
+        document.body.removeChild(seriesEl);
+    });
+
+    it("should resolve CSS variable with inline fallback in resolveCssVariable", () => {
+        const resolver = new ChartStyleResolver();
+        const resolved = resolver.resolveCssVariable("var(--non-existent-token, #abcdef)");
+        expect(resolved).toBe("#abcdef");
     });
 });
 

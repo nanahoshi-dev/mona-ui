@@ -274,53 +274,80 @@ export class ChartStyleResolver {
         const explicitWickWidth = series.wickWidth?.();
         const explicitOpacity = series.opacity?.();
 
+        const seriesEl = series.element?.nativeElement ?? null;
+
         let cssRisingColor: string | undefined;
         let cssFallingColor: string | undefined;
         let cssNeutralColor: string | undefined;
         let cssWickColor: string | undefined;
+        let cssHollowFillColor: string | undefined;
         let cssWickWidth: number | undefined;
         let cssOpacity: number | undefined;
 
-        if (typeof window !== "undefined" && series.element?.nativeElement) {
+        if (typeof window !== "undefined") {
             try {
-                const nativeEl = series.element.nativeElement;
-                const computed = window.getComputedStyle(nativeEl);
+                if (seriesEl) {
+                    const computed = window.getComputedStyle(seriesEl);
 
-                const risingVal = computed.getPropertyValue("--mona-chart-financial-rising-color");
-                if (risingVal) cssRisingColor = risingVal.trim();
+                    const risingVal = computed.getPropertyValue("--mona-chart-financial-rising-color") || computed.getPropertyValue("--mona-chart-color-rising");
+                    if (risingVal) cssRisingColor = risingVal.trim();
 
-                const fallingVal = computed.getPropertyValue("--mona-chart-financial-falling-color");
-                if (fallingVal) cssFallingColor = fallingVal.trim();
+                    const fallingVal = computed.getPropertyValue("--mona-chart-financial-falling-color") || computed.getPropertyValue("--mona-chart-color-falling");
+                    if (fallingVal) cssFallingColor = fallingVal.trim();
 
-                const neutralVal = computed.getPropertyValue("--mona-chart-financial-neutral-color");
-                if (neutralVal) cssNeutralColor = neutralVal.trim();
+                    const neutralVal = computed.getPropertyValue("--mona-chart-financial-neutral-color") || computed.getPropertyValue("--mona-chart-color-neutral");
+                    if (neutralVal) cssNeutralColor = neutralVal.trim();
 
-                const wickColVal = computed.getPropertyValue("--mona-chart-financial-wick-color");
-                if (wickColVal) cssWickColor = wickColVal.trim();
+                    const wickColVal = computed.getPropertyValue("--mona-chart-financial-wick-color");
+                    if (wickColVal) cssWickColor = wickColVal.trim();
 
-                const wickWVal = computed.getPropertyValue("--mona-chart-financial-wick-width");
-                if (wickWVal) {
-                    const parsed = parseFloat(wickWVal);
-                    if (isFiniteNumber(parsed) && parsed >= 0) cssWickWidth = parsed;
+                    const hollowVal = computed.getPropertyValue("--mona-chart-financial-hollow-fill");
+                    if (hollowVal) cssHollowFillColor = hollowVal.trim();
+
+                    const wickWVal = computed.getPropertyValue("--mona-chart-financial-wick-width");
+                    if (wickWVal) {
+                        const parsed = parseFloat(wickWVal);
+                        if (isFiniteNumber(parsed) && parsed >= 0) cssWickWidth = parsed;
+                    }
+
+                    const opVal = computed.getPropertyValue("--mona-chart-fill-opacity");
+                    if (opVal) {
+                        const parsed = parseFloat(opVal);
+                        if (isFiniteNumber(parsed)) cssOpacity = Math.max(0, Math.min(1, parsed));
+                    }
                 }
 
-                const opVal = computed.getPropertyValue("--mona-chart-fill-opacity");
-                if (opVal) {
-                    const parsed = parseFloat(opVal);
-                    if (isFiniteNumber(parsed)) cssOpacity = Math.max(0, Math.min(1, parsed));
+                if (this.#rootElement) {
+                    const rootComputed = window.getComputedStyle(this.#rootElement);
+                    if (!cssRisingColor) {
+                        const rootRising = rootComputed.getPropertyValue("--mona-chart-financial-rising-color") || rootComputed.getPropertyValue("--mona-chart-color-rising");
+                        if (rootRising) cssRisingColor = rootRising.trim();
+                    }
+                    if (!cssFallingColor) {
+                        const rootFalling = rootComputed.getPropertyValue("--mona-chart-financial-falling-color") || rootComputed.getPropertyValue("--mona-chart-color-falling");
+                        if (rootFalling) cssFallingColor = rootFalling.trim();
+                    }
+                    if (!cssNeutralColor) {
+                        const rootNeutral = rootComputed.getPropertyValue("--mona-chart-financial-neutral-color") || rootComputed.getPropertyValue("--mona-chart-color-neutral");
+                        if (rootNeutral) cssNeutralColor = rootNeutral.trim();
+                    }
+                    if (!cssHollowFillColor) {
+                        const rootHollow = rootComputed.getPropertyValue("--mona-chart-financial-hollow-fill");
+                        if (rootHollow) cssHollowFillColor = rootHollow.trim();
+                    }
                 }
             } catch {
                 // Ignore style resolution errors
             }
         }
 
-        const risingColor = this.resolveCssVariable(rawExplicitRising || cssRisingColor || "#22c55e");
-        const fallingColor = this.resolveCssVariable(rawExplicitFalling || cssFallingColor || "#ef4444");
-        const neutralColor = this.resolveCssVariable(rawExplicitNeutral || cssNeutralColor || "#6b7280");
+        const risingColor = this.resolveCssVariable(rawExplicitRising || cssRisingColor || "#22c55e", seriesEl);
+        const fallingColor = this.resolveCssVariable(rawExplicitFalling || cssFallingColor || "#ef4444", seriesEl);
+        const neutralColor = this.resolveCssVariable(rawExplicitNeutral || cssNeutralColor || "#6b7280", seriesEl);
         const wickColor = (rawExplicitWickColor || cssWickColor)
-            ? this.resolveCssVariable((rawExplicitWickColor || cssWickColor)!)
+            ? this.resolveCssVariable((rawExplicitWickColor || cssWickColor)!, seriesEl)
             : undefined;
-        const color = rawExplicitColor ? this.resolveCssVariable(rawExplicitColor) : undefined;
+        const color = rawExplicitColor ? this.resolveCssVariable(rawExplicitColor, seriesEl) : undefined;
         const wickWidth = explicitWickWidth !== undefined && isFiniteNumber(explicitWickWidth) && explicitWickWidth >= 0
             ? explicitWickWidth
             : (cssWickWidth ?? 1);
@@ -328,9 +355,21 @@ export class ChartStyleResolver {
             ? Math.max(0, Math.min(1, explicitOpacity))
             : (cssOpacity !== undefined ? cssOpacity : undefined);
 
+        const hollowFillColor = this.resolveCssVariable(
+            cssHollowFillColor ||
+            this.resolveCssVariable("--mona-chart-financial-hollow-fill", seriesEl) ||
+            this.resolveCssVariable("--color-surface", seriesEl) ||
+            this.resolveCssVariable("--mona-chart-surface", seriesEl) ||
+            this.resolveCssVariable("--color-card", seriesEl) ||
+            this.resolveCssVariable("--color-background", seriesEl) ||
+            "#ffffff",
+            seriesEl
+        ) || "#ffffff";
+
         return {
             color,
             fallingColor: fallingColor || "#ef4444",
+            hollowFillColor,
             neutralColor: neutralColor || "#6b7280",
             opacity,
             risingColor: risingColor || "#22c55e",
@@ -596,22 +635,45 @@ export class ChartStyleResolver {
         if (!isVariable) {
             return toCanvasColor(trimmed, (targetElement ?? this.#rootElement)?.ownerDocument);
         }
-        if (typeof window === "undefined" || (!targetElement && !this.#rootElement)) {
+        if (typeof window === "undefined") {
             return "";
         }
         try {
             let current = trimmed;
-            const primaryEl = targetElement ?? this.#rootElement!;
+            const primaryEl = targetElement ?? this.#rootElement ?? (typeof document !== "undefined" ? document.body : null);
+            if (!primaryEl) {
+                if (current.startsWith("var(")) {
+                    const inner = current.slice(4, -1).trim();
+                    const commaIdx = inner.indexOf(",");
+                    if (commaIdx !== -1) {
+                        return toCanvasColor(inner.slice(commaIdx + 1).trim());
+                    }
+                }
+                return "";
+            }
             for (let i = 0; i < 5; i++) {
                 if (!current.startsWith("var(") && !current.startsWith("--")) {
                     break;
                 }
-                const rawVar = current.startsWith("var(")
-                    ? current.replace(/^var\(\s*/, "").replace(/\s*\)$/, "").split(",")[0].trim()
-                    : current;
+                let rawVar = current;
+                let fallback: string | undefined;
+                if (current.startsWith("var(")) {
+                    const inner = current.slice(4, -1).trim();
+                    const commaIdx = inner.indexOf(",");
+                    if (commaIdx !== -1) {
+                        rawVar = inner.slice(0, commaIdx).trim();
+                        fallback = inner.slice(commaIdx + 1).trim();
+                    } else {
+                        rawVar = inner;
+                    }
+                }
                 let resolved = window.getComputedStyle(primaryEl).getPropertyValue(rawVar).trim();
                 if (!resolved && targetElement && this.#rootElement && targetElement !== this.#rootElement) {
                     resolved = window.getComputedStyle(this.#rootElement).getPropertyValue(rawVar).trim();
+                }
+                if (!resolved && fallback) {
+                    current = fallback;
+                    continue;
                 }
                 if (!resolved) {
                     return "";
