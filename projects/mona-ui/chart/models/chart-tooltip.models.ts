@@ -1,5 +1,5 @@
 import type { ChartFinancialDirection } from "./chart-financial.models";
-import type { ChartPointValueKind } from "./chart-point-value.models";
+import type { ChartOhlcPointValue, ChartPointValueKind } from "./chart-point-value.models";
 import type { ChartSeriesType } from "./chart-series.models";
 import type { ChartStackMode } from "./chart-stack.models";
 
@@ -9,12 +9,17 @@ export interface ChartTooltipPointContext<T = unknown> {
     category?: unknown;
     categoryX?: string;
     categoryY?: string;
+    change?: number;
+    changePercentage?: number;
     close?: number;
     color: string;
     dataIndex: number;
     datum: T;
+    financial?: ChartOhlcPointValue;
     financialDirection?: ChartFinancialDirection;
     formattedCategory?: string;
+    formattedChange?: string;
+    formattedChangePercentage?: string;
     formattedClose?: string;
     formattedFrom?: string;
     formattedHigh?: string;
