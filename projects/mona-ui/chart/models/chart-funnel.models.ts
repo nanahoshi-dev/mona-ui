@@ -51,6 +51,7 @@ export interface ChartFunnelStageContext<T = unknown> {
     readonly previousValue?: number;
     readonly stageId: string;
     readonly stageIndex: number;
+    readonly textColor?: string;
     readonly value: number;
 }
 
@@ -72,5 +73,6 @@ export interface ChartFunnelLabelTemplateContext<T = unknown> {
     readonly stage: ChartFunnelStageContext<T>;
     readonly stageId: string;
     readonly stageIndex: number;
+    readonly textColor?: string;
     readonly value: number;
 }

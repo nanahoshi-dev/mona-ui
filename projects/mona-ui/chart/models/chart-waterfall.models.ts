@@ -21,12 +21,15 @@ export interface ChartWaterfallPointContext<T = unknown> {
     readonly formattedDelta?: string;
     readonly formattedValue: string;
     readonly kind: ChartWaterfallDatumKind;
+    readonly textColor?: string;
     readonly value: number;
     readonly visualKind: ChartWaterfallVisualKind;
 }
 
 export interface ChartWaterfallLabelTemplateContext<T = unknown> {
     readonly $implicit: ChartWaterfallPointContext<T>;
+    readonly barEnd: number;
+    readonly barStart: number;
     readonly bounds: ChartRect;
     readonly category: unknown;
     readonly color: string;
@@ -42,6 +45,7 @@ export interface ChartWaterfallLabelTemplateContext<T = unknown> {
     readonly formattedValue: string;
     readonly kind: ChartWaterfallDatumKind;
     readonly step: ChartWaterfallPointContext<T>;
+    readonly textColor?: string;
     readonly value: number;
     readonly visualKind: ChartWaterfallVisualKind;
 }
