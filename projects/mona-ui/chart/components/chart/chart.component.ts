@@ -63,7 +63,12 @@ import type {
 import type { ChartGaugeSeriesScene, PolarArcChartScene } from "../../internal/scene/polar-arc-scene";
 import type { ChartGaugeCenterTemplateContext } from "../../models/chart-radial-arc.models";
 import type { ChartColorLegendScale } from "../../models/chart-heatmap.models";
-import type { ChartAngularAxisScene, ChartAngularAxisTick, ChartRadialAxisScene, ChartRadialAxisTick } from "../../internal/scene/polar-axis-scene";
+import type {
+    ChartAngularAxisScene,
+    ChartAngularAxisTick,
+    ChartRadialAxisScene,
+    ChartRadialAxisTick
+} from "../../internal/scene/polar-axis-scene";
 import type { SceneSectorSlice } from "../../internal/scene/polar-scene";
 import type { SceneHitTarget } from "../../internal/scene/scene-geometry";
 import { ChartStyleResolver } from "../../internal/style/chart-style-resolver";
@@ -113,7 +118,7 @@ function easingToCss(easing: string): string {
     providers: [
         {
             provide: CHART_CONTEXT,
-            useExisting: MonaChartComponent
+            useExisting: ChartComponent
         }
     ],
     host: {
@@ -128,7 +133,7 @@ function easingToCss(easing: string): string {
         "(focusout)": "onFocusOut($event)"
     }
 })
-export class MonaChartComponent implements ChartRegistrationContext, AfterContentChecked {
+export class ChartComponent implements ChartRegistrationContext, AfterContentChecked {
     readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
     readonly #animationController: ChartAnimationController;
     readonly #destroyRef = inject(DestroyRef);
@@ -182,7 +187,9 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
     });
     protected readonly heatmapScene = computed<CartesianHeatmapChartScene | null>(() => {
         const sc = this.scene();
-        return sc?.coordinateSystem === "cartesian" && sc.cartesianKind === "heatmap" ? (sc as CartesianHeatmapChartScene) : null;
+        return sc?.coordinateSystem === "cartesian" && sc.cartesianKind === "heatmap"
+            ? (sc as CartesianHeatmapChartScene)
+            : null;
     });
     protected readonly heatmapSeriesRegistration = computed<ChartHeatmapSeriesRegistration | null>(() => {
         const list = this.#registeredSeries();
@@ -351,8 +358,7 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
 
     public readonly angularAxisRegistration: Signal<ChartAngularAxisRegistration | null> =
         this.#angularAxis.asReadonly();
-    public readonly radialAxisRegistration: Signal<ChartRadialAxisRegistration | null> =
-        this.#radialAxis.asReadonly();
+    public readonly radialAxisRegistration: Signal<ChartRadialAxisRegistration | null> = this.#radialAxis.asReadonly();
     public readonly xAxisRegistration: Signal<ChartXAxisRegistration | null> = this.#xAxis.asReadonly();
     public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = this.#yAxis.asReadonly();
 
@@ -754,7 +760,9 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
             });
 
             if (this.#interactionState) {
-                const activeHits = this.#interactionState.activeHits.filter((h: SceneHitTarget) => h.seriesId !== seriesId);
+                const activeHits = this.#interactionState.activeHits.filter(
+                    (h: SceneHitTarget) => h.seriesId !== seriesId
+                );
                 if (activeHits.length === 0) {
                     this.#clearInteraction();
                 } else {
@@ -789,9 +797,13 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
         const xAxisType = xAxis?.type();
 
         const pointContexts: ChartTooltipPointContext[] = hits.map(hit => {
-            const seriesItem = seriesItems.find(s => s.itemId === hit.sliceId || s.itemId === hit.itemId || s.seriesId === hit.seriesId);
+            const seriesItem = seriesItems.find(
+                s => s.itemId === hit.sliceId || s.itemId === hit.itemId || s.seriesId === hit.seriesId
+            );
             const color = hit.color ?? seriesItem?.color ?? "#3b82f6";
-            const xStr = hit.formattedCategory ?? formatXValue(hit.xValue ?? hit.category, hit.dataIndex ?? hit.index ?? 0, xFormatter, xAxisType);
+            const xStr =
+                hit.formattedCategory ??
+                formatXValue(hit.xValue ?? hit.category, hit.dataIndex ?? hit.index ?? 0, xFormatter, xAxisType);
             const isRange = hit.valueKind === "range" || hit.range !== undefined;
             const fromValue = hit.fromValue ?? hit.range?.fromValue;
             const toValue = hit.toValue ?? hit.range?.toValue;
@@ -802,7 +814,8 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
                 (isRange && formattedFrom && formattedTo
                     ? `${formattedFrom} – ${formattedTo}`
                     : formatYValue(hit.yValue ?? hit.value, hit.dataIndex ?? hit.index ?? 0, yFormatter));
-            const markId = hit.animationKey ?? hit.itemId ?? hit.sliceId ?? `${hit.seriesId}:${hit.dataIndex ?? hit.index ?? 0}`;
+            const markId =
+                hit.animationKey ?? hit.itemId ?? hit.sliceId ?? `${hit.seriesId}:${hit.dataIndex ?? hit.index ?? 0}`;
 
             return {
                 category: hit.category ?? hit.xValue,
@@ -1004,9 +1017,7 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
             hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
 
         const requiresSceneRefresh =
-            isStructural ||
-            hasInvalidationReason(reason, ChartInvalidationReason.Style) ||
-            !this.scene();
+            isStructural || hasInvalidationReason(reason, ChartInvalidationReason.Style) || !this.scene();
 
         if (isStructural) {
             this.#clearInteractionState();
@@ -1193,11 +1204,7 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
 
         const matchingHit =
             (preferredHitKey
-                ? bucket.hits.find(
-                      h =>
-                          (h.animationKey ?? h.sliceId ?? `${h.seriesId}:${h.index}`) ===
-                          preferredHitKey
-                  )
+                ? bucket.hits.find(h => (h.animationKey ?? h.sliceId ?? `${h.seriesId}:${h.index}`) === preferredHitKey)
                 : undefined) ??
             bucket.hits.find(h => h.seriesId === preferredSeriesId) ??
             bucket.hits[0];
@@ -1208,8 +1215,8 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
         const pointPos: ChartPoint = {
             x:
                 matchingHit.point?.x ??
-                (matchingHit.bounds ? matchingHit.bounds.x + matchingHit.bounds.width / 2 : bucket.anchor?.x ?? 0),
-            y: matchingHit.point?.y ?? (matchingHit.bounds ? matchingHit.bounds.y : bucket.anchor?.y ?? 0)
+                (matchingHit.bounds ? matchingHit.bounds.x + matchingHit.bounds.width / 2 : (bucket.anchor?.x ?? 0)),
+            y: matchingHit.point?.y ?? (matchingHit.bounds ? matchingHit.bounds.y : (bucket.anchor?.y ?? 0))
         };
 
         const shared = this.#resolveSharedTooltip(currentScene);
@@ -1239,9 +1246,7 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
             const xStr = `${xTitle}${matchingHit.formattedXValue ?? matchingHit.formattedCategory ?? matchingHit.categoryX ?? matchingHit.xValue}`;
             const yStr = `${yTitle}${matchingHit.formattedYCategory ?? matchingHit.categoryY ?? matchingHit.category}`;
             const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
-            this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}: ${xStr}, ${yStr}, ${valStr}`
-            );
+            this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}, ${valStr}`);
         } else {
             const xAxis = this.#xAxis();
             const yAxis = this.#yAxis();
@@ -1257,21 +1262,27 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
                     ? `${fromStr} – ${toStr}`
                     : formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter()));
             const sizeStr =
-                matchingHit.formattedSize ??
-                (matchingHit.sizeValue !== undefined ? String(matchingHit.sizeValue) : "");
+                matchingHit.formattedSize ?? (matchingHit.sizeValue !== undefined ? String(matchingHit.sizeValue) : "");
             const isPercent = matchingHit.stackMode === "percent";
             const shareStr =
                 isPercent && matchingHit.formattedStackPercentage
                     ? `, stack share ${matchingHit.formattedStackPercentage}`
                     : "";
 
-            const isFinancial = matchingHit.valueKind === "ohlc" || matchingHit.seriesType === "candlestick" || matchingHit.seriesType === "ohlc";
+            const isFinancial =
+                matchingHit.valueKind === "ohlc" ||
+                matchingHit.seriesType === "candlestick" ||
+                matchingHit.seriesType === "ohlc";
             if (isFinancial) {
                 const fin = matchingHit.financial;
-                const openStr = fin?.formattedOpen ?? (fin?.open !== undefined ? String(fin.open) : String(matchingHit.open));
-                const highStr = fin?.formattedHigh ?? (fin?.high !== undefined ? String(fin.high) : String(matchingHit.high));
-                const lowStr = fin?.formattedLow ?? (fin?.low !== undefined ? String(fin.low) : String(matchingHit.low));
-                const closeStr = fin?.formattedClose ?? (fin?.close !== undefined ? String(fin.close) : String(matchingHit.close));
+                const openStr =
+                    fin?.formattedOpen ?? (fin?.open !== undefined ? String(fin.open) : String(matchingHit.open));
+                const highStr =
+                    fin?.formattedHigh ?? (fin?.high !== undefined ? String(fin.high) : String(matchingHit.high));
+                const lowStr =
+                    fin?.formattedLow ?? (fin?.low !== undefined ? String(fin.low) : String(matchingHit.low));
+                const closeStr =
+                    fin?.formattedClose ?? (fin?.close !== undefined ? String(fin.close) : String(matchingHit.close));
                 const dirStr = fin?.direction ?? matchingHit.financialDirection ?? "";
                 const changeStr = fin?.formattedChange ? `, change ${fin.formattedChange}` : "";
                 const dirPhrase = dirStr ? `, ${dirStr}` : "";

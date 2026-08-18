@@ -14,7 +14,7 @@ import type { ChartRadialGridShape } from "../../models/chart-polar.models";
         style: "display: none !important;"
     }
 })
-export class MonaChartRadialAxisComponent implements OnInit {
+export class ChartRadialAxisComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
 

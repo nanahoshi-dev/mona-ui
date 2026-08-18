@@ -1,10 +1,10 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { MonaScatterSeriesComponent } from "./scatter-series.component";
+import { ScatterSeriesComponent } from "./scatter-series.component";
 
 @Component({
-    imports: [MonaScatterSeriesComponent],
+    imports: [ScatterSeriesComponent],
     template: `
         <mona-scatter-series
             [field]="field()"
@@ -62,7 +62,7 @@ describe("MonaScatterSeriesComponent", () => {
         host.name.set("Updated Scatter");
         fixture.detectChanges();
 
-        const seriesComp = fixture.debugElement.children[0]?.componentInstance as MonaScatterSeriesComponent;
+        const seriesComp = fixture.debugElement.children[0]?.componentInstance as ScatterSeriesComponent;
         if (seriesComp) {
             expect(seriesComp.pointRadius()).toBe(8);
             expect(seriesComp.fillOpacity()).toBe(0.5);

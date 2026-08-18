@@ -1,14 +1,14 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
-import { MonaBarSeriesComponent } from "../bar-series/bar-series.component";
-import { MonaLineSeriesComponent } from "../line-series/line-series.component";
-import { MonaChartComponent } from "./chart.component";
+import { BarSeriesComponent } from "../bar-series/bar-series.component";
+import { LineSeriesComponent } from "../line-series/line-series.component";
+import { ChartComponent } from "./chart.component";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartAnimationInput } from "../../models/chart-animation.models";
 
 @Component({
-    imports: [MonaChartComponent, MonaBarSeriesComponent, MonaLineSeriesComponent],
+    imports: [ChartComponent, BarSeriesComponent, LineSeriesComponent],
     template: `
         <mona-chart [data]="data()" [animation]="animation()" xField="category">
             @if (showBar()) {
@@ -46,7 +46,7 @@ describe("MonaChartComponent Animation Integration", () => {
     });
 
     it("should accept animation input and normalize options", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         expect(chart).toBeTruthy();
         expect(chart.animation()).toBe(true);
         expect(chart.scene()).not.toBeNull();
@@ -61,7 +61,7 @@ describe("MonaChartComponent Animation Integration", () => {
     });
 
     it("should compute valid scenes with animation keys on marks", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         const scene = chart.scene();
         expect(scene).not.toBeNull();
 
@@ -78,17 +78,15 @@ describe("MonaChartComponent Animation Integration", () => {
         host.animation.set(false);
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
-        host.data.set([
-            { category: "A", id: "k1", val1: 50, val2: 60 }
-        ]);
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
+        host.data.set([{ category: "A", id: "k1", val1: 50, val2: 60 }]);
         fixture.detectChanges();
 
         expect(chart.isAnimating()).toBe(false);
     });
 
     it("should trigger animation when only one series is present", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         expect(chart).toBeTruthy();
 
         // Trigger data update with animation enabled
@@ -104,7 +102,7 @@ describe("MonaChartComponent Animation Integration", () => {
     });
 
     it("should animate when removing the last series (1 -> 0) and adding the first series (0 -> 1)", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
 
         // 2 -> 1 series
@@ -139,7 +137,7 @@ describe("MonaChartComponent Animation Integration", () => {
     });
 
     it("should not cut a structural animation short when a passive layout/size reflow arrives mid-flight", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
 
         // 2 -> 1 series, leaving the last series in flight

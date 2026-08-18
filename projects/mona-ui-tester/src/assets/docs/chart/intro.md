@@ -2,7 +2,7 @@
 
 **Selector:** `mona-chart`
 
-`MonaChartComponent` is a high-performance Canvas 2D visualization container designed for Angular 22. It renders composable Cartesian series (Line, Area, Bar, Range Bar, Range Area, Scatter, Bubble, Candlestick, and OHLC), Cartesian Heatmaps, Sector series (Pie and Donut), and Polar Axis series (Radar and Continuous Polar) using declarative child components, D3-powered mathematical geometry and scale engines, accessible DOM overlays, interactive tooltips, and responsive ResizeObserver layouts.
+`ChartComponent` is a high-performance Canvas 2D visualization container designed for Angular 22. It renders composable Cartesian series (Line, Area, Bar, Range Bar, Range Area, Scatter, Bubble, Candlestick, and OHLC), Cartesian Heatmaps, Sector series (Pie and Donut), and Polar Axis series (Radar and Continuous Polar) using declarative child components, D3-powered mathematical geometry and scale engines, accessible DOM overlays, interactive tooltips, and responsive ResizeObserver layouts.
 
 ### Key Highlights
 

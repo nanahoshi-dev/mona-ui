@@ -6,10 +6,7 @@ import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartColorLegendScale, ChartLegendMode } from "../../models/chart-heatmap.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
-import {
-    chartLegendBaseThemeVariants,
-    chartLegendItemBaseThemeVariants
-} from "../../styles/chart.styles";
+import { chartLegendBaseThemeVariants, chartLegendItemBaseThemeVariants } from "../../styles/chart.styles";
 
 @Component({
     selector: "mona-chart-legend",
@@ -20,7 +17,7 @@ import {
         "[style.order]": "hostOrder()"
     }
 })
-export class MonaChartLegendComponent implements OnInit {
+export class ChartLegendComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
 
@@ -39,7 +36,9 @@ export class MonaChartLegendComponent implements OnInit {
     });
     protected readonly itemTemplate = contentChild(ChartLegendItemTemplateDirective);
     protected readonly legendItems = computed(() => this.#chartContext?.legendItems() ?? []);
-    protected readonly legendScale = computed<ChartColorLegendScale | null>(() => this.#chartContext?.legendScale?.() ?? null);
+    protected readonly legendScale = computed<ChartColorLegendScale | null>(
+        () => this.#chartContext?.legendScale?.() ?? null
+    );
 
     protected readonly isColorScaleMode = computed(() => {
         const m = this.mode();

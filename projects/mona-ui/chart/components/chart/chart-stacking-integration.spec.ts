@@ -2,25 +2,25 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
-import { MonaChartComponent } from "./chart.component";
-import { MonaBarSeriesComponent } from "../bar-series/bar-series.component";
-import { MonaAreaSeriesComponent } from "../area-series/area-series.component";
-import { MonaChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
-import { MonaChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
-import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
-import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
+import { ChartComponent } from "./chart.component";
+import { BarSeriesComponent } from "../bar-series/bar-series.component";
+import { AreaSeriesComponent } from "../area-series/area-series.component";
+import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
+import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
+import { ChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
 import type { ChartPointEvent } from "../../models/chart-event.models";
 import type { CartesianChartScene } from "../../internal/scene/chart-scene";
 import type { ChartAreaSeriesScene, ChartAxisScene, ChartBarSeriesScene } from "../../internal/scene/cartesian-scene";
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaBarSeriesComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartLegendComponent,
-        MonaChartTooltipComponent
+        ChartComponent,
+        BarSeriesComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartLegendComponent,
+        ChartTooltipComponent
     ],
     template: `
         <mona-chart [data]="data()" [style.width.px]="600" [style.height.px]="400" (pointClick)="onPointClick($event)">
@@ -47,13 +47,7 @@ class StackedBarTestComponent {
 }
 
 @Component({
-    imports: [
-        MonaChartComponent,
-        MonaBarSeriesComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartLegendComponent
-    ],
+    imports: [ChartComponent, BarSeriesComponent, ChartXAxisComponent, ChartYAxisComponent, ChartLegendComponent],
     template: `
         <mona-chart [data]="data()" [style.width.px]="600" [style.height.px]="400">
             <mona-chart-x-axis field="quarter" type="category" />
@@ -79,12 +73,12 @@ class GroupedStackedBarTestComponent {
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaBarSeriesComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartLegendComponent,
-        MonaChartTooltipComponent
+        ChartComponent,
+        BarSeriesComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartLegendComponent,
+        ChartTooltipComponent
     ],
     template: `
         <mona-chart [data]="data()" [style.width.px]="600" [style.height.px]="400">
@@ -92,8 +86,20 @@ class GroupedStackedBarTestComponent {
             <mona-chart-y-axis />
             <mona-chart-legend />
             <mona-chart-tooltip />
-            <mona-bar-series [(visible)]="s1Visible" field="s1" name="Series 1" stack="pct" stackMode="percent" [borderRadius]="5" />
-            <mona-bar-series [(visible)]="s2Visible" field="s2" name="Series 2" stack="pct" stackMode="percent" [borderRadius]="5" />
+            <mona-bar-series
+                [(visible)]="s1Visible"
+                field="s1"
+                name="Series 1"
+                stack="pct"
+                stackMode="percent"
+                [borderRadius]="5" />
+            <mona-bar-series
+                [(visible)]="s2Visible"
+                field="s2"
+                name="Series 2"
+                stack="pct"
+                stackMode="percent"
+                [borderRadius]="5" />
         </mona-chart>
     `
 })
@@ -107,13 +113,7 @@ class PercentStackedBarTestComponent {
 }
 
 @Component({
-    imports: [
-        MonaChartComponent,
-        MonaAreaSeriesComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartLegendComponent
-    ],
+    imports: [ChartComponent, AreaSeriesComponent, ChartXAxisComponent, ChartYAxisComponent, ChartLegendComponent],
     template: `
         <mona-chart [data]="data()" xField="year" [style.width.px]="600" [style.height.px]="400">
             <mona-chart-x-axis type="linear" />
@@ -133,12 +133,7 @@ class StackedAreaTestComponent {
 }
 
 @Component({
-    imports: [
-        MonaChartComponent,
-        MonaAreaSeriesComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent
-    ],
+    imports: [ChartComponent, AreaSeriesComponent, ChartXAxisComponent, ChartYAxisComponent],
     template: `
         <mona-chart [data]="[]" [style.width.px]="600" [style.height.px]="400">
             <mona-chart-x-axis type="linear" />
@@ -174,7 +169,8 @@ describe("Cartesian Stacking Integration", () => {
         });
 
         it("should render stacked bars in declaration order with cumulative positions", () => {
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             const scene = chartComp.scene() as CartesianChartScene;
 
             expect(scene).toBeDefined();
@@ -226,7 +222,8 @@ describe("Cartesian Stacking Integration", () => {
         });
 
         it("should allocate separate horizontal slots for different stack groups and standalone series", () => {
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             const scene = chartComp.scene() as CartesianChartScene;
 
             const pA = (scene.series[0] as ChartBarSeriesScene).bars[0]; // hardware
@@ -258,7 +255,8 @@ describe("Cartesian Stacking Integration", () => {
         });
 
         it("should normalize stacked bars to 100% and format Y-axis with percent ticks", () => {
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             const scene = chartComp.scene() as CartesianChartScene;
 
             const s1Jan = (scene.series[0] as ChartBarSeriesScene).bars[0];
@@ -276,7 +274,9 @@ describe("Cartesian Stacking Integration", () => {
             // Y axis ticks should end with '%'
             const yAxisScene = scene.axes.find((a: ChartAxisScene) => a.axis === "y");
             expect(yAxisScene).toBeDefined();
-            expect(yAxisScene?.ticks.some((t: { formattedValue: string }) => t.formattedValue.includes("%"))).toBe(true);
+            expect(yAxisScene?.ticks.some((t: { formattedValue: string }) => t.formattedValue.includes("%"))).toBe(
+                true
+            );
         });
 
         it("should maintain [0, 100] domain when all percent members are toggled to hidden (STK-007)", () => {
@@ -285,12 +285,15 @@ describe("Cartesian Stacking Integration", () => {
             component.s2Visible.set(false);
             fixture.detectChanges();
 
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             const scene = chartComp.scene() as CartesianChartScene;
             const yAxisScene = scene.axes.find((a: ChartAxisScene) => a.axis === "y");
 
             expect(yAxisScene).toBeDefined();
-            expect(yAxisScene?.ticks.some((t: { formattedValue: string }) => t.formattedValue.includes("%"))).toBe(true);
+            expect(yAxisScene?.ticks.some((t: { formattedValue: string }) => t.formattedValue.includes("%"))).toBe(
+                true
+            );
         });
     });
 
@@ -307,7 +310,8 @@ describe("Cartesian Stacking Integration", () => {
         });
 
         it("should calculate cumulative baseY for each point in stacked Area series", () => {
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             const scene = chartComp.scene() as CartesianChartScene;
 
             expect(scene.series.length).toBe(2);
@@ -343,7 +347,8 @@ describe("Cartesian Stacking Integration", () => {
         });
 
         it("should align area series lattices with synthetic points for missing X coordinates", () => {
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             const scene = chartComp.scene() as CartesianChartScene;
 
             const a2 = scene.series[1] as ChartAreaSeriesScene;

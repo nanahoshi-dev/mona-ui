@@ -4,24 +4,24 @@ import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChartPointEvent, ChartPointFocusEvent } from "../../models/chart-event.models";
 import type { ChartFinancialFillMode } from "../../models/chart-financial.models";
-import { MonaChartComponent } from "./chart.component";
-import { MonaChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
-import { MonaChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
-import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
-import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
-import { MonaCandlestickSeriesComponent } from "../candlestick-series/candlestick-series.component";
-import { MonaOhlcSeriesComponent } from "../ohlc-series/ohlc-series.component";
+import { ChartComponent } from "./chart.component";
+import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
+import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { ChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
+import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
+import { CandlestickSeriesComponent } from "../candlestick-series/candlestick-series.component";
+import { OhlcSeriesComponent } from "../ohlc-series/ohlc-series.component";
 import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene } from "../../internal/scene/cartesian-scene";
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartTooltipComponent,
-        MonaChartLegendComponent,
-        MonaCandlestickSeriesComponent,
-        MonaOhlcSeriesComponent
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartTooltipComponent,
+        ChartLegendComponent,
+        CandlestickSeriesComponent,
+        OhlcSeriesComponent
     ],
     template: `
         <mona-chart
@@ -87,7 +87,7 @@ class TestFinancialHostComponent {
 describe("Chart Financial Series Integration (Candlestick & OHLC)", () => {
     let fixture: ComponentFixture<TestFinancialHostComponent>;
     let host: TestFinancialHostComponent;
-    let chartComponent: MonaChartComponent;
+    let chartComponent: ChartComponent;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -97,7 +97,7 @@ describe("Chart Financial Series Integration (Candlestick & OHLC)", () => {
         fixture = TestBed.createComponent(TestFinancialHostComponent);
         host = fixture.componentInstance;
         fixture.detectChanges();
-        chartComponent = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance;
+        chartComponent = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance;
     });
 
     it("should compute scene with Candlestick series and accurate mark directions and bounds", () => {

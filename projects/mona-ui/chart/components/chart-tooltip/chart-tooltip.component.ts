@@ -32,7 +32,7 @@ export interface ChartTooltipPlacement {
         class: "contents"
     }
 })
-export class MonaChartTooltipComponent implements OnInit {
+export class ChartTooltipComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #measuredHeight = signal<number>(60);
@@ -83,9 +83,7 @@ export class MonaChartTooltipComponent implements OnInit {
             top: clampTop
         };
     });
-    protected readonly tooltipClasses = computed(() =>
-        twMerge(chartTooltipBaseThemeVariants(), this.userClass())
-    );
+    protected readonly tooltipClasses = computed(() => twMerge(chartTooltipBaseThemeVariants(), this.userClass()));
     protected readonly tooltipContainer = viewChild<ElementRef<HTMLElement>>("tooltipContainer");
     protected readonly tooltipContext = computed(() => this.#chartContext?.tooltipContext() ?? null);
     protected readonly tooltipPosition = computed(() => this.#chartContext?.tooltipPosition() ?? null);

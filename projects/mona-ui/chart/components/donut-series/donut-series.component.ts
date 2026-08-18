@@ -40,7 +40,7 @@ let nextDonutSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaDonutSeriesComponent implements OnInit {
+export class DonutSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -327,7 +327,9 @@ export class MonaDonutSeriesComponent implements OnInit {
 
         const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
         const datum = raw[dataIndex];
-        const category = datum ? resolveValue(datum, this.categoryField(), dataIndex) ?? `Item ${dataIndex + 1}` : undefined;
+        const category = datum
+            ? (resolveValue(datum, this.categoryField(), dataIndex) ?? `Item ${dataIndex + 1}`)
+            : undefined;
 
         this.sliceVisibilityChange.emit({
             category,

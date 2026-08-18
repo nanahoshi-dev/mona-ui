@@ -6,12 +6,12 @@ import type { ChartPointEvent, ChartPointFocusEvent } from "../../models/chart-e
 import type { ChartRadialCurve, ChartRadialFillMode, ChartRadialGridShape } from "../../models/chart-polar.models";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { PolarAxisChartScene } from "../../internal/scene/chart-scene";
-import { MonaChartAngularAxisComponent } from "../chart-angular-axis/chart-angular-axis.component";
-import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
-import { MonaChartRadialAxisComponent } from "../chart-radial-axis/chart-radial-axis.component";
-import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
-import { MonaChartComponent } from "../chart/chart.component";
-import { MonaRadarSeriesComponent } from "./radar-series.component";
+import { ChartAngularAxisComponent } from "../chart-angular-axis/chart-angular-axis.component";
+import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
+import { ChartRadialAxisComponent } from "../chart-radial-axis/chart-radial-axis.component";
+import { ChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
+import { ChartComponent } from "../chart/chart.component";
+import { RadarSeriesComponent } from "./radar-series.component";
 
 interface CharacterStat {
     metric: string;
@@ -21,21 +21,16 @@ interface CharacterStat {
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaRadarSeriesComponent,
-        MonaChartAngularAxisComponent,
-        MonaChartRadialAxisComponent,
-        MonaChartLegendComponent,
-        MonaChartTooltipComponent
+        ChartComponent,
+        RadarSeriesComponent,
+        ChartAngularAxisComponent,
+        ChartRadialAxisComponent,
+        ChartLegendComponent,
+        ChartTooltipComponent
     ],
     template: `
-        <mona-chart
-            [data]="data()"
-            (pointClick)="onPointClick($event)"
-            (pointFocusChange)="onPointFocusChange($event)">
-            <mona-chart-angular-axis
-                [rotation]="angularRotation()"
-                [visible]="angularAxisVisible()" />
+        <mona-chart [data]="data()" (pointClick)="onPointClick($event)" (pointFocusChange)="onPointFocusChange($event)">
+            <mona-chart-angular-axis [rotation]="angularRotation()" [visible]="angularAxisVisible()" />
             <mona-chart-radial-axis
                 [min]="radialMin()"
                 [max]="radialMax()"
@@ -113,8 +108,7 @@ describe("Radar Chart Integration", () => {
     });
 
     it("should compute polar axis scene for radar chart with 2 series and 5 categories", () => {
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-            .componentInstance as MonaChartComponent;
+        const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         const scene = chartComp.scene() as PolarAxisChartScene;
 
         expect(scene).not.toBeNull();
@@ -136,8 +130,7 @@ describe("Radar Chart Integration", () => {
     });
 
     it("should render series-level legend items and toggle series visibility", () => {
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-            .componentInstance as MonaChartComponent;
+        const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         const legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
 
         expect(legendButtons.length).toBe(2);
@@ -171,7 +164,7 @@ describe("Radar Chart Integration", () => {
     });
 
     it("should support keyboard navigation across angular spokes and series switching", () => {
-        const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+        const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
 
         // ArrowRight: navigate to first spoke ("Strength")
         chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
@@ -210,8 +203,7 @@ describe("Radar Chart Integration", () => {
         host.mageVisible.set(false);
         fixture.detectChanges();
 
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-            .componentInstance as MonaChartComponent;
+        const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         chartComp.recomputeScene();
 
         const sceneBefore = chartComp.scene() as PolarAxisChartScene;
@@ -232,8 +224,7 @@ describe("Radar Chart Integration", () => {
     });
 
     it("should trigger animation when toggling legend items", () => {
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-            .componentInstance as MonaChartComponent;
+        const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         chartComp.recomputeScene();
 
         const scene = chartComp.scene() as PolarAxisChartScene;

@@ -1,13 +1,13 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
-import { MonaChartComponent } from "../chart/chart.component";
-import { MonaCandlestickSeriesComponent } from "./candlestick-series.component";
+import { ChartComponent } from "../chart/chart.component";
+import { CandlestickSeriesComponent } from "./candlestick-series.component";
 import type { ChartFinancialFillMode } from "../../models/chart-financial.models";
 import type { ChartCandlestickSeriesScene } from "../../internal/scene/cartesian-scene";
 
 @Component({
-    imports: [MonaChartComponent, MonaCandlestickSeriesComponent],
+    imports: [ChartComponent, CandlestickSeriesComponent],
     template: `
         <mona-chart [data]="data()" [xField]="'time'">
             <mona-candlestick-series
@@ -48,7 +48,7 @@ describe("MonaCandlestickSeriesComponent", () => {
         host = fixture.componentInstance;
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         const scene = chart.scene();
         expect(scene).toBeDefined();
         if (scene && scene.coordinateSystem === "cartesian") {
@@ -75,7 +75,7 @@ describe("MonaCandlestickSeriesComponent", () => {
         host.fillMode.set("hollow");
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         let scene = chart.scene();
         if (scene && scene.coordinateSystem === "cartesian") {
             const seriesScene = scene.series[0] as ChartCandlestickSeriesScene;

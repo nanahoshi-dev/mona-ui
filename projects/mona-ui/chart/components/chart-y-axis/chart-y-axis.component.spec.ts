@@ -1,11 +1,11 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { MonaChartYAxisComponent } from "./chart-y-axis.component";
+import { ChartYAxisComponent } from "./chart-y-axis.component";
 import type { ChartYAxisType } from "../../models/chart-axis.models";
 
 @Component({
-    imports: [MonaChartYAxisComponent],
+    imports: [ChartYAxisComponent],
     template: `
         <mona-chart-y-axis
             [visible]="visible()"
@@ -57,8 +57,7 @@ describe("MonaChartYAxisComponent", () => {
         host.title.set("Categories");
         fixture.detectChanges();
 
-        const axisComp = fixture.debugElement.children[0].children[0]
-            ?.componentInstance as MonaChartYAxisComponent;
+        const axisComp = fixture.debugElement.children[0].children[0]?.componentInstance as ChartYAxisComponent;
         if (axisComp) {
             expect(axisComp.type()).toBe("category");
             expect(axisComp.title()).toBe("Categories");

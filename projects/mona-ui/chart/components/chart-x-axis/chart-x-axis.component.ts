@@ -13,7 +13,7 @@ import type { ChartAxisFormatter, ChartXAxisPosition, ChartXAxisType } from "../
         style: "display: none !important;"
     }
 })
-export class MonaChartXAxisComponent implements OnInit {
+export class ChartXAxisComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
 

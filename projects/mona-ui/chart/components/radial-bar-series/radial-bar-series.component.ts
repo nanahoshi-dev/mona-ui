@@ -1,15 +1,4 @@
-import {
-    Component,
-    DestroyRef,
-    effect,
-    ElementRef,
-    inject,
-    input,
-    model,
-    OnInit,
-    output,
-    signal
-} from "@angular/core";
+import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit, output, signal } from "@angular/core";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
@@ -19,10 +8,7 @@ import {
 import { resolveData } from "../../internal/data/chart-value-resolver";
 import { extractRadialDatumIdentities } from "../../internal/data/radial-datum-identity";
 import type { ChartField } from "../../models/chart.models";
-import type {
-    ChartRadialArcFillMode,
-    ChartRadialDatumVisibilityEvent
-} from "../../models/chart-radial-arc.models";
+import type { ChartRadialArcFillMode, ChartRadialDatumVisibilityEvent } from "../../models/chart-radial-arc.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
 
 let nextRadialBarSeriesId = 0;
@@ -36,7 +22,7 @@ let nextRadialBarSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaRadialBarSeriesComponent implements OnInit {
+export class RadialBarSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

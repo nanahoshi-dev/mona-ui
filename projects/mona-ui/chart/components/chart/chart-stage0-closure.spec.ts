@@ -3,18 +3,15 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChartPointEvent } from "../../models/chart-event.models";
-import { MonaChartComponent } from "./chart.component";
-import { MonaHeatmapSeriesComponent } from "../heatmap-series/heatmap-series.component";
-import { MonaChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
-import { MonaChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
-import { MonaLineSeriesComponent } from "../line-series/line-series.component";
+import { ChartComponent } from "./chart.component";
+import { HeatmapSeriesComponent } from "../heatmap-series/heatmap-series.component";
+import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
+import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { LineSeriesComponent } from "../line-series/line-series.component";
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
 
 @Component({
-    imports: [
-        MonaChartComponent,
-        MonaHeatmapSeriesComponent
-    ],
+    imports: [ChartComponent, HeatmapSeriesComponent],
     template: `
         <mona-chart
             [data]="data()"
@@ -22,17 +19,12 @@ import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
             (pointClick)="onPointClick($event)"
             [style.width.px]="600"
             [style.height.px]="400">
-            <mona-heatmap-series
-                field="val"
-                yField="hour"
-                name="Activity" />
+            <mona-heatmap-series field="val" yField="hour" name="Activity" />
         </mona-chart>
     `
 })
 class HeatmapTestHostComponent {
-    public readonly data = signal([
-        { day: "Mon", hour: "10am", val: 42 }
-    ]);
+    public readonly data = signal([{ day: "Mon", hour: "10am", val: 42 }]);
     public readonly clickedEvents: ChartPointEvent[] = [];
 
     public onPointClick(event: ChartPointEvent): void {
@@ -41,18 +33,9 @@ class HeatmapTestHostComponent {
 }
 
 @Component({
-    imports: [
-        MonaChartComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaLineSeriesComponent
-    ],
+    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent],
     template: `
-        <mona-chart
-            [data]="data()"
-            xField="x"
-            [style.width.px]="600"
-            [style.height.px]="400">
+        <mona-chart [data]="data()" xField="x" [style.width.px]="600" [style.height.px]="400">
             <mona-chart-x-axis />
             <mona-chart-y-axis />
             <mona-line-series field="y" name="Trend" />
@@ -82,8 +65,8 @@ describe("Chart Stage 0 Stability Closure", () => {
         });
 
         it("should emit identical semantic payloads for pointer click, Enter, and Space", async () => {
-            const chartDebug = fixture.debugElement.query(By.directive(MonaChartComponent));
-            const chartComp = chartDebug.componentInstance as MonaChartComponent;
+            const chartDebug = fixture.debugElement.query(By.directive(ChartComponent));
+            const chartComp = chartDebug.componentInstance as ChartComponent;
             chartComp.recomputeScene();
             fixture.detectChanges();
 
@@ -147,8 +130,8 @@ describe("Chart Stage 0 Stability Closure", () => {
                 const fixture = TestBed.createComponent(CoalescingTestHostComponent);
                 fixture.detectChanges();
 
-                const chartDebug = fixture.debugElement.query(By.directive(MonaChartComponent));
-                const chartComp = chartDebug.componentInstance as MonaChartComponent;
+                const chartDebug = fixture.debugElement.query(By.directive(ChartComponent));
+                const chartComp = chartDebug.componentInstance as ChartComponent;
 
                 const scene = chartComp.scene();
                 expect(scene).toBeDefined();

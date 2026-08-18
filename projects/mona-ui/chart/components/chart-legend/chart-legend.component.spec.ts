@@ -6,10 +6,10 @@ import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import type { ChartRegistrationContext } from "../../internal/context/chart-registration-context";
 import type { ChartLegendItem } from "../../models/chart-series.models";
-import { MonaChartLegendComponent } from "./chart-legend.component";
+import { ChartLegendComponent } from "./chart-legend.component";
 
 @Component({
-    imports: [MonaChartLegendComponent, ChartLegendItemTemplateDirective],
+    imports: [ChartLegendComponent, ChartLegendItemTemplateDirective],
     template: `
         <mona-chart-legend [interactive]="interactive()" [position]="position()">
             @if (useCustomTemplate()) {
@@ -32,8 +32,24 @@ describe("MonaChartLegendComponent", () => {
     const toggleLegendItemSpy = vi.fn((_item: ChartLegendItem) => {});
 
     const mockLegendItems = signal<readonly ChartLegendItem[]>([
-        { color: "#3b82f6", itemId: "s1", kind: "series", name: "Series A", seriesId: "s1", seriesType: "line", visible: true },
-        { color: "#10b981", itemId: "s2", kind: "series", name: "Series B", seriesId: "s2", seriesType: "bar", visible: false }
+        {
+            color: "#3b82f6",
+            itemId: "s1",
+            kind: "series",
+            name: "Series A",
+            seriesId: "s1",
+            seriesType: "line",
+            visible: true
+        },
+        {
+            color: "#10b981",
+            itemId: "s2",
+            kind: "series",
+            name: "Series B",
+            seriesId: "s2",
+            seriesType: "bar",
+            visible: false
+        }
     ]);
 
     const mockChartContext: Partial<ChartRegistrationContext> = {

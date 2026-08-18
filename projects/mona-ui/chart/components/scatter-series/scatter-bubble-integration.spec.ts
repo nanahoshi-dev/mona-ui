@@ -4,23 +4,23 @@ import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { CartesianChartScene } from "../../internal/scene/chart-scene";
 import type { ChartPointEvent, ChartSeriesVisibilityEvent } from "../../models/chart-event.models";
-import { MonaChartComponent } from "../chart/chart.component";
-import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
-import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
-import { MonaChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
-import { MonaChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
-import { MonaBubbleSeriesComponent } from "../bubble-series/bubble-series.component";
-import { MonaScatterSeriesComponent } from "./scatter-series.component";
+import { ChartComponent } from "../chart/chart.component";
+import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
+import { ChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
+import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
+import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { BubbleSeriesComponent } from "../bubble-series/bubble-series.component";
+import { ScatterSeriesComponent } from "./scatter-series.component";
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartLegendComponent,
-        MonaChartTooltipComponent,
-        MonaScatterSeriesComponent,
-        MonaBubbleSeriesComponent
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartLegendComponent,
+        ChartTooltipComponent,
+        ScatterSeriesComponent,
+        BubbleSeriesComponent
     ],
     template: `
         <mona-chart
@@ -91,8 +91,7 @@ describe("Scatter and Bubble Integration", () => {
     });
 
     it("should compute Cartesian scene with Scatter and Bubble series scenes", () => {
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-            .componentInstance as MonaChartComponent;
+        const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         const scene = chartComp.scene() as CartesianChartScene;
 
         expect(scene).not.toBeNull();
@@ -137,8 +136,8 @@ describe("Scatter and Bubble Integration", () => {
     });
 
     it("should support keyboard navigation across duplicate X coordinates", () => {
-        const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
-        const chartComp = chartEl.componentInstance as MonaChartComponent;
+        const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
+        const chartComp = chartEl.componentInstance as ChartComponent;
 
         // Focus chart and press ArrowRight to select first bucket
         chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));

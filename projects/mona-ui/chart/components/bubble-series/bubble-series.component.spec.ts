@@ -1,10 +1,10 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { MonaBubbleSeriesComponent } from "./bubble-series.component";
+import { BubbleSeriesComponent } from "./bubble-series.component";
 
 @Component({
-    imports: [MonaBubbleSeriesComponent],
+    imports: [BubbleSeriesComponent],
     template: `
         <mona-bubble-series
             [field]="field()"
@@ -66,7 +66,7 @@ describe("MonaBubbleSeriesComponent", () => {
         host.sizeField.set("pop");
         fixture.detectChanges();
 
-        const seriesComp = fixture.debugElement.children[0]?.componentInstance as MonaBubbleSeriesComponent;
+        const seriesComp = fixture.debugElement.children[0]?.componentInstance as BubbleSeriesComponent;
         if (seriesComp) {
             expect(seriesComp.minRadius()).toBe(8);
             expect(seriesComp.maxRadius()).toBe(40);

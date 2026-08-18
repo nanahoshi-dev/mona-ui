@@ -2,12 +2,15 @@ import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
-import type { ChartRegistrationContext, ChartSeriesRegistration } from "../../internal/context/chart-registration-context";
+import type {
+    ChartRegistrationContext,
+    ChartSeriesRegistration
+} from "../../internal/context/chart-registration-context";
 import type { ChartRadialDatumVisibilityEvent, ChartRoseScaleMode } from "../../models/chart-radial-arc.models";
-import { MonaRoseSeriesComponent } from "./rose-series.component";
+import { RoseSeriesComponent } from "./rose-series.component";
 
 @Component({
-    imports: [MonaRoseSeriesComponent],
+    imports: [RoseSeriesComponent],
     template: `
         <mona-rose-series
             [data]="data()"
@@ -16,8 +19,7 @@ import { MonaRoseSeriesComponent } from "./rose-series.component";
             [scaleMode]="scaleMode()"
             [padAngle]="padAngle()"
             [(visible)]="visible"
-            (datumVisibilityChange)="onDatumVisibilityChange($event)"
-        />
+            (datumVisibilityChange)="onDatumVisibilityChange($event)" />
     `
 })
 class TestRoseHostComponent {
@@ -123,15 +125,11 @@ describe("MonaRoseSeriesComponent", () => {
             expect(seriesReg.isDatumVisible("c:s:North")).toBe(false);
 
             // Update data removing North
-            fixture.componentInstance.data.set([
-                { category: "East", value: 50 }
-            ]);
+            fixture.componentInstance.data.set([{ category: "East", value: 50 }]);
             fixture.detectChanges();
 
             // When North returns, it should be visible
-            fixture.componentInstance.data.set([
-                { category: "North", value: 45 }
-            ]);
+            fixture.componentInstance.data.set([{ category: "North", value: 45 }]);
             fixture.detectChanges();
 
             expect(seriesReg.isDatumVisible("c:s:North")).toBe(true);

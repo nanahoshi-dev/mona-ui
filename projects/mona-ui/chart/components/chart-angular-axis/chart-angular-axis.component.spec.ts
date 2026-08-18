@@ -1,10 +1,10 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { MonaChartAngularAxisComponent } from "./chart-angular-axis.component";
+import { ChartAngularAxisComponent } from "./chart-angular-axis.component";
 
 @Component({
-    imports: [MonaChartAngularAxisComponent],
+    imports: [ChartAngularAxisComponent],
     template: `
         <mona-chart-angular-axis
             [visible]="visible()"
@@ -54,8 +54,7 @@ describe("MonaChartAngularAxisComponent", () => {
         host.labelOffset.set(15);
         fixture.detectChanges();
 
-        const axisComp = fixture.debugElement.children[0].children[0]
-            ?.componentInstance as MonaChartAngularAxisComponent;
+        const axisComp = fixture.debugElement.children[0].children[0]?.componentInstance as ChartAngularAxisComponent;
         if (axisComp) {
             expect(axisComp.rotation()).toBe(45);
             expect(axisComp.labelOffset()).toBe(15);

@@ -7,31 +7,31 @@ import {
     ChartNoDataTemplateDirective,
     ChartSliceLabelTemplateDirective,
     ChartTooltipTemplateDirective,
-    MonaAreaSeriesComponent,
-    MonaBarSeriesComponent,
-    MonaChartAngularAxisComponent,
-    MonaChartComponent,
-    MonaChartLegendComponent,
-    MonaChartRadialAxisComponent,
-    MonaChartTooltipComponent,
-    MonaChartXAxisComponent,
-    MonaChartYAxisComponent,
-    MonaDonutSeriesComponent,
-    MonaLineSeriesComponent,
-    MonaPieSeriesComponent,
-    MonaPolarSeriesComponent,
-    MonaRadarSeriesComponent,
-    MonaRadialBarSeriesComponent,
-    MonaRoseSeriesComponent,
-    MonaGaugeSeriesComponent,
+    AreaSeriesComponent,
+    BarSeriesComponent,
+    ChartAngularAxisComponent,
+    ChartComponent,
+    ChartLegendComponent,
+    ChartRadialAxisComponent,
+    ChartTooltipComponent,
+    ChartXAxisComponent,
+    ChartYAxisComponent,
+    DonutSeriesComponent,
+    LineSeriesComponent,
+    PieSeriesComponent,
+    PolarSeriesComponent,
+    RadarSeriesComponent,
+    RadialBarSeriesComponent,
+    RoseSeriesComponent,
+    GaugeSeriesComponent,
     ChartGaugeCenterTemplateDirective,
-    MonaScatterSeriesComponent,
-    MonaBubbleSeriesComponent,
-    MonaCandlestickSeriesComponent,
-    MonaHeatmapSeriesComponent,
-    MonaOhlcSeriesComponent,
-    MonaRangeAreaSeriesComponent,
-    MonaRangeBarSeriesComponent,
+    ScatterSeriesComponent,
+    BubbleSeriesComponent,
+    CandlestickSeriesComponent,
+    HeatmapSeriesComponent,
+    OhlcSeriesComponent,
+    RangeAreaSeriesComponent,
+    RangeBarSeriesComponent,
     type ChartAreaFillMode,
     type ChartCurve,
     type ChartFinancialFillMode,
@@ -114,31 +114,31 @@ interface BubbleDataPoint {
         ButtonDirective,
         CheckBoxComponent,
         DropdownListComponent,
-        MonaChartComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartAngularAxisComponent,
-        MonaChartRadialAxisComponent,
-        MonaLineSeriesComponent,
-        MonaAreaSeriesComponent,
-        MonaBarSeriesComponent,
-        MonaPieSeriesComponent,
-        MonaDonutSeriesComponent,
-        MonaRadarSeriesComponent,
-        MonaPolarSeriesComponent,
-        MonaScatterSeriesComponent,
-        MonaBubbleSeriesComponent,
-        MonaCandlestickSeriesComponent,
-        MonaOhlcSeriesComponent,
-        MonaRangeBarSeriesComponent,
-        MonaRangeAreaSeriesComponent,
-        MonaHeatmapSeriesComponent,
-        MonaRadialBarSeriesComponent,
-        MonaRoseSeriesComponent,
-        MonaGaugeSeriesComponent,
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartAngularAxisComponent,
+        ChartRadialAxisComponent,
+        LineSeriesComponent,
+        AreaSeriesComponent,
+        BarSeriesComponent,
+        PieSeriesComponent,
+        DonutSeriesComponent,
+        RadarSeriesComponent,
+        PolarSeriesComponent,
+        ScatterSeriesComponent,
+        BubbleSeriesComponent,
+        CandlestickSeriesComponent,
+        OhlcSeriesComponent,
+        RangeBarSeriesComponent,
+        RangeAreaSeriesComponent,
+        HeatmapSeriesComponent,
+        RadialBarSeriesComponent,
+        RoseSeriesComponent,
+        GaugeSeriesComponent,
         ChartGaugeCenterTemplateDirective,
-        MonaChartLegendComponent,
-        MonaChartTooltipComponent,
+        ChartLegendComponent,
+        ChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
         ChartLegendItemTemplateDirective,
         ChartNoDataTemplateDirective,
@@ -183,7 +183,9 @@ export class ChartDemoComponent {
     protected readonly animationEnabled = signal<boolean>(true);
 
     // Candlestick & OHLC Chart Data & Controls
-    protected readonly candlestickData = signal<readonly { close: number; date: string; high: number; low: number; open: number }[]>([
+    protected readonly candlestickData = signal<
+        readonly { close: number; date: string; high: number; low: number; open: number }[]
+    >([
         { close: 104, date: "2026-03-01", high: 108, low: 98, open: 100 },
         { close: 102, date: "2026-03-02", high: 107, low: 100, open: 105 },
         { close: 112, date: "2026-03-03", high: 115, low: 101, open: 102 },
@@ -197,7 +199,9 @@ export class ChartDemoComponent {
     protected readonly candlestickWickWidth = signal<number>(1);
     protected readonly candlestickBodyWidthRatio = signal<number>(0.7);
 
-    protected readonly ohlcData = signal<readonly { close: number; date: string; high: number; low: number; open: number }[]>([
+    protected readonly ohlcData = signal<
+        readonly { close: number; date: string; high: number; low: number; open: number }[]
+    >([
         { close: 1850, date: "2026-03-01", high: 1880, low: 1820, open: 1830 },
         { close: 1820, date: "2026-03-02", high: 1860, low: 1810, open: 1850 },
         { close: 1910, date: "2026-03-03", high: 1930, low: 1815, open: 1820 },
@@ -292,9 +296,7 @@ export class ChartDemoComponent {
     protected readonly rangeBarMaxBarWidth = signal<number>(36);
     protected readonly rangeBarOpacity = signal<number>(0.85);
 
-    protected readonly rangeAreaData = signal<
-        readonly { actual: number; high: number; low: number; month: string }[]
-    >([
+    protected readonly rangeAreaData = signal<readonly { actual: number; high: number; low: number; month: string }[]>([
         { actual: 38, high: 48, low: 28, month: "Jan" },
         { actual: 44, high: 56, low: 32, month: "Feb" },
         { actual: 52, high: 65, low: 40, month: "Mar" },
@@ -310,7 +312,9 @@ export class ChartDemoComponent {
         { label: "Gradient (Fade to 0)", value: "gradient" },
         { label: "Solid Fill", value: "solid" }
     ];
-    protected readonly stackedBarData = signal<readonly { month: string; online: number; partner: number; retail: number }[]>([
+    protected readonly stackedBarData = signal<
+        readonly { month: string; online: number; partner: number; retail: number }[]
+    >([
         { month: "Jan", online: 1200, partner: 600, retail: 2400 },
         { month: "Feb", online: 1800, partner: 800, retail: 2100 },
         { month: "Mar", online: 2200, partner: 1100, retail: 2900 },
@@ -318,7 +322,9 @@ export class ChartDemoComponent {
         { month: "May", online: 3100, partner: 1600, retail: 3400 },
         { month: "Jun", online: 3800, partner: 1900, retail: 3200 }
     ]);
-    protected readonly stackedAreaData = signal<readonly { direct: number; organic: number; referral: number; year: number }[]>([
+    protected readonly stackedAreaData = signal<
+        readonly { direct: number; organic: number; referral: number; year: number }[]
+    >([
         { direct: 240, organic: 520, referral: 180, year: 2019 },
         { direct: 310, organic: 680, referral: 240, year: 2020 },
         { direct: 420, organic: 890, referral: 310, year: 2021 },

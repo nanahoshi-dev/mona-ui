@@ -2,10 +2,10 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChartRadialGridShape } from "../../models/chart-polar.models";
-import { MonaChartRadialAxisComponent } from "./chart-radial-axis.component";
+import { ChartRadialAxisComponent } from "./chart-radial-axis.component";
 
 @Component({
-    imports: [MonaChartRadialAxisComponent],
+    imports: [ChartRadialAxisComponent],
     template: `
         <mona-chart-radial-axis
             [visible]="visible()"
@@ -64,8 +64,7 @@ describe("MonaChartRadialAxisComponent", () => {
         host.gridShape.set("polygon");
         fixture.detectChanges();
 
-        const axisComp = fixture.debugElement.children[0].children[0]
-            ?.componentInstance as MonaChartRadialAxisComponent;
+        const axisComp = fixture.debugElement.children[0].children[0]?.componentInstance as ChartRadialAxisComponent;
         if (axisComp) {
             expect(axisComp.min()).toBe(-50);
             expect(axisComp.max()).toBe(50);

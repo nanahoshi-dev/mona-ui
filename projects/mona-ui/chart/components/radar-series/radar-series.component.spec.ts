@@ -2,10 +2,10 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChartRadialCurve, ChartRadialFillMode } from "../../models/chart-polar.models";
-import { MonaRadarSeriesComponent } from "./radar-series.component";
+import { RadarSeriesComponent } from "./radar-series.component";
 
 @Component({
-    imports: [MonaRadarSeriesComponent],
+    imports: [RadarSeriesComponent],
     template: `
         <mona-radar-series
             [field]="field()"
@@ -55,8 +55,7 @@ describe("MonaRadarSeriesComponent", () => {
         host.fillMode.set("solid");
         fixture.detectChanges();
 
-        const seriesComp = fixture.debugElement.children[0].children[0]
-            ?.componentInstance as MonaRadarSeriesComponent;
+        const seriesComp = fixture.debugElement.children[0].children[0]?.componentInstance as RadarSeriesComponent;
         if (seriesComp) {
             expect(seriesComp.curve()).toBe("smooth");
             expect(seriesComp.fillMode()).toBe("solid");

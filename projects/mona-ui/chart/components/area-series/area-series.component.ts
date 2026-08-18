@@ -16,7 +16,7 @@ let nextSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaAreaSeriesComponent implements OnInit {
+export class AreaSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

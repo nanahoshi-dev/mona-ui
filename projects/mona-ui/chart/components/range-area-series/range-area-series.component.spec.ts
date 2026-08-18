@@ -4,11 +4,11 @@ import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChartCurve } from "../../models/chart-series.models";
 import type { ChartField } from "../../models/chart.models";
-import { MonaChartComponent } from "../chart/chart.component";
-import { MonaRangeAreaSeriesComponent } from "./range-area-series.component";
+import { ChartComponent } from "../chart/chart.component";
+import { RangeAreaSeriesComponent } from "./range-area-series.component";
 
 @Component({
-    imports: [MonaChartComponent, MonaRangeAreaSeriesComponent],
+    imports: [ChartComponent, RangeAreaSeriesComponent],
     template: `
         <mona-chart [data]="data()">
             <mona-range-area-series
@@ -50,7 +50,7 @@ class TestHostComponent {
 describe("MonaRangeAreaSeriesComponent", () => {
     let fixture: ComponentFixture<TestHostComponent>;
     let host: TestHostComponent;
-    let seriesComponent: MonaRangeAreaSeriesComponent;
+    let seriesComponent: RangeAreaSeriesComponent;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -60,7 +60,7 @@ describe("MonaRangeAreaSeriesComponent", () => {
         fixture = TestBed.createComponent(TestHostComponent);
         host = fixture.componentInstance;
         fixture.detectChanges();
-        seriesComponent = fixture.debugElement.query(By.directive(MonaRangeAreaSeriesComponent)).componentInstance;
+        seriesComponent = fixture.debugElement.query(By.directive(RangeAreaSeriesComponent)).componentInstance;
     });
 
     it("should create component and bind inputs", () => {

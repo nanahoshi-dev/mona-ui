@@ -1,15 +1,4 @@
-import {
-    Component,
-    DestroyRef,
-    effect,
-    ElementRef,
-    inject,
-    input,
-    model,
-    OnInit,
-    output,
-    signal
-} from "@angular/core";
+import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit, output, signal } from "@angular/core";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
@@ -37,7 +26,7 @@ let nextRoseSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaRoseSeriesComponent implements OnInit {
+export class RoseSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

@@ -1,12 +1,12 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
-import { MonaChartComponent } from "../chart/chart.component";
-import { MonaOhlcSeriesComponent } from "./ohlc-series.component";
+import { ChartComponent } from "../chart/chart.component";
+import { OhlcSeriesComponent } from "./ohlc-series.component";
 import type { ChartOhlcSeriesScene } from "../../internal/scene/cartesian-scene";
 
 @Component({
-    imports: [MonaChartComponent, MonaOhlcSeriesComponent],
+    imports: [ChartComponent, OhlcSeriesComponent],
     template: `
         <mona-chart [data]="data()" [xField]="'time'">
             <mona-ohlc-series
@@ -45,7 +45,7 @@ describe("MonaOhlcSeriesComponent", () => {
         host = fixture.componentInstance;
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         const scene = chart.scene();
         expect(scene).toBeDefined();
         if (scene && scene.coordinateSystem === "cartesian") {
@@ -72,7 +72,7 @@ describe("MonaOhlcSeriesComponent", () => {
         host.visible.set(false);
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         const scene = chart.scene();
         if (scene && scene.coordinateSystem === "cartesian") {
             expect(scene.series.length).toBe(0);

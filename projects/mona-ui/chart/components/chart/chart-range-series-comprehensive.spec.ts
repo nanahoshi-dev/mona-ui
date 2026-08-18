@@ -7,23 +7,23 @@ import type {
     ChartPointFocusEvent,
     ChartSeriesVisibilityEvent
 } from "../../models/chart-event.models";
-import { MonaChartComponent } from "./chart.component";
-import { MonaChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
-import { MonaChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
-import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
-import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
-import { MonaRangeBarSeriesComponent } from "../range-bar-series/range-bar-series.component";
-import { MonaRangeAreaSeriesComponent } from "../range-area-series/range-area-series.component";
+import { ChartComponent } from "./chart.component";
+import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
+import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { ChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
+import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
+import { RangeBarSeriesComponent } from "../range-bar-series/range-bar-series.component";
+import { RangeAreaSeriesComponent } from "../range-area-series/range-area-series.component";
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartTooltipComponent,
-        MonaChartLegendComponent,
-        MonaRangeBarSeriesComponent,
-        MonaRangeAreaSeriesComponent
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartTooltipComponent,
+        ChartLegendComponent,
+        RangeBarSeriesComponent,
+        RangeAreaSeriesComponent
     ],
     template: `
         <mona-chart
@@ -94,7 +94,7 @@ class ComprehensiveRangeHostComponent {
 describe("Comprehensive Range Chart Features", () => {
     let fixture: ComponentFixture<ComprehensiveRangeHostComponent>;
     let host: ComprehensiveRangeHostComponent;
-    let chartComponent: MonaChartComponent;
+    let chartComponent: ChartComponent;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -104,7 +104,7 @@ describe("Comprehensive Range Chart Features", () => {
         fixture = TestBed.createComponent(ComprehensiveRangeHostComponent);
         host = fixture.componentInstance;
         fixture.detectChanges();
-        chartComponent = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance;
+        chartComponent = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance;
     });
 
     it("should compute scene with zero-length range bar and crossing range area (RNG-001, RNG-004)", () => {
@@ -159,7 +159,7 @@ describe("Comprehensive Range Chart Features", () => {
     });
 
     it("should handle keyboard navigation and emit formatted a11y values", () => {
-        const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+        const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
         chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }));
         fixture.detectChanges();
 

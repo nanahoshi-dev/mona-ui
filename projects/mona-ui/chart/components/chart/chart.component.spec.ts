@@ -11,28 +11,32 @@ import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-l
 import { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
 import type { ChartAnimationInput } from "../../models/chart-animation.models";
 import type { ChartAxisFormatter, ChartXAxisType } from "../../models/chart-axis.models";
-import type { ChartPointEvent, ChartPointFocusEvent, ChartSeriesVisibilityEvent } from "../../models/chart-event.models";
-import { MonaAreaSeriesComponent } from "../area-series/area-series.component";
-import { MonaBarSeriesComponent } from "../bar-series/bar-series.component";
-import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
-import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
-import { MonaChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
-import { MonaChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
-import { MonaDonutSeriesComponent } from "../donut-series/donut-series.component";
-import { MonaLineSeriesComponent } from "../line-series/line-series.component";
-import { MonaPieSeriesComponent } from "../pie-series/pie-series.component";
-import { MonaChartComponent } from "./chart.component";
+import type {
+    ChartPointEvent,
+    ChartPointFocusEvent,
+    ChartSeriesVisibilityEvent
+} from "../../models/chart-event.models";
+import { AreaSeriesComponent } from "../area-series/area-series.component";
+import { BarSeriesComponent } from "../bar-series/bar-series.component";
+import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
+import { ChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
+import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
+import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { DonutSeriesComponent } from "../donut-series/donut-series.component";
+import { LineSeriesComponent } from "../line-series/line-series.component";
+import { PieSeriesComponent } from "../pie-series/pie-series.component";
+import { ChartComponent } from "./chart.component";
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaLineSeriesComponent,
-        MonaAreaSeriesComponent,
-        MonaBarSeriesComponent,
-        MonaChartLegendComponent,
-        MonaChartTooltipComponent,
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        LineSeriesComponent,
+        AreaSeriesComponent,
+        BarSeriesComponent,
+        ChartLegendComponent,
+        ChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
         ChartLegendItemTemplateDirective,
         ChartNoDataTemplateDirective,
@@ -146,11 +150,11 @@ class TestHostComponent {
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaPieSeriesComponent,
-        MonaDonutSeriesComponent,
-        MonaChartLegendComponent,
-        MonaChartTooltipComponent,
+        ChartComponent,
+        PieSeriesComponent,
+        DonutSeriesComponent,
+        ChartLegendComponent,
+        ChartTooltipComponent,
         ChartCenterTemplateDirective,
         ChartSliceLabelTemplateDirective
     ],
@@ -161,20 +165,13 @@ class TestHostComponent {
             (pointClick)="onPointClick($event)"
             (pointFocusChange)="onPointFocusChange($event)">
             @if (isDonut()) {
-                <mona-donut-series
-                    field="share"
-                    categoryField="browser"
-                    [innerRadiusRatio]="0.6"
-                    [showLabels]="true">
+                <mona-donut-series field="share" categoryField="browser" [innerRadiusRatio]="0.6" [showLabels]="true">
                     <ng-template monaChartCenterTemplate let-formattedTotal="formattedTotal">
                         <div class="test-center">{{ formattedTotal }}</div>
                     </ng-template>
                 </mona-donut-series>
             } @else {
-                <mona-pie-series
-                    field="share"
-                    categoryField="browser"
-                    [showLabels]="true">
+                <mona-pie-series field="share" categoryField="browser" [showLabels]="true">
                     <ng-template monaChartSliceLabelTemplate let-slice>
                         <span class="test-slice-label">{{ slice.formattedPercentage }}</span>
                     </ng-template>
@@ -221,7 +218,7 @@ describe("MonaChartComponent", () => {
         });
 
         it("should create chart with canvas and aria attributes", () => {
-            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+            const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
             expect(chartEl).not.toBeNull();
             expect(chartEl.nativeElement.getAttribute("role")).toBe("region");
             expect(chartEl.nativeElement.getAttribute("aria-label")).toBe("Activity Metrics");
@@ -250,7 +247,7 @@ describe("MonaChartComponent", () => {
         });
 
         it("should handle keyboard navigation using ArrowRight / ArrowLeft / Enter", () => {
-            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+            const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
 
             // Press ArrowRight
             chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
@@ -310,7 +307,8 @@ describe("MonaChartComponent", () => {
         });
 
         it("should render polar pie chart scene with slice legend items", () => {
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             const scene = chartComp.scene();
 
             expect(scene?.coordinateSystem).toBe("polar");
@@ -325,7 +323,7 @@ describe("MonaChartComponent", () => {
         });
 
         it("should navigate polar slices with keyboard arrow keys and announce via live region", () => {
-            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+            const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
 
             chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
             fixture.detectChanges();
@@ -345,7 +343,7 @@ describe("MonaChartComponent", () => {
         });
 
         it("should select last slice on initial ArrowLeft or ArrowUp in polar mode", () => {
-            const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+            const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
 
             chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
             fixture.detectChanges();
@@ -358,7 +356,8 @@ describe("MonaChartComponent", () => {
             host.isDonut.set(true);
             fixture.detectChanges();
 
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             expect(chartComp.scene()?.series[0].type).toBe("donut");
 
             const centerEl = fixture.debugElement.query(By.css(".test-center"));
