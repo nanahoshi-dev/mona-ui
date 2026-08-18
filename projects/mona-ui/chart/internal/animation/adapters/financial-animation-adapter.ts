@@ -43,11 +43,22 @@ interface FinancialMarkPlan {
     readonly type: "enter" | "exit" | "update";
 }
 
+function getMarkWidth(mark: SceneCandlestickMark | SceneOhlcMark, fallbackWidth: number): number {
+    if ("bodyWidth" in mark && typeof mark.bodyWidth === "number" && mark.bodyWidth > 0) {
+        return mark.bodyWidth;
+    }
+    if ("totalWidth" in mark && typeof mark.totalWidth === "number" && mark.totalWidth > 0) {
+        return mark.totalWidth;
+    }
+    return fallbackWidth;
+}
+
 function toFinancialMarkState(
     mark: SceneCandlestickMark | SceneOhlcMark,
-    width: number,
+    fallbackWidth: number,
     opacity = 1
 ): FinancialMarkState {
+    const width = getMarkWidth(mark, fallbackWidth);
     return {
         animationKey: mark.animationKey,
         centerX: mark.centerX,
@@ -76,10 +87,11 @@ function toFinancialMarkState(
 
 function createCollapsedFinancialMarkState(
     mark: SceneCandlestickMark | SceneOhlcMark,
-    width: number,
+    fallbackWidth: number,
     opacity = 0
 ): FinancialMarkState {
     const midY = (mark.highY + mark.lowY) / 2;
+    const width = getMarkWidth(mark, fallbackWidth);
     return {
         animationKey: mark.animationKey,
         centerX: mark.centerX,

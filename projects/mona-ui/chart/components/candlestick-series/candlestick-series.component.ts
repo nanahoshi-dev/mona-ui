@@ -150,6 +150,8 @@ export class MonaCandlestickSeriesComponent implements OnInit {
      */
     public readonly xField = input<ChartField | undefined>(undefined);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
             this.closeField();
@@ -159,26 +161,42 @@ export class MonaCandlestickSeriesComponent implements OnInit {
             this.lowField();
             this.openField();
             this.xField();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            }
+        });
+
+        effect(() => {
+            this.visible();
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            }
         });
 
         effect(() => {
             this.bodyWidth();
             this.bodyWidthRatio();
+            this.maxBodyWidth();
+            this.name();
+            this.valueFormatter();
+            this.wickWidth();
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
+        });
+
+        effect(() => {
             this.color();
             this.fallingColor();
             this.fillMode();
-            this.maxBodyWidth();
-            this.name();
             this.neutralColor();
             this.opacity();
             this.risingColor();
             this.userClass();
-            this.valueFormatter();
-            this.visible();
             this.wickColor();
-            this.wickWidth();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            }
         });
     }
 
@@ -212,6 +230,7 @@ export class MonaCandlestickSeriesComponent implements OnInit {
         };
 
         const unregister = this.#chartContext?.registerSeries(registration);
+        this.#registered = true;
         this.#destroyRef.onDestroy(() => {
             unregister?.();
         });

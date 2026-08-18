@@ -85,7 +85,9 @@ export class FinancialLayoutEngine {
         });
 
         const nominalBodyWidth = markWidths.length > 0 ? markWidths[0] : 16;
-        const maxBodyWidth = normalizeNonNegativeNumber(explicitMaxBodyWidth, 32);
+        const maxBodyWidth = isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
+            ? Math.max(2, explicitMaxBodyWidth as number)
+            : 32;
         const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(series.wickWidth?.(), 1));
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
@@ -185,7 +187,9 @@ export class FinancialLayoutEngine {
         });
 
         const nominalBodyWidth = markWidths.length > 0 ? markWidths[0] : 16;
-        const maxBodyWidth = normalizeNonNegativeNumber(explicitMaxBodyWidth, 32);
+        const maxBodyWidth = isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
+            ? Math.max(2, explicitMaxBodyWidth as number)
+            : 32;
         const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(series.wickWidth?.(), 1));
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();

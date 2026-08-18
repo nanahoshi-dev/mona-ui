@@ -98,6 +98,8 @@ export class MonaChartRadialAxisComponent implements OnInit {
      */
     public readonly visible = input(true);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
             this.axisLine();
@@ -113,7 +115,9 @@ export class MonaChartRadialAxisComponent implements OnInit {
             this.tickCount();
             this.userClass();
             this.visible();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
         });
     }
 
@@ -139,6 +143,7 @@ export class MonaChartRadialAxisComponent implements OnInit {
             visible: this.visible
         });
 
+        this.#registered = true;
         this.#destroyRef.onDestroy(unregister);
     }
 }

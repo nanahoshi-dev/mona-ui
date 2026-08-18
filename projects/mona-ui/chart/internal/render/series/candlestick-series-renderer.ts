@@ -35,8 +35,8 @@ export class CandlestickSeriesRenderer {
 
             // 1. Draw central vertical wick (high to low)
             context.beginPath();
-            context.moveTo(crispCenterX, crispPixel(mark.highY, 1));
-            context.lineTo(crispCenterX, crispPixel(mark.lowY, 1));
+            context.moveTo(crispCenterX, crispPixel(mark.highY, wickWidth));
+            context.lineTo(crispCenterX, crispPixel(mark.lowY, wickWidth));
             context.lineWidth = wickWidth;
             context.strokeStyle = wickColor;
             context.stroke();
@@ -44,9 +44,8 @@ export class CandlestickSeriesRenderer {
             // 2. Draw body box
             const bounds = mark.bodyBounds;
             if (mark.fillMode === "hollow" && mark.direction === "rising") {
-                if (typeof context.clearRect === "function") {
-                    context.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
-                }
+                context.fillStyle = style.hollowFillColor ?? "#ffffff";
+                context.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
                 context.beginPath();
                 context.rect(bounds.x, bounds.y, bounds.width, bounds.height);
                 context.lineWidth = Math.max(1, wickWidth);

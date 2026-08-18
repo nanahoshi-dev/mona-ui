@@ -35,6 +35,8 @@ import type {
 import type { CartesianAxisTransitionPlan, PolarAxisTransitionPlan } from "./adapters/axis-animation-adapter";
 import type { ChartAnimationRenderFrame, ChartTransitionPlan } from "./chart-transition-types";
 import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
+import { CartesianFinancialIndex, type FinancialHitEntry } from "../interaction/cartesian-financial-index";
+import { createCandlestickFinancialHitGeometry, createOhlcFinancialHitGeometry } from "../interaction/financial-hit-geometry";
 
 export class SceneTransitionSampler {
     public static sampleFrame(plan: ChartTransitionPlan, progress: number): ChartAnimationRenderFrame {
@@ -200,6 +202,7 @@ export class SceneTransitionSampler {
         // Derive sampled hit targets directly from sampled series geometry
         const sampledHitTargets: SceneHitTarget[] = [];
         const sampledBarHitTargets: SceneHitTarget[] = [];
+        const sampledFinancialHitEntries: FinancialHitEntry[] = [];
         const sampledPointHitTargets: SceneHitTarget[] = [];
         const sampledHitsByX = new Map<ChartInteractionXKey, SceneHitTarget[]>();
 
@@ -217,14 +220,51 @@ export class SceneTransitionSampler {
             let rangeBand = targetHit.rangeBand;
             let range = targetHit.range;
 
+            let financial = targetHit.financial;
+            let financialDirection = targetHit.financialDirection;
+            let open = targetHit.open;
+            let high = targetHit.high;
+            let low = targetHit.low;
+            let close = targetHit.close;
+            let formattedOpen = targetHit.formattedOpen;
+            let formattedHigh = targetHit.formattedHigh;
+            let formattedLow = targetHit.formattedLow;
+            let formattedClose = targetHit.formattedClose;
+
             if (targetHit.seriesType === "candlestick") {
                 const sampledCandle = sampledCandlesByKey.get(key);
                 if (sampledCandle) {
                     pt = { x: sampledCandle.centerX, y: sampledCandle.closeY };
                     highPoint = { x: sampledCandle.centerX, y: sampledCandle.highY };
                     lowPoint = { x: sampledCandle.centerX, y: sampledCandle.lowY };
-                    bounds = sampledCandle.bodyBounds;
-                    visualBounds = sampledCandle.bodyBounds;
+                    const hitGeom = createCandlestickFinancialHitGeometry(sampledCandle);
+                    bounds = hitGeom.bounds;
+                    visualBounds = hitGeom.visualBounds;
+
+                    open = sampledCandle.open;
+                    high = sampledCandle.high;
+                    low = sampledCandle.low;
+                    close = sampledCandle.close;
+                    financialDirection = sampledCandle.direction;
+                    formattedOpen = sampledCandle.formattedOpen;
+                    formattedHigh = sampledCandle.formattedHigh;
+                    formattedLow = sampledCandle.formattedLow;
+                    formattedClose = sampledCandle.formattedClose;
+                    const chg = close - open;
+                    financial = {
+                        ...targetHit.financial,
+                        change: chg,
+                        close,
+                        direction: sampledCandle.direction,
+                        formattedClose,
+                        formattedHigh,
+                        formattedLow,
+                        formattedOpen,
+                        high,
+                        low,
+                        open,
+                        valueKind: "ohlc"
+                    };
                 }
             } else if (targetHit.seriesType === "ohlc") {
                 const sampledOhlc = sampledOhlcByKey.get(key);
@@ -232,13 +272,34 @@ export class SceneTransitionSampler {
                     pt = { x: sampledOhlc.centerX, y: sampledOhlc.closeY };
                     highPoint = { x: sampledOhlc.centerX, y: sampledOhlc.highY };
                     lowPoint = { x: sampledOhlc.centerX, y: sampledOhlc.lowY };
-                    bounds = {
-                        height: Math.max(1, sampledOhlc.lowY - sampledOhlc.highY),
-                        width: sampledOhlc.totalWidth,
-                        x: sampledOhlc.centerX - sampledOhlc.tickWidth,
-                        y: sampledOhlc.highY
+                    const hitGeom = createOhlcFinancialHitGeometry(sampledOhlc);
+                    bounds = hitGeom.bounds;
+                    visualBounds = hitGeom.visualBounds;
+
+                    open = sampledOhlc.open;
+                    high = sampledOhlc.high;
+                    low = sampledOhlc.low;
+                    close = sampledOhlc.close;
+                    financialDirection = sampledOhlc.direction;
+                    formattedOpen = sampledOhlc.formattedOpen;
+                    formattedHigh = sampledOhlc.formattedHigh;
+                    formattedLow = sampledOhlc.formattedLow;
+                    formattedClose = sampledOhlc.formattedClose;
+                    const chg = close - open;
+                    financial = {
+                        ...targetHit.financial,
+                        change: chg,
+                        close,
+                        direction: sampledOhlc.direction,
+                        formattedClose,
+                        formattedHigh,
+                        formattedLow,
+                        formattedOpen,
+                        high,
+                        low,
+                        open,
+                        valueKind: "ohlc"
                     };
-                    visualBounds = bounds;
                 }
             } else if (targetHit.seriesType === "rangeArea") {
                 const sampledRangeAreaPt = sampledRangeAreaPointsByKey.get(key);
@@ -326,8 +387,18 @@ export class SceneTransitionSampler {
             const hit: SceneHitTarget = {
                 ...targetHit,
                 bounds,
+                close,
+                financial,
+                financialDirection,
+                formattedClose,
+                formattedHigh,
+                formattedLow,
+                formattedOpen,
+                high,
                 highPoint,
+                low,
                 lowPoint,
+                open,
                 point: pt,
                 radius,
                 range,
@@ -337,8 +408,18 @@ export class SceneTransitionSampler {
             };
             sampledHitTargets.push(hit);
 
-            if (hit.bounds) {
+            const isFinancial = targetHit.seriesType === "candlestick" || targetHit.seriesType === "ohlc";
+            if (hit.bounds && !isFinancial) {
                 sampledBarHitTargets.push(hit);
+            }
+            if (isFinancial && hit.bounds) {
+                sampledFinancialHitEntries.push({
+                    bounds: hit.bounds,
+                    centerX: hit.point?.x ?? (hit.bounds.x + hit.bounds.width / 2),
+                    highY: hit.highPoint?.y ?? hit.bounds.y,
+                    lowY: hit.lowPoint?.y ?? (hit.bounds.y + hit.bounds.height),
+                    target: hit
+                });
             }
             if (hit.point) {
                 sampledPointHitTargets.push(hit);
@@ -389,6 +470,10 @@ export class SceneTransitionSampler {
             pointSpatialIndex.insertAll(sampledPointHitTargets);
         }
 
+        const financialIndex = sampledFinancialHitEntries.length > 0
+            ? new CartesianFinancialIndex(sampledFinancialHitEntries)
+            : undefined;
+
         const axes = axisPlan ? axisPlan.sample(progress) : toScene.axes;
 
         return {
@@ -396,6 +481,7 @@ export class SceneTransitionSampler {
             barHitTargets: sampledBarHitTargets,
             cartesianKind: "xy",
             coordinateSystem: "cartesian",
+            financialIndex,
             hasRenderableData: toScene.hasRenderableData,
             height: toScene.height,
             hitTargets: sampledHitTargets,

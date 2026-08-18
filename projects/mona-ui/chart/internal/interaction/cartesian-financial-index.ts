@@ -11,9 +11,21 @@ export interface FinancialHitEntry {
 
 export class CartesianFinancialIndex {
     readonly #entries: readonly FinancialHitEntry[];
+    readonly #maxHalfWidth: number;
 
     public constructor(entries: readonly FinancialHitEntry[]) {
         this.#entries = [...entries].sort((a, b) => a.centerX - b.centerX);
+        let maxHalf = 0;
+        for (const e of this.#entries) {
+            const halfW = Math.max(
+                Math.abs(e.centerX - e.bounds.x),
+                Math.abs(e.bounds.x + e.bounds.width - e.centerX)
+            );
+            if (halfW > maxHalf) {
+                maxHalf = halfW;
+            }
+        }
+        this.#maxHalfWidth = maxHalf;
     }
 
     public get size(): number {
@@ -27,31 +39,29 @@ export class CartesianFinancialIndex {
 
         const px = point.x;
         const py = point.y;
+        const minCenterX = px - this.#maxHalfWidth;
+        const maxCenterX = px + this.#maxHalfWidth;
 
-        // Binary search for the closest entry by centerX
         let low = 0;
         let high = this.#entries.length - 1;
-        let mid = 0;
+        let firstIdx = this.#entries.length;
 
         while (low <= high) {
-            mid = Math.floor((low + high) / 2);
-            const midX = this.#entries[mid].centerX;
-            if (midX < px) {
-                low = mid + 1;
-            } else if (midX > px) {
+            const mid = Math.floor((low + high) / 2);
+            if (this.#entries[mid].centerX >= minCenterX) {
+                firstIdx = mid;
                 high = mid - 1;
             } else {
-                break;
+                low = mid + 1;
             }
         }
 
-        // Candidate window around mid: bounded neighborhood search (O(log n + k))
         const results: SceneHitTarget[] = [];
-        const start = Math.max(0, mid - 15);
-        const end = Math.min(this.#entries.length - 1, mid + 15);
-
-        for (let i = start; i <= end; i++) {
+        for (let i = firstIdx; i < this.#entries.length; i++) {
             const entry = this.#entries[i];
+            if (entry.centerX > maxCenterX) {
+                break;
+            }
             const b = entry.bounds;
             if (px >= b.x && px <= b.x + b.width && py >= b.y && py <= b.y + b.height) {
                 results.push(entry.target);
@@ -65,6 +75,31 @@ export class CartesianFinancialIndex {
         if (this.#entries.length === 0) {
             return 0;
         }
-        return Math.min(this.#entries.length, 31);
+        const px = point.x;
+        const minCenterX = px - this.#maxHalfWidth;
+        const maxCenterX = px + this.#maxHalfWidth;
+
+        let low = 0;
+        let high = this.#entries.length - 1;
+        let firstIdx = this.#entries.length;
+
+        while (low <= high) {
+            const mid = Math.floor((low + high) / 2);
+            if (this.#entries[mid].centerX >= minCenterX) {
+                firstIdx = mid;
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        let count = 0;
+        for (let i = firstIdx; i < this.#entries.length; i++) {
+            if (this.#entries[i].centerX > maxCenterX) {
+                break;
+            }
+            count++;
+        }
+        return count;
     }
 }

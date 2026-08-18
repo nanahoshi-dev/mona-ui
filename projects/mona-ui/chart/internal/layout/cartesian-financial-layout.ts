@@ -5,6 +5,7 @@ import type {
     ChartFinancialSeriesRegistration
 } from "../context/chart-registration-context";
 import { FinancialDataResolver } from "../data/financial-data-resolver";
+import { createCandlestickFinancialHitGeometry, createOhlcFinancialHitGeometry } from "../interaction/financial-hit-geometry";
 import { CartesianFinancialIndex, type FinancialHitEntry } from "../interaction/cartesian-financial-index";
 import type { ChartBandScale, ChartContinuousScale } from "../scale/chart-scale";
 import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene } from "../scene/cartesian-scene";
@@ -149,32 +150,25 @@ export function computeFinancialLayout(
         );
 
         const isCandle = "bodyBounds" in mark;
-        const visualHalfWidth = isCandle
-            ? mark.bodyWidth / 2
-            : (mark as any).tickWidth;
-        const hitHalfWidth = Math.max(visualHalfWidth, 4);
+        const hitGeom = isCandle
+            ? createCandlestickFinancialHitGeometry(mark)
+            : createOhlcFinancialHitGeometry(mark as any);
 
-        const bounds: ChartRect = {
-            height: Math.max(6, Math.abs(mark.lowY - mark.highY)),
-            width: hitHalfWidth * 2,
-            x: mark.centerX - hitHalfWidth,
-            y: Math.min(mark.highY, mark.lowY)
-        };
-
-        const visualBounds: ChartRect = isCandle
-            ? (mark as any).bodyBounds
-            : {
-                height: Math.max(1, Math.abs(mark.lowY - mark.highY)),
-                width: (mark as any).totalWidth,
-                x: mark.centerX - (mark as any).tickWidth,
-                y: Math.min(mark.highY, mark.lowY)
-            };
+        const bounds: ChartRect = hitGeom.bounds;
+        const visualBounds: ChartRect = hitGeom.visualBounds;
 
         const change = resolvedMark?.change ?? (mark.close - mark.open);
         const changePercentage = resolvedMark?.changePercentage;
-        const formattedChange = changePercentage !== undefined
-            ? `${change >= 0 ? "+" : ""}${change.toFixed(2)}`
-            : undefined;
+        let formattedChange: string | undefined;
+        if (Number.isFinite(change)) {
+            const customFormatter = s.valueFormatter?.() ?? yFormatter;
+            if (customFormatter) {
+                const absFmt = (customFormatter as (val: unknown, idx?: number) => string)(Math.abs(change), mark.index);
+                formattedChange = `${change >= 0 ? "+" : "-"}${absFmt}`;
+            } else {
+                formattedChange = `${change >= 0 ? "+" : ""}${change.toFixed(2)}`;
+            }
+        }
         const formattedChangePercentage = changePercentage !== undefined
             ? `${changePercentage >= 0 ? "+" : ""}${(changePercentage * 100).toFixed(2)}%`
             : undefined;

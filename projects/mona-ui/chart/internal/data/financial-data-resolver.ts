@@ -236,10 +236,11 @@ export class FinancialDataResolver {
                         if (warnedDiagnosticSignatures) {
                             ChartDiagnostics.warnOnce(
                                 warnedDiagnosticSignatures,
-                                `Financial series "${seriesName}" encountered duplicate explicit animation key "${customKeyStr}" at data index ${i}.`,
+                                `Financial series "${seriesName}" encountered duplicate explicit animation key "${customKeyStr}" at data index ${i}. First valid datum wins.`,
                                 `${seriesId}:duplicate-financial-key`
                             );
                         }
+                        continue;
                     }
                     seenCustomKeys.add(customKeyStr);
                     animationKey = `${seriesId}:fin:key:${customKeyStr}`;

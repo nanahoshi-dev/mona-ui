@@ -157,6 +157,8 @@ export class MonaOhlcSeriesComponent implements OnInit {
      */
     public readonly xField = input<ChartField | undefined>(undefined);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
             this.closeField();
@@ -166,26 +168,42 @@ export class MonaOhlcSeriesComponent implements OnInit {
             this.lowField();
             this.openField();
             this.xField();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            }
+        });
+
+        effect(() => {
+            this.visible();
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            }
         });
 
         effect(() => {
             this.bodyWidth();
             this.bodyWidthRatio();
-            this.color();
-            this.fallingColor();
             this.maxBodyWidth();
             this.name();
+            this.effectiveTickLength();
+            this.valueFormatter();
+            this.wickWidth();
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
+        });
+
+        effect(() => {
+            this.color();
+            this.fallingColor();
             this.neutralColor();
             this.opacity();
             this.risingColor();
-            this.effectiveTickLength();
             this.userClass();
-            this.valueFormatter();
-            this.visible();
             this.wickColor();
-            this.wickWidth();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            }
         });
     }
 
@@ -220,6 +238,7 @@ export class MonaOhlcSeriesComponent implements OnInit {
         };
 
         const unregister = this.#chartContext?.registerSeries(registration);
+        this.#registered = true;
         this.#destroyRef.onDestroy(() => {
             unregister?.();
         });

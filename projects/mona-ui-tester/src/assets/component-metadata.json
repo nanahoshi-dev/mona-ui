@@ -4145,6 +4145,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Backward-compatible alias for tickLength.",
+        "kind": "input",
+        "name": "tickWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Additional CSS classes applied to the series host element.",
         "kind": "input",
         "name": "userClass",

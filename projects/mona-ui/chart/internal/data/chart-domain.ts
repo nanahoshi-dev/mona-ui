@@ -155,6 +155,51 @@ export function inferXAxisType(
     for (const s of seriesToInspect) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
+
+        if (s.type === "candlestick" || s.type === "ohlc") {
+            const finReg = s as ChartFinancialSeriesRegistration;
+            const openField = finReg.openField();
+            const highField = finReg.highField();
+            const lowField = finReg.lowField();
+            const closeField = finReg.closeField();
+            for (let i = 0; i < data.length; i++) {
+                const openVal = resolveValue(data[i], openField, i);
+                const highVal = resolveValue(data[i], highField, i);
+                const lowVal = resolveValue(data[i], lowField, i);
+                const closeVal = resolveValue(data[i], closeField, i);
+                if (
+                    typeof openVal !== "number" || !Number.isFinite(openVal) ||
+                    typeof highVal !== "number" || !Number.isFinite(highVal) ||
+                    typeof lowVal !== "number" || !Number.isFinite(lowVal) ||
+                    typeof closeVal !== "number" || !Number.isFinite(closeVal)
+                ) {
+                    continue;
+                }
+                if (lowVal > Math.min(openVal, closeVal) || highVal < Math.max(openVal, closeVal)) {
+                    continue;
+                }
+                const val = resolveValue(data[i], xField, i);
+                if (val === undefined || val === null) {
+                    continue;
+                }
+                if (val instanceof Date && !Number.isNaN(val.getTime())) {
+                    return "time";
+                }
+                if (typeof val === "string") {
+                    if (ISO_DATE_REGEX.test(val)) {
+                        const parsed = Date.parse(val);
+                        if (!Number.isNaN(parsed)) {
+                            return "time";
+                        }
+                    }
+                }
+                if (typeof val === "number" && Number.isFinite(val)) {
+                    return "linear";
+                }
+            }
+            continue;
+        }
+
         for (let i = 0; i < data.length; i++) {
             const val = resolveValue(data[i], xField, i);
             if (val === undefined || val === null) {
@@ -227,6 +272,31 @@ export function calculateCategoryDomain(
     for (const s of seriesToScan) {
         const data = resolveData(s.data(), rootData);
         const xField = s.xField() ?? rootXField;
+
+        if (s.type === "candlestick" || s.type === "ohlc") {
+            const finReg = s as ChartFinancialSeriesRegistration;
+            const resolved = FinancialDataResolver.resolve({
+                closeField: finReg.closeField(),
+                data,
+                highField: finReg.highField(),
+                keyField: finReg.keyField?.(),
+                lowField: finReg.lowField(),
+                openField: finReg.openField(),
+                seriesId: finReg.id,
+                seriesName: finReg.name(),
+                xAxisType: "category",
+                xField
+            });
+            for (const mark of resolved.marks) {
+                const key = String(mark.xScaleValue);
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    orderedKeys.push(key);
+                }
+            }
+            continue;
+        }
+
         for (let i = 0; i < data.length; i++) {
             const val = resolveValue(data[i], xField, i);
             const key = val !== undefined && val !== null ? String(val) : String(i);

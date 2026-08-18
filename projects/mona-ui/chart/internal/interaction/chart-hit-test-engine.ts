@@ -101,7 +101,16 @@ export class ChartHitTestEngine {
             if (cartesianScene.financialIndex) {
                 const finHits = cartesianScene.financialIndex.query(pointer);
                 if (finHits.length > 0) {
-                    const topFinHit = finHits[finHits.length - 1];
+                    let topFinHit = finHits[0];
+                    let maxRenderOrder = topFinHit.renderOrder ?? 0;
+                    for (let i = 1; i < finHits.length; i++) {
+                        const candidate = finHits[i];
+                        const order = candidate.renderOrder ?? 0;
+                        if (order >= maxRenderOrder) {
+                            maxRenderOrder = order;
+                            topFinHit = candidate;
+                        }
+                    }
                     const bucket = cartesianScene.interactionBucketLookup?.get(topFinHit.xKey) ??
                         interactionBuckets?.find(b => b.xKey === topFinHit.xKey);
                     const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === topFinHit.xKey);
@@ -219,7 +228,16 @@ export class ChartHitTestEngine {
         if (cartesianScene.financialIndex) {
             const finHits = cartesianScene.financialIndex.query(pointer);
             if (finHits.length > 0) {
-                const topFinHit = finHits[finHits.length - 1];
+                let topFinHit = finHits[0];
+                let maxRenderOrder = topFinHit.renderOrder ?? 0;
+                for (let i = 1; i < finHits.length; i++) {
+                    const candidate = finHits[i];
+                    const order = candidate.renderOrder ?? 0;
+                    if (order >= maxRenderOrder) {
+                        maxRenderOrder = order;
+                        topFinHit = candidate;
+                    }
+                }
                 return {
                     activeHitTarget: topFinHit,
                     activeHits: [topFinHit],

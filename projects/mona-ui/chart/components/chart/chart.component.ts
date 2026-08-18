@@ -363,15 +363,25 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
         });
 
         // Invalidate when data inputs change
+        let initialData = true;
         effect(() => {
             this.data();
             this.xField();
+            if (initialData) {
+                initialData = false;
+                return;
+            }
             this.invalidate(ChartInvalidationReason.Data);
         });
 
         // Invalidate when userClass changes
+        let initialClass = true;
         effect(() => {
             this.userClass();
+            if (initialClass) {
+                initialClass = false;
+                return;
+            }
             this.styleRevision.update(v => v + 1);
             this.invalidate(ChartInvalidationReason.Style);
         });
@@ -397,7 +407,7 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
         afterNextRender(() => {
             this.#initCanvasAndObserver();
             this.#canvasReady = true;
-            this.#recomputeAndPaint(ChartInvalidationReason.Data);
+            this.#recomputeAndPaint(ChartInvalidationReason.Size);
         });
 
         this.#recomputeAndPaint(ChartInvalidationReason.Data);
@@ -937,10 +947,15 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
             }
         }
 
+        const sizeChanged =
+            !this.scene() ||
+            Math.abs(this.scene()!.width - this.#currentWidth) >= 0.5 ||
+            Math.abs(this.scene()!.height - this.#currentHeight) >= 0.5;
+
         const isStructural =
             hasInvalidationReason(reason, ChartInvalidationReason.Data) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Layout) ||
-            hasInvalidationReason(reason, ChartInvalidationReason.Size) ||
+            (hasInvalidationReason(reason, ChartInvalidationReason.Size) && sizeChanged) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
 
         const requiresSceneRefresh =

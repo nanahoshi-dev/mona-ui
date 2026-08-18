@@ -144,7 +144,7 @@ describe("CandlestickSeriesRenderer", () => {
 
         CandlestickSeriesRenderer.render(mockContext, scene);
 
-        expect(mockContext.clearRect).toHaveBeenCalledWith(90, 100, 20, 30);
+        expect(mockContext.fillRect).toHaveBeenCalledWith(90, 100, 20, 30);
         expect(mockContext.rect).toHaveBeenCalledWith(90, 100, 20, 30);
         expect(mockContext.stroke).toHaveBeenCalled();
     });

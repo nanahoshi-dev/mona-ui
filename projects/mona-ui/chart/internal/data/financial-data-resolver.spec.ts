@@ -204,6 +204,38 @@ describe("FinancialDataResolver", () => {
         expect(resultB.marks[0].animationKey).toBe("fin-1:fin:key:candle-B");
     });
 
+    it("should retain first valid duplicate explicit keyField and skip subsequent ones with warning", () => {
+        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+        const signatures = new Set<string>();
+
+        const data = [
+            { c: 100, h: 110, id: "candle-1", l: 90, o: 95, x: "2026-01-01" },
+            { c: 120, h: 130, id: "candle-1", l: 110, o: 115, x: "2026-01-02" } // duplicate keyField
+        ];
+
+        const result = FinancialDataResolver.resolve({
+            closeField: "c",
+            data,
+            highField: "h",
+            keyField: "id",
+            lowField: "l",
+            openField: "o",
+            seriesId: "fin-1",
+            seriesName: "Price",
+            warnedDiagnosticSignatures: signatures,
+            xField: "x"
+        });
+
+        expect(result.marks.length).toBe(1);
+        expect(result.marks[0].close).toBe(100);
+        expect(result.marks[0].animationKey).toBe("fin-1:fin:key:candle-1");
+        expect(signatures.has("fin-1:duplicate-financial-key")).toBe(true);
+        expect(warnSpy).toHaveBeenCalledWith(
+            expect.stringContaining('Financial series "Price" encountered duplicate explicit animation key "candle-1" at data index 1. First valid datum wins.')
+        );
+        warnSpy.mockRestore();
+    });
+
     it("should handle empty dataset gracefully", () => {
         const result = FinancialDataResolver.resolve({
             closeField: "c",
