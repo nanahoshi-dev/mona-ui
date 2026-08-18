@@ -2,9 +2,11 @@ import type { ChartInteractionState } from "../interaction/chart-interaction-sta
 import type { ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianChartRenderer } from "./cartesian-chart-renderer";
+import { FunnelChartRenderer } from "./funnel-chart-renderer";
 import { HeatmapChartRenderer } from "./heatmap-chart-renderer";
 import { PolarChartRenderer } from "./polar-chart-renderer";
 import { TreemapChartRenderer } from "./treemap-chart-renderer";
+import { WaterfallChartRenderer } from "./waterfall-chart-renderer";
 
 export class CanvasChartRenderer {
     public static clear(context: CanvasRenderingContext2D, width: number, height: number): void {
@@ -35,6 +37,14 @@ export class CanvasChartRenderer {
                 }
                 if (scene.cartesianKind === "heatmap") {
                     HeatmapChartRenderer.render(context, scene, interactionState, styleResolver);
+                    return;
+                }
+                if (scene.cartesianKind === "funnel") {
+                    FunnelChartRenderer.render(context, scene, interactionState, styleResolver);
+                    return;
+                }
+                if (scene.cartesianKind === "waterfall") {
+                    WaterfallChartRenderer.render(context, scene, interactionState, styleResolver);
                     return;
                 }
                 return;

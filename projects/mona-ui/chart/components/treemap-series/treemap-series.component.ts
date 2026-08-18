@@ -119,7 +119,7 @@ export class TreemapSeriesComponent implements OnInit {
     public readonly labelTemplate = contentChild(ChartTreemapLabelTemplateDirective);
 
     /**
-     * @description Maximum tree depth to layout and render.
+     * @description Maximum tree depth to layout and render. Normalized: finite <= 0 becomes 1, finite > 0 is floored, undefined/NaN/Infinity is unlimited.
      * @default undefined
      */
     public readonly maxDepth = input<number | undefined>(undefined);
@@ -131,13 +131,13 @@ export class TreemapSeriesComponent implements OnInit {
     public readonly maxLabels = input<number>(100);
 
     /**
-     * @description Minimum pixel height required for a node to display a DOM label.
+     * @description Minimum pixel height required for a node to display a DOM label (defaults to 16 when showValues is false, 24 when true).
      * @default undefined
      */
     public readonly minLabelHeight = input<number | undefined>(undefined);
 
     /**
-     * @description Minimum pixel width required for a node to display a DOM label.
+     * @description Minimum pixel width required for a node to display a DOM label (defaults to 30).
      * @default undefined
      */
     public readonly minLabelWidth = input<number | undefined>(undefined);
@@ -149,22 +149,16 @@ export class TreemapSeriesComponent implements OnInit {
     public readonly name = input<string>("Treemap");
 
     /**
-     * @description Inner and outer padding in pixels around all treemap nodes.
+     * @description Inner padding in pixels between sibling treemap rectangles.
      * @default 2
      */
-    public readonly padding = input<number>(2);
-
-    /**
-     * @description Inner padding in pixels between sibling treemap rectangles.
-     * @default undefined
-     */
-    public readonly paddingInner = input<number | undefined>(undefined);
+    public readonly paddingInner = input<number>(2);
 
     /**
      * @description Outer padding in pixels around parent boundaries.
-     * @default undefined
+     * @default 4
      */
-    public readonly paddingOuter = input<number | undefined>(undefined);
+    public readonly paddingOuter = input<number>(4);
 
     /**
      * @description Fill opacity applied to non-leaf parent group background rectangles.
@@ -260,13 +254,15 @@ export class TreemapSeriesComponent implements OnInit {
             const keyF = this.keyField();
             const labelF = this.labelField();
             const labelFmt = this.labelFormatter();
+            const childrenF = this.childrenField();
 
-            const newMap = TreemapIdentity.extractRootBranchIdentities(
-                effectiveData,
-                keyF,
-                labelF,
-                labelFmt
-            );
+            const newMap = TreemapIdentity.extractRetainedRootBranchIdentities({
+                childrenField: childrenF,
+                data: effectiveData,
+                keyField: keyF,
+                labelField: labelF,
+                labelFormatter: labelFmt
+            });
 
             this.#identityMap.clear();
             for (const [k, v] of newMap) {
@@ -297,7 +293,6 @@ export class TreemapSeriesComponent implements OnInit {
             this.name();
             this.tile();
             this.sort();
-            this.padding();
             this.paddingInner();
             this.paddingOuter();
             this.parentHeaderHeight();
@@ -357,7 +352,6 @@ export class TreemapSeriesComponent implements OnInit {
             minLabelHeight: this.minLabelHeight,
             minLabelWidth: this.minLabelWidth,
             name: this.name,
-            padding: this.padding,
             paddingInner: this.paddingInner,
             paddingOuter: this.paddingOuter,
             parentFillOpacity: this.parentFillOpacity,

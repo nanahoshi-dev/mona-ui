@@ -3,12 +3,18 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     ChartAxisLabelTemplateDirective,
     ChartCenterTemplateDirective,
+    ChartFunnelLabelTemplateDirective,
+    ChartGaugeCenterTemplateDirective,
     ChartLegendItemTemplateDirective,
     ChartNoDataTemplateDirective,
     ChartSliceLabelTemplateDirective,
     ChartTooltipTemplateDirective,
+    ChartTreemapLabelTemplateDirective,
+    ChartWaterfallLabelTemplateDirective,
     AreaSeriesComponent,
     BarSeriesComponent,
+    BubbleSeriesComponent,
+    CandlestickSeriesComponent,
     ChartAngularAxisComponent,
     ChartComponent,
     ChartLegendComponent,
@@ -17,26 +23,27 @@ import {
     ChartXAxisComponent,
     ChartYAxisComponent,
     DonutSeriesComponent,
+    FunnelSeriesComponent,
+    GaugeSeriesComponent,
+    HeatmapSeriesComponent,
     LineSeriesComponent,
+    OhlcSeriesComponent,
     PieSeriesComponent,
     PolarSeriesComponent,
     RadarSeriesComponent,
     RadialBarSeriesComponent,
-    RoseSeriesComponent,
-    GaugeSeriesComponent,
-    ChartGaugeCenterTemplateDirective,
-    TreemapSeriesComponent,
-    ChartTreemapLabelTemplateDirective,
-    ScatterSeriesComponent,
-    BubbleSeriesComponent,
-    CandlestickSeriesComponent,
-    HeatmapSeriesComponent,
-    OhlcSeriesComponent,
     RangeAreaSeriesComponent,
     RangeBarSeriesComponent,
+    RoseSeriesComponent,
+    ScatterSeriesComponent,
+    TreemapSeriesComponent,
+    WaterfallSeriesComponent,
     type ChartAreaFillMode,
     type ChartCurve,
     type ChartFinancialFillMode,
+    type ChartFunnelLabelContent,
+    type ChartFunnelOrientation,
+    type ChartFunnelStageVisibilityEvent,
     type ChartGaugeIndicator,
     type ChartHeatmapColorMode,
     type ChartPointEvent,
@@ -145,6 +152,10 @@ interface BubbleDataPoint {
         ChartGaugeCenterTemplateDirective,
         TreemapSeriesComponent,
         ChartTreemapLabelTemplateDirective,
+        FunnelSeriesComponent,
+        ChartFunnelLabelTemplateDirective,
+        WaterfallSeriesComponent,
+        ChartWaterfallLabelTemplateDirective,
         ChartLegendComponent,
         ChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
@@ -169,6 +180,7 @@ export class ChartDemoComponent {
         | "candlestick"
         | "custom"
         | "donut"
+        | "funnel"
         | "gauge"
         | "grouped"
         | "heatmap"
@@ -188,6 +200,7 @@ export class ChartDemoComponent {
         | "stacked-bar"
         | "time"
         | "treemap"
+        | "waterfall"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
 
@@ -655,6 +668,107 @@ export class ChartDemoComponent {
             this.treemapSort.set(val as ChartTreemapSort);
             this.#addLog("settingChange", `Treemap Sibling Sort: ${val}`);
         }
+    }
+
+    // Funnel Controls & Data
+    protected readonly funnelData = signal<readonly { stage: string; value: number }[]>([
+        { stage: "Website Visits", value: 12500 },
+        { stage: "Product Views", value: 7200 },
+        { stage: "Add to Cart", value: 3400 },
+        { stage: "Checkout Started", value: 1600 },
+        { stage: "Purchases", value: 850 }
+    ]);
+    protected readonly funnelOrientation = signal<ChartFunnelOrientation>("vertical");
+    protected readonly funnelGap = signal<number>(4);
+    protected readonly funnelWidthRatio = signal<number>(0.85);
+    protected readonly funnelLabelContent = signal<ChartFunnelLabelContent>("category-value-conversion");
+    protected readonly funnelShowLabels = signal<boolean>(true);
+    protected readonly funnelUseCustomTemplate = signal<boolean>(false);
+
+    protected readonly funnelOrientationOptions: readonly { label: string; value: ChartFunnelOrientation }[] = [
+        { label: "Vertical (Top down)", value: "vertical" },
+        { label: "Horizontal (Left to right)", value: "horizontal" }
+    ];
+
+    protected readonly funnelLabelContentOptions: readonly { label: string; value: ChartFunnelLabelContent }[] = [
+        { label: "Category & Value & Conversion", value: "category-value-conversion" },
+        { label: "Category & Value", value: "category-value" },
+        { label: "Category Only", value: "category" },
+        { label: "Value Only", value: "value" }
+    ];
+
+    public onFunnelOrientationChange(val: unknown): void {
+        const v = typeof val === "string" ? val : (val as { value?: string })?.value;
+        if (v) {
+            this.funnelOrientation.set(v as ChartFunnelOrientation);
+            this.#addLog("settingChange", `Funnel Orientation: ${v}`);
+        }
+    }
+
+    public onFunnelLabelContentChange(val: unknown): void {
+        const v = typeof val === "string" ? val : (val as { value?: string })?.value;
+        if (v) {
+            this.funnelLabelContent.set(v as ChartFunnelLabelContent);
+            this.#addLog("settingChange", `Funnel Label Content: ${v}`);
+        }
+    }
+
+    public onFunnelStageVisibilityChange(event: ChartFunnelStageVisibilityEvent): void {
+        this.#addLog("stageVisibilityChange", `Stage "${event.formattedCategory}" visibility: ${event.visible}`);
+    }
+
+    public randomizeFunnelData(): void {
+        let val = Math.floor(10000 + Math.random() * 5000);
+        const stages = ["Website Visits", "Product Views", "Add to Cart", "Checkout Started", "Purchases"];
+        const next = stages.map(stage => {
+            const stageVal = val;
+            val = Math.max(10, Math.floor(val * (0.35 + Math.random() * 0.35)));
+            return { stage, value: stageVal };
+        });
+        this.funnelData.set(next);
+        this.#addLog("dataUpdate", "Randomized Funnel stages");
+    }
+
+    // Waterfall Controls & Data
+    protected readonly waterfallData = signal<readonly { category: string; kind?: "change" | "subtotal" | "total"; value?: number }[]>([
+        { category: "Opening Balance", kind: "total", value: 45000 },
+        { category: "Product Sales", kind: "change", value: 32000 },
+        { category: "Subscriptions", kind: "change", value: 15000 },
+        { category: "Gross Revenue", kind: "subtotal" },
+        { category: "Salaries", kind: "change", value: -22000 },
+        { category: "Infrastructure", kind: "change", value: -5500 },
+        { category: "Marketing", kind: "change", value: -7000 },
+        { category: "Operating Profit", kind: "subtotal" },
+        { category: "Taxes", kind: "change", value: -4500 },
+        { category: "Net Closing Balance", kind: "total" }
+    ]);
+    protected readonly waterfallShowConnectors = signal<boolean>(true);
+    protected readonly waterfallShowLabels = signal<boolean>(true);
+    protected readonly waterfallUseCustomTemplate = signal<boolean>(false);
+    protected readonly waterfallBorderRadius = signal<number>(4);
+
+    public randomizeWaterfallData(): void {
+        const initial = Math.floor(30000 + Math.random() * 25000);
+        const sales = Math.floor(20000 + Math.random() * 20000);
+        const sub = Math.floor(10000 + Math.random() * 10000);
+        const salaries = -Math.floor(15000 + Math.random() * 10000);
+        const infra = -Math.floor(3000 + Math.random() * 5000);
+        const marketing = -Math.floor(4000 + Math.random() * 6000);
+        const tax = -Math.floor(2000 + Math.random() * 4000);
+
+        this.waterfallData.set([
+            { category: "Opening Balance", kind: "total", value: initial },
+            { category: "Product Sales", kind: "change", value: sales },
+            { category: "Subscriptions", kind: "change", value: sub },
+            { category: "Gross Revenue", kind: "subtotal" },
+            { category: "Salaries", kind: "change", value: salaries },
+            { category: "Infrastructure", kind: "change", value: infra },
+            { category: "Marketing", kind: "change", value: marketing },
+            { category: "Operating Profit", kind: "subtotal" },
+            { category: "Taxes", kind: "change", value: tax },
+            { category: "Net Closing Balance", kind: "total" }
+        ]);
+        this.#addLog("dataUpdate", "Randomized Waterfall cashflow");
     }
 
     protected readonly sharedTooltip = signal<boolean>(false);
@@ -1170,6 +1284,7 @@ export class ChartDemoComponent {
             | "candlestick"
             | "custom"
             | "donut"
+            | "funnel"
             | "gauge"
             | "grouped"
             | "heatmap"
@@ -1189,6 +1304,7 @@ export class ChartDemoComponent {
             | "stacked-bar"
             | "time"
             | "treemap"
+            | "waterfall"
     ): void {
         this.activeTab.set(tab);
     }

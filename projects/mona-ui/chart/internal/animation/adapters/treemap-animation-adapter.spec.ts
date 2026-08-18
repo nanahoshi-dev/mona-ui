@@ -70,7 +70,7 @@ describe("TreemapAnimationAdapter", () => {
         nodes: [nodeAUpdated]
     };
 
-    it("interpolates bounding geometry and aggregate value during update transition", () => {
+    it("interpolates bounding geometry and preserves target aggregate value during update transition", () => {
         const plan = adapter.createPlan(scene1, scene2, {
             options: { data: true, duration: 300, easing: "ease-out", enabled: true, initial: true, visibility: true },
             trigger: "data"
@@ -85,7 +85,7 @@ describe("TreemapAnimationAdapter", () => {
         expect(midNode.bounds.y).toBe(25);
         expect(midNode.bounds.width).toBe(150);
         expect(midNode.bounds.height).toBe(150);
-        expect(midNode.aggregateValue).toBe(150);
+        expect(midNode.aggregateValue).toBe(200);
     });
 
     it("fades in entering nodes from 0 opacity to 1", () => {

@@ -112,15 +112,19 @@ export class ChartLegendComponent implements OnInit {
         this.#destroyRef.onDestroy(unregister);
     }
 
+    protected isItemInteractive(item: ChartLegendItem): boolean {
+        return this.interactive() && item.interactive !== false && item.kind !== "semantic";
+    }
+
     protected itemClasses(item: ChartLegendItem): string {
         return chartLegendItemBaseThemeVariants({
-            interactive: this.interactive(),
+            interactive: this.isItemInteractive(item),
             visible: item.visible
         });
     }
 
     protected onItemClick(item: ChartLegendItem): void {
-        if (!this.interactive() || !this.#chartContext) {
+        if (!this.isItemInteractive(item) || !this.#chartContext) {
             return;
         }
         this.#chartContext.toggleLegendItem(item);

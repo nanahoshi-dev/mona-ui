@@ -57,9 +57,9 @@
                     (keydown.enter)="onItemClick(item)"
                     (keydown.space)="onItemClick(item); $event.preventDefault()"
                     [class]="itemClasses(item)"
-                    [attr.role]="interactive() ? 'button' : null"
-                    [attr.tabindex]="interactive() ? 0 : null"
-                    [attr.aria-pressed]="interactive() ? item.visible : null">
+                    [attr.role]="isItemInteractive(item) ? 'button' : null"
+                    [attr.tabindex]="isItemInteractive(item) ? 0 : null"
+                    [attr.aria-pressed]="isItemInteractive(item) ? item.visible : null">
                     <ng-container
                         [ngTemplateOutlet]="template.templateRef"
                         [ngTemplateOutletContext]="{
@@ -67,6 +67,7 @@
                             color: item.color,
                             dataIndex: item.dataIndex,
                             datum: item.datum,
+                            interactive: isItemInteractive(item),
                             itemId: item.itemId,
                             kind: item.kind,
                             name: item.name,
@@ -80,7 +81,7 @@
                         }" />
                 </div>
             } @else {
-                @if (interactive()) {
+                @if (isItemInteractive(item)) {
                     <button
                         type="button"
                         (click)="onItemClick(item)"

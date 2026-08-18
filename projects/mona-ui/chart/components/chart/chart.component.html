@@ -261,6 +261,56 @@
             }
         }
 
+        <!-- DOM Funnel Labels -->
+        @if (funnelScene(); as fn) {
+            @for (seriesScene of fn.series; track seriesScene.id) {
+                @for (lbl of seriesScene.labels; track lbl.stageId) {
+                    <div
+                        aria-hidden="true"
+                        class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap flex flex-col items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                        [class.opacity-0]="isAnimating()"
+                        [style.left.px]="lbl.bounds.x"
+                        [style.top.px]="lbl.bounds.y"
+                        [style.width.px]="lbl.bounds.width"
+                        [style.height.px]="lbl.bounds.height"
+                        [style.color]="lbl.color">
+                        @if (funnelSeriesRegistration()?.labelTemplate?.(); as labelTemplate) {
+                            <ng-container
+                                [ngTemplateOutlet]="labelTemplate.templateRef"
+                                [ngTemplateOutletContext]="funnelLabelContext(lbl, seriesScene)" />
+                        } @else {
+                            <span class="font-medium truncate">{{ lbl.text }}</span>
+                        }
+                    </div>
+                }
+            }
+        }
+
+        <!-- DOM Waterfall Labels -->
+        @if (waterfallScene(); as wf) {
+            @for (seriesScene of wf.series; track seriesScene.id) {
+                @for (lbl of seriesScene.labels; track lbl.itemId) {
+                    <div
+                        aria-hidden="true"
+                        class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                        [class.opacity-0]="isAnimating()"
+                        [style.left.px]="lbl.bounds.x"
+                        [style.top.px]="lbl.bounds.y"
+                        [style.width.px]="lbl.bounds.width"
+                        [style.height.px]="lbl.bounds.height"
+                        [style.color]="lbl.color">
+                        @if (waterfallSeriesRegistration()?.labelTemplate?.(); as labelTemplate) {
+                            <ng-container
+                                [ngTemplateOutlet]="labelTemplate.templateRef"
+                                [ngTemplateOutletContext]="waterfallLabelContext(lbl, seriesScene)" />
+                        } @else {
+                            <span class="font-medium truncate">{{ lbl.formattedValue }}</span>
+                        }
+                    </div>
+                }
+            }
+        }
+
         <!-- Tooltip overlay in plot-local coordinates -->
         <ng-content select="mona-chart-tooltip"></ng-content>
 

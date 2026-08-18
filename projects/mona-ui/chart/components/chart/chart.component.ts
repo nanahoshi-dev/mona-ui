@@ -29,6 +29,7 @@ import {
     hasInvalidationReason,
     type ChartAngularAxisRegistration,
     type ChartDonutSeriesRegistration,
+    type ChartFunnelSeriesRegistration,
     type ChartGaugeSeriesRegistration,
     type ChartHeatmapSeriesRegistration,
     type ChartLegendRegistration,
@@ -41,6 +42,7 @@ import {
     type ChartSeriesRegistration,
     type ChartTooltipRegistration,
     type ChartTreemapSeriesRegistration,
+    type ChartWaterfallSeriesRegistration,
     type ChartXAxisRegistration,
     type ChartYAxisRegistration
 } from "../../internal/context/chart-registration-context";
@@ -54,7 +56,9 @@ import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer
 import { ChartRenderScheduler } from "../../internal/render/chart-render-scheduler";
 import type {
     CartesianChartScene,
+    CartesianFunnelChartScene,
     CartesianHeatmapChartScene,
+    CartesianWaterfallChartScene,
     CartesianXYChartScene,
     ChartScene,
     PolarAxisChartScene,
@@ -63,8 +67,12 @@ import type {
     TreemapChartScene
 } from "../../internal/scene/chart-scene";
 import type { ChartTreemapSeriesScene, SceneTreemapLabel } from "../../internal/scene/hierarchical-scene";
+import type { ChartFunnelSeriesScene, SceneFunnelLabel } from "../../internal/scene/funnel-scene";
+import type { ChartWaterfallSeriesScene, SceneWaterfallLabel } from "../../internal/scene/waterfall-scene";
 import type { ChartHierarchyNodeContext } from "../../models/chart-hierarchy.models";
 import type { ChartTreemapLabelTemplateContext } from "../../models/chart-treemap.models";
+import type { ChartFunnelLabelTemplateContext, ChartFunnelStageContext } from "../../models/chart-funnel.models";
+import type { ChartWaterfallLabelTemplateContext, ChartWaterfallPointContext } from "../../models/chart-waterfall.models";
 import type { ChartGaugeSeriesScene, PolarArcChartScene } from "../../internal/scene/polar-arc-scene";
 import type { ChartGaugeCenterTemplateContext } from "../../models/chart-radial-arc.models";
 import type { ChartColorLegendScale } from "../../models/chart-heatmap.models";
@@ -269,6 +277,26 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     protected readonly treemapSeriesRegistration = computed<ChartTreemapSeriesRegistration | null>(() => {
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "treemap") as ChartTreemapSeriesRegistration) ?? null;
+    });
+    protected readonly funnelScene = computed<CartesianFunnelChartScene | null>(() => {
+        const sc = this.scene();
+        return sc?.coordinateSystem === "cartesian" && sc.cartesianKind === "funnel"
+            ? (sc as CartesianFunnelChartScene)
+            : null;
+    });
+    protected readonly funnelSeriesRegistration = computed<ChartFunnelSeriesRegistration | null>(() => {
+        const list = this.#registeredSeries();
+        return (list.find(s => s.type === "funnel") as ChartFunnelSeriesRegistration) ?? null;
+    });
+    protected readonly waterfallScene = computed<CartesianWaterfallChartScene | null>(() => {
+        const sc = this.scene();
+        return sc?.coordinateSystem === "cartesian" && sc.cartesianKind === "waterfall"
+            ? (sc as CartesianWaterfallChartScene)
+            : null;
+    });
+    protected readonly waterfallSeriesRegistration = computed<ChartWaterfallSeriesRegistration | null>(() => {
+        const list = this.#registeredSeries();
+        return (list.find(s => s.type === "waterfall") as ChartWaterfallSeriesRegistration) ?? null;
     });
     readonly #isAnimating = signal(false);
     readonly #isStructuralAnimation = signal(false);
@@ -502,9 +530,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        const isSector = currentScene.coordinateSystem === "polar" && currentScene.polarKind === "sector";
-        const isHeatmap = currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap";
-        const shared = isSector || isHeatmap ? false : (this.#tooltip()?.shared() ?? false);
+        const shared = this.#resolveSharedTooltip(currentScene);
         const hitState = ChartHitTestEngine.testHit(pointer, currentScene, shared);
         if (hitState.activeHitTarget) {
             this.pointClick.emit(this.#toPointEvent(hitState.activeHitTarget));
@@ -746,6 +772,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public toggleLegendItem(item: ChartLegendItem): void {
+        if (item.kind === "semantic" || item.interactive === false) {
+            return;
+        }
         if (item.kind === "datum") {
             const series = this.#registeredSeries().find(s => s.id === item.seriesId);
             if (series) {
@@ -754,12 +783,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     if (item.dataIndex !== undefined) {
                         sec.toggleSliceVisibility(item.dataIndex);
                     }
-                } else if (series.type === "radialBar" || series.type === "rose" || series.type === "treemap") {
+                } else if (
+                    series.type === "radialBar" ||
+                    series.type === "rose" ||
+                    series.type === "treemap" ||
+                    series.type === "funnel" ||
+                    series.type === "waterfall"
+                ) {
                     const rad = series as
                         | ChartRadialBarSeriesRegistration
                         | ChartRoseSeriesRegistration
-                        | ChartTreemapSeriesRegistration;
-                    rad.toggleDatumVisibility(item.itemId);
+                        | ChartTreemapSeriesRegistration
+                        | ChartFunnelSeriesRegistration
+                        | ChartWaterfallSeriesRegistration;
+                    rad.toggleDatumVisibility?.(item.itemId);
                 }
             }
         } else {
@@ -1346,6 +1383,22 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const yStr = `${yTitle}${matchingHit.formattedYCategory ?? matchingHit.categoryY ?? matchingHit.category}`;
             const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
             this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}, ${valStr}`);
+        } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "funnel") {
+            const convStr = matchingHit.funnel?.formattedConversionRate
+                ? `, conversion ${matchingHit.funnel.formattedConversionRate}`
+                : "";
+            const dropStr =
+                matchingHit.funnel?.dropOff !== undefined ? `, drop-off ${matchingHit.funnel.dropOff}` : "";
+            this.activeAccessibilityText.set(
+                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}: ${matchingHit.formattedValue}${convStr}${dropStr}`
+            );
+        } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "waterfall") {
+            const wf = matchingHit.waterfall;
+            const deltaStr = wf?.formattedDelta ? `, change ${wf.formattedDelta}` : "";
+            const cumStr = wf ? `, running total ${wf.formattedCumulativeAfter}` : "";
+            this.activeAccessibilityText.set(
+                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}: ${matchingHit.formattedValue}${deltaStr}${cumStr}`
+            );
         } else {
             const xAxis = this.#xAxis();
             const yAxis = this.#yAxis();
@@ -1506,6 +1559,98 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    protected funnelLabelContext(
+        lbl: SceneFunnelLabel,
+        _seriesScene: ChartFunnelSeriesScene
+    ): ChartFunnelLabelTemplateContext {
+        const stageContext: ChartFunnelStageContext = {
+            bounds: lbl.bounds,
+            category: lbl.category,
+            color: lbl.color,
+            conversionRate: lbl.conversionRate,
+            dataIndex: lbl.dataIndex,
+            datum: lbl.datum,
+            dropOff: lbl.dropOff,
+            formattedCategory: lbl.formattedCategory,
+            formattedConversionRate: lbl.formattedConversionRate,
+            formattedOverallConversionRate: lbl.formattedOverallConversionRate,
+            formattedValue: lbl.formattedValue,
+            overallConversionRate: lbl.overallConversionRate,
+            previousValue: lbl.previousValue,
+            stageId: lbl.stageId,
+            stageIndex: lbl.stageIndex,
+            value: lbl.value
+        };
+
+        return {
+            $implicit: stageContext,
+            bounds: lbl.bounds,
+            category: lbl.category,
+            color: lbl.color,
+            conversionRate: lbl.conversionRate,
+            dataIndex: lbl.dataIndex,
+            datum: lbl.datum,
+            dropOff: lbl.dropOff,
+            formattedCategory: lbl.formattedCategory,
+            formattedConversionRate: lbl.formattedConversionRate,
+            formattedOverallConversionRate: lbl.formattedOverallConversionRate,
+            formattedValue: lbl.formattedValue,
+            overallConversionRate: lbl.overallConversionRate,
+            previousValue: lbl.previousValue,
+            stage: stageContext,
+            stageId: lbl.stageId,
+            stageIndex: lbl.stageIndex,
+            value: lbl.value
+        };
+    }
+
+    protected waterfallLabelContext(
+        lbl: SceneWaterfallLabel,
+        _seriesScene: ChartWaterfallSeriesScene
+    ): ChartWaterfallLabelTemplateContext {
+        const pointContext: ChartWaterfallPointContext = {
+            barEnd: lbl.cumulativeAfter,
+            barStart: lbl.cumulativeBefore,
+            bounds: lbl.barBounds,
+            category: lbl.category,
+            color: lbl.color,
+            cumulativeAfter: lbl.cumulativeAfter,
+            cumulativeBefore: lbl.cumulativeBefore,
+            dataIndex: lbl.dataIndex,
+            datum: lbl.datum,
+            deltaValue: lbl.deltaValue,
+            formattedCategory: lbl.formattedCategory,
+            formattedCumulativeAfter: lbl.formattedValue,
+            formattedCumulativeBefore: "",
+            formattedDelta: lbl.deltaValue !== undefined ? String(lbl.deltaValue) : undefined,
+            formattedValue: lbl.formattedValue,
+            kind: lbl.kind,
+            value: lbl.value,
+            visualKind: lbl.visualKind
+        };
+
+        return {
+            $implicit: pointContext,
+            bounds: lbl.bounds,
+            category: lbl.category,
+            color: lbl.color,
+            cumulativeAfter: lbl.cumulativeAfter,
+            cumulativeBefore: lbl.cumulativeBefore,
+            dataIndex: lbl.dataIndex,
+            datum: lbl.datum,
+            deltaValue: lbl.deltaValue,
+            formattedCategory: lbl.formattedCategory,
+            formattedCumulativeAfter: lbl.formattedValue,
+            formattedCumulativeBefore: "",
+            formattedDelta: lbl.deltaValue !== undefined ? String(lbl.deltaValue) : undefined,
+            formattedValue: lbl.formattedValue,
+            kind: lbl.kind,
+            step: pointContext,
+            value: lbl.value,
+            visualKind: lbl.visualKind
+        };
+    }
+
     public observeLabelElement(element: HTMLElement, labelId: string): void {
         if (typeof ResizeObserver === "undefined") {
             return;
@@ -1640,7 +1785,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             stackStart: target.stackStart,
             stackTotal: target.stackTotal,
             toValue: target.toValue ?? target.range?.toValue,
-            valueKind: target.valueKind ?? (target.range ? "range" : target.financial ? "ohlc" : "scalar"),
+            valueKind:
+                target.valueKind ??
+                (target.range
+                    ? "range"
+                    : target.financial
+                      ? "ohlc"
+                      : target.waterfall
+                        ? "waterfall"
+                        : "scalar"),
+            waterfall: target.waterfall,
+            funnel: target.funnel,
             xValue: target.xValue,
             yCategory: target.yCategory,
             yValue: target.yValue

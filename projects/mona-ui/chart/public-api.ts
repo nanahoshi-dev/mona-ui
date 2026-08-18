@@ -23,6 +23,8 @@ export { RadialBarSeriesComponent } from "./components/radial-bar-series/radial-
 export { RoseSeriesComponent } from "./components/rose-series/rose-series.component";
 export { GaugeSeriesComponent } from "./components/gauge-series/gauge-series.component";
 export { TreemapSeriesComponent } from "./components/treemap-series/treemap-series.component";
+export { FunnelSeriesComponent } from "./components/funnel-series/funnel-series.component";
+export { WaterfallSeriesComponent } from "./components/waterfall-series/waterfall-series.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -32,6 +34,8 @@ export { ChartSliceLabelTemplateDirective } from "./directives/chart-slice-label
 export { ChartCenterTemplateDirective } from "./directives/chart-center-template.directive";
 export { ChartGaugeCenterTemplateDirective } from "./directives/chart-gauge-center-template.directive";
 export { ChartTreemapLabelTemplateDirective } from "./directives/chart-treemap-label-template.directive";
+export { ChartFunnelLabelTemplateDirective } from "./directives/chart-funnel-label-template.directive";
+export { ChartWaterfallLabelTemplateDirective } from "./directives/chart-waterfall-label-template.directive";
 
 export type {
     ChartCoordinateSystem,
@@ -82,7 +86,8 @@ export type {
     ChartPointValue,
     ChartPointValueKind,
     ChartRangePointValue,
-    ChartScalarPointValue
+    ChartScalarPointValue,
+    ChartWaterfallPointValue
 } from "./models/chart-point-value.models";
 
 export type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "./models/chart-tooltip.models";
@@ -138,3 +143,19 @@ export type {
     ChartTreemapSort,
     ChartTreemapTile
 } from "./models/chart-treemap.models";
+
+export type {
+    ChartFunnelLabelContent,
+    ChartFunnelLabelTemplateContext,
+    ChartFunnelOrientation,
+    ChartFunnelPointMetadata,
+    ChartFunnelStageContext,
+    ChartFunnelStageVisibilityEvent
+} from "./models/chart-funnel.models";
+
+export type {
+    ChartWaterfallDatumKind,
+    ChartWaterfallLabelTemplateContext,
+    ChartWaterfallPointContext,
+    ChartWaterfallVisualKind
+} from "./models/chart-waterfall.models";

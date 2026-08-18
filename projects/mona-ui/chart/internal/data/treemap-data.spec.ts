@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TreemapDataProcessor } from "./treemap-data";
+import { TreemapIdentity } from "./treemap-identity";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 
 describe("TreemapDataProcessor", () => {
@@ -299,5 +300,84 @@ describe("TreemapDataProcessor", () => {
         expect(res.rootNodes[1].visible).toBe(true);
         expect(res.rootNodes[1].children[0].visible).toBe(true);
         expect(res.totalValue).toBe(100); // Only visible branch contributes to total
+    });
+
+    it("ensures extractRetainedRootBranchIdentities and process produce identical root nodeIds even with nested key collisions", () => {
+        const data = [
+            {
+                children: [
+                    { id: "shared-key", name: "A child", value: 10 }
+                ],
+                id: "root-a",
+                name: "A"
+            },
+            {
+                id: "shared-key",
+                name: "B",
+                value: 20
+            }
+        ];
+
+        const rootIdentities = TreemapIdentity.extractRetainedRootBranchIdentities({
+            data,
+            keyField: "id",
+            labelField: "name"
+        });
+
+        const res = TreemapDataProcessor.process({
+            data,
+            isDatumVisible: () => true,
+            keyField: "id",
+            labelField: "name",
+            seriesId: "tm-1",
+            seriesName: "Treemap",
+            styleResolver
+        });
+
+        const rootIdsFromMap = Array.from(rootIdentities.keys());
+        const rootIdsFromProcessor = res.rootNodes.map(n => n.nodeId);
+
+        expect(rootIdsFromMap).toEqual(rootIdsFromProcessor);
+        expect(rootIdsFromProcessor[0]).toBe("k:s:root-a");
+        // Root B had a key collision with nested A child, so it fell back to path identity
+        expect(rootIdsFromProcessor[1]).toBe("root/l:s:B");
+        expect(rootIdsFromMap[1]).toBe("root/l:s:B");
+    });
+
+    it("distinguishes string vs numeric keys with same stringified value", () => {
+        const data = [
+            {
+                children: [
+                    { id: 1, name: "Num child", value: 10 }
+                ],
+                id: "root-a",
+                name: "A"
+            },
+            {
+                id: "1",
+                name: "B",
+                value: 20
+            }
+        ];
+
+        const rootIdentities = TreemapIdentity.extractRetainedRootBranchIdentities({
+            data,
+            keyField: "id",
+            labelField: "name"
+        });
+
+        const res = TreemapDataProcessor.process({
+            data,
+            isDatumVisible: () => true,
+            keyField: "id",
+            labelField: "name",
+            seriesId: "tm-1",
+            seriesName: "Treemap",
+            styleResolver
+        });
+
+        // 1 (number) and "1" (string) are distinct: k:n:1 vs k:s:1
+        expect(res.rootNodes[1].nodeId).toBe("k:s:1");
+        expect(rootIdentities.get("k:s:1")).toBeDefined();
     });
 });

@@ -3764,6 +3764,179 @@
       }
     ]
   },
+  "FunnelSeriesComponent": {
+    "name": "FunnelSeriesComponent",
+    "selector": "\"mona-funnel-series\"",
+    "inputs": [
+      {
+        "description": "Array of stage data items overriding chart-level root data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting stage names.",
+        "kind": "input",
+        "name": "categoryField",
+        "type": "ChartField",
+        "defaultValue": "\"category\""
+      },
+      {
+        "description": "Optional custom formatter for category names.",
+        "kind": "input",
+        "name": "categoryFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Uniform fill color for all funnel stages.",
+        "kind": "input",
+        "name": "color",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Property key extracting discrete colors per datum.",
+        "kind": "input",
+        "name": "colorField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Palette array of colors cycled across stages.",
+        "kind": "input",
+        "name": "colors",
+        "type": "readonly string[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor function extracting numeric values.",
+        "kind": "input",
+        "name": "field",
+        "type": "ChartField",
+        "defaultValue": "\"value\""
+      },
+      {
+        "description": "Fill opacity applied to stage trapezoids (0 to 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Spacing in pixels between consecutive funnel stages.",
+        "kind": "input",
+        "name": "gap",
+        "type": "number",
+        "defaultValue": "4"
+      },
+      {
+        "description": "Unique identifier key field for datums.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Content format for automatic stage labels.",
+        "kind": "input",
+        "name": "labelContent",
+        "type": "ChartFunnelLabelContent",
+        "defaultValue": "\"category-value\""
+      },
+      {
+        "description": "Maximum number of visible stage labels rendered simultaneously.",
+        "kind": "input",
+        "name": "maxLabels",
+        "type": "number",
+        "defaultValue": "100"
+      },
+      {
+        "description": "Minimum stage height required in vertical orientation to render label.",
+        "kind": "input",
+        "name": "minLabelHeight",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Minimum stage width required in horizontal orientation to render label.",
+        "kind": "input",
+        "name": "minLabelWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Descriptive series name displayed in chart legend and tooltips.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Funnel\""
+      },
+      {
+        "description": "Layout orientation of the funnel ('vertical' or 'horizontal').",
+        "kind": "input",
+        "name": "orientation",
+        "type": "ChartFunnelOrientation",
+        "defaultValue": "\"vertical\""
+      },
+      {
+        "description": "Controls whether built-in stage text labels are rendered.",
+        "kind": "input",
+        "name": "showLabels",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Stroke outline color for stage trapezoids.",
+        "kind": "input",
+        "name": "strokeColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Stroke width in pixels for stage trapezoids.",
+        "kind": "input",
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "CSS class name applied to the hidden series host element.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Custom formatter function for numeric values.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Controls overall visibility of the funnel series.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Maximum width ratio (0 to 1) for the funnel's widest stage relative to plot area.",
+        "kind": "input",
+        "name": "widthRatio",
+        "type": "number",
+        "defaultValue": "0.8"
+      },
+      {
+        "description": "Emits when a stage's visibility is toggled via legend or API.",
+        "kind": "output",
+        "name": "stageVisibilityChange",
+        "type": "ChartFunnelStageVisibilityEvent"
+      }
+    ]
+  },
   "GaugeSeriesComponent": {
     "name": "GaugeSeriesComponent",
     "selector": "\"mona-gauge-series\"",
@@ -5553,7 +5726,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Maximum tree depth to layout and render.",
+        "description": "Maximum tree depth to layout and render. Normalized: finite <= 0 becomes 1, finite > 0 is floored, undefined/NaN/Infinity is unlimited.",
         "kind": "input",
         "name": "maxDepth",
         "type": "number | undefined",
@@ -5567,14 +5740,14 @@
         "defaultValue": "100"
       },
       {
-        "description": "Minimum pixel height required for a node to display a DOM label.",
+        "description": "Minimum pixel height required for a node to display a DOM label (defaults to 16 when showValues is false, 24 when true).",
         "kind": "input",
         "name": "minLabelHeight",
         "type": "number | undefined",
         "defaultValue": "undefined"
       },
       {
-        "description": "Minimum pixel width required for a node to display a DOM label.",
+        "description": "Minimum pixel width required for a node to display a DOM label (defaults to 30).",
         "kind": "input",
         "name": "minLabelWidth",
         "type": "number | undefined",
@@ -5588,25 +5761,18 @@
         "defaultValue": "\"Treemap\""
       },
       {
-        "description": "Inner and outer padding in pixels around all treemap nodes.",
-        "kind": "input",
-        "name": "padding",
-        "type": "number",
-        "defaultValue": "2"
-      },
-      {
         "description": "Inner padding in pixels between sibling treemap rectangles.",
         "kind": "input",
         "name": "paddingInner",
-        "type": "number | undefined",
-        "defaultValue": "undefined"
+        "type": "number",
+        "defaultValue": "2"
       },
       {
         "description": "Outer padding in pixels around parent boundaries.",
         "kind": "input",
         "name": "paddingOuter",
-        "type": "number | undefined",
-        "defaultValue": "undefined"
+        "type": "number",
+        "defaultValue": "4"
       },
       {
         "description": "Fill opacity applied to non-leaf parent group background rectangles.",
@@ -5697,6 +5863,187 @@
         "kind": "output",
         "name": "nodeVisibilityChange",
         "type": "ChartTreemapNodeVisibilityEvent"
+      }
+    ]
+  },
+  "WaterfallSeriesComponent": {
+    "name": "WaterfallSeriesComponent",
+    "selector": "\"mona-waterfall-series\"",
+    "inputs": [
+      {
+        "description": "Corner radius in pixels applied to the four corners of waterfall bars.",
+        "kind": "input",
+        "name": "borderRadius",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Color of the horizontal connector lines joining consecutive bars.",
+        "kind": "input",
+        "name": "connectorColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Line width in pixels of the connector lines between steps.",
+        "kind": "input",
+        "name": "connectorWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Array of step data items overriding chart-level root data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Fill color for negative change steps (decreases).",
+        "kind": "input",
+        "name": "decreaseColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Property key or accessor function extracting the numeric value/delta for each step.",
+        "kind": "input",
+        "name": "field",
+        "type": "ChartField",
+        "defaultValue": "\"value\""
+      },
+      {
+        "description": "Fill opacity applied to waterfall bars (0 to 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Fill color for positive change steps (increases).",
+        "kind": "input",
+        "name": "increaseColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Property key or accessor extracting step kind ('change' | 'subtotal' | 'total').",
+        "kind": "input",
+        "name": "kindField",
+        "type": "ChartField | undefined",
+        "defaultValue": "\"kind\""
+      },
+      {
+        "description": "Maximum width in pixels for waterfall bars.",
+        "kind": "input",
+        "name": "maxBarWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Maximum number of visible step labels rendered simultaneously.",
+        "kind": "input",
+        "name": "maxLabels",
+        "type": "number",
+        "defaultValue": "100"
+      },
+      {
+        "description": "Minimum bar width in pixels required to render its value label.",
+        "kind": "input",
+        "name": "minLabelWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Descriptive series name displayed in chart legend and tooltips.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Waterfall\""
+      },
+      {
+        "description": "Fill color for zero-change steps.",
+        "kind": "input",
+        "name": "neutralColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Controls whether horizontal connector lines are drawn between steps.",
+        "kind": "input",
+        "name": "showConnectors",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Controls whether built-in value text labels are rendered.",
+        "kind": "input",
+        "name": "showLabels",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Starting cumulative baseline value before the first step.",
+        "kind": "input",
+        "name": "startValue",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Stroke outline color for waterfall bars.",
+        "kind": "input",
+        "name": "strokeColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Stroke width in pixels for waterfall bars.",
+        "kind": "input",
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Fill color for subtotal steps that anchor to baseline without resetting cumulative count.",
+        "kind": "input",
+        "name": "subtotalColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Fill color for final total summary steps.",
+        "kind": "input",
+        "name": "totalColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "CSS class name applied to the hidden series host element for custom styling hooks.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Custom formatter function for numeric values.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Controls overall visibility of the waterfall series.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Property key or accessor extracting category / step names.",
+        "kind": "input",
+        "name": "xField",
+        "type": "ChartField | undefined",
+        "defaultValue": "\"category\""
       }
     ]
   },

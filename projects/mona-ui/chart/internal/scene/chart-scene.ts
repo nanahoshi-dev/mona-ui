@@ -17,6 +17,10 @@ import type { HeatmapCellIndex } from "../interaction/heatmap-cell-index";
 import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "./scene-geometry";
 import type { ChartStackMode } from "../../models/chart-stack.models";
 
+import type { CartesianFunnelChartScene } from "./funnel-scene";
+import type { CartesianWaterfallChartScene } from "./waterfall-scene";
+export type { CartesianFunnelChartScene, CartesianWaterfallChartScene };
+
 export interface CartesianStackSceneConfig {
     readonly geometryType: "area" | "bar";
     readonly groupId: string;
@@ -35,7 +39,7 @@ export interface ChartSceneBase {
     width: number;
 }
 
-export type ChartCartesianKind = "xy" | "heatmap";
+export type ChartCartesianKind = "funnel" | "heatmap" | "waterfall" | "xy";
 
 export interface CartesianSceneBase extends ChartSceneBase {
     axes: readonly ChartAxisScene[];
@@ -67,7 +71,11 @@ export interface CartesianHeatmapChartScene extends CartesianSceneBase {
     yCategories: readonly ChartHeatmapCategory[];
 }
 
-export type CartesianChartScene = CartesianXYChartScene | CartesianHeatmapChartScene;
+export type CartesianChartScene =
+    | CartesianFunnelChartScene
+    | CartesianHeatmapChartScene
+    | CartesianWaterfallChartScene
+    | CartesianXYChartScene;
 
 export interface PolarSceneBase extends ChartSceneBase {
     center: ChartPoint;

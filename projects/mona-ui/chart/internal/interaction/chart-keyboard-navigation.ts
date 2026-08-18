@@ -1,11 +1,19 @@
-import type { CartesianHeatmapChartScene, ChartScene } from "../scene/chart-scene";
+import type { CartesianHeatmapChartScene, CartesianFunnelChartScene, CartesianWaterfallChartScene, ChartScene } from "../scene/chart-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { clamp } from "../utils/number-utils";
+import { FunnelKeyboardNavigation } from "./funnel-keyboard-navigation";
 import { HeatmapKeyboardNavigation } from "./heatmap-keyboard-navigation";
 import { TreemapKeyboardNavigation } from "./treemap-keyboard-navigation";
+import { WaterfallKeyboardNavigation } from "./waterfall-keyboard-navigation";
 
 export function getHitTargetKey(hit: SceneHitTarget): string {
     return hit.animationKey ?? hit.sliceId ?? `${hit.seriesId}:${hit.index}`;
+}
+
+export interface ChartKeyboardNavResult {
+    bucketIndex: number;
+    hitKey: string;
+    seriesId: string;
 }
 
 export interface KeyboardNavigationResult {
@@ -43,20 +51,50 @@ export class ChartKeyboardNavigation {
             };
         }
 
-        if (scene.coordinateSystem === "cartesian" && scene.cartesianKind === "heatmap") {
-            const currentHit = activeHitKey ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null : null;
-            const nextHit = HeatmapKeyboardNavigation.handleKey(event, scene as CartesianHeatmapChartScene, currentHit);
-            if (!nextHit) {
-                return null;
+        if (scene.coordinateSystem === "cartesian") {
+            if (scene.cartesianKind === "heatmap") {
+                const currentHit = activeHitKey ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null : null;
+                const nextHit = HeatmapKeyboardNavigation.handleKey(event, scene as CartesianHeatmapChartScene, currentHit);
+                if (!nextHit) {
+                    return null;
+                }
+                event.preventDefault();
+                const bucketIdx = scene.interactionBuckets?.findIndex(b => b.xKey === nextHit.xKey) ?? 0;
+                return {
+                    bucketIndex: Math.max(0, bucketIdx),
+                    hitKey: getHitTargetKey(nextHit),
+                    hitTarget: nextHit,
+                    seriesId: nextHit.seriesId
+                };
             }
-            event.preventDefault();
-            const bucketIdx = scene.interactionBuckets?.findIndex(b => b.xKey === nextHit.xKey) ?? 0;
-            return {
-                bucketIndex: Math.max(0, bucketIdx),
-                hitKey: getHitTargetKey(nextHit),
-                hitTarget: nextHit,
-                seriesId: nextHit.seriesId
-            };
+
+            if (scene.cartesianKind === "funnel") {
+                const navRes = FunnelKeyboardNavigation.handleKeyDown(event, scene as CartesianFunnelChartScene, activeBucketIndex);
+                if (!navRes) {
+                    return null;
+                }
+                const hitTarget = scene.hitTargets[navRes.bucketIndex] ?? null;
+                return {
+                    bucketIndex: navRes.bucketIndex,
+                    hitKey: navRes.hitKey,
+                    hitTarget,
+                    seriesId: navRes.seriesId
+                };
+            }
+
+            if (scene.cartesianKind === "waterfall") {
+                const navRes = WaterfallKeyboardNavigation.handleKeyDown(event, scene as CartesianWaterfallChartScene, activeBucketIndex);
+                if (!navRes) {
+                    return null;
+                }
+                const hitTarget = scene.hitTargets[navRes.bucketIndex] ?? null;
+                return {
+                    bucketIndex: navRes.bucketIndex,
+                    hitKey: navRes.hitKey,
+                    hitTarget,
+                    seriesId: navRes.seriesId
+                };
+            }
         }
 
         const buckets = scene.interactionBuckets;

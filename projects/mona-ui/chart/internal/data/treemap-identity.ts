@@ -86,12 +86,21 @@ export class TreemapIdentity {
         };
     }
 
-    public static extractRootBranchIdentities(
-        data: readonly unknown[] | unknown | undefined,
-        keyField: ChartField | undefined,
-        labelField: ChartField = "name",
-        labelFormatter?: ChartValueFormatter
-    ): Map<string, RootBranchIdentityInfo> {
+    public static extractRetainedRootBranchIdentities(options: {
+        readonly childrenField?: ChartField;
+        readonly data?: readonly unknown[] | unknown;
+        readonly keyField?: ChartField;
+        readonly labelField?: ChartField;
+        readonly labelFormatter?: ChartValueFormatter;
+    }): Map<string, RootBranchIdentityInfo> {
+        const {
+            childrenField = "children",
+            data,
+            keyField,
+            labelField = "name",
+            labelFormatter
+        } = options;
+
         const result = new Map<string, RootBranchIdentityInfo>();
         if (data === undefined || data === null) {
             return result;
@@ -99,31 +108,93 @@ export class TreemapIdentity {
 
         const rawRoots = Array.isArray(data) ? data : [data];
         const seenExplicitKeys = new Set<string>();
-        const siblingTracker = new Map<string, number>();
+        const activeAncestors = new Set<object>();
+        const maxHardDepth = 128;
+        const rootSiblingTracker = new Map<string, number>();
+        let globalDataIndex = 0;
+
+        const traverseChildrenForReservation = (
+            datum: unknown,
+            depth: number,
+            parentId: string
+        ): void => {
+            if (typeof datum !== "object" || datum === null) {
+                return;
+            }
+            if (activeAncestors.has(datum) || depth >= maxHardDepth) {
+                return;
+            }
+
+            activeAncestors.add(datum);
+            const rawChildren = resolveValue(datum, childrenField, globalDataIndex);
+            if (Array.isArray(rawChildren)) {
+                const childSiblingTracker = new Map<string, number>();
+                for (let cIdx = 0; cIdx < rawChildren.length; cIdx++) {
+                    const childDatum = rawChildren[cIdx];
+                    if (typeof childDatum === "object" && childDatum !== null && activeAncestors.has(childDatum)) {
+                        continue;
+                    }
+                    const childDataIndex = ++globalDataIndex;
+                    const childIdentity = this.resolveNodeIdentity(
+                        childDatum,
+                        childDataIndex,
+                        cIdx,
+                        parentId,
+                        keyField,
+                        labelField,
+                        labelFormatter,
+                        seenExplicitKeys,
+                        childSiblingTracker
+                    );
+                    traverseChildrenForReservation(childDatum, depth + 1, childIdentity.nodeId);
+                }
+            }
+            activeAncestors.delete(datum);
+        };
 
         for (let bIdx = 0; bIdx < rawRoots.length; bIdx++) {
-            const datum = rawRoots[bIdx];
+            const rootDatum = rawRoots[bIdx];
+            const rootDataIndex = globalDataIndex++;
             const identity = this.resolveNodeIdentity(
-                datum,
-                bIdx,
+                rootDatum,
+                rootDataIndex,
                 bIdx,
                 undefined,
                 keyField,
                 labelField,
                 labelFormatter,
                 seenExplicitKeys,
-                siblingTracker
+                rootSiblingTracker
             );
 
             result.set(identity.nodeId, {
                 dataIndex: bIdx,
-                datum,
+                datum: rootDatum,
                 formattedLabel: identity.formattedLabel,
                 label: identity.label,
                 nodeId: identity.nodeId
             });
+
+            traverseChildrenForReservation(rootDatum, 1, identity.nodeId);
         }
 
         return result;
     }
+
+    public static extractRootBranchIdentities(
+        data: readonly unknown[] | unknown | undefined,
+        keyField: ChartField | undefined,
+        labelField: ChartField = "name",
+        labelFormatter?: ChartValueFormatter,
+        childrenField: ChartField = "children"
+    ): Map<string, RootBranchIdentityInfo> {
+        return this.extractRetainedRootBranchIdentities({
+            childrenField,
+            data,
+            keyField,
+            labelField,
+            labelFormatter
+        });
+    }
 }
+

@@ -8,6 +8,7 @@ export type ChartSeriesType =
     | "bubble"
     | "candlestick"
     | "donut"
+    | "funnel"
     | "gauge"
     | "heatmap"
     | "line"
@@ -20,9 +21,19 @@ export type ChartSeriesType =
     | "rangeBar"
     | "rose"
     | "scatter"
-    | "treemap";
+    | "treemap"
+    | "waterfall";
 
-export type ChartSeriesFamily = "cartesian" | "heatmap" | "hierarchy" | "polar" | "radar" | "radialArc" | "sector";
+export type ChartSeriesFamily =
+    | "cartesian"
+    | "funnel"
+    | "heatmap"
+    | "hierarchy"
+    | "polar"
+    | "radar"
+    | "radialArc"
+    | "sector"
+    | "waterfall";
 
 export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
     switch (type) {
@@ -38,6 +49,10 @@ export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
             return "cartesian";
         case "heatmap":
             return "heatmap";
+        case "funnel":
+            return "funnel";
+        case "waterfall":
+            return "waterfall";
         case "pie":
         case "donut":
             return "sector";
@@ -55,7 +70,7 @@ export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
 }
 
 export function isCartesianCoordinateFamily(family: ChartSeriesFamily): boolean {
-    return family === "cartesian" || family === "heatmap";
+    return family === "cartesian" || family === "heatmap" || family === "funnel" || family === "waterfall";
 }
 
 export function isPolarCoordinateFamily(family: ChartSeriesFamily): boolean {
@@ -67,12 +82,13 @@ export function isHierarchicalCoordinateFamily(family: ChartSeriesFamily): boole
 }
 
 
-export type ChartLegendItemKind = "datum" | "series";
+export type ChartLegendItemKind = "datum" | "semantic" | "series";
 
 export interface ChartLegendItem {
     color: string;
     dataIndex?: number;
     datum?: unknown;
+    interactive?: boolean;
     itemId: string;
     kind?: ChartLegendItemKind;
     name: string;
@@ -89,6 +105,7 @@ export interface ChartLegendItemTemplateContext {
     color: string;
     dataIndex?: number;
     datum?: unknown;
+    interactive?: boolean;
     itemId: string;
     kind?: ChartLegendItemKind;
     name: string;
