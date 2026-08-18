@@ -908,6 +908,31 @@ describe("chart-domain", () => {
             expect(minTime.getTime()).toBe(t0 - 43200000);
             expect(maxTime.getTime()).toBe(t2 + 43200000);
         });
+
+        it("should skip invalid OHLC rows with non-finite values or broken envelope in inferXAxisType (FIN2-008)", () => {
+            const series = [createMockCandlestickSeries("o", "h", "l", "c")];
+            const data = [
+                { c: 100, h: 80, l: 120, o: 100, x: new Date("2026-01-01") }, // Invalid envelope: low > high
+                { c: "not-num", h: 120, l: 90, o: 100, x: new Date("2026-01-02") }, // Invalid OHLC non-numeric
+                { c: 110, h: 120, l: 95, o: 100, x: 42 } // Valid row with numeric X
+            ];
+
+            // Only the valid 3rd row should be considered for X inference -> linear
+            expect(inferXAxisType(series, data, "x")).toBe("linear");
+        });
+
+        it("should extract category keys from FinancialDataResolver.resolve filtering duplicates (FIN2-009)", () => {
+            const series = [createMockCandlestickSeries("o", "h", "l", "c", undefined, true, "date")];
+            const data = [
+                { c: 110, date: "2026-01-01", h: 120, l: 95, o: 100 },
+                { c: 115, date: "2026-01-01", h: 125, l: 100, o: 105 }, // Duplicate X -> skipped
+                { c: "bad", date: "2026-01-02", h: 125, l: 100, o: 105 }, // Invalid OHLC -> skipped
+                { c: 130, date: "2026-01-03", h: 140, l: 110, o: 120 }
+            ];
+
+            const domain = calculateCategoryDomain(series, data, "date");
+            expect(domain).toEqual(["2026-01-01", "2026-01-03"]);
+        });
     });
 });
 
