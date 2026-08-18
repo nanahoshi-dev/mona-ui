@@ -6,6 +6,7 @@ describe("CandlestickSeriesRenderer", () => {
     it("should render rising, falling, and neutral candle marks", () => {
         const mockContext = {
             beginPath: vi.fn(),
+            clearRect: vi.fn(),
             closePath: vi.fn(),
             fill: vi.fn(),
             fillRect: vi.fn(),
@@ -88,6 +89,7 @@ describe("CandlestickSeriesRenderer", () => {
     it("should support hollow fillMode for rising candles", () => {
         const mockContext = {
             beginPath: vi.fn(),
+            clearRect: vi.fn(),
             closePath: vi.fn(),
             fill: vi.fn(),
             fillRect: vi.fn(),
@@ -142,8 +144,8 @@ describe("CandlestickSeriesRenderer", () => {
 
         CandlestickSeriesRenderer.render(mockContext, scene);
 
+        expect(mockContext.fillRect).toHaveBeenCalledWith(90, 100, 20, 30);
         expect(mockContext.rect).toHaveBeenCalledWith(90, 100, 20, 30);
-        expect(mockContext.fill).toHaveBeenCalled();
         expect(mockContext.stroke).toHaveBeenCalled();
     });
 });
