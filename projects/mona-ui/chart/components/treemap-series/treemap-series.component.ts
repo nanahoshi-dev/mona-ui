@@ -18,6 +18,7 @@ import {
     ChartInvalidationReason,
     type ChartTreemapSeriesRegistration
 } from "../../internal/context/chart-registration-context";
+import { TreemapIdentity, type RootBranchIdentityInfo } from "../../internal/data/treemap-identity";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
 import type {
     ChartTreemapNodeVisibilityEvent,
@@ -29,7 +30,7 @@ import type { ChartField } from "../../models/chart.models";
 let nextTreemapSeriesId = 0;
 
 @Component({
-    selector: "mona-chart-treemap-series",
+    selector: "mona-treemap-series",
     template: "",
     host: {
         "[class]": "userClass()",
@@ -37,26 +38,32 @@ let nextTreemapSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class ChartTreemapSeriesComponent implements OnInit {
+export class TreemapSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #hiddenNodeIds = signal<ImmutableSet<string>>(ImmutableSet.create());
-    readonly #identityMap = new Map<string, { datum: unknown; label: string }>();
+    readonly #identityMap = new Map<string, RootBranchIdentityInfo>();
     readonly #seriesId = `mona-treemap-series-${++nextTreemapSeriesId}`;
     readonly #visibilityRevision = signal<number>(0);
 
     /**
      * @description Corner radius in pixels applied to leaf node rectangles.
-     * @default 0
+     * @default undefined
      */
-    public readonly borderRadius = input<number>(0);
+    public readonly borderRadius = input<number | undefined>(undefined);
 
     /**
      * @description Property key or accessor function extracting child nodes from a hierarchical data object.
      * @default "children"
      */
     public readonly childrenField = input<ChartField>("children");
+
+    /**
+     * @description Fallback base fill color applied to series or root branches.
+     * @default ""
+     */
+    public readonly color = input<string>("");
 
     /**
      * @description Accessor function or property key extracting an explicit fill color for a node.
@@ -77,6 +84,12 @@ export class ChartTreemapSeriesComponent implements OnInit {
     public readonly data = input<readonly unknown[] | unknown | undefined>(undefined);
 
     /**
+     * @description Property key or accessor function extracting the numeric value for a leaf node.
+     * @default "value"
+     */
+    public readonly field = input<ChartField>("value");
+
+    /**
      * @description Opacity of leaf node fills (0 to 1).
      * @default undefined
      */
@@ -90,9 +103,9 @@ export class ChartTreemapSeriesComponent implements OnInit {
 
     /**
      * @description Property key or accessor extracting the display label for a node.
-     * @default "label"
+     * @default "name"
      */
-    public readonly labelField = input<ChartField>("label");
+    public readonly labelField = input<ChartField>("name");
 
     /**
      * @description Formatter callback for node display labels.
@@ -118,6 +131,18 @@ export class ChartTreemapSeriesComponent implements OnInit {
     public readonly maxLabels = input<number>(100);
 
     /**
+     * @description Minimum pixel height required for a node to display a DOM label.
+     * @default undefined
+     */
+    public readonly minLabelHeight = input<number | undefined>(undefined);
+
+    /**
+     * @description Minimum pixel width required for a node to display a DOM label.
+     * @default undefined
+     */
+    public readonly minLabelWidth = input<number | undefined>(undefined);
+
+    /**
      * @description Series name used in tooltips and accessibility announcements.
      * @default "Treemap"
      */
@@ -130,22 +155,10 @@ export class ChartTreemapSeriesComponent implements OnInit {
     public readonly padding = input<number>(2);
 
     /**
-     * @description Bottom padding in pixels for parent nodes.
-     * @default undefined
-     */
-    public readonly paddingBottom = input<number | undefined>(undefined);
-
-    /**
      * @description Inner padding in pixels between sibling treemap rectangles.
      * @default undefined
      */
     public readonly paddingInner = input<number | undefined>(undefined);
-
-    /**
-     * @description Left padding in pixels for parent nodes.
-     * @default undefined
-     */
-    public readonly paddingLeft = input<number | undefined>(undefined);
 
     /**
      * @description Outer padding in pixels around parent boundaries.
@@ -154,22 +167,22 @@ export class ChartTreemapSeriesComponent implements OnInit {
     public readonly paddingOuter = input<number | undefined>(undefined);
 
     /**
-     * @description Right padding in pixels for parent nodes.
-     * @default undefined
-     */
-    public readonly paddingRight = input<number | undefined>(undefined);
-
-    /**
-     * @description Top padding in pixels reserved for parent node header labels.
-     * @default undefined
-     */
-    public readonly paddingTop = input<number | undefined>(undefined);
-
-    /**
      * @description Fill opacity applied to non-leaf parent group background rectangles.
-     * @default 0.15
+     * @default undefined
      */
-    public readonly parentFillOpacity = input<number>(0.15);
+    public readonly parentFillOpacity = input<number | undefined>(undefined);
+
+    /**
+     * @description Header height in pixels reserved for parent node header labels.
+     * @default undefined
+     */
+    public readonly parentHeaderHeight = input<number | undefined>(undefined);
+
+    /**
+     * @description Whether to display DOM labels for leaf and terminal nodes.
+     * @default true
+     */
+    public readonly showLabels = input<boolean>(true);
 
     /**
      * @description Whether to reserve header space and display labels for parent grouping nodes.
@@ -179,9 +192,9 @@ export class ChartTreemapSeriesComponent implements OnInit {
 
     /**
      * @description Whether to display numeric values in default leaf labels.
-     * @default true
+     * @default false
      */
-    public readonly showValues = input<boolean>(true);
+    public readonly showValues = input<boolean>(false);
 
     /**
      * @description Sort order for sibling nodes: "descending", "ascending", or "none".
@@ -191,15 +204,15 @@ export class ChartTreemapSeriesComponent implements OnInit {
 
     /**
      * @description Color of node boundary stroke borders.
-     * @default "#ffffff"
+     * @default ""
      */
-    public readonly strokeColor = input<string>("#ffffff");
+    public readonly strokeColor = input<string>("");
 
     /**
      * @description Stroke width in pixels for node boundary borders.
-     * @default 1
+     * @default undefined
      */
-    public readonly strokeWidth = input<number>(1);
+    public readonly strokeWidth = input<number | undefined>(undefined);
 
     /**
      * @description D3 treemap tiling algorithm: "squarify", "binary", "dice", "slice", or "slice-dice".
@@ -212,12 +225,6 @@ export class ChartTreemapSeriesComponent implements OnInit {
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
-
-    /**
-     * @description Property key or accessor function extracting the numeric value for a leaf node.
-     * @default "value"
-     */
-    public readonly valueField = input<ChartField>("value");
 
     /**
      * @description Formatter callback for numeric values in labels and tooltips.
@@ -247,12 +254,40 @@ export class ChartTreemapSeriesComponent implements OnInit {
         });
 
         effect(() => {
-            this.data();
-            this.valueField();
+            const dataVal = this.data();
+            const rootDataVal = this.#chartContext?.rootData ? this.#chartContext.rootData() : undefined;
+            const effectiveData = dataVal !== undefined ? dataVal : rootDataVal;
+            const keyF = this.keyField();
+            const labelF = this.labelField();
+            const labelFmt = this.labelFormatter();
+
+            const newMap = TreemapIdentity.extractRootBranchIdentities(
+                effectiveData,
+                keyF,
+                labelF,
+                labelFmt
+            );
+
+            this.#identityMap.clear();
+            for (const [k, v] of newMap) {
+                this.#identityMap.set(k, v);
+            }
+
+            this.#hiddenNodeIds.update(set => {
+                let nextSet = set;
+                for (const hiddenId of set) {
+                    if (!newMap.has(hiddenId)) {
+                        nextSet = nextSet.remove(hiddenId);
+                    }
+                }
+                return nextSet;
+            });
+
+            this.field();
             this.childrenField();
-            this.labelField();
-            this.keyField();
+            this.color();
             this.colorField();
+
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
             }
@@ -265,16 +300,15 @@ export class ChartTreemapSeriesComponent implements OnInit {
             this.padding();
             this.paddingInner();
             this.paddingOuter();
-            this.paddingTop();
-            this.paddingRight();
-            this.paddingBottom();
-            this.paddingLeft();
+            this.parentHeaderHeight();
             this.maxDepth();
+            this.showLabels();
             this.showParentLabels();
             this.showValues();
             this.maxLabels();
+            this.minLabelWidth();
+            this.minLabelHeight();
             this.borderRadius();
-            this.labelFormatter();
             this.valueFormatter();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
@@ -304,11 +338,13 @@ export class ChartTreemapSeriesComponent implements OnInit {
         const registration: ChartTreemapSeriesRegistration = {
             borderRadius: this.borderRadius,
             childrenField: this.childrenField,
+            color: this.color,
             colorField: this.colorField,
             colors: this.colors,
             data: this.data,
             datumVisibilityRevision: this.#visibilityRevision.asReadonly(),
             element: this.#elementRef,
+            field: this.field,
             fillOpacity: this.fillOpacity,
             id: this.#seriesId,
             isDatumVisible: (nodeId: string) => !this.#hiddenNodeIds().contains(nodeId),
@@ -318,15 +354,15 @@ export class ChartTreemapSeriesComponent implements OnInit {
             labelTemplate: this.labelTemplate,
             maxDepth: this.maxDepth,
             maxLabels: this.maxLabels,
+            minLabelHeight: this.minLabelHeight,
+            minLabelWidth: this.minLabelWidth,
             name: this.name,
             padding: this.padding,
-            paddingBottom: this.paddingBottom,
             paddingInner: this.paddingInner,
-            paddingLeft: this.paddingLeft,
             paddingOuter: this.paddingOuter,
-            paddingRight: this.paddingRight,
-            paddingTop: this.paddingTop,
             parentFillOpacity: this.parentFillOpacity,
+            parentHeaderHeight: this.parentHeaderHeight,
+            showLabels: this.showLabels,
             showParentLabels: this.showParentLabels,
             showValues: this.showValues,
             sort: this.sort,
@@ -336,7 +372,6 @@ export class ChartTreemapSeriesComponent implements OnInit {
             toggleDatumVisibility: (nodeId: string) => this.toggleNode(nodeId),
             type: "treemap",
             userClass: this.userClass,
-            valueField: this.valueField,
             valueFormatter: this.valueFormatter,
             visible: this.visible
         };
@@ -361,8 +396,10 @@ export class ChartTreemapSeriesComponent implements OnInit {
         const match = this.#identityMap.get(nodeId);
 
         this.nodeVisibilityChange.emit({
+            dataIndex: match?.dataIndex,
             datum: match?.datum,
-            formattedLabel: match?.label ?? nodeId,
+            depth: 1,
+            formattedLabel: match?.formattedLabel ?? nodeId,
             label: match?.label ?? nodeId,
             nodeId,
             seriesId: this.#seriesId,
