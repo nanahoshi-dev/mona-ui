@@ -53,9 +53,9 @@ export class MonaCandlestickSeriesComponent implements OnInit {
 
     /**
      * @description Color for falling / bearish candles (close < open).
-     * @default "var(--mona-chart-color-falling, #ef4444)"
+     * @default ""
      */
-    public readonly fallingColor = input("var(--mona-chart-color-falling, #ef4444)");
+    public readonly fallingColor = input("");
 
     /**
      * @description Visual fill mode for candle bodies: 'filled' (solid fill) or 'hollow' (rising hollow, falling filled).
@@ -93,9 +93,9 @@ export class MonaCandlestickSeriesComponent implements OnInit {
 
     /**
      * @description Color for neutral / flat candles (close === open).
-     * @default "var(--mona-chart-color-neutral, #6b7280)"
+     * @default ""
      */
-    public readonly neutralColor = input("var(--mona-chart-color-neutral, #6b7280)");
+    public readonly neutralColor = input("");
 
     /**
      * @description Overall opacity multiplier applied to candle wicks and bodies.
@@ -110,9 +110,9 @@ export class MonaCandlestickSeriesComponent implements OnInit {
 
     /**
      * @description Color for rising / bullish candles (close > open).
-     * @default "var(--mona-chart-color-rising, #22c55e)"
+     * @default ""
      */
-    public readonly risingColor = input("var(--mona-chart-color-rising, #22c55e)");
+    public readonly risingColor = input("");
 
     /**
      * @description Additional CSS classes applied to the series host element.
@@ -150,31 +150,53 @@ export class MonaCandlestickSeriesComponent implements OnInit {
      */
     public readonly xField = input<ChartField | undefined>(undefined);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
-            this.bodyWidth();
-            this.bodyWidthRatio();
             this.closeField();
-            this.color();
             this.data();
-            this.fallingColor();
-            this.fillMode();
             this.highField();
             this.keyField();
             this.lowField();
+            this.openField();
+            this.xField();
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            }
+        });
+
+        effect(() => {
+            this.visible();
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
+            }
+        });
+
+        effect(() => {
+            this.bodyWidth();
+            this.bodyWidthRatio();
             this.maxBodyWidth();
             this.name();
+            this.valueFormatter();
+            this.wickWidth();
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
+        });
+
+        effect(() => {
+            this.color();
+            this.fallingColor();
+            this.fillMode();
             this.neutralColor();
             this.opacity();
-            this.openField();
             this.risingColor();
             this.userClass();
-            this.valueFormatter();
-            this.visible();
             this.wickColor();
-            this.wickWidth();
-            this.xField();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+            }
         });
     }
 
@@ -208,6 +230,7 @@ export class MonaCandlestickSeriesComponent implements OnInit {
         };
 
         const unregister = this.#chartContext?.registerSeries(registration);
+        this.#registered = true;
         this.#destroyRef.onDestroy(() => {
             unregister?.();
         });
