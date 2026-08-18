@@ -6,7 +6,7 @@ import {
     type ChartRoseSeriesRegistration
 } from "../../internal/context/chart-registration-context";
 import { resolveData } from "../../internal/data/chart-value-resolver";
-import { extractRadialDatumIdentities } from "../../internal/data/radial-datum-identity";
+import { extractRetainedRoseIdentities } from "../../internal/data/radial-datum-identity";
 import type { ChartField } from "../../models/chart.models";
 import type {
     ChartRadialArcFillMode,
@@ -191,7 +191,7 @@ export class RoseSeriesComponent implements OnInit {
 
             // Prune hidden item IDs and maintain canonical identity map
             const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
-            const identities = extractRadialDatumIdentities(raw, this.categoryField(), this.keyField());
+            const identities = extractRetainedRoseIdentities(raw, this.categoryField(), this.field(), this.keyField());
             const retainedIdSet = new Set(identities.map(id => id.itemId));
 
             this.#identityMap.clear();
