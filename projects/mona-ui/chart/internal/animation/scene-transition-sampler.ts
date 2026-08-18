@@ -1,6 +1,8 @@
 import type {
     CartesianChartScene,
+    CartesianFunnelChartScene,
     CartesianHeatmapChartScene,
+    CartesianWaterfallChartScene,
     CartesianXYChartScene,
     ChartScene,
     PolarArcChartScene,
@@ -11,6 +13,8 @@ import type {
 import type { ChartPoint } from "../../models/chart.models";
 import type { SceneHeatmapCell } from "../../models/chart-heatmap.models";
 import type { ChartTreemapSeriesScene } from "../scene/hierarchical-scene";
+import type { ChartFunnelSeriesScene } from "../scene/funnel-scene";
+import type { ChartWaterfallSeriesScene } from "../scene/waterfall-scene";
 import type {
     ChartBarSeriesScene,
     ChartCandlestickSeriesScene,
@@ -46,6 +50,8 @@ import { RadialBarHitIndex } from "../interaction/radial-bar-hit-index";
 import { RoseHitIndex } from "../interaction/rose-hit-index";
 import { GaugeHitIndex } from "../interaction/gauge-hit-index";
 import { TreemapHitIndex } from "../interaction/treemap-hit-index";
+import { FunnelHitIndex } from "../interaction/funnel-hit-index";
+import { WaterfallHitIndex } from "../interaction/waterfall-hit-index";
 
 export class SceneTransitionSampler {
     public static sampleFrame(plan: ChartTransitionPlan, progress: number): ChartAnimationRenderFrame {
@@ -99,6 +105,35 @@ export class SceneTransitionSampler {
                     mode: "morph",
                     progress,
                     scene: sampledHeatmap,
+                    toScene
+                };
+            }
+            if (toScene.cartesianKind === "funnel") {
+                const sampledFunnel = this.#sampleCartesianFunnelScene(
+                    toScene as CartesianFunnelChartScene,
+                    seriesPlans,
+                    progress
+                );
+                return {
+                    fromScene,
+                    mode: "morph",
+                    progress,
+                    scene: sampledFunnel,
+                    toScene
+                };
+            }
+            if (toScene.cartesianKind === "waterfall") {
+                const sampledWaterfall = this.#sampleCartesianWaterfallScene(
+                    toScene as CartesianWaterfallChartScene,
+                    seriesPlans,
+                    plan.axisPlan as CartesianAxisTransitionPlan | null | undefined,
+                    progress
+                );
+                return {
+                    fromScene,
+                    mode: "morph",
+                    progress,
+                    scene: sampledWaterfall,
                     toScene
                 };
             }
@@ -213,27 +248,26 @@ export class SceneTransitionSampler {
                         borderRadius: node.borderRadius,
                         bounds: pointerBounds,
                         color: node.fillColor,
-                        dataIndex: node.dataIndex,
-                        datum: node.datum,
-                        formattedValue: node.formattedValue,
+                        dataIndex: targetHit.dataIndex ?? node.dataIndex,
+                        datum: targetHit.datum ?? node.datum,
+                        formattedValue: targetHit.formattedValue,
                         hierarchy: targetHit.hierarchy
                             ? {
                                   ...targetHit.hierarchy,
-                                  aggregateValue: node.aggregateValue,
                                   isCollapsed: node.isCollapsed,
                                   isLeaf: node.isLeaf
                               }
                             : undefined,
-                        index: node.dataIndex,
+                        index: targetHit.index ?? node.dataIndex,
                         itemId: node.nodeId,
                         renderOrder: node.renderOrder,
                         seriesId: sampledSeries.id,
                         seriesName: sampledSeries.name,
                         seriesType: "treemap",
-                        value: node.aggregateValue,
+                        value: targetHit.value,
                         visualBounds: node.bounds,
                         xKey: node.nodeId,
-                        xValue: node.label
+                        xValue: targetHit.xValue ?? node.label
                     });
                 }
             }
@@ -1033,6 +1067,159 @@ export class SceneTransitionSampler {
             interactionBuckets: sampledBuckets,
             radialAxis: sampledRadialAxis,
             series: sampledSeries
+        };
+    }
+
+    static #sampleCartesianFunnelScene(
+        toScene: CartesianFunnelChartScene,
+        seriesPlans: ChartTransitionPlan["seriesPlans"],
+        progress: number
+    ): CartesianFunnelChartScene {
+        const plan = seriesPlans.find(p => p.adapterType === "funnel");
+        if (!plan) {
+            return toScene;
+        }
+
+        const sampledSeries = plan.sample(progress) as ChartFunnelSeriesScene | null;
+        if (!sampledSeries) {
+            return toScene;
+        }
+
+        const targetHitsByKey = new Map<string, SceneHitTarget>();
+        for (const th of toScene.hitTargets) {
+            if (th.animationKey) {
+                targetHitsByKey.set(th.animationKey, th);
+            }
+        }
+
+        const sampledHitTargets: SceneHitTarget[] = [];
+        for (const stage of sampledSeries.stages) {
+            if ((stage.renderOpacity ?? 1) > 0.05 && stage.bounds.width > 0 && stage.bounds.height > 0) {
+                const targetHit = targetHitsByKey.get(stage.animationKey);
+                if (targetHit) {
+                    sampledHitTargets.push({
+                        ...targetHit,
+                        animationKey: stage.animationKey,
+                        bounds: stage.bounds,
+                        color: stage.fillColor,
+                        dataIndex: targetHit.dataIndex ?? stage.dataIndex,
+                        datum: targetHit.datum ?? stage.datum,
+                        formattedCategory: targetHit.formattedCategory,
+                        formattedValue: targetHit.formattedValue,
+                        funnel: targetHit.funnel,
+                        index: targetHit.index ?? stage.dataIndex,
+                        itemId: stage.stageId,
+                        point: {
+                            x: stage.bounds.x + stage.bounds.width / 2,
+                            y: stage.bounds.y + stage.bounds.height / 2
+                        },
+                        renderOrder: stage.renderOrder,
+                        seriesId: sampledSeries.id,
+                        seriesName: sampledSeries.name,
+                        seriesType: "funnel",
+                        value: targetHit.value,
+                        visualBounds: stage.bounds,
+                        xKey: stage.stageId,
+                        xValue: targetHit.xValue ?? stage.category
+                    });
+                }
+            }
+        }
+
+        const hitIndex = new FunnelHitIndex(
+            toScene.plotRect,
+            toScene.orientation,
+            toScene.hitIndex.slotSpan,
+            toScene.hitIndex.gap,
+            sampledSeries.stages,
+            sampledHitTargets
+        );
+
+        return {
+            ...toScene,
+            hitIndex,
+            hitTargets: sampledHitTargets,
+            series: [sampledSeries]
+        };
+    }
+
+    static #sampleCartesianWaterfallScene(
+        toScene: CartesianWaterfallChartScene,
+        seriesPlans: ChartTransitionPlan["seriesPlans"],
+        axisPlan: CartesianAxisTransitionPlan | null | undefined,
+        progress: number
+    ): CartesianWaterfallChartScene {
+        const plan = seriesPlans.find(p => p.adapterType === "waterfall");
+        if (!plan) {
+            return toScene;
+        }
+
+        const sampledSeries = plan.sample(progress) as ChartWaterfallSeriesScene | null;
+        if (!sampledSeries) {
+            return toScene;
+        }
+
+        const targetHitsByKey = new Map<string, SceneHitTarget>();
+        for (const th of toScene.hitTargets) {
+            if (th.animationKey) {
+                targetHitsByKey.set(th.animationKey, th);
+            }
+        }
+
+        const sampledHitTargets: SceneHitTarget[] = [];
+        for (const bar of sampledSeries.bars) {
+            if ((bar.renderOpacity ?? 1) > 0.05 && bar.bounds.width > 0 && bar.bounds.height > 0) {
+                const targetHit = targetHitsByKey.get(bar.animationKey);
+                if (targetHit) {
+                    sampledHitTargets.push({
+                        ...targetHit,
+                        animationKey: bar.animationKey,
+                        bounds: bar.bounds,
+                        color: bar.color,
+                        dataIndex: targetHit.dataIndex ?? bar.dataIndex,
+                        datum: targetHit.datum ?? bar.datum,
+                        formattedCategory: targetHit.formattedCategory,
+                        formattedValue: targetHit.formattedValue,
+                        fromValue: targetHit.fromValue ?? bar.barStart,
+                        index: targetHit.index ?? bar.dataIndex,
+                        itemId: bar.itemId,
+                        point: {
+                            x: bar.bounds.x + bar.bounds.width / 2,
+                            y: bar.bounds.y + bar.bounds.height / 2
+                        },
+                        renderOrder: bar.renderOrder,
+                        seriesId: sampledSeries.id,
+                        seriesName: sampledSeries.name,
+                        seriesType: "waterfall",
+                        toValue: targetHit.toValue ?? bar.barEnd,
+                        value: targetHit.value,
+                        visualBounds: bar.bounds,
+                        waterfall: targetHit.waterfall,
+                        xKey: bar.itemId,
+                        xValue: targetHit.xValue ?? bar.category,
+                        yValue: targetHit.yValue ?? bar.barEnd
+                    });
+                }
+            }
+        }
+
+        const hitIndex = new WaterfallHitIndex(
+            toScene.plotRect,
+            sampledSeries.bars,
+            sampledHitTargets
+        );
+
+        let sampledAxes = toScene.axes;
+        if (axisPlan) {
+            sampledAxes = axisPlan.sample(progress);
+        }
+
+        return {
+            ...toScene,
+            axes: sampledAxes,
+            hitIndex,
+            hitTargets: sampledHitTargets,
+            series: [sampledSeries]
         };
     }
 }

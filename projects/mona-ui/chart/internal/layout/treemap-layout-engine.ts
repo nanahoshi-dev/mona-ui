@@ -76,14 +76,13 @@ export class TreemapLayoutEngine {
         const tileMode = registration.tile ? registration.tile() : "squarify";
         const sortMode = registration.sort ? registration.sort() : "descending";
 
-        const basePadding = registration.padding ? registration.padding() : 2;
         const paddingInner = Math.max(
             0,
-            registration.paddingInner ? (registration.paddingInner() ?? basePadding) : basePadding
+            registration.paddingInner ? (registration.paddingInner() ?? 2) : 2
         );
         const paddingOuter = Math.max(
             0,
-            registration.paddingOuter ? (registration.paddingOuter() ?? basePadding) : basePadding
+            registration.paddingOuter ? (registration.paddingOuter() ?? 4) : 4
         );
         const parentHeaderHeight = Math.max(
             0,
@@ -97,9 +96,11 @@ export class TreemapLayoutEngine {
 
         const rawMaxDepth = registration.maxDepth?.();
         const effectiveMaxDepth =
-            rawMaxDepth !== undefined && Number.isFinite(rawMaxDepth) && Math.floor(rawMaxDepth) >= 1
-                ? Math.floor(rawMaxDepth)
-                : undefined;
+            rawMaxDepth === undefined || !Number.isFinite(rawMaxDepth)
+                ? undefined
+                : rawMaxDepth <= 0
+                  ? 1
+                  : Math.floor(rawMaxDepth);
 
         const maxLabels = Math.max(0, registration.maxLabels ? registration.maxLabels() : 100);
         const minLabelWidth = Math.max(0, registration.minLabelWidth ? (registration.minLabelWidth() ?? 30) : 30);

@@ -1,6 +1,7 @@
 import type { ChartFinancialDirection } from "./chart-financial.models";
+import type { ChartWaterfallDatumKind } from "./chart-waterfall.models";
 
-export type ChartPointValueKind = "ohlc" | "range" | "scalar";
+export type ChartPointValueKind = "ohlc" | "range" | "scalar" | "waterfall";
 
 export interface ChartScalarPointValue {
     readonly valueKind: "scalar";
@@ -32,4 +33,22 @@ export interface ChartOhlcPointValue {
     readonly valueKind: "ohlc";
 }
 
-export type ChartPointValue = ChartOhlcPointValue | ChartRangePointValue | ChartScalarPointValue;
+export interface ChartWaterfallPointValue {
+    readonly barEnd: number;
+    readonly barStart: number;
+    readonly cumulativeAfter: number;
+    readonly cumulativeBefore: number;
+    readonly deltaValue?: number;
+    readonly formattedCumulativeAfter: string;
+    readonly formattedCumulativeBefore: string;
+    readonly formattedDelta?: string;
+    readonly kind: ChartWaterfallDatumKind;
+    readonly valueKind: "waterfall";
+}
+
+export type ChartPointValue =
+    | ChartOhlcPointValue
+    | ChartRangePointValue
+    | ChartScalarPointValue
+    | ChartWaterfallPointValue;
+

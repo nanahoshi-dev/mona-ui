@@ -92,4 +92,32 @@ describe("ChartDemoComponent", () => {
         fixture.detectChanges();
         expect(component.eventLogs()[0].details).toContain("Treemap Sibling Sort: ascending");
     });
+
+    it("should switch to funnel tab and handle orientation and label updates", () => {
+        component.setTab("funnel");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Conversion Funnel & Drop-off Analysis");
+
+        component.onFunnelOrientationChange("horizontal");
+        fixture.detectChanges();
+        expect(component.eventLogs()[0].details).toContain("Funnel Orientation: horizontal");
+
+        component.onFunnelLabelContentChange("category-value");
+        fixture.detectChanges();
+        expect(component.eventLogs()[0].details).toContain("Funnel Label Content: category-value");
+
+        component.randomizeFunnelData();
+        fixture.detectChanges();
+        expect(component.eventLogs()[0].details).toContain("Randomized Funnel stages");
+    });
+
+    it("should switch to waterfall tab and handle cash flow randomization", () => {
+        component.setTab("waterfall");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Corporate Cash Flow Breakdown");
+
+        component.randomizeWaterfallData();
+        fixture.detectChanges();
+        expect(component.eventLogs()[0].details).toContain("Randomized Waterfall cashflow");
+    });
 });

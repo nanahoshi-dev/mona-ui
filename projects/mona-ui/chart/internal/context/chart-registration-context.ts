@@ -454,7 +454,6 @@ export interface ChartTreemapSeriesRegistration
     readonly maxLabels?: Signal<number>;
     readonly minLabelHeight?: Signal<number | undefined>;
     readonly minLabelWidth?: Signal<number | undefined>;
-    readonly padding?: Signal<number>;
     readonly paddingInner?: Signal<number | undefined>;
     readonly paddingOuter?: Signal<number | undefined>;
     readonly parentFillOpacity?: Signal<number | undefined>;
@@ -469,6 +468,61 @@ export interface ChartTreemapSeriesRegistration
     readonly type: "treemap";
     readonly valueField?: Signal<ChartField>;
     readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
+}
+
+export interface ChartFunnelSeriesRegistration
+    extends ChartSeriesRegistrationBase,
+        ChartDatumVisibilityRegistration {
+    readonly categoryField: Signal<ChartField>;
+    readonly categoryFormatter?: Signal<ChartValueFormatter | undefined>;
+    readonly color?: Signal<string>;
+    readonly colorField?: Signal<ChartField | undefined>;
+    readonly colors?: Signal<readonly string[] | undefined>;
+    readonly field: Signal<ChartField>;
+    readonly fillOpacity?: Signal<number | undefined>;
+    readonly gap: Signal<number>;
+    readonly labelContent: Signal<import("../../models/chart-funnel.models").ChartFunnelLabelContent>;
+    readonly labelTemplate?: Signal<import("../../directives/chart-funnel-label-template.directive").ChartFunnelLabelTemplateDirective | undefined>;
+    readonly maxLabels?: Signal<number>;
+    readonly minLabelHeight?: Signal<number | undefined>;
+    readonly minLabelWidth?: Signal<number | undefined>;
+    readonly orientation: Signal<import("../../models/chart-funnel.models").ChartFunnelOrientation>;
+    readonly showLabels?: Signal<boolean>;
+    readonly strokeColor?: Signal<string>;
+    readonly strokeWidth?: Signal<number | undefined>;
+    readonly type: "funnel";
+    readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
+    readonly widthRatio: Signal<number>;
+}
+
+export interface ChartWaterfallSeriesRegistration
+    extends ChartSeriesRegistrationBase {
+    readonly borderRadius?: Signal<number | undefined>;
+    readonly connectorColor?: Signal<string>;
+    readonly connectorWidth?: Signal<number | undefined>;
+    readonly datumVisibilityRevision?: Signal<number>;
+    readonly decreaseColor?: Signal<string>;
+    readonly field: Signal<ChartField>;
+    readonly fillOpacity?: Signal<number | undefined>;
+    readonly increaseColor?: Signal<string>;
+    readonly isDatumVisible?: (kind: string) => boolean;
+    readonly kindField?: Signal<ChartField | undefined>;
+    readonly labelTemplate?: Signal<import("../../directives/chart-waterfall-label-template.directive").ChartWaterfallLabelTemplateDirective | undefined>;
+    readonly maxBarWidth?: Signal<number | undefined>;
+    readonly maxLabels?: Signal<number>;
+    readonly minLabelWidth?: Signal<number | undefined>;
+    readonly neutralColor?: Signal<string>;
+    readonly showConnectors?: Signal<boolean>;
+    readonly showLabels?: Signal<boolean>;
+    readonly startValue?: Signal<number>;
+    readonly strokeColor?: Signal<string>;
+    readonly strokeWidth?: Signal<number | undefined>;
+    readonly subtotalColor?: Signal<string>;
+    readonly toggleDatumVisibility?: (kind: string) => boolean;
+    readonly totalColor?: Signal<string>;
+    readonly type: "waterfall";
+    readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
+    readonly xField?: Signal<ChartField | undefined>;
 }
 
 export type ChartHierarchicalSeriesRegistration = ChartTreemapSeriesRegistration;
@@ -498,11 +552,13 @@ export type ChartRadialSeriesRegistration = ChartContinuousPolarSeriesRegistrati
 
 export type ChartSeriesRegistration =
     | ChartCartesianSeriesRegistration
+    | ChartFunnelSeriesRegistration
     | ChartHeatmapSeriesRegistration
     | ChartHierarchicalSeriesRegistration
     | ChartRadialArcSeriesRegistration
     | ChartRadialSeriesRegistration
-    | ChartSectorSeriesRegistration;
+    | ChartSectorSeriesRegistration
+    | ChartWaterfallSeriesRegistration;
 
 export interface ChartRegistrationContext {
     invalidate(reason?: ChartInvalidationReason): void;

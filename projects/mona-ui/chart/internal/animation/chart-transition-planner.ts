@@ -13,6 +13,7 @@ import { AreaSeriesAnimationAdapter } from "./adapters/area-animation-adapter";
 import { AxisAnimationAdapter } from "./adapters/axis-animation-adapter";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
 import { FinancialSeriesAnimationAdapter } from "./adapters/financial-animation-adapter";
+import { FunnelAnimationAdapter } from "./adapters/funnel-animation-adapter";
 import { HeatmapAnimationAdapter } from "./adapters/heatmap-animation-adapter";
 import { LineSeriesAnimationAdapter } from "./adapters/line-animation-adapter";
 import { MarkerSeriesAnimationAdapter } from "./marker-series-animation-adapter";
@@ -23,6 +24,7 @@ import { RangeAreaSeriesAnimationAdapter } from "./adapters/range-area-animation
 import { RangeBarSeriesAnimationAdapter } from "./adapters/range-bar-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
 import { TreemapAnimationAdapter } from "./adapters/treemap-animation-adapter";
+import { WaterfallAnimationAdapter } from "./adapters/waterfall-animation-adapter";
 import type { NormalizedChartAnimationOptions } from "./chart-animation-options";
 import type {
     ChartAnimationComplexity,
@@ -606,6 +608,8 @@ export class ChartTransitionPlanner {
             const rangeBarAdapter = new RangeBarSeriesAnimationAdapter();
             const rangeAreaAdapter = new RangeAreaSeriesAnimationAdapter();
             const financialAdapter = new FinancialSeriesAnimationAdapter();
+            const funnelAdapter = new FunnelAnimationAdapter();
+            const waterfallAdapter = new WaterfallAnimationAdapter();
 
             for (const targetSeries of targetCartesian.series) {
                 targetIds.add(targetSeries.id);
@@ -684,6 +688,22 @@ export class ChartTransitionPlanner {
                             context
                         )
                     );
+                } else if (targetSeries.type === "funnel") {
+                    plans.push(
+                        funnelAdapter.createPlan(
+                            prevSeries?.type === "funnel" ? prevSeries : null,
+                            targetSeries,
+                            context
+                        )
+                    );
+                } else if (targetSeries.type === "waterfall") {
+                    plans.push(
+                        waterfallAdapter.createPlan(
+                            prevSeries?.type === "waterfall" ? prevSeries : null,
+                            targetSeries,
+                            context
+                        )
+                    );
                 }
             }
 
@@ -705,6 +725,10 @@ export class ChartTransitionPlanner {
                             plans.push(rangeAreaAdapter.createPlan(prevSeries, null, context));
                         } else if (prevSeries.type === "heatmap") {
                             plans.push(HeatmapAnimationAdapter.createPlan(prevSeries, null, context));
+                        } else if (prevSeries.type === "funnel") {
+                            plans.push(funnelAdapter.createPlan(prevSeries, null, context));
+                        } else if (prevSeries.type === "waterfall") {
+                            plans.push(waterfallAdapter.createPlan(prevSeries, null, context));
                         } else if (prevSeries.type === "scatter" || prevSeries.type === "bubble") {
                             const markerPlan = MarkerSeriesAnimationAdapter.planSeries(prevSeries, undefined);
                             if (markerPlan) {

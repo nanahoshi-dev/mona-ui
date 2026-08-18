@@ -58,11 +58,10 @@ function sampleTreemapNode(plan: TreemapNodePlan, progress: number): SceneTreema
             : (to.headerBounds ?? from.headerBounds);
     const borderRadius = RectGeometryTransition.interpolateRadius(from.borderRadius, to.borderRadius, progress);
     const renderOpacity = lerpOpacity(from.renderOpacity ?? 1, to.renderOpacity ?? 1, progress);
-    const aggregateValue = lerp(from.aggregateValue, to.aggregateValue, progress);
 
     return {
         ...to,
-        aggregateValue,
+        aggregateValue: to.aggregateValue,
         animationKey: to.animationKey ?? from.animationKey,
         borderRadius,
         bounds,

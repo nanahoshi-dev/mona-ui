@@ -90,8 +90,26 @@ export class ChartHitTestEngine {
             return PolarAxisHitTester.testHit(pointer, scene as PolarAxisChartScene, shared, maxHoverDistance);
         }
 
-        if (scene.coordinateSystem === "cartesian" && scene.cartesianKind === "heatmap") {
-            return HeatmapHitTester.testHit(pointer, scene as CartesianHeatmapChartScene);
+        if (scene.coordinateSystem === "cartesian") {
+            if (scene.cartesianKind === "heatmap") {
+                return HeatmapHitTester.testHit(pointer, scene as CartesianHeatmapChartScene);
+            }
+            if (scene.cartesianKind === "funnel") {
+                const target = scene.hitIndex ? scene.hitIndex.query(pointer) : null;
+                return {
+                    activeHitTarget: target,
+                    activeHits: target ? [target] : [],
+                    pointerPosition: pointer
+                };
+            }
+            if (scene.cartesianKind === "waterfall") {
+                const target = scene.hitIndex ? scene.hitIndex.query(pointer) : null;
+                return {
+                    activeHitTarget: target,
+                    activeHits: target ? [target] : [],
+                    pointerPosition: pointer
+                };
+            }
         }
 
         const cartesianScene = scene as CartesianXYChartScene;

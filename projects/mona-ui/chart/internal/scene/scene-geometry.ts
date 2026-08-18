@@ -184,6 +184,7 @@ export interface SceneHitTarget {
     formattedXValue?: string;
     formattedYCategory?: string;
     fromValue?: number;
+    funnel?: import("../../models/chart-funnel.models").ChartFunnelPointMetadata;
     hierarchy?: import("../../models/chart-hierarchy.models").ChartHierarchyPointMetadata;
     high?: number;
     highPoint?: ChartPoint;
@@ -223,6 +224,7 @@ export interface SceneHitTarget {
     valueKind?: ChartPointValueKind;
     visualBounds?: ChartRect;
     visualRadius?: number;
+    waterfall?: import("../../models/chart-point-value.models").ChartWaterfallPointValue;
     xIndex?: number;
     xKey: ChartInteractionXKey;
     xValue: unknown;

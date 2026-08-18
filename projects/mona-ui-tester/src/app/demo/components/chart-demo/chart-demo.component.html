@@ -163,6 +163,20 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'funnel' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('funnel')">
+                Funnel Chart
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'waterfall' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('waterfall')">
+                Waterfall Chart
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('custom')">
@@ -595,6 +609,77 @@
                                 <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
                                 <button monaButton size="small" look="outline" (click)="randomizeTreemapData()">
                                     Randomize Leaf Values
+                                </button>
+                            </div>
+                        }
+
+                        @if (activeTab() === 'funnel') {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Orientation</span>
+                                <mona-dropdown-list
+                                    [data]="funnelOrientationOptions"
+                                    textField="label"
+                                    valueField="value"
+                                    [valuePrimitive]="true"
+                                    [value]="funnelOrientation()"
+                                    (valueChange)="onFunnelOrientationChange($event)"
+                                    size="small"
+                                    class="w-56" />
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label Content</span>
+                                <mona-dropdown-list
+                                    [data]="funnelLabelContentOptions"
+                                    textField="label"
+                                    valueField="value"
+                                    [valuePrimitive]="true"
+                                    [value]="funnelLabelContent()"
+                                    (valueChange)="onFunnelLabelContentChange($event)"
+                                    size="small"
+                                    class="w-64" />
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Options</span>
+                                <div class="flex items-center gap-4 flex-wrap">
+                                    <mona-check-box [checked]="funnelShowLabels()" (checkedChange)="funnelShowLabels.set($event)">
+                                        Show Labels
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="funnelUseCustomTemplate()" (checkedChange)="funnelUseCustomTemplate.set($event)">
+                                        Custom Label Template
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
+                                <button monaButton size="small" look="outline" (click)="randomizeFunnelData()">
+                                    Randomize Funnel Stages
+                                </button>
+                            </div>
+                        }
+
+                        @if (activeTab() === 'waterfall') {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Connectors</span>
+                                <div class="flex items-center gap-4 flex-wrap">
+                                    <mona-check-box [checked]="waterfallShowConnectors()" (checkedChange)="waterfallShowConnectors.set($event)">
+                                        Show Step Connectors
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="waterfallShowLabels()" (checkedChange)="waterfallShowLabels.set($event)">
+                                        Show Value Labels
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="waterfallUseCustomTemplate()" (checkedChange)="waterfallUseCustomTemplate.set($event)">
+                                        Custom Step Label Template
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
+                                <button monaButton size="small" look="outline" (click)="randomizeWaterfallData()">
+                                    Randomize Cash Flow
                                 </button>
                             </div>
                         }
@@ -1467,6 +1552,76 @@
                                 </ng-template>
                             }
                         </mona-treemap-series>
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
+                    </mona-chart>
+                </div>
+            }
+            @case ("funnel") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Conversion Funnel & Drop-off Analysis (Symmetric Trapezoids)</h3>
+                    <mona-chart
+                        [data]="funnelData()"
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Conversion Funnel Chart"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-funnel-series
+                            categoryField="stage"
+                            field="value"
+                            [orientation]="funnelOrientation()"
+                            [gap]="funnelGap()"
+                            [widthRatio]="funnelWidthRatio()"
+                            [showLabels]="funnelShowLabels()"
+                            [labelContent]="funnelLabelContent()"
+                            name="Sales Pipeline"
+                            (stageVisibilityChange)="onFunnelStageVisibilityChange($event)">
+                            @if (funnelUseCustomTemplate()) {
+                                <ng-template monaChartFunnelLabelTemplate let-stage>
+                                    <div class="flex flex-col items-center justify-center p-1 font-sans">
+                                        <span class="font-bold text-xs">{{ stage.formattedCategory }}</span>
+                                        <span class="text-[11px] opacity-90">{{ stage.formattedValue }}</span>
+                                        @if (stage.formattedConversionRate) {
+                                            <span class="text-[10px] opacity-75">({{ stage.formattedConversionRate }} step)</span>
+                                        }
+                                    </div>
+                                </ng-template>
+                            }
+                        </mona-funnel-series>
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
+                    </mona-chart>
+                </div>
+            }
+            @case ("waterfall") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Corporate Cash Flow Breakdown (Waterfall Chart with Subtotals)</h3>
+                    <mona-chart
+                        [data]="waterfallData()"
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Cash Flow Waterfall Chart"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-chart-x-axis [axisLine]="xAxisLine()" [gridLines]="xGridLines()" [nice]="true" />
+                        <mona-chart-y-axis [axisLine]="yAxisLine()" [gridLines]="yGridLines()" [nice]="true" />
+                        <mona-waterfall-series
+                            xField="category"
+                            field="value"
+                            kindField="kind"
+                            [showConnectors]="waterfallShowConnectors()"
+                            [showLabels]="waterfallShowLabels()"
+                            [borderRadius]="waterfallBorderRadius()"
+                            name="Cash Flow">
+                            @if (waterfallUseCustomTemplate()) {
+                                <ng-template monaChartWaterfallLabelTemplate let-step>
+                                    <div class="text-[11px] font-semibold px-1 py-0.5 rounded shadow-xs" [style.color]="step.color">
+                                        {{ step.formattedValue }}
+                                    </div>
+                                </ng-template>
+                            }
+                        </mona-waterfall-series>
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip />
                     </mona-chart>

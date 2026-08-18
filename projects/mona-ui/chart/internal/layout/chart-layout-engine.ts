@@ -10,6 +10,7 @@ import {
 import type {
     ChartAngularAxisRegistration,
     ChartCartesianSeriesRegistration,
+    ChartFunnelSeriesRegistration,
     ChartHeatmapSeriesRegistration,
     ChartHierarchicalSeriesRegistration,
     ChartRadialArcSeriesRegistration,
@@ -18,15 +19,18 @@ import type {
     ChartSectorSeriesRegistration,
     ChartSeriesRegistration,
     ChartTreemapSeriesRegistration,
+    ChartWaterfallSeriesRegistration,
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import type { ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianLayoutEngine } from "./cartesian-layout-engine";
+import { FunnelLayoutEngine } from "./funnel-layout-engine";
 import { HeatmapLayoutEngine } from "./heatmap-layout-engine";
 import { HierarchicalLayoutEngine } from "./hierarchical-layout-engine";
 import { PolarLayoutEngine } from "./polar-layout-engine";
+import { WaterfallLayoutEngine } from "./waterfall-layout-engine";
 
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
 
@@ -214,6 +218,77 @@ export class ChartLayoutEngine {
                 xAxis: options.xAxis,
                 yAxis: options.yAxis
             });
+        }
+
+        const funnelSeries = series.filter(
+            (s): s is ChartFunnelSeriesRegistration => s.type === "funnel"
+        );
+
+        if (funnelSeries.length > 0) {
+            if (funnelSeries.length > 1 || series.length > 1) {
+                warnOnce(
+                    funnelSeries.length > 1 ? "multi-funnel-series" : "mixed-funnel",
+                    funnelSeries.length > 1
+                        ? "[MonaChart] Only a single Funnel series is supported per chart."
+                        : "[MonaChart] Funnel series cannot be mixed with other chart series.",
+                    warnedSet
+                );
+                return FunnelLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight);
+            }
+
+            if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
+                warnOnce(
+                    "funnel-projected-axes",
+                    "[MonaChart] Projected axes (<mona-chart-x-axis>, <mona-chart-y-axis>, <mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Funnel charts.",
+                    warnedSet
+                );
+            }
+
+            const activeFunnel = funnelSeries[0];
+            const plotRect = {
+                height: options.containerHeight,
+                width: options.containerWidth,
+                x: 0,
+                y: 0
+            };
+
+            return FunnelLayoutEngine.layout(
+                activeFunnel,
+                plotRect,
+                options.containerWidth,
+                options.containerHeight,
+                options.styleResolver,
+                options.rootData,
+                warnedSet
+            );
+        }
+
+        const waterfallSeries = series.filter(
+            (s): s is ChartWaterfallSeriesRegistration => s.type === "waterfall"
+        );
+
+        if (waterfallSeries.length > 0) {
+            if (waterfallSeries.length > 1 || series.length > 1) {
+                warnOnce(
+                    waterfallSeries.length > 1 ? "multi-waterfall-series" : "mixed-waterfall",
+                    waterfallSeries.length > 1
+                        ? "[MonaChart] Only a single Waterfall series is supported per chart."
+                        : "[MonaChart] Waterfall series cannot be mixed with other chart series.",
+                    warnedSet
+                );
+                return WaterfallLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight);
+            }
+
+            return WaterfallLayoutEngine.layout(
+                waterfallSeries[0],
+                options.containerWidth,
+                options.containerHeight,
+                options.styleResolver,
+                options.xAxis,
+                options.yAxis,
+                options.rootData,
+                warnedSet
+            );
         }
 
         if (families.size > 1) {

@@ -3,6 +3,7 @@ import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {
     ChartCartesianSeriesRegistration,
     ChartFinancialSeriesRegistration,
+    ChartFunnelSeriesRegistration,
     ChartGaugeSeriesRegistration,
     ChartHeatmapSeriesRegistration,
     ChartPolarSeriesRegistration,
@@ -11,7 +12,8 @@ import type {
     ChartRadialSeriesRegistration,
     ChartRoseSeriesRegistration,
     ChartSeriesRegistration,
-    ChartTreemapSeriesRegistration
+    ChartTreemapSeriesRegistration,
+    ChartWaterfallSeriesRegistration
 } from "../context/chart-registration-context";
 import type { ChartField } from "../../models/chart.models";
 import type { ChartHeatmapSeriesStyle } from "../../models/chart-heatmap.models";
@@ -20,6 +22,8 @@ import type { ChartFinancialSeriesStyle } from "../scene/cartesian-scene";
 import type { ChartPolarSeriesStyle } from "../scene/polar-scene";
 import type { ChartGaugeSeriesStyle, ChartRadialArcSeriesStyle } from "../scene/polar-arc-scene";
 import type { ChartTreemapSeriesStyle } from "../scene/hierarchical-scene";
+import type { ChartFunnelSeriesStyle } from "../scene/funnel-scene";
+import type { ChartWaterfallSeriesStyle } from "../scene/waterfall-scene";
 import { isFiniteNumber } from "../utils/number-utils";
 
 const DEFAULT_CHART_COLORS = [
@@ -1170,6 +1174,286 @@ export class ChartStyleResolver {
             parentFillOpacity,
             strokeColor,
             strokeWidth
+        };
+    }
+
+    public resolveFunnelSeriesStyle(
+        series: ChartFunnelSeriesRegistration
+    ): ChartFunnelSeriesStyle {
+        const rawStrokeColor = series.strokeColor ? series.strokeColor() : "";
+        const strokeWidthInput = series.strokeWidth?.();
+        const fillOpacityInput = series.fillOpacity?.();
+        const rawBaseColor = series.colors ? (series.colors()?.[0] ?? "") : (series.color ? (series.color() ?? "") : "");
+
+        let cssStrokeWidth: number | undefined;
+        let cssStrokeColor: string | undefined;
+        let cssFillOpacity: number | undefined;
+
+        const targetElements = [
+            series.element?.nativeElement,
+            this.#rootElement
+        ].filter((el): el is HTMLElement => Boolean(el));
+
+        if (typeof window !== "undefined") {
+            for (const el of targetElements) {
+                try {
+                    const computed = window.getComputedStyle(el);
+                    if (cssStrokeWidth === undefined) {
+                        const sw = computed.getPropertyValue("--mona-chart-funnel-stroke-width");
+                        if (sw) {
+                            const parsed = parseFloat(sw);
+                            if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+                        }
+                    }
+                    if (!cssStrokeColor) {
+                        const sc = computed.getPropertyValue("--mona-chart-funnel-stroke-color").trim();
+                        if (sc) cssStrokeColor = sc;
+                    }
+                    if (cssFillOpacity === undefined) {
+                        const fo = computed.getPropertyValue("--mona-chart-funnel-fill-opacity");
+                        if (fo) {
+                            const parsed = parseFloat(fo);
+                            if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                        }
+                    }
+                } catch {
+                    // Ignore style resolution errors
+                }
+            }
+        }
+
+        const seriesEl = series.element?.nativeElement ?? this.#rootElement;
+
+        const defaultStrokeColor =
+            this.resolveCssVariable("--color-surface", seriesEl) ||
+            this.resolveCssVariable("--color-background", seriesEl) ||
+            "#ffffff";
+
+        const strokeColor = rawStrokeColor
+            ? this.resolveCssVariable(rawStrokeColor, seriesEl)
+            : (cssStrokeColor ? this.resolveCssVariable(cssStrokeColor, seriesEl) : defaultStrokeColor);
+
+        const strokeWidth =
+            strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
+                ? strokeWidthInput
+                : (cssStrokeWidth !== undefined ? cssStrokeWidth : 1);
+
+        const fillOpacity =
+            fillOpacityInput !== undefined && isFiniteNumber(fillOpacityInput)
+                ? Math.max(0, Math.min(1, fillOpacityInput))
+                : (cssFillOpacity !== undefined ? cssFillOpacity : 1);
+
+        const baseColor = rawBaseColor
+            ? this.resolveCssVariable(rawBaseColor, seriesEl)
+            : this.resolvePaletteColor(0);
+
+        return {
+            baseColor,
+            fillOpacity,
+            strokeColor,
+            strokeWidth
+        };
+    }
+
+    public resolveWaterfallSeriesStyle(
+        series: ChartWaterfallSeriesRegistration
+    ): ChartWaterfallSeriesStyle {
+        const rawIncreaseColor = series.increaseColor ? series.increaseColor() : "";
+        const rawDecreaseColor = series.decreaseColor ? series.decreaseColor() : "";
+        const rawNeutralColor = series.neutralColor ? series.neutralColor() : "";
+        const rawSubtotalColor = series.subtotalColor ? series.subtotalColor() : "";
+        const rawTotalColor = series.totalColor ? series.totalColor() : "";
+        const rawConnectorColor = series.connectorColor ? series.connectorColor() : "";
+        const rawStrokeColor = series.strokeColor ? series.strokeColor() : "";
+
+        const connectorWidthInput = series.connectorWidth?.();
+        const strokeWidthInput = series.strokeWidth?.();
+        const fillOpacityInput = series.fillOpacity?.();
+        const borderRadiusInput = series.borderRadius?.();
+
+        let cssIncreaseColor: string | undefined;
+        let cssDecreaseColor: string | undefined;
+        let cssNeutralColor: string | undefined;
+        let cssSubtotalColor: string | undefined;
+        let cssTotalColor: string | undefined;
+        let cssConnectorColor: string | undefined;
+        let cssConnectorWidth: number | undefined;
+        let cssStrokeColor: string | undefined;
+        let cssStrokeWidth: number | undefined;
+        let cssFillOpacity: number | undefined;
+        let cssBorderRadius: number | undefined;
+        let cssLabelColor: string | undefined;
+
+        const targetElements = [
+            series.element?.nativeElement,
+            this.#rootElement
+        ].filter((el): el is HTMLElement => Boolean(el));
+
+        if (typeof window !== "undefined") {
+            for (const el of targetElements) {
+                try {
+                    const computed = window.getComputedStyle(el);
+                    if (!cssIncreaseColor) {
+                        const v = computed.getPropertyValue("--mona-chart-waterfall-increase-color").trim();
+                        if (v) cssIncreaseColor = v;
+                    }
+                    if (!cssDecreaseColor) {
+                        const v = computed.getPropertyValue("--mona-chart-waterfall-decrease-color").trim();
+                        if (v) cssDecreaseColor = v;
+                    }
+                    if (!cssNeutralColor) {
+                        const v = computed.getPropertyValue("--mona-chart-waterfall-neutral-color").trim();
+                        if (v) cssNeutralColor = v;
+                    }
+                    if (!cssSubtotalColor) {
+                        const v = computed.getPropertyValue("--mona-chart-waterfall-subtotal-color").trim();
+                        if (v) cssSubtotalColor = v;
+                    }
+                    if (!cssTotalColor) {
+                        const v = computed.getPropertyValue("--mona-chart-waterfall-total-color").trim();
+                        if (v) cssTotalColor = v;
+                    }
+                    if (!cssConnectorColor) {
+                        const v = computed.getPropertyValue("--mona-chart-waterfall-connector-color").trim();
+                        if (v) cssConnectorColor = v;
+                    }
+                    if (cssConnectorWidth === undefined) {
+                        const sw = computed.getPropertyValue("--mona-chart-waterfall-connector-width");
+                        if (sw) {
+                            const parsed = parseFloat(sw);
+                            if (isFiniteNumber(parsed) && parsed >= 0) cssConnectorWidth = parsed;
+                        }
+                    }
+                    if (!cssStrokeColor) {
+                        const sc = computed.getPropertyValue("--mona-chart-waterfall-stroke-color").trim();
+                        if (sc) cssStrokeColor = sc;
+                    }
+                    if (cssStrokeWidth === undefined) {
+                        const sw = computed.getPropertyValue("--mona-chart-waterfall-stroke-width");
+                        if (sw) {
+                            const parsed = parseFloat(sw);
+                            if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+                        }
+                    }
+                    if (cssFillOpacity === undefined) {
+                        const fo = computed.getPropertyValue("--mona-chart-waterfall-fill-opacity");
+                        if (fo) {
+                            const parsed = parseFloat(fo);
+                            if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                        }
+                    }
+                    if (cssBorderRadius === undefined) {
+                        const br = computed.getPropertyValue("--mona-chart-waterfall-border-radius");
+                        if (br) {
+                            const parsed = parseFloat(br);
+                            if (isFiniteNumber(parsed) && parsed >= 0) cssBorderRadius = parsed;
+                        }
+                    }
+                    if (!cssLabelColor) {
+                        const lc = computed.getPropertyValue("--mona-chart-waterfall-label-color").trim();
+                        if (lc) cssLabelColor = lc;
+                    }
+                } catch {
+                    // Ignore style resolution errors
+                }
+            }
+        }
+
+        const seriesEl = series.element?.nativeElement ?? this.#rootElement;
+
+        const defaultIncrease =
+            this.resolveCssVariable("--color-emerald-500", seriesEl) ||
+            this.resolveCssVariable("--color-green-500", seriesEl) ||
+            "#10b981";
+
+        const defaultDecrease =
+            this.resolveCssVariable("--color-red-500", seriesEl) ||
+            this.resolveCssVariable("--color-rose-500", seriesEl) ||
+            "#ef4444";
+
+        const defaultNeutral =
+            this.resolveCssVariable("--color-muted-foreground", seriesEl) ||
+            this.resolveCssVariable("--color-gray-500", seriesEl) ||
+            "#6b7280";
+
+        const defaultSubtotal =
+            this.resolveCssVariable("--color-chart-2", seriesEl) ||
+            this.resolvePaletteColor(1) ||
+            "#3b82f6";
+
+        const defaultTotal =
+            this.resolveCssVariable("--color-chart-1", seriesEl) ||
+            this.resolvePaletteColor(0) ||
+            "#1d4ed8";
+
+        const defaultConnector =
+            this.resolveCssVariable("--color-muted-foreground", seriesEl) ||
+            this.resolveCssVariable("--color-border", seriesEl) ||
+            "#64748b";
+
+        const increaseColor = rawIncreaseColor
+            ? this.resolveCssVariable(rawIncreaseColor, seriesEl)
+            : (cssIncreaseColor ? this.resolveCssVariable(cssIncreaseColor, seriesEl) : defaultIncrease);
+
+        const decreaseColor = rawDecreaseColor
+            ? this.resolveCssVariable(rawDecreaseColor, seriesEl)
+            : (cssDecreaseColor ? this.resolveCssVariable(cssDecreaseColor, seriesEl) : defaultDecrease);
+
+        const neutralColor = rawNeutralColor
+            ? this.resolveCssVariable(rawNeutralColor, seriesEl)
+            : (cssNeutralColor ? this.resolveCssVariable(cssNeutralColor, seriesEl) : defaultNeutral);
+
+        const subtotalColor = rawSubtotalColor
+            ? this.resolveCssVariable(rawSubtotalColor, seriesEl)
+            : (cssSubtotalColor ? this.resolveCssVariable(cssSubtotalColor, seriesEl) : defaultSubtotal);
+
+        const totalColor = rawTotalColor
+            ? this.resolveCssVariable(rawTotalColor, seriesEl)
+            : (cssTotalColor ? this.resolveCssVariable(cssTotalColor, seriesEl) : defaultTotal);
+
+        const connectorColor = rawConnectorColor
+            ? this.resolveCssVariable(rawConnectorColor, seriesEl)
+            : (cssConnectorColor ? this.resolveCssVariable(cssConnectorColor, seriesEl) : defaultConnector);
+
+        const strokeColor = rawStrokeColor
+            ? this.resolveCssVariable(rawStrokeColor, seriesEl)
+            : (cssStrokeColor ? this.resolveCssVariable(cssStrokeColor, seriesEl) : "");
+
+        const strokeWidth =
+            strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
+                ? strokeWidthInput
+                : (cssStrokeWidth !== undefined ? cssStrokeWidth : 0);
+
+        const connectorWidth =
+            connectorWidthInput !== undefined && isFiniteNumber(connectorWidthInput) && connectorWidthInput >= 0
+                ? connectorWidthInput
+                : (cssConnectorWidth !== undefined ? cssConnectorWidth : 1);
+
+        const fillOpacity =
+            fillOpacityInput !== undefined && isFiniteNumber(fillOpacityInput)
+                ? Math.max(0, Math.min(1, fillOpacityInput))
+                : (cssFillOpacity !== undefined ? cssFillOpacity : 1);
+
+        const borderRadius =
+            borderRadiusInput !== undefined && isFiniteNumber(borderRadiusInput) && borderRadiusInput >= 0
+                ? borderRadiusInput
+                : (cssBorderRadius !== undefined ? cssBorderRadius : 4);
+
+        const labelColor = cssLabelColor ? this.resolveCssVariable(cssLabelColor, seriesEl) : undefined;
+
+        return {
+            borderRadius,
+            connectorColor,
+            connectorWidth,
+            decreaseColor,
+            fillOpacity,
+            increaseColor,
+            labelColor,
+            neutralColor,
+            strokeColor,
+            strokeWidth,
+            subtotalColor,
+            totalColor
         };
     }
 }

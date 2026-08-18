@@ -1,6 +1,7 @@
 import type { ChartHierarchyPointMetadata } from "./chart-hierarchy.models";
 import type { ChartFinancialDirection } from "./chart-financial.models";
-import type { ChartOhlcPointValue, ChartPointValueKind } from "./chart-point-value.models";
+import type { ChartFunnelPointMetadata } from "./chart-funnel.models";
+import type { ChartOhlcPointValue, ChartPointValueKind, ChartWaterfallPointValue } from "./chart-point-value.models";
 import type { ChartSeriesType } from "./chart-series.models";
 import type { ChartStackMode } from "./chart-stack.models";
 
@@ -26,6 +27,7 @@ export interface ChartPointEvent<T = unknown> {
     formattedXValue?: string;
     formattedYCategory?: string;
     fromValue?: number;
+    funnel?: ChartFunnelPointMetadata;
     hierarchy?: ChartHierarchyPointMetadata;
     high?: number;
     low?: number;
@@ -46,6 +48,7 @@ export interface ChartPointEvent<T = unknown> {
     stackTotal?: number;
     toValue?: number;
     valueKind?: ChartPointValueKind;
+    waterfall?: ChartWaterfallPointValue;
     xValue: unknown;
     yCategory?: unknown;
     yValue?: number;
@@ -73,6 +76,7 @@ export interface ChartPointFocusEvent<T = unknown> {
     formattedXValue?: string;
     formattedYCategory?: string;
     fromValue?: number;
+    funnel?: ChartFunnelPointMetadata;
     hierarchy?: ChartHierarchyPointMetadata;
     high?: number;
     low?: number;
@@ -93,6 +97,7 @@ export interface ChartPointFocusEvent<T = unknown> {
     stackTotal?: number;
     toValue?: number;
     valueKind?: ChartPointValueKind;
+    waterfall?: ChartWaterfallPointValue;
     xValue: unknown;
     yCategory?: unknown;
     yValue?: number;
