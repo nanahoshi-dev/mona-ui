@@ -50,7 +50,8 @@ describe("WaterfallDataProcessor", () => {
             seriesId: "w-1",
             seriesName: "Waterfall",
             style,
-            styleResolver
+            styleResolver,
+            xField: "category"
         });
 
         expect(res.points.length).toBe(7);
@@ -127,10 +128,10 @@ describe("WaterfallDataProcessor", () => {
         expect(res.minY).toBe(0);
         expect(res.maxY).toBe(150);
 
-        // Legend items for all 5 used visual kinds, interactive datum
+        // Legend items for all 5 used visual kinds, semantic presentation
         expect(res.legendItems.length).toBe(5);
         expect(res.legendItems.map(i => i.name)).toEqual(["Increase", "Decrease", "No Change", "Subtotal", "Total"]);
-        expect(res.legendItems.every(i => i.kind === "datum" && i.interactive === true && i.visible === true)).toBe(true);
+        expect(res.legendItems.every(i => i.kind === "semantic" && i.interactive === false && i.visible === true)).toBe(true);
     });
 
     it("supports startValue baseline offset and does NOT force zero if no subtotal/total is present", () => {
@@ -145,7 +146,8 @@ describe("WaterfallDataProcessor", () => {
             seriesName: "Waterfall",
             startValue: 1000,
             style,
-            styleResolver
+            styleResolver,
+            xField: "category"
         });
 
         expect(res.points[0].barStart).toBe(1000);
@@ -168,7 +170,8 @@ describe("WaterfallDataProcessor", () => {
             seriesName: "Waterfall",
             startValue: 1000,
             style,
-            styleResolver
+            styleResolver,
+            xField: "category"
         });
 
         expect(res.minY).toBe(0);
@@ -191,7 +194,8 @@ describe("WaterfallDataProcessor", () => {
             seriesId: "w-1",
             seriesName: "Waterfall",
             style,
-            styleResolver
+            styleResolver,
+            xField: "category"
         });
 
         // Only Valid 1 and Valid 2 should remain
@@ -215,7 +219,8 @@ describe("WaterfallDataProcessor", () => {
             seriesId: "w-1",
             seriesName: "Waterfall",
             style,
-            styleResolver
+            styleResolver,
+            xField: "category"
         });
 
         expect(res.points.length).toBe(3);
@@ -232,7 +237,8 @@ describe("WaterfallDataProcessor", () => {
             startValue: NaN,
             style,
             styleResolver,
-            warnedDiagnosticSignatures: warned
+            warnedDiagnosticSignatures: warned,
+            xField: "category"
         });
 
         expect(res.points[0].barStart).toBe(0);
@@ -252,7 +258,8 @@ describe("WaterfallDataProcessor", () => {
             seriesId: "w-1",
             seriesName: "Waterfall",
             style,
-            styleResolver
+            styleResolver,
+            xField: "category"
         });
 
         expect(res.points.length).toBe(3);
@@ -305,10 +312,35 @@ describe("WaterfallDataProcessor", () => {
         expect(warned.has("w-1:duplicate-keys")).toBe(true);
     });
 
-    it("warns on unknown kind and treats it as change", () => {
+    it("bounds unknown kind warnings per series", () => {
         const warned = new Set<string>();
+        const data = Array.from({ length: 100 }, (_, i) => ({
+            category: `Step ${i}`,
+            kind: `badKind_${i}`,
+            value: 10
+        }));
+
+        const res = WaterfallDataProcessor.process({
+            data,
+            kindField: "kind",
+            seriesId: "w-1",
+            seriesName: "Waterfall",
+            style,
+            styleResolver,
+            warnedDiagnosticSignatures: warned,
+            xField: "category"
+        });
+
+        expect(res.points.length).toBe(100);
+        expect(res.points.every(p => p.kind === "change")).toBe(true);
+        expect(warned.has("w-1:unknown-kind")).toBe(true);
+        expect(warned.size).toBe(1);
+    });
+
+    it("falls back to Step N when no xField or rootXField is provided", () => {
         const data = [
-            { category: "Unknown", kind: "arbitraryKind", value: 25 }
+            { value: 10 },
+            { value: 20 }
         ];
 
         const res = WaterfallDataProcessor.process({
@@ -316,14 +348,14 @@ describe("WaterfallDataProcessor", () => {
             seriesId: "w-1",
             seriesName: "Waterfall",
             style,
-            styleResolver,
-            warnedDiagnosticSignatures: warned
+            styleResolver
         });
 
-        expect(res.points.length).toBe(1);
-        expect(res.points[0].kind).toBe("change");
-        expect(res.points[0].value).toBe(25);
-        expect(warned.has("w-1:unknown-kind:arbitrarykind")).toBe(true);
+        expect(res.points.length).toBe(2);
+        expect(res.points[0].category).toBeUndefined();
+        expect(res.points[0].formattedCategory).toBe("Step 1");
+        expect(res.points[1].category).toBeUndefined();
+        expect(res.points[1].formattedCategory).toBe("Step 2");
     });
 
     it("applies valueFormatter with source dataIndex", () => {

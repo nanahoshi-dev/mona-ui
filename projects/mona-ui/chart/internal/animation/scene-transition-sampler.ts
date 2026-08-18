@@ -1132,7 +1132,6 @@ export class SceneTransitionSampler {
                         animationKey: stage.animationKey,
                         bounds: stage.bounds,
                         polygon: stage.polygon,
-                        slotIndex: i,
                         target: hitTarget
                     });
                     sampledBuckets.push({
@@ -1230,7 +1229,6 @@ export class SceneTransitionSampler {
                         animationKey: bar.animationKey,
                         bounds: bar.bounds,
                         isZeroChange: bar.isZeroChange ?? false,
-                        slotIndex: i,
                         target: hitTarget
                     });
                     sampledBuckets.push({

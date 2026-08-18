@@ -44,7 +44,7 @@ class TestWaterfallIntegrationComponent {
 }
 
 describe("ChartComponent Waterfall Integration", () => {
-    it("renders waterfall chart scene with cumulative values and interactive legend", () => {
+    it("renders waterfall chart scene with cumulative values and semantic noninteractive legend", () => {
         TestBed.configureTestingModule({
             imports: [TestWaterfallIntegrationComponent]
         });
@@ -71,11 +71,11 @@ describe("ChartComponent Waterfall Integration", () => {
         // Connectors generated
         expect(scene.series[0].connectors.length).toBe(4);
 
-        // Interactive legend items generated for all 4 kinds present (Increase, Decrease, Subtotal, Total)
+        // Semantic presentation legend items generated for all 4 kinds present (Increase, Decrease, Subtotal, Total)
         const legendItems = scene.legendItems;
         expect(legendItems.length).toBe(4);
         expect(legendItems.map(i => i.name)).toEqual(["Increase", "Decrease", "Subtotal", "Total"]);
-        expect(legendItems.every(i => i.kind === "datum" && i.interactive === true && i.visible === true)).toBe(true);
+        expect(legendItems.every(i => i.kind === "semantic" && i.interactive === false && i.visible === true)).toBe(true);
 
         // Custom template labels rendered
         const customLabels = fixture.nativeElement.querySelectorAll(".custom-wf-label");
@@ -84,16 +84,18 @@ describe("ChartComponent Waterfall Integration", () => {
         expect(customLabels[1].textContent).toContain("Gain: +50");
         expect(customLabels[2].textContent).toContain("Loss: -30");
 
-        // Toggle increase visibility via legend click
+        // Attempting to toggle a semantic legend item must not mutate scene or hide bars
         chartComp.toggleLegendItem(legendItems[0]);
         fixture.detectChanges();
         chartComp.recomputeScene(ChartInvalidationReason.Visibility);
 
         const updatedScene = chartComp.scene() as CartesianWaterfallChartScene;
-        expect(updatedScene.legendItems[0].visible).toBe(false);
-        // Increase bars have renderOpacity 0, other bars remain rendered
-        expect(updatedScene.series[0].bars[0].renderOpacity).toBe(0);
-        expect(updatedScene.series[0].bars[1].renderOpacity).toBe(0);
+        expect(updatedScene.legendItems[0].visible).toBe(true);
+        expect(updatedScene.series[0].bars[0].renderOpacity).toBe(1);
+        expect(updatedScene.series[0].bars[1].renderOpacity).toBe(1);
         expect(updatedScene.series[0].bars[2].renderOpacity).toBe(1);
+        expect(updatedScene.series[0].bars.length).toBe(5);
+        expect(updatedScene.series[0].connectors.length).toBe(4);
+        expect(updatedScene.hitTargets.length).toBe(5);
     });
 });

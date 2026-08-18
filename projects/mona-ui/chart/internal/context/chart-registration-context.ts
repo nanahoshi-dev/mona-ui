@@ -500,12 +500,10 @@ export interface ChartWaterfallSeriesRegistration
     readonly borderRadius?: Signal<number | undefined>;
     readonly connectorColor?: Signal<string>;
     readonly connectorWidth?: Signal<number | undefined>;
-    readonly datumVisibilityRevision?: Signal<number>;
     readonly decreaseColor?: Signal<string>;
     readonly field: Signal<ChartField>;
     readonly fillOpacity?: Signal<number | undefined>;
     readonly increaseColor?: Signal<string>;
-    readonly isDatumVisible?: (kind: string) => boolean;
     readonly keyField?: Signal<ChartField | undefined>;
     readonly kindField?: Signal<ChartField | undefined>;
     readonly labelTemplate?: Signal<import("../../directives/chart-waterfall-label-template.directive").ChartWaterfallLabelTemplateDirective | undefined>;
@@ -519,7 +517,6 @@ export interface ChartWaterfallSeriesRegistration
     readonly strokeColor?: Signal<string>;
     readonly strokeWidth?: Signal<number | undefined>;
     readonly subtotalColor?: Signal<string>;
-    readonly toggleDatumVisibility?: (kind: string) => boolean;
     readonly totalColor?: Signal<string>;
     readonly type: "waterfall";
     readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;

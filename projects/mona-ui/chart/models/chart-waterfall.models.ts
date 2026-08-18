@@ -27,6 +27,8 @@ export interface ChartWaterfallPointContext<T = unknown> {
 
 export interface ChartWaterfallLabelTemplateContext<T = unknown> {
     readonly $implicit: ChartWaterfallPointContext<T>;
+    readonly barEnd: number;
+    readonly barStart: number;
     readonly bounds: ChartRect;
     readonly category: unknown;
     readonly color: string;

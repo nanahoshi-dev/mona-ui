@@ -101,4 +101,48 @@ describe("FunnelHitIndex", () => {
         // Outside plotRect -> null
         expect(hitIndex.query({ x: 150, y: 50 })).toBeNull();
     });
+
+    it("queries exact polygon for sampled transition frames without slotIndex", () => {
+        const plotRect = { height: 200, width: 100, x: 0, y: 0 };
+        const stagePoly = [
+            { x: 10, y: 10 },
+            { x: 90, y: 10 },
+            { x: 70, y: 90 },
+            { x: 30, y: 90 }
+        ] as const;
+
+        const targetSampled: SceneHitTarget = {
+            animationKey: "f:sampled",
+            bounds: { height: 80, width: 80, x: 10, y: 10 },
+            dataIndex: 0,
+            datum: {},
+            index: 0,
+            itemId: "s0",
+            seriesId: "f-1",
+            seriesName: "Funnel",
+            seriesType: "funnel",
+            xKey: "s0",
+            xValue: "Sampled"
+        };
+
+        const entries: FunnelHitEntry[] = [
+            {
+                animationKey: "f:sampled",
+                bounds: targetSampled.bounds!,
+                polygon: stagePoly,
+                target: targetSampled
+            }
+        ];
+
+        const hitIndex = new FunnelHitIndex({
+            entries,
+            gap: 20,
+            orientation: "vertical",
+            plotRect,
+            slotSpan: 90
+        });
+
+        expect(hitIndex.query({ x: 50, y: 50 })).toBe(targetSampled);
+        expect(hitIndex.query({ x: 15, y: 85 })).toBeNull();
+    });
 });

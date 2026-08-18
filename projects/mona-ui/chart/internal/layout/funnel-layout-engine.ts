@@ -11,6 +11,8 @@ import type {
 } from "../scene/funnel-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
+import { ChartDiagnostics } from "../utils/chart-diagnostics";
+import { isFiniteNumber } from "../utils/number-utils";
 
 export function computeFunnelLabelRect(
     polygon: readonly [ChartPoint, ChartPoint, ChartPoint, ChartPoint],
@@ -65,16 +67,37 @@ export class FunnelLayoutEngine {
         const seriesName = registration.name ? registration.name() : "Funnel";
         const isVisible = registration.visible();
 
-        const orientation: ChartFunnelOrientation = registration.orientation ? registration.orientation() : "vertical";
-        const requestedGap = Math.max(0, registration.gap ? registration.gap() : 2);
-        const widthRatio = Math.max(0.1, Math.min(1, registration.widthRatio ? registration.widthRatio() : 0.9));
+        const rawOrientation = registration.orientation ? registration.orientation() : "vertical";
+        let orientation: ChartFunnelOrientation = "vertical";
+        if (rawOrientation === "horizontal") {
+            orientation = "horizontal";
+        } else if (rawOrientation === "vertical") {
+            orientation = "vertical";
+        } else {
+            if (warnedDiagnosticSignatures) {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `Funnel series "${seriesName}" received unknown orientation "${String(rawOrientation)}". Defaulting to "vertical".`,
+                    `${seriesId}:invalid-orientation`
+                );
+            }
+            orientation = "vertical";
+        }
+
+        const rawGap = registration.gap ? registration.gap() : 2;
+        const requestedGap = isFiniteNumber(rawGap) && rawGap >= 0 ? rawGap : 2;
+        const rawWidthRatio = registration.widthRatio ? registration.widthRatio() : 0.9;
+        const widthRatio = isFiniteNumber(rawWidthRatio) ? Math.max(0.1, Math.min(1, rawWidthRatio)) : 0.9;
         const showLabels = registration.showLabels ? registration.showLabels() : true;
         const labelContent: ChartFunnelLabelContent = registration.labelContent
             ? registration.labelContent()
             : "category-value";
-        const maxLabels = Math.max(0, registration.maxLabels ? registration.maxLabels() : 100);
-        const minLabelWidth = Math.max(0, registration.minLabelWidth ? (registration.minLabelWidth() ?? 0) : 0);
-        const minLabelHeight = Math.max(0, registration.minLabelHeight ? (registration.minLabelHeight() ?? 0) : 0);
+        const rawMaxLabels = registration.maxLabels ? registration.maxLabels() : 100;
+        const maxLabels = isFiniteNumber(rawMaxLabels) ? Math.max(0, Math.floor(rawMaxLabels)) : 100;
+        const rawMinLabelWidth = registration.minLabelWidth?.();
+        const minLabelWidth = isFiniteNumber(rawMinLabelWidth) && rawMinLabelWidth >= 0 ? rawMinLabelWidth : 48;
+        const rawMinLabelHeight = registration.minLabelHeight?.();
+        const minLabelHeight = isFiniteNumber(rawMinLabelHeight) && rawMinLabelHeight >= 0 ? rawMinLabelHeight : 20;
 
         const seriesStyle = styleResolver.resolveFunnelSeriesStyle(registration);
 
@@ -224,7 +247,7 @@ export class FunnelLayoutEngine {
                 };
             }
 
-            const labelColor = styleResolver.resolveCssVariable("--color-foreground") || "#1e293b";
+            const labelColor = seriesStyle.labelColor ?? styleResolver.getReadableForeground(stage.color);
 
             const sceneStage: SceneFunnelStage = {
                 animationKey: stage.animationKey,

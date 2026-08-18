@@ -250,4 +250,112 @@ describe("WaterfallLayoutEngine", () => {
         expect(scene.series[0].bars[0].borderRadius).toBe(8);
         expect(scene.hitTargets[0].borderRadius).toBe(8);
     });
+
+    it("normalizes non-finite layout caps (maxLabels, minLabelWidth, maxBarWidth)", () => {
+        const data = [
+            { category: "A", value: 10 },
+            { category: "B", value: 20 }
+        ];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            id: "w-1",
+            maxBarWidth: signal(NaN as any),
+            maxLabels: signal(Infinity as any),
+            minLabelWidth: signal(-5),
+            name: signal("Waterfall"),
+            showLabels: signal(true),
+            type: "waterfall",
+            visible: signal(true)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver
+        );
+
+        expect(scene.hasRenderableData).toBe(true);
+        expect(scene.series[0].labels.length).toBe(2);
+        expect(scene.series[0].bars.every(b => Number.isFinite(b.bounds.width) && b.bounds.width > 0)).toBe(true);
+    });
+
+    it("applies X-axis formatter consistently across bar, hit, label, and axis ticks", () => {
+        const data = [
+            { category: "2026-Q1", value: 100 },
+            { category: "2026-Q2", value: -30 }
+        ];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            id: "w-1",
+            name: signal("Waterfall"),
+            showLabels: signal(true),
+            type: "waterfall",
+            visible: signal(true),
+            xField: signal("category")
+        };
+
+        const xAxis: ChartXAxisRegistration = {
+            axisLine: signal(true),
+            formatter: signal((val: unknown) => `Quarter: ${String(val)}`),
+            gridLines: signal(false),
+            labelTemplate: signal(undefined),
+            max: signal(undefined),
+            min: signal(undefined),
+            nice: signal(true),
+            position: signal("bottom"),
+            tickCount: signal(undefined),
+            title: signal(""),
+            type: signal("category"),
+            visible: signal(true)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver,
+            xAxis
+        );
+
+        expect(scene.series[0].bars[0].formattedCategory).toBe("Quarter: 2026-Q1");
+        expect(scene.hitTargets[0].formattedCategory).toBe("Quarter: 2026-Q1");
+        expect(scene.series[0].labels[0].formattedCategory).toBe("Quarter: 2026-Q1");
+        expect(scene.axes[0].ticks[0].formattedValue).toBe("Quarter: 2026-Q1");
+    });
+
+    it("maintains static renderOpacity = 1 on scene bars and connectors regardless of fillOpacity", () => {
+        const data = [
+            { category: "A", value: 10 },
+            { category: "B", value: -5 }
+        ];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            fillOpacity: signal(0.5),
+            id: "w-1",
+            name: signal("Waterfall"),
+            type: "waterfall",
+            visible: signal(true)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver
+        );
+
+        expect(scene.series[0].bars[0].renderOpacity).toBe(1);
+        expect(scene.series[0].bars[1].renderOpacity).toBe(1);
+        expect(scene.series[0].connectors[0].renderOpacity).toBe(1);
+    });
 });

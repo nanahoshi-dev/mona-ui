@@ -15,6 +15,7 @@ import type { CartesianFunnelChartScene } from "../../internal/scene/funnel-scen
                 [field]="'value'"
                 [categoryField]="'stage'"
                 [orientation]="orientation()"
+                [minLabelWidth]="0"
                 [showLabels]="true">
                 <ng-template monaChartFunnelLabelTemplate let-stage>
                     <span class="custom-funnel-label">{{ stage.category }}: {{ stage.value }} ({{ stage.formattedOverallConversionRate }})</span>

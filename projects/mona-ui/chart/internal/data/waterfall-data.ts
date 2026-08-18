@@ -47,7 +47,6 @@ export interface PreparedWaterfallData {
 export interface WaterfallDataOptions {
     readonly data?: readonly unknown[] | unknown;
     readonly field?: ChartField;
-    readonly isDatumVisible?: (kind: string) => boolean;
     readonly keyField?: ChartField;
     readonly kindField?: ChartField;
     readonly rootData?: readonly unknown[];
@@ -68,7 +67,6 @@ export class WaterfallDataProcessor {
         const {
             data,
             field = "value",
-            isDatumVisible,
             keyField,
             kindField = "kind",
             rootData,
@@ -130,7 +128,7 @@ export class WaterfallDataProcessor {
         const categories: unknown[] = [];
         const seenExplicitKeys = new Set<string>();
 
-        const effectiveXField = xField ?? rootXField ?? "category";
+        const effectiveXField = xField ?? rootXField;
 
         for (let i = 0; i < rawData.length; i++) {
             const datum = rawData[i];
@@ -151,7 +149,7 @@ export class WaterfallDataProcessor {
                         ChartDiagnostics.warnOnce(
                             warnedDiagnosticSignatures,
                             `Waterfall series "${seriesName}" encountered unknown step kind "${String(rawKind)}" at index ${i}. Treating as "change".`,
-                            `${seriesId}:unknown-kind:${kindStr}`
+                            `${seriesId}:unknown-kind`
                         );
                     }
                     kind = "change";
@@ -196,7 +194,7 @@ export class WaterfallDataProcessor {
             const slotKey = `${seriesId}:slot:${itemId}`;
 
             // 4. Resolve category
-            const rawCat = resolveValue(datum, effectiveXField, i);
+            const rawCat = effectiveXField !== undefined ? resolveValue(datum, effectiveXField, i) : undefined;
             const formattedCategory = rawCat !== undefined && rawCat !== null ? String(rawCat) : `Step ${i + 1}`;
             categories.push(rawCat ?? formattedCategory);
 
@@ -328,13 +326,13 @@ export class WaterfallDataProcessor {
             if (usedVisualKinds.has(k)) {
                 legendItems.push({
                     color: KIND_COLORS[k],
-                    interactive: true,
+                    interactive: false,
                     itemId: k,
-                    kind: "datum",
+                    kind: "semantic",
                     name: KIND_NAMES[k],
                     seriesId,
                     seriesType: "waterfall",
-                    visible: isDatumVisible ? isDatumVisible(k) : true
+                    visible: true
                 });
             }
         }

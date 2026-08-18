@@ -180,4 +180,25 @@ describe("FunnelDataProcessor", () => {
         expect(resFull.allStages[2].color).toBe("#333333");
         expect(resHidden.visibleStages[1].color).toBe("#333333");
     });
+
+    it("handles widening funnel stages (conversion > 100%) gracefully", () => {
+        const data = [
+            { stage: "Narrow", value: 50 },
+            { stage: "Wide", value: 100 }
+        ];
+
+        const res = FunnelDataProcessor.process({
+            categoryField: "stage",
+            data,
+            isDatumVisible: () => true,
+            seriesId: "f-1",
+            seriesName: "Funnel",
+            styleResolver
+        });
+
+        expect(res.visibleStages.length).toBe(2);
+        expect(res.visibleStages[1].conversionRate).toBe(2);
+        expect(res.visibleStages[1].formattedConversionRate).toBe("200%");
+        expect(res.visibleStages[1].dropOff).toBe(-50);
+    });
 });

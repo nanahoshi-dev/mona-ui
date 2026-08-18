@@ -6,6 +6,7 @@ import type { CartesianSceneBase } from "./chart-scene";
 export interface ChartFunnelSeriesStyle {
     readonly baseColor: string;
     readonly fillOpacity: number;
+    readonly labelColor?: string;
     readonly strokeColor: string;
     readonly strokeWidth: number;
 }

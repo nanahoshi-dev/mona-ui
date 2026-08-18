@@ -65,7 +65,6 @@ export class WaterfallLayoutEngine {
         const preparedData = WaterfallDataProcessor.process({
             data: registration.data?.(),
             field: registration.field(),
-            isDatumVisible: registration.isDatumVisible ? (k: string) => registration.isDatumVisible!(k) : undefined,
             keyField: registration.keyField?.(),
             kindField: registration.kindField?.(),
             rootData,
@@ -207,11 +206,14 @@ export class WaterfallLayoutEngine {
         const slotKeys = preparedData.points.map(p => p.slotKey);
         const bandScale = CartesianScaleFactory.createBandScale(slotKeys, [0, plotWidth], 0.2, 0.1);
 
-        const maxBarWidth = registration.maxBarWidth?.();
+        const rawMaxBarWidth = registration.maxBarWidth?.();
+        const maxBarWidth = isFiniteNumber(rawMaxBarWidth) && rawMaxBarWidth > 0 ? rawMaxBarWidth : undefined;
         const showConnectors = registration.showConnectors ? registration.showConnectors() : true;
         const showLabels = registration.showLabels ? registration.showLabels() : false;
-        const minLabelWidth = registration.minLabelWidth ? Math.max(0, registration.minLabelWidth() ?? 24) : 24;
-        const maxLabels = Math.max(0, registration.maxLabels ? registration.maxLabels() : 100);
+        const rawMinLabelWidth = registration.minLabelWidth?.();
+        const minLabelWidth = isFiniteNumber(rawMinLabelWidth) && rawMinLabelWidth >= 0 ? rawMinLabelWidth : 24;
+        const rawMaxLabels = registration.maxLabels?.();
+        const maxLabels = isFiniteNumber(rawMaxLabels) ? Math.max(0, Math.floor(rawMaxLabels)) : 100;
 
         const sceneBars: SceneWaterfallBar[] = [];
         const sceneConnectors: SceneWaterfallConnector[] = [];
@@ -222,8 +224,6 @@ export class WaterfallLayoutEngine {
 
         for (let i = 0; i < preparedData.points.length; i++) {
             const pt = preparedData.points[i];
-            const isKindVisible = registration.isDatumVisible ? registration.isDatumVisible(pt.visualKind) : true;
-            const barOpacity = isKindVisible ? (style.fillOpacity ?? 1) : 0;
 
             const slotX = plotRect.x + (bandScale.map(pt.slotKey) ?? 0);
             const slotWidth = bandScale.bandwidth();
@@ -248,6 +248,14 @@ export class WaterfallLayoutEngine {
                 y: topY
             };
 
+            const displayValue = pt.category ?? pt.formattedCategory;
+            const formattedCategory = formatXValue(
+                displayValue,
+                pt.dataIndex,
+                xAxis?.formatter(),
+                "category"
+            );
+
             const sceneBar: SceneWaterfallBar = {
                 animationKey: pt.animationKey,
                 barEnd: pt.barEnd,
@@ -261,7 +269,7 @@ export class WaterfallLayoutEngine {
                 dataIndex: pt.dataIndex,
                 datum: pt.datum,
                 deltaValue: pt.deltaValue,
-                formattedCategory: pt.formattedCategory,
+                formattedCategory,
                 formattedCumulativeAfter: pt.formattedCumulativeAfter,
                 formattedCumulativeBefore: pt.formattedCumulativeBefore,
                 formattedDelta: pt.formattedDelta,
@@ -270,7 +278,7 @@ export class WaterfallLayoutEngine {
                 isZeroChange: pt.isZeroChange,
                 itemId: pt.itemId,
                 kind: pt.kind,
-                renderOpacity: barOpacity,
+                renderOpacity: 1,
                 renderOrder: i,
                 toY,
                 visualKind: pt.visualKind
@@ -280,9 +288,6 @@ export class WaterfallLayoutEngine {
             // Connector to previous bar
             if (showConnectors && style.connectorWidth > 0 && i > 0) {
                 const prevBar = sceneBars[i - 1];
-                const prevPt = preparedData.points[i - 1];
-                const isPrevVisible = registration.isDatumVisible ? registration.isDatumVisible(prevPt.visualKind) : true;
-                const connOpacity = (isPrevVisible && isKindVisible) ? 1 : 0;
 
                 if (prevBar) {
                     const connFromX = prevBar.bounds.x + prevBar.bounds.width;
@@ -295,7 +300,7 @@ export class WaterfallLayoutEngine {
                         cumulativeValue: preparedData.points[i - 1].cumulativeAfter,
                         fromAnimationKey: prevBar.animationKey,
                         fromX: connFromX,
-                        renderOpacity: connOpacity,
+                        renderOpacity: 1,
                         toAnimationKey: pt.animationKey,
                         toX: connToX,
                         width: style.connectorWidth,
@@ -318,7 +323,7 @@ export class WaterfallLayoutEngine {
                 color: pt.color,
                 dataIndex: pt.dataIndex,
                 datum: pt.datum,
-                formattedCategory: pt.formattedCategory,
+                formattedCategory,
                 formattedValue: pt.formattedValue,
                 fromValue: pt.barStart,
                 index: pt.dataIndex,
@@ -350,28 +355,26 @@ export class WaterfallLayoutEngine {
                 yValue: pt.value
             };
 
-            if (isKindVisible) {
-                hitTargets.push(hitTarget);
+            hitTargets.push(hitTarget);
 
-                hitEntries.push({
-                    animationKey: pt.animationKey,
-                    bounds: barBounds,
-                    isZeroChange: pt.isZeroChange,
-                    slotIndex: i,
-                    target: hitTarget
-                });
+            hitEntries.push({
+                animationKey: pt.animationKey,
+                bounds: barBounds,
+                isZeroChange: pt.isZeroChange,
+                slotIndex: i,
+                target: hitTarget
+            });
 
-                interactionBuckets.push({
-                    anchor: centerPoint,
-                    hits: [hitTarget],
-                    order: i,
-                    xKey: pt.itemId,
-                    xValue: pt.category
-                });
-            }
+            interactionBuckets.push({
+                anchor: centerPoint,
+                hits: [hitTarget],
+                order: i,
+                xKey: pt.itemId,
+                xValue: pt.category
+            });
 
             // Label Candidate
-            if (showLabels && barBounds.width >= minLabelWidth && isKindVisible) {
+            if (showLabels && barBounds.width >= minLabelWidth) {
                 const labelText = pt.kind === "change"
                     ? (pt.formattedDelta ?? pt.formattedValue)
                     : pt.formattedValue;
@@ -430,7 +433,7 @@ export class WaterfallLayoutEngine {
                     dataIndex: pt.dataIndex,
                     datum: pt.datum,
                     deltaValue: pt.deltaValue,
-                    formattedCategory: pt.formattedCategory,
+                    formattedCategory,
                     formattedCumulativeAfter: pt.formattedCumulativeAfter,
                     formattedCumulativeBefore: pt.formattedCumulativeBefore,
                     formattedDelta: pt.formattedDelta,
@@ -495,7 +498,7 @@ export class WaterfallLayoutEngine {
 
                         xTicks.push({
                             coordinate: pos,
-                            formattedValue: formatXValue(pt.category, pt.dataIndex, xAxis?.formatter(), "category"),
+                            formattedValue: formatXValue(displayVal, idx, xAxis?.formatter(), "category"),
                             index: idx,
                             value: displayVal
                         });

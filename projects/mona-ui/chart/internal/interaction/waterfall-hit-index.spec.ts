@@ -113,4 +113,26 @@ describe("WaterfallHitIndex", () => {
         expect(result).toBeDefined();
         expect(result?.itemId).toBe("s-500");
     });
+
+    it("queries exact bounds for sampled transition frames without slotIndex", () => {
+        const targetSampled = createDummyTarget("sampled-1", 150, 120, 50, 80);
+        const entries: WaterfallHitEntry[] = [
+            {
+                animationKey: "target:sampled-1",
+                bounds: targetSampled.bounds!,
+                isZeroChange: false,
+                target: targetSampled
+            }
+        ];
+
+        const index = new WaterfallHitIndex({
+            bandwidth: 50,
+            entries,
+            plotRect,
+            step: 100
+        });
+
+        expect(index.query({ x: 175, y: 150 })).toBe(targetSampled);
+        expect(index.query({ x: 140, y: 150 })).toBe(null);
+    });
 });

@@ -792,15 +792,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     series.type === "radialBar" ||
                     series.type === "rose" ||
                     series.type === "treemap" ||
-                    series.type === "funnel" ||
-                    series.type === "waterfall"
+                    series.type === "funnel"
                 ) {
                     const rad = series as
                         | ChartRadialBarSeriesRegistration
                         | ChartRoseSeriesRegistration
                         | ChartTreemapSeriesRegistration
-                        | ChartFunnelSeriesRegistration
-                        | ChartWaterfallSeriesRegistration;
+                        | ChartFunnelSeriesRegistration;
                     rad.toggleDatumVisibility?.(item.itemId);
                 }
             }
@@ -1395,16 +1393,36 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 ? `, conversion ${matchingHit.funnel.formattedConversionRate}`
                 : "";
             const dropStr =
-                matchingHit.funnel?.dropOff !== undefined ? `, drop-off ${matchingHit.funnel.dropOff}` : "";
+                matchingHit.funnel?.dropOff !== undefined && matchingHit.funnel.dropOff > 0
+                    ? `, drop-off ${matchingHit.funnel.dropOff}`
+                    : "";
             this.activeAccessibilityText.set(
                 `${matchingHit.seriesName}, ${matchingHit.formattedCategory}: ${matchingHit.formattedValue}${convStr}${dropStr}`
             );
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "waterfall") {
             const wf = matchingHit.waterfall;
-            const deltaStr = wf?.formattedDelta ? `, change ${wf.formattedDelta}` : "";
-            const cumStr = wf ? `, running total ${wf.formattedCumulativeAfter}` : "";
+            const totalSteps = currentScene.hitTargets.length;
+            const stepNum = (matchingHit.renderOrder ?? 0) + 1;
+            const stepPrefix = totalSteps > 0 ? `, step ${stepNum} of ${totalSteps}` : "";
+            let detail = "";
+            if (wf?.kind === "subtotal") {
+                detail = `subtotal ${matchingHit.formattedValue}`;
+            } else if (wf?.kind === "total") {
+                detail = `total ${matchingHit.formattedValue}`;
+            } else {
+                const delta = wf?.deltaValue ?? 0;
+                if (delta > 0) {
+                    const deltaFormatted = wf?.formattedDelta ? wf.formattedDelta.replace(/^\+/, "") : String(delta);
+                    detail = `increase ${deltaFormatted}, running total ${wf?.formattedCumulativeBefore ?? ""} to ${wf?.formattedCumulativeAfter ?? ""}`;
+                } else if (delta < 0) {
+                    const deltaFormatted = wf?.formattedDelta ? wf.formattedDelta.replace(/^-/, "") : String(Math.abs(delta));
+                    detail = `decrease ${deltaFormatted}, running total ${wf?.formattedCumulativeBefore ?? ""} to ${wf?.formattedCumulativeAfter ?? ""}`;
+                } else {
+                    detail = `no change, running total ${wf?.formattedCumulativeAfter ?? matchingHit.formattedValue}`;
+                }
+            }
             this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}: ${matchingHit.formattedValue}${deltaStr}${cumStr}`
+                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}${stepPrefix}: ${detail}.`
             );
         } else {
             const xAxis = this.#xAxis();
@@ -1586,6 +1604,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             previousValue: lbl.previousValue,
             stageId: lbl.stageId,
             stageIndex: lbl.stageIndex,
+            textColor: lbl.color,
             value: lbl.value
         };
 
@@ -1607,6 +1626,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             stage: stageContext,
             stageId: lbl.stageId,
             stageIndex: lbl.stageIndex,
+            textColor: lbl.color,
             value: lbl.value
         };
     }
@@ -1616,8 +1636,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         _seriesScene: ChartWaterfallSeriesScene
     ): ChartWaterfallLabelTemplateContext {
         const pointContext: ChartWaterfallPointContext = {
-            barEnd: lbl.cumulativeAfter,
-            barStart: lbl.cumulativeBefore,
+            barEnd: lbl.barEnd,
+            barStart: lbl.barStart,
             bounds: lbl.barBounds,
             category: lbl.category,
             color: lbl.color,
@@ -1627,9 +1647,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             datum: lbl.datum,
             deltaValue: lbl.deltaValue,
             formattedCategory: lbl.formattedCategory,
-            formattedCumulativeAfter: lbl.formattedValue,
-            formattedCumulativeBefore: "",
-            formattedDelta: lbl.deltaValue !== undefined ? String(lbl.deltaValue) : undefined,
+            formattedCumulativeAfter: lbl.formattedCumulativeAfter,
+            formattedCumulativeBefore: lbl.formattedCumulativeBefore,
+            formattedDelta: lbl.formattedDelta,
             formattedValue: lbl.formattedValue,
             kind: lbl.kind,
             value: lbl.value,
@@ -1638,6 +1658,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         return {
             $implicit: pointContext,
+            barEnd: lbl.barEnd,
+            barStart: lbl.barStart,
             bounds: lbl.bounds,
             category: lbl.category,
             color: lbl.color,
@@ -1647,9 +1669,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             datum: lbl.datum,
             deltaValue: lbl.deltaValue,
             formattedCategory: lbl.formattedCategory,
-            formattedCumulativeAfter: lbl.formattedValue,
-            formattedCumulativeBefore: "",
-            formattedDelta: lbl.deltaValue !== undefined ? String(lbl.deltaValue) : undefined,
+            formattedCumulativeAfter: lbl.formattedCumulativeAfter,
+            formattedCumulativeBefore: lbl.formattedCumulativeBefore,
+            formattedDelta: lbl.formattedDelta,
             formattedValue: lbl.formattedValue,
             kind: lbl.kind,
             step: pointContext,

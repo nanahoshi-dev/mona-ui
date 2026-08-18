@@ -103,7 +103,7 @@
                         Overall: <span class="font-medium text-foreground">{{ context.point.funnel!.formattedOverallConversionRate }}</span>
                     </div>
                 }
-                @if (context.point.funnel?.dropOff !== undefined) {
+                @if (context.point.funnel?.dropOff !== undefined && context.point.funnel!.dropOff > 0) {
                     <div>
                         Drop-off: <span class="font-medium text-foreground">{{ context.point.funnel!.dropOff }}</span>
                     </div>
