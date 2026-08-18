@@ -85,6 +85,8 @@ export class MonaChartYAxisComponent implements OnInit {
      */
     public readonly visible = input(true);
 
+    #registered = false;
+
     public constructor() {
         effect(() => {
             this.axisLine();
@@ -98,7 +100,9 @@ export class MonaChartYAxisComponent implements OnInit {
             this.title();
             this.type();
             this.visible();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
+            }
         });
     }
 
@@ -122,6 +126,7 @@ export class MonaChartYAxisComponent implements OnInit {
             visible: this.visible
         });
 
+        this.#registered = true;
         this.#destroyRef.onDestroy(unregister);
     }
 }
