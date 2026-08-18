@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { CartesianXYChartScene, PolarSectorChartScene } from "../scene/chart-scene";
 import type { ChartBarSeriesScene } from "../scene/cartesian-scene";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
+import { FinancialSeriesAnimationAdapter } from "./adapters/financial-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
 import { SceneTransitionSampler } from "./scene-transition-sampler";
 import type { ChartTransitionPlan } from "./chart-transition-types";
@@ -186,5 +187,99 @@ describe("SceneTransitionSampler", () => {
         const slice = sampledSectorMid.series[0].slices[0];
         expect(slice.startAngle).toBe(0);
         expect(slice.endAngle).toBeCloseTo(Math.PI / 2, 2);
+    });
+
+    it("should sample financial candlestick scene with sampledFinancialIndex and accurate bounds (FIN2-003, FIN2-005)", () => {
+        const candlestickMark = {
+            animationKey: "k1",
+            bodyBounds: { height: 40, width: 20, x: 90, y: 60 },
+            bodyWidth: 20,
+            centerX: 100,
+            close: 110,
+            closeY: 60,
+            datum: { id: 1 },
+            direction: "rising" as const,
+            fillMode: "filled" as const,
+            high: 120,
+            highY: 50,
+            index: 0,
+            low: 90,
+            lowY: 100,
+            open: 100,
+            openY: 100,
+            wickWidth: 1,
+            xValue: "Jan"
+        };
+
+        const candlestickScene: CartesianXYChartScene = {
+            axes: [],
+            cartesianKind: "xy",
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [
+                {
+                    animationKey: "k1",
+                    bounds: { height: 50, width: 20, x: 90, y: 50 },
+                    close: 110,
+                    datum: { id: 1 },
+                    high: 120,
+                    index: 0,
+                    low: 90,
+                    open: 100,
+                    seriesId: "fin1",
+                    seriesName: "Candles",
+                    seriesType: "candlestick",
+                    valueKind: "ohlc",
+                    visualBounds: { height: 50, width: 20, x: 90, y: 50 },
+                    xKey: "Jan",
+                    xValue: "Jan"
+                }
+            ],
+            interactionBuckets: [],
+            legendItems: [],
+            plotRect: { height: 260, width: 460, x: 20, y: 20 },
+            series: [
+                {
+                    bodyWidth: 20,
+                    fillMode: "filled",
+                    id: "fin1",
+                    marks: [candlestickMark],
+                    maxBodyWidth: 32,
+                    name: "Candles",
+                    style: { fallingColor: "#ef4444", neutralColor: "#6b7280", risingColor: "#22c55e", wickWidth: 1 },
+                    type: "candlestick",
+                    wickWidth: 1
+                }
+            ],
+            width: 500
+        };
+
+        const adapter = new FinancialSeriesAnimationAdapter();
+        const seriesPlan = adapter.createPlan(null, candlestickScene.series[0], {
+            options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+            plotRect: candlestickScene.plotRect,
+            trigger: "initial"
+        });
+
+        const plan: ChartTransitionPlan = {
+            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            duration: 400,
+            easing: "linear",
+            fromScene: null,
+            mode: "morph",
+            seriesPlans: [seriesPlan],
+            toScene: candlestickScene,
+            trigger: "initial"
+        };
+
+        const frameMid = SceneTransitionSampler.sampleFrame(plan, 0.5);
+        const sampled = frameMid.scene as CartesianXYChartScene;
+
+        expect(sampled.financialIndex).toBeDefined();
+        expect(sampled.hitTargets).toHaveLength(1);
+        expect(sampled.hitTargets[0].valueKind).toBe("ohlc");
+        expect(sampled.hitTargets[0].open).toBe(100);
+        expect(sampled.hitTargets[0].close).toBe(110);
     });
 });

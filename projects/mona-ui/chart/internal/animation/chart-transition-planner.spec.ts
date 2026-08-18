@@ -193,4 +193,55 @@ describe("ChartTransitionPlanner", () => {
 
         expect(plan.mode).toBe("crossfade");
     });
+
+    it("should fallback to crossfade when series changes type (e.g. candlestick to ohlc) (FIN2-019)", () => {
+        const candleSeries = {
+            bodyWidth: 20,
+            bodyWidthRatio: 0.7,
+            fillMode: "filled" as const,
+            id: "fin1",
+            marks: [],
+            maxBodyWidth: 32,
+            name: "Fin",
+            style: { fallingColor: "#ef4444", neutralColor: "#6b7280", risingColor: "#22c55e", wickWidth: 1 },
+            type: "candlestick" as const,
+            wickWidth: 1
+        };
+
+        const ohlcSeries = {
+            bodyWidth: 20,
+            bodyWidthRatio: 0.7,
+            id: "fin1",
+            marks: [],
+            maxBodyWidth: 32,
+            name: "Fin",
+            style: { fallingColor: "#ef4444", neutralColor: "#6b7280", risingColor: "#22c55e", wickWidth: 1 },
+            type: "ohlc" as const,
+            wickWidth: 1
+        };
+
+        const prev: CartesianXYChartScene = {
+            axes: [],
+            cartesianKind: "xy",
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            plotRect: { height: 260, width: 460, x: 20, y: 20 },
+            series: [candleSeries as any],
+            width: 500
+        };
+
+        const next: CartesianXYChartScene = {
+            ...prev,
+            series: [ohlcSeries as any]
+        };
+
+        const options = normalizeChartAnimationOptions(true);
+        const plan = ChartTransitionPlanner.plan(prev, next, "data", options);
+
+        expect(plan.mode).toBe("crossfade");
+    });
 });

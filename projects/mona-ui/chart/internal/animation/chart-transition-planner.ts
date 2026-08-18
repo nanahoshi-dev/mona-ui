@@ -264,8 +264,21 @@ export class ChartTransitionPlanner {
                 const prevSeriesById = new Map(prevCartesian.series.map(s => [s.id, s]));
 
                 for (const targetSeries of targetCartesian.series) {
+                    const prevSeries = prevSeriesById.get(targetSeries.id);
+                    if (prevSeries && prevSeries.type !== targetSeries.type) {
+                        return {
+                            complexity,
+                            duration: options.duration,
+                            easing: options.easing,
+                            fromScene: previous,
+                            mode: "crossfade",
+                            seriesPlans: [],
+                            toScene: target,
+                            trigger
+                        };
+                    }
+
                     if (targetSeries.type === "line" || targetSeries.type === "area" || targetSeries.type === "rangeArea") {
-                        const prevSeries = prevSeriesById.get(targetSeries.id);
                         if (prevSeries && prevSeries.type === targetSeries.type) {
                             if (!this.isPathTopologyCompatible(prevSeries.points, targetSeries.points)) {
                                 return {
@@ -387,6 +400,8 @@ export class ChartTransitionPlanner {
                         independentMarks += s.bars.length;
                     } else if (s.type === "scatter" || s.type === "bubble") {
                         independentMarks += s.markers.length;
+                    } else if (s.type === "candlestick" || s.type === "ohlc") {
+                        independentMarks += s.marks.length;
                     } else if (s.type === "heatmap") {
                         independentMarks += s.cells.length;
                     }
