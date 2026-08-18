@@ -1,8 +1,7 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
-import type { PolarArcChartScene } from "../scene/polar-arc-scene";
-import type { ChartAngularAxisScene, ChartRadialAxisScene } from "../scene/polar-axis-scene";
+import type { ChartRoseSeriesScene, PolarArcChartScene } from "../scene/polar-arc-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { PolarAxisGridRenderer } from "./polar-axis-grid-renderer";
+import { RoseGridRenderer } from "./rose-grid-renderer";
 import { GaugeSeriesRenderer } from "./series/gauge-series-renderer";
 import { RadialBarSeriesRenderer } from "./series/radial-bar-series-renderer";
 import { RoseSeriesRenderer } from "./series/rose-series-renderer";
@@ -14,52 +13,32 @@ export class PolarArcChartRenderer {
         interactionState: ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        const { center, series } = scene;
+        const { arcMode, center, innerRadius, outerRadius, series } = scene;
 
-        // 1. Render background radial/angular grids if configured (e.g. for Rose)
-        if (scene.radialAxis || scene.angularAxis) {
-            const fallbackAngular: ChartAngularAxisScene = scene.angularAxis ?? {
-                axisLine: false,
-                gridLines: false,
-                labelOffset: 0,
-                labels: false,
-                mode: "category",
-                rotation: 0,
-                ticks: [],
-                visible: false
-            };
-            const fallbackRadial: ChartRadialAxisScene = scene.radialAxis ?? {
-                axisLine: false,
-                domain: [0, 1],
-                gridLines: false,
-                gridShape: "circle",
-                labelAngle: 0,
-                labelOffset: 0,
-                labels: false,
-                ticks: [],
-                visible: false
-            };
-            PolarAxisGridRenderer.render(
-                context,
-                {
-                    angularAxis: fallbackAngular,
-                    axisMode: "radar",
-                    center: scene.center,
-                    coordinateSystem: "polar",
-                    hasRenderableData: scene.hasRenderableData,
-                    height: scene.height,
-                    hitTargets: [],
-                    interactionBuckets: [],
-                    legendItems: [],
-                    outerRadius: scene.outerRadius,
-                    plotRect: scene.plotRect,
-                    polarKind: "axis",
-                    radialAxis: fallbackRadial,
-                    series: [],
-                    width: scene.width
-                },
+        const isRose = arcMode === "rose";
+        let roseStartAngleRad = 0;
+        let roseEndAngleRad = Math.PI * 2;
+
+        if (isRose && series.length > 0 && series[0].type === "rose") {
+            const roseScene = series[0] as ChartRoseSeriesScene;
+            if (roseScene.angularCategories.length > 0) {
+                roseStartAngleRad = roseScene.angularCategories[0].startAngle;
+                roseEndAngleRad = roseScene.angularCategories[roseScene.angularCategories.length - 1].endAngle;
+            }
+        }
+
+        // 1. Render background grid if configured
+        if (isRose && (scene.radialAxis || scene.angularAxis)) {
+            RoseGridRenderer.renderBackground(context, {
+                angularAxis: scene.angularAxis,
+                center,
+                endAngleRad: roseEndAngleRad,
+                innerRadius,
+                outerRadius,
+                radialAxis: scene.radialAxis,
+                startAngleRad: roseStartAngleRad,
                 styleResolver
-            );
+            });
         }
 
         // 2. Render each series
@@ -75,6 +54,20 @@ export class PolarArcChartRenderer {
                     GaugeSeriesRenderer.render(context, s, center, interactionState, styleResolver);
                     break;
             }
+        }
+
+        // 3. Render foreground axis lines for Rose if configured
+        if (isRose && (scene.radialAxis || scene.angularAxis)) {
+            RoseGridRenderer.renderForeground(context, {
+                angularAxis: scene.angularAxis,
+                center,
+                endAngleRad: roseEndAngleRad,
+                innerRadius,
+                outerRadius,
+                radialAxis: scene.radialAxis,
+                startAngleRad: roseStartAngleRad,
+                styleResolver
+            });
         }
     }
 }
