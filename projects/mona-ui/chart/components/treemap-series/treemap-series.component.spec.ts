@@ -11,14 +11,14 @@ import type {
     ChartTreemapSort,
     ChartTreemapTile
 } from "../../models/chart-treemap.models";
-import { ChartTreemapSeriesComponent } from "./treemap-series.component";
+import { TreemapSeriesComponent } from "./treemap-series.component";
 
 @Component({
-    imports: [ChartTreemapSeriesComponent],
+    imports: [TreemapSeriesComponent],
     template: `
-        <mona-chart-treemap-series
+        <mona-treemap-series
             [data]="data()"
-            [valueField]="valueField()"
+            [field]="field()"
             [labelField]="labelField()"
             [childrenField]="childrenField()"
             [tile]="tile()"
@@ -31,14 +31,14 @@ class TestTreemapHostComponent {
     public readonly data = signal<readonly unknown[]>([
         {
             children: [
-                { label: "Alpha", value: 100 },
-                { label: "Beta", value: 200 }
+                { name: "Alpha", value: 100 },
+                { name: "Beta", value: 200 }
             ],
-            label: "Branch 1"
+            name: "Branch 1"
         }
     ]);
-    public readonly valueField = signal("value");
-    public readonly labelField = signal("label");
+    public readonly field = signal("value");
+    public readonly labelField = signal("name");
     public readonly childrenField = signal("children");
     public readonly tile = signal<ChartTreemapTile>("squarify");
     public readonly sort = signal<ChartTreemapSort>("descending");
@@ -51,7 +51,7 @@ class TestTreemapHostComponent {
     }
 }
 
-describe("ChartTreemapSeriesComponent", () => {
+describe("TreemapSeriesComponent", () => {
     let registeredSeries: ChartSeriesRegistration[] = [];
     let invalidatedReasons: number[] = [];
 
@@ -92,7 +92,7 @@ describe("ChartTreemapSeriesComponent", () => {
         expect(registeredSeries.length).toBe(0);
     });
 
-    it("supports toggling node visibility and emitting nodeVisibilityChange", () => {
+    it("supports toggling node visibility and emitting nodeVisibilityChange with full metadata", () => {
         TestBed.configureTestingModule({
             imports: [TestTreemapHostComponent],
             providers: [{ provide: CHART_CONTEXT, useValue: mockChartContext }]
@@ -112,6 +112,10 @@ describe("ChartTreemapSeriesComponent", () => {
             fixture.detectChanges();
             expect(fixture.componentInstance.lastVisibilityEvent).toEqual(
                 expect.objectContaining({
+                    dataIndex: 0,
+                    depth: 1,
+                    formattedLabel: "Branch 1",
+                    label: "Branch 1",
                     nodeId,
                     seriesType: "treemap",
                     visible: false

@@ -189,47 +189,53 @@ export class SceneTransitionSampler {
             return toScene;
         }
 
+        const targetHitsByKey = new Map<string, SceneHitTarget>();
+        for (const th of toScene.hitTargets) {
+            if (th.animationKey) {
+                targetHitsByKey.set(th.animationKey, th);
+            }
+        }
+
         const sampledHitTargets: SceneHitTarget[] = [];
         for (const node of sampledSeries.nodes) {
             if ((node.renderOpacity ?? 1) > 0.05 && node.bounds.width > 0 && node.bounds.height > 0) {
-                sampledHitTargets.push({
-                    animationKey: node.animationKey,
-                    bounds: node.bounds,
-                    color: node.fillColor,
-                    dataIndex: node.dataIndex,
-                    datum: node.datum,
-                    formattedValue: node.formattedValue,
-                    hierarchy: {
-                        aggregateValue: node.aggregateValue,
-                        childCount: node.childCount,
+                const targetHit = targetHitsByKey.get(node.animationKey);
+                if (targetHit) {
+                    const pointerBounds = targetHit.bounds
+                        ? (node.headerBounds && targetHit.bounds !== targetHit.visualBounds
+                              ? node.headerBounds
+                              : node.bounds)
+                        : undefined;
+
+                    sampledHitTargets.push({
+                        ...targetHit,
+                        animationKey: node.animationKey,
+                        borderRadius: node.borderRadius,
+                        bounds: pointerBounds,
+                        color: node.fillColor,
                         dataIndex: node.dataIndex,
-                        depth: node.depth,
-                        descendantCount: node.descendantCount,
-                        formattedLabel: node.formattedLabel,
-                        formattedPath: node.formattedPath,
+                        datum: node.datum,
                         formattedValue: node.formattedValue,
-                        isCollapsed: false,
-                        isLeaf: node.isLeaf,
-                        label: node.label,
-                        nodeId: node.nodeId,
-                        parentId: node.parentId,
-                        path: node.path,
-                        percentageOfParent: node.percentageOfParent,
-                        percentageOfRoot: node.percentageOfRoot,
-                        rawValue: node.rawValue,
-                        siblingIndex: node.siblingIndex,
-                        sourceIndexPath: node.sourceIndexPath,
-                        treeHeight: node.treeHeight
-                    },
-                    index: node.dataIndex,
-                    itemId: node.nodeId,
-                    seriesId: sampledSeries.id,
-                    seriesName: sampledSeries.name,
-                    seriesType: "treemap",
-                    value: node.aggregateValue,
-                    xKey: node.nodeId,
-                    xValue: node.label
-                });
+                        hierarchy: targetHit.hierarchy
+                            ? {
+                                  ...targetHit.hierarchy,
+                                  aggregateValue: node.aggregateValue,
+                                  isCollapsed: node.isCollapsed,
+                                  isLeaf: node.isLeaf
+                              }
+                            : undefined,
+                        index: node.dataIndex,
+                        itemId: node.nodeId,
+                        renderOrder: node.renderOrder,
+                        seriesId: sampledSeries.id,
+                        seriesName: sampledSeries.name,
+                        seriesType: "treemap",
+                        value: node.aggregateValue,
+                        visualBounds: node.bounds,
+                        xKey: node.nodeId,
+                        xValue: node.label
+                    });
+                }
             }
         }
 

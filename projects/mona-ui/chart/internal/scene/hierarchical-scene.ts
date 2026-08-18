@@ -51,16 +51,36 @@ export interface SceneTreemapNode {
 }
 
 export interface SceneTreemapLabel {
+    readonly aggregateValue: number;
     readonly bounds: ChartRect;
+    readonly childCount: number;
+    readonly color: string;
+    readonly dataIndex: number;
+    readonly datum: unknown;
+    readonly depth: number;
+    readonly descendantCount: number;
     readonly formattedLabel: string;
+    readonly formattedPath: readonly string[];
     readonly formattedValue: string;
+    readonly isCollapsed: boolean;
+    readonly isLeaf: boolean;
     readonly kind: "parent" | "terminal";
+    readonly label: unknown;
     readonly nodeId: string;
+    readonly parentId?: string;
+    readonly path: readonly unknown[];
+    readonly percentageOfParent?: number;
+    readonly percentageOfRoot?: number;
+    readonly rawValue?: number;
     readonly showValue: boolean;
+    readonly siblingIndex: number;
+    readonly sourceIndexPath: readonly number[];
     readonly textColor: string;
+    readonly treeHeight: number;
 }
 
 export interface ChartTreemapSeriesScene {
+    readonly effectiveMaxDepth?: number;
     readonly id: string;
     readonly labels: readonly SceneTreemapLabel[];
     readonly layoutSignature: string;

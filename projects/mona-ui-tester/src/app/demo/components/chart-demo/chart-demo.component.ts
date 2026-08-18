@@ -25,7 +25,7 @@ import {
     RoseSeriesComponent,
     GaugeSeriesComponent,
     ChartGaugeCenterTemplateDirective,
-    ChartTreemapSeriesComponent,
+    TreemapSeriesComponent,
     ChartTreemapLabelTemplateDirective,
     ScatterSeriesComponent,
     BubbleSeriesComponent,
@@ -143,7 +143,7 @@ interface BubbleDataPoint {
         RoseSeriesComponent,
         GaugeSeriesComponent,
         ChartGaugeCenterTemplateDirective,
-        ChartTreemapSeriesComponent,
+        TreemapSeriesComponent,
         ChartTreemapLabelTemplateDirective,
         ChartLegendComponent,
         ChartTooltipComponent,
@@ -621,9 +621,9 @@ export class ChartDemoComponent {
     protected readonly treemapStrokeWidth = signal<number>(1);
     protected readonly treemapStrokeColor = signal<string>("#ffffff");
     protected readonly treemapParentFillOpacity = signal<number>(0.15);
-    protected readonly treemapFillOpacity = signal<number>(0.9);
-    protected readonly treemapPadding = signal<number>(2);
-    protected readonly treemapPaddingTop = signal<number>(22);
+    protected readonly treemapPaddingInner = signal<number>(2);
+    protected readonly treemapPaddingOuter = signal<number>(4);
+    protected readonly treemapParentHeaderHeight = signal<number>(22);
     protected readonly treemapMaxDepth = signal<number | undefined>(undefined);
     protected readonly treemapUseCustomTemplate = signal<boolean>(false);
 

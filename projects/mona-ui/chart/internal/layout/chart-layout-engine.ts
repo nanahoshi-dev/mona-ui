@@ -129,6 +129,49 @@ export class ChartLayoutEngine {
             }
         }
 
+        const treemapSeries = series.filter(
+            (s): s is ChartTreemapSeriesRegistration => s.type === "treemap"
+        );
+
+        if (treemapSeries.length > 0 || coordinateSystem === "hierarchical") {
+            if (treemapSeries.length !== 1 || series.length !== 1) {
+                warnOnce(
+                    treemapSeries.length > 1 ? "multi-treemap-series" : "mixed-hierarchical",
+                    treemapSeries.length > 1
+                        ? "[MonaChart] Only a single Treemap series is supported per chart."
+                        : "[MonaChart] Hierarchical charts (treemap) cannot be mixed with other chart families.",
+                    warnedSet
+                );
+                return HierarchicalLayoutEngine.createEmptyScene(options.containerWidth, options.containerHeight);
+            }
+
+            if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
+                warnOnce(
+                    "treemap-projected-axes",
+                    "[MonaChart] Projected axes (<mona-chart-x-axis>, <mona-chart-y-axis>, <mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Treemap charts.",
+                    warnedSet
+                );
+            }
+
+            const activeTreemap = treemapSeries[0];
+            const plotRect = {
+                height: options.containerHeight,
+                width: options.containerWidth,
+                x: 0,
+                y: 0
+            };
+
+            return HierarchicalLayoutEngine.layout(
+                activeTreemap,
+                plotRect,
+                options.containerWidth,
+                options.containerHeight,
+                options.styleResolver,
+                options.rootData,
+                warnedSet
+            );
+        }
+
         const heatmapSeries = series.filter(
             (s): s is ChartHeatmapSeriesRegistration => s.type === "heatmap"
         );
@@ -171,47 +214,6 @@ export class ChartLayoutEngine {
                 xAxis: options.xAxis,
                 yAxis: options.yAxis
             });
-        }
-
-        const treemapSeries = series.filter(
-            (s): s is ChartTreemapSeriesRegistration => s.type === "treemap"
-        );
-
-        if (coordinateSystem === "hierarchical") {
-            if (treemapSeries.length > 1) {
-                warnOnce(
-                    "multi-treemap-series",
-                    "[MonaChart] Only a single Treemap series is supported per chart.",
-                    warnedSet
-                );
-            }
-            if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
-                warnOnce(
-                    "treemap-projected-axes",
-                    "[MonaChart] Projected axes (<mona-chart-x-axis>, <mona-chart-y-axis>, <mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Treemap charts.",
-                    warnedSet
-                );
-            }
-
-            if (treemapSeries.length > 0) {
-                const activeTreemap = treemapSeries[0];
-                const plotRect = {
-                    height: options.containerHeight,
-                    width: options.containerWidth,
-                    x: 0,
-                    y: 0
-                };
-
-                return HierarchicalLayoutEngine.layout(
-                    activeTreemap,
-                    plotRect,
-                    options.containerWidth,
-                    options.containerHeight,
-                    options.styleResolver,
-                    options.rootData,
-                    warnedSet
-                );
-            }
         }
 
         if (families.size > 1) {

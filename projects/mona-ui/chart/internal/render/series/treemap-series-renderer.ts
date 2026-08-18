@@ -1,5 +1,5 @@
-import type { ChartTreemapSeriesScene, SceneTreemapNode } from "../../scene/hierarchical-scene";
-import { drawBarRect, drawCellRectOutline } from "../../utils/canvas-utils";
+import type { ChartTreemapSeriesScene } from "../../scene/hierarchical-scene";
+import { drawCellRect, drawCellRectOutline } from "../../utils/canvas-utils";
 
 export class TreemapSeriesRenderer {
     public static render(context: CanvasRenderingContext2D, series: ChartTreemapSeriesScene): void {
@@ -14,7 +14,7 @@ export class TreemapSeriesRenderer {
         const parentFillOpacity = style.parentFillOpacity ?? 0.15;
         const leafFillOpacity = style.fillOpacity ?? 1;
 
-        // Render nodes in pre-order (parents first, then leaves on top)
+        // Render nodes in pre-order (parents first, then terminals on top)
         for (const node of nodes) {
             const nodeOpacity = node.renderOpacity ?? 1;
             if (nodeOpacity <= 0 || node.bounds.width <= 0 || node.bounds.height <= 0) {
@@ -23,13 +23,15 @@ export class TreemapSeriesRenderer {
 
             context.save();
 
-            if (!node.isLeaf) {
+            const isRenderTerminal = node.isLeaf || node.isCollapsed;
+
+            if (!isRenderTerminal) {
                 // Parent background
                 context.globalAlpha = renderOpacity * nodeOpacity * parentFillOpacity;
                 context.fillStyle = node.fillColor;
 
                 if (borderRadius > 0) {
-                    drawBarRect(context, node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, borderRadius);
+                    drawCellRect(context, node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, borderRadius);
                 } else {
                     context.fillRect(node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height);
                 }
@@ -39,7 +41,7 @@ export class TreemapSeriesRenderer {
                     context.globalAlpha = renderOpacity * nodeOpacity * (parentFillOpacity * 2);
                     context.fillStyle = node.fillColor;
                     if (borderRadius > 0) {
-                        drawBarRect(
+                        drawCellRect(
                             context,
                             node.headerBounds.x,
                             node.headerBounds.y,
@@ -57,12 +59,12 @@ export class TreemapSeriesRenderer {
                     }
                 }
             } else {
-                // Terminal leaf rectangle
+                // Terminal leaf or collapsed aggregate rectangle
                 context.globalAlpha = renderOpacity * nodeOpacity * leafFillOpacity;
                 context.fillStyle = node.fillColor;
 
                 if (borderRadius > 0) {
-                    drawBarRect(context, node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, borderRadius);
+                    drawCellRect(context, node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, borderRadius);
                 } else {
                     context.fillRect(node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height);
                 }

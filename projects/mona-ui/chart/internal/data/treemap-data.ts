@@ -1,18 +1,19 @@
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { resolveData, resolveValue } from "./chart-value-resolver";
-import { serializeKeyPart } from "../animation/animation-identity";
+import { resolveValue } from "./chart-value-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
-import { formatYValue } from "../utils/chart-formatter";
+import { TreemapIdentity } from "./treemap-identity";
 
 export interface PreparedTreemapNode {
+    readonly aggregateValue: number;
     readonly animationKey: string;
+    readonly children: readonly PreparedTreemapNode[];
     readonly color: string;
     readonly colorOverride?: string;
-    readonly children: readonly PreparedTreemapNode[];
     readonly dataIndex: number;
     readonly datum: unknown;
     readonly depth: number;
+    readonly descendantCount: number;
     readonly formattedLabel: string;
     readonly formattedPath: readonly string[];
     readonly label: unknown;
@@ -54,6 +55,29 @@ export interface TreemapDataOptions {
     readonly warnedDiagnosticSignatures?: Set<string>;
 }
 
+interface MutablePreparedNode {
+    aggregateValue: number;
+    animationKey: string;
+    children: MutablePreparedNode[];
+    color: string;
+    colorOverride?: string;
+    dataIndex: number;
+    datum: unknown;
+    depth: number;
+    descendantCount: number;
+    formattedLabel: string;
+    formattedPath: readonly string[];
+    label: unknown;
+    nodeId: string;
+    ownContribution: number;
+    parentId?: string;
+    path: readonly unknown[];
+    rawValue?: number;
+    siblingIndex: number;
+    sourceIndexPath: readonly number[];
+    visible: boolean;
+}
+
 export class TreemapDataProcessor {
     public static process(options: TreemapDataOptions): PreparedTreemapData {
         const {
@@ -68,15 +92,16 @@ export class TreemapDataProcessor {
             labelField = "name",
             labelFormatter,
             rootData = [],
+            seriesElement,
             seriesId,
             seriesName,
             styleResolver,
             valueField,
-            valueFormatter,
+            valueFormatter: _valueFormatter,
             warnedDiagnosticSignatures
         } = options;
 
-        const effectiveField = valueField ?? field ?? "value";
+        const effectiveField = field ?? valueField ?? "value";
 
         let rawData: readonly unknown[];
         if (data !== undefined && data !== null) {
@@ -98,12 +123,30 @@ export class TreemapDataProcessor {
             };
         }
 
-        const allNodes: PreparedTreemapNode[] = [];
+        const allNodes: MutablePreparedNode[] = [];
         const seenExplicitKeys = new Set<string>();
         const activeAncestors = new Set<object>();
         const maxHardDepth = 128;
         let globalDataIndex = 0;
         let hasPositiveLeaf = false;
+
+        let seriesExplicitHostColor = "";
+        if (typeof window !== "undefined" && seriesElement) {
+            try {
+                const userClass = seriesElement.className || "";
+                const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+                if (seriesElement.style?.color) {
+                    seriesExplicitHostColor = styleResolver.resolveCssVariable(seriesElement.style.color, seriesElement);
+                } else if (hasTextClass) {
+                    const computed = window.getComputedStyle(seriesElement);
+                    if (computed.color && computed.color !== "rgba(0, 0, 0, 0)" && computed.color !== "transparent") {
+                        seriesExplicitHostColor = styleResolver.resolveCssVariable(computed.color, seriesElement);
+                    }
+                }
+            } catch {
+                // Ignore style extraction errors
+            }
+        }
 
         const processNode = (
             datum: unknown,
@@ -117,73 +160,50 @@ export class TreemapDataProcessor {
             inheritedColorOverride: string | undefined,
             isParentVisible: boolean,
             siblingOccurrenceTracker: Map<string, number>
-        ): PreparedTreemapNode => {
+        ): MutablePreparedNode => {
             const currentDataIndex = globalDataIndex++;
 
-            // 1. Resolve label
-            const rawLabel = resolveValue(datum, labelField, currentDataIndex);
-            const formattedLabel = labelFormatter
-                ? labelFormatter(rawLabel, currentDataIndex)
-                : rawLabel !== undefined && rawLabel !== null
-                  ? String(rawLabel)
-                  : `Node ${currentDataIndex + 1}`;
+            // 1. Resolve identity and labels
+            const identity = TreemapIdentity.resolveNodeIdentity(
+                datum,
+                currentDataIndex,
+                siblingIndex,
+                parentId,
+                keyField,
+                labelField,
+                labelFormatter,
+                seenExplicitKeys,
+                siblingOccurrenceTracker,
+                warnedDiagnosticSignatures,
+                seriesName,
+                seriesId
+            );
 
+            const rawLabel = identity.label;
+            const formattedLabel = identity.formattedLabel;
+            const nodeId = identity.nodeId;
             const path = [...parentPath, rawLabel ?? currentDataIndex];
             const formattedPath = [...parentFormattedPath, formattedLabel];
-
-            // 2. Resolve identity
-            let nodeId: string;
-            let explicitKey: string | undefined;
-
-            if (keyField) {
-                const rawKey = resolveValue(datum, keyField, currentDataIndex);
-                const keyPart = serializeKeyPart(rawKey);
-                if (keyPart !== null) {
-                    const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
-                    if (seenExplicitKeys.has(keyStr)) {
-                        if (warnedDiagnosticSignatures) {
-                            ChartDiagnostics.warnOnce(
-                                warnedDiagnosticSignatures,
-                                `Treemap series "${seriesName}" encountered duplicate explicit key "${String(rawKey)}" at data index ${currentDataIndex}. Falling back to path identity.`,
-                                `${seriesId}:duplicate-key:${String(rawKey)}`
-                            );
-                        }
-                    } else {
-                        seenExplicitKeys.add(keyStr);
-                        explicitKey = keyStr;
-                    }
-                }
-            }
-
-            if (explicitKey !== undefined) {
-                nodeId = explicitKey;
-            } else {
-                const labelPart = serializeKeyPart(rawLabel);
-                const labelSegment = labelPart !== null ? `l:${labelPart.type}:${String(labelPart.value)}` : `i:${siblingIndex}`;
-                const count = siblingOccurrenceTracker.get(labelSegment) ?? 0;
-                siblingOccurrenceTracker.set(labelSegment, count + 1);
-                const uniqueSegment = count > 0 ? `${labelSegment}#${count}` : labelSegment;
-                nodeId = parentId ? `${parentId}/${uniqueSegment}` : `root/${uniqueSegment}`;
-            }
-
             const animationKey = `${seriesId}:tm:${nodeId}`;
 
-            // 3. Resolve visibility
-            // Top-level branch visibility is determined by isDatumVisible(nodeId)
+            // 2. Resolve visibility
             const isVisible = depth === 1 ? isDatumVisible(nodeId) : isParentVisible;
 
-            // 4. Resolve color
+            // 3. Resolve color
             let nodeColorOverride = inheritedColorOverride;
             if (colorField) {
                 const ownColorVal = resolveValue(datum, colorField, currentDataIndex);
                 if (typeof ownColorVal === "string" && ownColorVal.length > 0) {
-                    nodeColorOverride = ownColorVal;
+                    const resolved = styleResolver.resolveCssVariable(ownColorVal, seriesElement);
+                    if (resolved) {
+                        nodeColorOverride = resolved;
+                    }
                 }
             }
             const colorToUse = nodeColorOverride ?? branchBaseColor;
 
-            // 5. Traverse children
-            const children: PreparedTreemapNode[] = [];
+            // 4. Traverse children
+            const children: MutablePreparedNode[] = [];
             let isCyclic = false;
 
             if (typeof datum === "object" && datum !== null) {
@@ -193,7 +213,7 @@ export class TreemapDataProcessor {
                         ChartDiagnostics.warnOnce(
                             warnedDiagnosticSignatures,
                             `Treemap series "${seriesName}" encountered cyclic data at path "${formattedPath.join(" / ")}". The cyclic branch has been omitted.`,
-                            `${seriesId}:cycle:${nodeId}`
+                            `${seriesId}:cycles`
                         );
                     }
                 } else if (depth >= maxHardDepth) {
@@ -202,7 +222,7 @@ export class TreemapDataProcessor {
                         ChartDiagnostics.warnOnce(
                             warnedDiagnosticSignatures,
                             `Treemap series "${seriesName}" exceeded maximum depth of ${maxHardDepth}. Deep descendants have been omitted.`,
-                            `${seriesId}:max-hard-depth`
+                            `${seriesId}:safe-depth`
                         );
                     }
                 } else {
@@ -215,17 +235,10 @@ export class TreemapDataProcessor {
                                 const childDatum = rawChildren[cIdx];
                                 if (typeof childDatum === "object" && childDatum !== null && activeAncestors.has(childDatum)) {
                                     if (warnedDiagnosticSignatures) {
-                                        const childRawLabel = resolveValue(childDatum, labelField, currentDataIndex);
-                                        const childFormattedLabel = labelFormatter
-                                            ? labelFormatter(childRawLabel, currentDataIndex)
-                                            : childRawLabel !== undefined && childRawLabel !== null
-                                              ? String(childRawLabel)
-                                              : `Node`;
-                                        const cyclicPath = [...formattedPath, childFormattedLabel].join(" / ");
                                         ChartDiagnostics.warnOnce(
                                             warnedDiagnosticSignatures,
-                                            `Treemap series "${seriesName}" encountered cyclic data at path "${cyclicPath}". The cyclic branch has been omitted.`,
-                                            `${seriesId}:cycle:${nodeId}:${cIdx}`
+                                            `Treemap series "${seriesName}" encountered cyclic data at path "${[...formattedPath, `Child ${cIdx + 1}`].join(" / ")}". The cyclic branch has been omitted.`,
+                                            `${seriesId}:cycles`
                                         );
                                     }
                                     continue;
@@ -250,7 +263,7 @@ export class TreemapDataProcessor {
                             ChartDiagnostics.warnOnce(
                                 warnedDiagnosticSignatures,
                                 `Treemap series "${seriesName}" encountered non-array children at "${formattedPath.join(" / ")}".`,
-                                `${seriesId}:invalid-children:${nodeId}`
+                                `${seriesId}:invalid-children`
                             );
                         }
                     }
@@ -258,7 +271,7 @@ export class TreemapDataProcessor {
                 }
             }
 
-            // 6. Resolve value
+            // 5. Resolve value for leaf nodes
             let rawValue: number | undefined;
             let ownContribution = 0;
 
@@ -278,7 +291,7 @@ export class TreemapDataProcessor {
                             ChartDiagnostics.warnOnce(
                                 warnedDiagnosticSignatures,
                                 `Treemap series "${seriesName}" encountered negative value (${val}) for leaf "${formattedLabel}". Normalizing contribution to 0.`,
-                                `${seriesId}:negative-val:${nodeId}`
+                                `${seriesId}:negative-values`
                             );
                         }
                         ownContribution = 0;
@@ -289,7 +302,8 @@ export class TreemapDataProcessor {
                 }
             }
 
-            const preparedNode: PreparedTreemapNode = {
+            const preparedNode: MutablePreparedNode = {
+                aggregateValue: 0,
                 animationKey,
                 children,
                 color: colorToUse,
@@ -297,6 +311,7 @@ export class TreemapDataProcessor {
                 dataIndex: currentDataIndex,
                 datum,
                 depth,
+                descendantCount: 0,
                 formattedLabel,
                 formattedPath,
                 label: rawLabel,
@@ -314,19 +329,26 @@ export class TreemapDataProcessor {
             return preparedNode;
         };
 
-        const rootNodes: PreparedTreemapNode[] = [];
+        const rootNodes: MutablePreparedNode[] = [];
         const rootSiblingTracker = new Map<string, number>();
 
         for (let bIdx = 0; bIdx < rawData.length; bIdx++) {
             const rawDatum = rawData[bIdx];
 
-            // Resolve top-level branch base color before sorting
-            let branchBaseColor: string;
+            let branchBaseColor = "";
             if (colors && colors.length > 0) {
-                branchBaseColor = colors[bIdx % colors.length];
-            } else if (color && color.length > 0) {
-                branchBaseColor = color;
-            } else {
+                const rawCol = colors[bIdx % colors.length];
+                if (rawCol) {
+                    branchBaseColor = styleResolver.resolveCssVariable(rawCol, seriesElement);
+                }
+            }
+            if (!branchBaseColor && color && color.trim().length > 0) {
+                branchBaseColor = styleResolver.resolveCssVariable(color, seriesElement);
+            }
+            if (!branchBaseColor && seriesExplicitHostColor) {
+                branchBaseColor = seriesExplicitHostColor;
+            }
+            if (!branchBaseColor) {
                 branchBaseColor = styleResolver.resolvePaletteColor(bIdx);
             }
 
@@ -346,28 +368,40 @@ export class TreemapDataProcessor {
             rootNodes.push(rootNode);
         }
 
-        // Calculate total aggregate value of all visible leaves
-        const sumLeafContributions = (nodes: readonly PreparedTreemapNode[]): number => {
-            let sum = 0;
-            for (const n of nodes) {
-                if (!n.visible) {
-                    continue;
-                }
-                if (n.children.length === 0) {
-                    sum += n.ownContribution;
-                } else {
-                    sum += sumLeafContributions(n.children);
-                }
+        // Post-order pass to compute aggregateValue and descendantCount in O(N)
+        const computeAggregates = (node: MutablePreparedNode): { aggregate: number; count: number } => {
+            if (node.children.length === 0) {
+                node.aggregateValue = node.ownContribution;
+                node.descendantCount = 0;
+                return { aggregate: node.aggregateValue, count: 0 };
             }
-            return sum;
+
+            let sumAggregate = 0;
+            let sumDescendants = 0;
+            for (const child of node.children) {
+                const childResult = computeAggregates(child);
+                sumAggregate += childResult.aggregate;
+                sumDescendants += 1 + childResult.count;
+            }
+
+            node.aggregateValue = sumAggregate;
+            node.descendantCount = sumDescendants;
+            return { aggregate: sumAggregate, count: sumDescendants };
         };
 
-        const totalValue = sumLeafContributions(rootNodes);
+        for (const root of rootNodes) {
+            computeAggregates(root);
+        }
+
+        // Total value of visible root branches
+        const totalValue = rootNodes
+            .filter(r => r.visible)
+            .reduce((sum, r) => sum + r.aggregateValue, 0);
 
         return {
-            allNodes,
+            allNodes: allNodes as readonly PreparedTreemapNode[],
             hasPositiveLeaf,
-            rootNodes,
+            rootNodes: rootNodes as readonly PreparedTreemapNode[],
             totalValue
         };
     }

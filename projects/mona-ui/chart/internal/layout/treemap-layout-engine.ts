@@ -8,14 +8,12 @@ import {
     treemapSquarify,
     type HierarchyRectangularNode
 } from "d3-hierarchy";
-import { wcagContrast } from "culori";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartRect } from "../../models/chart.models";
 import type { ChartTreemapSeriesRegistration } from "../context/chart-registration-context";
 import { TreemapDataProcessor, type PreparedTreemapNode } from "../data/treemap-data";
 import { TreemapHitIndex } from "../interaction/treemap-hit-index";
 import {
-    TreemapKeyboardNavigation,
     type TreemapNavigationEntry,
     type TreemapNavigationIndex
 } from "../interaction/treemap-keyboard-navigation";
@@ -31,6 +29,7 @@ import { formatYValue } from "../utils/chart-formatter";
 
 interface TreemapHierarchyDatum {
     readonly children?: TreemapHierarchyDatum[];
+    readonly isCollapsed: boolean;
     readonly node: PreparedTreemapNode | null;
 }
 
@@ -50,9 +49,11 @@ export class TreemapLayoutEngine {
 
         const preparedData = TreemapDataProcessor.process({
             childrenField: registration.childrenField(),
+            color: registration.color?.(),
             colorField: registration.colorField?.(),
             colors: registration.colors?.(),
             data: registration.data?.(),
+            field: registration.field ? registration.field() : registration.valueField?.(),
             isDatumVisible: registration.isDatumVisible.bind(registration),
             keyField: registration.keyField?.(),
             labelField: registration.labelField(),
@@ -66,7 +67,7 @@ export class TreemapLayoutEngine {
             seriesId,
             seriesName,
             styleResolver,
-            valueField: registration.valueField(),
+            valueField: registration.valueField?.(),
             valueFormatter: registration.valueFormatter?.(),
             warnedDiagnosticSignatures
         });
@@ -86,37 +87,33 @@ export class TreemapLayoutEngine {
         );
         const parentHeaderHeight = Math.max(
             0,
-            registration.paddingTop ? (registration.paddingTop() ?? 20) : (registration.parentHeaderHeight?.() ?? 20)
+            registration.parentHeaderHeight
+                ? (registration.parentHeaderHeight() ?? 20)
+                : 20
         );
         const showParentLabels = registration.showParentLabels ? registration.showParentLabels() : true;
         const showLabels = registration.showLabels ? registration.showLabels() : true;
-        const showValues = registration.showValues ? registration.showValues() : true;
-        const maxDepth = registration.maxDepth?.();
+        const showValues = registration.showValues ? registration.showValues() : false;
+
+        const rawMaxDepth = registration.maxDepth?.();
+        const effectiveMaxDepth =
+            rawMaxDepth !== undefined && Number.isFinite(rawMaxDepth) && Math.floor(rawMaxDepth) >= 1
+                ? Math.floor(rawMaxDepth)
+                : undefined;
+
         const maxLabels = Math.max(0, registration.maxLabels ? registration.maxLabels() : 100);
-        const minLabelWidth = Math.max(0, registration.minLabelWidth ? registration.minLabelWidth() : 30);
-        const minLabelHeight = Math.max(0, registration.minLabelHeight ? registration.minLabelHeight() : 16);
+        const minLabelWidth = Math.max(0, registration.minLabelWidth ? (registration.minLabelWidth() ?? 30) : 30);
+        const defaultMinTerminalLabelHeight = showValues ? 24 : 16;
+        const minTerminalLabelHeight = Math.max(
+            0,
+            registration.minLabelHeight ? (registration.minLabelHeight() ?? defaultMinTerminalLabelHeight) : defaultMinTerminalLabelHeight
+        );
+        const minParentHeaderLabelHeight = 12;
 
         const emptyHitIndex = new TreemapHitIndex(plotRect, []);
         const emptyNavIndex: TreemapNavigationIndex = { entries: new Map() };
 
-        const calculateSubtreeTotal = (node: PreparedTreemapNode): number => {
-            if (node.children.length === 0) {
-                return node.ownContribution;
-            }
-            let sum = 0;
-            for (const child of node.children) {
-                sum += calculateSubtreeTotal(child);
-            }
-            return sum;
-        };
-
-        const sourceTotalValue = preparedData.rootNodes.reduce(
-            (sum, node) => sum + calculateSubtreeTotal(node),
-            0
-        );
-
         const legendItems: ChartLegendItem[] = preparedData.rootNodes.map(n => {
-            const nodeVal = calculateSubtreeTotal(n);
             const isNodeVisible = isVisible && registration.isDatumVisible(n.nodeId);
             return {
                 color: n.colorOverride ?? n.color,
@@ -125,10 +122,9 @@ export class TreemapLayoutEngine {
                 itemId: n.nodeId,
                 kind: "datum",
                 name: n.formattedLabel,
-                percentage: sourceTotalValue > 0 ? nodeVal / sourceTotalValue : undefined,
                 seriesId,
                 seriesType: "treemap",
-                value: nodeVal,
+                value: n.aggregateValue,
                 visible: isNodeVisible
             };
         });
@@ -141,9 +137,10 @@ export class TreemapLayoutEngine {
             plotRect.height <= 0
         ) {
             const emptySeries: ChartTreemapSeriesScene = {
+                effectiveMaxDepth,
                 id: seriesId,
                 labels: [],
-                layoutSignature: JSON.stringify([seriesId, tileMode, sortMode, 0, 0]),
+                layoutSignature: JSON.stringify([seriesId, tileMode, sortMode, effectiveMaxDepth ?? 0, 0, 0]),
                 name: seriesName,
                 nodes: [],
                 renderOpacity: 1,
@@ -190,29 +187,63 @@ export class TreemapLayoutEngine {
             tileFn = treemapSliceDice;
         }
 
-        // Build hierarchy
-        const buildTree = (nodes: readonly PreparedTreemapNode[]): TreemapHierarchyDatum[] => {
+        // Build D3 render hierarchy respecting effectiveMaxDepth
+        const buildTree = (nodes: readonly PreparedTreemapNode[], depth: number): TreemapHierarchyDatum[] => {
             return nodes
                 .filter(n => n.visible)
-                .map(n => ({
-                    children: n.children.length > 0 ? buildTree(n.children) : undefined,
-                    node: n
-                }));
+                .map(n => {
+                    const hasChildren = n.children.length > 0;
+                    const isCollapsed = Boolean(
+                        hasChildren && effectiveMaxDepth !== undefined && depth >= effectiveMaxDepth
+                    );
+
+                    if (isCollapsed || !hasChildren) {
+                        return {
+                            children: undefined,
+                            isCollapsed,
+                            node: n
+                        };
+                    }
+
+                    return {
+                        children: buildTree(n.children, depth + 1),
+                        isCollapsed: false,
+                        node: n
+                    };
+                });
         };
 
         const rootDatum: TreemapHierarchyDatum = {
-            children: buildTree(preparedData.rootNodes),
+            children: buildTree(preparedData.rootNodes, 1),
+            isCollapsed: false,
             node: null
         };
 
-        const rootHierarchy = hierarchy<TreemapHierarchyDatum>(rootDatum, d => d.children).sum(d =>
-            d.node && d.node.children.length === 0 ? d.node.ownContribution : 0
-        );
+        const rootHierarchy = hierarchy<TreemapHierarchyDatum>(rootDatum, d => d.children).sum(d => {
+            if (!d.node) {
+                return 0;
+            }
+            if (d.isCollapsed) {
+                return d.node.aggregateValue;
+            }
+            if (!d.children || d.children.length === 0) {
+                return d.node.ownContribution;
+            }
+            return 0;
+        });
 
         if (sortMode === "descending") {
-            rootHierarchy.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+            rootHierarchy.sort((a, b) =>
+                b.height - a.height ||
+                (b.value ?? 0) - (a.value ?? 0) ||
+                (a.data.node?.nodeId ?? "").localeCompare(b.data.node?.nodeId ?? "")
+            );
         } else if (sortMode === "ascending") {
-            rootHierarchy.sort((a, b) => (a.value ?? 0) - (b.value ?? 0));
+            rootHierarchy.sort((a, b) =>
+                a.height - b.height ||
+                (a.value ?? 0) - (b.value ?? 0) ||
+                (a.data.node?.nodeId ?? "").localeCompare(b.data.node?.nodeId ?? "")
+            );
         }
 
         const layoutGenerator = treemap<TreemapHierarchyDatum>()
@@ -220,32 +251,43 @@ export class TreemapLayoutEngine {
             .size([plotRect.width, plotRect.height])
             .paddingInner(paddingInner)
             .paddingOuter(paddingOuter)
-            .paddingTop(d =>
-                d.depth > 0 && d.children && d.children.length > 0 && showParentLabels && parentHeaderHeight > 0
-                    ? parentHeaderHeight
-                    : paddingOuter
-            );
+            .paddingTop(d => {
+                if (d.depth > 0 && d.children && d.children.length > 0 && showParentLabels && parentHeaderHeight > 0) {
+                    return parentHeaderHeight;
+                }
+                return paddingOuter;
+            });
 
         const rectangularRoot = rootHierarchy as HierarchyRectangularNode<TreemapHierarchyDatum>;
         layoutGenerator(rectangularRoot);
 
         // Collect all valid descendant nodes
-        let d3Nodes = rectangularRoot.descendants().filter(
+        const d3Nodes = rectangularRoot.descendants().filter(
             (d): d is HierarchyRectangularNode<TreemapHierarchyDatum> => d.depth > 0 && d.data.node !== null
         );
-        if (maxDepth !== undefined && Number.isFinite(maxDepth) && maxDepth >= 1) {
-            d3Nodes = d3Nodes.filter(d => d.depth <= maxDepth);
-        }
 
         const rootTotal = rootHierarchy.value ?? 0;
         const sceneNodes: SceneTreemapNode[] = [];
         const hitTargets: SceneHitTarget[] = [];
-        const navEntries = new Map<string, TreemapNavigationEntry>();
+        const candidateParentLabels: {
+            depth: number;
+            headerArea: number;
+            label: SceneTreemapLabel;
+            renderOrder: number;
+        }[] = [];
+        const candidateTerminalLabels: {
+            area: number;
+            label: SceneTreemapLabel;
+            renderOrder: number;
+        }[] = [];
 
-        // Pre-order traverse to assign nodes and hit targets
         for (let rIdx = 0; rIdx < d3Nodes.length; rIdx++) {
             const dNode = d3Nodes[rIdx];
             const pNode = dNode.data.node!;
+            const isCollapsed = Boolean(dNode.data.isCollapsed);
+            const hasRenderedChildren = Boolean(dNode.children && dNode.children.length > 0);
+            const isLeaf = !hasRenderedChildren && !isCollapsed;
+            const isRenderTerminal = !hasRenderedChildren || isCollapsed;
 
             const bounds: ChartRect = {
                 height: Math.max(0, dNode.y1 - dNode.y0),
@@ -254,9 +296,8 @@ export class TreemapLayoutEngine {
                 y: plotRect.y + dNode.y0
             };
 
-            const isLeaf = !dNode.children || dNode.children.length === 0;
             const headerBounds: ChartRect | undefined =
-                !isLeaf && showParentLabels && parentHeaderHeight > 0
+                !isRenderTerminal && showParentLabels && parentHeaderHeight > 0
                     ? {
                           height: Math.min(bounds.height, parentHeaderHeight),
                           width: bounds.width,
@@ -277,47 +318,49 @@ export class TreemapLayoutEngine {
             // Resolve text contrast color
             let textColor = seriesStyle.labelColor;
             if (!textColor) {
-                try {
-                    const whiteContrast = wcagContrast(pNode.color, "#ffffff") || 1;
-                    const darkContrast = wcagContrast(pNode.color, "#09090b") || 1;
-                    textColor = whiteContrast >= darkContrast ? "#ffffff" : "#09090b";
-                } catch {
-                    textColor = "#ffffff";
+                if (!isRenderTerminal) {
+                    textColor =
+                        styleResolver.resolveCssVariable("--color-foreground") ||
+                        styleResolver.resolveCssVariable("--mona-chart-foreground") ||
+                        "#09090b";
+                } else {
+                    textColor = styleResolver.getReadableForeground(pNode.color);
                 }
             }
 
+            const aggregateValue = isCollapsed ? pNode.aggregateValue : (dNode.value ?? pNode.aggregateValue);
             const percentageOfParent =
                 dNode.parent && dNode.parent.value && dNode.parent.value > 0
-                    ? (dNode.value ?? 0) / dNode.parent.value
+                    ? aggregateValue / dNode.parent.value
                     : 1;
-            const percentageOfRoot = rootTotal > 0 ? (dNode.value ?? 0) / rootTotal : 0;
+            const percentageOfRoot = rootTotal > 0 ? aggregateValue / rootTotal : 0;
 
             const formattedValue = formatYValue(
-                dNode.value ?? 0,
+                aggregateValue,
                 pNode.dataIndex,
                 registration.valueFormatter?.()
             );
 
             const sceneNode: SceneTreemapNode = {
-                aggregateValue: dNode.value ?? 0,
+                aggregateValue,
                 animationKey: pNode.animationKey,
                 borderRadius: seriesStyle.borderRadius,
                 bounds,
-                childCount: dNode.children?.length ?? 0,
+                childCount: isCollapsed ? 0 : (dNode.children?.length ?? 0),
                 contentBounds,
                 dataIndex: pNode.dataIndex,
                 datum: pNode.datum,
                 depth: dNode.depth,
-                descendantCount: dNode.descendants().length - 1,
+                descendantCount: pNode.descendantCount,
                 fillColor: pNode.color,
                 formattedLabel: pNode.formattedLabel,
                 formattedPath: pNode.formattedPath,
                 formattedValue,
                 headerBounds,
-                isCollapsed: false,
+                isCollapsed,
                 isLeaf,
                 label: pNode.label,
-                labelKind: isLeaf ? "terminal" : "parent",
+                labelKind: isRenderTerminal ? "terminal" : "parent",
                 nodeId: pNode.nodeId,
                 parentId: pNode.parentId,
                 path: pNode.path,
@@ -326,20 +369,28 @@ export class TreemapLayoutEngine {
                 rawValue: pNode.rawValue,
                 renderOpacity: 1,
                 renderOrder: rIdx,
-                showLabel: isLeaf ? showLabels : showParentLabels,
-                showValue: isLeaf ? showValues : false,
+                showLabel: isRenderTerminal ? showLabels : showParentLabels,
+                showValue: isRenderTerminal ? showValues : false,
                 siblingIndex: pNode.siblingIndex,
                 sourceIndexPath: pNode.sourceIndexPath,
                 textColor,
-                treeHeight: dNode.height
+                treeHeight: isCollapsed ? 0 : dNode.height
             };
 
             sceneNodes.push(sceneNode);
 
+            // Populate hit targets
             if (bounds.width > 0 && bounds.height > 0) {
+                const pointerBounds = isRenderTerminal
+                    ? bounds
+                    : headerBounds && headerBounds.height > 0
+                      ? headerBounds
+                      : undefined;
+
                 const hitTarget: SceneHitTarget = {
                     animationKey: sceneNode.animationKey,
-                    bounds: sceneNode.bounds,
+                    borderRadius: sceneNode.borderRadius,
+                    bounds: pointerBounds,
                     color: sceneNode.fillColor,
                     dataIndex: sceneNode.dataIndex,
                     datum: sceneNode.datum,
@@ -353,7 +404,7 @@ export class TreemapLayoutEngine {
                         formattedLabel: sceneNode.formattedLabel,
                         formattedPath: sceneNode.formattedPath,
                         formattedValue: sceneNode.formattedValue,
-                        isCollapsed: false,
+                        isCollapsed: sceneNode.isCollapsed,
                         isLeaf: sceneNode.isLeaf,
                         label: sceneNode.label,
                         nodeId: sceneNode.nodeId,
@@ -368,34 +419,135 @@ export class TreemapLayoutEngine {
                     },
                     index: sceneNode.dataIndex,
                     itemId: sceneNode.nodeId,
+                    renderOrder: rIdx,
                     seriesId,
                     seriesName,
                     seriesType: "treemap",
                     value: sceneNode.aggregateValue,
+                    visualBounds: bounds,
                     xKey: sceneNode.nodeId,
                     xValue: sceneNode.label
                 };
+
                 hitTargets.push(hitTarget);
+            }
+
+            // Collect DOM label candidates
+            if (!isRenderTerminal) {
+                if (showParentLabels && headerBounds) {
+                    if (headerBounds.width >= minLabelWidth && headerBounds.height >= minParentHeaderLabelHeight) {
+                        candidateParentLabels.push({
+                            depth: sceneNode.depth,
+                            headerArea: headerBounds.width * headerBounds.height,
+                            label: {
+                                aggregateValue: sceneNode.aggregateValue,
+                                bounds: headerBounds,
+                                childCount: sceneNode.childCount,
+                                color: sceneNode.fillColor,
+                                dataIndex: sceneNode.dataIndex,
+                                datum: sceneNode.datum,
+                                depth: sceneNode.depth,
+                                descendantCount: sceneNode.descendantCount,
+                                formattedLabel: sceneNode.formattedLabel,
+                                formattedPath: sceneNode.formattedPath,
+                                formattedValue: sceneNode.formattedValue,
+                                isCollapsed: sceneNode.isCollapsed,
+                                isLeaf: sceneNode.isLeaf,
+                                kind: "parent",
+                                label: sceneNode.label,
+                                nodeId: sceneNode.nodeId,
+                                parentId: sceneNode.parentId,
+                                path: sceneNode.path,
+                                percentageOfParent: sceneNode.percentageOfParent,
+                                percentageOfRoot: sceneNode.percentageOfRoot,
+                                rawValue: sceneNode.rawValue,
+                                showValue: false,
+                                siblingIndex: sceneNode.siblingIndex,
+                                sourceIndexPath: sceneNode.sourceIndexPath,
+                                textColor: sceneNode.textColor,
+                                treeHeight: sceneNode.treeHeight
+                            },
+                            renderOrder: rIdx
+                        });
+                    }
+                }
+            } else {
+                if (showLabels && bounds.width >= minLabelWidth && bounds.height >= minTerminalLabelHeight) {
+                    candidateTerminalLabels.push({
+                        area: bounds.width * bounds.height,
+                        label: {
+                            aggregateValue: sceneNode.aggregateValue,
+                            bounds,
+                            childCount: sceneNode.childCount,
+                            color: sceneNode.fillColor,
+                            dataIndex: sceneNode.dataIndex,
+                            datum: sceneNode.datum,
+                            depth: sceneNode.depth,
+                            descendantCount: sceneNode.descendantCount,
+                            formattedLabel: sceneNode.formattedLabel,
+                            formattedPath: sceneNode.formattedPath,
+                            formattedValue: sceneNode.formattedValue,
+                            isCollapsed: sceneNode.isCollapsed,
+                            isLeaf: sceneNode.isLeaf,
+                            kind: "terminal",
+                            label: sceneNode.label,
+                            nodeId: sceneNode.nodeId,
+                            parentId: sceneNode.parentId,
+                            path: sceneNode.path,
+                            percentageOfParent: sceneNode.percentageOfParent,
+                            percentageOfRoot: sceneNode.percentageOfRoot,
+                            rawValue: sceneNode.rawValue,
+                            showValue: showValues,
+                            siblingIndex: sceneNode.siblingIndex,
+                            sourceIndexPath: sceneNode.sourceIndexPath,
+                            textColor: sceneNode.textColor,
+                            treeHeight: sceneNode.treeHeight
+                        },
+                        renderOrder: rIdx
+                    });
+                }
             }
         }
 
-        // Build navigation index
-        for (let i = 0; i < d3Nodes.length; i++) {
-            const dNode = d3Nodes[i];
+        // Build explicit DFS navigation from selectable rendered nodes
+        const dfsOrderedNodes: HierarchyRectangularNode<TreemapHierarchyDatum>[] = [];
+        const traverseDfs = (node: HierarchyRectangularNode<TreemapHierarchyDatum>): void => {
+            if (node.depth > 0 && node.data.node !== null) {
+                const w = Math.max(0, node.x1 - node.x0);
+                const h = Math.max(0, node.y1 - node.y0);
+                if (w > 0 && h > 0) {
+                    dfsOrderedNodes.push(node);
+                }
+            }
+            if (!node.data.isCollapsed && node.children) {
+                for (const child of node.children) {
+                    traverseDfs(child);
+                }
+            }
+        };
+        traverseDfs(rectangularRoot);
+
+        const navEntries = new Map<string, TreemapNavigationEntry>();
+        for (let i = 0; i < dfsOrderedNodes.length; i++) {
+            const dNode = dfsOrderedNodes[i];
             const pNode = dNode.data.node!;
             const parentDNode = dNode.parent?.data.node;
 
-            const siblings = dNode.parent?.children ?? [];
+            const siblings = (dNode.parent?.children ?? []).filter(
+                c => c.data.node !== null && (c.x1 - c.x0) > 0 && (c.y1 - c.y0) > 0
+            );
             const sIdx = siblings.indexOf(dNode);
             const prevSibling = sIdx > 0 ? siblings[sIdx - 1].data.node?.nodeId : undefined;
             const nextSibling = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1].data.node?.nodeId : undefined;
 
-            const children = dNode.children ?? [];
+            const children = (dNode.children ?? []).filter(
+                c => c.data.node !== null && (c.x1 - c.x0) > 0 && (c.y1 - c.y0) > 0
+            );
             const firstChildId = children.length > 0 ? children[0].data.node?.nodeId : undefined;
             const lastChildId = children.length > 0 ? children[children.length - 1].data.node?.nodeId : undefined;
 
-            const previousDepthFirstId = i > 0 ? d3Nodes[i - 1].data.node?.nodeId : undefined;
-            const nextDepthFirstId = i < d3Nodes.length - 1 ? d3Nodes[i + 1].data.node?.nodeId : undefined;
+            const previousDepthFirstId = i > 0 ? dfsOrderedNodes[i - 1].data.node?.nodeId : undefined;
+            const nextDepthFirstId = i < dfsOrderedNodes.length - 1 ? dfsOrderedNodes[i + 1].data.node?.nodeId : undefined;
 
             navEntries.set(pNode.nodeId, {
                 firstChildId,
@@ -411,62 +563,40 @@ export class TreemapLayoutEngine {
 
         const navigationIndex: TreemapNavigationIndex = {
             entries: navEntries,
-            firstNodeId: d3Nodes.length > 0 ? d3Nodes[0].data.node?.nodeId : undefined,
-            lastNodeId: d3Nodes.length > 0 ? d3Nodes[d3Nodes.length - 1].data.node?.nodeId : undefined
+            firstNodeId: dfsOrderedNodes.length > 0 ? dfsOrderedNodes[0].data.node?.nodeId : undefined,
+            lastNodeId: dfsOrderedNodes.length > 0 ? dfsOrderedNodes[dfsOrderedNodes.length - 1].data.node?.nodeId : undefined
         };
 
         const hitIndex = new TreemapHitIndex(plotRect, hitTargets);
 
-        // Select candidate DOM labels (capped by maxLabels)
-        const parentLabels: SceneTreemapLabel[] = [];
-        const terminalLabels: { area: number; label: SceneTreemapLabel }[] = [];
+        // Select candidate DOM labels with global hard cap
+        candidateParentLabels.sort((a, b) => a.depth - b.depth || b.headerArea - a.headerArea || a.renderOrder - b.renderOrder);
+        candidateTerminalLabels.sort((a, b) => b.area - a.area || a.renderOrder - b.renderOrder);
 
-        for (const sNode of sceneNodes) {
-            if (!sNode.isLeaf) {
-                if (showParentLabels && sNode.headerBounds) {
-                    if (sNode.headerBounds.width >= minLabelWidth && sNode.headerBounds.height >= minLabelHeight) {
-                        parentLabels.push({
-                            bounds: sNode.headerBounds,
-                            formattedLabel: sNode.formattedLabel,
-                            formattedValue: sNode.formattedValue,
-                            kind: "parent",
-                            nodeId: sNode.nodeId,
-                            showValue: false,
-                            textColor: sNode.textColor
-                        });
-                    }
-                }
-            } else {
-                if (showLabels && sNode.bounds.width >= minLabelWidth && sNode.bounds.height >= minLabelHeight) {
-                    terminalLabels.push({
-                        area: sNode.bounds.width * sNode.bounds.height,
-                        label: {
-                            bounds: sNode.bounds,
-                            formattedLabel: sNode.formattedLabel,
-                            formattedValue: sNode.formattedValue,
-                            kind: "terminal",
-                            nodeId: sNode.nodeId,
-                            showValue: showValues,
-                            textColor: sNode.textColor
-                        }
-                    });
-                }
+        const selectedLabels: SceneTreemapLabel[] = [];
+        if (maxLabels > 0) {
+            const parentTake = Math.min(maxLabels, candidateParentLabels.length);
+            for (let i = 0; i < parentTake; i++) {
+                selectedLabels.push(candidateParentLabels[i].label);
+            }
+            const remainingCapacity = Math.max(0, maxLabels - selectedLabels.length);
+            const terminalTake = Math.min(remainingCapacity, candidateTerminalLabels.length);
+            for (let i = 0; i < terminalTake; i++) {
+                selectedLabels.push(candidateTerminalLabels[i].label);
             }
         }
 
-        terminalLabels.sort((a, b) => b.area - a.area);
+        // Order-stable topology signature
+        const sortedNodeRecords = [...sceneNodes]
+            .sort((a, b) => a.nodeId.localeCompare(b.nodeId))
+            .map(n => [n.nodeId, n.parentId ?? "", n.depth]);
+        const topologySignature = JSON.stringify([seriesId, sortedNodeRecords]);
 
-        const selectedLabels: SceneTreemapLabel[] = [...parentLabels];
-        const remainingCapacity = Math.max(0, maxLabels - selectedLabels.length);
-        for (let tIdx = 0; tIdx < Math.min(remainingCapacity, terminalLabels.length); tIdx++) {
-            selectedLabels.push(terminalLabels[tIdx].label);
-        }
-
-        const topologySignature = JSON.stringify(sceneNodes.map(n => [n.nodeId, n.parentId, n.depth]));
         const layoutSignature = JSON.stringify([
             seriesId,
             tileMode,
             sortMode,
+            effectiveMaxDepth ?? 0,
             paddingInner,
             paddingOuter,
             parentHeaderHeight,
@@ -476,6 +606,7 @@ export class TreemapLayoutEngine {
         ]);
 
         const seriesScene: ChartTreemapSeriesScene = {
+            effectiveMaxDepth,
             id: seriesId,
             labels: selectedLabels,
             layoutSignature,

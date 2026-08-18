@@ -159,6 +159,55 @@ export class ChartTransitionPlanner {
                 };
             }
 
+            if (previous.coordinateSystem === "hierarchical" && target.coordinateSystem === "hierarchical") {
+                const prevTreemap = previous as TreemapChartScene;
+                const targetTreemap = target as TreemapChartScene;
+                const prevSeries = prevTreemap.series[0];
+                const targetSeries = targetTreemap.series[0];
+
+                if (prevSeries && targetSeries) {
+                    if (
+                        prevSeries.tile !== targetSeries.tile ||
+                        prevSeries.sort !== targetSeries.sort ||
+                        prevSeries.effectiveMaxDepth !== targetSeries.effectiveMaxDepth
+                    ) {
+                        return {
+                            complexity,
+                            duration: options.duration,
+                            easing: options.easing,
+                            fromScene: previous,
+                            mode: "crossfade",
+                            seriesPlans: [],
+                            toScene: target,
+                            trigger
+                        };
+                    }
+
+                    const prevParentMap = new Map<string, string | undefined>();
+                    for (const node of prevSeries.nodes) {
+                        prevParentMap.set(node.animationKey, node.parentId);
+                    }
+
+                    for (const targetNode of targetSeries.nodes) {
+                        if (prevParentMap.has(targetNode.animationKey)) {
+                            const prevParent = prevParentMap.get(targetNode.animationKey);
+                            if (prevParent !== targetNode.parentId) {
+                                return {
+                                    complexity,
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    fromScene: previous,
+                                    mode: "crossfade",
+                                    seriesPlans: [],
+                                    toScene: target,
+                                    trigger
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+
             if (previous.coordinateSystem === "polar" && target.coordinateSystem === "polar") {
                 const prevPolar = previous as PolarChartScene;
                 const targetPolar = target as PolarChartScene;

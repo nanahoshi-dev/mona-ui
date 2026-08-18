@@ -607,6 +607,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #resolveSharedTooltip(scene: ChartScene): boolean {
+        if (scene.coordinateSystem === "hierarchical") {
+            return false;
+        }
         if (scene.coordinateSystem === "polar" && (scene.polarKind === "sector" || scene.polarKind === "arc")) {
             return false;
         }
@@ -872,6 +875,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 formattedY: yStr,
                 formattedYCategory: hit.formattedYCategory,
                 fromValue,
+                hierarchy: hit.hierarchy,
                 high: hit.high ?? hit.financial?.high,
                 isClamped: hit.isClamped,
                 low: hit.low ?? hit.financial?.low,
@@ -1454,52 +1458,51 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     protected treemapLabelContext(
         lbl: SceneTreemapLabel,
-        seriesScene: ChartTreemapSeriesScene
+        _seriesScene: ChartTreemapSeriesScene
     ): ChartTreemapLabelTemplateContext {
-        const node = seriesScene.nodes.find(n => n.nodeId === lbl.nodeId);
         const nodeContext: ChartHierarchyNodeContext = {
-            aggregateValue: node?.aggregateValue ?? 0,
-            childCount: node?.childCount ?? 0,
-            dataIndex: node?.dataIndex ?? 0,
-            datum: node?.datum,
-            depth: node?.depth ?? 0,
-            descendantCount: node?.descendantCount ?? 0,
-            formattedLabel: node?.formattedLabel ?? lbl.formattedLabel,
-            formattedPath: node?.formattedPath ?? [lbl.formattedLabel],
-            formattedValue: node?.formattedValue ?? lbl.formattedValue,
-            isCollapsed: false,
-            isLeaf: node?.isLeaf ?? true,
-            label: node?.label ?? lbl.formattedLabel,
+            aggregateValue: lbl.aggregateValue,
+            childCount: lbl.childCount,
+            dataIndex: lbl.dataIndex,
+            datum: lbl.datum,
+            depth: lbl.depth,
+            descendantCount: lbl.descendantCount,
+            formattedLabel: lbl.formattedLabel,
+            formattedPath: lbl.formattedPath,
+            formattedValue: lbl.formattedValue,
+            isCollapsed: lbl.isCollapsed,
+            isLeaf: lbl.isLeaf,
+            label: lbl.label,
             nodeId: lbl.nodeId,
-            parentId: node?.parentId,
-            path: node?.path ?? [lbl.formattedLabel],
-            percentageOfParent: node?.percentageOfParent,
-            percentageOfRoot: node?.percentageOfRoot,
-            rawValue: node?.rawValue,
-            siblingIndex: node?.siblingIndex ?? 0,
-            sourceIndexPath: node?.sourceIndexPath ?? [0],
-            treeHeight: node?.treeHeight ?? 0
+            parentId: lbl.parentId,
+            path: lbl.path,
+            percentageOfParent: lbl.percentageOfParent,
+            percentageOfRoot: lbl.percentageOfRoot,
+            rawValue: lbl.rawValue,
+            siblingIndex: lbl.siblingIndex,
+            sourceIndexPath: lbl.sourceIndexPath,
+            treeHeight: lbl.treeHeight
         };
 
         return {
             $implicit: nodeContext,
             bounds: lbl.bounds,
-            color: node?.fillColor ?? seriesScene.style.baseColor,
-            datum: node?.datum,
-            depth: node?.depth ?? 0,
-            formattedLabel: node?.formattedLabel ?? lbl.formattedLabel,
-            formattedPath: node?.formattedPath ?? [lbl.formattedLabel],
-            formattedValue: node?.formattedValue ?? lbl.formattedValue,
-            isCollapsed: false,
-            isLeaf: node?.isLeaf ?? true,
-            label: node?.label,
+            color: lbl.color,
+            datum: lbl.datum,
+            depth: lbl.depth,
+            formattedLabel: lbl.formattedLabel,
+            formattedPath: lbl.formattedPath,
+            formattedValue: lbl.formattedValue,
+            isCollapsed: lbl.isCollapsed,
+            isLeaf: lbl.isLeaf,
+            label: lbl.label,
             node: nodeContext,
             nodeId: lbl.nodeId,
-            path: node?.path ?? [lbl.formattedLabel],
-            percentageOfParent: node?.percentageOfParent,
-            percentageOfRoot: node?.percentageOfRoot,
+            path: lbl.path,
+            percentageOfParent: lbl.percentageOfParent,
+            percentageOfRoot: lbl.percentageOfRoot,
             textColor: lbl.textColor,
-            value: node?.aggregateValue ?? 0
+            value: lbl.aggregateValue
         };
     }
 

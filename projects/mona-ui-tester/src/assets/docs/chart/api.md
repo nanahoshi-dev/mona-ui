@@ -7,6 +7,7 @@ The chart component renders high-performance Canvas 2D visualizations composed o
 - **Sector**: `<mona-pie-series>`, `<mona-donut-series>`
 - **Polar Axis**: `<mona-radar-series>`, `<mona-polar-series>`
 - **Polar Arc**: `<mona-radial-bar-series>`, `<mona-rose-series>`, `<mona-gauge-series>`
+- **Hierarchical**: `<mona-treemap-series>`
 
 ## Import & Quick Start
 
@@ -398,6 +399,43 @@ Renders circular or semi-circular gauge meters with value progress arcs, tapered
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter callback for gauge numeric values. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
+### `<mona-treemap-series>`
+
+Renders hierarchical treemap visualizations using nested squarified, binary, dice, or slice-dice rectangles.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `borderRadius` | `number` | `undefined` | Uniform corner radius in pixels applied to cell boundaries. |
+| `childrenField` | `ChartField` | `"children"` | Property key or accessor extracting child node array. |
+| `color` | `string` | `undefined` | Explicit unified fill color for all nodes. |
+| `colorField` | `ChartField` | `undefined` | Property key or accessor extracting explicit color per item. |
+| `colors` | `readonly string[]` | `undefined` | Array of colors assigned to top-level branches and inherited down subtrees. |
+| `data` | `readonly unknown[]` | `undefined` | Hierarchical dataset overriding root chart data. |
+| `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric node value. |
+| `fillOpacity` | `number` | `undefined` | Fill opacity for terminal leaf cells (0 to 1). |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting unique node identifier. |
+| `labelField` | `ChartField` | `"name"` | Property key or accessor extracting node text label. |
+| `labelFormatter` | `ChartValueFormatter` | `undefined` | Formatter callback for node text labels. |
+| `maxDepth` | `number` | `undefined` | Maximum hierarchy depth to render; deeper subtrees are aggregated into solid terminal nodes. |
+| `maxLabels` | `number` | `100` | Maximum number of DOM overlay labels to render concurrently. |
+| `minLabelHeight` | `number` | `18` | Minimum node height in pixels required to render a DOM label. |
+| `minLabelWidth` | `number` | `32` | Minimum node width in pixels required to render a DOM label. |
+| `name` | `string` | `"Treemap"` | Series name for tooltips, legend, and accessibility. |
+| `paddingInner` | `number` | `2` | Inner gap in pixels between sibling node rectangles. |
+| `paddingOuter` | `number` | `4` | Outer padding in pixels between parent boundary and child nodes. |
+| `parentFillOpacity` | `number` | `undefined` | Fill opacity for parent container backgrounds (0 to 1). |
+| `parentHeaderHeight` | `number` | `20` | Reserved height in pixels for parent category header bars. |
+| `showLabels` | `boolean` | `true` | Whether to display DOM overlay text labels on nodes. |
+| `showParentLabels` | `boolean` | `true` | Whether to display header labels on parent nodes. |
+| `showValues` | `boolean` | `true` | Whether to append formatted numeric values to node labels. |
+| `sort` | `ChartTreemapSort` | `"descending"` | Sibling sorting order: `"descending"`, `"ascending"`, or `"none"`. |
+| `strokeColor` | `string` | `undefined` | Cell boundary border stroke color. |
+| `strokeWidth` | `number` | `undefined` | Cell boundary border stroke width in pixels. |
+| `tile` | `ChartTreemapTile` | `"squarify"` | Tiling algorithm: `"squarify"`, `"binary"`, `"dice"`, `"slice"`, or `"slice-dice"`. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter callback for numeric values. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `nodeVisibilityChange` | `output<ChartTreemapNodeVisibilityEvent>` | - | Emitted when a top-level branch visibility is toggled via legend or API. |
+
 ## Template Directives
 
 - `ng-template[monaChartTooltipTemplate]`: Customizes hover and keyboard tooltip contents with `{ $implicit, point, points, shared }`.
@@ -406,6 +444,7 @@ Renders circular or semi-circular gauge meters with value progress arcs, tapered
 - `ng-template[monaChartNoDataTemplate]`: Customizes empty state placeholder when no renderable data is present.
 - `ng-template[monaChartCenterTemplate]`: Customizes central donut cutout template with `{ $implicit, total, visibleCount }`.
 - `ng-template[monaChartGaugeCenterTemplate]`: Customizes central gauge readout template with `{ $implicit, formattedMax, formattedMin, formattedValue, isClamped, max, min, ratio, seriesId, seriesName, value }`.
+- `ng-template[monaChartTreemapLabelTemplate]`: Customizes DOM treemap node labels with `{ $implicit, aggregateValue, dataIndex, depth, descendantCount, formattedLabel, formattedPath, formattedValue, isCollapsed, isLeaf, kind, label, nodeId, percentageOfParent, percentageOfRoot, rawValue, seriesId, seriesName, value }`.
 
 ## Keyboard Navigation
 

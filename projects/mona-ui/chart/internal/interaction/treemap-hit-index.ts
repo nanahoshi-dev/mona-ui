@@ -101,7 +101,7 @@ export class TreemapHitIndex {
 
             if (point.x >= b.x && point.x <= b.x + b.width && point.y >= b.y && point.y <= b.y + b.height) {
                 const depth = candidate.hierarchy?.depth ?? 0;
-                const order = candidate.index ?? 0;
+                const order = candidate.renderOrder ?? candidate.index ?? 0;
 
                 if (depth > bestDepth || (depth === bestDepth && order >= bestOrder)) {
                     bestTarget = candidate;

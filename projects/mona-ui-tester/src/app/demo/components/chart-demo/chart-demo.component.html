@@ -1438,7 +1438,7 @@
                         aria-label="Tech Stack Treemap"
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)">
-                        <mona-chart-treemap-series
+                        <mona-treemap-series
                             [tile]="treemapTile()"
                             [sort]="treemapSort()"
                             [showParentLabels]="treemapShowParentLabels()"
@@ -1447,12 +1447,12 @@
                             [strokeWidth]="treemapStrokeWidth()"
                             [strokeColor]="treemapStrokeColor()"
                             [parentFillOpacity]="treemapParentFillOpacity()"
-                            [fillOpacity]="treemapFillOpacity()"
-                            [padding]="treemapPadding()"
-                            [paddingTop]="treemapPaddingTop()"
+                            [paddingInner]="treemapPaddingInner()"
+                            [paddingOuter]="treemapPaddingOuter()"
+                            [parentHeaderHeight]="treemapParentHeaderHeight()"
                             [maxDepth]="treemapMaxDepth()"
                             labelField="name"
-                            valueField="value"
+                            field="value"
                             childrenField="children"
                             name="Tech Ecosystem"
                             (nodeVisibilityChange)="onTreemapNodeVisibilityChange($event)">
@@ -1466,7 +1466,7 @@
                                     </div>
                                 </ng-template>
                             }
-                        </mona-chart-treemap-series>
+                        </mona-treemap-series>
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip />
                     </mona-chart>
