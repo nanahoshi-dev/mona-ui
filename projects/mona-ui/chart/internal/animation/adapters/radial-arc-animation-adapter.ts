@@ -324,8 +324,21 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
         const fromOpacity = previous ? 1 : 0;
         const toOpacity = target ? 1 : 0;
 
-        const fromVal = previous?.value;
-        const toVal = target?.value;
+        const effectiveFromVal: SceneGaugeValue | undefined = previous?.value ?? (target?.value ? {
+            ...target.value,
+            cornerRadius: target.value.cornerRadius,
+            endAngle: target.value.startAngle,
+            ratio: 0,
+            renderOpacity: 0
+        } : undefined);
+
+        const effectiveToVal: SceneGaugeValue | undefined = target?.value ?? (previous?.value ? {
+            ...previous.value,
+            cornerRadius: previous.value.cornerRadius,
+            endAngle: previous.value.startAngle,
+            ratio: 0,
+            renderOpacity: 0
+        } : undefined);
 
         const fromNeedle = previous?.needle;
         const toNeedle = target?.needle;
@@ -338,28 +351,30 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                 if (progress >= 1 && target) {
                     return target;
                 }
-                if (!baseScene || !toVal || !fromVal) {
+                if (!baseScene || !effectiveToVal || !effectiveFromVal) {
                     return target ?? previous;
                 }
 
-                const startAngle = lerp(fromVal.startAngle, toVal.startAngle, progress);
-                const endAngle = lerp(fromVal.endAngle, toVal.endAngle, progress);
-                const innerRadius = lerp(fromVal.innerRadius, toVal.innerRadius, progress);
-                const outerRadius = lerp(fromVal.outerRadius, toVal.outerRadius, progress);
-                const ratio = lerp(fromVal.ratio, toVal.ratio, progress);
-                const rawValue = lerp(fromVal.rawValue, toVal.rawValue, progress);
+                const startAngle = lerp(effectiveFromVal.startAngle, effectiveToVal.startAngle, progress);
+                const endAngle = lerp(effectiveFromVal.endAngle, effectiveToVal.endAngle, progress);
+                const innerRadius = lerp(effectiveFromVal.innerRadius, effectiveToVal.innerRadius, progress);
+                const outerRadius = lerp(effectiveFromVal.outerRadius, effectiveToVal.outerRadius, progress);
+                const ratio = lerp(effectiveFromVal.ratio, effectiveToVal.ratio, progress);
+                const rawValue = lerp(effectiveFromVal.rawValue, effectiveToVal.rawValue, progress);
+                const cornerRadius = lerp(effectiveFromVal.cornerRadius, effectiveToVal.cornerRadius, progress);
                 const renderOpacity = lerpOpacity(fromOpacity, toOpacity, progress);
 
                 const sampledValue: SceneGaugeValue = {
-                    animationKey: toVal.animationKey,
-                    dataIndex: toVal.dataIndex,
-                    datum: toVal.datum,
+                    animationKey: effectiveToVal.animationKey,
+                    cornerRadius,
+                    dataIndex: effectiveToVal.dataIndex,
+                    datum: effectiveToVal.datum,
                     endAngle,
-                    formattedValue: toVal.formattedValue,
+                    formattedValue: effectiveToVal.formattedValue,
                     innerRadius,
-                    isClamped: toVal.isClamped,
-                    max: toVal.max,
-                    min: toVal.min,
+                    isClamped: effectiveToVal.isClamped,
+                    max: effectiveToVal.max,
+                    min: effectiveToVal.min,
                     outerRadius,
                     ratio,
                     rawValue,

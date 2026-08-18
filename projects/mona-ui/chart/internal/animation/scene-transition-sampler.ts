@@ -7,6 +7,7 @@ import type {
     PolarAxisChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
+import type { ChartPoint } from "../../models/chart.models";
 import type { SceneHeatmapCell } from "../../models/chart-heatmap.models";
 import type {
     ChartBarSeriesScene,
@@ -815,7 +816,21 @@ export class SceneTransitionSampler {
                 if (series0.type === "radialBar") {
                     sampledHitIndex = new RadialBarHitIndex(toScene.center, sampledHitTargets);
                 } else {
-                    sampledHitIndex = new RoseHitIndex(toScene.center, sampledHitTargets);
+                    const K = series0.angularCategories?.length ?? sampledHitTargets.length;
+                    const spanRad = sampledHitTargets.length > 0 && sampledHitTargets[0].arc
+                        ? (sampledHitTargets[sampledHitTargets.length - 1].arc?.endAngle ?? Math.PI * 2) - (sampledHitTargets[0].arc?.startAngle ?? 0)
+                        : Math.PI * 2;
+                    const startAngleRad = sampledHitTargets.length > 0 && sampledHitTargets[0].arc
+                        ? (sampledHitTargets[0].arc?.startAngle ?? 0)
+                        : 0;
+
+                    sampledHitIndex = new RoseHitIndex(
+                        toScene.center,
+                        sampledHitTargets,
+                        startAngleRad,
+                        spanRad,
+                        K
+                    );
                 }
             } else if (series0.type === "gauge") {
                 const gVal = series0.value;
@@ -848,10 +863,38 @@ export class SceneTransitionSampler {
             }
         }
 
+        const hitsByKey = new Map<ChartInteractionXKey, SceneHitTarget>();
+        for (const h of sampledHitTargets) {
+            hitsByKey.set(h.xKey, h);
+        }
+
+        const sampledBuckets: ChartInteractionBucket[] = toScene.interactionBuckets
+            .map(targetBucket => {
+                const primaryHit = hitsByKey.get(targetBucket.xKey);
+                if (!primaryHit?.arc) {
+                    return targetBucket;
+                }
+                const arcGeom = primaryHit.arc;
+                const midAngle = (arcGeom.startAngle + arcGeom.endAngle) / 2;
+                const midRadius = (arcGeom.innerRadius + arcGeom.outerRadius) / 2;
+                const anchor: ChartPoint = {
+                    x: toScene.center.x + Math.sin(midAngle) * midRadius,
+                    y: toScene.center.y - Math.cos(midAngle) * midRadius
+                };
+                return {
+                    anchor,
+                    hits: [primaryHit],
+                    order: targetBucket.order,
+                    xKey: targetBucket.xKey,
+                    xValue: targetBucket.xValue
+                };
+            });
+
         return {
             ...toScene,
             hitIndex: sampledHitIndex,
             hitTargets: sampledHitTargets,
+            interactionBuckets: sampledBuckets,
             series: sampledSeries
         };
     }
