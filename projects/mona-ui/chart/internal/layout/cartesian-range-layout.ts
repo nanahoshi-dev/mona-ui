@@ -162,6 +162,7 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
             seriesName: seriesDisplayName,
             seriesType: "rangeBar",
             toValue: range.toValue,
+            value: [range.fromValue, range.toValue],
             valueKind: "range",
             visualBounds: {
                 height: barHeight,
@@ -380,6 +381,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
             seriesName: seriesDisplayName,
             seriesType: "rangeArea",
             toValue: range.toValue,
+            value: [range.fromValue, range.toValue],
             valueKind: "range",
             visualRadius: pointRadius,
             xKey: normalizedXKey,

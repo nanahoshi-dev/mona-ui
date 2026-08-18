@@ -940,6 +940,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 stackStart: hit.stackStart,
                 stackTotal: hit.stackTotal,
                 toValue,
+                value:
+                    hit.value ??
+                    (isRange && fromValue !== undefined && toValue !== undefined
+                        ? [fromValue, toValue]
+                        : hit.hierarchy?.aggregateValue ?? hit.yValue),
                 valueKind: hit.valueKind ?? (isRange ? "range" : hit.financial ? "ohlc" : hit.waterfall ? "waterfall" : "scalar"),
                 waterfall: hit.waterfall,
                 xValue: hit.xValue,
@@ -1782,6 +1787,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #toPointEvent(target: SceneHitTarget): ChartPointEvent {
+        const fromValue = target.fromValue ?? target.range?.fromValue;
+        const toValue = target.toValue ?? target.range?.toValue;
+        const value =
+            target.value ??
+            (fromValue !== undefined && toValue !== undefined
+                ? [fromValue, toValue]
+                : (target.hierarchy?.aggregateValue ?? target.yValue));
         return {
             category: target.category,
             categoryX: target.categoryX,
@@ -1803,7 +1815,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             formattedTo: target.formattedTo ?? target.range?.formattedTo,
             formattedXValue: target.formattedXValue ?? target.formattedCategory,
             formattedYCategory: target.formattedYCategory,
-            fromValue: target.fromValue ?? target.range?.fromValue,
+            fromValue,
             hierarchy: target.hierarchy,
             high: target.high ?? target.financial?.high,
             low: target.low ?? target.financial?.low,
@@ -1822,7 +1834,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             stackPosition: target.stackPosition,
             stackStart: target.stackStart,
             stackTotal: target.stackTotal,
-            toValue: target.toValue ?? target.range?.toValue,
+            toValue,
+            value,
             valueKind:
                 target.valueKind ??
                 (target.range
@@ -1836,7 +1849,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             funnel: target.funnel,
             xValue: target.xValue,
             yCategory: target.yCategory,
-            yValue: target.yValue
+            yValue: target.yValue ?? (typeof value === "number" ? value : undefined)
         };
     }
 

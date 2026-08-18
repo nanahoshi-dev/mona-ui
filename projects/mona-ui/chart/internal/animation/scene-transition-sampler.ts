@@ -368,6 +368,9 @@ export class SceneTransitionSampler {
 
             let rangeBand = targetHit.rangeBand;
             let range = targetHit.range;
+            let fromValue = targetHit.fromValue;
+            let toValue = targetHit.toValue;
+            let value = targetHit.value;
 
             let financial = targetHit.financial;
             let financialDirection = targetHit.financialDirection;
@@ -468,6 +471,9 @@ export class SceneTransitionSampler {
                         y: (sampledRangeAreaPt.fromPoint.y + sampledRangeAreaPt.toPoint.y) / 2
                     };
                     if (sampledRangeAreaPt.fromValue !== undefined && sampledRangeAreaPt.toValue !== undefined) {
+                        fromValue = sampledRangeAreaPt.fromValue;
+                        toValue = sampledRangeAreaPt.toValue;
+                        value = [sampledRangeAreaPt.fromValue, sampledRangeAreaPt.toValue];
                         range = {
                             formattedFrom: sampledRangeAreaPt.formattedFrom ?? targetHit.formattedFrom ?? "",
                             formattedTo: sampledRangeAreaPt.formattedTo ?? targetHit.formattedTo ?? "",
@@ -482,6 +488,9 @@ export class SceneTransitionSampler {
                 const sampledBar = sampledBarsByKey.get(key);
                 if (sampledBar && "fromValue" in sampledBar && "toValue" in sampledBar) {
                     const sb = sampledBar as SceneRangeBar;
+                    fromValue = sb.fromValue;
+                    toValue = sb.toValue;
+                    value = [sb.fromValue, sb.toValue];
                     range = {
                         formattedFrom: sb.formattedFrom ?? targetHit.formattedFrom ?? "",
                         formattedTo: sb.formattedTo ?? targetHit.formattedTo ?? "",
@@ -518,7 +527,7 @@ export class SceneTransitionSampler {
                     const hasPositiveHeight = sampledBar.height > 0;
                     if (isStackedBar && !hasPositiveHeight) {
                         bounds = undefined;
-                    } else if (targetHit.bounds !== undefined || !isStackedBar) {
+                    } else if (hasPositiveHeight || !isStackedBar) {
                         bounds = {
                             height: Math.max(4, sampledBar.height),
                             width: sampledBar.width,
@@ -547,6 +556,7 @@ export class SceneTransitionSampler {
                 formattedHigh,
                 formattedLow,
                 formattedOpen,
+                fromValue,
                 high,
                 highPoint,
                 low,
@@ -556,6 +566,8 @@ export class SceneTransitionSampler {
                 radius,
                 range,
                 rangeBand,
+                toValue,
+                value,
                 visualBounds,
                 visualRadius
             };

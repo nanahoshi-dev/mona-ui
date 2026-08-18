@@ -220,7 +220,7 @@ export interface SceneHitTarget {
     stackStart?: number;
     stackTotal?: number;
     toValue?: number;
-    value?: number;
+    value?: unknown;
     valueKind?: ChartPointValueKind;
     visualBounds?: ChartRect;
     visualRadius?: number;
