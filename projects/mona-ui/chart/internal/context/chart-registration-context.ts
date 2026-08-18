@@ -441,26 +441,24 @@ export interface ChartTreemapSeriesRegistration
         ChartDatumVisibilityRegistration {
     readonly borderRadius?: Signal<number | undefined>;
     readonly childrenField: Signal<ChartField>;
+    readonly color?: Signal<string | undefined>;
     readonly colorField?: Signal<ChartField | undefined>;
     readonly colors?: Signal<readonly string[] | undefined>;
     readonly data: Signal<readonly unknown[] | unknown | undefined>;
+    readonly field: Signal<ChartField>;
     readonly fillOpacity?: Signal<number | undefined>;
     readonly labelField: Signal<ChartField>;
     readonly labelFormatter?: Signal<ChartValueFormatter | undefined>;
     readonly labelTemplate?: Signal<ChartTreemapLabelTemplateDirective | undefined>;
     readonly maxDepth?: Signal<number | undefined>;
     readonly maxLabels?: Signal<number>;
-    readonly minLabelHeight?: Signal<number>;
-    readonly minLabelWidth?: Signal<number>;
+    readonly minLabelHeight?: Signal<number | undefined>;
+    readonly minLabelWidth?: Signal<number | undefined>;
     readonly padding?: Signal<number>;
-    readonly paddingBottom?: Signal<number | undefined>;
     readonly paddingInner?: Signal<number | undefined>;
-    readonly paddingLeft?: Signal<number | undefined>;
     readonly paddingOuter?: Signal<number | undefined>;
-    readonly paddingRight?: Signal<number | undefined>;
-    readonly paddingTop?: Signal<number | undefined>;
     readonly parentFillOpacity?: Signal<number | undefined>;
-    readonly parentHeaderHeight?: Signal<number>;
+    readonly parentHeaderHeight?: Signal<number | undefined>;
     readonly showLabels?: Signal<boolean>;
     readonly showParentLabels?: Signal<boolean>;
     readonly showValues?: Signal<boolean>;
@@ -469,7 +467,7 @@ export interface ChartTreemapSeriesRegistration
     readonly strokeWidth?: Signal<number | undefined>;
     readonly tile?: Signal<ChartTreemapTile>;
     readonly type: "treemap";
-    readonly valueField: Signal<ChartField>;
+    readonly valueField?: Signal<ChartField>;
     readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
 }
 
