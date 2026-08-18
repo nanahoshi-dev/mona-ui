@@ -2,7 +2,6 @@ import type { ChartPoint } from "../../models/chart.models";
 import type { ChartRadialBarSeriesRegistration } from "../context/chart-registration-context";
 import { RadialBarDataProcessor } from "../data/radial-bar-data";
 import type {
-    ChartRadialArcSeriesStyle,
     ChartRadialBarSeriesScene,
     PolarArcChartScene,
     SceneRadialArcMark,
@@ -12,6 +11,11 @@ import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geom
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { normalizeAngleSpan } from "../utils/angle-utils";
 import { RadialBarHitIndex } from "../interaction/radial-bar-hit-index";
+import {
+    computeOuterRadiusWithStroke,
+    computeRadialRingBands
+} from "./radial-geometry-utils";
+import { normalizeRatio } from "../utils/number-utils";
 
 export interface RadialBarLayoutOptions {
     readonly containerHeight: number;
@@ -38,16 +42,21 @@ export class RadialBarLayout {
             y: containerHeight / 2
         };
 
+        const isVisible = series.visible();
+        const seriesStyle = styleResolver.resolveRadialArcSeriesStyle(series);
+
         const maxAvailableRadius = Math.max(0, Math.min(containerWidth, containerHeight) / 2);
+        const outerRadius = computeOuterRadiusWithStroke(
+            maxAvailableRadius,
+            series.outerRadiusRatio(),
+            seriesStyle.strokeWidth
+        );
 
-        const outerRatio = Math.max(0.05, Math.min(1, series.outerRadiusRatio()));
-        const innerRatio = Math.max(0, Math.min(outerRatio - 0.01, series.innerRadiusRatio()));
-
-        const outerRadius = maxAvailableRadius * outerRatio;
-        const innerRadius = maxAvailableRadius * innerRatio;
-        const availableBand = Math.max(0, outerRadius - innerRadius);
+        const innerRatio = normalizeRatio(series.innerRadiusRatio(), 0.2, 0, 0.99);
+        const innerRadius = outerRadius * innerRatio;
 
         const spanInfo = normalizeAngleSpan(series.startAngle(), series.endAngle());
+        const totalSpanRad = spanInfo.endAngleRad - spanInfo.startAngleRad;
 
         const preparedData = RadialBarDataProcessor.process({
             categoryField: series.categoryField(),
@@ -69,140 +78,117 @@ export class RadialBarLayout {
             warnedDiagnosticSignatures
         });
 
-        const N = preparedData.visibleItems.length;
-        let barGap = Math.max(0, series.barGap());
-        let thickness: number;
-
-        const explicitThickness = series.barThickness?.();
-        if (explicitThickness !== undefined && explicitThickness > 0) {
-            thickness = Math.max(1, Math.min(explicitThickness, availableBand / Math.max(1, N)));
-        } else if (N > 0) {
-            const rawThickness = (availableBand - barGap * Math.max(0, N - 1)) / N;
-            if (rawThickness < 1 && N > 1) {
-                barGap = 0;
-                thickness = Math.max(1, availableBand / N);
-            } else {
-                thickness = Math.max(1, rawThickness);
-            }
-        } else {
-            thickness = Math.max(1, availableBand);
-        }
-
         const showTrack = series.showTrack();
-        const strokeColor = series.strokeColor();
-        const strokeWidth = series.strokeWidth?.() ?? 0;
         const fillMode = series.fillMode?.() ?? "solid";
-        const fillOpacity = series.fillOpacity?.() ?? 1;
-        const trackColor = series.trackColor() || styleResolver.resolveCssVariable("--mona-chart-radial-track-color") || "#e2e8f0";
-        const trackOpacity = series.trackOpacity?.() ?? 0.15;
 
         const marks: SceneRadialArcMark[] = [];
         const tracks: SceneRadialTrack[] = [];
         const hitTargets: SceneHitTarget[] = [];
         const interactionBuckets: ChartInteractionBucket[] = [];
 
-        const totalSpanRad = spanInfo.endAngleRad - spanInfo.startAngleRad;
+        const N = preparedData.visibleItems.length;
+        const ringBandsResult = computeRadialRingBands(
+            innerRadius,
+            outerRadius,
+            N,
+            series.barGap(),
+            series.barThickness?.()
+        );
 
-        for (let i = 0; i < N; i++) {
-            const datum = preparedData.visibleItems[i];
-            const ringOuter = Math.max(0, outerRadius - i * (thickness + barGap));
-            const ringInner = Math.max(0, ringOuter - thickness);
+        if (isVisible) {
+            for (let i = 0; i < N; i++) {
+                const datum = preparedData.visibleItems[i];
+                const band = ringBandsResult.bands[i];
+                const ringOuter = band ? band.outerRadius : outerRadius;
+                const ringInner = band ? band.innerRadius : innerRadius;
+                const thickness = ringOuter - ringInner;
 
-            if (showTrack) {
-                tracks.push({
-                    color: trackColor,
-                    endAngle: spanInfo.endAngleRad,
-                    innerRadius: ringInner,
-                    opacity: trackOpacity,
-                    outerRadius: ringOuter,
-                    startAngle: spanInfo.startAngleRad
-                });
-            }
+                if (showTrack) {
+                    tracks.push({
+                        color: seriesStyle.trackColor,
+                        endAngle: spanInfo.endAngleRad,
+                        innerRadius: ringInner,
+                        opacity: seriesStyle.trackOpacity,
+                        outerRadius: ringOuter,
+                        startAngle: spanInfo.startAngleRad
+                    });
+                }
 
-            const valueSpanRad = totalSpanRad * datum.normalizedValue;
-            const markEndAngle = spanInfo.startAngleRad + valueSpanRad;
-            const cornerRadius = series.cornerRadius?.() !== undefined
-                ? Math.min(series.cornerRadius()!, thickness / 2)
-                : thickness / 2;
+                const valueSpanRad = totalSpanRad * datum.normalizedValue;
+                const markEndAngle = spanInfo.startAngleRad + valueSpanRad;
+                const cornerRadius = series.cornerRadius?.() !== undefined
+                    ? Math.min(series.cornerRadius()!, thickness / 2)
+                    : thickness / 2;
 
-            const mark: SceneRadialArcMark = {
-                animationKey: datum.animationKey,
-                category: datum.category,
-                color: datum.color,
-                cornerRadius,
-                dataIndex: datum.dataIndex,
-                datum: datum.datum,
-                endAngle: markEndAngle,
-                formattedCategory: datum.formattedCategory,
-                formattedValue: datum.formattedValue,
-                innerRadius: ringInner,
-                itemId: datum.itemId,
-                normalizedValue: datum.normalizedValue,
-                outerRadius: ringOuter,
-                padAngle: 0,
-                rawValue: datum.rawValue,
-                startAngle: spanInfo.startAngleRad,
-                visible: true
-            };
-
-            marks.push(mark);
-
-            // Hit target (only if value arc has positive span or value is > 0)
-            const target: SceneHitTarget = {
-                arc: {
-                    center,
+                const mark: SceneRadialArcMark = {
+                    animationKey: datum.animationKey,
+                    category: datum.category,
+                    color: datum.color,
                     cornerRadius,
+                    dataIndex: datum.dataIndex,
+                    datum: datum.datum,
                     endAngle: markEndAngle,
+                    formattedCategory: datum.formattedCategory,
+                    formattedValue: datum.formattedValue,
                     innerRadius: ringInner,
+                    itemId: datum.itemId,
+                    normalizedValue: datum.normalizedValue,
                     outerRadius: ringOuter,
                     padAngle: 0,
-                    startAngle: spanInfo.startAngleRad
-                },
-                color: datum.color,
-                dataIndex: datum.dataIndex,
-                datum: datum.datum,
-                formattedCategory: datum.formattedCategory,
-                formattedValue: datum.formattedValue,
-                index: datum.dataIndex,
-                itemId: datum.itemId,
-                seriesId: series.id,
-                seriesName: series.name(),
-                seriesType: "radialBar",
-                value: datum.rawValue,
-                valueKind: "scalar",
-                xKey: datum.itemId,
-                xValue: datum.category,
-                yValue: datum.rawValue
-            };
+                    rawValue: datum.rawValue,
+                    startAngle: spanInfo.startAngleRad,
+                    visible: true
+                };
 
-            hitTargets.push(target);
+                marks.push(mark);
 
-            // Compute anchor on the arc mid-point for bucket
-            const midAngle = (spanInfo.startAngleRad + markEndAngle) / 2;
-            const midRadius = (ringInner + ringOuter) / 2;
-            interactionBuckets.push({
-                anchor: {
-                    x: center.x + Math.sin(midAngle) * midRadius,
-                    y: center.y - Math.cos(midAngle) * midRadius
-                },
-                hits: [target],
-                order: i,
-                xKey: datum.itemId,
-                xValue: datum.category
-            });
+                const target: SceneHitTarget = {
+                    animationKey: datum.animationKey,
+                    arc: {
+                        center,
+                        cornerRadius,
+                        endAngle: markEndAngle,
+                        innerRadius: ringInner,
+                        outerRadius: ringOuter,
+                        padAngle: 0,
+                        startAngle: spanInfo.startAngleRad
+                    },
+                    color: datum.color,
+                    dataIndex: datum.dataIndex,
+                    datum: datum.datum,
+                    formattedCategory: datum.formattedCategory,
+                    formattedValue: datum.formattedValue,
+                    index: datum.dataIndex,
+                    itemId: datum.itemId,
+                    seriesId: series.id,
+                    seriesName: series.name(),
+                    seriesType: "radialBar",
+                    value: datum.rawValue,
+                    valueKind: "scalar",
+                    xKey: datum.itemId,
+                    xValue: datum.category,
+                    yValue: datum.rawValue
+                };
+
+                hitTargets.push(target);
+
+                const midAngle = (spanInfo.startAngleRad + markEndAngle) / 2;
+                const midRadius = (ringInner + ringOuter) / 2;
+                interactionBuckets.push({
+                    anchor: {
+                        x: center.x + Math.sin(midAngle) * midRadius,
+                        y: center.y - Math.cos(midAngle) * midRadius
+                    },
+                    hits: [target],
+                    order: i,
+                    xKey: datum.itemId,
+                    xValue: datum.category
+                });
+            }
         }
 
-        const seriesStyle: ChartRadialArcSeriesStyle = {
-            fillOpacity,
-            strokeColor,
-            strokeSource: strokeColor ? "explicit" : "default",
-            strokeWidth,
-            trackColor,
-            trackOpacity
-        };
-
         const seriesScene: ChartRadialBarSeriesScene = {
-            barGap,
+            barGap: ringBandsResult.gap,
             fillMode,
             id: series.id,
             marks,
@@ -222,10 +208,12 @@ export class RadialBarLayout {
             seriesId: series.id,
             seriesType: "radialBar" as const,
             value: item.rawValue,
-            visible: item.visible
+            visible: isVisible && item.visible
         }));
 
-        const hasRenderableData = marks.some(m => m.normalizedValue !== undefined && m.normalizedValue > 0) || (showTrack && marks.length > 0);
+        const hasRenderableData = isVisible && (
+            marks.some(m => m.normalizedValue !== undefined && m.normalizedValue > 0) || (showTrack && marks.length > 0)
+        );
 
         const hitIndex = new RadialBarHitIndex(center, hitTargets);
 

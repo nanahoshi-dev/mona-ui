@@ -3,7 +3,6 @@ import type { ChartGaugeSeriesRegistration } from "../context/chart-registration
 import { GaugeDataProcessor } from "../data/gauge-data";
 import type {
     ChartGaugeSeriesScene,
-    ChartGaugeSeriesStyle,
     PolarArcChartScene,
     SceneGaugeNeedle,
     SceneGaugeValue,
@@ -13,6 +12,7 @@ import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geom
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { normalizeAngleSpan } from "../utils/angle-utils";
 import { GaugeHitIndex } from "../interaction/gauge-hit-index";
+import { normalizeGaugeGeometry } from "./radial-geometry-utils";
 
 export interface GaugeLayoutOptions {
     readonly containerHeight: number;
@@ -39,15 +39,23 @@ export class GaugeLayout {
             y: containerHeight / 2
         };
 
-        const maxAvailableRadius = Math.max(0, Math.min(containerWidth, containerHeight) / 2);
+        const isVisible = series.visible();
+        const seriesStyle = styleResolver.resolveGaugeSeriesStyle(series);
 
-        const outerRatio = Math.max(0.05, Math.min(1, series.outerRadiusRatio()));
-        const outerRadius = maxAvailableRadius * outerRatio;
+        const geom = normalizeGaugeGeometry({
+            containerHeight,
+            containerWidth,
+            cornerRadius: series.cornerRadius?.(),
+            endAngle: series.endAngle(),
+            hubRadius: series.hubRadius(),
+            innerRadiusRatio: series.innerRadiusRatio(),
+            needleLengthRatio: series.needleLengthRatio(),
+            needleWidth: series.needleWidth(),
+            outerRadiusRatio: series.outerRadiusRatio(),
+            startAngle: series.startAngle()
+        });
 
-        const innerRatio = Math.max(0, Math.min(0.99, series.innerRadiusRatio()));
-        const innerRadius = outerRadius * innerRatio;
-
-        const spanInfo = normalizeAngleSpan(series.startAngle(), series.endAngle());
+        const spanInfo = normalizeAngleSpan(geom.startAngle, geom.endAngle);
         const totalSpanRad = spanInfo.endAngleRad - spanInfo.startAngleRad;
 
         const preparedData = GaugeDataProcessor.process({
@@ -68,74 +76,46 @@ export class GaugeLayout {
         const markEndAngle = spanInfo.startAngleRad + valueSpanRad;
 
         const indicator = series.indicator();
-        const primaryColor = series.color()
-            ? styleResolver.resolveCssVariable(series.color(), series.element?.nativeElement)
-            : styleResolver.resolvePaletteColor(0);
-
-        const trackColor = series.trackColor()
-            ? styleResolver.resolveCssVariable(series.trackColor(), series.element?.nativeElement)
-            : styleResolver.resolveCssVariable("--mona-chart-radial-track-color") || "#e2e8f0";
-        const trackOpacity = series.trackOpacity?.() ?? 0.15;
-
-        const needleColor = series.needleColor()
-            ? styleResolver.resolveCssVariable(series.needleColor(), series.element?.nativeElement)
-            : primaryColor || "#1e293b";
-        const hubColor = needleColor;
-
         const fillMode = series.fillMode?.() ?? "solid";
-        const fillOpacity = series.fillOpacity?.() ?? 1;
-        const strokeColor = series.trackColor() ? "" : "";
-        const strokeWidth = 0;
 
         const track: SceneRadialTrack = {
-            color: trackColor,
+            color: seriesStyle.trackColor,
             endAngle: spanInfo.endAngleRad,
-            innerRadius,
-            opacity: trackOpacity,
-            outerRadius,
+            innerRadius: geom.innerRadius,
+            opacity: seriesStyle.trackOpacity,
+            outerRadius: geom.outerRadius,
             startAngle: spanInfo.startAngleRad
         };
 
         const value: SceneGaugeValue = {
             animationKey: preparedData.animationKey,
+            cornerRadius: geom.cornerRadius,
             dataIndex: preparedData.dataIndex,
             datum: preparedData.datum,
             endAngle: markEndAngle,
             formattedValue: preparedData.formattedValue,
-            innerRadius,
+            innerRadius: geom.innerRadius,
             isClamped: preparedData.isClamped,
             max: preparedData.max,
             min: preparedData.min,
-            outerRadius,
+            outerRadius: geom.outerRadius,
             ratio: preparedData.ratio,
             rawValue: preparedData.rawValue,
+            renderOpacity: preparedData.hasValidData && isVisible ? 1 : 0,
             startAngle: spanInfo.startAngleRad
         };
 
         let needle: SceneGaugeNeedle | undefined;
-        if (indicator === "needle" || indicator === "both") {
-            const lengthRatio = Math.max(0.1, Math.min(1, series.needleLengthRatio()));
+        if (isVisible && preparedData.hasValidData && (indicator === "needle" || indicator === "both")) {
             needle = {
                 angle: markEndAngle,
-                color: needleColor,
-                hubColor,
-                hubRadius: Math.max(1, series.hubRadius()),
-                length: outerRadius * lengthRatio,
-                width: Math.max(1, series.needleWidth())
+                color: seriesStyle.needleColor,
+                hubColor: seriesStyle.hubColor,
+                hubRadius: geom.hubRadius,
+                length: geom.needleLength,
+                width: geom.needleWidth
             };
         }
-
-        const seriesStyle: ChartGaugeSeriesStyle = {
-            color: primaryColor,
-            fillOpacity,
-            hubColor,
-            needleColor,
-            strokeColor,
-            strokeSource: "default",
-            strokeWidth,
-            trackColor,
-            trackOpacity
-        };
 
         const seriesScene: ChartGaugeSeriesScene = {
             fillMode,
@@ -150,36 +130,42 @@ export class GaugeLayout {
             value
         };
 
-        const hitTarget: SceneHitTarget = {
-            arc: {
-                center,
-                cornerRadius: series.cornerRadius?.() ?? 0,
-                endAngle: indicator === "needle" ? spanInfo.endAngleRad : markEndAngle,
-                innerRadius,
-                outerRadius,
-                padAngle: 0,
-                startAngle: spanInfo.startAngleRad
-            },
-            color: primaryColor,
-            dataIndex: preparedData.dataIndex,
-            datum: preparedData.datum,
-            formattedValue: preparedData.formattedValue,
-            index: preparedData.dataIndex >= 0 ? preparedData.dataIndex : 0,
-            itemId: series.id,
-            seriesId: series.id,
-            seriesName: series.name(),
-            seriesType: "gauge",
-            value: preparedData.rawValue,
-            valueKind: "scalar",
-            xKey: series.id,
-            xValue: series.name(),
-            yValue: preparedData.rawValue
-        };
+        const hitTargets: SceneHitTarget[] = [];
+        const interactionBuckets: ChartInteractionBucket[] = [];
 
-        const midAngle = (spanInfo.startAngleRad + markEndAngle) / 2;
-        const midRadius = (innerRadius + outerRadius) / 2;
-        const interactionBuckets: ChartInteractionBucket[] = [
-            {
+        if (isVisible && preparedData.hasValidData) {
+            const hitTarget: SceneHitTarget = {
+                animationKey: preparedData.animationKey,
+                arc: {
+                    center,
+                    cornerRadius: geom.cornerRadius,
+                    endAngle: indicator === "needle" ? spanInfo.endAngleRad : markEndAngle,
+                    innerRadius: geom.innerRadius,
+                    outerRadius: geom.outerRadius,
+                    padAngle: 0,
+                    startAngle: spanInfo.startAngleRad
+                },
+                color: seriesStyle.color,
+                dataIndex: preparedData.dataIndex,
+                datum: preparedData.datum,
+                formattedValue: preparedData.formattedValue,
+                index: preparedData.dataIndex >= 0 ? preparedData.dataIndex : 0,
+                itemId: series.id,
+                seriesId: series.id,
+                seriesName: series.name(),
+                seriesType: "gauge",
+                value: preparedData.rawValue,
+                valueKind: "scalar",
+                xKey: series.id,
+                xValue: series.name(),
+                yValue: preparedData.rawValue
+            };
+
+            hitTargets.push(hitTarget);
+
+            const midAngle = (spanInfo.startAngleRad + markEndAngle) / 2;
+            const midRadius = (geom.innerRadius + geom.outerRadius) / 2;
+            interactionBuckets.push({
                 anchor: {
                     x: center.x + Math.sin(midAngle) * midRadius,
                     y: center.y - Math.cos(midAngle) * midRadius
@@ -188,12 +174,12 @@ export class GaugeLayout {
                 order: 0,
                 xKey: series.id,
                 xValue: series.name()
-            }
-        ];
+            });
+        }
 
         const legendItems = [
             {
-                color: primaryColor,
+                color: seriesStyle.color,
                 dataIndex: preparedData.dataIndex,
                 datum: preparedData.datum,
                 itemId: series.id,
@@ -202,24 +188,25 @@ export class GaugeLayout {
                 seriesId: series.id,
                 seriesType: "gauge" as const,
                 value: preparedData.rawValue,
-                visible: series.visible()
+                visible: isVisible
             }
         ];
 
-        const hitIndex = new GaugeHitIndex(center, [hitTarget], innerRadius, outerRadius);
+        const hasRenderableData = isVisible && preparedData.hasValidData;
+        const hitIndex = new GaugeHitIndex(center, hitTargets, geom.innerRadius, geom.outerRadius);
 
         return {
             arcMode: "gauge",
             center,
             coordinateSystem: "polar",
-            hasRenderableData: true,
+            hasRenderableData,
             height: containerHeight,
             hitIndex,
-            hitTargets: [hitTarget],
-            innerRadius,
+            hitTargets,
+            innerRadius: geom.innerRadius,
             interactionBuckets,
             legendItems,
-            outerRadius,
+            outerRadius: geom.outerRadius,
             plotRect: { height: containerHeight, width: containerWidth, x: 0, y: 0 },
             polarKind: "arc",
             series: [seriesScene],

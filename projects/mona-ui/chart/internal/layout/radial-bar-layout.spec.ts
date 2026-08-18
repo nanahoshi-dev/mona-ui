@@ -92,4 +92,65 @@ describe("RadialBarLayout", () => {
         expect(markB.category).toBe("B");
         expect(markA.outerRadius).toBeGreaterThan(markB.outerRadius);
     });
+
+    it("returns empty renderable marks and targets when series is invisible", () => {
+        const series = createMockRadialBarSeries({
+            data: signal([
+                { category: "A", value: 30 },
+                { category: "B", value: 60 }
+            ]),
+            visible: signal(false)
+        });
+
+        const scene = RadialBarLayout.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            rootData: [],
+            series,
+            styleResolver
+        });
+
+        expect(scene.hasRenderableData).toBe(false);
+        expect(scene.hitTargets.length).toBe(0);
+        expect(scene.interactionBuckets.length).toBe(0);
+
+        const seriesScene = scene.series[0];
+        if (seriesScene.type === "radialBar") {
+            expect(seriesScene.marks.length).toBe(0);
+            expect(seriesScene.tracks.length).toBe(0);
+        }
+    });
+
+    it("reserves half stroke width from outer radius when strokeWidth is specified", () => {
+        const seriesWithoutStroke = createMockRadialBarSeries({
+            data: signal([{ category: "A", value: 50 }]),
+            outerRadiusRatio: signal(1.0),
+            strokeWidth: signal(0)
+        });
+
+        const seriesWithStroke = createMockRadialBarSeries({
+            data: signal([{ category: "A", value: 50 }]),
+            outerRadiusRatio: signal(1.0),
+            strokeWidth: signal(10)
+        });
+
+        const scene1 = RadialBarLayout.computeScene({
+            containerHeight: 200,
+            containerWidth: 200,
+            rootData: [],
+            series: seriesWithoutStroke,
+            styleResolver
+        });
+
+        const scene2 = RadialBarLayout.computeScene({
+            containerHeight: 200,
+            containerWidth: 200,
+            rootData: [],
+            series: seriesWithStroke,
+            styleResolver
+        });
+
+        expect(scene1.outerRadius).toBe(100);
+        expect(scene2.outerRadius).toBe(95); // 100 - 10/2
+    });
 });

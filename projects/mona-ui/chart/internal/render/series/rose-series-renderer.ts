@@ -2,6 +2,7 @@ import { arc } from "d3-shape";
 import type { ChartPoint } from "../../../models/chart.models";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
 import type { ChartRoseSeriesScene, SceneRadialArcMark } from "../../scene/polar-arc-scene";
+import type { SceneHitTarget } from "../../scene/scene-geometry";
 import type { ChartStyleResolver } from "../../style/chart-style-resolver";
 import { createPolarGradientSpec } from "./polar-gradient";
 
@@ -22,6 +23,15 @@ export class RoseSeriesRenderer {
             .endAngle(d => d.endAngle)
             .padAngle(d => d.padAngle)
             .cornerRadius(d => d.cornerRadius)
+            .context(context);
+
+        const highlightArcGenerator = arc<SceneHitTarget>()
+            .innerRadius(d => d.arc!.innerRadius)
+            .outerRadius(d => d.arc!.outerRadius)
+            .startAngle(d => d.arc!.startAngle)
+            .endAngle(d => d.arc!.endAngle)
+            .cornerRadius(d => d.arc!.cornerRadius ?? 0)
+            .padAngle(d => d.arc!.padAngle ?? 0)
             .context(context);
 
         context.save();
@@ -76,36 +86,33 @@ export class RoseSeriesRenderer {
             context.restore();
         }
 
-        // 2. Draw active interaction highlight
+        // 2. Draw active interaction highlight directly from activeHit.arc
         const activeHit = interactionState?.activeHitTarget;
-        if (activeHit && activeHit.seriesId === series.id) {
-            const activeMark = marks.find(m => m.itemId === activeHit.itemId || m.dataIndex === activeHit.dataIndex);
-            if (activeMark && activeMark.visible) {
-                context.save();
-                context.beginPath();
-                markArcGenerator(activeMark);
+        if (activeHit && activeHit.seriesId === series.id && activeHit.arc) {
+            context.save();
+            context.beginPath();
+            highlightArcGenerator(activeHit);
 
-                if (interactionState.source === "keyboard") {
-                    const focusIndicatorColor =
-                        styleResolver.resolveCssVariable("--color-focus-indicator") ||
-                        styleResolver.resolveCssVariable("--color-primary") ||
-                        "#3b82f6";
-                    context.strokeStyle = focusIndicatorColor;
-                    context.lineWidth = 3;
-                    context.globalAlpha = 1;
-                    context.stroke();
+            if (interactionState.source === "keyboard") {
+                const focusIndicatorColor =
+                    styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                    styleResolver.resolveCssVariable("--color-primary") ||
+                    "#3b82f6";
+                context.strokeStyle = focusIndicatorColor;
+                context.lineWidth = 3;
+                context.globalAlpha = 1;
+                context.stroke();
 
-                    context.fillStyle = "rgba(255, 255, 255, 0.15)";
-                    context.fill();
-                } else {
-                    const hoverOverlayColor =
-                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
-                    context.fillStyle = hoverOverlayColor;
-                    context.fill();
-                }
-
-                context.restore();
+                context.fillStyle = "rgba(255, 255, 255, 0.15)";
+                context.fill();
+            } else {
+                const hoverOverlayColor =
+                    styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
+                context.fillStyle = hoverOverlayColor;
+                context.fill();
             }
+
+            context.restore();
         }
 
         context.restore();

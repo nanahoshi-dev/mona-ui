@@ -3,9 +3,13 @@ import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {
     ChartCartesianSeriesRegistration,
     ChartFinancialSeriesRegistration,
+    ChartGaugeSeriesRegistration,
     ChartHeatmapSeriesRegistration,
     ChartPolarSeriesRegistration,
+    ChartRadialArcSeriesRegistration,
+    ChartRadialBarSeriesRegistration,
     ChartRadialSeriesRegistration,
+    ChartRoseSeriesRegistration,
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
 import type { ChartField } from "../../models/chart.models";
@@ -13,6 +17,7 @@ import type { ChartHeatmapSeriesStyle } from "../../models/chart-heatmap.models"
 import { resolveValue } from "../data/chart-value-resolver";
 import type { ChartFinancialSeriesStyle } from "../scene/cartesian-scene";
 import type { ChartPolarSeriesStyle } from "../scene/polar-scene";
+import type { ChartGaugeSeriesStyle, ChartRadialArcSeriesStyle } from "../scene/polar-arc-scene";
 import { isFiniteNumber } from "../utils/number-utils";
 
 const DEFAULT_CHART_COLORS = [
@@ -857,6 +862,196 @@ export class ChartStyleResolver {
             midColor: cssMidColor || undefined,
             strokeColor: resolvedStrokeColor,
             strokeWidth: Math.max(0, resolvedStrokeWidth)
+        };
+    }
+
+    public resolveRadialArcSeriesStyle(
+        series: ChartRadialBarSeriesRegistration | ChartRoseSeriesRegistration
+    ): ChartRadialArcSeriesStyle {
+        const rawStrokeColor = series.strokeColor();
+        const strokeWidthInput = series.strokeWidth?.();
+        const fillOpacityInput = series.fillOpacity?.();
+        const trackColorInput = "trackColor" in series ? series.trackColor() : "";
+        const trackOpacityInput = "trackOpacity" in series ? series.trackOpacity?.() : undefined;
+
+        let cssStrokeWidth: number | undefined;
+        let cssStrokeColor: string | undefined;
+        let cssFillOpacity: number | undefined;
+        let cssTrackColor: string | undefined;
+        let cssTrackOpacity: number | undefined;
+
+        const seriesEl = series.element?.nativeElement;
+
+        if (typeof window !== "undefined" && seriesEl) {
+            try {
+                const computed = window.getComputedStyle(seriesEl);
+                const sw = computed.getPropertyValue("--mona-chart-radial-arc-stroke-width");
+                if (sw) {
+                    const parsed = parseFloat(sw);
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+                }
+                const sc = computed.getPropertyValue("--mona-chart-radial-arc-stroke-color");
+                if (sc) {
+                    cssStrokeColor = sc.trim();
+                }
+                const fo = computed.getPropertyValue("--mona-chart-radial-arc-fill-opacity");
+                if (fo) {
+                    const parsed = parseFloat(fo);
+                    if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                }
+                const tc = computed.getPropertyValue("--mona-chart-radial-track-color");
+                if (tc) {
+                    cssTrackColor = tc.trim();
+                }
+                const to = computed.getPropertyValue("--mona-chart-radial-track-opacity");
+                if (to) {
+                    const parsed = parseFloat(to);
+                    if (isFiniteNumber(parsed)) cssTrackOpacity = Math.max(0, Math.min(1, parsed));
+                }
+            } catch {
+                // Ignore style resolution errors
+            }
+        }
+
+        const hasExplicitStroke = Boolean(rawStrokeColor || cssStrokeColor);
+        const strokeSource: "default" | "explicit" = hasExplicitStroke ? "explicit" : "default";
+
+        const strokeColor = rawStrokeColor
+            ? this.resolveCssVariable(rawStrokeColor, seriesEl)
+            : (cssStrokeColor
+                  ? this.resolveCssVariable(cssStrokeColor, seriesEl)
+                  : "");
+
+        const strokeWidth =
+            strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
+                ? strokeWidthInput
+                : (cssStrokeWidth ?? 0);
+
+        const fillOpacity =
+            fillOpacityInput !== undefined && isFiniteNumber(fillOpacityInput)
+                ? Math.max(0, Math.min(1, fillOpacityInput))
+                : (cssFillOpacity ?? 1);
+
+        const defaultTrackColor =
+            this.resolveCssVariable("--mona-chart-radial-track-color", seriesEl) ||
+            this.resolveCssVariable("--color-muted", seriesEl) ||
+            "#e2e8f0";
+
+        const trackColor = trackColorInput
+            ? this.resolveCssVariable(trackColorInput, seriesEl)
+            : (cssTrackColor ? this.resolveCssVariable(cssTrackColor, seriesEl) : defaultTrackColor);
+
+        const defaultTrackOpacity = 0.15;
+        const trackOpacity =
+            trackOpacityInput !== undefined && isFiniteNumber(trackOpacityInput)
+                ? Math.max(0, Math.min(1, trackOpacityInput))
+                : (cssTrackOpacity ?? defaultTrackOpacity);
+
+        return {
+            fillOpacity,
+            strokeColor,
+            strokeSource,
+            strokeWidth,
+            trackColor,
+            trackOpacity
+        };
+    }
+
+    public resolveGaugeSeriesStyle(
+        series: ChartGaugeSeriesRegistration
+    ): ChartGaugeSeriesStyle {
+        const rawColor = series.color();
+        const rawNeedleColor = series.needleColor();
+        const rawTrackColor = series.trackColor();
+        const rawTrackOpacity = series.trackOpacity?.();
+        const rawFillOpacity = series.fillOpacity?.();
+
+        const seriesEl = series.element?.nativeElement;
+
+        let cssGaugeColor: string | undefined;
+        let cssNeedleColor: string | undefined;
+        let cssHubColor: string | undefined;
+        let cssTrackColor: string | undefined;
+        let cssTrackOpacity: number | undefined;
+        let cssFillOpacity: number | undefined;
+
+        if (typeof window !== "undefined" && seriesEl) {
+            try {
+                const computed = window.getComputedStyle(seriesEl);
+                const gc = computed.getPropertyValue("--mona-chart-gauge-color");
+                if (gc) cssGaugeColor = gc.trim();
+
+                const nc = computed.getPropertyValue("--mona-chart-gauge-needle-color");
+                if (nc) cssNeedleColor = nc.trim();
+
+                const hc = computed.getPropertyValue("--mona-chart-gauge-hub-color");
+                if (hc) cssHubColor = hc.trim();
+
+                const tc = computed.getPropertyValue("--mona-chart-radial-track-color");
+                if (tc) cssTrackColor = tc.trim();
+
+                const to = computed.getPropertyValue("--mona-chart-radial-track-opacity");
+                if (to) {
+                    const parsed = parseFloat(to);
+                    if (isFiniteNumber(parsed)) cssTrackOpacity = Math.max(0, Math.min(1, parsed));
+                }
+
+                const fo = computed.getPropertyValue("--mona-chart-radial-arc-fill-opacity");
+                if (fo) {
+                    const parsed = parseFloat(fo);
+                    if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                }
+            } catch {
+                // Ignore style resolution errors
+            }
+        }
+
+        const primaryColor = rawColor
+            ? this.resolveCssVariable(rawColor, seriesEl)
+            : (cssGaugeColor
+                  ? this.resolveCssVariable(cssGaugeColor, seriesEl)
+                  : this.resolvePaletteColor(0));
+
+        const defaultTrackColor =
+            this.resolveCssVariable("--mona-chart-radial-track-color", seriesEl) ||
+            this.resolveCssVariable("--color-muted", seriesEl) ||
+            "#e2e8f0";
+
+        const trackColor = rawTrackColor
+            ? this.resolveCssVariable(rawTrackColor, seriesEl)
+            : (cssTrackColor ? this.resolveCssVariable(cssTrackColor, seriesEl) : defaultTrackColor);
+
+        const defaultTrackOpacity = 0.15;
+        const trackOpacity =
+            rawTrackOpacity !== undefined && isFiniteNumber(rawTrackOpacity)
+                ? Math.max(0, Math.min(1, rawTrackOpacity))
+                : (cssTrackOpacity ?? defaultTrackOpacity);
+
+        const needleColor = rawNeedleColor
+            ? this.resolveCssVariable(rawNeedleColor, seriesEl)
+            : (cssNeedleColor
+                  ? this.resolveCssVariable(cssNeedleColor, seriesEl)
+                  : (primaryColor || "#1e293b"));
+
+        const hubColor = cssHubColor
+            ? this.resolveCssVariable(cssHubColor, seriesEl)
+            : needleColor;
+
+        const fillOpacity =
+            rawFillOpacity !== undefined && isFiniteNumber(rawFillOpacity)
+                ? Math.max(0, Math.min(1, rawFillOpacity))
+                : (cssFillOpacity ?? 1);
+
+        return {
+            color: primaryColor,
+            fillOpacity,
+            hubColor,
+            needleColor,
+            strokeColor: "",
+            strokeSource: "default",
+            strokeWidth: 0,
+            trackColor,
+            trackOpacity
         };
     }
 }

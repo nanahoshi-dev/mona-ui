@@ -2,9 +2,22 @@ import type { ChartField } from "../../models/chart.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
 import type { ChartRoseScaleMode } from "../../models/chart-radial-arc.models";
 import { resolveData, resolveValue } from "./chart-value-resolver";
-import { deriveRadialDatumId } from "./radial-datum-identity";
+import {
+    deriveRadialDatumId,
+    serializeRadialCategoryKey,
+    serializeRadialExplicitKey
+} from "./radial-datum-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import { formatYValue } from "../utils/chart-formatter";
+
+export interface PreparedRoseCategory {
+    readonly category: unknown;
+    readonly categoryKey: string;
+    readonly formattedCategory: string;
+    readonly index: number;
+    readonly itemId: string;
+}
 
 export interface PreparedRoseDatum {
     readonly animationKey: string;
@@ -30,6 +43,8 @@ export interface RoseDataOptions {
     readonly data?: readonly unknown[];
     readonly isDatumVisible: (itemId: string) => boolean;
     readonly keyField?: ChartField;
+    readonly max?: number;
+    readonly min?: number;
     readonly rootData: readonly unknown[];
     readonly scaleMode: ChartRoseScaleMode;
     readonly seriesElement?: HTMLElement | null;
@@ -42,7 +57,7 @@ export interface RoseDataOptions {
 }
 
 export interface PreparedRoseData {
-    readonly allCategories: readonly { category: unknown; categoryKey: string; formattedCategory: string; itemId: string }[];
+    readonly allCategories: readonly PreparedRoseCategory[];
     readonly allItems: readonly PreparedRoseDatum[];
     readonly domain: readonly [number, number];
     readonly hasValidData: boolean;
@@ -65,6 +80,7 @@ export class RoseDataProcessor {
             isDatumVisible,
             keyField,
             rootData,
+            scaleMode,
             seriesElement,
             seriesField,
             seriesId,
@@ -86,87 +102,97 @@ export class RoseDataProcessor {
             };
         }
 
-        const validEntries: {
+        // 1. First pass: establish unique category slots in source order, even if first occurrence value is invalid
+        interface CategorySlot {
             category: unknown;
             categoryKey: string;
             dataIndex: number;
             datum: unknown;
+            explicitKey?: string;
             formattedCategory: string;
+            index: number;
             itemId: string;
-            value: number;
-        }[] = [];
+            validDatum?: {
+                dataIndex: number;
+                datum: unknown;
+                itemId: string;
+                value: number;
+            };
+        }
 
-        const seenCategories = new Set<string>();
+        const categorySlots: CategorySlot[] = [];
+        const slotByKey = new Map<string, CategorySlot>();
         const seenCustomKeys = new Set<string>();
 
         for (let i = 0; i < rawData.length; i++) {
             const row = rawData[i];
-            const rawVal = resolveValue(row, seriesField, i);
-
-            if (typeof rawVal === "number" && rawVal < 0) {
-                if (warnedDiagnosticSignatures) {
-                    ChartDiagnostics.warnOnce(
-                        warnedDiagnosticSignatures,
-                        `Rose series "${seriesName}" encountered negative value ${rawVal} at data index ${i}. Negative values are invalid and skipped.`,
-                        `${seriesId}:negative-rose-value`
-                    );
-                }
-                continue;
-            }
-
-            if (!isFiniteNonNegative(rawVal)) {
-                continue;
-            }
-
             const rawCat = resolveValue(row, categoryField, i);
-            const categoryKey = rawCat !== undefined && rawCat !== null ? String(rawCat) : String(i);
+            const catKey = serializeRadialCategoryKey(rawCat, i);
 
-            if (seenCategories.has(categoryKey)) {
-                if (warnedDiagnosticSignatures) {
-                    ChartDiagnostics.warnOnce(
-                        warnedDiagnosticSignatures,
-                        `Rose series "${seriesName}" encountered duplicate category "${categoryKey}" at data index ${i}. First valid datum wins.`,
-                        `${seriesId}:duplicate-rose-category`
-                    );
+            let slot = slotByKey.get(catKey);
+            const rawKey = keyField ? resolveValue(row, keyField, i) : undefined;
+            const customKey = serializeRadialExplicitKey(rawKey);
+
+            if (!slot) {
+                if (customKey !== null) {
+                    if (seenCustomKeys.has(customKey)) {
+                        if (warnedDiagnosticSignatures) {
+                            ChartDiagnostics.warnOnce(
+                                warnedDiagnosticSignatures,
+                                `Rose series "${seriesName}" encountered duplicate explicit key "${String(rawKey)}" at data index ${i}. First valid datum wins.`,
+                                `${seriesId}:duplicate-explicit-key`
+                            );
+                        }
+                        continue;
+                    }
+                    seenCustomKeys.add(customKey);
                 }
-                continue;
+
+                const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
+                const formattedCategory = categoryFormatter
+                    ? categoryFormatter(rawCat ?? `Item ${i + 1}`, i)
+                    : rawCat !== undefined && rawCat !== null
+                      ? String(rawCat)
+                      : `Item ${i + 1}`;
+
+                slot = {
+                    category: rawCat ?? `Item ${i + 1}`,
+                    categoryKey: catKey,
+                    dataIndex: i,
+                    datum: row,
+                    explicitKey: customKey ?? undefined,
+                    formattedCategory,
+                    index: categorySlots.length,
+                    itemId
+                };
+                categorySlots.push(slot);
+                slotByKey.set(catKey, slot);
             }
 
-            const rawKey = keyField ? resolveValue(row, keyField, i) : undefined;
-            if (rawKey !== undefined && rawKey !== null) {
-                const keyStr = String(rawKey);
-                if (seenCustomKeys.has(keyStr)) {
+            // Check if this row can provide the valid datum for this category slot (if not already populated)
+            if (!slot.validDatum) {
+                const rawVal = resolveValue(row, seriesField, i);
+                if (typeof rawVal === "number" && rawVal < 0) {
                     if (warnedDiagnosticSignatures) {
                         ChartDiagnostics.warnOnce(
                             warnedDiagnosticSignatures,
-                            `Rose series "${seriesName}" encountered duplicate explicit key "${keyStr}" at data index ${i}. First valid datum wins.`,
-                            `${seriesId}:duplicate-explicit-key`
+                            `Rose series "${seriesName}" encountered negative value ${rawVal} at data index ${i}. Negative values are invalid and skipped.`,
+                            `${seriesId}:negative-rose-value`
                         );
                     }
-                    continue;
+                } else if (isFiniteNonNegative(rawVal)) {
+                    const markItemId = deriveRadialDatumId(row, rawCat, rawKey, i);
+                    slot.validDatum = {
+                        dataIndex: i,
+                        datum: row,
+                        itemId: markItemId,
+                        value: rawVal
+                    };
                 }
-                seenCustomKeys.add(keyStr);
             }
-
-            seenCategories.add(categoryKey);
-            const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
-
-            const formattedCategory = categoryFormatter
-                ? categoryFormatter(rawCat ?? categoryKey, i)
-                : categoryKey;
-
-            validEntries.push({
-                category: rawCat ?? categoryKey,
-                categoryKey,
-                dataIndex: i,
-                datum: row,
-                formattedCategory,
-                itemId,
-                value: rawVal
-            });
         }
 
-        if (validEntries.length === 0) {
+        if (categorySlots.length === 0) {
             return {
                 allCategories: [],
                 allItems: [],
@@ -177,47 +203,71 @@ export class RoseDataProcessor {
             };
         }
 
-        const rawMax = Math.max(...validEntries.map(e => e.value));
-        const maxVal = rawMax > 0 ? rawMax : 1;
+        const validEntries = categorySlots.filter((slot): slot is CategorySlot & { validDatum: NonNullable<CategorySlot["validDatum"]> } => slot.validDatum !== undefined);
 
-        const allCategories = validEntries.map(e => ({
-            category: e.category,
-            categoryKey: e.categoryKey,
-            formattedCategory: e.formattedCategory,
-            itemId: e.itemId
+        const rawMax = validEntries.length > 0 ? Math.max(...validEntries.map(e => e.validDatum.value)) : 0;
+        let domainMin = options.min !== undefined && Number.isFinite(options.min) ? options.min : 0;
+        if (domainMin < 0) {
+            if (warnedDiagnosticSignatures) {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `Rose series "${seriesName}" encountered negative radial min (${domainMin}). Normalizing to 0.`,
+                    `${seriesId}:negative-rose-min`
+                );
+            }
+            domainMin = 0;
+        }
+
+        let domainMax = options.max !== undefined && Number.isFinite(options.max) ? options.max : rawMax;
+        if (domainMax <= domainMin) {
+            domainMax = domainMin + (rawMax > domainMin ? rawMax - domainMin : 1);
+        }
+        if (domainMax === domainMin) {
+            domainMax = domainMin + 1;
+        }
+
+        const maxVal = domainMax;
+        const span = domainMax - domainMin;
+
+        const allCategories: PreparedRoseCategory[] = categorySlots.map(s => ({
+            category: s.category,
+            categoryKey: s.categoryKey,
+            formattedCategory: s.formattedCategory,
+            index: s.index,
+            itemId: s.itemId
         }));
 
         const allItems: PreparedRoseDatum[] = [];
         const visibleItems: PreparedRoseDatum[] = [];
 
-        for (let i = 0; i < validEntries.length; i++) {
-            const entry = validEntries[i];
+        for (const slot of validEntries) {
+            const entry = slot.validDatum;
             const color = styleResolver.resolveDatumColor(
                 colorField,
                 colors,
                 entry.datum,
                 entry.dataIndex,
-                i,
+                slot.index,
                 seriesElement
             );
 
-            const ratio = Math.max(0, Math.min(1, entry.value / maxVal));
+            const ratio = Math.max(0, Math.min(1, (entry.value - domainMin) / span));
             const formattedValue = valueFormatter
                 ? valueFormatter(entry.value, entry.dataIndex)
-                : String(entry.value);
+                : formatYValue(entry.value, entry.dataIndex);
 
             const visible = isDatumVisible(entry.itemId);
             const animationKey = `${seriesId}:rose:${entry.itemId}`;
 
             const item: PreparedRoseDatum = {
                 animationKey,
-                category: entry.category,
-                categoryIndex: i,
-                categoryKey: entry.categoryKey,
+                category: slot.category,
+                categoryIndex: slot.index,
+                categoryKey: slot.categoryKey,
                 color,
                 dataIndex: entry.dataIndex,
                 datum: entry.datum,
-                formattedCategory: entry.formattedCategory,
+                formattedCategory: slot.formattedCategory,
                 formattedValue,
                 itemId: entry.itemId,
                 normalizedRatio: ratio,
@@ -234,7 +284,7 @@ export class RoseDataProcessor {
         return {
             allCategories,
             allItems,
-            domain: [0, maxVal],
+            domain: [domainMin, maxVal],
             hasValidData: allItems.length > 0,
             maxVal,
             visibleItems
