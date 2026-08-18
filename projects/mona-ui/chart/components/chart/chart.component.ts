@@ -63,7 +63,7 @@ import type {
 import type { ChartGaugeSeriesScene, PolarArcChartScene } from "../../internal/scene/polar-arc-scene";
 import type { ChartGaugeCenterTemplateContext } from "../../models/chart-radial-arc.models";
 import type { ChartColorLegendScale } from "../../models/chart-heatmap.models";
-import type { ChartAngularAxisTick, ChartRadialAxisTick } from "../../internal/scene/polar-axis-scene";
+import type { ChartAngularAxisScene, ChartAngularAxisTick, ChartRadialAxisScene, ChartRadialAxisTick } from "../../internal/scene/polar-axis-scene";
 import type { SceneSectorSlice } from "../../internal/scene/polar-scene";
 import type { SceneHitTarget } from "../../internal/scene/scene-geometry";
 import { ChartStyleResolver } from "../../internal/style/chart-style-resolver";
@@ -200,9 +200,26 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
         const sc = this.scene();
         return sc?.coordinateSystem === "polar" && sc.polarKind === "sector" ? (sc as PolarSectorChartScene) : null;
     });
-    protected readonly polarAxisScene = computed<PolarAxisChartScene | null>(() => {
+    protected readonly polarAxisScene = computed<{
+        angularAxis?: ChartAngularAxisScene;
+        radialAxis?: ChartRadialAxisScene;
+    } | null>(() => {
         const sc = this.scene();
-        return sc?.coordinateSystem === "polar" && sc.polarKind === "axis" ? (sc as PolarAxisChartScene) : null;
+        if (sc?.coordinateSystem === "polar") {
+            if (sc.polarKind === "axis") {
+                return sc as PolarAxisChartScene;
+            }
+            if (sc.polarKind === "arc" && sc.arcMode === "rose") {
+                const arcSc = sc as PolarArcChartScene;
+                if (arcSc.angularAxis || arcSc.radialAxis) {
+                    return {
+                        angularAxis: arcSc.angularAxis,
+                        radialAxis: arcSc.radialAxis
+                    };
+                }
+            }
+        }
+        return null;
     });
     protected readonly polarScene = computed<PolarChartScene | null>(() => {
         const sc = this.scene();

@@ -177,7 +177,7 @@
         <!-- DOM Radial Axis Labels (Angular Categories/Degrees and Radial Values) -->
         @if (polarAxisScene(); as radScene) {
             <!-- Angular Spoke Labels -->
-            @if (radScene.angularAxis.visible && radScene.angularAxis.labels) {
+            @if (radScene.angularAxis?.visible && radScene.angularAxis?.labels) {
                 @for (tick of radScene.angularAxis.ticks; track tick.index) {
                     @if (tick.visible) {
                         <div
@@ -205,7 +205,7 @@
             }
 
             <!-- Radial Numeric Tick Labels -->
-            @if (radScene.radialAxis.visible && radScene.radialAxis.labels) {
+            @if (radScene.radialAxis?.visible && radScene.radialAxis?.labels) {
                 @for (tick of radScene.radialAxis.ticks; track tick.index) {
                     @if (tick.visible) {
                         <div
