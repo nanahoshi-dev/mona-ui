@@ -34,6 +34,8 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
             <mona-chart
                 [data]="data()"
                 [xField]="'category'"
+                [aria-label]="ariaLabel()"
+                [title]="title()"
                 (pointClick)="onPointClick($event)">
                 <mona-chart-x-axis />
                 <mona-chart-y-axis />
@@ -44,6 +46,7 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
                     <mona-bar-series
                         [field]="'revenue'"
                         [name]="'Revenue'"
+                        [color]="bar1Color()"
                         [orientation]="orientation()"
                         [stack]="stack1()"
                         [stackMode]="stackMode()"
@@ -71,6 +74,7 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
                     <mona-line-series
                         [field]="'profit'"
                         [name]="'Profit Line'"
+                        [visible]="lineVisible()"
                         [showPoints]="true" />
                 }
 
@@ -87,11 +91,14 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
     `
 })
 class TestHorizontalBarHostComponent {
+    public readonly ariaLabel = signal("");
+    public readonly bar1Color = signal<string>("#3b82f6");
     public readonly data = signal<readonly unknown[]>([
         { category: "North", minVal: 40, maxVal: 120, profit: 40, revenue: 100 },
         { category: "South", minVal: 60, maxVal: 150, profit: 50, revenue: 140 },
         { category: "West", minVal: 80, maxVal: 180, profit: 70, revenue: 170 }
     ]);
+    public readonly lineVisible = signal(true);
     public readonly orientation = signal<ChartBarOrientation>("horizontal");
     public readonly showBar1 = signal(true);
     public readonly showBar2 = signal(true);
@@ -101,6 +108,7 @@ class TestHorizontalBarHostComponent {
     public readonly stack1 = signal<string | undefined>(undefined);
     public readonly stack2 = signal<string | undefined>(undefined);
     public readonly stackMode = signal<"normal" | "percent">("normal");
+    public readonly title = signal("");
     public readonly borderRadius = signal(4);
 
     public lastPointClick: ChartPointEvent | null = null;
@@ -293,5 +301,76 @@ describe("Horizontal Bar Chart Integration", () => {
         const scene = chartCmp.scene() as CartesianXYChartScene;
         expect(scene.orientation).toBe("horizontal");
         expect(chartCmp.isAnimating()).toBe(true);
+    });
+
+    it("recovers chart when invalid composition is resolved via interactive legend toggle (HAX-F03, HAX-F14)", () => {
+        // Line series starts present in template but hidden
+        host.showLine.set(true);
+        host.lineVisible.set(false);
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Visibility);
+        fixture.detectChanges();
+
+        // Initially valid horizontal bar chart with 2 bars
+        let scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.hasRenderableData).toBe(true);
+        expect(scene.series.length).toBe(2);
+
+        // Find legend buttons
+        const legendDe = fixture.debugElement.query(By.directive(ChartLegendComponent));
+        let legendButtons = legendDe.queryAll(By.css("button"));
+        expect(legendButtons.length).toBe(3); // Revenue, Profit, Profit Line
+
+        // Find "Profit Line" button and click it to make it visible
+        const lineBtn = legendButtons.find(b => b.nativeElement.textContent.includes("Profit Line"))!;
+        lineBtn.nativeElement.click();
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Visibility);
+        fixture.detectChanges();
+
+        // Now composition is invalid (horizontal Bar + visible Line)
+        scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.hasRenderableData).toBe(false);
+        expect(scene.series.length).toBe(0);
+
+        // CRITICAL CONTRACT: All 3 legend controls remain present and interactive in fail-safe scene
+        legendButtons = legendDe.queryAll(By.css("button"));
+        expect(legendButtons.length).toBe(3);
+
+        // Click "Profit Line" legend button again to hide it
+        const lineBtn2 = legendButtons.find(b => b.nativeElement.textContent.includes("Profit Line"))!;
+        lineBtn2.nativeElement.click();
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Visibility);
+        fixture.detectChanges();
+
+        // Chart successfully recovers via legend interaction alone!
+        scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.hasRenderableData).toBe(true);
+        expect(scene.orientation).toBe("horizontal");
+        expect(scene.series.length).toBe(2);
+    });
+
+    it("respects host CSS color and explicit input precedence on horizontal bar series (HAX-F15)", () => {
+        host.bar1Color.set("#9333ea");
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Style);
+        const scene = chartCmp.scene() as CartesianXYChartScene;
+
+        expect(scene.series[0].style.color).toBe("#9333ea");
+    });
+
+    it("normalizes whitespace-only aria-label to title fallback (HAX-F08)", () => {
+        host.ariaLabel.set("   ");
+        host.title.set("Quarterly Revenue");
+        fixture.detectChanges();
+
+        const chartDe = fixture.debugElement.query(By.directive(ChartComponent));
+        const ariaLabelAttr = chartDe.nativeElement.getAttribute("aria-label");
+        expect(ariaLabelAttr).toBe("Quarterly Revenue");
     });
 });

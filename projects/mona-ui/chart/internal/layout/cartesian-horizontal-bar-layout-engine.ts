@@ -37,6 +37,7 @@ import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { resolveFiniteRangeValues } from "../data/chart-range-resolver";
 import {
+    clamp,
     formatCompactNumber,
     isFiniteNumber,
     normalizeNonNegativeNumber,
@@ -48,6 +49,7 @@ import { CartesianAxisLabelGeometry } from "./cartesian-axis-label-geometry";
 import { CartesianAxisLayoutEngine } from "./cartesian-axis-layout-engine";
 import { CartesianBarGeometry } from "./cartesian-bar-geometry";
 import { CartesianBarSlots } from "./cartesian-bar-slots";
+import { CartesianLegendBuilder } from "./cartesian-legend-builder";
 
 export interface CartesianHorizontalBarLayoutOptions {
     readonly containerHeight: number;
@@ -223,63 +225,16 @@ export class CartesianHorizontalBarLayoutEngine {
             return formatXValue(val, idx, yAxis?.formatter?.(), "category");
         };
 
-        // Iterative Bounded Gutter Convergence (max 3 passes)
-        let plotRect: ChartRect = {
-            height: Math.max(0, containerHeight - 48),
-            width: Math.max(0, containerWidth - 80),
-            x: 64,
-            y: 16
-        };
-
-        let finalYScale = CartesianScaleFactory.createBandScale(
-            categoryDomain,
-            [plotRect.y, plotRect.y + plotRect.height],
-            0.2,
-            0.1
-        );
-        let finalXScale = CartesianScaleFactory.createLinearScale(
-            [domainMin, domainMax],
-            [plotRect.x, plotRect.x + plotRect.width],
-            niceX,
-            xTickCount,
-            explicitXMin,
-            explicitXMax
-        );
-        let finalYAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
-            axis: "y",
-            axisType: "category",
-            containerSize: containerHeight,
-            defaultGridLines: false,
-            effectiveFormatter: effectiveYFormatter,
-            measurements,
-            plotGutterConstraint: Math.min(240, Math.floor(containerWidth * 0.45)),
-            position: yAxisPosition,
-            registration: yAxis ?? undefined,
-            scale: finalYScale
-        });
-        let finalXAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
-            axis: "x",
-            axisType: "linear",
-            containerSize: containerWidth,
-            defaultGridLines: true,
-            effectiveFormatter: effectiveXFormatter,
-            measurements,
-            plotGutterConstraint: Math.min(240, Math.floor(containerHeight * 0.45)),
-            position: xAxisPosition,
-            registration: xAxis ?? undefined,
-            scale: finalXScale
-        });
-
-        for (let pass = 0; pass < 3; pass++) {
+        const buildHorizontalState = (rect: ChartRect) => {
             const currentYScale = CartesianScaleFactory.createBandScale(
                 categoryDomain,
-                [plotRect.y, plotRect.y + plotRect.height],
+                [rect.y, rect.y + rect.height],
                 0.2,
                 0.1
             );
             const currentXScale = CartesianScaleFactory.createLinearScale(
                 [domainMin, domainMax],
-                [plotRect.x, plotRect.x + plotRect.width],
+                [rect.x, rect.x + rect.width],
                 niceX,
                 xTickCount,
                 explicitXMin,
@@ -289,7 +244,7 @@ export class CartesianHorizontalBarLayoutEngine {
             const yAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
                 axis: "y",
                 axisType: "category",
-                containerSize: plotRect.height,
+                containerSize: rect.height,
                 defaultGridLines: false,
                 effectiveFormatter: effectiveYFormatter,
                 measurements,
@@ -302,7 +257,7 @@ export class CartesianHorizontalBarLayoutEngine {
             const xAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
                 axis: "x",
                 axisType: "linear",
-                containerSize: plotRect.width,
+                containerSize: rect.width,
                 defaultGridLines: true,
                 effectiveFormatter: effectiveXFormatter,
                 measurements,
@@ -344,48 +299,55 @@ export class CartesianHorizontalBarLayoutEngine {
                 top: xAxisPosition === "top" ? xAxisLayout.gutter : 16
             };
 
-            const newPlotWidth = Math.max(0, containerWidth - padding.left - padding.right);
-            const newPlotHeight = Math.max(0, containerHeight - padding.top - padding.bottom);
-            const newPlotRect: ChartRect = {
-                height: newPlotHeight,
-                width: newPlotWidth,
+            const nextPlotWidth = Math.max(0, containerWidth - padding.left - padding.right);
+            const nextPlotHeight = Math.max(0, containerHeight - padding.top - padding.bottom);
+            const nextPlotRect: ChartRect = {
+                height: nextPlotHeight,
+                width: nextPlotWidth,
                 x: padding.left,
                 y: padding.top
             };
 
-            finalYScale = currentYScale;
-            finalXScale = currentXScale;
-            finalYAxisLayout = yAxisLayout;
-            finalXAxisLayout = xAxisLayout;
+            return {
+                currentXScale,
+                currentYScale,
+                nextPlotRect,
+                xAxisLayout,
+                yAxisLayout
+            };
+        };
+
+        // Iterative Bounded Gutter Convergence (max 3 passes)
+        let candidateRect: ChartRect = {
+            height: Math.max(0, containerHeight - 48),
+            width: Math.max(0, containerWidth - 80),
+            x: 64,
+            y: 16
+        };
+
+        for (let pass = 0; pass < 3; pass++) {
+            const state = buildHorizontalState(candidateRect);
+            const next = state.nextPlotRect;
 
             if (
-                Math.abs(newPlotRect.x - plotRect.x) < 0.5 &&
-                Math.abs(newPlotRect.y - plotRect.y) < 0.5 &&
-                Math.abs(newPlotRect.width - plotRect.width) < 0.5 &&
-                Math.abs(newPlotRect.height - plotRect.height) < 0.5
+                Math.abs(next.x - candidateRect.x) < 0.5 &&
+                Math.abs(next.y - candidateRect.y) < 0.5 &&
+                Math.abs(next.width - candidateRect.width) < 0.5 &&
+                Math.abs(next.height - candidateRect.height) < 0.5
             ) {
-                plotRect = newPlotRect;
+                candidateRect = next;
                 break;
             }
 
-            plotRect = newPlotRect;
+            candidateRect = next;
         }
 
-        // Final scales and axes matched to converged plotRect
-        const yScale = CartesianScaleFactory.createBandScale(
-            categoryDomain,
-            [plotRect.y, plotRect.y + plotRect.height],
-            0.2,
-            0.1
-        );
-        const xScale = CartesianScaleFactory.createLinearScale(
-            [domainMin, domainMax],
-            [plotRect.x, plotRect.x + plotRect.width],
-            niceX,
-            xTickCount,
-            explicitXMin,
-            explicitXMax
-        );
+        const plotRect = candidateRect;
+        const finalState = buildHorizontalState(plotRect);
+        const yScale = finalState.currentYScale;
+        const xScale = finalState.currentXScale;
+        const finalYAxisLayout = finalState.yAxisLayout;
+        const finalXAxisLayout = finalState.xAxisLayout;
 
         const stackConfigForScene = stackAnalysis.configuration.groups.map(g => ({
             geometryType: g.geometryType,
@@ -395,6 +357,7 @@ export class CartesianHorizontalBarLayoutEngine {
         }));
 
         if (plotRect.width <= 0 || plotRect.height <= 0) {
+            const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
             return {
                 axes: [],
                 barHitTargets: [],
@@ -405,7 +368,7 @@ export class CartesianHorizontalBarLayoutEngine {
                 hitTargets: [],
                 interactionAxis: "y",
                 interactionBuckets: [],
-                legendItems: [],
+                legendItems,
                 orientation: "horizontal",
                 plotRect,
                 series: [],
@@ -446,23 +409,13 @@ export class CartesianHorizontalBarLayoutEngine {
             list.push(target);
         };
 
-        const legendItems: ChartLegendItem[] = [];
+        const legendItems: ChartLegendItem[] = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
 
         // Build series scenes
         for (let seriesIdx = 0; seriesIdx < effectiveSeries.length; seriesIdx++) {
             const series = effectiveSeries[seriesIdx];
             const seriesStyle = styleResolver.resolveSeriesStyle(series, seriesIdx);
             const seriesColor = seriesStyle.color;
-
-            legendItems.push({
-                color: seriesColor,
-                itemId: series.id,
-                kind: "series",
-                name: resolveSeriesDisplayName(series, seriesIdx),
-                seriesId: series.id,
-                seriesType: series.type,
-                visible: series.visible()
-            });
 
             if (!series.visible()) {
                 continue;
@@ -608,7 +561,7 @@ export class CartesianHorizontalBarLayoutEngine {
                             stackStart: startVal,
                             stackTotal: stackEntry.stackTotal,
                             value: stackEntry.rawValue,
-                            visualBounds: isZeroWidth ? { height: barRect.height, width: 4, x: barRect.x - 2, y: barRect.y } : barRect,
+                            visualBounds: barRect,
                             xKey: catKey,
                             xValue: stackEntry.xValue,
                             yValue: stackEntry.rawValue
@@ -636,9 +589,10 @@ export class CartesianHorizontalBarLayoutEngine {
                         const numVal = val;
                         const startVal = 0;
                         const endVal = numVal;
-                        const valueStartPixel = xScale.map(startVal);
-                        const valueEndPixel = xScale.map(endVal);
-                        const isPositive = endVal >= 0;
+                        const baselineX = clamp(xScale.map(0), plotRect.x, plotRect.x + plotRect.width);
+                        const valueStartPixel = baselineX;
+                        const valueEndPixel = numVal === 0 ? baselineX : xScale.map(numVal);
+                        const isPositive = numVal >= 0;
 
                         const barRect = CartesianBarGeometry.deriveBarRect({
                             categorySize: effectiveBarHeight,

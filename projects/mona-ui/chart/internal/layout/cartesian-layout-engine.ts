@@ -64,6 +64,7 @@ import { CartesianAxisLabelGeometry } from "./cartesian-axis-label-geometry";
 import { CartesianAxisLayoutEngine } from "./cartesian-axis-layout-engine";
 import { CartesianBarSlots } from "./cartesian-bar-slots";
 import { CartesianHorizontalBarLayoutEngine } from "./cartesian-horizontal-bar-layout-engine";
+import { CartesianLegendBuilder } from "./cartesian-legend-builder";
 import { CartesianMarkerLayout } from "./cartesian-marker-layout";
 import { CartesianOrientationPolicy } from "./cartesian-orientation-policy";
 import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
@@ -125,12 +126,13 @@ export class CartesianLayoutEngine {
 
         // Orientation policy validation
         const orientationResolution = CartesianOrientationPolicy.resolve(effectiveSeries);
-        if (!orientationResolution.valid) {
-            if (warnedDiagnosticSignatures) {
-                for (const diag of orientationResolution.diagnostics) {
-                    ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, diag);
-                }
+        if (warnedDiagnosticSignatures) {
+            for (const diag of orientationResolution.diagnostics) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, diag);
             }
+        }
+        if (!orientationResolution.valid) {
+            const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
             return {
                 axes: [],
                 barHitTargets: [],
@@ -139,10 +141,10 @@ export class CartesianLayoutEngine {
                 hasRenderableData: false,
                 height: containerHeight,
                 hitTargets: [],
-                interactionAxis: "x",
+                interactionAxis: orientationResolution.orientation === "horizontal" ? "y" : "x",
                 interactionBuckets: [],
-                legendItems: [],
-                orientation: "vertical",
+                legendItems,
+                orientation: orientationResolution.orientation,
                 plotRect: { height: 0, width: 0, x: 0, y: 0 },
                 series: [],
                 width: containerWidth,
@@ -349,6 +351,7 @@ export class CartesianLayoutEngine {
         }));
 
         if (plotWidth <= 0 || plotHeight <= 0) {
+            const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
             return {
                 axes: [],
                 barHitTargets: [],
@@ -359,7 +362,7 @@ export class CartesianLayoutEngine {
                 hitTargets: [],
                 interactionAxis: "x",
                 interactionBuckets: [],
-                legendItems: [],
+                legendItems,
                 orientation: "vertical",
                 plotRect,
                 series: [],
@@ -371,16 +374,10 @@ export class CartesianLayoutEngine {
             };
         }
 
-        // Bounded convergence loop (max 3 passes)
-        let finalYScale = tentativeYScale;
-        let finalXScale = tentativeXScale;
-        let finalYAxisLayout = yAxisLayoutPass1;
-        let finalXAxisLayout = xAxisLayoutPass1;
-
-        for (let pass = 0; pass < 3; pass++) {
+        const buildCartesianState = (rect: ChartRect) => {
             const currentYScale = CartesianScaleFactory.createLinearScale(
                 yDomain,
-                [plotRect.y + plotRect.height, plotRect.y],
+                [rect.y + rect.height, rect.y],
                 niceY,
                 yTickCount,
                 explicitYMin,
@@ -392,7 +389,7 @@ export class CartesianLayoutEngine {
                 const catDom = calculateCategoryDomain(effectiveSeries, rootData, rootXField);
                 currentXScale = CartesianScaleFactory.createBandScale(
                     catDom,
-                    [plotRect.x, plotRect.x + plotRect.width],
+                    [rect.x, rect.x + rect.width],
                     0.2,
                     0.1
                 );
@@ -407,7 +404,7 @@ export class CartesianLayoutEngine {
 
                 currentXScale = CartesianScaleFactory.createLinearScale(
                     xDomain,
-                    [plotRect.x, plotRect.x + plotRect.width],
+                    [rect.x, rect.x + rect.width],
                     niceX,
                     xTickCount,
                     explicitXMin,
@@ -429,14 +426,14 @@ export class CartesianLayoutEngine {
 
                 timeSpanMs = maxDate.getTime() - minDate.getTime();
                 currentXScale = xAxisType === "utc"
-                    ? CartesianScaleFactory.createUtcScale([minDate, maxDate], [plotRect.x, plotRect.x + plotRect.width])
-                    : CartesianScaleFactory.createTimeScale([minDate, maxDate], [plotRect.x, plotRect.x + plotRect.width]);
+                    ? CartesianScaleFactory.createUtcScale([minDate, maxDate], [rect.x, rect.x + rect.width])
+                    : CartesianScaleFactory.createTimeScale([minDate, maxDate], [rect.x, rect.x + rect.width]);
             }
 
             const yAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
                 axis: "y",
                 axisType: "linear",
-                containerSize: plotRect.height,
+                containerSize: rect.height,
                 defaultGridLines: true,
                 effectiveFormatter: effectiveYFormatter,
                 measurements: options.measurements,
@@ -449,7 +446,7 @@ export class CartesianLayoutEngine {
             const xAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
                 axis: "x",
                 axisType: xAxisType,
-                containerSize: plotRect.width,
+                containerSize: rect.width,
                 defaultGridLines: false,
                 effectiveFormatter: effectiveXFormatter,
                 measurements: options.measurements,
@@ -491,32 +488,49 @@ export class CartesianLayoutEngine {
                 top: xAxisPosition === "top" ? xAxisLayout.gutter : 16
             };
 
-            const newPlotWidth = Math.max(0, containerWidth - currentPadding.left - currentPadding.right);
-            const newPlotHeight = Math.max(0, containerHeight - currentPadding.top - currentPadding.bottom);
-            const newPlotRect: ChartRect = {
-                height: newPlotHeight,
-                width: newPlotWidth,
+            const nextPlotWidth = Math.max(0, containerWidth - currentPadding.left - currentPadding.right);
+            const nextPlotHeight = Math.max(0, containerHeight - currentPadding.top - currentPadding.bottom);
+            const nextPlotRect: ChartRect = {
+                height: nextPlotHeight,
+                width: nextPlotWidth,
                 x: currentPadding.left,
                 y: currentPadding.top
             };
 
-            finalYScale = currentYScale;
-            finalXScale = currentXScale;
-            finalYAxisLayout = yAxisLayout;
-            finalXAxisLayout = xAxisLayout;
+            return {
+                currentXScale,
+                currentYScale,
+                nextPlotRect,
+                xAxisLayout,
+                yAxisLayout
+            };
+        };
+
+        // Bounded convergence loop (max 3 passes)
+        let candidateRect = plotRect;
+        for (let pass = 0; pass < 3; pass++) {
+            const state = buildCartesianState(candidateRect);
+            const next = state.nextPlotRect;
 
             if (
-                Math.abs(newPlotRect.x - plotRect.x) < 0.5 &&
-                Math.abs(newPlotRect.y - plotRect.y) < 0.5 &&
-                Math.abs(newPlotRect.width - plotRect.width) < 0.5 &&
-                Math.abs(newPlotRect.height - plotRect.height) < 0.5
+                Math.abs(next.x - candidateRect.x) < 0.5 &&
+                Math.abs(next.y - candidateRect.y) < 0.5 &&
+                Math.abs(next.width - candidateRect.width) < 0.5 &&
+                Math.abs(next.height - candidateRect.height) < 0.5
             ) {
-                plotRect = newPlotRect;
+                candidateRect = next;
                 break;
             }
 
-            plotRect = newPlotRect;
+            candidateRect = next;
         }
+
+        plotRect = candidateRect;
+        const finalState = buildCartesianState(plotRect);
+        const finalYScale = finalState.currentYScale;
+        const finalXScale = finalState.currentXScale;
+        const finalYAxisLayout = finalState.yAxisLayout;
+        const finalXAxisLayout = finalState.xAxisLayout;
 
         const hitTargets: SceneHitTarget[] = [];
         const barHitTargets: SceneHitTarget[] = [];
@@ -1332,37 +1346,7 @@ export class CartesianLayoutEngine {
             }) ||
                 validMarkerCount > 0);
 
-        const legendItems: ChartLegendItem[] = effectiveSeries.map((s, idx) => {
-            if (s.type === "candlestick" || s.type === "ohlc") {
-                const finStyle = styleResolver.resolveFinancialSeriesStyle(s as ChartFinancialSeriesRegistration);
-                const color = finStyle.color || finStyle.risingColor;
-                const secondaryColor = finStyle.color ? undefined : finStyle.fallingColor;
-                return {
-                    color,
-                    itemId: s.id,
-                    kind: "series",
-                    name: resolveSeriesDisplayName(s, idx),
-                    secondaryColor,
-                    seriesId: s.id,
-                    seriesType: s.type,
-                    visible: s.visible()
-                };
-            }
-
-            const color =
-                s.type === "scatter" || s.type === "bubble"
-                    ? styleResolver.resolveMarkerSeriesStyle(s, idx).color
-                    : styleResolver.resolveSeriesStyle(s, idx).color;
-            return {
-                color,
-                itemId: s.id,
-                kind: "series",
-                name: resolveSeriesDisplayName(s, idx),
-                seriesId: s.id,
-                seriesType: s.type,
-                visible: s.visible()
-            };
-        });
+        const legendItems: ChartLegendItem[] = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
 
         return {
             axes: axisScenes,

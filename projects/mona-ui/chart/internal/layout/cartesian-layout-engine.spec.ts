@@ -564,6 +564,52 @@ describe("CartesianLayoutEngine", () => {
             expect(scene.stackConfiguration?.[0].mode).toBe("percent");
             expect(scene.stackSignature).toBeDefined();
         });
+
+        it("emits warning diagnostics when orientation falls back from invalid runtime value", () => {
+            const bar = createMockSeries("bar", "v1", "b1");
+            (bar as any).orientation = signal("diagonal");
+            const data = [{ month: "Jan", v1: 100 }];
+            const warned = new Set<string>();
+
+            const scene = CartesianLayoutEngine.computeScene({
+                containerHeight: 300,
+                containerWidth: 500,
+                rootData: data,
+                rootXField: "month",
+                series: [bar],
+                styleResolver,
+                warnedDiagnosticSignatures: warned
+            });
+
+            expect(scene.orientation).toBe("vertical");
+            expect(warned.size).toBe(1);
+            expect(Array.from(warned)[0]).toContain("diagonal");
+        });
+
+        it("preserves legend items in fail-safe scene when composition is invalid (HAX-F03)", () => {
+            const hBar = createMockSeries("bar", "v1", "b1");
+            (hBar as any).orientation = signal("horizontal");
+            const line = createMockSeries("line", "v2", "l1");
+            const data = [{ month: "Jan", v1: 100, v2: 200 }];
+            const warned = new Set<string>();
+
+            const scene = CartesianLayoutEngine.computeScene({
+                containerHeight: 300,
+                containerWidth: 500,
+                rootData: data,
+                rootXField: "month",
+                series: [hBar, line],
+                styleResolver,
+                warnedDiagnosticSignatures: warned
+            });
+
+            expect(scene.hasRenderableData).toBe(false);
+            expect(scene.series.length).toBe(0);
+            expect(scene.legendItems.length).toBe(2);
+            expect(scene.legendItems[0].seriesId).toBe("b1");
+            expect(scene.legendItems[1].seriesId).toBe("l1");
+            expect(warned.size).toBeGreaterThan(0);
+        });
     });
 });
 
