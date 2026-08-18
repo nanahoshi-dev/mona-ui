@@ -19,9 +19,10 @@ export type ChartSeriesType =
     | "rangeArea"
     | "rangeBar"
     | "rose"
-    | "scatter";
+    | "scatter"
+    | "treemap";
 
-export type ChartSeriesFamily = "cartesian" | "heatmap" | "polar" | "radar" | "radialArc" | "sector";
+export type ChartSeriesFamily = "cartesian" | "heatmap" | "hierarchy" | "polar" | "radar" | "radialArc" | "sector";
 
 export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
     switch (type) {
@@ -48,6 +49,8 @@ export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
         case "rose":
         case "gauge":
             return "radialArc";
+        case "treemap":
+            return "hierarchy";
     }
 }
 
@@ -57,6 +60,10 @@ export function isCartesianCoordinateFamily(family: ChartSeriesFamily): boolean 
 
 export function isPolarCoordinateFamily(family: ChartSeriesFamily): boolean {
     return family === "sector" || family === "radar" || family === "polar" || family === "radialArc";
+}
+
+export function isHierarchicalCoordinateFamily(family: ChartSeriesFamily): boolean {
+    return family === "hierarchy";
 }
 
 

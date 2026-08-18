@@ -233,6 +233,34 @@
             }
         }
 
+        <!-- DOM Treemap Labels -->
+        @if (treemapScene(); as tm) {
+            @for (seriesScene of tm.series; track seriesScene.id) {
+                @for (lbl of seriesScene.labels; track lbl.nodeId) {
+                    <div
+                        aria-hidden="true"
+                        class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap px-1.5 py-0.5 flex flex-col justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                        [class.opacity-0]="isAnimating() && isStructuralAnimation()"
+                        [style.left.px]="lbl.bounds.x"
+                        [style.top.px]="lbl.bounds.y"
+                        [style.width.px]="lbl.bounds.width"
+                        [style.height.px]="lbl.bounds.height"
+                        [style.color]="lbl.textColor">
+                        @if (treemapSeriesRegistration()?.labelTemplate?.(); as labelTemplate) {
+                            <ng-container
+                                [ngTemplateOutlet]="labelTemplate.templateRef"
+                                [ngTemplateOutletContext]="treemapLabelContext(lbl, seriesScene)" />
+                        } @else {
+                            <span class="font-medium truncate">{{ lbl.formattedLabel }}</span>
+                            @if (lbl.showValue) {
+                                <span class="text-[11px] opacity-80 truncate">{{ lbl.formattedValue }}</span>
+                            }
+                        }
+                    </div>
+                }
+            }
+        }
+
         <!-- Tooltip overlay in plot-local coordinates -->
         <ng-content select="mona-chart-tooltip"></ng-content>
 

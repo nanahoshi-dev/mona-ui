@@ -13,6 +13,7 @@ function createMockContext(): CanvasRenderingContext2D {
             addColorStop: vi.fn()
         }),
         fill: vi.fn(),
+        fillRect: vi.fn(),
         fillStyle: "",
         globalAlpha: 1,
         arc: vi.fn(),
@@ -26,6 +27,7 @@ function createMockContext(): CanvasRenderingContext2D {
         save: vi.fn(),
         setLineDash: vi.fn(),
         stroke: vi.fn(),
+        strokeRect: vi.fn(),
         strokeStyle: "",
         translate: vi.fn()
     } as unknown as CanvasRenderingContext2D;
@@ -435,5 +437,82 @@ describe("CanvasChartRenderer", () => {
         expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 500, 300);
         expect(ctx.translate).toHaveBeenCalledWith(250, 150);
         expect(ctx.fill).toHaveBeenCalled();
+    });
+
+    it("should render hierarchical treemap scene", () => {
+        const ctx = createMockContext();
+        const treemapScene: ChartScene = {
+            coordinateSystem: "hierarchical",
+            hasRenderableData: true,
+            height: 300,
+            hierarchicalKind: "treemap",
+            hitIndex: { query: vi.fn() } as any,
+            hitTargets: [],
+            interactionBuckets: [],
+            layoutSignature: "sig",
+            legendItems: [],
+            navigationIndex: { entries: new Map() },
+            plotRect: { height: 300, width: 500, x: 0, y: 0 },
+            series: [
+                {
+                    id: "tm-1",
+                    labels: [],
+                    layoutSignature: "sig",
+                    name: "Treemap",
+                    nodes: [
+                        {
+                            aggregateValue: 50,
+                            animationKey: "k:1",
+                            borderRadius: 0,
+                            bounds: { height: 300, width: 500, x: 0, y: 0 },
+                            childCount: 0,
+                            contentBounds: { height: 300, width: 500, x: 0, y: 0 },
+                            dataIndex: 0,
+                            datum: {},
+                            depth: 1,
+                            descendantCount: 0,
+                            fillColor: "#3b82f6",
+                            formattedLabel: "Leaf",
+                            formattedPath: ["Leaf"],
+                            formattedValue: "50",
+                            isCollapsed: false,
+                            isLeaf: true,
+                            label: "Leaf",
+                            labelKind: "terminal",
+                            nodeId: "root/l:s:Leaf",
+                            path: ["Leaf"],
+                            renderOpacity: 1,
+                            renderOrder: 0,
+                            showLabel: true,
+                            showValue: true,
+                            siblingIndex: 0,
+                            sourceIndexPath: [0],
+                            textColor: "#ffffff",
+                            treeHeight: 0
+                        }
+                    ],
+                    renderOpacity: 1,
+                    sort: "descending",
+                    style: {
+                        baseColor: "#3b82f6",
+                        borderRadius: 0,
+                        fillOpacity: 1,
+                        parentFillOpacity: 0.15,
+                        strokeColor: "#ffffff",
+                        strokeWidth: 1
+                    },
+                    tile: "squarify",
+                    topologySignature: "top",
+                    type: "treemap"
+                }
+            ],
+            topologySignature: "top",
+            width: 500
+        };
+
+        CanvasChartRenderer.render(ctx, treemapScene, null, styleResolver);
+
+        expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 500, 300);
+        expect(ctx.fillRect).toHaveBeenCalledWith(0, 0, 500, 300);
     });
 });

@@ -1,4 +1,6 @@
-export type ChartCoordinateSystem = "cartesian" | "polar";
+export type ChartCoordinateSystem = "cartesian" | "hierarchical" | "polar";
+
+export type ChartHierarchicalKind = "treemap";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ChartValueAccessor<T = any, TResult = any> = (item: T, index: number) => TResult;

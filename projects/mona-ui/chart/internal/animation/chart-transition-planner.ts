@@ -5,9 +5,10 @@ import type {
     PolarArcChartScene,
     PolarAxisChartScene,
     PolarChartScene,
-    PolarSectorChartScene
+    PolarSectorChartScene,
+    TreemapChartScene
 } from "../scene/chart-scene";
-import type { ChartGaugeSeriesScene } from "../scene/polar-arc-scene";
+import type { ChartGaugeSeriesScene, ChartRoseSeriesScene } from "../scene/polar-arc-scene";
 import { AreaSeriesAnimationAdapter } from "./adapters/area-animation-adapter";
 import { AxisAnimationAdapter } from "./adapters/axis-animation-adapter";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
@@ -21,6 +22,7 @@ import { RadialArcAnimationAdapter } from "./adapters/radial-arc-animation-adapt
 import { RangeAreaSeriesAnimationAdapter } from "./adapters/range-area-animation-adapter";
 import { RangeBarSeriesAnimationAdapter } from "./adapters/range-bar-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
+import { TreemapAnimationAdapter } from "./adapters/treemap-animation-adapter";
 import type { NormalizedChartAnimationOptions } from "./chart-animation-options";
 import type {
     ChartAnimationComplexity,
@@ -194,6 +196,33 @@ export class ChartTransitionPlanner {
                         const prevGauge = prevPolar.series[0] as ChartGaugeSeriesScene | undefined;
                         const targetGauge = targetPolar.series[0] as ChartGaugeSeriesScene | undefined;
                         if (prevGauge && targetGauge && prevGauge.indicator !== targetGauge.indicator) {
+                            return {
+                                complexity,
+                                duration: options.duration,
+                                easing: options.easing,
+                                fromScene: previous,
+                                mode: "crossfade",
+                                seriesPlans: [],
+                                toScene: target,
+                                trigger
+                            };
+                        }
+                    }
+
+                    if (prevPolar.arcMode === "rose" && targetPolar.arcMode === "rose") {
+                        const prevRose = prevPolar.series[0] as ChartRoseSeriesScene | undefined;
+                        const targetRose = targetPolar.series[0] as ChartRoseSeriesScene | undefined;
+                        const prevAng = prevPolar.angularAxis;
+                        const targetAng = targetPolar.angularAxis;
+
+                        const rotationChanged = (prevAng?.rotation ?? 0) !== (targetAng?.rotation ?? 0);
+                        const prevCats = prevRose?.angularCategories ?? [];
+                        const targetCats = targetRose?.angularCategories ?? [];
+                        const categoriesChanged =
+                            prevCats.length !== targetCats.length ||
+                            prevCats.some((c, i) => c.categoryKey !== targetCats[i]?.categoryKey);
+
+                        if (rotationChanged || categoriesChanged) {
                             return {
                                 complexity,
                                 duration: options.duration,
@@ -483,6 +512,11 @@ export class ChartTransitionPlanner {
                         }
                     }
                 }
+            } else if (sc.coordinateSystem === "hierarchical") {
+                const tmScene = sc as TreemapChartScene;
+                for (const s of tmScene.series) {
+                    independentMarks += s.nodes.length;
+                }
             }
         };
 
@@ -711,6 +745,18 @@ export class ChartTransitionPlanner {
 
             const arcAdapter = new RadialArcAnimationAdapter();
             plans.push(arcAdapter.createPlan(prevSeries, targetSeries, context));
+        } else if (target.coordinateSystem === "hierarchical" && target.hierarchicalKind === "treemap") {
+            const targetTreemap = target as TreemapChartScene;
+            const prevTreemap =
+                previous?.coordinateSystem === "hierarchical" && previous.hierarchicalKind === "treemap"
+                    ? (previous as TreemapChartScene)
+                    : null;
+
+            const prevSeries = prevTreemap?.series[0] ?? null;
+            const targetSeries = targetTreemap.series[0] ?? null;
+
+            const treemapAdapter = new TreemapAnimationAdapter();
+            plans.push(treemapAdapter.createPlan(prevSeries, targetSeries, context));
         }
 
         return plans;

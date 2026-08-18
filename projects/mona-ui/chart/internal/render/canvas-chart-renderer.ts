@@ -4,6 +4,7 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianChartRenderer } from "./cartesian-chart-renderer";
 import { HeatmapChartRenderer } from "./heatmap-chart-renderer";
 import { PolarChartRenderer } from "./polar-chart-renderer";
+import { TreemapChartRenderer } from "./treemap-chart-renderer";
 
 export class CanvasChartRenderer {
     public static clear(context: CanvasRenderingContext2D, width: number, height: number): void {
@@ -34,6 +35,12 @@ export class CanvasChartRenderer {
                 }
                 if (scene.cartesianKind === "heatmap") {
                     HeatmapChartRenderer.render(context, scene, interactionState, styleResolver);
+                    return;
+                }
+                return;
+            case "hierarchical":
+                if (scene.hierarchicalKind === "treemap") {
+                    TreemapChartRenderer.render(context, scene, interactionState, styleResolver);
                     return;
                 }
                 return;

@@ -25,6 +25,8 @@ import {
     RoseSeriesComponent,
     GaugeSeriesComponent,
     ChartGaugeCenterTemplateDirective,
+    ChartTreemapSeriesComponent,
+    ChartTreemapLabelTemplateDirective,
     ScatterSeriesComponent,
     BubbleSeriesComponent,
     CandlestickSeriesComponent,
@@ -48,7 +50,11 @@ import {
     type ChartRadialGridShape,
     type ChartRoseScaleMode,
     type ChartSeriesVisibilityEvent,
-    type ChartSliceVisibilityEvent
+    type ChartSliceVisibilityEvent,
+    type ChartTreemapLabelTemplateContext,
+    type ChartTreemapNodeVisibilityEvent,
+    type ChartTreemapSort,
+    type ChartTreemapTile
 } from "@nanahoshi/mona-ui/chart";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
@@ -137,6 +143,8 @@ interface BubbleDataPoint {
         RoseSeriesComponent,
         GaugeSeriesComponent,
         ChartGaugeCenterTemplateDirective,
+        ChartTreemapSeriesComponent,
+        ChartTreemapLabelTemplateDirective,
         ChartLegendComponent,
         ChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
@@ -179,6 +187,7 @@ export class ChartDemoComponent {
         | "stacked-area"
         | "stacked-bar"
         | "time"
+        | "treemap"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
 
@@ -563,6 +572,90 @@ export class ChartDemoComponent {
     protected readonly gaugeNeedleWidth = signal<number>(3);
     protected readonly gaugeShowValue = signal<boolean>(true);
     protected readonly gaugeCustomTemplate = signal<boolean>(false);
+
+    // Treemap Controls & Data
+    protected readonly treemapData = signal<readonly unknown[]>([
+        {
+            name: "Frontend",
+            children: [
+                { name: "Angular", value: 120 },
+                { name: "React", value: 110 },
+                { name: "Vue", value: 75 },
+                { name: "Svelte", value: 45 }
+            ]
+        },
+        {
+            name: "Backend",
+            children: [
+                { name: "Node.js", value: 95 },
+                { name: "Go", value: 130 },
+                { name: "Rust", value: 115 },
+                { name: "Java", value: 140 }
+            ]
+        },
+        {
+            name: "Database",
+            children: [
+                { name: "PostgreSQL", value: 110 },
+                { name: "Redis", value: 65 },
+                { name: "MongoDB", value: 55 },
+                { name: "DuckDB", value: 40 }
+            ]
+        },
+        {
+            name: "DevOps",
+            children: [
+                { name: "Kubernetes", value: 150 },
+                { name: "Docker", value: 90 },
+                { name: "Terraform", value: 70 },
+                { name: "AWS", value: 130 }
+            ]
+        }
+    ]);
+
+    protected readonly treemapTile = signal<ChartTreemapTile>("squarify");
+    protected readonly treemapSort = signal<ChartTreemapSort>("descending");
+    protected readonly treemapShowParentLabels = signal<boolean>(true);
+    protected readonly treemapShowValues = signal<boolean>(true);
+    protected readonly treemapBorderRadius = signal<number>(4);
+    protected readonly treemapStrokeWidth = signal<number>(1);
+    protected readonly treemapStrokeColor = signal<string>("#ffffff");
+    protected readonly treemapParentFillOpacity = signal<number>(0.15);
+    protected readonly treemapFillOpacity = signal<number>(0.9);
+    protected readonly treemapPadding = signal<number>(2);
+    protected readonly treemapPaddingTop = signal<number>(22);
+    protected readonly treemapMaxDepth = signal<number | undefined>(undefined);
+    protected readonly treemapUseCustomTemplate = signal<boolean>(false);
+
+    protected readonly treemapTileOptions: readonly { label: string; value: ChartTreemapTile }[] = [
+        { label: "Squarify (Golden Ratio)", value: "squarify" },
+        { label: "Binary (Recursive)", value: "binary" },
+        { label: "Dice (Horizontal)", value: "dice" },
+        { label: "Slice (Vertical)", value: "slice" },
+        { label: "Slice-Dice (Alternating)", value: "slice-dice" }
+    ];
+
+    protected readonly treemapSortOptions: readonly { label: string; value: ChartTreemapSort }[] = [
+        { label: "Descending", value: "descending" },
+        { label: "Ascending", value: "ascending" },
+        { label: "None (Preserve Order)", value: "none" }
+    ];
+
+    public onTreemapTileChange(tile: unknown): void {
+        const val = typeof tile === "string" ? tile : (tile as { value?: string })?.value;
+        if (val) {
+            this.treemapTile.set(val as ChartTreemapTile);
+            this.#addLog("settingChange", `Treemap Tile Algorithm: ${val}`);
+        }
+    }
+
+    public onTreemapSortChange(sort: unknown): void {
+        const val = typeof sort === "string" ? sort : (sort as { value?: string })?.value;
+        if (val) {
+            this.treemapSort.set(val as ChartTreemapSort);
+            this.#addLog("settingChange", `Treemap Sibling Sort: ${val}`);
+        }
+    }
 
     protected readonly sharedTooltip = signal<boolean>(false);
     protected readonly showArea = signal<boolean>(true);
@@ -973,6 +1066,26 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", `Updated Gauge value to ${val}`);
     }
 
+    public randomizeTreemapData(): void {
+        this.treemapData.update(roots =>
+            (roots as { name: string; children: { name: string; value: number }[] }[]).map(root => ({
+                ...root,
+                children: root.children.map(c => ({
+                    ...c,
+                    value: Math.round(20 + Math.random() * 150)
+                }))
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized Treemap leaf values");
+    }
+
+    public onTreemapNodeVisibilityChange(event: ChartTreemapNodeVisibilityEvent): void {
+        this.#addLog(
+            "nodeVisibilityChange",
+            `Treemap node "${event.formattedLabel ?? event.nodeId}" visibility -> ${event.visible}`
+        );
+    }
+
     public resetData(): void {
         this.monthlyData.set([
             { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
@@ -982,11 +1095,19 @@ export class ChartDemoComponent {
             { actual: 7200, forecast: 6800, month: "May", target: 6700 },
             { actual: 8100, forecast: 7500, month: "Jun", target: 7600 }
         ]);
+        this.candlestickData.set([
+            { close: 104, date: "2026-03-01", high: 108, low: 98, open: 100 },
+            { close: 112, date: "2026-03-02", high: 115, low: 102, open: 105 },
+            { close: 108, date: "2026-03-03", high: 114, low: 106, open: 111 },
+            { close: 118, date: "2026-03-04", high: 120, low: 107, open: 109 },
+            { close: 115, date: "2026-03-05", high: 122, low: 113, open: 119 },
+            { close: 125, date: "2026-03-06", high: 128, low: 114, open: 116 }
+        ]);
         this.radialBarData.set([
-            { category: "Disk Usage", color: "#3b82f6", value: 78 },
-            { category: "Memory", color: "#10b981", value: 62 },
-            { category: "CPU Load", color: "#f59e0b", value: 45 },
-            { category: "Network I/O", color: "#ec4899", value: 89 }
+            { category: "CPU Usage", color: "#3b82f6", value: 78 },
+            { category: "Memory Allocation", color: "#10b981", value: 62 },
+            { category: "Disk IOPS", color: "#f59e0b", value: 88 },
+            { category: "Network Throughput", color: "#8b5cf6", value: 45 }
         ]);
         this.roseData.set([
             { direction: "N", value: 45 },
@@ -997,6 +1118,44 @@ export class ChartDemoComponent {
             { direction: "SW", value: 55 },
             { direction: "W", value: 75 },
             { direction: "NW", value: 40 }
+        ]);
+        this.treemapData.set([
+            {
+                name: "Frontend",
+                children: [
+                    { name: "Angular", value: 120 },
+                    { name: "React", value: 110 },
+                    { name: "Vue", value: 75 },
+                    { name: "Svelte", value: 45 }
+                ]
+            },
+            {
+                name: "Backend",
+                children: [
+                    { name: "Node.js", value: 95 },
+                    { name: "Go", value: 130 },
+                    { name: "Rust", value: 115 },
+                    { name: "Java", value: 140 }
+                ]
+            },
+            {
+                name: "Database",
+                children: [
+                    { name: "PostgreSQL", value: 110 },
+                    { name: "Redis", value: 65 },
+                    { name: "MongoDB", value: 55 },
+                    { name: "DuckDB", value: 40 }
+                ]
+            },
+            {
+                name: "DevOps",
+                children: [
+                    { name: "Kubernetes", value: 150 },
+                    { name: "Docker", value: 90 },
+                    { name: "Terraform", value: 70 },
+                    { name: "AWS", value: 130 }
+                ]
+            }
         ]);
         this.gaugeValue.set(76);
         this.useIndependentSeriesData.set(false);
@@ -1029,6 +1188,7 @@ export class ChartDemoComponent {
             | "stacked-area"
             | "stacked-bar"
             | "time"
+            | "treemap"
     ): void {
         this.activeTab.set(tab);
     }

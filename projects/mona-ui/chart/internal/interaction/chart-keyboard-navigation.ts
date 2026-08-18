@@ -2,6 +2,7 @@ import type { CartesianHeatmapChartScene, ChartScene } from "../scene/chart-scen
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { clamp } from "../utils/number-utils";
 import { HeatmapKeyboardNavigation } from "./heatmap-keyboard-navigation";
+import { TreemapKeyboardNavigation } from "./treemap-keyboard-navigation";
 
 export function getHitTargetKey(hit: SceneHitTarget): string {
     return hit.animationKey ?? hit.sliceId ?? `${hit.seriesId}:${hit.index}`;
@@ -22,6 +23,26 @@ export class ChartKeyboardNavigation {
         activeSeriesId: string | null,
         activeHitKey?: string | null
     ): KeyboardNavigationResult | null {
+        if (scene.coordinateSystem === "hierarchical" && scene.hierarchicalKind === "treemap") {
+            const currentHit = activeHitKey ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null : null;
+            const currentId = currentHit?.hierarchy?.nodeId;
+            const nextNodeId = TreemapKeyboardNavigation.navigate(currentId, event.key, scene.navigationIndex);
+            if (!nextNodeId) {
+                return null;
+            }
+            const nextHit = scene.hitTargets.find(h => h.hierarchy?.nodeId === nextNodeId) ?? null;
+            if (!nextHit) {
+                return null;
+            }
+            event.preventDefault();
+            return {
+                bucketIndex: 0,
+                hitKey: getHitTargetKey(nextHit),
+                hitTarget: nextHit,
+                seriesId: nextHit.seriesId
+            };
+        }
+
         if (scene.coordinateSystem === "cartesian" && scene.cartesianKind === "heatmap") {
             const currentHit = activeHitKey ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null : null;
             const nextHit = HeatmapKeyboardNavigation.handleKey(event, scene as CartesianHeatmapChartScene, currentHit);

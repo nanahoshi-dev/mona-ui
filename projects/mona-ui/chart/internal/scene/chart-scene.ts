@@ -88,6 +88,9 @@ export interface PolarAxisChartScene extends PolarSceneBase {
     series: readonly ChartRadialSeriesScene[];
 }
 
+import type { HierarchicalChartScene, TreemapChartScene } from "./hierarchical-scene";
+export type { HierarchicalChartScene, TreemapChartScene };
+
 export type PolarChartScene = PolarArcChartScene | PolarAxisChartScene | PolarSectorChartScene;
 
-export type ChartScene = CartesianChartScene | PolarChartScene;
+export type ChartScene = CartesianChartScene | HierarchicalChartScene | PolarChartScene;

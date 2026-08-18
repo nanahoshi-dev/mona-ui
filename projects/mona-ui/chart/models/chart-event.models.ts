@@ -1,3 +1,4 @@
+import type { ChartHierarchyPointMetadata } from "./chart-hierarchy.models";
 import type { ChartFinancialDirection } from "./chart-financial.models";
 import type { ChartOhlcPointValue, ChartPointValueKind } from "./chart-point-value.models";
 import type { ChartSeriesType } from "./chart-series.models";
@@ -25,6 +26,7 @@ export interface ChartPointEvent<T = unknown> {
     formattedXValue?: string;
     formattedYCategory?: string;
     fromValue?: number;
+    hierarchy?: ChartHierarchyPointMetadata;
     high?: number;
     low?: number;
     open?: number;
@@ -71,6 +73,7 @@ export interface ChartPointFocusEvent<T = unknown> {
     formattedXValue?: string;
     formattedYCategory?: string;
     fromValue?: number;
+    hierarchy?: ChartHierarchyPointMetadata;
     high?: number;
     low?: number;
     open?: number;

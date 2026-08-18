@@ -22,6 +22,7 @@ export { OhlcSeriesComponent } from "./components/ohlc-series/ohlc-series.compon
 export { RadialBarSeriesComponent } from "./components/radial-bar-series/radial-bar-series.component";
 export { RoseSeriesComponent } from "./components/rose-series/rose-series.component";
 export { GaugeSeriesComponent } from "./components/gauge-series/gauge-series.component";
+export { ChartTreemapSeriesComponent } from "./components/treemap-series/treemap-series.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -30,6 +31,7 @@ export { ChartNoDataTemplateDirective } from "./directives/chart-no-data-templat
 export { ChartSliceLabelTemplateDirective } from "./directives/chart-slice-label-template.directive";
 export { ChartCenterTemplateDirective } from "./directives/chart-center-template.directive";
 export { ChartGaugeCenterTemplateDirective } from "./directives/chart-gauge-center-template.directive";
+export { ChartTreemapLabelTemplateDirective } from "./directives/chart-treemap-label-template.directive";
 
 export type {
     ChartCoordinateSystem,
@@ -122,3 +124,15 @@ export type {
     ChartRadialDatumVisibilityEvent,
     ChartRoseScaleMode
 } from "./models/chart-radial-arc.models";
+
+export type {
+    ChartHierarchyNodeContext,
+    ChartHierarchyPointMetadata
+} from "./models/chart-hierarchy.models";
+
+export type {
+    ChartTreemapLabelTemplateContext,
+    ChartTreemapNodeVisibilityEvent,
+    ChartTreemapSort,
+    ChartTreemapTile
+} from "./models/chart-treemap.models";

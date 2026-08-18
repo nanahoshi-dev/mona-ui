@@ -1,3 +1,4 @@
+import type { ChartHierarchyPointMetadata } from "./chart-hierarchy.models";
 import type { ChartFinancialDirection } from "./chart-financial.models";
 import type { ChartOhlcPointValue, ChartPointValueKind } from "./chart-point-value.models";
 import type { ChartSeriesType } from "./chart-series.models";
@@ -37,6 +38,7 @@ export interface ChartTooltipPointContext<T = unknown> {
     formattedY: string;
     formattedYCategory?: string;
     fromValue?: number;
+    hierarchy?: ChartHierarchyPointMetadata;
     high?: number;
     isClamped?: boolean;
     low?: number;

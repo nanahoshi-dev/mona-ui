@@ -4,7 +4,9 @@ import type { ChartCenterTemplateDirective } from "../../directives/chart-center
 import type { ChartGaugeCenterTemplateDirective } from "../../directives/chart-gauge-center-template.directive";
 import type { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
 import type { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
+import type { ChartTreemapLabelTemplateDirective } from "../../directives/chart-treemap-label-template.directive";
 import type { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
+import type { ChartTreemapSort, ChartTreemapTile } from "../../models/chart-treemap.models";
 import type {
     ChartAxisFormatter,
     ChartAxisPosition,
@@ -434,6 +436,45 @@ export interface ChartGaugeSeriesRegistration extends ChartRadialArcSeriesRegist
     readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
 }
 
+export interface ChartTreemapSeriesRegistration
+    extends Omit<ChartSeriesRegistrationBase, "data">,
+        ChartDatumVisibilityRegistration {
+    readonly borderRadius?: Signal<number | undefined>;
+    readonly childrenField: Signal<ChartField>;
+    readonly colorField?: Signal<ChartField | undefined>;
+    readonly colors?: Signal<readonly string[] | undefined>;
+    readonly data: Signal<readonly unknown[] | unknown | undefined>;
+    readonly fillOpacity?: Signal<number | undefined>;
+    readonly labelField: Signal<ChartField>;
+    readonly labelFormatter?: Signal<ChartValueFormatter | undefined>;
+    readonly labelTemplate?: Signal<ChartTreemapLabelTemplateDirective | undefined>;
+    readonly maxDepth?: Signal<number | undefined>;
+    readonly maxLabels?: Signal<number>;
+    readonly minLabelHeight?: Signal<number>;
+    readonly minLabelWidth?: Signal<number>;
+    readonly padding?: Signal<number>;
+    readonly paddingBottom?: Signal<number | undefined>;
+    readonly paddingInner?: Signal<number | undefined>;
+    readonly paddingLeft?: Signal<number | undefined>;
+    readonly paddingOuter?: Signal<number | undefined>;
+    readonly paddingRight?: Signal<number | undefined>;
+    readonly paddingTop?: Signal<number | undefined>;
+    readonly parentFillOpacity?: Signal<number | undefined>;
+    readonly parentHeaderHeight?: Signal<number>;
+    readonly showLabels?: Signal<boolean>;
+    readonly showParentLabels?: Signal<boolean>;
+    readonly showValues?: Signal<boolean>;
+    readonly sort?: Signal<ChartTreemapSort>;
+    readonly strokeColor?: Signal<string>;
+    readonly strokeWidth?: Signal<number | undefined>;
+    readonly tile?: Signal<ChartTreemapTile>;
+    readonly type: "treemap";
+    readonly valueField: Signal<ChartField>;
+    readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
+}
+
+export type ChartHierarchicalSeriesRegistration = ChartTreemapSeriesRegistration;
+
 export type ChartRadialArcSeriesRegistration =
     | ChartGaugeSeriesRegistration
     | ChartRadialBarSeriesRegistration
@@ -460,6 +501,7 @@ export type ChartRadialSeriesRegistration = ChartContinuousPolarSeriesRegistrati
 export type ChartSeriesRegistration =
     | ChartCartesianSeriesRegistration
     | ChartHeatmapSeriesRegistration
+    | ChartHierarchicalSeriesRegistration
     | ChartRadialArcSeriesRegistration
     | ChartRadialSeriesRegistration
     | ChartSectorSeriesRegistration;

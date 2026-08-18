@@ -166,4 +166,106 @@ describe("RoseLayout", () => {
         expect(scene.angularAxis?.ticks.length).toBe(2);
         expect(scene.radialAxis?.ticks.length).toBeGreaterThan(0);
     });
+
+    it("normalizes negative explicit radial minimum to 0 before generating ticks (PRE-TM-001)", () => {
+        const series = createMockRoseSeries({
+            data: signal([
+                { category: "N", value: 20 },
+                { category: "E", value: 40 },
+                { category: "S", value: 80 }
+            ])
+        });
+
+        const radialAxis: ChartRadialAxisRegistration = {
+            axisLine: signal(true),
+            formatter: signal(undefined),
+            gridLines: signal(true),
+            gridShape: signal("circle"),
+            labelAngle: signal(0),
+            labelOffset: signal(4),
+            labels: signal(true),
+            labelTemplate: signal(undefined),
+            max: signal(100),
+            min: signal(-50),
+            nice: signal(true),
+            tickCount: signal(5),
+            userClass: signal(""),
+            visible: signal(true)
+        };
+
+        const scene = RoseLayout.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            radialAxis,
+            rootData: [],
+            series,
+            styleResolver
+        });
+
+        expect(scene.radialAxis).toBeDefined();
+        expect(scene.radialAxis?.domain[0]).toBe(0);
+        for (const tick of scene.radialAxis!.ticks) {
+            expect(tick.value).toBeGreaterThanOrEqual(0);
+        }
+    });
+
+    it("treats all-zero Rose data as valid semantic data (PRE-TM-002)", () => {
+        const series = createMockRoseSeries({
+            data: signal([
+                { category: "N", value: 0 },
+                { category: "E", value: 0 }
+            ])
+        });
+
+        const scene = RoseLayout.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            rootData: [],
+            series,
+            styleResolver
+        });
+
+        expect(scene.hasRenderableData).toBe(true);
+        const seriesScene = scene.series[0];
+        if (seriesScene.type === "rose") {
+            expect(seriesScene.marks.length).toBe(2);
+        }
+    });
+
+    it("reserves gutters when radial axis labels are enabled (PRE-TM-006)", () => {
+        const series = createMockRoseSeries({
+            data: signal([
+                { category: "N", value: 100 },
+                { category: "E", value: 50 }
+            ])
+        });
+
+        const radialAxis: ChartRadialAxisRegistration = {
+            axisLine: signal(true),
+            formatter: signal(() => "Very Long Radial Label String 100000 USD"),
+            gridLines: signal(true),
+            gridShape: signal("circle"),
+            labelAngle: signal(90), // pointing right
+            labelOffset: signal(8),
+            labels: signal(true),
+            labelTemplate: signal(undefined),
+            max: signal(100),
+            min: signal(0),
+            nice: signal(true),
+            tickCount: signal(5),
+            userClass: signal(""),
+            visible: signal(true)
+        };
+
+        const scene = RoseLayout.computeScene({
+            containerHeight: 400,
+            containerWidth: 400,
+            radialAxis,
+            rootData: [],
+            series,
+            styleResolver
+        });
+
+        expect(scene.outerRadius).toBeLessThan(188); // Gutter was reserved
+    });
 });

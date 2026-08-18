@@ -156,6 +156,13 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'treemap' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('treemap')">
+                Treemap
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('custom')">
@@ -538,6 +545,56 @@
                                 <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
                                 <button monaButton size="small" look="outline" (click)="randomizeHeatmapData()">
                                     Randomize Heatmap Data
+                                </button>
+                            </div>
+                        }
+
+                        @if (activeTab() === 'treemap') {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tiling Algorithm</span>
+                                <mona-dropdown-list
+                                    [data]="treemapTileOptions"
+                                    textField="label"
+                                    valueField="value"
+                                    [valuePrimitive]="true"
+                                    [value]="treemapTile()"
+                                    (valueChange)="onTreemapTileChange($event)"
+                                    size="small"
+                                    class="w-56" />
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sibling Sort</span>
+                                <mona-dropdown-list
+                                    [data]="treemapSortOptions"
+                                    textField="label"
+                                    valueField="value"
+                                    [valuePrimitive]="true"
+                                    [value]="treemapSort()"
+                                    (valueChange)="onTreemapSortChange($event)"
+                                    size="small"
+                                    class="w-48" />
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Label Options</span>
+                                <div class="flex items-center gap-4 flex-wrap">
+                                    <mona-check-box [checked]="treemapShowParentLabels()" (checkedChange)="treemapShowParentLabels.set($event)">
+                                        Parent Headers
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="treemapShowValues()" (checkedChange)="treemapShowValues.set($event)">
+                                        Show Values
+                                    </mona-check-box>
+                                    <mona-check-box [checked]="treemapUseCustomTemplate()" (checkedChange)="treemapUseCustomTemplate.set($event)">
+                                        Custom Label Template
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Actions</span>
+                                <button monaButton size="small" look="outline" (click)="randomizeTreemapData()">
+                                    Randomize Leaf Values
                                 </button>
                             </div>
                         }
@@ -1365,6 +1422,51 @@
                                 </ng-template>
                             }
                         </mona-gauge-series>
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("treemap") {
+                <div>
+                    <h3 class="text-sm font-semibold text-muted-foreground mb-4">Tech Stack & Ecosystem Footprint (Hierarchical Treemap)</h3>
+                    <mona-chart
+                        [data]="treemapData()"
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Tech Stack Treemap"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-chart-treemap-series
+                            [tile]="treemapTile()"
+                            [sort]="treemapSort()"
+                            [showParentLabels]="treemapShowParentLabels()"
+                            [showValues]="treemapShowValues()"
+                            [borderRadius]="treemapBorderRadius()"
+                            [strokeWidth]="treemapStrokeWidth()"
+                            [strokeColor]="treemapStrokeColor()"
+                            [parentFillOpacity]="treemapParentFillOpacity()"
+                            [fillOpacity]="treemapFillOpacity()"
+                            [padding]="treemapPadding()"
+                            [paddingTop]="treemapPaddingTop()"
+                            [maxDepth]="treemapMaxDepth()"
+                            labelField="name"
+                            valueField="value"
+                            childrenField="children"
+                            name="Tech Ecosystem"
+                            (nodeVisibilityChange)="onTreemapNodeVisibilityChange($event)">
+                            @if (treemapUseCustomTemplate()) {
+                                <ng-template monaChartTreemapLabelTemplate let-ctx>
+                                    <div class="flex flex-col truncate">
+                                        <div class="font-bold text-xs truncate">{{ ctx.formattedLabel }}</div>
+                                        @if (ctx.isLeaf) {
+                                            <div class="text-[10px] opacity-75 truncate">{{ ctx.formattedValue }} pts ({{ ctx.percentageOfRoot?.toFixed(1) }}%)</div>
+                                        }
+                                    </div>
+                                </ng-template>
+                            }
+                        </mona-chart-treemap-series>
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip />
                     </mona-chart>

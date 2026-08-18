@@ -6,6 +6,7 @@
         "^@mirei/ts-collections$",
         "^class-variance-authority$",
         "^culori$",
+        "^d3-hierarchy$",
         "^d3-scale$",
         "^d3-shape$",
         "^luxon$",

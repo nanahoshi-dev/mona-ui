@@ -837,7 +837,7 @@ export function hasRenderableData(
         if (xAxisType && !isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType)) {
             continue;
         }
-        const data = resolveData(s.data(), rootData);
+        const data = resolveData(s.data() as readonly unknown[] | undefined, rootData);
         if (data.length === 0) {
             continue;
         }

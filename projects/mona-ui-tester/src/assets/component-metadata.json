@@ -5471,6 +5471,228 @@
       }
     ]
   },
+  "ChartTreemapSeriesComponent": {
+    "name": "ChartTreemapSeriesComponent",
+    "selector": "\"mona-chart-treemap-series\"",
+    "inputs": [
+      {
+        "description": "Corner radius in pixels applied to leaf node rectangles.",
+        "kind": "input",
+        "name": "borderRadius",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Property key or accessor function extracting child nodes from a hierarchical data object.",
+        "kind": "input",
+        "name": "childrenField",
+        "type": "ChartField",
+        "defaultValue": "\"children\""
+      },
+      {
+        "description": "Accessor function or property key extracting an explicit fill color for a node.",
+        "kind": "input",
+        "name": "colorField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit array of colors assigned to top-level branches and inherited down subtrees.",
+        "kind": "input",
+        "name": "colors",
+        "type": "readonly string[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Hierarchical root object or array of root nodes overriding chart-level data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | unknown | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Opacity of leaf node fills (0 to 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting a stable datum identity across data updates.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the display label for a node.",
+        "kind": "input",
+        "name": "labelField",
+        "type": "ChartField",
+        "defaultValue": "\"label\""
+      },
+      {
+        "description": "Formatter callback for node display labels.",
+        "kind": "input",
+        "name": "labelFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Maximum tree depth to layout and render.",
+        "kind": "input",
+        "name": "maxDepth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Maximum number of DOM label candidates to render (prioritizing parent headers and largest leaf areas).",
+        "kind": "input",
+        "name": "maxLabels",
+        "type": "number",
+        "defaultValue": "100"
+      },
+      {
+        "description": "Series name used in tooltips and accessibility announcements.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Treemap\""
+      },
+      {
+        "description": "Inner and outer padding in pixels around all treemap nodes.",
+        "kind": "input",
+        "name": "padding",
+        "type": "number",
+        "defaultValue": "2"
+      },
+      {
+        "description": "Bottom padding in pixels for parent nodes.",
+        "kind": "input",
+        "name": "paddingBottom",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Inner padding in pixels between sibling treemap rectangles.",
+        "kind": "input",
+        "name": "paddingInner",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Left padding in pixels for parent nodes.",
+        "kind": "input",
+        "name": "paddingLeft",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Outer padding in pixels around parent boundaries.",
+        "kind": "input",
+        "name": "paddingOuter",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Right padding in pixels for parent nodes.",
+        "kind": "input",
+        "name": "paddingRight",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Top padding in pixels reserved for parent node header labels.",
+        "kind": "input",
+        "name": "paddingTop",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Fill opacity applied to non-leaf parent group background rectangles.",
+        "kind": "input",
+        "name": "parentFillOpacity",
+        "type": "number",
+        "defaultValue": "0.15"
+      },
+      {
+        "description": "Whether to reserve header space and display labels for parent grouping nodes.",
+        "kind": "input",
+        "name": "showParentLabels",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Whether to display numeric values in default leaf labels.",
+        "kind": "input",
+        "name": "showValues",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Sort order for sibling nodes: \"descending\", \"ascending\", or \"none\".",
+        "kind": "input",
+        "name": "sort",
+        "type": "ChartTreemapSort",
+        "defaultValue": "\"descending\""
+      },
+      {
+        "description": "Color of node boundary stroke borders.",
+        "kind": "input",
+        "name": "strokeColor",
+        "type": "string",
+        "defaultValue": "\"#ffffff\""
+      },
+      {
+        "description": "Stroke width in pixels for node boundary borders.",
+        "kind": "input",
+        "name": "strokeWidth",
+        "type": "number",
+        "defaultValue": "1"
+      },
+      {
+        "description": "D3 treemap tiling algorithm: \"squarify\", \"binary\", \"dice\", \"slice\", or \"slice-dice\".",
+        "kind": "input",
+        "name": "tile",
+        "type": "ChartTreemapTile",
+        "defaultValue": "\"squarify\""
+      },
+      {
+        "description": "Additional CSS classes applied to the series.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Property key or accessor function extracting the numeric value for a leaf node.",
+        "kind": "input",
+        "name": "valueField",
+        "type": "ChartField",
+        "defaultValue": "\"value\""
+      },
+      {
+        "description": "Formatter callback for numeric values in labels and tooltips.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Two-way bindable visibility of the series.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emits when an individual node or branch's visibility is toggled via the legend.",
+        "kind": "output",
+        "name": "nodeVisibilityChange",
+        "type": "ChartTreemapNodeVisibilityEvent"
+      }
+    ]
+  },
   "ChartLabelMeasureDirective": {
     "name": "ChartLabelMeasureDirective",
     "selector": "\"[monaChartLabelMeasure]\"",
