@@ -1359,6 +1359,7 @@
                             <mona-bar-series
                                 [field]="useIndependentSeriesData() ? 'target' : 'actual'"
                                 [name]="useIndependentSeriesData() ? 'Target Budget (Bar)' : 'Bar Series'"
+                                [orientation]="barOrientation()"
                                 [borderRadius]="6" />
                         }
                         @if (showArea()) {
@@ -1643,12 +1644,14 @@
                             name="Actual Sales"
                             orientation="horizontal"
                             [borderRadius]="4"
+                            [orientation]="barOrientation()"
                             [maxBarWidth]="32" />
                         <mona-bar-series
                             field="target"
                             name="Target Sales"
                             orientation="horizontal"
                             [borderRadius]="4"
+                            [orientation]="barOrientation()"
                             [maxBarWidth]="32" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
@@ -1682,7 +1685,11 @@
                             [gridLines]="yGridLines()"
                             [nice]="true" />
 
-                        <mona-bar-series field="target" name="Target Plan" [borderRadius]="4" />
+                        <mona-bar-series
+                            field="target"
+                            name="Target Plan"
+                            [borderRadius]="4"
+                            [orientation]="barOrientation()" />
                         <mona-line-series field="actual" name="Actual Revenue" curve="natural" [showPoints]="true" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true">
@@ -1756,18 +1763,21 @@
                             name="Online Store"
                             stack="sales"
                             [borderRadius]="6"
+                            [orientation]="barOrientation()"
                             [maxBarWidth]="40" />
                         <mona-bar-series
                             field="retail"
                             name="Retail Outlets"
                             stack="sales"
                             [borderRadius]="6"
+                            [orientation]="barOrientation()"
                             [maxBarWidth]="40" />
                         <mona-bar-series
                             field="partner"
                             name="Partner Direct"
                             stack="sales"
                             [borderRadius]="6"
+                            [orientation]="barOrientation()"
                             [maxBarWidth]="40" />
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
@@ -1798,6 +1808,7 @@
                             name="Online Store"
                             stack="sales"
                             stackMode="percent"
+                            [orientation]="barOrientation()"
                             [borderRadius]="5"
                             [maxBarWidth]="40" />
                         <mona-bar-series
@@ -1805,6 +1816,7 @@
                             name="Retail Outlets"
                             stack="sales"
                             stackMode="percent"
+                            [orientation]="barOrientation()"
                             [borderRadius]="5"
                             [maxBarWidth]="40" />
                         <mona-bar-series
@@ -1812,6 +1824,7 @@
                             name="Partner Direct"
                             stack="sales"
                             stackMode="percent"
+                            [orientation]="barOrientation()"
                             [borderRadius]="5"
                             [maxBarWidth]="40" />
 
@@ -1920,6 +1933,7 @@
                             toField="high"
                             name="Temperature Range (°C)"
                             color="#8b5cf6"
+                            [orientation]="barOrientation()"
                             [borderRadius]="rangeBarRadius()"
                             [maxBarWidth]="rangeBarMaxBarWidth()"
                             [fillOpacity]="rangeBarOpacity()" />
