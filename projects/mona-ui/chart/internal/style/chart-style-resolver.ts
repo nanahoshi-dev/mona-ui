@@ -1188,6 +1188,7 @@ export class ChartStyleResolver {
         let cssStrokeWidth: number | undefined;
         let cssStrokeColor: string | undefined;
         let cssFillOpacity: number | undefined;
+        let cssLabelColor: string | undefined;
 
         const targetElements = [
             series.element?.nativeElement,
@@ -1215,6 +1216,10 @@ export class ChartStyleResolver {
                             const parsed = parseFloat(fo);
                             if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
                         }
+                    }
+                    if (!cssLabelColor) {
+                        const lc = computed.getPropertyValue("--mona-chart-funnel-label-color").trim();
+                        if (lc) cssLabelColor = lc;
                     }
                 } catch {
                     // Ignore style resolution errors
@@ -1247,9 +1252,14 @@ export class ChartStyleResolver {
             ? this.resolveCssVariable(rawBaseColor, seriesEl)
             : this.resolvePaletteColor(0);
 
+        const labelColor = cssLabelColor
+            ? this.resolveCssVariable(cssLabelColor, seriesEl)
+            : undefined;
+
         return {
             baseColor,
             fillOpacity,
+            labelColor,
             strokeColor,
             strokeWidth
         };
