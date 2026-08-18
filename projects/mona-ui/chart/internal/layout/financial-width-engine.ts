@@ -11,6 +11,17 @@ export interface FinancialWidthOptions {
 
 export class FinancialWidthEngine {
     public static resolveBodyWidth(options: FinancialWidthOptions): number {
+        const widths = this.resolveBodyWidths(options);
+        if (widths.length === 0) {
+            const maxBodyWidth = isFiniteNumber(options.explicitMaxBodyWidth) && (options.explicitMaxBodyWidth as number) > 0
+                ? (options.explicitMaxBodyWidth as number)
+                : 32;
+            return clamp(16, 2, maxBodyWidth);
+        }
+        return widths[0];
+    }
+
+    public static resolveBodyWidths(options: FinancialWidthOptions): readonly number[] {
         const {
             bandwidth,
             explicitBodyWidth,
@@ -21,11 +32,13 @@ export class FinancialWidthEngine {
         } = options;
 
         const maxBodyWidth = isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
-            ? (explicitMaxBodyWidth as number)
+            ? Math.max(2, explicitMaxBodyWidth as number)
             : 32;
 
         if (isFiniteNumber(explicitBodyWidth) && (explicitBodyWidth as number) > 0) {
-            return clamp(explicitBodyWidth as number, 2, maxBodyWidth);
+            const width = clamp(explicitBodyWidth as number, 2, maxBodyWidth);
+            const count = markPixelXCoordinates?.length ?? 1;
+            return Array.from({ length: count }, () => width);
         }
 
         const rawRatio = isFiniteNumber(explicitBodyWidthRatio) ? (explicitBodyWidthRatio as number) : 0.7;
@@ -34,38 +47,55 @@ export class FinancialWidthEngine {
         // 1. Band / category scale bandwidth available
         if (isFiniteNumber(bandwidth) && (bandwidth as number) > 0) {
             const candidate = (bandwidth as number) * widthRatio;
-            return clamp(candidate, 2, maxBodyWidth);
+            const width = clamp(candidate, 2, maxBodyWidth);
+            const count = markPixelXCoordinates?.length ?? 1;
+            return Array.from({ length: count }, () => width);
         }
 
         // 2. Continuous scale (Linear, Time, UTC)
-        if (!markPixelXCoordinates || markPixelXCoordinates.length <= 1) {
-            const fallbackWidth = Math.min(maxBodyWidth, Math.max(4, plotWidth * 0.05));
-            return clamp(fallbackWidth, 2, maxBodyWidth);
+        const count = markPixelXCoordinates?.length ?? 0;
+        if (count === 0) {
+            return [];
         }
 
-        const distinctX = Array.from(new Set(markPixelXCoordinates.filter(x => Number.isFinite(x)))).sort(
-            (a, b) => a - b
-        );
+        const fallbackWidth = clamp(Math.min(maxBodyWidth, Math.max(4, plotWidth * 0.05)), 2, maxBodyWidth);
 
-        if (distinctX.length <= 1) {
-            const fallbackWidth = Math.min(maxBodyWidth, Math.max(4, plotWidth * 0.05));
-            return clamp(fallbackWidth, 2, maxBodyWidth);
+        if (count === 1) {
+            return [fallbackWidth];
         }
 
-        let minSpacing = Number.POSITIVE_INFINITY;
-        for (let i = 1; i < distinctX.length; i++) {
-            const diff = distinctX[i] - distinctX[i - 1];
-            if (diff > 0 && diff < minSpacing) {
-                minSpacing = diff;
+        const indexedCoords = markPixelXCoordinates!.map((x, index) => ({ index, x }));
+        indexedCoords.sort((a, b) => a.x - b.x);
+
+        const result = new Array<number>(count);
+
+        for (let k = 0; k < count; k++) {
+            const curr = indexedCoords[k];
+            let prevGap = Number.POSITIVE_INFINITY;
+            let nextGap = Number.POSITIVE_INFINITY;
+
+            if (k > 0) {
+                const diff = curr.x - indexedCoords[k - 1].x;
+                if (diff > 0) {
+                    prevGap = diff;
+                }
+            }
+            if (k < count - 1) {
+                const diff = indexedCoords[k + 1].x - curr.x;
+                if (diff > 0) {
+                    nextGap = diff;
+                }
+            }
+
+            const localSpacing = Math.min(prevGap, nextGap);
+
+            if (!Number.isFinite(localSpacing) || localSpacing <= 0) {
+                result[curr.index] = fallbackWidth;
+            } else {
+                result[curr.index] = clamp(localSpacing * widthRatio, 2, maxBodyWidth);
             }
         }
 
-        if (!Number.isFinite(minSpacing) || minSpacing <= 0) {
-            const fallbackWidth = Math.min(maxBodyWidth, Math.max(4, plotWidth * 0.05));
-            return clamp(fallbackWidth, 2, maxBodyWidth);
-        }
-
-        const candidate = minSpacing * widthRatio;
-        return clamp(candidate, 2, maxBodyWidth);
+        return result;
     }
 }
