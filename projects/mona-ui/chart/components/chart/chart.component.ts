@@ -838,6 +838,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 formattedLow: hit.formattedLow ?? hit.financial?.formattedLow,
                 formattedOpen: hit.formattedOpen ?? hit.financial?.formattedOpen,
                 formattedPercentage: hit.formattedPercentage,
+                formattedRadialMax: hit.formattedRadialMax,
+                formattedRadialMin: hit.formattedRadialMin,
                 formattedSize: hit.formattedSize,
                 formattedStackPercentage: hit.formattedStackPercentage,
                 formattedStackTotal: hit.formattedStackTotal,
@@ -848,10 +850,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 formattedYCategory: hit.formattedYCategory,
                 fromValue,
                 high: hit.high ?? hit.financial?.high,
+                isClamped: hit.isClamped,
                 low: hit.low ?? hit.financial?.low,
                 markId,
                 open: hit.open ?? hit.financial?.open,
                 percentage: hit.percentage,
+                radialMax: hit.radialMax,
+                radialMin: hit.radialMin,
+                radialRatio: hit.radialRatio,
                 rawValue: hit.rawValue,
                 seriesId: hit.seriesId,
                 seriesName: hit.seriesName,
@@ -1235,11 +1241,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.pointFocusChange.emit(this.#toPointFocusEvent(matchingHit));
 
         if (currentScene.coordinateSystem === "polar") {
-            const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
-            const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
-            this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}, ${matchingHit.formattedCategory ?? matchingHit.category}: ${valStr}${pctStr}`
-            );
+            if (matchingHit.seriesType === "gauge") {
+                const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
+                const clampedStr = matchingHit.isClamped ? " (clamped)" : "";
+                this.activeAccessibilityText.set(
+                    `${matchingHit.seriesName}: ${valStr}${clampedStr}`
+                );
+            } else {
+                const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
+                const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
+                const catStr = matchingHit.formattedCategory ?? matchingHit.category ?? matchingHit.seriesName;
+                this.activeAccessibilityText.set(
+                    `${matchingHit.seriesName}, ${catStr}: ${valStr}${pctStr}`
+                );
+            }
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap") {
             const xTitle = this.#xAxis()?.title() ? `${this.#xAxis()?.title()} ` : "";
             const yTitle = this.#yAxis()?.title() ? `${this.#yAxis()?.title()} ` : "";
@@ -1408,8 +1423,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const val = gaugeSeries.value;
         return {
             $implicit: val.rawValue,
-            formattedMax: String(val.max),
-            formattedMin: String(val.min),
+            formattedMax: val.formattedMax ?? String(val.max),
+            formattedMin: val.formattedMin ?? String(val.min),
             formattedValue: val.formattedValue,
             isClamped: val.isClamped,
             max: val.max,
