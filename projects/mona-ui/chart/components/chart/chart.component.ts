@@ -40,6 +40,7 @@ import {
     type ChartSectorSeriesRegistration,
     type ChartSeriesRegistration,
     type ChartTooltipRegistration,
+    type ChartTreemapSeriesRegistration,
     type ChartXAxisRegistration,
     type ChartYAxisRegistration
 } from "../../internal/context/chart-registration-context";
@@ -58,8 +59,12 @@ import type {
     ChartScene,
     PolarAxisChartScene,
     PolarChartScene,
-    PolarSectorChartScene
+    PolarSectorChartScene,
+    TreemapChartScene
 } from "../../internal/scene/chart-scene";
+import type { ChartTreemapSeriesScene, SceneTreemapLabel } from "../../internal/scene/hierarchical-scene";
+import type { ChartHierarchyNodeContext } from "../../models/chart-hierarchy.models";
+import type { ChartTreemapLabelTemplateContext } from "../../models/chart-treemap.models";
 import type { ChartGaugeSeriesScene, PolarArcChartScene } from "../../internal/scene/polar-arc-scene";
 import type { ChartGaugeCenterTemplateContext } from "../../models/chart-radial-arc.models";
 import type { ChartColorLegendScale } from "../../models/chart-heatmap.models";
@@ -254,6 +259,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return sc.series[0] as ChartGaugeSeriesScene;
         }
         return null;
+    });
+    protected readonly treemapScene = computed<TreemapChartScene | null>(() => {
+        const sc = this.scene();
+        return sc?.coordinateSystem === "hierarchical" && sc.hierarchicalKind === "treemap"
+            ? (sc as TreemapChartScene)
+            : null;
+    });
+    protected readonly treemapSeriesRegistration = computed<ChartTreemapSeriesRegistration | null>(() => {
+        const list = this.#registeredSeries();
+        return (list.find(s => s.type === "treemap") as ChartTreemapSeriesRegistration) ?? null;
     });
     readonly #isAnimating = signal(false);
     readonly #isStructuralAnimation = signal(false);
@@ -518,8 +533,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
+        const isHierarchical = currentScene.coordinateSystem === "hierarchical";
+        const isHeatmap = currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap";
         const buckets = currentScene.interactionBuckets;
-        if (!buckets || buckets.length === 0) {
+        if (!isHierarchical && !isHeatmap && (!buckets || buckets.length === 0)) {
             return;
         }
 
@@ -538,7 +555,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            if (this.#activeKeyboardBucketIndex >= 0) {
+            const activeHit = this.#interactionState?.activeHitTarget;
+            if (activeHit) {
+                this.pointClick.emit(this.#toPointEvent(activeHit));
+            } else if (this.#activeKeyboardBucketIndex >= 0 && buckets && buckets.length > 0) {
                 const bucket = buckets[this.#activeKeyboardBucketIndex];
                 const hit =
                     (this.#activeKeyboardHitKey
@@ -731,8 +751,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     if (item.dataIndex !== undefined) {
                         sec.toggleSliceVisibility(item.dataIndex);
                     }
-                } else if (series.type === "radialBar" || series.type === "rose") {
-                    const rad = series as ChartRadialBarSeriesRegistration | ChartRoseSeriesRegistration;
+                } else if (series.type === "radialBar" || series.type === "rose" || series.type === "treemap") {
+                    const rad = series as
+                        | ChartRadialBarSeriesRegistration
+                        | ChartRoseSeriesRegistration
+                        | ChartTreemapSeriesRegistration;
                     rad.toggleDatumVisibility(item.itemId);
                 }
             }
@@ -1079,6 +1102,28 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         this.#labelMeasurements.delete(key);
                     }
                 }
+            } else if (newScene.polarKind === "arc") {
+                const arcScene = newScene as PolarArcChartScene;
+                if (arcScene.arcMode === "rose") {
+                    const validKeys = new Set<string>();
+                    if (arcScene.angularAxis) {
+                        for (const tick of arcScene.angularAxis.ticks) {
+                            validKeys.add(`angular:${tick.tickKey}`);
+                            validKeys.add(`angular:${tick.value}`);
+                        }
+                    }
+                    if (arcScene.radialAxis) {
+                        for (const tick of arcScene.radialAxis.ticks) {
+                            validKeys.add(`radial:${tick.tickKey}`);
+                            validKeys.add(`radial:${tick.value}`);
+                        }
+                    }
+                    for (const key of Array.from(this.#labelMeasurements.keys())) {
+                        if ((key.startsWith("angular:") || key.startsWith("radial:")) && !validKeys.has(key)) {
+                            this.#labelMeasurements.delete(key);
+                        }
+                    }
+                }
             }
         }
 
@@ -1201,19 +1246,36 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) return;
 
-        const buckets = currentScene.interactionBuckets;
-        if (!buckets || buckets.length === 0) return;
+        let matchingHit: SceneHitTarget | undefined;
+        let bucketAnchor: ChartPoint | undefined;
 
-        this.#activeKeyboardBucketIndex = clamp(bucketIndex, 0, buckets.length - 1);
-        const bucket = buckets[this.#activeKeyboardBucketIndex];
-        if (!bucket || bucket.hits.length === 0) return;
+        if (currentScene.coordinateSystem === "hierarchical") {
+            matchingHit =
+                (preferredHitKey
+                    ? currentScene.hitTargets.find(
+                          h => (h.animationKey ?? `${h.seriesId}:${h.index}`) === preferredHitKey
+                      )
+                    : undefined) ?? currentScene.hitTargets[0];
+            if (!matchingHit) return;
+        } else {
+            const buckets = currentScene.interactionBuckets;
+            if (!buckets || buckets.length === 0) return;
 
-        const matchingHit =
-            (preferredHitKey
-                ? bucket.hits.find(h => (h.animationKey ?? h.sliceId ?? `${h.seriesId}:${h.index}`) === preferredHitKey)
-                : undefined) ??
-            bucket.hits.find(h => h.seriesId === preferredSeriesId) ??
-            bucket.hits[0];
+            this.#activeKeyboardBucketIndex = clamp(bucketIndex, 0, buckets.length - 1);
+            const bucket = buckets[this.#activeKeyboardBucketIndex];
+            if (!bucket || bucket.hits.length === 0) return;
+
+            matchingHit =
+                (preferredHitKey
+                    ? bucket.hits.find(
+                          h => (h.animationKey ?? h.sliceId ?? `${h.seriesId}:${h.index}`) === preferredHitKey
+                      )
+                    : undefined) ??
+                bucket.hits.find(h => h.seriesId === preferredSeriesId) ??
+                bucket.hits[0];
+            bucketAnchor = bucket.anchor;
+        }
+
         this.#activeKeyboardSeriesId = matchingHit.seriesId;
         this.#activeKeyboardHitKey =
             matchingHit.animationKey ?? matchingHit.sliceId ?? `${matchingHit.seriesId}:${matchingHit.index}`;
@@ -1221,12 +1283,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const pointPos: ChartPoint = {
             x:
                 matchingHit.point?.x ??
-                (matchingHit.bounds ? matchingHit.bounds.x + matchingHit.bounds.width / 2 : (bucket.anchor?.x ?? 0)),
-            y: matchingHit.point?.y ?? (matchingHit.bounds ? matchingHit.bounds.y : (bucket.anchor?.y ?? 0))
+                (matchingHit.bounds ? matchingHit.bounds.x + matchingHit.bounds.width / 2 : (bucketAnchor?.x ?? 0)),
+            y: matchingHit.point?.y ?? (matchingHit.bounds ? matchingHit.bounds.y : (bucketAnchor?.y ?? 0))
         };
 
         const shared = this.#resolveSharedTooltip(currentScene);
-        const activeHits = shared ? bucket.hits : [matchingHit];
+        const activeHits =
+            shared && bucketIndex >= 0 && currentScene.interactionBuckets?.[bucketIndex]
+                ? currentScene.interactionBuckets[bucketIndex].hits
+                : [matchingHit];
 
         this.#interactionState = {
             activeHitTarget: matchingHit,
@@ -1240,12 +1305,27 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         this.pointFocusChange.emit(this.#toPointFocusEvent(matchingHit));
 
-        if (currentScene.coordinateSystem === "polar") {
+        if (currentScene.coordinateSystem === "hierarchical" && currentScene.hierarchicalKind === "treemap") {
+            const hit = matchingHit;
+            if (hit.hierarchy) {
+                const pathStr = hit.hierarchy.formattedPath.join(" / ");
+                const valStr = hit.hierarchy.formattedValue;
+                const pctStr =
+                    hit.hierarchy.percentageOfRoot !== undefined
+                        ? `, ${(hit.hierarchy.percentageOfRoot * 100).toFixed(1)}% of total`
+                        : "";
+                const leafStr = hit.hierarchy.isLeaf ? "Leaf" : `Group (${hit.hierarchy.childCount} children)`;
+                this.activeAccessibilityText.set(`${pathStr}: ${valStr}${pctStr}, ${leafStr}`);
+            }
+        } else if (currentScene.coordinateSystem === "polar") {
             if (matchingHit.seriesType === "gauge") {
                 const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
-                const clampedStr = matchingHit.isClamped ? " (clamped)" : "";
+                const clampedStr = matchingHit.isClamped ? " (visual indicator clamped)" : "";
+                const minStr = matchingHit.formattedRadialMin ?? (matchingHit.radialMin !== undefined ? String(matchingHit.radialMin) : "");
+                const maxStr = matchingHit.formattedRadialMax ?? (matchingHit.radialMax !== undefined ? String(matchingHit.radialMax) : "");
+                const rangeStr = minStr && maxStr ? `, range ${minStr} to ${maxStr}` : "";
                 this.activeAccessibilityText.set(
-                    `${matchingHit.seriesName}: ${valStr}${clampedStr}`
+                    `${matchingHit.seriesName}: ${valStr}${rangeStr}${clampedStr}`
                 );
             } else {
                 const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
@@ -1372,6 +1452,57 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    protected treemapLabelContext(
+        lbl: SceneTreemapLabel,
+        seriesScene: ChartTreemapSeriesScene
+    ): ChartTreemapLabelTemplateContext {
+        const node = seriesScene.nodes.find(n => n.nodeId === lbl.nodeId);
+        const nodeContext: ChartHierarchyNodeContext = {
+            aggregateValue: node?.aggregateValue ?? 0,
+            childCount: node?.childCount ?? 0,
+            dataIndex: node?.dataIndex ?? 0,
+            datum: node?.datum,
+            depth: node?.depth ?? 0,
+            descendantCount: node?.descendantCount ?? 0,
+            formattedLabel: node?.formattedLabel ?? lbl.formattedLabel,
+            formattedPath: node?.formattedPath ?? [lbl.formattedLabel],
+            formattedValue: node?.formattedValue ?? lbl.formattedValue,
+            isCollapsed: false,
+            isLeaf: node?.isLeaf ?? true,
+            label: node?.label ?? lbl.formattedLabel,
+            nodeId: lbl.nodeId,
+            parentId: node?.parentId,
+            path: node?.path ?? [lbl.formattedLabel],
+            percentageOfParent: node?.percentageOfParent,
+            percentageOfRoot: node?.percentageOfRoot,
+            rawValue: node?.rawValue,
+            siblingIndex: node?.siblingIndex ?? 0,
+            sourceIndexPath: node?.sourceIndexPath ?? [0],
+            treeHeight: node?.treeHeight ?? 0
+        };
+
+        return {
+            $implicit: nodeContext,
+            bounds: lbl.bounds,
+            color: node?.fillColor ?? seriesScene.style.baseColor,
+            datum: node?.datum,
+            depth: node?.depth ?? 0,
+            formattedLabel: node?.formattedLabel ?? lbl.formattedLabel,
+            formattedPath: node?.formattedPath ?? [lbl.formattedLabel],
+            formattedValue: node?.formattedValue ?? lbl.formattedValue,
+            isCollapsed: false,
+            isLeaf: node?.isLeaf ?? true,
+            label: node?.label,
+            node: nodeContext,
+            nodeId: lbl.nodeId,
+            path: node?.path ?? [lbl.formattedLabel],
+            percentageOfParent: node?.percentageOfParent,
+            percentageOfRoot: node?.percentageOfRoot,
+            textColor: lbl.textColor,
+            value: node?.aggregateValue ?? 0
+        };
+    }
+
     public observeLabelElement(element: HTMLElement, labelId: string): void {
         if (typeof ResizeObserver === "undefined") {
             return;
@@ -1487,6 +1618,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             formattedXValue: target.formattedXValue ?? target.formattedCategory,
             formattedYCategory: target.formattedYCategory,
             fromValue: target.fromValue ?? target.range?.fromValue,
+            hierarchy: target.hierarchy,
             high: target.high ?? target.financial?.high,
             low: target.low ?? target.financial?.low,
             open: target.open ?? target.financial?.open,

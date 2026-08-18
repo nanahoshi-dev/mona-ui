@@ -5,10 +5,12 @@ import type {
     ChartScene,
     PolarArcChartScene,
     PolarAxisChartScene,
-    PolarSectorChartScene
+    PolarSectorChartScene,
+    TreemapChartScene
 } from "../scene/chart-scene";
 import type { ChartPoint } from "../../models/chart.models";
 import type { SceneHeatmapCell } from "../../models/chart-heatmap.models";
+import type { ChartTreemapSeriesScene } from "../scene/hierarchical-scene";
 import type {
     ChartBarSeriesScene,
     ChartCandlestickSeriesScene,
@@ -43,6 +45,7 @@ import { createCandlestickFinancialHitGeometry, createOhlcFinancialHitGeometry }
 import { RadialBarHitIndex } from "../interaction/radial-bar-hit-index";
 import { RoseHitIndex } from "../interaction/rose-hit-index";
 import { GaugeHitIndex } from "../interaction/gauge-hit-index";
+import { TreemapHitIndex } from "../interaction/treemap-hit-index";
 
 export class SceneTransitionSampler {
     public static sampleFrame(plan: ChartTransitionPlan, progress: number): ChartAnimationRenderFrame {
@@ -148,11 +151,95 @@ export class SceneTransitionSampler {
             };
         }
 
+        if (toScene.coordinateSystem === "hierarchical" && toScene.hierarchicalKind === "treemap") {
+            const sampledTreemap = this.#sampleTreemapScene(
+                toScene as TreemapChartScene,
+                seriesPlans,
+                progress
+            );
+            return {
+                fromScene,
+                mode: "morph",
+                progress,
+                scene: sampledTreemap,
+                toScene
+            };
+        }
+
         return {
             mode: "immediate",
             progress: 1,
             scene: toScene,
             toScene
+        };
+    }
+
+    static #sampleTreemapScene(
+        toScene: TreemapChartScene,
+        seriesPlans: ChartTransitionPlan["seriesPlans"],
+        progress: number
+    ): TreemapChartScene {
+        const plan = seriesPlans.find(p => p.adapterType === "treemap");
+        if (!plan) {
+            return toScene;
+        }
+
+        const sampledSeries = plan.sample(progress) as ChartTreemapSeriesScene | null;
+        if (!sampledSeries) {
+            return toScene;
+        }
+
+        const sampledHitTargets: SceneHitTarget[] = [];
+        for (const node of sampledSeries.nodes) {
+            if ((node.renderOpacity ?? 1) > 0.05 && node.bounds.width > 0 && node.bounds.height > 0) {
+                sampledHitTargets.push({
+                    animationKey: node.animationKey,
+                    bounds: node.bounds,
+                    color: node.fillColor,
+                    dataIndex: node.dataIndex,
+                    datum: node.datum,
+                    formattedValue: node.formattedValue,
+                    hierarchy: {
+                        aggregateValue: node.aggregateValue,
+                        childCount: node.childCount,
+                        dataIndex: node.dataIndex,
+                        depth: node.depth,
+                        descendantCount: node.descendantCount,
+                        formattedLabel: node.formattedLabel,
+                        formattedPath: node.formattedPath,
+                        formattedValue: node.formattedValue,
+                        isCollapsed: false,
+                        isLeaf: node.isLeaf,
+                        label: node.label,
+                        nodeId: node.nodeId,
+                        parentId: node.parentId,
+                        path: node.path,
+                        percentageOfParent: node.percentageOfParent,
+                        percentageOfRoot: node.percentageOfRoot,
+                        rawValue: node.rawValue,
+                        siblingIndex: node.siblingIndex,
+                        sourceIndexPath: node.sourceIndexPath,
+                        treeHeight: node.treeHeight
+                    },
+                    index: node.dataIndex,
+                    itemId: node.nodeId,
+                    seriesId: sampledSeries.id,
+                    seriesName: sampledSeries.name,
+                    seriesType: "treemap",
+                    value: node.aggregateValue,
+                    xKey: node.nodeId,
+                    xValue: node.label
+                });
+            }
+        }
+
+        const hitIndex = new TreemapHitIndex(toScene.plotRect, sampledHitTargets);
+
+        return {
+            ...toScene,
+            hitIndex,
+            hitTargets: sampledHitTargets,
+            series: [sampledSeries]
         };
     }
 

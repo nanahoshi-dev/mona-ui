@@ -3,6 +3,7 @@ import type { CartesianXYChartScene, PolarSectorChartScene } from "../scene/char
 import type { ChartBarSeriesScene } from "../scene/cartesian-scene";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
 import { FinancialSeriesAnimationAdapter } from "./adapters/financial-animation-adapter";
+import { RadialArcAnimationAdapter } from "./adapters/radial-arc-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
 import { SceneTransitionSampler } from "./scene-transition-sampler";
 import type { ChartTransitionPlan } from "./chart-transition-types";
@@ -284,5 +285,78 @@ describe("SceneTransitionSampler", () => {
         expect(sampled.hitTargets[0].close).toBe(110);
         expect(sampled.hitTargets[0].financial?.change).toBe(10);
         expect(sampled.hitTargets[0].financial?.changePercentage).toBeCloseTo(0.1);
+    });
+
+    it("should sample radial bar scene correctly at progress 0.5 without squared opacity", () => {
+        const toScene: any = {
+            arcMode: "radialBar",
+            center: { x: 200, y: 200 },
+            coordinateSystem: "polar",
+            hasRenderableData: true,
+            height: 400,
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            plotRect: { height: 400, width: 400, x: 0, y: 0 },
+            polarKind: "arc",
+            series: [
+                {
+                    barGap: 4,
+                    fillMode: "solid",
+                    id: "rb-1",
+                    marks: [
+                        {
+                            animationKey: "rb-1:k1",
+                            category: "A",
+                            color: "#3b82f6",
+                            cornerRadius: 0,
+                            dataIndex: 0,
+                            datum: {},
+                            endAngle: Math.PI,
+                            formattedCategory: "A",
+                            formattedValue: "50",
+                            innerRadius: 50,
+                            itemId: "rb-1:k1",
+                            normalizedValue: 0.5,
+                            outerRadius: 80,
+                            padAngle: 0,
+                            rawValue: 50,
+                            renderOpacity: 1,
+                            startAngle: 0,
+                            visible: true
+                        }
+                    ],
+                    name: "RadialBar",
+                    renderOpacity: 1,
+                    style: { color: "#3b82f6", fillOpacity: 0.9, strokeColor: "", strokeSource: "default", strokeWidth: 0, trackColor: "", trackOpacity: 1 },
+                    tracks: [],
+                    type: "radialBar"
+                }
+            ],
+            width: 400
+        };
+
+        const adapter = new RadialArcAnimationAdapter();
+        const seriesPlan = adapter.createPlan(null, toScene.series[0], {
+            options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+            plotRect: toScene.plotRect,
+            trigger: "initial"
+        });
+
+        const plan: ChartTransitionPlan = {
+            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            duration: 400,
+            easing: "linear",
+            fromScene: null,
+            mode: "morph",
+            seriesPlans: [seriesPlan],
+            toScene,
+            trigger: "initial"
+        };
+
+        const frameMid = SceneTransitionSampler.sampleFrame(plan, 0.5);
+        const sampled = frameMid.scene as any;
+        expect(sampled.series[0].renderOpacity).toBe(1);
+        expect(sampled.series[0].marks[0].renderOpacity).toBeCloseTo(0.5, 2);
     });
 });

@@ -244,4 +244,62 @@ describe("ChartTransitionPlanner", () => {
 
         expect(plan.mode).toBe("crossfade");
     });
+
+    it("should crossfade when Rose angular topology changes (PRE-TM-009)", () => {
+        const createRoseScene = (cats: string[], rotation = 0): any => ({
+            angularAxis: {
+                axisLine: true,
+                gridLines: true,
+                labelOffset: 8,
+                labels: true,
+                mode: "category",
+                rotation,
+                ticks: [],
+                visible: true
+            },
+            arcMode: "rose",
+            center: { x: 200, y: 200 },
+            coordinateSystem: "polar",
+            hasRenderableData: true,
+            height: 400,
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            outerRadius: 150,
+            plotRect: { height: 400, width: 400, x: 0, y: 0 },
+            polarKind: "arc",
+            series: [
+                {
+                    angularCategories: cats.map((c, i) => ({
+                        category: c,
+                        categoryKey: `k:${c}`,
+                        endAngle: (i + 1) * 0.5,
+                        formattedCategory: c,
+                        index: i,
+                        midAngle: (i + 0.5) * 0.5,
+                        startAngle: i * 0.5
+                    })),
+                    fillMode: "solid",
+                    id: "rose-1",
+                    marks: [],
+                    name: "Rose",
+                    scaleMode: "radius",
+                    style: { color: "#3b82f6", fillOpacity: 0.8, strokeColor: "", strokeSource: "default", strokeWidth: 0, trackColor: "", trackOpacity: 1 },
+                    type: "rose"
+                }
+            ],
+            width: 400
+        });
+
+        const prev = createRoseScene(["N", "E", "S", "W"], 0);
+        const nextDiffCats = createRoseScene(["N", "E", "S", "W", "NW"], 0);
+        const options = normalizeChartAnimationOptions(true);
+
+        const planCats = ChartTransitionPlanner.plan(prev, nextDiffCats, "data", options);
+        expect(planCats.mode).toBe("crossfade");
+
+        const nextDiffRot = createRoseScene(["N", "E", "S", "W"], 45);
+        const planRot = ChartTransitionPlanner.plan(prev, nextDiffRot, "data", options);
+        expect(planRot.mode).toBe("crossfade");
+    });
 });

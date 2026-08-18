@@ -78,4 +78,18 @@ describe("ChartDemoComponent", () => {
         component.clearLogs();
         expect(component.eventLogs().length).toBe(0);
     });
+
+    it("should switch to treemap tab and handle tiling algorithm and sort updates", () => {
+        component.setTab("treemap");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Tech Stack & Ecosystem Footprint");
+
+        component.onTreemapTileChange("dice");
+        fixture.detectChanges();
+        expect(component.eventLogs()[0].details).toContain("Treemap Tile Algorithm: dice");
+
+        component.onTreemapSortChange("ascending");
+        fixture.detectChanges();
+        expect(component.eventLogs()[0].details).toContain("Treemap Sibling Sort: ascending");
+    });
 });

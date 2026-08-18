@@ -103,22 +103,33 @@ export class RoseLayout {
         // 1. Unified Rose Radial Domain
         const validValues = preparedData.allItems.map(i => i.rawValue);
         const radialTickCount = normalizeTickCount(radialAxis?.tickCount?.(), 5, 1, 20);
+
+        const requestedMin = radialAxis?.min?.();
+        let normalizedExplicitMin: number | undefined;
+        if (requestedMin !== undefined && Number.isFinite(requestedMin)) {
+            if (requestedMin < 0) {
+                if (warnedDiagnosticSignatures) {
+                    ChartDiagnostics.warnOnce(
+                        warnedDiagnosticSignatures,
+                        `Rose series "${series.name()}" encountered negative radial min (${requestedMin}). Normalizing to 0.`,
+                        `${series.id}:negative-rose-min`
+                    );
+                }
+                normalizedExplicitMin = 0;
+            } else {
+                normalizedExplicitMin = requestedMin;
+            }
+        }
+
         const domainResult = computeRadialDomain(validValues, {
             explicitMax: radialAxis?.max?.(),
-            explicitMin: radialAxis?.min?.(),
+            explicitMin: normalizedExplicitMin,
             nice: radialAxis?.nice?.() ?? true,
             tickCount: radialTickCount
         });
 
         let [dMin, dMax] = domainResult.domain;
         if (dMin < 0) {
-            if (warnedDiagnosticSignatures) {
-                ChartDiagnostics.warnOnce(
-                    warnedDiagnosticSignatures,
-                    `Rose series "${series.name()}" encountered negative radial min (${dMin}). Normalizing to 0.`,
-                    `${series.id}:negative-rose-min`
-                );
-            }
             dMin = 0;
         }
         if (dMax <= dMin) {
@@ -155,6 +166,43 @@ export class RoseLayout {
             rightGutter = Math.max(rightGutter, labelInsetX);
             topGutter = Math.max(topGutter, labelInsetY);
             bottomGutter = Math.max(bottomGutter, labelInsetY);
+        }
+
+        const showRadialLabels = radialAxis ? radialAxis.visible() && radialAxis.labels() : false;
+        if (showRadialLabels) {
+            const radialLabelAngle = normalizeDegrees(radialAxis?.labelAngle?.() ?? 0);
+            const labelAngleRad = degreesToRadians(radialLabelAngle);
+            const radialLabelOffset = normalizeNonNegativeNumber(radialAxis?.labelOffset?.(), 6);
+            let maxRadWidth = 24;
+            let maxRadHeight = 14;
+            for (let idx = 0; idx < domainResult.ticks.length; idx++) {
+                const val = domainResult.ticks[idx];
+                const meas = measurements?.get(`radial:val:${val}`) ?? measurements?.get(`radial:${val}`);
+                if (meas) {
+                    maxRadWidth = Math.max(maxRadWidth, meas.width);
+                    maxRadHeight = Math.max(maxRadHeight, meas.height);
+                } else {
+                    const text = radialAxis?.formatter?.() ? radialAxis.formatter()!(val, idx) : formatRadialValue(val);
+                    maxRadWidth = Math.max(maxRadWidth, Math.min(100, text.length * 7 + 8));
+                }
+            }
+            const maxInset = Math.min(containerWidth, containerHeight) * 0.22;
+            const radialInsetX = Math.min(maxInset, maxRadWidth + radialLabelOffset);
+            const radialInsetY = Math.min(maxInset, maxRadHeight + radialLabelOffset);
+
+            const sinA = Math.sin(labelAngleRad);
+            const cosA = Math.cos(labelAngleRad);
+
+            if (sinA > 0.3) {
+                rightGutter = Math.max(rightGutter, radialInsetX);
+            } else if (sinA < -0.3) {
+                leftGutter = Math.max(leftGutter, radialInsetX);
+            }
+            if (cosA > 0.3) {
+                topGutter = Math.max(topGutter, radialInsetY);
+            } else if (cosA < -0.3) {
+                bottomGutter = Math.max(bottomGutter, radialInsetY);
+            }
         }
 
         const usableWidth = Math.max(0, containerWidth - leftGutter - rightGutter);
@@ -429,7 +477,7 @@ export class RoseLayout {
             visible: isVisible && item.visible
         }));
 
-        const hasRenderableData = isVisible && marks.some(m => m.normalizedValue !== undefined && m.normalizedValue > 0);
+        const hasRenderableData = isVisible && preparedData.allItems.length > 0;
 
         const hitIndex = new RoseHitIndex(
             center,

@@ -10,7 +10,8 @@ import type {
     ChartRadialBarSeriesRegistration,
     ChartRadialSeriesRegistration,
     ChartRoseSeriesRegistration,
-    ChartSeriesRegistration
+    ChartSeriesRegistration,
+    ChartTreemapSeriesRegistration
 } from "../context/chart-registration-context";
 import type { ChartField } from "../../models/chart.models";
 import type { ChartHeatmapSeriesStyle } from "../../models/chart-heatmap.models";
@@ -18,6 +19,7 @@ import { resolveValue } from "../data/chart-value-resolver";
 import type { ChartFinancialSeriesStyle } from "../scene/cartesian-scene";
 import type { ChartPolarSeriesStyle } from "../scene/polar-scene";
 import type { ChartGaugeSeriesStyle, ChartRadialArcSeriesStyle } from "../scene/polar-arc-scene";
+import type { ChartTreemapSeriesStyle } from "../scene/hierarchical-scene";
 import { isFiniteNumber } from "../utils/number-utils";
 
 const DEFAULT_CHART_COLORS = [
@@ -1052,6 +1054,107 @@ export class ChartStyleResolver {
             strokeWidth: 0,
             trackColor,
             trackOpacity
+        };
+    }
+
+    public resolveTreemapSeriesStyle(
+        series: ChartTreemapSeriesRegistration
+    ): ChartTreemapSeriesStyle {
+        const rawStrokeColor = series.strokeColor ? series.strokeColor() : "";
+        const strokeWidthInput = series.strokeWidth?.();
+        const fillOpacityInput = series.fillOpacity?.();
+        const parentFillOpacityInput = series.parentFillOpacity?.();
+        const borderRadiusInput = series.borderRadius?.();
+        const rawBaseColor = series.colors ? (series.colors()?.[0] ?? "") : "";
+
+        let cssStrokeWidth: number | undefined;
+        let cssStrokeColor: string | undefined;
+        let cssFillOpacity: number | undefined;
+        let cssParentFillOpacity: number | undefined;
+        let cssBorderRadius: number | undefined;
+        let cssLabelColor: string | undefined;
+
+        const seriesEl = series.element?.nativeElement;
+
+        if (typeof window !== "undefined" && seriesEl) {
+            try {
+                const computed = window.getComputedStyle(seriesEl);
+                const sw = computed.getPropertyValue("--mona-chart-treemap-stroke-width");
+                if (sw) {
+                    const parsed = parseFloat(sw);
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+                }
+                const sc = computed.getPropertyValue("--mona-chart-treemap-stroke-color");
+                if (sc) {
+                    cssStrokeColor = sc.trim();
+                }
+                const fo = computed.getPropertyValue("--mona-chart-treemap-fill-opacity");
+                if (fo) {
+                    const parsed = parseFloat(fo);
+                    if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                }
+                const pfo = computed.getPropertyValue("--mona-chart-treemap-parent-fill-opacity");
+                if (pfo) {
+                    const parsed = parseFloat(pfo);
+                    if (isFiniteNumber(parsed)) cssParentFillOpacity = Math.max(0, Math.min(1, parsed));
+                }
+                const br = computed.getPropertyValue("--mona-chart-treemap-border-radius");
+                if (br) {
+                    const parsed = parseFloat(br);
+                    if (isFiniteNumber(parsed) && parsed >= 0) cssBorderRadius = parsed;
+                }
+                const lc = computed.getPropertyValue("--mona-chart-treemap-label-color");
+                if (lc) {
+                    cssLabelColor = lc.trim();
+                }
+            } catch {
+                // Ignore style resolution errors
+            }
+        }
+
+        const defaultStrokeColor =
+            this.resolveCssVariable("--color-surface", seriesEl) ||
+            this.resolveCssVariable("--color-background", seriesEl) ||
+            "#ffffff";
+
+        const strokeColor = rawStrokeColor
+            ? this.resolveCssVariable(rawStrokeColor, seriesEl)
+            : (cssStrokeColor ? this.resolveCssVariable(cssStrokeColor, seriesEl) : defaultStrokeColor);
+
+        const strokeWidth =
+            strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
+                ? strokeWidthInput
+                : (cssStrokeWidth !== undefined ? cssStrokeWidth : 1);
+
+        const fillOpacity =
+            fillOpacityInput !== undefined && isFiniteNumber(fillOpacityInput)
+                ? Math.max(0, Math.min(1, fillOpacityInput))
+                : (cssFillOpacity !== undefined ? cssFillOpacity : 1);
+
+        const parentFillOpacity =
+            parentFillOpacityInput !== undefined && isFiniteNumber(parentFillOpacityInput)
+                ? Math.max(0, Math.min(1, parentFillOpacityInput))
+                : (cssParentFillOpacity !== undefined ? cssParentFillOpacity : 0.15);
+
+        const borderRadius =
+            borderRadiusInput !== undefined && isFiniteNumber(borderRadiusInput) && borderRadiusInput >= 0
+                ? borderRadiusInput
+                : (cssBorderRadius !== undefined ? cssBorderRadius : 0);
+
+        const baseColor = rawBaseColor
+            ? this.resolveCssVariable(rawBaseColor, seriesEl)
+            : this.resolvePaletteColor(0);
+
+        const labelColor = cssLabelColor ? this.resolveCssVariable(cssLabelColor, seriesEl) : undefined;
+
+        return {
+            baseColor,
+            borderRadius,
+            fillOpacity,
+            labelColor,
+            parentFillOpacity,
+            strokeColor,
+            strokeWidth
         };
     }
 }

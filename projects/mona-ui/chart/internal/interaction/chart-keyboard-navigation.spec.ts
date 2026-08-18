@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { PolarAxisChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import { ChartKeyboardNavigation } from "./chart-keyboard-navigation";
@@ -93,8 +93,11 @@ describe("ChartKeyboardNavigation", () => {
         width: 400
     };
 
+    const createKeyEvent = (key: string): KeyboardEvent =>
+        ({ key, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+
     it("should navigate clockwise with ArrowRight and wrap around in polar axis charts", () => {
-        const eventRight = new KeyboardEvent("keydown", { key: "ArrowRight" });
+        const eventRight = createKeyEvent("ArrowRight");
         const res = ChartKeyboardNavigation.handleKeyDown(eventRight, mockPolarAxisScene, 0, "s1");
 
         expect(res).not.toBeNull();
@@ -107,14 +110,14 @@ describe("ChartKeyboardNavigation", () => {
     });
 
     it("should switch series with ArrowDown / ArrowUp within current bucket in polar axis charts", () => {
-        const eventDown = new KeyboardEvent("keydown", { key: "ArrowDown" });
+        const eventDown = createKeyEvent("ArrowDown");
         const resDown = ChartKeyboardNavigation.handleKeyDown(eventDown, mockPolarAxisScene, 0, "s1");
 
         expect(resDown?.bucketIndex).toBe(0);
         expect(resDown?.seriesId).toBe("s2");
         expect(resDown?.hitTarget).toBe(hitA2);
 
-        const eventUp = new KeyboardEvent("keydown", { key: "ArrowUp" });
+        const eventUp = createKeyEvent("ArrowUp");
         const resUp = ChartKeyboardNavigation.handleKeyDown(eventUp, mockPolarAxisScene, 0, "s2");
 
         expect(resUp?.bucketIndex).toBe(0);
@@ -123,12 +126,104 @@ describe("ChartKeyboardNavigation", () => {
     });
 
     it("should handle Home and End keys", () => {
-        const eventHome = new KeyboardEvent("keydown", { key: "Home" });
+        const eventHome = createKeyEvent("Home");
         const resHome = ChartKeyboardNavigation.handleKeyDown(eventHome, mockPolarAxisScene, 1, "s1");
         expect(resHome?.bucketIndex).toBe(0);
 
-        const eventEnd = new KeyboardEvent("keydown", { key: "End" });
+        const eventEnd = createKeyEvent("End");
         const resEnd = ChartKeyboardNavigation.handleKeyDown(eventEnd, mockPolarAxisScene, 0, "s1");
         expect(resEnd?.bucketIndex).toBe(1);
+    });
+
+    it("should handle hierarchical treemap keyboard navigation", () => {
+        const hitParent: SceneHitTarget = {
+            animationKey: "k:parent",
+            datum: {},
+            hierarchy: {
+                aggregateValue: 100,
+                childCount: 1,
+                dataIndex: 0,
+                depth: 1,
+                descendantCount: 1,
+                formattedLabel: "Parent",
+                formattedPath: ["Parent"],
+                formattedValue: "100",
+                isCollapsed: false,
+                isLeaf: false,
+                label: "Parent",
+                nodeId: "p1",
+                path: ["Parent"],
+                siblingIndex: 0,
+                sourceIndexPath: [0],
+                treeHeight: 1
+            },
+            index: 0,
+            seriesId: "tm-1",
+            seriesName: "Treemap",
+            seriesType: "treemap",
+            xKey: "p1",
+            xValue: "Parent"
+        };
+
+        const hitChild: SceneHitTarget = {
+            animationKey: "k:child",
+            datum: {},
+            hierarchy: {
+                aggregateValue: 100,
+                childCount: 0,
+                dataIndex: 1,
+                depth: 2,
+                descendantCount: 0,
+                formattedLabel: "Child",
+                formattedPath: ["Parent", "Child"],
+                formattedValue: "100",
+                isCollapsed: false,
+                isLeaf: true,
+                label: "Child",
+                nodeId: "c1",
+                parentId: "p1",
+                path: ["Parent", "Child"],
+                siblingIndex: 0,
+                sourceIndexPath: [0, 0],
+                treeHeight: 0
+            },
+            index: 1,
+            seriesId: "tm-1",
+            seriesName: "Treemap",
+            seriesType: "treemap",
+            xKey: "c1",
+            xValue: "Child"
+        };
+
+        const treemapScene: any = {
+            coordinateSystem: "hierarchical",
+            hasRenderableData: true,
+            height: 300,
+            hierarchicalKind: "treemap",
+            hitTargets: [hitParent, hitChild],
+            interactionBuckets: [],
+            legendItems: [],
+            navigationIndex: {
+                entries: new Map([
+                    ["p1", { firstChildId: "c1", nodeId: "p1" }],
+                    ["c1", { nodeId: "c1", parentId: "p1", previousDepthFirstId: "p1" }]
+                ]),
+                firstNodeId: "p1",
+                lastNodeId: "c1"
+            },
+            plotRect: { height: 300, width: 500, x: 0, y: 0 },
+            series: [],
+            width: 500
+        };
+
+        const eventEnterChild = createKeyEvent("ArrowRight");
+        const res = ChartKeyboardNavigation.handleKeyDown(eventEnterChild, treemapScene, 0, "tm-1", "k:parent");
+        expect(res).not.toBeNull();
+        expect(res?.hitTarget).toBe(hitChild);
+
+        const eventBackToParent = createKeyEvent("ArrowLeft");
+        const resBack = ChartKeyboardNavigation.handleKeyDown(eventBackToParent, treemapScene, 0, "tm-1", "k:child");
+        expect(resBack).not.toBeNull();
+        expect(resBack?.hitTarget).toBe(hitParent);
     });
 });

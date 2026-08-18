@@ -184,6 +184,7 @@ export interface SceneHitTarget {
     formattedXValue?: string;
     formattedYCategory?: string;
     fromValue?: number;
+    hierarchy?: import("../../models/chart-hierarchy.models").ChartHierarchyPointMetadata;
     high?: number;
     highPoint?: ChartPoint;
     highValue?: number;

@@ -62,6 +62,18 @@ export class ChartHitTestEngine {
             };
         }
 
+        // Hierarchical hit testing
+        if (scene.coordinateSystem === "hierarchical") {
+            if (scene.hierarchicalKind === "treemap") {
+                const target = scene.hitIndex ? scene.hitIndex.query(pointer) : null;
+                return {
+                    activeHitTarget: target,
+                    activeHits: target ? [target] : [],
+                    pointerPosition: pointer
+                };
+            }
+        }
+
         // Polar hit testing
         if (scene.coordinateSystem === "polar") {
             if (scene.polarKind === "sector") {

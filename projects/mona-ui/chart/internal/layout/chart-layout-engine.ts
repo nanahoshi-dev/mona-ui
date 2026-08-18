@@ -3,6 +3,7 @@ import type { ChartCoordinateSystem, ChartField } from "../../models/chart.model
 import {
     getChartSeriesFamily,
     isCartesianCoordinateFamily,
+    isHierarchicalCoordinateFamily,
     isPolarCoordinateFamily,
     type ChartSeriesFamily
 } from "../../models/chart-series.models";
@@ -10,11 +11,13 @@ import type {
     ChartAngularAxisRegistration,
     ChartCartesianSeriesRegistration,
     ChartHeatmapSeriesRegistration,
+    ChartHierarchicalSeriesRegistration,
     ChartRadialArcSeriesRegistration,
     ChartRadialAxisRegistration,
     ChartRadialSeriesRegistration,
     ChartSectorSeriesRegistration,
     ChartSeriesRegistration,
+    ChartTreemapSeriesRegistration,
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
@@ -22,6 +25,7 @@ import type { ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianLayoutEngine } from "./cartesian-layout-engine";
 import { HeatmapLayoutEngine } from "./heatmap-layout-engine";
+import { HierarchicalLayoutEngine } from "./hierarchical-layout-engine";
 import { PolarLayoutEngine } from "./polar-layout-engine";
 
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
@@ -56,17 +60,26 @@ export function resolveChartCoordinateSystem(
 ): ChartCoordinateSystem {
     let hasPolar = false;
     let hasCartesian = false;
+    let hasHierarchical = false;
 
     for (const s of series) {
         const family = getChartSeriesFamily(s.type);
-        if (isCartesianCoordinateFamily(family)) {
+        if (isHierarchicalCoordinateFamily(family)) {
+            hasHierarchical = true;
+        } else if (isCartesianCoordinateFamily(family)) {
             hasCartesian = true;
         } else if (isPolarCoordinateFamily(family)) {
             hasPolar = true;
         }
     }
 
-    if (hasPolar && hasCartesian) {
+    if (hasHierarchical && (hasCartesian || hasPolar)) {
+        warnOnce(
+            "mixed-hierarchical",
+            "[MonaChart] Hierarchical charts (treemap) cannot be mixed with other chart families.",
+            warnedSet
+        );
+    } else if (hasPolar && hasCartesian) {
         warnOnce(
             "mixed-cartesian-polar",
             "[MonaChart] Mixing Cartesian and polar chart families in the same chart is unsupported.",
@@ -74,6 +87,9 @@ export function resolveChartCoordinateSystem(
         );
     }
 
+    if (hasHierarchical) {
+        return "hierarchical";
+    }
     return hasPolar ? "polar" : "cartesian";
 }
 
@@ -155,6 +171,47 @@ export class ChartLayoutEngine {
                 xAxis: options.xAxis,
                 yAxis: options.yAxis
             });
+        }
+
+        const treemapSeries = series.filter(
+            (s): s is ChartTreemapSeriesRegistration => s.type === "treemap"
+        );
+
+        if (coordinateSystem === "hierarchical") {
+            if (treemapSeries.length > 1) {
+                warnOnce(
+                    "multi-treemap-series",
+                    "[MonaChart] Only a single Treemap series is supported per chart.",
+                    warnedSet
+                );
+            }
+            if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
+                warnOnce(
+                    "treemap-projected-axes",
+                    "[MonaChart] Projected axes (<mona-chart-x-axis>, <mona-chart-y-axis>, <mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Treemap charts.",
+                    warnedSet
+                );
+            }
+
+            if (treemapSeries.length > 0) {
+                const activeTreemap = treemapSeries[0];
+                const plotRect = {
+                    height: options.containerHeight,
+                    width: options.containerWidth,
+                    x: 0,
+                    y: 0
+                };
+
+                return HierarchicalLayoutEngine.layout(
+                    activeTreemap,
+                    plotRect,
+                    options.containerWidth,
+                    options.containerHeight,
+                    options.styleResolver,
+                    options.rootData,
+                    warnedSet
+                );
+            }
         }
 
         if (families.size > 1) {
