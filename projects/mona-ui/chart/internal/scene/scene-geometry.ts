@@ -157,6 +157,7 @@ export interface SceneHitTarget {
     borderRadius?: number;
     bounds?: ChartRect;
     category?: unknown;
+    categoryIndex?: number;
     categoryX?: string;
     categoryY?: string;
     close?: number;
@@ -173,6 +174,8 @@ export interface SceneHitTarget {
     formattedLow?: string;
     formattedOpen?: string;
     formattedPercentage?: string;
+    formattedRadialMax?: string;
+    formattedRadialMin?: string;
     formattedSize?: string;
     formattedStackPercentage?: string;
     formattedStackTotal?: string;
@@ -185,6 +188,7 @@ export interface SceneHitTarget {
     highPoint?: ChartPoint;
     highValue?: number;
     index: number;
+    isClamped?: boolean;
     isPositive?: boolean;
     itemId?: string;
     low?: number;
@@ -193,6 +197,9 @@ export interface SceneHitTarget {
     open?: number;
     percentage?: number;
     point?: ChartPoint;
+    radialMax?: number;
+    radialMin?: number;
+    radialRatio?: number;
     radius?: number;
     range?: SceneRangeHitValue;
     rangeBand?: SceneRangeBandGeometry;

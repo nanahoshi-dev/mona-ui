@@ -30,9 +30,11 @@ export interface SceneRadialArcMark {
 }
 
 export interface SceneRadialTrack {
+    readonly animationKey?: string;
     readonly color: string;
     readonly endAngle: number;
     readonly innerRadius: number;
+    readonly itemId?: string;
     readonly opacity: number;
     readonly outerRadius: number;
     readonly startAngle: number;
@@ -44,6 +46,8 @@ export interface SceneGaugeValue {
     readonly dataIndex: number;
     readonly datum: unknown;
     readonly endAngle: number;
+    readonly formattedMax?: string;
+    readonly formattedMin?: string;
     readonly formattedValue: string;
     readonly innerRadius: number;
     readonly isClamped: boolean;
