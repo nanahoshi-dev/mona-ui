@@ -277,9 +277,12 @@ describe("SceneTransitionSampler", () => {
         const sampled = frameMid.scene as CartesianXYChartScene;
 
         expect(sampled.financialIndex).toBeDefined();
+        expect(sampled.pointSpatialIndex).toBeUndefined();
         expect(sampled.hitTargets).toHaveLength(1);
         expect(sampled.hitTargets[0].valueKind).toBe("ohlc");
         expect(sampled.hitTargets[0].open).toBe(100);
         expect(sampled.hitTargets[0].close).toBe(110);
+        expect(sampled.hitTargets[0].financial?.change).toBe(10);
+        expect(sampled.hitTargets[0].financial?.changePercentage).toBeCloseTo(0.1);
     });
 });

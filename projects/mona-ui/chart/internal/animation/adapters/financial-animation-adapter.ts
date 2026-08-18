@@ -226,8 +226,6 @@ function sampleOhlcMark(plan: FinancialMarkPlan, progress: number, wickWidth: nu
 export class FinancialSeriesAnimationAdapter
     implements ChartSeriesAnimationAdapter<ChartCandlestickSeriesScene | ChartOhlcSeriesScene>
 {
-    public readonly type = "candlestick";
-
     public createPlan(
         from: ChartSeriesScene | null,
         to: ChartSeriesScene | null,

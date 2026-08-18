@@ -15,6 +15,7 @@ export interface ChartCornerRadii {
 
 export interface SceneArcHitGeometry {
     center: ChartPoint;
+    cornerRadius?: number;
     endAngle: number;
     innerRadius: number;
     outerRadius: number;
@@ -161,6 +162,7 @@ export interface SceneHitTarget {
     close?: number;
     color?: string;
     cornerRadii?: ChartCornerRadii;
+    dataIndex?: number;
     datum: unknown;
     financial?: SceneFinancialHitValue;
     financialDirection?: ChartFinancialDirection;
@@ -184,6 +186,7 @@ export interface SceneHitTarget {
     highValue?: number;
     index: number;
     isPositive?: boolean;
+    itemId?: string;
     low?: number;
     lowPoint?: ChartPoint;
     lowValue?: number;
@@ -208,6 +211,7 @@ export interface SceneHitTarget {
     stackStart?: number;
     stackTotal?: number;
     toValue?: number;
+    value?: number;
     valueKind?: ChartPointValueKind;
     visualBounds?: ChartRect;
     visualRadius?: number;

@@ -2,7 +2,9 @@ import type {
     CartesianChartScene,
     CartesianHeatmapChartScene,
     ChartScene,
+    PolarArcChartScene,
     PolarAxisChartScene,
+    PolarChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
 import { AreaSeriesAnimationAdapter } from "./adapters/area-animation-adapter";
@@ -14,6 +16,7 @@ import { LineSeriesAnimationAdapter } from "./adapters/line-animation-adapter";
 import { MarkerSeriesAnimationAdapter } from "./marker-series-animation-adapter";
 import { PolarSeriesAnimationAdapter } from "./adapters/polar-animation-adapter";
 import { RadarSeriesAnimationAdapter } from "./adapters/radar-animation-adapter";
+import { RadialArcAnimationAdapter } from "./adapters/radial-arc-animation-adapter";
 import { RangeAreaSeriesAnimationAdapter } from "./adapters/range-area-animation-adapter";
 import { RangeBarSeriesAnimationAdapter } from "./adapters/range-bar-animation-adapter";
 import { SectorSeriesAnimationAdapter } from "./adapters/sector-animation-adapter";
@@ -154,9 +157,26 @@ export class ChartTransitionPlanner {
             }
 
             if (previous.coordinateSystem === "polar" && target.coordinateSystem === "polar") {
-                const prevPolar = previous as PolarAxisChartScene | PolarSectorChartScene;
-                const targetPolar = target as PolarAxisChartScene | PolarSectorChartScene;
+                const prevPolar = previous as PolarChartScene;
+                const targetPolar = target as PolarChartScene;
                 if (prevPolar.polarKind !== targetPolar.polarKind) {
+                    return {
+                        complexity,
+                        duration: options.duration,
+                        easing: options.easing,
+                        fromScene: previous,
+                        mode: "crossfade",
+                        seriesPlans: [],
+                        toScene: target,
+                        trigger
+                    };
+                }
+
+                if (
+                    prevPolar.polarKind === "arc" &&
+                    targetPolar.polarKind === "arc" &&
+                    prevPolar.arcMode !== targetPolar.arcMode
+                ) {
                     return {
                         complexity,
                         duration: options.duration,
@@ -418,6 +438,15 @@ export class ChartTransitionPlanner {
                         pathPoints += s.points.length;
                         pathCount += 1;
                     }
+                } else if (sc.polarKind === "arc") {
+                    const arcScene = sc as PolarArcChartScene;
+                    for (const s of arcScene.series) {
+                        if (s.type === "radialBar" || s.type === "rose") {
+                            independentMarks += s.marks.length;
+                        } else if (s.type === "gauge") {
+                            independentMarks += 1;
+                        }
+                    }
                 }
             }
         };
@@ -635,6 +664,18 @@ export class ChartTransitionPlanner {
                     }
                 }
             }
+        } else if (target.coordinateSystem === "polar" && target.polarKind === "arc") {
+            const targetArc = target as PolarArcChartScene;
+            const prevArc =
+                previous?.coordinateSystem === "polar" && previous.polarKind === "arc"
+                    ? (previous as PolarArcChartScene)
+                    : null;
+
+            const prevSeries = prevArc?.series[0] ?? null;
+            const targetSeries = targetArc.series[0] ?? null;
+
+            const arcAdapter = new RadialArcAnimationAdapter();
+            plans.push(arcAdapter.createPlan(prevSeries, targetSeries, context));
         }
 
         return plans;

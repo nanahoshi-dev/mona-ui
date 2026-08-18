@@ -146,6 +146,34 @@
             }
         }
 
+        <!-- DOM Gauge Center Overlay -->
+        @if (polarArcScene(); as arcScene) {
+            @if (gaugeScene(); as gaugeSeries) {
+                @if (gaugeSeriesRegistration()?.centerTemplate?.(); as centerTemplate) {
+                    <div
+                        class="absolute pointer-events-none flex flex-col items-center justify-center text-center overflow-hidden"
+                        [style.left.px]="arcScene.center.x"
+                        [style.top.px]="arcScene.center.y"
+                        [style.transform]="'translate(-50%, -50%)'"
+                        [style.max-width.px]="gaugeSeries.value.innerRadius * 1.6"
+                        [style.max-height.px]="gaugeSeries.value.innerRadius * 1.6">
+                        <ng-container
+                            [ngTemplateOutlet]="centerTemplate.templateRef"
+                            [ngTemplateOutletContext]="gaugeCenterContext(gaugeSeries)" />
+                    </div>
+                } @else if (gaugeSeries.showValue) {
+                    <div
+                        class="absolute pointer-events-none flex flex-col items-center justify-center text-center font-bold text-foreground select-none"
+                        [style.left.px]="arcScene.center.x"
+                        [style.top.px]="arcScene.center.y"
+                        [style.transform]="'translate(-50%, -50%)'"
+                        [style.font-size.px]="gaugeFontSize(gaugeSeries)">
+                        <span>{{ gaugeSeries.value.formattedValue }}</span>
+                    </div>
+                }
+            }
+        }
+
         <!-- DOM Radial Axis Labels (Angular Categories/Degrees and Radial Values) -->
         @if (polarAxisScene(); as radScene) {
             <!-- Angular Spoke Labels -->

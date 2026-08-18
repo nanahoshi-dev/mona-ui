@@ -3764,6 +3764,194 @@
       }
     ]
   },
+  "MonaGaugeSeriesComponent": {
+    "name": "MonaGaugeSeriesComponent",
+    "selector": "\"mona-gauge-series\"",
+    "inputs": [
+      {
+        "description": "Direct scalar value for the gauge. When defined, takes precedence over data/field.",
+        "kind": "input",
+        "name": "value",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series-specific dataset overriding root chart data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the numeric gauge value when direct value is not set.",
+        "kind": "input",
+        "name": "field",
+        "type": "ChartField",
+        "defaultValue": "\"value\""
+      },
+      {
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series name used in tooltips and accessibility announcements.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Gauge\""
+      },
+      {
+        "description": "Minimum domain value.",
+        "kind": "input",
+        "name": "min",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Maximum domain value.",
+        "kind": "input",
+        "name": "max",
+        "type": "number",
+        "defaultValue": "100"
+      },
+      {
+        "description": "Formatter callback for gauge numeric values.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Starting angle in degrees (0 is 12 o'clock, clockwise).",
+        "kind": "input",
+        "name": "startAngle",
+        "type": "number",
+        "defaultValue": "-120"
+      },
+      {
+        "description": "Ending angle in degrees (clockwise from 12 o'clock).",
+        "kind": "input",
+        "name": "endAngle",
+        "type": "number",
+        "defaultValue": "120"
+      },
+      {
+        "description": "Inner radius ratio relative to outer radius (0 to 1).",
+        "kind": "input",
+        "name": "innerRadiusRatio",
+        "type": "number",
+        "defaultValue": "0.72"
+      },
+      {
+        "description": "Outer radius ratio relative to available plot bounds (0.1 to 1).",
+        "kind": "input",
+        "name": "outerRadiusRatio",
+        "type": "number",
+        "defaultValue": "0.9"
+      },
+      {
+        "description": "Corner radius in pixels applied to gauge arc endpoints.",
+        "kind": "input",
+        "name": "cornerRadius",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Indicator mode: \"arc\" (progress arc), \"needle\" (pointer needle), or \"both\".",
+        "kind": "input",
+        "name": "indicator",
+        "type": "ChartGaugeIndicator",
+        "defaultValue": "\"arc\""
+      },
+      {
+        "description": "Primary color of the gauge value arc.",
+        "kind": "input",
+        "name": "color",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Fill style applied to gauge value arc (\"solid\" or radial \"gradient\").",
+        "kind": "input",
+        "name": "fillMode",
+        "type": "ChartRadialArcFillMode",
+        "defaultValue": "\"solid\""
+      },
+      {
+        "description": "Opacity of gauge value arc fill (between 0 and 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Color of background track arc.",
+        "kind": "input",
+        "name": "trackColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Opacity of background track arc.",
+        "kind": "input",
+        "name": "trackOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Color of the needle and center hub.",
+        "kind": "input",
+        "name": "needleColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Stroke width in pixels for the needle pointer.",
+        "kind": "input",
+        "name": "needleWidth",
+        "type": "number",
+        "defaultValue": "2"
+      },
+      {
+        "description": "Length of the needle pointer as a fraction of outer radius (0.1 to 1).",
+        "kind": "input",
+        "name": "needleLengthRatio",
+        "type": "number",
+        "defaultValue": "0.78"
+      },
+      {
+        "description": "Radius in pixels of the needle center hub circle.",
+        "kind": "input",
+        "name": "hubRadius",
+        "type": "number",
+        "defaultValue": "5"
+      },
+      {
+        "description": "Whether to display the formatted value in the center of the gauge.",
+        "kind": "input",
+        "name": "showValue",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Two-way bindable visibility of the series.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Additional CSS classes applied to the series.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "MonaHeatmapSeriesComponent": {
     "name": "MonaHeatmapSeriesComponent",
     "selector": "\"mona-heatmap-series\"",
@@ -4611,6 +4799,207 @@
       }
     ]
   },
+  "MonaRadialBarSeriesComponent": {
+    "name": "MonaRadialBarSeriesComponent",
+    "selector": "\"mona-radial-bar-series\"",
+    "inputs": [
+      {
+        "description": "Spacing in pixels between concentric radial rings.",
+        "kind": "input",
+        "name": "barGap",
+        "type": "number",
+        "defaultValue": "4"
+      },
+      {
+        "description": "Explicit radial thickness in pixels for each bar ring.",
+        "kind": "input",
+        "name": "barThickness",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Property key or accessor extracting the category label for each radial ring.",
+        "kind": "input",
+        "name": "categoryField",
+        "type": "ChartField",
+        "defaultValue": "\"category\""
+      },
+      {
+        "description": "Formatter callback for ring category labels.",
+        "kind": "input",
+        "name": "categoryFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Accessor function or property key extracting an explicit color for each radial ring.",
+        "kind": "input",
+        "name": "colorField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit array of colors used to fill successive radial rings.",
+        "kind": "input",
+        "name": "colors",
+        "type": "readonly string[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Corner radius in pixels applied to arc endpoints.",
+        "kind": "input",
+        "name": "cornerRadius",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series-specific dataset overriding root chart data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Ending angle in degrees (clockwise from 12 o'clock).",
+        "kind": "input",
+        "name": "endAngle",
+        "type": "number",
+        "defaultValue": "360"
+      },
+      {
+        "description": "Property key or accessor extracting the numeric value for each radial ring.",
+        "kind": "input",
+        "name": "field",
+        "type": "ChartField",
+        "defaultValue": "\"value\""
+      },
+      {
+        "description": "Fill style applied to radial rings (\"solid\" or radial \"gradient\").",
+        "kind": "input",
+        "name": "fillMode",
+        "type": "ChartRadialArcFillMode",
+        "defaultValue": "\"solid\""
+      },
+      {
+        "description": "Opacity of bar fills (between 0 and 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Inner radius ratio relative to available plot bounds (0 to 1).",
+        "kind": "input",
+        "name": "innerRadiusRatio",
+        "type": "number",
+        "defaultValue": "0.2"
+      },
+      {
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit maximum value for the radial bar progress scale.",
+        "kind": "input",
+        "name": "max",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit minimum value for the radial bar progress scale.",
+        "kind": "input",
+        "name": "min",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series name used in tooltips and accessibility announcements.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Radial Bar\""
+      },
+      {
+        "description": "Outer radius ratio relative to available plot bounds (0.1 to 1).",
+        "kind": "input",
+        "name": "outerRadiusRatio",
+        "type": "number",
+        "defaultValue": "0.9"
+      },
+      {
+        "description": "Whether to display background circular track rings.",
+        "kind": "input",
+        "name": "showTrack",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Starting angle in degrees (0 is 12 o'clock, clockwise).",
+        "kind": "input",
+        "name": "startAngle",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Color of bar stroke boundary.",
+        "kind": "input",
+        "name": "strokeColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Stroke width in pixels for bar boundaries.",
+        "kind": "input",
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Color of background track rings.",
+        "kind": "input",
+        "name": "trackColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Opacity of background track rings.",
+        "kind": "input",
+        "name": "trackOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Additional CSS classes applied to the series.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Formatter callback for bar numeric values.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Two-way bindable visibility of the series.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emits when an individual ring's visibility is toggled via the legend.",
+        "kind": "output",
+        "name": "datumVisibilityChange",
+        "type": "ChartRadialDatumVisibilityEvent"
+      }
+    ]
+  },
   "MonaRangeAreaSeriesComponent": {
     "name": "MonaRangeAreaSeriesComponent",
     "selector": "\"mona-range-area-series\"",
@@ -4823,6 +5212,172 @@
         "name": "xField",
         "type": "ChartField | undefined",
         "defaultValue": "undefined"
+      }
+    ]
+  },
+  "MonaRoseSeriesComponent": {
+    "name": "MonaRoseSeriesComponent",
+    "selector": "\"mona-rose-series\"",
+    "inputs": [
+      {
+        "description": "Property key or accessor extracting the category label for each rose petal.",
+        "kind": "input",
+        "name": "categoryField",
+        "type": "ChartField",
+        "defaultValue": "\"category\""
+      },
+      {
+        "description": "Formatter callback for category labels.",
+        "kind": "input",
+        "name": "categoryFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Accessor function or property key extracting an explicit color for each petal.",
+        "kind": "input",
+        "name": "colorField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit array of colors used to fill successive rose petals.",
+        "kind": "input",
+        "name": "colors",
+        "type": "readonly string[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Corner radius in pixels applied to outer petal corners.",
+        "kind": "input",
+        "name": "cornerRadius",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series-specific dataset overriding root chart data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Ending angle in degrees (clockwise from 12 o'clock).",
+        "kind": "input",
+        "name": "endAngle",
+        "type": "number",
+        "defaultValue": "360"
+      },
+      {
+        "description": "Property key or accessor extracting the numeric petal value.",
+        "kind": "input",
+        "name": "field",
+        "type": "ChartField",
+        "defaultValue": "\"value\""
+      },
+      {
+        "description": "Fill style applied to rose petals (\"solid\" or radial \"gradient\").",
+        "kind": "input",
+        "name": "fillMode",
+        "type": "ChartRadialArcFillMode",
+        "defaultValue": "\"solid\""
+      },
+      {
+        "description": "Opacity of petal fills (between 0 and 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Inner radius ratio relative to available plot bounds (0 to 1).",
+        "kind": "input",
+        "name": "innerRadiusRatio",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Series name used in tooltips and accessibility announcements.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Rose\""
+      },
+      {
+        "description": "Outer radius ratio relative to available plot bounds (0.1 to 1).",
+        "kind": "input",
+        "name": "outerRadiusRatio",
+        "type": "number",
+        "defaultValue": "0.9"
+      },
+      {
+        "description": "Angular padding in degrees between adjacent rose petals.",
+        "kind": "input",
+        "name": "padAngle",
+        "type": "number",
+        "defaultValue": "2"
+      },
+      {
+        "description": "Scale mode for petal radius: \"area\" (annular area proportional to value) or \"radius\" (linear radial distance).",
+        "kind": "input",
+        "name": "scaleMode",
+        "type": "ChartRoseScaleMode",
+        "defaultValue": "\"area\""
+      },
+      {
+        "description": "Starting angle in degrees (0 is 12 o'clock, clockwise).",
+        "kind": "input",
+        "name": "startAngle",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Color of petal separator strokes.",
+        "kind": "input",
+        "name": "strokeColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Stroke width in pixels for petal boundaries.",
+        "kind": "input",
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Additional CSS classes applied to the series.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Formatter callback for petal numeric values.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Two-way bindable visibility of the series.",
+        "kind": "model",
+        "name": "visible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emits when an individual petal's visibility is toggled via the legend.",
+        "kind": "output",
+        "name": "datumVisibilityChange",
+        "type": "ChartRadialDatumVisibilityEvent"
       }
     ]
   },

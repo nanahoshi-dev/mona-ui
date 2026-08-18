@@ -192,6 +192,7 @@ export function inferXAxisType(
                             return "time";
                         }
                     }
+                    return "category";
                 }
                 if (typeof val === "number" && Number.isFinite(val)) {
                     return "linear";
@@ -215,6 +216,7 @@ export function inferXAxisType(
                         return "time";
                     }
                 }
+                return "category";
             }
             if (typeof val === "number" && Number.isFinite(val)) {
                 return "linear";

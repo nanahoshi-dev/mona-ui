@@ -67,6 +67,14 @@ export class ChartHitTestEngine {
             if (scene.polarKind === "sector") {
                 return PolarSectorHitTester.testHit(pointer, scene as PolarSectorChartScene);
             }
+            if (scene.polarKind === "arc") {
+                const hits = scene.hitIndex ? scene.hitIndex.query(pointer) : [];
+                return {
+                    activeHitTarget: hits[0] ?? null,
+                    activeHits: hits,
+                    pointerPosition: pointer
+                };
+            }
             return PolarAxisHitTester.testHit(pointer, scene as PolarAxisChartScene, shared, maxHoverDistance);
         }
 

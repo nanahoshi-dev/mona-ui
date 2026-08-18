@@ -135,6 +135,27 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'radial-bar' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('radial-bar')">
+                Radial Bar
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'rose' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('rose')">
+                Rose Chart
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'gauge' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('gauge')">
+                Gauge Chart
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('custom')">
@@ -1226,6 +1247,124 @@
                             [borderRadius]="heatmapBorderRadius()"
                             [cellGap]="heatmapCellGap()"
                             name="Server Load" />
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("radial-bar") {
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-muted-foreground">Multi-Ring Radial Bar Progress / Resource Utilization</h3>
+                        <button monaButton size="small" look="primary" (click)="randomizeRadialBarData()">
+                            Randomize Values
+                        </button>
+                    </div>
+                    <mona-chart
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Radial Bar Resource Utilization Chart"
+                        aria-description="Concentric multi-ring radial bar chart illustrating resource utilization percentages."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-radial-bar-series
+                            [data]="radialBarData()"
+                            categoryField="category"
+                            field="value"
+                            colorField="color"
+                            name="System Resources"
+                            [fillMode]="radialBarFillMode()"
+                            [barThickness]="radialBarThickness()"
+                            [barGap]="radialBarGap()"
+                            [cornerRadius]="radialBarCornerRadius()"
+                            [startAngle]="radialBarStartAngle()"
+                            [endAngle]="radialBarEndAngle()"
+                            [showTrack]="radialBarShowTracks()" />
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("rose") {
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-muted-foreground">Wind Rose / Polar Area Directional Velocity</h3>
+                        <div class="flex items-center gap-2">
+                            <button monaButton size="small" look="outline" (click)="roseScaleMode.set(roseScaleMode() === 'area' ? 'radius' : 'area')">
+                                Scale Mode: {{ roseScaleMode() }}
+                            </button>
+                            <button monaButton size="small" look="primary" (click)="randomizeRoseData()">
+                                Randomize Speeds
+                            </button>
+                        </div>
+                    </div>
+                    <mona-chart
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Wind Rose Polar Area Chart"
+                        aria-description="Equal-angle polar area chart showing directional wind speed distributions."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-rose-series
+                            [data]="roseData()"
+                            categoryField="direction"
+                            field="value"
+                            name="Wind Velocity"
+                            [scaleMode]="roseScaleMode()"
+                            [fillMode]="roseFillMode()"
+                            [padAngle]="rosePadAngle()"
+                            [cornerRadius]="roseCornerRadius()" />
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip />
+                    </mona-chart>
+                </div>
+            }
+
+            @case ("gauge") {
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-muted-foreground">Radial Arc Speedometer / Metric Gauge</h3>
+                        <div class="flex items-center gap-2">
+                            <button monaButton size="small" look="outline" (click)="gaugeIndicator.set(gaugeIndicator() === 'both' ? 'arc' : gaugeIndicator() === 'arc' ? 'needle' : 'both')">
+                                Indicator: {{ gaugeIndicator() }}
+                            </button>
+                            <button monaButton size="small" look="outline" (click)="gaugeCustomTemplate.set(!gaugeCustomTemplate())">
+                                Center Template: {{ gaugeCustomTemplate() ? 'Custom' : 'Default' }}
+                            </button>
+                            <button monaButton size="small" look="primary" (click)="randomizeGaugeValue()">
+                                Randomize Value
+                            </button>
+                        </div>
+                    </div>
+                    <mona-chart
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Metric Gauge Chart"
+                        aria-description="Radial arc speedometer gauge visualizing normalized metric progress."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-gauge-series
+                            [value]="gaugeValue()"
+                            [min]="gaugeMin()"
+                            [max]="gaugeMax()"
+                            [indicator]="gaugeIndicator()"
+                            [startAngle]="gaugeStartAngle()"
+                            [endAngle]="gaugeEndAngle()"
+                            [innerRadiusRatio]="gaugeInnerRadiusRatio()"
+                            [needleWidth]="gaugeNeedleWidth()"
+                            [showValue]="gaugeShowValue()"
+                            name="System Health">
+                            @if (gaugeCustomTemplate()) {
+                                <ng-template monaChartGaugeCenterTemplate let-val>
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-2xl font-bold text-primary">{{ val }}%</span>
+                                        <span class="text-xs text-muted-foreground">Operating Level</span>
+                                    </div>
+                                </ng-template>
+                            }
+                        </mona-gauge-series>
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip />
                     </mona-chart>

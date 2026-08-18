@@ -933,6 +933,38 @@ describe("chart-domain", () => {
             const domain = calculateCategoryDomain(series, data, "date");
             expect(domain).toEqual(["2026-01-01", "2026-01-03"]);
         });
+
+        it("should infer category for valid string Financial row when invalid row has numeric X (FIN-R3)", () => {
+            const series = [createMockCandlestickSeries("o", "h", "l", "c", undefined, true, "x")];
+            const data = [
+                { c: 100, h: 80, l: 120, o: 100, x: 42 }, // invalid envelope with numeric X
+                { c: 110, h: 120, l: 95, o: 100, x: "Sector-A" } // valid row with category X
+            ];
+
+            expect(inferXAxisType(series, data, "x")).toBe("category");
+        });
+
+        it("should infer category for valid string Financial row when invalid row has Date X (FIN-R3)", () => {
+            const series = [createMockCandlestickSeries("o", "h", "l", "c", undefined, true, "x")];
+            const data = [
+                { c: "bad", h: 120, l: 90, o: 100, x: new Date("2026-01-01") }, // invalid OHLC with date X
+                { c: 110, h: 120, l: 95, o: 100, x: "Category-1" } // valid row with category X
+            ];
+
+            expect(inferXAxisType(series, data, "x")).toBe("category");
+        });
+
+        it("should infer category from valid Financial category without being poisoned by malformed root data (FIN-R3)", () => {
+            const series = [createMockCandlestickSeries("o", "h", "l", "c", undefined, true, "x")];
+            const seriesData = [
+                { c: 110, h: 120, l: 95, o: 100, x: "Category-1" }
+            ];
+            const rootData = [
+                { x: 9999 } // rootData numeric fallback row
+            ];
+
+            expect(inferXAxisType(series, seriesData, "x")).toBe("category");
+        });
     });
 });
 
