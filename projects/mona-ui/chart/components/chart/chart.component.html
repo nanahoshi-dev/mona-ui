@@ -273,7 +273,7 @@
                         [style.top.px]="lbl.bounds.y"
                         [style.width.px]="lbl.bounds.width"
                         [style.height.px]="lbl.bounds.height"
-                        [style.color]="lbl.color">
+                        [style.color]="lbl.textColor">
                         @if (funnelSeriesRegistration()?.labelTemplate?.(); as labelTemplate) {
                             <ng-container
                                 [ngTemplateOutlet]="labelTemplate.templateRef"
@@ -298,13 +298,13 @@
                         [style.top.px]="lbl.bounds.y"
                         [style.width.px]="lbl.bounds.width"
                         [style.height.px]="lbl.bounds.height"
-                        [style.color]="lbl.color">
+                        [style.color]="lbl.textColor">
                         @if (waterfallSeriesRegistration()?.labelTemplate?.(); as labelTemplate) {
                             <ng-container
                                 [ngTemplateOutlet]="labelTemplate.templateRef"
                                 [ngTemplateOutletContext]="waterfallLabelContext(lbl, seriesScene)" />
                         } @else {
-                            <span class="font-medium truncate">{{ lbl.formattedValue }}</span>
+                            <span class="font-medium truncate">{{ lbl.text }}</span>
                         }
                     </div>
                 }
