@@ -34,6 +34,8 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
             <mona-chart
                 [data]="data()"
                 [xField]="'category'"
+                [aria-label]="ariaLabel()"
+                [title]="title()"
                 (pointClick)="onPointClick($event)">
                 <mona-chart-x-axis />
                 <mona-chart-y-axis />
@@ -44,6 +46,7 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
                     <mona-bar-series
                         [field]="'revenue'"
                         [name]="'Revenue'"
+                        [color]="bar1Color()"
                         [orientation]="orientation()"
                         [stack]="stack1()"
                         [stackMode]="stackMode()"
@@ -71,6 +74,7 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
                     <mona-line-series
                         [field]="'profit'"
                         [name]="'Profit Line'"
+                        [visible]="lineVisible()"
                         [showPoints]="true" />
                 }
 
@@ -87,11 +91,14 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
     `
 })
 class TestHorizontalBarHostComponent {
+    public readonly ariaLabel = signal("");
+    public readonly bar1Color = signal<string>("#3b82f6");
     public readonly data = signal<readonly unknown[]>([
         { category: "North", minVal: 40, maxVal: 120, profit: 40, revenue: 100 },
         { category: "South", minVal: 60, maxVal: 150, profit: 50, revenue: 140 },
         { category: "West", minVal: 80, maxVal: 180, profit: 70, revenue: 170 }
     ]);
+    public readonly lineVisible = signal(true);
     public readonly orientation = signal<ChartBarOrientation>("horizontal");
     public readonly showBar1 = signal(true);
     public readonly showBar2 = signal(true);
@@ -101,6 +108,7 @@ class TestHorizontalBarHostComponent {
     public readonly stack1 = signal<string | undefined>(undefined);
     public readonly stack2 = signal<string | undefined>(undefined);
     public readonly stackMode = signal<"normal" | "percent">("normal");
+    public readonly title = signal("");
     public readonly borderRadius = signal(4);
 
     public lastPointClick: ChartPointEvent | null = null;
@@ -164,31 +172,30 @@ describe("Horizontal Bar Chart Integration", () => {
         expect(s2.bars[0].x).toBeCloseTo(s1.bars[0].x + s1.bars[0].width, 1);
     });
 
-    it("renders mixed horizontal chart with Bar, Area, and Line series simultaneously", () => {
+    it("safely fails safe when unsupported series (Area, Line) are visible with horizontal bars", () => {
         host.showArea.set(true);
         host.showLine.set(true);
         fixture.detectChanges();
 
         const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
         const scene = chartCmp.scene() as CartesianXYChartScene;
 
         expect(scene).toBeDefined();
-        expect(scene.hasRenderableData).toBe(true);
-        expect(scene.orientation).toBe("horizontal");
-        expect(scene.series.length).toBe(4);
+        // Policy rejects incompatible mix: hasRenderableData is false and series array is empty
+        expect(scene.hasRenderableData).toBe(false);
+        expect(scene.series.length).toBe(0);
 
-        const barSeries = scene.series.filter(s => s.type === "bar");
-        const areaSeries = scene.series.find(s => s.type === "area") as ChartAreaSeriesScene;
-        const lineSeries = scene.series.find(s => s.type === "line") as ChartLineSeriesScene;
+        // Hiding incompatible series safely restores valid horizontal layout
+        host.showArea.set(false);
+        host.showLine.set(false);
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
 
-        expect(barSeries.length).toBe(2);
-        expect(areaSeries).toBeDefined();
-        expect(lineSeries).toBeDefined();
-
-        expect(areaSeries.points.length).toBe(3);
-        expect(lineSeries.points.length).toBe(3);
-        expect(areaSeries.orientation).toBe("horizontal");
-        expect(lineSeries.orientation).toBe("horizontal");
+        const restoredScene = chartCmp.scene() as CartesianXYChartScene;
+        expect(restoredScene.hasRenderableData).toBe(true);
+        expect(restoredScene.orientation).toBe("horizontal");
+        expect(restoredScene.series.length).toBe(2);
     });
 
     it("animates horizontal bar series upon data update", () => {
@@ -233,23 +240,47 @@ describe("Horizontal Bar Chart Integration", () => {
     it("handles keyboard navigation along Y axis (interactionAxis === 'y')", () => {
         const chartDe = fixture.debugElement.query(By.directive(ChartComponent));
         const chartEl = chartDe.nativeElement as HTMLElement;
+        const chartCmp = chartDe.componentInstance as ChartComponent;
 
-        // Dispatch ArrowDown keydown
-        const arrowDownEvent = new KeyboardEvent("keydown", {
-            bubbles: true,
-            cancelable: true,
-            key: "ArrowDown"
-        });
-        chartEl.dispatchEvent(arrowDownEvent);
+        // Focus chart container
+        chartEl.focus();
+
+        // Dispatch ArrowDown keydown to navigate across categories
+        chartEl.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowDown" }));
         fixture.detectChanges();
 
-        const chartCmp = chartDe.componentInstance as ChartComponent;
         expect(chartCmp).toBeDefined();
+
+        // Dispatch ArrowUp keydown to navigate back
+        chartEl.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowUp" }));
+        fixture.detectChanges();
+
+        // Dispatch ArrowRight keydown to navigate across series in current bucket
+        chartEl.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowRight" }));
+        fixture.detectChanges();
+    });
+
+    it("renders horizontal percent stacked bars summing to 100%", () => {
+        host.stack1.set("sales");
+        host.stack2.set("sales");
+        host.stackMode.set("percent");
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        const scene = chartCmp.scene() as CartesianXYChartScene;
+
+        expect(scene.orientation).toBe("horizontal");
+        const s1 = scene.series[0] as ChartBarSeriesScene;
+        const s2 = scene.series[1] as ChartBarSeriesScene;
+
+        expect(s1.bars[0].stackPercentage).toBeDefined();
+        expect(s2.bars[0].stackPercentage).toBeDefined();
+        const totalPct = (s1.bars[0].stackPercentage ?? 0) + (s2.bars[0].stackPercentage ?? 0);
+        expect(totalPct).toBeCloseTo(100, 0);
     });
 
     it("animates when toggling the last visible horizontal bar series to hidden", () => {
         const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
-        const legendItems = fixture.debugElement.queryAll(By.css("span.cursor-pointer, [role='button'], div.cursor-pointer"));
 
         // Toggle first bar series
         const barSeries1 = fixture.debugElement.queryAll(By.directive(BarSeriesComponent))[0].componentInstance as BarSeriesComponent;
@@ -270,5 +301,76 @@ describe("Horizontal Bar Chart Integration", () => {
         const scene = chartCmp.scene() as CartesianXYChartScene;
         expect(scene.orientation).toBe("horizontal");
         expect(chartCmp.isAnimating()).toBe(true);
+    });
+
+    it("recovers chart when invalid composition is resolved via interactive legend toggle (HAX-F03, HAX-F14)", () => {
+        // Line series starts present in template but hidden
+        host.showLine.set(true);
+        host.lineVisible.set(false);
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Visibility);
+        fixture.detectChanges();
+
+        // Initially valid horizontal bar chart with 2 bars
+        let scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.hasRenderableData).toBe(true);
+        expect(scene.series.length).toBe(2);
+
+        // Find legend buttons
+        const legendDe = fixture.debugElement.query(By.directive(ChartLegendComponent));
+        let legendButtons = legendDe.queryAll(By.css("button"));
+        expect(legendButtons.length).toBe(3); // Revenue, Profit, Profit Line
+
+        // Find "Profit Line" button and click it to make it visible
+        const lineBtn = legendButtons.find(b => b.nativeElement.textContent.includes("Profit Line"))!;
+        lineBtn.nativeElement.click();
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Visibility);
+        fixture.detectChanges();
+
+        // Now composition is invalid (horizontal Bar + visible Line)
+        scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.hasRenderableData).toBe(false);
+        expect(scene.series.length).toBe(0);
+
+        // CRITICAL CONTRACT: All 3 legend controls remain present and interactive in fail-safe scene
+        legendButtons = legendDe.queryAll(By.css("button"));
+        expect(legendButtons.length).toBe(3);
+
+        // Click "Profit Line" legend button again to hide it
+        const lineBtn2 = legendButtons.find(b => b.nativeElement.textContent.includes("Profit Line"))!;
+        lineBtn2.nativeElement.click();
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Visibility);
+        fixture.detectChanges();
+
+        // Chart successfully recovers via legend interaction alone!
+        scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.hasRenderableData).toBe(true);
+        expect(scene.orientation).toBe("horizontal");
+        expect(scene.series.length).toBe(2);
+    });
+
+    it("respects host CSS color and explicit input precedence on horizontal bar series (HAX-F15)", () => {
+        host.bar1Color.set("#9333ea");
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Style);
+        const scene = chartCmp.scene() as CartesianXYChartScene;
+
+        expect(scene.series[0].style.color).toBe("#9333ea");
+    });
+
+    it("normalizes whitespace-only aria-label to title fallback (HAX-F08)", () => {
+        host.ariaLabel.set("   ");
+        host.title.set("Quarterly Revenue");
+        fixture.detectChanges();
+
+        const chartDe = fixture.debugElement.query(By.directive(ChartComponent));
+        const ariaLabelAttr = chartDe.nativeElement.getAttribute("aria-label");
+        expect(ariaLabelAttr).toBe("Quarterly Revenue");
     });
 });

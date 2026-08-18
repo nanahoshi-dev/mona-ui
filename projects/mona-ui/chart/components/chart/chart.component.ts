@@ -52,6 +52,7 @@ import { ChartLabelMeasureDirective } from "../../internal/directives/chart-labe
 import { ChartHitTestEngine } from "../../internal/interaction/chart-hit-test-engine";
 import type { ChartInteractionState } from "../../internal/interaction/chart-interaction-state";
 import { ChartKeyboardNavigation } from "../../internal/interaction/chart-keyboard-navigation";
+import { ChartLabelMeasurementPruner } from "../../internal/layout/chart-label-measurement-pruner";
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
 import { formatPolarLabelText } from "../../internal/layout/polar-label-layout";
 import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer";
@@ -360,21 +361,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     /**
      * @description Accessible name for the chart container.
-     * @default "Chart"
+     * @default ""
      */
-    public readonly ariaLabel = input("Chart", { alias: "aria-label" });
+    public readonly ariaLabel = input("", { alias: "aria-label" });
 
     protected readonly effectiveAriaLabel = computed<string>(() => {
-        const raw = this.ariaLabel();
-        if (raw && raw !== "Chart") {
-            return raw;
-        }
-        return this.title() || raw || "Chart";
+        const explicit = this.ariaLabel().trim();
+        const builtIn = this.title().trim();
+        return explicit || builtIn || "Chart";
     });
 
     protected readonly effectiveAriaDescription = computed<string | null>(() => {
-        const raw = this.ariaDescription();
-        return raw || this.subtitle() || null;
+        const explicit = this.ariaDescription().trim();
+        const builtIn = this.subtitle().trim();
+        return explicit || builtIn || null;
     });
 
     /**
@@ -1259,61 +1259,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             : this.scene()!;
 
         // Prune measurements
-        if (newScene.coordinateSystem === "polar") {
-            if (newScene.polarKind === "sector") {
-                const sectorScene = newScene as PolarSectorChartScene;
-                const validSliceIds = new Set<string>();
-                for (const s of sectorScene.series) {
-                    for (const sl of s.slices) {
-                        validSliceIds.add(`sector:${sl.sliceId}`);
-                        validSliceIds.add(sl.sliceId);
-                    }
-                }
-                for (const key of Array.from(this.#labelMeasurements.keys())) {
-                    if ((key.startsWith("sector:") || key.startsWith("slice:")) && !validSliceIds.has(key)) {
-                        this.#labelMeasurements.delete(key);
-                    }
-                }
-            } else if (newScene.polarKind === "axis") {
-                const axisScene = newScene as PolarAxisChartScene;
-                const validKeys = new Set<string>();
-                for (const tick of axisScene.angularAxis.ticks) {
-                    validKeys.add(`angular:${tick.tickKey}`);
-                    validKeys.add(`angular:${tick.value}`);
-                }
-                for (const tick of axisScene.radialAxis.ticks) {
-                    validKeys.add(`radial:${tick.tickKey}`);
-                    validKeys.add(`radial:${tick.value}`);
-                }
-                for (const key of Array.from(this.#labelMeasurements.keys())) {
-                    if ((key.startsWith("angular:") || key.startsWith("radial:")) && !validKeys.has(key)) {
-                        this.#labelMeasurements.delete(key);
-                    }
-                }
-            } else if (newScene.polarKind === "arc") {
-                const arcScene = newScene as PolarArcChartScene;
-                if (arcScene.arcMode === "rose") {
-                    const validKeys = new Set<string>();
-                    if (arcScene.angularAxis) {
-                        for (const tick of arcScene.angularAxis.ticks) {
-                            validKeys.add(`angular:${tick.tickKey}`);
-                            validKeys.add(`angular:${tick.value}`);
-                        }
-                    }
-                    if (arcScene.radialAxis) {
-                        for (const tick of arcScene.radialAxis.ticks) {
-                            validKeys.add(`radial:${tick.tickKey}`);
-                            validKeys.add(`radial:${tick.value}`);
-                        }
-                    }
-                    for (const key of Array.from(this.#labelMeasurements.keys())) {
-                        if ((key.startsWith("angular:") || key.startsWith("radial:")) && !validKeys.has(key)) {
-                            this.#labelMeasurements.delete(key);
-                        }
-                    }
-                }
-            }
-        }
+        ChartLabelMeasurementPruner.prune(this.#labelMeasurements, newScene);
 
         // Commit semantic target scene immediately
         this.scene.set(newScene);
