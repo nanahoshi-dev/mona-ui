@@ -3,7 +3,7 @@
 The chart component renders high-performance Canvas 2D visualizations composed of declarative child series and axis components. It supports Cartesian, Sector, and Polar Axis coordinates.
 
 **Series Types:**
-- **Cartesian**: `<mona-line-series>`, `<mona-area-series>`, `<mona-bar-series>`, `<mona-scatter-series>`, `<mona-bubble-series>`
+- **Cartesian**: `<mona-line-series>`, `<mona-area-series>`, `<mona-bar-series>`, `<mona-range-bar-series>`, `<mona-range-area-series>`, `<mona-scatter-series>`, `<mona-bubble-series>`, `<mona-candlestick-series>`, `<mona-ohlc-series>`, `<mona-heatmap-series>`
 - **Sector**: `<mona-pie-series>`, `<mona-donut-series>`
 - **Polar Axis**: `<mona-radar-series>`, `<mona-polar-series>`
 
@@ -242,6 +242,62 @@ Renders continuous Cartesian vertical range bands/areas bounded between lower an
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter function for range values in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate/category value. |
+
+### `<mona-candlestick-series>`
+
+Renders financial Japanese candlestick series with central high/low wicks, rectangular open/close bodies, rising/falling/neutral color coding, and solid or hollow rising bodies.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `bodyWidth` | `number` | `undefined` | Explicit body width in pixels. |
+| `bodyWidthRatio` | `number` | `0.7` | Relative body width ratio (0 to 1) applied to available slot bandwidth. |
+| `closeField` | `ChartField` | `"close"` | Property key or accessor extracting closing price/value. |
+| `color` | `string` | `undefined` | Explicit unified color override for all candlesticks. |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `fallingColor` | `string` | `"#ef4444"` | Color override for falling candles (Close < Open). |
+| `fillMode` | `ChartFinancialFillMode` | `"filled"` | Body fill styling: `"filled"` or `"hollow"`. |
+| `highField` | `ChartField` | `"high"` | Property key or accessor extracting highest price/value. |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
+| `lowField` | `ChartField` | `"low"` | Property key or accessor extracting lowest price/value. |
+| `maxBodyWidth` | `number` | `32` | Maximum width constraint in pixels for candle bodies. |
+| `name` | `string` | `"Candlestick"` | Series name for tooltips, legend, and accessibility. |
+| `neutralColor` | `string` | `"#6b7280"` | Color override for neutral candles (Close == Open). |
+| `opacity` | `number` | `undefined` | Fill and stroke opacity ratio (0 to 1). |
+| `openField` | `ChartField` | `"open"` | Property key or accessor extracting opening price/value. |
+| `risingColor` | `string` | `"#22c55e"` | Color override for rising candles (Close > Open). |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for prices/values in tooltips and live region. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `wickColor` | `string` | `undefined` | Explicit color override for vertical wicks. Defaults to body color. |
+| `wickWidth` | `number` | `1` | Stroke width in pixels for central high/low wick lines. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate or timestamp. |
+
+### `<mona-ohlc-series>`
+
+Renders traditional financial OHLC (Open-High-Low-Close) bar series with vertical high/low price spans, left-facing open ticks, right-facing close ticks, and directional color coding.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `bodyWidth` | `number` | `undefined` | Explicit total width in pixels encompassing both left and right ticks. |
+| `bodyWidthRatio` | `number` | `0.7` | Relative width ratio (0 to 1) applied to available slot bandwidth. |
+| `closeField` | `ChartField` | `"close"` | Property key or accessor extracting closing price/value. |
+| `color` | `string` | `undefined` | Explicit unified color override for all OHLC bars. |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `fallingColor` | `string` | `"#ef4444"` | Color override for falling bars (Close < Open). |
+| `highField` | `ChartField` | `"high"` | Property key or accessor extracting highest price/value. |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
+| `lowField` | `ChartField` | `"low"` | Property key or accessor extracting lowest price/value. |
+| `maxBodyWidth` | `number` | `32` | Maximum total width constraint in pixels for OHLC bars. |
+| `name` | `string` | `"OHLC"` | Series name for tooltips, legend, and accessibility. |
+| `neutralColor` | `string` | `"#6b7280"` | Color override for neutral bars (Close == Open). |
+| `opacity` | `number` | `undefined` | Stroke opacity ratio (0 to 1). |
+| `openField` | `ChartField` | `"open"` | Property key or accessor extracting opening price/value. |
+| `risingColor` | `string` | `"#22c55e"` | Color override for rising bars (Close > Open). |
+| `tickLength` / `tickWidth` | `number` | `undefined` | Explicit length in pixels for left open and right close tick arms. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for prices/values in tooltips and live region. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `wickColor` | `string` | `undefined` | Explicit color override for vertical spine and ticks. |
+| `wickWidth` | `number` | `1` | Stroke width in pixels for vertical spine and horizontal tick lines. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate or timestamp. |
 
 ## Template Directives
 
