@@ -1,107 +1,138 @@
 import { describe, expect, it } from "vitest";
-import { WaterfallHitIndex } from "./waterfall-hit-index";
-import type { SceneWaterfallBar } from "../scene/waterfall-scene";
+import type { ChartRect } from "../../models/chart.models";
 import type { SceneHitTarget } from "../scene/scene-geometry";
+import { WaterfallHitIndex, type WaterfallHitEntry } from "./waterfall-hit-index";
 
 describe("WaterfallHitIndex", () => {
-    it("queries candidate bar bounding box with zero-change tolerance", () => {
-        const plotRect = { height: 200, width: 200, x: 0, y: 0 };
+    const plotRect: ChartRect = { height: 400, width: 600, x: 50, y: 50 };
 
-        const bar0: SceneWaterfallBar = {
-            animationKey: "w:0",
-            barEnd: 100,
-            barStart: 0,
-            borderRadius: 4,
-            bounds: { height: 50, width: 40, x: 20, y: 50 },
-            category: "A",
-            color: "#10b981",
-            cumulativeAfter: 100,
-            cumulativeBefore: 0,
+    function createDummyTarget(id: string, x: number, y: number, w: number, h: number): SceneHitTarget {
+        return {
+            animationKey: `target:${id}`,
+            bounds: { height: h, width: w, x, y },
             dataIndex: 0,
             datum: {},
-            formattedCategory: "A",
-            formattedCumulativeAfter: "100",
-            formattedCumulativeBefore: "0",
+            formattedCategory: id,
             formattedValue: "100",
-            fromY: 100,
-            isZeroChange: false,
-            itemId: "w:0",
-            kind: "change",
-            renderOrder: 0,
-            toY: 50,
-            visualKind: "increase"
-        };
-
-        const bar1Zero: SceneWaterfallBar = {
-            animationKey: "w:1",
-            barEnd: 100,
-            barStart: 100,
-            borderRadius: 4,
-            bounds: { height: 1, width: 40, x: 80, y: 50 },
-            category: "B",
-            color: "#6b7280",
-            cumulativeAfter: 100,
-            cumulativeBefore: 100,
-            dataIndex: 1,
-            datum: {},
-            formattedCategory: "B",
-            formattedCumulativeAfter: "100",
-            formattedCumulativeBefore: "100",
-            formattedValue: "100",
-            fromY: 50,
-            isZeroChange: true,
-            itemId: "w:1",
-            kind: "change",
-            renderOrder: 1,
-            toY: 50,
-            visualKind: "neutral"
-        };
-
-        const target0: SceneHitTarget = {
-            animationKey: "w:0",
-            bounds: bar0.bounds,
-            dataIndex: 0,
-            datum: {},
             index: 0,
-            itemId: "w:0",
+            itemId: id,
+            point: { x: x + w / 2, y: y + h / 2 },
+            renderOrder: 0,
             seriesId: "w-1",
             seriesName: "Waterfall",
             seriesType: "waterfall",
-            xKey: "w:0",
-            xValue: "A"
+            value: 100,
+            valueKind: "waterfall",
+            visualBounds: { height: h, width: w, x, y },
+            xKey: id,
+            xValue: id,
+            yValue: 100
         };
+    }
 
-        const target1: SceneHitTarget = {
-            animationKey: "w:1",
-            bounds: bar1Zero.bounds,
-            dataIndex: 1,
-            datum: {},
-            index: 1,
-            itemId: "w:1",
-            seriesId: "w-1",
-            seriesName: "Waterfall",
-            seriesType: "waterfall",
-            xKey: "w:1",
-            xValue: "B"
-        };
+    it("queries candidate bar bounding box with zero-change tolerance", () => {
+        const target1 = createDummyTarget("step1", 100, 100, 40, 60);
+        const targetZero = createDummyTarget("stepZero", 200, 150, 40, 1);
 
-        const hitIndex = new WaterfallHitIndex(
+        const entries: WaterfallHitEntry[] = [
+            {
+                animationKey: "target:step1",
+                bounds: target1.bounds!,
+                isZeroChange: false,
+                slotIndex: 0,
+                target: target1
+            },
+            {
+                animationKey: "target:stepZero",
+                bounds: targetZero.bounds!,
+                isZeroChange: true,
+                slotIndex: 1,
+                target: targetZero
+            }
+        ];
+
+        const index = new WaterfallHitIndex({
+            bandwidth: 40,
+            entries,
             plotRect,
-            [bar0, bar1Zero],
-            [target0, target1]
-        );
+            step: 100
+        });
 
-        // Inside bar 0
-        expect(hitIndex.query({ x: 30, y: 70 })).toBe(target0);
+        // Inside regular bar
+        expect(index.query({ x: 120, y: 130 })).toBe(target1);
 
-        // Outside bar 0
-        expect(hitIndex.query({ x: 10, y: 70 })).toBeNull();
+        // Outside regular bar X
+        expect(index.query({ x: 90, y: 130 })).toBe(null);
 
-        // Inside zero-change bar 1 with tolerance (y=50 +- 4)
-        expect(hitIndex.query({ x: 90, y: 52 })).toBe(target1);
-        expect(hitIndex.query({ x: 90, y: 48 })).toBe(target1);
+        // Outside regular bar Y
+        expect(index.query({ x: 120, y: 80 })).toBe(null);
 
-        // Outside plotRect
-        expect(hitIndex.query({ x: 250, y: 70 })).toBeNull();
+        // Zero-change hairline: exact Y (150)
+        expect(index.query({ x: 220, y: 150 })).toBe(targetZero);
+
+        // Zero-change hairline: within ±4px tolerance
+        expect(index.query({ x: 220, y: 147 })).toBe(targetZero);
+        expect(index.query({ x: 220, y: 154 })).toBe(targetZero);
+
+        // Zero-change hairline: outside tolerance
+        expect(index.query({ x: 220, y: 144 })).toBe(null);
+        expect(index.query({ x: 220, y: 158 })).toBe(null);
+
+        // Outside plot area entirely
+        expect(index.query({ x: 10, y: 10 })).toBe(null);
+        expect(index.query({ x: 700, y: 700 })).toBe(null);
+    });
+
+    it("queries efficiently with large entry counts (1,000 and 10,000)", () => {
+        const count = 1000;
+        const step = 600 / count;
+        const entries: WaterfallHitEntry[] = [];
+
+        for (let i = 0; i < count; i++) {
+            const x = plotRect.x + i * step;
+            const target = createDummyTarget(`s-${i}`, x, 100, step * 0.8, 50);
+            entries.push({
+                animationKey: `target:s-${i}`,
+                bounds: target.bounds!,
+                isZeroChange: false,
+                slotIndex: i,
+                target
+            });
+        }
+
+        const index = new WaterfallHitIndex({
+            bandwidth: step * 0.8,
+            entries,
+            plotRect,
+            step
+        });
+
+        // Query index 500
+        const queryPoint = { x: plotRect.x + 500 * step + (step * 0.8) / 2, y: 125 };
+        const result = index.query(queryPoint);
+        expect(result).toBeDefined();
+        expect(result?.itemId).toBe("s-500");
+    });
+
+    it("queries exact bounds for sampled transition frames without slotIndex", () => {
+        const targetSampled = createDummyTarget("sampled-1", 150, 120, 50, 80);
+        const entries: WaterfallHitEntry[] = [
+            {
+                animationKey: "target:sampled-1",
+                bounds: targetSampled.bounds!,
+                isZeroChange: false,
+                target: targetSampled
+            }
+        ];
+
+        const index = new WaterfallHitIndex({
+            bandwidth: 50,
+            entries,
+            plotRect,
+            step: 100
+        });
+
+        expect(index.query({ x: 175, y: 150 })).toBe(targetSampled);
+        expect(index.query({ x: 140, y: 150 })).toBe(null);
     });
 });

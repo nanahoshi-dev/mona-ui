@@ -17,7 +17,7 @@ describe("WaterfallKeyboardNavigation", () => {
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
-            hitIndex: new WaterfallHitIndex({ height: 300, width: 300, x: 0, y: 0 }, [], hitTargets),
+            hitIndex: new WaterfallHitIndex({ entries: [], plotRect: { height: 300, width: 300, x: 0, y: 0 } }),
             hitTargets,
             interactionBuckets: [],
             kindSignature: "",
@@ -47,24 +47,26 @@ describe("WaterfallKeyboardNavigation", () => {
     it("navigates horizontally with ArrowRight / ArrowLeft / Home / End", () => {
         const scene = createMockScene();
 
+        const createKeyEvent = (key: string) => ({ key, preventDefault: () => {} } as KeyboardEvent);
+
         // ArrowRight from none (-1) -> 0
-        const r1 = WaterfallKeyboardNavigation.handleKeyDown(new KeyboardEvent("keydown", { key: "ArrowRight" }), scene, -1);
+        const r1 = WaterfallKeyboardNavigation.handleKeyDown(createKeyEvent("ArrowRight"), scene, -1);
         expect(r1?.bucketIndex).toBe(0);
 
         // ArrowRight from 0 -> 1
-        const r2 = WaterfallKeyboardNavigation.handleKeyDown(new KeyboardEvent("keydown", { key: "ArrowRight" }), scene, 0);
+        const r2 = WaterfallKeyboardNavigation.handleKeyDown(createKeyEvent("ArrowRight"), scene, 0);
         expect(r2?.bucketIndex).toBe(1);
 
         // ArrowLeft from 1 -> 0
-        const r3 = WaterfallKeyboardNavigation.handleKeyDown(new KeyboardEvent("keydown", { key: "ArrowLeft" }), scene, 1);
+        const r3 = WaterfallKeyboardNavigation.handleKeyDown(createKeyEvent("ArrowLeft"), scene, 1);
         expect(r3?.bucketIndex).toBe(0);
 
         // Home -> 0
-        const r4 = WaterfallKeyboardNavigation.handleKeyDown(new KeyboardEvent("keydown", { key: "Home" }), scene, 2);
+        const r4 = WaterfallKeyboardNavigation.handleKeyDown(createKeyEvent("Home"), scene, 2);
         expect(r4?.bucketIndex).toBe(0);
 
         // End -> 2
-        const r5 = WaterfallKeyboardNavigation.handleKeyDown(new KeyboardEvent("keydown", { key: "End" }), scene, 0);
+        const r5 = WaterfallKeyboardNavigation.handleKeyDown(createKeyEvent("End"), scene, 0);
         expect(r5?.bucketIndex).toBe(2);
     });
 });
