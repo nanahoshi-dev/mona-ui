@@ -113,7 +113,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [barSeries],
-            palette: ["#3b82f6"],
             xAxis,
             yAxis
         });
@@ -153,7 +152,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 400,
             containerWidth: 600,
             effectiveSeries: [barSeries1, barSeries2],
-            palette: ["#3b82f6", "#ef4444"],
             xAxis,
             yAxis
         });
@@ -184,7 +182,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [barSeries1, barSeries2],
-            palette: ["#3b82f6", "#10b981"],
             xAxis,
             yAxis
         });
@@ -221,7 +218,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [barSeries1, barSeries2],
-            palette: ["#3b82f6", "#10b981"],
             xAxis,
             yAxis
         });
@@ -245,7 +241,6 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [rangeBarSeries],
-            palette: ["#10b981"],
             xAxis,
             yAxis
         });
@@ -273,13 +268,51 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
             containerHeight: 300,
             containerWidth: 500,
             effectiveSeries: [barSeries],
-            palette: ["#3b82f6"],
             xAxis,
             yAxis
         });
 
         const target = scene.hitTargets[0];
-        expect(target.bounds?.width).toBe(0);
+        expect(target.bounds).toBeUndefined();
         expect(target.visualBounds?.width).toBe(4);
+    });
+
+    it("omits non-finite values in unstacked horizontal bars", () => {
+        const barSeries = createMockBarSeries({
+            data: signal([{ cat: "Q1", val: 100 }, { cat: "Q2", val: Number.NaN }, { cat: "Q3", val: null }])
+        });
+        const xAxis = createMockXAxis();
+        const yAxis = createMockYAxis();
+
+        const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeries],
+            xAxis,
+            yAxis
+        });
+
+        const barScene = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+        expect(barScene.bars.length).toBe(1);
+        expect(barScene.bars[0].yValue).toBe(100);
+        expect(barScene.bars[0].xValue).toBe("Q1");
+    });
+
+    it("emits diagnostics when non-linear X axis or non-category Y axis is configured", () => {
+        const barSeries = createMockBarSeries();
+        const xAxis = createMockXAxis({ type: signal("category" as any) });
+        const yAxis = createMockYAxis({ type: signal("linear" as any) });
+        const warned = new Set<string>();
+
+        CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeries],
+            warnedDiagnosticSignatures: warned,
+            xAxis,
+            yAxis
+        });
+
+        expect(warned.size).toBe(2);
     });
 });

@@ -3148,7 +3148,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
-        "defaultValue": "\"Chart\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Primary dataset shared across all child series.",

@@ -360,16 +360,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     /**
      * @description Accessible name for the chart container.
-     * @default "Chart"
+     * @default ""
      */
-    public readonly ariaLabel = input("Chart", { alias: "aria-label" });
+    public readonly ariaLabel = input("", { alias: "aria-label" });
 
     protected readonly effectiveAriaLabel = computed<string>(() => {
-        const raw = this.ariaLabel();
-        if (raw && raw !== "Chart") {
-            return raw;
-        }
-        return this.title() || raw || "Chart";
+        return this.ariaLabel() || this.title() || "Chart";
     });
 
     protected readonly effectiveAriaDescription = computed<string | null>(() => {
@@ -1259,7 +1255,21 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             : this.scene()!;
 
         // Prune measurements
-        if (newScene.coordinateSystem === "polar") {
+        if (newScene.coordinateSystem === "cartesian") {
+            const validCartesianKeys = new Set<string>();
+            for (const axisScene of newScene.axes) {
+                for (const tick of axisScene.ticks) {
+                    if (tick.tickKey) {
+                        validCartesianKeys.add(tick.tickKey);
+                    }
+                }
+            }
+            for (const key of Array.from(this.#labelMeasurements.keys())) {
+                if ((key.startsWith("axis:x:") || key.startsWith("axis:y:")) && !validCartesianKeys.has(key)) {
+                    this.#labelMeasurements.delete(key);
+                }
+            }
+        } else if (newScene.coordinateSystem === "polar") {
             if (newScene.polarKind === "sector") {
                 const sectorScene = newScene as PolarSectorChartScene;
                 const validSliceIds = new Set<string>();

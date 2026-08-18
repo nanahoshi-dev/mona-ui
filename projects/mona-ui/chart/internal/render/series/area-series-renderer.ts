@@ -33,7 +33,6 @@ function getCurveFactory(curve: ChartCurve): CurveFactory {
 export class AreaSeriesRenderer {
     public static render(context: CanvasRenderingContext2D, scene: ChartAreaSeriesScene): void {
         const { baselineY, connectNulls, curve, fillMode, fillOpacity, points, showPoints, style } = scene;
-        const isHorizontal = scene.orientation === "horizontal";
         const validPoints = connectNulls ? points.filter(p => p.defined) : points;
 
         if (validPoints.length === 0) {
@@ -44,19 +43,12 @@ export class AreaSeriesRenderer {
 
         // 1. Draw Area Fill
         context.beginPath();
-        const areaGenerator = isHorizontal
-            ? area<SceneAreaPoint>()
-                .y(p => p.y)
-                .x0(p => p.baseX ?? p.baseY ?? (scene.baselineX ?? 0))
-                .x1(p => p.x)
-                .curve(getCurveFactory(curve))
-                .context(context)
-            : area<SceneAreaPoint>()
-                .x(p => p.x)
-                .y0(p => p.baseY ?? baselineY)
-                .y1(p => p.y)
-                .curve(getCurveFactory(curve))
-                .context(context);
+        const areaGenerator = area<SceneAreaPoint>()
+            .x(p => p.x)
+            .y0(p => p.baseY ?? baselineY)
+            .y1(p => p.y)
+            .curve(getCurveFactory(curve))
+            .context(context);
 
         if (!connectNulls) {
             areaGenerator.defined(p => p.defined);
@@ -76,12 +68,9 @@ export class AreaSeriesRenderer {
             context.fillStyle = withAlpha(style.areaFillColor, fillOpacity);
             context.fill();
         } else {
-            const baseline = isHorizontal ? (scene.baselineX ?? 0) : baselineY;
-            const spec = createAreaGradientSpec(baseline, definedPoints, style.areaFillColor, fillOpacity, isHorizontal ? "x" : "y");
+            const spec = createAreaGradientSpec(baselineY, definedPoints, style.areaFillColor, fillOpacity);
             if (spec) {
-                const gradient = isHorizontal
-                    ? context.createLinearGradient(spec.startX ?? spec.startPos, 0, spec.endX ?? spec.endPos, 0)
-                    : context.createLinearGradient(0, spec.startY ?? spec.startPos, 0, spec.endY ?? spec.endPos);
+                const gradient = context.createLinearGradient(0, spec.startY ?? spec.startPos, 0, spec.endY ?? spec.endPos);
                 for (const stop of spec.stops) {
                     gradient.addColorStop(stop.offset, stop.color);
                 }

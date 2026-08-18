@@ -29,7 +29,7 @@
                         @if (tick.labelVisible !== false) {
                             <div
                                 [class]="axisLabelClasses()"
-                                [monaChartLabelMeasure]="(axisScene.axis === 'x' && xAxisRegistration()?.labelTemplate?.()) || (axisScene.axis === 'y' && yAxisRegistration()?.labelTemplate?.()) ? (tick.tickKey ?? '') : ''"
+                                [monaChartLabelMeasure]="tick.tickKey ?? ''"
                                 [style.left.px]="axisLabelLeft(cart, axisScene, tick)"
                                 [style.top.px]="axisLabelTop(cart, axisScene, tick)"
                                 [style.max-width.px]="axisScene.labelMaxWidth ?? null"

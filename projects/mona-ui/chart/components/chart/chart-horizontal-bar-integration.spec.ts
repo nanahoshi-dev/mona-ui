@@ -164,31 +164,30 @@ describe("Horizontal Bar Chart Integration", () => {
         expect(s2.bars[0].x).toBeCloseTo(s1.bars[0].x + s1.bars[0].width, 1);
     });
 
-    it("renders mixed horizontal chart with Bar, Area, and Line series simultaneously", () => {
+    it("safely fails safe when unsupported series (Area, Line) are visible with horizontal bars", () => {
         host.showArea.set(true);
         host.showLine.set(true);
         fixture.detectChanges();
 
         const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
         const scene = chartCmp.scene() as CartesianXYChartScene;
 
         expect(scene).toBeDefined();
-        expect(scene.hasRenderableData).toBe(true);
-        expect(scene.orientation).toBe("horizontal");
-        expect(scene.series.length).toBe(4);
+        // Policy rejects incompatible mix: hasRenderableData is false and series array is empty
+        expect(scene.hasRenderableData).toBe(false);
+        expect(scene.series.length).toBe(0);
 
-        const barSeries = scene.series.filter(s => s.type === "bar");
-        const areaSeries = scene.series.find(s => s.type === "area") as ChartAreaSeriesScene;
-        const lineSeries = scene.series.find(s => s.type === "line") as ChartLineSeriesScene;
+        // Hiding incompatible series safely restores valid horizontal layout
+        host.showArea.set(false);
+        host.showLine.set(false);
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
 
-        expect(barSeries.length).toBe(2);
-        expect(areaSeries).toBeDefined();
-        expect(lineSeries).toBeDefined();
-
-        expect(areaSeries.points.length).toBe(3);
-        expect(lineSeries.points.length).toBe(3);
-        expect(areaSeries.orientation).toBe("horizontal");
-        expect(lineSeries.orientation).toBe("horizontal");
+        const restoredScene = chartCmp.scene() as CartesianXYChartScene;
+        expect(restoredScene.hasRenderableData).toBe(true);
+        expect(restoredScene.orientation).toBe("horizontal");
+        expect(restoredScene.series.length).toBe(2);
     });
 
     it("animates horizontal bar series upon data update", () => {
@@ -233,23 +232,47 @@ describe("Horizontal Bar Chart Integration", () => {
     it("handles keyboard navigation along Y axis (interactionAxis === 'y')", () => {
         const chartDe = fixture.debugElement.query(By.directive(ChartComponent));
         const chartEl = chartDe.nativeElement as HTMLElement;
+        const chartCmp = chartDe.componentInstance as ChartComponent;
 
-        // Dispatch ArrowDown keydown
-        const arrowDownEvent = new KeyboardEvent("keydown", {
-            bubbles: true,
-            cancelable: true,
-            key: "ArrowDown"
-        });
-        chartEl.dispatchEvent(arrowDownEvent);
+        // Focus chart container
+        chartEl.focus();
+
+        // Dispatch ArrowDown keydown to navigate across categories
+        chartEl.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowDown" }));
         fixture.detectChanges();
 
-        const chartCmp = chartDe.componentInstance as ChartComponent;
         expect(chartCmp).toBeDefined();
+
+        // Dispatch ArrowUp keydown to navigate back
+        chartEl.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowUp" }));
+        fixture.detectChanges();
+
+        // Dispatch ArrowRight keydown to navigate across series in current bucket
+        chartEl.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowRight" }));
+        fixture.detectChanges();
+    });
+
+    it("renders horizontal percent stacked bars summing to 100%", () => {
+        host.stack1.set("sales");
+        host.stack2.set("sales");
+        host.stackMode.set("percent");
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        const scene = chartCmp.scene() as CartesianXYChartScene;
+
+        expect(scene.orientation).toBe("horizontal");
+        const s1 = scene.series[0] as ChartBarSeriesScene;
+        const s2 = scene.series[1] as ChartBarSeriesScene;
+
+        expect(s1.bars[0].stackPercentage).toBeDefined();
+        expect(s2.bars[0].stackPercentage).toBeDefined();
+        const totalPct = (s1.bars[0].stackPercentage ?? 0) + (s2.bars[0].stackPercentage ?? 0);
+        expect(totalPct).toBeCloseTo(100, 0);
     });
 
     it("animates when toggling the last visible horizontal bar series to hidden", () => {
         const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
-        const legendItems = fixture.debugElement.queryAll(By.css("span.cursor-pointer, [role='button'], div.cursor-pointer"));
 
         // Toggle first bar series
         const barSeries1 = fixture.debugElement.queryAll(By.directive(BarSeriesComponent))[0].componentInstance as BarSeriesComponent;
