@@ -94,36 +94,62 @@ export class CartesianChartRenderer {
         }
         context.restore();
 
-        // 3. Draw Axis Baseline Lines (crisp lines at edges of plotRect on top of series)
+        // 3. Draw Axis Baseline Lines & Outward Tick Marks
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
             styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(148, 163, 184, 0.45)";
 
         for (const axisScene of axes) {
-            if (!axisScene.visible || !axisScene.axisLine) {
+            if (!axisScene.visible) {
                 continue;
             }
+
             context.strokeStyle = axisLineColor;
             context.lineWidth = 1;
-            context.beginPath();
 
-            if (axisScene.axis === "x") {
-                const y =
-                    axisScene.position === "top"
-                        ? crispPixel(plotRect.y, 1)
-                        : crispPixel(plotRect.y + plotRect.height, 1);
-                context.moveTo(plotRect.x, y);
-                context.lineTo(plotRect.x + plotRect.width, y);
-            } else if (axisScene.axis === "y") {
-                const x =
-                    axisScene.position === "right"
-                        ? crispPixel(plotRect.x + plotRect.width, 1)
-                        : crispPixel(plotRect.x, 1);
-                context.moveTo(x, plotRect.y);
-                context.lineTo(x, plotRect.y + plotRect.height);
+            if (axisScene.axisLine) {
+                context.beginPath();
+                if (axisScene.axis === "x") {
+                    const y =
+                        axisScene.position === "top"
+                            ? crispPixel(plotRect.y, 1)
+                            : crispPixel(plotRect.y + plotRect.height, 1);
+                    context.moveTo(plotRect.x, y);
+                    context.lineTo(plotRect.x + plotRect.width, y);
+                } else if (axisScene.axis === "y") {
+                    const x =
+                        axisScene.position === "right"
+                            ? crispPixel(plotRect.x + plotRect.width, 1)
+                            : crispPixel(plotRect.x, 1);
+                    context.moveTo(x, plotRect.y);
+                    context.lineTo(x, plotRect.y + plotRect.height);
+                }
+                context.stroke();
             }
-            context.stroke();
+
+            if (axisScene.tickMarks && axisScene.ticks.length > 0) {
+                const tickSize = axisScene.tickSize ?? 6;
+                context.beginPath();
+                if (axisScene.axis === "x") {
+                    const baselineY = axisScene.position === "top" ? plotRect.y : plotRect.y + plotRect.height;
+                    const targetY = axisScene.position === "top" ? baselineY - tickSize : baselineY + tickSize;
+                    for (const tick of axisScene.ticks) {
+                        const x = crispPixel(tick.coordinate, 1);
+                        context.moveTo(x, crispPixel(baselineY, 1));
+                        context.lineTo(x, crispPixel(targetY, 1));
+                    }
+                } else if (axisScene.axis === "y") {
+                    const baselineX = axisScene.position === "right" ? plotRect.x + plotRect.width : plotRect.x;
+                    const targetX = axisScene.position === "right" ? baselineX + tickSize : baselineX - tickSize;
+                    for (const tick of axisScene.ticks) {
+                        const y = crispPixel(tick.coordinate, 1);
+                        context.moveTo(crispPixel(baselineX, 1), y);
+                        context.lineTo(crispPixel(targetX, 1), y);
+                    }
+                }
+                context.stroke();
+            }
         }
 
         // 4. Draw Interaction Overlays clipped to plotRect
@@ -151,25 +177,42 @@ export class CartesianChartRenderer {
                     h.seriesType === "rangeArea" ||
                     h.seriesType === "rangeBar"
             );
-            const crosshairX =
-                primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : null);
 
-            // Vertical crosshair (suppressed when active hits are only scatter / bubble)
-            if (crosshairX !== null && hasConnectedOrBarHit) {
-                const crosshairColor =
-                    styleResolver.resolveCssVariable("--mona-chart-crosshair-color") ||
-                    styleResolver.resolveCssVariable("--color-focus-indicator") ||
-                    styleResolver.resolveCssVariable("--color-muted-foreground") ||
-                    "rgba(148, 163, 184, 0.4)";
-                context.strokeStyle = crosshairColor;
-                context.lineWidth = 1;
-                context.setLineDash([4, 4]);
-                context.beginPath();
-                const x = crispPixel(crosshairX, 1);
-                context.moveTo(x, plotRect.y);
-                context.lineTo(x, plotRect.y + plotRect.height);
-                context.stroke();
-                context.setLineDash([]);
+            const isHorizontalChart = scene.interactionAxis === "y";
+            const crosshairColor =
+                styleResolver.resolveCssVariable("--mona-chart-crosshair-color") ||
+                styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                styleResolver.resolveCssVariable("--color-muted-foreground") ||
+                "rgba(148, 163, 184, 0.4)";
+
+            if (isHorizontalChart && hasConnectedOrBarHit) {
+                const crosshairY =
+                    primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y + primaryHit.bounds.height / 2 : null);
+                if (crosshairY !== null) {
+                    context.strokeStyle = crosshairColor;
+                    context.lineWidth = 1;
+                    context.setLineDash([4, 4]);
+                    context.beginPath();
+                    const y = crispPixel(crosshairY, 1);
+                    context.moveTo(plotRect.x, y);
+                    context.lineTo(plotRect.x + plotRect.width, y);
+                    context.stroke();
+                    context.setLineDash([]);
+                }
+            } else if (!isHorizontalChart && hasConnectedOrBarHit) {
+                const crosshairX =
+                    primaryHit.point?.x ?? (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : null);
+                if (crosshairX !== null) {
+                    context.strokeStyle = crosshairColor;
+                    context.lineWidth = 1;
+                    context.setLineDash([4, 4]);
+                    context.beginPath();
+                    const x = crispPixel(crosshairX, 1);
+                    context.moveTo(x, plotRect.y);
+                    context.lineTo(x, plotRect.y + plotRect.height);
+                    context.stroke();
+                    context.setLineDash([]);
+                }
             }
 
             // Active point markers & bar highlights
@@ -232,13 +275,20 @@ export class CartesianChartRenderer {
                 } else if (hit.bounds || hit.visualBounds) {
                     const barRect = hit.visualBounds ?? hit.bounds;
                     if (barRect) {
-                        const isZeroHeight = barRect.height <= 0.001;
-                        if (isZeroHeight) {
+                        const isHorizontalBar = hit.barOrientation === "horizontal" || scene.orientation === "horizontal";
+                        const isZeroExtent = isHorizontalBar ? barRect.width <= 0.001 : barRect.height <= 0.001;
+                        if (isZeroExtent) {
                             context.save();
                             context.beginPath();
-                            const y = crispPixel(barRect.y, 1);
-                            context.moveTo(barRect.x, y);
-                            context.lineTo(barRect.x + barRect.width, y);
+                            if (isHorizontalBar) {
+                                const x = crispPixel(barRect.x, 1);
+                                context.moveTo(x, barRect.y);
+                                context.lineTo(x, barRect.y + barRect.height);
+                            } else {
+                                const y = crispPixel(barRect.y, 1);
+                                context.moveTo(barRect.x, y);
+                                context.lineTo(barRect.x + barRect.width, y);
+                            }
                             context.lineWidth = isKeyboardSource ? 2.5 : 2;
                             context.strokeStyle = isKeyboardSource ? focusIndicatorColor : barHighlightColor;
                             context.stroke();

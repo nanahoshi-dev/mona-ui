@@ -2,7 +2,12 @@ import { Component, contentChild, DestroyRef, effect, inject, input, OnInit } fr
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
-import type { ChartAxisFormatter, ChartXAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
+import type {
+    ChartAxisFormatter,
+    ChartAxisLabelRotation,
+    ChartXAxisPosition,
+    ChartXAxisType
+} from "../../models/chart-axis.models";
 
 @Component({
     selector: "mona-chart-x-axis",
@@ -32,10 +37,34 @@ export class ChartXAxisComponent implements OnInit {
     public readonly formatter = input<ChartAxisFormatter | undefined>(undefined);
 
     /**
-     * @description Whether vertical grid lines aligned with X-axis ticks are visible.
-     * @default false
+     * @description Whether vertical grid lines aligned with X-axis ticks are visible. Defaults to false in standard Cartesian and true for horizontal value axes.
+     * @default undefined
      */
-    public readonly gridLines = input(false);
+    public readonly gridLines = input<boolean | undefined>(undefined);
+
+    /**
+     * @description Maximum unrotated width in pixels for tick labels before truncation.
+     * @default undefined
+     */
+    public readonly labelMaxWidth = input<number | undefined>(undefined);
+
+    /**
+     * @description Spacing in pixels between the axis baseline / tick marks and tick labels.
+     * @default undefined
+     */
+    public readonly labelPadding = input<number | undefined>(undefined);
+
+    /**
+     * @description Explicit rotation angle in degrees for tick labels (-90 to 90), or 'auto' for responsive automatic angling.
+     * @default 0
+     */
+    public readonly labelRotation = input<ChartAxisLabelRotation>(0);
+
+    /**
+     * @description Whether the axis tick labels are rendered in the DOM.
+     * @default true
+     */
+    public readonly labels = input(true);
 
     /**
      * @description Explicit upper bound for the axis range.
@@ -62,16 +91,34 @@ export class ChartXAxisComponent implements OnInit {
     public readonly position = input<ChartXAxisPosition>("bottom");
 
     /**
-     * @description Suggested number of ticks to display along the axis.
+     * @description Suggested number of ticks to display along the axis (acts as preferred label count for category axes).
      * @default undefined
      */
     public readonly tickCount = input<number | undefined>(undefined);
+
+    /**
+     * @description Whether tick mark lines extending outward from the baseline are drawn.
+     * @default false
+     */
+    public readonly tickMarks = input(false);
+
+    /**
+     * @description Length in pixels of outward tick mark lines.
+     * @default undefined
+     */
+    public readonly tickSize = input<number | undefined>(undefined);
 
     /**
      * @description Title text rendered alongside the axis.
      * @default ""
      */
     public readonly title = input("");
+
+    /**
+     * @description Spacing in pixels between the outward extent of tick labels and the axis title.
+     * @default undefined
+     */
+    public readonly titlePadding = input<number | undefined>(undefined);
 
     /**
      * @description Scale type for the X axis (`"auto"`, `"category"`, `"linear"`, `"time"`, or `"utc"`).
@@ -92,12 +139,19 @@ export class ChartXAxisComponent implements OnInit {
             this.axisLine();
             this.formatter();
             this.gridLines();
+            this.labelMaxWidth();
+            this.labelPadding();
+            this.labelRotation();
+            this.labels();
             this.max();
             this.min();
             this.nice();
             this.position();
             this.tickCount();
+            this.tickMarks();
+            this.tickSize();
             this.title();
+            this.titlePadding();
             this.type();
             this.visible();
             if (this.#registered) {
@@ -115,13 +169,20 @@ export class ChartXAxisComponent implements OnInit {
             axisLine: this.axisLine,
             formatter: this.formatter,
             gridLines: this.gridLines,
+            labelMaxWidth: this.labelMaxWidth,
+            labelPadding: this.labelPadding,
+            labelRotation: this.labelRotation,
+            labels: this.labels,
             labelTemplate: this.labelTemplate,
             max: this.max,
             min: this.min,
             nice: this.nice,
             position: this.position,
             tickCount: this.tickCount,
+            tickMarks: this.tickMarks,
+            tickSize: this.tickSize,
             title: this.title,
+            titlePadding: this.titlePadding,
             type: this.type,
             visible: this.visible
         });

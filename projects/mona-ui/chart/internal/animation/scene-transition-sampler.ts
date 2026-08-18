@@ -650,10 +650,12 @@ export class SceneTransitionSampler {
             hasRenderableData: toScene.hasRenderableData,
             height: toScene.height,
             hitTargets: sampledHitTargets,
+            interactionAxis: toScene.interactionAxis,
             interactionBucketLookup,
             interactionBuckets: sampledBuckets,
             legendItems: toScene.legendItems,
             markerSpatialIndex: pointSpatialIndex,
+            orientation: toScene.orientation,
             plotRect: toScene.plotRect,
             pointSpatialIndex,
             series: sampledSeries,
@@ -661,7 +663,8 @@ export class SceneTransitionSampler {
             stackSignature: toScene.stackSignature,
             width: toScene.width,
             xAxisType: toScene.xAxisType,
-            xTimeSpanMs: toScene.xTimeSpanMs
+            xTimeSpanMs: toScene.xTimeSpanMs,
+            yAxisType: toScene.yAxisType
         };
     }
 

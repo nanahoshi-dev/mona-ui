@@ -18,6 +18,7 @@ function toRectState(bar: SceneBar, opacity = 1): RectMarkTransitionState {
         index: bar.index,
         isPositive: bar.isPositive,
         opacity,
+        orientation: bar.orientation,
         radius: bar.radius,
         stackEndValue: bar.stackEndValue,
         stackGroup: bar.stackGroup,
@@ -35,6 +36,32 @@ function toRectState(bar: SceneBar, opacity = 1): RectMarkTransitionState {
 }
 
 function createCollapsedBarState(bar: SceneBar, opacity = 0): RectMarkTransitionState {
+    if (bar.orientation === "horizontal") {
+        const collapsedX = bar.isPositive ? bar.x : bar.x + bar.width;
+        return {
+            animationKey: bar.animationKey,
+            cornerRadii: bar.cornerRadii,
+            datum: bar.datum,
+            height: bar.height,
+            index: bar.index,
+            isPositive: bar.isPositive,
+            opacity,
+            orientation: "horizontal",
+            radius: bar.radius,
+            stackEndValue: bar.stackEndValue,
+            stackGroup: bar.stackGroup,
+            stackMode: bar.stackMode,
+            stackPercentage: bar.stackPercentage,
+            stackPosition: bar.stackPosition,
+            stackStartValue: bar.stackStartValue,
+            stackTotal: bar.stackTotal,
+            width: 0,
+            x: collapsedX,
+            xValue: bar.xValue,
+            y: bar.y,
+            yValue: bar.yValue
+        };
+    }
     const collapsedY = bar.isPositive ? bar.y + bar.height : bar.y;
     return {
         animationKey: bar.animationKey,
@@ -44,6 +71,7 @@ function createCollapsedBarState(bar: SceneBar, opacity = 0): RectMarkTransition
         index: bar.index,
         isPositive: bar.isPositive,
         opacity,
+        orientation: "vertical",
         radius: bar.radius,
         stackEndValue: bar.stackEndValue,
         stackGroup: bar.stackGroup,
@@ -180,6 +208,7 @@ export class BarSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     fillOpacity: baseScene.fillOpacity,
                     id: baseScene.id,
                     name: baseScene.name,
+                    orientation: baseScene.orientation,
                     renderOpacity,
                     style: baseScene.style,
                     type: "bar"

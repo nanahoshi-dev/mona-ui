@@ -60,10 +60,14 @@ import type {
     SceneRangeBar
 } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { formatPercentagePoint, formatXValue, formatYValue } from "../utils/chart-formatter";
-import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
+import { CartesianAxisLabelGeometry } from "./cartesian-axis-label-geometry";
+import { CartesianAxisLayoutEngine } from "./cartesian-axis-layout-engine";
 import { CartesianBarSlots } from "./cartesian-bar-slots";
+import { CartesianHorizontalBarLayoutEngine } from "./cartesian-horizontal-bar-layout-engine";
 import { CartesianMarkerLayout } from "./cartesian-marker-layout";
+import { CartesianOrientationPolicy } from "./cartesian-orientation-policy";
+import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
+import { formatPercentagePoint, formatXValue, formatYValue } from "../utils/chart-formatter";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import {
     clamp,
@@ -78,6 +82,7 @@ import {
 export interface CartesianLayoutOptions {
     containerHeight: number;
     containerWidth: number;
+    measurements?: ReadonlyMap<string, { height: number; width: number }>;
     rootData: readonly unknown[];
     rootXField?: ChartField;
     series: readonly ChartCartesianSeriesRegistration[];
@@ -116,6 +121,49 @@ export class CartesianLayoutEngine {
             for (const diag of seriesPolicy.diagnostics) {
                 ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, diag);
             }
+        }
+
+        // Orientation policy validation
+        const orientationResolution = CartesianOrientationPolicy.resolve(effectiveSeries);
+        if (!orientationResolution.valid) {
+            if (warnedDiagnosticSignatures) {
+                for (const diag of orientationResolution.diagnostics) {
+                    ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, diag);
+                }
+            }
+            return {
+                axes: [],
+                barHitTargets: [],
+                cartesianKind: "xy",
+                coordinateSystem: "cartesian",
+                hasRenderableData: false,
+                height: containerHeight,
+                hitTargets: [],
+                interactionAxis: "x",
+                interactionBuckets: [],
+                legendItems: [],
+                orientation: "vertical",
+                plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                series: [],
+                width: containerWidth,
+                xAxisType: "category",
+                yAxisType: "linear"
+            };
+        }
+
+        if (orientationResolution.orientation === "horizontal") {
+            const palette = [0, 1, 2, 3, 4].map(i => styleResolver.resolvePaletteColor(i));
+            return CartesianHorizontalBarLayoutEngine.computeLayout({
+                containerHeight,
+                containerWidth,
+                effectiveSeries,
+                measurements: options.measurements,
+                palette,
+                rootData,
+                rootXField,
+                xAxis,
+                yAxis
+            });
         }
 
         // Determine X axis type
@@ -170,7 +218,7 @@ export class CartesianLayoutEngine {
         );
         const yTickCount = normalizeTickCount(yAxis?.tickCount(), 5);
 
-        // Pass 1: Estimate required Y-axis gutter from tentative ticks
+        // Pass 1: Estimate required Y-axis and X-axis gutters
         const tentativeYScale = CartesianScaleFactory.createLinearScale(
             yDomain,
             [containerHeight, 0],
@@ -179,21 +227,86 @@ export class CartesianLayoutEngine {
             explicitYMin,
             explicitYMax
         );
-        const tentativeYRawTicks = tentativeYScale.ticks(yTickCount);
-        const maxLabelLength = Math.max(
-            ...tentativeYRawTicks.map((val, idx) => formatYValue(val, idx, effectiveYFormatter).length),
-            3
-        );
-        const yMargin = isYAxisVisible
-            ? Math.max(48, Math.min(120, Math.round(maxLabelLength * 7.5 + (yTitle ? 32 : 16))))
-            : 8;
-        const xMargin = isXAxisVisible ? (xTitle ? 44 : 32) : 8;
+
+        const yAxisLayoutPass1 = CartesianAxisLayoutEngine.computeAxisLayout({
+            axis: "y",
+            axisType: "linear",
+            containerSize: containerHeight,
+            defaultGridLines: true,
+            effectiveFormatter: effectiveYFormatter,
+            measurements: options.measurements,
+            plotGutterConstraint: Math.min(240, Math.floor(containerWidth * 0.45)),
+            position: yAxisPosition,
+            registration: yAxis,
+            scale: tentativeYScale
+        });
+
+        let tentativeXScale: import("../scale/chart-scale").ChartBandScale<string> | import("../scale/chart-scale").ChartContinuousScale<any>;
+        if (xAxisType === "category") {
+            const catDom = calculateCategoryDomain(effectiveSeries, rootData, rootXField);
+            tentativeXScale = CartesianScaleFactory.createBandScale(catDom, [0, containerWidth], 0.2, 0.1);
+        } else if (xAxisType === "linear") {
+            const rawXMin = xAxis?.min();
+            const rawXMax = xAxis?.max();
+            const explicitXMin = isFiniteNumber(rawXMin) ? rawXMin : undefined;
+            const explicitXMax = isFiniteNumber(rawXMax) ? rawXMax : undefined;
+            const xDomain = calculateLinearXDomain(effectiveSeries, rootData, rootXField, explicitXMin, explicitXMax);
+            const niceX = xAxis?.nice() ?? true;
+            const xTickCount = normalizeTickCount(xAxis?.tickCount(), 5);
+            tentativeXScale = CartesianScaleFactory.createLinearScale(xDomain, [0, containerWidth], niceX, xTickCount, explicitXMin, explicitXMax);
+        } else {
+            const rawXMin = xAxis?.min();
+            const rawXMax = xAxis?.max();
+            const explicitXMin = rawXMin instanceof Date || isFiniteNumber(rawXMin) ? rawXMin : undefined;
+            const explicitXMax = rawXMax instanceof Date || isFiniteNumber(rawXMax) ? rawXMax : undefined;
+            const [minDate, maxDate] = calculateTimeDomain(effectiveSeries, rootData, rootXField, explicitXMin, explicitXMax, xAxisType === "utc" ? "utc" : "time");
+            tentativeXScale = xAxisType === "utc"
+                ? CartesianScaleFactory.createUtcScale([minDate, maxDate], [0, containerWidth])
+                : CartesianScaleFactory.createTimeScale([minDate, maxDate], [0, containerWidth]);
+        }
+
+        const xAxisLayoutPass1 = CartesianAxisLayoutEngine.computeAxisLayout({
+            axis: "x",
+            axisType: xAxisType,
+            containerSize: containerWidth,
+            defaultGridLines: false,
+            measurements: options.measurements,
+            plotGutterConstraint: Math.min(240, Math.floor(containerHeight * 0.45)),
+            position: xAxisPosition,
+            registration: xAxis,
+            scale: tentativeXScale
+        });
+
+        const xTicks = xAxisLayoutPass1.axisScene.ticks.filter(t => t.labelVisible);
+        let xLeftOverhang = 8;
+        let xRightOverhang = 8;
+        const xRot = xAxisLayoutPass1.axisScene.labelRotation ?? 0;
+        if (xTicks.length > 0) {
+            const firstTick = xTicks[0];
+            const lastTick = xTicks[xTicks.length - 1];
+            const firstWidth = firstTick.unrotatedWidth ?? 0;
+            const firstHeight = firstTick.unrotatedHeight ?? 16;
+            const lastWidth = lastTick.unrotatedWidth ?? 0;
+            const lastHeight = lastTick.unrotatedHeight ?? 16;
+            if (xRot === 0) {
+                xLeftOverhang = Math.ceil(firstWidth / 2);
+                xRightOverhang = Math.ceil(lastWidth / 2);
+            } else if (xRot > 0) {
+                const lastProj = CartesianAxisLabelGeometry.projectRotatedDimensions(lastWidth, lastHeight, xRot);
+                xRightOverhang = Math.ceil(lastProj.projectedWidth);
+                xLeftOverhang = 8;
+            } else {
+                const firstProj = CartesianAxisLabelGeometry.projectRotatedDimensions(firstWidth, firstHeight, xRot);
+                xLeftOverhang = Math.ceil(firstProj.projectedWidth);
+                xRightOverhang = 8;
+            }
+        }
 
         const padding: ChartPadding = {
-            bottom: xAxisPosition === "bottom" ? xMargin : 12,
-            left: yAxisPosition === "left" ? yMargin : 16,
-            right: yAxisPosition === "right" ? yMargin : 16,
-            top: xAxisPosition === "top" ? xMargin : 16
+            bottom: xAxisPosition === "bottom" ? xAxisLayoutPass1.gutter : 12,
+            left: yAxisPosition === "left" ? Math.max(yAxisLayoutPass1.gutter, xLeftOverhang + 4) : Math.max(16, xLeftOverhang + 4),
+            right: yAxisPosition === "right" ? Math.max(yAxisLayoutPass1.gutter, xRightOverhang + 4) : Math.max(16, xRightOverhang + 4),
+            top: xAxisPosition === "top" ? xAxisLayoutPass1.gutter : 16
         };
 
         const plotWidth = Math.max(0, containerWidth - padding.left - padding.right);
@@ -244,18 +357,21 @@ export class CartesianLayoutEngine {
                 hasRenderableData: false,
                 height: containerHeight,
                 hitTargets: [],
+                interactionAxis: "x",
                 interactionBuckets: [],
                 legendItems: [],
+                orientation: "vertical",
                 plotRect,
                 series: [],
                 stackConfiguration: stackConfigForScene,
                 stackSignature: stackAnalysis.configuration.signature,
                 width: containerWidth,
-                xAxisType
+                xAxisType,
+                yAxisType: "linear"
             };
         }
 
-        // Pass 2: Finalize Y scale and ticks for exact plotRect
+        // Pass 2: Finalize Y scale and layout for exact plotRect
         const yScale = CartesianScaleFactory.createLinearScale(
             yDomain,
             [plotRect.y + plotRect.height, plotRect.y],
@@ -265,23 +381,19 @@ export class CartesianLayoutEngine {
             explicitYMax
         );
 
-        const yRawTicks = yScale.ticks(yTickCount);
-        const yTicks: ChartAxisTick[] = yRawTicks.map((val, idx) => ({
-            coordinate: yScale.map(val),
-            formattedValue: formatYValue(val, idx, effectiveYFormatter),
-            index: idx,
-            value: val
-        }));
-
-        axisScenes.push({
+        const yAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
             axis: "y",
-            axisLine: yAxis?.axisLine() ?? true,
-            gridLines: yAxis?.gridLines() ?? true,
-            position: yAxis?.position() ?? "left",
-            ticks: yTicks,
-            title: yAxis?.title() ?? "",
-            visible: isYAxisVisible
+            axisType: "linear",
+            containerSize: plotRect.height,
+            defaultGridLines: true,
+            effectiveFormatter: effectiveYFormatter,
+            measurements: options.measurements,
+            plotGutterConstraint: Math.min(240, Math.floor(containerWidth * 0.45)),
+            position: yAxisPosition,
+            registration: yAxis,
+            scale: yScale
         });
+        axisScenes.push(yAxisLayout.axisScene);
 
         // X scale building
         let categoryDomain: readonly string[] = [];
@@ -289,9 +401,7 @@ export class CartesianLayoutEngine {
         let linearXScale: LinearScale | undefined;
         let timeScale: TimeScale | UtcScale | undefined;
         let timeSpanMs: number | undefined;
-
-        const xTicks: ChartAxisTick[] = [];
-        const xFormatter = xAxis?.formatter();
+        let finalXScale: import("../scale/chart-scale").ChartBandScale<string> | import("../scale/chart-scale").ChartContinuousScale<any>;
 
         if (xAxisType === "category") {
             categoryDomain = calculateCategoryDomain(effectiveSeries, rootData, rootXField);
@@ -301,28 +411,7 @@ export class CartesianLayoutEngine {
                 0.2,
                 0.1
             );
-
-            // Responsive label skipping
-            const maxCategoryLabelLength = Math.max(
-                ...categoryDomain.map((cat, idx) => formatXValue(cat, idx, xFormatter, "category").length),
-                1
-            );
-            const estLabelWidth = maxCategoryLabelLength * 7.5 + 8;
-            const availablePerBand = bandScale.bandwidth();
-            const step = availablePerBand < estLabelWidth ? Math.ceil(estLabelWidth / Math.max(1, availablePerBand)) : 1;
-
-            for (let i = 0; i < categoryDomain.length; i += step) {
-                const cat = categoryDomain[i];
-                const coord = bandScale.map(cat);
-                if (coord !== undefined) {
-                    xTicks.push({
-                        coordinate: coord + bandScale.bandwidth() / 2,
-                        formattedValue: formatXValue(cat, i, xFormatter, "category"),
-                        index: i,
-                        value: cat
-                    });
-                }
-            }
+            finalXScale = bandScale;
         } else if (xAxisType === "linear") {
             const rawXMin = xAxis?.min();
             const rawXMax = xAxis?.max();
@@ -340,17 +429,7 @@ export class CartesianLayoutEngine {
                 explicitXMin,
                 explicitXMax
             );
-
-            const rawTicks = linearXScale.ticks(xTickCount);
-            for (let i = 0; i < rawTicks.length; i++) {
-                const val = rawTicks[i];
-                xTicks.push({
-                    coordinate: linearXScale.map(val),
-                    formattedValue: formatXValue(val, i, xFormatter, "linear"),
-                    index: i,
-                    value: val
-                });
-            }
+            finalXScale = linearXScale;
         } else {
             // time or utc
             const rawXMin = xAxis?.min();
@@ -367,8 +446,6 @@ export class CartesianLayoutEngine {
             );
 
             timeSpanMs = maxDate.getTime() - minDate.getTime();
-            const xTickCount = normalizeTickCount(xAxis?.tickCount(), 5);
-
             if (xAxisType === "utc") {
                 timeScale = CartesianScaleFactory.createUtcScale(
                     [minDate, maxDate],
@@ -380,28 +457,21 @@ export class CartesianLayoutEngine {
                     [plotRect.x, plotRect.x + plotRect.width]
                 );
             }
-
-            const rawTicks = timeScale.ticks(xTickCount);
-            for (let i = 0; i < rawTicks.length; i++) {
-                const d = rawTicks[i];
-                xTicks.push({
-                    coordinate: timeScale.map(d),
-                    formattedValue: formatXValue(d, i, xFormatter, xAxisType, timeSpanMs),
-                    index: i,
-                    value: d
-                });
-            }
+            finalXScale = timeScale;
         }
 
-        axisScenes.push({
+        const xAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
             axis: "x",
-            axisLine: xAxis?.axisLine() ?? true,
-            gridLines: xAxis?.gridLines() ?? false,
-            position: xAxis?.position() ?? "bottom",
-            ticks: xTicks,
-            title: xAxis?.title() ?? "",
-            visible: isXAxisVisible
+            axisType: xAxisType,
+            containerSize: plotRect.width,
+            defaultGridLines: false,
+            measurements: options.measurements,
+            plotGutterConstraint: Math.min(240, Math.floor(containerHeight * 0.45)),
+            position: xAxisPosition,
+            registration: xAxis,
+            scale: finalXScale
         });
+        axisScenes.push(xAxisLayout.axisScene);
 
         // Bubble size domain
         const visibleBubbleSeries = effectiveSeries.filter(
@@ -1229,10 +1299,12 @@ export class CartesianLayoutEngine {
             hasRenderableData: hasData,
             height: containerHeight,
             hitTargets,
+            interactionAxis: "x",
             interactionBucketLookup,
             interactionBuckets,
             legendItems,
             markerSpatialIndex: pointSpatialIndex,
+            orientation: "vertical",
             plotRect,
             pointSpatialIndex,
             series: seriesScenes,
@@ -1240,7 +1312,8 @@ export class CartesianLayoutEngine {
             stackSignature: stackAnalysis.configuration.signature,
             width: containerWidth,
             xAxisType,
-            xTimeSpanMs: timeSpanMs
+            xTimeSpanMs: timeSpanMs,
+            yAxisType: "linear"
         };
     }
 }

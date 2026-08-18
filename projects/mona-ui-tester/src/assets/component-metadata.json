@@ -2804,6 +2804,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Orientation of the bars ('vertical' for column bars, 'horizontal' for row bars).",
+        "kind": "input",
+        "name": "orientation",
+        "type": "ChartBarOrientation",
+        "defaultValue": "\"vertical\""
+      },
+      {
         "description": "Named stack group to participate in. Series with matching trimmed stack names stack together.",
         "kind": "input",
         "name": "stack",
@@ -3169,6 +3176,27 @@
         "type": "ChartSeriesVisibilityEvent"
       },
       {
+        "description": "Title text rendered above the plot area.",
+        "kind": "input",
+        "name": "title",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Subtitle text rendered beneath the title.",
+        "kind": "input",
+        "name": "subtitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Horizontal alignment of the title and subtitle ('center', 'left', or 'right').",
+        "kind": "input",
+        "name": "titleAlign",
+        "type": "ChartHeaderAlignment",
+        "defaultValue": "\"left\""
+      },
+      {
         "description": "Additional CSS classes applied to chart root container.",
         "kind": "input",
         "name": "userClass",
@@ -3430,11 +3458,39 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Whether vertical grid lines aligned with X-axis ticks are visible.",
+        "description": "Whether vertical grid lines aligned with X-axis ticks are visible. Defaults to false in standard Cartesian and true for horizontal value axes.",
         "kind": "input",
         "name": "gridLines",
+        "type": "boolean | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Maximum unrotated width in pixels for tick labels before truncation.",
+        "kind": "input",
+        "name": "labelMaxWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Spacing in pixels between the axis baseline / tick marks and tick labels.",
+        "kind": "input",
+        "name": "labelPadding",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit rotation angle in degrees for tick labels (-90 to 90), or 'auto' for responsive automatic angling.",
+        "kind": "input",
+        "name": "labelRotation",
+        "type": "ChartAxisLabelRotation",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Whether the axis tick labels are rendered in the DOM.",
+        "kind": "input",
+        "name": "labels",
         "type": "boolean",
-        "defaultValue": "false"
+        "defaultValue": "true"
       },
       {
         "description": "Explicit upper bound for the axis range.",
@@ -3465,9 +3521,23 @@
         "defaultValue": "\"bottom\""
       },
       {
-        "description": "Suggested number of ticks to display along the axis.",
+        "description": "Suggested number of ticks to display along the axis (acts as preferred label count for category axes).",
         "kind": "input",
         "name": "tickCount",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Whether tick mark lines extending outward from the baseline are drawn.",
+        "kind": "input",
+        "name": "tickMarks",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Length in pixels of outward tick mark lines.",
+        "kind": "input",
+        "name": "tickSize",
         "type": "number | undefined",
         "defaultValue": "undefined"
       },
@@ -3477,6 +3547,13 @@
         "name": "title",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Spacing in pixels between the outward extent of tick labels and the axis title.",
+        "kind": "input",
+        "name": "titlePadding",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Scale type for the X axis (`\"auto\"`, `\"category\"`, `\"linear\"`, `\"time\"`, or `\"utc\"`).",
@@ -3513,9 +3590,37 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Whether horizontal grid lines aligned with Y-axis ticks are visible.",
+        "description": "Whether horizontal grid lines aligned with Y-axis ticks are visible. Defaults to true in standard Cartesian and false for horizontal value axes.",
         "kind": "input",
         "name": "gridLines",
+        "type": "boolean | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Maximum unrotated width in pixels for tick labels before truncation.",
+        "kind": "input",
+        "name": "labelMaxWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Spacing in pixels between the axis baseline / tick marks and tick labels.",
+        "kind": "input",
+        "name": "labelPadding",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Explicit rotation angle in degrees for tick labels (-90 to 90), or 'auto' for responsive automatic angling.",
+        "kind": "input",
+        "name": "labelRotation",
+        "type": "ChartAxisLabelRotation",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Whether the axis tick labels are rendered in the DOM.",
+        "kind": "input",
+        "name": "labels",
         "type": "boolean",
         "defaultValue": "true"
       },
@@ -3548,9 +3653,23 @@
         "defaultValue": "\"left\""
       },
       {
-        "description": "Suggested number of ticks to display along the axis.",
+        "description": "Suggested number of ticks to display along the axis (acts as preferred label count for category axes).",
         "kind": "input",
         "name": "tickCount",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Whether tick mark lines extending outward from the baseline are drawn.",
+        "kind": "input",
+        "name": "tickMarks",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Length in pixels of outward tick mark lines.",
+        "kind": "input",
+        "name": "tickSize",
         "type": "number | undefined",
         "defaultValue": "undefined"
       },
@@ -3560,6 +3679,13 @@
         "name": "title",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Spacing in pixels between the outward extent of tick labels and the axis title.",
+        "kind": "input",
+        "name": "titlePadding",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Scale type for the Y axis (`\"auto\"`, `\"category\"`, or `\"linear\"`).",
@@ -5350,6 +5476,13 @@
         "name": "name",
         "type": "string",
         "defaultValue": "\"Range Bar\""
+      },
+      {
+        "description": "Orientation of the range bars ('vertical' for vertical spans, 'horizontal' for horizontal intervals).",
+        "kind": "input",
+        "name": "orientation",
+        "type": "ChartBarOrientation",
+        "defaultValue": "\"vertical\""
       },
       {
         "description": "Property key or accessor extracting the ending range value for each bar.",

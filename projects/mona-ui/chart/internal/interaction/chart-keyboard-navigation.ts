@@ -1,4 +1,4 @@
-import type { CartesianHeatmapChartScene, CartesianFunnelChartScene, CartesianWaterfallChartScene, ChartScene } from "../scene/chart-scene";
+import type { CartesianFunnelChartScene, CartesianHeatmapChartScene, CartesianWaterfallChartScene, CartesianXYChartScene, ChartScene } from "../scene/chart-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { clamp } from "../utils/number-utils";
 import { FunnelKeyboardNavigation } from "./funnel-keyboard-navigation";
@@ -104,10 +104,35 @@ export class ChartKeyboardNavigation {
 
         const isSector = scene.coordinateSystem === "polar" && scene.polarKind === "sector";
         const isPolarAxis = scene.coordinateSystem === "polar" && scene.polarKind === "axis";
+        const isHorizontal = (scene as CartesianXYChartScene).interactionAxis === "y";
 
         switch (event.key) {
             case "ArrowRight": {
                 event.preventDefault();
+                if (isHorizontal) {
+                    // In horizontal charts, ArrowRight cycles through series at current category
+                    const currIdx = activeBucketIndex < 0 ? 0 : activeBucketIndex;
+                    const bucket = buckets[currIdx];
+                    if (!bucket || bucket.hits.length === 0) return null;
+
+                    let currentHitIdx = -1;
+                    if (activeHitKey) {
+                        currentHitIdx = bucket.hits.findIndex(h => getHitTargetKey(h) === activeHitKey);
+                    }
+                    if (currentHitIdx < 0 && activeSeriesId) {
+                        currentHitIdx = bucket.hits.findIndex(h => h.seriesId === activeSeriesId);
+                    }
+
+                    const nextHitIdx = currentHitIdx >= 0 ? (currentHitIdx + 1) % bucket.hits.length : 0;
+                    const hit = bucket.hits[nextHitIdx];
+                    return {
+                        bucketIndex: currIdx,
+                        hitKey: getHitTargetKey(hit),
+                        hitTarget: hit,
+                        seriesId: hit.seriesId
+                    };
+                }
+
                 let nextIdx: number;
                 if (isSector || isPolarAxis) {
                     nextIdx = activeBucketIndex < 0 ? 0 : (activeBucketIndex + 1) % buckets.length;
@@ -119,6 +144,31 @@ export class ChartKeyboardNavigation {
 
             case "ArrowLeft": {
                 event.preventDefault();
+                if (isHorizontal) {
+                    // In horizontal charts, ArrowLeft cycles in reverse through series at current category
+                    const currIdx = activeBucketIndex < 0 ? 0 : activeBucketIndex;
+                    const bucket = buckets[currIdx];
+                    if (!bucket || bucket.hits.length === 0) return null;
+
+                    let currentHitIdx = -1;
+                    if (activeHitKey) {
+                        currentHitIdx = bucket.hits.findIndex(h => getHitTargetKey(h) === activeHitKey);
+                    }
+                    if (currentHitIdx < 0 && activeSeriesId) {
+                        currentHitIdx = bucket.hits.findIndex(h => h.seriesId === activeSeriesId);
+                    }
+
+                    const prevHitIdx =
+                        currentHitIdx >= 0 ? (currentHitIdx - 1 + bucket.hits.length) % bucket.hits.length : 0;
+                    const hit = bucket.hits[prevHitIdx];
+                    return {
+                        bucketIndex: currIdx,
+                        hitKey: getHitTargetKey(hit),
+                        hitTarget: hit,
+                        seriesId: hit.seriesId
+                    };
+                }
+
                 let prevIdx: number;
                 if (isSector || isPolarAxis) {
                     prevIdx =
@@ -133,6 +183,12 @@ export class ChartKeyboardNavigation {
 
             case "ArrowDown": {
                 event.preventDefault();
+                if (isHorizontal) {
+                    // In horizontal charts, ArrowDown moves to next category bucket
+                    const nextIdx = activeBucketIndex < buckets.length - 1 ? activeBucketIndex + 1 : 0;
+                    return this.#resolveSelection(buckets, nextIdx, activeSeriesId, activeHitKey);
+                }
+
                 if (isSector) {
                     // In sector charts, ArrowDown navigates clockwise same as ArrowRight
                     const nextIdx = activeBucketIndex < 0 ? 0 : (activeBucketIndex + 1) % buckets.length;
@@ -164,6 +220,12 @@ export class ChartKeyboardNavigation {
 
             case "ArrowUp": {
                 event.preventDefault();
+                if (isHorizontal) {
+                    // In horizontal charts, ArrowUp moves to previous category bucket
+                    const prevIdx = activeBucketIndex > 0 ? activeBucketIndex - 1 : buckets.length - 1;
+                    return this.#resolveSelection(buckets, prevIdx, activeSeriesId, activeHitKey);
+                }
+
                 if (isSector) {
                     // In sector charts, ArrowUp navigates counter-clockwise same as ArrowLeft
                     const prevIdx =

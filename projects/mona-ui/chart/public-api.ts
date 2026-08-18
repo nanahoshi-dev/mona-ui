@@ -36,6 +36,8 @@ export { ChartGaugeCenterTemplateDirective } from "./directives/chart-gauge-cent
 export { ChartTreemapLabelTemplateDirective } from "./directives/chart-treemap-label-template.directive";
 export { ChartFunnelLabelTemplateDirective } from "./directives/chart-funnel-label-template.directive";
 export { ChartWaterfallLabelTemplateDirective } from "./directives/chart-waterfall-label-template.directive";
+export { ChartTitleTemplateDirective } from "./directives/chart-title-template.directive";
+export { ChartSubtitleTemplateDirective } from "./directives/chart-subtitle-template.directive";
 
 export type {
     ChartCoordinateSystem,
@@ -51,11 +53,17 @@ export type {
 
 export type { ChartAnimationEasing, ChartAnimationInput, ChartAnimationOptions } from "./models/chart-animation.models";
 
+export type { ChartBarOrientation } from "./models/chart-bar.models";
+
 export type {
     ChartAxisFormatter,
+    ChartAxisLabelRotation,
     ChartAxisLabelTemplateContext,
     ChartAxisPosition,
     ChartAxisTick,
+    ChartHeaderAlignment,
+    ChartSubtitleTemplateContext,
+    ChartTitleTemplateContext,
     ChartXAxisPosition,
     ChartXAxisType,
     ChartYAxisPosition,

@@ -10,6 +10,7 @@ export interface RectMarkTransitionState {
     readonly index: number;
     readonly isPositive: boolean;
     readonly opacity: number;
+    readonly orientation?: "horizontal" | "vertical";
     readonly radius: number;
     readonly stackEndValue?: number;
     readonly stackGroup?: string;
@@ -36,7 +37,7 @@ export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: num
     const { from, to } = plan;
     const x = lerp(from.x, to.x, progress);
     const y = lerp(from.y, to.y, progress);
-    const width = lerp(from.width, to.width, progress);
+    const width = Math.max(0, lerp(from.width, to.width, progress));
     const height = Math.max(0, lerp(from.height, to.height, progress));
     const radius = lerp(from.radius, to.radius, progress);
     const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
@@ -48,6 +49,7 @@ export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: num
         height,
         index: to.index,
         isPositive: to.isPositive,
+        orientation: to.orientation ?? from.orientation,
         radius,
         renderOpacity,
         stackEndValue: to.stackEndValue ?? from.stackEndValue,

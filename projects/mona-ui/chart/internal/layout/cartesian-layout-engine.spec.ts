@@ -340,11 +340,11 @@ describe("CartesianLayoutEngine", () => {
         });
 
         // Top X axis moves plotRect.y down
-        expect(invertedScene.plotRect.y).toBe(32);
+        expect(invertedScene.plotRect.y).toBe(28);
         // Right Y axis moves plotRect.x to left margin (16)
         expect(invertedScene.plotRect.x).toBe(16);
-        // Default left Y axis has plotRect.x = 48
-        expect(defaultScene.plotRect.x).toBe(48);
+        // Default left Y axis has plotRect.x = 46 (dynamically measured gutter)
+        expect(defaultScene.plotRect.x).toBe(46);
     });
 
     it("should reserve extra margin when axis title is specified", () => {

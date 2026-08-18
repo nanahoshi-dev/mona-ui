@@ -198,12 +198,34 @@ The root container that coordinates layout measurement, data domains, rendering 
 | :--- | :--- | :--- | :--- |
 | `data` | `readonly unknown[]` | `[]` | Primary dataset shared across all child series. |
 | `xField` | `ChartField` | `""` | Property key or accessor extracting the X-axis coordinate for each data item. |
+| `title` | `string` | `""` | Title text rendered at the top of the chart above the plot area. |
+| `subtitle` | `string` | `""` | Subtitle text rendered beneath the title. |
+| `titleAlign` | `ChartHeaderAlignment` | `"left"` | Alignment of the chart title and subtitle (`"center"`, `"left"`, or `"right"`). |
 | `animation` | `ChartAnimationInput` | `true` | Animation settings (`boolean` or `Partial<ChartAnimationOptions>`) for initial render, data transitions, and series visibility toggles. |
-| `ariaLabel` | `string` | `"Chart"` | Accessible name for the chart container. |
-| `ariaDescription` | `string` | `""` | Detailed accessible description explaining the chart's purpose and trends. |
+| `ariaLabel` | `string` | `"Chart"` | Accessible name for the chart container (falls back to `title`). |
+| `ariaDescription` | `string` | `""` | Detailed accessible description explaining the chart's purpose and trends (falls back to `subtitle`). |
 | `pointClick` | `output<ChartPointEvent>` | — | Emits when a data point, vertex, bar, marker, or sector slice is clicked. |
 | `pointFocusChange` | `output<ChartPointFocusEvent>` | — | Emits when keyboard focus moves to a new data point, marker, spoke, or slice. |
 | `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | — | Emits when a series visibility state is toggled via legend interaction. |
+
+### Cartesian Axes (`<mona-chart-x-axis>`, `<mona-chart-y-axis>`)
+
+| Input | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `axisLine` | `boolean` | `true` | Whether to draw the baseline border axis line. |
+| `gridLines` | `boolean` | `auto` | Whether to render orthogonal grid lines across the plot area (default `false` on X, `true` on Y in vertical charts). |
+| `labels` | `boolean` | `true` | Whether to render tick labels. |
+| `labelRotation` | `ChartAxisLabelRotation` | `0` | Axis label rotation in degrees (`-90` to `90`) or `"auto"` (auto-rotates to -45° when labels collide on physical X category axis). |
+| `labelPadding` | `number` | `4` | Spacing in pixels between the baseline/tick marks and the label bounds. |
+| `labelMaxWidth` | `number` | `undefined` | Optional maximum width in pixels applied to label spans with text truncation. |
+| `tickMarks` | `boolean` | `false` | Whether to render outward tick marks along the axis baseline. |
+| `tickSize` | `number` | `6` | Length in pixels of outward tick marks. |
+| `titlePadding` | `number` | `8` | Spacing in pixels between the outer label edge and the axis title. |
+| `position` | `string` | `"bottom"` / `"left"` | Axis placement (`"bottom"` or `"top"` for X; `"left"` or `"right"` for Y). |
+| `min` / `max` | `number \| Date` | `undefined` | Explicit domain bounds for continuous scales. |
+| `nice` | `boolean` | `true` | Rounds continuous domain bounds to clean tick increments. |
+| `tickCount` | `number` | `5` | Desired tick mark frequency for continuous scales or preferred maximum tick cap for category axes. |
+| `visible` | `boolean` | `true` | Whether the axis is visible. |
 
 ### Animation & Transitions
 
@@ -262,10 +284,11 @@ Renders a Cartesian bar series supporting standalone bars, grouped slots, stacke
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
 | `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
 | `name` | `string` | `"Bar"` | Series name for tooltips, legend, and accessibility. |
+| `orientation` | `ChartBarOrientation` | `"vertical"` | Bar orientation: `"vertical"` (category on X, value on Y) or `"horizontal"` (category on Y, value on X). |
 | `stack` | `string` | `undefined` | Stack group name. Series sharing the same stack identifier are stacked cumulatively into a single bar slot. |
 | `stackMode` | `ChartStackMode` | `"normal"` | Stacking calculation mode: `"normal"` (raw cumulative sum) or `"percent"` (normalized to 100%). |
 | `borderRadius` | `number` | `0` | Corner radius for the outer cap of the bar/stack. |
-| `maxBarWidth` | `number` | `undefined` | Maximum width of the bar in pixels. |
+| `maxBarWidth` | `number` | `undefined` | Maximum width/height of the bar in pixels. |
 | `color` | `string` | `undefined` | Bar fill color. Defaults to palette token. |
 | `fillOpacity` | `number` | `1.0` | Bar fill opacity between 0.0 and 1.0. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter callback for bar raw values and stack totals in tooltips and live region. |
@@ -279,10 +302,11 @@ Renders a Cartesian floating range bar series plotting discrete min-max interval
 | `fromField` | `ChartField` | (required) | Property key or accessor extracting the range starting/lower value. |
 | `toField` | `ChartField` | (required) | Property key or accessor extracting the range ending/upper value. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
+| `orientation` | `ChartBarOrientation` | `"vertical"` | Bar orientation: `"vertical"` or `"horizontal"`. |
 | `keyField` | `ChartField` | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
 | `name` | `string` | `"Range Bar"` | Series name for tooltips, legend, and accessibility. |
 | `borderRadius` | `number` | `4` | Corner radius applied to all 4 corners of floating bars. |
-| `maxBarWidth` | `number` | `undefined` | Maximum width of the bar in pixels. |
+| `maxBarWidth` | `number` | `undefined` | Maximum width/height of the bar in pixels. |
 | `color` | `string` | `undefined` | Bar fill color. Defaults to palette token. |
 | `fillOpacity` | `number` | `1.0` | Bar fill opacity between 0.0 and 1.0. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter callback for formatting range bounds in tooltips and live region. |

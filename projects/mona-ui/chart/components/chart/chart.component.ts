@@ -18,6 +18,8 @@ import {
 } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
+import { ChartSubtitleTemplateDirective } from "../../directives/chart-subtitle-template.directive";
+import { ChartTitleTemplateDirective } from "../../directives/chart-title-template.directive";
 import { BrowserAnimationClock } from "../../internal/animation/chart-animation-clock";
 import { ChartAnimationController } from "../../internal/animation/chart-animation-controller";
 import { normalizeChartAnimationOptions } from "../../internal/animation/chart-animation-options";
@@ -102,10 +104,14 @@ import type {
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
 import type { ChartField, ChartPoint } from "../../models/chart.models";
+import type { ChartHeaderAlignment } from "../../models/chart-axis.models";
 import {
     chartAxisLabelBaseThemeVariants,
     chartBaseThemeVariants,
-    chartNoDataBaseThemeVariants
+    chartHeaderBaseThemeVariants,
+    chartNoDataBaseThemeVariants,
+    chartSubtitleBaseThemeVariants,
+    chartTitleBaseThemeVariants
 } from "../../styles/chart.styles";
 
 function easingToCss(easing: string): string {
@@ -138,8 +144,8 @@ function easingToCss(easing: string): string {
         "[class]": "baseClasses()",
         "[attr.tabindex]": "0",
         role: "region",
-        "[attr.aria-label]": "ariaLabel() || 'Chart'",
-        "[attr.aria-description]": "ariaDescription() || null",
+        "[attr.aria-label]": "effectiveAriaLabel()",
+        "[attr.aria-description]": "effectiveAriaDescription()",
         "[style.--mona-chart-animation-duration]": "animationDurationCss()",
         "[style.--mona-chart-animation-easing]": "animationEasingCss()",
         "(keydown)": "onKeyDown($event)",
@@ -319,11 +325,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     });
     protected readonly layoutClasses = computed(() => {
         const pos = this.legendPosition();
-        if (pos === "top") return "relative flex flex-col h-full w-full overflow-hidden";
-        if (pos === "bottom") return "relative flex flex-col h-full w-full overflow-hidden";
-        if (pos === "left") return "relative flex flex-row items-center h-full w-full overflow-hidden";
-        if (pos === "right") return "relative flex flex-row items-center h-full w-full overflow-hidden";
-        return "relative flex flex-col h-full w-full overflow-hidden";
+        if (pos === "top" || pos === "bottom") {
+            return "relative flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden";
+        }
+        if (pos === "left" || pos === "right") {
+            return "relative flex flex-row items-center flex-1 min-h-0 min-w-0 w-full overflow-hidden";
+        }
+        return "relative flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden";
     });
     protected readonly legendPosition = computed(() => this.#legend()?.position() ?? "bottom");
     protected readonly noDataClasses = computed(() => chartNoDataBaseThemeVariants());
@@ -355,6 +363,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @default "Chart"
      */
     public readonly ariaLabel = input("Chart", { alias: "aria-label" });
+
+    protected readonly effectiveAriaLabel = computed<string>(() => {
+        const raw = this.ariaLabel();
+        if (raw && raw !== "Chart") {
+            return raw;
+        }
+        return this.title() || raw || "Chart";
+    });
+
+    protected readonly effectiveAriaDescription = computed<string | null>(() => {
+        const raw = this.ariaDescription();
+        return raw || this.subtitle() || null;
+    });
 
     /**
      * @description Primary dataset shared across all child series.
@@ -388,6 +409,40 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public readonly tooltipPosition = signal<ChartPoint | null>(null);
 
     /**
+     * @description Title text rendered above the plot area.
+     * @default ""
+     */
+    public readonly title = input("");
+
+    /**
+     * @description Subtitle text rendered beneath the title.
+     * @default ""
+     */
+    public readonly subtitle = input("");
+
+    /**
+     * @description Horizontal alignment of the title and subtitle ('center', 'left', or 'right').
+     * @default "left"
+     */
+    public readonly titleAlign = input<ChartHeaderAlignment>("left");
+
+    protected readonly titleTemplate = contentChild(ChartTitleTemplateDirective);
+    protected readonly subtitleTemplate = contentChild(ChartSubtitleTemplateDirective);
+
+    protected readonly hasHeader = computed(() =>
+        Boolean(this.title().trim() || this.subtitle().trim() || this.titleTemplate() || this.subtitleTemplate())
+    );
+    protected readonly headerClasses = computed(() =>
+        twMerge(chartHeaderBaseThemeVariants({ align: this.titleAlign() }))
+    );
+    protected readonly titleClasses = computed(() =>
+        twMerge(chartTitleBaseThemeVariants())
+    );
+    protected readonly subtitleClasses = computed(() =>
+        twMerge(chartSubtitleBaseThemeVariants())
+    );
+
+    /**
      * @description Additional CSS classes applied to chart root container.
      * @default ""
      */
@@ -404,6 +459,88 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public readonly radialAxisRegistration: Signal<ChartRadialAxisRegistration | null> = this.#radialAxis.asReadonly();
     public readonly xAxisRegistration: Signal<ChartXAxisRegistration | null> = this.#xAxis.asReadonly();
     public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = this.#yAxis.asReadonly();
+
+    protected axisLabelTransform(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): string {
+        const rot = axisScene.labelRotation ?? 0;
+        if (axisScene.axis === "x") {
+            if (axisScene.position === "top") {
+                if (rot === 0) {
+                    return "translate(-50%, -100%)";
+                }
+                return `translate(${rot > 0 ? "0" : "-100%"}, -100%) rotate(${rot}deg)`;
+            }
+            if (rot === 0) {
+                return "translateX(-50%)";
+            }
+            return rot > 0 ? `rotate(${rot}deg)` : `translate(-100%, 0) rotate(${rot}deg)`;
+        }
+        if (axisScene.position === "right") {
+            if (rot === 0) {
+                return "translate(0, -50%)";
+            }
+            return `translate(0, -50%) rotate(${rot}deg)`;
+        }
+        if (rot === 0) {
+            return "translate(-100%, -50%)";
+        }
+        return `translate(-100%, -50%) rotate(${rot}deg)`;
+    }
+
+    protected axisLabelTransformOrigin(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): string {
+        const rot = axisScene.labelRotation ?? 0;
+        if (axisScene.axis === "x") {
+            if (axisScene.position === "top") {
+                return rot > 0 ? "bottom left" : rot < 0 ? "bottom right" : "center center";
+            }
+            return rot > 0 ? "top left" : rot < 0 ? "top right" : "center center";
+        }
+        if (axisScene.position === "right") {
+            return rot === 0 ? "center center" : "left center";
+        }
+        return rot === 0 ? "center center" : "right center";
+    }
+
+    protected axisLabelLeft(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): number {
+        if (axisScene.axis === "x") {
+            return tick.coordinate;
+        }
+        const tickMarksOffset = axisScene.tickMarks ? (axisScene.tickSize ?? 6) : 0;
+        const labelPadding = axisScene.labelPadding ?? 4;
+        return axisScene.position === "right"
+            ? cart.plotRect.x + cart.plotRect.width + tickMarksOffset + labelPadding
+            : cart.plotRect.x - tickMarksOffset - labelPadding;
+    }
+
+    protected axisLabelTop(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): number {
+        if (axisScene.axis === "y") {
+            return tick.coordinate;
+        }
+        const tickMarksOffset = axisScene.tickMarks ? (axisScene.tickSize ?? 6) : 0;
+        const labelPadding = axisScene.labelPadding ?? 4;
+        return axisScene.position === "top"
+            ? cart.plotRect.y - tickMarksOffset - labelPadding
+            : cart.plotRect.y + cart.plotRect.height + tickMarksOffset + labelPadding;
+    }
+
+    protected axisTitleLeft(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): number {
+        if (axisScene.axis === "x") {
+            return cart.plotRect.x + cart.plotRect.width / 2;
+        }
+        const gutter = axisScene.gutter ?? 48;
+        return axisScene.position === "right"
+            ? cart.plotRect.x + cart.plotRect.width + gutter - 14
+            : cart.plotRect.x - gutter + 14;
+    }
+
+    protected axisTitleTop(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): number {
+        if (axisScene.axis === "y") {
+            return cart.plotRect.y + cart.plotRect.height / 2;
+        }
+        const gutter = axisScene.gutter ?? 32;
+        return axisScene.position === "top"
+            ? cart.plotRect.y - gutter + 6
+            : cart.plotRect.y + cart.plotRect.height + gutter - 6;
+    }
 
     public constructor() {
         this.#styleResolver = new ChartStyleResolver(this.#elementRef.nativeElement);
@@ -1695,7 +1832,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public observeLabelElement(element: HTMLElement, labelId: string): void {
-        if (typeof ResizeObserver === "undefined") {
+        if (!labelId || typeof ResizeObserver === "undefined") {
             return;
         }
         if (!this.#labelResizeObserver) {
@@ -1708,7 +1845,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         const prev = this.#labelMeasurements.get(targetId);
                         const widthDiff = prev ? Math.abs(prev.width - width) : width;
                         const heightDiff = prev ? Math.abs(prev.height - height) : height;
-                        if (widthDiff > 1 || heightDiff > 1) {
+                        if (widthDiff > 3 || heightDiff > 3) {
                             this.#labelMeasurements.set(targetId, { width, height });
                             hasChanged = true;
                         }

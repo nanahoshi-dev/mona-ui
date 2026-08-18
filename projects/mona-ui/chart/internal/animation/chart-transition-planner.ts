@@ -3,6 +3,7 @@ import type {
     CartesianFunnelChartScene,
     CartesianHeatmapChartScene,
     CartesianWaterfallChartScene,
+    CartesianXYChartScene,
     ChartScene,
     PolarArcChartScene,
     PolarAxisChartScene,
@@ -341,6 +342,23 @@ export class ChartTransitionPlanner {
                         toScene: target,
                         trigger
                     };
+                }
+
+                if (prevCartesian.cartesianKind === "xy" && targetCartesian.cartesianKind === "xy") {
+                    const prevXY = prevCartesian as CartesianXYChartScene;
+                    const targetXY = targetCartesian as CartesianXYChartScene;
+                    if ((prevXY.orientation ?? "vertical") !== (targetXY.orientation ?? "vertical")) {
+                        return {
+                            complexity,
+                            duration: options.duration,
+                            easing: options.easing,
+                            fromScene: previous,
+                            mode: "crossfade",
+                            seriesPlans: [],
+                            toScene: target,
+                            trigger
+                        };
+                    }
                 }
 
                 if (prevCartesian.cartesianKind === "heatmap" && targetCartesian.cartesianKind === "heatmap") {

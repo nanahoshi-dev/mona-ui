@@ -11,10 +11,16 @@ export class ChartLabelMeasureDirective implements AfterViewInit, OnDestroy {
     public readonly sliceId = input.required<string>({ alias: "monaChartLabelMeasure" });
 
     public ngAfterViewInit(): void {
-        this.#chartContext?.observeLabelElement?.(this.#elementRef.nativeElement, this.sliceId());
+        const id = this.sliceId();
+        if (id) {
+            this.#chartContext?.observeLabelElement?.(this.#elementRef.nativeElement, id);
+        }
     }
 
     public ngOnDestroy(): void {
-        this.#chartContext?.unobserveLabelElement?.(this.#elementRef.nativeElement, this.sliceId());
+        const id = this.sliceId();
+        if (id) {
+            this.#chartContext?.unobserveLabelElement?.(this.#elementRef.nativeElement, id);
+        }
     }
 }

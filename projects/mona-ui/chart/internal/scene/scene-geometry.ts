@@ -1,3 +1,4 @@
+import type { ChartBarOrientation } from "../../models/chart-bar.models";
 import type { ChartFinancialDirection, ChartFinancialFillMode } from "../../models/chart-financial.models";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartSeriesType } from "../../models/chart-series.models";
@@ -25,11 +26,14 @@ export interface SceneArcHitGeometry {
 
 export interface SceneBar {
     animationKey?: string;
+    categorySize?: number;
+    categoryStartPixel?: number;
     cornerRadii?: ChartCornerRadii;
     datum: unknown;
     height: number;
     index: number;
     isPositive: boolean;
+    orientation?: ChartBarOrientation;
     radius: number;
     renderOpacity?: number;
     stackEndValue?: number;
@@ -39,6 +43,8 @@ export interface SceneBar {
     stackPosition?: "inner" | "outer" | "single";
     stackStartValue?: number;
     stackTotal?: number;
+    valueEndPixel?: number;
+    valueStartPixel?: number;
     width: number;
     x: number;
     xValue: unknown;
@@ -53,19 +59,24 @@ export interface SceneRangeBandGeometry {
 
 export interface SceneRangeBar {
     readonly animationKey?: string;
+    readonly categorySize?: number;
+    readonly categoryStartPixel?: number;
     readonly cornerRadii?: ChartCornerRadii;
     readonly datum: unknown;
     readonly formattedFrom?: string;
     readonly formattedTo?: string;
     readonly fromValue: number;
+    readonly fromValuePixel?: number;
     readonly fromY: number;
     readonly height: number;
     readonly highValue: number;
     readonly index: number;
     readonly lowValue: number;
+    readonly orientation?: ChartBarOrientation;
     readonly radius: number;
     readonly renderOpacity?: number;
     readonly toValue: number;
+    readonly toValuePixel?: number;
     readonly toY: number;
     readonly width: number;
     readonly x: number;
@@ -154,6 +165,7 @@ export interface SceneHitTarget {
     angle?: number;
     animationKey?: string;
     arc?: SceneArcHitGeometry;
+    barOrientation?: ChartBarOrientation;
     borderRadius?: number;
     bounds?: ChartRect;
     category?: unknown;
@@ -254,6 +266,7 @@ export interface ScenePoint {
 }
 
 export interface SceneAreaPoint extends ScenePoint {
+    readonly baseX?: number;
     readonly baseY: number;
     readonly stackEndValue?: number;
     readonly stackPercentage?: number;

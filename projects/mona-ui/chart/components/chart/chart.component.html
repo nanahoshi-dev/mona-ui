@@ -1,3 +1,17 @@
+@if (hasHeader()) {
+    <div [class]="headerClasses()" [style.text-align]="titleAlign()">
+        @if (titleTemplate(); as tpl) {
+            <ng-container [ngTemplateOutlet]="tpl.templateRef" [ngTemplateOutletContext]="{ $implicit: title(), title: title() }" />
+        } @else if (title()) {
+            <div [class]="titleClasses()">{{ title() }}</div>
+        }
+        @if (subtitleTemplate(); as subTpl) {
+            <ng-container [ngTemplateOutlet]="subTpl.templateRef" [ngTemplateOutletContext]="{ $implicit: subtitle(), subtitle: subtitle() }" />
+        } @else if (subtitle()) {
+            <div [class]="subtitleClasses()">{{ subtitle() }}</div>
+        }
+    </div>
+}
 <div [class]="layoutClasses()">
     <div class="relative flex-1 min-h-0 min-w-0 w-full h-full overflow-hidden" [style.order]="plotOrder()">
         <canvas
@@ -10,15 +24,18 @@
         <!-- DOM Cartesian Axis Labels & Titles -->
         @if (cartesianScene(); as cart) {
             @for (axisScene of cart.axes; track axisScene.axis) {
-                @if (axisScene.visible) {
-                    @for (tick of axisScene.ticks; track tick.index) {
-                        @if (axisScene.axis === "x") {
+                @if (axisScene.visible && axisScene.labels !== false) {
+                    @for (tick of axisScene.ticks; track tick.tickKey ?? tick.index) {
+                        @if (tick.labelVisible !== false) {
                             <div
                                 [class]="axisLabelClasses()"
-                                [style.left.px]="tick.coordinate"
-                                [style.top.px]="axisScene.position === 'top' ? cart.plotRect.y - 6 : cart.plotRect.y + cart.plotRect.height + 6"
-                                [style.transform]="axisScene.position === 'top' ? 'translate(-50%, -100%)' : 'translateX(-50%)'">
-                                @if (xAxisRegistration()?.labelTemplate?.(); as template) {
+                                [monaChartLabelMeasure]="(axisScene.axis === 'x' && xAxisRegistration()?.labelTemplate?.()) || (axisScene.axis === 'y' && yAxisRegistration()?.labelTemplate?.()) ? (tick.tickKey ?? '') : ''"
+                                [style.left.px]="axisLabelLeft(cart, axisScene, tick)"
+                                [style.top.px]="axisLabelTop(cart, axisScene, tick)"
+                                [style.max-width.px]="axisScene.labelMaxWidth ?? null"
+                                [style.transform]="axisLabelTransform(axisScene, tick)"
+                                [style.transform-origin]="axisLabelTransformOrigin(axisScene)">
+                                @if (axisScene.axis === 'x' && xAxisRegistration()?.labelTemplate?.(); as template) {
                                     <ng-container
                                         [ngTemplateOutlet]="template.templateRef"
                                         [ngTemplateOutletContext]="{
@@ -27,17 +44,7 @@
                                             index: tick.index,
                                             value: tick.value
                                         }" />
-                                } @else {
-                                    {{ tick.formattedValue }}
-                                }
-                            </div>
-                        } @else if (axisScene.axis === "y") {
-                            <div
-                                [class]="axisLabelClasses()"
-                                [style.left.px]="axisScene.position === 'right' ? cart.plotRect.x + cart.plotRect.width + 8 : cart.plotRect.x - 8"
-                                [style.top.px]="tick.coordinate"
-                                [style.transform]="axisScene.position === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
-                                @if (yAxisRegistration()?.labelTemplate?.(); as template) {
+                                } @else if (axisScene.axis === 'y' && yAxisRegistration()?.labelTemplate?.(); as template) {
                                     <ng-container
                                         [ngTemplateOutlet]="template.templateRef"
                                         [ngTemplateOutletContext]="{
@@ -55,23 +62,13 @@
 
                     <!-- Axis Title -->
                     @if (axisScene.title) {
-                        @if (axisScene.axis === "x") {
-                            <div
-                                class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
-                                [style.left.px]="cart.plotRect.x + cart.plotRect.width / 2"
-                                [style.top.px]="axisScene.position === 'top' ? 6 : cart.plotRect.y + cart.plotRect.height + 24"
-                                [style.transform]="'translateX(-50%)'">
-                                {{ axisScene.title }}
-                            </div>
-                        } @else if (axisScene.axis === "y") {
-                            <div
-                                class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
-                                [style.left.px]="axisScene.position === 'right' ? cart.width - 12 : 12"
-                                [style.top.px]="cart.plotRect.y + cart.plotRect.height / 2"
-                                [style.transform]="axisScene.position === 'right' ? 'translate(-50%, -50%) rotate(90deg)' : 'translate(-50%, -50%) rotate(-90deg)'">
-                                {{ axisScene.title }}
-                            </div>
-                        }
+                        <div
+                            class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+                            [style.left.px]="axisTitleLeft(cart, axisScene)"
+                            [style.top.px]="axisTitleTop(cart, axisScene)"
+                            [style.transform]="axisScene.axis === 'x' ? (axisScene.position === 'top' ? 'translate(-50%, 0)' : 'translate(-50%, -100%)') : (axisScene.position === 'right' ? 'translate(-50%, -50%) rotate(90deg)' : 'translate(-50%, -50%) rotate(-90deg)')">
+                            {{ axisScene.title }}
+                        </div>
                     }
                 }
             }

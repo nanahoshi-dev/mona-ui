@@ -180,4 +180,60 @@ describe("HeatmapLayoutEngine", () => {
             expect(cell.height).toBeGreaterThanOrEqual(0);
         }
     });
+
+    it("should compute adequate gutters and axis scene properties when titles are present", () => {
+        const rootData = [
+            { day: "Mon", hour: "00:00", val: 10 },
+            { day: "Tue", hour: "04:00", val: 20 }
+        ];
+
+        const series = createMockSeries();
+        const scene = HeatmapLayoutEngine.computeScene({
+            containerHeight: 400,
+            containerWidth: 600,
+            rootData,
+            series,
+            styleResolver,
+            xAxis: {
+                axisLine: signal(true),
+                formatter: signal(undefined),
+                gridLines: signal(true),
+                labelPadding: signal(4),
+                labels: signal(true),
+                position: signal("bottom"),
+                tickMarks: signal(false),
+                tickSize: signal(6),
+                title: signal("Day of Week"),
+                titlePadding: signal(8),
+                visible: signal(true)
+            } as unknown as import("../context/chart-registration-context").ChartXAxisRegistration,
+            yAxis: {
+                axisLine: signal(true),
+                formatter: signal(undefined),
+                gridLines: signal(true),
+                labelPadding: signal(4),
+                labels: signal(true),
+                position: signal("left"),
+                tickMarks: signal(false),
+                tickSize: signal(6),
+                title: signal("Time Block"),
+                titlePadding: signal(8),
+                visible: signal(true)
+            } as unknown as import("../context/chart-registration-context").ChartYAxisRegistration
+        });
+
+        const xAxis = scene.axes.find(a => a.axis === "x");
+        const yAxis = scene.axes.find(a => a.axis === "y");
+
+        expect(xAxis?.gutter).toBeDefined();
+        expect(xAxis?.gutter).toBeGreaterThanOrEqual(48);
+        expect(xAxis?.title).toBe("Day of Week");
+
+        expect(yAxis?.gutter).toBeDefined();
+        expect(yAxis?.gutter).toBeGreaterThanOrEqual(60);
+        expect(yAxis?.title).toBe("Time Block");
+
+        // plotRect.x should equal left gutter
+        expect(scene.plotRect.x).toBe(yAxis?.gutter);
+    });
 });

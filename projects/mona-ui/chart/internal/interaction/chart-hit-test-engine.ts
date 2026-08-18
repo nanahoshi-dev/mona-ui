@@ -40,6 +40,39 @@ export function findNearestInteractionBucketByX(
     return dist1 <= dist2 ? candidate1 : candidate2;
 }
 
+export function findNearestInteractionBucketByY(
+    buckets: readonly ChartInteractionBucket[],
+    targetY: number
+): ChartInteractionBucket | null {
+    if (buckets.length === 0) {
+        return null;
+    }
+    if (buckets.length === 1) {
+        return buckets[0];
+    }
+    let low = 0;
+    let high = buckets.length - 1;
+
+    while (low <= high) {
+        const mid = (low + high) >> 1;
+        const midY = buckets[mid].anchor.y;
+        if (midY === targetY) {
+            return buckets[mid];
+        }
+        if (midY < targetY) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    const candidate1 = buckets[Math.min(low, buckets.length - 1)];
+    const candidate2 = buckets[Math.max(0, low - 1)];
+    const dist1 = Math.abs(targetY - candidate1.anchor.y);
+    const dist2 = Math.abs(targetY - candidate2.anchor.y);
+    return dist1 <= dist2 ? candidate1 : candidate2;
+}
+
 export class ChartHitTestEngine {
     public static testHit(
         pointer: ChartPoint,
@@ -123,7 +156,10 @@ export class ChartHitTestEngine {
         if (shared) {
             // 1. Direct bar hit test
             for (const target of barTargets) {
-                if (target.bounds && isPointInRect(pointer, target.bounds)) {
+                const isHit =
+                    (target.bounds !== undefined && isPointInRect(pointer, target.bounds)) ||
+                    (target.visualBounds !== undefined && isPointInRect(pointer, target.visualBounds));
+                if (isHit) {
                     const bucket = cartesianScene.interactionBucketLookup?.get(target.xKey) ??
                         interactionBuckets?.find(b => b.xKey === target.xKey);
                     const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === target.xKey);
@@ -206,11 +242,16 @@ export class ChartHitTestEngine {
                 };
             }
 
-            // 4. Nearest X bucket
+            // 4. Nearest category bucket (by X or Y based on interactionAxis)
             if (interactionBuckets && interactionBuckets.length > 0) {
-                const nearestBucket = findNearestInteractionBucketByX(interactionBuckets, pointer.x);
+                const isAxisY = cartesianScene.interactionAxis === "y";
+                const nearestBucket = isAxisY
+                    ? findNearestInteractionBucketByY(interactionBuckets, pointer.y)
+                    : findNearestInteractionBucketByX(interactionBuckets, pointer.x);
                 if (nearestBucket) {
-                    const minBucketDist = Math.abs(pointer.x - nearestBucket.anchor.x);
+                    const minBucketDist = isAxisY
+                        ? Math.abs(pointer.y - nearestBucket.anchor.y)
+                        : Math.abs(pointer.x - nearestBucket.anchor.x);
                     if (minBucketDist <= maxHoverDistance) {
                         let nearestHit = nearestBucket.hits[0];
                         let minHitDist = Number.POSITIVE_INFINITY;
@@ -253,7 +294,10 @@ export class ChartHitTestEngine {
         // Cartesian non-shared mode: single nearest target
         // 1. Direct bar hit test
         for (const target of barTargets) {
-            if (target.bounds && isPointInRect(pointer, target.bounds)) {
+            const isHit =
+                (target.bounds !== undefined && isPointInRect(pointer, target.bounds)) ||
+                (target.visualBounds !== undefined && isPointInRect(pointer, target.visualBounds));
+            if (isHit) {
                 return {
                     activeHitTarget: target,
                     activeHits: [target],
