@@ -1065,7 +1065,7 @@ export class ChartStyleResolver {
         const fillOpacityInput = series.fillOpacity?.();
         const parentFillOpacityInput = series.parentFillOpacity?.();
         const borderRadiusInput = series.borderRadius?.();
-        const rawBaseColor = series.colors ? (series.colors()?.[0] ?? "") : "";
+        const rawBaseColor = series.colors ? (series.colors()?.[0] ?? "") : (series.color ? (series.color() ?? "") : "");
 
         let cssStrokeWidth: number | undefined;
         let cssStrokeColor: string | undefined;
@@ -1074,43 +1074,58 @@ export class ChartStyleResolver {
         let cssBorderRadius: number | undefined;
         let cssLabelColor: string | undefined;
 
-        const seriesEl = series.element?.nativeElement;
+        const targetElements = [
+            series.element?.nativeElement,
+            this.#rootElement
+        ].filter((el): el is HTMLElement => Boolean(el));
 
-        if (typeof window !== "undefined" && seriesEl) {
-            try {
-                const computed = window.getComputedStyle(seriesEl);
-                const sw = computed.getPropertyValue("--mona-chart-treemap-stroke-width");
-                if (sw) {
-                    const parsed = parseFloat(sw);
-                    if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+        if (typeof window !== "undefined") {
+            for (const el of targetElements) {
+                try {
+                    const computed = window.getComputedStyle(el);
+                    if (cssStrokeWidth === undefined) {
+                        const sw = computed.getPropertyValue("--mona-chart-treemap-stroke-width");
+                        if (sw) {
+                            const parsed = parseFloat(sw);
+                            if (isFiniteNumber(parsed) && parsed >= 0) cssStrokeWidth = parsed;
+                        }
+                    }
+                    if (!cssStrokeColor) {
+                        const sc = computed.getPropertyValue("--mona-chart-treemap-stroke-color").trim();
+                        if (sc) cssStrokeColor = sc;
+                    }
+                    if (cssFillOpacity === undefined) {
+                        const fo = computed.getPropertyValue("--mona-chart-treemap-fill-opacity");
+                        if (fo) {
+                            const parsed = parseFloat(fo);
+                            if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
+                        }
+                    }
+                    if (cssParentFillOpacity === undefined) {
+                        const pfo = computed.getPropertyValue("--mona-chart-treemap-parent-fill-opacity");
+                        if (pfo) {
+                            const parsed = parseFloat(pfo);
+                            if (isFiniteNumber(parsed)) cssParentFillOpacity = Math.max(0, Math.min(1, parsed));
+                        }
+                    }
+                    if (cssBorderRadius === undefined) {
+                        const br = computed.getPropertyValue("--mona-chart-treemap-border-radius");
+                        if (br) {
+                            const parsed = parseFloat(br);
+                            if (isFiniteNumber(parsed) && parsed >= 0) cssBorderRadius = parsed;
+                        }
+                    }
+                    if (!cssLabelColor) {
+                        const lc = computed.getPropertyValue("--mona-chart-treemap-label-color").trim();
+                        if (lc) cssLabelColor = lc;
+                    }
+                } catch {
+                    // Ignore style resolution errors
                 }
-                const sc = computed.getPropertyValue("--mona-chart-treemap-stroke-color");
-                if (sc) {
-                    cssStrokeColor = sc.trim();
-                }
-                const fo = computed.getPropertyValue("--mona-chart-treemap-fill-opacity");
-                if (fo) {
-                    const parsed = parseFloat(fo);
-                    if (isFiniteNumber(parsed)) cssFillOpacity = Math.max(0, Math.min(1, parsed));
-                }
-                const pfo = computed.getPropertyValue("--mona-chart-treemap-parent-fill-opacity");
-                if (pfo) {
-                    const parsed = parseFloat(pfo);
-                    if (isFiniteNumber(parsed)) cssParentFillOpacity = Math.max(0, Math.min(1, parsed));
-                }
-                const br = computed.getPropertyValue("--mona-chart-treemap-border-radius");
-                if (br) {
-                    const parsed = parseFloat(br);
-                    if (isFiniteNumber(parsed) && parsed >= 0) cssBorderRadius = parsed;
-                }
-                const lc = computed.getPropertyValue("--mona-chart-treemap-label-color");
-                if (lc) {
-                    cssLabelColor = lc.trim();
-                }
-            } catch {
-                // Ignore style resolution errors
             }
         }
+
+        const seriesEl = series.element?.nativeElement ?? this.#rootElement;
 
         const defaultStrokeColor =
             this.resolveCssVariable("--color-surface", seriesEl) ||
