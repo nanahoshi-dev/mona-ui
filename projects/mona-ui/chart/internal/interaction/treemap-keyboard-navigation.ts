@@ -23,37 +23,50 @@ export class TreemapKeyboardNavigation {
     ): string | undefined {
         const { entries, firstNodeId, lastNodeId } = navigationIndex;
 
-        if (!currentId) {
-            if (key === "Home" || key === "ArrowRight" || key === "ArrowDown") {
-                return firstNodeId;
-            }
-            if (key === "End") {
-                return lastNodeId;
-            }
-            return firstNodeId;
-        }
-
-        const entry = entries.get(currentId);
-        if (!entry) {
-            return firstNodeId;
-        }
-
         switch (key) {
-            case "ArrowRight":
-                // If has child, enter first child; otherwise next sibling, otherwise depth-first next
+            case "ArrowRight": {
+                if (!currentId) {
+                    return firstNodeId;
+                }
+                const entry = entries.get(currentId);
+                if (!entry) {
+                    return firstNodeId;
+                }
                 return entry.firstChildId ?? entry.nextSiblingId ?? entry.nextDepthFirstId ?? currentId;
+            }
 
-            case "ArrowLeft":
-                // Return to parent if exists
+            case "ArrowLeft": {
+                if (!currentId) {
+                    return undefined;
+                }
+                const entry = entries.get(currentId);
+                if (!entry) {
+                    return undefined;
+                }
                 return entry.parentId ?? currentId;
+            }
 
-            case "ArrowDown":
-                // Next sibling if exists, otherwise depth-first next
+            case "ArrowDown": {
+                if (!currentId) {
+                    return firstNodeId;
+                }
+                const entry = entries.get(currentId);
+                if (!entry) {
+                    return firstNodeId;
+                }
                 return entry.nextSiblingId ?? entry.nextDepthFirstId ?? currentId;
+            }
 
-            case "ArrowUp":
-                // Previous sibling if exists, otherwise depth-first previous, otherwise parent
+            case "ArrowUp": {
+                if (!currentId) {
+                    return undefined;
+                }
+                const entry = entries.get(currentId);
+                if (!entry) {
+                    return undefined;
+                }
                 return entry.previousSiblingId ?? entry.previousDepthFirstId ?? entry.parentId ?? currentId;
+            }
 
             case "Home":
                 return firstNodeId;
@@ -62,7 +75,7 @@ export class TreemapKeyboardNavigation {
                 return lastNodeId;
 
             default:
-                return currentId;
+                return undefined;
         }
     }
 }

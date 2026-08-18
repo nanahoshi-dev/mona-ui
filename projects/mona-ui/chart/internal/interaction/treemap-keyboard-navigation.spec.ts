@@ -116,4 +116,15 @@ describe("TreemapKeyboardNavigation", () => {
         const prevFromC1b = TreemapKeyboardNavigation.navigate("c1b", "ArrowUp", navIndex);
         expect(prevFromC1b).toBe("c1a");
     });
+
+    it("returns undefined for non-navigation keys such as Enter, Space, Escape, and letters", () => {
+        expect(TreemapKeyboardNavigation.navigate("p1", "Enter", navIndex)).toBeUndefined();
+        expect(TreemapKeyboardNavigation.navigate("p1", " ", navIndex)).toBeUndefined();
+        expect(TreemapKeyboardNavigation.navigate("p1", "Escape", navIndex)).toBeUndefined();
+        expect(TreemapKeyboardNavigation.navigate("p1", "Tab", navIndex)).toBeUndefined();
+        expect(TreemapKeyboardNavigation.navigate("p1", "a", navIndex)).toBeUndefined();
+        expect(TreemapKeyboardNavigation.navigate(undefined, "Enter", navIndex)).toBeUndefined();
+        expect(TreemapKeyboardNavigation.navigate(undefined, "Escape", navIndex)).toBeUndefined();
+        expect(TreemapKeyboardNavigation.navigate(undefined, "a", navIndex)).toBeUndefined();
+    });
 });
