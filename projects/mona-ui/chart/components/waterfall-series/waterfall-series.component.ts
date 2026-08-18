@@ -7,10 +7,8 @@ import {
     inject,
     input,
     model,
-    OnInit,
-    signal
+    OnInit
 } from "@angular/core";
-import { ImmutableSet } from "@mirei/ts-collections";
 import { ChartWaterfallLabelTemplateDirective } from "../../directives/chart-waterfall-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
@@ -35,14 +33,11 @@ export class WaterfallSeriesComponent implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #seriesId = `mona-waterfall-series-${++nextWaterfallSeriesId}`;
-    readonly #hiddenKinds = signal<ImmutableSet<string>>(ImmutableSet.create());
-    readonly #visibilityRevision = signal(0);
     #registered = false;
 
     public constructor() {
         effect(() => {
             this.visible();
-            this.#visibilityRevision();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
             }
@@ -51,7 +46,9 @@ export class WaterfallSeriesComponent implements OnInit {
         effect(() => {
             this.data();
             this.field();
+            this.keyField();
             this.kindField();
+            this.startValue();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -66,7 +63,6 @@ export class WaterfallSeriesComponent implements OnInit {
             this.name();
             this.showConnectors();
             this.showLabels();
-            this.startValue();
             this.valueFormatter();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
@@ -140,6 +136,12 @@ export class WaterfallSeriesComponent implements OnInit {
     public readonly increaseColor = input<string>("");
 
     /**
+     * @description Unique identifier key field for datums.
+     * @default undefined
+     */
+    public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
      * @description Property key or accessor extracting step kind ('change' | 'subtotal' | 'total').
      * @default "kind"
      */
@@ -189,9 +191,9 @@ export class WaterfallSeriesComponent implements OnInit {
 
     /**
      * @description Controls whether built-in value text labels are rendered.
-     * @default true
+     * @default false
      */
-    public readonly showLabels = input<boolean>(true);
+    public readonly showLabels = input<boolean>(false);
 
     /**
      * @description Starting cumulative baseline value before the first step.
@@ -243,23 +245,9 @@ export class WaterfallSeriesComponent implements OnInit {
 
     /**
      * @description Property key or accessor extracting category / step names.
-     * @default "category"
+     * @default undefined
      */
-    public readonly xField = input<ChartField | undefined>("category");
-
-    public isDatumVisible(kind: string): boolean {
-        this.#visibilityRevision();
-        return !this.#hiddenKinds().contains(kind);
-    }
-
-    public toggleDatumVisibility(kind: string): boolean {
-        const current = this.#hiddenKinds();
-        const next = current.contains(kind) ? current.remove(kind) : current.add(kind);
-        this.#hiddenKinds.set(next);
-        this.#visibilityRevision.update(r => r + 1);
-        this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
-        return !next.contains(kind);
-    }
+    public readonly xField = input<ChartField | undefined>(undefined);
 
     public ngOnInit(): void {
         if (!this.#chartContext) {
@@ -271,14 +259,13 @@ export class WaterfallSeriesComponent implements OnInit {
             connectorColor: this.connectorColor,
             connectorWidth: this.connectorWidth,
             data: this.data,
-            datumVisibilityRevision: this.#visibilityRevision.asReadonly(),
             decreaseColor: this.decreaseColor,
             element: this.#elementRef,
             field: this.field,
             fillOpacity: this.fillOpacity,
             id: this.#seriesId,
             increaseColor: this.increaseColor,
-            isDatumVisible: (kind: string) => this.isDatumVisible(kind),
+            keyField: this.keyField,
             kindField: this.kindField,
             labelTemplate: this.labelTemplate,
             maxBarWidth: this.maxBarWidth,
@@ -292,7 +279,6 @@ export class WaterfallSeriesComponent implements OnInit {
             strokeColor: this.strokeColor,
             strokeWidth: this.strokeWidth,
             subtotalColor: this.subtotalColor,
-            toggleDatumVisibility: (kind: string) => this.toggleDatumVisibility(kind),
             totalColor: this.totalColor,
             type: "waterfall",
             userClass: this.userClass,
