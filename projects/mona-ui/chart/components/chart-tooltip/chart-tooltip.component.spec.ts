@@ -1,7 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import type { ChartRegistrationContext } from "../../internal/context/chart-registration-context";
 import type { ChartScene } from "../../internal/scene/chart-scene";
@@ -162,5 +162,64 @@ describe("MonaChartTooltipComponent", () => {
         const left = parseFloat(tooltipEl.nativeElement.style.left);
         expect(left).toBeGreaterThan(200);
         expect(left).toBeLessThan(400);
+    });
+
+    it("should render specialized funnel tooltip with conversion and drop-off", () => {
+        tooltipPositionSignal.set({ x: 400, y: 200 });
+        const funnelPoint: ChartTooltipPointContext = {
+            ...createMockPointContext("Clicks", "400", 400),
+            formattedCategory: "Clicks",
+            funnel: {
+                category: "Clicks",
+                conversionRate: 0.4,
+                dropOff: 600,
+                formattedCategory: "Clicks",
+                formattedConversionRate: "40%",
+                formattedOverallConversionRate: "40%",
+                formattedValue: "400",
+                overallConversionRate: 0.4,
+                previousValue: 1000,
+                stageId: "clicks",
+                stageIndex: 1,
+                value: 400
+            },
+            seriesType: "funnel"
+        };
+        tooltipContextSignal.set(createMockTemplateContext(funnelPoint));
+        fixture.detectChanges();
+
+        const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
+        expect(tooltipEl.nativeElement.textContent).toContain("Clicks");
+        expect(tooltipEl.nativeElement.textContent).toContain("Value: 400");
+        expect(tooltipEl.nativeElement.textContent).toContain("Conversion: 40%");
+        expect(tooltipEl.nativeElement.textContent).toContain("Drop-off: 600");
+    });
+
+    it("should render specialized waterfall tooltip with change delta and running total", () => {
+        tooltipPositionSignal.set({ x: 400, y: 200 });
+        const waterfallPoint: ChartTooltipPointContext = {
+            ...createMockPointContext("Q1 Sales", "+50", 50),
+            formattedCategory: "Q1 Sales",
+            seriesType: "waterfall",
+            waterfall: {
+                barEnd: 150,
+                barStart: 100,
+                cumulativeAfter: 150,
+                cumulativeBefore: 100,
+                deltaValue: 50,
+                formattedCumulativeAfter: "150",
+                formattedCumulativeBefore: "100",
+                formattedDelta: "+50",
+                kind: "change",
+                valueKind: "waterfall"
+            }
+        };
+        tooltipContextSignal.set(createMockTemplateContext(waterfallPoint));
+        fixture.detectChanges();
+
+        const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
+        expect(tooltipEl.nativeElement.textContent).toContain("Q1 Sales");
+        expect(tooltipEl.nativeElement.textContent).toContain("Change: +50");
+        expect(tooltipEl.nativeElement.textContent).toContain("Running Total: 150");
     });
 });

@@ -15,14 +15,14 @@ export class WaterfallSeriesRenderer {
         // 1. Render connectors behind bars
         for (const conn of connectors) {
             const connOpacity = conn.renderOpacity ?? 1;
-            if (connOpacity <= 0 || conn.fromX >= conn.toX) {
+            if (connOpacity <= 0 || conn.width <= 0 || conn.fromX >= conn.toX) {
                 continue;
             }
 
             context.save();
             context.globalAlpha = renderOpacity * connOpacity;
             context.strokeStyle = conn.color;
-            context.lineWidth = Math.max(1, conn.width || 1);
+            context.lineWidth = conn.width;
             context.setLineDash([4, 4]);
 
             context.beginPath();

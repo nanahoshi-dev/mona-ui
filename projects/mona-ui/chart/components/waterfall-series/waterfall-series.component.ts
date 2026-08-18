@@ -34,15 +34,14 @@ export class WaterfallSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #seriesId = `mona-waterfall-series-${++nextWaterfallSeriesId}`;
     readonly #hiddenKinds = signal<ImmutableSet<string>>(ImmutableSet.create());
-    readonly #visibilityRevision = signal(0);
+    readonly #seriesId = `mona-waterfall-series-${++nextWaterfallSeriesId}`;
+    readonly #visibilityRevision = signal<number>(0);
     #registered = false;
 
     public constructor() {
         effect(() => {
             this.visible();
-            this.#visibilityRevision();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
             }
@@ -51,7 +50,9 @@ export class WaterfallSeriesComponent implements OnInit {
         effect(() => {
             this.data();
             this.field();
+            this.keyField();
             this.kindField();
+            this.startValue();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -66,7 +67,6 @@ export class WaterfallSeriesComponent implements OnInit {
             this.name();
             this.showConnectors();
             this.showLabels();
-            this.startValue();
             this.valueFormatter();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
@@ -140,6 +140,12 @@ export class WaterfallSeriesComponent implements OnInit {
     public readonly increaseColor = input<string>("");
 
     /**
+     * @description Unique identifier key field for datums.
+     * @default undefined
+     */
+    public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
      * @description Property key or accessor extracting step kind ('change' | 'subtotal' | 'total').
      * @default "kind"
      */
@@ -189,9 +195,9 @@ export class WaterfallSeriesComponent implements OnInit {
 
     /**
      * @description Controls whether built-in value text labels are rendered.
-     * @default true
+     * @default false
      */
-    public readonly showLabels = input<boolean>(true);
+    public readonly showLabels = input<boolean>(false);
 
     /**
      * @description Starting cumulative baseline value before the first step.
@@ -243,9 +249,9 @@ export class WaterfallSeriesComponent implements OnInit {
 
     /**
      * @description Property key or accessor extracting category / step names.
-     * @default "category"
+     * @default undefined
      */
-    public readonly xField = input<ChartField | undefined>("category");
+    public readonly xField = input<ChartField | undefined>(undefined);
 
     public isDatumVisible(kind: string): boolean {
         this.#visibilityRevision();
@@ -279,6 +285,7 @@ export class WaterfallSeriesComponent implements OnInit {
             id: this.#seriesId,
             increaseColor: this.increaseColor,
             isDatumVisible: (kind: string) => this.isDatumVisible(kind),
+            keyField: this.keyField,
             kindField: this.kindField,
             labelTemplate: this.labelTemplate,
             maxBarWidth: this.maxBarWidth,

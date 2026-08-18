@@ -44,7 +44,7 @@ class TestWaterfallIntegrationComponent {
 }
 
 describe("ChartComponent Waterfall Integration", () => {
-    it("renders waterfall chart scene with cumulative values and interactive series legend", () => {
+    it("renders waterfall chart scene with cumulative values and interactive legend", () => {
         TestBed.configureTestingModule({
             imports: [TestWaterfallIntegrationComponent]
         });
@@ -71,13 +71,18 @@ describe("ChartComponent Waterfall Integration", () => {
         // Connectors generated
         expect(scene.series[0].connectors.length).toBe(4);
 
-        // Semantic legend items generated for all 4 kinds present (Increase, Decrease, Subtotal, Total)
+        // Interactive legend items generated for all 4 kinds present (Increase, Decrease, Subtotal, Total)
         const legendItems = scene.legendItems;
         expect(legendItems.length).toBe(4);
         expect(legendItems.map(i => i.name)).toEqual(["Increase", "Decrease", "Subtotal", "Total"]);
-        expect(legendItems[0].kind).toBe("datum");
-        expect(legendItems[0].itemId).toBe("increase");
-        expect(legendItems[0].visible).toBe(true);
+        expect(legendItems.every(i => i.kind === "datum" && i.interactive === true && i.visible === true)).toBe(true);
+
+        // Custom template labels rendered
+        const customLabels = fixture.nativeElement.querySelectorAll(".custom-wf-label");
+        expect(customLabels.length).toBe(5);
+        expect(customLabels[0].textContent).toContain("Initial: +100");
+        expect(customLabels[1].textContent).toContain("Gain: +50");
+        expect(customLabels[2].textContent).toContain("Loss: -30");
 
         // Toggle increase visibility via legend click
         chartComp.toggleLegendItem(legendItems[0]);

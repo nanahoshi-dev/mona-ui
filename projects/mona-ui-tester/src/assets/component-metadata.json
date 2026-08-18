@@ -3829,7 +3829,7 @@
         "kind": "input",
         "name": "gap",
         "type": "number",
-        "defaultValue": "4"
+        "defaultValue": "2"
       },
       {
         "description": "Unique identifier key field for datums.",
@@ -3927,7 +3927,7 @@
         "kind": "input",
         "name": "widthRatio",
         "type": "number",
-        "defaultValue": "0.8"
+        "defaultValue": "0.9"
       },
       {
         "description": "Emits when a stage's visibility is toggled via legend or API.",
@@ -5927,6 +5927,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Unique identifier key field for datums.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting step kind ('change' | 'subtotal' | 'total').",
         "kind": "input",
         "name": "kindField",
@@ -5980,7 +5987,7 @@
         "kind": "input",
         "name": "showLabels",
         "type": "boolean",
-        "defaultValue": "true"
+        "defaultValue": "false"
       },
       {
         "description": "Starting cumulative baseline value before the first step.",
@@ -6043,7 +6050,7 @@
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
-        "defaultValue": "\"category\""
+        "defaultValue": "undefined"
       }
     ]
   },

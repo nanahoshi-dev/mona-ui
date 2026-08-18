@@ -639,7 +639,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (scene.coordinateSystem === "polar" && (scene.polarKind === "sector" || scene.polarKind === "arc")) {
             return false;
         }
-        if (scene.coordinateSystem === "cartesian" && scene.cartesianKind === "heatmap") {
+        if (
+            scene.coordinateSystem === "cartesian" &&
+            (scene.cartesianKind === "heatmap" ||
+                scene.cartesianKind === "funnel" ||
+                scene.cartesianKind === "waterfall")
+        ) {
             return false;
         }
         return this.#tooltip()?.shared() ?? false;
@@ -912,6 +917,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 formattedY: yStr,
                 formattedYCategory: hit.formattedYCategory,
                 fromValue,
+                funnel: hit.funnel,
                 hierarchy: hit.hierarchy,
                 high: hit.high ?? hit.financial?.high,
                 isClamped: hit.isClamped,
@@ -936,7 +942,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 stackStart: hit.stackStart,
                 stackTotal: hit.stackTotal,
                 toValue,
-                valueKind: hit.valueKind ?? (isRange ? "range" : hit.financial ? "ohlc" : "scalar"),
+                valueKind: hit.valueKind ?? (isRange ? "range" : hit.financial ? "ohlc" : hit.waterfall ? "waterfall" : "scalar"),
+                waterfall: hit.waterfall,
                 xValue: hit.xValue,
                 yCategory: hit.yCategory,
                 yValue: hit.yValue

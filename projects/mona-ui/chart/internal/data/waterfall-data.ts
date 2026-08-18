@@ -3,6 +3,8 @@ import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartWaterfallDatumKind, ChartWaterfallVisualKind } from "../../models/chart-waterfall.models";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartWaterfallSeriesStyle } from "../scene/waterfall-scene";
+import { ChartDiagnostics } from "../utils/chart-diagnostics";
+import { serializeKeyPart } from "../animation/animation-identity";
 import { resolveValue } from "./chart-value-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
 
@@ -26,6 +28,7 @@ export interface PreparedWaterfallPoint {
     readonly itemId: string;
     readonly kind: ChartWaterfallDatumKind;
     readonly rawValue: number;
+    readonly slotKey: string;
     readonly value: number;
     readonly visualKind: ChartWaterfallVisualKind;
 }
@@ -45,8 +48,10 @@ export interface WaterfallDataOptions {
     readonly data?: readonly unknown[] | unknown;
     readonly field?: ChartField;
     readonly isDatumVisible?: (kind: string) => boolean;
+    readonly keyField?: ChartField;
     readonly kindField?: ChartField;
     readonly rootData?: readonly unknown[];
+    readonly rootXField?: ChartField;
     readonly seriesElement?: HTMLElement;
     readonly seriesId: string;
     readonly seriesName: string;
@@ -54,6 +59,7 @@ export interface WaterfallDataOptions {
     readonly style: ChartWaterfallSeriesStyle;
     readonly styleResolver: ChartStyleResolver;
     readonly valueFormatter?: ChartValueFormatter;
+    readonly warnedDiagnosticSignatures?: Set<string>;
     readonly xField?: ChartField;
 }
 
@@ -63,14 +69,19 @@ export class WaterfallDataProcessor {
             data,
             field = "value",
             isDatumVisible,
+            keyField,
             kindField = "kind",
             rootData,
+            rootXField,
+            seriesElement,
             seriesId,
             seriesName,
             startValue = 0,
             style,
+            styleResolver,
             valueFormatter,
-            xField = "category"
+            warnedDiagnosticSignatures,
+            xField
         } = options;
 
         let rawData: readonly unknown[];
@@ -97,34 +108,99 @@ export class WaterfallDataProcessor {
             };
         }
 
-        let runningTotal = isFiniteNumber(startValue) ? startValue : 0;
-        let minY = Math.min(0, runningTotal);
-        let maxY = Math.max(0, runningTotal);
+        let runningTotal = 0;
+        if (typeof startValue === "number" && Number.isFinite(startValue)) {
+            runningTotal = startValue;
+        } else if (startValue !== undefined) {
+            if (warnedDiagnosticSignatures) {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `Waterfall series "${seriesName}" received non-finite startValue "${String(startValue)}". Normalizing to 0.`,
+                    `${seriesId}:invalid-startValue`
+                );
+            }
+        }
+
+        let minY = runningTotal;
+        let maxY = runningTotal;
+        let hasInitializedMinMax = false;
 
         const points: PreparedWaterfallPoint[] = [];
         const usedVisualKinds = new Set<ChartWaterfallVisualKind>();
         const categories: unknown[] = [];
+        const seenExplicitKeys = new Set<string>();
+
+        const effectiveXField = xField ?? rootXField ?? "category";
 
         for (let i = 0; i < rawData.length; i++) {
             const datum = rawData[i];
-            const rawVal = resolveValue(datum, field, i);
-            const numVal = typeof rawVal === "number" && isFiniteNumber(rawVal) ? rawVal : 0;
 
-            const rawCat = resolveValue(datum, xField, i);
-            const formattedCategory = rawCat !== undefined && rawCat !== null ? String(rawCat) : `Step ${i + 1}`;
-            categories.push(rawCat ?? formattedCategory);
-
-            const rawKind = resolveValue(datum, kindField, i);
+            // 1. Resolve kind
+            const rawKind = kindField ? resolveValue(datum, kindField, i) : undefined;
             let kind: ChartWaterfallDatumKind = "change";
-            if (typeof rawKind === "string") {
-                const lower = rawKind.toLowerCase().trim();
-                if (lower === "subtotal") {
+            if (rawKind !== undefined && rawKind !== null && rawKind !== "") {
+                const kindStr = String(rawKind).toLowerCase().trim();
+                if (kindStr === "subtotal") {
                     kind = "subtotal";
-                } else if (lower === "total") {
+                } else if (kindStr === "total") {
                     kind = "total";
+                } else if (kindStr === "change") {
+                    kind = "change";
+                } else {
+                    if (warnedDiagnosticSignatures) {
+                        ChartDiagnostics.warnOnce(
+                            warnedDiagnosticSignatures,
+                            `Waterfall series "${seriesName}" encountered unknown step kind "${String(rawKind)}" at index ${i}. Treating as "change".`,
+                            `${seriesId}:unknown-kind:${kindStr}`
+                        );
+                    }
+                    kind = "change";
                 }
             }
 
+            // 2. Validate value for change rows
+            let numVal: number | undefined;
+            if (kind === "change") {
+                const rawVal = resolveValue(datum, field, i);
+                if (typeof rawVal === "number" && Number.isFinite(rawVal)) {
+                    numVal = rawVal;
+                } else {
+                    // Invalid change row is omitted
+                    continue;
+                }
+            }
+
+            // 3. Resolve identity (itemId, animationKey, slotKey)
+            let explicitKey: string | undefined;
+            if (keyField) {
+                const rawKey = resolveValue(datum, keyField, i);
+                const keyPart = serializeKeyPart(rawKey);
+                if (keyPart !== null) {
+                    const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
+                    if (seenExplicitKeys.has(keyStr)) {
+                        if (warnedDiagnosticSignatures) {
+                            ChartDiagnostics.warnOnce(
+                                warnedDiagnosticSignatures,
+                                `Waterfall series "${seriesName}" encountered duplicate explicit key "${String(rawKey)}" at index ${i}. Falling back to index identity.`,
+                                `${seriesId}:duplicate-keys`
+                            );
+                        }
+                    } else {
+                        seenExplicitKeys.add(keyStr);
+                        explicitKey = keyStr;
+                    }
+                }
+            }
+            const itemId = explicitKey ?? `i:${i}`;
+            const animationKey = `${seriesId}:waterfall:${itemId}`;
+            const slotKey = `${seriesId}:slot:${itemId}`;
+
+            // 4. Resolve category
+            const rawCat = resolveValue(datum, effectiveXField, i);
+            const formattedCategory = rawCat !== undefined && rawCat !== null ? String(rawCat) : `Step ${i + 1}`;
+            categories.push(rawCat ?? formattedCategory);
+
+            // 5. Cumulative calculations
             let barStart: number;
             let barEnd: number;
             let cumulativeBefore: number;
@@ -132,6 +208,7 @@ export class WaterfallDataProcessor {
             let deltaValue: number | undefined;
             let visualKind: ChartWaterfallVisualKind;
             let color: string;
+            let primaryValue: number;
 
             if (kind === "subtotal") {
                 cumulativeBefore = runningTotal;
@@ -140,6 +217,7 @@ export class WaterfallDataProcessor {
                 barEnd = runningTotal;
                 visualKind = "subtotal";
                 color = style.subtotalColor;
+                primaryValue = runningTotal;
             } else if (kind === "total") {
                 cumulativeBefore = runningTotal;
                 cumulativeAfter = runningTotal;
@@ -147,13 +225,15 @@ export class WaterfallDataProcessor {
                 barEnd = runningTotal;
                 visualKind = "total";
                 color = style.totalColor;
+                primaryValue = runningTotal;
             } else {
-                deltaValue = numVal;
+                deltaValue = numVal!;
                 cumulativeBefore = runningTotal;
                 runningTotal += deltaValue;
                 cumulativeAfter = runningTotal;
                 barStart = cumulativeBefore;
                 barEnd = cumulativeAfter;
+                primaryValue = deltaValue;
 
                 if (deltaValue > 0) {
                     visualKind = "increase";
@@ -169,20 +249,29 @@ export class WaterfallDataProcessor {
 
             usedVisualKinds.add(visualKind);
 
-            minY = Math.min(minY, barStart, barEnd);
-            maxY = Math.max(maxY, barStart, barEnd);
+            if (!hasInitializedMinMax) {
+                minY = Math.min(barStart, barEnd);
+                maxY = Math.max(barStart, barEnd);
+                hasInitializedMinMax = true;
+            } else {
+                minY = Math.min(minY, barStart, barEnd);
+                maxY = Math.max(maxY, barStart, barEnd);
+            }
 
             const isZeroChange = kind === "change" && deltaValue === 0;
 
-            const formattedValue = valueFormatter ? valueFormatter(barEnd, i) : String(barEnd);
-            const formattedDelta = deltaValue !== undefined
+            const formattedValue = valueFormatter
+                ? valueFormatter(primaryValue, i)
+                : (kind === "change" && deltaValue !== undefined)
+                  ? `${deltaValue >= 0 ? "+" : ""}${deltaValue}`
+                  : String(primaryValue);
+
+            const formattedDelta = kind === "change" && deltaValue !== undefined
                 ? (valueFormatter ? valueFormatter(deltaValue, i) : `${deltaValue >= 0 ? "+" : ""}${deltaValue}`)
                 : undefined;
+
             const formattedCumulativeBefore = valueFormatter ? valueFormatter(cumulativeBefore, i) : String(cumulativeBefore);
             const formattedCumulativeAfter = valueFormatter ? valueFormatter(cumulativeAfter, i) : String(cumulativeAfter);
-
-            const itemId = `w:${i}`;
-            const animationKey = `${seriesId}:waterfall:${itemId}`;
 
             points.push({
                 animationKey,
@@ -203,10 +292,16 @@ export class WaterfallDataProcessor {
                 isZeroChange,
                 itemId,
                 kind,
-                rawValue: numVal,
-                value: kind === "change" ? (deltaValue ?? 0) : barEnd,
+                rawValue: primaryValue,
+                slotKey,
+                value: primaryValue,
                 visualKind
             });
+        }
+
+        if (!hasInitializedMinMax) {
+            minY = 0;
+            maxY = 0;
         }
 
         const kindSignature = points.map(p => `${p.kind}:${p.visualKind}`).join(";");
@@ -228,18 +323,18 @@ export class WaterfallDataProcessor {
         };
 
         const legendItems: ChartLegendItem[] = [];
-        const kindOrder: readonly ChartWaterfallVisualKind[] = ["increase", "decrease", "subtotal", "total", "neutral"];
+        const kindOrder: readonly ChartWaterfallVisualKind[] = ["increase", "decrease", "neutral", "subtotal", "total"];
         for (const k of kindOrder) {
             if (usedVisualKinds.has(k)) {
-                const isVisible = isDatumVisible ? isDatumVisible(k) : true;
                 legendItems.push({
                     color: KIND_COLORS[k],
+                    interactive: true,
                     itemId: k,
                     kind: "datum",
                     name: KIND_NAMES[k],
                     seriesId,
                     seriesType: "waterfall",
-                    visible: isVisible
+                    visible: isDatumVisible ? isDatumVisible(k) : true
                 });
             }
         }

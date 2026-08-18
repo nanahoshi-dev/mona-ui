@@ -2,7 +2,7 @@ import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type { ChartFunnelSeriesRegistration } from "../context/chart-registration-context";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
-import { FunnelLayoutEngine } from "./funnel-layout-engine";
+import { computeFunnelLabelRect, FunnelLayoutEngine } from "./funnel-layout-engine";
 
 describe("FunnelLayoutEngine", () => {
     const styleResolver = new ChartStyleResolver();
@@ -12,6 +12,7 @@ describe("FunnelLayoutEngine", () => {
         expect(empty.hasRenderableData).toBe(false);
         expect(empty.series).toEqual([]);
         expect(empty.hitTargets).toEqual([]);
+        expect(empty.plotRect).toEqual({ height: 284, width: 384, x: 8, y: 8 });
     });
 
     it("generates correct vertical trapezoid geometry with flat bottom on the last stage", () => {
@@ -25,7 +26,7 @@ describe("FunnelLayoutEngine", () => {
             categoryField: signal("stage"),
             data: signal(data),
             datumVisibilityRevision: signal(0),
-            element: { nativeElement: document.createElement("div") },
+            element: { nativeElement: undefined as any },
             field: signal("value"),
             gap: signal(10),
             id: "f-1",
@@ -74,52 +75,63 @@ describe("FunnelLayoutEngine", () => {
         ]);
     });
 
-    it("generates correct horizontal trapezoid geometry with flat right side on the last stage", () => {
+    it("caps requested gap in dense scenarios so stages always have renderable positive span", () => {
         const data = [
-            { stage: "First", value: 100 },
-            { stage: "Last", value: 50 }
+            { stage: "S1", value: 100 },
+            { stage: "S2", value: 90 },
+            { stage: "S3", value: 80 },
+            { stage: "S4", value: 70 },
+            { stage: "S5", value: 60 }
         ];
 
+        // Total height = 100, requested gap = 50 (would consume 200px if uncapped)
         const registration: ChartFunnelSeriesRegistration = {
             categoryField: signal("stage"),
             data: signal(data),
             datumVisibilityRevision: signal(0),
-            element: { nativeElement: document.createElement("div") },
+            element: { nativeElement: undefined as any },
             field: signal("value"),
-            gap: signal(10),
+            gap: signal(50),
             id: "f-1",
             isDatumVisible: () => true,
             labelContent: signal("value"),
             name: signal("Funnel"),
-            orientation: signal("horizontal"),
+            orientation: signal("vertical"),
             toggleDatumVisibility: () => true,
             type: "funnel",
             visible: signal(true),
             widthRatio: signal(1.0)
         };
 
-        const plotRect = { height: 100, width: 210, x: 0, y: 0 };
-        const scene = FunnelLayoutEngine.layout(registration, plotRect, 210, 100, styleResolver);
+        const plotRect = { height: 100, width: 100, x: 0, y: 0 };
+        const scene = FunnelLayoutEngine.layout(registration, plotRect, 100, 100, styleResolver);
 
         expect(scene.hasRenderableData).toBe(true);
+        // Effective gap should be capped to (100 * 0.5) / 4 = 12.5
+        // Slot span should be (100 - 12.5 * 4) / 5 = 10
         const stages = scene.series[0].stages;
-        expect(stages.length).toBe(2);
+        expect(stages.length).toBe(5);
+        expect(stages[0].bounds.height).toBe(10);
+        expect(stages[1].bounds.y).toBe(22.5);
+    });
 
-        // 2 stages, gap = 10. Available width = 200. Slot width = 100.
-        // Stage 0: x in [0, 100]. Leading height: 100/100 * 100 = 100 (y in [0, 100]). Trailing height: 50/100 * 100 = 50 (y in [25, 75]).
-        expect(stages[0].polygon).toEqual([
-            { x: 0, y: 0 },
-            { x: 100, y: 25 },
-            { x: 100, y: 75 },
-            { x: 0, y: 100 }
-        ]);
+    it("computes safe inscribed label rects inside polygon bounds", () => {
+        const verticalPoly = [
+            { x: 20, y: 0 },
+            { x: 180, y: 0 },
+            { x: 140, y: 100 },
+            { x: 60, y: 100 }
+        ] as const;
 
-        // Stage 1 (last stage): x in [110, 210]. Leading height: 50 (y in [25, 75]). Trailing height: flat 50 (y in [25, 75]).
-        expect(stages[1].polygon).toEqual([
-            { x: 110, y: 25 },
-            { x: 210, y: 25 },
-            { x: 210, y: 75 },
-            { x: 110, y: 75 }
-        ]);
+        const labelRect = computeFunnelLabelRect(verticalPoly, "vertical");
+        // Safe X: max(20, 60) = 60
+        // Safe Right: min(180, 140) = 140 -> safe width = 80
+        // Safe Y: 0, safe height: 100
+        expect(labelRect).toEqual({
+            height: 100,
+            width: 80,
+            x: 60,
+            y: 0
+        });
     });
 });

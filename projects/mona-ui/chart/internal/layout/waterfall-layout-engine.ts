@@ -1,14 +1,14 @@
 import type { ChartAxisTick } from "../../models/chart-axis.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
-import type { ChartPadding, ChartPoint, ChartRect } from "../../models/chart.models";
+import type { ChartField, ChartPadding, ChartPoint, ChartRect } from "../../models/chart.models";
 import type {
     ChartWaterfallSeriesRegistration,
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import { WaterfallDataProcessor } from "../data/waterfall-data";
-import { WaterfallHitIndex } from "../interaction/waterfall-hit-index";
-import { BandScale, CartesianScaleFactory, LinearScale } from "../scale/cartesian-scale-factory";
+import { WaterfallHitIndex, type WaterfallHitEntry } from "../interaction/waterfall-hit-index";
+import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import type { ChartAxisScene } from "../scene/cartesian-scene";
 import type {
     CartesianWaterfallChartScene,
@@ -19,6 +19,7 @@ import type {
 } from "../scene/waterfall-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { formatXValue, formatYValue } from "../utils/chart-formatter";
 import { isFiniteNumber, normalizeTickCount } from "../utils/number-utils";
 
@@ -31,7 +32,7 @@ export class WaterfallLayoutEngine {
             coordinateSystem: "cartesian",
             hasRenderableData: false,
             height,
-            hitIndex: new WaterfallHitIndex(plotRect, [], []),
+            hitIndex: new WaterfallHitIndex({ entries: [], plotRect }),
             hitTargets: [],
             interactionBuckets: [],
             kindSignature: "",
@@ -52,7 +53,8 @@ export class WaterfallLayoutEngine {
         xAxis?: ChartXAxisRegistration,
         yAxis?: ChartYAxisRegistration,
         rootData?: readonly unknown[],
-        _warnedDiagnosticSignatures?: Set<string>
+        rootXField?: ChartField,
+        warnedDiagnosticSignatures?: Set<string>
     ): CartesianWaterfallChartScene {
         const seriesId = registration.id;
         const seriesName = registration.name ? registration.name() : "Waterfall";
@@ -63,9 +65,11 @@ export class WaterfallLayoutEngine {
         const preparedData = WaterfallDataProcessor.process({
             data: registration.data?.(),
             field: registration.field(),
-            isDatumVisible: registration.isDatumVisible,
+            isDatumVisible: registration.isDatumVisible ? (k: string) => registration.isDatumVisible!(k) : undefined,
+            keyField: registration.keyField?.(),
             kindField: registration.kindField?.(),
             rootData,
+            rootXField,
             seriesElement: registration.element?.nativeElement,
             seriesId,
             seriesName,
@@ -73,6 +77,7 @@ export class WaterfallLayoutEngine {
             style,
             styleResolver,
             valueFormatter: registration.valueFormatter?.(),
+            warnedDiagnosticSignatures,
             xField: registration.xField?.()
         });
 
@@ -83,6 +88,30 @@ export class WaterfallLayoutEngine {
         const xTitle = xAxis?.title() ?? "";
         const yTitle = yAxis?.title() ?? "";
         const yFormatter = yAxis?.formatter() ?? registration.valueFormatter?.();
+
+        // Validate X Axis Type
+        const rawXAxisType = xAxis?.type();
+        if (rawXAxisType !== undefined && rawXAxisType !== "category" && rawXAxisType !== "auto") {
+            if (warnedDiagnosticSignatures) {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `[MonaChart] Waterfall X axis is categorical; configured X axis type "${rawXAxisType}" is unsupported and will be treated as "category".`,
+                    `${seriesId}:incompatible-x-axis-type:${rawXAxisType}`
+                );
+            }
+        }
+
+        // Validate Y Axis Type
+        const rawYAxisType = yAxis?.type();
+        if (rawYAxisType === "category") {
+            if (warnedDiagnosticSignatures) {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `[MonaChart] Waterfall Y axis is linear; configured Y axis type "category" is unsupported and will be treated as "linear".`,
+                    `${seriesId}:incompatible-y-axis-type:category`
+                );
+            }
+        }
 
         const rawYMin = yAxis?.min();
         const rawYMax = yAxis?.max();
@@ -151,7 +180,7 @@ export class WaterfallLayoutEngine {
                 coordinateSystem: "cartesian",
                 hasRenderableData: false,
                 height: containerHeight,
-                hitIndex: new WaterfallHitIndex(plotRect, [], []),
+                hitIndex: new WaterfallHitIndex({ entries: [], plotRect }),
                 hitTargets: [],
                 interactionBuckets: [],
                 kindSignature: preparedData.kindSignature,
@@ -174,24 +203,29 @@ export class WaterfallLayoutEngine {
             explicitYMax
         );
 
-        const categoryStrings = preparedData.categories.map(String);
-        const bandScale = CartesianScaleFactory.createBandScale(categoryStrings, [0, plotWidth], 0.2, 0.1);
+        // FWF-001: BandScale domain MUST use unique slot keys
+        const slotKeys = preparedData.points.map(p => p.slotKey);
+        const bandScale = CartesianScaleFactory.createBandScale(slotKeys, [0, plotWidth], 0.2, 0.1);
 
         const maxBarWidth = registration.maxBarWidth?.();
         const showConnectors = registration.showConnectors ? registration.showConnectors() : true;
-        const showLabels = registration.showLabels ? registration.showLabels() : true;
-        const minLabelWidth = Math.max(0, registration.minLabelWidth ? (registration.minLabelWidth() ?? 0) : 0);
+        const showLabels = registration.showLabels ? registration.showLabels() : false;
+        const minLabelWidth = registration.minLabelWidth ? Math.max(0, registration.minLabelWidth() ?? 24) : 24;
         const maxLabels = Math.max(0, registration.maxLabels ? registration.maxLabels() : 100);
 
         const sceneBars: SceneWaterfallBar[] = [];
         const sceneConnectors: SceneWaterfallConnector[] = [];
-        const sceneLabels: SceneWaterfallLabel[] = [];
         const hitTargets: SceneHitTarget[] = [];
+        const hitEntries: WaterfallHitEntry[] = [];
         const interactionBuckets: ChartInteractionBucket[] = [];
+        const candidateLabels: SceneWaterfallLabel[] = [];
 
         for (let i = 0; i < preparedData.points.length; i++) {
             const pt = preparedData.points[i];
-            const slotX = plotRect.x + (bandScale.map(String(pt.category)) ?? 0);
+            const isKindVisible = registration.isDatumVisible ? registration.isDatumVisible(pt.visualKind) : true;
+            const barOpacity = isKindVisible ? (style.fillOpacity ?? 1) : 0;
+
+            const slotX = plotRect.x + (bandScale.map(pt.slotKey) ?? 0);
             const slotWidth = bandScale.bandwidth();
 
             let barWidth = slotWidth;
@@ -213,8 +247,6 @@ export class WaterfallLayoutEngine {
                 x: barX,
                 y: topY
             };
-
-            const isDatumVisible = registration.isDatumVisible ? registration.isDatumVisible(pt.visualKind) : true;
 
             const sceneBar: SceneWaterfallBar = {
                 animationKey: pt.animationKey,
@@ -238,7 +270,7 @@ export class WaterfallLayoutEngine {
                 isZeroChange: pt.isZeroChange,
                 itemId: pt.itemId,
                 kind: pt.kind,
-                renderOpacity: isDatumVisible ? 1 : 0,
+                renderOpacity: barOpacity,
                 renderOrder: i,
                 toY,
                 visualKind: pt.visualKind
@@ -246,9 +278,13 @@ export class WaterfallLayoutEngine {
             sceneBars.push(sceneBar);
 
             // Connector to previous bar
-            if (showConnectors && i > 0 && isDatumVisible) {
+            if (showConnectors && style.connectorWidth > 0 && i > 0) {
                 const prevBar = sceneBars[i - 1];
-                if (prevBar && (prevBar.renderOpacity ?? 1) > 0) {
+                const prevPt = preparedData.points[i - 1];
+                const isPrevVisible = registration.isDatumVisible ? registration.isDatumVisible(prevPt.visualKind) : true;
+                const connOpacity = (isPrevVisible && isKindVisible) ? 1 : 0;
+
+                if (prevBar) {
                     const connFromX = prevBar.bounds.x + prevBar.bounds.width;
                     const connToX = barBounds.x;
                     const connY = prevBar.toY;
@@ -257,8 +293,10 @@ export class WaterfallLayoutEngine {
                         animationKey: `conn:${i}`,
                         color: style.connectorColor,
                         cumulativeValue: preparedData.points[i - 1].cumulativeAfter,
+                        fromAnimationKey: prevBar.animationKey,
                         fromX: connFromX,
-                        renderOpacity: 1,
+                        renderOpacity: connOpacity,
+                        toAnimationKey: pt.animationKey,
                         toX: connToX,
                         width: style.connectorWidth,
                         y: connY
@@ -266,87 +304,62 @@ export class WaterfallLayoutEngine {
                 }
             }
 
-            // Labels
-            if (showLabels && isDatumVisible && barBounds.width >= minLabelWidth && sceneLabels.length < maxLabels) {
-                const labelText = pt.kind === "change"
-                    ? (pt.formattedDelta ?? pt.formattedValue)
-                    : pt.formattedValue;
+            // Hit target
+            const centerPoint: ChartPoint = {
+                x: barBounds.x + barBounds.width / 2,
+                y: barBounds.y + barBounds.height / 2
+            };
 
-                const labelColor = style.labelColor ?? (styleResolver.resolveCssVariable("--color-foreground") || "#1e293b");
-
-                const labelBounds: ChartRect = {
-                    height: 16,
-                    width: barBounds.width,
-                    x: barBounds.x,
-                    y: pt.visualKind === "decrease" ? barBounds.y + barBounds.height + 4 : barBounds.y - 20
-                };
-
-                sceneLabels.push({
-                    barBounds,
-                    bounds: labelBounds,
-                    category: pt.category,
-                    color: labelColor,
+            const hitTarget: SceneHitTarget = {
+                animationKey: pt.animationKey,
+                borderRadius: style.borderRadius,
+                bounds: barBounds,
+                category: pt.category,
+                color: pt.color,
+                dataIndex: pt.dataIndex,
+                datum: pt.datum,
+                formattedCategory: pt.formattedCategory,
+                formattedValue: pt.formattedValue,
+                fromValue: pt.barStart,
+                index: pt.dataIndex,
+                isPositive: pt.visualKind === "increase" || pt.visualKind === "total" || pt.visualKind === "subtotal",
+                itemId: pt.itemId,
+                point: centerPoint,
+                renderOrder: i,
+                seriesId,
+                seriesName,
+                seriesType: "waterfall",
+                toValue: pt.barEnd,
+                value: pt.value,
+                valueKind: "waterfall",
+                visualBounds: barBounds,
+                waterfall: {
+                    barEnd: pt.barEnd,
+                    barStart: pt.barStart,
                     cumulativeAfter: pt.cumulativeAfter,
                     cumulativeBefore: pt.cumulativeBefore,
-                    dataIndex: pt.dataIndex,
-                    datum: pt.datum,
                     deltaValue: pt.deltaValue,
-                    formattedCategory: pt.formattedCategory,
-                    formattedValue: pt.formattedValue,
-                    isInside: false,
-                    itemId: pt.itemId,
+                    formattedCumulativeAfter: pt.formattedCumulativeAfter,
+                    formattedCumulativeBefore: pt.formattedCumulativeBefore,
+                    formattedDelta: pt.formattedDelta,
                     kind: pt.kind,
-                    text: labelText,
-                    value: pt.value,
-                    visualKind: pt.visualKind
-                });
-            }
+                    valueKind: "waterfall"
+                },
+                xKey: pt.itemId,
+                xValue: pt.category,
+                yValue: pt.value
+            };
 
-            if (isDatumVisible) {
-                const centerPoint: ChartPoint = {
-                    x: barBounds.x + barBounds.width / 2,
-                    y: barBounds.y + barBounds.height / 2
-                };
+            if (isKindVisible) {
+                hitTargets.push(hitTarget);
 
-                const hitTarget: SceneHitTarget = {
+                hitEntries.push({
                     animationKey: pt.animationKey,
                     bounds: barBounds,
-                    category: pt.category,
-                    color: pt.color,
-                    dataIndex: pt.dataIndex,
-                    datum: pt.datum,
-                    formattedCategory: pt.formattedCategory,
-                    formattedValue: pt.formattedValue,
-                    fromValue: pt.barStart,
-                    index: pt.dataIndex,
-                    isPositive: pt.visualKind === "increase" || pt.visualKind === "total" || pt.visualKind === "subtotal",
-                    itemId: pt.itemId,
-                    point: centerPoint,
-                    renderOrder: i,
-                    seriesId,
-                    seriesName,
-                    seriesType: "waterfall",
-                    toValue: pt.barEnd,
-                    value: pt.value,
-                    valueKind: "waterfall",
-                    visualBounds: barBounds,
-                    waterfall: {
-                        barEnd: pt.barEnd,
-                        barStart: pt.barStart,
-                        cumulativeAfter: pt.cumulativeAfter,
-                        cumulativeBefore: pt.cumulativeBefore,
-                        deltaValue: pt.deltaValue,
-                        formattedCumulativeAfter: pt.formattedCumulativeAfter,
-                        formattedCumulativeBefore: pt.formattedCumulativeBefore,
-                        formattedDelta: pt.formattedDelta,
-                        kind: pt.kind,
-                        valueKind: "waterfall"
-                    },
-                    xKey: pt.itemId,
-                    xValue: pt.category,
-                    yValue: pt.barEnd
-                };
-                hitTargets.push(hitTarget);
+                    isZeroChange: pt.isZeroChange,
+                    slotIndex: i,
+                    target: hitTarget
+                });
 
                 interactionBuckets.push({
                     anchor: centerPoint,
@@ -356,22 +369,139 @@ export class WaterfallLayoutEngine {
                     xValue: pt.category
                 });
             }
+
+            // Label Candidate
+            if (showLabels && barBounds.width >= minLabelWidth && isKindVisible) {
+                const labelText = pt.kind === "change"
+                    ? (pt.formattedDelta ?? pt.formattedValue)
+                    : pt.formattedValue;
+
+                const labelColor = style.labelColor ?? (styleResolver.resolveCssVariable("--color-foreground") || "#1e293b");
+
+                let labelY: number;
+                let isInside = false;
+
+                if (pt.visualKind === "increase" || pt.visualKind === "total" || pt.visualKind === "subtotal") {
+                    labelY = barBounds.y - 18;
+                    if (labelY < plotRect.y) {
+                        if (barBounds.height >= 24) {
+                            labelY = barBounds.y + 4;
+                            isInside = true;
+                        } else {
+                            labelY = barBounds.y + barBounds.height + 4;
+                        }
+                    }
+                } else if (pt.visualKind === "decrease") {
+                    labelY = barBounds.y + barBounds.height + 4;
+                    if (labelY + 16 > plotRect.y + plotRect.height) {
+                        if (barBounds.height >= 24) {
+                            labelY = barBounds.y + barBounds.height - 20;
+                            isInside = true;
+                        } else {
+                            labelY = barBounds.y - 18;
+                        }
+                    }
+                } else {
+                    labelY = barBounds.y - 18;
+                    if (labelY < plotRect.y) {
+                        labelY = barBounds.y + barBounds.height + 4;
+                    }
+                }
+
+                // Clamp label bounds to plotRect
+                labelY = Math.max(plotRect.y, Math.min(plotRect.y + plotRect.height - 16, labelY));
+
+                const labelBounds: ChartRect = {
+                    height: 16,
+                    width: barBounds.width,
+                    x: barBounds.x,
+                    y: labelY
+                };
+
+                candidateLabels.push({
+                    barBounds,
+                    barEnd: pt.barEnd,
+                    barStart: pt.barStart,
+                    bounds: labelBounds,
+                    category: pt.category,
+                    color: labelColor,
+                    cumulativeAfter: pt.cumulativeAfter,
+                    cumulativeBefore: pt.cumulativeBefore,
+                    dataIndex: pt.dataIndex,
+                    datum: pt.datum,
+                    deltaValue: pt.deltaValue,
+                    formattedCategory: pt.formattedCategory,
+                    formattedCumulativeAfter: pt.formattedCumulativeAfter,
+                    formattedCumulativeBefore: pt.formattedCumulativeBefore,
+                    formattedDelta: pt.formattedDelta,
+                    formattedValue: pt.formattedValue,
+                    isInside,
+                    itemId: pt.itemId,
+                    kind: pt.kind,
+                    text: labelText,
+                    value: pt.value,
+                    visualKind: pt.visualKind
+                });
+            }
+        }
+
+        // Cap labels by priority (FWF-027)
+        let sceneLabels: SceneWaterfallLabel[] = candidateLabels;
+        if (candidateLabels.length > maxLabels && maxLabels >= 0) {
+            const prioritized = [...candidateLabels].sort((a, b) => {
+                const getKindPriority = (k: string) => (k === "total" ? 0 : k === "subtotal" ? 1 : 2);
+                const pA = getKindPriority(a.kind);
+                const pB = getKindPriority(b.kind);
+                if (pA !== pB) return pA - pB;
+
+                const magA = Math.abs(a.deltaValue ?? a.value);
+                const magB = Math.abs(b.deltaValue ?? b.value);
+                if (magA !== magB) return magB - magA;
+
+                return a.dataIndex - b.dataIndex;
+            });
+            const selectedSet = new Set(prioritized.slice(0, maxLabels).map(l => l.itemId));
+            sceneLabels = candidateLabels.filter(l => selectedSet.has(l.itemId));
         }
 
         // Axes scenes
         const axisScenes: ChartAxisScene[] = [];
 
-        // X Axis
+        // X Axis (FWF-019: Responsive Tick Thinning)
         if (isXAxisVisible) {
-            const xTicks: ChartAxisTick[] = preparedData.categories.map((cat, idx) => {
-                const pos = plotRect.x + (bandScale.map(String(cat)) ?? 0) + bandScale.bandwidth() / 2;
-                return {
-                    coordinate: pos,
-                    formattedValue: formatXValue(cat, idx, xAxis?.formatter(), "category"),
-                    index: idx,
-                    value: cat
-                };
-            });
+            const totalPoints = preparedData.points.length;
+            const xTicks: ChartAxisTick[] = [];
+
+            if (totalPoints > 0) {
+                const maxAllowedTicks = 100;
+                const estimatedLabelWidth = 50;
+                const capacity = Math.max(1, Math.min(maxAllowedTicks, Math.floor(plotWidth / estimatedLabelWidth)));
+                const stride = Math.max(1, Math.ceil(totalPoints / capacity));
+
+                const includedIndices = new Set<number>();
+                for (let idx = 0; idx < totalPoints; idx += stride) {
+                    includedIndices.add(idx);
+                }
+                // Always include the last tick if totalPoints > 1
+                if (totalPoints > 1) {
+                    includedIndices.add(totalPoints - 1);
+                }
+
+                for (let idx = 0; idx < totalPoints; idx++) {
+                    if (includedIndices.has(idx)) {
+                        const pt = preparedData.points[idx];
+                        const pos = plotRect.x + (bandScale.map(pt.slotKey) ?? 0) + bandScale.bandwidth() / 2;
+                        const displayVal = pt.category !== undefined ? pt.category : (pt.formattedCategory || `Step ${idx + 1}`);
+
+                        xTicks.push({
+                            coordinate: pos,
+                            formattedValue: formatXValue(pt.category, pt.dataIndex, xAxis?.formatter(), "category"),
+                            index: idx,
+                            value: displayVal
+                        });
+                    }
+                }
+            }
 
             axisScenes.push({
                 axis: "x",
@@ -408,7 +538,12 @@ export class WaterfallLayoutEngine {
             });
         }
 
-        const hitIndex = new WaterfallHitIndex(plotRect, sceneBars, hitTargets);
+        const hitIndex = new WaterfallHitIndex({
+            bandwidth: bandScale.bandwidth(),
+            entries: hitEntries,
+            plotRect,
+            step: bandScale.step()
+        });
 
         const seriesScene: ChartWaterfallSeriesScene = {
             bars: sceneBars,

@@ -506,6 +506,7 @@ export interface ChartWaterfallSeriesRegistration
     readonly fillOpacity?: Signal<number | undefined>;
     readonly increaseColor?: Signal<string>;
     readonly isDatumVisible?: (kind: string) => boolean;
+    readonly keyField?: Signal<ChartField | undefined>;
     readonly kindField?: Signal<ChartField | undefined>;
     readonly labelTemplate?: Signal<import("../../directives/chart-waterfall-label-template.directive").ChartWaterfallLabelTemplateDirective | undefined>;
     readonly maxBarWidth?: Signal<number | undefined>;

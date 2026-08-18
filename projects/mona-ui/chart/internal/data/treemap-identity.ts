@@ -116,7 +116,8 @@ export class TreemapIdentity {
         const traverseChildrenForReservation = (
             datum: unknown,
             depth: number,
-            parentId: string
+            parentId: string,
+            currentDataIndex: number
         ): void => {
             if (typeof datum !== "object" || datum === null) {
                 return;
@@ -126,7 +127,7 @@ export class TreemapIdentity {
             }
 
             activeAncestors.add(datum);
-            const rawChildren = resolveValue(datum, childrenField, globalDataIndex);
+            const rawChildren = resolveValue(datum, childrenField, currentDataIndex);
             if (Array.isArray(rawChildren)) {
                 const childSiblingTracker = new Map<string, number>();
                 for (let cIdx = 0; cIdx < rawChildren.length; cIdx++) {
@@ -134,7 +135,7 @@ export class TreemapIdentity {
                     if (typeof childDatum === "object" && childDatum !== null && activeAncestors.has(childDatum)) {
                         continue;
                     }
-                    const childDataIndex = ++globalDataIndex;
+                    const childDataIndex = globalDataIndex++;
                     const childIdentity = this.resolveNodeIdentity(
                         childDatum,
                         childDataIndex,
@@ -146,7 +147,7 @@ export class TreemapIdentity {
                         seenExplicitKeys,
                         childSiblingTracker
                     );
-                    traverseChildrenForReservation(childDatum, depth + 1, childIdentity.nodeId);
+                    traverseChildrenForReservation(childDatum, depth + 1, childIdentity.nodeId, childDataIndex);
                 }
             }
             activeAncestors.delete(datum);
@@ -175,7 +176,7 @@ export class TreemapIdentity {
                 nodeId: identity.nodeId
             });
 
-            traverseChildrenForReservation(rootDatum, 1, identity.nodeId);
+            traverseChildrenForReservation(rootDatum, 1, identity.nodeId, rootDataIndex);
         }
 
         return result;

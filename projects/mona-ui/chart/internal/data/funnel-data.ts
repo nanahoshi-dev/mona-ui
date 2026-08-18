@@ -3,7 +3,7 @@ import type { ChartFunnelPointMetadata } from "../../models/chart-funnel.models"
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
-import { serializeKeyPart } from "../animation/animation-identity";
+import { FunnelIdentity } from "./funnel-identity";
 import { resolveValue } from "./chart-value-resolver";
 
 export interface PreparedFunnelStage {
@@ -133,23 +133,16 @@ export class FunnelDataProcessor {
         for (let i = 0; i < rawData.length; i++) {
             const datum = rawData[i];
             const rawVal = resolveValue(datum, field, i);
-            let numVal: number | undefined;
 
-            if (typeof rawVal === "number" && Number.isFinite(rawVal)) {
-                if (rawVal >= 0) {
-                    numVal = rawVal;
-                } else {
-                    hasNegative = true;
-                    numVal = undefined;
-                }
-            } else {
-                numVal = undefined;
+            if (typeof rawVal === "number" && Number.isFinite(rawVal) && rawVal < 0) {
+                hasNegative = true;
             }
 
-            if (numVal === undefined) {
+            if (!FunnelIdentity.isValidFunnelValue(rawVal)) {
                 continue;
             }
 
+            const numVal = rawVal;
             const rawCat = resolveValue(datum, categoryField, i);
             const formattedCategory = categoryFormatter
                 ? categoryFormatter(rawCat, i)
@@ -157,31 +150,18 @@ export class FunnelDataProcessor {
                   ? String(rawCat)
                   : `Stage ${i + 1}`;
 
-            let explicitKey: string | undefined;
-            let stageId: string;
+            const identity = FunnelIdentity.resolveStageIdentity(
+                datum,
+                i,
+                seriesId,
+                keyField,
+                seenExplicitKeys,
+                warnedDiagnosticSignatures,
+                seriesName
+            );
 
-            if (keyField) {
-                const rawKey = resolveValue(datum, keyField, i);
-                const keyPart = serializeKeyPart(rawKey);
-                if (keyPart !== null) {
-                    const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
-                    if (seenExplicitKeys.has(keyStr)) {
-                        if (warnedDiagnosticSignatures) {
-                            ChartDiagnostics.warnOnce(
-                                warnedDiagnosticSignatures,
-                                `Funnel series "${seriesName}" encountered duplicate explicit key "${String(rawKey)}" at index ${i}. Falling back to index identity.`,
-                                `${seriesId}:duplicate-keys`
-                            );
-                        }
-                    } else {
-                        seenExplicitKeys.add(keyStr);
-                        explicitKey = keyStr;
-                    }
-                }
-            }
-
-            stageId = explicitKey ?? `i:${i}`;
-            const animationKey = `${seriesId}:funnel:${stageId}`;
+            const stageId = identity.stageId;
+            const animationKey = identity.animationKey;
             const visible = isDatumVisible(stageId);
 
             let stageColor = "";

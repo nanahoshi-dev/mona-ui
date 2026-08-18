@@ -304,7 +304,7 @@
                                 [ngTemplateOutlet]="labelTemplate.templateRef"
                                 [ngTemplateOutletContext]="waterfallLabelContext(lbl, seriesScene)" />
                         } @else {
-                            <span class="font-medium truncate">{{ lbl.formattedValue }}</span>
+                            <span class="font-medium truncate">{{ lbl.text }}</span>
                         }
                     </div>
                 }

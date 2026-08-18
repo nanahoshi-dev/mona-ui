@@ -1,6 +1,10 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
-import type { ChartWaterfallSeriesRegistration } from "../context/chart-registration-context";
+import type {
+    ChartWaterfallSeriesRegistration,
+    ChartXAxisRegistration,
+    ChartYAxisRegistration
+} from "../context/chart-registration-context";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { WaterfallLayoutEngine } from "./waterfall-layout-engine";
 
@@ -8,71 +12,242 @@ describe("WaterfallLayoutEngine", () => {
     const styleResolver = new ChartStyleResolver();
 
     it("computes empty scene with hasRenderableData false", () => {
-        const empty = WaterfallLayoutEngine.computeEmptyScene(400, 300);
-        expect(empty.hasRenderableData).toBe(false);
-        expect(empty.series).toEqual([]);
-        expect(empty.hitTargets).toEqual([]);
+        const scene = WaterfallLayoutEngine.computeEmptyScene(500, 400);
+        expect(scene.hasRenderableData).toBe(false);
+        expect(scene.cartesianKind).toBe("waterfall");
+        expect(scene.series).toEqual([]);
+        expect(scene.plotRect).toEqual({ height: 384, width: 484, x: 8, y: 8 });
     });
 
-    it("lays out waterfall bars with semantic endpoints and connectors", () => {
+    it("lays out waterfall bars with unique slot keys for duplicate categories", () => {
         const data = [
-            { category: "A", kind: "change", value: 100 },
-            { category: "B", kind: "change", value: -40 },
-            { category: "Total", kind: "total" }
+            { category: "Revenue", value: 100 },
+            { category: "Cost", value: -30 },
+            { category: "Revenue", value: 50 }
         ];
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: document.createElement("div") },
+            element: { nativeElement: undefined as any },
             field: signal("value"),
             id: "w-1",
-            kindField: signal("kind"),
             name: signal("Waterfall"),
             type: "waterfall",
-            visible: signal(true),
-            xField: signal("category")
+            visible: signal(true)
         };
 
         const scene = WaterfallLayoutEngine.layout(
             registration,
+            600,
             400,
-            300,
             styleResolver
         );
 
         expect(scene.hasRenderableData).toBe(true);
-        expect(scene.series.length).toBe(1);
+        const bars = scene.series[0].bars;
+        expect(bars.length).toBe(3);
 
-        const series = scene.series[0];
-        expect(series.bars.length).toBe(3);
+        // Three distinct X positions for the three bars
+        expect(bars[0].bounds.x).toBeLessThan(bars[1].bounds.x);
+        expect(bars[1].bounds.x).toBeLessThan(bars[2].bounds.x);
 
-        const [bar0, bar1, bar2] = series.bars;
-        // Bar 0: start 0 -> 100
-        expect(bar0.barStart).toBe(0);
-        expect(bar0.barEnd).toBe(100);
-        expect(bar0.bounds.height).toBeGreaterThan(0);
+        // First bar: 0..100
+        expect(bars[0].barStart).toBe(0);
+        expect(bars[0].barEnd).toBe(100);
 
-        // Bar 1: start 100 -> 60 (decrease)
-        expect(bar1.barStart).toBe(100);
-        expect(bar1.barEnd).toBe(60);
-        expect(bar1.fromY).toBe(bar0.toY); // fromY of bar1 matches toY of bar0
+        // Second bar: 100..70
+        expect(bars[1].barStart).toBe(100);
+        expect(bars[1].barEnd).toBe(70);
 
-        // Bar 2: total 0 -> 60
-        expect(bar2.barStart).toBe(0);
-        expect(bar2.barEnd).toBe(60);
+        // Third bar: 70..120
+        expect(bars[2].barStart).toBe(70);
+        expect(bars[2].barEnd).toBe(120);
 
-        // Connectors: between bar 0 and 1, and bar 1 and 2
-        expect(series.connectors.length).toBe(2);
-        // Connector 0 links from bar0 right edge to bar1 left edge at y = bar0.toY
-        expect(series.connectors[0].fromX).toBe(bar0.bounds.x + bar0.bounds.width);
-        expect(series.connectors[0].toX).toBe(bar1.bounds.x);
-        expect(series.connectors[0].y).toBe(bar0.toY);
+        // Connectors between adjacent bars
+        expect(scene.series[0].connectors.length).toBe(2);
+        expect(scene.series[0].connectors[0].fromAnimationKey).toBe(bars[0].animationKey);
+        expect(scene.series[0].connectors[0].toAnimationKey).toBe(bars[1].animationKey);
+    });
 
-        // Legend: Semantic datum items for Increase, Decrease, Total
-        expect(scene.legendItems).toHaveLength(3);
-        expect(scene.legendItems.map(i => i.name)).toEqual(["Increase", "Decrease", "Total"]);
-        expect(scene.legendItems[0].kind).toBe("datum");
-        expect(scene.legendItems[0].itemId).toBe("increase");
-        expect(scene.legendItems[0].visible).toBe(true);
+    it("falls back to rootXField when series xField is undefined", () => {
+        const data = [
+            { month: "Jan", value: 100 },
+            { month: "Feb", value: -20 }
+        ];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            id: "w-1",
+            name: signal("Waterfall"),
+            type: "waterfall",
+            visible: signal(true),
+            xField: signal(undefined)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver,
+            undefined,
+            undefined,
+            undefined,
+            "month"
+        );
+
+        expect(scene.series[0].bars[0].formattedCategory).toBe("Jan");
+        expect(scene.series[0].bars[1].formattedCategory).toBe("Feb");
+    });
+
+    it("warns on incompatible X and Y axis types and normalizes", () => {
+        const warned = new Set<string>();
+        const data = [{ category: "A", value: 10 }];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            id: "w-1",
+            name: signal("Waterfall"),
+            type: "waterfall",
+            visible: signal(true)
+        };
+
+        const xAxis: ChartXAxisRegistration = {
+            axisLine: signal(true),
+            formatter: signal(undefined),
+            gridLines: signal(false),
+            labelTemplate: signal(undefined),
+            max: signal(undefined),
+            min: signal(undefined),
+            nice: signal(true),
+            position: signal("bottom"),
+            tickCount: signal(undefined),
+            title: signal(""),
+            type: signal("linear" as any),
+            visible: signal(true)
+        };
+
+        const yAxis: ChartYAxisRegistration = {
+            axisLine: signal(true),
+            formatter: signal(undefined),
+            gridLines: signal(false),
+            labelTemplate: signal(undefined),
+            max: signal(undefined),
+            min: signal(undefined),
+            nice: signal(true),
+            position: signal("left"),
+            tickCount: signal(undefined),
+            title: signal(""),
+            type: signal("category" as any),
+            visible: signal(true)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver,
+            xAxis,
+            yAxis,
+            undefined,
+            undefined,
+            warned
+        );
+
+        expect(scene.hasRenderableData).toBe(true);
+        expect(warned.has("w-1:incompatible-x-axis-type:linear")).toBe(true);
+        expect(warned.has("w-1:incompatible-y-axis-type:category")).toBe(true);
+    });
+
+    it("applies responsive X tick thinning on large datasets while retaining first and last ticks", () => {
+        const count = 500;
+        const data = Array.from({ length: count }, (_, i) => ({
+            category: `Step ${i + 1}`,
+            value: (i % 2 === 0 ? 10 : -5)
+        }));
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            id: "w-1",
+            name: signal("Waterfall"),
+            type: "waterfall",
+            visible: signal(true)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver
+        );
+
+        const xAxes = scene.axes.filter(a => a.axis === "x");
+        expect(xAxes.length).toBe(1);
+        const ticks = xAxes[0].ticks;
+
+        // Bounded number of ticks (far less than 500)
+        expect(ticks.length).toBeLessThanOrEqual(100);
+        expect(ticks.length).toBeGreaterThan(1);
+
+        // First tick corresponds to index 0, last tick corresponds to index 499
+        expect(ticks[0].index).toBe(0);
+        expect(ticks[ticks.length - 1].index).toBe(499);
+    });
+
+    it("honors connectorWidth: 0 by not generating connectors", () => {
+        const data = [
+            { category: "A", value: 10 },
+            { category: "B", value: 20 }
+        ];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            connectorWidth: signal(0),
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            id: "w-1",
+            name: signal("Waterfall"),
+            type: "waterfall",
+            visible: signal(true)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver
+        );
+
+        expect(scene.series[0].connectors.length).toBe(0);
+    });
+
+    it("populates borderRadius on hit targets and bars", () => {
+        const data = [{ category: "A", value: 10 }];
+
+        const registration: ChartWaterfallSeriesRegistration = {
+            borderRadius: signal(8),
+            data: signal(data),
+            element: { nativeElement: undefined as any },
+            field: signal("value"),
+            id: "w-1",
+            name: signal("Waterfall"),
+            type: "waterfall",
+            visible: signal(true)
+        };
+
+        const scene = WaterfallLayoutEngine.layout(
+            registration,
+            600,
+            400,
+            styleResolver
+        );
+
+        expect(scene.series[0].bars[0].borderRadius).toBe(8);
+        expect(scene.hitTargets[0].borderRadius).toBe(8);
     });
 });

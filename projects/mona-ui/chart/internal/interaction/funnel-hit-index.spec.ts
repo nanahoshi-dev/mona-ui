@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FunnelHitIndex, isPointInConvexPolygon } from "./funnel-hit-index";
-import type { SceneFunnelStage } from "../scene/funnel-scene";
+import { FunnelHitIndex, isPointInConvexPolygon, type FunnelHitEntry } from "./funnel-hit-index";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 
 describe("FunnelHitIndex", () => {
@@ -34,45 +33,9 @@ describe("FunnelHitIndex", () => {
             { x: 20, y: 200 }
         ] as const;
 
-        const stage0: SceneFunnelStage = {
-            animationKey: "f:0",
-            bounds: { height: 90, width: 100, x: 0, y: 0 },
-            category: "A",
-            dataIndex: 0,
-            datum: {},
-            fillColor: "#3b82f6",
-            formattedCategory: "A",
-            formattedValue: "100",
-            polygon: stage0Poly,
-            renderOrder: 0,
-            sourceIndex: 0,
-            stageId: "0",
-            stageIndex: 0,
-            textColor: "#ffffff",
-            value: 100
-        };
-
-        const stage1: SceneFunnelStage = {
-            animationKey: "f:1",
-            bounds: { height: 90, width: 60, x: 20, y: 110 },
-            category: "B",
-            dataIndex: 1,
-            datum: {},
-            fillColor: "#10b981",
-            formattedCategory: "B",
-            formattedValue: "60",
-            polygon: stage1Poly,
-            renderOrder: 1,
-            sourceIndex: 1,
-            stageId: "1",
-            stageIndex: 1,
-            textColor: "#ffffff",
-            value: 60
-        };
-
         const target0: SceneHitTarget = {
             animationKey: "f:0",
-            bounds: stage0.bounds,
+            bounds: { height: 90, width: 100, x: 0, y: 0 },
             dataIndex: 0,
             datum: {},
             index: 0,
@@ -86,7 +49,7 @@ describe("FunnelHitIndex", () => {
 
         const target1: SceneHitTarget = {
             animationKey: "f:1",
-            bounds: stage1.bounds,
+            bounds: { height: 90, width: 60, x: 20, y: 110 },
             dataIndex: 1,
             datum: {},
             index: 1,
@@ -98,14 +61,30 @@ describe("FunnelHitIndex", () => {
             xValue: "B"
         };
 
-        const hitIndex = new FunnelHitIndex(
+        const entries: FunnelHitEntry[] = [
+            {
+                animationKey: "f:0",
+                bounds: target0.bounds!,
+                polygon: stage0Poly,
+                slotIndex: 0,
+                target: target0
+            },
+            {
+                animationKey: "f:1",
+                bounds: target1.bounds!,
+                polygon: stage1Poly,
+                slotIndex: 1,
+                target: target1
+            }
+        ];
+
+        const hitIndex = new FunnelHitIndex({
+            entries,
+            gap: 20,
+            orientation: "vertical",
             plotRect,
-            "vertical",
-            90, // slotSpan
-            20, // gap
-            [stage0, stage1],
-            [target0, target1]
-        );
+            slotSpan: 90
+        });
 
         // Center of stage 0 -> target 0
         expect(hitIndex.query({ x: 50, y: 45 })).toBe(target0);

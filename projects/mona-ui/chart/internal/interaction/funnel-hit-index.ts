@@ -1,7 +1,6 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartFunnelOrientation } from "../../models/chart-funnel.models";
 import type { SceneHitTarget } from "../scene/scene-geometry";
-import type { SceneFunnelStage } from "../scene/funnel-scene";
 
 export function isPointInConvexPolygon(point: ChartPoint, vertices: readonly ChartPoint[]): boolean {
     if (vertices.length < 3) {
@@ -32,50 +31,100 @@ export function isPointInConvexPolygon(point: ChartPoint, vertices: readonly Cha
     return true;
 }
 
+export interface FunnelHitEntry {
+    readonly animationKey?: string;
+    readonly bounds: ChartRect;
+    readonly polygon: readonly [ChartPoint, ChartPoint, ChartPoint, ChartPoint];
+    readonly slotIndex?: number;
+    readonly target: SceneHitTarget;
+}
+
+export interface FunnelHitIndexOptions {
+    readonly entries: readonly FunnelHitEntry[];
+    readonly gap: number;
+    readonly orientation: ChartFunnelOrientation;
+    readonly plotRect: ChartRect;
+    readonly slotSpan: number;
+}
+
 export class FunnelHitIndex {
-    public constructor(
-        public readonly plotRect: ChartRect,
-        public readonly orientation: ChartFunnelOrientation,
-        public readonly slotSpan: number,
-        public readonly gap: number,
-        public readonly stages: readonly SceneFunnelStage[],
-        public readonly hitTargets: readonly SceneHitTarget[]
-    ) {}
+    readonly #entries: readonly FunnelHitEntry[];
+    readonly #gap: number;
+    readonly #orientation: ChartFunnelOrientation;
+    readonly #plotRect: ChartRect;
+    readonly #slotMap = new Map<number, FunnelHitEntry>();
+    readonly #slotSpan: number;
+
+    public constructor(options: FunnelHitIndexOptions) {
+        this.#plotRect = options.plotRect;
+        this.#orientation = options.orientation;
+        this.#slotSpan = options.slotSpan;
+        this.#gap = options.gap;
+        this.#entries = options.entries;
+
+        for (const entry of options.entries) {
+            if (entry.slotIndex !== undefined) {
+                this.#slotMap.set(entry.slotIndex, entry);
+            }
+        }
+    }
+
+    public get entries(): readonly FunnelHitEntry[] {
+        return this.#entries;
+    }
+
+    public get gap(): number {
+        return this.#gap;
+    }
+
+    public get orientation(): ChartFunnelOrientation {
+        return this.#orientation;
+    }
+
+    public get plotRect(): ChartRect {
+        return this.#plotRect;
+    }
+
+    public get slotSpan(): number {
+        return this.#slotSpan;
+    }
 
     public query(point: ChartPoint): SceneHitTarget | null {
         if (
-            point.x < this.plotRect.x ||
-            point.x > this.plotRect.x + this.plotRect.width ||
-            point.y < this.plotRect.y ||
-            point.y > this.plotRect.y + this.plotRect.height
+            point.x < this.#plotRect.x ||
+            point.x > this.#plotRect.x + this.#plotRect.width ||
+            point.y < this.#plotRect.y ||
+            point.y > this.#plotRect.y + this.#plotRect.height
         ) {
             return null;
         }
 
-        const step = this.slotSpan + this.gap;
-        if (step <= 0 || this.stages.length === 0) {
+        const step = this.#slotSpan + this.#gap;
+        if (step > 0 && this.#slotMap.size > 0) {
+            const offset = this.#orientation === "vertical" ? point.y - this.#plotRect.y : point.x - this.#plotRect.x;
+            const slotIdx = Math.floor(offset / step);
+            const inSlotOffset = offset - slotIdx * step;
+            if (inSlotOffset > this.#slotSpan) {
+                return null; // Inside gap between stages
+            }
+
+            const entry = this.#slotMap.get(slotIdx);
+            if (entry && entry.bounds.width > 0 && entry.bounds.height > 0) {
+                if (isPointInConvexPolygon(point, entry.polygon)) {
+                    return entry.target;
+                }
+            }
             return null;
         }
 
-        const offset = this.orientation === "vertical" ? point.y - this.plotRect.y : point.x - this.plotRect.x;
-        const slotIdx = Math.floor(offset / step);
-
-        if (slotIdx < 0 || slotIdx >= this.stages.length) {
-            return null;
-        }
-
-        const inSlotOffset = offset - slotIdx * step;
-        if (inSlotOffset > this.slotSpan) {
-            return null; // Inside the gap between stages
-        }
-
-        const stage = this.stages[slotIdx];
-        if (!stage || stage.bounds.width <= 0 || stage.bounds.height <= 0) {
-            return null;
-        }
-
-        if (isPointInConvexPolygon(point, stage.polygon)) {
-            return this.hitTargets[slotIdx] ?? null;
+        // Fallback for sampled / arbitrary frames
+        for (let i = 0; i < this.#entries.length; i++) {
+            const entry = this.#entries[i];
+            if (entry.bounds.width > 0 && entry.bounds.height > 0) {
+                if (isPointInConvexPolygon(point, entry.polygon)) {
+                    return entry.target;
+                }
+            }
         }
 
         return null;

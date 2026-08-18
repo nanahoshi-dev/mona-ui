@@ -2,7 +2,7 @@ import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartFunnelLabelContent, ChartFunnelOrientation } from "../../models/chart-funnel.models";
 import type { ChartFunnelSeriesRegistration } from "../context/chart-registration-context";
 import { FunnelDataProcessor } from "../data/funnel-data";
-import { FunnelHitIndex } from "../interaction/funnel-hit-index";
+import { FunnelHitIndex, type FunnelHitEntry } from "../interaction/funnel-hit-index";
 import type {
     CartesianFunnelChartScene,
     ChartFunnelSeriesScene,
@@ -11,6 +11,25 @@ import type {
 } from "../scene/funnel-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
+
+export function computeFunnelLabelRect(
+    polygon: readonly [ChartPoint, ChartPoint, ChartPoint, ChartPoint],
+    orientation: ChartFunnelOrientation
+): ChartRect {
+    if (orientation === "vertical") {
+        const safeX = Math.max(polygon[0].x, polygon[3].x);
+        const safeWidth = Math.max(0, Math.min(polygon[1].x, polygon[2].x) - safeX);
+        const safeY = polygon[0].y;
+        const safeHeight = Math.max(0, polygon[2].y - polygon[0].y);
+        return { height: safeHeight, width: safeWidth, x: safeX, y: safeY };
+    }
+
+    const safeX = polygon[0].x;
+    const safeWidth = Math.max(0, polygon[1].x - polygon[0].x);
+    const safeY = Math.max(polygon[0].y, polygon[1].y);
+    const safeHeight = Math.max(0, Math.min(polygon[3].y, polygon[2].y) - safeY);
+    return { height: safeHeight, width: safeWidth, x: safeX, y: safeY };
+}
 
 export class FunnelLayoutEngine {
     public static computeEmptyScene(width: number, height: number): CartesianFunnelChartScene {
@@ -21,7 +40,7 @@ export class FunnelLayoutEngine {
             coordinateSystem: "cartesian",
             hasRenderableData: false,
             height,
-            hitIndex: new FunnelHitIndex(plotRect, "vertical", 0, 0, [], []),
+            hitIndex: new FunnelHitIndex({ entries: [], gap: 0, orientation: "vertical", plotRect, slotSpan: 0 }),
             hitTargets: [],
             interactionBuckets: [],
             legendItems: [],
@@ -47,7 +66,7 @@ export class FunnelLayoutEngine {
         const isVisible = registration.visible();
 
         const orientation: ChartFunnelOrientation = registration.orientation ? registration.orientation() : "vertical";
-        const gap = Math.max(0, registration.gap ? registration.gap() : 2);
+        const requestedGap = Math.max(0, registration.gap ? registration.gap() : 2);
         const widthRatio = Math.max(0.1, Math.min(1, registration.widthRatio ? registration.widthRatio() : 0.9));
         const showLabels = registration.showLabels ? registration.showLabels() : true;
         const labelContent: ChartFunnelLabelContent = registration.labelContent
@@ -112,7 +131,7 @@ export class FunnelLayoutEngine {
                 coordinateSystem: "cartesian",
                 hasRenderableData: false,
                 height,
-                hitIndex: new FunnelHitIndex(plotRect, orientation, 0, gap, [], []),
+                hitIndex: new FunnelHitIndex({ entries: [], gap: requestedGap, orientation, plotRect, slotSpan: 0 }),
                 hitTargets: [],
                 interactionBuckets: [],
                 legendItems,
@@ -128,17 +147,17 @@ export class FunnelLayoutEngine {
         const N = visibleStages.length;
         const isVertical = orientation === "vertical";
 
-        const availableSpan = isVertical
-            ? Math.max(0, plotRect.height - gap * (N - 1))
-            : Math.max(0, plotRect.width - gap * (N - 1));
+        const totalSpan = isVertical ? plotRect.height : plotRect.width;
+        const effectiveGap = N <= 1 ? 0 : Math.min(requestedGap, (totalSpan * 0.5) / (N - 1));
+        const slotSpan = N > 0 ? (totalSpan - effectiveGap * (N - 1)) / N : 0;
 
-        const slotSpan = availableSpan / N;
         const maxCrossSection = isVertical ? plotRect.width * widthRatio : plotRect.height * widthRatio;
         const centerCoord = isVertical ? plotRect.x + plotRect.width / 2 : plotRect.y + plotRect.height / 2;
 
         const sceneStages: SceneFunnelStage[] = [];
         const sceneLabels: SceneFunnelLabel[] = [];
         const hitTargets: SceneHitTarget[] = [];
+        const hitEntries: FunnelHitEntry[] = [];
         const interactionBuckets: ChartInteractionBucket[] = [];
 
         for (let i = 0; i < N; i++) {
@@ -158,7 +177,7 @@ export class FunnelLayoutEngine {
             let bounds: ChartRect;
 
             if (isVertical) {
-                const y0 = plotRect.y + i * (slotSpan + gap);
+                const y0 = plotRect.y + i * (slotSpan + effectiveGap);
                 const y1 = y0 + slotSpan;
                 const x0Top = centerCoord - leadingCross / 2;
                 const x1Top = centerCoord + leadingCross / 2;
@@ -181,7 +200,7 @@ export class FunnelLayoutEngine {
                     y: y0
                 };
             } else {
-                const x0 = plotRect.x + i * (slotSpan + gap);
+                const x0 = plotRect.x + i * (slotSpan + effectiveGap);
                 const x1 = x0 + slotSpan;
                 const y0Left = centerCoord - leadingCross / 2;
                 const y1Left = centerCoord + leadingCross / 2;
@@ -205,7 +224,7 @@ export class FunnelLayoutEngine {
                 };
             }
 
-            const textColor = styleResolver.getReadableForeground(stage.color);
+            const labelColor = styleResolver.resolveCssVariable("--color-foreground") || "#1e293b";
 
             const sceneStage: SceneFunnelStage = {
                 animationKey: stage.animationKey,
@@ -228,13 +247,20 @@ export class FunnelLayoutEngine {
                 sourceIndex: stage.sourceIndex,
                 stageId: stage.stageId,
                 stageIndex: stage.stageIndex,
-                textColor,
+                textColor: labelColor,
                 value: stage.value
             };
             sceneStages.push(sceneStage);
 
-            // Labels
-            if (showLabels && bounds.width >= minLabelWidth && bounds.height >= minLabelHeight && sceneLabels.length < maxLabels) {
+            // Inscribed safe label bounds
+            const labelBounds = computeFunnelLabelRect(polygon, orientation);
+
+            if (
+                showLabels &&
+                labelBounds.width >= minLabelWidth &&
+                labelBounds.height >= minLabelHeight &&
+                sceneLabels.length < maxLabels
+            ) {
                 let text = "";
                 switch (labelContent) {
                     case "category":
@@ -254,9 +280,9 @@ export class FunnelLayoutEngine {
                 }
 
                 sceneLabels.push({
-                    bounds,
+                    bounds: labelBounds,
                     category: stage.category,
-                    color: textColor,
+                    color: labelColor,
                     conversionRate: stage.conversionRate,
                     dataIndex: stage.dataIndex,
                     datum: stage.datum,
@@ -318,6 +344,14 @@ export class FunnelLayoutEngine {
             };
             hitTargets.push(hitTarget);
 
+            hitEntries.push({
+                animationKey: stage.animationKey,
+                bounds,
+                polygon,
+                slotIndex: i,
+                target: hitTarget
+            });
+
             interactionBuckets.push({
                 anchor: centerPoint,
                 hits: [hitTarget],
@@ -327,14 +361,13 @@ export class FunnelLayoutEngine {
             });
         }
 
-        const hitIndex = new FunnelHitIndex(
-            plotRect,
+        const hitIndex = new FunnelHitIndex({
+            entries: hitEntries,
+            gap: effectiveGap,
             orientation,
-            slotSpan,
-            gap,
-            sceneStages,
-            hitTargets
-        );
+            plotRect,
+            slotSpan
+        });
 
         const seriesScene: ChartFunnelSeriesScene = {
             id: seriesId,

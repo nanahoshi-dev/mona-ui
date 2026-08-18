@@ -7,7 +7,6 @@ import type {
 } from "../../scene/waterfall-scene";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
-import { RectGeometryTransition } from "../primitives/rect-geometry-transition";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";
 
 interface WaterfallBarPlan {
@@ -27,6 +26,7 @@ function createCollapsedBar(bar: SceneWaterfallBar, opacity = 0): SceneWaterfall
 
     return {
         ...bar,
+        borderRadius: bar.borderRadius,
         bounds: collapsedBounds,
         fromY: bar.fromY,
         renderOpacity: opacity,
@@ -41,6 +41,7 @@ function sampleBar(plan: WaterfallBarPlan, progress: number): SceneWaterfallBar 
     const toY = lerp(from.toY, to.toY, progress);
     const x = lerp(from.bounds.x, to.bounds.x, progress);
     const width = lerp(from.bounds.width, to.bounds.width, progress);
+    const borderRadius = lerp(from.borderRadius ?? 0, to.borderRadius ?? 0, progress);
 
     const topY = Math.min(fromY, toY);
     const rawHeight = Math.abs(toY - fromY);
@@ -58,6 +59,7 @@ function sampleBar(plan: WaterfallBarPlan, progress: number): SceneWaterfallBar 
     return {
         ...to,
         animationKey: to.animationKey ?? from.animationKey,
+        borderRadius,
         bounds,
         fromY,
         renderOpacity,
@@ -99,14 +101,15 @@ export class WaterfallAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                 id,
                 sample: (progress: number) => {
                     const bars = plans.map(p => sampleBar(p, progress));
+                    const barsByKey = new Map(bars.map(b => [b.animationKey, b]));
                     const connectors: SceneWaterfallConnector[] = [];
 
-                    for (let i = 0; i < bars.length - 1; i++) {
-                        const b1 = bars[i];
-                        const b2 = bars[i + 1];
-                        if (target.connectors[i]) {
+                    for (const conn of target.connectors) {
+                        const b1 = barsByKey.get(conn.fromAnimationKey);
+                        const b2 = barsByKey.get(conn.toAnimationKey);
+                        if (b1 && b2) {
                             connectors.push({
-                                ...target.connectors[i],
+                                ...conn,
                                 fromX: b1.bounds.x + b1.bounds.width,
                                 renderOpacity: progress,
                                 toX: b2.bounds.x,
@@ -177,13 +180,14 @@ export class WaterfallAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     .filter(p => (p.type !== "exit" || progress < 1))
                     .map(p => sampleBar(p, progress));
 
+                const barsByKey = new Map(bars.map(b => [b.animationKey, b]));
                 const connectors: SceneWaterfallConnector[] = [];
-                for (let i = 0; i < bars.length - 1; i++) {
-                    const b1 = bars[i];
-                    const b2 = bars[i + 1];
-                    if (target.connectors[i]) {
+                for (const conn of target.connectors) {
+                    const b1 = barsByKey.get(conn.fromAnimationKey);
+                    const b2 = barsByKey.get(conn.toAnimationKey);
+                    if (b1 && b2) {
                         connectors.push({
-                            ...target.connectors[i],
+                            ...conn,
                             fromX: b1.bounds.x + b1.bounds.width,
                             renderOpacity: 1,
                             toX: b2.bounds.x,

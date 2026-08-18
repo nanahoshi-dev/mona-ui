@@ -2,7 +2,6 @@ import type { ChartPoint, ChartRect } from "../../../models/chart.models";
 import type { ChartFunnelSeriesScene, SceneFunnelLabel, SceneFunnelStage } from "../../scene/funnel-scene";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
-import { RectGeometryTransition } from "../primitives/rect-geometry-transition";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";
 
 interface FunnelStagePlan {
@@ -70,7 +69,19 @@ function sampleStage(plan: FunnelStagePlan, progress: number): SceneFunnelStage 
         { x: lerp(fromPoly[3].x, toPoly[3].x, progress), y: lerp(fromPoly[3].y, toPoly[3].y, progress) }
     ];
 
-    const bounds = RectGeometryTransition.interpolate(from.bounds, to.bounds, progress);
+    const xs = polygon.map(p => p.x);
+    const ys = polygon.map(p => p.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const bounds: ChartRect = {
+        height: maxY - minY,
+        width: maxX - minX,
+        x: minX,
+        y: minY
+    };
+
     const renderOpacity = lerpOpacity(from.renderOpacity ?? 1, to.renderOpacity ?? 1, progress);
 
     return {

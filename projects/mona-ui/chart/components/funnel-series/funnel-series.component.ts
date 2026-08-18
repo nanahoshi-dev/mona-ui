@@ -18,7 +18,7 @@ import {
     ChartInvalidationReason,
     type ChartFunnelSeriesRegistration
 } from "../../internal/context/chart-registration-context";
-import { serializeKeyPart } from "../../internal/animation/animation-identity";
+import { FunnelIdentity } from "../../internal/data/funnel-identity";
 import { resolveValue } from "../../internal/data/chart-value-resolver";
 import type {
     ChartFunnelLabelContent,
@@ -104,9 +104,9 @@ export class FunnelSeriesComponent implements OnInit {
 
     /**
      * @description Spacing in pixels between consecutive funnel stages.
-     * @default 4
+     * @default 2
      */
-    public readonly gap = input<number>(4);
+    public readonly gap = input<number>(2);
 
     /**
      * @description Unique identifier key field for datums.
@@ -194,9 +194,9 @@ export class FunnelSeriesComponent implements OnInit {
 
     /**
      * @description Maximum width ratio (0 to 1) for the funnel's widest stage relative to plot area.
-     * @default 0.8
+     * @default 0.9
      */
-    public readonly widthRatio = input<number>(0.8);
+    public readonly widthRatio = input<number>(0.9);
 
     /**
      * @description Emits when a stage's visibility is toggled via legend or API.
@@ -207,16 +207,30 @@ export class FunnelSeriesComponent implements OnInit {
         effect(() => {
             const rawData = this.data() ?? this.#chartContext?.rootData() ?? [];
             const keyF = this.keyField();
+            const fieldF = this.field();
             const catF = this.categoryField();
             const catFmt = this.categoryFormatter();
 
-            const arr: readonly unknown[] = Array.isArray(rawData) ? rawData : [];
+            const arr: readonly unknown[] = Array.isArray(rawData) ? rawData : (rawData !== undefined && rawData !== null ? [rawData] : []);
 
             this.#stageIdentityMap.clear();
             const seenKeys = new Set<string>();
 
             for (let i = 0; i < arr.length; i++) {
                 const datum = arr[i];
+                const rawVal = resolveValue(datum, fieldF, i);
+                if (!FunnelIdentity.isValidFunnelValue(rawVal)) {
+                    continue;
+                }
+
+                const identity = FunnelIdentity.resolveStageIdentity(
+                    datum,
+                    i,
+                    this.#seriesId,
+                    keyF,
+                    seenKeys
+                );
+
                 const rawCat = resolveValue(datum, catF, i);
                 const formattedCategory = catFmt
                     ? catFmt(rawCat, i)
@@ -224,21 +238,7 @@ export class FunnelSeriesComponent implements OnInit {
                       ? String(rawCat)
                       : `Stage ${i + 1}`;
 
-                let explicitKey: string | undefined;
-                if (keyF) {
-                    const rawKey = resolveValue(datum, keyF, i);
-                    const keyPart = serializeKeyPart(rawKey);
-                    if (keyPart !== null) {
-                        const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
-                        if (!seenKeys.has(keyStr)) {
-                            seenKeys.add(keyStr);
-                            explicitKey = keyStr;
-                        }
-                    }
-                }
-
-                const stageId = explicitKey ?? `i:${i}`;
-                this.#stageIdentityMap.set(stageId, {
+                this.#stageIdentityMap.set(identity.stageId, {
                     category: rawCat,
                     dataIndex: i,
                     datum,

@@ -102,7 +102,7 @@ export class TreemapLayoutEngine {
                   ? 1
                   : Math.floor(rawMaxDepth);
 
-        const maxLabels = Math.max(0, registration.maxLabels ? registration.maxLabels() : 100);
+        const maxLabels = Math.max(0, Math.floor(registration.maxLabels ? registration.maxLabels() : 100));
         const minLabelWidth = Math.max(0, registration.minLabelWidth ? (registration.minLabelWidth() ?? 30) : 30);
         const defaultMinTerminalLabelHeight = showValues ? 24 : 16;
         const minTerminalLabelHeight = Math.max(
