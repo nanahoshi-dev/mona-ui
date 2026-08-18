@@ -3,6 +3,7 @@ import type { ChartValueFormatter } from "../../models/chart-polar.models";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 import { deriveRadialDatumId } from "./radial-datum-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
+import { formatYValue } from "../utils/chart-formatter";
 
 export interface PreparedGaugeData {
     readonly animationKey: string;
@@ -96,15 +97,15 @@ export class GaugeDataProcessor {
 
         const formattedValue = valueFormatter
             ? valueFormatter(effectiveValue, matchedDataIndex >= 0 ? matchedDataIndex : 0)
-            : String(effectiveValue);
+            : formatYValue(effectiveValue, matchedDataIndex >= 0 ? matchedDataIndex : 0);
 
         const formattedMin = valueFormatter
             ? valueFormatter(domainMin, 0)
-            : String(domainMin);
+            : formatYValue(domainMin, 0);
 
         const formattedMax = valueFormatter
             ? valueFormatter(domainMax, 0)
-            : String(domainMax);
+            : formatYValue(domainMax, 0);
 
         const rawKey = matchedDatum && keyField ? resolveValue(matchedDatum, keyField, matchedDataIndex) : undefined;
         const itemId = deriveRadialDatumId(matchedDatum, undefined, rawKey, matchedDataIndex >= 0 ? matchedDataIndex : 0);

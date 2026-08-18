@@ -1,10 +1,14 @@
-import { isDevMode } from "@angular/core";
 import type { ChartField } from "../../models/chart.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
 import { resolveData, resolveValue } from "./chart-value-resolver";
-import { deriveRadialDatumId } from "./radial-datum-identity";
+import {
+    deriveRadialDatumId,
+    serializeRadialCategoryKey,
+    serializeRadialExplicitKey
+} from "./radial-datum-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import { formatYValue } from "../utils/chart-formatter";
 
 export interface PreparedRadialBarDatum {
     readonly animationKey: string;
@@ -92,7 +96,6 @@ export class RadialBarDataProcessor {
             value: number;
         }[] = [];
 
-        const seenItemIds = new Set<string>();
         const seenCategories = new Set<string>();
         const seenCustomKeys = new Set<string>();
 
@@ -116,13 +119,13 @@ export class RadialBarDataProcessor {
             }
 
             const rawCat = resolveValue(row, categoryField, i);
-            const categoryKey = rawCat !== undefined && rawCat !== null ? String(rawCat) : String(i);
+            const categoryKey = serializeRadialCategoryKey(rawCat, i);
 
             if (seenCategories.has(categoryKey)) {
                 if (warnedDiagnosticSignatures) {
                     ChartDiagnostics.warnOnce(
                         warnedDiagnosticSignatures,
-                        `Radial Bar series "${seriesName}" encountered duplicate category "${categoryKey}" at data index ${i}. First valid datum wins.`,
+                        `Radial Bar series "${seriesName}" encountered duplicate category "${String(rawCat)}" at data index ${i}. First valid datum wins.`,
                         `${seriesId}:duplicate-radial-bar-category`
                     );
                 }
@@ -130,31 +133,32 @@ export class RadialBarDataProcessor {
             }
 
             const rawKey = keyField ? resolveValue(row, keyField, i) : undefined;
-            if (rawKey !== undefined && rawKey !== null) {
-                const keyStr = String(rawKey);
-                if (seenCustomKeys.has(keyStr)) {
+            const customKey = serializeRadialExplicitKey(rawKey);
+            if (customKey !== null) {
+                if (seenCustomKeys.has(customKey)) {
                     if (warnedDiagnosticSignatures) {
                         ChartDiagnostics.warnOnce(
                             warnedDiagnosticSignatures,
-                            `Radial Bar series "${seriesName}" encountered duplicate explicit key "${keyStr}" at data index ${i}. First valid datum wins.`,
+                            `Radial Bar series "${seriesName}" encountered duplicate explicit key "${String(rawKey)}" at data index ${i}. First valid datum wins.`,
                             `${seriesId}:duplicate-explicit-key`
                         );
                     }
                     continue;
                 }
-                seenCustomKeys.add(keyStr);
+                seenCustomKeys.add(customKey);
             }
 
             seenCategories.add(categoryKey);
             const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
-            seenItemIds.add(itemId);
 
             const formattedCategory = categoryFormatter
-                ? categoryFormatter(rawCat ?? categoryKey, i)
-                : categoryKey;
+                ? categoryFormatter(rawCat ?? `Item ${i + 1}`, i)
+                : rawCat !== undefined && rawCat !== null
+                  ? String(rawCat)
+                  : `Item ${i + 1}`;
 
             validEntries.push({
-                category: rawCat ?? categoryKey,
+                category: rawCat ?? `Item ${i + 1}`,
                 categoryKey,
                 dataIndex: i,
                 datum: row,
@@ -174,7 +178,10 @@ export class RadialBarDataProcessor {
         }
 
         // Domain calculation
-        let domainMin = options.min !== undefined && Number.isFinite(options.min) ? options.min : 0;
+        const isExplicitMin = options.min !== undefined && Number.isFinite(options.min);
+        const isExplicitMax = options.max !== undefined && Number.isFinite(options.max);
+
+        let domainMin = isExplicitMin ? options.min! : 0;
         if (domainMin < 0) {
             if (warnedDiagnosticSignatures) {
                 ChartDiagnostics.warnOnce(
@@ -187,9 +194,9 @@ export class RadialBarDataProcessor {
         }
 
         const maxVal = Math.max(...validEntries.map(e => e.value));
-        let domainMax = options.max !== undefined && Number.isFinite(options.max) ? options.max : maxVal;
+        let domainMax = isExplicitMax ? options.max! : maxVal;
 
-        if (domainMax <= domainMin) {
+        if (isExplicitMax && domainMax <= domainMin) {
             if (warnedDiagnosticSignatures) {
                 ChartDiagnostics.warnOnce(
                     warnedDiagnosticSignatures,
@@ -197,6 +204,10 @@ export class RadialBarDataProcessor {
                     `${seriesId}:invalid-radial-bar-domain`
                 );
             }
+            domainMax = domainMin + (maxVal > domainMin ? maxVal - domainMin : 1);
+        }
+
+        if (domainMax <= domainMin) {
             domainMax = domainMin + (maxVal > domainMin ? maxVal - domainMin : 1);
         }
 
@@ -222,7 +233,7 @@ export class RadialBarDataProcessor {
             const ratio = Math.max(0, Math.min(1, (entry.value - domainMin) / span));
             const formattedValue = valueFormatter
                 ? valueFormatter(entry.value, entry.dataIndex)
-                : String(entry.value);
+                : formatYValue(entry.value, entry.dataIndex);
 
             const visible = isDatumVisible(entry.itemId);
             const animationKey = `${seriesId}:rb:${entry.itemId}`;
