@@ -2,6 +2,7 @@ import { arc } from "d3-shape";
 import type { ChartPoint } from "../../../models/chart.models";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
 import type { ChartGaugeSeriesScene, SceneGaugeValue, SceneRadialTrack } from "../../scene/polar-arc-scene";
+import type { SceneHitTarget } from "../../scene/scene-geometry";
 import type { ChartStyleResolver } from "../../style/chart-style-resolver";
 import { createPolarGradientSpec } from "./polar-gradient";
 
@@ -28,7 +29,17 @@ export class GaugeSeriesRenderer {
             .outerRadius(d => d.outerRadius)
             .startAngle(d => d.startAngle)
             .endAngle(d => d.endAngle)
+            .cornerRadius(d => d.cornerRadius)
             .padAngle(0)
+            .context(context);
+
+        const highlightArcGenerator = arc<SceneHitTarget>()
+            .innerRadius(d => d.arc!.innerRadius)
+            .outerRadius(d => d.arc!.outerRadius)
+            .startAngle(d => d.arc!.startAngle)
+            .endAngle(d => d.arc!.endAngle)
+            .cornerRadius(d => d.arc!.cornerRadius ?? 0)
+            .padAngle(d => d.arc!.padAngle ?? 0)
             .context(context);
 
         context.save();
@@ -37,7 +48,7 @@ export class GaugeSeriesRenderer {
         const seriesOpacity = series.renderOpacity ?? 1;
 
         // 1. Draw track arc
-        if (track) {
+        if (track && seriesOpacity > 0) {
             context.save();
             context.beginPath();
             trackArcGenerator(track);
@@ -81,7 +92,7 @@ export class GaugeSeriesRenderer {
         }
 
         // 3. Draw needle & hub (if indicator is "needle" or "both")
-        if ((indicator === "needle" || indicator === "both") && needle) {
+        if ((indicator === "needle" || indicator === "both") && needle && seriesOpacity > 0) {
             context.save();
             context.globalAlpha = seriesOpacity;
 
@@ -106,12 +117,12 @@ export class GaugeSeriesRenderer {
             context.restore();
         }
 
-        // 4. Draw active interaction overlay on value arc
+        // 4. Draw active interaction overlay on value arc directly from activeHit.arc
         const activeHit = interactionState?.activeHitTarget;
-        if (activeHit && activeHit.seriesId === series.id && (indicator === "arc" || indicator === "both") && value) {
+        if (activeHit && activeHit.seriesId === series.id && activeHit.arc && (indicator === "arc" || indicator === "both")) {
             context.save();
             context.beginPath();
-            valueArcGenerator(value);
+            highlightArcGenerator(activeHit);
 
             if (interactionState.source === "keyboard") {
                 const focusIndicatorColor =
