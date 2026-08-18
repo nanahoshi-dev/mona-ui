@@ -22,7 +22,7 @@ import type {
 } from "../scene/cartesian-scene";
 import type { ChartSectorSeriesScene } from "../scene/polar-scene";
 import type { ChartContinuousPolarSeriesScene, ChartRadarSeriesScene } from "../scene/polar-axis-scene";
-import type { ChartRadialArcSeriesScene, SceneRadialArcMark } from "../scene/polar-arc-scene";
+import type { ChartGaugeSeriesScene, ChartRadialArcSeriesScene, ChartRoseSeriesScene, SceneRadialArcMark } from "../scene/polar-arc-scene";
 import type {
     ChartInteractionBucket,
     ChartInteractionXKey,
@@ -136,6 +136,7 @@ export class SceneTransitionSampler {
             const sampledArc = this.#sampleArcScene(
                 toScene as PolarArcChartScene,
                 seriesPlans,
+                plan.axisPlan as PolarAxisTransitionPlan | null | undefined,
                 progress
             );
             return {
@@ -709,7 +710,7 @@ export class SceneTransitionSampler {
         const sampledAxes = axisPlan ? axisPlan.sample(progress) : { angularAxis: toScene.angularAxis, radialAxis: toScene.radialAxis };
 
         return {
-            angularAxis: sampledAxes.angularAxis,
+            angularAxis: sampledAxes.angularAxis ?? toScene.angularAxis,
             axisMode: toScene.axisMode,
             center: toScene.center,
             coordinateSystem: "polar",
@@ -721,7 +722,7 @@ export class SceneTransitionSampler {
             outerRadius: toScene.outerRadius,
             plotRect: toScene.plotRect,
             polarKind: "axis",
-            radialAxis: sampledAxes.radialAxis,
+            radialAxis: sampledAxes.radialAxis ?? toScene.radialAxis,
             series: sampledSeries,
             width: toScene.width
         };
@@ -774,6 +775,7 @@ export class SceneTransitionSampler {
     static #sampleArcScene(
         toScene: PolarArcChartScene,
         seriesPlans: ChartTransitionPlan["seriesPlans"],
+        axisPlan: PolarAxisTransitionPlan | null | undefined,
         progress: number
     ): PolarArcChartScene {
         const sampledSeries = seriesPlans
@@ -808,6 +810,7 @@ export class SceneTransitionSampler {
                             padAngle: mark.padAngle,
                             startAngle: mark.startAngle
                         },
+                        radialRatio: mark.normalizedValue,
                         value: mark.rawValue,
                         yValue: mark.rawValue
                     };
@@ -816,13 +819,12 @@ export class SceneTransitionSampler {
                 if (series0.type === "radialBar") {
                     sampledHitIndex = new RadialBarHitIndex(toScene.center, sampledHitTargets);
                 } else {
-                    const K = series0.angularCategories?.length ?? sampledHitTargets.length;
-                    const spanRad = sampledHitTargets.length > 0 && sampledHitTargets[0].arc
-                        ? (sampledHitTargets[sampledHitTargets.length - 1].arc?.endAngle ?? Math.PI * 2) - (sampledHitTargets[0].arc?.startAngle ?? 0)
+                    const targetRose = toScene.series[0]?.type === "rose" ? (toScene.series[0] as ChartRoseSeriesScene) : undefined;
+                    const startAngleRad = targetRose?.angularCategories[0]?.startAngle ?? 0;
+                    const spanRad = targetRose?.angularCategories.length
+                        ? targetRose.angularCategories[targetRose.angularCategories.length - 1].endAngle - startAngleRad
                         : Math.PI * 2;
-                    const startAngleRad = sampledHitTargets.length > 0 && sampledHitTargets[0].arc
-                        ? (sampledHitTargets[0].arc?.startAngle ?? 0)
-                        : 0;
+                    const K = targetRose?.angularCategories.length ?? sampledHitTargets.length;
 
                     sampledHitIndex = new RoseHitIndex(
                         toScene.center,
@@ -834,32 +836,55 @@ export class SceneTransitionSampler {
                 }
             } else if (series0.type === "gauge") {
                 const gVal = series0.value;
+                const gNeedle = series0.needle;
+                const targetGauge = toScene.series[0]?.type === "gauge" ? (toScene.series[0] as ChartGaugeSeriesScene) : undefined;
+                const indicator = targetGauge?.indicator ?? "both";
+
                 sampledHitTargets = toScene.hitTargets.map((target: SceneHitTarget) => {
                     if (!gVal) {
                         return target;
                     }
+                    const isClamped = gVal.rawValue < gVal.min || gVal.rawValue > gVal.max;
                     return {
                         ...target,
                         arc: {
                             center: toScene.center,
-                            cornerRadius: target.arc?.cornerRadius ?? 0,
+                            cornerRadius: gVal.cornerRadius,
                             endAngle: gVal.endAngle,
                             innerRadius: gVal.innerRadius,
                             outerRadius: gVal.outerRadius,
                             padAngle: 0,
                             startAngle: gVal.startAngle
                         },
+                        formattedRadialMax: gVal.formattedMax,
+                        formattedRadialMin: gVal.formattedMin,
+                        isClamped,
+                        radialMax: gVal.max,
+                        radialMin: gVal.min,
+                        radialRatio: gVal.ratio,
                         value: gVal.rawValue,
                         yValue: gVal.rawValue
                     };
                 });
 
-                sampledHitIndex = new GaugeHitIndex(
-                    toScene.center,
-                    sampledHitTargets,
-                    toScene.innerRadius,
-                    toScene.outerRadius
-                );
+                const hitGeometry = sampledHitTargets.length > 0 && gVal
+                    ? {
+                          center: toScene.center,
+                          indicator,
+                          needle: gNeedle
+                              ? {
+                                    angle: gNeedle.angle,
+                                    hubRadius: gNeedle.hubRadius,
+                                    length: gNeedle.length,
+                                    width: gNeedle.width
+                                }
+                              : undefined,
+                          target: sampledHitTargets[0],
+                          valueArc: sampledHitTargets[0].arc
+                      }
+                    : null;
+
+                sampledHitIndex = new GaugeHitIndex(hitGeometry);
             }
         }
 
@@ -875,12 +900,21 @@ export class SceneTransitionSampler {
                     return targetBucket;
                 }
                 const arcGeom = primaryHit.arc;
-                const midAngle = (arcGeom.startAngle + arcGeom.endAngle) / 2;
-                const midRadius = (arcGeom.innerRadius + arcGeom.outerRadius) / 2;
-                const anchor: ChartPoint = {
-                    x: toScene.center.x + Math.sin(midAngle) * midRadius,
-                    y: toScene.center.y - Math.cos(midAngle) * midRadius
-                };
+                let anchor: ChartPoint;
+                if (series0?.type === "gauge" && series0.indicator === "needle" && series0.needle) {
+                    const needleMidRadius = series0.needle.length * 0.7;
+                    anchor = {
+                        x: toScene.center.x + Math.sin(series0.needle.angle) * needleMidRadius,
+                        y: toScene.center.y - Math.cos(series0.needle.angle) * needleMidRadius
+                    };
+                } else {
+                    const midAngle = (arcGeom.startAngle + arcGeom.endAngle) / 2;
+                    const midRadius = (arcGeom.innerRadius + arcGeom.outerRadius) / 2;
+                    anchor = {
+                        x: toScene.center.x + Math.sin(midAngle) * midRadius,
+                        y: toScene.center.y - Math.cos(midAngle) * midRadius
+                    };
+                }
                 return {
                     anchor,
                     hits: [primaryHit],
@@ -890,11 +924,21 @@ export class SceneTransitionSampler {
                 };
             });
 
+        let sampledAngularAxis = toScene.angularAxis;
+        let sampledRadialAxis = toScene.radialAxis;
+        if (axisPlan) {
+            const sampledAxes = axisPlan.sample(progress);
+            sampledAngularAxis = sampledAxes.angularAxis ?? toScene.angularAxis;
+            sampledRadialAxis = sampledAxes.radialAxis ?? toScene.radialAxis;
+        }
+
         return {
             ...toScene,
+            angularAxis: sampledAngularAxis,
             hitIndex: sampledHitIndex,
             hitTargets: sampledHitTargets,
             interactionBuckets: sampledBuckets,
+            radialAxis: sampledRadialAxis,
             series: sampledSeries
         };
     }

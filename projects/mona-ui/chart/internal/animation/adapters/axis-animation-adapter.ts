@@ -8,8 +8,8 @@ export interface CartesianAxisTransitionPlan {
 
 export interface PolarAxisTransitionPlan {
     readonly sample: (progress: number) => {
-        angularAxis: ChartAngularAxisScene;
-        radialAxis: ChartRadialAxisScene;
+        angularAxis?: ChartAngularAxisScene;
+        radialAxis?: ChartRadialAxisScene;
     };
 }
 
@@ -57,8 +57,8 @@ export class AxisAnimationAdapter {
     }
 
     public static createPolarAxisPlan(
-        previous: { angularAxis: ChartAngularAxisScene; radialAxis: ChartRadialAxisScene } | undefined,
-        target: { angularAxis: ChartAngularAxisScene; radialAxis: ChartRadialAxisScene }
+        previous: { angularAxis?: ChartAngularAxisScene; radialAxis?: ChartRadialAxisScene } | undefined,
+        target: { angularAxis?: ChartAngularAxisScene; radialAxis?: ChartRadialAxisScene }
     ): PolarAxisTransitionPlan {
         if (!previous) {
             return { sample: (_p: number) => target };
@@ -70,10 +70,18 @@ export class AxisAnimationAdapter {
                     return target;
                 }
 
-                const prevRadialTicks = new Map(previous.radialAxis.ticks.map(t => [t.tickKey, t.radius]));
+                if (!target.radialAxis) {
+                    return {
+                        angularAxis: target.angularAxis,
+                        radialAxis: undefined
+                    };
+                }
+
+                const prevRadial = previous.radialAxis;
+                const prevRadialTicks = prevRadial ? new Map(prevRadial.ticks.map(t => [t.tickKey, t.radius])) : null;
 
                 const interpolatedRadialTicks = target.radialAxis.ticks.map(tick => {
-                    const prevRadius = prevRadialTicks.get(tick.tickKey);
+                    const prevRadius = prevRadialTicks?.get(tick.tickKey);
                     if (prevRadius === undefined) {
                         return tick;
                     }
