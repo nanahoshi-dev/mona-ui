@@ -6,12 +6,12 @@ import type { ChartPointEvent, ChartPointFocusEvent } from "../../models/chart-e
 import type { ChartRadialCurve, ChartRadialFillMode, ChartRadialGridShape } from "../../models/chart-polar.models";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { PolarAxisChartScene } from "../../internal/scene/chart-scene";
-import { MonaChartAngularAxisComponent } from "../chart-angular-axis/chart-angular-axis.component";
-import { MonaChartLegendComponent } from "../chart-legend/chart-legend.component";
-import { MonaChartRadialAxisComponent } from "../chart-radial-axis/chart-radial-axis.component";
-import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
-import { MonaChartComponent } from "../chart/chart.component";
-import { MonaPolarSeriesComponent } from "./polar-series.component";
+import { ChartAngularAxisComponent } from "../chart-angular-axis/chart-angular-axis.component";
+import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
+import { ChartRadialAxisComponent } from "../chart-radial-axis/chart-radial-axis.component";
+import { ChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
+import { ChartComponent } from "../chart/chart.component";
+import { PolarSeriesComponent } from "./polar-series.component";
 
 interface AntennaMeasurement {
     angle: number;
@@ -20,18 +20,15 @@ interface AntennaMeasurement {
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaPolarSeriesComponent,
-        MonaChartAngularAxisComponent,
-        MonaChartRadialAxisComponent,
-        MonaChartLegendComponent,
-        MonaChartTooltipComponent
+        ChartComponent,
+        PolarSeriesComponent,
+        ChartAngularAxisComponent,
+        ChartRadialAxisComponent,
+        ChartLegendComponent,
+        ChartTooltipComponent
     ],
     template: `
-        <mona-chart
-            [data]="data()"
-            (pointClick)="onPointClick($event)"
-            (pointFocusChange)="onPointFocusChange($event)">
+        <mona-chart [data]="data()" (pointClick)="onPointClick($event)" (pointFocusChange)="onPointFocusChange($event)">
             <mona-chart-angular-axis
                 [rotation]="angularRotation()"
                 [tickCount]="angularTickCount()"
@@ -104,8 +101,7 @@ describe("Continuous Polar Chart Integration", () => {
     });
 
     it("should compute polar axis scene with continuous sorted angles and circular grid", () => {
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-            .componentInstance as MonaChartComponent;
+        const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         const scene = chartComp.scene() as PolarAxisChartScene;
 
         expect(scene).not.toBeNull();
@@ -123,7 +119,7 @@ describe("Continuous Polar Chart Integration", () => {
     });
 
     it("should navigate continuous polar points with keyboard arrow keys and trigger click", () => {
-        const chartEl = fixture.debugElement.query(By.directive(MonaChartComponent));
+        const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
 
         // ArrowRight: navigate to 0°
         chartEl.nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
@@ -150,8 +146,7 @@ describe("Continuous Polar Chart Integration", () => {
     });
 
     it("should toggle continuous polar series visibility from legend", () => {
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-            .componentInstance as MonaChartComponent;
+        const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         const legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));
 
         expect(legendButtons.length).toBe(1);
@@ -181,8 +176,7 @@ describe("Continuous Polar Chart Integration", () => {
     });
 
     it("should trigger visibility animation when toggling continuous polar series from legend", () => {
-        const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-            .componentInstance as MonaChartComponent;
+        const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         chartComp.recomputeScene();
 
         const legendButtons = fixture.debugElement.queryAll(By.css("mona-chart-legend button"));

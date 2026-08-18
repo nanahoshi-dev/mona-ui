@@ -7,7 +7,7 @@ import type { ChartRegistrationContext } from "../../internal/context/chart-regi
 import type { ChartScene } from "../../internal/scene/chart-scene";
 import type { ChartPoint } from "../../models/chart.models";
 import type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
-import { MonaChartTooltipComponent } from "./chart-tooltip.component";
+import { ChartTooltipComponent } from "./chart-tooltip.component";
 
 function createMockPointContext(x: string, y: string, yVal: number = 50): ChartTooltipPointContext {
     return {
@@ -25,7 +25,10 @@ function createMockPointContext(x: string, y: string, yVal: number = 50): ChartT
     };
 }
 
-function createMockTemplateContext(point: ChartTooltipPointContext, shared: boolean = false): ChartTooltipTemplateContext {
+function createMockTemplateContext(
+    point: ChartTooltipPointContext,
+    shared: boolean = false
+): ChartTooltipTemplateContext {
     return {
         $implicit: point,
         point,
@@ -36,7 +39,7 @@ function createMockTemplateContext(point: ChartTooltipPointContext, shared: bool
 }
 
 @Component({
-    imports: [MonaChartTooltipComponent],
+    imports: [ChartTooltipComponent],
     template: `<mona-chart-tooltip [shared]="isShared()" />`
 })
 class TestHostComponent {
@@ -81,7 +84,7 @@ describe("MonaChartTooltipComponent", () => {
         sceneSignal = signal<ChartScene | null>({
             axes: [],
             cartesianKind: "xy",
-        coordinateSystem: "cartesian",
+            coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 400,
             hitTargets: [],
@@ -161,4 +164,3 @@ describe("MonaChartTooltipComponent", () => {
         expect(left).toBeLessThan(400);
     });
 });
-

@@ -14,7 +14,7 @@ let nextSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaRangeBarSeriesComponent implements OnInit {
+export class RangeBarSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

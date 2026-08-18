@@ -4,11 +4,11 @@ import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
 import type { ChartPolarFillMode } from "../../models/chart-polar.models";
-import { MonaChartComponent } from "../chart/chart.component";
-import { MonaDonutSeriesComponent } from "./donut-series.component";
+import { ChartComponent } from "../chart/chart.component";
+import { DonutSeriesComponent } from "./donut-series.component";
 
 @Component({
-    imports: [MonaChartComponent, MonaDonutSeriesComponent, ChartCenterTemplateDirective],
+    imports: [ChartComponent, DonutSeriesComponent, ChartCenterTemplateDirective],
     template: `
         <mona-chart [data]="data()">
             <mona-donut-series
@@ -55,7 +55,7 @@ describe("MonaDonutSeriesComponent", () => {
     });
 
     it("should register donut series and compute innerRadius", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         const scene = chart.scene();
 
         expect(scene).not.toBeNull();
@@ -73,10 +73,10 @@ describe("MonaDonutSeriesComponent", () => {
         expect(centerEl).not.toBeNull();
         expect(centerEl.textContent).toContain("1,000");
 
-        const donutDebugEl = fixture.debugElement.query(By.directive(MonaDonutSeriesComponent));
-        const donutComponent = donutDebugEl?.componentInstance as MonaDonutSeriesComponent;
+        const donutDebugEl = fixture.debugElement.query(By.directive(DonutSeriesComponent));
+        const donutComponent = donutDebugEl?.componentInstance as DonutSeriesComponent;
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
 
         // Hide Services (200) -> total should be 800
         donutComponent.toggleSlice(2);
@@ -87,7 +87,7 @@ describe("MonaDonutSeriesComponent", () => {
     });
 
     it("should support solid and gradient fillMode", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
         let scene = chart.scene();
 

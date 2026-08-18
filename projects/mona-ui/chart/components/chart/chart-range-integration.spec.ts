@@ -3,21 +3,21 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChartPointEvent, ChartPointFocusEvent } from "../../models/chart-event.models";
-import { MonaChartComponent } from "./chart.component";
-import { MonaChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
-import { MonaChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
-import { MonaChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
-import { MonaRangeBarSeriesComponent } from "../range-bar-series/range-bar-series.component";
-import { MonaRangeAreaSeriesComponent } from "../range-area-series/range-area-series.component";
+import { ChartComponent } from "./chart.component";
+import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
+import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { ChartTooltipComponent } from "../chart-tooltip/chart-tooltip.component";
+import { RangeBarSeriesComponent } from "../range-bar-series/range-bar-series.component";
+import { RangeAreaSeriesComponent } from "../range-area-series/range-area-series.component";
 
 @Component({
     imports: [
-        MonaChartComponent,
-        MonaChartXAxisComponent,
-        MonaChartYAxisComponent,
-        MonaChartTooltipComponent,
-        MonaRangeBarSeriesComponent,
-        MonaRangeAreaSeriesComponent
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartTooltipComponent,
+        RangeBarSeriesComponent,
+        RangeAreaSeriesComponent
     ],
     template: `
         <mona-chart
@@ -73,7 +73,7 @@ class TestHostComponent {
 describe("Chart Range Series Integration", () => {
     let fixture: ComponentFixture<TestHostComponent>;
     let host: TestHostComponent;
-    let chartComponent: MonaChartComponent;
+    let chartComponent: ChartComponent;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -83,7 +83,7 @@ describe("Chart Range Series Integration", () => {
         fixture = TestBed.createComponent(TestHostComponent);
         host = fixture.componentInstance;
         fixture.detectChanges();
-        chartComponent = fixture.debugElement.query(By.directive(MonaChartComponent)).componentInstance;
+        chartComponent = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance;
     });
 
     it("should compute scene with both Range Bar and Range Area series", () => {

@@ -15,7 +15,7 @@ let nextPolarSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaPolarSeriesComponent implements OnInit {
+export class PolarSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

@@ -1,6 +1,9 @@
 import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
-import { ChartInvalidationReason, type ChartCandlestickSeriesRegistration } from "../../internal/context/chart-registration-context";
+import {
+    ChartInvalidationReason,
+    type ChartCandlestickSeriesRegistration
+} from "../../internal/context/chart-registration-context";
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
 import type { ChartFinancialFillMode } from "../../models/chart-financial.models";
 import type { ChartField } from "../../models/chart.models";
@@ -16,7 +19,7 @@ let nextSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaCandlestickSeriesComponent implements OnInit {
+export class CandlestickSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

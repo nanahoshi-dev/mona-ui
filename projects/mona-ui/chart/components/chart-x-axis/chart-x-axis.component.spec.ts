@@ -1,11 +1,11 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { MonaChartXAxisComponent } from "./chart-x-axis.component";
+import { ChartXAxisComponent } from "./chart-x-axis.component";
 import type { ChartXAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
 
 @Component({
-    imports: [MonaChartXAxisComponent],
+    imports: [ChartXAxisComponent],
     template: `
         <mona-chart-x-axis
             [visible]="visible()"
@@ -60,8 +60,7 @@ describe("MonaChartXAxisComponent", () => {
         host.title.set("Dates");
         fixture.detectChanges();
 
-        const axisComp = fixture.debugElement.children[0].children[0]
-            ?.componentInstance as MonaChartXAxisComponent;
+        const axisComp = fixture.debugElement.children[0].children[0]?.componentInstance as ChartXAxisComponent;
         if (axisComp) {
             expect(axisComp.type()).toBe("time");
             expect(axisComp.position()).toBe("top");

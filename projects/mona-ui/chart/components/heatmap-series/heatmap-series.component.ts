@@ -15,7 +15,7 @@ let nextSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaHeatmapSeriesComponent implements OnInit {
+export class HeatmapSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

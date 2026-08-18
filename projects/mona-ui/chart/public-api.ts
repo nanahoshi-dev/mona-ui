@@ -1,27 +1,27 @@
-export { MonaChartComponent } from "./components/chart/chart.component";
-export { MonaChartXAxisComponent } from "./components/chart-x-axis/chart-x-axis.component";
-export { MonaChartYAxisComponent } from "./components/chart-y-axis/chart-y-axis.component";
-export { MonaChartAngularAxisComponent } from "./components/chart-angular-axis/chart-angular-axis.component";
-export { MonaChartRadialAxisComponent } from "./components/chart-radial-axis/chart-radial-axis.component";
-export { MonaLineSeriesComponent } from "./components/line-series/line-series.component";
-export { MonaAreaSeriesComponent } from "./components/area-series/area-series.component";
-export { MonaBarSeriesComponent } from "./components/bar-series/bar-series.component";
-export { MonaPieSeriesComponent } from "./components/pie-series/pie-series.component";
-export { MonaDonutSeriesComponent } from "./components/donut-series/donut-series.component";
-export { MonaRadarSeriesComponent } from "./components/radar-series/radar-series.component";
-export { MonaPolarSeriesComponent } from "./components/polar-series/polar-series.component";
-export { MonaChartLegendComponent } from "./components/chart-legend/chart-legend.component";
-export { MonaChartTooltipComponent } from "./components/chart-tooltip/chart-tooltip.component";
-export { MonaScatterSeriesComponent } from "./components/scatter-series/scatter-series.component";
-export { MonaBubbleSeriesComponent } from "./components/bubble-series/bubble-series.component";
-export { MonaRangeBarSeriesComponent } from "./components/range-bar-series/range-bar-series.component";
-export { MonaRangeAreaSeriesComponent } from "./components/range-area-series/range-area-series.component";
-export { MonaHeatmapSeriesComponent } from "./components/heatmap-series/heatmap-series.component";
-export { MonaCandlestickSeriesComponent } from "./components/candlestick-series/candlestick-series.component";
-export { MonaOhlcSeriesComponent } from "./components/ohlc-series/ohlc-series.component";
-export { MonaRadialBarSeriesComponent } from "./components/radial-bar-series/radial-bar-series.component";
-export { MonaRoseSeriesComponent } from "./components/rose-series/rose-series.component";
-export { MonaGaugeSeriesComponent } from "./components/gauge-series/gauge-series.component";
+export { ChartComponent } from "./components/chart/chart.component";
+export { ChartXAxisComponent } from "./components/chart-x-axis/chart-x-axis.component";
+export { ChartYAxisComponent } from "./components/chart-y-axis/chart-y-axis.component";
+export { ChartAngularAxisComponent } from "./components/chart-angular-axis/chart-angular-axis.component";
+export { ChartRadialAxisComponent } from "./components/chart-radial-axis/chart-radial-axis.component";
+export { LineSeriesComponent } from "./components/line-series/line-series.component";
+export { AreaSeriesComponent } from "./components/area-series/area-series.component";
+export { BarSeriesComponent } from "./components/bar-series/bar-series.component";
+export { PieSeriesComponent } from "./components/pie-series/pie-series.component";
+export { DonutSeriesComponent } from "./components/donut-series/donut-series.component";
+export { RadarSeriesComponent } from "./components/radar-series/radar-series.component";
+export { PolarSeriesComponent } from "./components/polar-series/polar-series.component";
+export { ChartLegendComponent } from "./components/chart-legend/chart-legend.component";
+export { ChartTooltipComponent } from "./components/chart-tooltip/chart-tooltip.component";
+export { ScatterSeriesComponent } from "./components/scatter-series/scatter-series.component";
+export { BubbleSeriesComponent } from "./components/bubble-series/bubble-series.component";
+export { RangeBarSeriesComponent } from "./components/range-bar-series/range-bar-series.component";
+export { RangeAreaSeriesComponent } from "./components/range-area-series/range-area-series.component";
+export { HeatmapSeriesComponent } from "./components/heatmap-series/heatmap-series.component";
+export { CandlestickSeriesComponent } from "./components/candlestick-series/candlestick-series.component";
+export { OhlcSeriesComponent } from "./components/ohlc-series/ohlc-series.component";
+export { RadialBarSeriesComponent } from "./components/radial-bar-series/radial-bar-series.component";
+export { RoseSeriesComponent } from "./components/rose-series/rose-series.component";
+export { GaugeSeriesComponent } from "./components/gauge-series/gauge-series.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -42,11 +42,7 @@ export type {
     ChartValueFormatter
 } from "./models/chart.models";
 
-export type {
-    ChartAnimationEasing,
-    ChartAnimationInput,
-    ChartAnimationOptions
-} from "./models/chart-animation.models";
+export type { ChartAnimationEasing, ChartAnimationInput, ChartAnimationOptions } from "./models/chart-animation.models";
 
 export type {
     ChartAxisFormatter,
@@ -75,11 +71,7 @@ export {
     isPolarCoordinateFamily
 } from "./models/chart-series.models";
 
-export type {
-    ChartPointEvent,
-    ChartPointFocusEvent,
-    ChartSeriesVisibilityEvent
-} from "./models/chart-event.models";
+export type { ChartPointEvent, ChartPointFocusEvent, ChartSeriesVisibilityEvent } from "./models/chart-event.models";
 
 export type {
     ChartOhlcPointValue,
@@ -89,10 +81,7 @@ export type {
     ChartScalarPointValue
 } from "./models/chart-point-value.models";
 
-export type {
-    ChartTooltipPointContext,
-    ChartTooltipTemplateContext
-} from "./models/chart-tooltip.models";
+export type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "./models/chart-tooltip.models";
 
 export type {
     ChartCenterTemplateContext,
@@ -124,10 +113,7 @@ export type {
     HeatmapColorStop
 } from "./models/chart-heatmap.models";
 
-export type {
-    ChartFinancialDirection,
-    ChartFinancialFillMode
-} from "./models/chart-financial.models";
+export type { ChartFinancialDirection, ChartFinancialFillMode } from "./models/chart-financial.models";
 
 export type {
     ChartGaugeCenterTemplateContext,
@@ -136,4 +122,3 @@ export type {
     ChartRadialDatumVisibilityEvent,
     ChartRoseScaleMode
 } from "./models/chart-radial-arc.models";
-

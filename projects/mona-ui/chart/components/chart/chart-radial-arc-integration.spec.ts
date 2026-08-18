@@ -3,28 +3,20 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { describe, expect, it } from "vitest";
 import type { PolarArcChartScene } from "../../internal/scene/polar-arc-scene";
-import { MonaChartAngularAxisComponent } from "../chart-angular-axis/chart-angular-axis.component";
-import { MonaChartRadialAxisComponent } from "../chart-radial-axis/chart-radial-axis.component";
-import { MonaChartComponent } from "./chart.component";
-import { MonaRadialBarSeriesComponent } from "../radial-bar-series/radial-bar-series.component";
-import { MonaRoseSeriesComponent } from "../rose-series/rose-series.component";
-import { MonaGaugeSeriesComponent } from "../gauge-series/gauge-series.component";
+import { ChartAngularAxisComponent } from "../chart-angular-axis/chart-angular-axis.component";
+import { ChartRadialAxisComponent } from "../chart-radial-axis/chart-radial-axis.component";
+import { ChartComponent } from "./chart.component";
+import { RadialBarSeriesComponent } from "../radial-bar-series/radial-bar-series.component";
+import { RoseSeriesComponent } from "../rose-series/rose-series.component";
+import { GaugeSeriesComponent } from "../gauge-series/gauge-series.component";
 import { ChartGaugeCenterTemplateDirective } from "../../directives/chart-gauge-center-template.directive";
 
 @Component({
-    imports: [
-        MonaChartComponent,
-        MonaRadialBarSeriesComponent
-    ],
+    imports: [ChartComponent, RadialBarSeriesComponent],
     template: `
         <div style="width: 400px; height: 400px;">
             <mona-chart>
-                <mona-radial-bar-series
-                    [data]="data()"
-                    categoryField="category"
-                    field="value"
-                    [visible]="visible()"
-                />
+                <mona-radial-bar-series [data]="data()" categoryField="category" field="value" [visible]="visible()" />
             </mona-chart>
         </div>
     `
@@ -38,23 +30,13 @@ class TestRadialBarChartHostComponent {
 }
 
 @Component({
-    imports: [
-        MonaChartComponent,
-        MonaRoseSeriesComponent,
-        MonaChartAngularAxisComponent,
-        MonaChartRadialAxisComponent
-    ],
+    imports: [ChartComponent, RoseSeriesComponent, ChartAngularAxisComponent, ChartRadialAxisComponent],
     template: `
         <div style="width: 400px; height: 400px;">
             <mona-chart>
                 <mona-chart-angular-axis [labels]="true" [gridLines]="true" />
                 <mona-chart-radial-axis [min]="0" [max]="100" [labels]="true" [gridLines]="true" />
-                <mona-rose-series
-                    [data]="data()"
-                    categoryField="category"
-                    field="value"
-                    [visible]="visible()"
-                />
+                <mona-rose-series [data]="data()" categoryField="category" field="value" [visible]="visible()" />
             </mona-chart>
         </div>
     `
@@ -70,21 +52,11 @@ class TestRoseChartHostComponent {
 }
 
 @Component({
-    imports: [
-        MonaChartComponent,
-        MonaGaugeSeriesComponent,
-        ChartGaugeCenterTemplateDirective
-    ],
+    imports: [ChartComponent, GaugeSeriesComponent, ChartGaugeCenterTemplateDirective],
     template: `
         <div style="width: 400px; height: 400px;">
             <mona-chart>
-                <mona-gauge-series
-                    [value]="value()"
-                    [min]="0"
-                    [max]="100"
-                    [indicator]="'both'"
-                    [visible]="visible()"
-                >
+                <mona-gauge-series [value]="value()" [min]="0" [max]="100" [indicator]="'both'" [visible]="visible()">
                     <ng-template monaChartGaugeCenterTemplate let-val let-ratio="ratio">
                         <span class="gauge-center-text">{{ val }} ({{ ratio * 100 }}%)</span>
                     </ng-template>
@@ -108,8 +80,8 @@ describe("Chart Radial Arc Series Integration", () => {
             const fixture = TestBed.createComponent(TestRadialBarChartHostComponent);
             fixture.detectChanges();
 
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-                .componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             chartComp.recomputeScene();
 
             const scene = chartComp.scene() as PolarArcChartScene;
@@ -140,8 +112,8 @@ describe("Chart Radial Arc Series Integration", () => {
             const fixture = TestBed.createComponent(TestRoseChartHostComponent);
             fixture.detectChanges();
 
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-                .componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             chartComp.recomputeScene();
 
             const scene = chartComp.scene() as PolarArcChartScene;
@@ -165,8 +137,8 @@ describe("Chart Radial Arc Series Integration", () => {
             const fixture = TestBed.createComponent(TestGaugeChartHostComponent);
             fixture.detectChanges();
 
-            const chartComp = fixture.debugElement.query(By.directive(MonaChartComponent))
-                .componentInstance as MonaChartComponent;
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
             chartComp.recomputeScene();
 
             const scene = chartComp.scene() as PolarArcChartScene;

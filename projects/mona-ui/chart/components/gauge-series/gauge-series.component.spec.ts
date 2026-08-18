@@ -3,12 +3,15 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import { ChartGaugeCenterTemplateDirective } from "../../directives/chart-gauge-center-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
-import type { ChartRegistrationContext, ChartSeriesRegistration } from "../../internal/context/chart-registration-context";
+import type {
+    ChartRegistrationContext,
+    ChartSeriesRegistration
+} from "../../internal/context/chart-registration-context";
 import type { ChartGaugeIndicator } from "../../models/chart-radial-arc.models";
-import { MonaGaugeSeriesComponent } from "./gauge-series.component";
+import { GaugeSeriesComponent } from "./gauge-series.component";
 
 @Component({
-    imports: [MonaGaugeSeriesComponent, ChartGaugeCenterTemplateDirective],
+    imports: [GaugeSeriesComponent, ChartGaugeCenterTemplateDirective],
     template: `
         <mona-gauge-series
             [value]="value()"
@@ -16,8 +19,7 @@ import { MonaGaugeSeriesComponent } from "./gauge-series.component";
             [max]="max()"
             [indicator]="indicator()"
             [showValue]="showValue()"
-            [(visible)]="visible"
-        >
+            [(visible)]="visible">
             <ng-template monaChartGaugeCenterTemplate let-val let-ratio="ratio">
                 <span class="custom-center">{{ val }} ({{ ratio * 100 }}%)</span>
             </ng-template>

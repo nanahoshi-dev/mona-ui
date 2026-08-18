@@ -1,14 +1,4 @@
-import {
-    Component,
-    contentChild,
-    DestroyRef,
-    effect,
-    ElementRef,
-    inject,
-    input,
-    model,
-    OnInit
-} from "@angular/core";
+import { Component, contentChild, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { ChartGaugeCenterTemplateDirective } from "../../directives/chart-gauge-center-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
@@ -16,10 +6,7 @@ import {
     type ChartGaugeSeriesRegistration
 } from "../../internal/context/chart-registration-context";
 import type { ChartField } from "../../models/chart.models";
-import type {
-    ChartGaugeIndicator,
-    ChartRadialArcFillMode
-} from "../../models/chart-radial-arc.models";
+import type { ChartGaugeIndicator, ChartRadialArcFillMode } from "../../models/chart-radial-arc.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
 
 let nextGaugeSeriesId = 0;
@@ -33,7 +20,7 @@ let nextGaugeSeriesId = 0;
         style: "display: none !important;"
     }
 })
-export class MonaGaugeSeriesComponent implements OnInit {
+export class GaugeSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

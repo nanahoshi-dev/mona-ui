@@ -3,14 +3,18 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
-import type { ChartPolarFillMode, ChartPolarLabelPosition, ChartSliceVisibilityEvent } from "../../models/chart-polar.models";
+import type {
+    ChartPolarFillMode,
+    ChartPolarLabelPosition,
+    ChartSliceVisibilityEvent
+} from "../../models/chart-polar.models";
 import type { ChartField } from "../../models/chart.models";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
-import { MonaChartComponent } from "../chart/chart.component";
-import { MonaPieSeriesComponent } from "./pie-series.component";
+import { ChartComponent } from "../chart/chart.component";
+import { PieSeriesComponent } from "./pie-series.component";
 
 @Component({
-    imports: [MonaChartComponent, MonaPieSeriesComponent, ChartSliceLabelTemplateDirective],
+    imports: [ChartComponent, PieSeriesComponent, ChartSliceLabelTemplateDirective],
     template: `
         <mona-chart [data]="data()">
             <mona-pie-series
@@ -76,7 +80,7 @@ describe("MonaPieSeriesComponent", () => {
     });
 
     it("should register pie series and compute polar scene", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         const scene = chart.scene();
 
         expect(scene).not.toBeNull();
@@ -89,8 +93,8 @@ describe("MonaPieSeriesComponent", () => {
     });
 
     it("should toggle slice visibility and emit sliceVisibilityChange", () => {
-        const pieDebugEl = fixture.debugElement.query(By.directive(MonaPieSeriesComponent));
-        const pieComponent = pieDebugEl?.componentInstance as MonaPieSeriesComponent;
+        const pieDebugEl = fixture.debugElement.query(By.directive(PieSeriesComponent));
+        const pieComponent = pieDebugEl?.componentInstance as PieSeriesComponent;
 
         expect(pieComponent).toBeDefined();
 
@@ -103,7 +107,7 @@ describe("MonaPieSeriesComponent", () => {
         expect(host.lastVisibilityEvent?.seriesType).toBe("pie");
         expect(host.lastVisibilityEvent?.visible).toBe(false);
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
         const scene = chart.scene();
         // Slices visible in geometry should now be 2
@@ -117,7 +121,7 @@ describe("MonaPieSeriesComponent", () => {
         host.labelPosition.set("outside");
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
         const scene = chart.scene();
 
@@ -139,7 +143,7 @@ describe("MonaPieSeriesComponent", () => {
     });
 
     it("should support solid and gradient fillMode", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
         let scene = chart.scene();
 
@@ -162,7 +166,7 @@ describe("MonaPieSeriesComponent", () => {
         host.useCustomLabelTemplate.set(true);
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
         fixture.detectChanges();
 
@@ -171,8 +175,8 @@ describe("MonaPieSeriesComponent", () => {
     });
 
     it("should prune hidden indices when dataset shrinks", () => {
-        const pieDebugEl = fixture.debugElement.query(By.directive(MonaPieSeriesComponent));
-        const pieComponent = pieDebugEl?.componentInstance as MonaPieSeriesComponent;
+        const pieDebugEl = fixture.debugElement.query(By.directive(PieSeriesComponent));
+        const pieComponent = pieDebugEl?.componentInstance as PieSeriesComponent;
 
         // Hide index 2 (Firefox)
         pieComponent.toggleSlice(2);
@@ -185,7 +189,7 @@ describe("MonaPieSeriesComponent", () => {
         ]);
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
         const scene = chart.scene();
 
@@ -196,16 +200,15 @@ describe("MonaPieSeriesComponent", () => {
     });
 
     it("should resolve category and emit sliceVisibilityChange with function accessor", () => {
-        host.categoryField.set(
-            (d: unknown) =>
-                typeof d === "object" && d !== null && "browser" in d
-                    ? `Browser: ${(d as { browser: string }).browser}`
-                    : ""
+        host.categoryField.set((d: unknown) =>
+            typeof d === "object" && d !== null && "browser" in d
+                ? `Browser: ${(d as { browser: string }).browser}`
+                : ""
         );
         fixture.detectChanges();
 
-        const pieDebugEl = fixture.debugElement.query(By.directive(MonaPieSeriesComponent));
-        const pieComponent = pieDebugEl?.componentInstance as MonaPieSeriesComponent;
+        const pieDebugEl = fixture.debugElement.query(By.directive(PieSeriesComponent));
+        const pieComponent = pieDebugEl?.componentInstance as PieSeriesComponent;
 
         pieComponent.toggleSlice(0);
         fixture.detectChanges();
@@ -214,11 +217,11 @@ describe("MonaPieSeriesComponent", () => {
     });
 
     it("should trigger animation when toggling slice visibility", () => {
-        const chart = fixture.debugElement.children[0].componentInstance as MonaChartComponent;
+        const chart = fixture.debugElement.children[0].componentInstance as ChartComponent;
         chart.recomputeScene();
 
-        const pieDebugEl = fixture.debugElement.query(By.directive(MonaPieSeriesComponent));
-        const pieComponent = pieDebugEl?.componentInstance as MonaPieSeriesComponent;
+        const pieDebugEl = fixture.debugElement.query(By.directive(PieSeriesComponent));
+        const pieComponent = pieDebugEl?.componentInstance as PieSeriesComponent;
 
         pieComponent.toggleSlice(1);
         fixture.detectChanges();

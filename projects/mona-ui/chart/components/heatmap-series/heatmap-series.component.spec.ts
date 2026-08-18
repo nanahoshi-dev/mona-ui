@@ -1,11 +1,11 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
-import { MonaHeatmapSeriesComponent } from "./heatmap-series.component";
+import { HeatmapSeriesComponent } from "./heatmap-series.component";
 import type { ChartHeatmapColorMode } from "../../models/chart-heatmap.models";
 
 @Component({
-    imports: [MonaHeatmapSeriesComponent],
+    imports: [HeatmapSeriesComponent],
     template: `
         <mona-heatmap-series
             [field]="field()"
@@ -77,8 +77,7 @@ describe("MonaHeatmapSeriesComponent", () => {
         host.cellGap.set(4);
         fixture.detectChanges();
 
-        const seriesComp = fixture.debugElement.children[0].children[0]
-            ?.componentInstance as MonaHeatmapSeriesComponent;
+        const seriesComp = fixture.debugElement.children[0].children[0]?.componentInstance as HeatmapSeriesComponent;
         if (seriesComp) {
             expect(seriesComp.name()).toBe("Updated Heatmap");
             expect(seriesComp.colorMode()).toBe("diverging");
