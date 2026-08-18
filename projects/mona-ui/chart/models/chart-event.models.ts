@@ -1,5 +1,5 @@
-import type { ChartFinancialDirection, ChartOhlcPointValue } from "./chart-financial.models";
-import type { ChartPointValueKind } from "./chart-point-value.models";
+import type { ChartFinancialDirection } from "./chart-financial.models";
+import type { ChartOhlcPointValue, ChartPointValueKind } from "./chart-point-value.models";
 import type { ChartSeriesType } from "./chart-series.models";
 import type { ChartStackMode } from "./chart-stack.models";
 
@@ -7,11 +7,15 @@ export interface ChartPointEvent<T = unknown> {
     category?: unknown;
     categoryX?: string;
     categoryY?: string;
+    change?: number;
+    changePercentage?: number;
     close?: number;
     dataIndex: number;
     datum: T;
     financial?: ChartOhlcPointValue;
     financialDirection?: ChartFinancialDirection;
+    formattedChange?: string;
+    formattedChangePercentage?: string;
     formattedClose?: string;
     formattedFrom?: string;
     formattedHigh?: string;
@@ -49,11 +53,15 @@ export interface ChartPointFocusEvent<T = unknown> {
     category?: unknown;
     categoryX?: string;
     categoryY?: string;
+    change?: number;
+    changePercentage?: number;
     close?: number;
     dataIndex: number;
     datum: T;
     financial?: ChartOhlcPointValue;
     financialDirection?: ChartFinancialDirection;
+    formattedChange?: string;
+    formattedChangePercentage?: string;
     formattedClose?: string;
     formattedFrom?: string;
     formattedHigh?: string;

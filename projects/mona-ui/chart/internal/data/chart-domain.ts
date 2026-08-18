@@ -281,6 +281,7 @@ export function calculateTimeDomain(
                 openField: finReg.openField(),
                 seriesId: finReg.id,
                 seriesName: finReg.name(),
+                xAxisType,
                 xField
             });
             for (const mark of resolved.marks) {
@@ -357,24 +358,24 @@ export function calculateTimeDomain(
 
     if (financialTimes.length > 0) {
         const uniqueTimes = Array.from(new Set(financialTimes)).sort((a, b) => a - b);
-        let halfInterval = 1800000;
-        if (uniqueTimes.length > 1) {
-            let minDiff = Number.POSITIVE_INFINITY;
-            for (let i = 1; i < uniqueTimes.length; i++) {
-                const diff = uniqueTimes[i] - uniqueTimes[i - 1];
-                if (diff > 0 && diff < minDiff) {
-                    minDiff = diff;
-                }
+        const firstFin = uniqueTimes[0];
+        const lastFin = uniqueTimes[uniqueTimes.length - 1];
+
+        if (!isFiniteNumber(expMinNum) && firstFin === minTime) {
+            let leftHalf = 1800000;
+            if (uniqueTimes.length > 1) {
+                const diff = uniqueTimes[1] - uniqueTimes[0];
+                if (diff > 0) leftHalf = diff / 2;
             }
-            if (Number.isFinite(minDiff) && minDiff > 0) {
-                halfInterval = minDiff / 2;
+            minTime -= leftHalf;
+        }
+        if (!isFiniteNumber(expMaxNum) && lastFin === maxTime) {
+            let rightHalf = 1800000;
+            if (uniqueTimes.length > 1) {
+                const diff = uniqueTimes[uniqueTimes.length - 1] - uniqueTimes[uniqueTimes.length - 2];
+                if (diff > 0) rightHalf = diff / 2;
             }
-        }
-        if (!isFiniteNumber(expMinNum)) {
-            minTime -= halfInterval;
-        }
-        if (!isFiniteNumber(expMaxNum)) {
-            maxTime += halfInterval;
+            maxTime += rightHalf;
         }
     }
 
@@ -435,6 +436,7 @@ export function calculateLinearXDomain(
                 openField: finReg.openField(),
                 seriesId: finReg.id,
                 seriesName: finReg.name(),
+                xAxisType: "linear",
                 xField
             });
             for (const mark of resolved.marks) {
@@ -474,24 +476,24 @@ export function calculateLinearXDomain(
 
     if (financialX.length > 0) {
         const uniqueX = Array.from(new Set(financialX)).sort((a, b) => a - b);
-        let halfInterval = 0.5;
-        if (uniqueX.length > 1) {
-            let minDiff = Number.POSITIVE_INFINITY;
-            for (let i = 1; i < uniqueX.length; i++) {
-                const diff = uniqueX[i] - uniqueX[i - 1];
-                if (diff > 0 && diff < minDiff) {
-                    minDiff = diff;
-                }
+        const firstFin = uniqueX[0];
+        const lastFin = uniqueX[uniqueX.length - 1];
+
+        if (!isFiniteNumber(explicitMin) && firstFin === min) {
+            let leftHalf = 0.5;
+            if (uniqueX.length > 1) {
+                const diff = uniqueX[1] - uniqueX[0];
+                if (diff > 0) leftHalf = diff / 2;
             }
-            if (Number.isFinite(minDiff) && minDiff > 0) {
-                halfInterval = minDiff / 2;
+            min -= leftHalf;
+        }
+        if (!isFiniteNumber(explicitMax) && lastFin === max) {
+            let rightHalf = 0.5;
+            if (uniqueX.length > 1) {
+                const diff = uniqueX[uniqueX.length - 1] - uniqueX[uniqueX.length - 2];
+                if (diff > 0) rightHalf = diff / 2;
             }
-        }
-        if (!isFiniteNumber(explicitMin)) {
-            min -= halfInterval;
-        }
-        if (!isFiniteNumber(explicitMax)) {
-            max += halfInterval;
+            max += rightHalf;
         }
     }
 
@@ -608,6 +610,7 @@ export function calculateContinuousYDomain(
                     openField: finReg.openField(),
                     seriesId: finReg.id,
                     seriesName: finReg.name(),
+                    xAxisType,
                     xField
                 });
                 for (const mark of resolved.marks) {
@@ -782,6 +785,7 @@ export function hasRenderableData(
                 openField: finReg.openField(),
                 seriesId: finReg.id,
                 seriesName: finReg.name(),
+                xAxisType,
                 xField
             });
             for (const mark of resolved.marks) {

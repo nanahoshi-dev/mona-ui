@@ -79,6 +79,7 @@ export interface ChartLegendItemTemplateContext {
     kind?: ChartLegendItemKind;
     name: string;
     percentage?: number;
+    secondaryColor?: string;
     series: ChartLegendItem;
     seriesId: string;
     seriesType: ChartSeriesType;

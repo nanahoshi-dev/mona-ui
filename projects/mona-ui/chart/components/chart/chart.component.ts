@@ -753,6 +753,8 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
                 category: hit.category,
                 categoryX: hit.categoryX,
                 categoryY: hit.categoryY,
+                change: hit.financial?.change,
+                changePercentage: hit.financial?.changePercentage,
                 close: hit.close ?? hit.financial?.close,
                 color,
                 dataIndex: hit.index,
@@ -760,6 +762,8 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
                 financial: hit.financial,
                 financialDirection: hit.financialDirection ?? hit.financial?.direction,
                 formattedCategory: hit.formattedCategory,
+                formattedChange: hit.financial?.formattedChange,
+                formattedChangePercentage: hit.financial?.formattedChangePercentage,
                 formattedClose: hit.formattedClose ?? hit.financial?.formattedClose,
                 formattedFrom,
                 formattedHigh: hit.formattedHigh ?? hit.financial?.formattedHigh,
@@ -1201,7 +1205,20 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
                     ? `, stack share ${matchingHit.formattedStackPercentage}`
                     : "";
 
-            if (isRange && fromStr && toStr) {
+            const isFinancial = matchingHit.valueKind === "ohlc" || matchingHit.seriesType === "candlestick" || matchingHit.seriesType === "ohlc";
+            if (isFinancial) {
+                const fin = matchingHit.financial;
+                const openStr = fin?.formattedOpen ?? (fin?.open !== undefined ? String(fin.open) : String(matchingHit.open));
+                const highStr = fin?.formattedHigh ?? (fin?.high !== undefined ? String(fin.high) : String(matchingHit.high));
+                const lowStr = fin?.formattedLow ?? (fin?.low !== undefined ? String(fin.low) : String(matchingHit.low));
+                const closeStr = fin?.formattedClose ?? (fin?.close !== undefined ? String(fin.close) : String(matchingHit.close));
+                const dirStr = fin?.direction ?? matchingHit.financialDirection ?? "";
+                const changeStr = fin?.formattedChange ? `, change ${fin.formattedChange}` : "";
+                const dirPhrase = dirStr ? `, ${dirStr}` : "";
+                this.activeAccessibilityText.set(
+                    `${matchingHit.seriesName}, ${xStr}. Open ${openStr}, high ${highStr}, low ${lowStr}, close ${closeStr}${dirPhrase}${changeStr}.`
+                );
+            } else if (isRange && fromStr && toStr) {
                 this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${fromStr} to ${toStr}`);
             } else if (matchingHit.seriesType === "bubble" && sizeStr) {
                 this.activeAccessibilityText.set(
@@ -1345,11 +1362,15 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
             category: target.category,
             categoryX: target.categoryX,
             categoryY: target.categoryY,
+            change: target.financial?.change,
+            changePercentage: target.financial?.changePercentage,
             close: target.close ?? target.financial?.close,
             dataIndex: target.index,
             datum: target.datum,
             financial: target.financial,
             financialDirection: target.financialDirection ?? target.financial?.direction,
+            formattedChange: target.financial?.formattedChange,
+            formattedChangePercentage: target.financial?.formattedChangePercentage,
             formattedClose: target.formattedClose ?? target.financial?.formattedClose,
             formattedFrom: target.formattedFrom ?? target.range?.formattedFrom,
             formattedHigh: target.formattedHigh ?? target.financial?.formattedHigh,

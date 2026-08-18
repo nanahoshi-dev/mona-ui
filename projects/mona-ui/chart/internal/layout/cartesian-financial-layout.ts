@@ -5,12 +5,18 @@ import type {
     ChartFinancialSeriesRegistration
 } from "../context/chart-registration-context";
 import { FinancialDataResolver } from "../data/financial-data-resolver";
+import { CartesianFinancialIndex, type FinancialHitEntry } from "../interaction/cartesian-financial-index";
 import type { ChartBandScale, ChartContinuousScale } from "../scale/chart-scale";
 import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene } from "../scene/cartesian-scene";
 import type { ChartInteractionXKey, SceneHitTarget } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatXValue } from "../utils/chart-formatter";
 import { FinancialLayoutEngine, type FinancialLayoutContext } from "./financial-layout-engine";
+
+export interface CartesianFinancialLayoutResult {
+    readonly financialIndex: CartesianFinancialIndex;
+    readonly scene: ChartCandlestickSeriesScene | ChartOhlcSeriesScene;
+}
 
 export interface CartesianFinancialLayoutContext {
     readonly bandScale?: ChartBandScale;
@@ -35,7 +41,7 @@ export interface CartesianFinancialLayoutContext {
 
 export function computeFinancialLayout(
     ctx: CartesianFinancialLayoutContext
-): ChartCandlestickSeriesScene | ChartOhlcSeriesScene | null {
+): CartesianFinancialLayoutResult | null {
     const {
         bandScale,
         linearXScale,
@@ -75,6 +81,7 @@ export function computeFinancialLayout(
         seriesId: s.id,
         seriesName: seriesDisplayName,
         warnedDiagnosticSignatures,
+        xAxisType,
         xField: seriesXField
     });
 
@@ -115,12 +122,15 @@ export function computeFinancialLayout(
         : FinancialLayoutEngine.createOhlcScene(s, resolvedDataset, layoutContext);
 
     const xAxisFormatter = xAxis?.formatter?.() as ChartAxisFormatter<unknown> | undefined;
+    const financialHitEntries: FinancialHitEntry[] = [];
 
-    for (const mark of scene.marks) {
+    for (let i = 0; i < scene.marks.length; i++) {
+        const mark = scene.marks[i];
         const currentRenderOrder = ++renderOrderCounter.value;
-        const xKey: ChartInteractionXKey = typeof mark.xValue === "number" || typeof mark.xValue === "string"
+        const resolvedMark = resolvedDataset.marks[i];
+        const xKey: ChartInteractionXKey = resolvedMark?.xKey ?? (typeof mark.xValue === "number" || typeof mark.xValue === "string"
             ? mark.xValue
-            : String(mark.index);
+            : String(mark.index));
 
         const formattedCategory = formatXValue(
             mark.xValue,
@@ -138,14 +148,36 @@ export function computeFinancialLayout(
                     : scene.style.neutralColor
         );
 
-        const bounds: ChartRect = "bodyBounds" in mark
+        const isCandle = "bodyBounds" in mark;
+        const visualHalfWidth = isCandle
+            ? mark.bodyWidth / 2
+            : (mark as any).tickWidth;
+        const hitHalfWidth = Math.max(visualHalfWidth, 4);
+
+        const bounds: ChartRect = {
+            height: Math.max(6, Math.abs(mark.lowY - mark.highY)),
+            width: hitHalfWidth * 2,
+            x: mark.centerX - hitHalfWidth,
+            y: Math.min(mark.highY, mark.lowY)
+        };
+
+        const visualBounds: ChartRect = isCandle
             ? (mark as any).bodyBounds
             : {
-                height: Math.max(1, mark.lowY - mark.highY),
+                height: Math.max(1, Math.abs(mark.lowY - mark.highY)),
                 width: (mark as any).totalWidth,
                 x: mark.centerX - (mark as any).tickWidth,
-                y: mark.highY
+                y: Math.min(mark.highY, mark.lowY)
             };
+
+        const change = resolvedMark?.change ?? (mark.close - mark.open);
+        const changePercentage = resolvedMark?.changePercentage;
+        const formattedChange = changePercentage !== undefined
+            ? `${change >= 0 ? "+" : ""}${change.toFixed(2)}`
+            : undefined;
+        const formattedChangePercentage = changePercentage !== undefined
+            ? `${changePercentage >= 0 ? "+" : ""}${(changePercentage * 100).toFixed(2)}%`
+            : undefined;
 
         const target: SceneHitTarget = {
             animationKey: mark.animationKey,
@@ -155,15 +187,20 @@ export function computeFinancialLayout(
             color: markColor,
             datum: mark.datum,
             financial: {
+                change,
+                changePercentage,
                 close: mark.close,
                 direction: mark.direction,
+                formattedChange,
+                formattedChangePercentage,
                 formattedClose: mark.formattedClose,
                 formattedHigh: mark.formattedHigh,
                 formattedLow: mark.formattedLow,
                 formattedOpen: mark.formattedOpen,
                 high: mark.high,
                 low: mark.low,
-                open: mark.open
+                open: mark.open,
+                valueKind: "ohlc"
             },
             financialDirection: mark.direction,
             formattedCategory,
@@ -187,14 +224,28 @@ export function computeFinancialLayout(
             seriesName: seriesDisplayName,
             seriesType: s.type,
             valueKind: "ohlc",
-            visualBounds: bounds,
+            visualBounds,
             xKey,
             xValue: mark.xValue,
             yValue: mark.close
         };
 
-        recordHitTarget(target, true, true);
+        // Note: isBar is false so Financial marks do not pollute barHitTargets
+        recordHitTarget(target, false, false);
+
+        financialHitEntries.push({
+            bounds,
+            centerX: mark.centerX,
+            highY: mark.highY,
+            lowY: mark.lowY,
+            target
+        });
     }
 
-    return scene;
+    const financialIndex = new CartesianFinancialIndex(financialHitEntries);
+
+    return {
+        financialIndex,
+        scene
+    };
 }

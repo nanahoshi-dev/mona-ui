@@ -45,6 +45,8 @@ import type {
 } from "../scene/cartesian-scene";
 import { computeRangeAreaLayout, computeRangeBarLayout } from "./cartesian-range-layout";
 import { computeFinancialLayout } from "./cartesian-financial-layout";
+import { CartesianSeriesPolicy } from "./cartesian-series-policy";
+import type { CartesianFinancialIndex } from "../interaction/cartesian-financial-index";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type {
     ChartCornerRadii,
@@ -107,18 +109,27 @@ export class CartesianLayoutEngine {
         const yTitle = yAxis?.title() ?? "";
         const yFormatter = yAxis?.formatter();
 
+        // Resolve single-financial ownership and unsupported series (FIN-004)
+        const seriesPolicy = CartesianSeriesPolicy.resolve(series);
+        const effectiveSeries = seriesPolicy.effectiveSeries;
+        if (warnedDiagnosticSignatures) {
+            for (const diag of seriesPolicy.diagnostics) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, diag);
+            }
+        }
+
         // Determine X axis type
         const configuredXType = xAxis?.type();
         const xAxisType: ChartXAxisType =
             configuredXType && configuredXType !== "auto"
                 ? configuredXType
-                : inferXAxisType(series, rootData, rootXField);
+                : inferXAxisType(effectiveSeries, rootData, rootXField);
 
         // Precompute pure Cartesian stack analysis (STK-001, STK-002, STK-003, STK-015, STK-016)
         const stackAnalysis = CartesianStackEngine.computeAnalysis({
             rootData,
             rootXField,
-            series,
+            series: effectiveSeries,
             xAxisType
         });
         const stackLayout = stackAnalysis.visibleLayout;
@@ -149,7 +160,7 @@ export class CartesianLayoutEngine {
         const explicitYMax = isFiniteNumber(rawYMax) ? rawYMax : undefined;
         const niceY = yAxis?.nice() ?? true;
         const yDomain = calculateContinuousYDomain(
-            series,
+            effectiveSeries,
             rootData,
             explicitYMin,
             explicitYMax,
@@ -283,7 +294,7 @@ export class CartesianLayoutEngine {
         const xFormatter = xAxis?.formatter();
 
         if (xAxisType === "category") {
-            categoryDomain = calculateCategoryDomain(series, rootData, rootXField);
+            categoryDomain = calculateCategoryDomain(effectiveSeries, rootData, rootXField);
             bandScale = CartesianScaleFactory.createBandScale(
                 categoryDomain,
                 [plotRect.x, plotRect.x + plotRect.width],
@@ -317,7 +328,7 @@ export class CartesianLayoutEngine {
             const rawXMax = xAxis?.max();
             const explicitXMin = isFiniteNumber(rawXMin) ? rawXMin : undefined;
             const explicitXMax = isFiniteNumber(rawXMax) ? rawXMax : undefined;
-            const xDomain = calculateLinearXDomain(series, rootData, rootXField, explicitXMin, explicitXMax);
+            const xDomain = calculateLinearXDomain(effectiveSeries, rootData, rootXField, explicitXMin, explicitXMax);
             const niceX = xAxis?.nice() ?? true;
             const xTickCount = normalizeTickCount(xAxis?.tickCount(), 5);
 
@@ -347,7 +358,7 @@ export class CartesianLayoutEngine {
             const explicitXMin = rawXMin instanceof Date || isFiniteNumber(rawXMin) ? rawXMin : undefined;
             const explicitXMax = rawXMax instanceof Date || isFiniteNumber(rawXMax) ? rawXMax : undefined;
             const [minDate, maxDate] = calculateTimeDomain(
-                series,
+                effectiveSeries,
                 rootData,
                 rootXField,
                 explicitXMin,
@@ -393,7 +404,7 @@ export class CartesianLayoutEngine {
         });
 
         // Bubble size domain
-        const visibleBubbleSeries = series.filter(
+        const visibleBubbleSeries = effectiveSeries.filter(
             (s): s is ChartBubbleSeriesRegistration => s.visible() && s.type === "bubble"
         );
         const bubbleSizeDomain = CartesianMarkerLayout.calculateBubbleSizeDomain(
@@ -404,7 +415,7 @@ export class CartesianLayoutEngine {
         );
 
         // Compute bar slots (grouped and/or stacked) (STK-003, STK-019, STK-031)
-        const barSlotLayout = CartesianBarSlots.computeSlotLayout(series, stackLayout, invalidSeriesIds);
+        const barSlotLayout = CartesianBarSlots.computeSlotLayout(effectiveSeries, stackLayout, invalidSeriesIds);
         const barSlots = barSlotLayout.slots;
         let nestedBarScale: BandScale<string> | undefined;
         if (barSlots.length > 0 && bandScale) {
@@ -415,10 +426,10 @@ export class CartesianLayoutEngine {
         const baselineY = clamp(yScale.map(0), plotRect.y, plotRect.y + plotRect.height);
         const renderOrderCounter = { value: 0 };
         let validMarkerCount = 0;
-        let activeFinancialSeriesId: string | null = null;
+        let activeFinancialIndex: CartesianFinancialIndex | undefined;
 
-        for (let sIdx = 0; sIdx < series.length; sIdx++) {
-            const s = series[sIdx];
+        for (let sIdx = 0; sIdx < effectiveSeries.length; sIdx++) {
+            const s = effectiveSeries[sIdx];
             if (!s.visible()) {
                 continue;
             }
@@ -430,19 +441,7 @@ export class CartesianLayoutEngine {
 
             if (s.type === "candlestick" || s.type === "ohlc") {
                 const seriesDisplayName = resolveSeriesDisplayName(s, sIdx);
-                if (activeFinancialSeriesId !== null && activeFinancialSeriesId !== s.id) {
-                    if (warnedDiagnosticSignatures) {
-                        ChartDiagnostics.warnOnce(
-                            warnedDiagnosticSignatures,
-                            `Only one financial series (candlestick or ohlc) can be active per cartesian chart. Series "${seriesDisplayName}" will be ignored.`,
-                            `${s.id}:multiple-financial-series`
-                        );
-                    }
-                    continue;
-                }
-                activeFinancialSeriesId = s.id;
-
-                const financialScene = computeFinancialLayout({
+                const financialLayoutResult = computeFinancialLayout({
                     bandScale,
                     linearXScale,
                     plotRect,
@@ -459,11 +458,12 @@ export class CartesianLayoutEngine {
                     xAxis,
                     xAxisType,
                     yAxis,
-                    yFormatter,
+                    yFormatter: effectiveYFormatter,
                     yScale
                 });
-                if (financialScene) {
-                    seriesScenes.push(financialScene);
+                if (financialLayoutResult) {
+                    seriesScenes.push(financialLayoutResult.scene);
+                    activeFinancialIndex = financialLayoutResult.financialIndex;
                 }
                 continue;
             }
@@ -1176,7 +1176,7 @@ export class CartesianLayoutEngine {
         }
 
         const hasData =
-            hasRenderableData(series, rootData, xAxisType, rootXField) &&
+            hasRenderableData(effectiveSeries, rootData, xAxisType, rootXField) &&
             (seriesScenes.some(s => {
                 if (s.type === "bar" || s.type === "rangeBar") return s.bars.length > 0;
                 if (s.type === "scatter" || s.type === "bubble") return s.markers.length > 0;
@@ -1188,7 +1188,7 @@ export class CartesianLayoutEngine {
             }) ||
                 validMarkerCount > 0);
 
-        const legendItems: ChartLegendItem[] = series.map((s, idx) => {
+        const legendItems: ChartLegendItem[] = effectiveSeries.map((s, idx) => {
             if (s.type === "candlestick" || s.type === "ohlc") {
                 const finStyle = styleResolver.resolveFinancialSeriesStyle(s as ChartFinancialSeriesRegistration);
                 const color = finStyle.color || finStyle.risingColor;
@@ -1225,6 +1225,7 @@ export class CartesianLayoutEngine {
             barHitTargets,
             cartesianKind: "xy",
             coordinateSystem: "cartesian",
+            financialIndex: activeFinancialIndex,
             hasRenderableData: hasData,
             height: containerHeight,
             hitTargets,

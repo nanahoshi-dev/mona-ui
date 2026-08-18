@@ -118,6 +118,13 @@ function sampleCandlestickMark(plan: FinancialMarkPlan, progress: number, wickWi
     const bodyWidth = lerp(from.width, to.width, progress);
     const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
 
+    const open = lerp(from.open, to.open, progress);
+    const high = lerp(from.high, to.high, progress);
+    const low = lerp(from.low, to.low, progress);
+    const close = lerp(from.close, to.close, progress);
+    const direction: "falling" | "neutral" | "rising" =
+        close > open ? "rising" : close < open ? "falling" : "neutral";
+
     const bodyTopY = Math.min(openY, closeY);
     const bodyHeight = Math.max(1, Math.abs(closeY - openY));
     const bodyLeftX = centerX - bodyWidth / 2;
@@ -134,21 +141,21 @@ function sampleCandlestickMark(plan: FinancialMarkPlan, progress: number, wickWi
         },
         bodyWidth,
         centerX,
-        close: state.close,
+        close,
         closeY,
         datum: state.datum,
-        direction: state.direction,
+        direction,
         fillMode: to.fillMode ?? "filled",
         formattedClose: state.formattedClose,
         formattedHigh: state.formattedHigh,
         formattedLow: state.formattedLow,
         formattedOpen: state.formattedOpen,
-        high: state.high,
+        high,
         highY,
         index: state.index,
-        low: state.low,
+        low,
         lowY,
-        open: state.open,
+        open,
         openY,
         renderOpacity,
         wickWidth,
@@ -169,25 +176,32 @@ function sampleOhlcMark(plan: FinancialMarkPlan, progress: number, wickWidth: nu
     const tickWidth = lerp(from.tickWidth ?? from.width / 2, to.tickWidth ?? to.width / 2, progress);
     const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
 
+    const open = lerp(from.open, to.open, progress);
+    const high = lerp(from.high, to.high, progress);
+    const low = lerp(from.low, to.low, progress);
+    const close = lerp(from.close, to.close, progress);
+    const direction: "falling" | "neutral" | "rising" =
+        close > open ? "rising" : close < open ? "falling" : "neutral";
+
     const state = progress >= 0.5 ? to : from;
 
     return {
         animationKey: plan.animationKey,
         centerX,
-        close: state.close,
+        close,
         closeY,
         datum: state.datum,
-        direction: state.direction,
+        direction,
         formattedClose: state.formattedClose,
         formattedHigh: state.formattedHigh,
         formattedLow: state.formattedLow,
         formattedOpen: state.formattedOpen,
-        high: state.high,
+        high,
         highY,
         index: state.index,
-        low: state.low,
+        low,
         lowY,
-        open: state.open,
+        open,
         openY,
         renderOpacity,
         tickWidth,

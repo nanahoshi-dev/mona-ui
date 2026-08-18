@@ -1,11 +1,15 @@
+import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartFinancialDirection } from "../../models/chart-financial.models";
 import type { ChartField } from "../../models/chart.models";
-import { resolveValue } from "./chart-value-resolver";
+import type { ChartInteractionXKey } from "../scene/scene-geometry";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
+import { resolveValue } from "./chart-value-resolver";
 
 export interface ResolvedFinancialMark {
     readonly animationKey: string;
     readonly categoryIndex: number;
+    readonly change: number;
+    readonly changePercentage?: number;
     readonly close: number;
     readonly dataIndex: number;
     readonly datum: unknown;
@@ -13,7 +17,9 @@ export interface ResolvedFinancialMark {
     readonly high: number;
     readonly low: number;
     readonly open: number;
+    readonly xKey: ChartInteractionXKey;
     readonly xRaw: unknown;
+    readonly xScaleValue: string | number | Date;
 }
 
 export interface FinancialResolutionOptions {
@@ -26,6 +32,7 @@ export interface FinancialResolutionOptions {
     readonly seriesId: string;
     readonly seriesName: string;
     readonly warnedDiagnosticSignatures?: Set<string>;
+    readonly xAxisType?: ChartXAxisType;
     readonly xField?: ChartField;
 }
 
@@ -36,18 +43,79 @@ export interface ResolvedFinancialDataset {
     readonly lowValues: readonly number[];
     readonly marks: readonly ResolvedFinancialMark[];
     readonly openValues: readonly number[];
-    readonly yDomain: readonly [number, number];
 }
 
-function parseFiniteNumber(val: unknown): number | null {
-    if (typeof val === "number" && Number.isFinite(val)) {
-        return val;
+export interface ResolvedFinancialX {
+    readonly isContinuousInvalid?: boolean;
+    readonly key: ChartInteractionXKey;
+    readonly rawValue: unknown;
+    readonly scaleValue: string | number | Date;
+}
+
+function isFiniteNumericValue(val: unknown): val is number {
+    return typeof val === "number" && Number.isFinite(val);
+}
+
+export function resolveFinancialX(
+    row: unknown,
+    xField: ChartField | undefined,
+    dataIndex: number,
+    xAxisType?: ChartXAxisType
+): ResolvedFinancialX {
+    const rawX = xField !== undefined ? resolveValue(row, xField, dataIndex) : dataIndex;
+
+    if (xAxisType === "linear") {
+        if (typeof rawX !== "number" || !Number.isFinite(rawX)) {
+            return {
+                isContinuousInvalid: true,
+                key: "",
+                rawValue: rawX,
+                scaleValue: 0
+            };
+        }
+        return {
+            key: rawX,
+            rawValue: rawX,
+            scaleValue: rawX
+        };
     }
-    if (typeof val === "string" && val.trim().length > 0) {
-        const num = Number(val);
-        return Number.isFinite(num) ? num : null;
+
+    if (xAxisType === "time" || xAxisType === "utc") {
+        let epochMs: number | null = null;
+        if (rawX instanceof Date && !Number.isNaN(rawX.getTime())) {
+            epochMs = rawX.getTime();
+        } else if (typeof rawX === "number" && Number.isFinite(rawX)) {
+            epochMs = rawX;
+        } else if (typeof rawX === "string" && rawX.trim().length > 0) {
+            const parsed = Date.parse(rawX);
+            if (!Number.isNaN(parsed)) {
+                epochMs = parsed;
+            }
+        }
+
+        if (epochMs === null) {
+            return {
+                isContinuousInvalid: true,
+                key: 0,
+                rawValue: rawX,
+                scaleValue: new Date(0)
+            };
+        }
+
+        return {
+            key: epochMs,
+            rawValue: rawX,
+            scaleValue: new Date(epochMs)
+        };
     }
-    return null;
+
+    // Default: category
+    const categoryValue = rawX !== null && rawX !== undefined ? String(rawX) : String(dataIndex);
+    return {
+        key: categoryValue,
+        rawValue: rawX,
+        scaleValue: categoryValue
+    };
 }
 
 export class FinancialDataResolver {
@@ -62,6 +130,7 @@ export class FinancialDataResolver {
             seriesId,
             seriesName,
             warnedDiagnosticSignatures,
+            xAxisType,
             xField
         } = options;
 
@@ -72,8 +141,7 @@ export class FinancialDataResolver {
                 highValues: [],
                 lowValues: [],
                 marks: [],
-                openValues: [],
-                yDomain: [0, 0]
+                openValues: []
             };
         }
 
@@ -83,8 +151,8 @@ export class FinancialDataResolver {
         const lowValues: number[] = [];
         const closeValues: number[] = [];
 
-        let minLow = Number.POSITIVE_INFINITY;
-        let maxHigh = Number.NEGATIVE_INFINITY;
+        const seenXKeys = new Set<ChartInteractionXKey>();
+        const seenCustomKeys = new Set<string>();
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
@@ -93,12 +161,12 @@ export class FinancialDataResolver {
             const rawLow = resolveValue(row, lowField, i);
             const rawClose = resolveValue(row, closeField, i);
 
-            const open = parseFiniteNumber(rawOpen);
-            const high = parseFiniteNumber(rawHigh);
-            const low = parseFiniteNumber(rawLow);
-            const close = parseFiniteNumber(rawClose);
-
-            if (open === null || high === null || low === null || close === null) {
+            if (
+                !isFiniteNumericValue(rawOpen) ||
+                !isFiniteNumericValue(rawHigh) ||
+                !isFiniteNumericValue(rawLow) ||
+                !isFiniteNumericValue(rawClose)
+            ) {
                 if (warnedDiagnosticSignatures) {
                     ChartDiagnostics.warnOnce(
                         warnedDiagnosticSignatures,
@@ -108,6 +176,11 @@ export class FinancialDataResolver {
                 }
                 continue;
             }
+
+            const open = rawOpen;
+            const high = rawHigh;
+            const low = rawLow;
+            const close = rawClose;
 
             const minBody = Math.min(open, close);
             const maxBody = Math.max(open, close);
@@ -124,22 +197,60 @@ export class FinancialDataResolver {
                 continue;
             }
 
+            const resolvedX = resolveFinancialX(row, xField, i, xAxisType);
+            if (resolvedX.isContinuousInvalid) {
+                if (warnedDiagnosticSignatures) {
+                    ChartDiagnostics.warnOnce(
+                        warnedDiagnosticSignatures,
+                        `Financial series "${seriesName}" encountered invalid continuous X value at data index ${i}. Skipping row.`,
+                        `${seriesId}:invalid-continuous-x`
+                    );
+                }
+                continue;
+            }
+
+            if (seenXKeys.has(resolvedX.key)) {
+                if (warnedDiagnosticSignatures) {
+                    ChartDiagnostics.warnOnce(
+                        warnedDiagnosticSignatures,
+                        `Financial series "${seriesName}" encountered duplicate X key "${String(resolvedX.key)}" at data index ${i}. First valid datum wins.`,
+                        `${seriesId}:duplicate-financial-x`
+                    );
+                }
+                continue;
+            }
+            seenXKeys.add(resolvedX.key);
+
             const direction: ChartFinancialDirection =
                 close > open ? "rising" : close < open ? "falling" : "neutral";
 
-            const xRaw = xField !== undefined ? resolveValue(row, xField, i) : i;
+            const change = close - open;
+            const changePercentage = open !== 0 ? change / Math.abs(open) : undefined;
 
-            let animationKey = `${seriesId}:fin:${i}`;
+            let animationKey = `${seriesId}:fin:x:${String(resolvedX.key)}`;
             if (keyField !== undefined) {
                 const customKey = resolveValue(row, keyField, i);
                 if (customKey !== undefined && customKey !== null) {
-                    animationKey = `${seriesId}:fin:${String(customKey)}:${i}`;
+                    const customKeyStr = String(customKey);
+                    if (seenCustomKeys.has(customKeyStr)) {
+                        if (warnedDiagnosticSignatures) {
+                            ChartDiagnostics.warnOnce(
+                                warnedDiagnosticSignatures,
+                                `Financial series "${seriesName}" encountered duplicate explicit animation key "${customKeyStr}" at data index ${i}.`,
+                                `${seriesId}:duplicate-financial-key`
+                            );
+                        }
+                    }
+                    seenCustomKeys.add(customKeyStr);
+                    animationKey = `${seriesId}:fin:key:${customKeyStr}`;
                 }
             }
 
             marks.push({
                 animationKey,
                 categoryIndex: i,
+                change,
+                changePercentage,
                 close,
                 dataIndex: i,
                 datum: row,
@@ -147,32 +258,18 @@ export class FinancialDataResolver {
                 high,
                 low,
                 open,
-                xRaw
+                xKey: resolvedX.key,
+                xRaw: resolvedX.rawValue,
+                xScaleValue: resolvedX.scaleValue
             });
 
             openValues.push(open);
             highValues.push(high);
             lowValues.push(low);
             closeValues.push(close);
-
-            if (low < minLow) {
-                minLow = low;
-            }
-            if (high > maxHigh) {
-                maxHigh = high;
-            }
         }
 
         const hasData = marks.length > 0;
-        let yDomain: [number, number] = [0, 0];
-
-        if (hasData) {
-            if (minLow === maxHigh) {
-                yDomain = [minLow - 1, maxHigh + 1];
-            } else {
-                yDomain = [minLow, maxHigh];
-            }
-        }
 
         return {
             closeValues,
@@ -180,8 +277,7 @@ export class FinancialDataResolver {
             highValues,
             lowValues,
             marks,
-            openValues,
-            yDomain
+            openValues
         };
     }
 }

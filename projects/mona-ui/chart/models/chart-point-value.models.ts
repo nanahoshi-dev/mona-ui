@@ -15,9 +15,13 @@ export interface ChartRangePointValue {
     readonly valueKind: "range";
 }
 
-export interface ChartFinancialPointValue {
+export interface ChartOhlcPointValue {
+    readonly change?: number;
+    readonly changePercentage?: number;
     readonly close: number;
-    readonly financialDirection: ChartFinancialDirection;
+    readonly direction: ChartFinancialDirection;
+    readonly formattedChange?: string;
+    readonly formattedChangePercentage?: string;
     readonly formattedClose?: string;
     readonly formattedHigh?: string;
     readonly formattedLow?: string;
@@ -28,4 +32,4 @@ export interface ChartFinancialPointValue {
     readonly valueKind: "ohlc";
 }
 
-export type ChartPointValue = ChartFinancialPointValue | ChartRangePointValue | ChartScalarPointValue;
+export type ChartPointValue = ChartOhlcPointValue | ChartRangePointValue | ChartScalarPointValue;

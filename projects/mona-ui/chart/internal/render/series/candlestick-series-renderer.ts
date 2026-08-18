@@ -44,10 +44,11 @@ export class CandlestickSeriesRenderer {
             // 2. Draw body box
             const bounds = mark.bodyBounds;
             if (mark.fillMode === "hollow" && mark.direction === "rising") {
+                if (typeof context.clearRect === "function") {
+                    context.clearRect(bounds.x, bounds.y, bounds.width, bounds.height);
+                }
                 context.beginPath();
                 context.rect(bounds.x, bounds.y, bounds.width, bounds.height);
-                context.fillStyle = "#ffffff";
-                context.fill();
                 context.lineWidth = Math.max(1, wickWidth);
                 context.strokeStyle = markColor;
                 context.stroke();

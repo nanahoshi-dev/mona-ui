@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
+import { Component, computed, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason, type ChartOhlcSeriesRegistration } from "../../internal/context/chart-registration-context";
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
@@ -52,9 +52,9 @@ export class MonaOhlcSeriesComponent implements OnInit {
 
     /**
      * @description Color for falling / bearish bars (close < open).
-     * @default "var(--mona-chart-color-falling, #ef4444)"
+     * @default ""
      */
-    public readonly fallingColor = input("var(--mona-chart-color-falling, #ef4444)");
+    public readonly fallingColor = input("");
 
     /**
      * @description Property key or accessor extracting the highest price for each data item.
@@ -86,9 +86,9 @@ export class MonaOhlcSeriesComponent implements OnInit {
 
     /**
      * @description Color for neutral / flat bars (close === open).
-     * @default "var(--mona-chart-color-neutral, #6b7280)"
+     * @default ""
      */
-    public readonly neutralColor = input("var(--mona-chart-color-neutral, #6b7280)");
+    public readonly neutralColor = input("");
 
     /**
      * @description Overall opacity multiplier applied to OHLC stems and tick arms.
@@ -103,15 +103,23 @@ export class MonaOhlcSeriesComponent implements OnInit {
 
     /**
      * @description Color for rising / bullish bars (close > open).
-     * @default "var(--mona-chart-color-rising, #22c55e)"
+     * @default ""
      */
-    public readonly risingColor = input("var(--mona-chart-color-rising, #22c55e)");
+    public readonly risingColor = input("");
 
     /**
-     * @description Stroke width in pixels for horizontal open and close tick arms.
+     * @description Length in pixels for horizontal open and close tick arms.
+     * @default undefined
+     */
+    public readonly tickLength = input<number | undefined>(undefined);
+
+    /**
+     * @description Backward-compatible alias for tickLength.
      * @default undefined
      */
     public readonly tickWidth = input<number | undefined>(undefined);
+
+    protected readonly effectiveTickLength = computed(() => this.tickLength() ?? this.tickWidth());
 
     /**
      * @description Additional CSS classes applied to the series host element.
@@ -151,29 +159,33 @@ export class MonaOhlcSeriesComponent implements OnInit {
 
     public constructor() {
         effect(() => {
-            this.bodyWidth();
-            this.bodyWidthRatio();
             this.closeField();
-            this.color();
             this.data();
-            this.fallingColor();
             this.highField();
             this.keyField();
             this.lowField();
+            this.openField();
+            this.xField();
+            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+        });
+
+        effect(() => {
+            this.bodyWidth();
+            this.bodyWidthRatio();
+            this.color();
+            this.fallingColor();
             this.maxBodyWidth();
             this.name();
             this.neutralColor();
             this.opacity();
-            this.openField();
             this.risingColor();
-            this.tickWidth();
+            this.effectiveTickLength();
             this.userClass();
             this.valueFormatter();
             this.visible();
             this.wickColor();
             this.wickWidth();
-            this.xField();
-            this.#chartContext?.invalidate(ChartInvalidationReason.Data);
+            this.#chartContext?.invalidate(ChartInvalidationReason.Style);
         });
     }
 
@@ -196,7 +208,8 @@ export class MonaOhlcSeriesComponent implements OnInit {
             opacity: this.opacity,
             openField: this.openField,
             risingColor: this.risingColor,
-            tickWidth: this.tickWidth,
+            tickLength: this.effectiveTickLength,
+            tickWidth: this.effectiveTickLength,
             type: "ohlc",
             userClass: this.userClass,
             valueFormatter: this.valueFormatter,

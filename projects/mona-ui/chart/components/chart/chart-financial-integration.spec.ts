@@ -204,4 +204,45 @@ describe("Chart Financial Series Integration (Candlestick & OHLC)", () => {
             expect(legendItem.secondaryColor).toBeDefined();
         }
     });
+
+    it("should emit pointClick with full financial OHLC payload and change values", () => {
+        const scene = chartComponent.scene();
+        expect(scene).toBeDefined();
+        if (scene && scene.coordinateSystem === "cartesian") {
+            const target0 = scene.hitTargets[0];
+            const canvas = fixture.debugElement.query(By.css("canvas")).nativeElement;
+            const x = target0.point?.x ?? (target0.bounds ? target0.bounds.x + target0.bounds.width / 2 : 50);
+            const y = target0.point?.y ?? (target0.bounds ? target0.bounds.y + target0.bounds.height / 2 : 50);
+
+            canvas.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y }));
+            canvas.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+            fixture.detectChanges();
+
+            if (host.lastPointClick) {
+                expect(host.lastPointClick.valueKind).toBe("ohlc");
+                expect(host.lastPointClick.open).toBe(100);
+                expect(host.lastPointClick.close).toBe(104);
+                expect(host.lastPointClick.change).toBe(4);
+                expect(host.lastPointClick.changePercentage).toBe(0.04);
+                expect(host.lastPointClick.financialDirection).toBe("rising");
+            }
+        }
+    });
+
+    it("should format keyboard accessibility text with full OHLC values", () => {
+        const hostDiv = fixture.debugElement.query(By.css("[tabindex='0']")).nativeElement;
+        // Focus chart and press arrow right
+        hostDiv.focus();
+        hostDiv.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+        fixture.detectChanges();
+
+        const liveRegion = fixture.debugElement.query(By.css("[aria-live='polite']"));
+        expect(liveRegion).toBeDefined();
+        const text = liveRegion.nativeElement.textContent;
+        expect(text).toContain("Open 100");
+        expect(text).toContain("high 108");
+        expect(text).toContain("low 98");
+        expect(text).toContain("close 104");
+        expect(text).toContain("rising");
+    });
 });

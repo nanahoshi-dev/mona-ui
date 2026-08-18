@@ -9,6 +9,7 @@ import type {
 import type { ChartAxisScene, ChartSeriesScene } from "./cartesian-scene";
 import type { ChartAngularAxisScene, ChartRadialAxisScene, ChartRadialSeriesScene } from "./polar-axis-scene";
 import type { ChartSectorSeriesScene } from "./polar-scene";
+import type { CartesianFinancialIndex } from "../interaction/cartesian-financial-index";
 import type { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
 import type { HeatmapCellIndex } from "../interaction/heatmap-cell-index";
 import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "./scene-geometry";
@@ -43,6 +44,7 @@ export interface CartesianSceneBase extends ChartSceneBase {
 export interface CartesianXYChartScene extends CartesianSceneBase {
     barHitTargets?: readonly SceneHitTarget[];
     cartesianKind: "xy";
+    financialIndex?: CartesianFinancialIndex;
     interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
     markerSpatialIndex?: CartesianPointSpatialIndex;
     pointSpatialIndex?: CartesianPointSpatialIndex;

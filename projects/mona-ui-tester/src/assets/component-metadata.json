@@ -3002,7 +3002,7 @@
         "kind": "input",
         "name": "fallingColor",
         "type": "string",
-        "defaultValue": "\"var(--mona-chart-color-falling, #ef4444)\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Visual fill mode for candle bodies: 'filled' (solid fill) or 'hollow' (rising hollow, falling filled).",
@@ -3051,7 +3051,7 @@
         "kind": "input",
         "name": "neutralColor",
         "type": "string",
-        "defaultValue": "\"var(--mona-chart-color-neutral, #6b7280)\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Overall opacity multiplier applied to candle wicks and bodies.",
@@ -3072,7 +3072,7 @@
         "kind": "input",
         "name": "risingColor",
         "type": "string",
-        "defaultValue": "\"var(--mona-chart-color-rising, #22c55e)\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Additional CSS classes applied to the series host element.",
@@ -4072,7 +4072,7 @@
         "kind": "input",
         "name": "fallingColor",
         "type": "string",
-        "defaultValue": "\"var(--mona-chart-color-falling, #ef4444)\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Property key or accessor extracting the highest price for each data item.",
@@ -4114,7 +4114,7 @@
         "kind": "input",
         "name": "neutralColor",
         "type": "string",
-        "defaultValue": "\"var(--mona-chart-color-neutral, #6b7280)\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Overall opacity multiplier applied to OHLC stems and tick arms.",
@@ -4135,12 +4135,12 @@
         "kind": "input",
         "name": "risingColor",
         "type": "string",
-        "defaultValue": "\"var(--mona-chart-color-rising, #22c55e)\""
+        "defaultValue": "\"\""
       },
       {
-        "description": "Stroke width in pixels for horizontal open and close tick arms.",
+        "description": "Length in pixels for horizontal open and close tick arms.",
         "kind": "input",
-        "name": "tickWidth",
+        "name": "tickLength",
         "type": "number | undefined",
         "defaultValue": "undefined"
       },

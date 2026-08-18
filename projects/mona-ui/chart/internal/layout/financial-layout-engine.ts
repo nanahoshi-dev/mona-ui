@@ -10,7 +10,7 @@ import type {
 } from "../scene/cartesian-scene";
 import type { SceneCandlestickMark, SceneOhlcMark } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { normalizeNonNegativeNumber } from "../utils/number-utils";
+import { isFiniteNumber, normalizeNonNegativeNumber } from "../utils/number-utils";
 import { FinancialWidthEngine } from "./financial-width-engine";
 
 export interface FinancialLayoutContext {
@@ -25,23 +25,23 @@ export interface FinancialLayoutContext {
 }
 
 function mapXCoordinate(
-    xRaw: unknown,
+    xScaleValue: string | number | Date,
     xAxisType: ChartXAxisType,
     xScale: ChartBandScale | ChartContinuousScale
 ): number {
     if (xAxisType === "category") {
         const bandScale = xScale as ChartBandScale;
-        const mapped = bandScale.map(String(xRaw));
+        const mapped = bandScale.map(String(xScaleValue));
         const bandwidth = bandScale.bandwidth ? bandScale.bandwidth() : 0;
         return (mapped ?? 0) + bandwidth / 2;
     }
     if (xAxisType === "time" || xAxisType === "utc") {
         const timeScale = xScale as ChartContinuousScale<Date>;
-        const date = xRaw instanceof Date ? xRaw : new Date(xRaw as string | number);
+        const date = xScaleValue instanceof Date ? xScaleValue : new Date(xScaleValue as string | number);
         return timeScale.map(date);
     }
     const linearScale = xScale as ChartContinuousScale<number>;
-    return linearScale.map(Number(xRaw));
+    return linearScale.map(Number(xScaleValue));
 }
 
 function formatValue(
@@ -72,10 +72,10 @@ export class FinancialLayoutEngine {
         const explicitMaxBodyWidth = series.maxBodyWidth?.();
         const bandwidth = "bandwidth" in xScale ? (xScale as ChartBandScale).bandwidth() : undefined;
 
-        // Map all marks to pixel X coordinates to compute continuous mark width
-        const markCoordinates = resolvedDataset.marks.map(m => mapXCoordinate(m.xRaw, xAxisType, xScale));
+        // Map all marks to pixel X coordinates using canonical xScaleValue
+        const markCoordinates = resolvedDataset.marks.map(m => mapXCoordinate(m.xScaleValue, xAxisType, xScale));
 
-        const bodyWidth = FinancialWidthEngine.resolveBodyWidth({
+        const markWidths = FinancialWidthEngine.resolveBodyWidths({
             bandwidth,
             explicitBodyWidth,
             explicitBodyWidthRatio,
@@ -84,13 +84,15 @@ export class FinancialLayoutEngine {
             plotWidth: plotRect.width
         });
 
+        const nominalBodyWidth = markWidths.length > 0 ? markWidths[0] : 16;
         const maxBodyWidth = normalizeNonNegativeNumber(explicitMaxBodyWidth, 32);
-        const wickWidth = normalizeNonNegativeNumber(series.wickWidth?.(), 1);
+        const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(series.wickWidth?.(), 1));
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
 
         const sceneMarks: SceneCandlestickMark[] = resolvedDataset.marks.map((mark, i) => {
             const centerX = markCoordinates[i];
+            const bodyWidth = markWidths[i] ?? nominalBodyWidth;
             const openY = yScale.map(mark.open);
             const highY = yScale.map(mark.high);
             const lowY = yScale.map(mark.low);
@@ -140,7 +142,7 @@ export class FinancialLayoutEngine {
         });
 
         return {
-            bodyWidth,
+            bodyWidth: nominalBodyWidth,
             fillMode,
             id: series.id,
             marks: sceneMarks,
@@ -163,15 +165,17 @@ export class FinancialLayoutEngine {
         const explicitBodyWidth = series.bodyWidth?.();
         const explicitBodyWidthRatio = series.bodyWidthRatio?.();
         const explicitMaxBodyWidth = series.maxBodyWidth?.();
-        const explicitTickWidth = (series.type === "ohlc" && "tickWidth" in series && series.tickWidth)
-            ? series.tickWidth()
-            : undefined;
+        const explicitTickLength = (series.type === "ohlc" && "tickLength" in series && series.tickLength)
+            ? series.tickLength()
+            : (series.type === "ohlc" && "tickWidth" in series && series.tickWidth)
+                ? (series as any).tickWidth()
+                : undefined;
         const bandwidth = "bandwidth" in xScale ? (xScale as ChartBandScale).bandwidth() : undefined;
 
-        // Map all marks to pixel X coordinates
-        const markCoordinates = resolvedDataset.marks.map(m => mapXCoordinate(m.xRaw, xAxisType, xScale));
+        // Map all marks to pixel X coordinates using canonical xScaleValue
+        const markCoordinates = resolvedDataset.marks.map(m => mapXCoordinate(m.xScaleValue, xAxisType, xScale));
 
-        const bodyWidth = FinancialWidthEngine.resolveBodyWidth({
+        const markWidths = FinancialWidthEngine.resolveBodyWidths({
             bandwidth,
             explicitBodyWidth,
             explicitBodyWidthRatio,
@@ -180,17 +184,21 @@ export class FinancialLayoutEngine {
             plotWidth: plotRect.width
         });
 
+        const nominalBodyWidth = markWidths.length > 0 ? markWidths[0] : 16;
         const maxBodyWidth = normalizeNonNegativeNumber(explicitMaxBodyWidth, 32);
-        const tickWidth = (explicitTickWidth !== undefined && normalizeNonNegativeNumber(explicitTickWidth, 0) > 0)
-            ? (explicitTickWidth as number)
-            : bodyWidth / 2;
-        const totalWidth = tickWidth * 2;
-        const wickWidth = normalizeNonNegativeNumber(series.wickWidth?.(), 1);
+        const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(series.wickWidth?.(), 1));
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
 
         const sceneMarks: SceneOhlcMark[] = resolvedDataset.marks.map((mark, i) => {
             const centerX = markCoordinates[i];
+            const bodyWidth = markWidths[i] ?? nominalBodyWidth;
+            const maxTick = bodyWidth / 2;
+            const tickWidth = (explicitTickLength !== undefined && isFiniteNumber(explicitTickLength) && (explicitTickLength as number) > 0)
+                ? Math.min(explicitTickLength as number, maxTick)
+                : maxTick;
+            const totalWidth = tickWidth * 2;
+
             const openY = yScale.map(mark.open);
             const highY = yScale.map(mark.high);
             const lowY = yScale.map(mark.low);
@@ -227,13 +235,13 @@ export class FinancialLayoutEngine {
         });
 
         return {
-            bodyWidth,
+            bodyWidth: nominalBodyWidth,
             id: series.id,
             marks: sceneMarks,
             maxBodyWidth,
             name: seriesName,
             style: resolvedStyle,
-            tickWidth,
+            tickWidth: nominalBodyWidth / 2,
             type: "ohlc",
             wickWidth
         };

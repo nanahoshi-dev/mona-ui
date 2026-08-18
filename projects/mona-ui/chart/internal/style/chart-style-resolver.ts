@@ -281,33 +281,51 @@ export class ChartStyleResolver {
         let cssWickWidth: number | undefined;
         let cssOpacity: number | undefined;
 
-        if (typeof window !== "undefined" && series.element?.nativeElement) {
+        if (typeof window !== "undefined") {
             try {
-                const nativeEl = series.element.nativeElement;
-                const computed = window.getComputedStyle(nativeEl);
+                if (series.element?.nativeElement) {
+                    const nativeEl = series.element.nativeElement;
+                    const computed = window.getComputedStyle(nativeEl);
 
-                const risingVal = computed.getPropertyValue("--mona-chart-financial-rising-color");
-                if (risingVal) cssRisingColor = risingVal.trim();
+                    const risingVal = computed.getPropertyValue("--mona-chart-financial-rising-color") || computed.getPropertyValue("--mona-chart-color-rising");
+                    if (risingVal) cssRisingColor = risingVal.trim();
 
-                const fallingVal = computed.getPropertyValue("--mona-chart-financial-falling-color");
-                if (fallingVal) cssFallingColor = fallingVal.trim();
+                    const fallingVal = computed.getPropertyValue("--mona-chart-financial-falling-color") || computed.getPropertyValue("--mona-chart-color-falling");
+                    if (fallingVal) cssFallingColor = fallingVal.trim();
 
-                const neutralVal = computed.getPropertyValue("--mona-chart-financial-neutral-color");
-                if (neutralVal) cssNeutralColor = neutralVal.trim();
+                    const neutralVal = computed.getPropertyValue("--mona-chart-financial-neutral-color") || computed.getPropertyValue("--mona-chart-color-neutral");
+                    if (neutralVal) cssNeutralColor = neutralVal.trim();
 
-                const wickColVal = computed.getPropertyValue("--mona-chart-financial-wick-color");
-                if (wickColVal) cssWickColor = wickColVal.trim();
+                    const wickColVal = computed.getPropertyValue("--mona-chart-financial-wick-color");
+                    if (wickColVal) cssWickColor = wickColVal.trim();
 
-                const wickWVal = computed.getPropertyValue("--mona-chart-financial-wick-width");
-                if (wickWVal) {
-                    const parsed = parseFloat(wickWVal);
-                    if (isFiniteNumber(parsed) && parsed >= 0) cssWickWidth = parsed;
+                    const wickWVal = computed.getPropertyValue("--mona-chart-financial-wick-width");
+                    if (wickWVal) {
+                        const parsed = parseFloat(wickWVal);
+                        if (isFiniteNumber(parsed) && parsed >= 0) cssWickWidth = parsed;
+                    }
+
+                    const opVal = computed.getPropertyValue("--mona-chart-fill-opacity");
+                    if (opVal) {
+                        const parsed = parseFloat(opVal);
+                        if (isFiniteNumber(parsed)) cssOpacity = Math.max(0, Math.min(1, parsed));
+                    }
                 }
 
-                const opVal = computed.getPropertyValue("--mona-chart-fill-opacity");
-                if (opVal) {
-                    const parsed = parseFloat(opVal);
-                    if (isFiniteNumber(parsed)) cssOpacity = Math.max(0, Math.min(1, parsed));
+                if (this.#rootElement) {
+                    const rootComputed = window.getComputedStyle(this.#rootElement);
+                    if (!cssRisingColor) {
+                        const rootRising = rootComputed.getPropertyValue("--mona-chart-financial-rising-color") || rootComputed.getPropertyValue("--mona-chart-color-rising");
+                        if (rootRising) cssRisingColor = rootRising.trim();
+                    }
+                    if (!cssFallingColor) {
+                        const rootFalling = rootComputed.getPropertyValue("--mona-chart-financial-falling-color") || rootComputed.getPropertyValue("--mona-chart-color-falling");
+                        if (rootFalling) cssFallingColor = rootFalling.trim();
+                    }
+                    if (!cssNeutralColor) {
+                        const rootNeutral = rootComputed.getPropertyValue("--mona-chart-financial-neutral-color") || rootComputed.getPropertyValue("--mona-chart-color-neutral");
+                        if (rootNeutral) cssNeutralColor = rootNeutral.trim();
+                    }
                 }
             } catch {
                 // Ignore style resolution errors

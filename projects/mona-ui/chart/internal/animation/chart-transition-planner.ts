@@ -387,6 +387,8 @@ export class ChartTransitionPlanner {
                         independentMarks += s.bars.length;
                     } else if (s.type === "scatter" || s.type === "bubble") {
                         independentMarks += s.markers.length;
+                    } else if (s.type === "candlestick" || s.type === "ohlc") {
+                        independentMarks += s.marks.length;
                     } else if (s.type === "heatmap") {
                         independentMarks += s.cells.length;
                     }
