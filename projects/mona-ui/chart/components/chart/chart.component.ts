@@ -29,16 +29,19 @@ import {
     hasInvalidationReason,
     type ChartAngularAxisRegistration,
     type ChartDonutSeriesRegistration,
+    type ChartGaugeSeriesRegistration,
+    type ChartHeatmapSeriesRegistration,
     type ChartLegendRegistration,
     type ChartPolarSeriesRegistration,
     type ChartRadialAxisRegistration,
+    type ChartRadialBarSeriesRegistration,
     type ChartRegistrationContext,
+    type ChartRoseSeriesRegistration,
     type ChartSectorSeriesRegistration,
     type ChartSeriesRegistration,
     type ChartTooltipRegistration,
     type ChartXAxisRegistration,
-    type ChartYAxisRegistration,
-    type ChartHeatmapSeriesRegistration
+    type ChartYAxisRegistration
 } from "../../internal/context/chart-registration-context";
 import { ChartLabelMeasureDirective } from "../../internal/directives/chart-label-measure.directive";
 import { ChartHitTestEngine } from "../../internal/interaction/chart-hit-test-engine";
@@ -57,6 +60,8 @@ import type {
     PolarChartScene,
     PolarSectorChartScene
 } from "../../internal/scene/chart-scene";
+import type { ChartGaugeSeriesScene, PolarArcChartScene } from "../../internal/scene/polar-arc-scene";
+import type { ChartGaugeCenterTemplateContext } from "../../models/chart-radial-arc.models";
 import type { ChartColorLegendScale } from "../../models/chart-heatmap.models";
 import type { ChartAngularAxisTick, ChartRadialAxisTick } from "../../internal/scene/polar-axis-scene";
 import type { SceneSectorSlice } from "../../internal/scene/polar-scene";
@@ -203,6 +208,10 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
         const sc = this.scene();
         return sc?.coordinateSystem === "polar" ? (sc as PolarChartScene) : null;
     });
+    protected readonly polarArcScene = computed<PolarArcChartScene | null>(() => {
+        const sc = this.scene();
+        return sc?.coordinateSystem === "polar" && sc.polarKind === "arc" ? (sc as PolarArcChartScene) : null;
+    });
     protected readonly polarSeriesRegistration = computed<ChartSectorSeriesRegistration | null>(() => {
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "pie" || s.type === "donut") as ChartSectorSeriesRegistration) ?? null;
@@ -210,6 +219,17 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
     protected readonly donutSeriesRegistration = computed<ChartDonutSeriesRegistration | null>(() => {
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "donut") as ChartDonutSeriesRegistration) ?? null;
+    });
+    protected readonly gaugeSeriesRegistration = computed<ChartGaugeSeriesRegistration | null>(() => {
+        const list = this.#registeredSeries();
+        return (list.find(s => s.type === "gauge") as ChartGaugeSeriesRegistration) ?? null;
+    });
+    protected readonly gaugeScene = computed<ChartGaugeSeriesScene | null>(() => {
+        const sc = this.polarArcScene();
+        if (sc && sc.arcMode === "gauge" && sc.series[0]?.type === "gauge") {
+            return sc.series[0] as ChartGaugeSeriesScene;
+        }
+        return null;
     });
     readonly #isAnimating = signal(false);
     readonly #isStructuralAnimation = signal(false);
@@ -544,7 +564,7 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
     }
 
     #resolveSharedTooltip(scene: ChartScene): boolean {
-        if (scene.coordinateSystem === "polar" && scene.polarKind === "sector") {
+        if (scene.coordinateSystem === "polar" && (scene.polarKind === "sector" || scene.polarKind === "arc")) {
             return false;
         }
         if (scene.coordinateSystem === "cartesian" && scene.cartesianKind === "heatmap") {
@@ -680,10 +700,18 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
     }
 
     public toggleLegendItem(item: ChartLegendItem): void {
-        if (item.kind === "datum" && item.dataIndex !== undefined) {
-            const polarSeries = this.polarSeriesRegistration();
-            if (polarSeries) {
-                polarSeries.toggleSliceVisibility(item.dataIndex);
+        if (item.kind === "datum") {
+            const series = this.#registeredSeries().find(s => s.id === item.seriesId);
+            if (series) {
+                if (series.type === "pie" || series.type === "donut") {
+                    const sec = series as ChartSectorSeriesRegistration;
+                    if (item.dataIndex !== undefined) {
+                        sec.toggleSliceVisibility(item.dataIndex);
+                    }
+                } else if (series.type === "radialBar" || series.type === "rose") {
+                    const rad = series as ChartRadialBarSeriesRegistration | ChartRoseSeriesRegistration;
+                    rad.toggleDatumVisibility(item.itemId);
+                }
             }
         } else {
             this.toggleSeriesVisibility(item.seriesId);
@@ -744,9 +772,9 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
         const xAxisType = xAxis?.type();
 
         const pointContexts: ChartTooltipPointContext[] = hits.map(hit => {
-            const seriesItem = seriesItems.find(s => s.itemId === hit.sliceId || s.seriesId === hit.seriesId);
+            const seriesItem = seriesItems.find(s => s.itemId === hit.sliceId || s.itemId === hit.itemId || s.seriesId === hit.seriesId);
             const color = hit.color ?? seriesItem?.color ?? "#3b82f6";
-            const xStr = hit.formattedCategory ?? formatXValue(hit.xValue, hit.index, xFormatter, xAxisType);
+            const xStr = hit.formattedCategory ?? formatXValue(hit.xValue ?? hit.category, hit.dataIndex ?? hit.index ?? 0, xFormatter, xAxisType);
             const isRange = hit.valueKind === "range" || hit.range !== undefined;
             const fromValue = hit.fromValue ?? hit.range?.fromValue;
             const toValue = hit.toValue ?? hit.range?.toValue;
@@ -756,18 +784,18 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
                 hit.formattedValue ??
                 (isRange && formattedFrom && formattedTo
                     ? `${formattedFrom} – ${formattedTo}`
-                    : formatYValue(hit.yValue, hit.index, yFormatter));
-            const markId = hit.animationKey ?? hit.sliceId ?? `${hit.seriesId}:${hit.index}`;
+                    : formatYValue(hit.yValue ?? hit.value, hit.dataIndex ?? hit.index ?? 0, yFormatter));
+            const markId = hit.animationKey ?? hit.itemId ?? hit.sliceId ?? `${hit.seriesId}:${hit.dataIndex ?? hit.index ?? 0}`;
 
             return {
-                category: hit.category,
+                category: hit.category ?? hit.xValue,
                 categoryX: hit.categoryX,
                 categoryY: hit.categoryY,
                 change: hit.financial?.change,
                 changePercentage: hit.financial?.changePercentage,
                 close: hit.close ?? hit.financial?.close,
                 color,
-                dataIndex: hit.index,
+                dataIndex: hit.dataIndex ?? hit.index ?? 0,
                 datum: hit.datum,
                 financial: hit.financial,
                 financialDirection: hit.financialDirection ?? hit.financial?.direction,
@@ -1346,6 +1374,27 @@ export class MonaChartComponent implements ChartRegistrationContext, AfterConten
         const polarSeries = this.polarSeriesRegistration();
         const content = polarSeries?.labelContent() ?? "percentage";
         return formatPolarLabelText(slice, content);
+    }
+
+    protected gaugeCenterContext(gaugeSeries: ChartGaugeSeriesScene): ChartGaugeCenterTemplateContext {
+        const val = gaugeSeries.value;
+        return {
+            $implicit: val.rawValue,
+            formattedMax: String(val.max),
+            formattedMin: String(val.min),
+            formattedValue: val.formattedValue,
+            isClamped: val.isClamped,
+            max: val.max,
+            min: val.min,
+            ratio: val.ratio,
+            seriesId: gaugeSeries.id,
+            seriesName: gaugeSeries.name,
+            value: val.rawValue
+        };
+    }
+
+    protected gaugeFontSize(gaugeSeries: ChartGaugeSeriesScene): number {
+        return Math.max(14, Math.round(gaugeSeries.value.innerRadius * 0.35));
     }
 
     protected shouldShowSliceLabel(slice: SceneSectorSlice): boolean {

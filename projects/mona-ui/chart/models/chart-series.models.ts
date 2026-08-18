@@ -8,17 +8,20 @@ export type ChartSeriesType =
     | "bubble"
     | "candlestick"
     | "donut"
+    | "gauge"
     | "heatmap"
     | "line"
     | "ohlc"
     | "pie"
     | "polar"
     | "radar"
+    | "radialBar"
     | "rangeArea"
     | "rangeBar"
+    | "rose"
     | "scatter";
 
-export type ChartSeriesFamily = "cartesian" | "heatmap" | "polar" | "radar" | "sector";
+export type ChartSeriesFamily = "cartesian" | "heatmap" | "polar" | "radar" | "radialArc" | "sector";
 
 export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
     switch (type) {
@@ -41,6 +44,10 @@ export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
             return "radar";
         case "polar":
             return "polar";
+        case "radialBar":
+        case "rose":
+        case "gauge":
+            return "radialArc";
     }
 }
 
@@ -49,7 +56,7 @@ export function isCartesianCoordinateFamily(family: ChartSeriesFamily): boolean 
 }
 
 export function isPolarCoordinateFamily(family: ChartSeriesFamily): boolean {
-    return family === "sector" || family === "radar" || family === "polar";
+    return family === "sector" || family === "radar" || family === "polar" || family === "radialArc";
 }
 
 

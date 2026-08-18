@@ -198,10 +198,58 @@ describe("FinancialDataResolver", () => {
             xField: "x"
         });
 
-        expect(resultA.marks[0].animationKey).toBe("fin-1:fin:key:candle-A");
-        expect(resultA.marks[1].animationKey).toBe("fin-1:fin:key:candle-B");
-        expect(resultB.marks[1].animationKey).toBe("fin-1:fin:key:candle-A");
-        expect(resultB.marks[0].animationKey).toBe("fin-1:fin:key:candle-B");
+        expect(resultA.marks[0].animationKey).toBe("fin-1:fin:key:s:candle-A");
+        expect(resultA.marks[1].animationKey).toBe("fin-1:fin:key:s:candle-B");
+        expect(resultB.marks[1].animationKey).toBe("fin-1:fin:key:s:candle-A");
+        expect(resultB.marks[0].animationKey).toBe("fin-1:fin:key:s:candle-B");
+    });
+
+    it("should distinguish typed number key 1 from string key '1' (FIN-R2)", () => {
+        const data = [
+            { c: 100, h: 110, id: 1, l: 90, o: 95, x: "2026-01-01" },
+            { c: 120, h: 130, id: "1", l: 110, o: 115, x: "2026-01-02" }
+        ];
+
+        const result = FinancialDataResolver.resolve({
+            closeField: "c",
+            data,
+            highField: "h",
+            keyField: "id",
+            lowField: "l",
+            openField: "o",
+            seriesId: "fin-1",
+            seriesName: "Price",
+            xField: "x"
+        });
+
+        expect(result.marks.length).toBe(2);
+        expect(result.marks[0].animationKey).toBe("fin-1:fin:key:n:1");
+        expect(result.marks[1].animationKey).toBe("fin-1:fin:key:s:1");
+    });
+
+    it("should not reserve X when a row is rejected due to duplicate custom key (FIN-R1)", () => {
+        const data = [
+            { c: 100, h: 110, id: "dup-key", l: 90, o: 95, x: "day-1" },
+            { c: 105, h: 115, id: "dup-key", l: 92, o: 98, x: "day-2" }, // rejected due to duplicate key
+            { c: 110, h: 120, id: "unique-key", l: 95, o: 100, x: "day-2" } // valid row with X="day-2", should be retained!
+        ];
+
+        const result = FinancialDataResolver.resolve({
+            closeField: "c",
+            data,
+            highField: "h",
+            keyField: "id",
+            lowField: "l",
+            openField: "o",
+            seriesId: "fin-1",
+            seriesName: "Price",
+            xField: "x"
+        });
+
+        expect(result.marks.length).toBe(2);
+        expect(result.marks[0].xKey).toBe("day-1");
+        expect(result.marks[1].xKey).toBe("day-2");
+        expect(result.marks[1].animationKey).toBe("fin-1:fin:key:s:unique-key");
     });
 
     it("should retain first valid duplicate explicit keyField and skip subsequent ones with warning", () => {
@@ -228,10 +276,10 @@ describe("FinancialDataResolver", () => {
 
         expect(result.marks.length).toBe(1);
         expect(result.marks[0].close).toBe(100);
-        expect(result.marks[0].animationKey).toBe("fin-1:fin:key:candle-1");
+        expect(result.marks[0].animationKey).toBe("fin-1:fin:key:s:candle-1");
         expect(signatures.has("fin-1:duplicate-financial-key")).toBe(true);
         expect(warnSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Financial series "Price" encountered duplicate explicit animation key "candle-1" at data index 1. First valid datum wins.')
+            expect.stringContaining('Financial series "Price" encountered duplicate explicit animation key "s:candle-1" at data index 1. First valid datum wins.')
         );
         warnSpy.mockRestore();
     });

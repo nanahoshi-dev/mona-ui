@@ -1,6 +1,7 @@
 import type { ElementRef, Signal } from "@angular/core";
 import type { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import type { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
+import type { ChartGaugeCenterTemplateDirective } from "../../directives/chart-gauge-center-template.directive";
 import type { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
 import type { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import type { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
@@ -24,6 +25,11 @@ import type {
 import type { ChartField, ChartPoint } from "../../models/chart.models";
 import type { ChartFinancialFillMode } from "../../models/chart-financial.models";
 import type { ChartColorLegendScale, ChartHeatmapColorMode } from "../../models/chart-heatmap.models";
+import type {
+    ChartGaugeIndicator,
+    ChartRadialArcFillMode,
+    ChartRoseScaleMode
+} from "../../models/chart-radial-arc.models";
 import type {
     ChartAreaFillMode,
     ChartCurve,
@@ -346,6 +352,93 @@ export interface ChartOhlcSeriesRegistration extends ChartFinancialSeriesRegistr
     readonly type: "ohlc";
 }
 
+export interface ChartDatumVisibilityRegistration {
+    readonly datumVisibilityRevision: Signal<number>;
+    isDatumVisible(itemId: string): boolean;
+    toggleDatumVisibility(itemId: string): boolean;
+}
+
+export interface ChartRadialArcSeriesRegistrationBase extends ChartSeriesRegistrationBase {
+    readonly fillMode?: Signal<ChartRadialArcFillMode>;
+    readonly fillOpacity?: Signal<number | undefined>;
+}
+
+export interface ChartRadialBarSeriesRegistration
+    extends ChartRadialArcSeriesRegistrationBase,
+        ChartDatumVisibilityRegistration {
+    readonly barGap: Signal<number>;
+    readonly barThickness?: Signal<number | undefined>;
+    readonly categoryField: Signal<ChartField>;
+    readonly categoryFormatter?: Signal<ChartValueFormatter | undefined>;
+    readonly colorField?: Signal<ChartField | undefined>;
+    readonly colors?: Signal<readonly string[] | undefined>;
+    readonly cornerRadius?: Signal<number | undefined>;
+    readonly endAngle: Signal<number>;
+    readonly field: Signal<ChartField>;
+    readonly innerRadiusRatio: Signal<number>;
+    readonly max?: Signal<number | undefined>;
+    readonly min?: Signal<number | undefined>;
+    readonly outerRadiusRatio: Signal<number>;
+    readonly showTrack: Signal<boolean>;
+    readonly startAngle: Signal<number>;
+    readonly strokeColor: Signal<string>;
+    readonly strokeWidth?: Signal<number | undefined>;
+    readonly trackColor: Signal<string>;
+    readonly trackOpacity?: Signal<number | undefined>;
+    readonly type: "radialBar";
+    readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
+}
+
+export interface ChartRoseSeriesRegistration
+    extends ChartRadialArcSeriesRegistrationBase,
+        ChartDatumVisibilityRegistration {
+    readonly categoryField: Signal<ChartField>;
+    readonly categoryFormatter?: Signal<ChartValueFormatter | undefined>;
+    readonly colorField?: Signal<ChartField | undefined>;
+    readonly colors?: Signal<readonly string[] | undefined>;
+    readonly cornerRadius?: Signal<number | undefined>;
+    readonly endAngle: Signal<number>;
+    readonly field: Signal<ChartField>;
+    readonly innerRadiusRatio: Signal<number>;
+    readonly outerRadiusRatio: Signal<number>;
+    readonly padAngle: Signal<number>;
+    readonly scaleMode: Signal<ChartRoseScaleMode>;
+    readonly startAngle: Signal<number>;
+    readonly strokeColor: Signal<string>;
+    readonly strokeWidth?: Signal<number | undefined>;
+    readonly type: "rose";
+    readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
+}
+
+export interface ChartGaugeSeriesRegistration extends ChartRadialArcSeriesRegistrationBase {
+    readonly centerTemplate?: Signal<ChartGaugeCenterTemplateDirective | undefined>;
+    readonly color: Signal<string>;
+    readonly cornerRadius?: Signal<number | undefined>;
+    readonly endAngle: Signal<number>;
+    readonly field: Signal<ChartField>;
+    readonly hubRadius: Signal<number>;
+    readonly indicator: Signal<ChartGaugeIndicator>;
+    readonly innerRadiusRatio: Signal<number>;
+    readonly max: Signal<number>;
+    readonly min: Signal<number>;
+    readonly needleColor: Signal<string>;
+    readonly needleLengthRatio: Signal<number>;
+    readonly needleWidth: Signal<number>;
+    readonly outerRadiusRatio: Signal<number>;
+    readonly showValue: Signal<boolean>;
+    readonly startAngle: Signal<number>;
+    readonly trackColor: Signal<string>;
+    readonly trackOpacity?: Signal<number | undefined>;
+    readonly type: "gauge";
+    readonly value?: Signal<number | undefined>;
+    readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
+}
+
+export type ChartRadialArcSeriesRegistration =
+    | ChartGaugeSeriesRegistration
+    | ChartRadialBarSeriesRegistration
+    | ChartRoseSeriesRegistration;
+
 export type ChartFinancialSeriesRegistration = ChartCandlestickSeriesRegistration | ChartOhlcSeriesRegistration;
 
 export type ChartCartesianSeriesRegistration =
@@ -367,6 +460,7 @@ export type ChartRadialSeriesRegistration = ChartContinuousPolarSeriesRegistrati
 export type ChartSeriesRegistration =
     | ChartCartesianSeriesRegistration
     | ChartHeatmapSeriesRegistration
+    | ChartRadialArcSeriesRegistration
     | ChartRadialSeriesRegistration
     | ChartSectorSeriesRegistration;
 

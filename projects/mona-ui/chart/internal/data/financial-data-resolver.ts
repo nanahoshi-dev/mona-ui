@@ -2,6 +2,7 @@ import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartFinancialDirection } from "../../models/chart-financial.models";
 import type { ChartField } from "../../models/chart.models";
 import type { ChartInteractionXKey } from "../scene/scene-geometry";
+import { serializeKeyPart } from "../animation/animation-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { resolveValue } from "./chart-value-resolver";
 
@@ -219,33 +220,38 @@ export class FinancialDataResolver {
                 }
                 continue;
             }
+
+            let customKeyIdentifier: string | undefined;
+            let animationKey = `${seriesId}:fin:x:${String(resolvedX.key)}`;
+            if (keyField !== undefined) {
+                const customKey = resolveValue(row, keyField, i);
+                const keyPart = serializeKeyPart(customKey);
+                if (keyPart !== null) {
+                    customKeyIdentifier = `${keyPart.type}:${String(keyPart.value)}`;
+                    if (seenCustomKeys.has(customKeyIdentifier)) {
+                        if (warnedDiagnosticSignatures) {
+                            ChartDiagnostics.warnOnce(
+                                warnedDiagnosticSignatures,
+                                `Financial series "${seriesName}" encountered duplicate explicit animation key "${customKeyIdentifier}" at data index ${i}. First valid datum wins.`,
+                                `${seriesId}:duplicate-financial-key`
+                            );
+                        }
+                        continue;
+                    }
+                    animationKey = `${seriesId}:fin:key:${customKeyIdentifier}`;
+                }
+            }
+
             seenXKeys.add(resolvedX.key);
+            if (customKeyIdentifier !== undefined) {
+                seenCustomKeys.add(customKeyIdentifier);
+            }
 
             const direction: ChartFinancialDirection =
                 close > open ? "rising" : close < open ? "falling" : "neutral";
 
             const change = close - open;
             const changePercentage = open !== 0 ? change / Math.abs(open) : undefined;
-
-            let animationKey = `${seriesId}:fin:x:${String(resolvedX.key)}`;
-            if (keyField !== undefined) {
-                const customKey = resolveValue(row, keyField, i);
-                if (customKey !== undefined && customKey !== null) {
-                    const customKeyStr = String(customKey);
-                    if (seenCustomKeys.has(customKeyStr)) {
-                        if (warnedDiagnosticSignatures) {
-                            ChartDiagnostics.warnOnce(
-                                warnedDiagnosticSignatures,
-                                `Financial series "${seriesName}" encountered duplicate explicit animation key "${customKeyStr}" at data index ${i}. First valid datum wins.`,
-                                `${seriesId}:duplicate-financial-key`
-                            );
-                        }
-                        continue;
-                    }
-                    seenCustomKeys.add(customKeyStr);
-                    animationKey = `${seriesId}:fin:key:${customKeyStr}`;
-                }
-            }
 
             marks.push({
                 animationKey,

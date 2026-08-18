@@ -9,6 +9,8 @@ import type {
 import type { ChartAxisScene, ChartSeriesScene } from "./cartesian-scene";
 import type { ChartAngularAxisScene, ChartRadialAxisScene, ChartRadialSeriesScene } from "./polar-axis-scene";
 import type { ChartSectorSeriesScene } from "./polar-scene";
+import type { PolarArcChartScene } from "./polar-arc-scene";
+export type { PolarArcChartScene };
 import type { CartesianFinancialIndex } from "../interaction/cartesian-financial-index";
 import type { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
 import type { HeatmapCellIndex } from "../interaction/heatmap-cell-index";
@@ -86,6 +88,6 @@ export interface PolarAxisChartScene extends PolarSceneBase {
     series: readonly ChartRadialSeriesScene[];
 }
 
-export type PolarChartScene = PolarAxisChartScene | PolarSectorChartScene;
+export type PolarChartScene = PolarArcChartScene | PolarAxisChartScene | PolarSectorChartScene;
 
 export type ChartScene = CartesianChartScene | PolarChartScene;

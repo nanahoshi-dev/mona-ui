@@ -8,6 +8,7 @@ import type {
     ChartRadialSeriesRegistration,
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
+import type { ChartField } from "../../models/chart.models";
 import type { ChartHeatmapSeriesStyle } from "../../models/chart-heatmap.models";
 import { resolveValue } from "../data/chart-value-resolver";
 import type { ChartFinancialSeriesStyle } from "../scene/cartesian-scene";
@@ -595,28 +596,28 @@ export class ChartStyleResolver {
         };
     }
 
-    public resolveSliceColor(
-        registration: ChartPolarSeriesRegistration,
+    public resolveDatumColor(
+        colorField: ChartField | undefined,
+        colors: readonly string[] | undefined,
         datum: unknown,
         dataIndex: number,
-        paletteIndex: number
+        paletteIndex: number,
+        targetElement?: HTMLElement | null
     ): string {
-        const colorField = registration.colorField();
         if (colorField !== undefined) {
             const raw = resolveValue(datum, colorField, dataIndex);
             if (typeof raw === "string" && raw) {
-                const resolved = this.resolveCssVariable(raw);
+                const resolved = this.resolveCssVariable(raw, targetElement);
                 if (resolved) {
                     return resolved;
                 }
             }
         }
 
-        const colors = registration.colors();
         if (colors && colors.length > 0) {
             const explicit = colors[paletteIndex % colors.length];
             if (explicit) {
-                const resolved = this.resolveCssVariable(explicit);
+                const resolved = this.resolveCssVariable(explicit, targetElement);
                 if (resolved) {
                     return resolved;
                 }
@@ -624,6 +625,22 @@ export class ChartStyleResolver {
         }
 
         return this.resolvePaletteColor(paletteIndex);
+    }
+
+    public resolveSliceColor(
+        registration: ChartPolarSeriesRegistration,
+        datum: unknown,
+        dataIndex: number,
+        paletteIndex: number
+    ): string {
+        return this.resolveDatumColor(
+            registration.colorField(),
+            registration.colors(),
+            datum,
+            dataIndex,
+            paletteIndex,
+            registration.element?.nativeElement
+        );
     }
 
     public resolveCssVariable(varNameOrColor: string, targetElement?: HTMLElement | null): string {
@@ -636,6 +653,13 @@ export class ChartStyleResolver {
             return toCanvasColor(trimmed, (targetElement ?? this.#rootElement)?.ownerDocument);
         }
         if (typeof window === "undefined") {
+            if (trimmed.startsWith("var(")) {
+                const inner = trimmed.slice(4, -1).trim();
+                const commaIdx = inner.indexOf(",");
+                if (commaIdx !== -1) {
+                    return toCanvasColor(inner.slice(commaIdx + 1).trim());
+                }
+            }
             return "";
         }
         try {

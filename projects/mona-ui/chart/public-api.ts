@@ -19,6 +19,9 @@ export { MonaRangeAreaSeriesComponent } from "./components/range-area-series/ran
 export { MonaHeatmapSeriesComponent } from "./components/heatmap-series/heatmap-series.component";
 export { MonaCandlestickSeriesComponent } from "./components/candlestick-series/candlestick-series.component";
 export { MonaOhlcSeriesComponent } from "./components/ohlc-series/ohlc-series.component";
+export { MonaRadialBarSeriesComponent } from "./components/radial-bar-series/radial-bar-series.component";
+export { MonaRoseSeriesComponent } from "./components/rose-series/rose-series.component";
+export { MonaGaugeSeriesComponent } from "./components/gauge-series/gauge-series.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -26,6 +29,7 @@ export { ChartTooltipTemplateDirective } from "./directives/chart-tooltip-templa
 export { ChartNoDataTemplateDirective } from "./directives/chart-no-data-template.directive";
 export { ChartSliceLabelTemplateDirective } from "./directives/chart-slice-label-template.directive";
 export { ChartCenterTemplateDirective } from "./directives/chart-center-template.directive";
+export { ChartGaugeCenterTemplateDirective } from "./directives/chart-gauge-center-template.directive";
 
 export type {
     ChartCoordinateSystem,
@@ -124,4 +128,12 @@ export type {
     ChartFinancialDirection,
     ChartFinancialFillMode
 } from "./models/chart-financial.models";
+
+export type {
+    ChartGaugeCenterTemplateContext,
+    ChartGaugeIndicator,
+    ChartRadialArcFillMode,
+    ChartRadialDatumVisibilityEvent,
+    ChartRoseScaleMode
+} from "./models/chart-radial-arc.models";
 

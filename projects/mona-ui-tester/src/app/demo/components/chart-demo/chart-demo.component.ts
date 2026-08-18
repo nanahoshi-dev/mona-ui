@@ -21,6 +21,10 @@ import {
     MonaPieSeriesComponent,
     MonaPolarSeriesComponent,
     MonaRadarSeriesComponent,
+    MonaRadialBarSeriesComponent,
+    MonaRoseSeriesComponent,
+    MonaGaugeSeriesComponent,
+    ChartGaugeCenterTemplateDirective,
     MonaScatterSeriesComponent,
     MonaBubbleSeriesComponent,
     MonaCandlestickSeriesComponent,
@@ -31,15 +35,18 @@ import {
     type ChartAreaFillMode,
     type ChartCurve,
     type ChartFinancialFillMode,
+    type ChartGaugeIndicator,
     type ChartHeatmapColorMode,
     type ChartPointEvent,
     type ChartPointFocusEvent,
     type ChartPolarFillMode,
     type ChartPolarLabelContent,
     type ChartPolarLabelPosition,
+    type ChartRadialArcFillMode,
     type ChartRadialCurve,
     type ChartRadialFillMode,
     type ChartRadialGridShape,
+    type ChartRoseScaleMode,
     type ChartSeriesVisibilityEvent,
     type ChartSliceVisibilityEvent
 } from "@nanahoshi/mona-ui/chart";
@@ -126,6 +133,10 @@ interface BubbleDataPoint {
         MonaRangeBarSeriesComponent,
         MonaRangeAreaSeriesComponent,
         MonaHeatmapSeriesComponent,
+        MonaRadialBarSeriesComponent,
+        MonaRoseSeriesComponent,
+        MonaGaugeSeriesComponent,
+        ChartGaugeCenterTemplateDirective,
         MonaChartLegendComponent,
         MonaChartTooltipComponent,
         ChartAxisLabelTemplateDirective,
@@ -150,6 +161,7 @@ export class ChartDemoComponent {
         | "candlestick"
         | "custom"
         | "donut"
+        | "gauge"
         | "grouped"
         | "heatmap"
         | "mixed"
@@ -159,8 +171,10 @@ export class ChartDemoComponent {
         | "pie"
         | "polar"
         | "radar"
+        | "radial-bar"
         | "range-area"
         | "range-bar"
+        | "rose"
         | "scatter"
         | "stacked-area"
         | "stacked-bar"
@@ -502,6 +516,47 @@ export class ChartDemoComponent {
     protected readonly bubbleFillOpacity = signal<number>(0.6);
     protected readonly bubbleSizeFormatter = (value: unknown): string =>
         typeof value === "number" ? `${value.toLocaleString()}M` : String(value);
+
+    protected readonly radialBarData = signal<{ category: string; color?: string; value: number }[]>([
+        { category: "Disk Usage", color: "#3b82f6", value: 78 },
+        { category: "Memory", color: "#10b981", value: 62 },
+        { category: "CPU Load", color: "#f59e0b", value: 45 },
+        { category: "Network I/O", color: "#ec4899", value: 89 }
+    ]);
+    protected readonly radialBarFillMode = signal<ChartRadialArcFillMode>("solid");
+    protected readonly radialBarThickness = signal<number>(20);
+    protected readonly radialBarGap = signal<number>(6);
+    protected readonly radialBarCornerRadius = signal<number>(6);
+    protected readonly radialBarStartAngle = signal<number>(0);
+    protected readonly radialBarEndAngle = signal<number>(360);
+    protected readonly radialBarShowTracks = signal<boolean>(true);
+
+    protected readonly roseData = signal<{ direction: string; value: number }[]>([
+        { direction: "N", value: 45 },
+        { direction: "NE", value: 85 },
+        { direction: "E", value: 65 },
+        { direction: "SE", value: 30 },
+        { direction: "S", value: 95 },
+        { direction: "SW", value: 55 },
+        { direction: "W", value: 75 },
+        { direction: "NW", value: 40 }
+    ]);
+    protected readonly roseScaleMode = signal<ChartRoseScaleMode>("area");
+    protected readonly roseFillMode = signal<ChartRadialArcFillMode>("solid");
+    protected readonly rosePadAngle = signal<number>(2);
+    protected readonly roseCornerRadius = signal<number>(4);
+
+    protected readonly gaugeValue = signal<number>(76);
+    protected readonly gaugeMin = signal<number>(0);
+    protected readonly gaugeMax = signal<number>(100);
+    protected readonly gaugeIndicator = signal<ChartGaugeIndicator>("both");
+    protected readonly gaugeStartAngle = signal<number>(-120);
+    protected readonly gaugeEndAngle = signal<number>(120);
+    protected readonly gaugeInnerRadiusRatio = signal<number>(0.72);
+    protected readonly gaugeThickness = signal<number>(24);
+    protected readonly gaugeNeedleWidth = signal<number>(3);
+    protected readonly gaugeShowValue = signal<boolean>(true);
+    protected readonly gaugeCustomTemplate = signal<boolean>(false);
 
     protected readonly sharedTooltip = signal<boolean>(false);
     protected readonly showArea = signal<boolean>(true);
@@ -886,6 +941,32 @@ export class ChartDemoComponent {
         this.#addLog("dataUpdate", "Randomized heatmap 2D server activity matrix");
     }
 
+    public randomizeRadialBarData(): void {
+        this.radialBarData.update(list =>
+            list.map(item => ({
+                ...item,
+                value: Math.round(20 + Math.random() * 80)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized Radial Bar ring values");
+    }
+
+    public randomizeRoseData(): void {
+        this.roseData.update(list =>
+            list.map(item => ({
+                ...item,
+                value: Math.round(15 + Math.random() * 85)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized Rose wind petal speeds");
+    }
+
+    public randomizeGaugeValue(): void {
+        const val = Math.round(Math.random() * 100);
+        this.gaugeValue.set(val);
+        this.#addLog("dataUpdate", `Updated Gauge value to ${val}`);
+    }
+
     public resetData(): void {
         this.monthlyData.set([
             { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
@@ -895,6 +976,23 @@ export class ChartDemoComponent {
             { actual: 7200, forecast: 6800, month: "May", target: 6700 },
             { actual: 8100, forecast: 7500, month: "Jun", target: 7600 }
         ]);
+        this.radialBarData.set([
+            { category: "Disk Usage", color: "#3b82f6", value: 78 },
+            { category: "Memory", color: "#10b981", value: 62 },
+            { category: "CPU Load", color: "#f59e0b", value: 45 },
+            { category: "Network I/O", color: "#ec4899", value: 89 }
+        ]);
+        this.roseData.set([
+            { direction: "N", value: 45 },
+            { direction: "NE", value: 85 },
+            { direction: "E", value: 65 },
+            { direction: "SE", value: 30 },
+            { direction: "S", value: 95 },
+            { direction: "SW", value: 55 },
+            { direction: "W", value: 75 },
+            { direction: "NW", value: 40 }
+        ]);
+        this.gaugeValue.set(76);
         this.useIndependentSeriesData.set(false);
         this.includeNegativeValues.set(false);
         this.isDataEmpty.set(false);
@@ -907,6 +1005,7 @@ export class ChartDemoComponent {
             | "candlestick"
             | "custom"
             | "donut"
+            | "gauge"
             | "grouped"
             | "heatmap"
             | "mixed"
@@ -916,8 +1015,10 @@ export class ChartDemoComponent {
             | "pie"
             | "polar"
             | "radar"
+            | "radial-bar"
             | "range-area"
             | "range-bar"
+            | "rose"
             | "scatter"
             | "stacked-area"
             | "stacked-bar"

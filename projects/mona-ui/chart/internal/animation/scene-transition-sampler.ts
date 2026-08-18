@@ -3,6 +3,7 @@ import type {
     CartesianHeatmapChartScene,
     CartesianXYChartScene,
     ChartScene,
+    PolarArcChartScene,
     PolarAxisChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
@@ -20,6 +21,7 @@ import type {
 } from "../scene/cartesian-scene";
 import type { ChartSectorSeriesScene } from "../scene/polar-scene";
 import type { ChartContinuousPolarSeriesScene, ChartRadarSeriesScene } from "../scene/polar-axis-scene";
+import type { ChartRadialArcSeriesScene, SceneRadialArcMark } from "../scene/polar-arc-scene";
 import type {
     ChartInteractionBucket,
     ChartInteractionXKey,
@@ -37,6 +39,9 @@ import type { ChartAnimationRenderFrame, ChartTransitionPlan } from "./chart-tra
 import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
 import { CartesianFinancialIndex, type FinancialHitEntry } from "../interaction/cartesian-financial-index";
 import { createCandlestickFinancialHitGeometry, createOhlcFinancialHitGeometry } from "../interaction/financial-hit-geometry";
+import { RadialBarHitIndex } from "../interaction/radial-bar-hit-index";
+import { RoseHitIndex } from "../interaction/rose-hit-index";
+import { GaugeHitIndex } from "../interaction/gauge-hit-index";
 
 export class SceneTransitionSampler {
     public static sampleFrame(plan: ChartTransitionPlan, progress: number): ChartAnimationRenderFrame {
@@ -122,6 +127,21 @@ export class SceneTransitionSampler {
                 mode: "morph",
                 progress,
                 scene: sampledPolarAxis,
+                toScene
+            };
+        }
+
+        if (toScene.coordinateSystem === "polar" && toScene.polarKind === "arc") {
+            const sampledArc = this.#sampleArcScene(
+                toScene as PolarArcChartScene,
+                seriesPlans,
+                progress
+            );
+            return {
+                fromScene,
+                mode: "morph",
+                progress,
+                scene: sampledArc,
                 toScene
             };
         }
@@ -251,9 +271,11 @@ export class SceneTransitionSampler {
                     formattedLow = sampledCandle.formattedLow;
                     formattedClose = sampledCandle.formattedClose;
                     const chg = close - open;
+                    const changePercentage = open !== 0 ? chg / Math.abs(open) : undefined;
                     financial = {
                         ...targetHit.financial,
                         change: chg,
+                        changePercentage,
                         close,
                         direction: sampledCandle.direction,
                         formattedClose,
@@ -286,9 +308,11 @@ export class SceneTransitionSampler {
                     formattedLow = sampledOhlc.formattedLow;
                     formattedClose = sampledOhlc.formattedClose;
                     const chg = close - open;
+                    const changePercentage = open !== 0 ? chg / Math.abs(open) : undefined;
                     financial = {
                         ...targetHit.financial,
                         change: chg,
+                        changePercentage,
                         close,
                         direction: sampledOhlc.direction,
                         formattedClose,
@@ -421,7 +445,7 @@ export class SceneTransitionSampler {
                     target: hit
                 });
             }
-            if (hit.point) {
+            if (hit.point && !isFinancial) {
                 sampledPointHitTargets.push(hit);
             }
 
@@ -741,6 +765,92 @@ export class SceneTransitionSampler {
         return {
             ...toScene,
             axes: sampledAxes,
+            hitTargets: sampledHitTargets,
+            series: sampledSeries
+        };
+    }
+
+    static #sampleArcScene(
+        toScene: PolarArcChartScene,
+        seriesPlans: ChartTransitionPlan["seriesPlans"],
+        progress: number
+    ): PolarArcChartScene {
+        const sampledSeries = seriesPlans
+            .map(p => p.sample(progress))
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .filter((s): s is any => s !== null);
+
+        const series0 = sampledSeries[0];
+        let sampledHitIndex = toScene.hitIndex;
+        let sampledHitTargets = toScene.hitTargets;
+
+        if (series0) {
+            if (series0.type === "radialBar" || series0.type === "rose") {
+                const marksByKey = new Map<string, SceneRadialArcMark>();
+                for (const m of series0.marks) {
+                    marksByKey.set(m.animationKey, m);
+                }
+
+                sampledHitTargets = toScene.hitTargets.map((target: SceneHitTarget) => {
+                    const mark = target.animationKey ? marksByKey.get(target.animationKey) : undefined;
+                    if (!mark) {
+                        return target;
+                    }
+                    return {
+                        ...target,
+                        arc: {
+                            center: toScene.center,
+                            cornerRadius: mark.cornerRadius,
+                            endAngle: mark.endAngle,
+                            innerRadius: mark.innerRadius,
+                            outerRadius: mark.outerRadius,
+                            padAngle: mark.padAngle,
+                            startAngle: mark.startAngle
+                        },
+                        value: mark.rawValue,
+                        yValue: mark.rawValue
+                    };
+                });
+
+                if (series0.type === "radialBar") {
+                    sampledHitIndex = new RadialBarHitIndex(toScene.center, sampledHitTargets);
+                } else {
+                    sampledHitIndex = new RoseHitIndex(toScene.center, sampledHitTargets);
+                }
+            } else if (series0.type === "gauge") {
+                const gVal = series0.value;
+                sampledHitTargets = toScene.hitTargets.map((target: SceneHitTarget) => {
+                    if (!gVal) {
+                        return target;
+                    }
+                    return {
+                        ...target,
+                        arc: {
+                            center: toScene.center,
+                            cornerRadius: target.arc?.cornerRadius ?? 0,
+                            endAngle: gVal.endAngle,
+                            innerRadius: gVal.innerRadius,
+                            outerRadius: gVal.outerRadius,
+                            padAngle: 0,
+                            startAngle: gVal.startAngle
+                        },
+                        value: gVal.rawValue,
+                        yValue: gVal.rawValue
+                    };
+                });
+
+                sampledHitIndex = new GaugeHitIndex(
+                    toScene.center,
+                    sampledHitTargets,
+                    toScene.innerRadius,
+                    toScene.outerRadius
+                );
+            }
+        }
+
+        return {
+            ...toScene,
+            hitIndex: sampledHitIndex,
             hitTargets: sampledHitTargets,
             series: sampledSeries
         };

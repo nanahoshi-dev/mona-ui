@@ -10,6 +10,7 @@ import type {
     ChartAngularAxisRegistration,
     ChartCartesianSeriesRegistration,
     ChartHeatmapSeriesRegistration,
+    ChartRadialArcSeriesRegistration,
     ChartRadialAxisRegistration,
     ChartRadialSeriesRegistration,
     ChartSectorSeriesRegistration,
@@ -158,6 +159,75 @@ export class ChartLayoutEngine {
 
         if (families.size > 1) {
             const famArray = Array.from(families);
+            if (famArray.includes("radialArc") && famArray.includes("cartesian")) {
+                warnOnce(
+                    "mixed-cartesian-radial-arc",
+                    "[MonaChart] Mixing radial arc series (radialBar, rose, gauge) with Cartesian series is unsupported.",
+                    warnedSet
+                );
+                return {
+                    arcMode: "radialBar",
+                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                    coordinateSystem: "polar",
+                    hasRenderableData: false,
+                    height: options.containerHeight,
+                    hitTargets: [],
+                    innerRadius: 0,
+                    interactionBuckets: [],
+                    legendItems: [],
+                    outerRadius: 0,
+                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                    polarKind: "arc",
+                    series: [],
+                    width: options.containerWidth
+                };
+            }
+            if (famArray.includes("radialArc") && famArray.includes("sector")) {
+                warnOnce(
+                    "mixed-sector-radial-arc",
+                    "[MonaChart] Mixing radial arc series (radialBar, rose, gauge) with sector series (pie, donut) is unsupported.",
+                    warnedSet
+                );
+                return {
+                    arcMode: "radialBar",
+                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                    coordinateSystem: "polar",
+                    hasRenderableData: false,
+                    height: options.containerHeight,
+                    hitTargets: [],
+                    innerRadius: 0,
+                    interactionBuckets: [],
+                    legendItems: [],
+                    outerRadius: 0,
+                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                    polarKind: "arc",
+                    series: [],
+                    width: options.containerWidth
+                };
+            }
+            if (famArray.includes("radialArc") && (famArray.includes("radar") || famArray.includes("polar"))) {
+                warnOnce(
+                    "mixed-axis-radial-arc",
+                    "[MonaChart] Mixing radial arc series (radialBar, rose, gauge) with radial axis series (radar, polar) is unsupported.",
+                    warnedSet
+                );
+                return {
+                    arcMode: "radialBar",
+                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                    coordinateSystem: "polar",
+                    hasRenderableData: false,
+                    height: options.containerHeight,
+                    hitTargets: [],
+                    innerRadius: 0,
+                    interactionBuckets: [],
+                    legendItems: [],
+                    outerRadius: 0,
+                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                    polarKind: "arc",
+                    series: [],
+                    width: options.containerWidth
+                };
+            }
             if (famArray.includes("cartesian") && (famArray.includes("sector") || famArray.includes("radar") || famArray.includes("polar"))) {
                 return {
                     axes: [],
@@ -240,6 +310,31 @@ export class ChartLayoutEngine {
             }
         }
 
+        const radialArcSeriesList = series.filter(s => getChartSeriesFamily(s.type) === "radialArc");
+        if (radialArcSeriesList.length > 1) {
+            warnOnce(
+                "multi-radial-arc-series",
+                "[MonaChart] Only a single radial arc series (radialBar, rose, or gauge) is supported per chart.",
+                warnedSet
+            );
+            return {
+                arcMode: "radialBar",
+                center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                coordinateSystem: "polar",
+                hasRenderableData: false,
+                height: options.containerHeight,
+                hitTargets: [],
+                innerRadius: 0,
+                interactionBuckets: [],
+                legendItems: [],
+                outerRadius: 0,
+                plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                polarKind: "arc",
+                series: [],
+                width: options.containerWidth
+            };
+        }
+
         if (coordinateSystem === "polar") {
             if (options.xAxis || options.yAxis) {
                 warnOnce(
@@ -249,9 +344,26 @@ export class ChartLayoutEngine {
                 );
             }
 
-            const radialOrSectorSeries = series.filter(
-                (s): s is ChartRadialSeriesRegistration | ChartSectorSeriesRegistration =>
-                    s.type === "pie" || s.type === "donut" || s.type === "radar" || s.type === "polar"
+            const radialArcSeries = radialArcSeriesList[0];
+            if (radialArcSeries) {
+                if (radialArcSeries.type === "radialBar" && (options.angularAxis || options.radialAxis)) {
+                    warnOnce(
+                        "radial-bar-projected-axes",
+                        "[MonaChart] Projected axes (<mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Radial Bar charts.",
+                        warnedSet
+                    );
+                } else if (radialArcSeries.type === "gauge" && (options.angularAxis || options.radialAxis)) {
+                    warnOnce(
+                        "gauge-projected-axes",
+                        "[MonaChart] Projected axes (<mona-chart-angular-axis>, <mona-chart-radial-axis>) are ignored in Gauge charts.",
+                        warnedSet
+                    );
+                }
+            }
+
+            const polarSeries = series.filter(
+                (s): s is ChartRadialArcSeriesRegistration | ChartRadialSeriesRegistration | ChartSectorSeriesRegistration =>
+                    isPolarCoordinateFamily(getChartSeriesFamily(s.type))
             );
 
             return PolarLayoutEngine.computeScene({
@@ -261,8 +373,9 @@ export class ChartLayoutEngine {
                 measurements: options.measurements,
                 radialAxis: options.radialAxis,
                 rootData: options.rootData,
-                series: radialOrSectorSeries,
-                styleResolver: options.styleResolver
+                series: polarSeries,
+                styleResolver: options.styleResolver,
+                warnedDiagnosticSignatures: warnedSet
             });
         }
 
