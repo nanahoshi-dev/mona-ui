@@ -19,14 +19,18 @@ export class RoseHitIndex implements PolarArcHitIndex {
         categoryCount: number = targets.length
     ) {
         this.#center = center;
-        this.#targets = targets.filter(t => t.arc !== undefined);
+        this.#targets = targets.filter(t => t.arc !== undefined && t.arc.outerRadius - t.arc.innerRadius > 1e-6);
         this.#startAngleRad = startAngleRad;
         this.#totalSpanRad = totalSpanRad;
         this.#deltaTheta = categoryCount > 0 ? totalSpanRad / categoryCount : 0;
 
         for (let i = 0; i < this.#targets.length; i++) {
             const target = this.#targets[i];
-            const slotIndex = target.index !== undefined ? target.index : i;
+            const slotIndex = target.categoryIndex !== undefined
+                ? target.categoryIndex
+                : target.index !== undefined
+                  ? target.index
+                  : i;
             this.#targetBySlot.set(slotIndex, target);
         }
     }

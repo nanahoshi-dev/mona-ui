@@ -28,23 +28,61 @@ describe("GaugeHitIndex", () => {
         xValue: "Gauge"
     };
 
-    const index = new GaugeHitIndex(center, [target], innerRadius, outerRadius);
+    it("hits gauge arc inside 12 o'clock top region when indicator is arc", () => {
+        const index = new GaugeHitIndex({
+            center,
+            indicator: "arc",
+            target,
+            valueArc: target.arc
+        });
 
-    it("hits gauge arc inside 12 o'clock top region", () => {
         // Point at (200, 115): r = 85 (between 70 and 100), angle = 0 deg -> inside -120..120
         const hits = index.query({ x: 200, y: 115 });
         expect(hits.length).toBe(1);
         expect(hits[0].seriesId).toBe("gauge-1");
     });
 
-    it("misses when in the bottom 6 o'clock gap (outside -120..120)", () => {
-        // Point at (200, 285): r = 85, angle = 180 deg -> outside -120..120 (gap is 120..240)
+    it("misses when in the bottom 6 o'clock gap (outside -120..120) for arc indicator", () => {
+        const index = new GaugeHitIndex({
+            center,
+            indicator: "arc",
+            target,
+            valueArc: target.arc
+        });
+
         const hits = index.query({ x: 200, y: 285 });
         expect(hits.length).toBe(0);
     });
 
-    it("misses when inside center hub below inner radius", () => {
-        const hits = index.query({ x: 200, y: 160 }); // r = 40 < 70
-        expect(hits.length).toBe(0);
+    it("hits needle line segment and hub when indicator is needle", () => {
+        const needleAngle = 0; // 12 o'clock pointing straight up (0, -y)
+        const index = new GaugeHitIndex({
+            center,
+            indicator: "needle",
+            needle: {
+                angle: needleAngle,
+                hubRadius: 10,
+                length: 80,
+                width: 6
+            },
+            target
+        });
+
+        // Near needle shaft at (200, 150): dy = -50, dx = 0
+        const shaftHits = index.query({ x: 200, y: 150 });
+        expect(shaftHits.length).toBe(1);
+
+        // Inside hub circle at (200, 205): r = 5 <= hubRadius (10)
+        const hubHits = index.query({ x: 200, y: 205 });
+        expect(hubHits.length).toBe(1);
+
+        // Far away at 3 o'clock: (270, 200)
+        const missHits = index.query({ x: 270, y: 200 });
+        expect(missHits.length).toBe(0);
+    });
+
+    it("returns empty array for null geometry", () => {
+        const index = new GaugeHitIndex(null);
+        expect(index.query({ x: 200, y: 200 })).toEqual([]);
     });
 });
