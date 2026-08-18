@@ -341,7 +341,8 @@ export interface ChartCandlestickSeriesRegistration extends ChartFinancialSeries
 }
 
 export interface ChartOhlcSeriesRegistration extends ChartFinancialSeriesRegistrationBase {
-    readonly tickWidth: Signal<number | undefined>;
+    readonly tickLength?: Signal<number | undefined>;
+    readonly tickWidth?: Signal<number | undefined>;
     readonly type: "ohlc";
 }
 
