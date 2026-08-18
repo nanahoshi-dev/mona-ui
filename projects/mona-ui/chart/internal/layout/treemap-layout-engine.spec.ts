@@ -318,4 +318,19 @@ describe("TreemapLayoutEngine", () => {
         expect(terminalLabel).toBeDefined();
         expect(terminalLabel!.showValue).toBe(true);
     });
+
+    it("normalizes non-finite maxLabels safely", () => {
+        const data = [
+            { name: "A", value: 10 },
+            { name: "B", value: 20 }
+        ];
+
+        const reg = createMockTreemapRegistration(data, {
+            maxLabels: signal(NaN as any)
+        });
+
+        const scene = TreemapLayoutEngine.layout(reg, plotRect, 600, 400, styleResolver);
+        expect(scene.hasRenderableData).toBe(true);
+        expect(scene.series[0].labels.length).toBeGreaterThan(0);
+    });
 });

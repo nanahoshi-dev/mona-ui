@@ -26,6 +26,7 @@ import type {
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatYValue } from "../utils/chart-formatter";
+import { isFiniteNumber } from "../utils/number-utils";
 
 interface TreemapHierarchyDatum {
     readonly children?: TreemapHierarchyDatum[];
@@ -102,7 +103,8 @@ export class TreemapLayoutEngine {
                   ? 1
                   : Math.floor(rawMaxDepth);
 
-        const maxLabels = Math.max(0, registration.maxLabels ? registration.maxLabels() : 100);
+        const rawMaxLabels = registration.maxLabels?.();
+        const maxLabels = isFiniteNumber(rawMaxLabels) ? Math.max(0, Math.floor(rawMaxLabels)) : 100;
         const minLabelWidth = Math.max(0, registration.minLabelWidth ? (registration.minLabelWidth() ?? 30) : 30);
         const defaultMinTerminalLabelHeight = showValues ? 24 : 16;
         const minTerminalLabelHeight = Math.max(
