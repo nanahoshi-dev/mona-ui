@@ -166,6 +166,28 @@ export function drawBarRectOutline(
     context.stroke();
 }
 
+export function drawCellRect(
+    context: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number = 0
+): void {
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    const maxRadius = Math.min(width / 2, height / 2);
+    const r = clamp(radius, 0, maxRadius);
+    const radii: ChartCornerRadii = {
+        bottomLeft: r,
+        bottomRight: r,
+        topLeft: r,
+        topRight: r
+    };
+    drawRoundedRectCorners(context, x, y, width, height, radii);
+}
+
 export function drawCellRectOutline(
     context: CanvasRenderingContext2D,
     x: number,
