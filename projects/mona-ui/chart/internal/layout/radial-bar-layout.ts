@@ -13,7 +13,8 @@ import { normalizeAngleSpan } from "../utils/angle-utils";
 import { RadialBarHitIndex } from "../interaction/radial-bar-hit-index";
 import {
     computeOuterRadiusWithStroke,
-    computeRadialRingBands
+    computeRadialRingBands,
+    normalizeArcCornerRadius
 } from "./radial-geometry-utils";
 import { normalizeRatio } from "../utils/number-utils";
 
@@ -105,9 +106,11 @@ export class RadialBarLayout {
 
                 if (showTrack) {
                     tracks.push({
+                        animationKey: `${series.id}:track:${datum.itemId}`,
                         color: seriesStyle.trackColor,
                         endAngle: spanInfo.endAngleRad,
                         innerRadius: ringInner,
+                        itemId: datum.itemId,
                         opacity: seriesStyle.trackOpacity,
                         outerRadius: ringOuter,
                         startAngle: spanInfo.startAngleRad
@@ -116,9 +119,7 @@ export class RadialBarLayout {
 
                 const valueSpanRad = totalSpanRad * datum.normalizedValue;
                 const markEndAngle = spanInfo.startAngleRad + valueSpanRad;
-                const cornerRadius = series.cornerRadius?.() !== undefined
-                    ? Math.min(series.cornerRadius()!, thickness / 2)
-                    : thickness / 2;
+                const cornerRadius = normalizeArcCornerRadius(series.cornerRadius?.(), thickness / 2, thickness / 2);
 
                 const mark: SceneRadialArcMark = {
                     animationKey: datum.animationKey,
@@ -153,6 +154,8 @@ export class RadialBarLayout {
                         padAngle: 0,
                         startAngle: spanInfo.startAngleRad
                     },
+                    category: datum.category,
+                    categoryIndex: i,
                     color: datum.color,
                     dataIndex: datum.dataIndex,
                     datum: datum.datum,
@@ -172,7 +175,9 @@ export class RadialBarLayout {
 
                 hitTargets.push(target);
 
-                const midAngle = (spanInfo.startAngleRad + markEndAngle) / 2;
+                const midAngle = datum.normalizedValue > 0
+                    ? (spanInfo.startAngleRad + markEndAngle) / 2
+                    : spanInfo.startAngleRad;
                 const midRadius = (ringInner + ringOuter) / 2;
                 interactionBuckets.push({
                     anchor: {

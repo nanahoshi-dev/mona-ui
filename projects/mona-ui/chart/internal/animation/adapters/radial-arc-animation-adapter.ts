@@ -168,8 +168,8 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
         }
 
         const baseScene = target ?? previous;
-        const fromOpacity = previous ? 1 : 0;
-        const toOpacity = target ? 1 : 0;
+        const seriesEntering = !previous && !!target;
+        const seriesExiting = !!previous && !target;
 
         return {
             adapterType: "radialBar",
@@ -191,7 +191,23 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     marks.push(sampleRadialArcMark(plan, progress));
                 }
 
-                const renderOpacity = lerpOpacity(fromOpacity, toOpacity, progress);
+                // If series itself is entering/exiting without mark plans, use series opacity; otherwise keep 1
+                const renderOpacity = seriesEntering ? lerpOpacity(0, 1, progress) : seriesExiting ? lerpOpacity(1, 0, progress) : 1;
+
+                // Sync track radii with sampled marks
+                const tracks: SceneRadialTrack[] = [];
+                if (baseScene.tracks.length > 0) {
+                    for (const mark of marks) {
+                        const baseTrack = baseScene.tracks.find(t => t.itemId === mark.itemId) ?? baseScene.tracks[0];
+                        tracks.push({
+                            ...baseTrack,
+                            animationKey: `${baseScene.id}:track:${mark.itemId}`,
+                            innerRadius: mark.innerRadius,
+                            itemId: mark.itemId,
+                            outerRadius: mark.outerRadius
+                        });
+                    }
+                }
 
                 return {
                     barGap: baseScene.barGap,
@@ -201,7 +217,7 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     name: baseScene.name,
                     renderOpacity,
                     style: baseScene.style,
-                    tracks: target?.tracks ?? previous?.tracks ?? [],
+                    tracks: tracks.length > 0 ? tracks : (target?.tracks ?? previous?.tracks ?? []),
                     type: "radialBar"
                 };
             },
@@ -274,8 +290,8 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
         }
 
         const baseScene = target ?? previous;
-        const fromOpacity = previous ? 1 : 0;
-        const toOpacity = target ? 1 : 0;
+        const seriesEntering = !previous && !!target;
+        const seriesExiting = !!previous && !target;
 
         return {
             adapterType: "rose",
@@ -297,7 +313,7 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     marks.push(sampleRadialArcMark(plan, progress));
                 }
 
-                const renderOpacity = lerpOpacity(fromOpacity, toOpacity, progress);
+                const renderOpacity = seriesEntering ? lerpOpacity(0, 1, progress) : seriesExiting ? lerpOpacity(1, 0, progress) : 1;
 
                 return {
                     angularCategories: target?.angularCategories ?? previous?.angularCategories ?? [],
@@ -321,8 +337,8 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
         id: string
     ): ChartSeriesTransitionPlan<ChartGaugeSeriesScene> {
         const baseScene = target ?? previous;
-        const fromOpacity = previous ? 1 : 0;
-        const toOpacity = target ? 1 : 0;
+        const seriesEntering = !previous && !!target;
+        const seriesExiting = !!previous && !target;
 
         const effectiveFromVal: SceneGaugeValue | undefined = previous?.value ?? (target?.value ? {
             ...target.value,
@@ -362,7 +378,7 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                 const ratio = lerp(effectiveFromVal.ratio, effectiveToVal.ratio, progress);
                 const rawValue = lerp(effectiveFromVal.rawValue, effectiveToVal.rawValue, progress);
                 const cornerRadius = lerp(effectiveFromVal.cornerRadius, effectiveToVal.cornerRadius, progress);
-                const renderOpacity = lerpOpacity(fromOpacity, toOpacity, progress);
+                const valueOpacity = lerpOpacity(effectiveFromVal.renderOpacity ?? 1, effectiveToVal.renderOpacity ?? 1, progress);
 
                 const sampledValue: SceneGaugeValue = {
                     animationKey: effectiveToVal.animationKey,
@@ -370,22 +386,26 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     dataIndex: effectiveToVal.dataIndex,
                     datum: effectiveToVal.datum,
                     endAngle,
+                    formattedMax: effectiveToVal.formattedMax,
+                    formattedMin: effectiveToVal.formattedMin,
                     formattedValue: effectiveToVal.formattedValue,
                     innerRadius,
-                    isClamped: effectiveToVal.isClamped,
+                    isClamped: rawValue < effectiveToVal.min || rawValue > effectiveToVal.max,
                     max: effectiveToVal.max,
                     min: effectiveToVal.min,
                     outerRadius,
                     ratio,
                     rawValue,
-                    renderOpacity,
+                    renderOpacity: valueOpacity,
                     startAngle
                 };
 
                 let sampledNeedle: SceneGaugeNeedle | undefined;
                 if (toNeedle || fromNeedle) {
                     const baseNeedle = toNeedle ?? fromNeedle!;
-                    const angle = fromNeedle && toNeedle ? lerp(fromNeedle.angle, toNeedle.angle, progress) : (toNeedle?.angle ?? fromNeedle!.angle);
+                    const fromAngle = fromNeedle?.angle ?? effectiveFromVal.startAngle;
+                    const toAngle = toNeedle?.angle ?? effectiveToVal.startAngle;
+                    const angle = lerp(fromAngle, toAngle, progress);
                     const length = fromNeedle && toNeedle ? lerp(fromNeedle.length, toNeedle.length, progress) : baseNeedle.length;
                     const width = fromNeedle && toNeedle ? lerp(fromNeedle.width, toNeedle.width, progress) : baseNeedle.width;
 
@@ -398,6 +418,8 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                         width
                     };
                 }
+
+                const renderOpacity = seriesEntering ? lerpOpacity(0, 1, progress) : seriesExiting ? lerpOpacity(1, 0, progress) : 1;
 
                 return {
                     fillMode: baseScene.fillMode,

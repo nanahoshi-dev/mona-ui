@@ -52,11 +52,24 @@ export class GaugeDataProcessor {
         let domainMin = Number.isFinite(options.min) ? options.min : 0;
         let domainMax = Number.isFinite(options.max) ? options.max : 100;
 
-        if (domainMax <= domainMin) {
+        if (domainMax < domainMin) {
             if (warnedDiagnosticSignatures) {
                 ChartDiagnostics.warnOnce(
                     warnedDiagnosticSignatures,
-                    `Gauge series "${seriesName}" encountered max (${domainMax}) <= min (${domainMin}). Normalizing max.`,
+                    `Gauge series "${seriesName}" encountered max (${domainMax}) < min (${domainMin}). Normalizing by swapping min and max.`,
+                    `${seriesId}:reversed-gauge-domain`
+                );
+            }
+            const temp = domainMin;
+            domainMin = domainMax;
+            domainMax = temp;
+        }
+
+        if (domainMax === domainMin) {
+            if (warnedDiagnosticSignatures) {
+                ChartDiagnostics.warnOnce(
+                    warnedDiagnosticSignatures,
+                    `Gauge series "${seriesName}" encountered max (${domainMax}) === min (${domainMin}). Normalizing max.`,
                     `${seriesId}:invalid-gauge-domain`
                 );
             }
@@ -71,20 +84,34 @@ export class GaugeDataProcessor {
         // 1. Explicit value input takes top precedence
         if (explicitValue !== undefined && Number.isFinite(explicitValue)) {
             rawValue = explicitValue;
+            matchedDataIndex = 0;
+            matchedDatum = undefined;
             hasValidData = true;
         } else {
             // 2. Resolve from series data or rootData
             const rawData = resolveData(data, rootData);
             if (rawData && rawData.length > 0) {
+                let validCount = 0;
                 for (let i = 0; i < rawData.length; i++) {
                     const row = rawData[i];
                     const val = resolveValue(row, seriesField, i);
                     if (typeof val === "number" && Number.isFinite(val)) {
-                        rawValue = val;
-                        matchedDatum = row;
-                        matchedDataIndex = i;
-                        hasValidData = true;
-                        break;
+                        validCount++;
+                        if (validCount === 1) {
+                            rawValue = val;
+                            matchedDatum = row;
+                            matchedDataIndex = i;
+                            hasValidData = true;
+                        } else if (validCount === 2) {
+                            if (warnedDiagnosticSignatures) {
+                                ChartDiagnostics.warnOnce(
+                                    warnedDiagnosticSignatures,
+                                    `Gauge series "${seriesName}" received multiple valid rows. Only the first valid value is used.`,
+                                    `${seriesId}:multiple-valid-gauge-rows`
+                                );
+                            }
+                            break;
+                        }
                     }
                 }
             }

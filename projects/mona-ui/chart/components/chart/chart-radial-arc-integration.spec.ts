@@ -101,6 +101,27 @@ describe("Chart Radial Arc Series Integration", () => {
             expect(hiddenScene.hasRenderableData).toBe(false);
             expect(hiddenScene.hitTargets.length).toBe(0);
         });
+
+        it("assigns stable animationKey and itemId to tracks", () => {
+            TestBed.configureTestingModule({
+                imports: [TestRadialBarChartHostComponent]
+            });
+
+            const fixture = TestBed.createComponent(TestRadialBarChartHostComponent);
+            fixture.detectChanges();
+
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
+            chartComp.recomputeScene();
+
+            const scene = chartComp.scene() as PolarArcChartScene;
+            const series0 = scene.series[0];
+            if (series0.type === "radialBar") {
+                expect(series0.tracks.length).toBe(2);
+                expect(series0.tracks[0].itemId).toBeDefined();
+                expect(series0.tracks[0].animationKey).toContain("track");
+            }
+        });
     });
 
     describe("Rose Series Integration", () => {
@@ -125,6 +146,32 @@ describe("Chart Radial Arc Series Integration", () => {
             expect(scene.hitTargets.length).toBe(4);
             expect(scene.angularAxis).toBeDefined();
             expect(scene.radialAxis).toBeDefined();
+        });
+
+        it("stabilizes category slots when duplicate category rows have invalid first values but valid later values", () => {
+            TestBed.configureTestingModule({
+                imports: [TestRoseChartHostComponent]
+            });
+
+            const fixture = TestBed.createComponent(TestRoseChartHostComponent);
+            // First North row is negative (invalid), second North row has valid 75
+            fixture.componentInstance.data.set([
+                { category: "North", value: -10 },
+                { category: "South", value: 50 },
+                { category: "North", value: 75 }
+            ]);
+            fixture.detectChanges();
+
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
+            chartComp.recomputeScene();
+
+            const scene = chartComp.scene() as PolarArcChartScene;
+            expect(scene.hitTargets.length).toBe(2);
+            const northTarget = scene.hitTargets.find(t => t.category === "North");
+            expect(northTarget).toBeDefined();
+            expect(northTarget?.value).toBe(75);
+            expect(northTarget?.categoryIndex).toBe(0);
         });
     });
 
@@ -153,6 +200,24 @@ describe("Chart Radial Arc Series Integration", () => {
             const centerEl = fixture.nativeElement.querySelector(".gauge-center-text");
             expect(centerEl).not.toBeNull();
             expect(centerEl?.textContent).toContain("65 (65%)");
+        });
+
+        it("normalizes direct gauge value dataIndex to 0 and datum to undefined", () => {
+            TestBed.configureTestingModule({
+                imports: [TestGaugeChartHostComponent]
+            });
+
+            const fixture = TestBed.createComponent(TestGaugeChartHostComponent);
+            fixture.detectChanges();
+
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
+            chartComp.recomputeScene();
+
+            const scene = chartComp.scene() as PolarArcChartScene;
+            const target = scene.hitTargets[0];
+            expect(target.dataIndex).toBe(0);
+            expect(target.datum).toBeUndefined();
         });
     });
 });

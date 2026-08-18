@@ -26,6 +26,8 @@ export interface ChartTooltipPointContext<T = unknown> {
     formattedLow?: string;
     formattedOpen?: string;
     formattedPercentage?: string;
+    formattedRadialMax?: string;
+    formattedRadialMin?: string;
     formattedSize?: string;
     formattedStackPercentage?: string;
     formattedStackTotal?: string;
@@ -36,10 +38,14 @@ export interface ChartTooltipPointContext<T = unknown> {
     formattedYCategory?: string;
     fromValue?: number;
     high?: number;
+    isClamped?: boolean;
     low?: number;
     markId: string;
     open?: number;
     percentage?: number;
+    radialMax?: number;
+    radialMin?: number;
+    radialRatio?: number;
     rawValue?: unknown;
     seriesId: string;
     seriesName: string;

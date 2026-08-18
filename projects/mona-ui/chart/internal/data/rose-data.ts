@@ -181,11 +181,24 @@ export class RoseDataProcessor {
                         );
                     }
                 } else if (isFiniteNonNegative(rawVal)) {
-                    const markItemId = deriveRadialDatumId(row, rawCat, rawKey, i);
+                    if (customKey !== null) {
+                        if (seenCustomKeys.has(customKey) && slot.explicitKey !== customKey) {
+                            if (warnedDiagnosticSignatures) {
+                                ChartDiagnostics.warnOnce(
+                                    warnedDiagnosticSignatures,
+                                    `Rose series "${seriesName}" encountered duplicate explicit key "${String(rawKey)}" at data index ${i}. First valid datum wins.`,
+                                    `${seriesId}:duplicate-explicit-key`
+                                );
+                            }
+                            continue;
+                        }
+                        seenCustomKeys.add(customKey);
+                    }
+
                     slot.validDatum = {
                         dataIndex: i,
                         datum: row,
-                        itemId: markItemId,
+                        itemId: slot.itemId,
                         value: rawVal
                     };
                 }

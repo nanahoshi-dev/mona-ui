@@ -117,33 +117,61 @@ export class GaugeSeriesRenderer {
             context.restore();
         }
 
-        // 4. Draw active interaction overlay on value arc directly from activeHit.arc
+        // 4. Draw active interaction overlay on value arc or needle
         const activeHit = interactionState?.activeHitTarget;
-        if (activeHit && activeHit.seriesId === series.id && activeHit.arc && (indicator === "arc" || indicator === "both")) {
-            context.save();
-            context.beginPath();
-            highlightArcGenerator(activeHit);
+        if (activeHit && activeHit.seriesId === series.id) {
+            if (activeHit.arc && (indicator === "arc" || indicator === "both")) {
+                context.save();
+                context.beginPath();
+                highlightArcGenerator(activeHit);
 
-            if (interactionState.source === "keyboard") {
+                if (interactionState.source === "keyboard") {
+                    const focusIndicatorColor =
+                        styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                        styleResolver.resolveCssVariable("--color-primary") ||
+                        "#3b82f6";
+                    context.strokeStyle = focusIndicatorColor;
+                    context.lineWidth = 3;
+                    context.globalAlpha = 1;
+                    context.stroke();
+
+                    context.fillStyle = "rgba(255, 255, 255, 0.15)";
+                    context.fill();
+                } else {
+                    const hoverOverlayColor =
+                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
+                    context.fillStyle = hoverOverlayColor;
+                    context.fill();
+                }
+
+                context.restore();
+            } else if (indicator === "needle" && needle && interactionState.source === "keyboard") {
                 const focusIndicatorColor =
                     styleResolver.resolveCssVariable("--color-focus-indicator") ||
                     styleResolver.resolveCssVariable("--color-primary") ||
                     "#3b82f6";
+                context.save();
+                context.rotate(needle.angle);
+
+                // Outline around needle
+                context.beginPath();
+                context.moveTo(-(needle.width / 2 + 3), 0);
+                context.lineTo(0, -(needle.length + 3));
+                context.lineTo(needle.width / 2 + 3, 0);
+                context.closePath();
                 context.strokeStyle = focusIndicatorColor;
-                context.lineWidth = 3;
-                context.globalAlpha = 1;
+                context.lineWidth = 2.5;
                 context.stroke();
 
-                context.fillStyle = "rgba(255, 255, 255, 0.15)";
-                context.fill();
-            } else {
-                const hoverOverlayColor =
-                    styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
-                context.fillStyle = hoverOverlayColor;
-                context.fill();
-            }
+                // Focus ring around hub
+                context.beginPath();
+                context.arc(0, 0, needle.hubRadius + 3, 0, Math.PI * 2);
+                context.strokeStyle = focusIndicatorColor;
+                context.lineWidth = 2.5;
+                context.stroke();
 
-            context.restore();
+                context.restore();
+            }
         }
 
         context.restore();

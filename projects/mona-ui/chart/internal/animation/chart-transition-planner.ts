@@ -7,6 +7,7 @@ import type {
     PolarChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
+import type { ChartGaugeSeriesScene } from "../scene/polar-arc-scene";
 import { AreaSeriesAnimationAdapter } from "./adapters/area-animation-adapter";
 import { AxisAnimationAdapter } from "./adapters/axis-animation-adapter";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
@@ -174,19 +175,37 @@ export class ChartTransitionPlanner {
 
                 if (
                     prevPolar.polarKind === "arc" &&
-                    targetPolar.polarKind === "arc" &&
-                    prevPolar.arcMode !== targetPolar.arcMode
+                    targetPolar.polarKind === "arc"
                 ) {
-                    return {
-                        complexity,
-                        duration: options.duration,
-                        easing: options.easing,
-                        fromScene: previous,
-                        mode: "crossfade",
-                        seriesPlans: [],
-                        toScene: target,
-                        trigger
-                    };
+                    if (prevPolar.arcMode !== targetPolar.arcMode) {
+                        return {
+                            complexity,
+                            duration: options.duration,
+                            easing: options.easing,
+                            fromScene: previous,
+                            mode: "crossfade",
+                            seriesPlans: [],
+                            toScene: target,
+                            trigger
+                        };
+                    }
+
+                    if (prevPolar.arcMode === "gauge" && targetPolar.arcMode === "gauge") {
+                        const prevGauge = prevPolar.series[0] as ChartGaugeSeriesScene | undefined;
+                        const targetGauge = targetPolar.series[0] as ChartGaugeSeriesScene | undefined;
+                        if (prevGauge && targetGauge && prevGauge.indicator !== targetGauge.indicator) {
+                            return {
+                                complexity,
+                                duration: options.duration,
+                                easing: options.easing,
+                                fromScene: previous,
+                                mode: "crossfade",
+                                seriesPlans: [],
+                                toScene: target,
+                                trigger
+                            };
+                        }
+                    }
                 }
 
                 // Incompatible axis mode (radar vs continuous polar)
@@ -376,18 +395,34 @@ export class ChartTransitionPlanner {
                 previous?.coordinateSystem === "cartesian" ? (previous as CartesianChartScene) : null;
             const targetCartesian = target as CartesianChartScene;
             axisPlan = AxisAnimationAdapter.createCartesianAxisPlan(prevCartesian?.axes, targetCartesian.axes);
-        } else if (target.coordinateSystem === "polar" && target.polarKind === "axis") {
-            const prevPolarAxis =
-                previous?.coordinateSystem === "polar" && previous.polarKind === "axis"
-                    ? (previous as PolarAxisChartScene)
-                    : null;
-            const targetPolarAxis = target as PolarAxisChartScene;
-            axisPlan = AxisAnimationAdapter.createPolarAxisPlan(
-                prevPolarAxis
-                    ? { angularAxis: prevPolarAxis.angularAxis, radialAxis: prevPolarAxis.radialAxis }
-                    : undefined,
-                { angularAxis: targetPolarAxis.angularAxis, radialAxis: targetPolarAxis.radialAxis }
-            );
+        } else if (target.coordinateSystem === "polar") {
+            if (target.polarKind === "axis") {
+                const prevPolarAxis =
+                    previous?.coordinateSystem === "polar" && previous.polarKind === "axis"
+                        ? (previous as PolarAxisChartScene)
+                        : null;
+                const targetPolarAxis = target as PolarAxisChartScene;
+                axisPlan = AxisAnimationAdapter.createPolarAxisPlan(
+                    prevPolarAxis
+                        ? { angularAxis: prevPolarAxis.angularAxis, radialAxis: prevPolarAxis.radialAxis }
+                        : undefined,
+                    { angularAxis: targetPolarAxis.angularAxis, radialAxis: targetPolarAxis.radialAxis }
+                );
+            } else if (target.polarKind === "arc" && target.arcMode === "rose") {
+                const prevRose =
+                    previous?.coordinateSystem === "polar" && previous.polarKind === "arc" && previous.arcMode === "rose"
+                        ? (previous as PolarArcChartScene)
+                        : null;
+                const targetRose = target as PolarArcChartScene;
+                if (targetRose.angularAxis || targetRose.radialAxis || prevRose?.angularAxis || prevRose?.radialAxis) {
+                    axisPlan = AxisAnimationAdapter.createPolarAxisPlan(
+                        prevRose
+                            ? { angularAxis: prevRose.angularAxis, radialAxis: prevRose.radialAxis }
+                            : undefined,
+                        { angularAxis: targetRose.angularAxis, radialAxis: targetRose.radialAxis }
+                    );
+                }
+            }
         }
 
         return {

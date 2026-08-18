@@ -2611,8 +2611,8 @@
       }
     ]
   },
-  "MonaAreaSeriesComponent": {
-    "name": "MonaAreaSeriesComponent",
+  "AreaSeriesComponent": {
+    "name": "AreaSeriesComponent",
     "selector": "\"mona-area-series\"",
     "inputs": [
       {
@@ -2743,8 +2743,8 @@
       }
     ]
   },
-  "MonaBarSeriesComponent": {
-    "name": "MonaBarSeriesComponent",
+  "BarSeriesComponent": {
+    "name": "BarSeriesComponent",
     "selector": "\"mona-bar-series\"",
     "inputs": [
       {
@@ -2847,8 +2847,8 @@
       }
     ]
   },
-  "MonaBubbleSeriesComponent": {
-    "name": "MonaBubbleSeriesComponent",
+  "BubbleSeriesComponent": {
+    "name": "BubbleSeriesComponent",
     "selector": "\"mona-bubble-series\"",
     "inputs": [
       {
@@ -2958,8 +2958,8 @@
       }
     ]
   },
-  "MonaCandlestickSeriesComponent": {
-    "name": "MonaCandlestickSeriesComponent",
+  "CandlestickSeriesComponent": {
+    "name": "CandlestickSeriesComponent",
     "selector": "\"mona-candlestick-series\"",
     "inputs": [
       {
@@ -3118,8 +3118,8 @@
       }
     ]
   },
-  "MonaChartComponent": {
-    "name": "MonaChartComponent",
+  "ChartComponent": {
+    "name": "ChartComponent",
     "selector": "\"mona-chart\"",
     "inputs": [
       {
@@ -3184,8 +3184,8 @@
       }
     ]
   },
-  "MonaChartAngularAxisComponent": {
-    "name": "MonaChartAngularAxisComponent",
+  "ChartAngularAxisComponent": {
+    "name": "ChartAngularAxisComponent",
     "selector": "\"mona-chart-angular-axis\"",
     "inputs": [
       {
@@ -3253,8 +3253,8 @@
       }
     ]
   },
-  "MonaChartLegendComponent": {
-    "name": "MonaChartLegendComponent",
+  "ChartLegendComponent": {
+    "name": "ChartLegendComponent",
     "selector": "\"mona-chart-legend\"",
     "inputs": [
       {
@@ -3287,8 +3287,8 @@
       }
     ]
   },
-  "MonaChartRadialAxisComponent": {
-    "name": "MonaChartRadialAxisComponent",
+  "ChartRadialAxisComponent": {
+    "name": "ChartRadialAxisComponent",
     "selector": "\"mona-chart-radial-axis\"",
     "inputs": [
       {
@@ -3384,8 +3384,8 @@
       }
     ]
   },
-  "MonaChartTooltipComponent": {
-    "name": "MonaChartTooltipComponent",
+  "ChartTooltipComponent": {
+    "name": "ChartTooltipComponent",
     "selector": "\"mona-chart-tooltip\"",
     "inputs": [
       {
@@ -3411,8 +3411,8 @@
       }
     ]
   },
-  "MonaChartXAxisComponent": {
-    "name": "MonaChartXAxisComponent",
+  "ChartXAxisComponent": {
+    "name": "ChartXAxisComponent",
     "selector": "\"mona-chart-x-axis\"",
     "inputs": [
       {
@@ -3494,8 +3494,8 @@
       }
     ]
   },
-  "MonaChartYAxisComponent": {
-    "name": "MonaChartYAxisComponent",
+  "ChartYAxisComponent": {
+    "name": "ChartYAxisComponent",
     "selector": "\"mona-chart-y-axis\"",
     "inputs": [
       {
@@ -3577,8 +3577,8 @@
       }
     ]
   },
-  "MonaDonutSeriesComponent": {
-    "name": "MonaDonutSeriesComponent",
+  "DonutSeriesComponent": {
+    "name": "DonutSeriesComponent",
     "selector": "\"mona-donut-series\"",
     "inputs": [
       {
@@ -3764,8 +3764,8 @@
       }
     ]
   },
-  "MonaGaugeSeriesComponent": {
-    "name": "MonaGaugeSeriesComponent",
+  "GaugeSeriesComponent": {
+    "name": "GaugeSeriesComponent",
     "selector": "\"mona-gauge-series\"",
     "inputs": [
       {
@@ -3952,8 +3952,8 @@
       }
     ]
   },
-  "MonaHeatmapSeriesComponent": {
-    "name": "MonaHeatmapSeriesComponent",
+  "HeatmapSeriesComponent": {
+    "name": "HeatmapSeriesComponent",
     "selector": "\"mona-heatmap-series\"",
     "inputs": [
       {
@@ -4119,8 +4119,8 @@
       }
     ]
   },
-  "MonaLineSeriesComponent": {
-    "name": "MonaLineSeriesComponent",
+  "LineSeriesComponent": {
+    "name": "LineSeriesComponent",
     "selector": "\"mona-line-series\"",
     "inputs": [
       {
@@ -4216,8 +4216,8 @@
       }
     ]
   },
-  "MonaOhlcSeriesComponent": {
-    "name": "MonaOhlcSeriesComponent",
+  "OhlcSeriesComponent": {
+    "name": "OhlcSeriesComponent",
     "selector": "\"mona-ohlc-series\"",
     "inputs": [
       {
@@ -4383,8 +4383,8 @@
       }
     ]
   },
-  "MonaPieSeriesComponent": {
-    "name": "MonaPieSeriesComponent",
+  "PieSeriesComponent": {
+    "name": "PieSeriesComponent",
     "selector": "\"mona-pie-series\"",
     "inputs": [
       {
@@ -4563,8 +4563,8 @@
       }
     ]
   },
-  "MonaPolarSeriesComponent": {
-    "name": "MonaPolarSeriesComponent",
+  "PolarSeriesComponent": {
+    "name": "PolarSeriesComponent",
     "selector": "\"mona-polar-series\"",
     "inputs": [
       {
@@ -4681,8 +4681,8 @@
       }
     ]
   },
-  "MonaRadarSeriesComponent": {
-    "name": "MonaRadarSeriesComponent",
+  "RadarSeriesComponent": {
+    "name": "RadarSeriesComponent",
     "selector": "\"mona-radar-series\"",
     "inputs": [
       {
@@ -4799,8 +4799,8 @@
       }
     ]
   },
-  "MonaRadialBarSeriesComponent": {
-    "name": "MonaRadialBarSeriesComponent",
+  "RadialBarSeriesComponent": {
+    "name": "RadialBarSeriesComponent",
     "selector": "\"mona-radial-bar-series\"",
     "inputs": [
       {
@@ -5000,8 +5000,8 @@
       }
     ]
   },
-  "MonaRangeAreaSeriesComponent": {
-    "name": "MonaRangeAreaSeriesComponent",
+  "RangeAreaSeriesComponent": {
+    "name": "RangeAreaSeriesComponent",
     "selector": "\"mona-range-area-series\"",
     "inputs": [
       {
@@ -5118,8 +5118,8 @@
       }
     ]
   },
-  "MonaRangeBarSeriesComponent": {
-    "name": "MonaRangeBarSeriesComponent",
+  "RangeBarSeriesComponent": {
+    "name": "RangeBarSeriesComponent",
     "selector": "\"mona-range-bar-series\"",
     "inputs": [
       {
@@ -5215,8 +5215,8 @@
       }
     ]
   },
-  "MonaRoseSeriesComponent": {
-    "name": "MonaRoseSeriesComponent",
+  "RoseSeriesComponent": {
+    "name": "RoseSeriesComponent",
     "selector": "\"mona-rose-series\"",
     "inputs": [
       {
@@ -5381,8 +5381,8 @@
       }
     ]
   },
-  "MonaScatterSeriesComponent": {
-    "name": "MonaScatterSeriesComponent",
+  "ScatterSeriesComponent": {
+    "name": "ScatterSeriesComponent",
     "selector": "\"mona-scatter-series\"",
     "inputs": [
       {
