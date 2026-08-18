@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { TreemapDataProcessor } from "./treemap-data";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 
@@ -20,7 +20,7 @@ describe("TreemapDataProcessor", () => {
         expect(res.hasPositiveLeaf).toBe(false);
     });
 
-    it("processes a multi-level nested hierarchy with leaf values", () => {
+    it("processes a multi-level nested hierarchy with leaf values and precomputes aggregates", () => {
         const data = [
             {
                 name: "Compute",
@@ -55,11 +55,15 @@ describe("TreemapDataProcessor", () => {
         expect(computeNode.formattedLabel).toBe("Compute");
         expect(computeNode.children).toHaveLength(2);
         expect(computeNode.ownContribution).toBe(0); // Parent own contribution is 0
+        expect(computeNode.aggregateValue).toBe(100); // 40 + 60
+        expect(computeNode.descendantCount).toBe(2);
 
         const apiNode = computeNode.children[0];
         expect(apiNode.depth).toBe(2);
         expect(apiNode.formattedLabel).toBe("API");
         expect(apiNode.ownContribution).toBe(40);
+        expect(apiNode.aggregateValue).toBe(40);
+        expect(apiNode.descendantCount).toBe(0);
         expect(apiNode.parentId).toBe(computeNode.nodeId);
         expect(apiNode.nodeId).toBe(`${computeNode.nodeId}/l:s:API`);
     });
@@ -86,9 +90,10 @@ describe("TreemapDataProcessor", () => {
 
         expect(res.totalValue).toBe(100);
         expect(res.rootNodes[0].ownContribution).toBe(0);
+        expect(res.rootNodes[0].aggregateValue).toBe(100);
     });
 
-    it("normalizes negative leaf values to 0 with diagnostic warning", () => {
+    it("normalizes negative leaf values to 0 with bounded diagnostic warning", () => {
         const warned = new Set<string>();
         const data = [
             { name: "Positive", value: 50 },
@@ -106,7 +111,7 @@ describe("TreemapDataProcessor", () => {
 
         expect(res.totalValue).toBe(50);
         expect(res.rootNodes[1].ownContribution).toBe(0);
-        expect(warned.has("tm-1:negative-val:root/l:s:Negative")).toBe(true);
+        expect(warned.has("tm-1:negative-values")).toBe(true);
     });
 
     it("handles all-zero hierarchy with hasPositiveLeaf=false", () => {
@@ -164,12 +169,14 @@ describe("TreemapDataProcessor", () => {
 
         expect(res.rootNodes[0].nodeId).toBe("k:s:dup");
         expect(res.rootNodes[1].nodeId).toBe("root/l:s:Node 2");
-        expect(warned.has("tm-1:duplicate-key:dup")).toBe(true);
+        expect(warned.has("tm-1:duplicate-keys")).toBe(true);
     });
 
     it("safely breaks cyclic hierarchy without infinite loop or throwing", () => {
         const warned = new Set<string>();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const nodeA: any = { name: "A", children: [] };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const nodeB: any = { name: "B", children: [] };
         nodeA.children.push(nodeB);
         nodeB.children.push(nodeA); // Cycle!
@@ -184,7 +191,7 @@ describe("TreemapDataProcessor", () => {
         });
 
         expect(res.allNodes).toHaveLength(2); // A and B, but B's cyclic child omitted
-        expect(warned.has("tm-1:cycle:root/l:s:A/l:s:B:0")).toBe(true);
+        expect(warned.has("tm-1:cycles")).toBe(true);
     });
 
     it("handles reused object instances across different branches with distinct path identities", () => {
@@ -208,20 +215,52 @@ describe("TreemapDataProcessor", () => {
         expect(res.totalValue).toBe(50);
     });
 
+    it("assigns distinct theme palette colors to successive top-level branches by default", () => {
+        const data = [
+            {
+                children: [{ name: "Angular", value: 50 }],
+                name: "Frontend"
+            },
+            {
+                children: [{ name: "NestJS", value: 60 }],
+                name: "Backend"
+            },
+            {
+                children: [{ name: "Postgres", value: 70 }],
+                name: "Database"
+            }
+        ];
+
+        const res = TreemapDataProcessor.process({
+            data,
+            isDatumVisible: () => true,
+            seriesId: "tm-1",
+            seriesName: "Treemap",
+            styleResolver
+        });
+
+        expect(res.rootNodes[0].color).toBe(styleResolver.resolvePaletteColor(0));
+        expect(res.rootNodes[0].children[0].color).toBe(styleResolver.resolvePaletteColor(0));
+        expect(res.rootNodes[1].color).toBe(styleResolver.resolvePaletteColor(1));
+        expect(res.rootNodes[1].children[0].color).toBe(styleResolver.resolvePaletteColor(1));
+        expect(res.rootNodes[2].color).toBe(styleResolver.resolvePaletteColor(2));
+        expect(res.rootNodes[2].children[0].color).toBe(styleResolver.resolvePaletteColor(2));
+    });
+
     it("inherits branch color down the hierarchy with colorField override capability", () => {
         const data = [
             {
                 name: "Branch A",
                 children: [
                     { name: "Child 1", value: 30 },
-                    { name: "Child 2", customColor: "#ff0000", value: 40 }
+                    { customColor: "#ff0000", name: "Child 2", value: 40 }
                 ]
             }
         ];
 
         const res = TreemapDataProcessor.process({
-            colors: ["#3b82f6"],
             colorField: "customColor",
+            colors: ["#3b82f6"],
             data,
             isDatumVisible: () => true,
             seriesId: "tm-1",
@@ -238,12 +277,12 @@ describe("TreemapDataProcessor", () => {
     it("marks branch and all its descendants hidden when top-level branch is toggled hidden", () => {
         const data = [
             {
-                name: "Compute",
-                children: [{ name: "API", value: 50 }]
+                children: [{ name: "API", value: 50 }],
+                name: "Compute"
             },
             {
-                name: "Storage",
-                children: [{ name: "DB", value: 100 }]
+                children: [{ name: "DB", value: 100 }],
+                name: "Storage"
             }
         ];
 
