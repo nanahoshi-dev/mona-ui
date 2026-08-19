@@ -146,21 +146,39 @@ describe("Cartesian Plot Convergence Synchronization (HAX-F01, HAX-F02, HAX-F13)
             }
         });
 
-        it("synchronizes scales and axis scenes under forced multi-pass convergence with label measurements", () => {
+        it("synchronizes scales and axis scenes under forced multi-pass convergence with label measurements (HAX-3-003)", () => {
             const bar = createMockBar("b1", "val", [
-                { cat: "Very Long Category Name 1", val: 10000 },
-                { cat: "Very Long Category Name 2", val: 20000 }
+                { cat: "Q1", val: 100 },
+                { cat: "Q2", val: 200 }
             ]);
 
-            // Supply large mocked label measurements to force gutter recalculations across passes
-            const measurements = new Map<string, { height: number; width: number }>([
-                ["axis:y:10000", { height: 16, width: 80 }],
-                ["axis:y:20000", { height: 16, width: 80 }],
-                ["axis:x:Very Long Category Name 1", { height: 24, width: 120 }],
-                ["axis:x:Very Long Category Name 2", { height: 24, width: 120 }]
-            ]);
+            const initialScene = CartesianLayoutEngine.computeScene({
+                containerHeight: 400,
+                containerWidth: 600,
+                rootData: [],
+                series: [bar],
+                styleResolver,
+                xAxis: createMockXAxis({ type: "category" }),
+                yAxis: createMockYAxis({ type: "linear" })
+            });
 
-            const scene = CartesianLayoutEngine.computeScene({
+            // Extract real production tickKeys from initial layout and supply exaggerated measurements
+            const measurements = new Map<string, { height: number; width: number }>();
+            for (const axisScene of initialScene.axes) {
+                for (const tick of axisScene.ticks) {
+                    if (tick.tickKey) {
+                        if (axisScene.axis === "y") {
+                            measurements.set(tick.tickKey, { height: 20, width: 120 });
+                        } else {
+                            measurements.set(tick.tickKey, { height: 40, width: 80 });
+                        }
+                    }
+                }
+            }
+
+            expect(measurements.size).toBeGreaterThan(0);
+
+            const measuredScene = CartesianLayoutEngine.computeScene({
                 containerHeight: 400,
                 containerWidth: 600,
                 measurements,
@@ -171,15 +189,43 @@ describe("Cartesian Plot Convergence Synchronization (HAX-F01, HAX-F02, HAX-F13)
                 yAxis: createMockYAxis({ type: "linear" })
             });
 
-            // Gutter should accommodate large measurements
-            expect(scene.plotRect.x).toBeGreaterThanOrEqual(80);
+            // Gutter should meaningfully change because measurements are applied
+            expect(measuredScene.plotRect.x).toBeGreaterThan(initialScene.plotRect.x + 50);
+            expect(measuredScene.plotRect.height).toBeLessThan(initialScene.plotRect.height - 10);
 
-            // Final scales and series geometry must strictly align with final committed plotRect
-            const barScene = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
-            expect(barScene.bars[0].x).toBeGreaterThanOrEqual(scene.plotRect.x);
+            // Final scales, axis scene ticks and series geometry must strictly align with final committed plotRect
+            const xAxisScene = measuredScene.axes.find(a => a.axis === "x")!;
+            const yAxisScene = measuredScene.axes.find(a => a.axis === "y")!;
+            for (const t of yAxisScene.ticks) {
+                expect(t.coordinate).toBeGreaterThanOrEqual(measuredScene.plotRect.y - 0.5);
+                expect(t.coordinate).toBeLessThanOrEqual(measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5);
+            }
+            for (const t of xAxisScene.ticks) {
+                expect(t.coordinate).toBeGreaterThanOrEqual(measuredScene.plotRect.x - 0.5);
+                expect(t.coordinate).toBeLessThanOrEqual(measuredScene.plotRect.x + measuredScene.plotRect.width + 0.5);
+            }
+
+            const barScene = measuredScene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+            expect(barScene.bars[0].x).toBeGreaterThanOrEqual(measuredScene.plotRect.x);
             expect(barScene.bars[1].x + barScene.bars[1].width).toBeLessThanOrEqual(
-                scene.plotRect.x + scene.plotRect.width + 0.5
+                measuredScene.plotRect.x + measuredScene.plotRect.width + 0.5
             );
+
+            // Stable on identical second recomputation
+            const stableScene = CartesianLayoutEngine.computeScene({
+                containerHeight: 400,
+                containerWidth: 600,
+                measurements,
+                rootData: [],
+                series: [bar],
+                styleResolver,
+                xAxis: createMockXAxis({ type: "category" }),
+                yAxis: createMockYAxis({ type: "linear" })
+            });
+            expect(stableScene.plotRect.x).toBeCloseTo(measuredScene.plotRect.x, 3);
+            expect(stableScene.plotRect.y).toBeCloseTo(measuredScene.plotRect.y, 3);
+            expect(stableScene.plotRect.width).toBeCloseTo(measuredScene.plotRect.width, 3);
+            expect(stableScene.plotRect.height).toBeCloseTo(measuredScene.plotRect.height, 3);
         });
     });
 
@@ -223,26 +269,45 @@ describe("Cartesian Plot Convergence Synchronization (HAX-F01, HAX-F02, HAX-F13)
             }
         });
 
-        it("synchronizes scales and axis scenes under forced multi-pass convergence with label measurements", () => {
+        it("synchronizes scales and axis scenes under forced multi-pass convergence with label measurements (HAX-3-003)", () => {
             const hBar = createMockBar(
                 "hb1",
                 "val",
                 [
-                    { cat: "Department of Engineering & Operations", val: 50000 },
-                    { cat: "Department of Marketing & Sales", val: 80000 }
+                    { cat: "Q1", val: 50000 },
+                    { cat: "Q2", val: 80000 }
                 ],
                 "horizontal"
             );
 
-            const measurements = new Map<string, { height: number; width: number }>([
-                ["axis:y:Department of Engineering & Operations", { height: 20, width: 140 }],
-                ["axis:y:Department of Marketing & Sales", { height: 20, width: 130 }],
-                ["axis:x:0", { height: 16, width: 30 }],
-                ["axis:x:50000", { height: 16, width: 60 }],
-                ["axis:x:80000", { height: 16, width: 60 }]
-            ]);
+            const initialScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+                containerHeight: 400,
+                containerWidth: 600,
+                effectiveSeries: [hBar],
+                styleResolver,
+                xAxis: createMockXAxis({ type: "linear" }),
+                yAxis: createMockYAxis({ type: "category" })
+            });
 
-            const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            // Extract actual production tickKeys
+            const measurements = new Map<string, { height: number; width: number }>();
+            for (const axisScene of initialScene.axes) {
+                for (const tick of axisScene.ticks) {
+                    if (tick.tickKey) {
+                        if (axisScene.axis === "y") {
+                            // Exaggerated wide category measurements
+                            measurements.set(tick.tickKey, { height: 24, width: 160 });
+                        } else {
+                            // Exaggerated value measurements
+                            measurements.set(tick.tickKey, { height: 35, width: 80 });
+                        }
+                    }
+                }
+            }
+
+            expect(measurements.size).toBeGreaterThan(0);
+
+            const measuredScene = CartesianHorizontalBarLayoutEngine.computeLayout({
                 containerHeight: 400,
                 containerWidth: 600,
                 effectiveSeries: [hBar],
@@ -252,15 +317,98 @@ describe("Cartesian Plot Convergence Synchronization (HAX-F01, HAX-F02, HAX-F13)
                 yAxis: createMockYAxis({ type: "category" })
             });
 
-            // Gutter accommodates wide Y-axis category names
-            expect(scene.plotRect.x).toBeGreaterThanOrEqual(130);
+            // Gutter accommodates wide Y-axis category names, changing plotRect.x meaningfully
+            expect(measuredScene.plotRect.x).toBeGreaterThan(initialScene.plotRect.x + 80);
 
             // Final axis scene ticks coordinates and bars are in perfect alignment
-            const barScene = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
-            expect(barScene.bars[0].x).toBe(scene.plotRect.x);
+            const xAxisScene = measuredScene.axes.find(a => a.axis === "x")!;
+            const yAxisScene = measuredScene.axes.find(a => a.axis === "y")!;
+            for (const t of yAxisScene.ticks) {
+                expect(t.coordinate).toBeGreaterThanOrEqual(measuredScene.plotRect.y - 0.5);
+                expect(t.coordinate).toBeLessThanOrEqual(measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5);
+            }
+            for (const t of xAxisScene.ticks) {
+                expect(t.coordinate).toBeGreaterThanOrEqual(measuredScene.plotRect.x - 0.5);
+                expect(t.coordinate).toBeLessThanOrEqual(measuredScene.plotRect.x + measuredScene.plotRect.width + 0.5);
+            }
+
+            const barScene = measuredScene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+            expect(barScene.bars[0].x).toBe(measuredScene.plotRect.x);
             expect(barScene.bars[1].x + barScene.bars[1].width).toBeLessThanOrEqual(
-                scene.plotRect.x + scene.plotRect.width + 0.5
+                measuredScene.plotRect.x + measuredScene.plotRect.width + 0.5
             );
+
+            // Stable second recomputation
+            const stableScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+                containerHeight: 400,
+                containerWidth: 600,
+                effectiveSeries: [hBar],
+                measurements,
+                styleResolver,
+                xAxis: createMockXAxis({ type: "linear" }),
+                yAxis: createMockYAxis({ type: "category" })
+            });
+            expect(stableScene.plotRect.x).toBeCloseTo(measuredScene.plotRect.x, 3);
+            expect(stableScene.plotRect.y).toBeCloseTo(measuredScene.plotRect.y, 3);
+            expect(stableScene.plotRect.width).toBeCloseTo(measuredScene.plotRect.width, 3);
+            expect(stableScene.plotRect.height).toBeCloseTo(measuredScene.plotRect.height, 3);
+        });
+
+        it("converges with right category axis and top value axis using canonical tick keys (HAX-3-003)", () => {
+            const hBar = createMockBar(
+                "hb1",
+                "val",
+                [
+                    { cat: "Engineering", val: 120 },
+                    { cat: "Product", val: 240 }
+                ],
+                "horizontal"
+            );
+
+            const initialScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+                containerHeight: 400,
+                containerWidth: 600,
+                effectiveSeries: [hBar],
+                styleResolver,
+                xAxis: createMockXAxis({ position: "top", type: "linear" }),
+                yAxis: createMockYAxis({ position: "right", type: "category" })
+            });
+
+            const measurements = new Map<string, { height: number; width: number }>();
+            for (const axisScene of initialScene.axes) {
+                for (const tick of axisScene.ticks) {
+                    if (tick.tickKey) {
+                        if (axisScene.axis === "y") {
+                            measurements.set(tick.tickKey, { height: 20, width: 140 });
+                        } else {
+                            measurements.set(tick.tickKey, { height: 45, width: 60 });
+                        }
+                    }
+                }
+            }
+
+            const measuredScene = CartesianHorizontalBarLayoutEngine.computeLayout({
+                containerHeight: 400,
+                containerWidth: 600,
+                effectiveSeries: [hBar],
+                measurements,
+                styleResolver,
+                xAxis: createMockXAxis({ position: "top", type: "linear" }),
+                yAxis: createMockYAxis({ position: "right", type: "category" })
+            });
+
+            // Top axis gutter increases Y, right axis gutter decreases width
+            expect(measuredScene.plotRect.y).toBeGreaterThan(initialScene.plotRect.y + 15);
+            expect(measuredScene.plotRect.width).toBeLessThan(initialScene.plotRect.width - 30);
+
+            // Synchronized geometry
+            const barScene = measuredScene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+            for (const b of barScene.bars) {
+                expect(b.x).toBe(measuredScene.plotRect.x);
+                expect(b.x + b.width).toBeLessThanOrEqual(measuredScene.plotRect.x + measuredScene.plotRect.width + 0.5);
+                expect(b.y).toBeGreaterThanOrEqual(measuredScene.plotRect.y);
+                expect(b.y + b.height).toBeLessThanOrEqual(measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5);
+            }
         });
     });
 });
