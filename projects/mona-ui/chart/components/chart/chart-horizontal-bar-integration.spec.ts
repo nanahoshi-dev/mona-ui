@@ -13,6 +13,7 @@ import { BarSeriesComponent } from "../bar-series/bar-series.component";
 import { AreaSeriesComponent } from "../area-series/area-series.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
 import { RangeBarSeriesComponent } from "../range-bar-series/range-bar-series.component";
+import { RangeBarSeriesRenderer } from "../../internal/render/series/range-bar-series-renderer";
 import type { ChartAreaSeriesScene, ChartBarSeriesScene, ChartLineSeriesScene, ChartRangeBarSeriesScene } from "../../internal/scene/cartesian-scene";
 import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
@@ -47,6 +48,7 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
                         [field]="'revenue'"
                         [name]="'Revenue'"
                         [color]="bar1Color()"
+                        [style.color]="bar1HostColor()"
                         [orientation]="orientation()"
                         [stack]="stack1()"
                         [stackMode]="stackMode()"
@@ -93,6 +95,7 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
 class TestHorizontalBarHostComponent {
     public readonly ariaLabel = signal("");
     public readonly bar1Color = signal<string>("#3b82f6");
+    public readonly bar1HostColor = signal<string | undefined>(undefined);
     public readonly data = signal<readonly unknown[]>([
         { category: "North", minVal: 40, maxVal: 120, profit: 40, revenue: 100 },
         { category: "South", minVal: 60, maxVal: 150, profit: 50, revenue: 140 },
@@ -353,7 +356,8 @@ describe("Horizontal Bar Chart Integration", () => {
         expect(scene.series.length).toBe(2);
     });
 
-    it("respects host CSS color and explicit input precedence on horizontal bar series (HAX-F15)", () => {
+    it("respects explicit [color] input precedence over host CSS color on horizontal bar series (HAX-3-005)", () => {
+        host.bar1HostColor.set("rgb(16, 185, 129)");
         host.bar1Color.set("#9333ea");
         fixture.detectChanges();
 
@@ -362,6 +366,72 @@ describe("Horizontal Bar Chart Integration", () => {
         const scene = chartCmp.scene() as CartesianXYChartScene;
 
         expect(scene.series[0].style.color).toBe("#9333ea");
+    });
+
+    it("resolves host CSS color bridge on horizontal bar series when explicit color is omitted (HAX-3-005)", () => {
+        host.bar1HostColor.set("rgb(16, 185, 129)");
+        host.bar1Color.set("");
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Style);
+        const scene = chartCmp.scene() as CartesianXYChartScene;
+
+        expect(scene.series[0].style.color).toBe("rgb(16, 185, 129)");
+    });
+
+    it("correctly integrates zero-length horizontal range bar with vertical hairline renderer (HAX-3-001, HAX-3-002)", () => {
+        host.showBar1.set(false);
+        host.showBar2.set(false);
+        host.showRangeBar.set(true);
+        host.data.set([{ category: "Q1", maxVal: 50, minVal: 50 }]);
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
+        const scene = chartCmp.scene() as CartesianXYChartScene;
+
+        expect(scene.hasRenderableData).toBe(true);
+        expect(scene.orientation).toBe("horizontal");
+        expect(scene.series.length).toBe(1);
+
+        const rangeBarScene = scene.series[0] as ChartRangeBarSeriesScene;
+        expect(rangeBarScene.bars.length).toBe(1);
+        expect(rangeBarScene.bars[0].width).toBe(0);
+        expect(rangeBarScene.bars[0].height).toBeGreaterThan(0);
+        expect(rangeBarScene.bars[0].orientation).toBe("horizontal");
+
+        // Pointer hit target retains forgiving tolerance while direct bounds is absent
+        const hit = scene.hitTargets.find(h => h.seriesType === "rangeBar");
+        expect(hit).toBeDefined();
+        expect(hit?.bounds).toBeUndefined();
+        expect(hit?.visualBounds?.width).toBe(4);
+        expect(hit?.visualBounds?.x).toBe(rangeBarScene.bars[0].x - 2);
+
+        // Renderer renders vertical hairline
+        const mockCtx = {
+            beginPath: vi.fn(),
+            closePath: vi.fn(),
+            fill: vi.fn(),
+            fillStyle: "",
+            globalAlpha: 1,
+            lineTo: vi.fn(),
+            lineWidth: 1,
+            moveTo: vi.fn(),
+            quadraticCurveTo: vi.fn(),
+            rect: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+            stroke: vi.fn(),
+            strokeStyle: ""
+        } as unknown as CanvasRenderingContext2D;
+
+        RangeBarSeriesRenderer.render(mockCtx, rangeBarScene);
+        expect(mockCtx.beginPath).toHaveBeenCalled();
+        expect(mockCtx.moveTo).toHaveBeenCalledWith(expect.any(Number), rangeBarScene.bars[0].y);
+        expect(mockCtx.lineTo).toHaveBeenCalledWith(expect.any(Number), rangeBarScene.bars[0].y + rangeBarScene.bars[0].height);
+        expect(mockCtx.stroke).toHaveBeenCalled();
+        expect(mockCtx.fill).not.toHaveBeenCalled();
     });
 
     it("normalizes whitespace-only aria-label to title fallback (HAX-F08)", () => {
