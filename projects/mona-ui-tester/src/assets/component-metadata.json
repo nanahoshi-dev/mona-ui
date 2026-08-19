@@ -3232,6 +3232,33 @@
         "type": "ChartSeriesVisibilityEvent"
       },
       {
+        "description": "Navigation, panning, and zooming options for the chart.",
+        "kind": "input",
+        "name": "navigation",
+        "type": "ChartNavigationInput",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Active viewport window state for chart axes.",
+        "kind": "input",
+        "name": "viewport",
+        "type": "ChartViewportState | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Initial default viewport window state for chart axes.",
+        "kind": "input",
+        "name": "defaultViewport",
+        "type": "ChartViewportState | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Emits when the chart viewport changes via pan, zoom, fit, reset, or keyboard navigation.",
+        "kind": "output",
+        "name": "viewportChange",
+        "type": "ChartViewportChangeEvent"
+      },
+      {
         "description": "Title text rendered above the plot area.",
         "kind": "input",
         "name": "title",

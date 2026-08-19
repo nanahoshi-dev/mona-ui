@@ -51,6 +51,7 @@ import { CartesianLegendBuilder } from "./cartesian-legend-builder";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { CartesianAxisResolvedContextBuilder } from "./cartesian-axis-resolved-context";
 import { CartesianAxisCompatibilityPolicy } from "./cartesian-axis-compatibility-policy";
+import { toPublicViewportState } from "../viewport/cartesian-viewport-normalizer";
 
 export class CartesianHorizontalBarLayoutEngine {
     public static computeLayout(options: CartesianLayoutOptions): CartesianXYChartScene {
@@ -100,6 +101,7 @@ export class CartesianHorizontalBarLayoutEngine {
             orientation: "horizontal",
             rootData,
             rootXField: effectiveRootXField,
+            viewport: options.viewport,
             warnedDiagnosticSignatures
         });
 
@@ -745,12 +747,36 @@ export class CartesianHorizontalBarLayoutEngine {
 
         const hasRenderableData = seriesScenes.some(s => (s.type === "bar" || s.type === "rangeBar") && s.bars.length > 0);
 
+        const viewportState = options.viewport
+            ? toPublicViewportState(options.viewport, {
+                  x: new Map(
+                      axisResolution.xAxes.map(a => [
+                          a.axisId,
+                          {
+                              baseDomain: coordResult.preparation.baseDomains.x.get(a.axisId)!,
+                              resolvedType: coordResult.resolvedTypes.x.get(a.axisId)!
+                          }
+                      ])
+                  ),
+                  y: new Map(
+                      axisResolution.yAxes.map(a => [
+                          a.axisId,
+                          {
+                              baseDomain: coordResult.preparation.baseDomains.y.get(a.axisId)!,
+                              resolvedType: coordResult.resolvedTypes.y.get(a.axisId)!
+                          }
+                      ])
+                  )
+              })
+            : undefined;
+
         return {
             axes: axisScenes,
             axisTopology,
             axisTopologySignature,
             barHitTargets,
             cartesianKind: "xy",
+            coordinateSpace: coordResult.coordinateSpace,
             coordinateSystem: "cartesian",
             hasRenderableData,
             height: containerHeight,
@@ -767,6 +793,7 @@ export class CartesianHorizontalBarLayoutEngine {
             series: seriesScenes,
             stackConfiguration: stackConfigForScene,
             stackSignature,
+            viewport: viewportState,
             width: containerWidth,
             xAxisType: primaryXType as any,
             yAxisType: primaryYType

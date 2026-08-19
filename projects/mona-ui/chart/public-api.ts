@@ -168,3 +168,21 @@ export type {
     ChartWaterfallPointContext,
     ChartWaterfallVisualKind
 } from "./models/chart-waterfall.models";
+
+export type {
+    ChartCategoryViewportWindow,
+    ChartContinuousViewportWindow,
+    ChartNavigationAxisTarget,
+    ChartNavigationInput,
+    ChartNavigationOptions,
+    ChartViewportAxisRef,
+    ChartViewportChangeEvent,
+    ChartViewportChangePhase,
+    ChartViewportChangeSource,
+    ChartViewportConstraint,
+    ChartViewportLinkGroup,
+    ChartViewportLinkMode,
+    ChartViewportState,
+    ChartViewportWindow
+} from "./models/chart-viewport.models";
+

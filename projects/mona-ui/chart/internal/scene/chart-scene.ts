@@ -16,6 +16,8 @@ import type { CartesianPointSpatialIndex } from "../interaction/cartesian-point-
 import type { HeatmapCellIndex } from "../interaction/heatmap-cell-index";
 import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "./scene-geometry";
 import type { ChartStackMode } from "../../models/chart-stack.models";
+import type { ChartViewportState } from "../../models/chart-viewport.models";
+import type { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
 
 import type { CartesianFunnelChartScene } from "./funnel-scene";
 import type { CartesianWaterfallChartScene } from "./waterfall-scene";
@@ -62,6 +64,7 @@ export interface CartesianXYChartScene extends CartesianSceneBase {
     axisTopologySignature?: string;
     barHitTargets?: readonly SceneHitTarget[];
     cartesianKind: "xy";
+    coordinateSpace?: CartesianAxisCoordinateSpace;
     financialIndex?: CartesianFinancialIndex;
     interactionAxis?: ChartInteractionAxis;
     interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
@@ -74,6 +77,7 @@ export interface CartesianXYChartScene extends CartesianSceneBase {
     series: readonly ChartSeriesScene[];
     stackConfiguration?: readonly CartesianStackSceneConfig[];
     stackSignature?: string;
+    viewport?: ChartViewportState;
     xAxisType?: ChartXAxisType;
     xTimeSpanMs?: number;
     yAxisType?: ChartYAxisType;

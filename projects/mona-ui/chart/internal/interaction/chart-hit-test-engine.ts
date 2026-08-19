@@ -153,15 +153,27 @@ export class ChartHitTestEngine {
             : hitTargets;
 
         const getBucketForHit = (target: SceneHitTarget): ChartInteractionBucket | undefined => {
-            const axisId = target.xAxisId ?? (cartesianScene.interactionAxis === "y" ? target.yAxisId : undefined);
+            const axisId =
+                cartesianScene.interactionAxis === "y"
+                    ? target.yAxisId ?? cartesianScene.primaryYAxisId
+                    : target.xAxisId ?? cartesianScene.primaryXAxisId;
             if (axisId && cartesianScene.interactionBucketsByAxisId) {
                 const axisLookup = cartesianScene.interactionBucketsByAxisId.get(axisId);
                 if (axisLookup?.has(target.xKey)) {
                     return axisLookup.get(target.xKey);
                 }
             }
-            return cartesianScene.interactionBucketLookup?.get(target.xKey) ??
-                interactionBuckets?.find(b => b.xKey === target.xKey);
+            const primaryId =
+                cartesianScene.interactionAxis === "y"
+                    ? cartesianScene.primaryYAxisId
+                    : cartesianScene.primaryXAxisId;
+            if (!axisId || axisId === primaryId || !cartesianScene.interactionBucketsByAxisId) {
+                return (
+                    cartesianScene.interactionBucketLookup?.get(target.xKey) ??
+                    interactionBuckets?.find(b => b.xKey === target.xKey)
+                );
+            }
+            return undefined;
         };
 
         // Cartesian shared mode

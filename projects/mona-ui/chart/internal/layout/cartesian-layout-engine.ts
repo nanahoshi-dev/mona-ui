@@ -71,6 +71,10 @@ import {
     normalizeNonNegativeNumber,
     normalizeOpacity
 } from "../utils/number-utils";
+import {
+    toPublicViewportState,
+    type InternalCartesianViewportState
+} from "../viewport/cartesian-viewport-normalizer";
 
 export interface CartesianLayoutOptions {
     containerHeight: number;
@@ -81,6 +85,7 @@ export interface CartesianLayoutOptions {
     rootXField?: ChartField;
     series?: readonly ChartCartesianSeriesRegistration[];
     styleResolver?: ChartStyleResolver;
+    viewport?: InternalCartesianViewportState;
     warnedDiagnosticSignatures?: Set<string>;
     xAxis?: ChartXAxisRegistration;
     xAxes?: readonly ChartXAxisRegistration[];
@@ -154,6 +159,7 @@ export class CartesianLayoutEngine {
                 rootXField,
                 series: effectiveSeries,
                 styleResolver,
+                viewport: options.viewport,
                 warnedDiagnosticSignatures,
                 xAxis: options.xAxis,
                 xAxes: options.xAxes,
@@ -195,6 +201,7 @@ export class CartesianLayoutEngine {
             orientation: "vertical",
             rootData,
             rootXField: effectiveRootXField,
+            viewport: options.viewport,
             warnedDiagnosticSignatures
         });
 
@@ -1202,12 +1209,36 @@ export class CartesianLayoutEngine {
 
         const legendItems: ChartLegendItem[] = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
 
+        const viewportState = options.viewport
+            ? toPublicViewportState(options.viewport, {
+                  x: new Map(
+                      axisResolution.xAxes.map(a => [
+                          a.axisId,
+                          {
+                              baseDomain: coordResult.preparation.baseDomains.x.get(a.axisId)!,
+                              resolvedType: coordResult.resolvedTypes.x.get(a.axisId)!
+                          }
+                      ])
+                  ),
+                  y: new Map(
+                      axisResolution.yAxes.map(a => [
+                          a.axisId,
+                          {
+                              baseDomain: coordResult.preparation.baseDomains.y.get(a.axisId)!,
+                              resolvedType: coordResult.resolvedTypes.y.get(a.axisId)!
+                          }
+                      ])
+                  )
+              })
+            : undefined;
+
         return {
             axes: axisScenes,
             axisTopology,
             axisTopologySignature,
             barHitTargets,
             cartesianKind: "xy",
+            coordinateSpace: coordResult.coordinateSpace,
             coordinateSystem: "cartesian",
             financialIndex: activeFinancialIndex,
             hasRenderableData: hasData,
@@ -1227,6 +1258,7 @@ export class CartesianLayoutEngine {
             series: seriesScenes,
             stackConfiguration: stackConfigForScene,
             stackSignature,
+            viewport: viewportState,
             width: containerWidth,
             xAxisType: primaryXType as ChartXAxisType,
             yAxisType: primaryYType

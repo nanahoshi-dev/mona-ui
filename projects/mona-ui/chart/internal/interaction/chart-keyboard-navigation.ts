@@ -10,6 +10,18 @@ export function getHitTargetKey(hit: SceneHitTarget): string {
     return hit.animationKey ?? hit.sliceId ?? `${hit.seriesId}:${hit.index}`;
 }
 
+export interface ChartKeyboardAxisNamespace {
+    readonly axis: "x" | "y";
+    readonly axisId: string;
+}
+
+export interface ChartKeyboardSelectionState {
+    readonly namespace: ChartKeyboardAxisNamespace;
+    readonly bucketIndex: number;
+    readonly hitKey: string | null;
+    readonly seriesId: string | null;
+}
+
 export interface ChartKeyboardNavResult {
     bucketIndex: number;
     hitKey: string;
@@ -21,6 +33,79 @@ export interface KeyboardNavigationResult {
     hitKey: string | null;
     hitTarget: SceneHitTarget | null;
     seriesId: string | null;
+    namespace?: ChartKeyboardAxisNamespace;
+}
+
+export function getAvailableAxisNamespaces(scene: ChartScene): readonly ChartKeyboardAxisNamespace[] {
+    if (scene.coordinateSystem !== "cartesian" || scene.cartesianKind !== "xy") {
+        return [{ axis: "x", axisId: "default" }];
+    }
+    const cartesianScene = scene as CartesianXYChartScene;
+    const dimension: "x" | "y" = cartesianScene.interactionAxis === "y" ? "y" : "x";
+
+    const axisIds: string[] = [];
+    if (cartesianScene.interactionBucketsByAxisId && cartesianScene.interactionBucketsByAxisId.size > 0) {
+        if (cartesianScene.axes) {
+            for (const axisScene of cartesianScene.axes) {
+                if (
+                    axisScene.axis === dimension &&
+                    axisScene.axisId &&
+                    cartesianScene.interactionBucketsByAxisId.has(axisScene.axisId)
+                ) {
+                    if (!axisIds.includes(axisScene.axisId)) {
+                        axisIds.push(axisScene.axisId);
+                    }
+                }
+            }
+        }
+        for (const id of cartesianScene.interactionBucketsByAxisId.keys()) {
+            if (!axisIds.includes(id)) {
+                axisIds.push(id);
+            }
+        }
+    }
+
+    if (axisIds.length === 0) {
+        const primaryId =
+            dimension === "y"
+                ? (cartesianScene.primaryYAxisId ?? "default")
+                : (cartesianScene.primaryXAxisId ?? "default");
+        axisIds.push(primaryId);
+    }
+    return axisIds.map(axisId => ({ axis: dimension, axisId }));
+}
+
+export function resolveInteractionBuckets(
+    scene: ChartScene,
+    namespace?: ChartKeyboardAxisNamespace | null
+): readonly ChartInteractionBucket[] {
+    if (scene.coordinateSystem !== "cartesian" || scene.cartesianKind !== "xy") {
+        return scene.interactionBuckets ?? [];
+    }
+    const cartesianScene = scene as CartesianXYChartScene;
+    const dimension: "x" | "y" = cartesianScene.interactionAxis === "y" ? "y" : "x";
+    const primaryId =
+        dimension === "y"
+            ? (cartesianScene.primaryYAxisId ?? "")
+            : (cartesianScene.primaryXAxisId ?? "");
+
+    const targetNamespace = namespace ?? {
+        axis: dimension,
+        axisId: primaryId
+    };
+
+    if (cartesianScene.interactionBucketsByAxisId && targetNamespace.axisId) {
+        const map = cartesianScene.interactionBucketsByAxisId.get(targetNamespace.axisId);
+        if (map && map.size > 0) {
+            return Array.from(map.values());
+        }
+    }
+
+    if (!targetNamespace.axisId || targetNamespace.axisId === primaryId || !cartesianScene.interactionBucketsByAxisId) {
+        return scene.interactionBuckets ?? [];
+    }
+
+    return [];
 }
 
 export class ChartKeyboardNavigation {
@@ -29,7 +114,8 @@ export class ChartKeyboardNavigation {
         scene: ChartScene,
         activeBucketIndex: number,
         activeSeriesId: string | null,
-        activeHitKey?: string | null
+        activeHitKey?: string | null,
+        activeNamespace?: ChartKeyboardAxisNamespace | null
     ): KeyboardNavigationResult | null {
         if (scene.coordinateSystem === "hierarchical" && scene.hierarchicalKind === "treemap") {
             const currentHit = activeHitKey ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null : null;
@@ -97,7 +183,51 @@ export class ChartKeyboardNavigation {
             }
         }
 
-        const buckets = scene.interactionBuckets;
+        const isCartesianXY = scene.coordinateSystem === "cartesian" && scene.cartesianKind === "xy";
+        const availableNamespaces = getAvailableAxisNamespaces(scene);
+        const resolvedNamespace: ChartKeyboardAxisNamespace =
+            activeNamespace && availableNamespaces.some(ns => ns.axis === activeNamespace.axis && ns.axisId === activeNamespace.axisId)
+                ? activeNamespace
+                : availableNamespaces[0];
+
+        // PageUp / PageDown namespace cycling for multi-axis Cartesian charts
+        if (isCartesianXY && (event.key === "PageDown" || event.key === "PageUp")) {
+            if (availableNamespaces.length > 1) {
+                event.preventDefault();
+                const currentIdx = availableNamespaces.findIndex(
+                    ns => ns.axis === resolvedNamespace.axis && ns.axisId === resolvedNamespace.axisId
+                );
+                const baseIdx = currentIdx >= 0 ? currentIdx : 0;
+                const nextIdx =
+                    event.key === "PageDown"
+                        ? (baseIdx + 1) % availableNamespaces.length
+                        : (baseIdx - 1 + availableNamespaces.length) % availableNamespaces.length;
+                const nextNamespace = availableNamespaces[nextIdx];
+                const nextBuckets = resolveInteractionBuckets(scene, nextNamespace);
+                if (nextBuckets.length > 0) {
+                    const currentHit = activeHitKey
+                        ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey)
+                        : undefined;
+                    let targetBucketIndex = -1;
+                    if (currentHit) {
+                        targetBucketIndex = nextBuckets.findIndex(b => b.xKey === currentHit.xKey);
+                    }
+                    if (targetBucketIndex < 0) {
+                        targetBucketIndex = clamp(activeBucketIndex < 0 ? 0 : activeBucketIndex, 0, nextBuckets.length - 1);
+                    }
+                    return this.#resolveSelection(
+                        nextBuckets,
+                        targetBucketIndex,
+                        activeSeriesId,
+                        activeHitKey,
+                        nextNamespace
+                    );
+                }
+            }
+            return null;
+        }
+
+        const buckets = resolveInteractionBuckets(scene, resolvedNamespace);
         if (!buckets || buckets.length === 0) {
             return null;
         }
@@ -110,7 +240,6 @@ export class ChartKeyboardNavigation {
             case "ArrowRight": {
                 event.preventDefault();
                 if (isHorizontal) {
-                    // In horizontal charts, ArrowRight cycles through series at current category
                     const currIdx = activeBucketIndex < 0 ? 0 : activeBucketIndex;
                     const bucket = buckets[currIdx];
                     if (!bucket || bucket.hits.length === 0) return null;
@@ -129,7 +258,8 @@ export class ChartKeyboardNavigation {
                         bucketIndex: currIdx,
                         hitKey: getHitTargetKey(hit),
                         hitTarget: hit,
-                        seriesId: hit.seriesId
+                        seriesId: hit.seriesId,
+                        namespace: resolvedNamespace
                     };
                 }
 
@@ -139,13 +269,12 @@ export class ChartKeyboardNavigation {
                 } else {
                     nextIdx = activeBucketIndex < buckets.length - 1 ? activeBucketIndex + 1 : 0;
                 }
-                return this.#resolveSelection(buckets, nextIdx, activeSeriesId, activeHitKey);
+                return this.#resolveSelection(buckets, nextIdx, activeSeriesId, activeHitKey, resolvedNamespace);
             }
 
             case "ArrowLeft": {
                 event.preventDefault();
                 if (isHorizontal) {
-                    // In horizontal charts, ArrowLeft cycles in reverse through series at current category
                     const currIdx = activeBucketIndex < 0 ? 0 : activeBucketIndex;
                     const bucket = buckets[currIdx];
                     if (!bucket || bucket.hits.length === 0) return null;
@@ -165,7 +294,8 @@ export class ChartKeyboardNavigation {
                         bucketIndex: currIdx,
                         hitKey: getHitTargetKey(hit),
                         hitTarget: hit,
-                        seriesId: hit.seriesId
+                        seriesId: hit.seriesId,
+                        namespace: resolvedNamespace
                     };
                 }
 
@@ -178,24 +308,21 @@ export class ChartKeyboardNavigation {
                 } else {
                     prevIdx = activeBucketIndex > 0 ? activeBucketIndex - 1 : buckets.length - 1;
                 }
-                return this.#resolveSelection(buckets, prevIdx, activeSeriesId, activeHitKey);
+                return this.#resolveSelection(buckets, prevIdx, activeSeriesId, activeHitKey, resolvedNamespace);
             }
 
             case "ArrowDown": {
                 event.preventDefault();
                 if (isHorizontal) {
-                    // In horizontal charts, ArrowDown moves to next category bucket
                     const nextIdx = activeBucketIndex < buckets.length - 1 ? activeBucketIndex + 1 : 0;
-                    return this.#resolveSelection(buckets, nextIdx, activeSeriesId, activeHitKey);
+                    return this.#resolveSelection(buckets, nextIdx, activeSeriesId, activeHitKey, resolvedNamespace);
                 }
 
                 if (isSector) {
-                    // In sector charts, ArrowDown navigates clockwise same as ArrowRight
                     const nextIdx = activeBucketIndex < 0 ? 0 : (activeBucketIndex + 1) % buckets.length;
-                    return this.#resolveSelection(buckets, nextIdx, activeSeriesId, activeHitKey);
+                    return this.#resolveSelection(buckets, nextIdx, activeSeriesId, activeHitKey, resolvedNamespace);
                 }
 
-                // In Cartesian and Polar Axis charts, ArrowDown cycles to next hit at current spoke/bucket
                 const currIdx = activeBucketIndex < 0 ? 0 : activeBucketIndex;
                 const bucket = buckets[currIdx];
                 if (!bucket || bucket.hits.length === 0) return null;
@@ -214,28 +341,26 @@ export class ChartKeyboardNavigation {
                     bucketIndex: currIdx,
                     hitKey: getHitTargetKey(hit),
                     hitTarget: hit,
-                    seriesId: hit.seriesId
+                    seriesId: hit.seriesId,
+                    namespace: resolvedNamespace
                 };
             }
 
             case "ArrowUp": {
                 event.preventDefault();
                 if (isHorizontal) {
-                    // In horizontal charts, ArrowUp moves to previous category bucket
                     const prevIdx = activeBucketIndex > 0 ? activeBucketIndex - 1 : buckets.length - 1;
-                    return this.#resolveSelection(buckets, prevIdx, activeSeriesId, activeHitKey);
+                    return this.#resolveSelection(buckets, prevIdx, activeSeriesId, activeHitKey, resolvedNamespace);
                 }
 
                 if (isSector) {
-                    // In sector charts, ArrowUp navigates counter-clockwise same as ArrowLeft
                     const prevIdx =
                         activeBucketIndex < 0
                             ? buckets.length - 1
                             : (activeBucketIndex - 1 + buckets.length) % buckets.length;
-                    return this.#resolveSelection(buckets, prevIdx, activeSeriesId, activeHitKey);
+                    return this.#resolveSelection(buckets, prevIdx, activeSeriesId, activeHitKey, resolvedNamespace);
                 }
 
-                // In Cartesian and Polar Axis charts, ArrowUp cycles to previous hit at current spoke/bucket
                 const currIdx = activeBucketIndex < 0 ? 0 : activeBucketIndex;
                 const bucket = buckets[currIdx];
                 if (!bucket || bucket.hits.length === 0) return null;
@@ -255,18 +380,19 @@ export class ChartKeyboardNavigation {
                     bucketIndex: currIdx,
                     hitKey: getHitTargetKey(hit),
                     hitTarget: hit,
-                    seriesId: hit.seriesId
+                    seriesId: hit.seriesId,
+                    namespace: resolvedNamespace
                 };
             }
 
             case "Home": {
                 event.preventDefault();
-                return this.#resolveSelection(buckets, 0, activeSeriesId, activeHitKey);
+                return this.#resolveSelection(buckets, 0, activeSeriesId, activeHitKey, resolvedNamespace);
             }
 
             case "End": {
                 event.preventDefault();
-                return this.#resolveSelection(buckets, buckets.length - 1, activeSeriesId, activeHitKey);
+                return this.#resolveSelection(buckets, buckets.length - 1, activeSeriesId, activeHitKey, resolvedNamespace);
             }
 
             default:
@@ -278,7 +404,8 @@ export class ChartKeyboardNavigation {
         buckets: readonly ChartInteractionBucket[],
         bucketIndex: number,
         preferredSeriesId: string | null,
-        preferredHitKey?: string | null
+        preferredHitKey?: string | null,
+        namespace?: ChartKeyboardAxisNamespace
     ): KeyboardNavigationResult {
         const clampedIndex = clamp(bucketIndex, 0, buckets.length - 1);
         const bucket = buckets[clampedIndex];
@@ -293,7 +420,9 @@ export class ChartKeyboardNavigation {
             bucketIndex: clampedIndex,
             hitKey: hit ? getHitTargetKey(hit) : null,
             hitTarget: hit,
-            seriesId: hit ? hit.seriesId : preferredSeriesId
+            seriesId: hit ? hit.seriesId : preferredSeriesId,
+            namespace
         };
     }
 }
+
