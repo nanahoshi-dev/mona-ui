@@ -39,10 +39,10 @@ interface RangeBarMarkPlan {
 
 function toRangeBarState(bar: SceneRangeBar, opacity = 1): RangeBarMarkState {
     const isHorizontal = bar.orientation === "horizontal";
-    const fromY = bar.fromY ?? bar.y;
-    const toY = bar.toY ?? (bar.y + bar.height);
-    const fromValuePixel = bar.fromValuePixel ?? bar.x;
-    const toValuePixel = bar.toValuePixel ?? (bar.x + bar.width);
+    const fromY = bar.fromY ?? (bar.fromValue > bar.toValue ? bar.y : bar.y + bar.height);
+    const toY = bar.toY ?? (bar.fromValue > bar.toValue ? bar.y + bar.height : bar.y);
+    const fromValuePixel = bar.fromValuePixel ?? (bar.fromValue > bar.toValue ? bar.x + bar.width : bar.x);
+    const toValuePixel = bar.toValuePixel ?? (bar.fromValue > bar.toValue ? bar.x : bar.x + bar.width);
 
     return {
         animationKey: bar.animationKey,
@@ -192,10 +192,58 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
     const cornerRadii = lerpCornerRadii(plan.from.cornerRadii, plan.to.cornerRadii, progress);
 
     if (isOrientationSwitch) {
+        if (plan.to.orientation === "horizontal") {
+            const fromSourceX = plan.from.fromValuePixel ?? (plan.from.fromValue > plan.from.toValue ? plan.from.x + plan.from.width : plan.from.x);
+            const toSourceX = plan.from.toValuePixel ?? (plan.from.fromValue > plan.from.toValue ? plan.from.x : plan.from.x + plan.from.width);
+            const fromTargetX = plan.to.fromValuePixel ?? (plan.to.fromValue > plan.to.toValue ? plan.to.x + plan.to.width : plan.to.x);
+            const toTargetX = plan.to.toValuePixel ?? (plan.to.fromValue > plan.to.toValue ? plan.to.x : plan.to.x + plan.to.width);
+
+            const fromValuePixel = lerp(fromSourceX, fromTargetX, progress);
+            const toValuePixel = lerp(toSourceX, toTargetX, progress);
+            const x = Math.min(fromValuePixel, toValuePixel);
+            const width = Math.abs(fromValuePixel - toValuePixel);
+            const y = lerp(plan.from.y, plan.to.y, progress);
+            const height = Math.max(0, lerp(plan.from.height, plan.to.height, progress));
+
+            return {
+                animationKey: plan.to.animationKey,
+                cornerRadii,
+                datum: plan.to.datum,
+                formattedFrom: plan.to.formattedFrom ?? plan.from.formattedFrom,
+                formattedTo: plan.to.formattedTo ?? plan.from.formattedTo,
+                fromValue,
+                fromValuePixel,
+                fromY: y,
+                height,
+                highValue,
+                index: plan.to.index,
+                lowValue,
+                orientation: "horizontal",
+                radius,
+                renderOpacity,
+                toValue,
+                toValuePixel,
+                toY: y,
+                width,
+                x,
+                xValue: plan.to.xValue ?? plan.from.xValue,
+                y
+            };
+        }
+
+        const fromSourceY = plan.from.fromY ?? (plan.from.fromValue > plan.from.toValue ? plan.from.y : plan.from.y + plan.from.height);
+        const toSourceY = plan.from.toY ?? (plan.from.fromValue > plan.from.toValue ? plan.from.y + plan.from.height : plan.from.y);
+        const fromTargetY = plan.to.fromY ?? (plan.to.fromValue > plan.to.toValue ? plan.to.y : plan.to.y + plan.to.height);
+        const toTargetY = plan.to.toY ?? (plan.to.fromValue > plan.to.toValue ? plan.to.y + plan.to.height : plan.to.y);
+
+        const fromY = lerp(fromSourceY, fromTargetY, progress);
+        const toY = lerp(toSourceY, toTargetY, progress);
+        const y = Math.min(fromY, toY);
+        const height = Math.abs(fromY - toY);
         const x = lerp(plan.from.x, plan.to.x, progress);
-        const y = lerp(plan.from.y, plan.to.y, progress);
         const width = Math.max(0, lerp(plan.from.width, plan.to.width, progress));
-        const height = Math.max(0, lerp(plan.from.height, plan.to.height, progress));
+        const fromValuePixel = x;
+        const toValuePixel = x + width;
 
         return {
             animationKey: plan.to.animationKey,
@@ -204,18 +252,18 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
             formattedFrom: plan.to.formattedFrom ?? plan.from.formattedFrom,
             formattedTo: plan.to.formattedTo ?? plan.from.formattedTo,
             fromValue,
-            fromValuePixel: x,
-            fromY: y,
+            fromValuePixel,
+            fromY,
             height,
             highValue,
             index: plan.to.index,
             lowValue,
-            orientation: plan.to.orientation,
+            orientation: "vertical",
             radius,
             renderOpacity,
             toValue,
-            toValuePixel: x + width,
-            toY: plan.to.orientation === "vertical" ? y + height : y,
+            toValuePixel,
+            toY,
             width,
             x,
             xValue: plan.to.xValue ?? plan.from.xValue,

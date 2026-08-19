@@ -358,5 +358,74 @@ describe("Series Animation Adapters", () => {
             const sampled = plan.sample(0.5);
             expect(sampled[0].ticks[0].coordinate).toBe(150);
         });
+
+        it("does not pseudo-interpolate ticks across category and quantitative axis role swap during orientation morph (HAX-3-006)", () => {
+            const prevAxes = [
+                {
+                    axis: "x" as const,
+                    axisLine: true,
+                    gridLines: true,
+                    position: "bottom" as const,
+                    ticks: [
+                        { coordinate: 100, formattedValue: "Jan", index: 0, value: "Jan" },
+                        { coordinate: 200, formattedValue: "Feb", index: 1, value: "Feb" }
+                    ],
+                    title: "",
+                    visible: true
+                },
+                {
+                    axis: "y" as const,
+                    axisLine: true,
+                    gridLines: true,
+                    position: "left" as const,
+                    ticks: [
+                        { coordinate: 50, formattedValue: "0", index: 0, value: 0 },
+                        { coordinate: 250, formattedValue: "100", index: 1, value: 100 }
+                    ],
+                    title: "",
+                    visible: true
+                }
+            ];
+
+            const targetAxes = [
+                {
+                    axis: "x" as const,
+                    axisLine: true,
+                    gridLines: true,
+                    position: "bottom" as const,
+                    ticks: [
+                        { coordinate: 50, formattedValue: "0", index: 0, value: 0 },
+                        { coordinate: 250, formattedValue: "100", index: 1, value: 100 }
+                    ],
+                    title: "",
+                    visible: true
+                },
+                {
+                    axis: "y" as const,
+                    axisLine: true,
+                    gridLines: true,
+                    position: "left" as const,
+                    ticks: [
+                        { coordinate: 80, formattedValue: "Jan", index: 0, value: "Jan" },
+                        { coordinate: 160, formattedValue: "Feb", index: 1, value: "Feb" }
+                    ],
+                    title: "",
+                    visible: true
+                }
+            ];
+
+            const plan = AxisAnimationAdapter.createCartesianAxisPlan(prevAxes, targetAxes);
+            const sampled = plan.sample(0.5);
+
+            // On X-axis (now numeric), tick values (0, 100) did not match previous X category strings ("Jan", "Feb"),
+            // so target ticks take their target coordinates directly without spurious coordinate interpolation.
+            expect(sampled[0].ticks[0].coordinate).toBe(50);
+            expect(sampled[0].ticks[1].coordinate).toBe(250);
+
+            // On Y-axis (now category), tick values ("Jan", "Feb") did not match previous Y numeric values (0, 100),
+            // so target ticks take their target coordinates directly.
+            expect(sampled[1].ticks[0].coordinate).toBe(80);
+            expect(sampled[1].ticks[1].coordinate).toBe(160);
+        });
     });
 });
