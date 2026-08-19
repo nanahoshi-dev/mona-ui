@@ -818,9 +818,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#canvasReady = true;
             this.#layoutReady = true;
             if (!this.scene()) {
-                this.#recomputeAndPaint(ChartInvalidationReason.Data | ChartInvalidationReason.Size);
+                this.#renderScheduler.flushWithDefault(ChartInvalidationReason.Data | ChartInvalidationReason.Size);
             } else if (this.#currentWidth !== oldWidth || this.#currentHeight !== oldHeight) {
-                this.#recomputeAndPaint(ChartInvalidationReason.Size);
+                this.#renderScheduler.flushWithDefault(ChartInvalidationReason.Size);
             } else {
                 this.#renderScheduler.flush();
                 this.#paint();
@@ -833,6 +833,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public flushPendingRender(): void {
+        this.#gestureController?.flushPendingFrame();
         this.#renderScheduler.flush();
     }
 
@@ -849,6 +850,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public onPointerDown(event: PointerEvent): void {
+        if (!this.#gestureController || this.#gestureController.activePointersCount === 0) {
+            this.#suppressNextCanvasClick = false;
+        }
         const pointer = this.#normalizePointer(event);
         if (!pointer) return;
         this.#gestureController?.handlePointerDown(event, pointer, event.currentTarget as Element);

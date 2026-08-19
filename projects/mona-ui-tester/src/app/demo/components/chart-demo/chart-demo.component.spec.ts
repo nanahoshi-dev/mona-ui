@@ -174,7 +174,9 @@ describe("ChartDemoComponent", () => {
         expect(component.eventLogs()[0].details).toContain("Randomized Waterfall cashflow");
     });
 
-    it("should render mixed tab with bar, area, and line series in any combination", () => {
+    it("should render mixed tab with bar, area, and line series in any combination even if barOrientation is horizontal", () => {
+        // Set barOrientation to horizontal (as if user changed it in Grouped tab)
+        (component as any).barOrientation.set("horizontal");
         component.setTab("mixed");
         fixture.detectChanges();
         expect(fixture.nativeElement.textContent).toContain("Mixed Series Comparison");
@@ -224,5 +226,25 @@ describe("ChartDemoComponent", () => {
         expect(scene?.hasRenderableData).toBe(true);
         expect(scene?.series.length).toBe(2);
         expect(scene?.series.map(s => s.type)).toEqual(["area", "line"]);
+    });
+
+    it("should render custom and horizontal tabs consistently regardless of barOrientation signal", () => {
+        (component as any).barOrientation.set("horizontal");
+        component.setTab("custom");
+        fixture.detectChanges();
+
+        const customChartDe = fixture.debugElement.query(By.directive(ChartComponent));
+        const customChart = customChartDe.componentInstance as ChartComponent;
+        expect(customChart.scene()?.hasRenderableData).toBe(true);
+        expect(customChart.scene()?.series.map(s => s.type)).toEqual(["bar", "line"]);
+
+        (component as any).barOrientation.set("vertical");
+        component.setTab("horizontal");
+        fixture.detectChanges();
+
+        const horizChartDe = fixture.debugElement.query(By.directive(ChartComponent));
+        const horizChart = horizChartDe.componentInstance as ChartComponent;
+        expect(horizChart.scene()?.hasRenderableData).toBe(true);
+        expect((horizChart.scene() as any)?.orientation).toBe("horizontal");
     });
 });

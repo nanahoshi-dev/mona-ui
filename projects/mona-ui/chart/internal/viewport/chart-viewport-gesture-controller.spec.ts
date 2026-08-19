@@ -517,4 +517,246 @@ describe("ChartViewportGestureController", () => {
             expect(dragEvents.length).toBeGreaterThanOrEqual(1);
         });
     });
+
+    describe("Tenth Remediation Gesture Capture Ownership (PZV10-WP3 / Section 15)", () => {
+        it("tracks inherited pointer capture across pinch->drag and releases upon authority change before drag threshold", () => {
+            const captured = new Set<number>();
+            const { context, events } = createMockContext({
+                setPointerCapture: (id: number) => captured.add(id),
+                releasePointerCapture: (id: number) => captured.delete(id)
+            });
+            const controller = new ChartViewportGestureController(context);
+
+            // Start pinch with pointers 1 and 2
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2 } as PointerEvent, { x: 200, y: 150 });
+            expect(captured.has(1)).toBe(true);
+            expect(captured.has(2)).toBe(true);
+            expect(controller.isPinching).toBe(true);
+
+            // Lift pointer 1 -> pinch ends, pointer 2 transitions to pre-threshold drag with inherited capture
+            controller.handlePointerUp({ pointerId: 1 } as PointerEvent);
+            expect(captured.has(1)).toBe(false);
+            expect(captured.has(2)).toBe(true); // Pointer 2 still captured!
+            expect(controller.isPinching).toBe(false);
+            expect(controller.isDragging).toBe(false); // Sub-threshold
+
+            // Authority change occurs before pointer 2 exceeds drag threshold
+            controller.abortForAuthorityChange();
+
+            // Captured pointer 2 must be released explicitly!
+            expect(captured.has(2)).toBe(false);
+            // No drag end event because drag never exceeded threshold
+            const dragEndEvents = events.filter(e => e.source === "drag" && e.phase === "end");
+            expect(dragEndEvents.length).toBe(0);
+        });
+
+        it("releases all captures when pinch ends with dragPan=false or no valid drag target", () => {
+            const captured = new Set<number>();
+            const { context } = createMockContext({
+                navigationOptions: normalizeChartNavigationOptions({
+                    dragPan: false,
+                    pinchZoom: true
+                }),
+                setPointerCapture: (id: number) => captured.add(id),
+                releasePointerCapture: (id: number) => captured.delete(id)
+            });
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, { x: 200, y: 150 });
+            expect(captured.has(1)).toBe(true);
+            expect(captured.has(2)).toBe(true);
+
+            // Lift pointer 1 -> dragPan is false, so remaining pointer 2 must be released!
+            controller.handlePointerUp({ pointerId: 1 } as PointerEvent);
+            expect(captured.size).toBe(0);
+        });
+
+        it("handles lost pointer capture silently for pre-threshold inherited drag", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2 } as PointerEvent, { x: 200, y: 150 });
+            controller.handlePointerUp({ pointerId: 1 } as PointerEvent);
+
+            // Lost capture on pointer 2 before threshold
+            controller.handleLostPointerCapture({ pointerId: 2 } as PointerEvent);
+
+            const dragEvents = events.filter(e => e.source === "drag");
+            expect(dragEvents.length).toBe(0);
+        });
+    });
+
+    describe("Tenth Remediation Dynamic Navigation Policy Authority (PZV10-WP4 / Section 18)", () => {
+        it("terminates active drag when dragPan is dynamically disabled while navigation remains enabled", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 100 });
+            controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 150, y: 100 });
+            controller.flushPendingFrame();
+            expect(controller.isDragging).toBe(true);
+
+            // Dynamically disable dragPan
+            controller.updateContext({
+                ...context,
+                navigationOptions: normalizeChartNavigationOptions({
+                    dragPan: false,
+                    pan: false,
+                    zoom: true
+                })
+            });
+
+            expect(controller.isDragging).toBe(false);
+            const endEvents = events.filter(e => e.source === "drag" && e.phase === "end");
+            expect(endEvents.length).toBe(1);
+        });
+
+        it("terminates active pinch when pinchZoom is dynamically disabled", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2 } as PointerEvent, { x: 200, y: 150 });
+            expect(controller.isPinching).toBe(true);
+
+            controller.updateContext({
+                ...context,
+                navigationOptions: normalizeChartNavigationOptions({
+                    pinchZoom: false,
+                    wheelZoom: true
+                })
+            });
+
+            expect(controller.isPinching).toBe(false);
+            const endEvents = events.filter(e => e.source === "pinch" && e.phase === "end");
+            expect(endEvents.length).toBe(1);
+        });
+
+        it("terminates active wheel session and clears timer when wheelZoom or wheelSensitivity changes", () => {
+            vi.useFakeTimers();
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handleWheel({ deltaY: -50 } as WheelEvent, { x: 200, y: 150 });
+            expect(events.filter(e => e.source === "wheel" && e.phase === "start").length).toBe(1);
+
+            // Update wheelSensitivity mid-session
+            controller.updateContext({
+                ...context,
+                navigationOptions: normalizeChartNavigationOptions({
+                    wheelSensitivity: 0.005,
+                    wheelZoom: true
+                })
+            });
+
+            const endEvents = events.filter(e => e.source === "wheel" && e.phase === "end");
+            expect(endEvents.length).toBe(1);
+
+            // Ensure timer was cancelled
+            vi.advanceTimersByTime(300);
+            expect(events.filter(e => e.source === "wheel" && e.phase === "end").length).toBe(1);
+            vi.useRealTimers();
+        });
+
+        it("terminates active session when clampToData, constraints, or linkGroups change", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 100 });
+            controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 150, y: 100 });
+            controller.flushPendingFrame();
+            expect(controller.isDragging).toBe(true);
+
+            // Change clampToData
+            controller.updateContext({
+                ...context,
+                navigationOptions: normalizeChartNavigationOptions({
+                    clampToData: false
+                })
+            });
+
+            expect(controller.isDragging).toBe(false);
+            expect(events.filter(e => e.phase === "end").length).toBe(1);
+        });
+    });
+
+    describe("Tenth Remediation Pointer Admission (PZV10-WP5 / Section 21)", () => {
+        it("rejects non-primary mouse button and does not retain in activePointers", () => {
+            const { context } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            // Right click (button = 2)
+            const down = controller.handlePointerDown(
+                { button: 2, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 100, y: 100 }
+            );
+
+            expect(down).toBe(false);
+            expect(controller.activePointersCount).toBe(0);
+        });
+
+        it("ignores third+ pointers and does not retain them", () => {
+            const { context } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, { x: 200, y: 150 });
+            expect(controller.activePointersCount).toBe(2);
+
+            // Third pointer arriving
+            const down3 = controller.handlePointerDown(
+                { button: 0, pointerId: 3, pointerType: "touch" } as PointerEvent,
+                { x: 300, y: 150 }
+            );
+            expect(down3).toBe(false);
+            expect(controller.activePointersCount).toBe(2);
+        });
+
+        it("rolls back to 1-pointer state when second pointer has invalid pinch target", () => {
+            const { context } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            // Pointer 1 inside plot
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
+            expect(controller.activePointersCount).toBe(1);
+
+            // Pointer 2 far outside plot causing centroid to have no valid target
+            const down2 = controller.handlePointerDown(
+                { button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent,
+                { x: -500, y: -500 }
+            );
+
+            expect(down2).toBe(false);
+            expect(controller.activePointersCount).toBe(1); // Pointer 2 was NOT retained!
+        });
+
+        it("retains first touch pointer when drag is disabled as a future pinch candidate", () => {
+            const { context } = createMockContext({
+                navigationOptions: normalizeChartNavigationOptions({
+                    dragPan: false,
+                    pinchZoom: true
+                })
+            });
+            const controller = new ChartViewportGestureController(context);
+
+            // Touch 1 down: returns false (no drag), but retained in activePointers
+            const down1 = controller.handlePointerDown(
+                { button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent,
+                { x: 100, y: 150 }
+            );
+            expect(down1).toBe(false);
+            expect(controller.activePointersCount).toBe(1);
+
+            // Touch 2 down: starts pinch zoom
+            const down2 = controller.handlePointerDown(
+                { button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent,
+                { x: 200, y: 150 }
+            );
+            expect(down2).toBe(true);
+            expect(controller.isPinching).toBe(true);
+        });
+    });
 });

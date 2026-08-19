@@ -466,4 +466,331 @@ describe("CartesianAxisCoordinateSpace", () => {
             expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 100, y: 300 }, plotRect)).toEqual({ x: 100, y: 230 });
         });
     });
+
+    describe("Category Performance & Linear Index Construction (PZV10-001 / Section 6)", () => {
+        it("scales with viewport size and retains base index for large base + small viewport", () => {
+            const baseCount = 100_000;
+            const baseDomain: string[] = [];
+            for (let i = 0; i < baseCount; i++) {
+                baseDomain.push(`cat_${i}`);
+            }
+
+            const baseScale = CartesianScaleFactory.createBandScale({
+                domain: baseDomain,
+                range: [0, 50000]
+            });
+
+            const viewportCount = 100;
+            const viewportDomain = baseDomain.slice(500, 600);
+            const viewportScale = CartesianScaleFactory.createBandScale({
+                domain: viewportDomain,
+                range: [0, 500]
+            });
+
+            const snap: CartesianAxisCoordinateSnapshot = {
+                baseDomain,
+                baseScale,
+                range: [0, 500],
+                ref: { axis: "x", axisId: "x-cat-large" },
+                resolvedType: "category",
+                valid: true,
+                viewportDomain,
+                viewportScale
+            };
+
+            const space = new CartesianAxisCoordinateSpace(new Map([["x-cat-large", snap]]), new Map());
+            const catSnap = space.get({ axis: "x", axisId: "x-cat-large" });
+
+            expect(catSnap?.categoryIndex).toBeDefined();
+            // Visible items only in byKey
+            expect(catSnap?.categoryIndex?.byKey.size).toBe(viewportCount);
+
+            // Lazy resolution of base-only category
+            const baseOnlyGeom = space.resolveCategoryByKey({ axis: "x", axisId: "x-cat-large" }, "cat_10", "base");
+            expect(baseOnlyGeom).toBeDefined();
+            expect(baseOnlyGeom?.baseIndex).toBe(10);
+            expect(baseOnlyGeom?.visibleInViewport).toBe(false);
+            expect(baseOnlyGeom?.viewportIndex).toBeUndefined();
+
+            // Viewport lookup of visible category
+            const visibleGeom = space.resolveCategoryByKey({ axis: "x", axisId: "x-cat-large" }, "cat_505", "viewport");
+            expect(visibleGeom).toBeDefined();
+            expect(visibleGeom?.baseIndex).toBe(505);
+            expect(visibleGeom?.viewportIndex).toBe(5);
+            expect(visibleGeom?.visibleInViewport).toBe(true);
+
+            // Viewport lookup of non-visible category returns undefined
+            expect(space.resolveCategoryByKey({ axis: "x", axisId: "x-cat-large" }, "cat_10", "viewport")).toBeUndefined();
+        });
+
+        it("constructs 10,000 category full viewport without quadratic scan", () => {
+            const count = 10_000;
+            const domain: string[] = [];
+            for (let i = 0; i < count; i++) {
+                domain.push(`item_${i}`);
+            }
+
+            const scale = CartesianScaleFactory.createBandScale({
+                domain,
+                range: [0, 5000]
+            });
+
+            const snap: CartesianAxisCoordinateSnapshot = {
+                baseDomain: domain,
+                baseScale: scale,
+                range: [0, 5000],
+                ref: { axis: "x", axisId: "x-cat-10k" },
+                resolvedType: "category",
+                valid: true,
+                viewportDomain: domain,
+                viewportScale: scale
+            };
+
+            const space = new CartesianAxisCoordinateSpace(new Map([["x-cat-10k", snap]]), new Map());
+            const catSnap = space.get({ axis: "x", axisId: "x-cat-10k" });
+            expect(catSnap?.categoryIndex?.byKey.size).toBe(count);
+
+            const midGeom = space.resolveCategoryByKey({ axis: "x", axisId: "x-cat-10k" }, "item_5000");
+            expect(midGeom?.baseIndex).toBe(5000);
+            expect(midGeom?.viewportIndex).toBe(5000);
+        });
+
+        it("matches reference linear scan query equivalence across interior, gaps, midpoints, and boundaries", () => {
+            const domain = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon"];
+            const scale = CartesianScaleFactory.createBandScale({
+                domain,
+                range: [0, 500],
+                paddingInner: 0.2,
+                paddingOuter: 0.1
+            });
+
+            const snap: CartesianAxisCoordinateSnapshot = {
+                baseDomain: domain,
+                baseScale: scale,
+                range: [0, 500],
+                ref: { axis: "x", axisId: "x-equiv" },
+                resolvedType: "category",
+                valid: true,
+                viewportDomain: domain,
+                viewportScale: scale
+            };
+
+            const space = new CartesianAxisCoordinateSpace(new Map([["x-equiv", snap]]), new Map());
+
+            // Reference linear resolver
+            const bandwidth = scale.bandwidth();
+            const referenceResolveAtPixel = (px: number): string => {
+                // Pass 1: exact band
+                for (let i = 0; i < domain.length; i++) {
+                    const k = domain[i];
+                    const start = scale.map(k)!;
+                    const end = start + bandwidth;
+                    const isLast = i === domain.length - 1;
+                    if (px >= start && (isLast ? px <= end : px < end)) {
+                        return k;
+                    }
+                }
+                // Pass 2: nearest center
+                let bestK = domain[0];
+                let bestDist = Infinity;
+                for (let i = 0; i < domain.length; i++) {
+                    const k = domain[i];
+                    const center = scale.map(k)! + bandwidth / 2;
+                    const dist = Math.abs(px - center);
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        bestK = k;
+                    }
+                }
+                return bestK;
+            };
+
+            const testPixels = [-50, 0, 10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550];
+            for (const px of testPixels) {
+                const opt = space.resolveCategoryAtPixel({ axis: "x", axisId: "x-equiv" }, px);
+                const ref = referenceResolveAtPixel(px);
+                expect(opt?.key).toBe(ref);
+            }
+        });
+    });
+
+    describe("Continuous Semantic Coordinate API (PZV10-010 / Section 28 & 29)", () => {
+        const types = [
+            { type: "linear", domain: [0, 100], val: 42 },
+            { type: "log", domain: [1, 1000], val: 100 },
+            { type: "log", domain: [-1000, -1], val: -100 },
+            { type: "symlog", domain: [-100, 100], val: 0 },
+            { type: "pow", domain: [0, 100], val: 25 },
+            { type: "sqrt", domain: [0, 100], val: 49 }
+        ] as const;
+
+        for (const { type, domain, val } of types) {
+            it(`correctly maps and resolves continuous value round-trip for ${type} scale (${domain[0]}..${domain[1]})`, () => {
+                const scale = CartesianScaleFactory.createExactPositionScale({
+                    type,
+                    domain: domain as [number, number],
+                    range: [0, 500]
+                });
+
+                const snap: CartesianAxisCoordinateSnapshot = {
+                    baseDomain: domain,
+                    baseScale: scale,
+                    range: [0, 500],
+                    ref: { axis: "x", axisId: `x-${type}` },
+                    resolvedType: type,
+                    valid: true,
+                    viewportDomain: domain,
+                    viewportScale: scale
+                };
+
+                const space = new CartesianAxisCoordinateSpace(new Map([[snap.ref.axisId, snap]]), new Map());
+
+                const pixel = space.mapContinuousValue(snap.ref, val);
+                expect(pixel).toBeDefined();
+                expect(Number.isFinite(pixel)).toBe(true);
+
+                const resolved = space.resolveContinuousAtPixel(snap.ref, pixel!);
+                expect(resolved).toBeDefined();
+                expect(resolved?.axis).toBe("x");
+                expect(resolved?.axisId).toBe(snap.ref.axisId);
+                expect(resolved?.resolvedType).toBe(type);
+                expect((resolved?.value as number)).toBeCloseTo(val, 2);
+            });
+        }
+
+        it("correctly maps and resolves date/time scales", () => {
+            const d1 = new Date("2025-01-01T00:00:00Z");
+            const d2 = new Date("2025-01-10T00:00:00Z");
+            const target = new Date("2025-01-05T12:00:00Z");
+
+            for (const timeType of ["time", "utc"] as const) {
+                const scale = CartesianScaleFactory.createExactPositionScale({
+                    type: timeType,
+                    domain: [d1, d2],
+                    range: [0, 500]
+                });
+
+                const snap: CartesianAxisCoordinateSnapshot = {
+                    baseDomain: [d1, d2],
+                    baseScale: scale,
+                    range: [0, 500],
+                    ref: { axis: "x", axisId: `x-${timeType}` },
+                    resolvedType: timeType,
+                    valid: true,
+                    viewportDomain: [d1, d2],
+                    viewportScale: scale
+                };
+
+                const space = new CartesianAxisCoordinateSpace(new Map([[snap.ref.axisId, snap]]), new Map());
+
+                const pixel = space.mapContinuousValue(snap.ref, target);
+                expect(pixel).toBeCloseTo(250, 1);
+
+                const resolved = space.resolveContinuousAtPixel(snap.ref, pixel!);
+                expect(resolved).toBeDefined();
+                expect(resolved?.axis).toBe("x");
+                expect(resolved?.axisId).toBe(`x-${timeType}`);
+                expect(resolved?.resolvedType).toBe(timeType);
+                expect((resolved?.value as Date).getTime()).toBeCloseTo(target.getTime(), -3);
+            }
+        });
+
+        it("rejects invalid axes, category axes, and unknown axes with undefined", () => {
+            const dummyScale = CartesianScaleFactory.createExactPositionScale({
+                type: "linear",
+                domain: [0, 100],
+                range: [0, 500]
+            });
+            const bandScale = CartesianScaleFactory.createBandScale({
+                domain: ["A", "B"],
+                range: [0, 500]
+            });
+
+            const invalidSnap: CartesianAxisCoordinateSnapshot = {
+                baseDomain: [0, 100],
+                baseScale: dummyScale,
+                range: [0, 500],
+                ref: { axis: "x", axisId: "x-invalid" },
+                resolvedType: "linear",
+                valid: false,
+                viewportDomain: [0, 100],
+                viewportScale: dummyScale
+            };
+
+            const catSnap: CartesianAxisCoordinateSnapshot = {
+                baseDomain: ["A", "B"],
+                baseScale: bandScale,
+                range: [0, 500],
+                ref: { axis: "x", axisId: "x-cat" },
+                resolvedType: "category",
+                valid: true,
+                viewportDomain: ["A", "B"],
+                viewportScale: bandScale
+            };
+
+            const space = new CartesianAxisCoordinateSpace(
+                new Map([["x-invalid", invalidSnap], ["x-cat", catSnap]]),
+                new Map()
+            );
+
+            // Invalid axis
+            expect(space.resolveContinuousAtPixel({ axis: "x", axisId: "x-invalid" }, 250)).toBeUndefined();
+            expect(space.mapContinuousValue({ axis: "x", axisId: "x-invalid" }, 50)).toBeUndefined();
+
+            // Category axis
+            expect(space.resolveContinuousAtPixel({ axis: "x", axisId: "x-cat" }, 250)).toBeUndefined();
+            expect(space.mapContinuousValue({ axis: "x", axisId: "x-cat" }, "A")).toBeUndefined();
+
+            // Unknown axis
+            expect(space.resolveContinuousAtPixel({ axis: "x", axisId: "x-unknown" }, 250)).toBeUndefined();
+            expect(space.mapContinuousValue({ axis: "x", axisId: "x-unknown" }, 50)).toBeUndefined();
+
+            // Non-finite values
+            expect(space.resolveContinuousAtPixel({ axis: "x", axisId: "x-invalid" }, NaN)).toBeUndefined();
+            expect(space.mapContinuousValue({ axis: "x", axisId: "x-invalid" }, Infinity)).toBeUndefined();
+        });
+
+        it("distinguishes base vs viewport space in continuous resolution", () => {
+            const baseScale = CartesianScaleFactory.createExactPositionScale({
+                type: "linear",
+                domain: [0, 100],
+                range: [0, 500]
+            });
+            const vpScale = CartesianScaleFactory.createExactPositionScale({
+                type: "linear",
+                domain: [25, 75],
+                range: [0, 500]
+            });
+
+            const snap: CartesianAxisCoordinateSnapshot = {
+                baseDomain: [0, 100],
+                baseScale,
+                range: [0, 500],
+                ref: { axis: "x", axisId: "x-zoomed" },
+                resolvedType: "linear",
+                valid: true,
+                viewportDomain: [25, 75],
+                viewportScale: vpScale
+            };
+
+            const space = new CartesianAxisCoordinateSpace(new Map([["x-zoomed", snap]]), new Map());
+
+            // Viewport space: 25 maps to pixel 0
+            expect(space.mapContinuousValue(snap.ref, 25, "viewport")).toBe(0);
+            // Base space: 25 maps to pixel 125
+            expect(space.mapContinuousValue(snap.ref, 25, "base")).toBe(125);
+
+            // Pixel 250 in viewport space resolves to 50
+            const resVp = space.resolveContinuousAtPixel(snap.ref, 250, "viewport");
+            expect(resVp?.value).toBe(50);
+            // Pixel 250 in base space resolves to 50
+            const resBase = space.resolveContinuousAtPixel(snap.ref, 250, "base");
+            expect(resBase?.value).toBe(50);
+
+            // Pixel 0 in viewport space resolves to 25
+            expect(space.resolveContinuousAtPixel(snap.ref, 0, "viewport")?.value).toBe(25);
+            // Pixel 0 in base space resolves to 0
+            expect(space.resolveContinuousAtPixel(snap.ref, 0, "base")?.value).toBe(0);
+        });
+    });
 });

@@ -13,6 +13,7 @@ export type ViewportGestureCancelReason =
     | "destroy";
 
 export interface ChartViewportDragSession {
+    captureOwned: boolean;
     changedAxes: readonly ChartViewportAxisRef[];
     hasChanged: boolean;
     readonly initialViewport: InternalCartesianViewportState;

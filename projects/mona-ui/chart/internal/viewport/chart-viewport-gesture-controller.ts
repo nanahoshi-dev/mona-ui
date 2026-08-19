@@ -49,11 +49,33 @@ export interface ChartViewportGestureContext {
     releasePointerCapture?(pointerId: number, target?: Element | null): void;
 }
 
+function createNavigationTransformPolicySignature(
+    nav: NormalizedChartNavigationOptions,
+    constraints?: readonly ChartViewportConstraint[],
+    linkGroups?: readonly ChartViewportLinkGroup[]
+): string {
+    const effectiveConstraints = constraints ?? nav.constraints;
+    const effectiveLinkGroups = linkGroups ?? nav.linkGroups;
+    return JSON.stringify({
+        clampToData: nav.clampToData,
+        constraints: effectiveConstraints,
+        dragPan: nav.dragPan,
+        linkGroups: effectiveLinkGroups,
+        minVisibleCategories: nav.minVisibleCategories,
+        panAxes: nav.panAxes,
+        pinchZoom: nav.pinchZoom,
+        wheelSensitivity: nav.wheelSensitivity,
+        wheelZoom: nav.wheelZoom,
+        zoomAxes: nav.zoomAxes
+    });
+}
+
 export class ChartViewportGestureController {
     readonly #activePointers = new Map<number, ChartPoint>();
     readonly #cancelFrame: (handle: number) => void;
     #context: ChartViewportGestureContext;
     #currentAuthorityToken: object | number | undefined;
+    #currentPolicySignature: string;
     #dragSession: ChartViewportDragSession | null = null;
     #gestureFrameId: number | null = null;
     #isClickSuppressed = false;
@@ -69,6 +91,11 @@ export class ChartViewportGestureController {
     ) {
         this.#context = context;
         this.#currentAuthorityToken = context.authorityToken;
+        this.#currentPolicySignature = createNavigationTransformPolicySignature(
+            context.navigationOptions,
+            context.constraints,
+            context.linkGroups
+        );
         this.#requestFrame =
             requestFrame ??
             (typeof requestAnimationFrame === "function"
@@ -81,20 +108,44 @@ export class ChartViewportGestureController {
                 : handle => clearTimeout(handle));
     }
 
+    public get activePointersCount(): number {
+        return this.#activePointers.size;
+    }
+
     public updateContext(context: ChartViewportGestureContext): void {
         const tokenChanged =
             this.#currentAuthorityToken !== undefined &&
             context.authorityToken !== undefined &&
             this.#currentAuthorityToken !== context.authorityToken;
 
-        if (tokenChanged) {
+        const newPolicy = createNavigationTransformPolicySignature(
+            context.navigationOptions,
+            context.constraints,
+            context.linkGroups
+        );
+        const policyChanged =
+            this.#currentPolicySignature !== undefined &&
+            this.#currentPolicySignature !== newPolicy;
+
+        if (tokenChanged || policyChanged) {
             if (this.#dragSession || this.#pinchSession || this.#wheelSession) {
-                this.abortForAuthorityChange();
+                if (this.#gestureFrameId !== null) {
+                    this.#cancelFrame(this.#gestureFrameId);
+                    this.#gestureFrameId = null;
+                }
+                this.#flushPendingGestureFrame();
+                this.#finalizeWheel({ silent: false });
+                this.#finalizePinch({ releaseCapture: true, silent: false });
+                this.#finalizeDrag({
+                    releaseCapture: true,
+                    silent: this.#dragSession ? !this.#dragSession.isThresholdMet : false
+                });
             }
         }
 
         this.#context = context;
         this.#currentAuthorityToken = context.authorityToken;
+        this.#currentPolicySignature = newPolicy;
     }
 
     public flushPendingFrame(): void {
@@ -123,14 +174,27 @@ export class ChartViewportGestureController {
         const nav = this.#context.navigationOptions;
         if (!nav.enabled) return false;
 
-        this.#targetElement = targetElement ?? (event.target as Element | null);
-        this.#activePointers.set(event.pointerId, elementPoint);
+        // Mouse: only primary button (button === 0) is admitted
+        if (event.pointerType === "mouse" && event.button !== 0) {
+            return false;
+        }
 
-        // Check for pinch zoom start (2 pointers)
-        if (this.#activePointers.size === 2 && nav.pinchZoom) {
+        // Pointers limit: at most 2 pointers supported
+        if (this.#activePointers.size >= 2) {
+            return false;
+        }
+
+        this.#targetElement = targetElement ?? (event.target as Element | null);
+
+        // If 1 pointer already active, check if this 2nd pointer can start pinch zoom
+        if (this.#activePointers.size === 1) {
+            if (!nav.pinchZoom) {
+                return false;
+            }
+
             const entries = Array.from(this.#activePointers.entries());
             const p1 = entries[0][1];
-            const p2 = entries[1][1];
+            const p2 = elementPoint;
             const distance = Math.hypot(p2.x - p1.x, p2.y - p1.y);
             const centroid: ChartPoint = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
 
@@ -150,8 +214,12 @@ export class ChartViewportGestureController {
             });
 
             if (validSourceAxes.length === 0) {
+                // Invalid second pinch pointer: do not retain, keep prior 1-pointer state intact
                 return false;
             }
+
+            // Commit second pointer
+            this.#activePointers.set(event.pointerId, elementPoint);
 
             if (this.#dragSession) {
                 this.#flushPendingGestureFrame();
@@ -161,7 +229,7 @@ export class ChartViewportGestureController {
             this.#isClickSuppressed = true;
 
             const ptr1 = entries[0][0];
-            const ptr2 = entries[1][0];
+            const ptr2 = event.pointerId;
             this.#context.setPointerCapture?.(ptr1, this.#targetElement);
             this.#context.setPointerCapture?.(ptr2, this.#targetElement);
 
@@ -189,42 +257,50 @@ export class ChartViewportGestureController {
             return true;
         }
 
-        // Single pointer drag pan
-        if (event.button !== 0 || !nav.dragPan || this.#activePointers.size > 1) {
+        // 0 pointers active: first pointer arriving
+        if (nav.dragPan) {
+            const resolved = CartesianViewportTargetResolver.resolveTargets(
+                elementPoint,
+                this.#context.plotRect,
+                this.#context.axisScenes,
+                nav,
+                this.#context.orientation,
+                nav.panAxes,
+                this.#context.navigationProfile
+            );
+
+            const validSourceAxes = resolved.targetAxes.filter(ref => {
+                const snap = this.#context.coordinateSpace?.get(ref);
+                return snap !== undefined && snap.valid !== false;
+            });
+
+            if (validSourceAxes.length > 0) {
+                this.#activePointers.set(event.pointerId, elementPoint);
+                this.#dragSession = {
+                    captureOwned: false,
+                    changedAxes: [],
+                    hasChanged: false,
+                    initialViewport: this.#context.currentViewport,
+                    isThresholdMet: false,
+                    latestPoint: elementPoint,
+                    latestViewport: this.#context.currentViewport,
+                    pointerId: event.pointerId,
+                    sourceAxes: validSourceAxes,
+                    startPoint: elementPoint
+                };
+
+                this.#isClickSuppressed = false;
+                return true;
+            }
+        }
+
+        // Drag cannot start: for touch pointer when pinch is enabled, retain as future pinch candidate
+        if (nav.pinchZoom && event.pointerType === "touch") {
+            this.#activePointers.set(event.pointerId, elementPoint);
             return false;
         }
 
-        const resolved = CartesianViewportTargetResolver.resolveTargets(
-            elementPoint,
-            this.#context.plotRect,
-            this.#context.axisScenes,
-            nav,
-            this.#context.orientation,
-            nav.panAxes,
-            this.#context.navigationProfile
-        );
-
-        const validSourceAxes = resolved.targetAxes.filter(ref => {
-            const snap = this.#context.coordinateSpace?.get(ref);
-            return snap !== undefined && snap.valid !== false;
-        });
-
-        if (validSourceAxes.length === 0) return false;
-
-        this.#dragSession = {
-            changedAxes: [],
-            hasChanged: false,
-            initialViewport: this.#context.currentViewport,
-            isThresholdMet: false,
-            latestPoint: elementPoint,
-            latestViewport: this.#context.currentViewport,
-            pointerId: event.pointerId,
-            sourceAxes: validSourceAxes,
-            startPoint: elementPoint
-        };
-
-        this.#isClickSuppressed = false;
-        return true;
+        return false;
     }
 
     public handlePointerMove(event: PointerEvent, elementPoint: ChartPoint): boolean {
@@ -239,8 +315,12 @@ export class ChartViewportGestureController {
                     this.#flushPendingGestureFrame();
                     this.#finalizeDrag({ releaseCapture: true });
                 } else {
+                    const captureOwned = this.#dragSession.captureOwned;
                     this.#dragSession = null;
                     this.#activePointers.delete(event.pointerId);
+                    if (captureOwned) {
+                        this.#context.releasePointerCapture?.(event.pointerId, this.#targetElement);
+                    }
                     this.#context.onCursorChange(null);
                 }
                 return false;
@@ -271,6 +351,7 @@ export class ChartViewportGestureController {
                 );
                 if (totalDist >= 4) {
                     this.#dragSession.isThresholdMet = true;
+                    this.#dragSession.captureOwned = true;
                     this.#isClickSuppressed = true;
                     this.#context.onCursorChange("grabbing");
                     this.#context.setPointerCapture?.(event.pointerId, this.#targetElement);
@@ -297,13 +378,13 @@ export class ChartViewportGestureController {
     }
 
     public handlePointerLeave(event: PointerEvent): void {
-        // If active captured drag (threshold met), pointer capture owns continued movement - do not cancel
-        if (this.#dragSession && this.#dragSession.isThresholdMet && this.#dragSession.pointerId === event.pointerId) {
+        // If captured drag (threshold met or inherited from pinch), pointer capture owns continued movement - do not cancel
+        if (this.#dragSession && this.#dragSession.captureOwned && this.#dragSession.pointerId === event.pointerId) {
             return;
         }
 
-        // If pre-threshold drag candidate leaves without capture, remove silently
-        if (this.#dragSession && !this.#dragSession.isThresholdMet && this.#dragSession.pointerId === event.pointerId) {
+        // If uncaptured pre-threshold drag candidate leaves without capture, remove silently
+        if (this.#dragSession && !this.#dragSession.captureOwned && this.#dragSession.pointerId === event.pointerId) {
             this.#dragSession = null;
             this.#activePointers.delete(event.pointerId);
             this.#context.onCursorChange(null);
@@ -331,6 +412,8 @@ export class ChartViewportGestureController {
                 this.#finalizePinch({ releaseCapture: false });
                 this.#context.releasePointerCapture?.(event.pointerId, this.#targetElement);
 
+                let transitionedToDrag = false;
+
                 // 2 -> 1 Pointer Transition: check if remaining pointer can initiate drag seeded from latest pinch viewport
                 if (this.#activePointers.size === 1 && this.#context.navigationOptions.dragPan) {
                     const [remainingPointerId, remainingPoint] = Array.from(this.#activePointers.entries())[0];
@@ -348,7 +431,9 @@ export class ChartViewportGestureController {
                         return snap !== undefined && snap.valid !== false;
                     });
                     if (validSourceAxes.length > 0) {
+                        transitionedToDrag = true;
                         this.#dragSession = {
+                            captureOwned: true,
                             changedAxes: [],
                             hasChanged: false,
                             initialViewport: endedSessionLatestViewport,
@@ -359,6 +444,12 @@ export class ChartViewportGestureController {
                             sourceAxes: validSourceAxes,
                             startPoint: remainingPoint
                         };
+                    }
+                }
+
+                if (!transitionedToDrag) {
+                    for (const [remainingPointerId] of this.#activePointers) {
+                        this.#context.releasePointerCapture?.(remainingPointerId, this.#targetElement);
                     }
                 }
 
@@ -388,7 +479,7 @@ export class ChartViewportGestureController {
 
         if (this.#dragSession && this.#dragSession.pointerId === event.pointerId) {
             this.#flushPendingGestureFrame();
-            this.#finalizeDrag({ releaseCapture: true });
+            this.#finalizeDrag({ releaseCapture: true, silent: !this.#dragSession.isThresholdMet });
             return true;
         }
 
@@ -407,7 +498,7 @@ export class ChartViewportGestureController {
 
         if (this.#dragSession && this.#dragSession.pointerId === event.pointerId) {
             this.#flushPendingGestureFrame();
-            this.#finalizeDrag({ releaseCapture: false });
+            this.#finalizeDrag({ releaseCapture: false, silent: !this.#dragSession.isThresholdMet });
         }
     }
 
@@ -420,7 +511,7 @@ export class ChartViewportGestureController {
         const shouldEmitEnd = session.isThresholdMet && !options.silent;
         const finalViewport = session.latestViewport;
 
-        if (options.releaseCapture && session.isThresholdMet) {
+        if (options.releaseCapture && session.captureOwned) {
             this.#context.releasePointerCapture?.(session.pointerId, this.#targetElement);
         }
 
@@ -491,10 +582,11 @@ export class ChartViewportGestureController {
             this.#gestureFrameId = null;
         }
 
+        const wasDragThresholdMet = this.#dragSession?.isThresholdMet ?? false;
         this.#activePointers.clear();
         this.#finalizeWheel({ silent: false });
         this.#finalizePinch({ releaseCapture: true, silent: false });
-        this.#finalizeDrag({ releaseCapture: true, silent: false });
+        this.#finalizeDrag({ releaseCapture: true, silent: !wasDragThresholdMet });
     }
 
     public cancel(reason?: ViewportGestureCancelReason | string): void {
@@ -520,9 +612,10 @@ export class ChartViewportGestureController {
         }
 
         // Non-destroy cancel (e.g. "escape", "navigation-disabled"): balanced end
+        const wasDragThresholdMet = this.#dragSession?.isThresholdMet ?? false;
         this.#finalizeWheel({ silent: false });
         this.#finalizePinch({ releaseCapture: true, silent: false });
-        this.#finalizeDrag({ releaseCapture: true, silent: false });
+        this.#finalizeDrag({ releaseCapture: true, silent: !wasDragThresholdMet });
     }
 
     public destroy(): void {

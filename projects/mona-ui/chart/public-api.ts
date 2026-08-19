@@ -186,3 +186,11 @@ export type {
     ChartViewportWindow
 } from "./models/chart-viewport.models";
 
+export { CartesianAxisCoordinateSpace } from "./internal/viewport/cartesian-axis-coordinate-space";
+export type {
+    CartesianCategoryGeometryIndex,
+    ResolvedCategoryAtPixel,
+    ResolvedCategoryGeometry,
+    ResolvedContinuousCoordinate
+} from "./internal/viewport/cartesian-axis-coordinate-space";
+
