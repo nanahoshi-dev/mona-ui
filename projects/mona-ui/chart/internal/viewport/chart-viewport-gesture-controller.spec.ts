@@ -229,4 +229,88 @@ describe("ChartViewportGestureController", () => {
         expect(endEvent.source).toBe("pinch");
         expect(endEvent.phase).toBe("end");
     });
+
+    it("should return false on wheel zoom when at boundary and not ctrlKey", () => {
+        const { context } = createMockContext({
+            // Viewport already fully zoomed out to base domain and clampToData true
+            currentViewport: createEmptyInternalViewportState(),
+            navigationOptions: normalizeChartNavigationOptions({
+                clampToData: true,
+                wheelZoom: true
+            })
+        });
+        const controller = new ChartViewportGestureController(context);
+
+        // Zoom out (positive deltaY) when already at full boundary
+        const handled = controller.handleWheel(
+            { ctrlKey: false, deltaY: 100 } as WheelEvent,
+            { x: 250, y: 180 }
+        );
+
+        expect(handled).toBe(false);
+    });
+
+    it("should return true on ctrlKey wheel even when zoomFactor doesn't change to prevent page zoom", () => {
+        const { context } = createMockContext({
+            currentViewport: createEmptyInternalViewportState(),
+            navigationOptions: normalizeChartNavigationOptions({
+                clampToData: true,
+                wheelZoom: true
+            })
+        });
+        const controller = new ChartViewportGestureController(context);
+
+        const handled = controller.handleWheel(
+            { ctrlKey: true, deltaY: 100 } as WheelEvent,
+            { x: 250, y: 180 }
+        );
+
+        expect(handled).toBe(true);
+    });
+
+    it("should perform silent teardown on destroy() without emitting events", () => {
+        const { context, events } = createMockContext();
+        const controller = new ChartViewportGestureController(context);
+
+        controller.handlePointerDown(
+            { button: 0, pointerId: 1 } as PointerEvent,
+            { x: 100, y: 100 }
+        );
+        controller.handlePointerMove(
+            { pointerId: 1 } as PointerEvent,
+            { x: 150, y: 100 }
+        );
+        expect(controller.isDragging).toBe(true);
+
+        const eventCountBeforeDestroy = events.length;
+
+        // Destroy controller
+        controller.destroy();
+
+        expect(controller.isDragging).toBe(false);
+        // No end event was emitted during destroy
+        expect(events.length).toBe(eventCountBeforeDestroy);
+    });
+
+    it("should handle lostpointercapture event and end active drag gracefully", () => {
+        const { context, events } = createMockContext();
+        const controller = new ChartViewportGestureController(context);
+
+        controller.handlePointerDown(
+            { button: 0, pointerId: 5 } as PointerEvent,
+            { x: 100, y: 100 }
+        );
+        controller.handlePointerMove(
+            { pointerId: 5 } as PointerEvent,
+            { x: 120, y: 100 }
+        );
+        expect(controller.isDragging).toBe(true);
+
+        controller.handleLostPointerCapture({ pointerId: 5 } as PointerEvent);
+
+        expect(controller.isDragging).toBe(false);
+        const lastEvent = events[events.length - 1];
+        expect(lastEvent.source).toBe("drag");
+        expect(lastEvent.phase).toBe("end");
+    });
 });

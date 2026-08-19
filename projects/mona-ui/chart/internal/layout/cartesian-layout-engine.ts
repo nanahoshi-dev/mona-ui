@@ -86,6 +86,7 @@ import {
     type InternalCartesianViewportState
 } from "../viewport/cartesian-viewport-normalizer";
 import { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
+import { CartesianViewportReconciler } from "../viewport/cartesian-viewport-reconciler";
 import type { CartesianNavigationProfile } from "../viewport/cartesian-viewport-target-resolver";
 
 export interface CartesianXYLayoutRuntime {
@@ -383,19 +384,50 @@ export class CartesianLayoutEngine {
         }
 
         // Stage C: Viewport projection
+        const canonicalViewport = options.viewport
+            ? CartesianViewportReconciler.reconcile(options.viewport, baseCoordinateSpace, {
+                  clampToData: true
+              }).viewport
+            : undefined;
+
         const proj = CartesianMultiAxisCoordinator.projectViewport(
             prep,
             chrome,
-            options.viewport,
+            canonicalViewport,
             options.measurements
         );
 
-        const scene = this.#projectSeriesGeometry(runtime, proj, options.viewport, warnedDiagnosticSignatures);
+        const scene = this.#projectSeriesGeometry(runtime, proj, canonicalViewport, warnedDiagnosticSignatures);
         return { runtime, scene };
     }
 
     public static computeScene(options: CartesianLayoutOptions): CartesianXYChartScene {
         return this.compute(options).scene;
+    }
+
+    public static recomputeChrome(
+        runtime: CartesianXYLayoutRuntime,
+        containerWidth: number,
+        containerHeight: number,
+        measurements?: ReadonlyMap<string, { height: number; width: number }>
+    ): CartesianXYLayoutRuntime {
+        if (runtime.orientation === "horizontal") {
+            return CartesianHorizontalBarLayoutEngine.recomputeChrome(runtime, containerWidth, containerHeight, measurements);
+        }
+        const chrome = CartesianMultiAxisCoordinator.computeChrome(runtime.preparation, {
+            chartHeight: containerHeight,
+            chartWidth: containerWidth,
+            labelMeasurements: measurements ?? new Map()
+        });
+        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(runtime.preparation, chrome);
+        return {
+            ...runtime,
+            baseCoordinateSpace,
+            chrome,
+            containerHeight,
+            containerWidth,
+            plotRect: chrome.plotRect
+        };
     }
 
     public static projectViewportFastPath(

@@ -120,16 +120,49 @@ export class CartesianViewportOperationCoordinator {
         };
     }
 
+    public static previewTransform(
+        currentViewport: InternalCartesianViewportState,
+        coordinateSpace: CartesianAxisCoordinateSpace,
+        sourceAxes: readonly ChartViewportAxisRef[],
+        intent: CartesianViewportTransformIntent,
+        options?: CartesianViewportOperationOptions
+    ): { readonly accepted: boolean; readonly changed: boolean } {
+        if (!sourceAxes || sourceAxes.length === 0) {
+            return { accepted: false, changed: false };
+        }
+        const validSourceAxes = sourceAxes.filter(ref => {
+            const snap = coordinateSpace.get(ref);
+            return snap !== undefined && snap.valid !== false;
+        });
+        if (validSourceAxes.length === 0) {
+            return { accepted: false, changed: false };
+        }
+        const controllerResult = CartesianViewportController.applyTransform(
+            currentViewport,
+            coordinateSpace,
+            validSourceAxes,
+            intent,
+            {
+                clampToData: options?.clampToData,
+                constraints: options?.constraints,
+                minVisibleCategories: options?.minVisibleCategories
+            }
+        );
+        return {
+            accepted: true,
+            changed: controllerResult.changed
+        };
+    }
+
     public static setViewport(
         currentViewport: InternalCartesianViewportState,
         coordinateSpace: CartesianAxisCoordinateSpace,
         viewport: ChartViewportState,
         options?: CartesianViewportOperationOptions
     ): CartesianViewportOperationResult {
-        const resolvedAxisMap = coordinateSpace.toResolvedAxisInfoMap();
         const normalized = normalizeViewportState(
             viewport,
-            resolvedAxisMap,
+            coordinateSpace,
             {
                 clampToData: options?.clampToData,
                 constraints: options?.constraints,
@@ -175,33 +208,11 @@ export class CartesianViewportOperationCoordinator {
             };
         }
 
-        // Propagate links
-        const linkResult = CartesianViewportLinker.propagateLinks(
-            { x: nextX, y: nextY },
-            changedSourceAxes,
-            coordinateSpace,
-            options?.linkGroups,
-            {
-                clampToData: options?.clampToData,
-                constraints: options?.constraints,
-                minVisibleCategories: options?.minVisibleCategories,
-                warnedSignatures: options?.warnedSignatures
-            }
-        );
-
-        const changedAxesMap = new Map<string, ChartViewportAxisRef>();
-        for (const ax of changedSourceAxes) {
-            changedAxesMap.set(`${ax.axis}:${ax.axisId}`, ax);
-        }
-        for (const ax of linkResult.changedAxes) {
-            changedAxesMap.set(`${ax.axis}:${ax.axisId}`, ax);
-        }
-
         return {
             accepted: true,
             changed: true,
-            changedAxes: Array.from(changedAxesMap.values()),
-            viewport: linkResult.viewport
+            changedAxes: changedSourceAxes,
+            viewport: { x: nextX, y: nextY }
         };
     }
 
@@ -221,10 +232,10 @@ export class CartesianViewportOperationCoordinator {
             };
         }
 
-        const resolvedAxisMap = coordinateSpace.toResolvedAxisInfoMap();
         const nextX = new Map<string, InternalAxisViewport>(currentViewport.x);
         const nextY = new Map<string, InternalAxisViewport>(currentViewport.y);
         const changedSourceAxes: ChartViewportAxisRef[] = [];
+        const explicitAxisSet = new Set<string>();
         let anyAccepted = false;
 
         for (const win of windowList) {
@@ -233,15 +244,15 @@ export class CartesianViewportOperationCoordinator {
             const axisId = win.axisId;
             if (axis !== "x" && axis !== "y") continue;
 
-            const axisInfo = resolvedAxisMap[axis as "x" | "y"]?.get(axisId);
             const snapshot = coordinateSpace.get({ axis, axisId });
-            if (!axisInfo || !snapshot || !snapshot.valid) continue;
+            if (!snapshot || !snapshot.valid) continue;
 
+            explicitAxisSet.add(`${axis}:${axisId}`);
             anyAccepted = true;
             const constraint = options?.constraints?.find(c => c.axis === axis && c.axisId === axisId);
             const normalized = normalizeAxisWindow(
                 win,
-                axisInfo,
+                snapshot,
                 constraint,
                 {
                     clampToData: options?.clampToData,
@@ -281,7 +292,7 @@ export class CartesianViewportOperationCoordinator {
             };
         }
 
-        // Propagate links
+        // Propagate links to unsupplied siblings only
         const linkResult = CartesianViewportLinker.propagateLinks(
             { x: nextX, y: nextY },
             changedSourceAxes,
@@ -290,6 +301,7 @@ export class CartesianViewportOperationCoordinator {
             {
                 clampToData: options?.clampToData,
                 constraints: options?.constraints,
+                excludedAxes: explicitAxisSet,
                 minVisibleCategories: options?.minVisibleCategories,
                 warnedSignatures: options?.warnedSignatures
             }
@@ -393,10 +405,9 @@ export class CartesianViewportOperationCoordinator {
             return this.fit(currentViewport, coordinateSpace, targetAxes, options);
         }
 
-        const resolvedAxisMap = coordinateSpace.toResolvedAxisInfoMap();
         const normalizedDefault = normalizeViewportState(
             defaultViewport,
-            resolvedAxisMap,
+            coordinateSpace,
             {
                 clampToData: options?.clampToData,
                 constraints: options?.constraints,
@@ -405,18 +416,46 @@ export class CartesianViewportOperationCoordinator {
             }
         );
 
+        const isFullReset = !targetAxes || targetAxes.length === 0;
+        if (isFullReset) {
+            const changedAxes: ChartViewportAxisRef[] = [];
+            const nextX = new Map<string, InternalAxisViewport>();
+            const nextY = new Map<string, InternalAxisViewport>();
+
+            for (const [axisId, snap] of coordinateSpace.x) {
+                if (!snap.valid) continue;
+                const defWin = normalizedDefault.x.get(axisId);
+                const curWin = currentViewport.x.get(axisId);
+                if (defWin) nextX.set(axisId, defWin);
+                if (!areAxisViewportsEqual(curWin, defWin)) {
+                    changedAxes.push({ axis: "x", axisId });
+                }
+            }
+
+            for (const [axisId, snap] of coordinateSpace.y) {
+                if (!snap.valid) continue;
+                const defWin = normalizedDefault.y.get(axisId);
+                const curWin = currentViewport.y.get(axisId);
+                if (defWin) nextY.set(axisId, defWin);
+                if (!areAxisViewportsEqual(curWin, defWin)) {
+                    changedAxes.push({ axis: "y", axisId });
+                }
+            }
+
+            return {
+                accepted: true,
+                changed: changedAxes.length > 0,
+                changedAxes,
+                viewport: { x: nextX, y: nextY }
+            };
+        }
+
+        // Targeted reset
         const nextX = new Map<string, InternalAxisViewport>(currentViewport.x);
         const nextY = new Map<string, InternalAxisViewport>(currentViewport.y);
         const changedAxes: ChartViewportAxisRef[] = [];
 
-        const targets = targetAxes && targetAxes.length > 0
-            ? targetAxes
-            : [
-                  ...Array.from(coordinateSpace.x.keys()).map(axisId => ({ axis: "x" as const, axisId })),
-                  ...Array.from(coordinateSpace.y.keys()).map(axisId => ({ axis: "y" as const, axisId }))
-              ];
-
-        for (const target of targets) {
+        for (const target of targetAxes) {
             const defaultWin = target.axis === "x"
                 ? normalizedDefault.x.get(target.axisId)
                 : normalizedDefault.y.get(target.axisId);

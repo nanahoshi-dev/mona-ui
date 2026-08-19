@@ -91,6 +91,7 @@ export class CartesianViewportLinker {
         options?: {
             clampToData?: boolean;
             constraints?: readonly ChartViewportConstraint[];
+            excludedAxes?: ReadonlySet<string>;
             minVisibleCategories?: number;
             warnedSignatures?: Set<string>;
         }
@@ -128,6 +129,11 @@ export class CartesianViewportLinker {
 
                 for (const targetRef of group.axes) {
                     if (targetRef.axis === sourceRef.axis && targetRef.axisId === sourceRef.axisId) {
+                        continue;
+                    }
+
+                    const targetKey = `${targetRef.axis}:${targetRef.axisId}`;
+                    if (options?.excludedAxes?.has(targetKey)) {
                         continue;
                     }
 

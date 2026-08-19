@@ -22,7 +22,8 @@ import type { NormalizedChartNavigationOptions } from "./chart-navigation-option
 import type {
     ChartViewportDragSession,
     ChartViewportPinchSession,
-    ChartViewportWheelSession
+    ChartViewportWheelSession,
+    ViewportGestureCancelReason
 } from "./chart-viewport-gesture-session";
 import { clamp } from "../utils/number-utils";
 
@@ -124,15 +125,24 @@ export class ChartViewportGestureController {
                 this.#context.navigationProfile
             );
 
+            const validSourceAxes = resolved.targetAxes.filter(ref => {
+                const snap = this.#context.coordinateSpace?.get(ref);
+                return snap !== undefined && snap.valid !== false;
+            });
+
+            if (validSourceAxes.length === 0) {
+                return false;
+            }
+
             if (this.#dragSession) {
                 this.#flushPendingGestureFrame();
                 if (this.#dragSession.isThresholdMet) {
                     this.#dispatchChangeEvent(
                         "drag",
                         "end",
-                        this.#context.currentViewport,
-                        this.#dragSession.initialViewport,
-                        this.#dragSession.sourceAxes
+                        this.#dragSession.latestViewport,
+                        this.#dragSession.latestViewport,
+                        []
                     );
                 }
                 this.#dragSession = null;
@@ -140,14 +150,22 @@ export class ChartViewportGestureController {
 
             this.#isClickSuppressed = true;
 
+            const ptr1 = entries[0][0];
+            const ptr2 = entries[1][0];
+            this.#context.setPointerCapture?.(ptr1, this.#targetElement);
+            this.#context.setPointerCapture?.(ptr2, this.#targetElement);
+
             this.#pinchSession = {
+                changedAxes: [],
+                hasChanged: false,
                 initialDistance: distance > 0 ? distance : 1,
                 initialViewport: this.#context.currentViewport,
                 latestCentroid: centroid,
                 latestDistance: distance,
-                pointer1Id: entries[0][0],
-                pointer2Id: entries[1][0],
-                sourceAxes: resolved.targetAxes,
+                latestViewport: this.#context.currentViewport,
+                pointer1Id: ptr1,
+                pointer2Id: ptr2,
+                sourceAxes: validSourceAxes,
                 startCentroid: centroid
             };
 
@@ -156,7 +174,7 @@ export class ChartViewportGestureController {
                 "start",
                 this.#context.currentViewport,
                 this.#context.currentViewport,
-                resolved.targetAxes
+                []
             );
             return true;
         }
@@ -176,14 +194,22 @@ export class ChartViewportGestureController {
             this.#context.navigationProfile
         );
 
-        if (resolved.targetAxes.length === 0) return false;
+        const validSourceAxes = resolved.targetAxes.filter(ref => {
+            const snap = this.#context.coordinateSpace?.get(ref);
+            return snap !== undefined && snap.valid !== false;
+        });
+
+        if (validSourceAxes.length === 0) return false;
 
         this.#dragSession = {
+            changedAxes: [],
+            hasChanged: false,
             initialViewport: this.#context.currentViewport,
             isThresholdMet: false,
             latestPoint: elementPoint,
+            latestViewport: this.#context.currentViewport,
             pointerId: event.pointerId,
-            sourceAxes: resolved.targetAxes,
+            sourceAxes: validSourceAxes,
             startPoint: elementPoint
         };
 
@@ -226,9 +252,9 @@ export class ChartViewportGestureController {
                     this.#dispatchChangeEvent(
                         "drag",
                         "start",
-                        this.#context.currentViewport,
-                        this.#context.currentViewport,
-                        this.#dragSession.sourceAxes
+                        this.#dragSession.initialViewport,
+                        this.#dragSession.initialViewport,
+                        []
                     );
                 } else {
                     return false;
@@ -254,15 +280,21 @@ export class ChartViewportGestureController {
                 this.#flushPendingGestureFrame();
                 const endedSession = this.#pinchSession;
                 this.#pinchSession = null;
+
+                const ptr1 = endedSession.pointer1Id;
+                const ptr2 = endedSession.pointer2Id;
+                this.#context.releasePointerCapture?.(ptr1, this.#targetElement);
+                this.#context.releasePointerCapture?.(ptr2, this.#targetElement);
+
                 this.#dispatchChangeEvent(
                     "pinch",
                     "end",
-                    this.#context.currentViewport,
-                    endedSession.initialViewport,
-                    endedSession.sourceAxes
+                    endedSession.latestViewport,
+                    endedSession.latestViewport,
+                    []
                 );
 
-                // 2 -> 1 Pointer Transition: check if remaining pointer can initiate drag
+                // 2 -> 1 Pointer Transition: check if remaining pointer can initiate drag seeded from latest pinch viewport
                 if (this.#activePointers.size === 1 && this.#context.navigationOptions.dragPan) {
                     const [remainingPointerId, remainingPoint] = Array.from(this.#activePointers.entries())[0];
                     const resolved = CartesianViewportTargetResolver.resolveTargets(
@@ -274,13 +306,20 @@ export class ChartViewportGestureController {
                         this.#context.navigationOptions.panAxes,
                         this.#context.navigationProfile
                     );
-                    if (resolved.targetAxes.length > 0) {
+                    const validSourceAxes = resolved.targetAxes.filter(ref => {
+                        const snap = this.#context.coordinateSpace?.get(ref);
+                        return snap !== undefined && snap.valid !== false;
+                    });
+                    if (validSourceAxes.length > 0) {
                         this.#dragSession = {
-                            initialViewport: this.#context.currentViewport,
+                            changedAxes: [],
+                            hasChanged: false,
+                            initialViewport: endedSession.latestViewport,
                             isThresholdMet: false,
                             latestPoint: remainingPoint,
+                            latestViewport: endedSession.latestViewport,
                             pointerId: remainingPointerId,
-                            sourceAxes: resolved.targetAxes,
+                            sourceAxes: validSourceAxes,
                             startPoint: remainingPoint
                         };
                     }
@@ -293,12 +332,13 @@ export class ChartViewportGestureController {
         if (this.#dragSession && this.#dragSession.pointerId === event.pointerId) {
             if (this.#dragSession.isThresholdMet) {
                 this.#flushPendingGestureFrame();
+                const finalViewport = this.#dragSession.latestViewport;
                 this.#dispatchChangeEvent(
                     "drag",
                     "end",
-                    this.#context.currentViewport,
-                    this.#dragSession.initialViewport,
-                    this.#dragSession.sourceAxes
+                    finalViewport,
+                    finalViewport,
+                    []
                 );
             }
             this.#dragSession = null;
@@ -318,12 +358,18 @@ export class ChartViewportGestureController {
                 this.#flushPendingGestureFrame();
                 const endedSession = this.#pinchSession;
                 this.#pinchSession = null;
+
+                const ptr1 = endedSession.pointer1Id;
+                const ptr2 = endedSession.pointer2Id;
+                this.#context.releasePointerCapture?.(ptr1, this.#targetElement);
+                this.#context.releasePointerCapture?.(ptr2, this.#targetElement);
+
                 this.#dispatchChangeEvent(
                     "pinch",
                     "end",
-                    this.#context.currentViewport,
-                    endedSession.initialViewport,
-                    endedSession.sourceAxes
+                    endedSession.latestViewport,
+                    endedSession.latestViewport,
+                    []
                 );
                 return true;
             }
@@ -332,12 +378,13 @@ export class ChartViewportGestureController {
         if (this.#dragSession && this.#dragSession.pointerId === event.pointerId) {
             if (this.#dragSession.isThresholdMet) {
                 this.#flushPendingGestureFrame();
+                const finalViewport = this.#dragSession.latestViewport;
                 this.#dispatchChangeEvent(
                     "drag",
                     "end",
-                    this.#context.currentViewport,
-                    this.#dragSession.initialViewport,
-                    this.#dragSession.sourceAxes
+                    finalViewport,
+                    finalViewport,
+                    []
                 );
             }
             this.#dragSession = null;
@@ -348,7 +395,42 @@ export class ChartViewportGestureController {
         return false;
     }
 
-    public cancel(reason?: string): void {
+    public handleLostPointerCapture(event: PointerEvent): void {
+        this.#activePointers.delete(event.pointerId);
+
+        if (this.#pinchSession) {
+            if (event.pointerId === this.#pinchSession.pointer1Id || event.pointerId === this.#pinchSession.pointer2Id) {
+                this.#flushPendingGestureFrame();
+                const endedSession = this.#pinchSession;
+                this.#pinchSession = null;
+                this.#dispatchChangeEvent(
+                    "pinch",
+                    "end",
+                    endedSession.latestViewport,
+                    endedSession.latestViewport,
+                    []
+                );
+            }
+        }
+
+        if (this.#dragSession && this.#dragSession.pointerId === event.pointerId) {
+            if (this.#dragSession.isThresholdMet) {
+                this.#flushPendingGestureFrame();
+                const finalViewport = this.#dragSession.latestViewport;
+                this.#dispatchChangeEvent(
+                    "drag",
+                    "end",
+                    finalViewport,
+                    finalViewport,
+                    []
+                );
+            }
+            this.#dragSession = null;
+            this.#context.onCursorChange(null);
+        }
+    }
+
+    public cancel(reason?: ViewportGestureCancelReason | string): void {
         if (this.#gestureFrameId !== null) {
             this.#cancelFrame(this.#gestureFrameId);
             this.#gestureFrameId = null;
@@ -356,43 +438,68 @@ export class ChartViewportGestureController {
 
         this.#activePointers.clear();
 
+        if (reason === "destroy") {
+            // Silent teardown: do not emit user-facing viewportChange lifecycle output
+            if (this.#wheelSession && this.#wheelSession.endTimerId !== null) {
+                clearTimeout(this.#wheelSession.endTimerId);
+            }
+            if (this.#dragSession && this.#dragSession.isThresholdMet) {
+                this.#context.releasePointerCapture?.(this.#dragSession.pointerId, this.#targetElement);
+            }
+            if (this.#pinchSession) {
+                this.#context.releasePointerCapture?.(this.#pinchSession.pointer1Id, this.#targetElement);
+                this.#context.releasePointerCapture?.(this.#pinchSession.pointer2Id, this.#targetElement);
+            }
+            this.#wheelSession = null;
+            this.#pinchSession = null;
+            this.#dragSession = null;
+            this.#isClickSuppressed = false;
+            this.#context.onCursorChange(null);
+            return;
+        }
+
         if (this.#wheelSession) {
             if (this.#wheelSession.endTimerId !== null) {
                 clearTimeout(this.#wheelSession.endTimerId);
             }
+            const finalViewport = this.#wheelSession.latestViewport;
             this.#dispatchChangeEvent(
                 "wheel",
                 "end",
-                this.#context.currentViewport,
-                this.#wheelSession.initialViewport,
-                this.#wheelSession.sourceAxes
+                finalViewport,
+                finalViewport,
+                []
             );
             this.#wheelSession = null;
         }
         if (this.#pinchSession) {
+            this.#context.releasePointerCapture?.(this.#pinchSession.pointer1Id, this.#targetElement);
+            this.#context.releasePointerCapture?.(this.#pinchSession.pointer2Id, this.#targetElement);
+            const finalViewport = this.#pinchSession.latestViewport;
             this.#dispatchChangeEvent(
                 "pinch",
                 "end",
-                this.#context.currentViewport,
-                this.#pinchSession.initialViewport,
-                this.#pinchSession.sourceAxes
+                finalViewport,
+                finalViewport,
+                []
             );
             this.#pinchSession = null;
         }
         if (this.#dragSession) {
             if (this.#dragSession.isThresholdMet) {
                 this.#context.releasePointerCapture?.(this.#dragSession.pointerId, this.#targetElement);
+                const finalViewport = this.#dragSession.latestViewport;
                 this.#dispatchChangeEvent(
                     "drag",
                     "end",
-                    this.#context.currentViewport,
-                    this.#dragSession.initialViewport,
-                    this.#dragSession.sourceAxes
+                    finalViewport,
+                    finalViewport,
+                    []
                 );
             }
             this.#dragSession = null;
         }
-        this.#isClickSuppressed = false;
+
         this.#context.onCursorChange(null);
     }
 
@@ -423,31 +530,85 @@ export class ChartViewportGestureController {
 
         if (validSourceAxes.length === 0) return false;
 
-        let deltaY = event.deltaY;
+        let rawDeltaY = event.deltaY;
         if (event.deltaMode === 1) {
-            deltaY *= 16;
+            rawDeltaY *= 16;
         } else if (event.deltaMode === 2) {
-            deltaY *= this.#context.plotRect.height;
+            rawDeltaY *= this.#context.plotRect.height;
         }
 
+        const sensitivity = nav.wheelSensitivity ?? 0.0015;
+        const normalizedDelta = rawDeltaY * sensitivity;
+
+        const isCtrlKey = event.ctrlKey === true;
+
+        // Synchronous preflight check for first event
         if (!this.#wheelSession) {
+            const rawFactor = Math.exp(-normalizedDelta);
+            const factor = clamp(rawFactor, 0.5, 2.0);
+            const preflight = CartesianViewportOperationCoordinator.previewTransform(
+                this.#context.currentViewport,
+                this.#context.coordinateSpace,
+                validSourceAxes,
+                {
+                    anchor: elementPoint,
+                    zoomFactor: factor
+                },
+                {
+                    clampToData: nav.clampToData,
+                    constraints: this.#context.constraints,
+                    minVisibleCategories: nav.minVisibleCategories
+                }
+            );
+
+            if (!preflight.accepted || (!preflight.changed && !isCtrlKey)) {
+                // Hard boundary or cannot transform: browser owns ordinary wheel
+                return false;
+            }
+
             this.#wheelSession = {
-                accumulatedDeltaY: 0,
+                anchor: elementPoint,
+                changedAxes: [],
                 endTimerId: null,
+                hasChanged: false,
                 initialViewport: this.#context.currentViewport,
                 latestAnchor: elementPoint,
-                sourceAxes: validSourceAxes
+                latestViewport: this.#context.currentViewport,
+                sourceAxes: validSourceAxes,
+                totalNormalizedDeltaY: 0
             };
+
             this.#dispatchChangeEvent(
                 "wheel",
                 "start",
                 this.#context.currentViewport,
                 this.#context.currentViewport,
-                validSourceAxes
+                []
             );
+        } else {
+            // If pointer moved significantly (> 8px) during ongoing wheel, restart session anchor cleanly
+            const distFromAnchor = Math.hypot(
+                elementPoint.x - this.#wheelSession.anchor.x,
+                elementPoint.y - this.#wheelSession.anchor.y
+            );
+            if (distFromAnchor > 8) {
+                this.#flushPendingGestureFrame();
+                const prevProposal = this.#wheelSession.latestViewport;
+                this.#wheelSession = {
+                    anchor: elementPoint,
+                    changedAxes: [],
+                    endTimerId: null,
+                    hasChanged: false,
+                    initialViewport: prevProposal,
+                    latestAnchor: elementPoint,
+                    latestViewport: prevProposal,
+                    sourceAxes: validSourceAxes,
+                    totalNormalizedDeltaY: 0
+                };
+            }
         }
 
-        this.#wheelSession.accumulatedDeltaY += deltaY;
+        this.#wheelSession.totalNormalizedDeltaY += normalizedDelta;
         this.#wheelSession.latestAnchor = elementPoint;
 
         if (this.#wheelSession.endTimerId !== null) {
@@ -462,9 +623,9 @@ export class ChartViewportGestureController {
                 this.#dispatchChangeEvent(
                     "wheel",
                     "end",
-                    this.#context.currentViewport,
-                    endedSession.initialViewport,
-                    endedSession.sourceAxes
+                    endedSession.latestViewport,
+                    endedSession.latestViewport,
+                    []
                 );
             }
         }, 150);
@@ -514,11 +675,15 @@ export class ChartViewportGestureController {
                 coordinatorOptions
             );
             if (res.changed) {
+                const prevProposal = this.#dragSession.latestViewport;
+                this.#dragSession.latestViewport = res.viewport;
+                this.#dragSession.changedAxes = res.changedAxes;
+                this.#dragSession.hasChanged = true;
                 this.#dispatchChangeEvent(
                     "drag",
                     "update",
                     res.viewport,
-                    this.#context.currentViewport,
+                    prevProposal,
                     res.changedAxes
                 );
             }
@@ -543,40 +708,45 @@ export class ChartViewportGestureController {
                 coordinatorOptions
             );
             if (res.changed) {
+                const prevProposal = this.#pinchSession.latestViewport;
+                this.#pinchSession.latestViewport = res.viewport;
+                this.#pinchSession.changedAxes = res.changedAxes;
+                this.#pinchSession.hasChanged = true;
                 this.#dispatchChangeEvent(
                     "pinch",
                     "update",
                     res.viewport,
-                    this.#context.currentViewport,
+                    prevProposal,
                     res.changedAxes
                 );
             }
         }
 
         // 3. Flush Wheel
-        if (this.#wheelSession && this.#wheelSession.accumulatedDeltaY !== 0) {
-            const sensitivity = this.#context.navigationOptions.wheelSensitivity ?? 0.0015;
-            const normalizedDelta = this.#wheelSession.accumulatedDeltaY * sensitivity;
-            const rawFactor = Math.exp(-normalizedDelta);
+        if (this.#wheelSession && this.#wheelSession.totalNormalizedDeltaY !== 0) {
+            const rawFactor = Math.exp(-this.#wheelSession.totalNormalizedDeltaY);
             const factor = clamp(rawFactor, 0.5, 2.0);
-            this.#wheelSession.accumulatedDeltaY = 0;
 
             const res = CartesianViewportOperationCoordinator.transform(
-                this.#context.currentViewport,
+                this.#wheelSession.initialViewport,
                 this.#context.coordinateSpace,
                 this.#wheelSession.sourceAxes,
                 {
-                    anchor: this.#wheelSession.latestAnchor,
+                    anchor: this.#wheelSession.anchor,
                     zoomFactor: factor
                 },
                 coordinatorOptions
             );
             if (res.changed) {
+                const prevProposal = this.#wheelSession.latestViewport;
+                this.#wheelSession.latestViewport = res.viewport;
+                this.#wheelSession.changedAxes = res.changedAxes;
+                this.#wheelSession.hasChanged = true;
                 this.#dispatchChangeEvent(
                     "wheel",
                     "update",
                     res.viewport,
-                    this.#context.currentViewport,
+                    prevProposal,
                     res.changedAxes
                 );
             }

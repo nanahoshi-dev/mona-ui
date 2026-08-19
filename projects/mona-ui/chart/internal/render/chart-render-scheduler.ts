@@ -48,13 +48,22 @@ export class ChartRenderScheduler {
         }
     }
 
+    public consume(reason: ChartInvalidationReason): void {
+        this.#pendingReason &= ~reason;
+        if (this.#pendingReason === 0 && this.#frameId !== null) {
+            this.#cancelFrame(this.#frameId);
+            this.#frameId = null;
+        }
+    }
+
     public flushStructural(): void {
         const structuralMask =
             ChartInvalidationReason.Data |
             ChartInvalidationReason.Layout |
             ChartInvalidationReason.Size |
             ChartInvalidationReason.Visibility |
-            ChartInvalidationReason.Style;
+            ChartInvalidationReason.Style |
+            ChartInvalidationReason.Chrome;
 
         const structuralReason = this.#pendingReason & structuralMask;
         if (structuralReason === 0) {

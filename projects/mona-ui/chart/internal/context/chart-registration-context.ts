@@ -51,7 +51,8 @@ export const enum ChartInvalidationReason {
     Interaction = 1 << 3,
     Size = 1 << 4,
     Visibility = 1 << 5,
-    Viewport = 1 << 6
+    Viewport = 1 << 6,
+    Chrome = 1 << 7
 }
 
 export function hasInvalidationReason(

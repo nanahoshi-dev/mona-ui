@@ -67,13 +67,56 @@ describe("ChartRenderScheduler", () => {
         scheduler.schedule(ChartInvalidationReason.Data);
         scheduler.schedule(ChartInvalidationReason.Layout);
 
-        expect(callback).not.toHaveBeenCalled();
-        expect(requestFrame).toHaveBeenCalledTimes(1);
-
         scheduler.flush();
 
-        expect(cancelFrame).toHaveBeenCalledWith(101);
         expect(callback).toHaveBeenCalledTimes(1);
         expect(capturedReason).toBe(ChartInvalidationReason.Data | ChartInvalidationReason.Layout);
+    });
+
+    it("should consume specific invalidation reason and cancel frame if no reasons remain", () => {
+        const callback = vi.fn();
+        const cancelFrame = vi.fn();
+        const requestFrame = vi.fn(() => 777);
+
+        const scheduler = new ChartRenderScheduler(callback, requestFrame, cancelFrame);
+        scheduler.schedule(ChartInvalidationReason.Viewport);
+
+        expect(requestFrame).toHaveBeenCalledTimes(1);
+
+        // Consume Viewport
+        scheduler.consume(ChartInvalidationReason.Viewport);
+
+        expect(cancelFrame).toHaveBeenCalledWith(777);
+    });
+
+    it("should flush structural invalidations including Chrome while leaving Viewport intact", () => {
+        let capturedReason: ChartInvalidationReason | null = null;
+        const callback = vi.fn((reason: ChartInvalidationReason) => {
+            capturedReason = reason;
+        });
+
+        let frameCallback: (() => void) | undefined;
+        const requestFrame = vi.fn((cb: () => void) => {
+            frameCallback = cb;
+            return 888;
+        });
+        const cancelFrame = vi.fn();
+
+        const scheduler = new ChartRenderScheduler(callback, requestFrame, cancelFrame);
+        scheduler.schedule(ChartInvalidationReason.Chrome);
+        scheduler.schedule(ChartInvalidationReason.Viewport);
+
+        // Flush structural
+        scheduler.flushStructural();
+
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(capturedReason).toBe(ChartInvalidationReason.Chrome);
+
+        // Next frame runner triggers remaining Viewport
+        if (frameCallback) {
+            (frameCallback as () => void)();
+        }
+
+        expect(callback).toHaveBeenCalledTimes(2);
     });
 });

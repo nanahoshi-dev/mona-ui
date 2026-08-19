@@ -407,9 +407,10 @@ export function normalizeViewportState(
         return { x: xMap, y: yMap };
     }
 
+    const isCoordinateSpace = "get" in resolvedAxes && typeof resolvedAxes.get === "function";
     const resolvedMap: ResolvedAxisInfoMap =
-        "toResolvedAxisInfoMap" in resolvedAxes && typeof resolvedAxes.toResolvedAxisInfoMap === "function"
-            ? resolvedAxes.toResolvedAxisInfoMap()
+        isCoordinateSpace && typeof (resolvedAxes as CartesianAxisCoordinateSpace).toResolvedAxisInfoMap === "function"
+            ? (resolvedAxes as CartesianAxisCoordinateSpace).toResolvedAxisInfoMap()
             : (resolvedAxes as ResolvedAxisInfoMap);
 
     const seenAxes = new Set<string>();
@@ -439,10 +440,11 @@ export function normalizeViewportState(
         }
         seenAxes.add(axisKey);
 
-        const axisMap = axis === "x" ? resolvedMap.x : resolvedMap.y;
-        const axisInfo = axisMap.get(axisId);
+        const axisInfo: ResolvedAxisInfo | CartesianAxisCoordinateSnapshot | undefined = isCoordinateSpace
+            ? (resolvedAxes as CartesianAxisCoordinateSpace).get({ axis, axisId })
+            : (axis === "x" ? resolvedMap.x : resolvedMap.y).get(axisId);
 
-        if (!axisInfo) {
+        if (!axisInfo || ("valid" in axisInfo && axisInfo.valid === false)) {
             ChartDiagnostics.warnOnce(
                 warned,
                 `Viewport specified for unrecognized axis "${axis}" with id "${axisId}".`,
