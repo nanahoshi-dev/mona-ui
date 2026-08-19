@@ -154,4 +154,132 @@ describe("CartesianMultiAxisCoordinator", () => {
         expect(scene2.sideOffset).toBeGreaterThan(0);
         expect(scene2.sideOffset).toBe((scene1.gutter ?? 0) + 8); // axisSpacing = 8
     });
+
+    it("should center category ticks in the middle of each category band (Bug 2)", () => {
+        const x1 = createMockXAxis({ axisId: signal("x-cat"), field: signal("month"), type: signal("category") });
+        const y1 = createMockYAxis({ axisId: signal("y-val") });
+        const s1 = createMockLineSeries({ field: signal("val"), id: "s1" });
+
+        const data = [
+            { month: "Jan", val: 10 },
+            { month: "Feb", val: 20 },
+            { month: "Mar", val: 30 }
+        ];
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve([x1], [y1]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([s1], axisResolution);
+
+        const res = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 300,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            rootData: data,
+            rootXField: "month"
+        });
+
+        const xScene = res.axisScenes.find(a => a.axisId === "x-cat")!;
+        const xScale = res.scaleRegistry.getXScale("x-cat")! as import("../scale/cartesian-scale-factory").BandScale;
+        const bandwidth = xScale.bandwidth();
+
+        expect(bandwidth).toBeGreaterThan(0);
+        expect(xScene.ticks.length).toBe(3);
+
+        for (const tick of xScene.ticks) {
+            const bandStart = xScale.map(String(tick.value))!;
+            expect(tick.coordinate).toBeCloseTo(bandStart + bandwidth / 2, 5);
+        }
+    });
+
+    it("should allocate title padding, extent, and breathing room for axes with title (Bug 3)", () => {
+        const xNoTitle = createMockXAxis({ axisId: signal("x1"), title: signal("") });
+        const xWithTitle = createMockXAxis({ axisId: signal("x2"), title: signal("Monthly Period") });
+        const y1 = createMockYAxis({ axisId: signal("y1") });
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve([xNoTitle, xWithTitle], [y1]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([], axisResolution);
+
+        const res = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 300,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            rootData: [{ x1: "A", x2: "A" }]
+        });
+
+        const sceneNoTitle = res.axisScenes.find(a => a.axisId === "x1")!;
+        const sceneWithTitle = res.axisScenes.find(a => a.axisId === "x2")!;
+
+        expect(sceneWithTitle.gutter ?? 0).toBeGreaterThanOrEqual((sceneNoTitle.gutter ?? 0) + 30);
+    });
+
+    it("should keep plotRect and Y-axis gutter stable between unmeasured initial render and measured DOM layout (preventing Bug 1 horizontal axis shift)", () => {
+        const x1 = createMockXAxis({ axisId: signal("x-axis"), field: signal("month"), type: signal("category") });
+        const y1 = createMockYAxis({
+            axisId: signal("y-axis"),
+            formatter: signal((val: unknown) => `$${Number(val).toLocaleString()}`)
+        });
+        const s1 = createMockLineSeries({ field: signal("val"), id: "s1" });
+
+        const data = [
+            { month: "Jan", val: 1200 },
+            { month: "Feb", val: 3400 },
+            { month: "Mar", val: 6800 },
+            { month: "Apr", val: 8900 }
+        ];
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve([x1], [y1]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([s1], axisResolution);
+
+        // Pass 1: Pre-measurement initial render (empty measurements map)
+        const initialRes = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 400,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            rootData: data,
+            rootXField: "month"
+        });
+
+        const initialYScene = initialRes.axisScenes.find(a => a.axisId === "y-axis")!;
+        const initialXScene = initialRes.axisScenes.find(a => a.axisId === "x-axis")!;
+
+        // Simulate ResizeObserver measuring DOM label elements accurately
+        const measurements = new Map<string, { height: number; width: number }>();
+        for (const tick of [...initialYScene.ticks, ...initialXScene.ticks]) {
+            if (tick.tickKey) {
+                measurements.set(tick.tickKey, {
+                    height: tick.unrotatedHeight ?? 16,
+                    width: tick.unrotatedWidth ?? 40
+                });
+            }
+        }
+
+        // Pass 2: Post-measurement layout pass
+        const measuredRes = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 400,
+            chartWidth: 600,
+            labelMeasurements: measurements,
+            rootData: data,
+            rootXField: "month"
+        });
+
+        const measuredYScene = measuredRes.axisScenes.find(a => a.axisId === "y-axis")!;
+        const measuredXScene = measuredRes.axisScenes.find(a => a.axisId === "x-axis")!;
+
+        // Plot position and dimensions must be rock-solid identical (0 drift)
+        expect(measuredRes.plotRect.x).toBe(initialRes.plotRect.x);
+        expect(measuredRes.plotRect.y).toBe(initialRes.plotRect.y);
+        expect(measuredRes.plotRect.width).toBe(initialRes.plotRect.width);
+        expect(measuredRes.plotRect.height).toBe(initialRes.plotRect.height);
+
+        // Axis gutters must be identical
+        expect(measuredYScene.gutter).toBe(initialYScene.gutter);
+        expect(measuredXScene.gutter).toBe(initialXScene.gutter);
+    });
 });

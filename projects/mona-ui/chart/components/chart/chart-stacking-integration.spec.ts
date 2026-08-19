@@ -226,6 +226,48 @@ describe("Cartesian Stacking Integration", () => {
             expect(oJan.cornerRadii?.topLeft).toBe(0);
             expect(rJan.cornerRadii?.topLeft).toBe(0);
         });
+
+        it("should align category tick coordinates with the center of stacked bars (Bug 2)", () => {
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
+            const scene = chartComp.scene() as CartesianChartScene;
+            const xAxisScene = scene.axes.find(a => a.axis === "x")!;
+            const online = scene.series[0] as ChartBarSeriesScene;
+
+            expect(xAxisScene).toBeDefined();
+            expect(xAxisScene.ticks.length).toBe(2);
+
+            // Jan tick aligns with center of Jan bar
+            const janTick = xAxisScene.ticks[0];
+            const janBar = online.bars[0];
+            const janBarCenter = janBar.x + janBar.width / 2;
+            expect(janTick.coordinate).toBeCloseTo(janBarCenter, 1);
+
+            // Feb tick aligns with center of Feb bar
+            const febTick = xAxisScene.ticks[1];
+            const febBar = online.bars[1];
+            const febBarCenter = febBar.x + febBar.width / 2;
+            expect(febTick.coordinate).toBeCloseTo(febBarCenter, 1);
+        });
+
+        it("should preserve stable plotRect across layout recomputations (Bug 1)", () => {
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
+            const initialScene = chartComp.scene() as CartesianChartScene;
+            const initialPlotX = initialScene.plotRect.x;
+            const initialPlotY = initialScene.plotRect.y;
+            const initialPlotW = initialScene.plotRect.width;
+            const initialPlotH = initialScene.plotRect.height;
+
+            // Recompute scene (e.g. triggered post-animation or layout pass)
+            chartComp.recomputeScene();
+            const recomputedScene = chartComp.scene() as CartesianChartScene;
+
+            expect(recomputedScene.plotRect.x).toBe(initialPlotX);
+            expect(recomputedScene.plotRect.y).toBe(initialPlotY);
+            expect(recomputedScene.plotRect.width).toBe(initialPlotW);
+            expect(recomputedScene.plotRect.height).toBe(initialPlotH);
+        });
     });
 
     describe("Grouped and Stacked Bar Series", () => {

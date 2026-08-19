@@ -15,6 +15,7 @@ import type { ChartAxisScene, ChartAxisSceneTick } from "../scene/cartesian-scen
 import { CartesianAxisCompatibilityPolicy } from "./cartesian-axis-compatibility-policy";
 import { CartesianAxisDomainResolver } from "./cartesian-axis-domain-resolver";
 import { CartesianAxisGeometry, type ChartRect } from "./cartesian-axis-geometry";
+import { CartesianAxisLabelGeometry } from "./cartesian-axis-label-geometry";
 import type { CartesianAxisRegistryResolution, ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
 import { CartesianAxisOverhangResolver } from "./cartesian-axis-overhang-resolver";
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
@@ -361,11 +362,11 @@ export class CartesianMultiAxisCoordinator {
 
         const tickMarksOffset = axis.tickMarks ? (axis.tickSize ?? 6) : 0;
         const labelPadding = axis.labelPadding ?? 4;
-        const titlePadding = axis.titlePadding ?? 8;
-        const titleExtent = axis.title ? 16 : 0;
+        const titlePadding = axis.titlePadding ?? 12;
+        const titleExtent = axis.title ? 18 : 0;
 
         if (axis.labels === false) {
-            return tickMarksOffset + (axis.title ? titlePadding + titleExtent : 0);
+            return tickMarksOffset + (axis.title ? titlePadding + titleExtent + 8 : 0);
         }
 
         const rawTicks = "ticks" in scale
@@ -379,19 +380,25 @@ export class CartesianMultiAxisCoordinator {
             const measurement = labelMeasurements.get(tickKey);
 
             let width = 26;
-            let height = 14;
+            let height = 16;
 
             if (measurement) {
                 width = measurement.width;
                 height = measurement.height;
             } else {
-                const text = axis.formatter
-                    ? axis.formatter(val, i)
-                    : unitMode === "percent" && typeof val === "number"
-                      ? formatPercentagePoint(val)
-                      : String(val);
-                width = Math.min(axis.labelMaxWidth ?? 120, Math.max(26, text.length * 6));
-                height = 14;
+                let formattedText: string;
+                if (axis.formatter) {
+                    formattedText = axis.formatter(val, i);
+                } else if (unitMode === "percent" && typeof val === "number") {
+                    formattedText = formatPercentagePoint(val);
+                } else if ("formatTick" in scale && typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function") {
+                    formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(val as number, axis.tickCount ?? 5);
+                } else {
+                    formattedText = String(val);
+                }
+                const estimated = CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText);
+                width = Math.min(axis.labelMaxWidth ?? 120, estimated.width);
+                height = estimated.height;
             }
 
             const rot = typeof axis.labelRotation === "number" ? axis.labelRotation : 0;
@@ -417,7 +424,7 @@ export class CartesianMultiAxisCoordinator {
         }
 
         const basePerp = maxPerpExtent > 0 ? maxPerpExtent : (axis.dimension === "x" ? 16 : 36);
-        return tickMarksOffset + labelPadding + basePerp + (axis.title ? titlePadding + titleExtent : 0);
+        return tickMarksOffset + labelPadding + basePerp + (axis.title ? titlePadding + titleExtent + 8 : 0);
     }
 
     static #generateAxisSceneTicks(
@@ -431,12 +438,16 @@ export class CartesianMultiAxisCoordinator {
             ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
             : (scale as ChartBandPositionScale).domain();
         const ticks: ChartAxisSceneTick[] = [];
+        const bandwidth = typeof (scale as any).bandwidth === "function" ? (scale as any).bandwidth() : 0;
 
         for (let i = 0; i < rawTicks.length; i++) {
             const val = rawTicks[i];
-            const coord = (scale as ChartPositionScale<any>).map(val);
+            let coord = (scale as ChartPositionScale<any>).map(val);
             if (coord === undefined || !Number.isFinite(coord)) {
                 continue;
+            }
+            if (bandwidth > 0) {
+                coord += bandwidth / 2;
             }
 
             let formattedText: string;
@@ -452,6 +463,7 @@ export class CartesianMultiAxisCoordinator {
 
             const tickKey = `axis:${axis.dimension}:${encodeURIComponent(axis.axisId)}:${resolvedType}:${String(val)}`;
             const measurement = labelMeasurements.get(tickKey);
+            const estimated = !measurement ? CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText) : undefined;
 
             ticks.push({
                 coordinate: coord,
@@ -459,8 +471,8 @@ export class CartesianMultiAxisCoordinator {
                 index: i,
                 labelVisible: formattedText !== "",
                 tickKey,
-                unrotatedHeight: measurement?.height ?? 14,
-                unrotatedWidth: measurement?.width ?? (formattedText.length * 7),
+                unrotatedHeight: measurement?.height ?? estimated?.height ?? 16,
+                unrotatedWidth: measurement?.width ?? estimated?.width ?? (formattedText.length * 7.5),
                 value: val
             });
         }
