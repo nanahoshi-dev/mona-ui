@@ -134,7 +134,8 @@ export class CartesianMultiAxisCoordinator {
                 boundSeries,
                 rootData,
                 effectiveRootXField,
-                stackedExtents
+                stackedExtents,
+                stackAnalysis
             );
             warnings.push(...domainRes.warnings);
             domainsByAxisId.set(yAxis.axisId, domainRes.domain);

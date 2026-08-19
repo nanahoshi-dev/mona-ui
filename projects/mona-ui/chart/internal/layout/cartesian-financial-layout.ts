@@ -75,10 +75,16 @@ export function computeFinancialLayout(
     } = ctx as any;
 
     let xScale: ChartPositionScale | undefined = customXScale;
+    const effectiveXAxisType: ChartXAxisType = (
+        customXScale?.type ??
+        (bandScale ? "category" : linearXScale ? "linear" : timeScale ? "time" : xAxisType) ??
+        "category"
+    ) as ChartXAxisType;
+
     if (!xScale) {
-        if (xAxisType === "category") {
+        if (effectiveXAxisType === "category") {
             xScale = bandScale;
-        } else if (xAxisType === "linear") {
+        } else if (effectiveXAxisType === "linear") {
             xScale = linearXScale;
         } else {
             xScale = timeScale;
@@ -101,7 +107,7 @@ export function computeFinancialLayout(
         seriesId: s.id,
         seriesName: seriesDisplayName,
         warnedDiagnosticSignatures,
-        xAxisType,
+        xAxisType: effectiveXAxisType,
         xField: seriesXField
     });
     if (!resolvedDataset.hasData || resolvedDataset.marks.length === 0) {
@@ -113,7 +119,7 @@ export function computeFinancialLayout(
         rootXField,
         styleResolver,
         valueFormatter: yFormatter,
-        xAxisType,
+        xAxisType: effectiveXAxisType,
         xScale: xScale as any,
         yScale
     };

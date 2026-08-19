@@ -133,6 +133,25 @@ class StackedAreaTestComponent {
 }
 
 @Component({
+    imports: [ChartComponent, AreaSeriesComponent, ChartXAxisComponent, ChartYAxisComponent, ChartLegendComponent],
+    template: `
+        <mona-chart [data]="data()" xField="year" [style.width.px]="600" [style.height.px]="400">
+            <mona-chart-x-axis type="linear" />
+            <mona-chart-y-axis />
+            <mona-chart-legend />
+            <mona-area-series field="desktop" name="Desktop" stack="traffic" stackMode="percent" fillMode="solid" />
+            <mona-area-series field="mobile" name="Mobile" stack="traffic" stackMode="percent" fillMode="solid" />
+        </mona-chart>
+    `
+})
+class PercentStackedAreaTestComponent {
+    public readonly data = signal([
+        { desktop: 1000, mobile: 1000, year: 2020 },
+        { desktop: 1500, mobile: 500, year: 2021 }
+    ]);
+}
+
+@Component({
     imports: [ChartComponent, AreaSeriesComponent, ChartXAxisComponent, ChartYAxisComponent],
     template: `
         <mona-chart [data]="[]" [style.width.px]="600" [style.height.px]="400">
@@ -331,6 +350,49 @@ describe("Cartesian Stacking Integration", () => {
 
             // mobile baseY corresponds to top of desktop (mobile.baseY === desktop.y)
             expect(m2020.baseY).toBeCloseTo(d2020.y, 1);
+        });
+    });
+
+    describe("100% Percent Stacked Area Series", () => {
+        let fixture: ComponentFixture<PercentStackedAreaTestComponent>;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [PercentStackedAreaTestComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(PercentStackedAreaTestComponent);
+            fixture.detectChanges();
+        });
+
+        it("should normalize stacked areas to 100% with domain [0, 100]", () => {
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
+            const scene = chartComp.scene() as CartesianChartScene;
+
+            expect(scene.series.length).toBe(2);
+
+            const desktop = scene.series[0] as ChartAreaSeriesScene;
+            const mobile = scene.series[1] as ChartAreaSeriesScene;
+
+            // 2020: desktop=1000, mobile=1000 -> desktop is 50%, mobile is 50% (reaches 100%)
+            const d2020 = desktop.points[0];
+            const m2020 = mobile.points[0];
+
+            expect(d2020.stackPercentage).toBe(50);
+            expect(d2020.stackStartValue).toBe(0);
+            expect(d2020.stackEndValue).toBe(50);
+
+            expect(m2020.stackPercentage).toBe(50);
+            expect(m2020.stackStartValue).toBe(50);
+            expect(m2020.stackEndValue).toBe(100);
+
+            // Y axis domain is [0, 100]
+            const yAxisScene = scene.axes.find((a: ChartAxisScene) => a.axis === "y");
+            expect(yAxisScene).toBeDefined();
+            expect(yAxisScene?.ticks.some((t: { formattedValue: string }) => t.formattedValue.includes("%"))).toBe(
+                true
+            );
         });
     });
 

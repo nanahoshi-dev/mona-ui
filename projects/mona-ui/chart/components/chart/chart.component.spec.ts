@@ -286,6 +286,17 @@ describe("MonaChartComponent", () => {
             expect(custom.nativeElement.textContent).toBe("Custom empty state");
         });
 
+        it("should not display no-data state when series data is valid even if root xField is empty", () => {
+            host.xField.set("");
+            fixture.detectChanges();
+
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent))
+                .componentInstance as ChartComponent;
+            expect(chartComp.scene()?.hasRenderableData).toBe(true);
+            const noData = fixture.debugElement.query(By.css(".custom-no-data"));
+            expect(noData).toBeNull();
+        });
+
         it("should pass AXE accessibility verification", async () => {
             const result = await axe.run(fixture.nativeElement);
             expect(result.violations.length).toBe(0);
