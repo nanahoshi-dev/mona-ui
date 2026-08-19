@@ -2,6 +2,7 @@ import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChartNavigationInput, ChartViewportChangeEvent, ChartViewportState } from "../../models/chart-viewport.models";
+import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
@@ -250,5 +251,27 @@ describe("ChartComponent Viewport Integration", () => {
 
         expect(host.emittedEvents.length).toBe(1);
         expect(host.emittedEvents[0].source).toBe("reset");
+    });
+
+    it("should keep axis positions stable without secondary layout jumps when DOM labels are measured", () => {
+        const chart = host.chart();
+        const initialScene = chart.scene();
+        expect(initialScene).not.toBeNull();
+        expect(initialScene?.coordinateSystem).toBe("cartesian");
+
+        const xyScene = initialScene as CartesianXYChartScene;
+        const initialPlotRect = { ...xyScene.plotRect };
+        const initialYAxis = xyScene.axes.find(a => a.axisId === "y-main");
+        const initialGutter = initialYAxis?.gutter;
+
+        // Simulate DOM element observation for a label whose rendered size matches estimated size (<= 3px diff)
+        const mockEl = document.createElement("div");
+        chart.observeLabelElement(mockEl, "axis:y:y-main:linear:50");
+
+        fixture.detectChanges();
+
+        const currentScene = chart.scene() as CartesianXYChartScene;
+        expect(currentScene.plotRect.x).toBe(initialPlotRect.x);
+        expect(currentScene.axes.find(a => a.axisId === "y-main")?.gutter).toBe(initialGutter);
     });
 });

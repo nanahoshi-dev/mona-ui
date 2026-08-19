@@ -2411,8 +2411,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     if (targetId) {
                         const { width, height } = entry.contentRect;
                         const prev = this.#labelMeasurements.get(targetId);
-                        const widthDiff = prev ? Math.abs(prev.width - width) : width;
-                        const heightDiff = prev ? Math.abs(prev.height - height) : height;
+                        const widthDiff = prev ? Math.abs(prev.width - width) : 0;
+                        const heightDiff = prev ? Math.abs(prev.height - height) : 0;
                         if (widthDiff > 3 || heightDiff > 3) {
                             this.#labelMeasurements.set(targetId, { width, height });
                             if (baseKeys && !baseKeys.has(targetId) && targetId.startsWith("axis:")) {
@@ -2420,6 +2420,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                             } else {
                                 hasBaseChromeChanged = true;
                             }
+                        } else if (!prev) {
+                            this.#labelMeasurements.set(targetId, { width, height });
                         }
                     }
                 }

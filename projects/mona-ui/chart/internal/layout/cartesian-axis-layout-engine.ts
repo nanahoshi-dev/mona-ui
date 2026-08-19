@@ -151,7 +151,13 @@ export class CartesianAxisLayoutEngine {
 
         // 2. Measure unrotated dimensions
         const intermediateTicks: IntermediateTick[] = rawTicks.map(t => {
-            const measured = measurements?.get(t.tickKey) ?? CartesianAxisLabelGeometry.estimateLabelDimensions(t.formattedValue);
+            let measured = measurements?.get(t.tickKey);
+            if (!measured) {
+                measured = CartesianAxisLabelGeometry.estimateLabelDimensions(t.formattedValue);
+                if (measurements && measurements instanceof Map && !measurements.has(t.tickKey)) {
+                    (measurements as Map<string, { height: number; width: number }>).set(t.tickKey, measured);
+                }
+            }
             let unrotatedWidth = measured.width;
             if (labelMaxWidth !== undefined && labelMaxWidth > 0) {
                 unrotatedWidth = Math.min(unrotatedWidth, labelMaxWidth);
