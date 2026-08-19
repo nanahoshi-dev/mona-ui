@@ -17,8 +17,14 @@
         <canvas
             #canvas
             class="absolute inset-0 block h-full w-full"
+            [style.touch-action]="touchActionStyle()"
+            [style.cursor]="viewportCursor() ?? 'default'"
+            (pointerdown)="onPointerDown($event)"
             (pointermove)="onPointerMove($event)"
+            (pointerup)="onPointerUp($event)"
+            (pointercancel)="onPointerUp($event)"
             (pointerleave)="onPointerLeave()"
+            (wheel)="onWheel($event)"
             (click)="onCanvasClick($event)"></canvas>
 
         <!-- DOM Cartesian Axis Labels & Titles -->

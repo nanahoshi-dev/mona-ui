@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from "@angular/core";
+import { Component, computed, inject, signal, viewChild } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     ChartAxisLabelTemplateDirective,
@@ -51,6 +51,7 @@ import {
     type ChartGaugeIndicator,
     type ChartHeaderAlignment,
     type ChartHeatmapColorMode,
+    type ChartNavigationInput,
     type ChartPointEvent,
     type ChartPointFocusEvent,
     type ChartPolarFillMode,
@@ -66,7 +67,10 @@ import {
     type ChartTreemapLabelTemplateContext,
     type ChartTreemapNodeVisibilityEvent,
     type ChartTreemapSort,
-    type ChartTreemapTile
+    type ChartTreemapTile,
+    type ChartViewportChangeEvent,
+    type ChartViewportState,
+    type ChartYAxisPosition
 } from "@nanahoshi/mona-ui/chart";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
@@ -127,6 +131,21 @@ interface BubbleDataPoint {
     readonly id?: string;
     readonly lifeExp: number;
     readonly population: number;
+}
+
+interface PanZoomTelemetryMetric {
+    readonly cpu: number;
+    readonly date: Date;
+    readonly memory: number;
+    readonly requests: number;
+}
+
+interface MultiAxisMetric {
+    readonly load: number;
+    readonly margin: number;
+    readonly month: string;
+    readonly quarter: string;
+    readonly revenue: number;
 }
 
 @Component({
@@ -197,7 +216,9 @@ export class ChartDemoComponent {
         | "heatmap"
         | "horizontal"
         | "mixed"
+        | "multi-axis"
         | "ohlc"
+        | "pan-zoom"
         | "percent-area"
         | "percent-bar"
         | "pie"
@@ -1383,6 +1404,201 @@ export class ChartDemoComponent {
         }
     }
 
+    protected readonly panZoomChart = viewChild<ChartComponent>("panZoomChart");
+    protected readonly multiAxisChart = viewChild<ChartComponent>("multiAxisChart");
+
+    // Pan & Zoom Viewport Controls & State
+    protected readonly panZoomEnabled = signal<boolean>(true);
+    protected readonly dragPanEnabled = signal<boolean>(true);
+    protected readonly wheelZoomEnabled = signal<boolean>(true);
+    protected readonly pinchZoomEnabled = signal<boolean>(true);
+    protected readonly keyboardEnabled = signal<boolean>(true);
+    protected readonly panZoomClampToData = signal<boolean>(true);
+    protected readonly panZoomAxisTarget = signal<"auto" | "x" | "y" | "xy">("auto");
+    protected readonly panZoomAxisTargetOptions: readonly { label: string; value: "auto" | "x" | "y" | "xy" }[] = [
+        { label: "Both Axes (Auto)", value: "auto" },
+        { label: "X-Axis Only (Horizontal)", value: "x" },
+        { label: "Y-Axis Only (Vertical)", value: "y" },
+        { label: "Both Axes (XY)", value: "xy" }
+    ];
+    protected readonly panZoomNavigationOptions = computed<ChartNavigationInput>(() => ({
+        clampToData: this.panZoomClampToData(),
+        dragPan: this.dragPanEnabled(),
+        enabled: this.panZoomEnabled(),
+        keyboard: this.keyboardEnabled(),
+        pan: this.panZoomEnabled(),
+        panAxes: this.panZoomAxisTarget(),
+        pinchZoom: this.pinchZoomEnabled(),
+        wheelZoom: this.wheelZoomEnabled(),
+        zoom: this.panZoomEnabled(),
+        zoomAxes: this.panZoomAxisTarget()
+    }));
+    protected readonly panZoomViewportState = signal<ChartViewportState | undefined>(undefined);
+    protected readonly panZoomData = signal<readonly PanZoomTelemetryMetric[]>(this.#generateTelemetryData());
+    protected readonly activeViewportSummary = signal<string>("Full Range (100% visible)");
+
+    // Multi-Axis Controls & State
+    protected readonly multiAxisData = signal<readonly MultiAxisMetric[]>([
+        { load: 42, margin: 28.5, month: "Jan", quarter: "Q1", revenue: 125 },
+        { load: 51, margin: 31.2, month: "Feb", quarter: "Q1", revenue: 148 },
+        { load: 68, margin: 35.0, month: "Mar", quarter: "Q1", revenue: 195 },
+        { load: 58, margin: 30.8, month: "Apr", quarter: "Q2", revenue: 165 },
+        { load: 74, margin: 38.4, month: "May", quarter: "Q2", revenue: 215 },
+        { load: 83, margin: 42.0, month: "Jun", quarter: "Q2", revenue: 260 },
+        { load: 79, margin: 39.5, month: "Jul", quarter: "Q3", revenue: 235 },
+        { load: 88, margin: 44.1, month: "Aug", quarter: "Q3", revenue: 280 },
+        { load: 92, margin: 46.0, month: "Sep", quarter: "Q3", revenue: 295 },
+        { load: 94, margin: 49.2, month: "Oct", quarter: "Q4", revenue: 320 },
+        { load: 97, margin: 52.8, month: "Nov", quarter: "Q4", revenue: 355 },
+        { load: 99, margin: 56.4, month: "Dec", quarter: "Q4", revenue: 395 }
+    ]);
+    protected readonly multiAxisShowSecondaryX = signal<boolean>(true);
+    protected readonly multiAxisShowSecondaryY = signal<boolean>(true);
+    protected readonly multiAxisSecondaryYPosition = signal<ChartYAxisPosition>("right");
+    protected readonly multiAxisSecondaryYPositionOptions: readonly { label: string; value: ChartYAxisPosition }[] = [
+        { label: "Right Position", value: "right" },
+        { label: "Left Position", value: "left" }
+    ];
+    protected readonly multiAxisPrimaryYGridLines = signal<boolean>(true);
+    protected readonly multiAxisSecondaryYGridLines = signal<boolean>(false);
+    protected readonly multiAxisPrimaryXGridLines = signal<boolean>(false);
+    protected readonly multiAxisSecondaryXGridLines = signal<boolean>(false);
+    protected readonly multiAxisNavigation = signal<boolean>(true);
+
+    public onPanZoomAxisTargetChange(target: "auto" | "x" | "y" | "xy" | null): void {
+        if (target) {
+            this.panZoomAxisTarget.set(target);
+            this.#addLog("settingChange", `Pan & Zoom Target Axes: ${target}`);
+        }
+    }
+
+    public onMultiAxisSecondaryYPositionChange(pos: ChartYAxisPosition | null): void {
+        if (pos) {
+            this.multiAxisSecondaryYPosition.set(pos);
+            this.#addLog("settingChange", `Secondary Y Position: ${pos}`);
+        }
+    }
+
+    public onPanZoomViewportChange(event: ChartViewportChangeEvent): void {
+        const ranges = event.viewport.axes
+            .map(a => {
+                if (a.kind === "continuous") {
+                    const minStr =
+                        a.min instanceof Date
+                            ? a.min.toISOString().slice(0, 10)
+                            : typeof a.min === "number"
+                              ? a.min.toFixed(1)
+                              : String(a.min);
+                    const maxStr =
+                        a.max instanceof Date
+                            ? a.max.toISOString().slice(0, 10)
+                            : typeof a.max === "number"
+                              ? a.max.toFixed(1)
+                              : String(a.max);
+                    return `${a.axisId} (${minStr} - ${maxStr})`;
+                }
+                return `${a.axisId} [${a.startIndex}..${a.endIndexExclusive}]`;
+            })
+            .join(", ");
+        this.activeViewportSummary.set(ranges || "Full Range (100% visible)");
+        this.#addLog("viewportChange", `Source: ${event.source} | Phase: ${event.phase} | Axes: ${ranges || "Full Range"}`);
+    }
+
+    public zoomInPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.zoom(1.25, undefined, target);
+        this.#addLog("programmaticNav", `Zoom In (+25%) [${target}]`);
+    }
+
+    public zoomOutPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.zoom(0.8, undefined, target);
+        this.#addLog("programmaticNav", `Zoom Out (-20%) [${target}]`);
+    }
+
+    public panLeftPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.pan({ x: -80, y: 0 }, target);
+        this.#addLog("programmaticNav", `Pan Left (-80px) [${target}]`);
+    }
+
+    public panRightPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.pan({ x: 80, y: 0 }, target);
+        this.#addLog("programmaticNav", `Pan Right (+80px) [${target}]`);
+    }
+
+    public panUpPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.pan({ x: 0, y: 50 }, target);
+        this.#addLog("programmaticNav", `Pan Up (+50px) [${target}]`);
+    }
+
+    public panDownPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.pan({ x: 0, y: -50 }, target);
+        this.#addLog("programmaticNav", `Pan Down (-50px) [${target}]`);
+    }
+
+    public resetPanZoom(): void {
+        this.panZoomChart()?.resetViewport();
+        this.#addLog("programmaticNav", "Reset Viewport");
+    }
+
+    public fitPanZoomWindow(): void {
+        const data = this.panZoomData();
+        if (data.length > 20) {
+            const start = data[Math.floor(data.length * 0.25)].date;
+            const end = data[Math.floor(data.length * 0.75)].date;
+            this.panZoomChart()?.fit({
+                axis: "x",
+                axisId: "telemetry-time",
+                kind: "continuous",
+                max: end,
+                min: start
+            });
+            this.#addLog("programmaticNav", "Fit Viewport Window to Middle 50%");
+        }
+    }
+
+    public randomizeTelemetryData(): void {
+        this.panZoomData.set(this.#generateTelemetryData());
+        this.#addLog("dataUpdate", "Generated new 120-point Telemetry dataset");
+    }
+
+    public randomizeMultiAxisData(): void {
+        this.multiAxisData.update(list =>
+            list.map(item => ({
+                ...item,
+                load: Math.floor(30 + Math.random() * 65),
+                margin: Number((20 + Math.random() * 35).toFixed(1)),
+                revenue: Math.floor(100 + Math.random() * 300)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized multi-axis metrics");
+    }
+
+    #generateTelemetryData(): PanZoomTelemetryMetric[] {
+        const result: PanZoomTelemetryMetric[] = [];
+        const baseDate = new Date("2026-01-01T00:00:00Z");
+        let cpu = 40;
+        let memory = 50;
+        let requests = 120;
+        for (let i = 0; i < 120; i++) {
+            const date = new Date(baseDate.getTime() + i * 24 * 60 * 60 * 1000);
+            cpu = Math.max(10, Math.min(95, cpu + (Math.random() - 0.48) * 8));
+            memory = Math.max(20, Math.min(98, memory + (Math.random() - 0.47) * 5));
+            requests = Math.max(30, Math.min(450, requests + (Math.random() - 0.48) * 25));
+            result.push({
+                cpu: Math.round(cpu * 10) / 10,
+                date,
+                memory: Math.round(memory * 10) / 10,
+                requests: Math.round(requests)
+            });
+        }
+        return result;
+    }
+
     public setTab(
         tab:
             | "bubble"
@@ -1395,7 +1611,9 @@ export class ChartDemoComponent {
             | "heatmap"
             | "horizontal"
             | "mixed"
+            | "multi-axis"
             | "ohlc"
+            | "pan-zoom"
             | "percent-area"
             | "percent-bar"
             | "pie"

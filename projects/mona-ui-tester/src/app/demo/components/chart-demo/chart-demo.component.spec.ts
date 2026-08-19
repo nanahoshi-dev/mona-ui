@@ -53,9 +53,60 @@ describe("ChartDemoComponent", () => {
         fixture.detectChanges();
         expect(fixture.nativeElement.textContent).toContain("100% Stacked Area Chart");
 
+        component.setTab("pan-zoom");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Interactive Pan & Zoom Studio");
+
+        component.setTab("multi-axis");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Enterprise Performance Dashboard");
+
         component.setTab("custom");
         fixture.detectChanges();
         expect(fixture.nativeElement.textContent).toContain("Custom Angular Templates");
+    });
+
+    it("should handle Pan & Zoom actions and telemetry data randomization", () => {
+        component.setTab("pan-zoom");
+        fixture.detectChanges();
+
+        component.zoomInPanZoom();
+        expect(component.eventLogs()[0].details).toContain("Zoom In");
+
+        component.zoomOutPanZoom();
+        expect(component.eventLogs()[0].details).toContain("Zoom Out");
+
+        component.panLeftPanZoom();
+        expect(component.eventLogs()[0].details).toContain("Pan Left");
+
+        component.panRightPanZoom();
+        expect(component.eventLogs()[0].details).toContain("Pan Right");
+
+        component.panUpPanZoom();
+        expect(component.eventLogs()[0].details).toContain("Pan Up");
+
+        component.panDownPanZoom();
+        expect(component.eventLogs()[0].details).toContain("Pan Down");
+
+        component.onPanZoomAxisTargetChange("x");
+        expect(component.eventLogs()[0].details).toContain("Pan & Zoom Target Axes: x");
+
+        component.fitPanZoomWindow();
+        expect(component.eventLogs()[0].details).toContain("Fit Viewport Window");
+
+        component.resetPanZoom();
+        expect(component.eventLogs()[0].details).toContain("Reset Viewport");
+
+        component.randomizeTelemetryData();
+        expect(component.eventLogs()[0].details).toContain("Telemetry dataset");
+    });
+
+    it("should handle Multi-Axis actions and metric randomization", () => {
+        component.setTab("multi-axis");
+        fixture.detectChanges();
+
+        component.randomizeMultiAxisData();
+        expect(component.eventLogs()[0].details).toContain("Randomized multi-axis metrics");
     });
 
     it("should append and randomize data for Cartesian and Polar series", () => {

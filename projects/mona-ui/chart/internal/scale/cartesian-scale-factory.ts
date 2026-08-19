@@ -686,6 +686,54 @@ export class CartesianScaleFactory {
             type: "utc"
         }) as UtcScale;
     }
+
+    public static createExactPositionScale(options: {
+        domain: readonly unknown[];
+        exponent?: number;
+        logBase?: number;
+        paddingInner?: number;
+        paddingOuter?: number;
+        range: readonly [number, number];
+        symlogConstant?: number;
+        type: ResolvedChartCartesianAxisType;
+    }): ChartPositionScale<unknown> {
+        const { type, domain, range } = options;
+        if (type === "category") {
+            return CartesianScaleFactory.createBandScale({
+                domain: domain as readonly string[],
+                paddingInner: options.paddingInner ?? 0.2,
+                paddingOuter: options.paddingOuter ?? 0.1,
+                range
+            }) as ChartPositionScale<unknown>;
+        }
+
+        if (type === "time") {
+            const minD = domain[0] instanceof Date ? domain[0] : new Date(Number(domain[0]));
+            const maxD = domain[1] instanceof Date ? domain[1] : new Date(Number(domain[1]));
+            return new TimeScale([minD, maxD], range) as ChartPositionScale<unknown>;
+        }
+
+        if (type === "utc") {
+            const minD = domain[0] instanceof Date ? domain[0] : new Date(Number(domain[0]));
+            const maxD = domain[1] instanceof Date ? domain[1] : new Date(Number(domain[1]));
+            return new UtcScale([minD, maxD], range) as ChartPositionScale<unknown>;
+        }
+
+        const numDomain: [number, number] = [Number(domain[0]), Number(domain[1])];
+        switch (type) {
+            case "log":
+                return new LogScale(numDomain, range, options.logBase ?? 10) as ChartPositionScale<unknown>;
+            case "symlog":
+                return new SymlogScale(numDomain, range, options.symlogConstant ?? 1) as ChartPositionScale<unknown>;
+            case "pow":
+                return new PowScale(numDomain, range, options.exponent ?? 1) as ChartPositionScale<unknown>;
+            case "sqrt":
+                return new SqrtScale(numDomain, range) as ChartPositionScale<unknown>;
+            case "linear":
+            default:
+                return new LinearScale(numDomain, range) as ChartPositionScale<unknown>;
+        }
+    }
 }
 
 

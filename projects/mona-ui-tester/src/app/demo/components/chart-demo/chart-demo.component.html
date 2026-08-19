@@ -187,6 +187,20 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'pan-zoom' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('pan-zoom')">
+                Pan & Zoom
+            </button>
+            <button
+                monaButton
+                [look]="activeTab() === 'multi-axis' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('multi-axis')">
+                Multi-Axis
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('custom')">
@@ -962,6 +976,170 @@
                                 >
                                 <button monaButton size="small" look="outline" (click)="randomizeWaterfallData()">
                                     Randomize Cash Flow
+                                </button>
+                            </div>
+                        }
+
+                        @if (activeTab() === "pan-zoom") {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Navigation Modes</span
+                                >
+                                <div class="flex items-center gap-4 flex-wrap">
+                                    <mona-check-box
+                                        [checked]="panZoomEnabled()"
+                                        (checkedChange)="panZoomEnabled.set($event)">
+                                        Navigation Enabled
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="dragPanEnabled()"
+                                        (checkedChange)="dragPanEnabled.set($event)">
+                                        Mouse Drag Pan
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="wheelZoomEnabled()"
+                                        (checkedChange)="wheelZoomEnabled.set($event)">
+                                        Mouse Wheel Zoom
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="pinchZoomEnabled()"
+                                        (checkedChange)="pinchZoomEnabled.set($event)">
+                                        Touch Pinch Zoom
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="keyboardEnabled()"
+                                        (checkedChange)="keyboardEnabled.set($event)">
+                                        Keyboard Nav
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="panZoomClampToData()"
+                                        (checkedChange)="panZoomClampToData.set($event)">
+                                        Clamp to Data
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Target Axes</span
+                                >
+                                <div class="flex items-center gap-2">
+                                    <mona-dropdown-list
+                                        [data]="panZoomAxisTargetOptions"
+                                        [value]="panZoomAxisTarget()"
+                                        (valueChange)="onPanZoomAxisTargetChange($event)"
+                                        textField="label"
+                                        valueField="value"
+                                        [valuePrimitive]="true"
+                                        size="small"
+                                        class="w-52" />
+                                </div>
+                            </div>
+
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Programmatic Actions</span
+                                >
+                                <div class="flex flex-wrap gap-2">
+                                    <button monaButton size="small" look="secondary" (click)="zoomInPanZoom()">
+                                        Zoom In (+25%)
+                                    </button>
+                                    <button monaButton size="small" look="secondary" (click)="zoomOutPanZoom()">
+                                        Zoom Out (-20%)
+                                    </button>
+                                    <button monaButton size="small" look="secondary" (click)="panLeftPanZoom()">
+                                        Pan Left (-80px)
+                                    </button>
+                                    <button monaButton size="small" look="secondary" (click)="panRightPanZoom()">
+                                        Pan Right (+80px)
+                                    </button>
+                                    <button monaButton size="small" look="secondary" (click)="panUpPanZoom()">
+                                        Pan Up (+50px)
+                                    </button>
+                                    <button monaButton size="small" look="secondary" (click)="panDownPanZoom()">
+                                        Pan Down (-50px)
+                                    </button>
+                                    <button monaButton size="small" look="outline" (click)="fitPanZoomWindow()">
+                                        Fit Middle 50%
+                                    </button>
+                                    <button monaButton size="small" look="outline" (click)="resetPanZoom()">
+                                        Reset Viewport
+                                    </button>
+                                    <button monaButton size="small" look="outline" (click)="randomizeTelemetryData()">
+                                        Randomize Data
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
+                        @if (activeTab() === "multi-axis") {
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Axis Visibility & Layout</span
+                                >
+                                <div class="flex items-center gap-4 flex-wrap">
+                                    <mona-check-box
+                                        [checked]="multiAxisShowSecondaryY()"
+                                        (checkedChange)="multiAxisShowSecondaryY.set($event)">
+                                        Secondary Y-Axis (Right)
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="multiAxisShowSecondaryX()"
+                                        (checkedChange)="multiAxisShowSecondaryX.set($event)">
+                                        Secondary X-Axis (Top Quarters)
+                                    </mona-check-box>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-muted-foreground">Secondary Y Position:</span>
+                                        <mona-dropdown-list
+                                            [data]="multiAxisSecondaryYPositionOptions"
+                                            [value]="multiAxisSecondaryYPosition()"
+                                            (valueChange)="onMultiAxisSecondaryYPositionChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-36" />
+                                    </div>
+                                    <mona-check-box
+                                        [checked]="multiAxisNavigation()"
+                                        (checkedChange)="multiAxisNavigation.set($event)">
+                                        Axis Gutter Pan & Zoom
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Grid Lines</span
+                                >
+                                <div class="flex items-center gap-4 flex-wrap">
+                                    <mona-check-box
+                                        [checked]="multiAxisPrimaryYGridLines()"
+                                        (checkedChange)="multiAxisPrimaryYGridLines.set($event)">
+                                        Primary Y Grid
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="multiAxisSecondaryYGridLines()"
+                                        (checkedChange)="multiAxisSecondaryYGridLines.set($event)">
+                                        Secondary Y Grid
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Data Actions</span
+                                >
+                                <button monaButton size="small" look="outline" (click)="randomizeMultiAxisData()">
+                                    Randomize Multi-Axis Metrics
                                 </button>
                             </div>
                         }
@@ -2387,6 +2565,184 @@
                     </mona-chart>
                 </div>
             }
+            @case ("pan-zoom") {
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-sm font-semibold text-foreground">
+                                High-Density Telemetry Stream (Interactive Pan & Zoom Studio)
+                            </h3>
+                            <p class="text-xs text-muted-foreground">
+                                Drag to pan along axes, scroll wheel to zoom at mouse position, use touch pinch, or use Shift+Arrow keys.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border border-border text-xs font-mono">
+                            <span class="text-muted-foreground">Viewport:</span>
+                            <span class="text-foreground font-semibold">{{ activeViewportSummary() }}</span>
+                        </div>
+                    </div>
+
+                    <mona-chart
+                        #panZoomChart
+                        [data]="panZoomData()"
+                        xField="date"
+                        [navigation]="panZoomNavigationOptions()"
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="High-Density Telemetry Pan and Zoom Chart"
+                        (viewportChange)="onPanZoomViewportChange($event)"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <mona-chart-x-axis
+                            axisId="telemetry-time"
+                            type="time"
+                            [axisLine]="xAxisLine()"
+                            [gridLines]="xGridLines()"
+                            [nice]="false" />
+                        <mona-chart-y-axis
+                            axisId="telemetry-values"
+                            type="linear"
+                            [axisLine]="yAxisLine()"
+                            [gridLines]="yGridLines()"
+                            [nice]="true" />
+                        <mona-area-series
+                            field="memory"
+                            xAxisId="telemetry-time"
+                            yAxisId="telemetry-values"
+                            fillMode="gradient"
+                            opacity="0.25"
+                            name="Memory (GB)" />
+                        <mona-line-series
+                            field="cpu"
+                            xAxisId="telemetry-time"
+                            yAxisId="telemetry-values"
+                            curve="natural"
+                            name="CPU Usage (%)" />
+                        <mona-line-series
+                            field="requests"
+                            xAxisId="telemetry-time"
+                            yAxisId="telemetry-values"
+                            curve="linear"
+                            name="Network (Req/s)" />
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-muted-foreground bg-muted/20 p-3 rounded-lg border border-border/60">
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-foreground">🖱️ Mouse:</span>
+                            <span>Drag to pan. Wheel scroll zooms in/out at pointer coordinates. Drag on axis gutter to isolate single axis.</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-foreground">🖐️ Touch:</span>
+                            <span>Two-finger pinch to zoom & pan centroid simultaneously. Single finger drag to pan.</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="font-bold text-foreground">⌨️ Keyboard:</span>
+                            <span>Shift + Left/Right/Up/Down to pan, <kbd class="px-1 py-0.5 bg-muted rounded border border-border">+</kbd>/<kbd class="px-1 py-0.5 bg-muted rounded border border-border">-</kbd> to zoom, <kbd class="px-1 py-0.5 bg-muted rounded border border-border">0</kbd> to reset.</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            @case ("multi-axis") {
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-sm font-semibold text-foreground">
+                                Enterprise Performance Dashboard (Multi-Axis Cartesian Layout)
+                            </h3>
+                            <p class="text-xs text-muted-foreground">
+                                Dual Y-axes (Revenue $k vs Profit Margin & Load %) with independent scales and dual hierarchical X-axes.
+                            </p>
+                        </div>
+                        <div class="text-xs text-muted-foreground">
+                            Tip: Scroll or drag over an axis gutter to zoom/pan that axis independently!
+                        </div>
+                    </div>
+
+                    <mona-chart
+                        #multiAxisChart
+                        [data]="multiAxisData()"
+                        xField="month"
+                        [navigation]="multiAxisNavigation()"
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Multi-Axis Enterprise Performance Chart"
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)">
+                        <!-- Primary Bottom Month Axis -->
+                        <mona-chart-x-axis
+                            axisId="x-months"
+                            type="category"
+                            position="bottom"
+                            title="Fiscal Month"
+                            [axisLine]="xAxisLine()"
+                            [gridLines]="multiAxisPrimaryXGridLines()" />
+
+                        <!-- Optional Secondary Top Quarter Axis -->
+                        @if (multiAxisShowSecondaryX()) {
+                            <mona-chart-x-axis
+                                axisId="x-quarters"
+                                type="category"
+                                position="top"
+                                title="Fiscal Quarter"
+                                [axisLine]="true"
+                                [gridLines]="multiAxisSecondaryXGridLines()" />
+                        }
+
+                        <!-- Primary Y-Axis (Left Revenue) -->
+                        <mona-chart-y-axis
+                            axisId="y-revenue"
+                            type="linear"
+                            position="left"
+                            title="Gross Revenue"
+                            [formatter]="currencyFormatter"
+                            [axisLine]="yAxisLine()"
+                            [gridLines]="multiAxisPrimaryYGridLines()"
+                            [nice]="true" />
+
+                        <!-- Secondary Y-Axis (Right Margin & Load) -->
+                        @if (multiAxisShowSecondaryY()) {
+                            <mona-chart-y-axis
+                                axisId="y-margin"
+                                type="linear"
+                                [position]="multiAxisSecondaryYPosition()"
+                                title="Profit Margin & System Load"
+                                [formatter]="percentFormatter"
+                                [axisLine]="true"
+                                [gridLines]="multiAxisSecondaryYGridLines()"
+                                [nice]="true" />
+                        }
+
+                        <!-- Revenue Bar Series bound to Left Y-Axis -->
+                        <mona-bar-series
+                            field="revenue"
+                            xAxisId="x-months"
+                            yAxisId="y-revenue"
+                            name="Gross Revenue ($k)" />
+
+                        <!-- Margin Line Series bound to Right Y-Axis -->
+                        <mona-line-series
+                            field="margin"
+                            xAxisId="x-months"
+                            yAxisId="y-margin"
+                            curve="natural"
+                            name="Profit Margin (%)" />
+
+                        <!-- Load Area Series bound to Right Y-Axis -->
+                        <mona-area-series
+                            field="load"
+                            xAxisId="x-months"
+                            yAxisId="y-margin"
+                            fillMode="gradient"
+                            opacity="0.2"
+                            name="System Load (%)" />
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
         }
     </div>
 
@@ -2427,7 +2783,11 @@
                                     [class.bg-teal-500/10]="log.eventType === 'sliceVisibilityChange'"
                                     [class.text-teal-500]="log.eventType === 'sliceVisibilityChange'"
                                     [class.bg-purple-500/10]="log.eventType === 'dataUpdate'"
-                                    [class.text-purple-500]="log.eventType === 'dataUpdate'">
+                                    [class.text-purple-500]="log.eventType === 'dataUpdate'"
+                                    [class.bg-sky-500/10]="log.eventType === 'viewportChange'"
+                                    [class.text-sky-500]="log.eventType === 'viewportChange'"
+                                    [class.bg-indigo-500/10]="log.eventType === 'programmaticNav'"
+                                    [class.text-indigo-500]="log.eventType === 'programmaticNav'">
                                     {{ log.eventType }}
                                 </span>
                             </td>

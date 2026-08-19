@@ -18,13 +18,15 @@ export class CartesianAxisOverhangResolver {
         let maxTop = 0;
         let maxBottom = 0;
 
+        if (labelMeasurements.size === 0) {
+            return { bottom: 0, left: 0, right: 0, top: 0 };
+        }
+
         for (const axis of axes) {
-            if (!axis.visible || axis.labels === false) {
+            if (!axis.visible || axis.labels === false || axis.type === "category") {
                 continue;
             }
             if (axis.dimension === "x") {
-                // X axis labels may overhang left and right boundaries by ~ half of label width
-                // We check first and last measured label for this axis
                 const prefix = `axis:x:${encodeURIComponent(axis.axisId)}:`;
                 const matchingMeasurements: ChartLabelMeasurement[] = [];
                 for (const [key, m] of labelMeasurements) {
@@ -39,7 +41,6 @@ export class CartesianAxisOverhangResolver {
                     maxRight = Math.max(maxRight, Math.ceil(lastWidth / 2));
                 }
             } else {
-                // Y axis labels may overhang top and bottom boundaries by ~ half of label height
                 const prefix = `axis:y:${encodeURIComponent(axis.axisId)}:`;
                 const matchingMeasurements: ChartLabelMeasurement[] = [];
                 for (const [key, m] of labelMeasurements) {

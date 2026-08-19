@@ -10,6 +10,7 @@ import {
     ElementRef,
     inject,
     input,
+    model,
     output,
     Signal,
     signal,
@@ -52,7 +53,12 @@ import {
 import { ChartLabelMeasureDirective } from "../../internal/directives/chart-label-measure.directive";
 import { ChartHitTestEngine } from "../../internal/interaction/chart-hit-test-engine";
 import type { ChartInteractionState } from "../../internal/interaction/chart-interaction-state";
-import { ChartKeyboardNavigation } from "../../internal/interaction/chart-keyboard-navigation";
+import {
+    ChartKeyboardNavigation,
+    type ChartKeyboardAxisNamespace,
+    getAvailableAxisNamespaces,
+    resolveInteractionBuckets
+} from "../../internal/interaction/chart-keyboard-navigation";
 import { ChartLabelMeasurementPruner } from "../../internal/layout/chart-label-measurement-pruner";
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
 import { formatPolarLabelText } from "../../internal/layout/polar-label-layout";
@@ -99,10 +105,33 @@ import type {
     ChartSeriesVisibilityEvent
 } from "../../models/chart-event.models";
 import type {
+    ChartNavigationAxisTarget,
+    ChartNavigationInput,
+    ChartViewportChangeEvent,
+    ChartViewportChangePhase,
+    ChartViewportChangeSource,
+    ChartViewportState,
+    ChartViewportWindow
+} from "../../models/chart-viewport.models";
+import { normalizeChartNavigationOptions } from "../../internal/viewport/chart-navigation-options";
+import {
+    areInternalViewportStatesEqual,
+    areViewportStatesEqual,
+    normalizeViewportState,
+    toPublicViewportState,
+    type InternalCartesianViewportState
+} from "../../internal/viewport/cartesian-viewport-normalizer";
+import { CartesianViewportController } from "../../internal/viewport/cartesian-viewport-controller";
+import { CartesianViewportTargetResolver } from "../../internal/viewport/cartesian-viewport-target-resolver";
+import { CartesianViewportLinker } from "../../internal/viewport/cartesian-viewport-linker";
+import { ChartViewportGestureController } from "../../internal/viewport/chart-viewport-gesture-controller";
+import { ChartViewportKeyboardController } from "../../internal/viewport/chart-viewport-keyboard-controller";
+import type {
     ChartLabelMeasurement,
     ChartSliceContext,
     ChartSliceLabelTemplateContext
 } from "../../models/chart-polar.models";
+import type { ResolvedChartCartesianAxisType } from "../../internal/scale/chart-scale";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
 import type { ChartField, ChartPoint } from "../../models/chart.models";
@@ -176,12 +205,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     #activeKeyboardBucketIndex: number = -1;
     #activeKeyboardHitKey: string | null = null;
+    #activeKeyboardNamespace: ChartKeyboardAxisNamespace | null = null;
     #activeKeyboardSeriesId: string | null = null;
     #canvasContext: CanvasRenderingContext2D | null = null;
     #canvasReady: boolean = false;
     #currentHeight: number = 300;
     #currentWidth: number = 500;
     #hasCommittedVisualScene: boolean = false;
+    #gestureController: ChartViewportGestureController | null = null;
+    readonly #hasInitializedDefaultViewport = signal(false);
+    readonly #internalViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
     #interactionState: ChartInteractionState | null = null;
     #labelResizeObserver: ResizeObserver | null = null;
     #mediaQueryList: MediaQueryList | null = null;
@@ -193,6 +226,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #themeObserver: MutationObserver | null = null;
 
     protected readonly activeAccessibilityText = signal<string>("");
+    protected readonly viewportCursor = signal<string | null>(null);
     protected readonly axisLabelClasses = computed(() => chartAxisLabelBaseThemeVariants());
     protected readonly baseClasses = computed(() =>
         twMerge(chartBaseThemeVariants({ interactive: true }), this.userClass())
@@ -405,6 +439,34 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @description Emits when a series visibility state is toggled via legend interaction.
      */
     public readonly seriesVisibilityChange = output<ChartSeriesVisibilityEvent>();
+
+    /**
+     * @description Navigation, panning, and zooming options for the chart.
+     * @default false
+     */
+    public readonly navigation = input<ChartNavigationInput>(false);
+    protected readonly normalizedNavigation = computed(() => normalizeChartNavigationOptions(this.navigation()));
+    protected readonly touchActionStyle = computed(() => {
+        const nav = this.normalizedNavigation();
+        return nav.enabled && (nav.pan || nav.pinchZoom || nav.dragPan) ? "none" : null;
+    });
+
+    /**
+     * @description Active viewport window state for chart axes.
+     * @default undefined
+     */
+    public readonly viewport = input<ChartViewportState | undefined>(undefined);
+
+    /**
+     * @description Initial default viewport window state for chart axes.
+     * @default undefined
+     */
+    public readonly defaultViewport = input<ChartViewportState | undefined>(undefined);
+
+    /**
+     * @description Emits when the chart viewport changes via pan, zoom, fit, reset, or keyboard navigation.
+     */
+    public readonly viewportChange = output<ChartViewportChangeEvent>();
 
     public readonly tooltipContext = signal<ChartTooltipTemplateContext | null>(null);
     public readonly tooltipPosition = signal<ChartPoint | null>(null);
@@ -643,6 +705,81 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
         });
 
+        // Initialize default viewport
+        effect(() => {
+            const def = this.defaultViewport();
+            if (def && !this.#hasInitializedDefaultViewport()) {
+                this.#hasInitializedDefaultViewport.set(true);
+                const sc = this.cartesianXYScene();
+                if (sc) {
+                    const resolvedAxisMap = {
+                        x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                            sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+                        ),
+                        y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                            sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+                        )
+                    };
+                    const normalized = normalizeViewportState(def, resolvedAxisMap);
+                    this.#internalViewportState.set(normalized);
+                    this.invalidate(ChartInvalidationReason.Viewport);
+                }
+            }
+        });
+
+        // Sync external viewport model changes to internal state
+        effect(() => {
+            const extViewport = this.viewport();
+            const sc = this.cartesianXYScene();
+            if (extViewport && sc) {
+                const resolvedAxisMap = {
+                    x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                        sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+                    ),
+                    y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                        sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+                    )
+                };
+                const normalized = normalizeViewportState(extViewport, resolvedAxisMap);
+                if (!areInternalViewportStatesEqual(this.#internalViewportState(), normalized)) {
+                    this.#internalViewportState.set(normalized);
+                    this.invalidate(ChartInvalidationReason.Viewport);
+                }
+            }
+        });
+
+        // Update gesture controller when cartesian XY scene or navigation options change
+        effect(() => {
+            const sc = this.cartesianXYScene();
+            const nav = this.normalizedNavigation();
+            if (sc && nav.enabled) {
+                const gestureContext = {
+                    axisScenes: sc.axes,
+                    constraints: nav.constraints,
+                    coordinateSpace: sc.coordinateSpace,
+                    currentViewport: this.#internalViewportState(),
+                    linkGroups: nav.linkGroups,
+                    navigationOptions: nav,
+                    onCursorChange: (cursor: string | null) => this.viewportCursor.set(cursor),
+                    onViewportChange: (nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent) => {
+                        this.#internalViewportState.set(nextState);
+                        this.viewportChange.emit(event);
+                        this.invalidate(ChartInvalidationReason.Viewport);
+                    },
+                    orientation: sc.orientation ?? "vertical",
+                    plotRect: sc.plotRect
+                };
+                if (!this.#gestureController) {
+                    this.#gestureController = new ChartViewportGestureController(gestureContext);
+                } else {
+                    this.#gestureController.updateContext(gestureContext);
+                }
+            } else {
+                this.#gestureController = null;
+                this.viewportCursor.set(null);
+            }
+        });
+
         afterNextRender(() => {
             this.#initCanvasAndObserver();
             this.#canvasReady = true;
@@ -668,8 +805,37 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#recomputeAndPaint(reason);
     }
 
+    public onPointerDown(event: PointerEvent): void {
+        const pointer = this.#normalizePointer(event);
+        if (!pointer) return;
+        if (this.#gestureController?.handlePointerDown(event, pointer)) {
+            try {
+                (event.currentTarget as HTMLElement)?.setPointerCapture?.(event.pointerId);
+            } catch {}
+        }
+    }
+
+    public onPointerUp(event: PointerEvent): void {
+        if (this.#gestureController?.handlePointerUp(event)) {
+            try {
+                (event.currentTarget as HTMLElement)?.releasePointerCapture?.(event.pointerId);
+            } catch {}
+        }
+    }
+
+    public onWheel(event: WheelEvent): void {
+        const pointer = this.#normalizePointer(event);
+        if (!pointer) return;
+        if (this.#gestureController?.handleWheel(event, pointer)) {
+            event.preventDefault();
+        }
+    }
+
     public onCanvasClick(event: MouseEvent): void {
         if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+            return;
+        }
+        if (this.#gestureController?.isClickSuppressed) {
             return;
         }
 
@@ -712,6 +878,35 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
+        // Try Viewport Keyboard Navigation first
+        if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "xy") {
+            const xyScene = currentScene as CartesianXYChartScene;
+            const nav = this.normalizedNavigation();
+            const kbResult = ChartViewportKeyboardController.handleKeyDown(
+                event,
+                xyScene.coordinateSpace,
+                xyScene.plotRect,
+                xyScene.axes,
+                nav,
+                xyScene.orientation ?? "vertical",
+                this.#internalViewportState(),
+                nav.constraints,
+                nav.linkGroups,
+                this.#activeKeyboardNamespace
+            );
+
+            if (kbResult.handled) {
+                event.preventDefault();
+                if (kbResult.nextState) {
+                    this.#applyViewportUpdate(kbResult.nextState, "keyboard", "end", kbResult.changedAxes);
+                }
+                if (kbResult.announcement) {
+                    this.activeAccessibilityText.set(kbResult.announcement);
+                }
+                return;
+            }
+        }
+
         const isHierarchical = currentScene.coordinateSystem === "hierarchical";
         const isHeatmap = currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap";
         const buckets = currentScene.interactionBuckets;
@@ -724,11 +919,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             currentScene,
             this.#activeKeyboardBucketIndex,
             this.#activeKeyboardSeriesId,
-            this.#activeKeyboardHitKey
+            this.#activeKeyboardHitKey,
+            this.#activeKeyboardNamespace
         );
 
         if (navResult) {
-            this.#setKeyboardSelection(navResult.bucketIndex, navResult.seriesId, navResult.hitKey);
+            this.#setKeyboardSelection(
+                navResult.bucketIndex,
+                navResult.seriesId,
+                navResult.hitKey,
+                navResult.namespace
+            );
             return;
         }
 
@@ -737,20 +938,23 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const activeHit = this.#interactionState?.activeHitTarget;
             if (activeHit) {
                 this.pointClick.emit(this.#toPointEvent(activeHit));
-            } else if (this.#activeKeyboardBucketIndex >= 0 && buckets && buckets.length > 0) {
-                const bucket = buckets[this.#activeKeyboardBucketIndex];
-                const hit =
-                    (this.#activeKeyboardHitKey
-                        ? bucket?.hits.find(
-                              h =>
-                                  (h.animationKey ?? h.sliceId ?? `${h.seriesId}:${h.index}`) ===
-                                  this.#activeKeyboardHitKey
-                          )
-                        : undefined) ??
-                    bucket?.hits.find(h => h.seriesId === this.#activeKeyboardSeriesId) ??
-                    bucket?.hits[0];
-                if (hit) {
-                    this.pointClick.emit(this.#toPointEvent(hit));
+            } else if (this.#activeKeyboardBucketIndex >= 0) {
+                const resolvedBuckets = resolveInteractionBuckets(currentScene, this.#activeKeyboardNamespace);
+                if (resolvedBuckets && resolvedBuckets.length > 0) {
+                    const bucket = resolvedBuckets[this.#activeKeyboardBucketIndex];
+                    const hit =
+                        (this.#activeKeyboardHitKey
+                            ? bucket?.hits.find(
+                                  h =>
+                                      (h.animationKey ?? h.sliceId ?? `${h.seriesId}:${h.index}`) ===
+                                      this.#activeKeyboardHitKey
+                              )
+                            : undefined) ??
+                        bucket?.hits.find(h => h.seriesId === this.#activeKeyboardSeriesId) ??
+                        bucket?.hits[0];
+                    if (hit) {
+                        this.pointClick.emit(this.#toPointEvent(hit));
+                    }
                 }
             }
         } else if (event.key === "Escape") {
@@ -765,6 +969,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public onPointerMove(event: PointerEvent): void {
+        const pointer = this.#normalizePointer(event);
+        if (pointer && this.#gestureController?.handlePointerMove(event, pointer)) {
+            if (this.#interactionState !== null) {
+                this.#clearInteraction();
+            }
+            return;
+        }
+
         const tooltip = this.#tooltip();
         const hoverEnabled = tooltip ? tooltip.enabled() !== false : false;
         if (!hoverEnabled || (this.#isAnimating() && !this.#isStructuralAnimation())) {
@@ -783,6 +995,185 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 }
             });
         }
+    }
+
+    /**
+     * @description Returns the current active viewport window state, or null if chart is not Cartesian XY.
+     */
+    public getViewport(): ChartViewportState | null {
+        const sc = this.scene();
+        if (!sc || sc.coordinateSystem !== "cartesian" || sc.cartesianKind !== "xy") return null;
+        const resolvedAxisMap = {
+            x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+            ),
+            y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+            )
+        };
+        return toPublicViewportState(this.#internalViewportState(), resolvedAxisMap);
+    }
+
+    /**
+     * @description Sets the active viewport window state.
+     */
+    public setViewport(viewport: ChartViewportState): void {
+        const sc = this.cartesianXYScene();
+        if (!sc) return;
+        const resolvedAxisMap = {
+            x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+            ),
+            y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+            )
+        };
+        const normalized = normalizeViewportState(viewport, resolvedAxisMap);
+        this.#applyViewportUpdate(normalized, "programmatic", "end");
+    }
+
+    /**
+     * @description Zooms the viewport by a scale factor around an optional pixel anchor point.
+     */
+    public zoom(factor: number, anchor?: ChartPoint, target?: ChartNavigationAxisTarget): void {
+        const sc = this.cartesianXYScene();
+        if (!sc || !sc.coordinateSpace) return;
+        const center = anchor ?? { x: sc.plotRect.x + sc.plotRect.width / 2, y: sc.plotRect.y + sc.plotRect.height / 2 };
+        const resolved = CartesianViewportTargetResolver.resolveTargets(
+            center,
+            sc.plotRect,
+            sc.axes,
+            this.normalizedNavigation(),
+            sc.orientation ?? "vertical",
+            target
+        );
+        const targetAxes = CartesianViewportLinker.expandTargetAxesWithLinks(
+            resolved.targetAxes,
+            this.normalizedNavigation().linkGroups
+        );
+        const nav = this.normalizedNavigation();
+        const res = CartesianViewportController.zoom(
+            this.#internalViewportState(),
+            sc.coordinateSpace,
+            targetAxes,
+            factor,
+            center,
+            {
+                clampToData: nav.clampToData,
+                constraints: nav.constraints,
+                minVisibleCategories: nav.minVisibleCategories
+            }
+        );
+        if (res.changed) {
+            this.#applyViewportUpdate(res.viewport, "programmatic", "end", res.changedAxes);
+        }
+    }
+
+    /**
+     * @description Pans the viewport by pixel delta vector { x, y }.
+     */
+    public pan(delta: { x: number; y: number }, target?: ChartNavigationAxisTarget): void {
+        const sc = this.cartesianXYScene();
+        if (!sc || !sc.coordinateSpace) return;
+        const resolved = CartesianViewportTargetResolver.resolveTargets(
+            null,
+            sc.plotRect,
+            sc.axes,
+            this.normalizedNavigation(),
+            sc.orientation ?? "vertical",
+            target
+        );
+        const targetAxes = CartesianViewportLinker.expandTargetAxesWithLinks(
+            resolved.targetAxes,
+            this.normalizedNavigation().linkGroups
+        );
+        const nav = this.normalizedNavigation();
+        const res = CartesianViewportController.pan(
+            this.#internalViewportState(),
+            sc.coordinateSpace,
+            targetAxes,
+            delta,
+            {
+                clampToData: nav.clampToData,
+                constraints: nav.constraints,
+                minVisibleCategories: nav.minVisibleCategories
+            }
+        );
+        if (res.changed) {
+            this.#applyViewportUpdate(res.viewport, "programmatic", "end", res.changedAxes);
+        }
+    }
+
+    /**
+     * @description Fits the viewport window to a specified continuous range or category indices.
+     */
+    public fit(window: ChartViewportWindow | readonly ChartViewportWindow[]): void {
+        const sc = this.cartesianXYScene();
+        if (!sc || !sc.coordinateSpace) return;
+        const nav = this.normalizedNavigation();
+        const res = CartesianViewportController.setWindow(
+            this.#internalViewportState(),
+            sc.coordinateSpace,
+            window,
+            {
+                clampToData: nav.clampToData,
+                constraints: nav.constraints,
+                minVisibleCategories: nav.minVisibleCategories
+            }
+        );
+        if (res.changed) {
+            this.#applyViewportUpdate(res.viewport, "programmatic", "end", res.changedAxes);
+        }
+    }
+
+    /**
+     * @description Resets the viewport window back to the canonical base domain for target axes.
+     */
+    public resetViewport(target?: ChartNavigationAxisTarget): void {
+        const sc = this.cartesianXYScene();
+        if (!sc || !sc.coordinateSpace) return;
+        const targetAxes = target !== undefined
+            ? CartesianViewportTargetResolver.resolveExplicitTarget(target, sc.axes)
+            : undefined;
+        const res = CartesianViewportController.reset(
+            this.#internalViewportState(),
+            undefined,
+            targetAxes
+        );
+        if (res.changed) {
+            this.#applyViewportUpdate(res.viewport, "programmatic", "end", res.changedAxes);
+        }
+    }
+
+    #applyViewportUpdate(
+        nextState: InternalCartesianViewportState,
+        source: ChartViewportChangeSource,
+        phase: ChartViewportChangePhase,
+        changedAxes?: readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[]
+    ): void {
+        const previousState = this.#internalViewportState();
+        this.#internalViewportState.set(nextState);
+        const sc = this.cartesianXYScene();
+        if (sc) {
+            const resolvedAxisMap = {
+                x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                    sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+                ),
+                y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
+                    sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+                )
+            };
+            const publicState = toPublicViewportState(nextState, resolvedAxisMap);
+            const prevPublicState = toPublicViewportState(previousState, resolvedAxisMap);
+            this.viewportChange.emit({
+                changedAxes: changedAxes ?? [],
+                phase,
+                previousViewport: prevPublicState,
+                source,
+                viewport: publicState
+            });
+        }
+        this.invalidate(ChartInvalidationReason.Viewport);
     }
 
     #resolveSharedTooltip(scene: ChartScene): boolean {
@@ -1129,8 +1520,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     #clearInteractionState(): void {
         this.#activeKeyboardBucketIndex = -1;
-        this.#activeKeyboardSeriesId = null;
         this.#activeKeyboardHitKey = null;
+        this.#activeKeyboardNamespace = null;
+        this.#activeKeyboardSeriesId = null;
         this.#interactionState = null;
         this.tooltipContext.set(null);
         this.tooltipPosition.set(null);
@@ -1252,7 +1644,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
 
         const requiresSceneRefresh =
-            isStructural || hasInvalidationReason(reason, ChartInvalidationReason.Style) || !this.scene();
+            isStructural ||
+            hasInvalidationReason(reason, ChartInvalidationReason.Style) ||
+            hasInvalidationReason(reason, ChartInvalidationReason.Viewport) ||
+            !this.scene();
 
         if (isStructural) {
             this.#clearInteractionState();
@@ -1270,6 +1665,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                   rootXField: this.xField(),
                   series: this.#registeredSeries(),
                   styleResolver: this.#styleResolver,
+                  viewport: this.#internalViewportState(),
                   warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures,
                   xAxis: this.#xAxes()[0] ?? undefined,
                   xAxes: this.#xAxes(),
@@ -1287,6 +1683,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const isInitial = !this.#hasCommittedVisualScene;
         const isVisibility = hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
         const isData = hasInvalidationReason(reason, ChartInvalidationReason.Data);
+        const isViewport = hasInvalidationReason(reason, ChartInvalidationReason.Viewport);
         const trigger: ChartAnimationTrigger = isInitial
             ? "initial"
             : isVisibility
@@ -1313,7 +1710,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        if (trigger === "layout" || effectiveOptions.duration === 0) {
+        if (trigger === "layout" || isViewport || effectiveOptions.duration === 0) {
             this.#animationController.cancel("keep-current");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
@@ -1395,7 +1792,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #setKeyboardSelection(
         bucketIndex: number,
         preferredSeriesId: string | null,
-        preferredHitKey: string | null = null
+        preferredHitKey: string | null = null,
+        namespace?: ChartKeyboardAxisNamespace | null
     ): void {
         const currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) return;
@@ -1412,7 +1810,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     : undefined) ?? currentScene.hitTargets[0];
             if (!matchingHit) return;
         } else {
-            const buckets = currentScene.interactionBuckets;
+            const isCartesianXY = currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "xy";
+            if (isCartesianXY) {
+                const xyScene = currentScene as CartesianXYChartScene;
+                const dimension: "x" | "y" = xyScene.interactionAxis === "y" ? "y" : "x";
+                const primaryId =
+                    dimension === "y" ? (xyScene.primaryYAxisId ?? "default") : (xyScene.primaryXAxisId ?? "default");
+                this.#activeKeyboardNamespace =
+                    namespace ?? this.#activeKeyboardNamespace ?? { axis: dimension, axisId: primaryId };
+            }
+
+            const buckets = resolveInteractionBuckets(currentScene, this.#activeKeyboardNamespace);
             if (!buckets || buckets.length === 0) return;
 
             this.#activeKeyboardBucketIndex = clamp(bucketIndex, 0, buckets.length - 1);
@@ -1442,9 +1850,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
 
         const shared = this.#resolveSharedTooltip(currentScene);
+        const resolvedBuckets =
+            currentScene.coordinateSystem === "hierarchical"
+                ? undefined
+                : resolveInteractionBuckets(currentScene, this.#activeKeyboardNamespace);
         const activeHits =
-            shared && bucketIndex >= 0 && currentScene.interactionBuckets?.[bucketIndex]
-                ? currentScene.interactionBuckets[bucketIndex].hits
+            shared && bucketIndex >= 0 && resolvedBuckets && resolvedBuckets[this.#activeKeyboardBucketIndex]
+                ? resolvedBuckets[this.#activeKeyboardBucketIndex].hits
                 : [matchingHit];
 
         this.#interactionState = {

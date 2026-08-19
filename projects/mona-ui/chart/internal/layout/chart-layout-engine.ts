@@ -33,6 +33,7 @@ import { PolarLayoutEngine } from "./polar-layout-engine";
 import { WaterfallLayoutEngine } from "./waterfall-layout-engine";
 
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
+import type { InternalCartesianViewportState } from "../viewport/cartesian-viewport-normalizer";
 
 const globalWarnedSignatures = new Set<string>();
 
@@ -53,6 +54,7 @@ export interface ChartLayoutOptions {
     rootXField?: ChartField;
     series: readonly ChartSeriesRegistration[];
     styleResolver: ChartStyleResolver;
+    viewport?: InternalCartesianViewportState;
     warnedDiagnosticSignatures?: Set<string>;
     xAxis?: ChartXAxisRegistration;
     xAxes?: readonly ChartXAxisRegistration[];
@@ -533,6 +535,7 @@ export class ChartLayoutEngine {
             rootXField: options.rootXField,
             series: cartesianSeries,
             styleResolver: options.styleResolver,
+            viewport: options.viewport,
             warnedDiagnosticSignatures: warnedSet,
             xAxis: options.xAxis,
             xAxes: options.xAxes,
