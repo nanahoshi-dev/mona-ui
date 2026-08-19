@@ -61,7 +61,9 @@ export interface CartesianHorizontalBarLayoutOptions {
     readonly styleResolver?: ChartStyleResolver;
     readonly warnedDiagnosticSignatures?: Set<string>;
     readonly xAxis?: ChartXAxisRegistration | null;
+    readonly xAxes?: readonly ChartXAxisRegistration[];
     readonly yAxis?: ChartYAxisRegistration | null;
+    readonly yAxes?: readonly ChartYAxisRegistration[];
 }
 
 export class CartesianHorizontalBarLayoutEngine {
@@ -73,10 +75,10 @@ export class CartesianHorizontalBarLayoutEngine {
             measurements,
             rootData,
             rootXField,
-            warnedDiagnosticSignatures,
-            xAxis,
-            yAxis
+            warnedDiagnosticSignatures
         } = options;
+        const xAxis = options.xAxis ?? (options.xAxes && options.xAxes.length > 0 ? options.xAxes[0] : null);
+        const yAxis = options.yAxis ?? (options.yAxes && options.yAxes.length > 0 ? options.yAxes[0] : null);
         const styleResolver = options.styleResolver ?? new ChartStyleResolver();
 
         const visibleSeries = effectiveSeries.filter(s => s.visible());
@@ -471,8 +473,8 @@ export class CartesianHorizontalBarLayoutEngine {
                         const categoryStartPixel = bandStart + slotOffset + centeringOffset;
                         const startVal = stackEntry.stackStart;
                         const endVal = stackEntry.stackEnd;
-                        const valueStartPixel = xScale.map(startVal);
-                        const valueEndPixel = xScale.map(endVal);
+                        const valueStartPixel = xScale.map(startVal) ?? 0;
+                        const valueEndPixel = xScale.map(endVal) ?? 0;
                         const isPositive = endVal >= startVal;
 
                         const barRect = CartesianBarGeometry.deriveBarRect({
@@ -562,8 +564,12 @@ export class CartesianHorizontalBarLayoutEngine {
                             stackTotal: stackEntry.stackTotal,
                             value: stackEntry.rawValue,
                             visualBounds: barRect,
+                            xAxisId: series.xAxisId?.() ?? xAxis?.axisId?.() ?? "default-x",
+                            xAxisTitle: xAxis?.title?.() ?? "",
                             xKey: catKey,
                             xValue: stackEntry.xValue,
+                            yAxisId: series.yAxisId?.() ?? yAxis?.axisId?.() ?? "default-y",
+                            yAxisTitle: yAxis?.title?.() ?? "",
                             yValue: stackEntry.rawValue
                         };
                         recordHit(hitTarget);
@@ -589,9 +595,9 @@ export class CartesianHorizontalBarLayoutEngine {
                         const numVal = val;
                         const startVal = 0;
                         const endVal = numVal;
-                        const baselineX = clamp(xScale.map(0), plotRect.x, plotRect.x + plotRect.width);
+                        const baselineX = clamp(xScale.map(0) ?? plotRect.x, plotRect.x, plotRect.x + plotRect.width);
                         const valueStartPixel = baselineX;
-                        const valueEndPixel = numVal === 0 ? baselineX : xScale.map(numVal);
+                        const valueEndPixel = numVal === 0 ? baselineX : (xScale.map(numVal) ?? baselineX);
                         const isPositive = numVal >= 0;
 
                         const barRect = CartesianBarGeometry.deriveBarRect({
@@ -662,8 +668,12 @@ export class CartesianHorizontalBarLayoutEngine {
                             seriesType: "bar",
                             value: numVal,
                             visualBounds: isZeroWidth ? { height: barRect.height, width: 4, x: barRect.x - 2, y: barRect.y } : barRect,
+                            xAxisId: series.xAxisId?.() ?? xAxis?.axisId?.() ?? "default-x",
+                            xAxisTitle: xAxis?.title?.() ?? "",
                             xKey: catKey,
                             xValue: catVal,
+                            yAxisId: series.yAxisId?.() ?? yAxis?.axisId?.() ?? "default-y",
+                            yAxisTitle: yAxis?.title?.() ?? "",
                             yValue: numVal
                         };
                         recordHit(hitTarget);
@@ -728,8 +738,8 @@ export class CartesianHorizontalBarLayoutEngine {
                     }
 
                     const categoryStartPixel = bandStart + slotOffset + centeringOffset;
-                    const fromValuePixel = xScale.map(range.fromValue);
-                    const toValuePixel = xScale.map(range.toValue);
+                    const fromValuePixel = xScale.map(range.fromValue) ?? 0;
+                    const toValuePixel = xScale.map(range.toValue) ?? 0;
 
                     const barRect = CartesianBarGeometry.deriveBarRect({
                         categorySize: effectiveBarHeight,
@@ -812,8 +822,12 @@ export class CartesianHorizontalBarLayoutEngine {
                         value: [range.fromValue, range.toValue],
                         valueKind: "range",
                         visualBounds: isZeroInterval ? { height: barRect.height, width: 4, x: barRect.x - 2, y: barRect.y } : barRect,
+                        xAxisId: series.xAxisId?.() ?? xAxis?.axisId?.() ?? "default-x",
+                        xAxisTitle: xAxis?.title?.() ?? "",
                         xKey: catKey,
-                        xValue: catVal
+                        xValue: catVal,
+                        yAxisId: series.yAxisId?.() ?? yAxis?.axisId?.() ?? "default-y",
+                        yAxisTitle: yAxis?.title?.() ?? ""
                     };
                     recordHit(hitTarget);
                 }

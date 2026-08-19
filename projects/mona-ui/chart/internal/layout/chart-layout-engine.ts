@@ -55,7 +55,9 @@ export interface ChartLayoutOptions {
     styleResolver: ChartStyleResolver;
     warnedDiagnosticSignatures?: Set<string>;
     xAxis?: ChartXAxisRegistration;
+    xAxes?: readonly ChartXAxisRegistration[];
     yAxis?: ChartYAxisRegistration;
+    yAxes?: readonly ChartYAxisRegistration[];
 }
 
 export function resolveChartCoordinateSystem(
@@ -474,6 +476,13 @@ export class ChartLayoutEngine {
         }
 
         if (coordinateSystem === "polar") {
+            const polarSeries = series.filter(
+                (s): s is ChartRadialSeriesRegistration | ChartRadialArcSeriesRegistration =>
+                    getChartSeriesFamily(s.type) === "polar" ||
+                    getChartSeriesFamily(s.type) === "radar" ||
+                    getChartSeriesFamily(s.type) === "radialArc" ||
+                    getChartSeriesFamily(s.type) === "sector"
+            );
             if (options.xAxis || options.yAxis) {
                 warnOnce(
                     "polar-projected-axes",
@@ -498,11 +507,6 @@ export class ChartLayoutEngine {
                     );
                 }
             }
-
-            const polarSeries = series.filter(
-                (s): s is ChartRadialArcSeriesRegistration | ChartRadialSeriesRegistration | ChartSectorSeriesRegistration =>
-                    isPolarCoordinateFamily(getChartSeriesFamily(s.type))
-            );
 
             return PolarLayoutEngine.computeScene({
                 angularAxis: options.angularAxis,
@@ -531,8 +535,9 @@ export class ChartLayoutEngine {
             styleResolver: options.styleResolver,
             warnedDiagnosticSignatures: warnedSet,
             xAxis: options.xAxis,
-            yAxis: options.yAxis
+            xAxes: options.xAxes,
+            yAxis: options.yAxis,
+            yAxes: options.yAxes
         });
     }
 }
-

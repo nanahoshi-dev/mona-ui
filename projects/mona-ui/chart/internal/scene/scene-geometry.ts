@@ -237,9 +237,13 @@ export interface SceneHitTarget {
     visualBounds?: ChartRect;
     visualRadius?: number;
     waterfall?: import("../../models/chart-point-value.models").ChartWaterfallPointValue;
+    xAxisId?: string;
+    xAxisTitle?: string;
     xIndex?: number;
     xKey: ChartInteractionXKey;
     xValue: unknown;
+    yAxisId?: string;
+    yAxisTitle?: string;
     yCategory?: unknown;
     yIndex?: number;
     yValue?: number;
@@ -249,8 +253,12 @@ export interface ChartInteractionBucket {
     readonly anchor: ChartPoint;
     readonly hits: readonly SceneHitTarget[];
     readonly order: number;
+    readonly xAxisId?: string;
+    readonly xAxisTitle?: string;
     readonly xKey: ChartInteractionXKey;
     readonly xValue: unknown;
+    readonly yAxisId?: string;
+    readonly yAxisTitle?: string;
 }
 
 export interface ScenePoint {

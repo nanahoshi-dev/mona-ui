@@ -62,6 +62,7 @@ export type {
     ChartAxisPosition,
     ChartAxisTick,
     ChartHeaderAlignment,
+    ChartNumericScaleType,
     ChartSubtitleTemplateContext,
     ChartTitleTemplateContext,
     ChartXAxisPosition,

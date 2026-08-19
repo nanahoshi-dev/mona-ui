@@ -9,6 +9,8 @@ import type {
     ChartYAxisType
 } from "../../models/chart-axis.models";
 
+let nextYAxisId = 0;
+
 @Component({
     selector: "mona-chart-y-axis",
     template: "",
@@ -21,14 +23,31 @@ import type {
 export class ChartYAxisComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #registrationId = `mona-y-axis-${++nextYAxisId}`;
 
     protected readonly labelTemplate = contentChild(ChartAxisLabelTemplateDirective);
+
+    public get registrationId(): string {
+        return this.#registrationId;
+    }
+
+    /**
+     * @description Optional semantic identifier for the Y axis, referenced by series `yAxisId`.
+     * @default undefined
+     */
+    public readonly axisId = input<string | undefined>(undefined);
 
     /**
      * @description Whether the solid baseline axis border line is rendered.
      * @default true
      */
     public readonly axisLine = input(true);
+
+    /**
+     * @description Exponent for power scale (`type="pow"`). Must be a positive finite number.
+     * @default 1
+     */
+    public readonly exponent = input(1);
 
     /**
      * @description Custom formatter function for axis tick labels.
@@ -67,6 +86,12 @@ export class ChartYAxisComponent implements OnInit {
     public readonly labels = input(true);
 
     /**
+     * @description Base logarithm for log scale (`type="log"`). Must be a positive finite number not equal to 1.
+     * @default 10
+     */
+    public readonly logBase = input(10);
+
+    /**
      * @description Explicit upper bound for the numeric value range.
      * @default undefined
      */
@@ -89,6 +114,12 @@ export class ChartYAxisComponent implements OnInit {
      * @default "left"
      */
     public readonly position = input<ChartYAxisPosition>("left");
+
+    /**
+     * @description Constant for symlog scale (`type="symlog"`). Must be a positive finite number.
+     * @default 1
+     */
+    public readonly symlogConstant = input(1);
 
     /**
      * @description Suggested number of ticks to display along the axis (acts as preferred label count for category axes).
@@ -121,7 +152,7 @@ export class ChartYAxisComponent implements OnInit {
     public readonly titlePadding = input<number | undefined>(undefined);
 
     /**
-     * @description Scale type for the Y axis (`"auto"`, `"category"`, or `"linear"`).
+     * @description Scale type for the Y axis (`"auto"`, `"category"`, `"linear"`, `"log"`, `"symlog"`, `"pow"`, or `"sqrt"`).
      * @default "auto"
      */
     public readonly type = input<ChartYAxisType>("auto");
@@ -136,17 +167,21 @@ export class ChartYAxisComponent implements OnInit {
 
     public constructor() {
         effect(() => {
+            this.axisId();
             this.axisLine();
+            this.exponent();
             this.formatter();
             this.gridLines();
             this.labelMaxWidth();
             this.labelPadding();
             this.labelRotation();
             this.labels();
+            this.logBase();
             this.max();
             this.min();
             this.nice();
             this.position();
+            this.symlogConstant();
             this.tickCount();
             this.tickMarks();
             this.tickSize();
@@ -166,7 +201,9 @@ export class ChartYAxisComponent implements OnInit {
         }
 
         const unregister = this.#chartContext.registerYAxis({
+            axisId: this.axisId,
             axisLine: this.axisLine,
+            exponent: this.exponent,
             formatter: this.formatter,
             gridLines: this.gridLines,
             labelMaxWidth: this.labelMaxWidth,
@@ -174,10 +211,13 @@ export class ChartYAxisComponent implements OnInit {
             labelRotation: this.labelRotation,
             labels: this.labels,
             labelTemplate: this.labelTemplate,
+            logBase: this.logBase,
             max: this.max,
             min: this.min,
             nice: this.nice,
             position: this.position,
+            registrationId: this.#registrationId,
+            symlogConstant: this.symlogConstant,
             tickCount: this.tickCount,
             tickMarks: this.tickMarks,
             tickSize: this.tickSize,

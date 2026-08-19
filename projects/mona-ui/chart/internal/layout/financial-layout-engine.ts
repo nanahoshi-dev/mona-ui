@@ -38,10 +38,10 @@ function mapXCoordinate(
     if (xAxisType === "time" || xAxisType === "utc") {
         const timeScale = xScale as ChartContinuousScale<Date>;
         const date = xScaleValue instanceof Date ? xScaleValue : new Date(xScaleValue as string | number);
-        return timeScale.map(date);
+        return timeScale.map(date) ?? 0;
     }
     const linearScale = xScale as ChartContinuousScale<number>;
-    return linearScale.map(Number(xScaleValue));
+    return linearScale.map(Number(xScaleValue)) ?? 0;
 }
 
 function formatValue(
@@ -95,10 +95,10 @@ export class FinancialLayoutEngine {
         const sceneMarks: SceneCandlestickMark[] = resolvedDataset.marks.map((mark, i) => {
             const centerX = markCoordinates[i];
             const bodyWidth = markWidths[i] ?? nominalBodyWidth;
-            const openY = yScale.map(mark.open);
-            const highY = yScale.map(mark.high);
-            const lowY = yScale.map(mark.low);
-            const closeY = yScale.map(mark.close);
+            const openY = yScale.map(mark.open) ?? 0;
+            const highY = yScale.map(mark.high) ?? 0;
+            const lowY = yScale.map(mark.low) ?? 0;
+            const closeY = yScale.map(mark.close) ?? 0;
 
             const bodyTopY = Math.min(openY, closeY);
             const rawBodyHeight = Math.abs(closeY - openY);
@@ -203,10 +203,10 @@ export class FinancialLayoutEngine {
                 : maxTick;
             const totalWidth = tickWidth * 2;
 
-            const openY = yScale.map(mark.open);
-            const highY = yScale.map(mark.high);
-            const lowY = yScale.map(mark.low);
-            const closeY = yScale.map(mark.close);
+            const openY = yScale.map(mark.open) ?? 0;
+            const highY = yScale.map(mark.high) ?? 0;
+            const lowY = yScale.map(mark.low) ?? 0;
+            const closeY = yScale.map(mark.close) ?? 0;
 
             const formattedOpen = formatValue(mark.open, seriesFormatter, mark.dataIndex);
             const formattedHigh = formatValue(mark.high, seriesFormatter, mark.dataIndex);

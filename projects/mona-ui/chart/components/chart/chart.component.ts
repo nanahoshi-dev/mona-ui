@@ -17,6 +17,7 @@ import {
     viewChild
 } from "@angular/core";
 import { twMerge } from "tailwind-merge";
+import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
 import { ChartSubtitleTemplateDirective } from "../../directives/chart-subtitle-template.directive";
 import { ChartTitleTemplateDirective } from "../../directives/chart-title-template.directive";
@@ -166,8 +167,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #renderScheduler: ChartRenderScheduler;
     readonly #styleResolver: ChartStyleResolver;
     readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
-    readonly #xAxis = signal<ChartXAxisRegistration | null>(null);
-    readonly #yAxis = signal<ChartYAxisRegistration | null>(null);
+    readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
+    readonly #yAxes = signal<ChartYAxisRegistration[]>([]);
 
     public ngAfterContentChecked(): void {
         this.#renderScheduler.flush();
@@ -457,8 +458,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public readonly angularAxisRegistration: Signal<ChartAngularAxisRegistration | null> =
         this.#angularAxis.asReadonly();
     public readonly radialAxisRegistration: Signal<ChartRadialAxisRegistration | null> = this.#radialAxis.asReadonly();
-    public readonly xAxisRegistration: Signal<ChartXAxisRegistration | null> = this.#xAxis.asReadonly();
-    public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = this.#yAxis.asReadonly();
+    public readonly xAxesRegistration: Signal<readonly ChartXAxisRegistration[]> = this.#xAxes.asReadonly();
+    public readonly yAxesRegistration: Signal<readonly ChartYAxisRegistration[]> = this.#yAxes.asReadonly();
+    public readonly xAxisRegistration: Signal<ChartXAxisRegistration | null> = computed(() => this.#xAxes()[0] ?? null);
+    public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = computed(() => this.#yAxes()[0] ?? null);
+
+    protected resolveAxisLabelTemplate(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): ChartAxisLabelTemplateDirective | undefined {
+        if (axisScene.axis === "x") {
+            const reg = this.#xAxes().find(a => a.registrationId === axisScene.registrationId || (a.axisId?.() ?? "default-x") === axisScene.axisId);
+            return reg?.labelTemplate?.();
+        }
+        const reg = this.#yAxes().find(a => a.registrationId === axisScene.registrationId || (a.axisId?.() ?? "default-y") === axisScene.axisId);
+        return reg?.labelTemplate?.();
+    }
 
     protected axisLabelTransform(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): string {
         const rot = axisScene.labelRotation ?? 0;
@@ -506,9 +518,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
         const tickMarksOffset = axisScene.tickMarks ? (axisScene.tickSize ?? 6) : 0;
         const labelPadding = axisScene.labelPadding ?? 4;
+        const sideOffset = axisScene.sideOffset ?? 0;
         return axisScene.position === "right"
-            ? cart.plotRect.x + cart.plotRect.width + tickMarksOffset + labelPadding
-            : cart.plotRect.x - tickMarksOffset - labelPadding;
+            ? cart.plotRect.x + cart.plotRect.width + sideOffset + tickMarksOffset + labelPadding
+            : cart.plotRect.x - sideOffset - tickMarksOffset - labelPadding;
     }
 
     protected axisLabelTop(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): number {
@@ -517,9 +530,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
         const tickMarksOffset = axisScene.tickMarks ? (axisScene.tickSize ?? 6) : 0;
         const labelPadding = axisScene.labelPadding ?? 4;
+        const sideOffset = axisScene.sideOffset ?? 0;
         return axisScene.position === "top"
-            ? cart.plotRect.y - tickMarksOffset - labelPadding
-            : cart.plotRect.y + cart.plotRect.height + tickMarksOffset + labelPadding;
+            ? cart.plotRect.y - sideOffset - tickMarksOffset - labelPadding
+            : cart.plotRect.y + cart.plotRect.height + sideOffset + tickMarksOffset + labelPadding;
     }
 
     protected axisTitleLeft(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): number {
@@ -527,9 +541,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return cart.plotRect.x + cart.plotRect.width / 2;
         }
         const gutter = axisScene.gutter ?? 48;
+        const sideOffset = axisScene.sideOffset ?? 0;
         return axisScene.position === "right"
-            ? cart.plotRect.x + cart.plotRect.width + gutter - 14
-            : cart.plotRect.x - gutter + 14;
+            ? cart.plotRect.x + cart.plotRect.width + sideOffset + gutter - 14
+            : cart.plotRect.x - sideOffset - gutter + 14;
     }
 
     protected axisTitleTop(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): number {
@@ -537,9 +552,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return cart.plotRect.y + cart.plotRect.height / 2;
         }
         const gutter = axisScene.gutter ?? 32;
+        const sideOffset = axisScene.sideOffset ?? 0;
         return axisScene.position === "top"
-            ? cart.plotRect.y - gutter + 6
-            : cart.plotRect.y + cart.plotRect.height + gutter - 6;
+            ? cart.plotRect.y - sideOffset - gutter + 6
+            : cart.plotRect.y + cart.plotRect.height + sideOffset + gutter - 6;
     }
 
     public constructor() {
@@ -892,24 +908,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public registerXAxis(registration: ChartXAxisRegistration): () => void {
-        this.#xAxis.set(registration);
-        this.invalidate(ChartInvalidationReason.Data);
+        this.#xAxes.update(list => [...list, registration]);
+        this.invalidate(ChartInvalidationReason.Layout);
         return () => {
-            if (this.#xAxis() === registration) {
-                this.#xAxis.set(null);
-                this.invalidate(ChartInvalidationReason.Data);
-            }
+            this.#xAxes.update(list => list.filter(a => a !== registration));
+            this.invalidate(ChartInvalidationReason.Layout);
         };
     }
 
     public registerYAxis(registration: ChartYAxisRegistration): () => void {
-        this.#yAxis.set(registration);
-        this.invalidate(ChartInvalidationReason.Data);
+        this.#yAxes.update(list => [...list, registration]);
+        this.invalidate(ChartInvalidationReason.Layout);
         return () => {
-            if (this.#yAxis() === registration) {
-                this.#yAxis.set(null);
-                this.invalidate(ChartInvalidationReason.Data);
-            }
+            this.#yAxes.update(list => list.filter(a => a !== registration));
+            this.invalidate(ChartInvalidationReason.Layout);
         };
     }
 
@@ -993,17 +1005,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         primaryHit?: SceneHitTarget
     ): ChartTooltipTemplateContext {
         const seriesItems = this.legendItems();
-        const xAxis = this.#xAxis();
-        const yAxis = this.#yAxis();
-        const xFormatter = xAxis?.formatter();
-        const yFormatter = yAxis?.formatter();
-        const xAxisType = xAxis?.type();
+        const xAxes = this.#xAxes();
+        const yAxes = this.#yAxes();
 
         const pointContexts: ChartTooltipPointContext[] = hits.map(hit => {
             const seriesItem = seriesItems.find(
                 s => s.itemId === hit.sliceId || s.itemId === hit.itemId || s.seriesId === hit.seriesId
             );
             const color = hit.color ?? seriesItem?.color ?? "#3b82f6";
+            const hitXAxis = (hit.xAxisId ? xAxes.find(a => a.axisId?.() === hit.xAxisId) : undefined) ?? xAxes[0];
+            const hitYAxis = (hit.yAxisId ? yAxes.find(a => a.axisId?.() === hit.yAxisId) : undefined) ?? yAxes[0];
+            const xFormatter = hitXAxis?.formatter();
+            const yFormatter = hitYAxis?.formatter();
+            const xAxisType = hitXAxis?.type();
             const xStr =
                 hit.formattedCategory ??
                 formatXValue(hit.xValue ?? hit.category, hit.dataIndex ?? hit.index ?? 0, xFormatter, xAxisType);
@@ -1084,7 +1098,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         : hit.hierarchy?.aggregateValue ?? hit.yValue),
                 valueKind: hit.valueKind ?? (isRange ? "range" : hit.financial ? "ohlc" : hit.waterfall ? "waterfall" : "scalar"),
                 waterfall: hit.waterfall,
+                xAxisId: hit.xAxisId,
+                xAxisTitle: hit.xAxisTitle,
                 xValue: hit.xValue,
+                yAxisId: hit.yAxisId,
+                yAxisTitle: hit.yAxisTitle,
                 yCategory: hit.yCategory,
                 yValue: hit.yValue
             };
@@ -1253,8 +1271,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                   series: this.#registeredSeries(),
                   styleResolver: this.#styleResolver,
                   warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures,
-                  xAxis: this.#xAxis() ?? undefined,
-                  yAxis: this.#yAxis() ?? undefined
+                  xAxis: this.#xAxes()[0] ?? undefined,
+                  xAxes: this.#xAxes(),
+                  yAxis: this.#yAxes()[0] ?? undefined,
+                  yAxes: this.#yAxes()
               })
             : this.scene()!;
 
@@ -1470,8 +1490,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 );
             }
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap") {
-            const xTitle = this.#xAxis()?.title() ? `${this.#xAxis()?.title()} ` : "";
-            const yTitle = this.#yAxis()?.title() ? `${this.#yAxis()?.title()} ` : "";
+            const primaryX = this.#xAxes()[0];
+            const primaryY = this.#yAxes()[0];
+            const xTitle = primaryX?.title() ? `${primaryX.title()} ` : "";
+            const yTitle = primaryY?.title() ? `${primaryY.title()} ` : "";
             const xStr = `${xTitle}${matchingHit.formattedXValue ?? matchingHit.formattedCategory ?? matchingHit.categoryX ?? matchingHit.xValue}`;
             const yStr = `${yTitle}${matchingHit.formattedYCategory ?? matchingHit.categoryY ?? matchingHit.category}`;
             const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
@@ -1520,8 +1542,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 `${matchingHit.seriesName}, ${matchingHit.formattedCategory}${stepPrefix}: ${detail}.`
             );
         } else {
-            const xAxis = this.#xAxis();
-            const yAxis = this.#yAxis();
+            const xAxis = (matchingHit.xAxisId ? this.#xAxes().find(a => a.axisId?.() === matchingHit.xAxisId) : undefined) ?? this.#xAxes()[0];
+            const yAxis = (matchingHit.yAxisId ? this.#yAxes().find(a => a.axisId?.() === matchingHit.yAxisId) : undefined) ?? this.#yAxes()[0];
             const xStr =
                 matchingHit.formattedCategory ??
                 formatXValue(matchingHit.xValue, matchingHit.index, xAxis?.formatter(), xAxis?.type());
@@ -1930,7 +1952,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         : "scalar"),
             waterfall: target.waterfall,
             funnel: target.funnel,
+            xAxisId: target.xAxisId,
+            xAxisTitle: target.xAxisTitle,
             xValue: target.xValue,
+            yAxisId: target.yAxisId,
+            yAxisTitle: target.yAxisTitle,
             yCategory: target.yCategory,
             yValue: target.yValue ?? (typeof value === "number" ? value : undefined)
         };

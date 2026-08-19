@@ -256,8 +256,8 @@ export class WaterfallLayoutEngine {
             }
             const barX = slotX + (slotWidth - barWidth) / 2;
 
-            const fromY = plotRect.y + yScale.map(pt.barStart);
-            const toY = plotRect.y + yScale.map(pt.barEnd);
+            const fromY = plotRect.y + (yScale.map(pt.barStart) ?? 0);
+            const toY = plotRect.y + (yScale.map(pt.barEnd) ?? 0);
 
             const topY = Math.min(fromY, toY);
             const rawHeight = Math.abs(toY - fromY);
@@ -535,6 +535,7 @@ export class WaterfallLayoutEngine {
 
             axisScenes.push({
                 axis: "x",
+                axisId: xAxis?.axisId?.() ?? "default-x",
                 axisLine: xAxis?.axisLine() ?? true,
                 gridLines: xAxis?.gridLines() ?? false,
                 gutter: xGutter,
@@ -554,7 +555,8 @@ export class WaterfallLayoutEngine {
         if (isYAxisVisible) {
             const yRawTicks = yScale.ticks(yTickCount);
             const yTicks: ChartAxisTick[] = yRawTicks.map((val, idx) => {
-                const pos = plotRect.y + yScale.map(val);
+                const mapped = yScale.map(val);
+                const pos = mapped !== undefined ? plotRect.y + mapped : plotRect.y;
                 return {
                     coordinate: pos,
                     formattedValue: formatYValue(val, idx, yFormatter),
@@ -565,6 +567,7 @@ export class WaterfallLayoutEngine {
 
             axisScenes.push({
                 axis: "y",
+                axisId: yAxis?.axisId?.() ?? "default-y",
                 axisLine: yAxis?.axisLine() ?? true,
                 gridLines: yAxis?.gridLines() ?? true,
                 gutter: yGutter,

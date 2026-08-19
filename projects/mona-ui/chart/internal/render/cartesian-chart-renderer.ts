@@ -108,20 +108,22 @@ export class CartesianChartRenderer {
             context.strokeStyle = axisLineColor;
             context.lineWidth = 1;
 
+            const sideOffset = axisScene.sideOffset ?? 0;
+
             if (axisScene.axisLine) {
                 context.beginPath();
                 if (axisScene.axis === "x") {
                     const y =
                         axisScene.position === "top"
-                            ? crispPixel(plotRect.y, 1)
-                            : crispPixel(plotRect.y + plotRect.height, 1);
+                            ? crispPixel(plotRect.y - sideOffset, 1)
+                            : crispPixel(plotRect.y + plotRect.height + sideOffset, 1);
                     context.moveTo(plotRect.x, y);
                     context.lineTo(plotRect.x + plotRect.width, y);
                 } else if (axisScene.axis === "y") {
                     const x =
                         axisScene.position === "right"
-                            ? crispPixel(plotRect.x + plotRect.width, 1)
-                            : crispPixel(plotRect.x, 1);
+                            ? crispPixel(plotRect.x + plotRect.width + sideOffset, 1)
+                            : crispPixel(plotRect.x - sideOffset, 1);
                     context.moveTo(x, plotRect.y);
                     context.lineTo(x, plotRect.y + plotRect.height);
                 }
@@ -132,7 +134,7 @@ export class CartesianChartRenderer {
                 const tickSize = axisScene.tickSize ?? 6;
                 context.beginPath();
                 if (axisScene.axis === "x") {
-                    const baselineY = axisScene.position === "top" ? plotRect.y : plotRect.y + plotRect.height;
+                    const baselineY = axisScene.position === "top" ? plotRect.y - sideOffset : plotRect.y + plotRect.height + sideOffset;
                     const targetY = axisScene.position === "top" ? baselineY - tickSize : baselineY + tickSize;
                     for (const tick of axisScene.ticks) {
                         const x = crispPixel(tick.coordinate, 1);
@@ -140,7 +142,7 @@ export class CartesianChartRenderer {
                         context.lineTo(x, crispPixel(targetY, 1));
                     }
                 } else if (axisScene.axis === "y") {
-                    const baselineX = axisScene.position === "right" ? plotRect.x + plotRect.width : plotRect.x;
+                    const baselineX = axisScene.position === "right" ? plotRect.x + plotRect.width + sideOffset : plotRect.x - sideOffset;
                     const targetX = axisScene.position === "right" ? baselineX + tickSize : baselineX - tickSize;
                     for (const tick of axisScene.ticks) {
                         const y = crispPixel(tick.coordinate, 1);

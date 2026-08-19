@@ -29,7 +29,11 @@ export interface RangeBarLayoutContext {
     seriesDisplayName: string;
     style: ChartSeriesStyle;
     xAxis?: ChartAxisRegistration;
+    xAxisId?: string;
+    xAxisTitle?: string;
     yAxis?: ChartAxisRegistration;
+    yAxisId?: string;
+    yAxisTitle?: string;
     yFormatter?: (val: number, idx: number) => string;
     yScale: ChartContinuousScale;
 }
@@ -47,6 +51,11 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
         seriesDisplayName,
         style: sStyle,
         xAxis,
+        xAxisId,
+        xAxisTitle,
+        yAxis,
+        yAxisId,
+        yAxisTitle,
         yFormatter,
         yScale
     } = ctx;
@@ -61,22 +70,11 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
     const sToField = s.toField();
     const sKeyField = s.keyField?.();
     const sXField = s.xField?.() ?? rootXField;
-    const sBorderRadius = s.borderRadius?.();
-    const sFillOpacity = s.fillOpacity?.();
+    const sRadius = s.borderRadius?.();
     const seriesRawFormatter = s.valueFormatter?.() as ChartAxisFormatter<unknown> | undefined;
     const effectiveRawFormatter = seriesRawFormatter ?? (yFormatter as ChartAxisFormatter<unknown> | undefined);
 
-    const radius = normalizeNonNegativeNumber(sBorderRadius, 4);
-    const cornerRadii =
-        radius > 0
-            ? {
-                  bottomLeft: radius,
-                  bottomRight: radius,
-                  topLeft: radius,
-                  topRight: radius
-              }
-            : undefined;
-
+    const radius = normalizeNonNegativeNumber(sRadius, 4);
     const slotWidth = nestedBarScale.bandwidth();
     const barWidth = Math.min(slotWidth, slot.maxBarWidth ?? Number.POSITIVE_INFINITY);
     const centerOffset = (slotWidth - barWidth) / 2;
@@ -90,29 +88,45 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
         const xVal = resolveValue(datum, sXField, dIdx);
         const catKey = xVal !== undefined && xVal !== null ? String(xVal) : String(dIdx);
         const bandOuterX = bandScale.map(catKey);
-        if (bandOuterX === undefined) continue;
+
+        if (bandOuterX === undefined) {
+            continue;
+        }
 
         const range = resolveFiniteRangeValues(datum, sFromField, sToField, dIdx);
-        if (!range) continue;
 
-        const fromY = yScale.map(range.fromValue);
-        const toY = yScale.map(range.toValue);
-        const topY = Math.min(fromY, toY);
-        const barHeight = Math.abs(fromY - toY);
+        if (!range) {
+            continue;
+        }
+
         const barX = bandOuterX + subX + centerOffset;
+        const fromY = (yScale as any).map(range.fromValue);
+        const toY = (yScale as any).map(range.toValue);
+        const topY = Math.min(fromY, toY);
+        const barHeight = Math.abs(toY - fromY);
+
+        const cornerRadii = {
+            bottomLeft: radius,
+            bottomRight: radius,
+            topLeft: radius,
+            topRight: radius
+        };
 
         const animationKey = keyResolver.resolveKey(datum, catKey, dIdx);
         const formattedFrom = formatYValue(range.fromValue, dIdx, effectiveRawFormatter);
         const formattedTo = formatYValue(range.toValue, dIdx, effectiveRawFormatter);
-        const formattedValue = `${formattedFrom} \u2013 ${formattedTo}`;
+        const formattedValue = `${formattedFrom} - ${formattedTo}`;
 
         const bar: SceneRangeBar = {
             animationKey,
+            categorySize: barWidth,
+            categoryStartPixel: barX,
             cornerRadii,
             datum,
             formattedFrom,
             formattedTo,
             fromValue: range.fromValue,
+            fromValuePixel: fromY,
             fromY,
             height: barHeight,
             highValue: range.highValue,
@@ -121,6 +135,7 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
             radius,
             renderOpacity: 1,
             toValue: range.toValue,
+            toValuePixel: toY,
             toY,
             width: barWidth,
             x: barX,
@@ -134,10 +149,10 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
             animationKey,
             borderRadius: radius,
             bounds: {
-                height: Math.max(4, barHeight),
+                height: barHeight,
                 width: barWidth,
                 x: barX,
-                y: barHeight === 0 ? topY - 2 : topY
+                y: topY
             },
             cornerRadii,
             datum,
@@ -170,8 +185,12 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
                 x: barX,
                 y: topY
             },
+            xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
+            xAxisTitle: xAxisTitle ?? (xAxis?.title?.() ?? ""),
             xKey: catKey,
-            xValue: xVal
+            xValue: xVal,
+            yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y"),
+            yAxisTitle: yAxisTitle ?? (yAxis?.title?.() ?? "")
         };
         recordHitTarget(barTarget, true, false);
     }
@@ -179,7 +198,7 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
     return {
         bars,
         borderRadius: radius,
-        fillOpacity: normalizeOpacity(sFillOpacity, sStyle.fillOpacity ?? 1),
+        fillOpacity: normalizeOpacity(s.fillOpacity?.(), sStyle.fillOpacity ?? 1),
         id: s.id,
         name: seriesDisplayName,
         style: sStyle,
@@ -201,8 +220,12 @@ export interface RangeAreaLayoutContext {
     timeScale?: ChartContinuousScale;
     timeSpanMs?: number;
     xAxis?: ChartAxisRegistration;
+    xAxisId?: string;
+    xAxisTitle?: string;
     xAxisType: ChartXAxisType;
     yAxis?: ChartAxisRegistration;
+    yAxisId?: string;
+    yAxisTitle?: string;
     yFormatter?: (val: number, idx: number) => string;
     yScale: ChartContinuousScale;
 }
@@ -222,7 +245,12 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
         timeScale,
         timeSpanMs,
         xAxis,
+        xAxisId,
+        xAxisTitle,
         xAxisType,
+        yAxis,
+        yAxisId,
+        yAxisTitle,
         yFormatter,
         yScale
     } = ctx;
@@ -267,8 +295,11 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
         } else if (linearXScale) {
             if (isFiniteNumber(xVal)) {
                 normalizedXKey = Number(xVal);
-                xPos = linearXScale.map(xVal);
-                isXValid = true;
+                const mappedX = linearXScale.map(Number(xVal));
+                if (mappedX !== undefined) {
+                    xPos = mappedX;
+                    isXValid = true;
+                }
             }
         } else if (timeScale) {
             let dateVal: Date | undefined;
@@ -284,8 +315,11 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
             }
             if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
                 normalizedXKey = dateVal.getTime();
-                xPos = timeScale.map(dateVal);
-                isXValid = true;
+                const mappedX = timeScale.map(dateVal);
+                if (mappedX !== undefined) {
+                    xPos = mappedX;
+                    isXValid = true;
+                }
             }
         }
 
@@ -306,8 +340,22 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
             continue;
         }
 
-        const fromY = yScale.map(range.fromValue);
-        const toY = yScale.map(range.toValue);
+        const rawFromY = yScale.map(range.fromValue);
+        const rawToY = yScale.map(range.toValue);
+        if (rawFromY === undefined || rawToY === undefined) {
+            points.push({
+                animationKey,
+                datum,
+                defined: false,
+                index: dIdx,
+                renderOpacity: 1,
+                x: xPos,
+                xValue: xVal
+            });
+            continue;
+        }
+        const fromY = rawFromY;
+        const toY = rawToY;
         const lowY = Math.max(fromY, toY);
         const highY = Math.min(fromY, toY);
         const fromPoint = { x: xPos, y: fromY };
@@ -384,8 +432,12 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
             value: [range.fromValue, range.toValue],
             valueKind: "range",
             visualRadius: pointRadius,
+            xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
+            xAxisTitle: xAxisTitle ?? (xAxis?.title?.() ?? ""),
             xKey: normalizedXKey,
-            xValue: xVal
+            xValue: xVal,
+            yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y"),
+            yAxisTitle: yAxisTitle ?? (yAxis?.title?.() ?? "")
         };
         recordHitTarget(rangeTarget, false, true);
     }

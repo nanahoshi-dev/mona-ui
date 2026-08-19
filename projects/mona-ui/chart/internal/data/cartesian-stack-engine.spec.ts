@@ -28,7 +28,9 @@ function createMockBarSeries(config: {
         stackMode: signal(config.stackMode ?? "normal"),
         type: "bar",
         visible: signal(config.visible ?? true),
-        xField: signal(config.xField)
+        xAxisId: signal(undefined),
+        xField: signal(config.xField),
+        yAxisId: signal(undefined)
     };
 }
 
@@ -53,7 +55,9 @@ function createMockAreaSeries(config: {
         stackMode: signal(config.stackMode ?? "normal"),
         type: "area",
         visible: signal(config.visible ?? true),
-        xField: signal(config.xField)
+        xAxisId: signal(undefined),
+        xField: signal(config.xField),
+        yAxisId: signal(undefined)
     };
 }
 

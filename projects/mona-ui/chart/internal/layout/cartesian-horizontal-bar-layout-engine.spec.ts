@@ -26,7 +26,9 @@ function createMockBarSeries(overrides: Partial<ChartBarSeriesRegistration> = {}
         type: "bar",
         valueFormatter: signal(undefined),
         visible: signal(true),
+        xAxisId: signal(undefined),
         xField: signal("cat"),
+        yAxisId: signal(undefined),
         ...overrides
     };
 }
@@ -48,13 +50,16 @@ function createMockRangeBarSeries(overrides: Partial<ChartRangeBarSeriesRegistra
         type: "rangeBar",
         valueFormatter: signal(undefined),
         visible: signal(true),
+        xAxisId: signal(undefined),
         xField: signal("cat"),
+        yAxisId: signal(undefined),
         ...overrides
     };
 }
 
 function createMockXAxis(overrides: Partial<ChartXAxisRegistration> = {}): ChartXAxisRegistration {
     return {
+        axisId: signal(undefined),
         axisLine: signal(true),
         formatter: signal(undefined),
         gridLines: signal(true),
@@ -67,6 +72,7 @@ function createMockXAxis(overrides: Partial<ChartXAxisRegistration> = {}): Chart
         min: signal(undefined),
         nice: signal(true),
         position: signal("bottom"),
+        registrationId: "mock-x",
         tickCount: signal(5),
         tickMarks: signal(false),
         tickSize: signal(6),
@@ -80,6 +86,7 @@ function createMockXAxis(overrides: Partial<ChartXAxisRegistration> = {}): Chart
 
 function createMockYAxis(overrides: Partial<ChartYAxisRegistration> = {}): ChartYAxisRegistration {
     return {
+        axisId: signal(undefined),
         axisLine: signal(true),
         formatter: signal(undefined),
         gridLines: signal(false),
@@ -92,6 +99,7 @@ function createMockYAxis(overrides: Partial<ChartYAxisRegistration> = {}): Chart
         min: signal(undefined),
         nice: signal(true),
         position: signal("left"),
+        registrationId: "mock-y",
         tickCount: signal(5),
         tickMarks: signal(false),
         tickSize: signal(6),

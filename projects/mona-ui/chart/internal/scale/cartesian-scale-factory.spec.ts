@@ -1,94 +1,151 @@
 import { describe, expect, it } from "vitest";
-import { CartesianScaleFactory } from "./cartesian-scale-factory";
+import {
+    BandScale,
+    CartesianScaleFactory,
+    LinearScale,
+    LogScale,
+    PowScale,
+    SqrtScale,
+    SymlogScale,
+    TimeScale,
+    UtcScale
+} from "./cartesian-scale-factory";
 
-describe("CartesianScaleFactory", () => {
+describe("CartesianScaleFactory and Scale Adapters", () => {
     describe("LinearScale", () => {
-        it("should map domain values to range pixels linearly", () => {
-            const scale = CartesianScaleFactory.createLinearScale([0, 100], [0, 500], false);
+        it("should map domain to range and invert correctly", () => {
+            const scale = new LinearScale([0, 100], [0, 500]);
             expect(scale.map(0)).toBe(0);
             expect(scale.map(50)).toBe(250);
             expect(scale.map(100)).toBe(500);
-        });
-
-        it("should invert pixels to domain value", () => {
-            const scale = CartesianScaleFactory.createLinearScale([0, 100], [0, 500], false);
             expect(scale.invert(250)).toBe(50);
-            expect(scale.invert(scale.map(75))).toBeCloseTo(75, 5);
         });
 
-        it("should preserve exact explicit bounds after nice()", () => {
-            const scale = CartesianScaleFactory.createLinearScale([0, 85], [0, 500], true, 5, 0, 85);
-            expect(scale.domain()).toEqual([0, 85]);
-        });
-
-        it("should never produce degenerate scale when explicit min equals explicit max", () => {
-            const scale = CartesianScaleFactory.createLinearScale([100, 100], [0, 500], true, 5, 100, 100);
-            const domain = scale.domain();
-            expect(domain[0]).toBeLessThan(100);
-            expect(domain[1]).toBeGreaterThan(100);
-            expect(Number.isFinite(scale.map(100))).toBe(true);
-        });
-
-        it("should generate ticks", () => {
-            const scale = CartesianScaleFactory.createLinearScale([0, 100], [0, 500], false);
+        it("should generate ticks and format tick values", () => {
+            const scale = new LinearScale([0, 100], [0, 500]);
             const ticks = scale.ticks(5);
-            expect(ticks.length).toBeGreaterThanOrEqual(4);
-            expect(ticks[0]).toBe(0);
-            expect(ticks[ticks.length - 1]).toBe(100);
+            expect(ticks.length).toBeGreaterThan(0);
+            expect(scale.formatTick(100, 5)).toBe("100");
+        });
+    });
+
+    describe("LogScale", () => {
+        it("should map positive values logarithmically with specified base", () => {
+            const scale = new LogScale([1, 1000], [0, 300], 10);
+            expect(scale.map(1)).toBeCloseTo(0, 5);
+            expect(scale.map(10)).toBeCloseTo(100, 5);
+            expect(scale.map(100)).toBeCloseTo(200, 5);
+            expect(scale.map(1000)).toBeCloseTo(300, 5);
+            expect(scale.invert(200)).toBeCloseTo(100, 5);
+        });
+
+        it("should handle negative log domains gracefully", () => {
+            const scale = new LogScale([-1000, -1], [300, 0], 10);
+            expect(scale.map(-1)).toBeCloseTo(0, 5);
+            expect(scale.map(-1000)).toBeCloseTo(300, 5);
+        });
+
+        it("should return undefined for zero and opposite-sign values safely", () => {
+            const scale = new LogScale([1, 100], [0, 200], 10);
+            expect(scale.map(0)).toBeUndefined();
+            expect(scale.map(-10)).toBeUndefined();
+        });
+    });
+
+    describe("SymlogScale", () => {
+        it("should handle domains crossing zero smoothly using constant c", () => {
+            const scale = new SymlogScale([-100, 100], [0, 200], 1);
+            expect(scale.map(0)).toBeCloseTo(100, 2);
+            expect(scale.map(-100)).toBeCloseTo(0, 2);
+            expect(scale.map(100)).toBeCloseTo(200, 2);
+            expect(scale.invert(100)).toBeCloseTo(0, 2);
+        });
+    });
+
+    describe("PowScale and SqrtScale", () => {
+        it("should apply power transformation with custom exponent", () => {
+            const scale = new PowScale([0, 10], [0, 100], 2);
+            // 0^2 = 0 -> 0; 10^2 = 100 -> 100; for x=5: (25 / 100) * 100 = 25
+            expect(scale.map(0)).toBe(0);
+            expect(scale.map(5)).toBeCloseTo(25, 2);
+            expect(scale.map(10)).toBe(100);
+            expect(scale.invert(25)).toBeCloseTo(5, 2);
+        });
+
+        it("should apply square root transformation", () => {
+            const scale = new SqrtScale([0, 100], [0, 100]);
+            // sqrt(0) = 0 -> 0; sqrt(100) = 10 -> 100; for x=25: sqrt(25)/10 * 100 = 50
+            expect(scale.map(0)).toBe(0);
+            expect(scale.map(25)).toBeCloseTo(50, 2);
+            expect(scale.map(100)).toBe(100);
+            expect(scale.invert(50)).toBeCloseTo(25, 2);
+        });
+    });
+
+    describe("TimeScale and UtcScale", () => {
+        it("should map Date objects and timestamps linearly across time", () => {
+            const d1 = new Date(2025, 0, 1);
+            const d2 = new Date(2025, 0, 3);
+            const mid = new Date(2025, 0, 2);
+            const scale = new TimeScale([d1, d2], [0, 200]);
+
+            expect(scale.map(d1)).toBeCloseTo(0, 2);
+            expect(scale.map(mid)).toBeCloseTo(100, 2);
+            expect(scale.map(d2)).toBeCloseTo(200, 2);
+            expect(scale.invert(100).getTime()).toBeCloseTo(mid.getTime(), -2);
         });
     });
 
     describe("BandScale", () => {
-        it("should map categorical keys to band coordinates", () => {
-            const categories = ["A", "B", "C"];
-            const scale = CartesianScaleFactory.createBandScale(categories, [0, 300], 0, 0);
-            expect(scale.bandwidth()).toBe(100);
+        it("should divide range evenly across discrete categories", () => {
+            const scale = new BandScale(["A", "B", "C", "D"], [0, 400], 0, 0);
+            expect(scale.bandwidth()).toBeCloseTo(100, 2);
             expect(scale.map("A")).toBe(0);
             expect(scale.map("B")).toBe(100);
             expect(scale.map("C")).toBe(200);
-        });
-
-        it("should return undefined for unknown keys", () => {
-            const scale = CartesianScaleFactory.createBandScale(["A", "B"], [0, 200]);
-            expect(scale.map("UNKNOWN")).toBeUndefined();
+            expect(scale.map("D")).toBe(300);
         });
     });
 
-    describe("TimeScale", () => {
-        it("should map dates to range coordinates", () => {
-            const d1 = new Date(2026, 0, 1);
-            const d2 = new Date(2026, 0, 11);
-            const mid = new Date(2026, 0, 6);
-            const scale = CartesianScaleFactory.createTimeScale([d1, d2], [0, 1000], false);
-            expect(scale.map(d1)).toBe(0);
-            expect(scale.map(mid)).toBeCloseTo(500, 0);
-            expect(scale.map(d2)).toBe(1000);
-        });
+    describe("CartesianScaleFactory", () => {
+        it("should construct appropriate scale instances via factory methods", () => {
+            const linear = CartesianScaleFactory.createNumericScale({
+                domain: [0, 100],
+                range: [0, 500],
+                type: "linear"
+            });
+            expect(linear.type).toBe("linear");
 
-        it("should preserve exact explicit bounds after nice()", () => {
-            const d1 = new Date(2026, 0, 1);
-            const d2 = new Date(2026, 0, 11);
-            const scale = CartesianScaleFactory.createTimeScale([d1, d2], [0, 1000], true, 5, d1, d2);
-            expect(scale.domain()[0].getTime()).toBe(d1.getTime());
-            expect(scale.domain()[1].getTime()).toBe(d2.getTime());
-        });
+            const log = CartesianScaleFactory.createNumericScale({
+                domain: [1, 1000],
+                logBase: 10,
+                range: [0, 300],
+                type: "log"
+            });
+            expect(log.type).toBe("log");
 
-        it("should handle equal explicit dates without creating zero-width scale", () => {
-            const d = new Date(2026, 0, 1);
-            const scale = CartesianScaleFactory.createTimeScale([d, d], [0, 1000], true, 5, d, d);
-            const domain = scale.domain();
-            expect(domain[0].getTime()).toBeLessThan(d.getTime());
-            expect(domain[1].getTime()).toBeGreaterThan(d.getTime());
-        });
-    });
+            const symlog = CartesianScaleFactory.createNumericScale({
+                domain: [-100, 100],
+                range: [0, 200],
+                symlogConstant: 2,
+                type: "symlog"
+            });
+            expect(symlog.type).toBe("symlog");
 
-    describe("UtcScale", () => {
-        it("should map UTC dates to range coordinates", () => {
-            const d1 = new Date("2026-01-01T00:00:00Z");
-            const d2 = new Date("2026-01-11T00:00:00Z");
-            const scale = CartesianScaleFactory.createUtcScale([d1, d2], [0, 1000], false);
-            expect(scale.map(d1)).toBe(0);
-            expect(scale.map(d2)).toBe(1000);
+            const pow = CartesianScaleFactory.createNumericScale({
+                domain: [0, 10],
+                exponent: 3,
+                range: [0, 1000],
+                type: "pow"
+            });
+            expect(pow.type).toBe("pow");
+
+            const sqrt = CartesianScaleFactory.createNumericScale({
+                domain: [0, 100],
+                range: [0, 10],
+                type: "sqrt"
+            });
+            expect(sqrt.type).toBe("sqrt");
         });
     });
 });

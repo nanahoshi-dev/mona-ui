@@ -27,7 +27,9 @@ describe("CartesianOrientationPolicy", () => {
             stackMode: signal("normal"),
             type: "bar",
             visible: visibleSig,
-            xField: signal(undefined)
+            xAxisId: signal(undefined),
+            xField: signal(undefined),
+            yAxisId: signal(undefined)
         };
     };
 
@@ -49,7 +51,9 @@ describe("CartesianOrientationPolicy", () => {
             type: "rangeBar",
             valueFormatter: signal(undefined),
             visible: visibleSig,
-            xField: signal(undefined)
+            xAxisId: signal(undefined),
+            xField: signal(undefined),
+            yAxisId: signal(undefined)
         };
     };
 
@@ -64,7 +68,9 @@ describe("CartesianOrientationPolicy", () => {
             name: signal(id),
             type: "line",
             visible: visibleSig,
-            xField: signal(undefined)
+            xAxisId: signal(undefined),
+            xField: signal(undefined),
+            yAxisId: signal(undefined)
         };
     };
 

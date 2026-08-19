@@ -2,8 +2,10 @@ export type ChartXAxisPosition = "bottom" | "top";
 export type ChartYAxisPosition = "left" | "right";
 export type ChartAxisPosition = ChartXAxisPosition | ChartYAxisPosition;
 
-export type ChartXAxisType = "auto" | "category" | "linear" | "time" | "utc";
-export type ChartYAxisType = "auto" | "category" | "linear";
+export type ChartNumericScaleType = "linear" | "log" | "symlog" | "pow" | "sqrt";
+
+export type ChartXAxisType = "auto" | "category" | ChartNumericScaleType | "time" | "utc";
+export type ChartYAxisType = "auto" | "category" | ChartNumericScaleType;
 
 export type ChartAxisLabelRotation = "auto" | number;
 export type ChartHeaderAlignment = "center" | "left" | "right";
@@ -13,7 +15,10 @@ export type ChartAxisFormatter<T = unknown> = (value: T, index: number) => strin
 export interface ChartAxisLabelTemplateContext<T = unknown> {
     $implicit: T;
     axis: "angular" | "radial" | "x" | "y";
+    axisId?: string;
     index: number;
+    position?: ChartAxisPosition;
+    scaleType?: ChartXAxisType | string;
     value: T;
 }
 

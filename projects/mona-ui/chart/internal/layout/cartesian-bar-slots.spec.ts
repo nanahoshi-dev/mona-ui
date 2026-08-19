@@ -24,7 +24,9 @@ function createMockBarSeries(config: {
         stackMode: signal("normal"),
         type: "bar",
         visible: signal(config.visible ?? true),
-        xField: signal(undefined)
+        xAxisId: signal(undefined),
+        xField: signal(undefined),
+        yAxisId: signal(undefined)
     };
 }
 

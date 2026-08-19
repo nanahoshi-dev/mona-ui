@@ -67,7 +67,11 @@ export interface ChartTooltipPointContext<T = unknown> {
     value?: unknown;
     valueKind?: ChartPointValueKind;
     waterfall?: ChartWaterfallPointValue;
+    xAxisId?: string;
+    xAxisTitle?: string;
     xValue: unknown;
+    yAxisId?: string;
+    yAxisTitle?: string;
     yCategory?: unknown;
     yValue?: number;
 }

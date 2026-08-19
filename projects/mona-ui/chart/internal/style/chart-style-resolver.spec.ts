@@ -32,7 +32,9 @@ function createMockSeries(
         type,
         userClass: options?.userClass !== undefined ? signal(options.userClass) : undefined,
         visible: signal(true),
-        xField: signal(undefined)
+        xAxisId: signal(undefined),
+        xField: signal(undefined),
+        yAxisId: signal(undefined)
     } as ChartCartesianSeriesRegistration;
 }
 

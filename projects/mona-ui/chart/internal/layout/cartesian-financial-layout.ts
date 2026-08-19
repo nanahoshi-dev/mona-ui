@@ -7,7 +7,7 @@ import type {
 import { FinancialDataResolver } from "../data/financial-data-resolver";
 import { createCandlestickFinancialHitGeometry, createOhlcFinancialHitGeometry } from "../interaction/financial-hit-geometry";
 import { CartesianFinancialIndex, type FinancialHitEntry } from "../interaction/cartesian-financial-index";
-import type { ChartBandScale, ChartContinuousScale } from "../scale/chart-scale";
+import type { ChartBandScale, ChartContinuousScale, ChartPositionScale } from "../scale/chart-scale";
 import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene } from "../scene/cartesian-scene";
 import type { ChartInteractionXKey, SceneHitTarget } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
@@ -34,8 +34,13 @@ export interface CartesianFinancialLayoutContext {
     readonly timeSpanMs?: number;
     readonly warnedDiagnosticSignatures?: Set<string>;
     readonly xAxis?: ChartAxisRegistration;
+    readonly xAxisId?: string;
+    readonly xAxisTitle?: string;
     readonly xAxisType: ChartXAxisType;
+    readonly xScale?: ChartPositionScale;
     readonly yAxis?: ChartAxisRegistration;
+    readonly yAxisId?: string;
+    readonly yAxisTitle?: string;
     readonly yFormatter?: (val: number, idx: number) => string;
     readonly yScale: ChartContinuousScale;
 }
@@ -58,54 +63,49 @@ export function computeFinancialLayout(
         timeSpanMs,
         warnedDiagnosticSignatures,
         xAxis,
+        xAxisId,
+        xAxisTitle,
         xAxisType,
+        xScale: customXScale,
         yAxis,
+        yAxisId,
+        yAxisTitle,
         yFormatter,
         yScale
-    } = ctx;
+    } = ctx as any;
+
+    let xScale: ChartPositionScale | undefined = customXScale;
+    if (!xScale) {
+        if (xAxisType === "category") {
+            xScale = bandScale;
+        } else if (xAxisType === "linear") {
+            xScale = linearXScale;
+        } else {
+            xScale = timeScale;
+        }
+    }
+
+    if (!xScale) {
+        return null;
+    }
 
     const seriesData = s.data?.() ?? rootData;
     const seriesXField = s.xField?.() ?? rootXField;
-    const seriesOpenField = s.openField();
-    const seriesHighField = s.highField();
-    const seriesLowField = s.lowField();
-    const seriesCloseField = s.closeField();
-    const seriesKeyField = s.keyField?.();
-
     const resolvedDataset = FinancialDataResolver.resolve({
-        closeField: seriesCloseField,
+        closeField: s.closeField(),
         data: seriesData,
-        highField: seriesHighField,
-        keyField: seriesKeyField,
-        lowField: seriesLowField,
-        openField: seriesOpenField,
+        highField: s.highField(),
+        keyField: s.keyField?.(),
+        lowField: s.lowField(),
+        openField: s.openField(),
         seriesId: s.id,
         seriesName: seriesDisplayName,
         warnedDiagnosticSignatures,
         xAxisType,
         xField: seriesXField
     });
-
-    if (!resolvedDataset.hasData) {
+    if (!resolvedDataset.hasData || resolvedDataset.marks.length === 0) {
         return null;
-    }
-
-    let xScale: ChartBandScale | ChartContinuousScale;
-    if (xAxisType === "category") {
-        if (!bandScale) {
-            return null;
-        }
-        xScale = bandScale;
-    } else if (xAxisType === "time" || xAxisType === "utc") {
-        if (!timeScale) {
-            return null;
-        }
-        xScale = timeScale;
-    } else {
-        if (!linearXScale) {
-            return null;
-        }
-        xScale = linearXScale;
     }
 
     const layoutContext: FinancialLayoutContext = {
@@ -114,7 +114,7 @@ export function computeFinancialLayout(
         styleResolver,
         valueFormatter: yFormatter,
         xAxisType,
-        xScale,
+        xScale: xScale as any,
         yScale
     };
 
@@ -219,8 +219,12 @@ export function computeFinancialLayout(
             seriesType: s.type,
             valueKind: "ohlc",
             visualBounds,
+            xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
+            xAxisTitle: xAxisTitle ?? (xAxis?.title?.() ?? ""),
             xKey,
             xValue: mark.xValue,
+            yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y"),
+            yAxisTitle: yAxisTitle ?? (yAxis?.title?.() ?? ""),
             yValue: mark.close
         };
 
