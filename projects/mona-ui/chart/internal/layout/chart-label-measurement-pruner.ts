@@ -14,19 +14,18 @@ export class ChartLabelMeasurementPruner {
     ): void {
         if (scene.coordinateSystem === "cartesian") {
             const cartesianScene = scene as CartesianChartScene;
-            const validCartesianKeys = new Set<string>();
+            const activeAxisIds = new Set<string>();
             if (cartesianScene.axes) {
                 for (const axisScene of cartesianScene.axes) {
-                    for (const tick of axisScene.ticks) {
-                        if (tick.tickKey) {
-                            validCartesianKeys.add(tick.tickKey);
-                        }
-                    }
+                    const id = axisScene.axisId ?? (axisScene.axis === "x" ? "default-x" : "default-y");
+                    activeAxisIds.add(id);
                 }
             }
             for (const key of Array.from(measurements.keys())) {
                 if (key.startsWith("axis:")) {
-                    if (!validCartesianKeys.has(key)) {
+                    const parts = key.split(":");
+                    const axisId = parts[1];
+                    if (axisId && !activeAxisIds.has(axisId)) {
                         measurements.delete(key);
                     }
                 } else if (

@@ -60,6 +60,7 @@ import { CartesianAxisRegistryResolver, type ResolvedCartesianAxisDescriptor } f
 import { CartesianSeriesAxisBindingResolver } from "./cartesian-series-axis-binding-resolver";
 import { CartesianMultiAxisCoordinator } from "./cartesian-multi-axis-coordinator";
 import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
+import { CartesianViewportHitPolicy } from "../interaction/cartesian-viewport-hit-policy";
 import { formatPercentagePoint, formatXValue, formatYValue } from "../utils/chart-formatter";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { CartesianAxisResolvedContextBuilder } from "./cartesian-axis-resolved-context";
@@ -310,6 +311,9 @@ export class CartesianLayoutEngine {
         const hitsByAxisId = new Map<string, Map<ChartInteractionXKey, SceneHitTarget[]>>();
 
         const recordHitTarget = (target: SceneHitTarget, isBar: boolean, isPoint: boolean): void => {
+            if (!CartesianViewportHitPolicy.isHitTargetVisible(target, plotRect)) {
+                return;
+            }
             hitTargets.push(target);
             if (isBar && target.bounds) {
                 barHitTargets.push(target);

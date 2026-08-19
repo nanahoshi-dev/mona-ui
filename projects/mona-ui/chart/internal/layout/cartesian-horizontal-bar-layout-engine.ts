@@ -51,6 +51,7 @@ import { CartesianLegendBuilder } from "./cartesian-legend-builder";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { CartesianAxisResolvedContextBuilder } from "./cartesian-axis-resolved-context";
 import { CartesianAxisCompatibilityPolicy } from "./cartesian-axis-compatibility-policy";
+import { CartesianViewportHitPolicy } from "../interaction/cartesian-viewport-hit-policy";
 import { toPublicViewportState } from "../viewport/cartesian-viewport-normalizer";
 
 export class CartesianHorizontalBarLayoutEngine {
@@ -212,6 +213,9 @@ export class CartesianHorizontalBarLayoutEngine {
         const hitsByAxisId = new Map<string, Map<string, SceneHitTarget[]>>();
 
         const recordHit = (target: SceneHitTarget): void => {
+            if (!CartesianViewportHitPolicy.isHitTargetVisible(target, plotRect)) {
+                return;
+            }
             hitTargets.push(target);
             barHitTargets.push(target);
             const axisId = target.yAxisId ?? axisResolution.primaryYAxisId;

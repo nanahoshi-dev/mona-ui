@@ -289,7 +289,42 @@ export class CartesianMultiAxisCoordinator {
                 orientation
             );
             warnings.push(...domainRes.warnings);
-            xDomains.set(xAxis.axisId, domainRes.domain);
+
+            let canonicalBaseDomain: readonly unknown[] = domainRes.domain;
+            if (domainRes.isValid && resolvedType !== "category" && Array.isArray(canonicalBaseDomain) && canonicalBaseDomain.length >= 2) {
+                if (resolvedType === "time" || resolvedType === "utc") {
+                    const minD = canonicalBaseDomain[0] instanceof Date ? canonicalBaseDomain[0] : new Date(Number(canonicalBaseDomain[0]));
+                    const maxD = canonicalBaseDomain[1] instanceof Date ? canonicalBaseDomain[1] : new Date(Number(canonicalBaseDomain[1]));
+                    const tempScale = CartesianScaleFactory.createTemporalScale({
+                        domain: [minD, maxD],
+                        explicitMax: xAxis.explicitMax,
+                        explicitMin: xAxis.explicitMin,
+                        nice: xAxis.nice ?? true,
+                        range: [0, 1],
+                        tickCount: xAxis.tickCount,
+                        type: resolvedType
+                    });
+                    canonicalBaseDomain = tempScale.domain();
+                } else {
+                    const minN = Number(canonicalBaseDomain[0]);
+                    const maxN = Number(canonicalBaseDomain[1]);
+                    const tempScale = CartesianScaleFactory.createNumericScale({
+                        domain: [minN, maxN],
+                        explicitMax: typeof xAxis.explicitMax === "number" ? xAxis.explicitMax : undefined,
+                        explicitMin: typeof xAxis.explicitMin === "number" ? xAxis.explicitMin : undefined,
+                        exponent: xAxis.exponent,
+                        logBase: xAxis.logBase,
+                        nice: xAxis.nice ?? true,
+                        range: [0, 1],
+                        symlogConstant: xAxis.symlogConstant,
+                        tickCount: xAxis.tickCount,
+                        type: resolvedType as "linear" | "log" | "symlog" | "pow" | "sqrt"
+                    });
+                    canonicalBaseDomain = tempScale.domain();
+                }
+            }
+
+            xDomains.set(xAxis.axisId, canonicalBaseDomain);
             xAxisValidityById.set(xAxis.axisId, { reason: domainRes.reason, valid: domainRes.isValid });
         }
 
@@ -327,7 +362,42 @@ export class CartesianMultiAxisCoordinator {
                 orientation
             );
             warnings.push(...domainRes.warnings);
-            yDomains.set(yAxis.axisId, domainRes.domain);
+
+            let canonicalBaseDomain: readonly unknown[] = domainRes.domain;
+            if (domainRes.isValid && resolvedType !== "category" && Array.isArray(canonicalBaseDomain) && canonicalBaseDomain.length >= 2) {
+                if (resolvedType === "time" || resolvedType === "utc") {
+                    const minD = canonicalBaseDomain[0] instanceof Date ? canonicalBaseDomain[0] : new Date(Number(canonicalBaseDomain[0]));
+                    const maxD = canonicalBaseDomain[1] instanceof Date ? canonicalBaseDomain[1] : new Date(Number(canonicalBaseDomain[1]));
+                    const tempScale = CartesianScaleFactory.createTemporalScale({
+                        domain: [minD, maxD],
+                        explicitMax: yAxis.explicitMax,
+                        explicitMin: yAxis.explicitMin,
+                        nice: yAxis.nice ?? true,
+                        range: [0, 1],
+                        tickCount: yAxis.tickCount,
+                        type: resolvedType
+                    });
+                    canonicalBaseDomain = tempScale.domain();
+                } else {
+                    const minN = Number(canonicalBaseDomain[0]);
+                    const maxN = Number(canonicalBaseDomain[1]);
+                    const tempScale = CartesianScaleFactory.createNumericScale({
+                        domain: [minN, maxN],
+                        explicitMax: typeof yAxis.explicitMax === "number" ? yAxis.explicitMax : undefined,
+                        explicitMin: typeof yAxis.explicitMin === "number" ? yAxis.explicitMin : undefined,
+                        exponent: yAxis.exponent,
+                        logBase: yAxis.logBase,
+                        nice: yAxis.nice ?? true,
+                        range: [0, 1],
+                        symlogConstant: yAxis.symlogConstant,
+                        tickCount: yAxis.tickCount,
+                        type: resolvedType as "linear" | "log" | "symlog" | "pow" | "sqrt"
+                    });
+                    canonicalBaseDomain = tempScale.domain();
+                }
+            }
+
+            yDomains.set(yAxis.axisId, canonicalBaseDomain);
             yAxisValidityById.set(yAxis.axisId, { reason: domainRes.reason, valid: domainRes.isValid });
         }
 
@@ -342,9 +412,12 @@ export class CartesianMultiAxisCoordinator {
         const axisTopology: CartesianAxisTopologyItem[] = allDescriptors.map(a => ({
             axisId: a.axisId,
             dimension: a.dimension,
+            isPrimary: a.isPrimary,
             position: a.position,
             resolvedType: (a.dimension === "x" ? resolvedXTypes.get(a.axisId) : resolvedYTypes.get(a.axisId)) ?? "linear",
-            stackIndex: a.stackIndex
+            stackIndex: a.stackIndex,
+            valid: (a.dimension === "x" ? xAxisValidityById.get(a.axisId)?.valid : yAxisValidityById.get(a.axisId)?.valid) ?? true,
+            visible: a.visible
         }));
         const axisTopologySignature = JSON.stringify(axisTopology);
 
@@ -356,7 +429,7 @@ export class CartesianMultiAxisCoordinator {
                   registeredSeriesIds: g.registeredSeriesIds
               }))
             : [];
-        const stackSignature = JSON.stringify(stackConfiguration);
+        const stackSignature = stackCoordination?.configuration.signature ?? "[]";
 
         return {
             axisResolution,
@@ -514,6 +587,8 @@ export class CartesianMultiAxisCoordinator {
                 break;
             }
         }
+
+        finalScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
 
         const baseScaleRegistry = new CartesianScaleRegistry({
             primaryXAxisId: axisResolution.primaryXAxisId,
@@ -891,33 +966,14 @@ export class CartesianMultiAxisCoordinator {
             const domain = domains.x.get(xAxis.axisId)!;
             const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
 
-            let scale: ChartPositionScale;
-            if (type === "category") {
-                scale = CartesianScaleFactory.createBandScale(domain as readonly string[], range);
-            } else if (type === "time" || type === "utc") {
-                scale = CartesianScaleFactory.createTemporalScale({
-                    domain: domain as readonly [Date, Date],
-                    explicitMax: xAxis.explicitMax,
-                    explicitMin: xAxis.explicitMin,
-                    nice: xAxis.nice,
-                    range,
-                    tickCount: xAxis.tickCount,
-                    type
-                });
-            } else {
-                scale = CartesianScaleFactory.createNumericScale({
-                    domain: domain as readonly [number, number],
-                    explicitMax: typeof xAxis.explicitMax === "number" ? xAxis.explicitMax : undefined,
-                    explicitMin: typeof xAxis.explicitMin === "number" ? xAxis.explicitMin : undefined,
-                    exponent: xAxis.exponent,
-                    logBase: xAxis.logBase,
-                    nice: xAxis.nice,
-                    range,
-                    symlogConstant: xAxis.symlogConstant,
-                    tickCount: xAxis.tickCount,
-                    type
-                });
-            }
+            const scale = CartesianScaleFactory.createExactPositionScale({
+                domain,
+                exponent: xAxis.exponent,
+                logBase: xAxis.logBase,
+                range,
+                symlogConstant: xAxis.symlogConstant,
+                type
+            });
             xScales.set(xAxis.axisId, scale);
         }
 
@@ -928,23 +984,14 @@ export class CartesianMultiAxisCoordinator {
                 ? [plotRect.y, plotRect.y + plotRect.height]
                 : [plotRect.y + plotRect.height, plotRect.y];
 
-            let scale: ChartPositionScale;
-            if (type === "category") {
-                scale = CartesianScaleFactory.createBandScale(domain as readonly string[], range);
-            } else {
-                scale = CartesianScaleFactory.createNumericScale({
-                    domain: domain as readonly [number, number],
-                    explicitMax: typeof yAxis.explicitMax === "number" ? yAxis.explicitMax : undefined,
-                    explicitMin: typeof yAxis.explicitMin === "number" ? yAxis.explicitMin : undefined,
-                    exponent: yAxis.exponent,
-                    logBase: yAxis.logBase,
-                    nice: yAxis.nice,
-                    range,
-                    symlogConstant: yAxis.symlogConstant,
-                    tickCount: yAxis.tickCount,
-                    type: type as "linear" | "log" | "symlog" | "pow" | "sqrt"
-                });
-            }
+            const scale = CartesianScaleFactory.createExactPositionScale({
+                domain,
+                exponent: yAxis.exponent,
+                logBase: yAxis.logBase,
+                range,
+                symlogConstant: yAxis.symlogConstant,
+                type
+            });
             yScales.set(yAxis.axisId, scale);
         }
 

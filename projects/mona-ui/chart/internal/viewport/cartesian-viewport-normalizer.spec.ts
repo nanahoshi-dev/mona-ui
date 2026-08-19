@@ -88,19 +88,28 @@ describe("cartesian-viewport-normalizer", () => {
     it("should clamp category viewport and reject invalid indices", () => {
         const publicState: ChartViewportState = {
             axes: [
-                { axis: "x", axisId: "x-cat", kind: "category", startIndex: -5, endIndexExclusive: 10 }
+                { axis: "x", axisId: "x-cat", kind: "category", startIndex: -5, endIndexExclusive: 3 }
             ]
         };
         const normalized = normalizeViewportState(publicState, mockAxes, { clampToData: true });
         expect(normalized.x.get("x-cat")).toEqual({
             axis: "x",
             axisId: "x-cat",
-            kind: "category",
-            startIndex: 0,
-            endIndexExclusive: 5,
+            endIndexExclusive: 3,
             firstVisibleKey: "A",
-            lastVisibleKey: "E"
+            kind: "category",
+            lastVisibleKey: "C",
+            startIndex: 0
         });
+
+        // Full domain clamping collapses to undefined (omitted)
+        const fullSpanState: ChartViewportState = {
+            axes: [
+                { axis: "x", axisId: "x-cat", kind: "category", startIndex: -5, endIndexExclusive: 10 }
+            ]
+        };
+        const fullNormalized = normalizeViewportState(fullSpanState, mockAxes, { clampToData: true });
+        expect(fullNormalized.x.get("x-cat")).toBeUndefined();
     });
 
     it("should reject log sign mismatch / zero crossing", () => {

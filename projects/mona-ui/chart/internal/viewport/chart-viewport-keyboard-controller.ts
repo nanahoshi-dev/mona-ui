@@ -64,7 +64,8 @@ export class ChartViewportKeyboardController {
             return { announcement: null, changedAxes: [], handled: false, nextState: null };
         }
 
-        const panStep = plotRect.width * options.keyboardPanRatio;
+        const xPanStep = plotRect.width * options.keyboardPanRatio;
+        const yPanStep = plotRect.height * options.keyboardPanRatio;
         const zoomInFactor = options.keyboardZoomFactor;
         const zoomOutFactor = 1 / options.keyboardZoomFactor;
 
@@ -80,12 +81,16 @@ export class ChartViewportKeyboardController {
         };
 
         if (event.shiftKey) {
+            if (!options.dragPan) {
+                return { announcement: null, changedAxes: [], handled: false, nextState: null };
+            }
+
             if (event.key === "ArrowLeft") {
                 const res = CartesianViewportController.pan(
                     currentViewport,
                     coordinateSpace,
                     targetAxes.filter(a => a.axis === "x"),
-                    { x: panStep, y: 0 },
+                    { x: xPanStep, y: 0 },
                     controllerOptions
                 );
                 nextState = res.viewport;
@@ -97,7 +102,7 @@ export class ChartViewportKeyboardController {
                     currentViewport,
                     coordinateSpace,
                     targetAxes.filter(a => a.axis === "x"),
-                    { x: -panStep, y: 0 },
+                    { x: -xPanStep, y: 0 },
                     controllerOptions
                 );
                 nextState = res.viewport;
@@ -109,7 +114,7 @@ export class ChartViewportKeyboardController {
                     currentViewport,
                     coordinateSpace,
                     targetAxes.filter(a => a.axis === "y"),
-                    { x: 0, y: panStep },
+                    { x: 0, y: yPanStep },
                     controllerOptions
                 );
                 nextState = res.viewport;
@@ -121,7 +126,7 @@ export class ChartViewportKeyboardController {
                     currentViewport,
                     coordinateSpace,
                     targetAxes.filter(a => a.axis === "y"),
-                    { x: 0, y: -panStep },
+                    { x: 0, y: -yPanStep },
                     controllerOptions
                 );
                 nextState = res.viewport;
@@ -130,6 +135,9 @@ export class ChartViewportKeyboardController {
                 handled = true;
             }
         } else if (event.key === "+" || event.key === "=") {
+            if (!options.wheelZoom && !options.pinchZoom) {
+                return { announcement: null, changedAxes: [], handled: false, nextState: null };
+            }
             const res = CartesianViewportController.zoom(
                 currentViewport,
                 coordinateSpace,
@@ -143,6 +151,9 @@ export class ChartViewportKeyboardController {
             announcement = "Zoomed in";
             handled = true;
         } else if (event.key === "-" || event.key === "_") {
+            if (!options.wheelZoom && !options.pinchZoom) {
+                return { announcement: null, changedAxes: [], handled: false, nextState: null };
+            }
             const res = CartesianViewportController.zoom(
                 currentViewport,
                 coordinateSpace,

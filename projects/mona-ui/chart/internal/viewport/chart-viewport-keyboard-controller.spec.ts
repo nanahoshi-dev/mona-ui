@@ -8,7 +8,10 @@ import {
 } from "./cartesian-axis-coordinate-space";
 import { ChartViewportKeyboardController } from "./chart-viewport-keyboard-controller";
 import { normalizeChartNavigationOptions } from "./chart-navigation-options";
-import { createEmptyInternalViewportState } from "./cartesian-viewport-normalizer";
+import {
+    createEmptyInternalViewportState,
+    type InternalCartesianViewportState
+} from "./cartesian-viewport-normalizer";
 
 describe("ChartViewportKeyboardController", () => {
     const plotRect: ChartRect = { height: 300, width: 400, x: 50, y: 30 };
@@ -81,6 +84,10 @@ describe("ChartViewportKeyboardController", () => {
 
     const options = normalizeChartNavigationOptions(true);
     const initialViewport = createEmptyInternalViewportState();
+    const zoomedViewport: InternalCartesianViewportState = {
+        x: new Map([["x-1", { axis: "x", axisId: "x-1", kind: "continuous", min: 25, max: 75 }]]),
+        y: new Map([["y-1", { axis: "y", axisId: "y-1", kind: "continuous", min: 10, max: 40 }]])
+    };
 
     it("should handle Shift+ArrowLeft and Shift+ArrowRight for X-axis pan", () => {
         const leftResult = ChartViewportKeyboardController.handleKeyDown(
@@ -90,7 +97,7 @@ describe("ChartViewportKeyboardController", () => {
             axisScenes,
             options,
             "vertical",
-            initialViewport
+            zoomedViewport
         );
         expect(leftResult.handled).toBe(true);
         expect(leftResult.announcement).toBe("Panned left");
@@ -103,7 +110,7 @@ describe("ChartViewportKeyboardController", () => {
             axisScenes,
             options,
             "vertical",
-            initialViewport
+            zoomedViewport
         );
         expect(rightResult.handled).toBe(true);
         expect(rightResult.announcement).toBe("Panned right");
@@ -117,7 +124,7 @@ describe("ChartViewportKeyboardController", () => {
             axisScenes,
             options,
             "vertical",
-            initialViewport
+            zoomedViewport
         );
         expect(upResult.handled).toBe(true);
         expect(upResult.announcement).toBe("Panned up");
@@ -130,7 +137,7 @@ describe("ChartViewportKeyboardController", () => {
             axisScenes,
             options,
             "vertical",
-            initialViewport
+            zoomedViewport
         );
         expect(downResult.handled).toBe(true);
         expect(downResult.announcement).toBe("Panned down");
@@ -156,7 +163,7 @@ describe("ChartViewportKeyboardController", () => {
             axisScenes,
             options,
             "vertical",
-            initialViewport
+            zoomInResult.nextState!
         );
         expect(zoomOutResult.handled).toBe(true);
         expect(zoomOutResult.announcement).toBe("Zoomed out");

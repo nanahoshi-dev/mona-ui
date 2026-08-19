@@ -184,6 +184,8 @@ export function normalizeViewportState(
         return { x: xMap, y: yMap };
     }
 
+    const seenAxes = new Set<string>();
+
     for (const rawWindow of publicState.axes) {
         if (!rawWindow || typeof rawWindow !== "object") continue;
         const axis = rawWindow.axis;
@@ -197,6 +199,17 @@ export function normalizeViewportState(
             );
             continue;
         }
+
+        const axisKey = `${axis}:${axisId}`;
+        if (seenAxes.has(axisKey)) {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Duplicate viewport window for axis "${axis}" with id "${axisId}". Ignoring duplicate.`,
+                `viewport-duplicate-axis-${axis}-${axisId}`
+            );
+            continue;
+        }
+        seenAxes.add(axisKey);
 
         const axisMap = axis === "x" ? resolvedAxes.x : resolvedAxes.y;
         const axisInfo = axisMap.get(axisId);
@@ -242,12 +255,13 @@ export function normalizeViewportState(
                 1,
                 constraint?.minVisibleCategories ?? defaultMinCat
             );
-            const maxVisible = constraint?.maxVisibleCategories ?? baseCount;
+            const maxVisible = Math.min(
+                baseCount,
+                constraint?.maxVisibleCategories ?? baseCount
+            );
 
-            if (clampToData) {
-                startIndex = clamp(startIndex, 0, baseCount - 1);
-                endIndex = clamp(endIndex, startIndex + 1, baseCount);
-            }
+            startIndex = clamp(startIndex, 0, baseCount - 1);
+            endIndex = clamp(endIndex, startIndex + 1, baseCount);
 
             let span = endIndex - startIndex;
             if (span < minVisible) {
@@ -259,6 +273,11 @@ export function normalizeViewportState(
             } else if (span > maxVisible) {
                 span = maxVisible;
                 endIndex = startIndex + span;
+            }
+
+            if (startIndex === 0 && endIndex === baseCount) {
+                // Full domain is canonicalized to no entry
+                continue;
             }
 
             const catDomain = axisInfo.baseDomain as readonly string[];
@@ -286,7 +305,6 @@ export function normalizeViewportState(
                 continue;
             }
 
-            const isDate = axisInfo.resolvedType === "time" || axisInfo.resolvedType === "utc";
             let minVal = rawWindow.min instanceof Date ? rawWindow.min.getTime() : Number(rawWindow.min);
             let maxVal = rawWindow.max instanceof Date ? rawWindow.max.getTime() : Number(rawWindow.max);
 
@@ -299,8 +317,8 @@ export function normalizeViewportState(
                 continue;
             }
 
-            // Log sign validation
-            if (axisInfo.resolvedType === "log") {
+            // Validate log sign before constraints/clamping
+            if (axisInfo.resolvedType === "log" && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
                 const baseMin = Number(axisInfo.baseDomain[0]);
                 const baseMax = Number(axisInfo.baseDomain[1]);
                 if (baseMin > 0 && (minVal <= 0 || maxVal <= 0)) {
@@ -323,15 +341,28 @@ export function normalizeViewportState(
 
             // Apply constraints
             if (constraint) {
-                if (constraint.minSpan !== undefined && maxVal - minVal < constraint.minSpan) {
+                if (constraint.minSpan !== undefined && constraint.minSpan > 0 && maxVal - minVal < constraint.minSpan) {
                     const mid = (minVal + maxVal) / 2;
                     minVal = mid - constraint.minSpan / 2;
                     maxVal = mid + constraint.minSpan / 2;
                 }
-                if (constraint.maxSpan !== undefined && maxVal - minVal > constraint.maxSpan) {
+                if (constraint.maxSpan !== undefined && constraint.maxSpan > 0 && maxVal - minVal > constraint.maxSpan) {
                     const mid = (minVal + maxVal) / 2;
                     minVal = mid - constraint.maxSpan / 2;
                     maxVal = mid + constraint.maxSpan / 2;
+                }
+                if (constraint.maxZoom !== undefined && constraint.maxZoom > 1 && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
+                    const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
+                    const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
+                    const baseSpan = bMax - bMin;
+                    if (baseSpan > 0) {
+                        const minAllowedSpan = baseSpan / constraint.maxZoom;
+                        if (maxVal - minVal < minAllowedSpan) {
+                            const mid = (minVal + maxVal) / 2;
+                            minVal = mid - minAllowedSpan / 2;
+                            maxVal = mid + minAllowedSpan / 2;
+                        }
+                    }
                 }
             }
 
@@ -354,6 +385,37 @@ export function normalizeViewportState(
                             minVal = bMax - span;
                         }
                     }
+                }
+            }
+
+            // Re-validate log sign after constraints/clamping
+            if (axisInfo.resolvedType === "log" && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
+                const baseMin = Number(axisInfo.baseDomain[0]);
+                const baseMax = Number(axisInfo.baseDomain[1]);
+                if (baseMin > 0 && (minVal <= 0 || maxVal <= 0)) {
+                    ChartDiagnostics.warnOnce(
+                        warned,
+                        `Viewport [${minVal}, ${maxVal}] crosses zero or is negative on positive log axis "${axisId}".`,
+                        `viewport-log-sign-mismatch-${axis}-${axisId}`
+                    );
+                    continue;
+                }
+                if (baseMax < 0 && (minVal >= 0 || maxVal >= 0)) {
+                    ChartDiagnostics.warnOnce(
+                        warned,
+                        `Viewport [${minVal}, ${maxVal}] crosses zero or is positive on negative log axis "${axisId}".`,
+                        `viewport-log-sign-mismatch-${axis}-${axisId}`
+                    );
+                    continue;
+                }
+            }
+
+            // Full domain check
+            if (Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
+                const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
+                const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
+                if (Math.abs(minVal - bMin) < 1e-9 && Math.abs(maxVal - bMax) < 1e-9) {
+                    continue;
                 }
             }
 

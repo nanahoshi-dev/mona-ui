@@ -273,6 +273,52 @@ export class ChartViewportGestureController {
         return false;
     }
 
+    public handlePointerCancel(event: PointerEvent): boolean {
+        this.#activePointers.delete(event.pointerId);
+
+        if (this.#pinchSession) {
+            if (event.pointerId === this.#pinchSession.pointer1Id || event.pointerId === this.#pinchSession.pointer2Id) {
+                this.#dispatchChangeEvent("pinch", "end", this.#context.currentViewport, this.#pinchSession.initialViewport, this.#pinchSession.targetAxes);
+                this.#pinchSession = null;
+                return true;
+            }
+        }
+
+        if (this.#dragSession && this.#dragSession.pointerId === event.pointerId) {
+            if (this.#dragSession.isThresholdMet) {
+                this.#dispatchChangeEvent("drag", "end", this.#context.currentViewport, this.#dragSession.initialViewport, this.#dragSession.targetAxes);
+            }
+            this.#dragSession = null;
+            this.#context.onCursorChange(null);
+            return true;
+        }
+
+        return false;
+    }
+
+    public cancel(reason?: string): void {
+        this.#activePointers.clear();
+        if (this.#wheelSession) {
+            if (this.#wheelSession.endTimerId !== null) {
+                clearTimeout(this.#wheelSession.endTimerId);
+            }
+            this.#dispatchChangeEvent("wheel", "end", this.#context.currentViewport, this.#wheelSession.initialViewport, this.#wheelSession.targetAxes);
+            this.#wheelSession = null;
+        }
+        if (this.#pinchSession) {
+            this.#dispatchChangeEvent("pinch", "end", this.#context.currentViewport, this.#pinchSession.initialViewport, this.#pinchSession.targetAxes);
+            this.#pinchSession = null;
+        }
+        if (this.#dragSession) {
+            if (this.#dragSession.isThresholdMet) {
+                this.#dispatchChangeEvent("drag", "end", this.#context.currentViewport, this.#dragSession.initialViewport, this.#dragSession.targetAxes);
+            }
+            this.#dragSession = null;
+        }
+        this.#isClickSuppressed = false;
+        this.#context.onCursorChange(null);
+    }
+
     public handleWheel(event: WheelEvent, elementPoint: ChartPoint): boolean {
         const nav = this.#context.navigationOptions;
         if (!nav.enabled || !nav.wheelZoom || !this.#context.coordinateSpace) return false;
@@ -293,9 +339,16 @@ export class ChartViewportGestureController {
             this.#context.linkGroups
         );
 
-        const delta = -event.deltaY;
-        const speed = nav.wheelSensitivity * Math.abs(event.deltaY);
-        const factor = delta > 0 ? (1 + speed) : (1 / (1 + speed));
+        let deltaY = event.deltaY;
+        if (event.deltaMode === 1) {
+            deltaY *= 16;
+        } else if (event.deltaMode === 2) {
+            deltaY *= this.#context.plotRect.height;
+        }
+
+        const sensitivity = nav.wheelSensitivity ?? 0.0015;
+        const normalizedDelta = deltaY * sensitivity;
+        const factor = Math.exp(-normalizedDelta);
 
         if (!this.#wheelSession) {
             this.#wheelSession = {
@@ -345,7 +398,7 @@ export class ChartViewportGestureController {
         previousState: InternalCartesianViewportState,
         changedAxes?: readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[]
     ): void {
-        const resolvedAxisMap = {
+        const resolvedAxisMap = this.#context.coordinateSpace?.toResolvedAxisInfoMap() ?? {
             x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
                 this.#context.axisScenes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
             ),

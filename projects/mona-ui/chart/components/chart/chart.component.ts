@@ -122,6 +122,7 @@ import {
     type InternalCartesianViewportState
 } from "../../internal/viewport/cartesian-viewport-normalizer";
 import { CartesianViewportController } from "../../internal/viewport/cartesian-viewport-controller";
+import { CartesianViewportReconciler } from "../../internal/viewport/cartesian-viewport-reconciler";
 import { CartesianViewportTargetResolver } from "../../internal/viewport/cartesian-viewport-target-resolver";
 import { CartesianViewportLinker } from "../../internal/viewport/cartesian-viewport-linker";
 import { ChartViewportGestureController } from "../../internal/viewport/chart-viewport-gesture-controller";
@@ -214,7 +215,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #hasCommittedVisualScene: boolean = false;
     #gestureController: ChartViewportGestureController | null = null;
     readonly #hasInitializedDefaultViewport = signal(false);
-    readonly #internalViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
+    readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
     #interactionState: ChartInteractionState | null = null;
     #labelResizeObserver: ResizeObserver | null = null;
     #mediaQueryList: MediaQueryList | null = null;
@@ -708,20 +709,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         // Initialize default viewport
         effect(() => {
             const def = this.defaultViewport();
-            if (def && !this.#hasInitializedDefaultViewport()) {
-                this.#hasInitializedDefaultViewport.set(true);
+            const ext = this.viewport();
+            if (def && ext === undefined && !this.#hasInitializedDefaultViewport()) {
                 const sc = this.cartesianXYScene();
-                if (sc) {
-                    const resolvedAxisMap = {
-                        x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                            sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-                        ),
-                        y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                            sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-                        )
-                    };
-                    const normalized = normalizeViewportState(def, resolvedAxisMap);
-                    this.#internalViewportState.set(normalized);
+                if (sc && sc.coordinateSpace) {
+                    this.#hasInitializedDefaultViewport.set(true);
+                    const normalized = normalizeViewportState(def, sc.coordinateSpace.toResolvedAxisInfoMap(), {
+                        clampToData: this.normalizedNavigation().clampToData,
+                        constraints: this.normalizedNavigation().constraints,
+                        minVisibleCategories: this.normalizedNavigation().minVisibleCategories
+                    });
+                    this.#uncontrolledViewportState.set(normalized);
                     this.invalidate(ChartInvalidationReason.Viewport);
                 }
             }
@@ -731,20 +729,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         effect(() => {
             const extViewport = this.viewport();
             const sc = this.cartesianXYScene();
-            if (extViewport && sc) {
-                const resolvedAxisMap = {
-                    x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                        sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-                    ),
-                    y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                        sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-                    )
-                };
-                const normalized = normalizeViewportState(extViewport, resolvedAxisMap);
-                if (!areInternalViewportStatesEqual(this.#internalViewportState(), normalized)) {
-                    this.#internalViewportState.set(normalized);
-                    this.invalidate(ChartInvalidationReason.Viewport);
-                }
+            if (extViewport !== undefined && sc && sc.coordinateSpace) {
+                this.invalidate(ChartInvalidationReason.Viewport);
             }
         });
 
@@ -757,14 +743,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     axisScenes: sc.axes,
                     constraints: nav.constraints,
                     coordinateSpace: sc.coordinateSpace,
-                    currentViewport: this.#internalViewportState(),
+                    currentViewport: this.#effectiveViewportState(),
                     linkGroups: nav.linkGroups,
                     navigationOptions: nav,
                     onCursorChange: (cursor: string | null) => this.viewportCursor.set(cursor),
                     onViewportChange: (nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent) => {
-                        this.#internalViewportState.set(nextState);
-                        this.viewportChange.emit(event);
-                        this.invalidate(ChartInvalidationReason.Viewport);
+                        this.#applyViewportUpdate(nextState, event.source, event.phase, event.changedAxes);
                     },
                     orientation: sc.orientation ?? "vertical",
                     plotRect: sc.plotRect
@@ -889,7 +873,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 xyScene.axes,
                 nav,
                 xyScene.orientation ?? "vertical",
-                this.#internalViewportState(),
+                this.#effectiveViewportState(),
                 nav.constraints,
                 nav.linkGroups,
                 this.#activeKeyboardNamespace
@@ -997,21 +981,30 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    #effectiveViewportState(): InternalCartesianViewportState {
+        const controlled = this.viewport();
+        if (controlled !== undefined) {
+            const sc = this.cartesianXYScene();
+            if (sc?.coordinateSpace) {
+                return normalizeViewportState(controlled, sc.coordinateSpace.toResolvedAxisInfoMap(), {
+                    clampToData: this.normalizedNavigation().clampToData,
+                    constraints: this.normalizedNavigation().constraints,
+                    minVisibleCategories: this.normalizedNavigation().minVisibleCategories
+                });
+            }
+        }
+        return this.#uncontrolledViewportState();
+    }
+
     /**
      * @description Returns the current active viewport window state, or null if chart is not Cartesian XY.
      */
     public getViewport(): ChartViewportState | null {
         const sc = this.scene();
         if (!sc || sc.coordinateSystem !== "cartesian" || sc.cartesianKind !== "xy") return null;
-        const resolvedAxisMap = {
-            x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-            ),
-            y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-            )
-        };
-        return toPublicViewportState(this.#internalViewportState(), resolvedAxisMap);
+        const xyScene = sc as CartesianXYChartScene;
+        if (!xyScene.coordinateSpace) return null;
+        return toPublicViewportState(this.#effectiveViewportState(), xyScene.coordinateSpace.toResolvedAxisInfoMap());
     }
 
     /**
@@ -1019,16 +1012,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      */
     public setViewport(viewport: ChartViewportState): void {
         const sc = this.cartesianXYScene();
-        if (!sc) return;
-        const resolvedAxisMap = {
-            x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-            ),
-            y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-            )
-        };
-        const normalized = normalizeViewportState(viewport, resolvedAxisMap);
+        if (!sc || !sc.coordinateSpace) return;
+        const normalized = normalizeViewportState(viewport, sc.coordinateSpace.toResolvedAxisInfoMap(), {
+            clampToData: this.normalizedNavigation().clampToData,
+            constraints: this.normalizedNavigation().constraints,
+            minVisibleCategories: this.normalizedNavigation().minVisibleCategories
+        });
         this.#applyViewportUpdate(normalized, "programmatic", "end");
     }
 
@@ -1053,7 +1042,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         );
         const nav = this.normalizedNavigation();
         const res = CartesianViewportController.zoom(
-            this.#internalViewportState(),
+            this.#effectiveViewportState(),
             sc.coordinateSpace,
             targetAxes,
             factor,
@@ -1089,7 +1078,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         );
         const nav = this.normalizedNavigation();
         const res = CartesianViewportController.pan(
-            this.#internalViewportState(),
+            this.#effectiveViewportState(),
             sc.coordinateSpace,
             targetAxes,
             delta,
@@ -1112,7 +1101,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (!sc || !sc.coordinateSpace) return;
         const nav = this.normalizedNavigation();
         const res = CartesianViewportController.setWindow(
-            this.#internalViewportState(),
+            this.#effectiveViewportState(),
             sc.coordinateSpace,
             window,
             {
@@ -1136,7 +1125,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             ? CartesianViewportTargetResolver.resolveExplicitTarget(target, sc.axes)
             : undefined;
         const res = CartesianViewportController.reset(
-            this.#internalViewportState(),
+            this.#effectiveViewportState(),
             undefined,
             targetAxes
         );
@@ -1151,29 +1140,27 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         phase: ChartViewportChangePhase,
         changedAxes?: readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[]
     ): void {
-        const previousState = this.#internalViewportState();
-        this.#internalViewportState.set(nextState);
         const sc = this.cartesianXYScene();
-        if (sc) {
-            const resolvedAxisMap = {
-                x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                    sc.axes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-                ),
-                y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                    sc.axes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
-                )
-            };
-            const publicState = toPublicViewportState(nextState, resolvedAxisMap);
-            const prevPublicState = toPublicViewportState(previousState, resolvedAxisMap);
-            this.viewportChange.emit({
-                changedAxes: changedAxes ?? [],
-                phase,
-                previousViewport: prevPublicState,
-                source,
-                viewport: publicState
-            });
+        if (!sc || !sc.coordinateSpace) return;
+        const resolvedAxisMap = sc.coordinateSpace.toResolvedAxisInfoMap();
+        const previousState = this.#effectiveViewportState();
+        const prevPublicState = toPublicViewportState(previousState, resolvedAxisMap);
+        const publicState = toPublicViewportState(nextState, resolvedAxisMap);
+
+        const isControlled = this.viewport() !== undefined;
+
+        this.viewportChange.emit({
+            changedAxes: changedAxes ?? [],
+            phase,
+            previousViewport: prevPublicState,
+            source,
+            viewport: publicState
+        });
+
+        if (!isControlled) {
+            this.#uncontrolledViewportState.set(nextState);
+            this.invalidate(ChartInvalidationReason.Viewport);
         }
-        this.invalidate(ChartInvalidationReason.Viewport);
     }
 
     #resolveSharedTooltip(scene: ChartScene): boolean {
@@ -1665,7 +1652,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                   rootXField: this.xField(),
                   series: this.#registeredSeries(),
                   styleResolver: this.#styleResolver,
-                  viewport: this.#internalViewportState(),
+                  viewport: this.#effectiveViewportState(),
                   warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures,
                   xAxis: this.#xAxes()[0] ?? undefined,
                   xAxes: this.#xAxes(),
@@ -1679,6 +1666,37 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         // Commit semantic target scene immediately
         this.scene.set(newScene);
+
+        if ((isStructural || hasInvalidationReason(reason, ChartInvalidationReason.Data)) &&
+            newScene.coordinateSystem === "cartesian" &&
+            newScene.cartesianKind === "xy" &&
+            this.viewport() === undefined) {
+            const xyScene = newScene as CartesianXYChartScene;
+            if (xyScene.coordinateSpace) {
+                const reconcilerRes = CartesianViewportReconciler.reconcile(
+                    this.#uncontrolledViewportState(),
+                    xyScene.coordinateSpace,
+                    {
+                        clampToData: this.normalizedNavigation().clampToData,
+                        constraints: this.normalizedNavigation().constraints,
+                        minVisibleCategories: this.normalizedNavigation().minVisibleCategories
+                    }
+                );
+                if (reconcilerRes.changed) {
+                    const resolvedMap = xyScene.coordinateSpace.toResolvedAxisInfoMap();
+                    const prevPublic = toPublicViewportState(this.#uncontrolledViewportState(), resolvedMap);
+                    const nextPublic = toPublicViewportState(reconcilerRes.viewport, resolvedMap);
+                    this.#uncontrolledViewportState.set(reconcilerRes.viewport);
+                    this.viewportChange.emit({
+                        changedAxes: reconcilerRes.changedAxes,
+                        phase: "end",
+                        previousViewport: prevPublic,
+                        source: "data-reconcile",
+                        viewport: nextPublic
+                    });
+                }
+            }
+        }
 
         const isInitial = !this.#hasCommittedVisualScene;
         const isVisibility = hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
