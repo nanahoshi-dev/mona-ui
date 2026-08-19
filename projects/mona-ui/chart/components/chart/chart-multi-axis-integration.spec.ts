@@ -162,4 +162,85 @@ describe("Chart Multi-Axis & Rich Scale Integration", () => {
             }
         });
     });
+
+    describe("Axis Title Independent of Labels (MAX3-020)", () => {
+        @Component({
+            imports: [
+                ChartComponent,
+                LineSeriesComponent,
+                ChartXAxisComponent,
+                ChartYAxisComponent
+            ],
+            template: `
+                <mona-chart [data]="data()" [style.width.px]="600" [style.height.px]="400">
+                    <mona-chart-x-axis field="month" [labels]="false" title="Months (No Labels)" />
+                    <mona-chart-y-axis [labels]="false" title="Values (No Labels)" />
+                    <mona-line-series field="val" />
+                </mona-chart>
+            `
+        })
+        class AxisTitleNoLabelsTestComponent {
+            public readonly data = signal([
+                { month: "Jan", val: 10 },
+                { month: "Feb", val: 20 }
+            ]);
+        }
+
+        it("should render axis titles even when axis labels are disabled", async () => {
+            await TestBed.configureTestingModule({
+                imports: [AxisTitleNoLabelsTestComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(AxisTitleNoLabelsTestComponent);
+            fixture.detectChanges();
+
+            const titles = fixture.debugElement.queryAll(By.css(".mona-chart-axis-title"));
+            expect(titles.length).toBe(2);
+
+            const titleTexts = titles.map(t => (t.nativeElement as HTMLElement).textContent?.trim());
+            expect(titleTexts).toContain("Months (No Labels)");
+            expect(titleTexts).toContain("Values (No Labels)");
+        });
+    });
+
+    describe("Shared Axis ID Collision Safety (MAX3-001)", () => {
+        @Component({
+            imports: [
+                ChartComponent,
+                LineSeriesComponent,
+                ChartXAxisComponent,
+                ChartYAxisComponent
+            ],
+            template: `
+                <mona-chart [data]="data()" [style.width.px]="600" [style.height.px]="400">
+                    <mona-chart-x-axis axisId="axis-1" field="month" type="category" />
+                    <mona-chart-y-axis axisId="axis-1" type="linear" />
+                    <mona-line-series field="val" xAxisId="axis-1" yAxisId="axis-1" />
+                </mona-chart>
+            `
+        })
+        class SharedAxisIdTestComponent {
+            public readonly data = signal([
+                { month: "Jan", val: 10 },
+                { month: "Feb", val: 20 }
+            ]);
+        }
+
+        it("should safely resolve X and Y axes sharing the same identifier", async () => {
+            await TestBed.configureTestingModule({
+                imports: [SharedAxisIdTestComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(SharedAxisIdTestComponent);
+            fixture.detectChanges();
+
+            const chartComp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+            const scene = chartComp.scene() as CartesianChartScene;
+
+            expect(scene).toBeDefined();
+            expect(scene.axes.length).toBe(2);
+            expect(scene.series.length).toBe(1);
+            expect(scene.hasRenderableData).toBe(true);
+        });
+    });
 });

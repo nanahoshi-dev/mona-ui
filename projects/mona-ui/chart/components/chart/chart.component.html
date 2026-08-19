@@ -24,40 +24,42 @@
         <!-- DOM Cartesian Axis Labels & Titles -->
         @if (cartesianScene(); as cart) {
             @for (axisScene of cart.axes; track axisScene.axisId ?? axisScene.axis) {
-                @if (axisScene.visible && axisScene.labels !== false) {
-                    @for (tick of axisScene.ticks; track tick.tickKey ?? tick.index) {
-                        @if (tick.labelVisible !== false) {
-                            <div
-                                [class]="axisLabelClasses()"
-                                [monaChartLabelMeasure]="tick.tickKey ?? ''"
-                                [style.left.px]="axisLabelLeft(cart, axisScene, tick)"
-                                [style.top.px]="axisLabelTop(cart, axisScene, tick)"
-                                [style.max-width.px]="axisScene.labelMaxWidth ?? null"
-                                [style.transform]="axisLabelTransform(axisScene, tick)"
-                                [style.transform-origin]="axisLabelTransformOrigin(axisScene)">
-                                @if (resolveAxisLabelTemplate(axisScene); as template) {
-                                    <ng-container
-                                        [ngTemplateOutlet]="template.templateRef"
-                                        [ngTemplateOutletContext]="{
-                                            $implicit: tick.value,
-                                            axis: axisScene.axis,
-                                            axisId: axisScene.axisId,
-                                            index: tick.index,
-                                            position: axisScene.position,
-                                            scaleType: axisScene.scaleType,
-                                            value: tick.value
-                                        }" />
-                                } @else {
-                                    {{ tick.formattedValue }}
-                                }
-                            </div>
+                @if (axisScene.visible) {
+                    @if (axisScene.labels !== false) {
+                        @for (tick of axisScene.ticks; track tick.tickKey ?? tick.index) {
+                            @if (tick.labelVisible !== false) {
+                                <div
+                                    [class]="axisLabelClasses()"
+                                    [monaChartLabelMeasure]="tick.tickKey ?? ''"
+                                    [style.left.px]="axisLabelLeft(cart, axisScene, tick)"
+                                    [style.top.px]="axisLabelTop(cart, axisScene, tick)"
+                                    [style.max-width.px]="axisScene.labelMaxWidth ?? null"
+                                    [style.transform]="axisLabelTransform(axisScene, tick)"
+                                    [style.transform-origin]="axisLabelTransformOrigin(axisScene)">
+                                    @if (resolveAxisLabelTemplate(axisScene); as template) {
+                                        <ng-container
+                                            [ngTemplateOutlet]="template.templateRef"
+                                            [ngTemplateOutletContext]="{
+                                                $implicit: tick.value,
+                                                axis: axisScene.axis,
+                                                axisId: axisScene.axisId,
+                                                index: tick.index,
+                                                position: axisScene.position,
+                                                scaleType: axisScene.scaleType,
+                                                value: tick.value
+                                            }" />
+                                    } @else {
+                                        {{ tick.formattedValue }}
+                                    }
+                                </div>
+                            }
                         }
                     }
 
                     <!-- Axis Title -->
                     @if (axisScene.title) {
                         <div
-                            class="absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+                            class="mona-chart-axis-title absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
                             [style.left.px]="axisTitleLeft(cart, axisScene)"
                             [style.top.px]="axisTitleTop(cart, axisScene)"
                             [style.transform]="axisScene.axis === 'x' ? (axisScene.position === 'top' ? 'translate(-50%, 0)' : 'translate(-50%, -100%)') : (axisScene.position === 'right' ? 'translate(-50%, -50%) rotate(90deg)' : 'translate(-50%, -50%) rotate(-90deg)')">
