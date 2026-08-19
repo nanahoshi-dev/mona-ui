@@ -1061,6 +1061,9 @@ export class CartesianMultiAxisCoordinator {
                 const estimated = CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText);
                 width = Math.min(axis.labelMaxWidth ?? 120, estimated.width);
                 height = estimated.height;
+                if (labelMeasurements instanceof Map && !labelMeasurements.has(tickKey)) {
+                    (labelMeasurements as Map<string, ChartLabelMeasurement>).set(tickKey, { height, width });
+                }
             }
 
             maxUnrotatedWidth = Math.max(maxUnrotatedWidth, width);
@@ -1148,6 +1151,12 @@ export class CartesianMultiAxisCoordinator {
             const tickKey = createCartesianAxisMeasurementKey(axis.dimension, axis.axisId, resolvedType, val);
             const measurement = labelMeasurements.get(tickKey);
             const estimated = !measurement ? CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText) : undefined;
+            if (!measurement && estimated && labelMeasurements instanceof Map && !labelMeasurements.has(tickKey)) {
+                (labelMeasurements as Map<string, ChartLabelMeasurement>).set(tickKey, {
+                    height: estimated.height,
+                    width: axis.labelMaxWidth !== undefined ? Math.min(axis.labelMaxWidth, estimated.width) : estimated.width
+                });
+            }
 
             const isThinned = thinningFlags ? !thinningFlags[i] : false;
             const labelVisible = formattedText !== "" && !isThinned;
