@@ -23,14 +23,20 @@ export interface ChartAxisSceneTick<T = unknown> extends ChartAxisTick<T> {
 
 export interface ChartAxisScene {
     axis: "x" | "y";
+    axisId?: string;
     axisLine: boolean;
     gridLines: boolean;
     gutter?: number;
+    isPrimary?: boolean;
     labelMaxWidth?: number;
     labelPadding?: number;
     labelRotation?: number;
     labels?: boolean;
     position: ChartAxisPosition;
+    registrationId?: string;
+    scaleType?: string;
+    sideOffset?: number;
+    stackIndex?: number;
     tickMarks?: boolean;
     ticks: readonly ChartAxisSceneTick[];
     tickSize?: number;

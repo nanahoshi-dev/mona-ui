@@ -29,7 +29,9 @@ describe("CartesianMarkerLayout", () => {
             pointRadius: signal(5),
             type: "scatter",
             visible: signal(true),
-            xField: signal("x")
+            xAxisId: signal(undefined),
+            xField: signal("x"),
+            yAxisId: signal(undefined)
         };
 
         const result = CartesianMarkerLayout.compute({
@@ -76,7 +78,9 @@ describe("CartesianMarkerLayout", () => {
             sizeField: signal("pop"),
             type: "bubble",
             visible: signal(true),
-            xField: signal("x")
+            xAxisId: signal(undefined),
+            xField: signal("x"),
+            yAxisId: signal(undefined)
         };
 
         const result = CartesianMarkerLayout.compute({
@@ -115,7 +119,9 @@ describe("CartesianMarkerLayout", () => {
             sizeField: signal("pop"),
             type: "bubble",
             visible: signal(true),
-            xField: signal("x")
+            xAxisId: signal(undefined),
+            xField: signal("x"),
+            yAxisId: signal(undefined)
         };
 
         const bubbleReg2: ChartBubbleSeriesRegistration = {
@@ -130,7 +136,9 @@ describe("CartesianMarkerLayout", () => {
             sizeField: signal("pop"),
             type: "bubble",
             visible: signal(true),
-            xField: signal("x")
+            xAxisId: signal(undefined),
+            xField: signal("x"),
+            yAxisId: signal(undefined)
         };
 
         const result = CartesianMarkerLayout.compute({
@@ -159,7 +167,9 @@ describe("CartesianMarkerLayout", () => {
             name: signal("Scatter"),
             type: "scatter",
             visible: signal(true),
-            xField: signal("x")
+            xAxisId: signal(undefined),
+            xField: signal("x"),
+            yAxisId: signal(undefined)
         };
 
         const result = CartesianMarkerLayout.compute({

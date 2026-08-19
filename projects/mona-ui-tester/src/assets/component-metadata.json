@@ -2735,10 +2735,24 @@
         "defaultValue": "true"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X value, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]
@@ -2846,10 +2860,24 @@
         "defaultValue": "true"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X/category value, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]
@@ -2957,10 +2985,24 @@
         "defaultValue": "true"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X value, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]
@@ -3117,10 +3159,24 @@
         "defaultValue": "1"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X-axis coordinate or timestamp for each data item.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]
@@ -3444,11 +3500,32 @@
     "selector": "\"mona-chart-x-axis\"",
     "inputs": [
       {
+        "description": "Optional semantic identifier for the X axis, referenced by series `xAxisId`.",
+        "kind": "input",
+        "name": "axisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether the solid baseline axis border line is rendered.",
         "kind": "input",
         "name": "axisLine",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Exponent for power scale (`type=\"pow\"`). Must be a positive finite number.",
+        "kind": "input",
+        "name": "exponent",
+        "type": "number",
+        "defaultValue": "1"
+      },
+      {
+        "description": "Optional data field name for the X axis categories or values.",
+        "kind": "input",
+        "name": "field",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Custom formatter function for axis tick labels.",
@@ -3493,6 +3570,13 @@
         "defaultValue": "true"
       },
       {
+        "description": "Base logarithm for log scale (`type=\"log\"`). Must be a positive finite number not equal to 1.",
+        "kind": "input",
+        "name": "logBase",
+        "type": "number",
+        "defaultValue": "10"
+      },
+      {
         "description": "Explicit upper bound for the axis range.",
         "kind": "input",
         "name": "max",
@@ -3519,6 +3603,13 @@
         "name": "position",
         "type": "ChartXAxisPosition",
         "defaultValue": "\"bottom\""
+      },
+      {
+        "description": "Constant for symlog scale (`type=\"symlog\"`). Must be a positive finite number.",
+        "kind": "input",
+        "name": "symlogConstant",
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "Suggested number of ticks to display along the axis (acts as preferred label count for category axes).",
@@ -3556,7 +3647,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Scale type for the X axis (`\"auto\"`, `\"category\"`, `\"linear\"`, `\"time\"`, or `\"utc\"`).",
+        "description": "Scale type for the X axis (`\"auto\"`, `\"category\"`, `\"linear\"`, `\"log\"`, `\"symlog\"`, `\"pow\"`, `\"sqrt\"`, `\"time\"`, or `\"utc\"`).",
         "kind": "input",
         "name": "type",
         "type": "ChartXAxisType",
@@ -3576,11 +3667,25 @@
     "selector": "\"mona-chart-y-axis\"",
     "inputs": [
       {
+        "description": "Optional semantic identifier for the Y axis, referenced by series `yAxisId`.",
+        "kind": "input",
+        "name": "axisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether the solid baseline axis border line is rendered.",
         "kind": "input",
         "name": "axisLine",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Exponent for power scale (`type=\"pow\"`). Must be a positive finite number.",
+        "kind": "input",
+        "name": "exponent",
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "Custom formatter function for axis tick labels.",
@@ -3625,6 +3730,13 @@
         "defaultValue": "true"
       },
       {
+        "description": "Base logarithm for log scale (`type=\"log\"`). Must be a positive finite number not equal to 1.",
+        "kind": "input",
+        "name": "logBase",
+        "type": "number",
+        "defaultValue": "10"
+      },
+      {
         "description": "Explicit upper bound for the numeric value range.",
         "kind": "input",
         "name": "max",
@@ -3651,6 +3763,13 @@
         "name": "position",
         "type": "ChartYAxisPosition",
         "defaultValue": "\"left\""
+      },
+      {
+        "description": "Constant for symlog scale (`type=\"symlog\"`). Must be a positive finite number.",
+        "kind": "input",
+        "name": "symlogConstant",
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "Suggested number of ticks to display along the axis (acts as preferred label count for category axes).",
@@ -3688,7 +3807,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Scale type for the Y axis (`\"auto\"`, `\"category\"`, or `\"linear\"`).",
+        "description": "Scale type for the Y axis (`\"auto\"`, `\"category\"`, `\"linear\"`, `\"log\"`, `\"symlog\"`, `\"pow\"`, or `\"sqrt\"`).",
         "kind": "input",
         "name": "type",
         "type": "ChartYAxisType",
@@ -4507,10 +4626,24 @@
         "defaultValue": "true"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X value, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]
@@ -4674,10 +4807,24 @@
         "defaultValue": "1"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X-axis coordinate or timestamp for each data item.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]
@@ -5409,10 +5556,24 @@
         "defaultValue": "true"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X coordinate, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]
@@ -5513,10 +5674,24 @@
         "defaultValue": "true"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X/category value, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]
@@ -5769,10 +5944,24 @@
         "defaultValue": "true"
       },
       {
+        "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the X value, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       }
     ]

@@ -6,6 +6,7 @@ import { CartesianAxisLayoutEngine } from "./cartesian-axis-layout-engine";
 
 describe("CartesianAxisLayoutEngine", () => {
     const createXAxisReg = (overrides: Partial<ChartXAxisRegistration> = {}): ChartXAxisRegistration => ({
+        axisId: signal(undefined),
         axisLine: signal(true),
         formatter: signal(undefined),
         gridLines: signal(undefined),
@@ -18,6 +19,7 @@ describe("CartesianAxisLayoutEngine", () => {
         min: signal(undefined),
         nice: signal(true),
         position: signal("bottom"),
+        registrationId: "mock-x",
         tickCount: signal(undefined),
         tickMarks: signal(false),
         tickSize: signal(undefined),
@@ -29,6 +31,7 @@ describe("CartesianAxisLayoutEngine", () => {
     });
 
     const createYAxisReg = (overrides: Partial<ChartYAxisRegistration> = {}): ChartYAxisRegistration => ({
+        axisId: signal(undefined),
         axisLine: signal(true),
         formatter: signal(undefined),
         gridLines: signal(undefined),
@@ -41,6 +44,7 @@ describe("CartesianAxisLayoutEngine", () => {
         min: signal(undefined),
         nice: signal(true),
         position: signal("left"),
+        registrationId: "mock-y",
         tickCount: signal(undefined),
         tickMarks: signal(false),
         tickSize: signal(undefined),

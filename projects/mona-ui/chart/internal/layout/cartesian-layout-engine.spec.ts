@@ -46,7 +46,9 @@ function createMockSeries(
         type,
         valueFormatter: signal(options?.valueFormatter),
         visible: signal(visible),
-        xField: signal(xField)
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
     };
 }
 
@@ -68,7 +70,9 @@ function createMockScatter(
         pointRadius: signal(pointRadius),
         type: "scatter",
         visible: signal(visible),
-        xField: signal(xField)
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
     };
 }
 
@@ -94,7 +98,9 @@ function createMockBubble(
         sizeField: signal(sizeField),
         type: "bubble",
         visible: signal(visible),
-        xField: signal(xField)
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
     };
 }
 
@@ -108,6 +114,7 @@ function createMockXAxis(options?: Partial<{
     type: "auto" | "category" | "linear" | "time" | "utc";
 }>): ChartXAxisRegistration {
     return {
+        axisId: signal(undefined),
         axisLine: signal(true),
         formatter: signal(undefined),
         gridLines: signal(true),
@@ -116,6 +123,7 @@ function createMockXAxis(options?: Partial<{
         min: signal(options?.min),
         nice: signal(options?.nice ?? true),
         position: signal(options?.position ?? "bottom"),
+        registrationId: "mock-x",
         tickCount: signal(options?.tickCount),
         title: signal(options?.title ?? ""),
         type: signal(options?.type ?? "auto"),
@@ -133,6 +141,7 @@ function createMockYAxis(options?: Partial<{
     type: "auto" | "category" | "linear";
 }>): ChartYAxisRegistration {
     return {
+        axisId: signal(undefined),
         axisLine: signal(true),
         formatter: signal(undefined),
         gridLines: signal(true),
@@ -141,6 +150,7 @@ function createMockYAxis(options?: Partial<{
         min: signal(options?.min),
         nice: signal(options?.nice ?? true),
         position: signal(options?.position ?? "left"),
+        registrationId: "mock-y",
         tickCount: signal(options?.tickCount),
         title: signal(options?.title ?? ""),
         type: signal(options?.type ?? "auto"),

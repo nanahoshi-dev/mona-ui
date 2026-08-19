@@ -105,10 +105,22 @@ export class BubbleSeriesComponent implements OnInit {
     public readonly visible = model(true);
 
     /**
+     * @description Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.
+     * @default undefined
+     */
+    public readonly xAxisId = input<string | undefined>(undefined);
+
+    /**
      * @description Property key or accessor extracting the X value, overriding the root chart X field.
      * @default undefined
      */
     public readonly xField = input<ChartField | undefined>(undefined);
+
+    /**
+     * @description Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.
+     * @default undefined
+     */
+    public readonly yAxisId = input<string | undefined>(undefined);
 
     #registered = false;
 
@@ -136,6 +148,8 @@ export class BubbleSeriesComponent implements OnInit {
             this.minRadius();
             this.name();
             this.sizeFormatter();
+            this.xAxisId();
+            this.yAxisId();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
             }
@@ -183,7 +197,9 @@ export class BubbleSeriesComponent implements OnInit {
             type: "bubble",
             userClass: this.userClass,
             visible: this.visible,
-            xField: this.xField
+            xAxisId: this.xAxisId,
+            xField: this.xField,
+            yAxisId: this.yAxisId
         });
 
         this.#destroyRef.onDestroy(unregister);

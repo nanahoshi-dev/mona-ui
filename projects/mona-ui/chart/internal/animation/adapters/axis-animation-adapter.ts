@@ -29,7 +29,9 @@ export class AxisAnimationAdapter {
                 }
 
                 return targetAxes.map(targetAxis => {
-                    const prevAxis = previousAxes.find(a => a.axis === targetAxis.axis);
+                    const prevAxis = previousAxes.find(
+                        a => (a.axisId && a.axisId === targetAxis.axisId) || (a.axis === targetAxis.axis && a.position === targetAxis.position)
+                    );
                     if (!prevAxis) {
                         return targetAxis;
                     }

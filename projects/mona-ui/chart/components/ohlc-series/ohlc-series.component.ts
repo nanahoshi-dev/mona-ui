@@ -155,10 +155,22 @@ export class OhlcSeriesComponent implements OnInit {
     public readonly wickWidth = input(1);
 
     /**
+     * @description Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.
+     * @default undefined
+     */
+    public readonly xAxisId = input<string | undefined>(undefined);
+
+    /**
      * @description Property key or accessor extracting the X-axis coordinate or timestamp for each data item.
      * @default undefined
      */
     public readonly xField = input<ChartField | undefined>(undefined);
+
+    /**
+     * @description Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used.
+     * @default undefined
+     */
+    public readonly yAxisId = input<string | undefined>(undefined);
 
     #registered = false;
 
@@ -191,6 +203,8 @@ export class OhlcSeriesComponent implements OnInit {
             this.effectiveTickLength();
             this.valueFormatter();
             this.wickWidth();
+            this.xAxisId();
+            this.yAxisId();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
             }
@@ -237,7 +251,9 @@ export class OhlcSeriesComponent implements OnInit {
             visible: this.visible,
             wickColor: this.wickColor,
             wickWidth: this.wickWidth,
-            xField: this.xField
+            xAxisId: this.xAxisId,
+            xField: this.xField,
+            yAxisId: this.yAxisId
         };
 
         const unregister = this.#chartContext?.registerSeries(registration);

@@ -50,7 +50,11 @@ export interface ChartPointEvent<T = unknown> {
     value?: unknown;
     valueKind?: ChartPointValueKind;
     waterfall?: ChartWaterfallPointValue;
+    xAxisId?: string;
+    xAxisTitle?: string;
     xValue: unknown;
+    yAxisId?: string;
+    yAxisTitle?: string;
     yCategory?: unknown;
     yValue?: number;
 }
@@ -100,7 +104,11 @@ export interface ChartPointFocusEvent<T = unknown> {
     value?: unknown;
     valueKind?: ChartPointValueKind;
     waterfall?: ChartWaterfallPointValue;
+    xAxisId?: string;
+    xAxisTitle?: string;
     xValue: unknown;
+    yAxisId?: string;
+    yAxisTitle?: string;
     yCategory?: unknown;
     yValue?: number;
 }

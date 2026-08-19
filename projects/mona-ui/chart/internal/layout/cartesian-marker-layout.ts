@@ -4,7 +4,9 @@ import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import type {
     ChartBubbleSeriesRegistration,
     ChartCartesianSeriesRegistration,
-    ChartScatterSeriesRegistration
+    ChartScatterSeriesRegistration,
+    ChartXAxisRegistration,
+    ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import { isContinuousXValid } from "../data/chart-domain";
 import { resolveData, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
@@ -23,6 +25,7 @@ import {
     isFiniteNumber,
     normalizeMarkerRadius
 } from "../utils/number-utils";
+import type { ChartPositionScale } from "../scale/chart-scale";
 
 export interface ResolvedCartesianXCoordinate {
     readonly coordinate: number;
@@ -35,38 +38,45 @@ export function resolveCartesianContinuousXCoordinate(
     val: unknown,
     linearXScale: LinearScale | undefined,
     timeScale: TimeScale | UtcScale | undefined,
-    dataIndex: number
+    dataIndex: number,
+    genericXScale?: ChartPositionScale
 ): ResolvedCartesianXCoordinate {
-    if (linearXScale) {
-        if (isFiniteNumber(val)) {
-            const num = Number(val);
-            return {
-                coordinate: linearXScale.map(num),
-                interactionKey: num,
-                valid: true,
-                value: val
-            };
-        }
-    } else if (timeScale) {
-        let dateVal: Date | undefined;
-        if (val instanceof Date && !Number.isNaN(val.getTime())) {
-            dateVal = val;
-        } else if (typeof val === "number" && Number.isFinite(val)) {
-            dateVal = new Date(val);
-        } else if (typeof val === "string") {
-            const parsed = Date.parse(val);
-            if (!Number.isNaN(parsed)) {
-                dateVal = new Date(parsed);
+    const activeScale = genericXScale ?? linearXScale ?? timeScale;
+    if (activeScale) {
+        if (activeScale.type === "time" || activeScale.type === "utc") {
+            let dateVal: Date | undefined;
+            if (val instanceof Date && !Number.isNaN(val.getTime())) {
+                dateVal = val;
+            } else if (typeof val === "number" && Number.isFinite(val)) {
+                dateVal = new Date(val);
+            } else if (typeof val === "string") {
+                const parsed = Date.parse(val);
+                if (!Number.isNaN(parsed)) {
+                    dateVal = new Date(parsed);
+                }
             }
-        }
-        if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
-            const time = dateVal.getTime();
-            return {
-                coordinate: timeScale.map(dateVal),
-                interactionKey: time,
-                valid: true,
-                value: val
-            };
+            if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
+                const coord = (activeScale as any).map(dateVal);
+                if (coord !== undefined && Number.isFinite(coord)) {
+                    return {
+                        coordinate: coord,
+                        interactionKey: dateVal.getTime(),
+                        valid: true,
+                        value: val
+                    };
+                }
+            }
+        } else if (isFiniteNumber(val)) {
+            const num = Number(val);
+            const coord = (activeScale as any).map(num);
+            if (coord !== undefined && Number.isFinite(coord)) {
+                return {
+                    coordinate: coord,
+                    interactionKey: num,
+                    valid: true,
+                    value: val
+                };
+            }
         }
     }
 
@@ -95,11 +105,18 @@ export interface CartesianMarkerSeriesLayoutOptions {
     readonly seriesIndex: number;
     readonly styleResolver: ChartStyleResolver;
     readonly timeScale?: TimeScale | UtcScale;
+    readonly xAxis?: ChartXAxisRegistration;
     readonly xAxisFormatter?: ChartAxisFormatter;
+    readonly xAxisId?: string;
+    readonly xAxisTitle?: string;
     readonly xAxisType: ChartXAxisType;
+    readonly xScale?: ChartPositionScale;
     readonly xTimeSpanMs?: number;
+    readonly yAxis?: ChartYAxisRegistration;
     readonly yAxisFormatter?: ChartAxisFormatter;
-    readonly yScale: LinearScale;
+    readonly yAxisId?: string;
+    readonly yAxisTitle?: string;
+    readonly yScale: ChartPositionScale;
 }
 
 export interface CartesianMarkerLayoutResult {
@@ -179,12 +196,14 @@ export class CartesianMarkerLayout {
             timeScale,
             xAxisFormatter,
             xAxisType,
+            xScale,
             xTimeSpanMs,
             yAxisFormatter,
             yScale
         } = options;
 
-        if (xAxisType === "category" || (!linearXScale && !timeScale)) {
+        const effectiveXScale = xScale ?? linearXScale ?? timeScale;
+        if (xAxisType === "category" || !effectiveXScale) {
             return null;
         }
 
@@ -226,7 +245,13 @@ export class CartesianMarkerLayout {
             const rawXVal = resolveValue(datum, sXField, dIdx);
             const rawYVal = resolveValue(datum, sField, dIdx);
 
-            const resolvedX = resolveCartesianContinuousXCoordinate(rawXVal, linearXScale, timeScale, dIdx);
+            const resolvedX = resolveCartesianContinuousXCoordinate(
+                rawXVal,
+                linearXScale,
+                timeScale,
+                dIdx,
+                options.xScale
+            );
             if (!resolvedX.valid) {
                 continue;
             }
@@ -237,7 +262,10 @@ export class CartesianMarkerLayout {
 
             const yVal = Number(rawYVal);
             const xPos = resolvedX.coordinate;
-            const yPos = yScale.map(yVal);
+            const yPos = (yScale as any).map(yVal);
+            if (yPos === undefined || !Number.isFinite(yPos)) {
+                continue;
+            }
 
             let markerRadius: number;
             let sizeVal: number | undefined;
@@ -313,8 +341,12 @@ export class CartesianMarkerLayout {
                 seriesType: s.type,
                 sizeValue: sizeVal,
                 visualRadius: markerRadius,
+                xAxisId: options.xAxisId ?? (options.xAxis?.axisId?.() ?? "default-x"),
+                xAxisTitle: options.xAxisTitle ?? (options.xAxis?.title?.() ?? ""),
                 xKey: resolvedX.interactionKey,
                 xValue: rawXVal,
+                yAxisId: options.yAxisId ?? (options.yAxis?.axisId?.() ?? "default-y"),
+                yAxisTitle: options.yAxisTitle ?? (options.yAxis?.title?.() ?? ""),
                 yValue: yVal
             });
         }

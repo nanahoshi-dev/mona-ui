@@ -1,16 +1,39 @@
-export interface ChartContinuousScale<T = number | Date> {
-    domain(): readonly [T, T];
-    invert(pixel: number): T;
-    map(value: T): number;
-    nice(count?: number): ChartContinuousScale<T>;
-    range(): readonly [number, number];
-    ticks(count?: number): readonly T[];
-}
+export type ResolvedChartCartesianAxisType =
+    | "category"
+    | "linear"
+    | "log"
+    | "symlog"
+    | "pow"
+    | "sqrt"
+    | "time"
+    | "utc";
 
-export interface ChartBandScale<T extends { toString(): string } = string> {
-    bandwidth(): number;
+export interface ChartPositionScaleBase<T = unknown> {
+    readonly type: ResolvedChartCartesianAxisType;
     domain(): readonly T[];
     map(value: T): number | undefined;
     range(): readonly [number, number];
+}
+
+export interface ChartContinuousPositionScale<T extends number | Date = number | Date>
+    extends ChartPositionScaleBase<T> {
+    formatTick?(value: T, count?: number): string;
+    invert(pixel: number): T;
+    nice(count?: number): this;
+    setDomain?(domain: readonly [T, T]): this;
+    ticks(count?: number): readonly T[];
+}
+
+export interface ChartBandPositionScale<T extends { toString(): string } = string>
+    extends ChartPositionScaleBase<T> {
+    readonly type: "category";
+    bandwidth(): number;
     step(): number;
 }
+
+export type ChartPositionScale<T = unknown> =
+    | ChartContinuousPositionScale<T & (number | Date)>
+    | ChartBandPositionScale<T & { toString(): string }>;
+
+export type ChartContinuousScale<T = number | Date> = ChartContinuousPositionScale<T & (number | Date)>;
+export type ChartBandScale<T extends { toString(): string } = string> = ChartBandPositionScale<T>;

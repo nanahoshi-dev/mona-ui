@@ -116,6 +116,7 @@ describe("WaterfallLayoutEngine", () => {
         };
 
         const xAxis: ChartXAxisRegistration = {
+            axisId: signal(undefined),
             axisLine: signal(true),
             formatter: signal(undefined),
             gridLines: signal(false),
@@ -124,6 +125,7 @@ describe("WaterfallLayoutEngine", () => {
             min: signal(undefined),
             nice: signal(true),
             position: signal("bottom"),
+            registrationId: "mock-x",
             tickCount: signal(undefined),
             title: signal(""),
             type: signal("linear" as any),
@@ -131,6 +133,7 @@ describe("WaterfallLayoutEngine", () => {
         };
 
         const yAxis: ChartYAxisRegistration = {
+            axisId: signal(undefined),
             axisLine: signal(true),
             formatter: signal(undefined),
             gridLines: signal(false),
@@ -139,6 +142,7 @@ describe("WaterfallLayoutEngine", () => {
             min: signal(undefined),
             nice: signal(true),
             position: signal("left"),
+            registrationId: "mock-y",
             tickCount: signal(undefined),
             title: signal(""),
             type: signal("category" as any),
@@ -302,6 +306,7 @@ describe("WaterfallLayoutEngine", () => {
         };
 
         const xAxis: ChartXAxisRegistration = {
+            axisId: signal(undefined),
             axisLine: signal(true),
             formatter: signal((val: unknown) => `Quarter: ${String(val)}`),
             gridLines: signal(false),
@@ -310,6 +315,7 @@ describe("WaterfallLayoutEngine", () => {
             min: signal(undefined),
             nice: signal(true),
             position: signal("bottom"),
+            registrationId: "mock-x-2",
             tickCount: signal(undefined),
             title: signal(""),
             type: signal("category"),
@@ -380,6 +386,7 @@ describe("WaterfallLayoutEngine", () => {
         };
 
         const xAxis: ChartXAxisRegistration = {
+            axisId: signal(undefined),
             axisLine: signal(true),
             formatter: signal((val: unknown, idx?: number) => `src-${idx}:${val}`),
             gridLines: signal(false),
@@ -388,6 +395,7 @@ describe("WaterfallLayoutEngine", () => {
             min: signal(undefined),
             nice: signal(true),
             position: signal("bottom"),
+            registrationId: "mock-x-3",
             tickCount: signal(undefined),
             title: signal(""),
             type: signal("category"),

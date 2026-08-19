@@ -23,7 +23,7 @@
 
         <!-- DOM Cartesian Axis Labels & Titles -->
         @if (cartesianScene(); as cart) {
-            @for (axisScene of cart.axes; track axisScene.axis) {
+            @for (axisScene of cart.axes; track axisScene.axisId ?? axisScene.axis) {
                 @if (axisScene.visible && axisScene.labels !== false) {
                     @for (tick of axisScene.ticks; track tick.tickKey ?? tick.index) {
                         @if (tick.labelVisible !== false) {
@@ -35,22 +35,16 @@
                                 [style.max-width.px]="axisScene.labelMaxWidth ?? null"
                                 [style.transform]="axisLabelTransform(axisScene, tick)"
                                 [style.transform-origin]="axisLabelTransformOrigin(axisScene)">
-                                @if (axisScene.axis === 'x' && xAxisRegistration()?.labelTemplate?.(); as template) {
+                                @if (resolveAxisLabelTemplate(axisScene); as template) {
                                     <ng-container
                                         [ngTemplateOutlet]="template.templateRef"
                                         [ngTemplateOutletContext]="{
                                             $implicit: tick.value,
-                                            axis: 'x',
+                                            axis: axisScene.axis,
+                                            axisId: axisScene.axisId,
                                             index: tick.index,
-                                            value: tick.value
-                                        }" />
-                                } @else if (axisScene.axis === 'y' && yAxisRegistration()?.labelTemplate?.(); as template) {
-                                    <ng-container
-                                        [ngTemplateOutlet]="template.templateRef"
-                                        [ngTemplateOutletContext]="{
-                                            $implicit: tick.value,
-                                            axis: 'y',
-                                            index: tick.index,
+                                            position: axisScene.position,
+                                            scaleType: axisScene.scaleType,
                                             value: tick.value
                                         }" />
                                 } @else {

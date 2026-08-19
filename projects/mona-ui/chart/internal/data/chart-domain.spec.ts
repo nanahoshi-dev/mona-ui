@@ -31,8 +31,10 @@ function createMockSeries(
         stackMode: signal("normal"),
         type,
         visible: signal(visible),
-        xField: signal(xField)
-    } as ChartCartesianSeriesRegistration;
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
+    } as unknown as ChartCartesianSeriesRegistration;
 }
 
 function createMockScatterSeries(
@@ -51,7 +53,9 @@ function createMockScatterSeries(
         pointRadius: signal(5),
         type: "scatter",
         visible: signal(visible),
-        xField: signal(xField)
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
     };
 }
 
@@ -74,8 +78,10 @@ function createMockBubbleSeries(
         sizeField: signal(sizeField),
         type: "bubble",
         visible: signal(visible),
-        xField: signal(xField)
-    } as ChartCartesianSeriesRegistration;
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
+    } as unknown as ChartCartesianSeriesRegistration;
 }
 
 function createMockRangeBarSeries(
@@ -96,8 +102,10 @@ function createMockRangeBarSeries(
         type: "rangeBar",
         valueFormatter: signal(undefined),
         visible: signal(visible),
-        xField: signal(xField)
-    } as ChartCartesianSeriesRegistration;
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
+    } as unknown as ChartCartesianSeriesRegistration;
 }
 
 function createMockRangeAreaSeries(
@@ -118,8 +126,10 @@ function createMockRangeAreaSeries(
         type: "rangeArea",
         valueFormatter: signal(undefined),
         visible: signal(visible),
-        xField: signal(xField)
-    } as ChartCartesianSeriesRegistration;
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
+    } as unknown as ChartCartesianSeriesRegistration;
 }
 
 function createMockCandlestickSeries(
@@ -155,7 +165,9 @@ function createMockCandlestickSeries(
         visible: signal(visible),
         wickColor: signal(undefined),
         wickWidth: signal(1),
-        xField: signal(xField)
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
     } as unknown as ChartCartesianSeriesRegistration;
 }
 
@@ -192,7 +204,9 @@ function createMockOhlcSeries(
         visible: signal(visible),
         wickColor: signal(undefined),
         wickWidth: signal(1),
-        xField: signal(xField)
+        xAxisId: signal(undefined),
+        xField: signal(xField),
+        yAxisId: signal(undefined)
     } as unknown as ChartCartesianSeriesRegistration;
 }
 

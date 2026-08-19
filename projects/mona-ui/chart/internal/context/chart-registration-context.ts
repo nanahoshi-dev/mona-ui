@@ -61,7 +61,9 @@ export function hasInvalidationReason(
 }
 
 export interface ChartAxisRegistrationBase {
+    axisId: Signal<string | undefined>;
     axisLine: Signal<boolean>;
+    exponent?: Signal<number | undefined>;
     formatter: Signal<ChartAxisFormatter | undefined>;
     gridLines: Signal<boolean | undefined>;
     labelMaxWidth?: Signal<number | undefined>;
@@ -69,7 +71,10 @@ export interface ChartAxisRegistrationBase {
     labelRotation?: Signal<ChartAxisLabelRotation | undefined>;
     labels?: Signal<boolean | undefined>;
     labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
+    logBase?: Signal<number | undefined>;
     nice: Signal<boolean>;
+    registrationId: string;
+    symlogConstant?: Signal<number | undefined>;
     tickCount: Signal<number | undefined>;
     tickMarks?: Signal<boolean | undefined>;
     tickSize?: Signal<number | undefined>;
@@ -80,6 +85,7 @@ export interface ChartAxisRegistrationBase {
 }
 
 export interface ChartXAxisRegistration extends ChartAxisRegistrationBase {
+    field?: Signal<ChartField | undefined>;
     max: Signal<Date | number | undefined>;
     min: Signal<Date | number | undefined>;
     position: Signal<ChartXAxisPosition>;
@@ -156,7 +162,9 @@ export interface ChartScalarSeriesRegistrationBase extends ChartSeriesRegistrati
 export interface ChartCartesianSeriesRegistrationBase extends ChartSeriesRegistrationBase {
     color: Signal<string>;
     toggleVisibility?: () => boolean;
+    xAxisId: Signal<string | undefined>;
     xField: Signal<ChartField | undefined>;
+    yAxisId: Signal<string | undefined>;
 }
 
 export interface ChartCartesianScalarSeriesRegistrationBase
@@ -351,7 +359,9 @@ export interface ChartFinancialSeriesRegistrationBase {
     readonly visible: Signal<boolean>;
     readonly wickColor: Signal<string | undefined>;
     readonly wickWidth: Signal<number>;
+    readonly xAxisId: Signal<string | undefined>;
     readonly xField: Signal<ChartField | undefined>;
+    readonly yAxisId: Signal<string | undefined>;
 }
 
 export interface ChartCandlestickSeriesRegistration extends ChartFinancialSeriesRegistrationBase {
