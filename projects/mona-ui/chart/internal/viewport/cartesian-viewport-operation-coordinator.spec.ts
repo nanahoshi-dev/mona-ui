@@ -282,4 +282,74 @@ describe("CartesianViewportOperationCoordinator", () => {
         expect(res.viewport.x.get("x-1")).toBeDefined();
         expect(res.viewport.x.get("x-2")).toBeDefined();
     });
+
+    it("should preview transform accurately without mutating state", () => {
+        const initial: InternalCartesianViewportState = {
+            x: new Map([["x-1", { axis: "x", axisId: "x-1", kind: "continuous", min: 20, max: 80 }]]),
+            y: new Map()
+        };
+
+        const preview = CartesianViewportOperationCoordinator.previewTransform(
+            initial,
+            coordSpace,
+            [{ axis: "x", axisId: "x-1" }],
+            { zoomFactor: 1.5 }
+        );
+
+        expect(preview.accepted).toBe(true);
+        expect(preview.changed).toBe(true);
+    });
+
+    it("should assign complete state in setViewport authoritatively without link propagation", () => {
+        const x2Snap: CartesianAxisCoordinateSnapshot = {
+            baseDomain: [0, 100],
+            baseScale: xScale,
+            range: [0, 500],
+            ref: { axis: "x", axisId: "x-2" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 100],
+            viewportScale: xScale
+        };
+        const multiCoordSpace = new CartesianAxisCoordinateSpace(
+            new Map([
+                ["x-1", xSnap],
+                ["x-2", x2Snap]
+            ]),
+            new Map()
+        );
+        const linkGroups: readonly ChartViewportLinkGroup[] = [
+            {
+                axes: [
+                    { axis: "x", axisId: "x-1" },
+                    { axis: "x", axisId: "x-2" }
+                ],
+                id: "g1",
+                mode: "domain"
+            }
+        ];
+
+        // Explicitly set x-1 to [20, 80] and x-2 to [30, 70]
+        const state: ChartViewportState = {
+            axes: [
+                { axis: "x", axisId: "x-1", kind: "continuous", min: 20, max: 80 },
+                { axis: "x", axisId: "x-2", kind: "continuous", min: 30, max: 70 }
+            ]
+        };
+
+        const res = CartesianViewportOperationCoordinator.setViewport(
+            emptyViewport,
+            multiCoordSpace,
+            state,
+            { linkGroups }
+        );
+
+        expect(res.accepted).toBe(true);
+        expect(res.changed).toBe(true);
+        // Both explicit windows must be preserved exactly without link propagation overwriting x-2
+        const x1Win = res.viewport.x.get("x-1");
+        const x2Win = res.viewport.x.get("x-2");
+        expect(x1Win && x1Win.kind === "continuous" && x1Win.min).toBe(20);
+        expect(x2Win && x2Win.kind === "continuous" && x2Win.min).toBe(30);
+    });
 });

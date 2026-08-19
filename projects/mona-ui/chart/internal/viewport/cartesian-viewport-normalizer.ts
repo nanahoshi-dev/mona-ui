@@ -95,6 +95,61 @@ export function areInternalViewportStatesEqual(
     return true;
 }
 
+export interface InternalViewportDiff {
+    readonly changed: boolean;
+    readonly changedAxes: readonly ChartViewportAxisRef[];
+}
+
+export function diffInternalViewportStates(
+    previous: InternalCartesianViewportState | undefined,
+    next: InternalCartesianViewportState | undefined
+): InternalViewportDiff {
+    if (previous === next) {
+        return { changed: false, changedAxes: [] };
+    }
+    if (!previous && !next) {
+        return { changed: false, changedAxes: [] };
+    }
+    if (!previous) {
+        const changedAxes: ChartViewportAxisRef[] = [];
+        if (next) {
+            for (const id of next.x.keys()) changedAxes.push({ axis: "x", axisId: id });
+            for (const id of next.y.keys()) changedAxes.push({ axis: "y", axisId: id });
+        }
+        return { changed: changedAxes.length > 0, changedAxes };
+    }
+    if (!next) {
+        const changedAxes: ChartViewportAxisRef[] = [];
+        for (const id of previous.x.keys()) changedAxes.push({ axis: "x", axisId: id });
+        for (const id of previous.y.keys()) changedAxes.push({ axis: "y", axisId: id });
+        return { changed: changedAxes.length > 0, changedAxes };
+    }
+
+    const changedAxes: ChartViewportAxisRef[] = [];
+    const allXKeys = new Set([...previous.x.keys(), ...next.x.keys()]);
+    for (const id of allXKeys) {
+        const prevW = previous.x.get(id);
+        const nextW = next.x.get(id);
+        if (!areAxisViewportsEqual(prevW, nextW)) {
+            changedAxes.push({ axis: "x", axisId: id });
+        }
+    }
+
+    const allYKeys = new Set([...previous.y.keys(), ...next.y.keys()]);
+    for (const id of allYKeys) {
+        const prevW = previous.y.get(id);
+        const nextW = next.y.get(id);
+        if (!areAxisViewportsEqual(prevW, nextW)) {
+            changedAxes.push({ axis: "y", axisId: id });
+        }
+    }
+
+    return {
+        changed: changedAxes.length > 0,
+        changedAxes
+    };
+}
+
 export function areViewportStatesEqual(
     a: ChartViewportState | undefined,
     b: ChartViewportState | undefined
@@ -407,9 +462,10 @@ export function normalizeViewportState(
         return { x: xMap, y: yMap };
     }
 
+    const isCoordinateSpace = "get" in resolvedAxes && typeof resolvedAxes.get === "function";
     const resolvedMap: ResolvedAxisInfoMap =
-        "toResolvedAxisInfoMap" in resolvedAxes && typeof resolvedAxes.toResolvedAxisInfoMap === "function"
-            ? resolvedAxes.toResolvedAxisInfoMap()
+        isCoordinateSpace && typeof (resolvedAxes as CartesianAxisCoordinateSpace).toResolvedAxisInfoMap === "function"
+            ? (resolvedAxes as CartesianAxisCoordinateSpace).toResolvedAxisInfoMap()
             : (resolvedAxes as ResolvedAxisInfoMap);
 
     const seenAxes = new Set<string>();
@@ -439,10 +495,11 @@ export function normalizeViewportState(
         }
         seenAxes.add(axisKey);
 
-        const axisMap = axis === "x" ? resolvedMap.x : resolvedMap.y;
-        const axisInfo = axisMap.get(axisId);
+        const axisInfo: ResolvedAxisInfo | CartesianAxisCoordinateSnapshot | undefined = isCoordinateSpace
+            ? (resolvedAxes as CartesianAxisCoordinateSpace).get({ axis, axisId })
+            : (axis === "x" ? resolvedMap.x : resolvedMap.y).get(axisId);
 
-        if (!axisInfo) {
+        if (!axisInfo || ("valid" in axisInfo && axisInfo.valid === false)) {
             ChartDiagnostics.warnOnce(
                 warned,
                 `Viewport specified for unrecognized axis "${axis}" with id "${axisId}".`,
