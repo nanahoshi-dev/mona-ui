@@ -1,6 +1,7 @@
 import type { ChartRangeBarSeriesScene } from "../../scene/cartesian-scene";
 import type { ChartCornerRadii, SceneRangeBar } from "../../scene/scene-geometry";
 import { lerp, lerpOpacity } from "../animation-math";
+import { lerpCornerRadii } from "../primitives/rect-transition";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";
 
@@ -181,14 +182,48 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
         };
     }
 
-    const isHorizontal = plan.to.orientation === "horizontal" || plan.from.orientation === "horizontal";
+    const isOrientationSwitch = plan.from.orientation !== plan.to.orientation;
     const fromValue = lerp(plan.from.fromValue, plan.to.fromValue, progress);
     const toValue = lerp(plan.from.toValue, plan.to.toValue, progress);
     const lowValue = Math.min(fromValue, toValue);
     const highValue = Math.max(fromValue, toValue);
     const renderOpacity = lerpOpacity(plan.from.opacity, plan.to.opacity, progress);
-    const radius = plan.to.radius ?? plan.from.radius ?? 4;
-    const cornerRadii = plan.to.cornerRadii ?? plan.from.cornerRadii;
+    const radius = lerp(plan.from.radius, plan.to.radius, progress);
+    const cornerRadii = lerpCornerRadii(plan.from.cornerRadii, plan.to.cornerRadii, progress);
+
+    if (isOrientationSwitch) {
+        const x = lerp(plan.from.x, plan.to.x, progress);
+        const y = lerp(plan.from.y, plan.to.y, progress);
+        const width = Math.max(0, lerp(plan.from.width, plan.to.width, progress));
+        const height = Math.max(0, lerp(plan.from.height, plan.to.height, progress));
+
+        return {
+            animationKey: plan.to.animationKey,
+            cornerRadii,
+            datum: plan.to.datum,
+            formattedFrom: plan.to.formattedFrom ?? plan.from.formattedFrom,
+            formattedTo: plan.to.formattedTo ?? plan.from.formattedTo,
+            fromValue,
+            fromValuePixel: x,
+            fromY: y,
+            height,
+            highValue,
+            index: plan.to.index,
+            lowValue,
+            orientation: plan.to.orientation,
+            radius,
+            renderOpacity,
+            toValue,
+            toValuePixel: x + width,
+            toY: plan.to.orientation === "vertical" ? y + height : y,
+            width,
+            x,
+            xValue: plan.to.xValue ?? plan.from.xValue,
+            y
+        };
+    }
+
+    const isHorizontal = plan.to.orientation === "horizontal";
 
     if (isHorizontal) {
         const fromValuePixel = lerp(plan.from.fromValuePixel ?? plan.from.x, plan.to.fromValuePixel ?? plan.to.x, progress);

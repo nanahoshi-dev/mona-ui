@@ -56,6 +56,80 @@ describe("Series Animation Adapters", () => {
             expect(sampled1?.bars[0].height).toBe(100);
             expect(sampled1?.bars[1].height).toBe(60);
         });
+
+        it("should smoothly morph bars and interpolate cornerRadii when transitioning between vertical and horizontal", () => {
+            const adapter = new BarSeriesAnimationAdapter();
+            const fromVertical: ChartBarSeriesScene = {
+                bars: [
+                    {
+                        animationKey: "b:0",
+                        cornerRadii: { bottomLeft: 0, bottomRight: 0, topLeft: 4, topRight: 4 },
+                        datum: {},
+                        height: 100,
+                        index: 0,
+                        isPositive: true,
+                        orientation: "vertical",
+                        radius: 4,
+                        width: 20,
+                        x: 50,
+                        xValue: 0,
+                        y: 100,
+                        yValue: 10
+                    }
+                ],
+                borderRadius: 4,
+                fillOpacity: 1,
+                id: "b",
+                name: "Bar",
+                orientation: "vertical",
+                style: mockStyle,
+                type: "bar"
+            };
+
+            const toHorizontal: ChartBarSeriesScene = {
+                bars: [
+                    {
+                        animationKey: "b:0",
+                        cornerRadii: { bottomLeft: 0, bottomRight: 4, topLeft: 0, topRight: 4 },
+                        datum: {},
+                        height: 20,
+                        index: 0,
+                        isPositive: true,
+                        orientation: "horizontal",
+                        radius: 4,
+                        width: 150,
+                        x: 20,
+                        xValue: 10,
+                        y: 50,
+                        yValue: 0
+                    }
+                ],
+                borderRadius: 4,
+                fillOpacity: 1,
+                id: "b",
+                name: "Bar",
+                orientation: "horizontal",
+                style: mockStyle,
+                type: "bar"
+            };
+
+            const plan = adapter.createPlan(fromVertical, toHorizontal, {
+                options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+                plotRect: { height: 260, width: 460, x: 20, y: 20 },
+                trigger: "data"
+            });
+
+            const sampledMid = plan.sample(0.5);
+            expect(sampledMid).not.toBeNull();
+            expect(sampledMid!.bars[0].x).toBeCloseTo(35, 1);
+            expect(sampledMid!.bars[0].y).toBeCloseTo(75, 1);
+            expect(sampledMid!.bars[0].width).toBeCloseTo(85, 1);
+            expect(sampledMid!.bars[0].height).toBeCloseTo(60, 1);
+            expect(sampledMid!.bars[0].cornerRadii?.topLeft).toBeCloseTo(2, 1);
+            expect(sampledMid!.bars[0].cornerRadii?.topRight).toBeCloseTo(4, 1);
+            expect(sampledMid!.bars[0].cornerRadii?.bottomRight).toBeCloseTo(2, 1);
+            expect(sampledMid!.bars[0].cornerRadii?.bottomLeft).toBeCloseTo(0, 1);
+        });
     });
 
     describe("LineSeriesAnimationAdapter", () => {

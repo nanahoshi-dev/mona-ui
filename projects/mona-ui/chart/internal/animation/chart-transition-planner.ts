@@ -344,20 +344,33 @@ export class ChartTransitionPlanner {
                     };
                 }
 
+                let isBarOrientationChange = false;
                 if (prevCartesian.cartesianKind === "xy" && targetCartesian.cartesianKind === "xy") {
                     const prevXY = prevCartesian as CartesianXYChartScene;
                     const targetXY = targetCartesian as CartesianXYChartScene;
-                    if ((prevXY.orientation ?? "vertical") !== (targetXY.orientation ?? "vertical")) {
-                        return {
-                            complexity,
-                            duration: options.duration,
-                            easing: options.easing,
-                            fromScene: previous,
-                            mode: "crossfade",
-                            seriesPlans: [],
-                            toScene: target,
-                            trigger
-                        };
+                    const prevOrientation = prevXY.orientation ?? "vertical";
+                    const targetOrientation = targetXY.orientation ?? "vertical";
+                    if (prevOrientation !== targetOrientation) {
+                        const canMorphOrientation =
+                            prevCartesian.series.length > 0 &&
+                            targetCartesian.series.length > 0 &&
+                            prevCartesian.series.every(s => s.type === "bar" || s.type === "rangeBar") &&
+                            targetCartesian.series.every(s => s.type === "bar" || s.type === "rangeBar");
+
+                        if (canMorphOrientation) {
+                            isBarOrientationChange = true;
+                        } else {
+                            return {
+                                complexity,
+                                duration: options.duration,
+                                easing: options.easing,
+                                fromScene: previous,
+                                mode: "crossfade",
+                                seriesPlans: [],
+                                toScene: target,
+                                trigger
+                            };
+                        }
                     }
                 }
 
@@ -451,6 +464,7 @@ export class ChartTransitionPlanner {
                 if (
                     prevCartesian.cartesianKind === "xy" &&
                     targetCartesian.cartesianKind === "xy" &&
+                    !isBarOrientationChange &&
                     prevCartesian.xAxisType &&
                     targetCartesian.xAxisType &&
                     prevCartesian.xAxisType !== targetCartesian.xAxisType
