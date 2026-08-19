@@ -144,7 +144,7 @@ export class CartesianViewportConstraints {
         baseCount: number,
         constraint?: ChartViewportConstraint,
         defaultMinCategories: number = 1,
-        clampToData: boolean = true
+        _clampToData: boolean = true
     ): [number, number] {
         if (baseCount <= 0) return [0, 0];
 
@@ -160,10 +160,9 @@ export class CartesianViewportConstraints {
             constraint?.maxVisibleCategories ?? baseCount
         );
 
-        if (clampToData) {
-            start = clamp(start, 0, baseCount - 1);
-            end = clamp(end, start + 1, baseCount);
-        }
+        // Category indices are array slice indices and must always remain legal [0, baseCount]
+        start = clamp(start, 0, baseCount - 1);
+        end = clamp(end, start + 1, baseCount);
 
         let span = end - start;
         if (span < minVisible) {
@@ -177,15 +176,13 @@ export class CartesianViewportConstraints {
             end = start + span;
         }
 
-        if (clampToData) {
-            if (start < 0) {
-                start = 0;
-                end = Math.min(baseCount, start + span);
-            }
-            if (end > baseCount) {
-                end = baseCount;
-                start = Math.max(0, end - span);
-            }
+        if (start < 0) {
+            start = 0;
+            end = Math.min(baseCount, start + span);
+        }
+        if (end > baseCount) {
+            end = baseCount;
+            start = Math.max(0, end - span);
         }
 
         return [start, end];

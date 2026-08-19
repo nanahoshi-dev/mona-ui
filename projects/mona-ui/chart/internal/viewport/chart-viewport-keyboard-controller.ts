@@ -4,17 +4,20 @@ import type {
     ChartViewportAxisRef,
     ChartViewportChangeEvent,
     ChartViewportConstraint,
-    ChartViewportLinkGroup
+    ChartViewportLinkGroup,
+    ChartViewportState
 } from "../../models/chart-viewport.models";
 import type { ChartAxisScene } from "../scene/cartesian-scene";
 import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
-import { CartesianViewportController } from "./cartesian-viewport-controller";
-import { CartesianViewportLinker } from "./cartesian-viewport-linker";
+import { CartesianViewportOperationCoordinator } from "./cartesian-viewport-operation-coordinator";
 import {
     areInternalViewportStatesEqual,
     type InternalCartesianViewportState
 } from "./cartesian-viewport-normalizer";
-import { CartesianViewportTargetResolver } from "./cartesian-viewport-target-resolver";
+import {
+    CartesianViewportTargetResolver,
+    type CartesianNavigationProfile
+} from "./cartesian-viewport-target-resolver";
 import type { NormalizedChartNavigationOptions } from "./chart-navigation-options";
 
 export interface ChartViewportKeyboardResult {
@@ -35,7 +38,9 @@ export class ChartViewportKeyboardController {
         currentViewport: InternalCartesianViewportState,
         constraints?: readonly ChartViewportConstraint[],
         linkGroups?: readonly ChartViewportLinkGroup[],
-        activeNamespace?: { axis: "x" | "y"; axisId: string } | null
+        activeNamespace?: { axis: "x" | "y"; axisId: string } | null,
+        defaultViewport?: ChartViewportState,
+        navigationProfile?: CartesianNavigationProfile
     ): ChartViewportKeyboardResult {
         if (!options.enabled || !options.keyboard || !coordinateSpace) {
             return { announcement: null, changedAxes: [], handled: false, nextState: null };
@@ -46,25 +51,56 @@ export class ChartViewportKeyboardController {
             y: plotRect.y + plotRect.height / 2
         };
 
+        const isPanKey = event.shiftKey && (
+            event.key === "ArrowLeft" ||
+            event.key === "ArrowRight" ||
+            event.key === "ArrowUp" ||
+            event.key === "ArrowDown"
+        );
+
+        const isZoomKey = !event.shiftKey && (
+            event.key === "+" ||
+            event.key === "=" ||
+            event.key === "-" ||
+            event.key === "_"
+        );
+
+        const isResetKey = !event.shiftKey && event.key === "0";
+
+        if (isPanKey && !options.pan) {
+            return { announcement: null, changedAxes: [], handled: false, nextState: null };
+        }
+
+        if (isZoomKey && !options.zoom) {
+            return { announcement: null, changedAxes: [], handled: false, nextState: null };
+        }
+
+        if (isResetKey && !options.pan && !options.zoom) {
+            return { announcement: null, changedAxes: [], handled: false, nextState: null };
+        }
+
+        const keyTarget: ChartNavigationAxisTarget | undefined = activeNamespace
+            ? [activeNamespace]
+            : isPanKey
+              ? (event.key === "ArrowLeft" || event.key === "ArrowRight" ? "x" : "y")
+              : isZoomKey
+                ? options.zoomAxes
+                : undefined;
+
         const resolved = CartesianViewportTargetResolver.resolveTargets(
             center,
             plotRect,
             axisScenes,
             options,
             orientation,
-            activeNamespace ? [activeNamespace] : (event.shiftKey ? options.panAxes : options.zoomAxes)
+            keyTarget,
+            navigationProfile
         );
 
-        const targetAxes = CartesianViewportLinker.expandTargetAxesWithLinks(
-            resolved.targetAxes,
-            linkGroups
-        );
+        const targetAxes = resolved.targetAxes;
 
-        if (targetAxes.length === 0) {
-            return { announcement: null, changedAxes: [], handled: false, nextState: null };
-        }
-
-        const panStep = plotRect.width * options.keyboardPanRatio;
+        const xPanStep = plotRect.width * options.keyboardPanRatio;
+        const yPanStep = plotRect.height * options.keyboardPanRatio;
         const zoomInFactor = options.keyboardZoomFactor;
         const zoomOutFactor = 1 / options.keyboardZoomFactor;
 
@@ -73,98 +109,115 @@ export class ChartViewportKeyboardController {
         let handled = false;
         let changedAxes: readonly ChartViewportAxisRef[] = [];
 
-        const controllerOptions = {
+        const coordinatorOptions = {
             clampToData: options.clampToData,
             constraints,
+            linkGroups,
             minVisibleCategories: options.minVisibleCategories
         };
 
-        if (event.shiftKey) {
+        if (isPanKey) {
             if (event.key === "ArrowLeft") {
-                const res = CartesianViewportController.pan(
+                const res = CartesianViewportOperationCoordinator.transform(
                     currentViewport,
                     coordinateSpace,
                     targetAxes.filter(a => a.axis === "x"),
-                    { x: panStep, y: 0 },
-                    controllerOptions
+                    { panDeltaPx: { x: xPanStep, y: 0 } },
+                    coordinatorOptions
                 );
-                nextState = res.viewport;
-                changedAxes = res.changedAxes;
-                announcement = "Panned left";
-                handled = true;
+                if (res.accepted) {
+                    nextState = res.viewport;
+                    changedAxes = res.changedAxes;
+                    announcement = "Panned left";
+                    handled = true;
+                }
             } else if (event.key === "ArrowRight") {
-                const res = CartesianViewportController.pan(
+                const res = CartesianViewportOperationCoordinator.transform(
                     currentViewport,
                     coordinateSpace,
                     targetAxes.filter(a => a.axis === "x"),
-                    { x: -panStep, y: 0 },
-                    controllerOptions
+                    { panDeltaPx: { x: -xPanStep, y: 0 } },
+                    coordinatorOptions
                 );
-                nextState = res.viewport;
-                changedAxes = res.changedAxes;
-                announcement = "Panned right";
-                handled = true;
+                if (res.accepted) {
+                    nextState = res.viewport;
+                    changedAxes = res.changedAxes;
+                    announcement = "Panned right";
+                    handled = true;
+                }
             } else if (event.key === "ArrowUp") {
-                const res = CartesianViewportController.pan(
+                const res = CartesianViewportOperationCoordinator.transform(
                     currentViewport,
                     coordinateSpace,
                     targetAxes.filter(a => a.axis === "y"),
-                    { x: 0, y: panStep },
-                    controllerOptions
+                    { panDeltaPx: { x: 0, y: yPanStep } },
+                    coordinatorOptions
                 );
-                nextState = res.viewport;
-                changedAxes = res.changedAxes;
-                announcement = "Panned up";
-                handled = true;
+                if (res.accepted) {
+                    nextState = res.viewport;
+                    changedAxes = res.changedAxes;
+                    announcement = "Panned up";
+                    handled = true;
+                }
             } else if (event.key === "ArrowDown") {
-                const res = CartesianViewportController.pan(
+                const res = CartesianViewportOperationCoordinator.transform(
                     currentViewport,
                     coordinateSpace,
                     targetAxes.filter(a => a.axis === "y"),
-                    { x: 0, y: -panStep },
-                    controllerOptions
+                    { panDeltaPx: { x: 0, y: -yPanStep } },
+                    coordinatorOptions
                 );
-                nextState = res.viewport;
-                changedAxes = res.changedAxes;
-                announcement = "Panned down";
-                handled = true;
+                if (res.accepted) {
+                    nextState = res.viewport;
+                    changedAxes = res.changedAxes;
+                    announcement = "Panned down";
+                    handled = true;
+                }
             }
         } else if (event.key === "+" || event.key === "=") {
-            const res = CartesianViewportController.zoom(
+            const res = CartesianViewportOperationCoordinator.transform(
                 currentViewport,
                 coordinateSpace,
                 targetAxes,
-                zoomInFactor,
-                center,
-                controllerOptions
+                { anchor: center, zoomFactor: zoomInFactor },
+                coordinatorOptions
             );
-            nextState = res.viewport;
-            changedAxes = res.changedAxes;
-            announcement = "Zoomed in";
-            handled = true;
+            if (res.accepted) {
+                nextState = res.viewport;
+                changedAxes = res.changedAxes;
+                announcement = "Zoomed in";
+                handled = true;
+            }
         } else if (event.key === "-" || event.key === "_") {
-            const res = CartesianViewportController.zoom(
+            const res = CartesianViewportOperationCoordinator.transform(
                 currentViewport,
                 coordinateSpace,
                 targetAxes,
-                zoomOutFactor,
-                center,
-                controllerOptions
+                { anchor: center, zoomFactor: zoomOutFactor },
+                coordinatorOptions
             );
-            nextState = res.viewport;
-            changedAxes = res.changedAxes;
-            announcement = "Zoomed out";
-            handled = true;
-        } else if (event.key === "0") {
-            const res = CartesianViewportController.reset(
+            if (res.accepted) {
+                nextState = res.viewport;
+                changedAxes = res.changedAxes;
+                announcement = "Zoomed out";
+                handled = true;
+            }
+        } else if (isResetKey) {
+            const res = CartesianViewportOperationCoordinator.reset(
                 currentViewport,
+                coordinateSpace,
+                defaultViewport,
                 undefined,
-                targetAxes
+                coordinatorOptions
             );
-            nextState = res.viewport;
-            changedAxes = res.changedAxes;
-            announcement = "Viewport reset to full range";
-            handled = true;
+            if (res.accepted) {
+                nextState = res.viewport;
+                changedAxes = res.changedAxes;
+                announcement = defaultViewport && defaultViewport.axes && defaultViewport.axes.length > 0
+                    ? "Viewport reset to default range"
+                    : "Viewport reset to full range";
+                handled = true;
+            }
         }
 
         if (handled && !areInternalViewportStatesEqual(currentViewport, nextState)) {

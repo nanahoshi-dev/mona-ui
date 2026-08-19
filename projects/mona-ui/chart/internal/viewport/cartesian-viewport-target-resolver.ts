@@ -11,6 +11,8 @@ export interface ResolvedTargetAxes {
     readonly targetAxes: readonly ChartViewportAxisRef[];
 }
 
+export type CartesianNavigationProfile = "independent-x" | "independent-y" | "xy";
+
 export class CartesianViewportTargetResolver {
     public static resolveTargets(
         pointer: ChartPoint | null,
@@ -18,7 +20,8 @@ export class CartesianViewportTargetResolver {
         axisScenes: readonly ChartAxisScene[],
         options: NormalizedChartNavigationOptions,
         orientation: "horizontal" | "vertical",
-        explicitTarget?: ChartNavigationAxisTarget
+        explicitTarget?: ChartNavigationAxisTarget,
+        profile?: CartesianNavigationProfile
     ): ResolvedTargetAxes {
         const targetOption = explicitTarget ?? options.panAxes;
 
@@ -47,26 +50,42 @@ export class CartesianViewportTargetResolver {
             }
         }
 
-        // Inside plotRect or no pointer
-        if (targetOption !== "auto") {
-            return {
-                isAxisGutterHit: false,
-                targetAxes: this.resolveExplicitTarget(targetOption, axisScenes)
-            };
+        if (pointer) {
+            const isInsidePlot =
+                pointer.x >= plotRect.x &&
+                pointer.x <= plotRect.x + plotRect.width &&
+                pointer.y >= plotRect.y &&
+                pointer.y <= plotRect.y + plotRect.height;
+            if (!isInsidePlot) {
+                return {
+                    isAxisGutterHit: false,
+                    targetAxes: []
+                };
+            }
         }
 
-        const targets: ChartViewportAxisRef[] = [];
-        for (const scene of axisScenes) {
-            if (!scene.visible) continue;
-            const axisId = scene.axisId ?? (scene.axis === "x" ? "default-x" : "default-y");
-            targets.push({ axis: scene.axis, axisId });
+        if (targetOption === "auto") {
+            if (profile === "xy") {
+                return {
+                    isAxisGutterHit: false,
+                    targetAxes: this.resolveExplicitTarget("xy", axisScenes)
+                };
+            }
+            if (orientation === "horizontal" || profile === "independent-y") {
+                return {
+                    isAxisGutterHit: false,
+                    targetAxes: this.resolveExplicitTarget("y", axisScenes)
+                };
+            }
+            return {
+                isAxisGutterHit: false,
+                targetAxes: this.resolveExplicitTarget("x", axisScenes)
+            };
         }
 
         return {
             isAxisGutterHit: false,
-            targetAxes: targets.length > 0
-                ? targets
-                : axisScenes.filter(s => s.visible).map(s => ({ axis: s.axis, axisId: s.axisId ?? (s.axis === "x" ? "default-x" : "default-y") }))
+            targetAxes: this.resolveExplicitTarget(targetOption, axisScenes)
         };
     }
 
@@ -74,34 +93,57 @@ export class CartesianViewportTargetResolver {
         target: ChartNavigationAxisTarget,
         axisScenes: readonly ChartAxisScene[]
     ): readonly ChartViewportAxisRef[] {
-        if (target === "xy" || target === "auto") {
-            return axisScenes.map(s => ({
-                axis: s.axis,
-                axisId: s.axisId ?? (s.axis === "x" ? "default-x" : "default-y")
-            }));
+        const visibleScenes = axisScenes.filter(s => s.visible);
+        const primaryX = visibleScenes.find(s => s.axis === "x" && s.isPrimary) ?? visibleScenes.find(s => s.axis === "x");
+        const primaryY = visibleScenes.find(s => s.axis === "y" && s.isPrimary) ?? visibleScenes.find(s => s.axis === "y");
+
+        if (target === "xy") {
+            const targets: ChartViewportAxisRef[] = [];
+            if (primaryX) {
+                targets.push({ axis: "x", axisId: primaryX.axisId ?? "default-x" });
+            }
+            if (primaryY) {
+                targets.push({ axis: "y", axisId: primaryY.axisId ?? "default-y" });
+            }
+            return targets;
         }
         if (target === "x") {
-            return axisScenes
-                .filter(s => s.axis === "x")
-                .map(s => ({ axis: "x", axisId: s.axisId ?? "default-x" }));
+            return primaryX
+                ? [{ axis: "x", axisId: primaryX.axisId ?? "default-x" }]
+                : [];
         }
         if (target === "y") {
-            return axisScenes
-                .filter(s => s.axis === "y")
-                .map(s => ({ axis: "y", axisId: s.axisId ?? "default-y" }));
+            return primaryY
+                ? [{ axis: "y", axisId: primaryY.axisId ?? "default-y" }]
+                : [];
+        }
+        if (target === "auto") {
+            return primaryX
+                ? [{ axis: "x", axisId: primaryX.axisId ?? "default-x" }]
+                : [];
         }
         if (Array.isArray(target)) {
-            return (target as readonly ChartNavigationAxisTarget[]).flatMap(t =>
-                this.resolveExplicitTarget(t, axisScenes)
-            );
+            const seen = new Set<string>();
+            const result: ChartViewportAxisRef[] = [];
+            for (const t of target) {
+                const resolved = this.resolveExplicitTarget(t, axisScenes);
+                for (const r of resolved) {
+                    const key = `${r.axis}:${r.axisId}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        result.push(r);
+                    }
+                }
+            }
+            return result;
         }
         if (typeof target === "object" && target !== null && "axis" in target && "axisId" in target) {
-            return [target as ChartViewportAxisRef];
+            const exists = visibleScenes.some(
+                s => s.axis === target.axis && (s.axisId ?? (s.axis === "x" ? "default-x" : "default-y")) === target.axisId
+            );
+            return exists ? [target as ChartViewportAxisRef] : [];
         }
-        return axisScenes.map(s => ({
-            axis: s.axis,
-            axisId: s.axisId ?? (s.axis === "x" ? "default-x" : "default-y")
-        }));
+        return [];
     }
 
     public static findAxisAtPoint(

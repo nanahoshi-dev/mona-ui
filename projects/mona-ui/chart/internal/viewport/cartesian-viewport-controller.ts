@@ -20,6 +20,12 @@ import {
     type InternalContinuousViewport
 } from "./cartesian-viewport-normalizer";
 
+export interface CartesianViewportTransformIntent {
+    readonly anchor?: ChartPoint;
+    readonly panDeltaPx?: ChartPoint;
+    readonly zoomFactor?: number;
+}
+
 export interface ViewportControllerOptions {
     readonly clampToData?: boolean;
     readonly constraints?: readonly ChartViewportConstraint[];
@@ -33,17 +39,24 @@ export interface ViewportOperationResult {
 }
 
 export class CartesianViewportController {
-    public static zoom(
+    public static applyTransform(
         currentViewport: InternalCartesianViewportState,
         coordinateSpace: CartesianAxisCoordinateSpace,
         targetAxes: readonly ChartViewportAxisRef[],
-        factor: number,
-        anchor: ChartPoint,
+        intent: CartesianViewportTransformIntent,
         options?: ViewportControllerOptions
     ): ViewportOperationResult {
-        if (!Number.isFinite(factor) || factor <= 0 || targetAxes.length === 0) {
+        if (targetAxes.length === 0) {
             return { changed: false, changedAxes: [], viewport: currentViewport };
         }
+
+        const factor = intent.zoomFactor ?? 1;
+        if (!Number.isFinite(factor) || factor <= 0) {
+            return { changed: false, changedAxes: [], viewport: currentViewport };
+        }
+
+        const deltaPx = intent.panDeltaPx ?? { x: 0, y: 0 };
+        const anchor = intent.anchor ?? { x: 0, y: 0 };
 
         const nextX = new Map<string, InternalAxisViewport>(currentViewport.x);
         const nextY = new Map<string, InternalAxisViewport>(currentViewport.y);
@@ -55,33 +68,39 @@ export class CartesianViewportController {
 
             const existingWindow = axisRef.axis === "x" ? currentViewport.x.get(axisRef.axisId) : currentViewport.y.get(axisRef.axisId);
             const anchorPixel = axisRef.axis === "x" ? anchor.x : anchor.y;
+            const delta = axisRef.axis === "x" ? deltaPx.x : deltaPx.y;
+
+            let nextWindow: InternalAxisViewport | undefined;
 
             if (snapshot.resolvedType === "category") {
-                const nextWindow = this.#zoomCategoryAxis(
+                nextWindow = this.#transformCategoryAxis(
                     existingWindow,
                     snapshot,
                     factor,
+                    delta,
                     anchorPixel,
                     options
                 );
-                if (nextWindow && !areAxisViewportsEqual(existingWindow, nextWindow)) {
-                    if (axisRef.axis === "x") nextX.set(axisRef.axisId, nextWindow);
-                    else nextY.set(axisRef.axisId, nextWindow);
-                    changedAxes.push(axisRef);
-                }
             } else {
-                const nextWindow = this.#zoomContinuousAxis(
+                nextWindow = this.#transformContinuousAxis(
                     existingWindow,
                     snapshot,
                     factor,
+                    delta,
                     anchorPixel,
                     options
                 );
-                if (nextWindow && !areAxisViewportsEqual(existingWindow, nextWindow)) {
+            }
+
+            if (!areAxisViewportsEqual(existingWindow, nextWindow)) {
+                if (nextWindow) {
                     if (axisRef.axis === "x") nextX.set(axisRef.axisId, nextWindow);
                     else nextY.set(axisRef.axisId, nextWindow);
-                    changedAxes.push(axisRef);
+                } else {
+                    if (axisRef.axis === "x") nextX.delete(axisRef.axisId);
+                    else nextY.delete(axisRef.axisId);
                 }
+                changedAxes.push(axisRef);
             }
         }
 
@@ -92,6 +111,23 @@ export class CartesianViewportController {
         };
     }
 
+    public static zoom(
+        currentViewport: InternalCartesianViewportState,
+        coordinateSpace: CartesianAxisCoordinateSpace,
+        targetAxes: readonly ChartViewportAxisRef[],
+        factor: number,
+        anchor: ChartPoint,
+        options?: ViewportControllerOptions
+    ): ViewportOperationResult {
+        return this.applyTransform(
+            currentViewport,
+            coordinateSpace,
+            targetAxes,
+            { anchor, panDeltaPx: { x: 0, y: 0 }, zoomFactor: factor },
+            options
+        );
+    }
+
     public static pan(
         currentViewport: InternalCartesianViewportState,
         coordinateSpace: CartesianAxisCoordinateSpace,
@@ -99,53 +135,13 @@ export class CartesianViewportController {
         deltaPx: ChartPoint,
         options?: ViewportControllerOptions
     ): ViewportOperationResult {
-        if (targetAxes.length === 0) {
-            return { changed: false, changedAxes: [], viewport: currentViewport };
-        }
-
-        const nextX = new Map<string, InternalAxisViewport>(currentViewport.x);
-        const nextY = new Map<string, InternalAxisViewport>(currentViewport.y);
-        const changedAxes: ChartViewportAxisRef[] = [];
-
-        for (const axisRef of targetAxes) {
-            const snapshot = coordinateSpace.get(axisRef);
-            if (!snapshot || !snapshot.valid) continue;
-
-            const existingWindow = axisRef.axis === "x" ? currentViewport.x.get(axisRef.axisId) : currentViewport.y.get(axisRef.axisId);
-            const delta = axisRef.axis === "x" ? deltaPx.x : deltaPx.y;
-
-            if (snapshot.resolvedType === "category") {
-                const nextWindow = this.#panCategoryAxis(
-                    existingWindow,
-                    snapshot,
-                    delta,
-                    options
-                );
-                if (nextWindow && !areAxisViewportsEqual(existingWindow, nextWindow)) {
-                    if (axisRef.axis === "x") nextX.set(axisRef.axisId, nextWindow);
-                    else nextY.set(axisRef.axisId, nextWindow);
-                    changedAxes.push(axisRef);
-                }
-            } else {
-                const nextWindow = this.#panContinuousAxis(
-                    existingWindow,
-                    snapshot,
-                    delta,
-                    options
-                );
-                if (nextWindow && !areAxisViewportsEqual(existingWindow, nextWindow)) {
-                    if (axisRef.axis === "x") nextX.set(axisRef.axisId, nextWindow);
-                    else nextY.set(axisRef.axisId, nextWindow);
-                    changedAxes.push(axisRef);
-                }
-            }
-        }
-
-        return {
-            changed: changedAxes.length > 0,
-            changedAxes,
-            viewport: { x: nextX, y: nextY }
-        };
+        return this.applyTransform(
+            currentViewport,
+            coordinateSpace,
+            targetAxes,
+            { panDeltaPx: deltaPx, zoomFactor: 1 },
+            options
+        );
     }
 
     public static fit(
@@ -200,37 +196,119 @@ export class CartesianViewportController {
             if (!snapshot || !snapshot.valid) continue;
 
             const existingWindow = win.axis === "x" ? currentViewport.x.get(win.axisId) : currentViewport.y.get(win.axisId);
-            let nextWin: InternalAxisViewport;
+            let nextWin: InternalAxisViewport | undefined;
 
-            if (win.type === "category") {
-                nextWin = {
-                    axis: win.axis,
-                    axisId: win.axisId,
-                    endIndexExclusive: win.endIndexExclusive,
-                    kind: "category",
-                    startIndex: win.startIndex
-                };
-            } else if (win.type === "continuous-date") {
-                nextWin = {
-                    axis: win.axis,
-                    axisId: win.axisId,
-                    kind: "continuous",
-                    max: win.max instanceof Date ? win.max.getTime() : Number(win.max),
-                    min: win.min instanceof Date ? win.min.getTime() : Number(win.min)
-                };
-            } else {
-                nextWin = {
-                    axis: win.axis,
-                    axisId: win.axisId,
-                    kind: "continuous",
-                    max: Number(win.max),
-                    min: Number(win.min)
-                };
+            switch (win.kind) {
+                case "category": {
+                    if (snapshot.resolvedType !== "category") {
+                        continue;
+                    }
+                    const baseCount = Array.isArray(snapshot.baseDomain) ? snapshot.baseDomain.length : 0;
+                    if (baseCount === 0) continue;
+                    let startIndex = Math.floor(Number(win.startIndex));
+                    let endIndex = Math.ceil(Number(win.endIndexExclusive));
+                    if (!Number.isFinite(startIndex) || !Number.isFinite(endIndex) || startIndex >= endIndex) {
+                        continue;
+                    }
+                    startIndex = Math.max(0, Math.min(startIndex, baseCount - 1));
+                    endIndex = Math.max(startIndex + 1, Math.min(endIndex, baseCount));
+
+                    const catDomain = snapshot.baseDomain as readonly string[];
+                    const firstVisibleKey = catDomain[startIndex] !== undefined ? String(catDomain[startIndex]) : undefined;
+                    const lastVisibleKey = catDomain[endIndex - 1] !== undefined ? String(catDomain[endIndex - 1]) : undefined;
+
+                    if (startIndex === 0 && endIndex === baseCount) {
+                        nextWin = undefined;
+                    } else {
+                        nextWin = {
+                            axis: win.axis,
+                            axisId: win.axisId,
+                            endIndexExclusive: endIndex,
+                            firstVisibleKey,
+                            kind: "category",
+                            lastVisibleKey,
+                            startIndex
+                        };
+                    }
+                    break;
+                }
+                case "continuous": {
+                    if (snapshot.resolvedType === "category") {
+                        continue;
+                    }
+                    const minVal = win.min instanceof Date ? win.min.getTime() : Number(win.min);
+                    const maxVal = win.max instanceof Date ? win.max.getTime() : Number(win.max);
+                    if (!Number.isFinite(minVal) || !Number.isFinite(maxVal) || minVal >= maxVal) {
+                        continue;
+                    }
+
+                    if (snapshot.resolvedType === "log") {
+                        const bMin = Number(snapshot.baseDomain[0]);
+                        const bMax = Number(snapshot.baseDomain[1]);
+                        if (bMin > 0 && (minVal <= 0 || maxVal <= 0)) continue;
+                        if (bMax < 0 && (minVal >= 0 || maxVal >= 0)) continue;
+                    }
+
+                    let finalMin = minVal;
+                    let finalMax = maxVal;
+
+                    if (options?.clampToData !== false && Array.isArray(snapshot.baseDomain) && snapshot.baseDomain.length >= 2) {
+                        const bMin = snapshot.baseDomain[0] instanceof Date ? snapshot.baseDomain[0].getTime() : Number(snapshot.baseDomain[0]);
+                        const bMax = snapshot.baseDomain[1] instanceof Date ? snapshot.baseDomain[1].getTime() : Number(snapshot.baseDomain[1]);
+                        if (Number.isFinite(bMin) && Number.isFinite(bMax)) {
+                            const span = finalMax - finalMin;
+                            const baseSpan = bMax - bMin;
+                            if (span >= baseSpan) {
+                                finalMin = bMin;
+                                finalMax = bMax;
+                            } else {
+                                if (finalMin < bMin) {
+                                    finalMin = bMin;
+                                    finalMax = bMin + span;
+                                }
+                                if (finalMax > bMax) {
+                                    finalMax = bMax;
+                                    finalMin = bMax - span;
+                                }
+                            }
+                        }
+                    }
+
+                    if (Array.isArray(snapshot.baseDomain) && snapshot.baseDomain.length >= 2) {
+                        const bMin = snapshot.baseDomain[0] instanceof Date ? snapshot.baseDomain[0].getTime() : Number(snapshot.baseDomain[0]);
+                        const bMax = snapshot.baseDomain[1] instanceof Date ? snapshot.baseDomain[1].getTime() : Number(snapshot.baseDomain[1]);
+                        if (Math.abs(finalMin - bMin) < 1e-9 && Math.abs(finalMax - bMax) < 1e-9) {
+                            nextWin = undefined;
+                        } else {
+                            nextWin = {
+                                axis: win.axis,
+                                axisId: win.axisId,
+                                kind: "continuous",
+                                max: finalMax,
+                                min: finalMin
+                            };
+                        }
+                    } else {
+                        nextWin = {
+                            axis: win.axis,
+                            axisId: win.axisId,
+                            kind: "continuous",
+                            max: finalMax,
+                            min: finalMin
+                        };
+                    }
+                    break;
+                }
             }
 
             if (!areAxisViewportsEqual(existingWindow, nextWin)) {
-                if (win.axis === "x") nextX.set(win.axisId, nextWin);
-                else nextY.set(win.axisId, nextWin);
+                if (nextWin) {
+                    if (win.axis === "x") nextX.set(win.axisId, nextWin);
+                    else nextY.set(win.axisId, nextWin);
+                } else {
+                    if (win.axis === "x") nextX.delete(win.axisId);
+                    else nextY.delete(win.axisId);
+                }
                 changedAxes.push(axisRef);
             }
         }
@@ -294,43 +372,65 @@ export class CartesianViewportController {
         };
     }
 
-    static #zoomContinuousAxis(
+    static #transformContinuousAxis(
         currentWindow: InternalAxisViewport | undefined,
         snapshot: CartesianAxisCoordinateSnapshot,
         factor: number,
+        deltaPx: number,
         anchorPixel: number,
         options?: ViewportControllerOptions
     ): InternalContinuousViewport | undefined {
-        const scale = snapshot.viewportScale as ChartContinuousPositionScale<number | Date>;
         const [r0, r1] = snapshot.range;
-
-        // Calculate source range points
-        const source0 = anchorPixel + (r0 - anchorPixel) / factor;
-        const source1 = anchorPixel + (r1 - anchorPixel) / factor;
-
-        const inv0 = scale.invert(source0);
-        const inv1 = scale.invert(source1);
-        if (inv0 === undefined || inv1 === undefined) return undefined;
-
-        let num0 = inv0 instanceof Date ? inv0.getTime() : Number(inv0);
-        let num1 = inv1 instanceof Date ? inv1.getTime() : Number(inv1);
-        if (!Number.isFinite(num0) || !Number.isFinite(num1) || num0 === num1) return undefined;
-
-        if (num0 > num1) {
-            const tmp = num0;
-            num0 = num1;
-            num1 = tmp;
-        }
+        const rangeSpan = r1 - r0;
+        if (rangeSpan === 0) return undefined;
 
         const b0 = snapshot.baseDomain[0] instanceof Date ? snapshot.baseDomain[0].getTime() : Number(snapshot.baseDomain[0]);
         const b1 = snapshot.baseDomain[1] instanceof Date ? snapshot.baseDomain[1].getTime() : Number(snapshot.baseDomain[1]);
         const baseMin = Math.min(b0, b1);
         const baseMax = Math.max(b0, b1);
 
+        let curMin = baseMin;
+        let curMax = baseMax;
+        if (currentWindow && currentWindow.kind === "continuous") {
+            curMin = currentWindow.min;
+            curMax = currentWindow.max;
+        }
+
+        const pMinVal = snapshot.resolvedType === "time" || snapshot.resolvedType === "utc" ? new Date(curMin) : curMin;
+        const pMaxVal = snapshot.resolvedType === "time" || snapshot.resolvedType === "utc" ? new Date(curMax) : curMax;
+
+        const p0 = snapshot.baseScale.map(pMinVal as never);
+        const p1 = snapshot.baseScale.map(pMaxVal as never);
+        if (p0 === undefined || p1 === undefined || !Number.isFinite(p0) || !Number.isFinite(p1)) {
+            return undefined;
+        }
+
+        // Compute where the visible plot range [r0, r1] maps in the previous plot coordinate space
+        const s0 = anchorPixel + (r0 - deltaPx - anchorPixel) / factor;
+        const s1 = anchorPixel + (r1 - deltaPx - anchorPixel) / factor;
+
+        const t0 = (s0 - r0) / rangeSpan;
+        const t1 = (s1 - r0) / rangeSpan;
+
+        const baseP0 = p0 + t0 * (p1 - p0);
+        const baseP1 = p0 + t1 * (p1 - p0);
+
+        const continuousScale = snapshot.baseScale as ChartContinuousPositionScale<number | Date>;
+        const inv0 = continuousScale.invert?.(baseP0);
+        const inv1 = continuousScale.invert?.(baseP1);
+        if (inv0 === undefined || inv1 === undefined) return undefined;
+
+        const num0 = inv0 instanceof Date ? inv0.getTime() : Number(inv0);
+        const num1 = inv1 instanceof Date ? inv1.getTime() : Number(inv1);
+        if (!Number.isFinite(num0) || !Number.isFinite(num1) || num0 === num1) return undefined;
+
+        const calcMin = Math.min(num0, num1);
+        const calcMax = Math.max(num0, num1);
+
         const constraint = options?.constraints?.find(c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId);
         const [cMin, cMax] = CartesianViewportConstraints.applyContinuousConstraints(
-            num0,
-            num1,
+            calcMin,
+            calcMax,
             baseMin,
             baseMax,
             constraint,
@@ -338,6 +438,10 @@ export class CartesianViewportController {
             snapshot.baseScale,
             snapshot.resolvedType
         );
+
+        if (Math.abs(cMin - baseMin) < 1e-9 && Math.abs(cMax - baseMax) < 1e-9) {
+            return undefined;
+        }
 
         return {
             axis: snapshot.ref.axis,
@@ -348,62 +452,11 @@ export class CartesianViewportController {
         };
     }
 
-    static #panContinuousAxis(
-        currentWindow: InternalAxisViewport | undefined,
-        snapshot: CartesianAxisCoordinateSnapshot,
-        deltaPx: number,
-        options?: ViewportControllerOptions
-    ): InternalContinuousViewport | undefined {
-        const scale = snapshot.viewportScale as ChartContinuousPositionScale<number | Date>;
-        const [r0, r1] = snapshot.range;
-
-        const source0 = r0 - deltaPx;
-        const source1 = r1 - deltaPx;
-
-        const inv0 = scale.invert(source0);
-        const inv1 = scale.invert(source1);
-        if (inv0 === undefined || inv1 === undefined) return undefined;
-
-        let num0 = inv0 instanceof Date ? inv0.getTime() : Number(inv0);
-        let num1 = inv1 instanceof Date ? inv1.getTime() : Number(inv1);
-        if (!Number.isFinite(num0) || !Number.isFinite(num1) || num0 === num1) return undefined;
-
-        if (num0 > num1) {
-            const tmp = num0;
-            num0 = num1;
-            num1 = tmp;
-        }
-
-        const b0 = snapshot.baseDomain[0] instanceof Date ? snapshot.baseDomain[0].getTime() : Number(snapshot.baseDomain[0]);
-        const b1 = snapshot.baseDomain[1] instanceof Date ? snapshot.baseDomain[1].getTime() : Number(snapshot.baseDomain[1]);
-        const baseMin = Math.min(b0, b1);
-        const baseMax = Math.max(b0, b1);
-
-        const constraint = options?.constraints?.find(c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId);
-        const [cMin, cMax] = CartesianViewportConstraints.applyContinuousConstraints(
-            num0,
-            num1,
-            baseMin,
-            baseMax,
-            constraint,
-            options?.clampToData !== false,
-            snapshot.baseScale,
-            snapshot.resolvedType
-        );
-
-        return {
-            axis: snapshot.ref.axis,
-            axisId: snapshot.ref.axisId,
-            kind: "continuous",
-            max: cMax,
-            min: cMin
-        };
-    }
-
-    static #zoomCategoryAxis(
+    static #transformCategoryAxis(
         currentWindow: InternalAxisViewport | undefined,
         snapshot: CartesianAxisCoordinateSnapshot,
         factor: number,
+        deltaPx: number,
         anchorPixel: number,
         options?: ViewportControllerOptions
     ): InternalCategoryViewport | undefined {
@@ -414,67 +467,43 @@ export class CartesianViewportController {
         const curEnd = currentWindow && currentWindow.kind === "category" ? currentWindow.endIndexExclusive : baseCount;
         const curCount = curEnd - curStart;
 
-        const r0 = Math.min(snapshot.range[0], snapshot.range[1]);
-        const r1 = Math.max(snapshot.range[0], snapshot.range[1]);
-        const plotSpan = Math.max(1, r1 - r0);
-        const t = Math.max(0, Math.min(1, (anchorPixel - r0) / plotSpan));
+        const [r0, r1] = snapshot.range;
+        const plotSpan = Math.abs(r1 - r0);
+        if (plotSpan === 0) return undefined;
+
+        const minR = Math.min(r0, r1);
+        const maxR = Math.max(r0, r1);
+        const t = Math.max(0, Math.min(1, (anchorPixel - minR) / (maxR - minR)));
 
         const anchor = curStart + t * curCount;
         const newCount = curCount / factor;
-        let newStart = Math.round(anchor - t * newCount);
-        let newEnd = newStart + Math.round(newCount);
+
+        let nextStart = anchor - t * newCount;
+        let nextEnd = nextStart + newCount;
+
+        if (deltaPx !== 0) {
+            const pixelsPerCat = Math.max(1e-4, plotSpan / curCount);
+            const catDelta = -deltaPx / pixelsPerCat;
+            nextStart += catDelta;
+            nextEnd += catDelta;
+        }
+
+        const roundedStart = Math.round(nextStart);
+        const roundedEnd = Math.round(nextEnd);
 
         const constraint = options?.constraints?.find(c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId);
         const [cStart, cEnd] = CartesianViewportConstraints.applyCategoryConstraints(
-            newStart,
-            newEnd,
+            roundedStart,
+            roundedEnd,
             baseCount,
             constraint,
             options?.minVisibleCategories ?? 1,
             options?.clampToData !== false
         );
 
-        const catDomain = snapshot.baseDomain as readonly string[];
-        return {
-            axis: snapshot.ref.axis,
-            axisId: snapshot.ref.axisId,
-            endIndexExclusive: cEnd,
-            firstVisibleKey: catDomain[cStart] !== undefined ? String(catDomain[cStart]) : undefined,
-            kind: "category",
-            lastVisibleKey: catDomain[cEnd - 1] !== undefined ? String(catDomain[cEnd - 1]) : undefined,
-            startIndex: cStart
-        };
-    }
-
-    static #panCategoryAxis(
-        currentWindow: InternalAxisViewport | undefined,
-        snapshot: CartesianAxisCoordinateSnapshot,
-        deltaPx: number,
-        options?: ViewportControllerOptions
-    ): InternalCategoryViewport | undefined {
-        const baseCount = Array.isArray(snapshot.baseDomain) ? snapshot.baseDomain.length : 0;
-        if (baseCount === 0) return undefined;
-
-        const curStart = currentWindow && currentWindow.kind === "category" ? currentWindow.startIndex : 0;
-        const curEnd = currentWindow && currentWindow.kind === "category" ? currentWindow.endIndexExclusive : baseCount;
-        const curCount = curEnd - curStart;
-
-        const plotSpan = Math.abs(snapshot.range[1] - snapshot.range[0]);
-        const pixelsPerCat = Math.max(1, plotSpan / curCount);
-        const catDelta = Math.round(-deltaPx / pixelsPerCat);
-
-        const newStart = curStart + catDelta;
-        const newEnd = newStart + curCount;
-
-        const constraint = options?.constraints?.find(c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId);
-        const [cStart, cEnd] = CartesianViewportConstraints.applyCategoryConstraints(
-            newStart,
-            newEnd,
-            baseCount,
-            constraint,
-            options?.minVisibleCategories ?? 1,
-            options?.clampToData !== false
-        );
+        if (cStart === 0 && cEnd === baseCount) {
+            return undefined;
+        }
 
         const catDomain = snapshot.baseDomain as readonly string[];
         return {
