@@ -1,14 +1,35 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartViewportAxisRef } from "../../models/chart-viewport.models";
 import type {
+    ChartBandPositionScale,
     ChartContinuousPositionScale,
     ChartPositionScale,
     ResolvedChartCartesianAxisType
 } from "../scale/chart-scale";
 
+export interface ResolvedCategoryGeometry {
+    readonly bandCenter: number;
+    readonly bandEnd: number;
+    readonly bandStart: number;
+    readonly bandwidth: number;
+    readonly baseIndex: number;
+    readonly key: string;
+    readonly viewportIndex?: number;
+    readonly visibleInViewport: boolean;
+}
+
+export interface CartesianCategoryGeometryIndex {
+    readonly bandwidth: number;
+    readonly byKey: ReadonlyMap<string, ResolvedCategoryGeometry>;
+    readonly firstCenter: number;
+    readonly signedStep: number;
+    readonly viewportDomain: readonly string[];
+}
+
 export interface CartesianAxisCoordinateSnapshot {
     readonly baseDomain: readonly unknown[];
     readonly baseScale: ChartPositionScale<unknown>;
+    readonly categoryIndex?: CartesianCategoryGeometryIndex;
     readonly range: readonly [number, number];
     readonly ref: ChartViewportAxisRef;
     readonly resolvedType: ResolvedChartCartesianAxisType;
@@ -27,6 +48,109 @@ export interface ResolvedCategoryAtPixel {
     readonly viewportIndex: number;
 }
 
+function buildCategoryGeometryIndex(
+    baseDomain: readonly unknown[],
+    viewportDomain: readonly unknown[],
+    baseScale: ChartPositionScale<unknown>,
+    viewportScale: ChartPositionScale<unknown>
+): CartesianCategoryGeometryIndex {
+    const vDomain = (viewportDomain as readonly string[]).map(String);
+    const bDomain = (baseDomain as readonly string[]).map(String);
+    const bandScale = viewportScale as ChartBandPositionScale<string>;
+    const bandwidth = typeof bandScale.bandwidth === "function" ? bandScale.bandwidth() : 0;
+    const byKey = new Map<string, ResolvedCategoryGeometry>();
+
+    let firstCenter = 0;
+    let signedStep = 0;
+
+    if (vDomain.length > 0) {
+        const start0 = bandScale.map(vDomain[0]) ?? 0;
+        firstCenter = start0 + bandwidth / 2;
+        if (vDomain.length > 1) {
+            const start1 = bandScale.map(vDomain[1]) ?? start0;
+            const center1 = start1 + bandwidth / 2;
+            signedStep = center1 - firstCenter;
+        }
+    }
+
+    for (let i = 0; i < vDomain.length; i++) {
+        const key = vDomain[i];
+        const bandStart = bandScale.map(key) ?? 0;
+        const bandCenter = bandStart + bandwidth / 2;
+        const bandEnd = bandStart + bandwidth;
+        const baseIndex = bDomain.indexOf(key);
+
+        byKey.set(key, {
+            bandCenter,
+            bandEnd,
+            bandStart,
+            bandwidth,
+            baseIndex: baseIndex !== -1 ? baseIndex : i,
+            key,
+            viewportIndex: i,
+            visibleInViewport: true
+        });
+    }
+
+    const baseBandScale = baseScale as ChartBandPositionScale<string>;
+    const baseBandwidth = typeof baseBandScale.bandwidth === "function" ? baseBandScale.bandwidth() : 0;
+    for (let i = 0; i < bDomain.length; i++) {
+        const key = bDomain[i];
+        if (!byKey.has(key)) {
+            const baseStart = baseBandScale.map(key) ?? 0;
+            byKey.set(key, {
+                bandCenter: baseStart + baseBandwidth / 2,
+                bandEnd: baseStart + baseBandwidth,
+                bandStart: baseStart,
+                bandwidth: baseBandwidth,
+                baseIndex: i,
+                key,
+                viewportIndex: undefined,
+                visibleInViewport: false
+            });
+        }
+    }
+
+    return {
+        bandwidth,
+        byKey,
+        firstCenter,
+        signedStep,
+        viewportDomain: vDomain
+    };
+}
+
+function ensureCategorySnapshotIndex(snapshot: CartesianAxisCoordinateSnapshot): CartesianAxisCoordinateSnapshot {
+    if (snapshot.resolvedType !== "category" || snapshot.categoryIndex) {
+        return snapshot;
+    }
+    const categoryIndex = buildCategoryGeometryIndex(
+        snapshot.baseDomain,
+        snapshot.viewportDomain,
+        snapshot.baseScale,
+        snapshot.viewportScale
+    );
+    return {
+        ...snapshot,
+        categoryIndex
+    };
+}
+
+function ensureCategoryIndices(
+    map: ReadonlyMap<string, CartesianAxisCoordinateSnapshot>
+): ReadonlyMap<string, CartesianAxisCoordinateSnapshot> {
+    let hasModified = false;
+    const result = new Map<string, CartesianAxisCoordinateSnapshot>();
+    for (const [id, snap] of map) {
+        const enhanced = ensureCategorySnapshotIndex(snap);
+        if (enhanced !== snap) {
+            hasModified = true;
+        }
+        result.set(id, enhanced);
+    }
+    return hasModified ? result : map;
+}
+
 export class CartesianAxisCoordinateSpace {
     public readonly x: ReadonlyMap<string, CartesianAxisCoordinateSnapshot>;
     public readonly y: ReadonlyMap<string, CartesianAxisCoordinateSnapshot>;
@@ -35,8 +159,8 @@ export class CartesianAxisCoordinateSpace {
         x: ReadonlyMap<string, CartesianAxisCoordinateSnapshot>,
         y: ReadonlyMap<string, CartesianAxisCoordinateSnapshot>
     ) {
-        this.x = x;
-        this.y = y;
+        this.x = ensureCategoryIndices(x);
+        this.y = ensureCategoryIndices(y);
     }
 
     public static fromBaseAuthority(
@@ -56,7 +180,7 @@ export class CartesianAxisCoordinateSpace {
             const baseScale = baseScales.getXScale(xAxis.axisId)!;
             const isValid = xAxisValidityById.get(xAxis.axisId)?.valid ?? true;
 
-            xSnapshots.set(xAxis.axisId, {
+            const snap: CartesianAxisCoordinateSnapshot = {
                 baseDomain,
                 baseScale,
                 range,
@@ -65,7 +189,8 @@ export class CartesianAxisCoordinateSpace {
                 valid: isValid,
                 viewportDomain: baseDomain,
                 viewportScale: baseScale
-            });
+            };
+            xSnapshots.set(xAxis.axisId, ensureCategorySnapshotIndex(snap));
         }
 
         for (const yAxis of axisResolution.yAxes) {
@@ -77,7 +202,7 @@ export class CartesianAxisCoordinateSpace {
             const baseScale = baseScales.getYScale(yAxis.axisId)!;
             const isValid = yAxisValidityById.get(yAxis.axisId)?.valid ?? true;
 
-            ySnapshots.set(yAxis.axisId, {
+            const snap: CartesianAxisCoordinateSnapshot = {
                 baseDomain,
                 baseScale,
                 range,
@@ -86,7 +211,8 @@ export class CartesianAxisCoordinateSpace {
                 valid: isValid,
                 viewportDomain: baseDomain,
                 viewportScale: baseScale
-            });
+            };
+            ySnapshots.set(yAxis.axisId, ensureCategorySnapshotIndex(snap));
         }
 
         return new CartesianAxisCoordinateSpace(xSnapshots, ySnapshots);
@@ -136,82 +262,180 @@ export class CartesianAxisCoordinateSpace {
     }
 
     /**
-     * Resolves the category at the specified pixel coordinate.
+     * Resolves category band geometry by category key.
+     *
+     * Semantic lookup contract:
+     * - Invalid axes (valid === false) return undefined.
+     * - In 'viewport' space, categories outside the current viewport return undefined.
+     * - In 'base' space, geometry is mapped against base scale authority; viewportIndex is undefined if not in viewport.
+     */
+    public resolveCategoryByKey(
+        ref: ChartViewportAxisRef,
+        key: unknown,
+        space: "viewport" | "base" = "viewport"
+    ): ResolvedCategoryGeometry | undefined {
+        const snap = this.get(ref);
+        if (!snap || snap.resolvedType !== "category" || snap.valid === false) {
+            return undefined;
+        }
+
+        const categoryIndex = snap.categoryIndex;
+        if (!categoryIndex) {
+            return undefined;
+        }
+
+        const keyStr = String(key);
+        const geom = categoryIndex.byKey.get(keyStr);
+        if (!geom) {
+            return undefined;
+        }
+
+        if (space === "viewport") {
+            return geom.visibleInViewport ? geom : undefined;
+        }
+
+        // Base space geometry
+        const baseBandScale = snap.baseScale as ChartBandPositionScale<string>;
+        const baseBandwidth = typeof baseBandScale.bandwidth === "function" ? baseBandScale.bandwidth() : 0;
+        const baseStart = baseBandScale.map(keyStr);
+        if (baseStart === undefined) {
+            return undefined;
+        }
+
+        return {
+            bandCenter: baseStart + baseBandwidth / 2,
+            bandEnd: baseStart + baseBandwidth,
+            bandStart: baseStart,
+            bandwidth: baseBandwidth,
+            baseIndex: geom.baseIndex,
+            key: keyStr,
+            viewportIndex: geom.viewportIndex,
+            visibleInViewport: geom.visibleInViewport
+        };
+    }
+
+    public mapCategoryCenter(
+        ref: ChartViewportAxisRef,
+        key: unknown,
+        space: "viewport" | "base" = "viewport"
+    ): number | undefined {
+        return this.resolveCategoryByKey(ref, key, space)?.bandCenter;
+    }
+
+    public mapCategoryBand(
+        ref: ChartViewportAxisRef,
+        key: unknown,
+        space: "viewport" | "base" = "viewport"
+    ): { readonly bandEnd: number; readonly bandStart: number; readonly bandwidth: number } | undefined {
+        const geom = this.resolveCategoryByKey(ref, key, space);
+        if (!geom) {
+            return undefined;
+        }
+        return {
+            bandEnd: geom.bandEnd,
+            bandStart: geom.bandStart,
+            bandwidth: geom.bandwidth
+        };
+    }
+
+    /**
+     * Resolves the category at the specified pixel coordinate in O(1) time.
      *
      * Category resolution contract:
-     * 1. Exact band containment: If the pixel falls inside [bandStart, bandStart + bandwidth), that category is returned.
+     * 1. Invalid axes (valid === false) return undefined.
+     * 2. Exact band containment: If the pixel falls inside [bandStart, bandStart + bandwidth), that category is returned.
      *    For the final category in the domain, the right/bottom edge [bandStart, bandStart + bandwidth] is inclusive.
-     * 2. Inner/outer padding gap fallback: If the pixel lies in padding, the category whose band center is nearest
+     * 3. Inner/outer padding gap fallback: If the pixel lies in padding, the category whose band center is nearest
      *    (min abs(pixel - bandCenter)) is returned. Ties break deterministically to the lower viewport index.
-     * 3. Category domain keys within a single axis domain are contracted to be unique.
+     * 4. Category domain keys within a single axis domain are contracted to be unique.
      */
     public resolveCategoryAtPixel(
         ref: ChartViewportAxisRef,
         pixel: number
     ): ResolvedCategoryAtPixel | undefined {
         const snap = this.get(ref);
-        if (!snap || snap.resolvedType !== "category") return undefined;
+        if (!snap || snap.resolvedType !== "category" || snap.valid === false) {
+            return undefined;
+        }
 
-        const catDomain = snap.viewportDomain as readonly string[];
-        if (catDomain.length === 0) return undefined;
+        const categoryIndex = snap.categoryIndex;
+        if (!categoryIndex || categoryIndex.viewportDomain.length === 0) {
+            return undefined;
+        }
 
-        const catBaseDomain = snap.baseDomain as readonly string[];
-        const bandScale = snap.viewportScale as import("../scale/chart-scale").ChartBandPositionScale<string>;
-        const bandwidth = bandScale.bandwidth();
+        const vDomain = categoryIndex.viewportDomain;
+        const count = vDomain.length;
+        const signedStep = categoryIndex.signedStep;
+        const firstCenter = categoryIndex.firstCenter;
 
-        // Pass 1: Actual painted band containment
-        for (let i = 0; i < catDomain.length; i++) {
-            const key = String(catDomain[i]);
-            const bandStart = bandScale.map(key);
-            if (bandStart !== undefined) {
-                const bStart = Math.min(bandStart, bandStart + bandwidth);
-                const bEnd = Math.max(bandStart, bandStart + bandwidth);
-                const isLast = i === catDomain.length - 1;
+        let approxIndex = 0;
+        if (count > 1 && Math.abs(signedStep) > 1e-9) {
+            approxIndex = Math.round((pixel - firstCenter) / signedStep);
+        }
+
+        const minIdx = Math.max(0, approxIndex - 1);
+        const maxIdx = Math.min(count - 1, approxIndex + 1);
+
+        // Pass 1: Exact band containment in neighboring candidates
+        for (let i = minIdx; i <= maxIdx; i++) {
+            const key = vDomain[i];
+            const geom = categoryIndex.byKey.get(key);
+            if (geom) {
+                const bStart = Math.min(geom.bandStart, geom.bandEnd);
+                const bEnd = Math.max(geom.bandStart, geom.bandEnd);
+                const isLast = i === count - 1;
                 const insideBand = pixel >= bStart && (isLast ? pixel <= bEnd : pixel < bEnd);
                 if (insideBand) {
-                    const baseIndex = catBaseDomain.indexOf(key);
                     return {
-                        bandCenter: bandStart + bandwidth / 2,
-                        bandStart,
-                        bandwidth,
-                        baseIndex: baseIndex !== -1 ? baseIndex : i,
+                        bandCenter: geom.bandCenter,
+                        bandStart: geom.bandStart,
+                        bandwidth: geom.bandwidth,
+                        baseIndex: geom.baseIndex,
                         index: i,
-                        key,
+                        key: geom.key,
                         viewportIndex: i
                     };
                 }
             }
         }
 
-        // Pass 2: Inner padding / outer padding fallback to nearest band center
-        let closestIndex = 0;
-        let closestDist = Infinity;
-        let closestStart = 0;
-        for (let i = 0; i < catDomain.length; i++) {
-            const key = String(catDomain[i]);
-            const start = bandScale.map(key);
-            if (start !== undefined) {
-                const center = start + bandwidth / 2;
-                const dist = Math.abs(pixel - center);
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestIndex = i;
-                    closestStart = start;
+        // Pass 2: Nearest band center among candidate indices (and boundary candidates if pixel is outside range)
+        const candidateIndices = new Set<number>();
+        for (let i = minIdx; i <= maxIdx; i++) candidateIndices.add(i);
+        candidateIndices.add(0);
+        candidateIndices.add(count - 1);
+
+        let bestIndex = 0;
+        let bestDist = Infinity;
+        let bestGeom: ResolvedCategoryGeometry | undefined;
+
+        // Iterate in ascending index order for deterministic lower-index tie breaking
+        const sortedIndices = Array.from(candidateIndices).sort((a, b) => a - b);
+        for (const i of sortedIndices) {
+            const key = vDomain[i];
+            const geom = categoryIndex.byKey.get(key);
+            if (geom) {
+                const dist = Math.abs(pixel - geom.bandCenter);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestIndex = i;
+                    bestGeom = geom;
                 }
             }
         }
 
-        const key = String(catDomain[closestIndex]);
-        const baseIndex = catBaseDomain.indexOf(key);
+        if (!bestGeom) {
+            return undefined;
+        }
 
         return {
-            bandCenter: closestStart + bandwidth / 2,
-            bandStart: closestStart,
-            bandwidth,
-            baseIndex: baseIndex !== -1 ? baseIndex : closestIndex,
-            index: closestIndex,
-            key,
-            viewportIndex: closestIndex
+            bandCenter: bestGeom.bandCenter,
+            bandStart: bestGeom.bandStart,
+            bandwidth: bestGeom.bandwidth,
+            baseIndex: bestGeom.baseIndex,
+            index: bestIndex,
+            key: bestGeom.key,
+            viewportIndex: bestIndex
         };
     }
 

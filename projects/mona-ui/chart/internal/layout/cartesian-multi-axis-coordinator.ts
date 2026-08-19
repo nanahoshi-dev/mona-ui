@@ -618,7 +618,8 @@ export class CartesianMultiAxisCoordinator {
                     resolvedType,
                     labelMeasurements,
                     unitMode,
-                    plotRect
+                    plotRect,
+                    labelRotation
                 )
                 : [];
 
@@ -670,7 +671,8 @@ export class CartesianMultiAxisCoordinator {
                     resolvedType,
                     labelMeasurements,
                     unitMode,
-                    plotRect
+                    plotRect,
+                    labelRotation
                 )
                 : [];
 
@@ -847,7 +849,8 @@ export class CartesianMultiAxisCoordinator {
                     resolvedType,
                     measurements,
                     unitMode,
-                    plotRect
+                    plotRect,
+                    labelRotation
                 )
                 : [];
 
@@ -895,7 +898,8 @@ export class CartesianMultiAxisCoordinator {
                     resolvedType,
                     measurements,
                     unitMode,
-                    plotRect
+                    plotRect,
+                    labelRotation
                 )
                 : [];
 
@@ -1109,12 +1113,12 @@ export class CartesianMultiAxisCoordinator {
         resolvedType: ResolvedChartCartesianAxisType,
         labelMeasurements: ReadonlyMap<string, ChartLabelMeasurement>,
         unitMode: "percent" | "raw" = "raw",
-        plotRect: ChartRect
+        plotRect: ChartRect,
+        labelRotation: number = 0
     ): readonly ChartAxisSceneTick[] {
         const rawTicks = "ticks" in scale
             ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
             : (scale as ChartBandPositionScale).domain();
-        const ticks: ChartAxisSceneTick[] = [];
         const bandwidth = typeof (scale as any).bandwidth === "function" ? (scale as any).bandwidth() : 0;
         const step = typeof (scale as any).step === "function"
             ? (scale as any).step()
@@ -1122,15 +1126,18 @@ export class CartesianMultiAxisCoordinator {
                 ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
                 : 60;
 
-        let thinningFlags: readonly boolean[] | undefined;
-        if (resolvedType === "category" && rawTicks.length > 1) {
-            thinningFlags = CartesianAxisLabelGeometry.resolveCategoryLabelThinning({
-                categoryCount: rawTicks.length,
-                categoryStep: step,
-                maxLabelExtentAlongAxis: axis.labelMaxWidth ?? 60,
-                preferredTickCount: axis.tickCount
-            });
+        interface IntermediateTick {
+            readonly coord: number;
+            readonly extentAlongAxis: number;
+            readonly formattedText: string;
+            readonly height: number;
+            readonly index: number;
+            readonly tickKey: string;
+            readonly val: unknown;
+            readonly width: number;
         }
+
+        const intermediateTicks: IntermediateTick[] = [];
 
         for (let i = 0; i < rawTicks.length; i++) {
             const val = rawTicks[i];
@@ -1163,18 +1170,49 @@ export class CartesianMultiAxisCoordinator {
                 });
             }
 
+            const rawWidth = measurement?.width ?? estimated?.width ?? (formattedText.length * 7.5);
+            const rawHeight = measurement?.height ?? estimated?.height ?? 16;
+            const projected = CartesianAxisLabelGeometry.projectRotatedDimensions(rawWidth, rawHeight, labelRotation);
+            const extentAlongAxis = axis.dimension === "x" ? projected.projectedWidth : projected.projectedHeight;
+
+            intermediateTicks.push({
+                coord,
+                extentAlongAxis,
+                formattedText,
+                height: rawHeight,
+                index: i,
+                tickKey,
+                val,
+                width: rawWidth
+            });
+        }
+
+        let thinningFlags: readonly boolean[] | undefined;
+        if (resolvedType === "category" && intermediateTicks.length > 0) {
+            const maxExtentAlong = intermediateTicks.reduce((max, t) => Math.max(max, t.extentAlongAxis), 12);
+            thinningFlags = CartesianAxisLabelGeometry.resolveCategoryLabelThinning({
+                categoryCount: intermediateTicks.length,
+                categoryStep: step,
+                maxLabelExtentAlongAxis: maxExtentAlong,
+                preferredTickCount: axis.tickCount
+            });
+        }
+
+        const ticks: ChartAxisSceneTick[] = [];
+        for (let i = 0; i < intermediateTicks.length; i++) {
+            const t = intermediateTicks[i];
             const isThinned = thinningFlags ? !thinningFlags[i] : false;
-            const labelVisible = formattedText !== "" && !isThinned;
+            const labelVisible = t.formattedText !== "" && !isThinned;
 
             ticks.push({
-                coordinate: coord,
-                formattedValue: formattedText,
-                index: i,
+                coordinate: t.coord,
+                formattedValue: t.formattedText,
+                index: t.index,
                 labelVisible,
-                tickKey,
-                unrotatedHeight: measurement?.height ?? estimated?.height ?? 16,
-                unrotatedWidth: measurement?.width ?? estimated?.width ?? (formattedText.length * 7.5),
-                value: val
+                tickKey: t.tickKey,
+                unrotatedHeight: t.height,
+                unrotatedWidth: t.width,
+                value: t.val
             });
         }
 

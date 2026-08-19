@@ -122,6 +122,7 @@ import {
     type InternalCartesianViewportState
 } from "../../internal/viewport/cartesian-viewport-normalizer";
 import { CartesianViewportController } from "../../internal/viewport/cartesian-viewport-controller";
+import type { CartesianAxisCoordinateSpace } from "../../internal/viewport/cartesian-axis-coordinate-space";
 import { CartesianViewportOperationCoordinator } from "../../internal/viewport/cartesian-viewport-operation-coordinator";
 import { CartesianViewportReconciler } from "../../internal/viewport/cartesian-viewport-reconciler";
 import { CartesianViewportTargetResolver } from "../../internal/viewport/cartesian-viewport-target-resolver";
@@ -220,6 +221,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #hasInitializedDefaultViewport = signal(false);
     #isDestroyed = false;
     #lastNormalizedControlledViewport: InternalCartesianViewportState | null = null;
+    #layoutReady: boolean = false;
+    #suppressNextCanvasClick: boolean = false;
     readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
     #interactionState: ChartInteractionState | null = null;
     #labelResizeObserver: ResizeObserver | null = null;
@@ -355,8 +358,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #hasPendingSizeReflow: boolean = false;
     #interactionRevision: number = 0;
 
+    #takeGestureClickSuppression(): void {
+        if (this.#gestureController?.consumeClickSuppression()) {
+            this.#suppressNextCanvasClick = true;
+        }
+    }
+
     #beginInteractionAuthorityChange(): void {
         this.#gestureController?.abortForAuthorityChange();
+        this.#takeGestureClickSuppression();
         this.#interactionRevision++;
     }
 
@@ -721,26 +731,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
         });
 
-        // Initialize default viewport
-        effect(() => {
-            const def = this.defaultViewport();
-            const ext = this.viewport();
-            if (def && ext === undefined && !this.#hasInitializedDefaultViewport()) {
-                const sc = this.cartesianXYScene();
-                if (sc && sc.coordinateSpace) {
-                    this.#hasInitializedDefaultViewport.set(true);
-                    const normalized = normalizeViewportState(def, sc.coordinateSpace.toResolvedAxisInfoMap(), {
-                        clampToData: this.normalizedNavigation().clampToData,
-                        constraints: this.normalizedNavigation().constraints,
-                        minVisibleCategories: this.normalizedNavigation().minVisibleCategories,
-                        warnedSignatures: this.#warnedDiagnosticSignatures
-                    });
-                    this.#uncontrolledViewportState.set(normalized);
-                    this.invalidate(ChartInvalidationReason.Viewport);
-                }
-            }
-        });
-
         // Sync external viewport model changes to internal state
         effect(() => {
             const extViewport = this.viewport();
@@ -809,9 +799,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     this.#gestureController.updateContext(gestureContext);
                 }
             } else {
-                this.#gestureController?.destroy();
-                this.#gestureController = null;
-                this.viewportCursor.set(null);
+                if (this.#gestureController) {
+                    if (!nav.enabled) {
+                        this.#gestureController.cancel("navigation-disabled");
+                    }
+                    this.#takeGestureClickSuppression();
+                    this.#gestureController.destroy();
+                    this.#gestureController = null;
+                    this.viewportCursor.set(null);
+                }
             }
         });
 
@@ -820,11 +816,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const oldHeight = this.#currentHeight;
             this.#initCanvasAndObserver();
             this.#canvasReady = true;
+            this.#layoutReady = true;
             if (!this.scene()) {
                 this.#recomputeAndPaint(ChartInvalidationReason.Data | ChartInvalidationReason.Size);
             } else if (this.#currentWidth !== oldWidth || this.#currentHeight !== oldHeight) {
                 this.#recomputeAndPaint(ChartInvalidationReason.Size);
             } else {
+                this.#renderScheduler.flush();
                 this.#paint();
             }
         });
@@ -878,6 +876,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     public onCanvasClick(event: MouseEvent): void {
         if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+            return;
+        }
+        if (this.#suppressNextCanvasClick) {
+            this.#suppressNextCanvasClick = false;
             return;
         }
         if (this.#gestureController?.consumeClickSuppression()) {
@@ -1012,7 +1014,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
-    public onPointerLeave(): void {
+    public onPointerLeave(event?: PointerEvent): void {
+        if (event) {
+            this.#gestureController?.handlePointerLeave(event);
+        }
         this.#clearInteraction();
     }
 
@@ -1742,6 +1747,86 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         CanvasChartRenderer.render(context, currentScene, this.#interactionState, this.#styleResolver);
     }
 
+    #resolveCanonicalViewportForAuthority(
+        baseCoordSpace: CartesianAxisCoordinateSpace,
+        _cause: "structural" | "chrome"
+    ): {
+        viewport: InternalCartesianViewportState;
+        reconciliationEvent?: ChartViewportChangeEvent;
+    } {
+        const rawControlled = this.viewport();
+        const nav = this.normalizedNavigation();
+        const normalizeOpts = {
+            clampToData: nav.clampToData,
+            constraints: nav.constraints,
+            minVisibleCategories: nav.minVisibleCategories,
+            warnedSignatures: this.#warnedDiagnosticSignatures
+        };
+
+        if (rawControlled !== undefined) {
+            // Controlled: normalize raw public input against the newly computed base authority
+            const canonicalViewport = normalizeViewportState(
+                rawControlled,
+                baseCoordSpace,
+                normalizeOpts
+            );
+            this.#lastNormalizedControlledViewport = canonicalViewport;
+            return { viewport: canonicalViewport };
+        }
+
+        // Uncontrolled
+        // If transitioning from controlled, seed from last normalized controlled viewport
+        if (this.#lastNormalizedControlledViewport !== null) {
+            this.#uncontrolledViewportState.set(this.#lastNormalizedControlledViewport);
+            this.#lastNormalizedControlledViewport = null;
+        }
+
+        // Initial default viewport seeding (once, if defaultViewport is provided and not yet initialized)
+        const rawDefault = this.defaultViewport();
+        if (rawDefault !== undefined && !this.#hasInitializedDefaultViewport()) {
+            this.#hasInitializedDefaultViewport.set(true);
+            const canonicalDefault = normalizeViewportState(
+                rawDefault,
+                baseCoordSpace,
+                normalizeOpts
+            );
+            this.#uncontrolledViewportState.set(canonicalDefault);
+            return { viewport: canonicalDefault };
+        }
+
+        const reconcilerRes = CartesianViewportReconciler.reconcile(
+            this.#uncontrolledViewportState(),
+            baseCoordSpace,
+            {
+                clampToData: nav.clampToData,
+                constraints: nav.constraints,
+                minVisibleCategories: nav.minVisibleCategories
+            }
+        );
+
+        let reconciliationEvent: ChartViewportChangeEvent | undefined;
+        if (reconcilerRes.changed) {
+            const resolvedMap = baseCoordSpace.toResolvedAxisInfoMap();
+            const prevPublic = toPublicViewportState(this.#uncontrolledViewportState(), resolvedMap);
+            const nextPublic = toPublicViewportState(reconcilerRes.viewport, resolvedMap);
+            this.#uncontrolledViewportState.set(reconcilerRes.viewport);
+            if (!this.#isDestroyed) {
+                reconciliationEvent = {
+                    changedAxes: reconcilerRes.changedAxes,
+                    phase: "end",
+                    previousViewport: prevPublic,
+                    source: "data-reconcile",
+                    viewport: nextPublic
+                };
+            }
+        }
+
+        return {
+            viewport: reconcilerRes.viewport,
+            reconciliationEvent
+        };
+    }
+
     #recomputeAndPaint(reason: ChartInvalidationReason): void {
         if (reason === ChartInvalidationReason.Interaction) {
             this.#paint();
@@ -1813,47 +1898,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#labelMeasurements
             );
             const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
-            const rawControlled = this.viewport();
-            let canonicalViewport: InternalCartesianViewportState;
+            const { viewport: canonicalViewport, reconciliationEvent } =
+                this.#resolveCanonicalViewportForAuthority(baseCoordSpace, "chrome");
 
-            if (rawControlled !== undefined) {
-                canonicalViewport = normalizeViewportState(
-                    rawControlled,
-                    baseCoordSpace,
-                    {
-                        clampToData: this.normalizedNavigation().clampToData,
-                        constraints: this.normalizedNavigation().constraints,
-                        minVisibleCategories: this.normalizedNavigation().minVisibleCategories,
-                        warnedSignatures: this.#warnedDiagnosticSignatures
-                    }
-                );
-                this.#lastNormalizedControlledViewport = canonicalViewport;
-            } else {
-                const reconcilerRes = CartesianViewportReconciler.reconcile(
-                    this.#uncontrolledViewportState(),
-                    baseCoordSpace,
-                    {
-                        clampToData: this.normalizedNavigation().clampToData,
-                        constraints: this.normalizedNavigation().constraints,
-                        minVisibleCategories: this.normalizedNavigation().minVisibleCategories
-                    }
-                );
-                canonicalViewport = reconcilerRes.viewport;
-                if (reconcilerRes.changed) {
-                    const resolvedMap = baseCoordSpace.toResolvedAxisInfoMap();
-                    const prevPublic = toPublicViewportState(this.#uncontrolledViewportState(), resolvedMap);
-                    const nextPublic = toPublicViewportState(canonicalViewport, resolvedMap);
-                    this.#uncontrolledViewportState.set(canonicalViewport);
-                    if (!this.#isDestroyed) {
-                        this.viewportChange.emit({
-                            changedAxes: reconcilerRes.changedAxes,
-                            phase: "end",
-                            previousViewport: prevPublic,
-                            source: "data-reconcile",
-                            viewport: nextPublic
-                        });
-                    }
-                }
+            if (reconciliationEvent) {
+                this.viewportChange.emit(reconciliationEvent);
             }
 
             const projectedComp = CartesianLayoutEngine.projectRuntime(
@@ -1887,55 +1936,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#beginInteractionAuthorityChange();
                 this.#cartesianLayoutRuntime = preparation.runtime;
                 const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
-                const rawControlled = this.viewport();
+                const { viewport: canonicalViewport, reconciliationEvent } =
+                    this.#resolveCanonicalViewportForAuthority(baseCoordSpace, "structural");
 
-                let canonicalViewport: InternalCartesianViewportState;
-                if (rawControlled !== undefined) {
-                    // Controlled: normalize raw public input against the newly computed base authority
-                    canonicalViewport = normalizeViewportState(
-                        rawControlled,
-                        baseCoordSpace,
-                        {
-                            clampToData: this.normalizedNavigation().clampToData,
-                            constraints: this.normalizedNavigation().constraints,
-                            minVisibleCategories: this.normalizedNavigation().minVisibleCategories,
-                            warnedSignatures: this.#warnedDiagnosticSignatures
-                        }
-                    );
-                    this.#lastNormalizedControlledViewport = canonicalViewport;
-                } else {
-                    // Uncontrolled: if transitioning from controlled, seed from last normalized controlled viewport
-                    if (this.#lastNormalizedControlledViewport !== null) {
-                        this.#uncontrolledViewportState.set(this.#lastNormalizedControlledViewport);
-                        this.#lastNormalizedControlledViewport = null;
-                    }
-
-                    const reconcilerRes = CartesianViewportReconciler.reconcile(
-                        this.#uncontrolledViewportState(),
-                        baseCoordSpace,
-                        {
-                            clampToData: this.normalizedNavigation().clampToData,
-                            constraints: this.normalizedNavigation().constraints,
-                            minVisibleCategories: this.normalizedNavigation().minVisibleCategories
-                        }
-                    );
-                    canonicalViewport = reconcilerRes.viewport;
-
-                    if (reconcilerRes.changed) {
-                        const resolvedMap = baseCoordSpace.toResolvedAxisInfoMap();
-                        const prevPublic = toPublicViewportState(this.#uncontrolledViewportState(), resolvedMap);
-                        const nextPublic = toPublicViewportState(canonicalViewport, resolvedMap);
-                        this.#uncontrolledViewportState.set(canonicalViewport);
-                        if (!this.#isDestroyed) {
-                            this.viewportChange.emit({
-                                changedAxes: reconcilerRes.changedAxes,
-                                phase: "end",
-                                previousViewport: prevPublic,
-                                source: "data-reconcile",
-                                viewport: nextPublic
-                            });
-                        }
-                    }
+                if (reconciliationEvent) {
+                    this.viewportChange.emit(reconciliationEvent);
                 }
 
                 const projectedComp = CartesianLayoutEngine.projectRuntime(
@@ -2537,6 +2542,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                             }
                         } else if (!prev) {
                             this.#labelMeasurements.set(targetId, { width, height });
+                            if (!isCartesian) {
+                                hasNonCartesianLabelChanged = true;
+                            }
                         }
                     }
                 }
