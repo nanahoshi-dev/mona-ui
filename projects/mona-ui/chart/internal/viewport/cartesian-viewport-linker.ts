@@ -108,6 +108,7 @@ export class CartesianViewportLinker {
         const nextX = new Map<string, InternalAxisViewport>(viewportState.x);
         const nextY = new Map<string, InternalAxisViewport>(viewportState.y);
         const changedAxes: ChartViewportAxisRef[] = [];
+        const processedLinkGroups = new Set<string>();
 
         for (const sourceRef of sourceAxes) {
             const sourceSnap = coordinateSpace.get(sourceRef);
@@ -118,6 +119,12 @@ export class CartesianViewportLinker {
             for (const group of validGroups) {
                 const isMember = group.axes.some(a => a.axis === sourceRef.axis && a.axisId === sourceRef.axisId);
                 if (!isMember) continue;
+
+                if (processedLinkGroups.has(group.id)) {
+                    // First direct source axis in caller target order is authoritative for this link group
+                    continue;
+                }
+                processedLinkGroups.add(group.id);
 
                 for (const targetRef of group.axes) {
                     if (targetRef.axis === sourceRef.axis && targetRef.axisId === sourceRef.axisId) {

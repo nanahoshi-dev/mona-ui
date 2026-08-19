@@ -138,4 +138,117 @@ describe("ChartComponent Viewport Integration", () => {
             expect(xAxis.max).toBe(75);
         }
     });
+
+    it("should normalize controlled viewport against new data authority after structural data change (PZV5-005)", () => {
+        // Controlled viewport set to [20, 80]
+        host.viewport.set({
+            axes: [
+                { axis: "x", axisId: "x-main", kind: "continuous", min: 20, max: 80 }
+            ]
+        });
+        fixture.detectChanges();
+
+        // Expand data to [0, 500]
+        host.data.set([
+            { x: 0, y: 10 },
+            { x: 250, y: 30 },
+            { x: 500, y: 50 }
+        ]);
+        fixture.detectChanges();
+
+        const chart = host.chart();
+        const vp = chart.getViewport();
+        const xAxis = vp?.axes.find(a => a.axisId === "x-main");
+        expect(xAxis).toBeDefined();
+        if (xAxis && xAxis.kind === "continuous") {
+            expect(xAxis.min).toBe(20);
+            expect(xAxis.max).toBe(80);
+        }
+    });
+
+    it("should seed uncontrolled state from last normalized controlled viewport when transitioning to uncontrolled (PZV5-006)", () => {
+        // Set controlled viewport
+        host.viewport.set({
+            axes: [
+                { axis: "x", axisId: "x-main", kind: "continuous", min: 30, max: 70 }
+            ]
+        });
+        fixture.detectChanges();
+
+        // Clear controlled viewport -> transition to uncontrolled
+        host.viewport.set(undefined);
+        fixture.detectChanges();
+
+        const chart = host.chart();
+        const vp = chart.getViewport();
+        const xAxis = vp?.axes.find(a => a.axisId === "x-main");
+        expect(xAxis).toBeDefined();
+        if (xAxis && xAxis.kind === "continuous") {
+            // Uncontrolled state retained the [30, 70] window
+            expect(xAxis.min).toBe(30);
+            expect(xAxis.max).toBe(70);
+        }
+    });
+
+    it("should perform full replacement with setViewport and partial mutation with setViewportWindow (PZV5-015)", () => {
+        const chart = host.chart();
+
+        // Set partial window on x
+        chart.setViewportWindow({
+            axis: "x",
+            axisId: "x-main",
+            kind: "continuous",
+            min: 10,
+            max: 90
+        });
+        fixture.detectChanges();
+
+        let vp = chart.getViewport();
+        expect(vp?.axes.length).toBe(1);
+
+        // setViewport with empty axes resets all axes to full domain
+        chart.setViewport({ axes: [] });
+        fixture.detectChanges();
+
+        vp = chart.getViewport();
+        expect(vp?.axes.length).toBe(0);
+    });
+
+    it("should emit correct sources for fitViewport ('fit') and resetViewport ('reset') (PZV5-016)", () => {
+        const chart = host.chart();
+
+        chart.setViewportWindow({
+            axis: "x",
+            axisId: "x-main",
+            kind: "continuous",
+            min: 20,
+            max: 80
+        });
+        fixture.detectChanges();
+
+        host.emittedEvents.length = 0;
+
+        chart.fitViewport();
+        fixture.detectChanges();
+
+        expect(host.emittedEvents.length).toBe(1);
+        expect(host.emittedEvents[0].source).toBe("fit");
+
+        chart.setViewportWindow({
+            axis: "x",
+            axisId: "x-main",
+            kind: "continuous",
+            min: 20,
+            max: 80
+        });
+        fixture.detectChanges();
+
+        host.emittedEvents.length = 0;
+
+        chart.resetViewport();
+        fixture.detectChanges();
+
+        expect(host.emittedEvents.length).toBe(1);
+        expect(host.emittedEvents[0].source).toBe("reset");
+    });
 });

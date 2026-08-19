@@ -11,12 +11,18 @@ import { parseCartesianAxisMeasurementKey } from "./cartesian-axis-measurement-k
 export class ChartLabelMeasurementPruner {
     public static prune(
         measurements: Map<string, ChartLabelMeasurement>,
-        scene: ChartScene
+        scene: ChartScene,
+        retainedBaseKeys?: ReadonlySet<string>
     ): void {
         if (scene.coordinateSystem === "cartesian") {
             const cartesianScene = scene as CartesianChartScene;
             const activeAxes = new Set<string>();
             const activeTickKeys = new Set<string>();
+            if (retainedBaseKeys) {
+                for (const k of retainedBaseKeys) {
+                    activeTickKeys.add(k);
+                }
+            }
             if (cartesianScene.axes) {
                 for (const axisScene of cartesianScene.axes) {
                     const id = axisScene.axisId ?? (axisScene.axis === "x" ? "default-x" : "default-y");

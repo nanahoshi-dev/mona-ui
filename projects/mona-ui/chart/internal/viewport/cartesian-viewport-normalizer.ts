@@ -163,9 +163,12 @@ export function toPublicViewportState(
     return { axes };
 }
 
+import type { CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
+import { CartesianViewportConstraints } from "./cartesian-viewport-constraints";
+
 export function normalizeAxisWindow(
     rawWindow: ChartViewportWindow,
-    axisInfo: ResolvedAxisInfo,
+    axisInfo: ResolvedAxisInfo | CartesianAxisCoordinateSnapshot,
     constraint?: ChartViewportConstraint,
     options?: {
         clampToData?: boolean;
@@ -180,6 +183,49 @@ export function normalizeAxisWindow(
     const clampToData = options?.clampToData !== false;
     const defaultMinCat = options?.minVisibleCategories ?? 1;
 
+    // Validate constraint applicability and bounds
+    if (constraint) {
+        if (isCategory) {
+            if (constraint.minSpan !== undefined || constraint.maxSpan !== undefined || constraint.maxZoom !== undefined) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Continuous constraint options (minSpan, maxSpan, maxZoom) ignored for category axis "${axisId}".`,
+                    `viewport-constraint-type-mismatch-${axis}-${axisId}`
+                );
+            }
+            if (
+                constraint.minVisibleCategories !== undefined &&
+                constraint.maxVisibleCategories !== undefined &&
+                constraint.minVisibleCategories > constraint.maxVisibleCategories
+            ) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Constraint minVisibleCategories (${constraint.minVisibleCategories}) exceeds maxVisibleCategories (${constraint.maxVisibleCategories}) for axis "${axisId}".`,
+                    `viewport-constraint-invalid-bounds-${axis}-${axisId}`
+                );
+            }
+        } else {
+            if (constraint.minVisibleCategories !== undefined || constraint.maxVisibleCategories !== undefined) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Category constraint options (minVisibleCategories, maxVisibleCategories) ignored for continuous axis "${axisId}".`,
+                    `viewport-constraint-type-mismatch-${axis}-${axisId}`
+                );
+            }
+            if (
+                constraint.minSpan !== undefined &&
+                constraint.maxSpan !== undefined &&
+                constraint.minSpan > constraint.maxSpan
+            ) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Constraint minSpan (${constraint.minSpan}) exceeds maxSpan (${constraint.maxSpan}) for axis "${axisId}".`,
+                    `viewport-constraint-invalid-bounds-${axis}-${axisId}`
+                );
+            }
+        }
+    }
+
     if (isCategory) {
         if (rawWindow.kind !== "category") {
             ChartDiagnostics.warnOnce(
@@ -193,41 +239,26 @@ export function normalizeAxisWindow(
         const baseCount = Array.isArray(axisInfo.baseDomain) ? axisInfo.baseDomain.length : 0;
         if (baseCount === 0) return undefined;
 
-        let startIndex = Math.floor(Number(rawWindow.startIndex));
-        let endIndex = Math.ceil(Number(rawWindow.endIndexExclusive));
+        const rawStart = Number(rawWindow.startIndex);
+        const rawEnd = Number(rawWindow.endIndexExclusive);
 
-        if (!Number.isFinite(startIndex) || !Number.isFinite(endIndex) || startIndex >= endIndex) {
+        if (!Number.isFinite(rawStart) || !Number.isFinite(rawEnd) || rawStart >= rawEnd) {
             ChartDiagnostics.warnOnce(
                 warned,
-                `Invalid category viewport indices [${startIndex}, ${endIndex}] for axis "${axisId}".`,
+                `Invalid category viewport indices [${rawStart}, ${rawEnd}] for axis "${axisId}".`,
                 `viewport-category-index-out-of-range-${axis}-${axisId}`
             );
             return undefined;
         }
 
-        const minVisible = Math.max(
-            1,
-            constraint?.minVisibleCategories ?? defaultMinCat
-        );
-        const maxVisible = Math.min(
+        const [startIndex, endIndex] = CartesianViewportConstraints.applyCategoryConstraints(
+            rawStart,
+            rawEnd,
             baseCount,
-            constraint?.maxVisibleCategories ?? baseCount
+            constraint,
+            defaultMinCat,
+            clampToData
         );
-
-        startIndex = clamp(startIndex, 0, baseCount - 1);
-        endIndex = clamp(endIndex, startIndex + 1, baseCount);
-
-        let span = endIndex - startIndex;
-        if (span < minVisible) {
-            span = Math.min(minVisible, baseCount);
-            if (startIndex + span > baseCount) {
-                startIndex = Math.max(0, baseCount - span);
-            }
-            endIndex = startIndex + span;
-        } else if (span > maxVisible) {
-            span = maxVisible;
-            endIndex = startIndex + span;
-        }
 
         if (startIndex === 0 && endIndex === baseCount) {
             // Full domain is canonicalized to no entry
@@ -292,60 +323,34 @@ export function normalizeAxisWindow(
             }
         }
 
-        // Apply constraints
-        if (constraint) {
-            if (constraint.minSpan !== undefined && constraint.minSpan > 0 && maxVal - minVal < constraint.minSpan) {
-                const mid = (minVal + maxVal) / 2;
-                minVal = mid - constraint.minSpan / 2;
-                maxVal = mid + constraint.minSpan / 2;
-            }
-            if (constraint.maxSpan !== undefined && constraint.maxSpan > 0 && maxVal - minVal > constraint.maxSpan) {
-                const mid = (minVal + maxVal) / 2;
-                minVal = mid - constraint.maxSpan / 2;
-                maxVal = mid + constraint.maxSpan / 2;
-            }
-            if (constraint.maxZoom !== undefined && constraint.maxZoom > 1 && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-                const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
-                const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
-                const baseSpan = bMax - bMin;
-                if (baseSpan > 0) {
-                    const minAllowedSpan = baseSpan / constraint.maxZoom;
-                    if (maxVal - minVal < minAllowedSpan) {
-                        const mid = (minVal + maxVal) / 2;
-                        minVal = mid - minAllowedSpan / 2;
-                        maxVal = mid + minAllowedSpan / 2;
-                    }
-                }
-            }
-        }
+        const baseMin = Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2
+            ? (axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]))
+            : minVal;
+        const baseMax = Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2
+            ? (axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]))
+            : maxVal;
 
-        if (clampToData && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-            const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
-            const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
-            if (Number.isFinite(bMin) && Number.isFinite(bMax)) {
-                const span = maxVal - minVal;
-                const baseSpan = bMax - bMin;
-                if (span >= baseSpan) {
-                    minVal = bMin;
-                    maxVal = bMax;
-                } else {
-                    if (minVal < bMin) {
-                        minVal = bMin;
-                        maxVal = bMin + span;
-                    }
-                    if (maxVal > bMax) {
-                        maxVal = bMax;
-                        minVal = bMax - span;
-                    }
-                }
-            }
-        }
+        const baseScale = "baseScale" in axisInfo ? axisInfo.baseScale : undefined;
+
+        const [cMin, cMax] = CartesianViewportConstraints.applyContinuousConstraints(
+            minVal,
+            maxVal,
+            baseMin,
+            baseMax,
+            constraint,
+            clampToData,
+            baseScale,
+            axisInfo.resolvedType
+        );
+
+        minVal = cMin;
+        maxVal = cMax;
 
         // Re-validate log sign after constraints/clamping
         if (axisInfo.resolvedType === "log" && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-            const baseMin = Number(axisInfo.baseDomain[0]);
-            const baseMax = Number(axisInfo.baseDomain[1]);
-            if (baseMin > 0 && (minVal <= 0 || maxVal <= 0)) {
+            const bMin = Number(axisInfo.baseDomain[0]);
+            const bMax = Number(axisInfo.baseDomain[1]);
+            if (bMin > 0 && (minVal <= 0 || maxVal <= 0)) {
                 ChartDiagnostics.warnOnce(
                     warned,
                     `Viewport [${minVal}, ${maxVal}] crosses zero or is negative on positive log axis "${axisId}".`,
@@ -353,7 +358,7 @@ export function normalizeAxisWindow(
                 );
                 return undefined;
             }
-            if (baseMax < 0 && (minVal >= 0 || maxVal >= 0)) {
+            if (bMax < 0 && (minVal >= 0 || maxVal >= 0)) {
                 ChartDiagnostics.warnOnce(
                     warned,
                     `Viewport [${minVal}, ${maxVal}] crosses zero or is positive on negative log axis "${axisId}".`,
@@ -382,9 +387,11 @@ export function normalizeAxisWindow(
     }
 }
 
+import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
+
 export function normalizeViewportState(
     publicState: ChartViewportState | undefined | null,
-    resolvedAxes: ResolvedAxisInfoMap,
+    resolvedAxes: ResolvedAxisInfoMap | CartesianAxisCoordinateSpace,
     options?: {
         clampToData?: boolean;
         constraints?: readonly ChartViewportConstraint[];
@@ -399,6 +406,11 @@ export function normalizeViewportState(
     if (!publicState || !Array.isArray(publicState.axes) || publicState.axes.length === 0) {
         return { x: xMap, y: yMap };
     }
+
+    const resolvedMap: ResolvedAxisInfoMap =
+        "toResolvedAxisInfoMap" in resolvedAxes && typeof resolvedAxes.toResolvedAxisInfoMap === "function"
+            ? resolvedAxes.toResolvedAxisInfoMap()
+            : (resolvedAxes as ResolvedAxisInfoMap);
 
     const seenAxes = new Set<string>();
 
@@ -427,7 +439,7 @@ export function normalizeViewportState(
         }
         seenAxes.add(axisKey);
 
-        const axisMap = axis === "x" ? resolvedAxes.x : resolvedAxes.y;
+        const axisMap = axis === "x" ? resolvedMap.x : resolvedMap.y;
         const axisInfo = axisMap.get(axisId);
 
         if (!axisInfo) {

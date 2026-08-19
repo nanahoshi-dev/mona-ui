@@ -48,6 +48,23 @@ export class ChartRenderScheduler {
         }
     }
 
+    public flushStructural(): void {
+        const structuralMask =
+            ChartInvalidationReason.Data |
+            ChartInvalidationReason.Layout |
+            ChartInvalidationReason.Size |
+            ChartInvalidationReason.Visibility |
+            ChartInvalidationReason.Style;
+
+        const structuralReason = this.#pendingReason & structuralMask;
+        if (structuralReason === 0) {
+            return;
+        }
+
+        this.#pendingReason &= ~structuralMask;
+        this.#callback(structuralReason as ChartInvalidationReason);
+    }
+
     public schedule(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         this.#pendingReason |= reason;
 

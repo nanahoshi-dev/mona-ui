@@ -120,6 +120,91 @@ export class CartesianViewportOperationCoordinator {
         };
     }
 
+    public static setViewport(
+        currentViewport: InternalCartesianViewportState,
+        coordinateSpace: CartesianAxisCoordinateSpace,
+        viewport: ChartViewportState,
+        options?: CartesianViewportOperationOptions
+    ): CartesianViewportOperationResult {
+        const resolvedAxisMap = coordinateSpace.toResolvedAxisInfoMap();
+        const normalized = normalizeViewportState(
+            viewport,
+            resolvedAxisMap,
+            {
+                clampToData: options?.clampToData,
+                constraints: options?.constraints,
+                minVisibleCategories: options?.minVisibleCategories,
+                warnedSignatures: options?.warnedSignatures
+            }
+        );
+
+        const changedSourceAxes: ChartViewportAxisRef[] = [];
+        const nextX = new Map<string, InternalAxisViewport>();
+        const nextY = new Map<string, InternalAxisViewport>();
+
+        for (const [axisId, snap] of coordinateSpace.x) {
+            if (!snap.valid) continue;
+            const newWin = normalized.x.get(axisId);
+            const oldWin = currentViewport.x.get(axisId);
+            if (newWin) {
+                nextX.set(axisId, newWin);
+            }
+            if (!areAxisViewportsEqual(oldWin, newWin)) {
+                changedSourceAxes.push({ axis: "x", axisId });
+            }
+        }
+
+        for (const [axisId, snap] of coordinateSpace.y) {
+            if (!snap.valid) continue;
+            const newWin = normalized.y.get(axisId);
+            const oldWin = currentViewport.y.get(axisId);
+            if (newWin) {
+                nextY.set(axisId, newWin);
+            }
+            if (!areAxisViewportsEqual(oldWin, newWin)) {
+                changedSourceAxes.push({ axis: "y", axisId });
+            }
+        }
+
+        if (changedSourceAxes.length === 0) {
+            return {
+                accepted: true,
+                changed: false,
+                changedAxes: [],
+                viewport: currentViewport
+            };
+        }
+
+        // Propagate links
+        const linkResult = CartesianViewportLinker.propagateLinks(
+            { x: nextX, y: nextY },
+            changedSourceAxes,
+            coordinateSpace,
+            options?.linkGroups,
+            {
+                clampToData: options?.clampToData,
+                constraints: options?.constraints,
+                minVisibleCategories: options?.minVisibleCategories,
+                warnedSignatures: options?.warnedSignatures
+            }
+        );
+
+        const changedAxesMap = new Map<string, ChartViewportAxisRef>();
+        for (const ax of changedSourceAxes) {
+            changedAxesMap.set(`${ax.axis}:${ax.axisId}`, ax);
+        }
+        for (const ax of linkResult.changedAxes) {
+            changedAxesMap.set(`${ax.axis}:${ax.axisId}`, ax);
+        }
+
+        return {
+            accepted: true,
+            changed: true,
+            changedAxes: Array.from(changedAxesMap.values()),
+            viewport: linkResult.viewport
+        };
+    }
+
     public static setWindow(
         currentViewport: InternalCartesianViewportState,
         coordinateSpace: CartesianAxisCoordinateSpace,

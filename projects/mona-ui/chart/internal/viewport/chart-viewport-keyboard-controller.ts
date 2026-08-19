@@ -14,7 +14,10 @@ import {
     areInternalViewportStatesEqual,
     type InternalCartesianViewportState
 } from "./cartesian-viewport-normalizer";
-import { CartesianViewportTargetResolver } from "./cartesian-viewport-target-resolver";
+import {
+    CartesianViewportTargetResolver,
+    type CartesianNavigationProfile
+} from "./cartesian-viewport-target-resolver";
 import type { NormalizedChartNavigationOptions } from "./chart-navigation-options";
 
 export interface ChartViewportKeyboardResult {
@@ -36,7 +39,8 @@ export class ChartViewportKeyboardController {
         constraints?: readonly ChartViewportConstraint[],
         linkGroups?: readonly ChartViewportLinkGroup[],
         activeNamespace?: { axis: "x" | "y"; axisId: string } | null,
-        defaultViewport?: ChartViewportState
+        defaultViewport?: ChartViewportState,
+        navigationProfile?: CartesianNavigationProfile
     ): ChartViewportKeyboardResult {
         if (!options.enabled || !options.keyboard || !coordinateSpace) {
             return { announcement: null, changedAxes: [], handled: false, nextState: null };
@@ -47,11 +51,39 @@ export class ChartViewportKeyboardController {
             y: plotRect.y + plotRect.height / 2
         };
 
+        const isPanKey = event.shiftKey && (
+            event.key === "ArrowLeft" ||
+            event.key === "ArrowRight" ||
+            event.key === "ArrowUp" ||
+            event.key === "ArrowDown"
+        );
+
+        const isZoomKey = !event.shiftKey && (
+            event.key === "+" ||
+            event.key === "=" ||
+            event.key === "-" ||
+            event.key === "_"
+        );
+
+        const isResetKey = !event.shiftKey && event.key === "0";
+
+        if (isPanKey && !options.pan) {
+            return { announcement: null, changedAxes: [], handled: false, nextState: null };
+        }
+
+        if (isZoomKey && !options.zoom) {
+            return { announcement: null, changedAxes: [], handled: false, nextState: null };
+        }
+
+        if (isResetKey && !options.pan && !options.zoom) {
+            return { announcement: null, changedAxes: [], handled: false, nextState: null };
+        }
+
         const keyTarget: ChartNavigationAxisTarget | undefined = activeNamespace
             ? [activeNamespace]
-            : event.shiftKey
-              ? (event.key === "ArrowLeft" || event.key === "ArrowRight" ? "x" : (event.key === "ArrowUp" || event.key === "ArrowDown" ? "y" : undefined))
-              : (event.key === "+" || event.key === "=" || event.key === "-" || event.key === "_")
+            : isPanKey
+              ? (event.key === "ArrowLeft" || event.key === "ArrowRight" ? "x" : "y")
+              : isZoomKey
                 ? options.zoomAxes
                 : undefined;
 
@@ -61,7 +93,8 @@ export class ChartViewportKeyboardController {
             axisScenes,
             options,
             orientation,
-            keyTarget
+            keyTarget,
+            navigationProfile
         );
 
         const targetAxes = resolved.targetAxes;
@@ -83,7 +116,7 @@ export class ChartViewportKeyboardController {
             minVisibleCategories: options.minVisibleCategories
         };
 
-        if (event.shiftKey) {
+        if (isPanKey) {
             if (event.key === "ArrowLeft") {
                 const res = CartesianViewportOperationCoordinator.transform(
                     currentViewport,
@@ -92,10 +125,12 @@ export class ChartViewportKeyboardController {
                     { panDeltaPx: { x: xPanStep, y: 0 } },
                     coordinatorOptions
                 );
-                nextState = res.viewport;
-                changedAxes = res.changedAxes;
-                announcement = "Panned left";
-                handled = true;
+                if (res.accepted) {
+                    nextState = res.viewport;
+                    changedAxes = res.changedAxes;
+                    announcement = "Panned left";
+                    handled = true;
+                }
             } else if (event.key === "ArrowRight") {
                 const res = CartesianViewportOperationCoordinator.transform(
                     currentViewport,
@@ -104,10 +139,12 @@ export class ChartViewportKeyboardController {
                     { panDeltaPx: { x: -xPanStep, y: 0 } },
                     coordinatorOptions
                 );
-                nextState = res.viewport;
-                changedAxes = res.changedAxes;
-                announcement = "Panned right";
-                handled = true;
+                if (res.accepted) {
+                    nextState = res.viewport;
+                    changedAxes = res.changedAxes;
+                    announcement = "Panned right";
+                    handled = true;
+                }
             } else if (event.key === "ArrowUp") {
                 const res = CartesianViewportOperationCoordinator.transform(
                     currentViewport,
@@ -116,10 +153,12 @@ export class ChartViewportKeyboardController {
                     { panDeltaPx: { x: 0, y: yPanStep } },
                     coordinatorOptions
                 );
-                nextState = res.viewport;
-                changedAxes = res.changedAxes;
-                announcement = "Panned up";
-                handled = true;
+                if (res.accepted) {
+                    nextState = res.viewport;
+                    changedAxes = res.changedAxes;
+                    announcement = "Panned up";
+                    handled = true;
+                }
             } else if (event.key === "ArrowDown") {
                 const res = CartesianViewportOperationCoordinator.transform(
                     currentViewport,
@@ -128,10 +167,12 @@ export class ChartViewportKeyboardController {
                     { panDeltaPx: { x: 0, y: -yPanStep } },
                     coordinatorOptions
                 );
-                nextState = res.viewport;
-                changedAxes = res.changedAxes;
-                announcement = "Panned down";
-                handled = true;
+                if (res.accepted) {
+                    nextState = res.viewport;
+                    changedAxes = res.changedAxes;
+                    announcement = "Panned down";
+                    handled = true;
+                }
             }
         } else if (event.key === "+" || event.key === "=") {
             const res = CartesianViewportOperationCoordinator.transform(
@@ -141,10 +182,12 @@ export class ChartViewportKeyboardController {
                 { anchor: center, zoomFactor: zoomInFactor },
                 coordinatorOptions
             );
-            nextState = res.viewport;
-            changedAxes = res.changedAxes;
-            announcement = "Zoomed in";
-            handled = true;
+            if (res.accepted) {
+                nextState = res.viewport;
+                changedAxes = res.changedAxes;
+                announcement = "Zoomed in";
+                handled = true;
+            }
         } else if (event.key === "-" || event.key === "_") {
             const res = CartesianViewportOperationCoordinator.transform(
                 currentViewport,
@@ -153,11 +196,13 @@ export class ChartViewportKeyboardController {
                 { anchor: center, zoomFactor: zoomOutFactor },
                 coordinatorOptions
             );
-            nextState = res.viewport;
-            changedAxes = res.changedAxes;
-            announcement = "Zoomed out";
-            handled = true;
-        } else if (event.key === "0") {
+            if (res.accepted) {
+                nextState = res.viewport;
+                changedAxes = res.changedAxes;
+                announcement = "Zoomed out";
+                handled = true;
+            }
+        } else if (isResetKey) {
             const res = CartesianViewportOperationCoordinator.reset(
                 currentViewport,
                 coordinateSpace,
@@ -165,10 +210,14 @@ export class ChartViewportKeyboardController {
                 undefined,
                 coordinatorOptions
             );
-            nextState = res.viewport;
-            changedAxes = res.changedAxes;
-            announcement = "Viewport reset to full range";
-            handled = true;
+            if (res.accepted) {
+                nextState = res.viewport;
+                changedAxes = res.changedAxes;
+                announcement = defaultViewport && defaultViewport.axes && defaultViewport.axes.length > 0
+                    ? "Viewport reset to default range"
+                    : "Viewport reset to full range";
+                handled = true;
+            }
         }
 
         if (handled && !areInternalViewportStatesEqual(currentViewport, nextState)) {

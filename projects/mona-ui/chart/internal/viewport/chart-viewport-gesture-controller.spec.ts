@@ -214,6 +214,7 @@ describe("ChartViewportGestureController", () => {
             { x: 260, y: 150 }
         );
         expect(move).toBe(true);
+        controller.flushPendingFrame();
 
         const updateEvent = events[events.length - 1];
         expect(updateEvent.source).toBe("pinch");
