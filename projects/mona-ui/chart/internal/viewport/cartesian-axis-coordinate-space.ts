@@ -1,3 +1,4 @@
+import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartViewportAxisRef } from "../../models/chart-viewport.models";
 import type {
     ChartContinuousPositionScale,
@@ -16,6 +17,16 @@ export interface CartesianAxisCoordinateSnapshot {
     readonly viewportScale: ChartPositionScale<unknown>;
 }
 
+export interface ResolvedCategoryAtPixel {
+    readonly bandCenter: number;
+    readonly bandStart: number;
+    readonly bandwidth: number;
+    readonly baseIndex: number;
+    readonly index: number;
+    readonly key: string;
+    readonly viewportIndex: number;
+}
+
 export class CartesianAxisCoordinateSpace {
     public readonly x: ReadonlyMap<string, CartesianAxisCoordinateSnapshot>;
     public readonly y: ReadonlyMap<string, CartesianAxisCoordinateSnapshot>;
@@ -26,6 +37,59 @@ export class CartesianAxisCoordinateSpace {
     ) {
         this.x = x;
         this.y = y;
+    }
+
+    public static fromBaseAuthority(
+        preparation: import("../layout/cartesian-multi-axis-coordinator").CartesianDomainPreparation,
+        chrome: import("../layout/cartesian-multi-axis-coordinator").CartesianAxisChromeLayout
+    ): CartesianAxisCoordinateSpace {
+        const { axisResolution, baseDomains, resolvedTypes, xAxisValidityById, yAxisValidityById } = preparation;
+        const { plotRect, baseScales } = chrome;
+
+        const xSnapshots = new Map<string, CartesianAxisCoordinateSnapshot>();
+        const ySnapshots = new Map<string, CartesianAxisCoordinateSnapshot>();
+
+        for (const xAxis of axisResolution.xAxes) {
+            const resolvedType = resolvedTypes.x.get(xAxis.axisId)!;
+            const baseDomain = baseDomains.x.get(xAxis.axisId)!;
+            const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
+            const baseScale = baseScales.getXScale(xAxis.axisId)!;
+            const isValid = xAxisValidityById.get(xAxis.axisId)?.valid ?? true;
+
+            xSnapshots.set(xAxis.axisId, {
+                baseDomain,
+                baseScale,
+                range,
+                ref: { axis: "x", axisId: xAxis.axisId },
+                resolvedType,
+                valid: isValid,
+                viewportDomain: baseDomain,
+                viewportScale: baseScale
+            });
+        }
+
+        for (const yAxis of axisResolution.yAxes) {
+            const resolvedType = resolvedTypes.y.get(yAxis.axisId)!;
+            const baseDomain = baseDomains.y.get(yAxis.axisId)!;
+            const range: readonly [number, number] = resolvedType === "category"
+                ? [plotRect.y, plotRect.y + plotRect.height]
+                : [plotRect.y + plotRect.height, plotRect.y];
+            const baseScale = baseScales.getYScale(yAxis.axisId)!;
+            const isValid = yAxisValidityById.get(yAxis.axisId)?.valid ?? true;
+
+            ySnapshots.set(yAxis.axisId, {
+                baseDomain,
+                baseScale,
+                range,
+                ref: { axis: "y", axisId: yAxis.axisId },
+                resolvedType,
+                valid: isValid,
+                viewportDomain: baseDomain,
+                viewportScale: baseScale
+            });
+        }
+
+        return new CartesianAxisCoordinateSpace(xSnapshots, ySnapshots);
     }
 
     public get(ref: ChartViewportAxisRef): CartesianAxisCoordinateSnapshot | undefined {
@@ -48,6 +112,12 @@ export class CartesianAxisCoordinateSpace {
         return (snap.viewportScale as ChartContinuousPositionScale<number | Date>).invert?.(pixel);
     }
 
+    public invertBase(ref: ChartViewportAxisRef, pixel: number): unknown | undefined {
+        const snap = this.get(ref);
+        if (!snap || snap.resolvedType === "category") return undefined;
+        return (snap.baseScale as ChartContinuousPositionScale<number | Date>).invert?.(pixel);
+    }
+
     public toResolvedAxisInfoMap(): {
         readonly x: ReadonlyMap<string, { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }>;
         readonly y: ReadonlyMap<string, { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }>;
@@ -68,12 +138,14 @@ export class CartesianAxisCoordinateSpace {
     public resolveCategoryAtPixel(
         ref: ChartViewportAxisRef,
         pixel: number
-    ): { readonly bandCenter: number; readonly bandStart: number; readonly bandwidth: number; readonly index: number; readonly key: string } | undefined {
+    ): ResolvedCategoryAtPixel | undefined {
         const snap = this.get(ref);
         if (!snap || snap.resolvedType !== "category") return undefined;
 
         const catDomain = snap.viewportDomain as readonly string[];
         if (catDomain.length === 0) return undefined;
+
+        const catBaseDomain = snap.baseDomain as readonly string[];
 
         const bandScale = snap.viewportScale as import("../scale/chart-scale").ChartBandPositionScale<string>;
         const bandwidth = bandScale.bandwidth();
@@ -84,12 +156,15 @@ export class CartesianAxisCoordinateSpace {
             const bandStart = bandScale.map(key);
             if (bandStart !== undefined) {
                 if (pixel >= bandStart && pixel <= bandStart + (step > 0 ? step : bandwidth)) {
+                    const baseIndex = catBaseDomain.indexOf(key);
                     return {
                         bandCenter: bandStart + bandwidth / 2,
                         bandStart,
                         bandwidth,
+                        baseIndex: baseIndex !== -1 ? baseIndex : i,
                         index: i,
-                        key
+                        key,
+                        viewportIndex: i
                     };
                 }
             }
@@ -112,12 +187,17 @@ export class CartesianAxisCoordinateSpace {
             }
         }
 
+        const key = String(catDomain[closestIndex]);
+        const baseIndex = catBaseDomain.indexOf(key);
+
         return {
             bandCenter: closestStart + bandwidth / 2,
             bandStart: closestStart,
             bandwidth,
+            baseIndex: baseIndex !== -1 ? baseIndex : closestIndex,
             index: closestIndex,
-            key: String(catDomain[closestIndex])
+            key,
+            viewportIndex: closestIndex
         };
     }
 
@@ -137,5 +217,21 @@ export class CartesianAxisCoordinateSpace {
         const [r0, r1] = snap.range;
         const pixel = r0 + u * (r1 - r0);
         return (snap.baseScale as ChartContinuousPositionScale<number | Date>).invert?.(pixel);
+    }
+
+    public static containsPlotPoint(point: ChartPoint, plotRect: ChartRect): boolean {
+        return (
+            point.x >= plotRect.x &&
+            point.x <= plotRect.x + plotRect.width &&
+            point.y >= plotRect.y &&
+            point.y <= plotRect.y + plotRect.height
+        );
+    }
+
+    public static clampPointToPlot(point: ChartPoint, plotRect: ChartRect): ChartPoint {
+        return {
+            x: Math.max(plotRect.x, Math.min(plotRect.x + plotRect.width, point.x)),
+            y: Math.max(plotRect.y, Math.min(plotRect.y + plotRect.height, point.y))
+        };
     }
 }

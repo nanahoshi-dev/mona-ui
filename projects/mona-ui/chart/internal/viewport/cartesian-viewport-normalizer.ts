@@ -131,7 +131,6 @@ export function toPublicViewportState(
 ): ChartViewportState {
     const axes: ChartViewportWindow[] = [];
 
-    // Helper to add windows in canonical order
     const processMap = (map: ReadonlyMap<string, InternalAxisViewport>, axis: "x" | "y") => {
         for (const [axisId, window] of map) {
             const axisInfo = resolvedAxes?.[axis]?.get(axisId);
@@ -164,6 +163,225 @@ export function toPublicViewportState(
     return { axes };
 }
 
+export function normalizeAxisWindow(
+    rawWindow: ChartViewportWindow,
+    axisInfo: ResolvedAxisInfo,
+    constraint?: ChartViewportConstraint,
+    options?: {
+        clampToData?: boolean;
+        minVisibleCategories?: number;
+        warnedSignatures?: Set<string>;
+    }
+): InternalAxisViewport | undefined {
+    const axis = rawWindow.axis;
+    const axisId = rawWindow.axisId;
+    const isCategory = axisInfo.resolvedType === "category";
+    const warned = options?.warnedSignatures ?? new Set<string>();
+    const clampToData = options?.clampToData !== false;
+    const defaultMinCat = options?.minVisibleCategories ?? 1;
+
+    if (isCategory) {
+        if (rawWindow.kind !== "category") {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Viewport kind "${rawWindow.kind}" does not match category axis "${axisId}".`,
+                `viewport-kind-mismatch-${axis}-${axisId}`
+            );
+            return undefined;
+        }
+
+        const baseCount = Array.isArray(axisInfo.baseDomain) ? axisInfo.baseDomain.length : 0;
+        if (baseCount === 0) return undefined;
+
+        let startIndex = Math.floor(Number(rawWindow.startIndex));
+        let endIndex = Math.ceil(Number(rawWindow.endIndexExclusive));
+
+        if (!Number.isFinite(startIndex) || !Number.isFinite(endIndex) || startIndex >= endIndex) {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Invalid category viewport indices [${startIndex}, ${endIndex}] for axis "${axisId}".`,
+                `viewport-category-index-out-of-range-${axis}-${axisId}`
+            );
+            return undefined;
+        }
+
+        const minVisible = Math.max(
+            1,
+            constraint?.minVisibleCategories ?? defaultMinCat
+        );
+        const maxVisible = Math.min(
+            baseCount,
+            constraint?.maxVisibleCategories ?? baseCount
+        );
+
+        startIndex = clamp(startIndex, 0, baseCount - 1);
+        endIndex = clamp(endIndex, startIndex + 1, baseCount);
+
+        let span = endIndex - startIndex;
+        if (span < minVisible) {
+            span = Math.min(minVisible, baseCount);
+            if (startIndex + span > baseCount) {
+                startIndex = Math.max(0, baseCount - span);
+            }
+            endIndex = startIndex + span;
+        } else if (span > maxVisible) {
+            span = maxVisible;
+            endIndex = startIndex + span;
+        }
+
+        if (startIndex === 0 && endIndex === baseCount) {
+            // Full domain is canonicalized to no entry
+            return undefined;
+        }
+
+        const catDomain = axisInfo.baseDomain as readonly string[];
+        const firstVisibleKey = catDomain[startIndex] !== undefined ? String(catDomain[startIndex]) : undefined;
+        const lastVisibleKey = catDomain[endIndex - 1] !== undefined ? String(catDomain[endIndex - 1]) : undefined;
+
+        return {
+            axis,
+            axisId,
+            endIndexExclusive: endIndex,
+            firstVisibleKey,
+            kind: "category",
+            lastVisibleKey,
+            startIndex
+        };
+    } else {
+        // Continuous
+        if (rawWindow.kind !== "continuous") {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Viewport kind "${rawWindow.kind}" does not match continuous axis "${axisId}".`,
+                `viewport-kind-mismatch-${axis}-${axisId}`
+            );
+            return undefined;
+        }
+
+        let minVal = rawWindow.min instanceof Date ? rawWindow.min.getTime() : Number(rawWindow.min);
+        let maxVal = rawWindow.max instanceof Date ? rawWindow.max.getTime() : Number(rawWindow.max);
+
+        if (!Number.isFinite(minVal) || !Number.isFinite(maxVal) || minVal >= maxVal) {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Invalid continuous viewport domain [${minVal}, ${maxVal}] for axis "${axisId}".`,
+                `viewport-invalid-domain-${axis}-${axisId}`
+            );
+            return undefined;
+        }
+
+        // Validate log sign before constraints/clamping
+        if (axisInfo.resolvedType === "log" && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
+            const baseMin = Number(axisInfo.baseDomain[0]);
+            const baseMax = Number(axisInfo.baseDomain[1]);
+            if (baseMin > 0 && (minVal <= 0 || maxVal <= 0)) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Viewport [${minVal}, ${maxVal}] crosses zero or is negative on positive log axis "${axisId}".`,
+                    `viewport-log-sign-mismatch-${axis}-${axisId}`
+                );
+                return undefined;
+            }
+            if (baseMax < 0 && (minVal >= 0 || maxVal >= 0)) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Viewport [${minVal}, ${maxVal}] crosses zero or is positive on negative log axis "${axisId}".`,
+                    `viewport-log-sign-mismatch-${axis}-${axisId}`
+                );
+                return undefined;
+            }
+        }
+
+        // Apply constraints
+        if (constraint) {
+            if (constraint.minSpan !== undefined && constraint.minSpan > 0 && maxVal - minVal < constraint.minSpan) {
+                const mid = (minVal + maxVal) / 2;
+                minVal = mid - constraint.minSpan / 2;
+                maxVal = mid + constraint.minSpan / 2;
+            }
+            if (constraint.maxSpan !== undefined && constraint.maxSpan > 0 && maxVal - minVal > constraint.maxSpan) {
+                const mid = (minVal + maxVal) / 2;
+                minVal = mid - constraint.maxSpan / 2;
+                maxVal = mid + constraint.maxSpan / 2;
+            }
+            if (constraint.maxZoom !== undefined && constraint.maxZoom > 1 && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
+                const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
+                const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
+                const baseSpan = bMax - bMin;
+                if (baseSpan > 0) {
+                    const minAllowedSpan = baseSpan / constraint.maxZoom;
+                    if (maxVal - minVal < minAllowedSpan) {
+                        const mid = (minVal + maxVal) / 2;
+                        minVal = mid - minAllowedSpan / 2;
+                        maxVal = mid + minAllowedSpan / 2;
+                    }
+                }
+            }
+        }
+
+        if (clampToData && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
+            const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
+            const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
+            if (Number.isFinite(bMin) && Number.isFinite(bMax)) {
+                const span = maxVal - minVal;
+                const baseSpan = bMax - bMin;
+                if (span >= baseSpan) {
+                    minVal = bMin;
+                    maxVal = bMax;
+                } else {
+                    if (minVal < bMin) {
+                        minVal = bMin;
+                        maxVal = bMin + span;
+                    }
+                    if (maxVal > bMax) {
+                        maxVal = bMax;
+                        minVal = bMax - span;
+                    }
+                }
+            }
+        }
+
+        // Re-validate log sign after constraints/clamping
+        if (axisInfo.resolvedType === "log" && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
+            const baseMin = Number(axisInfo.baseDomain[0]);
+            const baseMax = Number(axisInfo.baseDomain[1]);
+            if (baseMin > 0 && (minVal <= 0 || maxVal <= 0)) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Viewport [${minVal}, ${maxVal}] crosses zero or is negative on positive log axis "${axisId}".`,
+                    `viewport-log-sign-mismatch-${axis}-${axisId}`
+                );
+                return undefined;
+            }
+            if (baseMax < 0 && (minVal >= 0 || maxVal >= 0)) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Viewport [${minVal}, ${maxVal}] crosses zero or is positive on negative log axis "${axisId}".`,
+                    `viewport-log-sign-mismatch-${axis}-${axisId}`
+                );
+                return undefined;
+            }
+        }
+
+        // Full domain check
+        if (Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
+            const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
+            const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
+            if (Math.abs(minVal - bMin) < 1e-9 && Math.abs(maxVal - bMax) < 1e-9) {
+                return undefined;
+            }
+        }
+
+        return {
+            axis,
+            axisId,
+            kind: "continuous",
+            max: maxVal,
+            min: minVal
+        };
+    }
+}
+
 export function normalizeViewportState(
     publicState: ChartViewportState | undefined | null,
     resolvedAxes: ResolvedAxisInfoMap,
@@ -177,8 +395,6 @@ export function normalizeViewportState(
     const xMap = new Map<string, InternalAxisViewport>();
     const yMap = new Map<string, InternalAxisViewport>();
     const warned = options?.warnedSignatures ?? new Set<string>();
-    const clampToData = options?.clampToData !== false;
-    const defaultMinCat = options?.minVisibleCategories ?? 1;
 
     if (!publicState || !Array.isArray(publicState.axes) || publicState.axes.length === 0) {
         return { x: xMap, y: yMap };
@@ -223,210 +439,12 @@ export function normalizeViewportState(
             continue;
         }
 
-        const isCategory = axisInfo.resolvedType === "category";
         const constraint = options?.constraints?.find(c => c.axis === axis && c.axisId === axisId);
+        const normalized = normalizeAxisWindow(rawWindow, axisInfo, constraint, options);
 
-        if (isCategory) {
-            if (rawWindow.kind !== "category") {
-                ChartDiagnostics.warnOnce(
-                    warned,
-                    `Viewport kind "${rawWindow.kind}" does not match category axis "${axisId}".`,
-                    `viewport-kind-mismatch-${axis}-${axisId}`
-                );
-                continue;
-            }
-
-            const baseCount = Array.isArray(axisInfo.baseDomain) ? axisInfo.baseDomain.length : 0;
-            if (baseCount === 0) continue;
-
-            let startIndex = Math.floor(Number(rawWindow.startIndex));
-            let endIndex = Math.ceil(Number(rawWindow.endIndexExclusive));
-
-            if (!Number.isFinite(startIndex) || !Number.isFinite(endIndex) || startIndex >= endIndex) {
-                ChartDiagnostics.warnOnce(
-                    warned,
-                    `Invalid category viewport indices [${startIndex}, ${endIndex}] for axis "${axisId}".`,
-                    `viewport-category-index-out-of-range-${axis}-${axisId}`
-                );
-                continue;
-            }
-
-            const minVisible = Math.max(
-                1,
-                constraint?.minVisibleCategories ?? defaultMinCat
-            );
-            const maxVisible = Math.min(
-                baseCount,
-                constraint?.maxVisibleCategories ?? baseCount
-            );
-
-            startIndex = clamp(startIndex, 0, baseCount - 1);
-            endIndex = clamp(endIndex, startIndex + 1, baseCount);
-
-            let span = endIndex - startIndex;
-            if (span < minVisible) {
-                span = Math.min(minVisible, baseCount);
-                if (startIndex + span > baseCount) {
-                    startIndex = Math.max(0, baseCount - span);
-                }
-                endIndex = startIndex + span;
-            } else if (span > maxVisible) {
-                span = maxVisible;
-                endIndex = startIndex + span;
-            }
-
-            if (startIndex === 0 && endIndex === baseCount) {
-                // Full domain is canonicalized to no entry
-                continue;
-            }
-
-            const catDomain = axisInfo.baseDomain as readonly string[];
-            const firstVisibleKey = catDomain[startIndex] !== undefined ? String(catDomain[startIndex]) : undefined;
-            const lastVisibleKey = catDomain[endIndex - 1] !== undefined ? String(catDomain[endIndex - 1]) : undefined;
-
+        if (normalized) {
             const targetMap = axis === "x" ? xMap : yMap;
-            targetMap.set(axisId, {
-                axis,
-                axisId,
-                endIndexExclusive: endIndex,
-                firstVisibleKey,
-                kind: "category",
-                lastVisibleKey,
-                startIndex
-            });
-        } else {
-            // Continuous
-            if (rawWindow.kind !== "continuous") {
-                ChartDiagnostics.warnOnce(
-                    warned,
-                    `Viewport kind "${rawWindow.kind}" does not match continuous axis "${axisId}".`,
-                    `viewport-kind-mismatch-${axis}-${axisId}`
-                );
-                continue;
-            }
-
-            let minVal = rawWindow.min instanceof Date ? rawWindow.min.getTime() : Number(rawWindow.min);
-            let maxVal = rawWindow.max instanceof Date ? rawWindow.max.getTime() : Number(rawWindow.max);
-
-            if (!Number.isFinite(minVal) || !Number.isFinite(maxVal) || minVal >= maxVal) {
-                ChartDiagnostics.warnOnce(
-                    warned,
-                    `Invalid continuous viewport domain [${minVal}, ${maxVal}] for axis "${axisId}".`,
-                    `viewport-invalid-domain-${axis}-${axisId}`
-                );
-                continue;
-            }
-
-            // Validate log sign before constraints/clamping
-            if (axisInfo.resolvedType === "log" && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-                const baseMin = Number(axisInfo.baseDomain[0]);
-                const baseMax = Number(axisInfo.baseDomain[1]);
-                if (baseMin > 0 && (minVal <= 0 || maxVal <= 0)) {
-                    ChartDiagnostics.warnOnce(
-                        warned,
-                        `Viewport [${minVal}, ${maxVal}] crosses zero or is negative on positive log axis "${axisId}".`,
-                        `viewport-log-sign-mismatch-${axis}-${axisId}`
-                    );
-                    continue;
-                }
-                if (baseMax < 0 && (minVal >= 0 || maxVal >= 0)) {
-                    ChartDiagnostics.warnOnce(
-                        warned,
-                        `Viewport [${minVal}, ${maxVal}] crosses zero or is positive on negative log axis "${axisId}".`,
-                        `viewport-log-sign-mismatch-${axis}-${axisId}`
-                    );
-                    continue;
-                }
-            }
-
-            // Apply constraints
-            if (constraint) {
-                if (constraint.minSpan !== undefined && constraint.minSpan > 0 && maxVal - minVal < constraint.minSpan) {
-                    const mid = (minVal + maxVal) / 2;
-                    minVal = mid - constraint.minSpan / 2;
-                    maxVal = mid + constraint.minSpan / 2;
-                }
-                if (constraint.maxSpan !== undefined && constraint.maxSpan > 0 && maxVal - minVal > constraint.maxSpan) {
-                    const mid = (minVal + maxVal) / 2;
-                    minVal = mid - constraint.maxSpan / 2;
-                    maxVal = mid + constraint.maxSpan / 2;
-                }
-                if (constraint.maxZoom !== undefined && constraint.maxZoom > 1 && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-                    const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
-                    const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
-                    const baseSpan = bMax - bMin;
-                    if (baseSpan > 0) {
-                        const minAllowedSpan = baseSpan / constraint.maxZoom;
-                        if (maxVal - minVal < minAllowedSpan) {
-                            const mid = (minVal + maxVal) / 2;
-                            minVal = mid - minAllowedSpan / 2;
-                            maxVal = mid + minAllowedSpan / 2;
-                        }
-                    }
-                }
-            }
-
-            if (clampToData && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-                const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
-                const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
-                if (Number.isFinite(bMin) && Number.isFinite(bMax)) {
-                    const span = maxVal - minVal;
-                    const baseSpan = bMax - bMin;
-                    if (span >= baseSpan) {
-                        minVal = bMin;
-                        maxVal = bMax;
-                    } else {
-                        if (minVal < bMin) {
-                            minVal = bMin;
-                            maxVal = bMin + span;
-                        }
-                        if (maxVal > bMax) {
-                            maxVal = bMax;
-                            minVal = bMax - span;
-                        }
-                    }
-                }
-            }
-
-            // Re-validate log sign after constraints/clamping
-            if (axisInfo.resolvedType === "log" && Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-                const baseMin = Number(axisInfo.baseDomain[0]);
-                const baseMax = Number(axisInfo.baseDomain[1]);
-                if (baseMin > 0 && (minVal <= 0 || maxVal <= 0)) {
-                    ChartDiagnostics.warnOnce(
-                        warned,
-                        `Viewport [${minVal}, ${maxVal}] crosses zero or is negative on positive log axis "${axisId}".`,
-                        `viewport-log-sign-mismatch-${axis}-${axisId}`
-                    );
-                    continue;
-                }
-                if (baseMax < 0 && (minVal >= 0 || maxVal >= 0)) {
-                    ChartDiagnostics.warnOnce(
-                        warned,
-                        `Viewport [${minVal}, ${maxVal}] crosses zero or is positive on negative log axis "${axisId}".`,
-                        `viewport-log-sign-mismatch-${axis}-${axisId}`
-                    );
-                    continue;
-                }
-            }
-
-            // Full domain check
-            if (Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-                const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
-                const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
-                if (Math.abs(minVal - bMin) < 1e-9 && Math.abs(maxVal - bMax) < 1e-9) {
-                    continue;
-                }
-            }
-
-            const targetMap = axis === "x" ? xMap : yMap;
-            targetMap.set(axisId, {
-                axis,
-                axisId,
-                kind: "continuous",
-                max: maxVal,
-                min: minVal
-            });
+            targetMap.set(axisId, normalized);
         }
     }
 

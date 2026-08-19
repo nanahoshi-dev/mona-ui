@@ -16,6 +16,41 @@ import {
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 
 export class CartesianViewportLinker {
+    public static filterValidLinkGroups(
+        linkGroups: readonly ChartViewportLinkGroup[] | undefined,
+        warned?: Set<string>
+    ): readonly ChartViewportLinkGroup[] {
+        if (!linkGroups || linkGroups.length === 0) return [];
+        const seenAxes = new Set<string>();
+        const validGroups: ChartViewportLinkGroup[] = [];
+
+        for (const group of linkGroups) {
+            const uniqueGroupAxes: ChartViewportAxisRef[] = [];
+            for (const axis of group.axes) {
+                const key = `${axis.axis}:${axis.axisId}`;
+                if (seenAxes.has(key)) {
+                    if (warned) {
+                        ChartDiagnostics.warnOnce(
+                            warned,
+                            `Axis "${key}" is defined in multiple link groups. Ignoring duplicate membership in group "${group.id}".`,
+                            `duplicate-link-group-axis-${key}-${group.id}`
+                        );
+                    }
+                } else {
+                    seenAxes.add(key);
+                    uniqueGroupAxes.push(axis);
+                }
+            }
+            if (uniqueGroupAxes.length > 1) {
+                validGroups.push({
+                    ...group,
+                    axes: uniqueGroupAxes
+                });
+            }
+        }
+        return validGroups;
+    }
+
     public static expandTargetAxesWithLinks(
         primaryTargets: readonly ChartViewportAxisRef[],
         linkGroups: readonly ChartViewportLinkGroup[] | undefined
@@ -24,6 +59,7 @@ export class CartesianViewportLinker {
             return primaryTargets;
         }
 
+        const validGroups = this.filterValidLinkGroups(linkGroups);
         const resultSet = new Map<string, ChartViewportAxisRef>();
         for (const target of primaryTargets) {
             const key = `${target.axis}:${target.axisId}`;
@@ -31,7 +67,7 @@ export class CartesianViewportLinker {
         }
 
         for (const target of primaryTargets) {
-            for (const group of linkGroups) {
+            for (const group of validGroups) {
                 const isMember = group.axes.some(a => a.axis === target.axis && a.axisId === target.axisId);
                 if (isMember) {
                     for (const sibling of group.axes) {
@@ -63,10 +99,15 @@ export class CartesianViewportLinker {
             return { changedAxes: [], viewport: viewportState };
         }
 
+        const warned = options?.warnedSignatures ?? new Set<string>();
+        const validGroups = this.filterValidLinkGroups(linkGroups, warned);
+        if (validGroups.length === 0) {
+            return { changedAxes: [], viewport: viewportState };
+        }
+
         const nextX = new Map<string, InternalAxisViewport>(viewportState.x);
         const nextY = new Map<string, InternalAxisViewport>(viewportState.y);
         const changedAxes: ChartViewportAxisRef[] = [];
-        const warned = options?.warnedSignatures ?? new Set<string>();
 
         for (const sourceRef of sourceAxes) {
             const sourceSnap = coordinateSpace.get(sourceRef);
@@ -74,7 +115,7 @@ export class CartesianViewportLinker {
 
             const sourceWin = sourceRef.axis === "x" ? nextX.get(sourceRef.axisId) : nextY.get(sourceRef.axisId);
 
-            for (const group of linkGroups) {
+            for (const group of validGroups) {
                 const isMember = group.axes.some(a => a.axis === sourceRef.axis && a.axisId === sourceRef.axisId);
                 if (!isMember) continue;
 

@@ -25,7 +25,7 @@ import type {
 } from "../context/chart-registration-context";
 import type { ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { CartesianLayoutEngine } from "./cartesian-layout-engine";
+import { CartesianLayoutEngine, type CartesianXYLayoutRuntime } from "./cartesian-layout-engine";
 import { FunnelLayoutEngine } from "./funnel-layout-engine";
 import { HeatmapLayoutEngine } from "./heatmap-layout-engine";
 import { HierarchicalLayoutEngine } from "./hierarchical-layout-engine";
@@ -34,6 +34,11 @@ import { WaterfallLayoutEngine } from "./waterfall-layout-engine";
 
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
 import type { InternalCartesianViewportState } from "../viewport/cartesian-viewport-normalizer";
+
+export interface ChartLayoutComputation {
+    readonly runtime?: CartesianXYLayoutRuntime;
+    readonly scene: ChartScene;
+}
 
 const globalWarnedSignatures = new Set<string>();
 
@@ -102,7 +107,7 @@ export function resolveChartCoordinateSystem(
 }
 
 export class ChartLayoutEngine {
-    public static computeScene(options: ChartLayoutOptions): ChartScene {
+    public static compute(options: ChartLayoutOptions): ChartLayoutComputation {
         const { series } = options;
         const warnedSet = options.warnedDiagnosticSignatures ?? globalWarnedSignatures;
         const coordinateSystem = resolveChartCoordinateSystem(series, warnedSet);
@@ -150,7 +155,7 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Hierarchical charts (treemap) cannot be mixed with other chart families.",
                     warnedSet
                 );
-                return HierarchicalLayoutEngine.createEmptyScene(options.containerWidth, options.containerHeight);
+                return { scene: HierarchicalLayoutEngine.createEmptyScene(options.containerWidth, options.containerHeight) };
             }
 
             if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
@@ -169,15 +174,17 @@ export class ChartLayoutEngine {
                 y: 0
             };
 
-            return HierarchicalLayoutEngine.layout(
-                activeTreemap,
-                plotRect,
-                options.containerWidth,
-                options.containerHeight,
-                options.styleResolver,
-                options.rootData,
-                warnedSet
-            );
+            return {
+                scene: HierarchicalLayoutEngine.layout(
+                    activeTreemap,
+                    plotRect,
+                    options.containerWidth,
+                    options.containerHeight,
+                    options.styleResolver,
+                    options.rootData,
+                    warnedSet
+                )
+            };
         }
 
         const funnelSeries = series.filter(
@@ -193,7 +200,7 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Funnel series cannot be mixed with other chart series.",
                     warnedSet
                 );
-                return FunnelLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight);
+                return { scene: FunnelLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
             }
 
             if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
@@ -212,15 +219,17 @@ export class ChartLayoutEngine {
                 y: 8
             };
 
-            return FunnelLayoutEngine.layout(
-                activeFunnel,
-                plotRect,
-                options.containerWidth,
-                options.containerHeight,
-                options.styleResolver,
-                options.rootData,
-                warnedSet
-            );
+            return {
+                scene: FunnelLayoutEngine.layout(
+                    activeFunnel,
+                    plotRect,
+                    options.containerWidth,
+                    options.containerHeight,
+                    options.styleResolver,
+                    options.rootData,
+                    warnedSet
+                )
+            };
         }
 
         const waterfallSeries = series.filter(
@@ -236,20 +245,22 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Waterfall series cannot be mixed with other chart series.",
                     warnedSet
                 );
-                return WaterfallLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight);
+                return { scene: WaterfallLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
             }
 
-            return WaterfallLayoutEngine.layout(
-                waterfallSeries[0],
-                options.containerWidth,
-                options.containerHeight,
-                options.styleResolver,
-                options.xAxis,
-                options.yAxis,
-                options.rootData,
-                options.rootXField,
-                warnedSet
-            );
+            return {
+                scene: WaterfallLayoutEngine.layout(
+                    waterfallSeries[0],
+                    options.containerWidth,
+                    options.containerHeight,
+                    options.styleResolver,
+                    options.xAxis,
+                    options.yAxis,
+                    options.rootData,
+                    options.rootXField,
+                    warnedSet
+                )
+            };
         }
 
         const heatmapSeries = series.filter(
@@ -263,7 +274,7 @@ export class ChartLayoutEngine {
                     "[MonaChart] Multiple heatmap series in the same chart are unsupported.",
                     warnedSet
                 );
-                return HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight);
+                return { scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
             }
             if (series.length > heatmapSeries.length) {
                 const hasPolar = series.some(s => isPolarCoordinateFamily(getChartSeriesFamily(s.type)));
@@ -280,20 +291,22 @@ export class ChartLayoutEngine {
                         warnedSet
                     );
                 }
-                return HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight);
+                return { scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
             }
 
-            return HeatmapLayoutEngine.computeScene({
-                containerHeight: options.containerHeight,
-                containerWidth: options.containerWidth,
-                rootData: options.rootData,
-                rootXField: options.rootXField,
-                series: heatmapSeries[0],
-                styleResolver: options.styleResolver,
-                warnedDiagnosticSignatures: warnedSet,
-                xAxis: options.xAxis,
-                yAxis: options.yAxis
-            });
+            return {
+                scene: HeatmapLayoutEngine.computeScene({
+                    containerHeight: options.containerHeight,
+                    containerWidth: options.containerWidth,
+                    rootData: options.rootData,
+                    rootXField: options.rootXField,
+                    series: heatmapSeries[0],
+                    styleResolver: options.styleResolver,
+                    warnedDiagnosticSignatures: warnedSet,
+                    xAxis: options.xAxis,
+                    yAxis: options.yAxis
+                })
+            };
         }
 
         if (families.size > 1) {
@@ -305,20 +318,22 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
-                    arcMode: "radialBar",
-                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
-                    coordinateSystem: "polar",
-                    hasRenderableData: false,
-                    height: options.containerHeight,
-                    hitTargets: [],
-                    innerRadius: 0,
-                    interactionBuckets: [],
-                    legendItems: [],
-                    outerRadius: 0,
-                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                    polarKind: "arc",
-                    series: [],
-                    width: options.containerWidth
+                    scene: {
+                        arcMode: "radialBar",
+                        center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                        coordinateSystem: "polar",
+                        hasRenderableData: false,
+                        height: options.containerHeight,
+                        hitTargets: [],
+                        innerRadius: 0,
+                        interactionBuckets: [],
+                        legendItems: [],
+                        outerRadius: 0,
+                        plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                        polarKind: "arc",
+                        series: [],
+                        width: options.containerWidth
+                    }
                 };
             }
             if (famArray.includes("radialArc") && famArray.includes("sector")) {
@@ -328,20 +343,22 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
-                    arcMode: "radialBar",
-                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
-                    coordinateSystem: "polar",
-                    hasRenderableData: false,
-                    height: options.containerHeight,
-                    hitTargets: [],
-                    innerRadius: 0,
-                    interactionBuckets: [],
-                    legendItems: [],
-                    outerRadius: 0,
-                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                    polarKind: "arc",
-                    series: [],
-                    width: options.containerWidth
+                    scene: {
+                        arcMode: "radialBar",
+                        center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                        coordinateSystem: "polar",
+                        hasRenderableData: false,
+                        height: options.containerHeight,
+                        hitTargets: [],
+                        innerRadius: 0,
+                        interactionBuckets: [],
+                        legendItems: [],
+                        outerRadius: 0,
+                        plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                        polarKind: "arc",
+                        series: [],
+                        width: options.containerWidth
+                    }
                 };
             }
             if (famArray.includes("radialArc") && (famArray.includes("radar") || famArray.includes("polar"))) {
@@ -351,40 +368,44 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
-                    arcMode: "radialBar",
-                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
-                    coordinateSystem: "polar",
-                    hasRenderableData: false,
-                    height: options.containerHeight,
-                    hitTargets: [],
-                    innerRadius: 0,
-                    interactionBuckets: [],
-                    legendItems: [],
-                    outerRadius: 0,
-                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                    polarKind: "arc",
-                    series: [],
-                    width: options.containerWidth
+                    scene: {
+                        arcMode: "radialBar",
+                        center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                        coordinateSystem: "polar",
+                        hasRenderableData: false,
+                        height: options.containerHeight,
+                        hitTargets: [],
+                        innerRadius: 0,
+                        interactionBuckets: [],
+                        legendItems: [],
+                        outerRadius: 0,
+                        plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                        polarKind: "arc",
+                        series: [],
+                        width: options.containerWidth
+                    }
                 };
             }
             if (famArray.includes("cartesian") && (famArray.includes("sector") || famArray.includes("radar") || famArray.includes("polar"))) {
                 return {
-                    axes: [],
-                    barHitTargets: [],
-                    cartesianKind: "xy",
-                    coordinateSystem: "cartesian",
-                    hasRenderableData: false,
-                    height: options.containerHeight,
-                    hitTargets: [],
-                    interactionAxis: "x",
-                    interactionBuckets: [],
-                    legendItems: [],
-                    orientation: "vertical",
-                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                    series: [],
-                    width: options.containerWidth,
-                    xAxisType: "category",
-                    yAxisType: "linear"
+                    scene: {
+                        axes: [],
+                        barHitTargets: [],
+                        cartesianKind: "xy",
+                        coordinateSystem: "cartesian",
+                        hasRenderableData: false,
+                        height: options.containerHeight,
+                        hitTargets: [],
+                        interactionAxis: "x",
+                        interactionBuckets: [],
+                        legendItems: [],
+                        orientation: "vertical",
+                        plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                        series: [],
+                        width: options.containerWidth,
+                        xAxisType: "category",
+                        yAxisType: "linear"
+                    }
                 };
             }
             if (famArray.includes("sector") && (famArray.includes("radar") || famArray.includes("polar"))) {
@@ -394,17 +415,19 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
-                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
-                    coordinateSystem: "polar",
-                    hasRenderableData: false,
-                    height: options.containerHeight,
-                    hitTargets: [],
-                    interactionBuckets: [],
-                    legendItems: [],
-                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                    polarKind: "sector",
-                    series: [],
-                    width: options.containerWidth
+                    scene: {
+                        center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                        coordinateSystem: "polar",
+                        hasRenderableData: false,
+                        height: options.containerHeight,
+                        hitTargets: [],
+                        interactionBuckets: [],
+                        legendItems: [],
+                        plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                        polarKind: "sector",
+                        series: [],
+                        width: options.containerWidth
+                    }
                 };
             }
             if (famArray.includes("radar") && famArray.includes("polar")) {
@@ -414,40 +437,42 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
-                    angularAxis: {
-                        axisLine: true,
-                        gridLines: true,
-                        labelOffset: 10,
-                        labels: true,
-                        mode: "category",
-                        rotation: 0,
-                        ticks: [],
-                        visible: true
-                    },
-                    axisMode: "radar",
-                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
-                    coordinateSystem: "polar",
-                    hasRenderableData: false,
-                    height: options.containerHeight,
-                    hitTargets: [],
-                    interactionBuckets: [],
-                    legendItems: [],
-                    outerRadius: 0,
-                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                    polarKind: "axis",
-                    radialAxis: {
-                        axisLine: true,
-                        domain: [0, 1],
-                        gridLines: true,
-                        gridShape: "polygon",
-                        labelAngle: 0,
-                        labelOffset: 6,
-                        labels: true,
-                        ticks: [],
-                        visible: true
-                    },
-                    series: [],
-                    width: options.containerWidth
+                    scene: {
+                        angularAxis: {
+                            axisLine: true,
+                            gridLines: true,
+                            labelOffset: 10,
+                            labels: true,
+                            mode: "category",
+                            rotation: 0,
+                            ticks: [],
+                            visible: true
+                        },
+                        axisMode: "radar",
+                        center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                        coordinateSystem: "polar",
+                        hasRenderableData: false,
+                        height: options.containerHeight,
+                        hitTargets: [],
+                        interactionBuckets: [],
+                        legendItems: [],
+                        outerRadius: 0,
+                        plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                        polarKind: "axis",
+                        radialAxis: {
+                            axisLine: true,
+                            domain: [0, 1],
+                            gridLines: true,
+                            gridShape: "polygon",
+                            labelAngle: 0,
+                            labelOffset: 6,
+                            labels: true,
+                            ticks: [],
+                            visible: true
+                        },
+                        series: [],
+                        width: options.containerWidth
+                    }
                 };
             }
         }
@@ -460,20 +485,22 @@ export class ChartLayoutEngine {
                 warnedSet
             );
             return {
-                arcMode: "radialBar",
-                center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
-                coordinateSystem: "polar",
-                hasRenderableData: false,
-                height: options.containerHeight,
-                hitTargets: [],
-                innerRadius: 0,
-                interactionBuckets: [],
-                legendItems: [],
-                outerRadius: 0,
-                plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                polarKind: "arc",
-                series: [],
-                width: options.containerWidth
+                scene: {
+                    arcMode: "radialBar",
+                    center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
+                    coordinateSystem: "polar",
+                    hasRenderableData: false,
+                    height: options.containerHeight,
+                    hitTargets: [],
+                    innerRadius: 0,
+                    interactionBuckets: [],
+                    legendItems: [],
+                    outerRadius: 0,
+                    plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                    polarKind: "arc",
+                    series: [],
+                    width: options.containerWidth
+                }
             };
         }
 
@@ -510,24 +537,26 @@ export class ChartLayoutEngine {
                 }
             }
 
-            return PolarLayoutEngine.computeScene({
-                angularAxis: options.angularAxis,
-                containerHeight: options.containerHeight,
-                containerWidth: options.containerWidth,
-                measurements: options.measurements,
-                radialAxis: options.radialAxis,
-                rootData: options.rootData,
-                series: polarSeries,
-                styleResolver: options.styleResolver,
-                warnedDiagnosticSignatures: warnedSet
-            });
+            return {
+                scene: PolarLayoutEngine.computeScene({
+                    angularAxis: options.angularAxis,
+                    containerHeight: options.containerHeight,
+                    containerWidth: options.containerWidth,
+                    measurements: options.measurements,
+                    radialAxis: options.radialAxis,
+                    rootData: options.rootData,
+                    series: polarSeries,
+                    styleResolver: options.styleResolver,
+                    warnedDiagnosticSignatures: warnedSet
+                })
+            };
         }
 
         const cartesianSeries = series.filter(
             (s): s is ChartCartesianSeriesRegistration => getChartSeriesFamily(s.type) === "cartesian"
         );
 
-        return CartesianLayoutEngine.computeScene({
+        return CartesianLayoutEngine.compute({
             containerHeight: options.containerHeight,
             containerWidth: options.containerWidth,
             measurements: options.measurements,
@@ -542,5 +571,9 @@ export class ChartLayoutEngine {
             yAxis: options.yAxis,
             yAxes: options.yAxes
         });
+    }
+
+    public static computeScene(options: ChartLayoutOptions): ChartScene {
+        return this.compute(options).scene;
     }
 }

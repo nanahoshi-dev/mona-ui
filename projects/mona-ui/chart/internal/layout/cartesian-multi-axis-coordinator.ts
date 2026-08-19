@@ -37,6 +37,7 @@ import {
     type CartesianAxisCoordinateSnapshot
 } from "../viewport/cartesian-axis-coordinate-space";
 import type { InternalCartesianViewportState } from "../viewport/cartesian-viewport-normalizer";
+import { createCartesianAxisMeasurementKey } from "./cartesian-axis-measurement-key";
 
 export interface MultiAxisPreparationOptions {
     readonly axisResolution: CartesianAxisRegistryResolution;
@@ -1037,7 +1038,7 @@ export class CartesianMultiAxisCoordinator {
 
         for (let i = 0; i < rawTicks.length; i++) {
             const val = rawTicks[i];
-            const tickKey = `axis:${axis.dimension}:${encodeURIComponent(axis.axisId)}:${resolvedType}:${String(val)}`;
+            const tickKey = createCartesianAxisMeasurementKey(axis.dimension, axis.axisId, resolvedType, val);
             const measurement = labelMeasurements.get(tickKey);
 
             let width: number;
@@ -1144,7 +1145,7 @@ export class CartesianMultiAxisCoordinator {
                 formattedText = String(val);
             }
 
-            const tickKey = `axis:${axis.dimension}:${encodeURIComponent(axis.axisId)}:${resolvedType}:${String(val)}`;
+            const tickKey = createCartesianAxisMeasurementKey(axis.dimension, axis.axisId, resolvedType, val);
             const measurement = labelMeasurements.get(tickKey);
             const estimated = !measurement ? CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText) : undefined;
 

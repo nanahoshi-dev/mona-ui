@@ -76,7 +76,7 @@ describe("CartesianViewportTargetResolver", () => {
         expect(result.targetAxes).toEqual([{ axis: "y", axisId: "y-left" }]);
     });
 
-    it("should detect right axis gutter hit", () => {
+    it("should detect right secondary axis gutter hit and target only the secondary axis", () => {
         // Right axis gutter is from x: 450 to x: 495, y: 30 to 330
         const result = CartesianViewportTargetResolver.resolveTargets(
             { x: 470, y: 150 },
@@ -91,7 +91,7 @@ describe("CartesianViewportTargetResolver", () => {
         ]);
     });
 
-    it("should target all visible axes when pointer is inside plot rect and panAxes is auto", () => {
+    it("should target primary X axis by default in vertical Cartesian when panAxes is auto", () => {
         const result = CartesianViewportTargetResolver.resolveTargets(
             { x: 200, y: 150 },
             plotRect,
@@ -101,13 +101,42 @@ describe("CartesianViewportTargetResolver", () => {
         );
         expect(result.isAxisGutterHit).toBe(false);
         expect(result.targetAxes).toEqual([
-            { axis: "x", axisId: "x-bottom" },
-            { axis: "y", axisId: "y-left" },
-            { axis: "y", axisId: "y-right" }
+            { axis: "x", axisId: "x-bottom" }
         ]);
     });
 
-    it("should target only X axes when panAxes is locked to x", () => {
+    it("should target primary Y axis by default in horizontal Cartesian when panAxes is auto", () => {
+        const result = CartesianViewportTargetResolver.resolveTargets(
+            { x: 200, y: 150 },
+            plotRect,
+            axisScenes,
+            options,
+            "horizontal"
+        );
+        expect(result.isAxisGutterHit).toBe(false);
+        expect(result.targetAxes).toEqual([
+            { axis: "y", axisId: "y-left" }
+        ]);
+    });
+
+    it("should target primary X and primary Y when profile is xy", () => {
+        const result = CartesianViewportTargetResolver.resolveTargets(
+            { x: 200, y: 150 },
+            plotRect,
+            axisScenes,
+            options,
+            "vertical",
+            undefined,
+            "xy"
+        );
+        expect(result.isAxisGutterHit).toBe(false);
+        expect(result.targetAxes).toEqual([
+            { axis: "x", axisId: "x-bottom" },
+            { axis: "y", axisId: "y-left" }
+        ]);
+    });
+
+    it("should target only primary X when panAxes is locked to x", () => {
         const xOnlyOptions = normalizeChartNavigationOptions({ panAxes: "x" });
         const result = CartesianViewportTargetResolver.resolveTargets(
             { x: 200, y: 150 },
@@ -120,7 +149,7 @@ describe("CartesianViewportTargetResolver", () => {
         expect(result.targetAxes).toEqual([{ axis: "x", axisId: "x-bottom" }]);
     });
 
-    it("should target only Y axes when panAxes is locked to y", () => {
+    it("should target only primary Y when panAxes is locked to y", () => {
         const yOnlyOptions = normalizeChartNavigationOptions({ panAxes: "y" });
         const result = CartesianViewportTargetResolver.resolveTargets(
             { x: 200, y: 150 },
@@ -131,8 +160,7 @@ describe("CartesianViewportTargetResolver", () => {
         );
         expect(result.isAxisGutterHit).toBe(false);
         expect(result.targetAxes).toEqual([
-            { axis: "y", axisId: "y-left" },
-            { axis: "y", axisId: "y-right" }
+            { axis: "y", axisId: "y-left" }
         ]);
     });
 
@@ -141,8 +169,11 @@ describe("CartesianViewportTargetResolver", () => {
             { axis: "x", axisId: "x-bottom" }
         ]);
         expect(CartesianViewportTargetResolver.resolveExplicitTarget("y", axisScenes)).toEqual([
-            { axis: "y", axisId: "y-left" },
-            { axis: "y", axisId: "y-right" }
+            { axis: "y", axisId: "y-left" }
+        ]);
+        expect(CartesianViewportTargetResolver.resolveExplicitTarget("xy", axisScenes)).toEqual([
+            { axis: "x", axisId: "x-bottom" },
+            { axis: "y", axisId: "y-left" }
         ]);
         expect(
             CartesianViewportTargetResolver.resolveExplicitTarget(

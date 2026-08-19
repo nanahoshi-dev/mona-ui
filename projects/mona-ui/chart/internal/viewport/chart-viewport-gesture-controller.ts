@@ -34,6 +34,8 @@ export interface ChartViewportGestureContext {
     plotRect: ChartRect;
     onCursorChange(cursor: string | null): void;
     onViewportChange(nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent): void;
+    setPointerCapture?(pointerId: number, target?: Element | null): void;
+    releasePointerCapture?(pointerId: number, target?: Element | null): void;
 }
 
 export class ChartViewportGestureController {
@@ -43,6 +45,7 @@ export class ChartViewportGestureController {
     #pinchSession: ChartViewportPinchSession | null = null;
     #wheelSession: ChartViewportWheelSession | null = null;
     #isClickSuppressed = false;
+    #targetElement: Element | null = null;
 
     public constructor(context: ChartViewportGestureContext) {
         this.#context = context;
@@ -56,6 +59,12 @@ export class ChartViewportGestureController {
         return this.#isClickSuppressed;
     }
 
+    public consumeClickSuppression(): boolean {
+        const suppressed = this.#isClickSuppressed;
+        this.#isClickSuppressed = false;
+        return suppressed;
+    }
+
     public get isDragging(): boolean {
         return this.#dragSession !== null && this.#dragSession.isThresholdMet;
     }
@@ -64,10 +73,11 @@ export class ChartViewportGestureController {
         return this.#pinchSession !== null;
     }
 
-    public handlePointerDown(event: PointerEvent, elementPoint: ChartPoint): boolean {
+    public handlePointerDown(event: PointerEvent, elementPoint: ChartPoint, targetElement?: Element | null): boolean {
         const nav = this.#context.navigationOptions;
         if (!nav.enabled) return false;
 
+        this.#targetElement = targetElement ?? (event.target as Element | null);
         this.#activePointers.set(event.pointerId, elementPoint);
 
         // Check for pinch zoom start (2 pointers)
@@ -92,9 +102,15 @@ export class ChartViewportGestureController {
                 this.#context.linkGroups
             );
 
-            this.#dragSession = null;
+            if (this.#dragSession) {
+                if (this.#dragSession.isThresholdMet) {
+                    this.#dispatchChangeEvent("drag", "end", this.#context.currentViewport, this.#dragSession.initialViewport, this.#dragSession.targetAxes);
+                }
+                this.#dragSession = null;
+            }
+
             this.#pinchSession = {
-                initialDistance: distance,
+                initialDistance: distance > 0 ? distance : 1,
                 initialViewport: this.#context.currentViewport,
                 lastCentroid: centroid,
                 lastDistance: distance,
@@ -156,18 +172,12 @@ export class ChartViewportGestureController {
             const distance = Math.hypot(p2.x - p1.x, p2.y - p1.y);
             const centroid: ChartPoint = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
 
-            const scaleFactor = this.#pinchSession.lastDistance > 0
-                ? distance / this.#pinchSession.lastDistance
+            const totalScaleFactor = this.#pinchSession.initialDistance > 0
+                ? distance / this.#pinchSession.initialDistance
                 : 1;
 
-            const deltaX = centroid.x - this.#pinchSession.lastCentroid.x;
-            const deltaY = centroid.y - this.#pinchSession.lastCentroid.y;
-
-            let updated = {
-                changed: false,
-                changedAxes: [] as readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[],
-                viewport: this.#context.currentViewport
-            };
+            const totalDeltaX = centroid.x - this.#pinchSession.startCentroid.x;
+            const totalDeltaY = centroid.y - this.#pinchSession.startCentroid.y;
 
             const options = {
                 clampToData: this.#context.navigationOptions.clampToData,
@@ -175,23 +185,22 @@ export class ChartViewportGestureController {
                 minVisibleCategories: this.#context.navigationOptions.minVisibleCategories
             };
 
-            if (Math.abs(scaleFactor - 1) > 0.001) {
-                updated = CartesianViewportController.zoom(
-                    updated.viewport,
-                    this.#context.coordinateSpace,
-                    this.#pinchSession.targetAxes,
-                    scaleFactor,
-                    centroid,
-                    options
-                );
-            }
+            // Start-state anchored transform
+            let updated = CartesianViewportController.zoom(
+                this.#pinchSession.initialViewport,
+                this.#context.coordinateSpace,
+                this.#pinchSession.targetAxes,
+                totalScaleFactor,
+                this.#pinchSession.startCentroid,
+                options
+            );
 
-            if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
+            if (Math.abs(totalDeltaX) > 0.5 || Math.abs(totalDeltaY) > 0.5) {
                 updated = CartesianViewportController.pan(
                     updated.viewport,
                     this.#context.coordinateSpace,
                     this.#pinchSession.targetAxes,
-                    { x: deltaX, y: deltaY },
+                    { x: totalDeltaX, y: totalDeltaY },
                     options
                 );
             }
@@ -200,7 +209,13 @@ export class ChartViewportGestureController {
             this.#pinchSession.lastDistance = distance;
 
             if (updated.changed) {
-                this.#dispatchChangeEvent("pinch", "update", updated.viewport, this.#context.currentViewport, updated.changedAxes);
+                this.#dispatchChangeEvent(
+                    "pinch",
+                    "update",
+                    updated.viewport,
+                    this.#context.currentViewport,
+                    updated.changedAxes
+                );
             }
             return true;
         }
@@ -216,6 +231,7 @@ export class ChartViewportGestureController {
                     this.#dragSession.isThresholdMet = true;
                     this.#isClickSuppressed = true;
                     this.#context.onCursorChange("grabbing");
+                    this.#context.setPointerCapture?.(event.pointerId, this.#targetElement);
                     this.#dispatchChangeEvent("drag", "start", this.#context.currentViewport, this.#context.currentViewport, this.#dragSession.targetAxes);
                 } else {
                     return false;
@@ -224,16 +240,16 @@ export class ChartViewportGestureController {
 
             if (!this.#context.coordinateSpace) return false;
 
-            const deltaX = elementPoint.x - this.#dragSession.lastPoint.x;
-            const deltaY = elementPoint.y - this.#dragSession.lastPoint.y;
-
+            const totalDeltaX = elementPoint.x - this.#dragSession.startPoint.x;
+            const totalDeltaY = elementPoint.y - this.#dragSession.startPoint.y;
             this.#dragSession.lastPoint = elementPoint;
 
+            // Start-state anchored pan transform
             const res = CartesianViewportController.pan(
-                this.#context.currentViewport,
+                this.#dragSession.initialViewport,
                 this.#context.coordinateSpace,
                 this.#dragSession.targetAxes,
-                { x: deltaX, y: deltaY },
+                { x: totalDeltaX, y: totalDeltaY },
                 {
                     clampToData: this.#context.navigationOptions.clampToData,
                     constraints: this.#context.constraints,
@@ -242,7 +258,13 @@ export class ChartViewportGestureController {
             );
 
             if (res.changed) {
-                this.#dispatchChangeEvent("drag", "update", res.viewport, this.#context.currentViewport, res.changedAxes);
+                this.#dispatchChangeEvent(
+                    "drag",
+                    "update",
+                    res.viewport,
+                    this.#context.currentViewport,
+                    res.changedAxes
+                );
             }
             return true;
         }
@@ -252,6 +274,7 @@ export class ChartViewportGestureController {
 
     public handlePointerUp(event: PointerEvent): boolean {
         this.#activePointers.delete(event.pointerId);
+        this.#context.releasePointerCapture?.(event.pointerId, this.#targetElement);
 
         if (this.#pinchSession) {
             if (event.pointerId === this.#pinchSession.pointer1Id || event.pointerId === this.#pinchSession.pointer2Id) {
@@ -275,6 +298,7 @@ export class ChartViewportGestureController {
 
     public handlePointerCancel(event: PointerEvent): boolean {
         this.#activePointers.delete(event.pointerId);
+        this.#context.releasePointerCapture?.(event.pointerId, this.#targetElement);
 
         if (this.#pinchSession) {
             if (event.pointerId === this.#pinchSession.pointer1Id || event.pointerId === this.#pinchSession.pointer2Id) {
@@ -298,6 +322,7 @@ export class ChartViewportGestureController {
 
     public cancel(reason?: string): void {
         this.#activePointers.clear();
+
         if (this.#wheelSession) {
             if (this.#wheelSession.endTimerId !== null) {
                 clearTimeout(this.#wheelSession.endTimerId);
@@ -311,6 +336,7 @@ export class ChartViewportGestureController {
         }
         if (this.#dragSession) {
             if (this.#dragSession.isThresholdMet) {
+                this.#context.releasePointerCapture?.(this.#dragSession.pointerId, this.#targetElement);
                 this.#dispatchChangeEvent("drag", "end", this.#context.currentViewport, this.#dragSession.initialViewport, this.#dragSession.targetAxes);
             }
             this.#dragSession = null;
@@ -384,7 +410,13 @@ export class ChartViewportGestureController {
         );
 
         if (res.changed) {
-            this.#dispatchChangeEvent("wheel", "update", res.viewport, this.#context.currentViewport, res.changedAxes);
+            this.#dispatchChangeEvent(
+                "wheel",
+                "update",
+                res.viewport,
+                this.#context.currentViewport,
+                res.changedAxes
+            );
             return true;
         }
 

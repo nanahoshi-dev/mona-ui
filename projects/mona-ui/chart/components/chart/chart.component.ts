@@ -122,11 +122,13 @@ import {
     type InternalCartesianViewportState
 } from "../../internal/viewport/cartesian-viewport-normalizer";
 import { CartesianViewportController } from "../../internal/viewport/cartesian-viewport-controller";
+import { CartesianViewportOperationCoordinator } from "../../internal/viewport/cartesian-viewport-operation-coordinator";
 import { CartesianViewportReconciler } from "../../internal/viewport/cartesian-viewport-reconciler";
 import { CartesianViewportTargetResolver } from "../../internal/viewport/cartesian-viewport-target-resolver";
 import { CartesianViewportLinker } from "../../internal/viewport/cartesian-viewport-linker";
 import { ChartViewportGestureController } from "../../internal/viewport/chart-viewport-gesture-controller";
 import { ChartViewportKeyboardController } from "../../internal/viewport/chart-viewport-keyboard-controller";
+import { CartesianLayoutEngine, type CartesianXYLayoutRuntime } from "../../internal/layout/cartesian-layout-engine";
 import type {
     ChartLabelMeasurement,
     ChartSliceContext,
@@ -210,6 +212,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #activeKeyboardSeriesId: string | null = null;
     #canvasContext: CanvasRenderingContext2D | null = null;
     #canvasReady: boolean = false;
+    #cartesianLayoutRuntime: CartesianXYLayoutRuntime | null = null;
     #currentHeight: number = 300;
     #currentWidth: number = 500;
     #hasCommittedVisualScene: boolean = false;
@@ -751,7 +754,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         this.#applyViewportUpdate(nextState, event.source, event.phase, event.changedAxes);
                     },
                     orientation: sc.orientation ?? "vertical",
-                    plotRect: sc.plotRect
+                    plotRect: sc.plotRect,
+                    releasePointerCapture: (pointerId: number, target?: Element | null) => {
+                        try {
+                            const el = target ?? this.canvasElement()?.nativeElement;
+                            el?.releasePointerCapture?.(pointerId);
+                        } catch {}
+                    },
+                    setPointerCapture: (pointerId: number, target?: Element | null) => {
+                        try {
+                            const el = target ?? this.canvasElement()?.nativeElement;
+                            el?.setPointerCapture?.(pointerId);
+                        } catch {}
+                    }
                 };
                 if (!this.#gestureController) {
                     this.#gestureController = new ChartViewportGestureController(gestureContext);
@@ -792,19 +807,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public onPointerDown(event: PointerEvent): void {
         const pointer = this.#normalizePointer(event);
         if (!pointer) return;
-        if (this.#gestureController?.handlePointerDown(event, pointer)) {
-            try {
-                (event.currentTarget as HTMLElement)?.setPointerCapture?.(event.pointerId);
-            } catch {}
-        }
+        this.#gestureController?.handlePointerDown(event, pointer, event.currentTarget as Element);
     }
 
     public onPointerUp(event: PointerEvent): void {
-        if (this.#gestureController?.handlePointerUp(event)) {
-            try {
-                (event.currentTarget as HTMLElement)?.releasePointerCapture?.(event.pointerId);
-            } catch {}
-        }
+        this.#gestureController?.handlePointerUp(event);
+    }
+
+    public onPointerCancel(event: PointerEvent): void {
+        this.#gestureController?.handlePointerCancel(event);
     }
 
     public onWheel(event: WheelEvent): void {
@@ -819,7 +830,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (this.#isAnimating() && !this.#isStructuralAnimation()) {
             return;
         }
-        if (this.#gestureController?.isClickSuppressed) {
+        if (this.#gestureController?.consumeClickSuppression()) {
             return;
         }
 
@@ -876,7 +887,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#effectiveViewportState(),
                 nav.constraints,
                 nav.linkGroups,
-                this.#activeKeyboardNamespace
+                this.#activeKeyboardNamespace,
+                this.defaultViewport()
             );
 
             if (kbResult.handled) {
@@ -943,6 +955,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
         } else if (event.key === "Escape") {
             event.preventDefault();
+            this.#gestureController?.cancel("escape");
             this.#clearInteraction();
             this.activeAccessibilityText.set("");
         }
@@ -1013,12 +1026,22 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public setViewport(viewport: ChartViewportState): void {
         const sc = this.cartesianXYScene();
         if (!sc || !sc.coordinateSpace) return;
-        const normalized = normalizeViewportState(viewport, sc.coordinateSpace.toResolvedAxisInfoMap(), {
-            clampToData: this.normalizedNavigation().clampToData,
-            constraints: this.normalizedNavigation().constraints,
-            minVisibleCategories: this.normalizedNavigation().minVisibleCategories
-        });
-        this.#applyViewportUpdate(normalized, "programmatic", "end");
+        const nav = this.normalizedNavigation();
+        const res = CartesianViewportOperationCoordinator.setWindow(
+            this.#effectiveViewportState(),
+            sc.coordinateSpace,
+            viewport.axes,
+            {
+                clampToData: nav.clampToData,
+                constraints: nav.constraints,
+                linkGroups: nav.linkGroups,
+                minVisibleCategories: nav.minVisibleCategories,
+                warnedSignatures: this.#warnedDiagnosticSignatures
+            }
+        );
+        if (res.changed) {
+            this.#applyViewportUpdate(res.viewport, "programmatic", "end", res.changedAxes);
+        }
     }
 
     /**
@@ -1028,29 +1051,30 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const sc = this.cartesianXYScene();
         if (!sc || !sc.coordinateSpace) return;
         const center = anchor ?? { x: sc.plotRect.x + sc.plotRect.width / 2, y: sc.plotRect.y + sc.plotRect.height / 2 };
+        const nav = this.normalizedNavigation();
         const resolved = CartesianViewportTargetResolver.resolveTargets(
             center,
             sc.plotRect,
             sc.axes,
-            this.normalizedNavigation(),
+            nav,
             sc.orientation ?? "vertical",
-            target
+            target ?? nav.zoomAxes,
+            this.#cartesianLayoutRuntime?.navigationProfile
         );
-        const targetAxes = CartesianViewportLinker.expandTargetAxesWithLinks(
-            resolved.targetAxes,
-            this.normalizedNavigation().linkGroups
-        );
-        const nav = this.normalizedNavigation();
-        const res = CartesianViewportController.zoom(
+        const res = CartesianViewportOperationCoordinator.transform(
             this.#effectiveViewportState(),
             sc.coordinateSpace,
-            targetAxes,
-            factor,
-            center,
+            resolved.targetAxes,
+            {
+                anchor: center,
+                zoomFactor: factor
+            },
             {
                 clampToData: nav.clampToData,
                 constraints: nav.constraints,
-                minVisibleCategories: nav.minVisibleCategories
+                linkGroups: nav.linkGroups,
+                minVisibleCategories: nav.minVisibleCategories,
+                warnedSignatures: this.#warnedDiagnosticSignatures
             }
         );
         if (res.changed) {
@@ -1064,28 +1088,29 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public pan(delta: { x: number; y: number }, target?: ChartNavigationAxisTarget): void {
         const sc = this.cartesianXYScene();
         if (!sc || !sc.coordinateSpace) return;
+        const nav = this.normalizedNavigation();
         const resolved = CartesianViewportTargetResolver.resolveTargets(
             null,
             sc.plotRect,
             sc.axes,
-            this.normalizedNavigation(),
+            nav,
             sc.orientation ?? "vertical",
-            target
+            target ?? nav.panAxes,
+            this.#cartesianLayoutRuntime?.navigationProfile
         );
-        const targetAxes = CartesianViewportLinker.expandTargetAxesWithLinks(
-            resolved.targetAxes,
-            this.normalizedNavigation().linkGroups
-        );
-        const nav = this.normalizedNavigation();
-        const res = CartesianViewportController.pan(
+        const res = CartesianViewportOperationCoordinator.transform(
             this.#effectiveViewportState(),
             sc.coordinateSpace,
-            targetAxes,
-            delta,
+            resolved.targetAxes,
+            {
+                panDeltaPx: delta
+            },
             {
                 clampToData: nav.clampToData,
                 constraints: nav.constraints,
-                minVisibleCategories: nav.minVisibleCategories
+                linkGroups: nav.linkGroups,
+                minVisibleCategories: nav.minVisibleCategories,
+                warnedSignatures: this.#warnedDiagnosticSignatures
             }
         );
         if (res.changed) {
@@ -1100,14 +1125,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const sc = this.cartesianXYScene();
         if (!sc || !sc.coordinateSpace) return;
         const nav = this.normalizedNavigation();
-        const res = CartesianViewportController.setWindow(
+        const res = CartesianViewportOperationCoordinator.setWindow(
             this.#effectiveViewportState(),
             sc.coordinateSpace,
             window,
             {
                 clampToData: nav.clampToData,
                 constraints: nav.constraints,
-                minVisibleCategories: nav.minVisibleCategories
+                linkGroups: nav.linkGroups,
+                minVisibleCategories: nav.minVisibleCategories,
+                warnedSignatures: this.#warnedDiagnosticSignatures
             }
         );
         if (res.changed) {
@@ -1116,7 +1143,31 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     /**
-     * @description Resets the viewport window back to the canonical base domain for target axes.
+     * @description Fits target axes (or all axes) to full canonical base domain.
+     */
+    public fitViewport(target?: ChartNavigationAxisTarget): void {
+        const sc = this.cartesianXYScene();
+        if (!sc || !sc.coordinateSpace) return;
+        const targetAxes = target !== undefined
+            ? CartesianViewportTargetResolver.resolveExplicitTarget(target, sc.axes)
+            : undefined;
+        const nav = this.normalizedNavigation();
+        const res = CartesianViewportOperationCoordinator.fit(
+            this.#effectiveViewportState(),
+            sc.coordinateSpace,
+            targetAxes,
+            {
+                linkGroups: nav.linkGroups,
+                warnedSignatures: this.#warnedDiagnosticSignatures
+            }
+        );
+        if (res.changed) {
+            this.#applyViewportUpdate(res.viewport, "programmatic", "end", res.changedAxes);
+        }
+    }
+
+    /**
+     * @description Resets the viewport window back to the default viewport (or base domain) for target axes.
      */
     public resetViewport(target?: ChartNavigationAxisTarget): void {
         const sc = this.cartesianXYScene();
@@ -1124,10 +1175,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const targetAxes = target !== undefined
             ? CartesianViewportTargetResolver.resolveExplicitTarget(target, sc.axes)
             : undefined;
-        const res = CartesianViewportController.reset(
+        const nav = this.normalizedNavigation();
+        const res = CartesianViewportOperationCoordinator.reset(
             this.#effectiveViewportState(),
-            undefined,
-            targetAxes
+            sc.coordinateSpace,
+            this.defaultViewport(),
+            targetAxes,
+            {
+                clampToData: nav.clampToData,
+                constraints: nav.constraints,
+                linkGroups: nav.linkGroups,
+                minVisibleCategories: nav.minVisibleCategories,
+                warnedSignatures: this.#warnedDiagnosticSignatures
+            }
         );
         if (res.changed) {
             this.#applyViewportUpdate(res.viewport, "programmatic", "end", res.changedAxes);
@@ -1630,6 +1690,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             (hasInvalidationReason(reason, ChartInvalidationReason.Size) && sizeChanged) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
 
+        const isViewportOnly =
+            hasInvalidationReason(reason, ChartInvalidationReason.Viewport) &&
+            !isStructural &&
+            !hasInvalidationReason(reason, ChartInvalidationReason.Style) &&
+            this.#cartesianLayoutRuntime !== null;
+
         const requiresSceneRefresh =
             isStructural ||
             hasInvalidationReason(reason, ChartInvalidationReason.Style) ||
@@ -1641,49 +1707,50 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.activeAccessibilityText.set("");
         }
 
-        const newScene = requiresSceneRefresh
-            ? ChartLayoutEngine.computeScene({
-                  angularAxis: this.#angularAxis() ?? undefined,
-                  containerHeight: this.#currentHeight,
-                  containerWidth: this.#currentWidth,
-                  measurements: this.#labelMeasurements,
-                  radialAxis: this.#radialAxis() ?? undefined,
-                  rootData: this.data(),
-                  rootXField: this.xField(),
-                  series: this.#registeredSeries(),
-                  styleResolver: this.#styleResolver,
-                  viewport: this.#effectiveViewportState(),
-                  warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures,
-                  xAxis: this.#xAxes()[0] ?? undefined,
-                  xAxes: this.#xAxes(),
-                  yAxis: this.#yAxes()[0] ?? undefined,
-                  yAxes: this.#yAxes()
-              })
-            : this.scene()!;
+        let newScene: ChartScene;
+        if (isViewportOnly && this.#cartesianLayoutRuntime) {
+            const computation = CartesianLayoutEngine.projectViewportFastPath(
+                this.#cartesianLayoutRuntime,
+                this.#effectiveViewportState(),
+                this.#labelMeasurements,
+                this.#warnedDiagnosticSignatures
+            );
+            newScene = computation.scene;
+        } else if (requiresSceneRefresh) {
+            const computation = ChartLayoutEngine.compute({
+                angularAxis: this.#angularAxis() ?? undefined,
+                containerHeight: this.#currentHeight,
+                containerWidth: this.#currentWidth,
+                measurements: this.#labelMeasurements,
+                radialAxis: this.#radialAxis() ?? undefined,
+                rootData: this.data(),
+                rootXField: this.xField(),
+                series: this.#registeredSeries(),
+                styleResolver: this.#styleResolver,
+                viewport: this.#effectiveViewportState(),
+                warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures,
+                xAxis: this.#xAxes()[0] ?? undefined,
+                xAxes: this.#xAxes(),
+                yAxis: this.#yAxes()[0] ?? undefined,
+                yAxes: this.#yAxes()
+            });
 
-        // Prune measurements
-        ChartLabelMeasurementPruner.prune(this.#labelMeasurements, newScene);
+            this.#cartesianLayoutRuntime = computation.runtime ?? null;
 
-        // Commit semantic target scene immediately
-        this.scene.set(newScene);
-
-        if ((isStructural || hasInvalidationReason(reason, ChartInvalidationReason.Data)) &&
-            newScene.coordinateSystem === "cartesian" &&
-            newScene.cartesianKind === "xy" &&
-            this.viewport() === undefined) {
-            const xyScene = newScene as CartesianXYChartScene;
-            if (xyScene.coordinateSpace) {
+            if (this.#cartesianLayoutRuntime && this.viewport() === undefined) {
+                const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
                 const reconcilerRes = CartesianViewportReconciler.reconcile(
                     this.#uncontrolledViewportState(),
-                    xyScene.coordinateSpace,
+                    baseCoordSpace,
                     {
                         clampToData: this.normalizedNavigation().clampToData,
                         constraints: this.normalizedNavigation().constraints,
                         minVisibleCategories: this.normalizedNavigation().minVisibleCategories
                     }
                 );
+
                 if (reconcilerRes.changed) {
-                    const resolvedMap = xyScene.coordinateSpace.toResolvedAxisInfoMap();
+                    const resolvedMap = baseCoordSpace.toResolvedAxisInfoMap();
                     const prevPublic = toPublicViewportState(this.#uncontrolledViewportState(), resolvedMap);
                     const nextPublic = toPublicViewportState(reconcilerRes.viewport, resolvedMap);
                     this.#uncontrolledViewportState.set(reconcilerRes.viewport);
@@ -1694,9 +1761,29 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         source: "data-reconcile",
                         viewport: nextPublic
                     });
+
+                    const reconciledComp = CartesianLayoutEngine.projectViewportFastPath(
+                        this.#cartesianLayoutRuntime,
+                        reconcilerRes.viewport,
+                        this.#labelMeasurements,
+                        this.#warnedDiagnosticSignatures
+                    );
+                    newScene = reconciledComp.scene;
+                } else {
+                    newScene = computation.scene;
                 }
+            } else {
+                newScene = computation.scene;
             }
+        } else {
+            newScene = this.scene()!;
         }
+
+        // Prune measurements
+        ChartLabelMeasurementPruner.prune(this.#labelMeasurements, newScene);
+
+        // Commit semantic target scene immediately
+        this.scene.set(newScene);
 
         const isInitial = !this.#hasCommittedVisualScene;
         const isVisibility = hasInvalidationReason(reason, ChartInvalidationReason.Visibility);

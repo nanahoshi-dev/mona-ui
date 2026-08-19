@@ -6,6 +6,7 @@ import type {
     PolarAxisChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
+import { parseCartesianAxisMeasurementKey } from "./cartesian-axis-measurement-key";
 
 export class ChartLabelMeasurementPruner {
     public static prune(
@@ -14,18 +15,30 @@ export class ChartLabelMeasurementPruner {
     ): void {
         if (scene.coordinateSystem === "cartesian") {
             const cartesianScene = scene as CartesianChartScene;
-            const activeAxisIds = new Set<string>();
+            const activeAxes = new Set<string>();
+            const activeTickKeys = new Set<string>();
             if (cartesianScene.axes) {
                 for (const axisScene of cartesianScene.axes) {
                     const id = axisScene.axisId ?? (axisScene.axis === "x" ? "default-x" : "default-y");
-                    activeAxisIds.add(id);
+                    activeAxes.add(`${axisScene.axis}:${id}`);
+                    if (axisScene.ticks) {
+                        for (const tick of axisScene.ticks) {
+                            if (tick.tickKey) {
+                                activeTickKeys.add(tick.tickKey);
+                            }
+                        }
+                    }
                 }
             }
             for (const key of Array.from(measurements.keys())) {
                 if (key.startsWith("axis:")) {
-                    const parts = key.split(":");
-                    const axisId = parts[1];
-                    if (axisId && !activeAxisIds.has(axisId)) {
+                    const parsed = parseCartesianAxisMeasurementKey(key);
+                    if (!parsed) {
+                        measurements.delete(key);
+                        continue;
+                    }
+                    const axisKey = `${parsed.axis}:${parsed.axisId}`;
+                    if (!activeAxes.has(axisKey) || (activeTickKeys.size > 0 && !activeTickKeys.has(key))) {
                         measurements.delete(key);
                     }
                 } else if (
