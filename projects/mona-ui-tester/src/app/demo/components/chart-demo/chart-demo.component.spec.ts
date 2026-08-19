@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
+import { ChartComponent } from "@nanahoshi/mona-ui/chart";
 import { ChartDemoComponent } from "./chart-demo.component";
 
 describe("ChartDemoComponent", () => {
@@ -170,5 +172,79 @@ describe("ChartDemoComponent", () => {
         component.randomizeWaterfallData();
         fixture.detectChanges();
         expect(component.eventLogs()[0].details).toContain("Randomized Waterfall cashflow");
+    });
+
+    it("should render mixed tab with bar, area, and line series in any combination even if barOrientation is horizontal", () => {
+        // Set barOrientation to horizontal (as if user changed it in Grouped tab)
+        (component as any).barOrientation.set("horizontal");
+        component.setTab("mixed");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Mixed Series Comparison");
+
+        const chartDe = fixture.debugElement.query(By.directive(ChartComponent));
+        expect(chartDe).toBeTruthy();
+        const chart = chartDe.componentInstance as ChartComponent;
+
+        // 1. All three active: Bar + Area + Line
+        let scene = chart.scene();
+        expect(scene).toBeDefined();
+        expect(scene?.hasRenderableData).toBe(true);
+        expect(scene?.series.length).toBe(3);
+        expect(scene?.series.map(s => s.type)).toEqual(["bar", "area", "line"]);
+
+        // 2. Bar + Area only
+        (component as any).showLine.set(false);
+        fixture.detectChanges();
+        scene = chart.scene();
+        expect(scene?.hasRenderableData).toBe(true);
+        expect(scene?.series.length).toBe(2);
+        expect(scene?.series.map(s => s.type)).toEqual(["bar", "area"]);
+
+        // 3. Bar + Line only
+        (component as any).showArea.set(false);
+        (component as any).showLine.set(true);
+        fixture.detectChanges();
+        scene = chart.scene();
+        expect(scene?.hasRenderableData).toBe(true);
+        expect(scene?.series.length).toBe(2);
+        expect(scene?.series.map(s => s.type)).toEqual(["bar", "line"]);
+
+        // 4. Bar only
+        (component as any).showLine.set(false);
+        fixture.detectChanges();
+        scene = chart.scene();
+        expect(scene?.hasRenderableData).toBe(true);
+        expect(scene?.series.length).toBe(1);
+        expect(scene?.series[0].type).toBe("bar");
+
+        // 5. Area + Line only
+        (component as any).showBars.set(false);
+        (component as any).showArea.set(true);
+        (component as any).showLine.set(true);
+        fixture.detectChanges();
+        scene = chart.scene();
+        expect(scene?.hasRenderableData).toBe(true);
+        expect(scene?.series.length).toBe(2);
+        expect(scene?.series.map(s => s.type)).toEqual(["area", "line"]);
+    });
+
+    it("should render custom and horizontal tabs consistently regardless of barOrientation signal", () => {
+        (component as any).barOrientation.set("horizontal");
+        component.setTab("custom");
+        fixture.detectChanges();
+
+        const customChartDe = fixture.debugElement.query(By.directive(ChartComponent));
+        const customChart = customChartDe.componentInstance as ChartComponent;
+        expect(customChart.scene()?.hasRenderableData).toBe(true);
+        expect(customChart.scene()?.series.map(s => s.type)).toEqual(["bar", "line"]);
+
+        (component as any).barOrientation.set("vertical");
+        component.setTab("horizontal");
+        fixture.detectChanges();
+
+        const horizChartDe = fixture.debugElement.query(By.directive(ChartComponent));
+        const horizChart = horizChartDe.componentInstance as ChartComponent;
+        expect(horizChart.scene()?.hasRenderableData).toBe(true);
+        expect((horizChart.scene() as any)?.orientation).toBe("horizontal");
     });
 });
