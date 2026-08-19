@@ -373,4 +373,31 @@ describe("Horizontal Bar Chart Integration", () => {
         const ariaLabelAttr = chartDe.nativeElement.getAttribute("aria-label");
         expect(ariaLabelAttr).toBe("Quarterly Revenue");
     });
+
+    it("animates smoothly with morph mode when switching orientation dynamically between horizontal and vertical", () => {
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
+
+        let scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.orientation).toBe("horizontal");
+
+        // Switch orientation to vertical
+        host.orientation.set("vertical");
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
+
+        scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.orientation).toBe("vertical");
+        expect(chartCmp.isAnimating()).toBe(true);
+
+        // Switch back to horizontal
+        host.orientation.set("horizontal");
+        fixture.detectChanges();
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
+
+        scene = chartCmp.scene() as CartesianXYChartScene;
+        expect(scene.orientation).toBe("horizontal");
+        expect(chartCmp.isAnimating()).toBe(true);
+    });
 });

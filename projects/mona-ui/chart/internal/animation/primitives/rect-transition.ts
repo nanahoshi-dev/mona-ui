@@ -33,6 +33,22 @@ export interface RectMarkTransitionPlan {
     readonly type: "enter" | "exit" | "update";
 }
 
+export function lerpCornerRadii(
+    from?: ChartCornerRadii,
+    to?: ChartCornerRadii,
+    progress = 1
+): ChartCornerRadii | undefined {
+    if (!from && !to) return undefined;
+    const f = from ?? { bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 };
+    const t = to ?? { bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 };
+    return {
+        bottomLeft: lerp(f.bottomLeft, t.bottomLeft, progress),
+        bottomRight: lerp(f.bottomRight, t.bottomRight, progress),
+        topLeft: lerp(f.topLeft, t.topLeft, progress),
+        topRight: lerp(f.topRight, t.topRight, progress)
+    };
+}
+
 export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: number): SceneBar {
     const { from, to } = plan;
     const x = lerp(from.x, to.x, progress);
@@ -41,10 +57,11 @@ export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: num
     const height = Math.max(0, lerp(from.height, to.height, progress));
     const radius = lerp(from.radius, to.radius, progress);
     const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
+    const cornerRadii = lerpCornerRadii(from.cornerRadii, to.cornerRadii, progress);
 
     return {
         animationKey: to.animationKey ?? from.animationKey,
-        cornerRadii: to.cornerRadii ?? from.cornerRadii,
+        cornerRadii,
         datum: to.datum ?? from.datum,
         height,
         index: to.index,

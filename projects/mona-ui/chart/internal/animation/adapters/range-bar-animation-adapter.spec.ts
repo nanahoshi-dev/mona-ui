@@ -219,4 +219,80 @@ describe("RangeBarSeriesAnimationAdapter", () => {
         expect(sampleThreeQuarter!.bars[0].y).toBe(87.5);
         expect(sampleThreeQuarter!.bars[0].height).toBe(50);
     });
+
+    it("should smoothly morph range bars when transitioning between vertical and horizontal", () => {
+        const prevVertical: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "bar-0",
+                    cornerRadii: { bottomLeft: 4, bottomRight: 4, topLeft: 4, topRight: 4 },
+                    datum: {},
+                    fromValue: 10,
+                    fromY: 200,
+                    height: 100,
+                    highValue: 30,
+                    index: 0,
+                    lowValue: 10,
+                    orientation: "vertical",
+                    radius: 4,
+                    toValue: 30,
+                    toY: 100,
+                    width: 20,
+                    x: 50,
+                    xValue: "Jan",
+                    y: 100
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "series-1",
+            name: "Range 1",
+            orientation: "vertical",
+            style: mockStyle,
+            type: "rangeBar"
+        };
+
+        const nextHorizontal: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "bar-0",
+                    cornerRadii: { bottomLeft: 4, bottomRight: 4, topLeft: 4, topRight: 4 },
+                    datum: {},
+                    fromValue: 10,
+                    fromValuePixel: 50,
+                    fromY: 50,
+                    height: 20,
+                    highValue: 30,
+                    index: 0,
+                    lowValue: 10,
+                    orientation: "horizontal",
+                    radius: 4,
+                    toValue: 30,
+                    toValuePixel: 200,
+                    toY: 50,
+                    width: 150,
+                    x: 50,
+                    xValue: "Jan",
+                    y: 50
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "series-1",
+            name: "Range 1",
+            orientation: "horizontal",
+            style: mockStyle,
+            type: "rangeBar"
+        };
+
+        const plan = adapter.createPlan(prevVertical, nextHorizontal, {} as any);
+        const sampledMid = plan.sample(0.5);
+
+        expect(sampledMid).toBeDefined();
+        expect(sampledMid!.bars[0].x).toBeCloseTo(50, 1);
+        expect(sampledMid!.bars[0].y).toBeCloseTo(75, 1);
+        expect(sampledMid!.bars[0].width).toBeCloseTo(85, 1);
+        expect(sampledMid!.bars[0].height).toBeCloseTo(60, 1);
+        expect(sampledMid!.bars[0].orientation).toBe("horizontal");
+    });
 });

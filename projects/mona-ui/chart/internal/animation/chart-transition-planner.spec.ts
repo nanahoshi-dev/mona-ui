@@ -302,4 +302,139 @@ describe("ChartTransitionPlanner", () => {
         const planRot = ChartTransitionPlanner.plan(prev, nextDiffRot, "data", options);
         expect(planRot.mode).toBe("crossfade");
     });
+
+    describe("Bar & RangeBar Orientation Switching", () => {
+        it("should plan morph transition when switching Bar series orientation between vertical and horizontal", () => {
+            const prevVertical = createMockCartesianSceneWithBars();
+            prevVertical.orientation = "vertical";
+            prevVertical.xAxisType = "category";
+            prevVertical.yAxisType = "linear";
+
+            const nextHorizontal: CartesianXYChartScene = {
+                axes: [],
+                cartesianKind: "xy",
+                coordinateSystem: "cartesian",
+                hasRenderableData: true,
+                height: 300,
+                hitTargets: [
+                    {
+                        animationKey: "b1:catA",
+                        barOrientation: "horizontal",
+                        datum: {},
+                        index: 0,
+                        seriesId: "b1",
+                        seriesName: "Bar 1",
+                        seriesType: "bar",
+                        xKey: "catA",
+                        xValue: "catA",
+                        yValue: 10
+                    }
+                ],
+                interactionBuckets: [],
+                legendItems: [],
+                orientation: "horizontal",
+                plotRect: { height: 260, width: 460, x: 20, y: 20 },
+                series: [
+                    {
+                        bars: [
+                            {
+                                animationKey: "b1:catA",
+                                datum: {},
+                                height: 20,
+                                index: 0,
+                                isPositive: true,
+                                orientation: "horizontal",
+                                radius: 4,
+                                width: 150,
+                                x: 20,
+                                xValue: "catA",
+                                y: 50,
+                                yValue: 10
+                            }
+                        ],
+                        borderRadius: 4,
+                        fillOpacity: 1,
+                        id: "b1",
+                        name: "Bar 1",
+                        orientation: "horizontal",
+                        style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                        type: "bar"
+                    }
+                ],
+                width: 500,
+                xAxisType: "linear",
+                yAxisType: "category"
+            };
+
+            const options = normalizeChartAnimationOptions(true);
+            const plan = ChartTransitionPlanner.plan(prevVertical, nextHorizontal, "data", options);
+
+            expect(plan.mode).toBe("morph");
+            expect(plan.seriesPlans.length).toBe(1);
+            expect(plan.seriesPlans[0].adapterType).toBe("bar");
+        });
+
+        it("should fallback to crossfade when orientation switches with incompatible series type (e.g. Line)", () => {
+            const prevVertical: CartesianXYChartScene = {
+                axes: [],
+                cartesianKind: "xy",
+                coordinateSystem: "cartesian",
+                hasRenderableData: true,
+                height: 300,
+                hitTargets: [],
+                interactionBuckets: [],
+                legendItems: [],
+                orientation: "vertical",
+                plotRect: { height: 260, width: 460, x: 20, y: 20 },
+                series: [
+                    {
+                        connectNulls: false,
+                        curve: "linear",
+                        id: "l1",
+                        name: "Line 1",
+                        points: [{ animationKey: "p0", datum: {}, defined: true, index: 0, x: 10, xValue: 0, y: 50, yValue: 50 }],
+                        showPoints: true,
+                        style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                        type: "line"
+                    }
+                ],
+                width: 500,
+                xAxisType: "category",
+                yAxisType: "linear"
+            };
+
+            const nextHorizontal: CartesianXYChartScene = {
+                axes: [],
+                cartesianKind: "xy",
+                coordinateSystem: "cartesian",
+                hasRenderableData: true,
+                height: 300,
+                hitTargets: [],
+                interactionBuckets: [],
+                legendItems: [],
+                orientation: "horizontal",
+                plotRect: { height: 260, width: 460, x: 20, y: 20 },
+                series: [
+                    {
+                        connectNulls: false,
+                        curve: "linear",
+                        id: "l1",
+                        name: "Line 1",
+                        points: [{ animationKey: "p0", datum: {}, defined: true, index: 0, x: 50, xValue: 50, y: 10, yValue: 0 }],
+                        showPoints: true,
+                        style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                        type: "line"
+                    }
+                ],
+                width: 500,
+                xAxisType: "linear",
+                yAxisType: "category"
+            };
+
+            const options = normalizeChartAnimationOptions(true);
+            const plan = ChartTransitionPlanner.plan(prevVertical, nextHorizontal, "data", options);
+
+            expect(plan.mode).toBe("crossfade");
+        });
+    });
 });
