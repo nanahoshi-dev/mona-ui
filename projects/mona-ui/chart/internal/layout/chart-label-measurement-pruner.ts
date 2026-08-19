@@ -6,27 +6,45 @@ import type {
     PolarAxisChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
+import { parseCartesianAxisMeasurementKey } from "./cartesian-axis-measurement-key";
 
 export class ChartLabelMeasurementPruner {
     public static prune(
         measurements: Map<string, ChartLabelMeasurement>,
-        scene: ChartScene
+        scene: ChartScene,
+        retainedBaseKeys?: ReadonlySet<string>
     ): void {
         if (scene.coordinateSystem === "cartesian") {
             const cartesianScene = scene as CartesianChartScene;
-            const validCartesianKeys = new Set<string>();
+            const activeAxes = new Set<string>();
+            const activeTickKeys = new Set<string>();
+            if (retainedBaseKeys) {
+                for (const k of retainedBaseKeys) {
+                    activeTickKeys.add(k);
+                }
+            }
             if (cartesianScene.axes) {
                 for (const axisScene of cartesianScene.axes) {
-                    for (const tick of axisScene.ticks) {
-                        if (tick.tickKey) {
-                            validCartesianKeys.add(tick.tickKey);
+                    const id = axisScene.axisId ?? (axisScene.axis === "x" ? "default-x" : "default-y");
+                    activeAxes.add(`${axisScene.axis}:${id}`);
+                    if (axisScene.ticks) {
+                        for (const tick of axisScene.ticks) {
+                            if (tick.tickKey) {
+                                activeTickKeys.add(tick.tickKey);
+                            }
                         }
                     }
                 }
             }
             for (const key of Array.from(measurements.keys())) {
                 if (key.startsWith("axis:")) {
-                    if (!validCartesianKeys.has(key)) {
+                    const parsed = parseCartesianAxisMeasurementKey(key);
+                    if (!parsed) {
+                        measurements.delete(key);
+                        continue;
+                    }
+                    const axisKey = `${parsed.axis}:${parsed.axisId}`;
+                    if (!activeAxes.has(axisKey) || (activeTickKeys.size > 0 && !activeTickKeys.has(key))) {
                         measurements.delete(key);
                     }
                 } else if (
