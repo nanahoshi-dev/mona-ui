@@ -1,6 +1,7 @@
 import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartFinancialDirection } from "../../models/chart-financial.models";
 import type { ChartField } from "../../models/chart.models";
+import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ChartInteractionXKey } from "../scene/scene-geometry";
 import { serializeKeyPart } from "../animation/animation-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
@@ -61,11 +62,17 @@ export function resolveFinancialX(
     row: unknown,
     xField: ChartField | undefined,
     dataIndex: number,
-    xAxisType?: ChartXAxisType
+    xAxisType?: ChartXAxisType | ResolvedChartCartesianAxisType
 ): ResolvedFinancialX {
     const rawX = xField !== undefined ? resolveValue(row, xField, dataIndex) : dataIndex;
 
-    if (xAxisType === "linear") {
+    if (
+        xAxisType === "linear" ||
+        xAxisType === "log" ||
+        xAxisType === "symlog" ||
+        xAxisType === "pow" ||
+        xAxisType === "sqrt"
+    ) {
         if (typeof rawX !== "number" || !Number.isFinite(rawX)) {
             return {
                 isContinuousInvalid: true,
@@ -247,8 +254,7 @@ export class FinancialDataResolver {
                 seenCustomKeys.add(customKeyIdentifier);
             }
 
-            const direction: ChartFinancialDirection =
-                close > open ? "rising" : close < open ? "falling" : "neutral";
+            const direction: ChartFinancialDirection = close > open ? "rising" : close < open ? "falling" : "neutral";
 
             const change = close - open;
             const changePercentage = open !== 0 ? change / Math.abs(open) : undefined;
