@@ -48,13 +48,39 @@ export class ChartRenderScheduler {
         }
     }
 
+    public hasPending(reasonMask?: number): boolean {
+        if (reasonMask === undefined) {
+            return this.#pendingReason !== 0;
+        }
+        return (this.#pendingReason & reasonMask) !== 0;
+    }
+
+    public flushWithDefault(defaultReason: ChartInvalidationReason): void {
+        if (this.#frameId !== null) {
+            this.#cancelFrame(this.#frameId);
+            this.#frameId = null;
+        }
+        const accumulatedReason = this.#pendingReason !== 0 ? (this.#pendingReason | defaultReason) : defaultReason;
+        this.#pendingReason = 0;
+        this.#callback(accumulatedReason as ChartInvalidationReason);
+    }
+
+    public consume(reason: ChartInvalidationReason): void {
+        this.#pendingReason &= ~reason;
+        if (this.#pendingReason === 0 && this.#frameId !== null) {
+            this.#cancelFrame(this.#frameId);
+            this.#frameId = null;
+        }
+    }
+
     public flushStructural(): void {
         const structuralMask =
             ChartInvalidationReason.Data |
             ChartInvalidationReason.Layout |
             ChartInvalidationReason.Size |
             ChartInvalidationReason.Visibility |
-            ChartInvalidationReason.Style;
+            ChartInvalidationReason.Style |
+            ChartInvalidationReason.Chrome;
 
         const structuralReason = this.#pendingReason & structuralMask;
         if (structuralReason === 0) {
