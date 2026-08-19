@@ -18,6 +18,8 @@ export interface MarkerSeriesTransitionState {
     readonly toOpacity: number;
     readonly toStyle: ChartMarkerSeriesStyle;
     readonly type: "bubble" | "scatter";
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export class MarkerSeriesAnimationAdapter {
@@ -32,6 +34,8 @@ export class MarkerSeriesAnimationAdapter {
         const id = toSeries?.id ?? fromSeries?.id ?? "";
         const name = toSeries?.name ?? fromSeries?.name ?? "";
         const type = (toSeries?.type ?? fromSeries?.type ?? "scatter") as "bubble" | "scatter";
+        const xAxisId = toSeries?.xAxisId ?? fromSeries?.xAxisId ?? "default-x";
+        const yAxisId = toSeries?.yAxisId ?? fromSeries?.yAxisId ?? "default-y";
 
         const fromMarkers = fromSeries?.markers ?? [];
         const toMarkers = toSeries?.markers ?? [];
@@ -60,7 +64,9 @@ export class MarkerSeriesAnimationAdapter {
                 (fromSeries as ChartScatterSeriesScene)?.pointRadius,
             toOpacity: toSeries ? (toSeries.renderOpacity ?? 1) : 0,
             toStyle,
-            type
+            type,
+            xAxisId,
+            yAxisId
         };
     }
 
@@ -96,7 +102,9 @@ export class MarkerSeriesAnimationAdapter {
                 name: state.name,
                 renderOpacity,
                 style,
-                type: "bubble"
+                type: "bubble",
+                xAxisId: state.xAxisId,
+                yAxisId: state.yAxisId
             };
             return bubbleScene;
         }
@@ -108,7 +116,9 @@ export class MarkerSeriesAnimationAdapter {
             pointRadius: state.pointRadius ?? 4,
             renderOpacity,
             style,
-            type: "scatter"
+            type: "scatter",
+            xAxisId: state.xAxisId,
+            yAxisId: state.yAxisId
         };
         return scatterScene;
     }

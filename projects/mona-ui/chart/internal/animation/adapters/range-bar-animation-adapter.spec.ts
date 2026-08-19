@@ -42,7 +42,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             id: "series-1",
             name: "Range 1",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(null, targetScene, {} as any);
@@ -88,7 +90,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             id: "series-1",
             name: "Range 1",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const nextScene: ChartRangeBarSeriesScene = {
@@ -116,7 +120,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             id: "series-1",
             name: "Range 1",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(prevScene, nextScene, {} as any);
@@ -153,7 +159,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             id: "series-1",
             name: "Range 1",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const nextScene: ChartRangeBarSeriesScene = {
@@ -181,7 +189,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             id: "series-1",
             name: "Range 1",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(prevScene, nextScene, {} as any);
@@ -249,7 +259,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             name: "Range 1",
             orientation: "vertical",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const nextHorizontal: ChartRangeBarSeriesScene = {
@@ -282,7 +294,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             name: "Range 1",
             orientation: "horizontal",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(prevVertical, nextHorizontal, {} as any);
@@ -324,7 +338,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             name: "Range 1",
             orientation: "vertical",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const nextHorizontalReversed: ChartRangeBarSeriesScene = {
@@ -356,7 +372,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             name: "Range 1",
             orientation: "horizontal",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(prevVerticalReversed, nextHorizontalReversed, {} as any);
@@ -419,7 +437,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             name: "Range 1",
             orientation: "horizontal",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const nextVerticalReversed: ChartRangeBarSeriesScene = {
@@ -449,7 +469,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             name: "Range 1",
             orientation: "vertical",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(prevHorizontalReversed, nextVerticalReversed, {} as any);
@@ -506,7 +528,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             name: "Range 1",
             orientation: "vertical",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const nextHorizontalZero: ChartRangeBarSeriesScene = {
@@ -538,7 +562,9 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             name: "Range 1",
             orientation: "horizontal",
             style: mockStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(prevVerticalZero, nextHorizontalZero, {} as any);

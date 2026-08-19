@@ -64,7 +64,9 @@ describe("SceneTransitionSampler", () => {
                     id: "b1",
                     name: "Bar",
                     style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                    type: "bar"
+                    type: "bar",
+                    xAxisId: "default-x",
+                    yAxisId: "default-y"
                 }
             ],
             stackConfiguration: [
@@ -259,7 +261,9 @@ describe("SceneTransitionSampler", () => {
                     name: "Candles",
                     style: { fallingColor: "#ef4444", neutralColor: "#6b7280", risingColor: "#22c55e", wickWidth: 1 },
                     type: "candlestick",
-                    wickWidth: 1
+                    wickWidth: 1,
+                    xAxisId: "default-x",
+                    yAxisId: "default-y"
                 }
             ],
             width: 500

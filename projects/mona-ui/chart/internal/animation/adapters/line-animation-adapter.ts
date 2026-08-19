@@ -179,7 +179,9 @@ export class LineSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<C
                     renderOpacity,
                     showPoints: baseScene.showPoints,
                     style: baseScene.style,
-                    type: "line"
+                    type: "line",
+                    xAxisId: baseScene.xAxisId ?? "default-x",
+                    yAxisId: baseScene.yAxisId ?? "default-y"
                 };
             },
             toSeries: target

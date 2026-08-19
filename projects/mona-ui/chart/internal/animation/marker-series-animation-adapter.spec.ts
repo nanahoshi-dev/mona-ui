@@ -12,7 +12,9 @@ describe("MarkerSeriesAnimationAdapter", () => {
             name: "Scatter",
             pointRadius: 4,
             style: { color: "#ff0000", fillOpacity: 0.8, strokeColor: "#ffffff", strokeWidth: 1 },
-            type: "scatter"
+            type: "scatter",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const to: ChartScatterSeriesScene = {
@@ -23,7 +25,9 @@ describe("MarkerSeriesAnimationAdapter", () => {
             name: "Scatter",
             pointRadius: 8,
             style: { color: "#0000ff", fillOpacity: 0.4, strokeColor: "#000000", strokeWidth: 2 },
-            type: "scatter"
+            type: "scatter",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = MarkerSeriesAnimationAdapter.planSeries(from, to);

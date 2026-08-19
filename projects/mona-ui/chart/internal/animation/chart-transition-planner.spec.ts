@@ -49,7 +49,9 @@ function createMockCartesianSceneWithBars(): CartesianXYChartScene {
                 id: "b1",
                 name: "Bar 1",
                 style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                type: "bar"
+                type: "bar",
+                xAxisId: "default-x",
+                yAxisId: "default-y"
             }
         ],
         width: 500
@@ -157,7 +159,9 @@ describe("ChartTransitionPlanner", () => {
             ],
             showPoints: true,
             style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-            type: "line"
+            type: "line",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const prev: CartesianXYChartScene = {
@@ -358,7 +362,9 @@ describe("ChartTransitionPlanner", () => {
                         name: "Bar 1",
                         orientation: "horizontal",
                         style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                        type: "bar"
+                        type: "bar",
+                        xAxisId: "default-x",
+                        yAxisId: "default-y"
                     }
                 ],
                 width: 500,
@@ -395,7 +401,9 @@ describe("ChartTransitionPlanner", () => {
                         points: [{ animationKey: "p0", datum: {}, defined: true, index: 0, x: 10, xValue: 0, y: 50, yValue: 50 }],
                         showPoints: true,
                         style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                        type: "line"
+                        type: "line",
+                        xAxisId: "default-x",
+                        yAxisId: "default-y"
                     }
                 ],
                 width: 500,
@@ -423,7 +431,9 @@ describe("ChartTransitionPlanner", () => {
                         points: [{ animationKey: "p0", datum: {}, defined: true, index: 0, x: 50, xValue: 50, y: 10, yValue: 0 }],
                         showPoints: true,
                         style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                        type: "line"
+                        type: "line",
+                        xAxisId: "default-x",
+                        yAxisId: "default-y"
                     }
                 ],
                 width: 500,
@@ -433,6 +443,39 @@ describe("ChartTransitionPlanner", () => {
 
             const options = normalizeChartAnimationOptions(true);
             const plan = ChartTransitionPlanner.plan(prevVertical, nextHorizontal, "data", options);
+
+            expect(plan.mode).toBe("crossfade");
+        });
+    });
+
+    describe("Multi-Axis Topology & Re-binding Transitions (MAXR-025, MAXR-026)", () => {
+        it("should fallback to crossfade when Cartesian axisTopologySignature changes (MAXR-025)", () => {
+            const prev = createMockCartesianSceneWithBars();
+            prev.axisTopologySignature = "sig-1-axis";
+
+            const next = createMockCartesianSceneWithBars();
+            next.axisTopologySignature = "sig-2-axes";
+
+            const options = normalizeChartAnimationOptions(true);
+            const plan = ChartTransitionPlanner.plan(prev, next, "data", options);
+
+            expect(plan.mode).toBe("crossfade");
+        });
+
+        it("should fallback to crossfade when a series is rebound to a different axis (MAXR-026)", () => {
+            const baseScene = createMockCartesianSceneWithBars();
+            const prev: CartesianXYChartScene = {
+                ...baseScene,
+                series: [{ ...baseScene.series[0], xAxisId: "x-primary", yAxisId: "y-left" }]
+            };
+
+            const next: CartesianXYChartScene = {
+                ...baseScene,
+                series: [{ ...baseScene.series[0], xAxisId: "x-primary", yAxisId: "y-right" }] // Rebound from y-left to y-right
+            };
+
+            const options = normalizeChartAnimationOptions(true);
+            const plan = ChartTransitionPlanner.plan(prev, next, "data", options);
 
             expect(plan.mode).toBe("crossfade");
         });

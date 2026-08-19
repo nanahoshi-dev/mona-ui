@@ -127,7 +127,9 @@ describe("Cartesian Stack Animation Planning & Sampling", () => {
                     id: "s1",
                     name: "S1",
                     style: { areaFillColor: "#3b82f6", areaFillOpacity: 1, color: "#3b82f6", fillOpacity: 1, lineWidth: 1, opacity: 1, pointRadius: 4 },
-                    type: "bar"
+                    type: "bar",
+                    xAxisId: "default-x",
+                    yAxisId: "default-y"
                 }],
                 width: 500,
                 xAxisType: "category"

@@ -201,7 +201,9 @@ export class AreaSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<C
                     renderOpacity,
                     showPoints: baseScene.showPoints,
                     style: baseScene.style,
-                    type: "area"
+                    type: "area",
+                    xAxisId: baseScene.xAxisId ?? "default-x",
+                    yAxisId: baseScene.yAxisId ?? "default-y"
                 };
             },
             toSeries: target

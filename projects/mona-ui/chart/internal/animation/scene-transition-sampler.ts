@@ -353,7 +353,7 @@ export class SceneTransitionSampler {
         const sampledBarHitTargets: SceneHitTarget[] = [];
         const sampledFinancialHitEntries: FinancialHitEntry[] = [];
         const sampledPointHitTargets: SceneHitTarget[] = [];
-        const sampledHitsByX = new Map<ChartInteractionXKey, SceneHitTarget[]>();
+        const sampledHitsByAxis = new Map<string, Map<ChartInteractionXKey, SceneHitTarget[]>>();
 
         for (const targetHit of toScene.hitTargets) {
             const key = targetHit.animationKey ?? `${targetHit.seriesId}:${targetHit.xKey}`;
@@ -606,65 +606,89 @@ export class SceneTransitionSampler {
                 sampledPointHitTargets.push(hit);
             }
 
-            let xList = sampledHitsByX.get(targetHit.xKey);
+            const isHorizontal = toScene.orientation === "horizontal";
+            const hitAxisId = isHorizontal
+                ? (targetHit.yAxisId ?? toScene.primaryYAxisId ?? "default-y")
+                : (targetHit.xAxisId ?? toScene.primaryXAxisId ?? "default-x");
+            let axisMap = sampledHitsByAxis.get(hitAxisId);
+            if (!axisMap) {
+                axisMap = new Map<ChartInteractionXKey, SceneHitTarget[]>();
+                sampledHitsByAxis.set(hitAxisId, axisMap);
+            }
+            let xList = axisMap.get(targetHit.xKey);
             if (!xList) {
                 xList = [];
-                sampledHitsByX.set(targetHit.xKey, xList);
+                axisMap.set(targetHit.xKey, xList);
             }
             xList.push(hit);
         }
 
-        // Interpolate interaction buckets with sampled hit geometry in linear O(H+B) time
-        const sampledBuckets: ChartInteractionBucket[] = [];
         const isHorizontal = toScene.orientation === "horizontal";
-        for (const targetBucket of toScene.interactionBuckets) {
-            const bucketHits = sampledHitsByX.get(targetBucket.xKey) ?? [];
-            if (bucketHits.length === 0) {
-                continue;
-            }
-            const primaryHit = bucketHits[0];
-            let anchor: ChartPoint;
-            if (isHorizontal) {
-                let minCenterY = Number.POSITIVE_INFINITY;
-                let maxCenterY = Number.NEGATIVE_INFINITY;
-                let anchorX = targetBucket.anchor.x;
-                for (const hit of bucketHits) {
-                    if (hit.visualBounds) {
-                        const cy = hit.visualBounds.y + hit.visualBounds.height / 2;
-                        minCenterY = Math.min(minCenterY, cy);
-                        maxCenterY = Math.max(maxCenterY, cy);
-                        anchorX = hit.visualBounds.x + hit.visualBounds.width;
+        const sampledBucketsByAxisId = new Map<string, Map<ChartInteractionXKey, ChartInteractionBucket>>();
+
+        if (toScene.interactionBucketsByAxisId) {
+            for (const [axisId, targetBucketsMap] of toScene.interactionBucketsByAxisId) {
+                const axisHitsMap = sampledHitsByAxis.get(axisId);
+                const axisSampledBuckets = new Map<ChartInteractionXKey, ChartInteractionBucket>();
+
+                for (const [xKey, targetBucket] of targetBucketsMap) {
+                    const bucketHits = axisHitsMap?.get(xKey) ?? [];
+                    if (bucketHits.length === 0) {
+                        continue;
                     }
+                    const primaryHit = bucketHits[0];
+                    let anchor: ChartPoint;
+                    if (isHorizontal) {
+                        let minCenterY = Number.POSITIVE_INFINITY;
+                        let maxCenterY = Number.NEGATIVE_INFINITY;
+                        let anchorX = targetBucket.anchor.x;
+                        for (const hit of bucketHits) {
+                            if (hit.visualBounds) {
+                                const cy = hit.visualBounds.y + hit.visualBounds.height / 2;
+                                minCenterY = Math.min(minCenterY, cy);
+                                maxCenterY = Math.max(maxCenterY, cy);
+                                anchorX = hit.visualBounds.x + hit.visualBounds.width;
+                            }
+                        }
+                        const centerY =
+                            Number.isFinite(minCenterY) && Number.isFinite(maxCenterY)
+                                ? (minCenterY + maxCenterY) / 2
+                                : targetBucket.anchor.y;
+                        anchor = { x: anchorX, y: centerY };
+                    } else {
+                        anchor = primaryHit
+                            ? {
+                                  x:
+                                      primaryHit.point?.x ??
+                                      (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : targetBucket.anchor.x),
+                                  y: primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : targetBucket.anchor.y)
+                              }
+                            : targetBucket.anchor;
+                    }
+
+                    axisSampledBuckets.set(xKey, {
+                        anchor,
+                        axisDimension: targetBucket.axisDimension,
+                        axisId: targetBucket.axisId,
+                        hits: bucketHits,
+                        order: targetBucket.order,
+                        xAxisId: targetBucket.xAxisId,
+                        xAxisTitle: targetBucket.xAxisTitle,
+                        xKey: targetBucket.xKey,
+                        xValue: targetBucket.xValue,
+                        yAxisId: targetBucket.yAxisId,
+                        yAxisTitle: targetBucket.yAxisTitle
+                    });
                 }
-                const centerY =
-                    Number.isFinite(minCenterY) && Number.isFinite(maxCenterY)
-                        ? (minCenterY + maxCenterY) / 2
-                        : targetBucket.anchor.y;
-                anchor = { x: anchorX, y: centerY };
-            } else {
-                anchor = primaryHit
-                    ? {
-                          x:
-                              primaryHit.point?.x ??
-                              (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : targetBucket.anchor.x),
-                          y: primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : targetBucket.anchor.y)
-                      }
-                    : targetBucket.anchor;
+                sampledBucketsByAxisId.set(axisId, axisSampledBuckets);
             }
-
-            sampledBuckets.push({
-                anchor,
-                hits: bucketHits,
-                order: targetBucket.order,
-                xKey: targetBucket.xKey,
-                xValue: targetBucket.xValue
-            });
         }
 
-        const interactionBucketLookup = new Map<ChartInteractionXKey, ChartInteractionBucket>();
-        for (const b of sampledBuckets) {
-            interactionBucketLookup.set(b.xKey, b);
-        }
+        const primaryAxisId = isHorizontal
+            ? (toScene.primaryYAxisId ?? "default-y")
+            : (toScene.primaryXAxisId ?? "default-x");
+        const sampledBuckets = Array.from(sampledBucketsByAxisId.get(primaryAxisId)?.values() ?? []);
+        const interactionBucketLookup = sampledBucketsByAxisId.get(primaryAxisId) ?? new Map();
 
         let pointSpatialIndex: CartesianPointSpatialIndex | undefined;
         if (sampledPointHitTargets.length >= 100) {
@@ -680,6 +704,8 @@ export class SceneTransitionSampler {
 
         return {
             axes,
+            axisTopology: toScene.axisTopology,
+            axisTopologySignature: toScene.axisTopologySignature,
             barHitTargets: sampledBarHitTargets,
             cartesianKind: "xy",
             coordinateSystem: "cartesian",
@@ -690,11 +716,14 @@ export class SceneTransitionSampler {
             interactionAxis: toScene.interactionAxis,
             interactionBucketLookup,
             interactionBuckets: sampledBuckets,
+            interactionBucketsByAxisId: sampledBucketsByAxisId,
             legendItems: toScene.legendItems,
             markerSpatialIndex: pointSpatialIndex,
             orientation: toScene.orientation,
             plotRect: toScene.plotRect,
             pointSpatialIndex,
+            primaryXAxisId: toScene.primaryXAxisId,
+            primaryYAxisId: toScene.primaryYAxisId,
             series: sampledSeries,
             stackConfiguration: toScene.stackConfiguration,
             stackSignature: toScene.stackSignature,

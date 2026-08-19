@@ -463,7 +463,9 @@ export class RangeBarSeriesAnimationAdapter implements ChartSeriesAnimationAdapt
                     orientation: baseScene.orientation,
                     renderOpacity,
                     style: baseScene.style,
-                    type: "rangeBar"
+                    type: "rangeBar",
+                    xAxisId: baseScene.xAxisId ?? "default-x",
+                    yAxisId: baseScene.yAxisId ?? "default-y"
                 };
             },
             toSeries: target

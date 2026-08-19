@@ -35,7 +35,9 @@ describe("Series Animation Adapters", () => {
                 id: "b",
                 name: "Bar",
                 style: mockStyle,
-                type: "bar"
+                type: "bar",
+                xAxisId: "default-x",
+                yAxisId: "default-y"
             };
 
             const plan = adapter.createPlan(null, toSeries, {
@@ -83,7 +85,9 @@ describe("Series Animation Adapters", () => {
                 name: "Bar",
                 orientation: "vertical",
                 style: mockStyle,
-                type: "bar"
+                type: "bar",
+                xAxisId: "default-x",
+                yAxisId: "default-y"
             };
 
             const toHorizontal: ChartBarSeriesScene = {
@@ -110,7 +114,9 @@ describe("Series Animation Adapters", () => {
                 name: "Bar",
                 orientation: "horizontal",
                 style: mockStyle,
-                type: "bar"
+                type: "bar",
+                xAxisId: "default-x",
+                yAxisId: "default-y"
             };
 
             const plan = adapter.createPlan(fromVertical, toHorizontal, {
@@ -146,7 +152,9 @@ describe("Series Animation Adapters", () => {
                 ],
                 showPoints: true,
                 style: mockStyle,
-                type: "line"
+                type: "line",
+                xAxisId: "default-x",
+                yAxisId: "default-y"
             };
 
             const plan = adapter.createPlan(null, toSeries, {
@@ -179,7 +187,9 @@ describe("Series Animation Adapters", () => {
                 ],
                 showPoints: false,
                 style: mockStyle,
-                type: "area"
+                type: "area",
+                xAxisId: "default-x",
+                yAxisId: "default-y"
             };
 
             const plan = adapter.createPlan(null, toSeries, {

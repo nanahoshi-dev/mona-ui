@@ -199,7 +199,9 @@ export class RangeAreaSeriesAnimationAdapter implements ChartSeriesAnimationAdap
                     showPoints: baseScene.showPoints,
                     strokeWidth: baseScene.strokeWidth,
                     style: baseScene.style,
-                    type: "rangeArea"
+                    type: "rangeArea",
+                    xAxisId: baseScene.xAxisId ?? "default-x",
+                    yAxisId: baseScene.yAxisId ?? "default-y"
                 };
             },
             toSeries: target
