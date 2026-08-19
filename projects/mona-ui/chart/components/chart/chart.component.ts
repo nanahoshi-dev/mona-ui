@@ -543,8 +543,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const gutter = axisScene.gutter ?? 48;
         const sideOffset = axisScene.sideOffset ?? 0;
         return axisScene.position === "right"
-            ? cart.plotRect.x + cart.plotRect.width + sideOffset + gutter - 14
-            : cart.plotRect.x - sideOffset - gutter + 14;
+            ? cart.plotRect.x + cart.plotRect.width + sideOffset + gutter - 12
+            : cart.plotRect.x - sideOffset - gutter + 12;
     }
 
     protected axisTitleTop(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): number {
@@ -554,8 +554,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const gutter = axisScene.gutter ?? 32;
         const sideOffset = axisScene.sideOffset ?? 0;
         return axisScene.position === "top"
-            ? cart.plotRect.y - sideOffset - gutter + 6
-            : cart.plotRect.y + cart.plotRect.height + sideOffset + gutter - 6;
+            ? cart.plotRect.y - sideOffset - gutter + 4
+            : cart.plotRect.y + cart.plotRect.height + sideOffset + gutter - 4;
     }
 
     public constructor() {
