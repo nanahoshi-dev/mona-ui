@@ -112,14 +112,39 @@ describe("CartesianAxisRegistryResolver", () => {
         expect(rightAxes[1].stackIndex).toBe(1);
     });
 
-    it("should detect duplicate axis IDs and issue warning diagnostics", () => {
+    it("should allow the same textual ID on X and Y without namespace collision", () => {
+        const x1 = createMockXAxis({ axisId: signal("value"), position: signal("bottom") });
+        const y1 = createMockYAxis({ axisId: signal("value"), position: signal("left") });
+
+        const res = CartesianAxisRegistryResolver.resolve([x1], [y1]);
+        expect(res.warnings.length).toBe(0);
+        expect(res.xAxisById.has("value")).toBe(true);
+        expect(res.yAxisById.has("value")).toBe(true);
+        expect(res.xAxisById.get("value")?.dimension).toBe("x");
+        expect(res.yAxisById.get("value")?.dimension).toBe("y");
+        expect(res.getAxis("x", "value")?.dimension).toBe("x");
+        expect(res.getAxis("y", "value")?.dimension).toBe("y");
+    });
+
+    it("should detect duplicate axis IDs on same dimension, emit warning and keep duplicate inactive", () => {
         const y1 = createMockYAxis({ axisId: signal("shared-y"), position: signal("left") });
         const y2 = createMockYAxis({ axisId: signal("shared-y"), position: signal("right") });
 
         const res = CartesianAxisRegistryResolver.resolve([], [y1, y2]);
         expect(res.warnings.length).toBeGreaterThanOrEqual(1);
         expect(res.warnings[0]).toContain('Duplicate Y axis ID "shared-y"');
+        expect(res.yAxes.length).toBe(1);
         expect(res.yAxes[0].axisId).toBe("shared-y");
-        expect(res.yAxes[1].axisId).not.toBe("shared-y");
+        expect(res.yAxisById.get("shared-y")?.position).toBe("left");
+    });
+
+    it("should use registrationId for unnamed secondary axis identity", () => {
+        const y1 = createMockYAxis({ axisId: signal(undefined), position: signal("left"), registrationId: "reg-y-1" });
+        const y2 = createMockYAxis({ axisId: signal(undefined), position: signal("right"), registrationId: "reg-y-2" });
+
+        const res = CartesianAxisRegistryResolver.resolve([], [y1, y2]);
+        expect(res.yAxes.length).toBe(2);
+        expect(res.yAxes[0].axisId).toBe("default-y");
+        expect(res.yAxes[1].axisId).toBe(`__mona_y_reg-y-2__`);
     });
 });

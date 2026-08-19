@@ -25,7 +25,7 @@ import {
     isFiniteNumber,
     normalizeMarkerRadius
 } from "../utils/number-utils";
-import type { ChartPositionScale } from "../scale/chart-scale";
+import type { ChartPositionScale, ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 
 export interface ResolvedCartesianXCoordinate {
     readonly coordinate: number;
@@ -146,16 +146,19 @@ export class CartesianMarkerLayout {
         visibleBubbleSeries: readonly ChartBubbleSeriesRegistration[],
         rootData: readonly unknown[],
         rootXField: ChartField | undefined,
-        xAxisType: ChartXAxisType
+        xAxisType: ChartXAxisType,
+        seriesContextResolver?: (seriesId: string) => { effectiveXField?: ChartField; xType?: ResolvedChartCartesianAxisType } | undefined
     ): readonly [number, number] {
         let globalMinSize = Number.POSITIVE_INFINITY;
         let globalMaxSize = Number.NEGATIVE_INFINITY;
 
         for (const bubbleSeries of visibleBubbleSeries) {
+            const ctx = seriesContextResolver?.(bubbleSeries.id);
             const sData = resolveData(bubbleSeries.data(), rootData);
             const sizeField = bubbleSeries.sizeField();
-            const sXField = bubbleSeries.xField() ?? rootXField;
+            const sXField = ctx?.effectiveXField ?? bubbleSeries.xField() ?? rootXField;
             const sField = bubbleSeries.field();
+            const sXType = (ctx?.xType as ChartXAxisType) ?? xAxisType;
 
             for (let i = 0; i < sData.length; i++) {
                 const rawX = resolveValue(sData[i], sXField, i);
@@ -164,7 +167,7 @@ export class CartesianMarkerLayout {
 
                 // Fully valid check: X is valid, Y is finite, size is finite > 0
                 if (
-                    isContinuousXValid(rawX, xAxisType) &&
+                    isContinuousXValid(rawX, sXType) &&
                     isFiniteNumber(rawY) &&
                     isFiniteNumber(sVal) &&
                     (sVal as number) > 0
@@ -360,7 +363,9 @@ export class CartesianMarkerLayout {
                 minRadius: normalizedMinRadius,
                 name: seriesDisplayName,
                 style: sStyle,
-                type: "bubble"
+                type: "bubble",
+                xAxisId: options.xAxisId ?? (s.xAxisId?.() ?? "default-x"),
+                yAxisId: options.yAxisId ?? (s.yAxisId?.() ?? "default-y")
             };
         } else {
             const scatterSeries = s as ChartScatterSeriesRegistration;
@@ -375,7 +380,9 @@ export class CartesianMarkerLayout {
                 name: seriesDisplayName,
                 pointRadius: normalizeMarkerRadius(rawRadius, 4, 1, 100),
                 style: sStyle,
-                type: "scatter"
+                type: "scatter",
+                xAxisId: options.xAxisId ?? (s.xAxisId?.() ?? "default-x"),
+                yAxisId: options.yAxisId ?? (s.yAxisId?.() ?? "default-y")
             };
         }
 

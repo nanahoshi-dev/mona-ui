@@ -59,8 +59,8 @@ export class CartesianSeriesAxisBindingResolver {
             const targetXId = isDefaultX ? axisResolution.primaryXAxisId : rawXId;
             const targetYId = isDefaultY ? axisResolution.primaryYAxisId : rawYId;
 
-            const targetXAxis = targetXId ? (axisResolution.axisById.get(targetXId) as ResolvedCartesianAxisDescriptor<"x"> | undefined) : undefined;
-            const targetYAxis = targetYId ? (axisResolution.axisById.get(targetYId) as ResolvedCartesianAxisDescriptor<"y"> | undefined) : undefined;
+            const targetXAxis = targetXId ? axisResolution.xAxisById.get(targetXId) : undefined;
+            const targetYAxis = targetYId ? axisResolution.yAxisById.get(targetYId) : undefined;
 
             const xValid = targetXAxis !== undefined && targetXAxis.dimension === "x";
             const yValid = targetYAxis !== undefined && targetYAxis.dimension === "y";

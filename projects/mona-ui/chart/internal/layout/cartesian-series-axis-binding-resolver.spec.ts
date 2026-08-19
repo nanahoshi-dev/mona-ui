@@ -170,4 +170,22 @@ describe("CartesianSeriesAxisBindingResolver", () => {
         expect(b1.isValid).toBe(false);
         expect(bindingResolution.unboundSeries.map(s => s.id)).toEqual(["s1"]);
     });
+
+    it("should resolve series when X and Y axes share the same textual axisId", () => {
+        const x1 = createMockXAxis({ axisId: signal("value") });
+        const y1 = createMockYAxis({ axisId: signal("value") });
+        const axisResolution = CartesianAxisRegistryResolver.resolve([x1], [y1]);
+
+        const s1 = createMockBarSeries({ id: "s1", xAxisId: signal("value"), yAxisId: signal("value") });
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([s1], axisResolution);
+
+        expect(bindingResolution.warnings.length).toBe(0);
+        const b1 = bindingResolution.bindings.get("s1")!;
+        expect(b1.isValid).toBe(true);
+        expect(b1.xAxisId).toBe("value");
+        expect(b1.yAxisId).toBe("value");
+        expect(b1.xAxis?.dimension).toBe("x");
+        expect(b1.yAxis?.dimension).toBe("y");
+        expect(bindingResolution.activeSeries.length).toBe(1);
+    });
 });

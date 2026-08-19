@@ -1,112 +1,176 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import { resolveData, resolveValue } from "../data/chart-value-resolver";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
 
 export interface AxisCompatibilityResult {
+    readonly incompatibleSeriesIds: readonly string[];
     readonly resolvedType: ResolvedChartCartesianAxisType;
     readonly warnings: readonly string[];
 }
 
+function isDateString(val: string): boolean {
+    if (!val || val.trim().length === 0) return false;
+    if (/^\s*-?\d+(\.\d+)?\s*$/.test(val)) {
+        return false;
+    }
+    const t = Date.parse(val);
+    return !Number.isNaN(t);
+}
+
+function isTemporalSample(val: unknown): boolean {
+    if (val instanceof Date) {
+        return !Number.isNaN(val.getTime());
+    }
+    if (typeof val === "string") {
+        return isDateString(val);
+    }
+    return false;
+}
+
 export class CartesianAxisCompatibilityPolicy {
+    public static isSeriesCompatibleWithAxis(
+        series: ChartSeriesRegistration,
+        axis: ResolvedCartesianAxisDescriptor,
+        resolvedType: ResolvedChartCartesianAxisType,
+        orientation: "horizontal" | "vertical" = "vertical"
+    ): boolean {
+        if (orientation === "horizontal") {
+            if (axis.dimension === "y" && resolvedType !== "category") {
+                return false;
+            }
+            if (axis.dimension === "x") {
+                if (resolvedType === "category") {
+                    return false;
+                }
+                if (resolvedType === "log" && series.type === "bar") {
+                    return false;
+                }
+            }
+        } else {
+            const isValueAxis = axis.dimension === "y";
+            if (isValueAxis) {
+                if (resolvedType === "log") {
+                    if (series.type === "bar" || series.type === "area") {
+                        return false;
+                    }
+                }
+                if (resolvedType === "category") {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public static resolveAxisType(
         axis: ResolvedCartesianAxisDescriptor,
         boundSeries: readonly ChartSeriesRegistration[],
         rootData?: readonly unknown[],
-        rootXField?: ChartField
+        rootXField?: ChartField,
+        orientation: "horizontal" | "vertical" = "vertical"
     ): AxisCompatibilityResult {
         const warnings: string[] = [];
+        const incompatibleSeriesIds: string[] = [];
         const configuredType = axis.type;
 
+        let resolvedType: ResolvedChartCartesianAxisType;
+
         if (configuredType !== "auto") {
-            let resolvedType: ResolvedChartCartesianAxisType = configuredType;
+            resolvedType = configuredType;
 
-            // Validate log compatibility with series
-            if (resolvedType === "log") {
-                for (const s of boundSeries) {
-                    if (axis.dimension === "y" && (s.type === "bar" || s.type === "area")) {
+            if (orientation === "horizontal") {
+                if (axis.dimension === "y" && resolvedType !== "category") {
+                    for (const s of boundSeries) {
+                        incompatibleSeriesIds.push(s.id);
+                        const sName = "name" in s && typeof s.name === "function" ? s.name() : s.id;
                         warnings.push(
-                            `[MonaChart] Scale "log" on axis "${axis.axisId}" is incompatible with ${s.type} series "${s.id}" which requires a zero-baseline. Falling back to "linear".`
+                            `[MonaChart] Horizontal series "${sName}" requires a categorical Y axis, but axis "${axis.axisId}" is configured as "${configuredType}". Series geometry is omitted.`
                         );
-                        resolvedType = "linear";
-                        break;
                     }
-                    // For horizontal bars, X is value axis
-                    if (axis.dimension === "x" && s.type === "bar" && "orientation" in s && s.orientation?.() === "horizontal") {
+                } else if (axis.dimension === "x" && resolvedType === "category") {
+                    for (const s of boundSeries) {
+                        incompatibleSeriesIds.push(s.id);
+                        const sName = "name" in s && typeof s.name === "function" ? s.name() : s.id;
                         warnings.push(
-                            `[MonaChart] Scale "log" on axis "${axis.axisId}" is incompatible with horizontal bar series "${s.id}" which requires a zero-baseline. Falling back to "linear".`
+                            `[MonaChart] Horizontal series "${sName}" requires a numeric X value axis, but axis "${axis.axisId}" is configured as "category". Series geometry is omitted.`
                         );
-                        resolvedType = "linear";
-                        break;
-                    }
-                }
-            }
-
-            // Validate stacked series on non-linear value scale
-            if (resolvedType !== "linear" && resolvedType !== "category") {
-                for (const s of boundSeries) {
-                    if ("stack" in s && Boolean(s.stack?.())) {
-                        warnings.push(
-                            `[MonaChart] Scale "${resolvedType}" on axis "${axis.axisId}" is unsupported for stacked series "${s.id}". Falling back to "linear".`
-                        );
-                        resolvedType = "linear";
-                        break;
                     }
                 }
             }
 
-            return {
-                resolvedType,
-                warnings
-            };
+            const isValueAxis = orientation === "horizontal" ? axis.dimension === "x" : axis.dimension === "y";
+            if (resolvedType === "log" && isValueAxis) {
+                for (const s of boundSeries) {
+                    if (s.type === "bar" || (s.type === "area" && orientation !== "horizontal")) {
+                        if (!incompatibleSeriesIds.includes(s.id)) {
+                            incompatibleSeriesIds.push(s.id);
+                        }
+                        const sName = "name" in s && typeof s.name === "function" ? s.name() : s.id;
+                        warnings.push(
+                            `[MonaChart] Scale "log" on axis "${axis.axisId}" is incompatible with ${s.type} series "${sName}" which requires a zero-baseline. Series geometry is omitted from layout.`
+                        );
+                    }
+                }
+            } else if (resolvedType === "category" && isValueAxis && orientation !== "horizontal") {
+                for (const s of boundSeries) {
+                    if (!incompatibleSeriesIds.includes(s.id)) {
+                        incompatibleSeriesIds.push(s.id);
+                    }
+                    const sName = "name" in s && typeof s.name === "function" ? s.name() : s.id;
+                    warnings.push(
+                        `[MonaChart] Scale "category" on value axis "${axis.axisId}" is incompatible with ${s.type} series "${sName}". Series geometry is omitted from layout.`
+                    );
+                }
+            }
+        } else {
+            // Auto inference based on bound series data
+            const sampleValues = this.#collectSampleValues(axis, boundSeries, rootData, rootXField, orientation);
+            resolvedType = this.#inferScaleType(axis.dimension, sampleValues, orientation);
         }
 
-        // Auto inference based on bound series data
-        const sampleValues = this.#collectSampleValues(axis.dimension, boundSeries, rootData, rootXField);
-        const resolvedType = this.#inferScaleType(axis.dimension, sampleValues);
-
         return {
+            incompatibleSeriesIds,
             resolvedType,
             warnings
         };
     }
 
     static #collectSampleValues(
-        dimension: "x" | "y",
+        axis: ResolvedCartesianAxisDescriptor,
         boundSeries: readonly ChartSeriesRegistration[],
         rootData?: readonly unknown[],
-        rootXField?: ChartField
+        rootXField?: ChartField,
+        orientation: "horizontal" | "vertical" = "vertical"
     ): unknown[] {
         const samples: unknown[] = [];
-        const maxSamples = 20;
+        const maxSamples = 30;
+        const isCategoryDim = orientation === "horizontal" ? axis.dimension === "y" : axis.dimension === "x";
 
         for (const s of boundSeries) {
-            const data = ((s.data?.() ?? rootData) ?? []) as readonly unknown[];
+            const data = resolveData("data" in s && typeof (s as any).data === "function" ? ((s as any).data() as readonly unknown[] | undefined) : undefined, rootData);
             for (let i = 0; i < data.length && samples.length < maxSamples; i++) {
                 const item = data[i];
-                if (dimension === "x") {
-                    const field = ("xField" in s ? s.xField?.() : undefined) ?? rootXField;
-                    if (field && item && typeof item === "object") {
-                        samples.push((item as Record<string, unknown>)[field as string]);
-                    } else {
-                        samples.push(item);
+                if (isCategoryDim) {
+                    const field = ("xField" in s && typeof s.xField === "function" && s.xField() !== undefined)
+                        ? s.xField()
+                        : (orientation === "vertical" && axis.field !== undefined ? axis.field : rootXField);
+                    const val = resolveValue(item, field, i);
+                    if (val !== null && val !== undefined) {
+                        samples.push(val);
                     }
                 } else {
-                    if ("field" in s && s.field) {
-                        const f = s.field();
-                        if (f && item && typeof item === "object") {
-                            samples.push((item as Record<string, unknown>)[f as string]);
-                        }
-                    } else if ("fromField" in s && s.fromField) {
-                        const f = s.fromField();
-                        if (f && item && typeof item === "object") {
-                            samples.push((item as Record<string, unknown>)[f as string]);
-                        }
-                    } else if ("closeField" in s && s.closeField) {
-                        const f = s.closeField();
-                        if (f && item && typeof item === "object") {
-                            samples.push((item as Record<string, unknown>)[f as string]);
-                        }
+                    if ("field" in s && typeof (s as any).field === "function") {
+                        const val = resolveValue(item, (s as any).field(), i);
+                        if (val !== null && val !== undefined) samples.push(val);
+                    } else if ("fromField" in s && typeof (s as any).fromField === "function") {
+                        const fv = resolveValue(item, (s as any).fromField(), i);
+                        if (fv !== null && fv !== undefined) samples.push(fv);
+                    } else if ("closeField" in s && typeof (s as any).closeField === "function") {
+                        const cv = resolveValue(item, (s as any).closeField(), i);
+                        if (cv !== null && cv !== undefined) samples.push(cv);
                     }
                 }
             }
@@ -115,20 +179,28 @@ export class CartesianAxisCompatibilityPolicy {
             }
         }
 
-        return samples.filter(v => v !== null && v !== undefined);
+        return samples;
     }
 
-    static #inferScaleType(dimension: "x" | "y", values: unknown[]): ResolvedChartCartesianAxisType {
+    static #inferScaleType(
+        dimension: "x" | "y",
+        values: unknown[],
+        orientation: "horizontal" | "vertical" = "vertical"
+    ): ResolvedChartCartesianAxisType {
+        const defaultType = orientation === "horizontal"
+            ? (dimension === "x" ? "linear" : "category")
+            : (dimension === "x" ? "category" : "linear");
+
         if (values.length === 0) {
-            return dimension === "x" ? "category" : "linear";
+            return defaultType;
         }
 
-        const allDates = values.every(v => v instanceof Date);
-        if (allDates) {
+        const allTemporal = values.every(v => isTemporalSample(v));
+        if (allTemporal) {
             return "time";
         }
 
-        const allNumbers = values.every(v => typeof v === "number" && !Number.isNaN(v));
+        const allNumbers = values.every(v => typeof v === "number" && Number.isFinite(v));
         if (allNumbers) {
             return "linear";
         }

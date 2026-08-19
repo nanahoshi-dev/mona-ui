@@ -9,7 +9,7 @@ import type {
 } from "../context/chart-registration-context";
 import { resolveFiniteRangeValues } from "../data/chart-range-resolver";
 import { resolveValue } from "../data/chart-value-resolver";
-import type { ChartBandScale, ChartContinuousScale } from "../scale/chart-scale";
+import type { ChartBandScale, ChartContinuousScale, ChartPositionScale, ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ChartRangeAreaSeriesScene, ChartRangeBarSeriesScene } from "../scene/cartesian-scene";
 import type { SceneHitTarget, SceneRangeAreaPoint, SceneRangeBar } from "../scene/scene-geometry";
 import { formatXValue, formatYValue } from "../utils/chart-formatter";
@@ -99,9 +99,18 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
             continue;
         }
 
+        const rawFromY = (yScale as any).map(range.fromValue);
+        const rawToY = (yScale as any).map(range.toValue);
+        if (
+            rawFromY === undefined || !Number.isFinite(rawFromY) ||
+            rawToY === undefined || !Number.isFinite(rawToY)
+        ) {
+            continue;
+        }
+
         const barX = bandOuterX + subX + centerOffset;
-        const fromY = (yScale as any).map(range.fromValue);
-        const toY = (yScale as any).map(range.toValue);
+        const fromY = rawFromY;
+        const toY = rawToY;
         const topY = Math.min(fromY, toY);
         const barHeight = Math.abs(toY - fromY);
 
@@ -202,7 +211,9 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
         id: s.id,
         name: seriesDisplayName,
         style: sStyle,
-        type: "rangeBar"
+        type: "rangeBar",
+        xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
+        yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y")
     };
 }
 
@@ -222,7 +233,8 @@ export interface RangeAreaLayoutContext {
     xAxis?: ChartAxisRegistration;
     xAxisId?: string;
     xAxisTitle?: string;
-    xAxisType: ChartXAxisType;
+    xAxisType: ChartXAxisType | ResolvedChartCartesianAxisType;
+    xScale?: ChartPositionScale;
     yAxis?: ChartAxisRegistration;
     yAxisId?: string;
     yAxisTitle?: string;
@@ -248,6 +260,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
         xAxisId,
         xAxisTitle,
         xAxisType,
+        xScale,
         yAxis,
         yAxisId,
         yAxisTitle,
@@ -276,6 +289,8 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
     const keyResolver = new ChartMarkKeyResolver(s.id, sKeyField);
     const points: SceneRangeAreaPoint[] = [];
 
+    const effectiveXScale = xScale ?? bandScale ?? linearXScale ?? timeScale;
+
     for (let dIdx = 0; dIdx < sData.length; dIdx++) {
         const datum = sData[dIdx];
         const xVal = resolveValue(datum, sXField, dIdx);
@@ -284,30 +299,24 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
         let isXValid = false;
         let normalizedXKey: number | string = dIdx;
 
-        if (bandScale) {
-            const catKey = xVal !== undefined && xVal !== null ? String(xVal) : String(dIdx);
-            normalizedXKey = catKey;
-            const bPos = bandScale.map(catKey);
-            if (bPos !== undefined) {
-                xPos = bPos + bandScale.bandwidth() / 2;
-                isXValid = true;
-            }
-        } else if (linearXScale) {
-            if (isFiniteNumber(xVal)) {
-                normalizedXKey = Number(xVal);
-                const mappedX = linearXScale.map(Number(xVal));
-                if (mappedX !== undefined) {
-                    xPos = mappedX;
+        if (xAxisType === "category") {
+            const bScale = (effectiveXScale as ChartBandScale) ?? bandScale;
+            if (bScale) {
+                const catKey = xVal !== undefined && xVal !== null ? String(xVal) : String(dIdx);
+                normalizedXKey = catKey;
+                const bPos = bScale.map(catKey);
+                if (bPos !== undefined) {
+                    xPos = bPos + bScale.bandwidth() / 2;
                     isXValid = true;
                 }
             }
-        } else if (timeScale) {
+        } else if (xAxisType === "time" || xAxisType === "utc") {
             let dateVal: Date | undefined;
             if (xVal instanceof Date && !Number.isNaN(xVal.getTime())) {
                 dateVal = xVal;
             } else if (typeof xVal === "number" && Number.isFinite(xVal)) {
                 dateVal = new Date(xVal);
-            } else if (typeof xVal === "string") {
+            } else if (typeof xVal === "string" && xVal.trim().length > 0 && !/^\s*-?\d+(\.\d+)?\s*$/.test(xVal)) {
                 const parsed = Date.parse(xVal);
                 if (!Number.isNaN(parsed)) {
                     dateVal = new Date(parsed);
@@ -315,8 +324,21 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
             }
             if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
                 normalizedXKey = dateVal.getTime();
-                const mappedX = timeScale.map(dateVal);
-                if (mappedX !== undefined) {
+                const tScale = (effectiveXScale as ChartContinuousScale<Date>) ?? timeScale;
+                const mappedX = tScale?.map(dateVal);
+                if (mappedX !== undefined && Number.isFinite(mappedX)) {
+                    xPos = mappedX;
+                    isXValid = true;
+                }
+            }
+        } else {
+            // Numeric scale: linear, log, symlog, pow, sqrt
+            if (isFiniteNumber(xVal)) {
+                const numVal = Number(xVal);
+                normalizedXKey = numVal;
+                const numScale = (effectiveXScale as ChartContinuousScale<number>) ?? linearXScale;
+                const mappedX = numScale?.map(numVal);
+                if (mappedX !== undefined && Number.isFinite(mappedX)) {
                     xPos = mappedX;
                     isXValid = true;
                 }
@@ -342,7 +364,10 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
 
         const rawFromY = yScale.map(range.fromValue);
         const rawToY = yScale.map(range.toValue);
-        if (rawFromY === undefined || rawToY === undefined) {
+        if (
+            rawFromY === undefined || !Number.isFinite(rawFromY) ||
+            rawToY === undefined || !Number.isFinite(rawToY)
+        ) {
             points.push({
                 animationKey,
                 datum,
@@ -454,6 +479,8 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
         showPoints: sShowPoints,
         strokeWidth,
         style: sStyle,
-        type: "rangeArea"
+        type: "rangeArea",
+        xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
+        yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y")
     };
 }

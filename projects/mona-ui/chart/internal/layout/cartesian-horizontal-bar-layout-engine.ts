@@ -1,21 +1,21 @@
-import type {
-    ChartXAxisPosition,
-    ChartYAxisPosition
-} from "../../models/chart-axis.models";
-import type { ChartPadding, ChartRect } from "../../models/chart.models";
+import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
+import type { ChartField, ChartRect } from "../../models/chart.models";
+import { ChartMarkKeyResolver } from "../animation/animation-identity";
+import { CartesianBarGeometry } from "./cartesian-bar-geometry";
+import { CartesianBarSlots } from "./cartesian-bar-slots";
 import type {
     ChartBarSeriesRegistration,
     ChartCartesianSeriesRegistration,
-    ChartRangeBarSeriesRegistration,
-    ChartXAxisRegistration,
-    ChartYAxisRegistration
+    ChartRangeBarSeriesRegistration
 } from "../context/chart-registration-context";
-import { resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
+import { calculateCategoryDomain } from "../data/chart-domain";
+import { resolveFiniteRangeValues } from "../data/chart-range-resolver";
 import {
-    CartesianStackEngine,
-    type CartesianStackEntry
-} from "../data/cartesian-stack-engine";
+    resolveData,
+    resolveSeriesDisplayName,
+    resolveValue
+} from "../data/chart-value-resolver";
 import { CartesianScaleFactory, type BandScale } from "../scale/cartesian-scale-factory";
 import type {
     ChartAxisScene,
@@ -23,8 +23,12 @@ import type {
     ChartRangeBarSeriesScene,
     ChartSeriesScene
 } from "../scene/cartesian-scene";
-import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type {
+    CartesianXYChartScene
+} from "../scene/chart-scene";
+import type { CartesianLayoutOptions } from "./cartesian-layout-engine";
+import type {
+    ChartCornerRadii,
     ChartInteractionBucket,
     ChartInteractionXKey,
     SceneBar,
@@ -33,335 +37,151 @@ import type {
 } from "../scene/scene-geometry";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatPercentagePoint, formatXValue, formatYValue } from "../utils/chart-formatter";
-import { ChartDiagnostics } from "../utils/chart-diagnostics";
-import { ChartMarkKeyResolver } from "../animation/animation-identity";
-import { resolveFiniteRangeValues } from "../data/chart-range-resolver";
 import {
     clamp,
     formatCompactNumber,
     isFiniteNumber,
     normalizeNonNegativeNumber,
-    normalizeOpacity,
-    normalizePositiveNumber,
-    normalizeTickCount
+    normalizeOpacity
 } from "../utils/number-utils";
-import { CartesianAxisLabelGeometry } from "./cartesian-axis-label-geometry";
-import { CartesianAxisLayoutEngine } from "./cartesian-axis-layout-engine";
-import { CartesianBarGeometry } from "./cartesian-bar-geometry";
-import { CartesianBarSlots } from "./cartesian-bar-slots";
+import { CartesianAxisRegistryResolver } from "./cartesian-axis-registry-resolver";
+import { CartesianSeriesAxisBindingResolver } from "./cartesian-series-axis-binding-resolver";
+import { CartesianMultiAxisCoordinator } from "./cartesian-multi-axis-coordinator";
 import { CartesianLegendBuilder } from "./cartesian-legend-builder";
-
-export interface CartesianHorizontalBarLayoutOptions {
-    readonly containerHeight: number;
-    readonly containerWidth: number;
-    readonly effectiveSeries: readonly ChartCartesianSeriesRegistration[];
-    readonly measurements?: ReadonlyMap<string, { height: number; width: number }>;
-    readonly rootData?: readonly unknown[];
-    readonly rootXField?: import("../../models/chart.models").ChartField;
-    readonly styleResolver?: ChartStyleResolver;
-    readonly warnedDiagnosticSignatures?: Set<string>;
-    readonly xAxis?: ChartXAxisRegistration | null;
-    readonly xAxes?: readonly ChartXAxisRegistration[];
-    readonly yAxis?: ChartYAxisRegistration | null;
-    readonly yAxes?: readonly ChartYAxisRegistration[];
-}
+import { ChartDiagnostics } from "../utils/chart-diagnostics";
+import { CartesianAxisResolvedContextBuilder } from "./cartesian-axis-resolved-context";
+import { CartesianAxisCompatibilityPolicy } from "./cartesian-axis-compatibility-policy";
 
 export class CartesianHorizontalBarLayoutEngine {
-    public static computeLayout(options: CartesianHorizontalBarLayoutOptions): CartesianXYChartScene {
+    public static computeLayout(options: CartesianLayoutOptions): CartesianXYChartScene {
         const {
             containerHeight,
             containerWidth,
-            effectiveSeries,
             measurements,
-            rootData,
             rootXField,
             warnedDiagnosticSignatures
         } = options;
-        const xAxis = options.xAxis ?? (options.xAxes && options.xAxes.length > 0 ? options.xAxes[0] : null);
-        const yAxis = options.yAxis ?? (options.yAxes && options.yAxes.length > 0 ? options.yAxes[0] : null);
+
+        const rootData = options.rootData ?? [];
+        const effectiveSeries = options.series ?? options.effectiveSeries ?? [];
+
+        const xAxes = options.xAxes && options.xAxes.length > 0
+            ? options.xAxes
+            : (options.xAxis ? [options.xAxis] : []);
+        const yAxes = options.yAxes && options.yAxes.length > 0
+            ? options.yAxes
+            : (options.yAxis ? [options.yAxis] : []);
         const styleResolver = options.styleResolver ?? new ChartStyleResolver();
 
-        const visibleSeries = effectiveSeries.filter(s => s.visible());
-        const xAxisPosition: ChartXAxisPosition = xAxis?.position() ?? "bottom";
-        const yAxisPosition: ChartYAxisPosition = yAxis?.position() ?? "left";
-
-        // Validate axis configurations and emit diagnostics if unsupported types are configured
+        // 1. Resolve axis registries and bindings
+        const axisResolution = CartesianAxisRegistryResolver.resolve(xAxes, yAxes);
         if (warnedDiagnosticSignatures) {
-            if (xAxis?.type && xAxis.type() !== "auto" && xAxis.type() !== "linear") {
-                ChartDiagnostics.warnOnce(
-                    warnedDiagnosticSignatures,
-                    `[MonaChart] Horizontal Bar charts require a linear X value axis; '${xAxis.type()}' is not supported and will be treated as linear.`
-                );
-            }
-            if (yAxis?.type && yAxis.type() !== "auto" && yAxis.type() !== "category") {
-                ChartDiagnostics.warnOnce(
-                    warnedDiagnosticSignatures,
-                    `[MonaChart] Horizontal Bar charts require a categorical Y axis; '${yAxis.type()}' is not supported and will be treated as category.`
-                );
-            }
-            if (isFiniteNumber(yAxis?.min?.()) || isFiniteNumber(yAxis?.max?.())) {
-                ChartDiagnostics.warnOnce(
-                    warnedDiagnosticSignatures,
-                    "[MonaChart] Min and max properties are ignored on categorical Y axis in horizontal charts."
-                );
+            for (const w of axisResolution.warnings) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
             }
         }
 
-        // Stack analysis for horizontal bar series
-        const stackAnalysis = CartesianStackEngine.computeAnalysis({
-            rootData: rootData ?? [],
-            rootXField,
-            series: effectiveSeries,
-            xAxisType: "category"
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve(effectiveSeries, axisResolution);
+        if (warnedDiagnosticSignatures) {
+            for (const w of bindingResolution.warnings) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
+            }
+        }
+
+        const effectiveRootXField = rootXField || (axisResolution.xAxes[0]?.field as import("../../models/chart.models").ChartField | undefined);
+
+        // 2. Multi-axis coordinate convergence & layout
+        const coordResult = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: containerHeight,
+            chartWidth: containerWidth,
+            labelMeasurements: measurements ?? new Map(),
+            orientation: "horizontal",
+            rootData,
+            rootXField: effectiveRootXField,
+            warnedDiagnosticSignatures
         });
-        const stackLayout = stackAnalysis.visibleLayout;
-        const invalidSeriesIds = new Set<string>(stackAnalysis.invalidSeriesIds);
 
+        const { axisScenes, plotRect, scaleRegistry, stackAnalysesByYAxis } = coordResult;
         if (warnedDiagnosticSignatures) {
-            for (const diag of stackAnalysis.diagnostics) {
-                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, diag);
+            for (const w of coordResult.warnings) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
             }
         }
 
-        // Calculate Category Domain along Y (ordered categories)
-        const categorySet = new Set<string>();
-        const seriesForCategories = visibleSeries.length > 0 ? visibleSeries : effectiveSeries;
-        for (const series of seriesForCategories) {
-            const data = series.data() ?? rootData ?? [];
-            const xField = series.xField() ?? rootXField;
-            for (let i = 0; i < data.length; i++) {
-                const raw = data[i];
-                const catVal = resolveValue(raw, xField, i);
-                categorySet.add(catVal !== undefined && catVal !== null ? String(catVal) : String(i));
-            }
-        }
-        if (categorySet.size === 0 && rootData && rootData.length > 0) {
-            for (let i = 0; i < rootData.length; i++) {
-                const raw = rootData[i];
-                const catVal = resolveValue(raw, rootXField, i);
-                categorySet.add(catVal !== undefined && catVal !== null ? String(catVal) : String(i));
-            }
-        }
-        const categoryDomain: readonly string[] = Array.from(categorySet);
+        const resolvedContext = CartesianAxisResolvedContextBuilder.create({
+            axisResolution,
+            axisUnitModes: coordResult.axisUnitModes,
+            axisValidity: coordResult.axisValidity,
+            axisValidityById: coordResult.axisValidityById,
+            bindingResolution,
+            invalidStackSeriesIds: coordResult.stackCoordination?.invalidSeriesIds,
+            orientation: "horizontal",
+            resolvedTypes: coordResult.resolvedTypes,
+            resolvedXTypeByAxisId: coordResult.resolvedXTypesByAxisId,
+            resolvedYTypeByAxisId: coordResult.resolvedYTypesByAxisId,
+            rootXField: effectiveRootXField,
+            seriesIncompatibilityById: new Set(
+                axisResolution.xAxes.flatMap(a => CartesianAxisCompatibilityPolicy.resolveAxisType(a, bindingResolution.seriesByXAxis.get(a.axisId) ?? [], rootData, effectiveRootXField, "horizontal").incompatibleSeriesIds)
+                .concat(axisResolution.yAxes.flatMap(a => CartesianAxisCompatibilityPolicy.resolveAxisType(a, bindingResolution.seriesByYAxis.get(a.axisId) ?? [], rootData, effectiveRootXField, "horizontal").incompatibleSeriesIds))
+            ),
+            xAxisValidityById: coordResult.xAxisValidityById,
+            yAxisValidityById: coordResult.yAxisValidityById
+        });
 
-        // Calculate Linear Value Domain along X
-        let rawMin = 0;
-        let rawMax = 0;
-        let hasValues = false;
+        const primaryXType = (scaleRegistry.getXScale(axisResolution.primaryXAxisId)?.type as ChartXAxisType) ?? "linear";
+        const primaryYType = (scaleRegistry.getYScale(axisResolution.primaryYAxisId)?.type as ChartYAxisType) ?? "category";
 
-        for (const series of visibleSeries) {
-            const data = series.data() ?? rootData ?? [];
-            if (series.type === "bar") {
-                const isStacked = stackLayout.bySeriesId.has(series.id);
-                if (isStacked) {
-                    const entries = stackLayout.orderedBySeriesId.get(series.id) ?? [];
-                    for (const entry of entries) {
-                        if (entry.defined) {
-                            rawMin = Math.min(rawMin, entry.stackStart, entry.stackEnd);
-                            rawMax = Math.max(rawMax, entry.stackStart, entry.stackEnd);
-                            hasValues = true;
-                        }
-                    }
-                } else {
-                    const barReg = series as ChartBarSeriesRegistration;
-                    const field = barReg.field();
-                    for (let i = 0; i < data.length; i++) {
-                        const d = data[i];
-                        const val = resolveValue(d, field, i);
-                        if (typeof val === "number" && isFiniteNumber(val)) {
-                            rawMin = Math.min(rawMin, val);
-                            rawMax = Math.max(rawMax, val);
-                            hasValues = true;
-                        }
-                    }
-                }
-            } else if (series.type === "rangeBar") {
-                const rangeReg = series as ChartRangeBarSeriesRegistration;
-                const fromField = rangeReg.fromField();
-                const toField = rangeReg.toField();
-                for (let i = 0; i < data.length; i++) {
-                    const d = data[i];
-                    const range = resolveFiniteRangeValues(d, fromField, toField, i);
-                    if (range) {
-                        rawMin = Math.min(rawMin, range.lowValue);
-                        rawMax = Math.max(rawMax, range.highValue);
-                        hasValues = true;
-                    }
-                }
-            }
-        }
+        const primaryYScale = scaleRegistry.getYScale(axisResolution.primaryYAxisId) as BandScale<string> | undefined;
+        const categoryDomain = primaryYScale ? (primaryYScale.domain() as readonly string[]) : [];
 
-        if (!hasValues) {
-            rawMin = 0;
-            rawMax = 100;
-        }
+        const stackConfigForScene = coordResult.stackCoordination
+            ? coordResult.stackCoordination.configuration.groups.map(g => ({
+                  geometryType: g.geometryType,
+                  groupId: g.id,
+                  mode: g.mode,
+                  name: g.name,
+                  registeredSeriesIds: g.registeredSeriesIds,
+                  valid: g.valid,
+                  xAxisId: g.xAxisId,
+                  yAxisId: g.yAxisId
+              }))
+            : [];
+        const stackSignature = coordResult.stackCoordination?.configuration.signature ?? "";
 
-        // Include 0 baseline in value axis domain unless both min/max are explicitly specified
-        const explicitXMin = isFiniteNumber(xAxis?.min?.()) ? (xAxis?.min() as number) : undefined;
-        const explicitXMax = isFiniteNumber(xAxis?.max?.()) ? (xAxis?.max() as number) : undefined;
-
-        let domainMin = explicitXMin !== undefined ? explicitXMin : Math.min(0, rawMin);
-        let domainMax = explicitXMax !== undefined ? explicitXMax : Math.max(0, rawMax);
-
-        if (domainMin === domainMax) {
-            domainMin = domainMin === 0 ? -1 : domainMin - 1;
-            domainMax = domainMax === 0 ? 1 : domainMax + 1;
-        }
-
-        const niceX = xAxis?.nice?.() ?? true;
-        const xTickCount = normalizeTickCount(xAxis?.tickCount?.(), 5);
-
-        // Effective X Formatter (support percent stack mode formatting on X value axis)
-        const isPercentAxis = stackAnalysis.axisUnitMode === "percent";
-        const effectiveXFormatter = (val: unknown, idx: number) => {
-            if (xAxis?.formatter?.()) {
-                return xAxis.formatter()!(val, idx);
-            }
-            if (isPercentAxis && isFiniteNumber(val)) {
-                return formatPercentagePoint(val as number, 0);
-            }
-            return formatXValue(val, idx, undefined, "linear");
-        };
-
-        const effectiveYFormatter = (val: unknown, idx: number) => {
-            return formatXValue(val, idx, yAxis?.formatter?.(), "category");
-        };
-
-        const buildHorizontalState = (rect: ChartRect) => {
-            const currentYScale = CartesianScaleFactory.createBandScale(
-                categoryDomain,
-                [rect.y, rect.y + rect.height],
-                0.2,
-                0.1
-            );
-            const currentXScale = CartesianScaleFactory.createLinearScale(
-                [domainMin, domainMax],
-                [rect.x, rect.x + rect.width],
-                niceX,
-                xTickCount,
-                explicitXMin,
-                explicitXMax
-            );
-
-            const yAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
-                axis: "y",
-                axisType: "category",
-                containerSize: rect.height,
-                defaultGridLines: false,
-                effectiveFormatter: effectiveYFormatter,
-                measurements,
-                plotGutterConstraint: Math.min(240, Math.floor(containerWidth * 0.45)),
-                position: yAxisPosition,
-                registration: yAxis ?? undefined,
-                scale: currentYScale
-            });
-
-            const xAxisLayout = CartesianAxisLayoutEngine.computeAxisLayout({
-                axis: "x",
-                axisType: "linear",
-                containerSize: rect.width,
-                defaultGridLines: true,
-                effectiveFormatter: effectiveXFormatter,
-                measurements,
-                plotGutterConstraint: Math.min(240, Math.floor(containerHeight * 0.45)),
-                position: xAxisPosition,
-                registration: xAxis ?? undefined,
-                scale: currentXScale
-            });
-
-            const xTicks = xAxisLayout.axisScene.ticks.filter(t => t.labelVisible);
-            let xLeftOverhang = 8;
-            let xRightOverhang = 8;
-            const xRot = xAxisLayout.axisScene.labelRotation ?? 0;
-            if (xTicks.length > 0) {
-                const firstTick = xTicks[0];
-                const lastTick = xTicks[xTicks.length - 1];
-                const firstWidth = firstTick.unrotatedWidth ?? 0;
-                const firstHeight = firstTick.unrotatedHeight ?? 16;
-                const lastWidth = lastTick.unrotatedWidth ?? 0;
-                const lastHeight = lastTick.unrotatedHeight ?? 16;
-                if (xRot === 0) {
-                    xLeftOverhang = Math.ceil(firstWidth / 2);
-                    xRightOverhang = Math.ceil(lastWidth / 2);
-                } else if (xRot > 0) {
-                    const lastProj = CartesianAxisLabelGeometry.projectRotatedDimensions(lastWidth, lastHeight, xRot);
-                    xRightOverhang = Math.ceil(lastProj.projectedWidth);
-                    xLeftOverhang = 8;
-                } else {
-                    const firstProj = CartesianAxisLabelGeometry.projectRotatedDimensions(firstWidth, firstHeight, xRot);
-                    xLeftOverhang = Math.ceil(firstProj.projectedWidth);
-                    xRightOverhang = 8;
-                }
-            }
-
-            const padding: ChartPadding = {
-                bottom: xAxisPosition === "bottom" ? xAxisLayout.gutter : 12,
-                left: yAxisPosition === "left" ? Math.max(yAxisLayout.gutter, xLeftOverhang + 4) : Math.max(16, xLeftOverhang + 4),
-                right: yAxisPosition === "right" ? Math.max(yAxisLayout.gutter, xRightOverhang + 4) : Math.max(16, xRightOverhang + 4),
-                top: xAxisPosition === "top" ? xAxisLayout.gutter : 16
-            };
-
-            const nextPlotWidth = Math.max(0, containerWidth - padding.left - padding.right);
-            const nextPlotHeight = Math.max(0, containerHeight - padding.top - padding.bottom);
-            const nextPlotRect: ChartRect = {
-                height: nextPlotHeight,
-                width: nextPlotWidth,
-                x: padding.left,
-                y: padding.top
-            };
-
-            return {
-                currentXScale,
-                currentYScale,
-                nextPlotRect,
-                xAxisLayout,
-                yAxisLayout
-            };
-        };
-
-        // Iterative Bounded Gutter Convergence (max 3 passes)
-        let candidateRect: ChartRect = {
-            height: Math.max(0, containerHeight - 48),
-            width: Math.max(0, containerWidth - 80),
-            x: 64,
-            y: 16
-        };
-
-        for (let pass = 0; pass < 3; pass++) {
-            const state = buildHorizontalState(candidateRect);
-            const next = state.nextPlotRect;
-
-            if (
-                Math.abs(next.x - candidateRect.x) < 0.5 &&
-                Math.abs(next.y - candidateRect.y) < 0.5 &&
-                Math.abs(next.width - candidateRect.width) < 0.5 &&
-                Math.abs(next.height - candidateRect.height) < 0.5
-            ) {
-                candidateRect = next;
-                break;
-            }
-
-            candidateRect = next;
-        }
-
-        const plotRect = candidateRect;
-        const finalState = buildHorizontalState(plotRect);
-        const yScale = finalState.currentYScale;
-        const xScale = finalState.currentXScale;
-        const finalYAxisLayout = finalState.yAxisLayout;
-        const finalXAxisLayout = finalState.xAxisLayout;
-
-        const stackConfigForScene = stackAnalysis.configuration.groups.map(g => ({
-            geometryType: g.geometryType,
-            groupId: g.id,
-            mode: g.mode,
-            registeredSeriesIds: g.registeredSeriesIds
-        }));
+        const axisTopology = [
+            ...axisResolution.xAxes.map(ax => ({
+                axis: "x" as const,
+                axisId: ax.axisId,
+                dimension: "x" as const,
+                isPrimary: ax.isPrimary,
+                position: ax.position,
+                resolvedType: resolvedContext.resolvedXTypeByAxisId.get(ax.axisId) ?? "linear",
+                stackIndex: ax.stackIndex,
+                valid: resolvedContext.xAxisValidityById.get(ax.axisId)?.valid ?? true,
+                visible: ax.visible
+            })),
+            ...axisResolution.yAxes.map(ay => ({
+                axis: "y" as const,
+                axisId: ay.axisId,
+                dimension: "y" as const,
+                isPrimary: ay.isPrimary,
+                position: ay.position,
+                resolvedType: resolvedContext.resolvedYTypeByAxisId.get(ay.axisId) ?? "category",
+                stackIndex: ay.stackIndex,
+                valid: resolvedContext.yAxisValidityById.get(ay.axisId)?.valid ?? true,
+                visible: ay.visible
+            }))
+        ];
+        const axisTopologySignature = JSON.stringify(axisTopology);
 
         if (plotRect.width <= 0 || plotRect.height <= 0) {
             const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
             return {
-                axes: [],
+                axes: axisScenes,
+                axisTopology,
+                axisTopologySignature,
                 barHitTargets: [],
                 cartesianKind: "xy",
                 coordinateSystem: "cartesian",
@@ -373,134 +193,151 @@ export class CartesianHorizontalBarLayoutEngine {
                 legendItems,
                 orientation: "horizontal",
                 plotRect,
+                primaryXAxisId: axisResolution.primaryXAxisId,
+                primaryYAxisId: axisResolution.primaryYAxisId,
                 series: [],
                 stackConfiguration: stackConfigForScene,
-                stackSignature: stackAnalysis.configuration.signature,
+                stackSignature,
                 width: containerWidth,
-                xAxisType: "linear",
-                yAxisType: "category"
+                xAxisType: primaryXType as any,
+                yAxisType: primaryYType
             };
-        }
-
-        const axisScenes: ChartAxisScene[] = [finalXAxisLayout.axisScene, finalYAxisLayout.axisScene];
-
-        // Bar slots layout (nested grouping along Y)
-        const barSlotLayout = CartesianBarSlots.computeSlotLayout(effectiveSeries, stackLayout, invalidSeriesIds);
-        const barSlots = barSlotLayout.slots;
-        let nestedBarScale: BandScale<string> | undefined;
-        if (barSlots.length > 0) {
-            const slotIds = barSlots.map(s => s.id);
-            nestedBarScale = CartesianScaleFactory.createBandScale(slotIds, [0, yScale.bandwidth()], 0.1, 0.05);
         }
 
         const hitTargets: SceneHitTarget[] = [];
         const barHitTargets: SceneHitTarget[] = [];
         const seriesScenes: ChartSeriesScene[] = [];
-        const hitsByCategoryKey = new Map<string, SceneHitTarget[]>();
-        let renderableMarkCount = 0;
+        const hitsByAxisId = new Map<string, Map<string, SceneHitTarget[]>>();
 
         const recordHit = (target: SceneHitTarget): void => {
             hitTargets.push(target);
             barHitTargets.push(target);
+            const axisId = target.yAxisId ?? axisResolution.primaryYAxisId;
+            let axisMap = hitsByAxisId.get(axisId);
+            if (!axisMap) {
+                axisMap = new Map();
+                hitsByAxisId.set(axisId, axisMap);
+            }
             const k = String(target.xKey);
-            let list = hitsByCategoryKey.get(k);
+            let list = axisMap.get(k);
             if (!list) {
                 list = [];
-                hitsByCategoryKey.set(k, list);
+                axisMap.set(k, list);
             }
             list.push(target);
         };
 
         const legendItems: ChartLegendItem[] = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
 
-        // Build series scenes
+        // 3. Render marks for each series using its bound scales
         for (let seriesIdx = 0; seriesIdx < effectiveSeries.length; seriesIdx++) {
             const series = effectiveSeries[seriesIdx];
+            const sCtx = resolvedContext.resolvedSeriesContextById.get(series.id);
+            if (!sCtx || !sCtx.valid || !series.visible()) {
+                continue;
+            }
+
             const seriesStyle = styleResolver.resolveSeriesStyle(series, seriesIdx);
             const seriesColor = seriesStyle.color;
+            const binding = sCtx.binding;
 
-            if (!series.visible()) {
+            const seriesXAxis = binding.xAxis;
+            const seriesYAxis = binding.yAxis;
+            const seriesXScale = scaleRegistry.getXScale(binding.xAxisId);
+            const seriesYScale = (scaleRegistry.getYScale(binding.yAxisId) ?? primaryYScale) as BandScale<string> | undefined;
+
+            if (!seriesXScale || !seriesYScale) {
                 continue;
             }
 
-            if (invalidSeriesIds.has(series.id)) {
-                continue;
-            }
+            const seriesStackAnalysis = binding.yAxisId ? stackAnalysesByYAxis.get(binding.yAxisId) : undefined;
+            const seriesStackLayout = seriesStackAnalysis?.visibleLayout;
 
-            const seriesData = series.data() ?? rootData ?? [];
-            const xField = series.xField() ?? rootXField;
+            const seriesData = resolveData(series.data(), rootData);
+            const xField = sCtx.effectiveXField;
+            const seriesRadius = "borderRadius" in series && typeof series.borderRadius === "function" ? series.borderRadius() : undefined;
+            const radius = normalizeNonNegativeNumber(seriesRadius, 4);
 
             if (series.type === "bar") {
-                const barSeries = series as ChartBarSeriesRegistration;
+                const barSlotLayout = CartesianBarSlots.computeSlotLayout(
+                    effectiveSeries.filter((es: ChartCartesianSeriesRegistration) => {
+                        const esCtx = resolvedContext.resolvedSeriesContextById.get(es.id);
+                        return esCtx?.valid && esCtx.binding.yAxisId === binding.yAxisId;
+                    }),
+                    seriesStackLayout,
+                    new Set()
+                );
+
                 const slot = barSlotLayout.bySeriesId.get(series.id);
-                if (!slot || !nestedBarScale) {
-                    continue;
+                let nestedBarScale: BandScale<string> | undefined;
+                if (barSlotLayout.slots.length > 0) {
+                    const slotIds = barSlotLayout.slots.map(s => s.id);
+                    nestedBarScale = CartesianScaleFactory.createBandScale(slotIds, [0, seriesYScale.bandwidth()], 0.1, 0.05);
                 }
 
-                const slotOffset = nestedBarScale.map(slot.id) ?? 0;
-                const slotHeight = nestedBarScale.bandwidth();
+                const slotHeight = nestedBarScale ? nestedBarScale.bandwidth() : (seriesYScale.bandwidth() || 16);
+                const explicitBarHeight = "maxBarWidth" in series && typeof series.maxBarWidth === "function" ? series.maxBarWidth() : undefined;
+                const effectiveBarHeight = explicitBarHeight !== undefined && isFiniteNumber(explicitBarHeight) && (explicitBarHeight as number) > 0
+                    ? Math.min(explicitBarHeight as number, slotHeight)
+                    : (slot?.maxBarWidth !== undefined ? Math.min(slotHeight, slot.maxBarWidth) : slotHeight);
 
-                const rawMaxBarWidth = barSeries.maxBarWidth?.();
-                const maxBarWidth = normalizePositiveNumber(rawMaxBarWidth);
-                const effectiveBarHeight = maxBarWidth !== undefined ? Math.min(slotHeight, maxBarWidth) : slotHeight;
+                const slotOffset = nestedBarScale && slot ? (nestedBarScale.map(slot.id) ?? 0) : 0;
                 const centeringOffset = (slotHeight - effectiveBarHeight) / 2;
 
-                const radius = normalizeNonNegativeNumber(barSeries.borderRadius?.(), 4);
-                const fillOpacity = normalizeOpacity(barSeries.fillOpacity?.(), 1);
-                const field = barSeries.field();
-                const valueFormatter = barSeries.valueFormatter?.();
-                const isStacked = stackLayout.bySeriesId.has(series.id);
-                const stackGroup = stackLayout.groupBySeriesId.get(series.id);
+                const isStacked = seriesStackLayout?.bySeriesId.has(series.id);
+                const stackGroup = seriesStackLayout?.groupBySeriesId.get(series.id);
+                const valueFormatter = series.valueFormatter?.();
+                const baselineX = clamp(seriesXScale.map(0) ?? plotRect.x, plotRect.x, plotRect.x + plotRect.width);
                 const keyResolver = new ChartMarkKeyResolver(series.id, series.keyField?.());
 
                 const sceneBars: SceneBar[] = [];
 
-                if (isStacked) {
-                    const stackEntries = stackLayout.orderedBySeriesId.get(series.id) ?? [];
-                    const effectiveRawFormatter = valueFormatter ?? (stackGroup?.mode === "percent" ? undefined : xAxis?.formatter?.());
+                if (isStacked && seriesStackLayout) {
+                    const stackEntries = seriesStackLayout.orderedBySeriesId.get(series.id) ?? [];
+                    const effectiveValueFormatter = valueFormatter ?? (stackGroup?.mode === "percent" ? undefined : seriesXAxis?.formatter);
 
                     for (const stackEntry of stackEntries) {
-                        if (!stackEntry.defined) {
-                            continue;
-                        }
-
                         const catKey = String(stackEntry.xKey);
-                        const bandStart = yScale.map(catKey);
+                        const bandStart = seriesYScale.map(catKey);
                         if (bandStart === undefined) {
                             continue;
                         }
 
                         const categoryStartPixel = bandStart + slotOffset + centeringOffset;
-                        const startVal = stackEntry.stackStart;
-                        const endVal = stackEntry.stackEnd;
-                        const valueStartPixel = xScale.map(startVal) ?? 0;
-                        const valueEndPixel = xScale.map(endVal) ?? 0;
-                        const isPositive = endVal >= startVal;
+                        const fromValuePixel = clamp(seriesXScale.map(stackEntry.stackStart) ?? baselineX, plotRect.x, plotRect.x + plotRect.width);
+                        const toValuePixel = clamp(seriesXScale.map(stackEntry.stackEnd) ?? baselineX, plotRect.x, plotRect.x + plotRect.width);
 
                         const barRect = CartesianBarGeometry.deriveBarRect({
                             categorySize: effectiveBarHeight,
                             categoryStart: categoryStartPixel,
                             orientation: "horizontal",
-                            valueEnd: valueEndPixel,
-                            valueStart: valueStartPixel
+                            valueEnd: toValuePixel,
+                            valueStart: fromValuePixel
                         });
 
-                        const isOuter = stackEntry.stackPosition === "outer" || stackEntry.stackPosition === "single";
-                        const cornerRadii = barRect.width > 0 && isOuter
-                            ? CartesianBarGeometry.deriveCornerRadii({
-                                isPositive,
-                                orientation: "horizontal",
-                                radius,
-                                stackPosition: stackEntry.stackPosition
-                            })
-                            : { bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 };
+                        const isPositive = stackEntry.rawValue >= 0;
+                        const isZeroBar = stackEntry.rawValue === 0;
 
-                        const isZeroWidth = barRect.width <= 0.001;
+                        const pos = stackEntry.stackPosition ?? "single";
+                        let cornerRadii: ChartCornerRadii;
+                        if (radius > 0 && barRect.width > 0 && !isZeroBar) {
+                            if (pos === "single") {
+                                cornerRadii = isPositive
+                                    ? { bottomLeft: 0, bottomRight: radius, topLeft: 0, topRight: radius }
+                                    : { bottomLeft: radius, bottomRight: 0, topLeft: radius, topRight: 0 };
+                            } else if (pos === "outer") {
+                                cornerRadii = isPositive
+                                    ? { bottomLeft: 0, bottomRight: radius, topLeft: 0, topRight: radius }
+                                    : { bottomLeft: radius, bottomRight: 0, topLeft: radius, topRight: 0 };
+                            } else {
+                                cornerRadii = { bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 };
+                            }
+                        } else {
+                            cornerRadii = { bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 };
+                        }
 
-                        const sceneBar: SceneBar = {
+                        const bar: SceneBar = {
                             animationKey: stackEntry.animationKey,
-                            categorySize: effectiveBarHeight,
-                            categoryStartPixel,
                             cornerRadii,
                             datum: stackEntry.datum,
                             height: barRect.height,
@@ -508,122 +345,119 @@ export class CartesianHorizontalBarLayoutEngine {
                             isPositive,
                             orientation: "horizontal",
                             radius,
-                            stackEndValue: endVal,
-                            stackGroup: slot.stackGroup,
+                            stackEndValue: stackEntry.stackEnd,
+                            stackGroup: stackGroup?.name,
                             stackMode: stackGroup?.mode,
                             stackPercentage: stackEntry.stackPercentage,
-                            stackPosition: stackEntry.stackPosition,
-                            stackStartValue: startVal,
+                            stackPosition: pos,
+                            stackStartValue: stackEntry.stackStart,
                             stackTotal: stackEntry.stackTotal,
-                            valueEndPixel,
-                            valueStartPixel,
+                            synthetic: stackEntry.synthetic,
+                            valueEndPixel: toValuePixel,
+                            valueStartPixel: fromValuePixel,
                             width: barRect.width,
                             x: barRect.x,
                             xValue: stackEntry.xValue,
                             y: barRect.y,
                             yValue: stackEntry.rawValue
                         };
-                        sceneBars.push(sceneBar);
-                        renderableMarkCount++;
+                        sceneBars.push(bar);
 
-                        const formattedCategory = formatXValue(catKey, stackEntry.dataIndex, yAxis?.formatter?.(), "category");
-                        const formattedValue = formatYValue(stackEntry.rawValue, stackEntry.dataIndex, effectiveRawFormatter);
-                        const formattedStackPercentage = stackEntry.stackPercentage !== undefined ? formatPercentagePoint(stackEntry.stackPercentage) : undefined;
-                        const formattedStackTotal = stackEntry.stackTotal !== undefined
-                            ? (valueFormatter ? formatYValue(stackEntry.stackTotal, stackEntry.dataIndex, valueFormatter) : formatCompactNumber(stackEntry.stackTotal))
-                            : undefined;
+                        if (!stackEntry.synthetic) {
+                            const formattedCategory = formatXValue(stackEntry.xValue, stackEntry.dataIndex, seriesYAxis?.formatter, "category");
+                            const formattedValue = formatYValue(stackEntry.rawValue, stackEntry.dataIndex, effectiveValueFormatter);
+                            const formattedStackTotal = stackEntry.stackTotal !== undefined
+                                ? (valueFormatter ? formatYValue(stackEntry.stackTotal, stackEntry.dataIndex, valueFormatter) : formatCompactNumber(stackEntry.stackTotal))
+                                : undefined;
+                            const formattedStackPercentage = stackEntry.stackPercentage !== undefined ? formatPercentagePoint(stackEntry.stackPercentage) : undefined;
 
-                        const hitTarget: SceneHitTarget = {
-                            animationKey: stackEntry.animationKey,
-                            barOrientation: "horizontal",
-                            borderRadius: radius,
-                            bounds: isZeroWidth ? undefined : barRect,
-                            category: stackEntry.xValue,
-                            categoryIndex: stackEntry.dataIndex,
-                            categoryY: catKey,
-                            color: seriesColor,
-                            cornerRadii,
-                            dataIndex: stackEntry.dataIndex,
-                            datum: stackEntry.datum,
-                            formattedCategory,
-                            formattedPercentage: formattedStackPercentage,
-                            formattedStackPercentage,
-                            formattedStackTotal,
-                            formattedValue,
-                            index: stackEntry.dataIndex,
-                            isPositive,
-                            seriesId: series.id,
-                            seriesName: resolveSeriesDisplayName(series, seriesIdx),
-                            seriesType: "bar",
-                            stackEnd: endVal,
-                            stackGroup: slot.stackGroup,
-                            stackMode: stackGroup?.mode,
-                            stackPercentage: stackEntry.stackPercentage,
-                            stackPosition: stackEntry.stackPosition,
-                            stackStart: startVal,
-                            stackTotal: stackEntry.stackTotal,
-                            value: stackEntry.rawValue,
-                            visualBounds: barRect,
-                            xAxisId: series.xAxisId?.() ?? xAxis?.axisId?.() ?? "default-x",
-                            xAxisTitle: xAxis?.title?.() ?? "",
-                            xKey: catKey,
-                            xValue: stackEntry.xValue,
-                            yAxisId: series.yAxisId?.() ?? yAxis?.axisId?.() ?? "default-y",
-                            yAxisTitle: yAxis?.title?.() ?? "",
-                            yValue: stackEntry.rawValue
-                        };
-                        recordHit(hitTarget);
+                            const hitTarget: SceneHitTarget = {
+                                animationKey: stackEntry.animationKey,
+                                barOrientation: "horizontal",
+                                borderRadius: radius,
+                                bounds: isZeroBar ? undefined : barRect,
+                                category: stackEntry.xValue,
+                                categoryIndex: stackEntry.dataIndex,
+                                categoryY: catKey,
+                                color: seriesColor,
+                                cornerRadii,
+                                dataIndex: stackEntry.dataIndex,
+                                datum: stackEntry.datum,
+                                formattedCategory,
+                                formattedPercentage: formattedStackPercentage,
+                                formattedStackPercentage,
+                                formattedStackTotal,
+                                formattedValue,
+                                index: stackEntry.dataIndex,
+                                isPositive,
+                                percentage: stackEntry.stackPercentage,
+                                seriesId: series.id,
+                                seriesName: resolveSeriesDisplayName(series, seriesIdx),
+                                seriesType: "bar",
+                                stackEnd: stackEntry.stackEnd,
+                                stackGroup: stackGroup?.name,
+                                stackMode: stackGroup?.mode,
+                                stackPercentage: stackEntry.stackPercentage,
+                                stackStart: stackEntry.stackStart,
+                                stackTotal: stackEntry.stackTotal,
+                                value: stackEntry.rawValue,
+                                visualBounds: isZeroBar ? { height: barRect.height, width: 0, x: barRect.x, y: barRect.y } : barRect,
+                                xAxisId: binding.xAxisId,
+                                xAxisTitle: seriesXAxis?.title ?? "",
+                                xKey: catKey,
+                                xValue: stackEntry.xValue,
+                                yAxisId: binding.yAxisId,
+                                yAxisTitle: seriesYAxis?.title ?? "",
+                                yValue: stackEntry.rawValue
+                            };
+                            recordHit(hitTarget);
+                        }
                     }
                 } else {
-                    const effectiveRawFormatter = valueFormatter ?? xAxis?.formatter?.();
+                    const effectiveValueFormatter = valueFormatter ?? seriesXAxis?.formatter;
 
                     for (let i = 0; i < seriesData.length; i++) {
                         const datum = seriesData[i];
-                        const val = resolveValue(datum, field, i);
-                        if (typeof val !== "number" || !isFiniteNumber(val)) {
+                        const val = resolveValue(datum, series.field(), i);
+                        if (!isFiniteNumber(val)) {
                             continue;
                         }
 
+                        const numVal = Number(val);
                         const catVal = resolveValue(datum, xField, i);
                         const catKey = catVal !== undefined && catVal !== null ? String(catVal) : String(i);
-                        const bandStart = yScale.map(catKey);
+                        const bandStart = seriesYScale.map(catKey);
                         if (bandStart === undefined) {
                             continue;
                         }
 
                         const categoryStartPixel = bandStart + slotOffset + centeringOffset;
-                        const numVal = val;
-                        const startVal = 0;
-                        const endVal = numVal;
-                        const baselineX = clamp(xScale.map(0) ?? plotRect.x, plotRect.x, plotRect.x + plotRect.width);
-                        const valueStartPixel = baselineX;
-                        const valueEndPixel = numVal === 0 ? baselineX : (xScale.map(numVal) ?? baselineX);
-                        const isPositive = numVal >= 0;
+                        const fromValuePixel = baselineX;
+                        const toValuePixel = numVal === 0
+                            ? baselineX
+                            : clamp(seriesXScale.map(numVal) ?? baselineX, plotRect.x, plotRect.x + plotRect.width);
 
                         const barRect = CartesianBarGeometry.deriveBarRect({
                             categorySize: effectiveBarHeight,
                             categoryStart: categoryStartPixel,
                             orientation: "horizontal",
-                            valueEnd: valueEndPixel,
-                            valueStart: valueStartPixel
+                            valueEnd: toValuePixel,
+                            valueStart: fromValuePixel
                         });
 
-                        const cornerRadii = barRect.width > 0
-                            ? CartesianBarGeometry.deriveCornerRadii({
-                                isPositive,
-                                orientation: "horizontal",
-                                radius,
-                                stackPosition: "single"
-                            })
+                        const isPositive = numVal >= 0;
+                        const isZeroBar = numVal === 0;
+
+                        const cornerRadii: ChartCornerRadii = radius > 0 && barRect.width > 0 && !isZeroBar
+                            ? (isPositive
+                                ? { bottomLeft: 0, bottomRight: radius, topLeft: 0, topRight: radius }
+                                : { bottomLeft: radius, bottomRight: 0, topLeft: radius, topRight: 0 })
                             : { bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 };
 
                         const animationKey = keyResolver.resolveKey(datum, catKey, i);
-                        const isZeroWidth = barRect.width <= 0.001;
 
-                        const sceneBar: SceneBar = {
+                        const bar: SceneBar = {
                             animationKey,
-                            categorySize: effectiveBarHeight,
-                            categoryStartPixel,
                             cornerRadii,
                             datum,
                             height: barRect.height,
@@ -631,27 +465,24 @@ export class CartesianHorizontalBarLayoutEngine {
                             isPositive,
                             orientation: "horizontal",
                             radius,
-                            stackEndValue: endVal,
-                            stackStartValue: startVal,
-                            valueEndPixel,
-                            valueStartPixel,
+                            valueEndPixel: toValuePixel,
+                            valueStartPixel: fromValuePixel,
                             width: barRect.width,
                             x: barRect.x,
                             xValue: catVal,
                             y: barRect.y,
                             yValue: numVal
                         };
-                        sceneBars.push(sceneBar);
-                        renderableMarkCount++;
+                        sceneBars.push(bar);
 
-                        const formattedCategory = formatXValue(catVal, i, yAxis?.formatter?.(), "category");
-                        const formattedValue = formatYValue(numVal, i, effectiveRawFormatter);
+                        const formattedCategory = formatXValue(catVal, i, seriesYAxis?.formatter, "category");
+                        const formattedValue = formatYValue(numVal, i, effectiveValueFormatter);
 
                         const hitTarget: SceneHitTarget = {
                             animationKey,
                             barOrientation: "horizontal",
                             borderRadius: radius,
-                            bounds: isZeroWidth ? undefined : barRect,
+                            bounds: isZeroBar ? undefined : barRect,
                             category: catVal,
                             categoryIndex: i,
                             categoryY: catKey,
@@ -667,13 +498,13 @@ export class CartesianHorizontalBarLayoutEngine {
                             seriesName: resolveSeriesDisplayName(series, seriesIdx),
                             seriesType: "bar",
                             value: numVal,
-                            visualBounds: isZeroWidth ? { height: barRect.height, width: 4, x: barRect.x - 2, y: barRect.y } : barRect,
-                            xAxisId: series.xAxisId?.() ?? xAxis?.axisId?.() ?? "default-x",
-                            xAxisTitle: xAxis?.title?.() ?? "",
+                            visualBounds: isZeroBar ? { height: barRect.height, width: 4, x: barRect.x - 2, y: barRect.y } : barRect,
+                            xAxisId: binding.xAxisId,
+                            xAxisTitle: seriesXAxis?.title ?? "",
                             xKey: catKey,
                             xValue: catVal,
-                            yAxisId: series.yAxisId?.() ?? yAxis?.axisId?.() ?? "default-y",
-                            yAxisTitle: yAxis?.title?.() ?? "",
+                            yAxisId: binding.yAxisId,
+                            yAxisTitle: seriesYAxis?.title ?? "",
                             yValue: numVal
                         };
                         recordHit(hitTarget);
@@ -683,42 +514,56 @@ export class CartesianHorizontalBarLayoutEngine {
                 seriesScenes.push({
                     bars: sceneBars,
                     borderRadius: radius,
-                    fillOpacity,
+                    fillOpacity: normalizeOpacity(series.fillOpacity?.(), 1),
                     id: series.id,
                     name: resolveSeriesDisplayName(series, seriesIdx),
                     orientation: "horizontal",
                     style: {
                         areaFillColor: seriesColor,
-                        areaFillOpacity: fillOpacity,
+                        areaFillOpacity: normalizeOpacity(series.fillOpacity?.(), 1),
                         color: seriesColor,
-                        fillOpacity,
+                        fillOpacity: normalizeOpacity(series.fillOpacity?.(), 1),
                         lineWidth: 0,
                         opacity: 1,
                         pointRadius: 0
                     },
-                    type: "bar"
+                    type: "bar",
+                    xAxisId: binding.xAxisId,
+                    yAxisId: binding.yAxisId
                 } as ChartBarSeriesScene);
             } else if (series.type === "rangeBar") {
-                const rangeBarSeries = series as ChartRangeBarSeriesRegistration;
+                const rangeBarReg = series as ChartRangeBarSeriesRegistration;
+                const fromField = rangeBarReg.fromField();
+                const toField = rangeBarReg.toField();
+                const fillOpacity = normalizeOpacity(series.fillOpacity?.(), 1);
+
+                const barSlotLayout = CartesianBarSlots.computeSlotLayout(
+                    effectiveSeries.filter((es: ChartCartesianSeriesRegistration) => {
+                        const esCtx = resolvedContext.resolvedSeriesContextById.get(es.id);
+                        return esCtx?.valid && esCtx.binding.yAxisId === binding.yAxisId;
+                    }),
+                    seriesStackLayout,
+                    new Set()
+                );
+
                 const slot = barSlotLayout.bySeriesId.get(series.id);
-                if (!slot || !nestedBarScale) {
-                    continue;
+                let nestedBarScale: BandScale<string> | undefined;
+                if (barSlotLayout.slots.length > 0) {
+                    const slotIds = barSlotLayout.slots.map(s => s.id);
+                    nestedBarScale = CartesianScaleFactory.createBandScale(slotIds, [0, seriesYScale.bandwidth()], 0.1, 0.05);
                 }
 
-                const slotOffset = nestedBarScale.map(slot.id) ?? 0;
-                const slotHeight = nestedBarScale.bandwidth();
+                const slotHeight = nestedBarScale ? nestedBarScale.bandwidth() : (seriesYScale.bandwidth() || 16);
+                const explicitBarHeight = "maxBarWidth" in series && typeof series.maxBarWidth === "function" ? series.maxBarWidth() : undefined;
+                const effectiveBarHeight = explicitBarHeight !== undefined && isFiniteNumber(explicitBarHeight) && (explicitBarHeight as number) > 0
+                    ? Math.min(explicitBarHeight as number, slotHeight)
+                    : (slot?.maxBarWidth !== undefined ? Math.min(slotHeight, slot.maxBarWidth) : slotHeight);
 
-                const rawMaxBarWidth = rangeBarSeries.maxBarWidth?.();
-                const maxBarWidth = normalizePositiveNumber(rawMaxBarWidth);
-                const effectiveBarHeight = maxBarWidth !== undefined ? Math.min(slotHeight, maxBarWidth) : slotHeight;
+                const slotOffset = nestedBarScale && slot ? (nestedBarScale.map(slot.id) ?? 0) : 0;
                 const centeringOffset = (slotHeight - effectiveBarHeight) / 2;
 
-                const radius = normalizeNonNegativeNumber(rangeBarSeries.borderRadius?.(), 4);
-                const fillOpacity = normalizeOpacity(rangeBarSeries.fillOpacity?.(), 1);
-                const fromField = rangeBarSeries.fromField();
-                const toField = rangeBarSeries.toField();
-                const valueFormatter = rangeBarSeries.valueFormatter?.();
-                const effectiveValueFormatter = valueFormatter ?? xAxis?.formatter?.();
+                const valueFormatter = series.valueFormatter?.();
+                const effectiveValueFormatter = valueFormatter ?? seriesXAxis?.formatter;
                 const keyResolver = new ChartMarkKeyResolver(series.id, series.keyField?.());
 
                 const sceneBars: SceneRangeBar[] = [];
@@ -732,14 +577,18 @@ export class CartesianHorizontalBarLayoutEngine {
 
                     const catVal = resolveValue(datum, xField, i);
                     const catKey = catVal !== undefined && catVal !== null ? String(catVal) : String(i);
-                    const bandStart = yScale.map(catKey);
+                    const bandStart = seriesYScale.map(catKey);
                     if (bandStart === undefined) {
                         continue;
                     }
 
                     const categoryStartPixel = bandStart + slotOffset + centeringOffset;
-                    const fromValuePixel = xScale.map(range.fromValue) ?? 0;
-                    const toValuePixel = xScale.map(range.toValue) ?? 0;
+                    const fromValuePixel = seriesXScale.map(range.fromValue);
+                    const toValuePixel = seriesXScale.map(range.toValue);
+
+                    if (fromValuePixel === undefined || !Number.isFinite(fromValuePixel) || toValuePixel === undefined || !Number.isFinite(toValuePixel)) {
+                        continue;
+                    }
 
                     const barRect = CartesianBarGeometry.deriveBarRect({
                         categorySize: effectiveBarHeight,
@@ -758,19 +607,17 @@ export class CartesianHorizontalBarLayoutEngine {
 
                     const formattedFrom = formatYValue(range.fromValue, i, effectiveValueFormatter);
                     const formattedTo = formatYValue(range.toValue, i, effectiveValueFormatter);
-                    const formattedCategory = formatXValue(catVal, i, yAxis?.formatter?.(), "category");
+                    const formattedCategory = formatXValue(catVal, i, seriesYAxis?.formatter, "category");
 
-                    const sceneRangeBar: SceneRangeBar = {
+                    const bar: SceneRangeBar = {
                         animationKey,
-                        categorySize: effectiveBarHeight,
-                        categoryStartPixel,
                         cornerRadii,
                         datum,
                         formattedFrom,
                         formattedTo,
                         fromValue: range.fromValue,
                         fromValuePixel,
-                        fromY: categoryStartPixel,
+                        fromY: barRect.y,
                         height: barRect.height,
                         highValue: range.highValue,
                         index: i,
@@ -779,14 +626,13 @@ export class CartesianHorizontalBarLayoutEngine {
                         radius,
                         toValue: range.toValue,
                         toValuePixel,
-                        toY: categoryStartPixel,
+                        toY: barRect.y,
                         width: barRect.width,
                         x: barRect.x,
                         xValue: catVal,
                         y: barRect.y
                     };
-                    sceneBars.push(sceneRangeBar);
-                    renderableMarkCount++;
+                    sceneBars.push(bar);
 
                     const hitTarget: SceneHitTarget = {
                         animationKey,
@@ -822,12 +668,12 @@ export class CartesianHorizontalBarLayoutEngine {
                         value: [range.fromValue, range.toValue],
                         valueKind: "range",
                         visualBounds: isZeroInterval ? { height: barRect.height, width: 4, x: barRect.x - 2, y: barRect.y } : barRect,
-                        xAxisId: series.xAxisId?.() ?? xAxis?.axisId?.() ?? "default-x",
-                        xAxisTitle: xAxis?.title?.() ?? "",
+                        xAxisId: binding.xAxisId,
+                        xAxisTitle: seriesXAxis?.title ?? "",
                         xKey: catKey,
                         xValue: catVal,
-                        yAxisId: series.yAxisId?.() ?? yAxis?.axisId?.() ?? "default-y",
-                        yAxisTitle: yAxis?.title?.() ?? ""
+                        yAxisId: binding.yAxisId,
+                        yAxisTitle: seriesYAxis?.title ?? ""
                     };
                     recordHit(hitTarget);
                 }
@@ -848,55 +694,82 @@ export class CartesianHorizontalBarLayoutEngine {
                         opacity: 1,
                         pointRadius: 0
                     },
-                    type: "rangeBar"
+                    type: "rangeBar",
+                    xAxisId: binding.xAxisId,
+                    yAxisId: binding.yAxisId
                 } as ChartRangeBarSeriesScene);
             }
         }
 
-        // Build interaction buckets sorted by anchor.y (ascending top-to-bottom)
-        const interactionBuckets: ChartInteractionBucket[] = [];
-        const interactionBucketLookup = new Map<ChartInteractionXKey, ChartInteractionBucket>();
+        // 4. Build namespaced interaction buckets per Y axis ID (MAX3-004)
+        const interactionBucketsByAxisId = new Map<string, Map<ChartInteractionXKey, ChartInteractionBucket>>();
 
-        for (let i = 0; i < categoryDomain.length; i++) {
-            const catKey = categoryDomain[i];
-            const hits = hitsByCategoryKey.get(catKey) ?? [];
-            const bandCoord = yScale.map(catKey) ?? plotRect.y;
-            const centerY = bandCoord + yScale.bandwidth() / 2;
+        for (const yAxis of axisResolution.yAxes) {
+            const yAxisId = yAxis.axisId;
+            const yAxisScale = scaleRegistry.getYScale(yAxisId) as BandScale<string> | undefined;
+            const yCategoryDomain = yAxisScale ? (yAxisScale.domain() as readonly string[]) : categoryDomain;
+            const axisHitsMap = hitsByAxisId.get(yAxisId) ?? new Map();
+            const axisBuckets = new Map<ChartInteractionXKey, ChartInteractionBucket>();
 
-            const bucket: ChartInteractionBucket = {
-                anchor: {
-                    x: plotRect.x + plotRect.width / 2,
-                    y: centerY
-                },
-                hits,
-                order: i,
-                xKey: catKey,
-                xValue: catKey
-            };
-            interactionBuckets.push(bucket);
-            interactionBucketLookup.set(catKey, bucket);
+            for (let i = 0; i < yCategoryDomain.length; i++) {
+                const catKey = yCategoryDomain[i];
+                const hits = axisHitsMap.get(catKey) ?? [];
+                const bandCoord = yAxisScale?.map(catKey) ?? plotRect.y;
+                const bandWidth = (yAxisScale && "bandwidth" in yAxisScale && typeof yAxisScale.bandwidth === "function") ? yAxisScale.bandwidth() : 0;
+                const centerY = bandCoord + bandWidth / 2;
+
+                const bucket: ChartInteractionBucket = {
+                    anchor: {
+                        x: plotRect.x + plotRect.width / 2,
+                        y: centerY
+                    },
+                    axisDimension: "y",
+                    axisId: yAxisId,
+                    hits,
+                    order: i,
+                    xAxisId: hits[0]?.xAxisId ?? axisResolution.primaryXAxisId,
+                    xAxisTitle: hits[0]?.xAxisTitle ?? "",
+                    xKey: catKey,
+                    xValue: catKey,
+                    yAxisId: yAxisId,
+                    yAxisTitle: yAxis.title ?? ""
+                };
+                axisBuckets.set(catKey, bucket);
+            }
+            interactionBucketsByAxisId.set(yAxisId, axisBuckets);
         }
+
+        const primaryBucketsMap = interactionBucketsByAxisId.get(axisResolution.primaryYAxisId) ?? new Map();
+        const interactionBuckets = Array.from(primaryBucketsMap.values());
+        const interactionBucketLookup = primaryBucketsMap;
+
+        const hasRenderableData = seriesScenes.some(s => (s.type === "bar" || s.type === "rangeBar") && s.bars.length > 0);
 
         return {
             axes: axisScenes,
+            axisTopology,
+            axisTopologySignature,
             barHitTargets,
             cartesianKind: "xy",
             coordinateSystem: "cartesian",
-            hasRenderableData: renderableMarkCount > 0,
+            hasRenderableData,
             height: containerHeight,
             hitTargets,
             interactionAxis: "y",
             interactionBucketLookup,
             interactionBuckets,
+            interactionBucketsByAxisId,
             legendItems,
             orientation: "horizontal",
             plotRect,
+            primaryXAxisId: axisResolution.primaryXAxisId,
+            primaryYAxisId: axisResolution.primaryYAxisId,
             series: seriesScenes,
             stackConfiguration: stackConfigForScene,
-            stackSignature: stackAnalysis.configuration.signature,
+            stackSignature,
             width: containerWidth,
-            xAxisType: "linear",
-            yAxisType: "category"
+            xAxisType: primaryXType as any,
+            yAxisType: primaryYType
         };
     }
 }
