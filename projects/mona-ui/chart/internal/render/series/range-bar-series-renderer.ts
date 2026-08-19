@@ -19,8 +19,25 @@ export class RangeBarSeriesRenderer {
                 continue;
             }
 
-            if (bar.height <= 0.001) {
-                // Render zero-length interval as horizontal hairline
+            const orientation = bar.orientation ?? scene.orientation ?? "vertical";
+
+            if (orientation === "horizontal" && bar.width <= 0.001) {
+                // Render zero-length horizontal interval as vertical hairline
+                context.save();
+                context.beginPath();
+                const x = crispPixel(bar.x, 1);
+                context.moveTo(x, bar.y);
+                context.lineTo(x, bar.y + bar.height);
+                context.lineWidth = 1.5;
+                context.strokeStyle = style.color;
+                context.globalAlpha = barAlpha;
+                context.stroke();
+                context.restore();
+                continue;
+            }
+
+            if (orientation === "vertical" && bar.height <= 0.001) {
+                // Render zero-length vertical interval as horizontal hairline
                 context.save();
                 context.beginPath();
                 const y = crispPixel(bar.y, 1);
