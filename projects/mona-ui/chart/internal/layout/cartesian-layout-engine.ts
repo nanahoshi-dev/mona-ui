@@ -7,6 +7,7 @@ import type {
     ChartBubbleSeriesRegistration,
     ChartCartesianSeriesRegistration,
     ChartFinancialSeriesRegistration,
+    ChartLineSeriesRegistration,
     ChartRangeAreaSeriesRegistration,
     ChartRangeBarSeriesRegistration,
     ChartScalarSeriesRegistrationBase,
@@ -320,7 +321,7 @@ export class CartesianLayoutEngine {
                     xAxis: seriesXAxis?.registration,
                     xAxisId: binding.xAxisId,
                     xAxisTitle: seriesXAxis?.title,
-                    xAxisType: (seriesXAxis?.type ?? "linear") as ChartXAxisType,
+                    xAxisType: seriesXScale.type as ChartXAxisType,
                     xScale: seriesXScale as any,
                     yAxis: seriesYAxis?.registration,
                     yAxisId: binding.yAxisId,
@@ -341,7 +342,7 @@ export class CartesianLayoutEngine {
                     plotRect,
                     renderOrderCounter,
                     rootData,
-                    rootXField,
+                    rootXField: effectiveRootXField,
                     series: s,
                     seriesIndex: sIdx,
                     styleResolver,
@@ -349,7 +350,7 @@ export class CartesianLayoutEngine {
                     xAxisFormatter: seriesXAxis?.formatter,
                     xAxisId: binding.xAxisId,
                     xAxisTitle: seriesXAxis?.title,
-                    xAxisType: (seriesXAxis?.type ?? "linear") as ChartXAxisType,
+                    xAxisType: seriesXScale.type as ChartXAxisType,
                     xScale: seriesXScale,
                     yAxis: seriesYAxis?.registration,
                     yAxisFormatter: seriesYAxis?.formatter,
@@ -423,7 +424,7 @@ export class CartesianLayoutEngine {
                     xAxis: seriesXAxis?.registration,
                     xAxisId: binding.xAxisId,
                     xAxisTitle: seriesXAxis?.title,
-                    xAxisType: (seriesXAxis?.type ?? "category") as ChartXAxisType,
+                    xAxisType: seriesXScale.type as ChartXAxisType,
                     yAxis: seriesYAxis?.registration,
                     yAxisId: binding.yAxisId,
                     yAxisTitle: seriesYAxis?.title,
@@ -775,7 +776,7 @@ export class CartesianLayoutEngine {
                                 normalizedXKey,
                                 dIdx,
                                 seriesXAxis?.formatter,
-                                (seriesXAxis?.type ?? "category") as any
+                                (seriesXScale.type ?? "category") as any
                             ),
                             formattedValue: formatYValue(yVal, dIdx, seriesYAxis?.formatter),
                             index: dIdx,
@@ -797,19 +798,19 @@ export class CartesianLayoutEngine {
                     }
                 }
 
+                const lineReg = s as ChartLineSeriesRegistration;
                 const lineScene: ChartLineSeriesScene = {
-                    connectNulls: s.connectNulls?.() ?? false,
-                    curve: s.curve?.() ?? "linear",
+                    connectNulls: lineReg.connectNulls?.() ?? false,
+                    curve: lineReg.curve?.() ?? "linear",
                     id: s.id,
                     name: seriesDisplayName,
                     points,
-                    showPoints: s.showPoints?.() ?? false,
+                    showPoints: lineReg.showPoints?.() ?? false,
                     style: sStyle,
                     type: "line"
                 };
                 seriesScenes.push(lineScene);
-            } else {
-                // Area series
+            } else if (s.type === "area") {
                 const points: SceneAreaPoint[] = [];
                 const isStacked = seriesStackLayout?.bySeriesId.has(s.id);
                 const stackGroup = seriesStackLayout?.groupBySeriesId.get(s.id);
@@ -821,43 +822,29 @@ export class CartesianLayoutEngine {
                         seriesRawFormatter ?? (stackGroup?.mode === "percent" ? undefined : seriesYAxis?.formatter);
 
                     for (const entry of stackEntries) {
+                        const isDefined = entry.defined;
                         let xPos = plotRect.x;
-                        let isXValid = false;
-
                         if (seriesXScale.type === "category") {
                             const bPos = (seriesXScale as BandScale<string>).map(String(entry.xKey));
                             if (bPos !== undefined) {
                                 xPos = bPos + (seriesXScale as BandScale<string>).bandwidth() / 2;
-                                isXValid = true;
                             }
                         } else if (seriesXScale.type === "time" || seriesXScale.type === "utc") {
-                            const dateVal = new Date(Number(entry.xKey));
-                            if (Number.isFinite(dateVal.getTime())) {
-                                const coord = (seriesXScale as any).map(dateVal);
-                                if (coord !== undefined && Number.isFinite(coord)) {
-                                    xPos = coord;
-                                    isXValid = true;
-                                }
-                            }
+                            const dateVal = entry.xValue instanceof Date ? entry.xValue : new Date(Number(entry.xValue));
+                            xPos = (seriesXScale as TimeScale | UtcScale).map(dateVal) ?? plotRect.x;
                         } else {
-                            if (isFiniteNumber(entry.xKey)) {
-                                const coord = (seriesXScale as any).map(Number(entry.xKey));
-                                if (coord !== undefined && Number.isFinite(coord)) {
-                                    xPos = coord;
-                                    isXValid = true;
-                                }
-                            }
+                            xPos = (seriesXScale as LinearScale).map(Number(entry.xValue)) ?? plotRect.x;
                         }
 
-                        const baseY = (seriesYScale as any).map(entry.stackStart) ?? plotRect.y + plotRect.height;
-                        const topY = (seriesYScale as any).map(entry.stackEnd) ?? plotRect.y + plotRect.height;
-                        const defined = entry.defined && isXValid;
+                        const baselineY = clamp(seriesYScale.map(0) ?? plotRect.y + plotRect.height, plotRect.y, plotRect.y + plotRect.height);
+                        const topY = isDefined ? (seriesYScale.map(entry.stackEnd) ?? baselineY) : baselineY;
+                        const baseY = isDefined ? (seriesYScale.map(entry.stackStart) ?? baselineY) : baselineY;
 
                         const point: SceneAreaPoint = {
                             animationKey: entry.animationKey,
                             baseY,
                             datum: entry.datum,
-                            defined,
+                            defined: isDefined,
                             index: entry.dataIndex,
                             stackEndValue: entry.stackEnd,
                             stackPercentage: entry.stackPercentage,
@@ -871,7 +858,7 @@ export class CartesianLayoutEngine {
                         };
                         points.push(point);
 
-                        if (defined && !entry.synthetic) {
+                        if (isDefined && !entry.synthetic) {
                             const currentRenderOrder = ++renderOrderCounter.value;
                             const formattedStackTotal =
                                 entry.stackTotal !== undefined
@@ -896,7 +883,7 @@ export class CartesianLayoutEngine {
                                     entry.xKey,
                                     entry.dataIndex,
                                     seriesXAxis?.formatter,
-                                    (seriesXAxis?.type ?? "category") as any
+                                    (seriesXScale.type ?? "category") as any
                                 ),
                                 formattedStackPercentage,
                                 formattedStackTotal,
@@ -959,37 +946,28 @@ export class CartesianLayoutEngine {
                                     dateVal = new Date(parsed);
                                 }
                             }
-                            if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
+                            if (dateVal) {
                                 normalizedXKey = dateVal.getTime();
-                                const coord = (seriesXScale as any).map(dateVal);
-                                if (coord !== undefined && Number.isFinite(coord)) {
-                                    xPos = coord;
+                                const tPos = (seriesXScale as TimeScale | UtcScale).map(dateVal);
+                                if (tPos !== undefined) {
+                                    xPos = tPos;
                                     isXValid = true;
                                 }
                             }
                         } else {
-                            if (isFiniteNumber(xVal)) {
-                                normalizedXKey = Number(xVal);
-                                const coord = (seriesXScale as any).map(Number(xVal));
-                                if (coord !== undefined && Number.isFinite(coord)) {
-                                    xPos = coord;
+                            if (typeof xVal === "number" && Number.isFinite(xVal)) {
+                                normalizedXKey = xVal;
+                                const lPos = (seriesXScale as LinearScale).map(xVal);
+                                if (lPos !== undefined) {
+                                    xPos = lPos;
                                     isXValid = true;
                                 }
                             }
                         }
 
-                        let isYValid = isFiniteNumber(yVal);
-                        let topY = baselineY;
-                        if (isYValid) {
-                            const coord = (seriesYScale as any).map(Number(yVal));
-                            if (coord !== undefined && Number.isFinite(coord)) {
-                                topY = coord;
-                            } else {
-                                isYValid = false;
-                            }
-                        }
-
+                        const isYValid = isFiniteNumber(yVal);
                         const defined = isXValid && isYValid;
+                        const topY = isYValid ? (seriesYScale.map(Number(yVal)) ?? baselineY) : baselineY;
                         const animationKey = keyResolver.resolveKey(datum, normalizedXKey, dIdx);
 
                         const point: SceneAreaPoint = {
@@ -1014,7 +992,7 @@ export class CartesianLayoutEngine {
                                     normalizedXKey,
                                     dIdx,
                                     seriesXAxis?.formatter,
-                                    (seriesXAxis?.type ?? "category") as any
+                                    (seriesXScale.type ?? "category") as any
                                 ),
                                 formattedValue: formatYValue(yVal, dIdx, effectiveRawFormatter),
                                 index: dIdx,
@@ -1067,7 +1045,7 @@ export class CartesianLayoutEngine {
         const primaryBandScale = primaryXScale && primaryXScale.type === "category" ? (primaryXScale as BandScale<string>) : undefined;
 
         if (primaryXType === "category" && primaryBandScale) {
-            const categoryDomain = calculateCategoryDomain(effectiveSeries, rootData, rootXField);
+            const categoryDomain = calculateCategoryDomain(effectiveSeries, rootData, effectiveRootXField);
             let bucketIdx = 0;
             for (const cat of categoryDomain) {
                 const hits = hitsByXKey.get(cat);
@@ -1139,9 +1117,8 @@ export class CartesianLayoutEngine {
             interactionBucketLookup.set(bucket.xKey, bucket);
         }
 
-        const hasData =
-            hasRenderableData(effectiveSeries, rootData, primaryXType as ChartXAxisType, rootXField) &&
-            (seriesScenes.some(s => {
+        const hasRenderedElements =
+            seriesScenes.some(s => {
                 if (s.type === "bar" || s.type === "rangeBar") return s.bars.length > 0;
                 if (s.type === "scatter" || s.type === "bubble") return s.markers.length > 0;
                 if (s.type === "candlestick" || s.type === "ohlc") return s.marks.length > 0;
@@ -1149,8 +1126,11 @@ export class CartesianLayoutEngine {
                     return s.points.some((p: { defined: boolean }) => p.defined);
                 }
                 return false;
-            }) ||
-                validMarkerCount > 0);
+            }) || validMarkerCount > 0;
+
+        const hasData =
+            hasRenderedElements ||
+            hasRenderableData(effectiveSeries, rootData, primaryXType as ChartXAxisType, effectiveRootXField);
 
         const legendItems: ChartLegendItem[] = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
 

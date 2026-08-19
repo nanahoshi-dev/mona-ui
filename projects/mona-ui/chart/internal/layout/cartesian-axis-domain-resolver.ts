@@ -1,5 +1,6 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import type { CartesianStackAnalysis } from "../data/cartesian-stack-engine";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
 
@@ -15,7 +16,8 @@ export class CartesianAxisDomainResolver {
         boundSeries: readonly ChartSeriesRegistration[],
         rootData?: readonly unknown[],
         rootXField?: ChartField,
-        stackedExtents?: { min: number; max: number }
+        stackedExtents?: { min: number; max: number },
+        stackAnalysis?: CartesianStackAnalysis
     ): AxisDomainResult {
         const warnings: string[] = [];
 
@@ -43,6 +45,7 @@ export class CartesianAxisDomainResolver {
             rootData,
             rootXField,
             stackedExtents,
+            stackAnalysis,
             warnings
         );
 
@@ -149,15 +152,27 @@ export class CartesianAxisDomainResolver {
         rootData?: readonly unknown[],
         rootXField?: ChartField,
         stackedExtents?: { min: number; max: number },
+        stackAnalysis?: CartesianStackAnalysis,
         warnings: string[] = []
     ): readonly [number, number] {
+        if (stackAnalysis && stackAnalysis.axisUnitMode === "percent") {
+            const min = axis.explicitMin !== undefined ? Number(axis.explicitMin) : 0;
+            const max = axis.explicitMax !== undefined ? Number(axis.explicitMax) : 100;
+            return [min, max];
+        }
+
         const rawValues: number[] = [];
 
         if (stackedExtents) {
             rawValues.push(stackedExtents.min, stackedExtents.max);
         }
 
+        const stackedSeriesIds = stackAnalysis?.visibleLayout?.bySeriesId;
+
         for (const s of boundSeries) {
+            if (axis.dimension === "y" && stackedSeriesIds && stackedSeriesIds.has(s.id)) {
+                continue;
+            }
             const data = ((s.data?.() ?? rootData) ?? []) as readonly unknown[];
             if (axis.dimension === "x") {
                 const field = ("xField" in s ? s.xField?.() : undefined) ?? rootXField;

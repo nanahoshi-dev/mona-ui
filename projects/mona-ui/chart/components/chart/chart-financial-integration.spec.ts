@@ -245,4 +245,38 @@ describe("Chart Financial Series Integration (Candlestick & OHLC)", () => {
         expect(text).toContain("close 104");
         expect(text).toContain("rising");
     });
+
+    it("should render candlestick marks properly when xAxisType is auto", () => {
+        host.xAxisType.set("auto" as any);
+        fixture.detectChanges();
+
+        const scene = chartComponent.scene();
+        expect(scene).toBeDefined();
+        if (scene && scene.coordinateSystem === "cartesian") {
+            expect(scene.hasRenderableData).toBe(true);
+            expect(scene.series.length).toBe(1);
+            const candlestickScene = scene.series[0] as ChartCandlestickSeriesScene;
+            expect(candlestickScene.type).toBe("candlestick");
+            expect(candlestickScene.marks.length).toBe(3);
+            expect(candlestickScene.marks[0].bodyBounds.width).toBeGreaterThan(0);
+        }
+    });
+
+    it("should render OHLC marks properly when showOhlc is active and xAxisType is auto", () => {
+        host.showCandlestick.set(false);
+        host.showOhlc.set(true);
+        host.xAxisType.set("auto" as any);
+        fixture.detectChanges();
+
+        const scene = chartComponent.scene();
+        expect(scene).toBeDefined();
+        if (scene && scene.coordinateSystem === "cartesian") {
+            expect(scene.hasRenderableData).toBe(true);
+            expect(scene.series.length).toBe(1);
+            const ohlcScene = scene.series[0] as ChartOhlcSeriesScene;
+            expect(ohlcScene.type).toBe("ohlc");
+            expect(ohlcScene.marks.length).toBe(3);
+            expect(ohlcScene.marks[0].totalWidth).toBeGreaterThan(0);
+        }
+    });
 });
