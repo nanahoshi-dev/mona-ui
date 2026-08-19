@@ -14,6 +14,8 @@ import type {
     ChartPositionScale,
     ResolvedChartCartesianAxisType
 } from "./chart-scale";
+import { formatCompactNumber } from "../utils/number-utils";
+import { formatTimeRange } from "../utils/chart-formatter";
 
 export class LinearScale implements ChartContinuousPositionScale<number> {
     public readonly type = "linear" as const;
@@ -34,8 +36,8 @@ export class LinearScale implements ChartContinuousPositionScale<number> {
         return this.#scale.domain() as [number, number];
     }
 
-    public formatTick(value: number, count: number = 5): string {
-        return this.#scale.tickFormat(count)(value);
+    public formatTick(value: number, _count: number = 5): string {
+        return formatCompactNumber(value);
     }
 
     public invert(pixel: number): number {
@@ -125,7 +127,11 @@ export class LogScale implements ChartContinuousPositionScale<number> {
     }
 
     public formatTick(value: number, count: number = 5): string {
-        return this.#scale.tickFormat(count)(value);
+        const d3Formatted = this.#scale.tickFormat(count)(value);
+        if (d3Formatted === "") {
+            return "";
+        }
+        return formatCompactNumber(value);
     }
 
     public invert(pixel: number): number {
@@ -195,8 +201,8 @@ export class SymlogScale implements ChartContinuousPositionScale<number> {
         return this.#scale.domain() as [number, number];
     }
 
-    public formatTick(value: number, count: number = 5): string {
-        return this.#scale.tickFormat(count)(value);
+    public formatTick(value: number, _count: number = 5): string {
+        return formatCompactNumber(value);
     }
 
     public invert(pixel: number): number {
@@ -260,8 +266,8 @@ export class PowScale implements ChartContinuousPositionScale<number> {
         return this.#scale.domain() as [number, number];
     }
 
-    public formatTick(value: number, count: number = 5): string {
-        return this.#scale.tickFormat(count)(value);
+    public formatTick(value: number, _count: number = 5): string {
+        return formatCompactNumber(value);
     }
 
     public invert(pixel: number): number {
@@ -312,8 +318,8 @@ export class SqrtScale implements ChartContinuousPositionScale<number> {
         return this.#scale.domain() as [number, number];
     }
 
-    public formatTick(value: number, count: number = 5): string {
-        return this.#scale.tickFormat(count)(value);
+    public formatTick(value: number, _count: number = 5): string {
+        return formatCompactNumber(value);
     }
 
     public invert(pixel: number): number {
@@ -362,8 +368,10 @@ export class TimeScale implements ChartContinuousPositionScale<Date> {
         return this.#scale.domain() as [Date, Date];
     }
 
-    public formatTick(value: Date, count: number = 5): string {
-        return this.#scale.tickFormat(count)(value);
+    public formatTick(value: Date, _count: number = 5): string {
+        const d = this.#scale.domain();
+        const spanMs = Math.abs(d[1].getTime() - d[0].getTime());
+        return formatTimeRange(value, spanMs, false);
     }
 
     public invert(pixel: number): Date {
@@ -412,8 +420,10 @@ export class UtcScale implements ChartContinuousPositionScale<Date> {
         return this.#scale.domain() as [Date, Date];
     }
 
-    public formatTick(value: Date, count: number = 5): string {
-        return this.#scale.tickFormat(count)(value);
+    public formatTick(value: Date, _count: number = 5): string {
+        const d = this.#scale.domain();
+        const spanMs = Math.abs(d[1].getTime() - d[0].getTime());
+        return formatTimeRange(value, spanMs, true);
     }
 
     public invert(pixel: number): Date {
@@ -536,8 +546,29 @@ export class CartesianScaleFactory {
             scale.nice(tickCount);
             if (explicitMin !== undefined || explicitMax !== undefined) {
                 const current = scale.domain();
-                let min = explicitMin !== undefined ? explicitMin : current[0];
-                let max = explicitMax !== undefined ? explicitMax : current[1];
+                let min = current[0];
+                let max = current[1];
+
+                if (type === "log") {
+                    const isPositive = current[0] > 0;
+                    if (isPositive) {
+                        if (explicitMin !== undefined && explicitMin > 0) min = explicitMin;
+                        if (explicitMax !== undefined && explicitMax > 0) max = explicitMax;
+                    } else {
+                        if (explicitMin !== undefined && explicitMin < 0) min = explicitMin;
+                        if (explicitMax !== undefined && explicitMax < 0) max = explicitMax;
+                    }
+                } else {
+                    if (explicitMin !== undefined) min = explicitMin;
+                    if (explicitMax !== undefined) max = explicitMax;
+                }
+
+                if (min > max) {
+                    const temp = min;
+                    min = max;
+                    max = temp;
+                }
+
                 if (min === max) {
                     if (type === "log") {
                         if (min > 0) {
