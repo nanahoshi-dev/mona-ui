@@ -49,7 +49,9 @@ describe("OhlcSeriesRenderer", () => {
             },
             tickWidth: 10,
             type: "ohlc",
-            wickWidth: 1
+            wickWidth: 1,
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         OhlcSeriesRenderer.render(mockContext, scene);
