@@ -295,4 +295,260 @@ describe("RangeBarSeriesAnimationAdapter", () => {
         expect(sampledMid!.bars[0].height).toBeCloseTo(60, 1);
         expect(sampledMid!.bars[0].orientation).toBe("horizontal");
     });
+
+    it("should preserve reversed semantic endpoints during vertical to horizontal morph (HAX-3-004)", () => {
+        const prevVerticalReversed: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "bar-rev",
+                    datum: {},
+                    fromValue: 80,
+                    fromY: 50, // Top of chart for higher value
+                    height: 150,
+                    highValue: 80,
+                    index: 0,
+                    lowValue: 20,
+                    orientation: "vertical",
+                    radius: 4,
+                    toValue: 20,
+                    toY: 200, // Bottom of chart for lower value
+                    width: 20,
+                    x: 50,
+                    xValue: "Jan",
+                    y: 50
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "series-1",
+            name: "Range 1",
+            orientation: "vertical",
+            style: mockStyle,
+            type: "rangeBar"
+        };
+
+        const nextHorizontalReversed: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "bar-rev",
+                    datum: {},
+                    fromValue: 80,
+                    fromValuePixel: 200, // Right edge for higher value
+                    fromY: 50,
+                    height: 20,
+                    highValue: 80,
+                    index: 0,
+                    lowValue: 20,
+                    orientation: "horizontal",
+                    radius: 4,
+                    toValue: 20,
+                    toValuePixel: 50, // Left edge for lower value
+                    toY: 50,
+                    width: 150,
+                    x: 50,
+                    xValue: "Jan",
+                    y: 50
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "series-1",
+            name: "Range 1",
+            orientation: "horizontal",
+            style: mockStyle,
+            type: "rangeBar"
+        };
+
+        const plan = adapter.createPlan(prevVerticalReversed, nextHorizontalReversed, {} as any);
+
+        for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
+            const sampled = plan.sample(progress);
+            expect(sampled).toBeDefined();
+            const bar = sampled!.bars[0];
+
+            // Semantic values invariant: fromValue > toValue
+            expect(bar.fromValue).toBe(80);
+            expect(bar.toValue).toBe(20);
+            expect(bar.fromValue).toBeGreaterThan(bar.toValue);
+
+            // Bounding box dimensions must remain finite and non-negative
+            expect(bar.x).toBeGreaterThanOrEqual(0);
+            expect(bar.y).toBeGreaterThanOrEqual(0);
+            expect(bar.width).toBeGreaterThanOrEqual(0);
+            expect(bar.height).toBeGreaterThanOrEqual(0);
+
+            // Target is horizontal: fromValuePixel must be the right-side coordinate and toValuePixel the left-side
+            if (progress > 0) {
+                expect(bar.orientation).toBe("horizontal");
+                expect(bar.fromValuePixel).toBeDefined();
+                expect(bar.toValuePixel).toBeDefined();
+                expect(bar.fromValuePixel!).toBeGreaterThan(bar.toValuePixel!);
+                expect(bar.x).toBe(bar.toValuePixel);
+                expect(bar.x + bar.width).toBeCloseTo(bar.fromValuePixel!, 1);
+            }
+        }
+    });
+
+    it("should preserve reversed semantic endpoints during horizontal to vertical morph (HAX-3-004)", () => {
+        const prevHorizontalReversed: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "bar-rev",
+                    datum: {},
+                    fromValue: 80,
+                    fromValuePixel: 200,
+                    fromY: 50,
+                    height: 20,
+                    highValue: 80,
+                    index: 0,
+                    lowValue: 20,
+                    orientation: "horizontal",
+                    radius: 4,
+                    toValue: 20,
+                    toValuePixel: 50,
+                    toY: 50,
+                    width: 150,
+                    x: 50,
+                    xValue: "Jan",
+                    y: 50
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "series-1",
+            name: "Range 1",
+            orientation: "horizontal",
+            style: mockStyle,
+            type: "rangeBar"
+        };
+
+        const nextVerticalReversed: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "bar-rev",
+                    datum: {},
+                    fromValue: 80,
+                    fromY: 50,
+                    height: 150,
+                    highValue: 80,
+                    index: 0,
+                    lowValue: 20,
+                    orientation: "vertical",
+                    radius: 4,
+                    toValue: 20,
+                    toY: 200,
+                    width: 20,
+                    x: 50,
+                    xValue: "Jan",
+                    y: 50
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "series-1",
+            name: "Range 1",
+            orientation: "vertical",
+            style: mockStyle,
+            type: "rangeBar"
+        };
+
+        const plan = adapter.createPlan(prevHorizontalReversed, nextVerticalReversed, {} as any);
+
+        for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
+            const sampled = plan.sample(progress);
+            expect(sampled).toBeDefined();
+            const bar = sampled!.bars[0];
+
+            expect(bar.fromValue).toBe(80);
+            expect(bar.toValue).toBe(20);
+            expect(bar.fromValue).toBeGreaterThan(bar.toValue);
+
+            expect(bar.x).toBeGreaterThanOrEqual(0);
+            expect(bar.y).toBeGreaterThanOrEqual(0);
+            expect(bar.width).toBeGreaterThanOrEqual(0);
+            expect(bar.height).toBeGreaterThanOrEqual(0);
+
+            if (progress > 0) {
+                expect(bar.orientation).toBe("vertical");
+                // In vertical, fromValue=80 maps to top (fromY=50), toValue=20 maps to bottom (toY=200)
+                expect(bar.fromY).toBeLessThan(bar.toY);
+                expect(bar.y).toBe(bar.fromY);
+                expect(bar.y + bar.height).toBeCloseTo(bar.toY, 1);
+            }
+        }
+    });
+
+    it("should animate zero-range interval between orientations correctly", () => {
+        const prevVerticalZero: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "bar-zero",
+                    datum: {},
+                    fromValue: 50,
+                    fromY: 150,
+                    height: 0,
+                    highValue: 50,
+                    index: 0,
+                    lowValue: 50,
+                    orientation: "vertical",
+                    radius: 4,
+                    toValue: 50,
+                    toY: 150,
+                    width: 20,
+                    x: 50,
+                    xValue: "Jan",
+                    y: 150
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "series-1",
+            name: "Range 1",
+            orientation: "vertical",
+            style: mockStyle,
+            type: "rangeBar"
+        };
+
+        const nextHorizontalZero: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "bar-zero",
+                    datum: {},
+                    fromValue: 50,
+                    fromValuePixel: 180,
+                    fromY: 60,
+                    height: 20,
+                    highValue: 50,
+                    index: 0,
+                    lowValue: 50,
+                    orientation: "horizontal",
+                    radius: 4,
+                    toValue: 50,
+                    toValuePixel: 180,
+                    toY: 60,
+                    width: 0,
+                    x: 180,
+                    xValue: "Jan",
+                    y: 60
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "series-1",
+            name: "Range 1",
+            orientation: "horizontal",
+            style: mockStyle,
+            type: "rangeBar"
+        };
+
+        const plan = adapter.createPlan(prevVerticalZero, nextHorizontalZero, {} as any);
+        const finalSample = plan.sample(1);
+
+        expect(finalSample).toBeDefined();
+        expect(finalSample!.bars[0].width).toBe(0);
+        expect(finalSample!.bars[0].height).toBe(20);
+        expect(finalSample!.bars[0].orientation).toBe("horizontal");
+        expect(finalSample!.bars[0].fromValuePixel).toBe(180);
+        expect(finalSample!.bars[0].toValuePixel).toBe(180);
+    });
 });

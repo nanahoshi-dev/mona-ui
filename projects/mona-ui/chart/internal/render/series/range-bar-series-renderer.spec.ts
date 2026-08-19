@@ -77,7 +77,7 @@ describe("RangeBarSeriesRenderer", () => {
         expect(ctx.restore).toHaveBeenCalled();
     });
 
-    it("should render zero-height range bar as horizontal hairline (RNG-004)", () => {
+    it("should render zero-height vertical range bar as horizontal hairline (RNG-004)", () => {
         const ctx = createMockContext();
         const scene: ChartRangeBarSeriesScene = {
             bars: [
@@ -92,6 +92,7 @@ describe("RangeBarSeriesRenderer", () => {
                     highValue: 10,
                     index: 0,
                     lowValue: 10,
+                    orientation: "vertical",
                     radius: 4,
                     toValue: 10,
                     toY: 150,
@@ -105,6 +106,7 @@ describe("RangeBarSeriesRenderer", () => {
             fillOpacity: 0.9,
             id: "rb1",
             name: "RangeBar 1",
+            orientation: "vertical",
             style: {
                 ...defaultStyle,
                 color: "#10b981"
@@ -120,6 +122,162 @@ describe("RangeBarSeriesRenderer", () => {
         expect(ctx.lineWidth).toBe(1.5);
         expect(ctx.strokeStyle).toBe("#10b981");
         expect(ctx.stroke).toHaveBeenCalled();
+        expect(ctx.fill).not.toHaveBeenCalled();
+    });
+
+    it("should render zero-width horizontal range bar as vertical hairline (HAX-3-001, HAX-3-002)", () => {
+        const ctx = createMockContext();
+        const scene: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "k1",
+                    datum: {},
+                    formattedFrom: "50",
+                    formattedTo: "50",
+                    fromValue: 50,
+                    fromValuePixel: 180,
+                    fromY: 60,
+                    height: 24,
+                    highValue: 50,
+                    index: 0,
+                    lowValue: 50,
+                    orientation: "horizontal",
+                    radius: 4,
+                    toValue: 50,
+                    toValuePixel: 180,
+                    toY: 60,
+                    width: 0,
+                    x: 180,
+                    xValue: "Q1",
+                    y: 60
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 0.8,
+            id: "rb1",
+            name: "RangeBar 1",
+            orientation: "horizontal",
+            renderOpacity: 0.5,
+            style: {
+                ...defaultStyle,
+                color: "#8b5cf6"
+            },
+            type: "rangeBar"
+        };
+
+        RangeBarSeriesRenderer.render(ctx, scene);
+
+        expect(ctx.beginPath).toHaveBeenCalled();
+        // Hairline must be vertical: moveTo(crispPixel(x, 1), y), lineTo(crispPixel(x, 1), y + height)
+        expect(ctx.moveTo).toHaveBeenCalledWith(expect.any(Number), 60);
+        expect(ctx.lineTo).toHaveBeenCalledWith(expect.any(Number), 84);
+        expect(ctx.lineWidth).toBe(1.5);
+        expect(ctx.strokeStyle).toBe("#8b5cf6");
+        expect(ctx.globalAlpha).toBeCloseTo(0.4, 2); // 0.8 * 0.5
+        expect(ctx.stroke).toHaveBeenCalled();
+        expect(ctx.fill).not.toHaveBeenCalled();
+    });
+
+    it("should render non-zero horizontal range bar with rounded rect fill", () => {
+        const ctx = createMockContext();
+        const scene: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "k1",
+                    cornerRadii: { bottomLeft: 4, bottomRight: 4, topLeft: 4, topRight: 4 },
+                    datum: {},
+                    formattedFrom: "20",
+                    formattedTo: "80",
+                    fromValue: 20,
+                    fromValuePixel: 100,
+                    fromY: 50,
+                    height: 20,
+                    highValue: 80,
+                    index: 0,
+                    lowValue: 20,
+                    orientation: "horizontal",
+                    radius: 4,
+                    toValue: 80,
+                    toValuePixel: 250,
+                    toY: 50,
+                    width: 150,
+                    x: 100,
+                    xValue: "Q1",
+                    y: 50
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "rb1",
+            name: "RangeBar 1",
+            orientation: "horizontal",
+            style: defaultStyle,
+            type: "rangeBar"
+        };
+
+        RangeBarSeriesRenderer.render(ctx, scene);
+
+        expect(ctx.beginPath).toHaveBeenCalled();
+        expect(ctx.quadraticCurveTo).toHaveBeenCalled();
+        expect(ctx.fill).toHaveBeenCalled();
+        expect(ctx.stroke).not.toHaveBeenCalled();
+    });
+
+    it("should distinguish epsilon boundary between hairline and filled rect", () => {
+        const ctx = createMockContext();
+        const scene: ChartRangeBarSeriesScene = {
+            bars: [
+                {
+                    animationKey: "zero-bar",
+                    datum: {},
+                    fromValue: 10,
+                    fromY: 10,
+                    height: 20,
+                    highValue: 10,
+                    index: 0,
+                    lowValue: 10,
+                    orientation: "horizontal",
+                    radius: 4,
+                    toValue: 10,
+                    toY: 10,
+                    width: 0.001, // <= 0.001 threshold
+                    x: 50,
+                    xValue: "A",
+                    y: 10
+                },
+                {
+                    animationKey: "non-zero-bar",
+                    datum: {},
+                    fromValue: 10,
+                    fromY: 40,
+                    height: 20,
+                    highValue: 10.01,
+                    index: 1,
+                    lowValue: 10,
+                    orientation: "horizontal",
+                    radius: 4,
+                    toValue: 10.01,
+                    toY: 40,
+                    width: 0.002, // > 0.001 threshold
+                    x: 50,
+                    xValue: "B",
+                    y: 40
+                }
+            ],
+            borderRadius: 4,
+            fillOpacity: 1,
+            id: "rb1",
+            name: "RangeBar 1",
+            orientation: "horizontal",
+            style: defaultStyle,
+            type: "rangeBar"
+        };
+
+        RangeBarSeriesRenderer.render(ctx, scene);
+
+        // First mark is hairline (stroke), second mark is filled
+        expect(ctx.stroke).toHaveBeenCalledTimes(1);
+        expect(ctx.fill).toHaveBeenCalledTimes(1);
     });
 
     it("should skip bars with zero opacity", () => {
