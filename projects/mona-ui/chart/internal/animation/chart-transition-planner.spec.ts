@@ -380,6 +380,82 @@ describe("ChartTransitionPlanner", () => {
             expect(plan.seriesPlans[0].adapterType).toBe("bar");
         });
 
+        it("should plan morph transition when switching Bar orientation even with axisTopologySignature and stackSignature present", () => {
+            const prevVertical = createMockCartesianSceneWithBars();
+            prevVertical.orientation = "vertical";
+            prevVertical.xAxisType = "category";
+            prevVertical.yAxisType = "linear";
+            prevVertical.axisTopologySignature = "axis:x,bottom,category;axis:y,left,linear";
+            prevVertical.stackSignature = "v-group";
+
+            const nextHorizontal: CartesianXYChartScene = {
+                axes: [],
+                axisTopologySignature: "axis:x,bottom,linear;axis:y,left,category",
+                cartesianKind: "xy",
+                coordinateSystem: "cartesian",
+                hasRenderableData: true,
+                height: 300,
+                hitTargets: [
+                    {
+                        animationKey: "b1:catA",
+                        barOrientation: "horizontal",
+                        datum: {},
+                        index: 0,
+                        seriesId: "b1",
+                        seriesName: "Bar 1",
+                        seriesType: "bar",
+                        xKey: "catA",
+                        xValue: "catA",
+                        yValue: 10
+                    }
+                ],
+                interactionBuckets: [],
+                legendItems: [],
+                orientation: "horizontal",
+                plotRect: { height: 260, width: 460, x: 20, y: 20 },
+                series: [
+                    {
+                        bars: [
+                            {
+                                animationKey: "b1:catA",
+                                datum: {},
+                                height: 20,
+                                index: 0,
+                                isPositive: true,
+                                orientation: "horizontal",
+                                radius: 4,
+                                width: 150,
+                                x: 20,
+                                xValue: "catA",
+                                y: 50,
+                                yValue: 10
+                            }
+                        ],
+                        borderRadius: 4,
+                        fillOpacity: 1,
+                        id: "b1",
+                        name: "Bar 1",
+                        orientation: "horizontal",
+                        style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                        type: "bar",
+                        xAxisId: "default-x",
+                        yAxisId: "default-y"
+                    }
+                ],
+                stackSignature: "h-group",
+                width: 500,
+                xAxisType: "linear",
+                yAxisType: "category"
+            };
+
+            const options = normalizeChartAnimationOptions(true);
+            const plan = ChartTransitionPlanner.plan(prevVertical, nextHorizontal, "data", options);
+
+            expect(plan.mode).toBe("morph");
+            expect(plan.seriesPlans.length).toBe(1);
+            expect(plan.seriesPlans[0].adapterType).toBe("bar");
+        });
+
         it("should fallback to crossfade when orientation switches with incompatible series type (e.g. Line)", () => {
             const prevVertical: CartesianXYChartScene = {
                 axes: [],

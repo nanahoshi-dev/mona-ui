@@ -484,6 +484,7 @@ export class ChartTransitionPlanner {
                 if (
                     prevCartesian.cartesianKind === "xy" &&
                     targetCartesian.cartesianKind === "xy" &&
+                    !isBarOrientationChange &&
                     prevCartesian.stackSignature !== undefined &&
                     targetCartesian.stackSignature !== undefined &&
                     prevCartesian.stackSignature !== targetCartesian.stackSignature
@@ -503,6 +504,7 @@ export class ChartTransitionPlanner {
                 if (
                     prevCartesian.cartesianKind === "xy" &&
                     targetCartesian.cartesianKind === "xy" &&
+                    !isBarOrientationChange &&
                     (prevCartesian as CartesianXYChartScene).axisTopologySignature !== undefined &&
                     (targetCartesian as CartesianXYChartScene).axisTopologySignature !== undefined &&
                     (prevCartesian as CartesianXYChartScene).axisTopologySignature !== (targetCartesian as CartesianXYChartScene).axisTopologySignature
