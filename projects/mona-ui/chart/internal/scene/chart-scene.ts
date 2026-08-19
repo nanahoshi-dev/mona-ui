@@ -54,9 +54,12 @@ export interface CartesianSceneBase extends ChartSceneBase {
 export interface CartesianAxisTopologyItem {
     readonly axisId: string;
     readonly dimension: "x" | "y";
+    readonly isPrimary?: boolean;
     readonly position: import("../../models/chart-axis.models").ChartAxisPosition;
     readonly resolvedType: import("../scale/chart-scale").ResolvedChartCartesianAxisType;
     readonly stackIndex: number;
+    readonly valid?: boolean;
+    readonly visible?: boolean;
 }
 
 export interface CartesianXYChartScene extends CartesianSceneBase {
