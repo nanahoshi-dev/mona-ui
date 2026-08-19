@@ -1,5 +1,6 @@
 import type { ChartCartesianSeriesRegistration } from "../context/chart-registration-context";
 import type { CartesianXYOrientation } from "../scene/chart-scene";
+import { CartesianStageTracker } from "./cartesian-stage-instrumentation";
 
 export interface CartesianOrientationResolution {
     readonly diagnostics: readonly string[];
@@ -11,6 +12,7 @@ export class CartesianOrientationPolicy {
     public static resolve(
         effectiveSeries: readonly ChartCartesianSeriesRegistration[]
     ): CartesianOrientationResolution {
+        CartesianStageTracker.current?.onOrientationPolicy?.();
         const diagnostics: string[] = [];
 
         const getOrientation = (s: ChartCartesianSeriesRegistration): "horizontal" | "vertical" => {

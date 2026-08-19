@@ -95,6 +95,61 @@ export function areInternalViewportStatesEqual(
     return true;
 }
 
+export interface InternalViewportDiff {
+    readonly changed: boolean;
+    readonly changedAxes: readonly ChartViewportAxisRef[];
+}
+
+export function diffInternalViewportStates(
+    previous: InternalCartesianViewportState | undefined,
+    next: InternalCartesianViewportState | undefined
+): InternalViewportDiff {
+    if (previous === next) {
+        return { changed: false, changedAxes: [] };
+    }
+    if (!previous && !next) {
+        return { changed: false, changedAxes: [] };
+    }
+    if (!previous) {
+        const changedAxes: ChartViewportAxisRef[] = [];
+        if (next) {
+            for (const id of next.x.keys()) changedAxes.push({ axis: "x", axisId: id });
+            for (const id of next.y.keys()) changedAxes.push({ axis: "y", axisId: id });
+        }
+        return { changed: changedAxes.length > 0, changedAxes };
+    }
+    if (!next) {
+        const changedAxes: ChartViewportAxisRef[] = [];
+        for (const id of previous.x.keys()) changedAxes.push({ axis: "x", axisId: id });
+        for (const id of previous.y.keys()) changedAxes.push({ axis: "y", axisId: id });
+        return { changed: changedAxes.length > 0, changedAxes };
+    }
+
+    const changedAxes: ChartViewportAxisRef[] = [];
+    const allXKeys = new Set([...previous.x.keys(), ...next.x.keys()]);
+    for (const id of allXKeys) {
+        const prevW = previous.x.get(id);
+        const nextW = next.x.get(id);
+        if (!areAxisViewportsEqual(prevW, nextW)) {
+            changedAxes.push({ axis: "x", axisId: id });
+        }
+    }
+
+    const allYKeys = new Set([...previous.y.keys(), ...next.y.keys()]);
+    for (const id of allYKeys) {
+        const prevW = previous.y.get(id);
+        const nextW = next.y.get(id);
+        if (!areAxisViewportsEqual(prevW, nextW)) {
+            changedAxes.push({ axis: "y", axisId: id });
+        }
+    }
+
+    return {
+        changed: changedAxes.length > 0,
+        changedAxes
+    };
+}
+
 export function areViewportStatesEqual(
     a: ChartViewportState | undefined,
     b: ChartViewportState | undefined

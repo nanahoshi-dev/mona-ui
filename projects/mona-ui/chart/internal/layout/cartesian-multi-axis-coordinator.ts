@@ -38,6 +38,7 @@ import {
 } from "../viewport/cartesian-axis-coordinate-space";
 import type { InternalCartesianViewportState } from "../viewport/cartesian-viewport-normalizer";
 import { createCartesianAxisMeasurementKey } from "./cartesian-axis-measurement-key";
+import { CartesianStageTracker } from "./cartesian-stage-instrumentation";
 
 export interface MultiAxisPreparationOptions {
     readonly axisResolution: CartesianAxisRegistryResolution;
@@ -146,6 +147,7 @@ export interface MultiAxisCoordinatorResult {
 
 export class CartesianMultiAxisCoordinator {
     public static prepareDomains(options: MultiAxisPreparationOptions): CartesianDomainPreparation {
+        CartesianStageTracker.current?.onStageA?.();
         const {
             axisResolution,
             bindingResolution,
@@ -463,6 +465,7 @@ export class CartesianMultiAxisCoordinator {
         preparation: CartesianDomainPreparation,
         options: MultiAxisChromeOptions
     ): CartesianAxisChromeLayout {
+        CartesianStageTracker.current?.onStageB?.();
         const { chartHeight, chartWidth, insets = {}, labelMeasurements } = options;
         const { axisResolution, baseDomains, resolvedTypes, axisUnitModes } = preparation;
 
@@ -722,6 +725,7 @@ export class CartesianMultiAxisCoordinator {
         viewport?: InternalCartesianViewportState,
         labelMeasurements?: ReadonlyMap<string, ChartLabelMeasurement>
     ): MultiAxisViewportProjectionResult {
+        CartesianStageTracker.current?.onStageC?.();
         const { axisResolution, baseDomains, resolvedTypes, axisUnitModes, xAxisValidityById, yAxisValidityById } = preparation;
         const { plotRect, gutters, sideOffsets, effectiveRotations, baseScales } = chrome;
         const measurements = labelMeasurements ?? new Map();

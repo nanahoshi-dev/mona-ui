@@ -351,8 +351,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #animationMode = signal<"crossfade" | "morph" | null>(null);
     readonly #isExitingData = signal(false);
     readonly #warnedDiagnosticSignatures = new Set<string>();
-    #hasPendingLabelMeasurementLayout: boolean = false;
+    #pendingLabelMeasurementReason: number = 0;
     #hasPendingSizeReflow: boolean = false;
+    #interactionRevision: number = 0;
 
     public readonly isAnimating = this.#isAnimating.asReadonly();
     public readonly isStructuralAnimation = this.#isStructuralAnimation.asReadonly();
@@ -706,9 +707,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#isStructuralAnimation.set(false);
                 this.#animationMode.set(null);
                 this.#isExitingData.set(false);
-                if (this.#hasPendingLabelMeasurementLayout) {
-                    this.#hasPendingLabelMeasurementLayout = false;
-                    this.invalidate(ChartInvalidationReason.Layout);
+                if (this.#pendingLabelMeasurementReason !== 0) {
+                    const r = this.#pendingLabelMeasurementReason;
+                    this.#pendingLabelMeasurementReason = 0;
+                    this.invalidate(r as ChartInvalidationReason);
                 }
                 this.#paint();
             }
@@ -768,6 +770,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const nav = this.normalizedNavigation();
             if (sc && nav.enabled) {
                 const gestureContext = {
+                    authorityToken: this.#interactionRevision,
                     axisScenes: sc.axes,
                     constraints: nav.constraints,
                     coordinateSpace: sc.coordinateSpace,
@@ -777,7 +780,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     navigationProfile: this.#cartesianLayoutRuntime?.navigationProfile,
                     onCursorChange: (cursor: string | null) => this.viewportCursor.set(cursor),
                     onViewportChange: (nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent) => {
-                        this.#applyViewportUpdate(nextState, event.source, event.phase, event.changedAxes);
+                        this.#applyGestureViewportEvent(nextState, event);
                     },
                     orientation: sc.orientation ?? "vertical",
                     plotRect: sc.plotRect,
@@ -818,6 +821,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     public invalidate(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         this.#renderScheduler.schedule(reason);
+    }
+
+    public flushPendingRender(): void {
+        this.#renderScheduler.flush();
     }
 
     public recomputeScene(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
@@ -1241,6 +1248,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    #applyGestureViewportEvent(
+        nextState: InternalCartesianViewportState,
+        event: ChartViewportChangeEvent
+    ): void {
+        if (this.#isDestroyed) return;
+        this.viewportChange.emit(event);
+
+        const isControlled = this.viewport() !== undefined;
+        if (!isControlled && event.phase === "update") {
+            this.#uncontrolledViewportState.set(nextState);
+            this.invalidate(ChartInvalidationReason.Viewport);
+        }
+    }
+
     #applyViewportUpdate(
         nextState: InternalCartesianViewportState,
         source: ChartViewportChangeSource,
@@ -1266,13 +1287,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         });
 
         if (!isControlled) {
-            const isContinuousGestureBoundary =
-                (source === "drag" || source === "pinch" || source === "wheel") &&
-                (phase === "start" || phase === "end");
-            if (!isContinuousGestureBoundary) {
-                this.#uncontrolledViewportState.set(nextState);
-                this.invalidate(ChartInvalidationReason.Viewport);
-            }
+            this.#uncontrolledViewportState.set(nextState);
+            this.invalidate(ChartInvalidationReason.Viewport);
         }
     }
 
@@ -1770,7 +1786,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         let newScene: ChartScene;
         if (isViewportOnly && this.#cartesianLayoutRuntime) {
-            const computation = CartesianLayoutEngine.projectViewportFastPath(
+            const computation = CartesianLayoutEngine.projectRuntime(
                 this.#cartesianLayoutRuntime,
                 this.#effectiveViewportState(),
                 this.#labelMeasurements,
@@ -1784,6 +1800,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#currentHeight,
                 this.#labelMeasurements
             );
+            this.#interactionRevision++;
             const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
             const rawControlled = this.viewport();
             let canonicalViewport: InternalCartesianViewportState;
@@ -1828,7 +1845,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 }
             }
 
-            const projectedComp = CartesianLayoutEngine.projectViewportFastPath(
+            const projectedComp = CartesianLayoutEngine.projectRuntime(
                 this.#cartesianLayoutRuntime,
                 canonicalViewport,
                 this.#labelMeasurements,
@@ -1837,7 +1854,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             newScene = projectedComp.scene;
             this.#renderScheduler.consume(ChartInvalidationReason.Viewport);
         } else if (requiresSceneRefresh) {
-            const computation = ChartLayoutEngine.compute({
+            const preparation = ChartLayoutEngine.prepareStructural({
                 angularAxis: this.#angularAxis() ?? undefined,
                 containerHeight: this.#currentHeight,
                 containerWidth: this.#currentWidth,
@@ -1855,15 +1872,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 yAxes: this.#yAxes()
             });
 
-            this.#cartesianLayoutRuntime = computation.runtime ?? null;
-
-            if (this.#cartesianLayoutRuntime) {
+            if (preparation.kind === "cartesian-xy") {
+                this.#cartesianLayoutRuntime = preparation.runtime;
+                this.#interactionRevision++;
                 const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
                 const rawControlled = this.viewport();
 
+                let canonicalViewport: InternalCartesianViewportState;
                 if (rawControlled !== undefined) {
                     // Controlled: normalize raw public input against the newly computed base authority
-                    const normalizedControlled = normalizeViewportState(
+                    canonicalViewport = normalizeViewportState(
                         rawControlled,
                         baseCoordSpace,
                         {
@@ -1873,15 +1891,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                             warnedSignatures: this.#warnedDiagnosticSignatures
                         }
                     );
-                    this.#lastNormalizedControlledViewport = normalizedControlled;
-
-                    const projectedComp = CartesianLayoutEngine.projectViewportFastPath(
-                        this.#cartesianLayoutRuntime,
-                        normalizedControlled,
-                        this.#labelMeasurements,
-                        this.#warnedDiagnosticSignatures
-                    );
-                    newScene = projectedComp.scene;
+                    this.#lastNormalizedControlledViewport = canonicalViewport;
                 } else {
                     // Uncontrolled: if transitioning from controlled, seed from last normalized controlled viewport
                     if (this.#lastNormalizedControlledViewport !== null) {
@@ -1898,12 +1908,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                             minVisibleCategories: this.normalizedNavigation().minVisibleCategories
                         }
                     );
+                    canonicalViewport = reconcilerRes.viewport;
 
                     if (reconcilerRes.changed) {
                         const resolvedMap = baseCoordSpace.toResolvedAxisInfoMap();
                         const prevPublic = toPublicViewportState(this.#uncontrolledViewportState(), resolvedMap);
-                        const nextPublic = toPublicViewportState(reconcilerRes.viewport, resolvedMap);
-                        this.#uncontrolledViewportState.set(reconcilerRes.viewport);
+                        const nextPublic = toPublicViewportState(canonicalViewport, resolvedMap);
+                        this.#uncontrolledViewportState.set(canonicalViewport);
                         if (!this.#isDestroyed) {
                             this.viewportChange.emit({
                                 changedAxes: reconcilerRes.changedAxes,
@@ -1914,18 +1925,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                             });
                         }
                     }
-
-                    const reconciledComp = CartesianLayoutEngine.projectViewportFastPath(
-                        this.#cartesianLayoutRuntime,
-                        reconcilerRes.viewport,
-                        this.#labelMeasurements,
-                        this.#warnedDiagnosticSignatures
-                    );
-                    newScene = reconciledComp.scene;
                 }
+
+                const projectedComp = CartesianLayoutEngine.projectRuntime(
+                    this.#cartesianLayoutRuntime,
+                    canonicalViewport,
+                    this.#labelMeasurements,
+                    this.#warnedDiagnosticSignatures
+                );
+                newScene = projectedComp.scene;
                 this.#renderScheduler.consume(ChartInvalidationReason.Viewport);
             } else {
-                newScene = computation.scene;
+                this.#cartesianLayoutRuntime = null;
+                this.#interactionRevision++;
+                newScene = preparation.scene;
             }
         } else {
             newScene = this.scene()!;
@@ -1979,10 +1992,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#isStructuralAnimation.set(false);
             this.#animationMode.set(null);
             this.#isExitingData.set(false);
-            if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
-                this.#hasPendingLabelMeasurementLayout = false;
+            if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
+                const reasonToInvalidate = this.#pendingLabelMeasurementReason !== 0
+                    ? this.#pendingLabelMeasurementReason
+                    : ChartInvalidationReason.Layout;
+                this.#pendingLabelMeasurementReason = 0;
                 this.#hasPendingSizeReflow = false;
-                this.invalidate(ChartInvalidationReason.Layout);
+                this.invalidate(reasonToInvalidate as ChartInvalidationReason);
             }
             this.#paint();
             return;
@@ -1999,10 +2015,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#isStructuralAnimation.set(false);
             this.#animationMode.set(null);
             this.#isExitingData.set(false);
-            if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
-                this.#hasPendingLabelMeasurementLayout = false;
+            if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
+                const reasonToInvalidate = this.#pendingLabelMeasurementReason !== 0
+                    ? this.#pendingLabelMeasurementReason
+                    : ChartInvalidationReason.Layout;
+                this.#pendingLabelMeasurementReason = 0;
                 this.#hasPendingSizeReflow = false;
-                this.invalidate(ChartInvalidationReason.Layout);
+                this.invalidate(reasonToInvalidate as ChartInvalidationReason);
             }
             this.#paint();
         } else {
@@ -2024,10 +2043,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     this.#isStructuralAnimation.set(false);
                     this.#animationMode.set(null);
                     this.#isExitingData.set(false);
-                    if (this.#hasPendingLabelMeasurementLayout || this.#hasPendingSizeReflow) {
-                        this.#hasPendingLabelMeasurementLayout = false;
+                    if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
+                        const reasonToInvalidate = this.#pendingLabelMeasurementReason !== 0
+                            ? this.#pendingLabelMeasurementReason
+                            : ChartInvalidationReason.Layout;
+                        this.#pendingLabelMeasurementReason = 0;
                         this.#hasPendingSizeReflow = false;
-                        this.invalidate(ChartInvalidationReason.Layout);
+                        this.invalidate(reasonToInvalidate as ChartInvalidationReason);
                     }
                     this.#paint();
                 },
@@ -2480,7 +2502,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#labelResizeObserver = new ResizeObserver(entries => {
                 let hasBaseChromeChanged = false;
                 let hasViewportTickChanged = false;
+                let hasNonCartesianLabelChanged = false;
                 const baseKeys = this.#cartesianLayoutRuntime?.chrome?.measurementKeys;
+                const isCartesian = this.#cartesianLayoutRuntime !== null;
 
                 for (const entry of entries) {
                     const targetId = this.#observedLabelElements.get(entry.target);
@@ -2491,10 +2515,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         const heightDiff = prev ? Math.abs(prev.height - height) : 0;
                         if (widthDiff > 3 || heightDiff > 3) {
                             this.#labelMeasurements.set(targetId, { width, height });
-                            if (baseKeys && !baseKeys.has(targetId) && targetId.startsWith("axis:")) {
-                                hasViewportTickChanged = true;
+                            if (isCartesian) {
+                                if (baseKeys && !baseKeys.has(targetId) && targetId.startsWith("axis:")) {
+                                    hasViewportTickChanged = true;
+                                } else {
+                                    hasBaseChromeChanged = true;
+                                }
                             } else {
-                                hasBaseChromeChanged = true;
+                                hasNonCartesianLabelChanged = true;
                             }
                         } else if (!prev) {
                             this.#labelMeasurements.set(targetId, { width, height });
@@ -2502,9 +2530,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     }
                 }
 
-                if (hasBaseChromeChanged) {
+                if (hasNonCartesianLabelChanged) {
                     if (this.#animationController.isRunning()) {
-                        this.#hasPendingLabelMeasurementLayout = true;
+                        this.#pendingLabelMeasurementReason |= ChartInvalidationReason.Layout;
+                    } else {
+                        this.invalidate(ChartInvalidationReason.Layout);
+                    }
+                } else if (hasBaseChromeChanged) {
+                    if (this.#animationController.isRunning()) {
+                        this.#pendingLabelMeasurementReason |= ChartInvalidationReason.Chrome;
                     } else {
                         this.invalidate(ChartInvalidationReason.Chrome);
                     }

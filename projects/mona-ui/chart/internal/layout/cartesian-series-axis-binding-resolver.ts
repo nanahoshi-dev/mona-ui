@@ -3,6 +3,7 @@ import type {
     CartesianAxisRegistryResolution,
     ResolvedCartesianAxisDescriptor
 } from "./cartesian-axis-registry-resolver";
+import { CartesianStageTracker } from "./cartesian-stage-instrumentation";
 
 export interface ResolvedSeriesAxisBinding {
     readonly isDefaultX: boolean;
@@ -30,6 +31,7 @@ export class CartesianSeriesAxisBindingResolver {
         seriesList: readonly ChartSeriesRegistration[],
         axisResolution: CartesianAxisRegistryResolution
     ): SeriesAxisBindingResolution {
+        CartesianStageTracker.current?.onBindingResolution?.();
         const bindings = new Map<string, ResolvedSeriesAxisBinding>();
         const activeSeries: ChartSeriesRegistration[] = [];
         const unboundSeries: ChartSeriesRegistration[] = [];

@@ -1,5 +1,6 @@
 import type { ChartCartesianSeriesRegistration } from "../context/chart-registration-context";
 import type { ChartDiagnostic } from "../utils/chart-diagnostics";
+import { CartesianStageTracker } from "./cartesian-stage-instrumentation";
 
 export interface CartesianSeriesPolicyResult {
     readonly diagnostics: readonly ChartDiagnostic[];
@@ -9,6 +10,7 @@ export interface CartesianSeriesPolicyResult {
 
 export class CartesianSeriesPolicy {
     public static resolve(series: readonly ChartCartesianSeriesRegistration[]): CartesianSeriesPolicyResult {
+        CartesianStageTracker.current?.onSeriesPolicy?.();
         const effectiveSeries: ChartCartesianSeriesRegistration[] = [];
         const ignoredSeriesIds = new Set<string>();
         const diagnostics: ChartDiagnostic[] = [];

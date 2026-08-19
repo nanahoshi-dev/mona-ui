@@ -9,6 +9,7 @@ export type ViewportGestureCancelReason =
     | "navigation-disabled"
     | "pointer-cancel"
     | "lost-pointer-capture"
+    | "authority-change"
     | "destroy";
 
 export interface ChartViewportDragSession {

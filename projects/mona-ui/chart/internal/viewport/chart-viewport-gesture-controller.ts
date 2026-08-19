@@ -11,6 +11,7 @@ import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-s
 import { CartesianViewportOperationCoordinator } from "./cartesian-viewport-operation-coordinator";
 import {
     areInternalViewportStatesEqual,
+    diffInternalViewportStates,
     toPublicViewportState,
     type InternalCartesianViewportState
 } from "./cartesian-viewport-normalizer";
@@ -27,7 +28,11 @@ import type {
 } from "./chart-viewport-gesture-session";
 import { clamp } from "../utils/number-utils";
 
+const MIN_SAFE_WHEEL_EXPONENT = -10;
+const MAX_SAFE_WHEEL_EXPONENT = 10;
+
 export interface ChartViewportGestureContext {
+    authorityToken?: object | number;
     axisScenes: readonly ChartAxisScene[];
     constraints?: readonly ChartViewportConstraint[];
     coordinateSpace?: CartesianAxisCoordinateSpace;
@@ -48,6 +53,7 @@ export class ChartViewportGestureController {
     readonly #activePointers = new Map<number, ChartPoint>();
     readonly #cancelFrame: (handle: number) => void;
     #context: ChartViewportGestureContext;
+    #currentAuthorityToken: object | number | undefined;
     #dragSession: ChartViewportDragSession | null = null;
     #gestureFrameId: number | null = null;
     #isClickSuppressed = false;
@@ -62,6 +68,7 @@ export class ChartViewportGestureController {
         cancelFrame?: (handle: number) => void
     ) {
         this.#context = context;
+        this.#currentAuthorityToken = context.authorityToken;
         this.#requestFrame =
             requestFrame ??
             (typeof requestAnimationFrame === "function"
@@ -75,7 +82,18 @@ export class ChartViewportGestureController {
     }
 
     public updateContext(context: ChartViewportGestureContext): void {
+        const tokenChanged =
+            this.#currentAuthorityToken !== undefined &&
+            context.authorityToken !== undefined &&
+            this.#currentAuthorityToken !== context.authorityToken;
         this.#context = context;
+        this.#currentAuthorityToken = context.authorityToken;
+
+        if (tokenChanged) {
+            if (this.#dragSession || this.#pinchSession || this.#wheelSession) {
+                this.cancel("authority-change");
+            }
+        }
     }
 
     public flushPendingFrame(): void {
@@ -438,7 +456,7 @@ export class ChartViewportGestureController {
 
         this.#activePointers.clear();
 
-        if (reason === "destroy") {
+        if (reason === "destroy" || reason === "authority-change") {
             // Silent teardown: do not emit user-facing viewportChange lifecycle output
             if (this.#wheelSession && this.#wheelSession.endTimerId !== null) {
                 clearTimeout(this.#wheelSession.endTimerId);
@@ -544,8 +562,8 @@ export class ChartViewportGestureController {
 
         // Synchronous preflight check for first event
         if (!this.#wheelSession) {
-            const rawFactor = Math.exp(-normalizedDelta);
-            const factor = clamp(rawFactor, 0.5, 2.0);
+            const exponent = clamp(-normalizedDelta, MIN_SAFE_WHEEL_EXPONENT, MAX_SAFE_WHEEL_EXPONENT);
+            const factor = Math.exp(exponent);
             const preflight = CartesianViewportOperationCoordinator.previewTransform(
                 this.#context.currentViewport,
                 this.#context.coordinateSpace,
@@ -674,19 +692,7 @@ export class ChartViewportGestureController {
                 { panDeltaPx: { x: totalDeltaX, y: totalDeltaY } },
                 coordinatorOptions
             );
-            if (res.changed) {
-                const prevProposal = this.#dragSession.latestViewport;
-                this.#dragSession.latestViewport = res.viewport;
-                this.#dragSession.changedAxes = res.changedAxes;
-                this.#dragSession.hasChanged = true;
-                this.#dispatchChangeEvent(
-                    "drag",
-                    "update",
-                    res.viewport,
-                    prevProposal,
-                    res.changedAxes
-                );
-            }
+            this.#publishProposal(this.#dragSession, res.viewport, "drag");
         }
 
         // 2. Flush Pinch
@@ -707,25 +713,17 @@ export class ChartViewportGestureController {
                 },
                 coordinatorOptions
             );
-            if (res.changed) {
-                const prevProposal = this.#pinchSession.latestViewport;
-                this.#pinchSession.latestViewport = res.viewport;
-                this.#pinchSession.changedAxes = res.changedAxes;
-                this.#pinchSession.hasChanged = true;
-                this.#dispatchChangeEvent(
-                    "pinch",
-                    "update",
-                    res.viewport,
-                    prevProposal,
-                    res.changedAxes
-                );
-            }
+            this.#publishProposal(this.#pinchSession, res.viewport, "pinch");
         }
 
         // 3. Flush Wheel
-        if (this.#wheelSession && this.#wheelSession.totalNormalizedDeltaY !== 0) {
-            const rawFactor = Math.exp(-this.#wheelSession.totalNormalizedDeltaY);
-            const factor = clamp(rawFactor, 0.5, 2.0);
+        if (this.#wheelSession) {
+            const exponent = clamp(
+                -this.#wheelSession.totalNormalizedDeltaY,
+                MIN_SAFE_WHEEL_EXPONENT,
+                MAX_SAFE_WHEEL_EXPONENT
+            );
+            const factor = Math.exp(exponent);
 
             const res = CartesianViewportOperationCoordinator.transform(
                 this.#wheelSession.initialViewport,
@@ -737,20 +735,31 @@ export class ChartViewportGestureController {
                 },
                 coordinatorOptions
             );
-            if (res.changed) {
-                const prevProposal = this.#wheelSession.latestViewport;
-                this.#wheelSession.latestViewport = res.viewport;
-                this.#wheelSession.changedAxes = res.changedAxes;
-                this.#wheelSession.hasChanged = true;
-                this.#dispatchChangeEvent(
-                    "wheel",
-                    "update",
-                    res.viewport,
-                    prevProposal,
-                    res.changedAxes
-                );
-            }
+            this.#publishProposal(this.#wheelSession, res.viewport, "wheel");
         }
+    }
+
+    #publishProposal(
+        session: ChartViewportDragSession | ChartViewportPinchSession | ChartViewportWheelSession,
+        proposal: InternalCartesianViewportState,
+        source: import("../../models/chart-viewport.models").ChartViewportChangeSource
+    ): void {
+        const diff = diffInternalViewportStates(session.latestViewport, proposal);
+        if (!diff.changed) {
+            return;
+        }
+        const previous = session.latestViewport;
+        session.latestViewport = proposal;
+        session.changedAxes = diff.changedAxes;
+        session.hasChanged = true;
+
+        this.#dispatchChangeEvent(
+            source,
+            "update",
+            proposal,
+            previous,
+            diff.changedAxes
+        );
     }
 
     #dispatchChangeEvent(
