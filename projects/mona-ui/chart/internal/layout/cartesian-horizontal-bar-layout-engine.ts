@@ -29,6 +29,7 @@ import type {
 import type {
     CartesianLayoutComputation,
     CartesianLayoutOptions,
+    CartesianPreparedLayout,
     CartesianXYLayoutRuntime
 } from "./cartesian-layout-engine";
 import type {
@@ -64,9 +65,10 @@ import {
     type InternalCartesianViewportState
 } from "../viewport/cartesian-viewport-normalizer";
 import { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
+import { CartesianViewportReconciler } from "../viewport/cartesian-viewport-reconciler";
 
 export class CartesianHorizontalBarLayoutEngine {
-    public static compute(options: CartesianLayoutOptions): CartesianLayoutComputation {
+    public static prepareRuntime(options: CartesianLayoutOptions): CartesianPreparedLayout {
         const {
             containerHeight,
             containerWidth,
@@ -215,6 +217,32 @@ export class CartesianHorizontalBarLayoutEngine {
             styleResolver
         };
 
+        return { runtime };
+    }
+
+    public static projectRuntime(
+        runtime: CartesianXYLayoutRuntime,
+        viewport?: InternalCartesianViewportState,
+        measurements?: ReadonlyMap<string, { height: number; width: number }>,
+        warnedDiagnosticSignatures?: Set<string>
+    ): CartesianLayoutComputation {
+        const {
+            axisResolution,
+            axisTopology,
+            axisTopologySignature,
+            baseCoordinateSpace,
+            chrome,
+            containerHeight,
+            containerWidth,
+            effectiveSeries,
+            preparation,
+            primaryXType,
+            primaryYType,
+            stackConfigForScene,
+            stackSignature,
+            styleResolver
+        } = runtime;
+
         if (chrome.plotRect.width <= 0 || chrome.plotRect.height <= 0) {
             const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries ?? [], styleResolver);
             const emptyScene: CartesianXYChartScene = {
@@ -242,26 +270,63 @@ export class CartesianHorizontalBarLayoutEngine {
                 stackSignature,
                 viewport: undefined,
                 width: containerWidth,
-                xAxisType: primaryXType,
-                yAxisType: primaryYType
+                xAxisType: primaryXType as ChartXAxisType,
+                yAxisType: primaryYType as ChartYAxisType
             };
             return { runtime, scene: emptyScene };
         }
 
-        // Stage C: Viewport projection
         const proj = CartesianMultiAxisCoordinator.projectViewport(
-            prep,
+            preparation,
             chrome,
-            options.viewport,
+            viewport,
             measurements
         );
 
-        const scene = this.#projectSeriesGeometry(runtime, proj, options.viewport, warnedDiagnosticSignatures);
+        const scene = this.#projectSeriesGeometry(runtime, proj, viewport, warnedDiagnosticSignatures);
         return { runtime, scene };
+    }
+
+    public static compute(options: CartesianLayoutOptions): CartesianLayoutComputation {
+        const prep = this.prepareRuntime(options);
+        if (prep.fallbackScene) {
+            return { runtime: prep.runtime, scene: prep.fallbackScene };
+        }
+        if (!prep.runtime) {
+            throw new Error("Horizontal cartesian runtime could not be prepared");
+        }
+        const canonicalViewport = options.viewport
+            ? CartesianViewportReconciler.reconcile(options.viewport, prep.runtime.baseCoordinateSpace, {
+                  clampToData: true
+              }).viewport
+            : undefined;
+        return this.projectRuntime(prep.runtime, canonicalViewport, options.measurements, options.warnedDiagnosticSignatures);
     }
 
     public static computeLayout(options: CartesianLayoutOptions): CartesianXYChartScene {
         return this.compute(options).scene;
+    }
+
+    public static recomputeChrome(
+        runtime: CartesianXYLayoutRuntime,
+        containerWidth: number,
+        containerHeight: number,
+        measurements?: ReadonlyMap<string, { height: number; width: number }>
+    ): CartesianXYLayoutRuntime {
+        const chrome = CartesianMultiAxisCoordinator.computeChrome(runtime.preparation, {
+            chartHeight: containerHeight,
+            chartWidth: containerWidth,
+            labelMeasurements: measurements ?? new Map()
+        });
+        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(runtime.preparation, chrome);
+        return {
+            ...runtime,
+            baseCoordinateSpace,
+            chrome,
+            containerHeight,
+            containerWidth,
+            plotRect: chrome.plotRect
+        };
     }
 
     public static projectViewportFastPath(
@@ -270,15 +335,7 @@ export class CartesianHorizontalBarLayoutEngine {
         measurements?: ReadonlyMap<string, { height: number; width: number }>,
         warnedDiagnosticSignatures?: Set<string>
     ): CartesianLayoutComputation {
-        const proj = CartesianMultiAxisCoordinator.projectViewport(
-            runtime.preparation,
-            runtime.chrome,
-            viewport,
-            measurements
-        );
-
-        const scene = this.#projectSeriesGeometry(runtime, proj, viewport, warnedDiagnosticSignatures);
-        return { runtime, scene };
+        return this.projectRuntime(runtime, viewport, measurements, warnedDiagnosticSignatures);
     }
 
     static #projectSeriesGeometry(

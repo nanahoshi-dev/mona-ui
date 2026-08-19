@@ -14,7 +14,9 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { degreesToRadians, normalizeAngleSpan, radiansToDegrees } from "../utils/angle-utils";
 import { clamp, normalizeFiniteNumber, normalizeNonNegativeNumber, normalizeRatio } from "../utils/number-utils";
+import { createSectorLabelMeasurementKey } from "./cartesian-axis-measurement-key";
 import {
+    DEFAULT_LABEL_HEIGHT,
     formatPolarLabelText,
     layoutOutsidePolarLabels,
     OUTSIDE_LABEL_HORIZONTAL_LENGTH,
@@ -118,9 +120,17 @@ export class PolarSectorLayoutEngine {
                 const midAngleRad = degreesToRadians(midAngleDeg);
                 const isRight = Math.sin(midAngleRad) >= 0;
 
-                const m = measurements?.get(d.sliceId);
+                const sectorKey = createSectorLabelMeasurementKey(d.sliceId);
+                const m = measurements?.get(sectorKey) ?? measurements?.get(d.sliceId);
                 const defaultText = formatPolarLabelText(d, labelContent);
                 const estimatedWidth = m?.width ?? (defaultText ? Math.max(24, defaultText.length * 7.5 + 8) : 48);
+
+                if (measurements instanceof Map && !measurements.has(sectorKey)) {
+                    (measurements as Map<string, ChartLabelMeasurement>).set(sectorKey, {
+                        height: DEFAULT_LABEL_HEIGHT,
+                        width: estimatedWidth
+                    });
+                }
 
                 if (isRight) {
                     hasRight = true;

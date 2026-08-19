@@ -10,12 +10,16 @@ export interface AxisCompatibilityResult {
     readonly warnings: readonly string[];
 }
 
+const DATE_STRING_REGEX =
+    /^(?:\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{4})(?:[T ]\d{1,2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
+
 function isDateString(val: string): boolean {
-    if (!val || val.trim().length === 0) return false;
-    if (/^\s*-?\d+(\.\d+)?\s*$/.test(val)) {
+    if (!val || typeof val !== "string") return false;
+    const trimmed = val.trim();
+    if (!DATE_STRING_REGEX.test(trimmed)) {
         return false;
     }
-    const t = Date.parse(val);
+    const t = Date.parse(trimmed);
     return !Number.isNaN(t);
 }
 

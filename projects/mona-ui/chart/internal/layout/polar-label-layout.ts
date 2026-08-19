@@ -1,6 +1,7 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartLabelMeasurement, ChartPolarLabelContent, ChartPolarLabelSide } from "../../models/chart-polar.models";
 import type { ScenePolarLabel, ScenePolarSlice } from "../scene/polar-scene";
+import { createSectorLabelMeasurementKey } from "./cartesian-axis-measurement-key";
 
 export const OUTSIDE_LABEL_RADIAL_SEGMENT_LENGTH = 12;
 export const OUTSIDE_LABEL_HORIZONTAL_LENGTH = 18;
@@ -93,12 +94,17 @@ export function layoutOutsidePolarLabels(
             y: elbow.y
         };
 
-        const measured = measurements?.get(slice.sliceId);
+        const sectorKey = createSectorLabelMeasurementKey(slice.sliceId);
+        const measured = measurements?.get(sectorKey) ?? measurements?.get(slice.sliceId);
         const height = measured?.height ?? DEFAULT_LABEL_HEIGHT;
         const defaultText = formatPolarLabelText(slice, labelContent);
         const width =
             measured?.width ??
             (defaultText ? Math.max(24, defaultText.length * 7.5 + 8) : DEFAULT_LABEL_WIDTH);
+
+        if (measurements instanceof Map && !measurements.has(sectorKey)) {
+            (measurements as Map<string, ChartLabelMeasurement>).set(sectorKey, { height, width });
+        }
 
         candidates.push({
             arcAnchor,

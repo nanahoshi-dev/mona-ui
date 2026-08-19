@@ -34,11 +34,22 @@ import { WaterfallLayoutEngine } from "./waterfall-layout-engine";
 
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
 import type { InternalCartesianViewportState } from "../viewport/cartesian-viewport-normalizer";
+import { CartesianViewportReconciler } from "../viewport/cartesian-viewport-reconciler";
 
 export interface ChartLayoutComputation {
     readonly runtime?: CartesianXYLayoutRuntime;
     readonly scene: ChartScene;
 }
+
+export type ChartStructuralPreparation =
+    | {
+          kind: "cartesian-xy";
+          runtime: CartesianXYLayoutRuntime;
+      }
+    | {
+          kind: "scene";
+          scene: ChartScene;
+      };
 
 const globalWarnedSignatures = new Set<string>();
 
@@ -107,7 +118,7 @@ export function resolveChartCoordinateSystem(
 }
 
 export class ChartLayoutEngine {
-    public static compute(options: ChartLayoutOptions): ChartLayoutComputation {
+    public static prepareStructural(options: ChartLayoutOptions): ChartStructuralPreparation {
         const { series } = options;
         const warnedSet = options.warnedDiagnosticSignatures ?? globalWarnedSignatures;
         const coordinateSystem = resolveChartCoordinateSystem(series, warnedSet);
@@ -155,7 +166,7 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Hierarchical charts (treemap) cannot be mixed with other chart families.",
                     warnedSet
                 );
-                return { scene: HierarchicalLayoutEngine.createEmptyScene(options.containerWidth, options.containerHeight) };
+                return { kind: "scene", scene: HierarchicalLayoutEngine.createEmptyScene(options.containerWidth, options.containerHeight) };
             }
 
             if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
@@ -175,6 +186,7 @@ export class ChartLayoutEngine {
             };
 
             return {
+                kind: "scene",
                 scene: HierarchicalLayoutEngine.layout(
                     activeTreemap,
                     plotRect,
@@ -200,7 +212,7 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Funnel series cannot be mixed with other chart series.",
                     warnedSet
                 );
-                return { scene: FunnelLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
+                return { kind: "scene", scene: FunnelLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
             }
 
             if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
@@ -220,6 +232,7 @@ export class ChartLayoutEngine {
             };
 
             return {
+                kind: "scene",
                 scene: FunnelLayoutEngine.layout(
                     activeFunnel,
                     plotRect,
@@ -245,10 +258,11 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Waterfall series cannot be mixed with other chart series.",
                     warnedSet
                 );
-                return { scene: WaterfallLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
+                return { kind: "scene", scene: WaterfallLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
             }
 
             return {
+                kind: "scene",
                 scene: WaterfallLayoutEngine.layout(
                     waterfallSeries[0],
                     options.containerWidth,
@@ -274,7 +288,7 @@ export class ChartLayoutEngine {
                     "[MonaChart] Multiple heatmap series in the same chart are unsupported.",
                     warnedSet
                 );
-                return { scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
+                return { kind: "scene", scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
             }
             if (series.length > heatmapSeries.length) {
                 const hasPolar = series.some(s => isPolarCoordinateFamily(getChartSeriesFamily(s.type)));
@@ -291,10 +305,11 @@ export class ChartLayoutEngine {
                         warnedSet
                     );
                 }
-                return { scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
+                return { kind: "scene", scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
             }
 
             return {
+                kind: "scene",
                 scene: HeatmapLayoutEngine.computeScene({
                     containerHeight: options.containerHeight,
                     containerWidth: options.containerWidth,
@@ -318,6 +333,7 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
+                    kind: "scene",
                     scene: {
                         arcMode: "radialBar",
                         center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
@@ -343,6 +359,7 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
+                    kind: "scene",
                     scene: {
                         arcMode: "radialBar",
                         center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
@@ -368,6 +385,7 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
+                    kind: "scene",
                     scene: {
                         arcMode: "radialBar",
                         center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
@@ -388,6 +406,7 @@ export class ChartLayoutEngine {
             }
             if (famArray.includes("cartesian") && (famArray.includes("sector") || famArray.includes("radar") || famArray.includes("polar"))) {
                 return {
+                    kind: "scene",
                     scene: {
                         axes: [],
                         barHitTargets: [],
@@ -415,6 +434,7 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
+                    kind: "scene",
                     scene: {
                         center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
                         coordinateSystem: "polar",
@@ -437,6 +457,7 @@ export class ChartLayoutEngine {
                     warnedSet
                 );
                 return {
+                    kind: "scene",
                     scene: {
                         angularAxis: {
                             axisLine: true,
@@ -485,6 +506,7 @@ export class ChartLayoutEngine {
                 warnedSet
             );
             return {
+                kind: "scene",
                 scene: {
                     arcMode: "radialBar",
                     center: { x: options.containerWidth / 2, y: options.containerHeight / 2 },
@@ -538,6 +560,7 @@ export class ChartLayoutEngine {
             }
 
             return {
+                kind: "scene",
                 scene: PolarLayoutEngine.computeScene({
                     angularAxis: options.angularAxis,
                     containerHeight: options.containerHeight,
@@ -556,7 +579,7 @@ export class ChartLayoutEngine {
             (s): s is ChartCartesianSeriesRegistration => getChartSeriesFamily(s.type) === "cartesian"
         );
 
-        return CartesianLayoutEngine.compute({
+        const prep = CartesianLayoutEngine.prepareRuntime({
             containerHeight: options.containerHeight,
             containerWidth: options.containerWidth,
             measurements: options.measurements,
@@ -571,6 +594,40 @@ export class ChartLayoutEngine {
             yAxis: options.yAxis,
             yAxes: options.yAxes
         });
+
+        if (prep.fallbackScene) {
+            return {
+                kind: "scene",
+                scene: prep.fallbackScene
+            };
+        }
+
+        if (!prep.runtime) {
+            throw new Error("Cartesian preparation failed to produce a runtime or fallback scene");
+        }
+
+        return {
+            kind: "cartesian-xy",
+            runtime: prep.runtime
+        };
+    }
+
+    public static compute(options: ChartLayoutOptions): ChartLayoutComputation {
+        const structural = this.prepareStructural(options);
+        if (structural.kind === "scene") {
+            return { scene: structural.scene };
+        }
+        const canonicalViewport = options.viewport
+            ? CartesianViewportReconciler.reconcile(options.viewport, structural.runtime.baseCoordinateSpace, {
+                  clampToData: true
+              }).viewport
+            : undefined;
+        return CartesianLayoutEngine.projectRuntime(
+            structural.runtime,
+            canonicalViewport,
+            options.measurements,
+            options.warnedDiagnosticSignatures
+        );
     }
 
     public static computeScene(options: ChartLayoutOptions): ChartScene {

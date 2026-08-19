@@ -14,6 +14,7 @@ import type {
     ChartYAxisType
 } from "../../models/chart-axis.models";
 import type { ChartField } from "../../models/chart.models";
+import { CartesianStageTracker } from "./cartesian-stage-instrumentation";
 
 export interface ResolvedCartesianAxisDescriptor<D extends "x" | "y" = "x" | "y"> {
     readonly axisId: string;
@@ -68,6 +69,7 @@ export class CartesianAxisRegistryResolver {
         xRegistrations?: readonly ChartXAxisRegistration[],
         yRegistrations?: readonly ChartYAxisRegistration[]
     ): CartesianAxisRegistryResolution {
+        CartesianStageTracker.current?.onAxisRegistry?.();
         const warnings: string[] = [];
         const seenXIds = new Set<string>();
         const seenYIds = new Set<string>();

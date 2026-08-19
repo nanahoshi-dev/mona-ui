@@ -68,3 +68,16 @@ export function parseCartesianAxisMeasurementKey(key: string): ParsedCartesianAx
         valueString
     };
 }
+
+export function createSectorLabelMeasurementKey(sliceId: string): string {
+    return `sector:${sliceId}`;
+}
+
+export function createAngularLabelMeasurementKey(tickKey: string): string {
+    return `angular:${tickKey}`;
+}
+
+export function createRadialLabelMeasurementKey(tickKey: string): string {
+    return `radial:${tickKey}`;
+}
+
