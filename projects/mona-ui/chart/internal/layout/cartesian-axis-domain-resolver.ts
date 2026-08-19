@@ -5,10 +5,12 @@ import { resolveData, resolveValue } from "../data/chart-value-resolver";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
 import type { CartesianStackAnalysis } from "../data/cartesian-stack-engine";
+import { isFiniteNumber } from "../utils/number-utils";
 
 export interface AxisDomainResult {
     readonly domain: readonly [unknown, unknown] | readonly string[];
     readonly isValid: boolean;
+    readonly reason?: "all-zero-log" | "invalid-explicit-domain" | "mixed-log-sign";
     readonly warnings: readonly string[];
 }
 
@@ -226,13 +228,18 @@ export class CartesianAxisDomainResolver {
                 }
             }
 
-            let min = axis.explicitMin !== undefined ? Number(axis.explicitMin) : defaultMin;
-            let max = axis.explicitMax !== undefined ? Number(axis.explicitMax) : defaultMax;
+            let min = isFiniteNumber(axis.explicitMin) ? Number(axis.explicitMin) : defaultMin;
+            let max = isFiniteNumber(axis.explicitMax) ? Number(axis.explicitMax) : defaultMax;
 
             if (min > max) {
                 const temp = min;
                 min = max;
                 max = temp;
+            }
+
+            if (min === max) {
+                min = min - 1;
+                max = max + 1;
             }
 
             return {
@@ -375,6 +382,7 @@ export class CartesianAxisDomainResolver {
                 return {
                     domain: [1, 10],
                     isValid: false,
+                    reason: "mixed-log-sign",
                     warnings
                 };
             }
@@ -388,6 +396,7 @@ export class CartesianAxisDomainResolver {
                 return {
                     domain: [1, 10],
                     isValid: false,
+                    reason: "all-zero-log",
                     warnings
                 };
             }
@@ -405,7 +414,7 @@ export class CartesianAxisDomainResolver {
 
             if (axis.explicitMin !== undefined) {
                 const em = Number(axis.explicitMin);
-                if (Number.isFinite(em)) {
+                if (isFiniteNumber(em)) {
                     if ((isPositive && em > 0) || (!isPositive && em < 0)) {
                         min = em;
                     } else {
@@ -416,7 +425,7 @@ export class CartesianAxisDomainResolver {
             }
             if (axis.explicitMax !== undefined) {
                 const em = Number(axis.explicitMax);
-                if (Number.isFinite(em)) {
+                if (isFiniteNumber(em)) {
                     if ((isPositive && em > 0) || (!isPositive && em < 0)) {
                         max = em;
                     } else {
@@ -461,11 +470,11 @@ export class CartesianAxisDomainResolver {
 
         if (axis.explicitMin !== undefined) {
             const em = Number(axis.explicitMin);
-            if (Number.isFinite(em)) min = em;
+            if (isFiniteNumber(em)) min = em;
         }
         if (axis.explicitMax !== undefined) {
             const em = Number(axis.explicitMax);
-            if (Number.isFinite(em)) max = em;
+            if (isFiniteNumber(em)) max = em;
         }
 
         if (min > max) {

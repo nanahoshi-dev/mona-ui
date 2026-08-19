@@ -36,19 +36,29 @@ export class CartesianAxisCompatibilityPolicy {
         resolvedType: ResolvedChartCartesianAxisType,
         orientation: "horizontal" | "vertical" = "vertical"
     ): boolean {
-        const isValueAxis = orientation === "horizontal" ? axis.dimension === "x" : axis.dimension === "y";
-
-        if (isValueAxis) {
-            if (resolvedType === "log") {
-                if (series.type === "bar") {
+        if (orientation === "horizontal") {
+            if (axis.dimension === "y" && resolvedType !== "category") {
+                return false;
+            }
+            if (axis.dimension === "x") {
+                if (resolvedType === "category") {
                     return false;
                 }
-                if (series.type === "area" && orientation !== "horizontal") {
+                if (resolvedType === "log" && series.type === "bar") {
                     return false;
                 }
             }
-            if (resolvedType === "category") {
-                return false;
+        } else {
+            const isValueAxis = axis.dimension === "y";
+            if (isValueAxis) {
+                if (resolvedType === "log") {
+                    if (series.type === "bar" || series.type === "area") {
+                        return false;
+                    }
+                }
+                if (resolvedType === "category") {
+                    return false;
+                }
             }
         }
 
@@ -66,48 +76,60 @@ export class CartesianAxisCompatibilityPolicy {
         const incompatibleSeriesIds: string[] = [];
         const configuredType = axis.type;
 
-        if (configuredType !== "auto") {
-            let resolvedType: ResolvedChartCartesianAxisType = configuredType;
+        let resolvedType: ResolvedChartCartesianAxisType;
 
-            // Enforce horizontal orientation axis type constraints
+        if (configuredType !== "auto") {
+            resolvedType = configuredType;
+
             if (orientation === "horizontal") {
                 if (axis.dimension === "y" && resolvedType !== "category") {
-                    warnings.push(
-                        `[MonaChart] Horizontal Bar charts require a categorical Y axis; '${configuredType}' is not supported and will be treated as category.`
-                    );
-                    resolvedType = "category";
+                    for (const s of boundSeries) {
+                        incompatibleSeriesIds.push(s.id);
+                        const sName = "name" in s && typeof s.name === "function" ? s.name() : s.id;
+                        warnings.push(
+                            `[MonaChart] Horizontal series "${sName}" requires a categorical Y axis, but axis "${axis.axisId}" is configured as "${configuredType}". Series geometry is omitted.`
+                        );
+                    }
                 } else if (axis.dimension === "x" && resolvedType === "category") {
-                    warnings.push(
-                        `[MonaChart] Horizontal Bar charts require a numeric X value axis; '${configuredType}' is not supported and will be treated as linear.`
-                    );
-                    resolvedType = "linear";
+                    for (const s of boundSeries) {
+                        incompatibleSeriesIds.push(s.id);
+                        const sName = "name" in s && typeof s.name === "function" ? s.name() : s.id;
+                        warnings.push(
+                            `[MonaChart] Horizontal series "${sName}" requires a numeric X value axis, but axis "${axis.axisId}" is configured as "category". Series geometry is omitted.`
+                        );
+                    }
                 }
             }
 
-            // Check series compatibility without mutating explicit requested scale
             const isValueAxis = orientation === "horizontal" ? axis.dimension === "x" : axis.dimension === "y";
             if (resolvedType === "log" && isValueAxis) {
                 for (const s of boundSeries) {
                     if (s.type === "bar" || (s.type === "area" && orientation !== "horizontal")) {
-                        incompatibleSeriesIds.push(s.id);
+                        if (!incompatibleSeriesIds.includes(s.id)) {
+                            incompatibleSeriesIds.push(s.id);
+                        }
                         const sName = "name" in s && typeof s.name === "function" ? s.name() : s.id;
                         warnings.push(
                             `[MonaChart] Scale "log" on axis "${axis.axisId}" is incompatible with ${s.type} series "${sName}" which requires a zero-baseline. Series geometry is omitted from layout.`
                         );
                     }
                 }
+            } else if (resolvedType === "category" && isValueAxis && orientation !== "horizontal") {
+                for (const s of boundSeries) {
+                    if (!incompatibleSeriesIds.includes(s.id)) {
+                        incompatibleSeriesIds.push(s.id);
+                    }
+                    const sName = "name" in s && typeof s.name === "function" ? s.name() : s.id;
+                    warnings.push(
+                        `[MonaChart] Scale "category" on value axis "${axis.axisId}" is incompatible with ${s.type} series "${sName}". Series geometry is omitted from layout.`
+                    );
+                }
             }
-
-            return {
-                incompatibleSeriesIds,
-                resolvedType,
-                warnings
-            };
+        } else {
+            // Auto inference based on bound series data
+            const sampleValues = this.#collectSampleValues(axis, boundSeries, rootData, rootXField, orientation);
+            resolvedType = this.#inferScaleType(axis.dimension, sampleValues, orientation);
         }
-
-        // Auto inference based on bound series data
-        const sampleValues = this.#collectSampleValues(axis, boundSeries, rootData, rootXField, orientation);
-        const resolvedType = this.#inferScaleType(axis.dimension, sampleValues, orientation);
 
         return {
             incompatibleSeriesIds,

@@ -134,8 +134,7 @@ export function computeFinancialLayout(
     for (let i = 0; i < scene.marks.length; i++) {
         const mark = scene.marks[i];
         const currentRenderOrder = ++renderOrderCounter.value;
-        const resolvedMark = resolvedDataset.marks[i];
-        const xKey: ChartInteractionXKey = resolvedMark?.xKey ?? (typeof mark.xValue === "number" || typeof mark.xValue === "string"
+        const xKey: ChartInteractionXKey = mark.xKey ?? (typeof mark.xValue === "number" || typeof mark.xValue === "string"
             ? mark.xValue
             : String(mark.index));
 
@@ -163,8 +162,8 @@ export function computeFinancialLayout(
         const bounds: ChartRect = hitGeom.bounds;
         const visualBounds: ChartRect = hitGeom.visualBounds;
 
-        const change = resolvedMark?.change ?? (mark.close - mark.open);
-        const changePercentage = resolvedMark?.changePercentage;
+        const change = mark.change ?? (mark.close - mark.open);
+        const changePercentage = mark.changePercentage ?? (mark.open !== 0 ? (mark.close - mark.open) / mark.open : undefined);
         let formattedChange: string | undefined;
         if (Number.isFinite(change)) {
             const customFormatter = s.valueFormatter?.() ?? yFormatter;

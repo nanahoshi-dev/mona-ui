@@ -82,7 +82,9 @@ describe("RangeAreaSeriesRenderer", () => {
             showPoints: false,
             strokeWidth: 2,
             style: defaultStyle,
-            type: "rangeArea"
+            type: "rangeArea",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeAreaSeriesRenderer.render(ctx, scene);
@@ -122,7 +124,9 @@ describe("RangeAreaSeriesRenderer", () => {
             showPoints: true,
             strokeWidth: 2,
             style: defaultStyle,
-            type: "rangeArea"
+            type: "rangeArea",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeAreaSeriesRenderer.render(ctx, scene);
@@ -174,7 +178,9 @@ describe("RangeAreaSeriesRenderer", () => {
             showPoints: false,
             strokeWidth: 2,
             style: defaultStyle,
-            type: "rangeArea"
+            type: "rangeArea",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         expect(() => RangeAreaSeriesRenderer.render(ctx, scene)).not.toThrow();
@@ -204,7 +210,9 @@ describe("RangeAreaSeriesRenderer", () => {
             showPoints: true,
             strokeWidth: 2,
             style: defaultStyle,
-            type: "rangeArea"
+            type: "rangeArea",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeAreaSeriesRenderer.render(ctx, scene);

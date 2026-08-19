@@ -43,10 +43,14 @@ export class AxisAnimationAdapter {
                         return targetAxis;
                     }
 
-                    const prevTicksByVal = new Map(prevAxis.ticks.map(t => [String(t.value), t.coordinate]));
+                    const prevTicksByKey = new Map(prevAxis.ticks.map(t => [
+                        t.tickKey ?? (t.value instanceof Date ? String(t.value.getTime()) : `${typeof t.value}:${t.value}`),
+                        t.coordinate
+                    ]));
 
                     const interpolatedTicks = targetAxis.ticks.map(tick => {
-                        const prevCoord = prevTicksByVal.get(String(tick.value));
+                        const key = tick.tickKey ?? (tick.value instanceof Date ? String(tick.value.getTime()) : `${typeof tick.value}:${tick.value}`);
+                        const prevCoord = prevTicksByKey.get(key);
                         if (prevCoord === undefined) {
                             return tick;
                         }

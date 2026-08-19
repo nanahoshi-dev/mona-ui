@@ -43,6 +43,7 @@ export interface SceneBar {
     stackPosition?: "inner" | "outer" | "single";
     stackStartValue?: number;
     stackTotal?: number;
+    synthetic?: boolean;
     valueEndPixel?: number;
     valueStartPixel?: number;
     width: number;
@@ -115,6 +116,8 @@ export interface SceneCandlestickMark {
     readonly bodyBounds: ChartRect;
     readonly bodyWidth: number;
     readonly centerX: number;
+    readonly change?: number;
+    readonly changePercentage?: number;
     readonly close: number;
     readonly closeY: number;
     readonly datum: unknown;
@@ -133,12 +136,15 @@ export interface SceneCandlestickMark {
     readonly openY: number;
     readonly renderOpacity?: number;
     readonly wickWidth: number;
+    readonly xKey?: ChartInteractionXKey;
     readonly xValue: unknown;
 }
 
 export interface SceneOhlcMark {
     readonly animationKey?: string;
     readonly centerX: number;
+    readonly change?: number;
+    readonly changePercentage?: number;
     readonly close: number;
     readonly closeY: number;
     readonly datum: unknown;
@@ -158,6 +164,7 @@ export interface SceneOhlcMark {
     readonly tickWidth: number;
     readonly totalWidth: number;
     readonly wickWidth: number;
+    readonly xKey?: ChartInteractionXKey;
     readonly xValue: unknown;
 }
 

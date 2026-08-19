@@ -398,4 +398,110 @@ describe("CartesianMultiAxisCoordinator", () => {
         expect(horizRes.axisScenes.find(a => a.axisId === "x1")?.gridLines).toBe(true);
         expect(horizRes.axisScenes.find(a => a.axisId === "y1")?.gridLines).toBe(false);
     });
+
+    it("should coordinate identically-named X and Y axes without cross-dimension collision (MAX3-001, MAX3-017)", () => {
+        const xShared = createMockXAxis({ axisId: signal("shared"), field: signal("cat"), type: signal("category") });
+        const yShared = createMockYAxis({ axisId: signal("shared"), position: signal("left"), title: signal("Value"), type: signal("linear") });
+
+        const s1 = createMockLineSeries({
+            field: signal("val"),
+            id: "s1",
+            xAxisId: signal("shared"),
+            yAxisId: signal("shared")
+        });
+
+        const data = [
+            { cat: "A", val: 10 },
+            { cat: "B", val: 20 },
+            { cat: "C", val: 30 }
+        ];
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve([xShared], [yShared]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([s1], axisResolution);
+
+        const res = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 300,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            orientation: "vertical",
+            rootData: data,
+            rootXField: "cat"
+        });
+
+        expect(res.axisScenes.length).toBe(2);
+        const xScene = res.axisScenes.find(a => a.axis === "x" && a.axisId === "shared");
+        const yScene = res.axisScenes.find(a => a.axis === "y" && a.axisId === "shared");
+
+        expect(xScene).toBeDefined();
+        expect(yScene).toBeDefined();
+        expect(xScene?.scaleType).toBe("category");
+        expect(yScene?.scaleType).toBe("linear");
+
+        expect(res.resolvedTypes.x.get("shared")).toBe("category");
+        expect(res.resolvedTypes.y.get("shared")).toBe("linear");
+
+        const xScale = res.scaleRegistry.getXScale("shared");
+        const yScale = res.scaleRegistry.getYScale("shared");
+        expect(xScale).toBeDefined();
+        expect(yScale).toBeDefined();
+        expect(xScale?.type).toBe("category");
+        expect(yScale?.type).toBe("linear");
+    });
+
+    it("should coordinate horizontal multi-axis stacking with independent X value axes (MAX3-006, MAX3-007)", () => {
+        const yCat = createMockYAxis({ axisId: signal("y-cat"), type: signal("category") });
+        const xVal1 = createMockXAxis({ axisId: signal("x-raw"), position: signal("bottom"), type: signal("linear") });
+        const xVal2 = createMockXAxis({ axisId: signal("x-pct"), position: signal("top"), type: signal("linear") });
+
+        const bar1 = {
+            ...createMockLineSeries({ id: "bar1", xAxisId: signal("x-raw"), yAxisId: signal("y-cat") }),
+            stack: signal("group1"),
+            stackMode: signal("normal" as const),
+            type: "bar" as const
+        };
+        const bar2 = {
+            ...createMockLineSeries({ id: "bar2", xAxisId: signal("x-raw"), yAxisId: signal("y-cat") }),
+            stack: signal("group1"),
+            stackMode: signal("normal" as const),
+            type: "bar" as const
+        };
+        const bar3 = {
+            ...createMockLineSeries({ id: "bar3", xAxisId: signal("x-pct"), yAxisId: signal("y-cat") }),
+            stack: signal("group2"),
+            stackMode: signal("percent" as const),
+            type: "bar" as const
+        };
+        const bar4 = {
+            ...createMockLineSeries({ id: "bar4", xAxisId: signal("x-pct"), yAxisId: signal("y-cat") }),
+            stack: signal("group2"),
+            stackMode: signal("percent" as const),
+            type: "bar" as const
+        };
+
+        const data = [
+            { cat: "Q1", v1: 10, v2: 20, v3: 40, v4: 60 },
+            { cat: "Q2", v1: 15, v2: 25, v3: 50, v4: 50 }
+        ];
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve([xVal1, xVal2], [yCat]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([bar1, bar2, bar3, bar4], axisResolution);
+
+        const res = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 300,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            orientation: "horizontal",
+            rootData: data,
+            rootXField: "cat"
+        });
+
+        expect(res.axisUnitModes.x.get("x-raw")).toBe("raw");
+        expect(res.axisUnitModes.x.get("x-pct")).toBe("percent");
+        expect(res.xAxisValidityById.get("x-raw")?.valid).toBe(true);
+        expect(res.xAxisValidityById.get("x-pct")?.valid).toBe(true);
+    });
 });

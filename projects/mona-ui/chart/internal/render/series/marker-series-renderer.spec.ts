@@ -55,7 +55,9 @@ describe("MarkerSeriesRenderer", () => {
                 strokeColor: "#ffffff",
                 strokeWidth: 1.5
             },
-            type: "scatter"
+            type: "scatter",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         MarkerSeriesRenderer.render(ctx, scene);
@@ -104,7 +106,9 @@ describe("MarkerSeriesRenderer", () => {
                 strokeColor: "#ffffff",
                 strokeWidth: 1.5
             },
-            type: "scatter"
+            type: "scatter",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         MarkerSeriesRenderer.render(ctx, scene);

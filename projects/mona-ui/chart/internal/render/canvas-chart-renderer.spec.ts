@@ -102,7 +102,9 @@ describe("CanvasChartRenderer", () => {
                         opacity: 1,
                         pointRadius: 3
                     },
-                    type: "area"
+                    type: "area",
+                    xAxisId: "default-x",
+                    yAxisId: "default-y"
                 }
             ],
             width: 500
@@ -157,7 +159,9 @@ describe("CanvasChartRenderer", () => {
                         opacity: 1,
                         pointRadius: 3
                     },
-                    type: "area"
+                    type: "area",
+                    xAxisId: "default-x",
+                    yAxisId: "default-y"
                 }
             ],
             width: 500
@@ -212,7 +216,9 @@ describe("CanvasChartRenderer", () => {
                         opacity: 1,
                         pointRadius: 3
                     },
-                    type: "area"
+                    type: "area",
+                    xAxisId: "default-x",
+                    yAxisId: "default-y"
                 }
             ],
             width: 500
@@ -264,7 +270,9 @@ describe("CanvasChartRenderer", () => {
                         opacity: 1,
                         pointRadius: 3
                     },
-                    type: "area"
+                    type: "area",
+                    xAxisId: "default-x",
+                    yAxisId: "default-y"
                 }
             ],
             width: 500
@@ -368,7 +376,9 @@ describe("CanvasChartRenderer", () => {
                         opacity: 1,
                         pointRadius: 3
                     },
-                    type: "bar"
+                    type: "bar",
+                    xAxisId: "default-x",
+                    yAxisId: "default-y"
                 }
             ],
             width: 500

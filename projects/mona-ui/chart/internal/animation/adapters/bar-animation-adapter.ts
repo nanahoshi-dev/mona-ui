@@ -211,7 +211,9 @@ export class BarSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     orientation: baseScene.orientation,
                     renderOpacity,
                     style: baseScene.style,
-                    type: "bar"
+                    type: "bar",
+                    xAxisId: baseScene.xAxisId ?? "default-x",
+                    yAxisId: baseScene.yAxisId ?? "default-y"
                 };
             },
             toSeries: target

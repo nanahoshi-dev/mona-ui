@@ -45,7 +45,9 @@ describe("RangeAreaSeriesAnimationAdapter", () => {
             showPoints: true,
             strokeWidth: 2,
             style: mockStyle,
-            type: "rangeArea"
+            type: "rangeArea",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(null, targetScene, {} as any);
@@ -86,7 +88,9 @@ describe("RangeAreaSeriesAnimationAdapter", () => {
             showPoints: false,
             strokeWidth: 2,
             style: mockStyle,
-            type: "rangeArea"
+            type: "rangeArea",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(null, targetScene, {} as any);
@@ -115,7 +119,9 @@ describe("RangeAreaSeriesAnimationAdapter", () => {
             showPoints: true,
             strokeWidth: 2,
             style: mockStyle,
-            type: "rangeArea"
+            type: "rangeArea",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const targetScene: ChartRangeAreaSeriesScene = {
@@ -146,7 +152,9 @@ describe("RangeAreaSeriesAnimationAdapter", () => {
             showPoints: true,
             strokeWidth: 2,
             style: mockStyle,
-            type: "rangeArea"
+            type: "rangeArea",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const plan = adapter.createPlan(previousScene, targetScene, {} as any);

@@ -63,7 +63,9 @@ describe("RangeBarSeriesRenderer", () => {
             id: "rb1",
             name: "RangeBar 1",
             style: defaultStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeBarSeriesRenderer.render(ctx, scene);
@@ -111,7 +113,9 @@ describe("RangeBarSeriesRenderer", () => {
                 ...defaultStyle,
                 color: "#10b981"
             },
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeBarSeriesRenderer.render(ctx, scene);
@@ -162,7 +166,9 @@ describe("RangeBarSeriesRenderer", () => {
                 ...defaultStyle,
                 color: "#8b5cf6"
             },
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeBarSeriesRenderer.render(ctx, scene);
@@ -212,7 +218,9 @@ describe("RangeBarSeriesRenderer", () => {
             name: "RangeBar 1",
             orientation: "horizontal",
             style: defaultStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeBarSeriesRenderer.render(ctx, scene);
@@ -270,7 +278,9 @@ describe("RangeBarSeriesRenderer", () => {
             name: "RangeBar 1",
             orientation: "horizontal",
             style: defaultStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeBarSeriesRenderer.render(ctx, scene);
@@ -310,7 +320,9 @@ describe("RangeBarSeriesRenderer", () => {
             id: "rb1",
             name: "RangeBar 1",
             style: defaultStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeBarSeriesRenderer.render(ctx, scene);
@@ -328,7 +340,9 @@ describe("RangeBarSeriesRenderer", () => {
             id: "rb1",
             name: "RangeBar 1",
             style: defaultStyle,
-            type: "rangeBar"
+            type: "rangeBar",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         RangeBarSeriesRenderer.render(ctx, scene);

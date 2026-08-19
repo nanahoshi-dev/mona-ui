@@ -49,7 +49,9 @@ function createMockCartesianSceneWithBars(): CartesianXYChartScene {
                 id: "b1",
                 name: "Bar 1",
                 style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                type: "bar"
+                type: "bar",
+                xAxisId: "default-x",
+                yAxisId: "default-y"
             }
         ],
         width: 500
@@ -157,7 +159,9 @@ describe("ChartTransitionPlanner", () => {
             ],
             showPoints: true,
             style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-            type: "line"
+            type: "line",
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         const prev: CartesianXYChartScene = {
@@ -358,7 +362,9 @@ describe("ChartTransitionPlanner", () => {
                         name: "Bar 1",
                         orientation: "horizontal",
                         style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                        type: "bar"
+                        type: "bar",
+                        xAxisId: "default-x",
+                        yAxisId: "default-y"
                     }
                 ],
                 width: 500,
@@ -395,7 +401,9 @@ describe("ChartTransitionPlanner", () => {
                         points: [{ animationKey: "p0", datum: {}, defined: true, index: 0, x: 10, xValue: 0, y: 50, yValue: 50 }],
                         showPoints: true,
                         style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                        type: "line"
+                        type: "line",
+                        xAxisId: "default-x",
+                        yAxisId: "default-y"
                     }
                 ],
                 width: 500,
@@ -423,7 +431,9 @@ describe("ChartTransitionPlanner", () => {
                         points: [{ animationKey: "p0", datum: {}, defined: true, index: 0, x: 50, xValue: 50, y: 10, yValue: 0 }],
                         showPoints: true,
                         style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
-                        type: "line"
+                        type: "line",
+                        xAxisId: "default-x",
+                        yAxisId: "default-y"
                     }
                 ],
                 width: 500,

@@ -175,6 +175,8 @@ export class FinancialLayoutEngine {
                 bodyBounds,
                 bodyWidth,
                 centerX,
+                change: mark.change,
+                changePercentage: mark.changePercentage,
                 close: mark.close,
                 closeY,
                 datum: mark.datum,
@@ -192,6 +194,7 @@ export class FinancialLayoutEngine {
                 open: mark.open,
                 openY,
                 wickWidth,
+                xKey: mark.xKey,
                 xValue: mark.xRaw
             };
         });
@@ -203,9 +206,12 @@ export class FinancialLayoutEngine {
             marks: sceneMarks,
             maxBodyWidth,
             name: seriesName,
+            renderOpacity: ("renderOpacity" in series && typeof series.renderOpacity === "function" ? (series as any).renderOpacity() : undefined),
             style: resolvedStyle,
             type: "candlestick",
-            wickWidth
+            wickWidth,
+            xAxisId: ("xAxisId" in series && typeof series.xAxisId === "function" ? series.xAxisId() : undefined) ?? "default-x",
+            yAxisId: ("yAxisId" in series && typeof series.yAxisId === "function" ? series.yAxisId() : undefined) ?? "default-y"
         };
     }
 
@@ -293,6 +299,8 @@ export class FinancialLayoutEngine {
             return {
                 animationKey: mark.animationKey,
                 centerX,
+                change: mark.change,
+                changePercentage: mark.changePercentage,
                 close: mark.close,
                 closeY,
                 datum: mark.datum,
@@ -311,6 +319,7 @@ export class FinancialLayoutEngine {
                 tickWidth,
                 totalWidth,
                 wickWidth,
+                xKey: mark.xKey,
                 xValue: mark.xRaw
             };
         });
@@ -321,10 +330,13 @@ export class FinancialLayoutEngine {
             marks: sceneMarks,
             maxBodyWidth,
             name: seriesName,
+            renderOpacity: ("renderOpacity" in series && typeof series.renderOpacity === "function" ? (series as any).renderOpacity() : undefined),
             style: resolvedStyle,
             tickWidth: nominalBodyWidth / 2,
             type: "ohlc",
-            wickWidth
+            wickWidth,
+            xAxisId: ("xAxisId" in series && typeof series.xAxisId === "function" ? series.xAxisId() : undefined) ?? "default-x",
+            yAxisId: ("yAxisId" in series && typeof series.yAxisId === "function" ? series.yAxisId() : undefined) ?? "default-y"
         };
     }
 }

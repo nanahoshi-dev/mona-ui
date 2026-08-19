@@ -60,8 +60,8 @@ export interface ChartScatterSeriesScene {
     readonly renderOpacity?: number;
     readonly style: ChartMarkerSeriesStyle;
     readonly type: "scatter";
-    readonly xAxisId?: string;
-    readonly yAxisId?: string;
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export interface ChartBubbleSeriesScene {
@@ -73,8 +73,8 @@ export interface ChartBubbleSeriesScene {
     readonly renderOpacity?: number;
     readonly style: ChartMarkerSeriesStyle;
     readonly type: "bubble";
-    readonly xAxisId?: string;
-    readonly yAxisId?: string;
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export interface ChartLineSeriesScene {
@@ -88,8 +88,8 @@ export interface ChartLineSeriesScene {
     showPoints: boolean;
     style: ChartSeriesStyle;
     type: "line";
-    xAxisId?: string;
-    yAxisId?: string;
+    xAxisId: string;
+    yAxisId: string;
 }
 
 export interface ChartAreaSeriesScene {
@@ -107,8 +107,8 @@ export interface ChartAreaSeriesScene {
     showPoints: boolean;
     style: ChartSeriesStyle;
     type: "area";
-    xAxisId?: string;
-    yAxisId?: string;
+    xAxisId: string;
+    yAxisId: string;
 }
 
 export interface ChartBarSeriesScene {
@@ -121,8 +121,8 @@ export interface ChartBarSeriesScene {
     renderOpacity?: number;
     style: ChartSeriesStyle;
     type: "bar";
-    xAxisId?: string;
-    yAxisId?: string;
+    xAxisId: string;
+    yAxisId: string;
 }
 
 export interface ChartRangeBarSeriesScene {
@@ -135,8 +135,8 @@ export interface ChartRangeBarSeriesScene {
     readonly renderOpacity?: number;
     readonly style: ChartSeriesStyle;
     readonly type: "rangeBar";
-    readonly xAxisId?: string;
-    readonly yAxisId?: string;
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export interface ChartRangeAreaSeriesScene {
@@ -152,8 +152,8 @@ export interface ChartRangeAreaSeriesScene {
     readonly strokeWidth: number;
     readonly style: ChartSeriesStyle;
     readonly type: "rangeArea";
-    readonly xAxisId?: string;
-    readonly yAxisId?: string;
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export interface ChartFinancialSeriesStyle {
@@ -178,8 +178,8 @@ export interface ChartCandlestickSeriesScene {
     readonly style: ChartFinancialSeriesStyle;
     readonly type: "candlestick";
     readonly wickWidth: number;
-    readonly xAxisId?: string;
-    readonly yAxisId?: string;
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export interface ChartOhlcSeriesScene {
@@ -193,8 +193,8 @@ export interface ChartOhlcSeriesScene {
     readonly tickWidth: number;
     readonly type: "ohlc";
     readonly wickWidth: number;
-    readonly xAxisId?: string;
-    readonly yAxisId?: string;
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export type ChartSeriesScene =
@@ -207,4 +207,3 @@ export type ChartSeriesScene =
     | ChartRangeAreaSeriesScene
     | ChartRangeBarSeriesScene
     | ChartScatterSeriesScene;
-

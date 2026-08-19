@@ -211,7 +211,9 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
         id: s.id,
         name: seriesDisplayName,
         style: sStyle,
-        type: "rangeBar"
+        type: "rangeBar",
+        xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
+        yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y")
     };
 }
 
@@ -477,6 +479,8 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
         showPoints: sShowPoints,
         strokeWidth,
         style: sStyle,
-        type: "rangeArea"
+        type: "rangeArea",
+        xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
+        yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y")
     };
 }

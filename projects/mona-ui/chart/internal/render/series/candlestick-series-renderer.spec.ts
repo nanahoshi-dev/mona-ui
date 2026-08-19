@@ -75,7 +75,9 @@ describe("CandlestickSeriesRenderer", () => {
                 wickWidth: 1
             },
             type: "candlestick",
-            wickWidth: 1
+            wickWidth: 1,
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         CandlestickSeriesRenderer.render(mockContext, scene);
@@ -139,7 +141,9 @@ describe("CandlestickSeriesRenderer", () => {
                 wickWidth: 1
             },
             type: "candlestick",
-            wickWidth: 1
+            wickWidth: 1,
+            xAxisId: "default-x",
+            yAxisId: "default-y"
         };
 
         CandlestickSeriesRenderer.render(mockContext, scene);
