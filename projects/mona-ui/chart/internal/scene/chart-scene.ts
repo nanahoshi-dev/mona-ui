@@ -49,15 +49,28 @@ export interface CartesianSceneBase extends ChartSceneBase {
     coordinateSystem: "cartesian";
 }
 
+export interface CartesianAxisTopologyItem {
+    readonly axisId: string;
+    readonly dimension: "x" | "y";
+    readonly position: import("../../models/chart-axis.models").ChartAxisPosition;
+    readonly resolvedType: import("../scale/chart-scale").ResolvedChartCartesianAxisType;
+    readonly stackIndex: number;
+}
+
 export interface CartesianXYChartScene extends CartesianSceneBase {
+    axisTopology?: readonly CartesianAxisTopologyItem[];
+    axisTopologySignature?: string;
     barHitTargets?: readonly SceneHitTarget[];
     cartesianKind: "xy";
     financialIndex?: CartesianFinancialIndex;
     interactionAxis?: ChartInteractionAxis;
     interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
+    interactionBucketsByAxisId?: ReadonlyMap<string, ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>>;
     markerSpatialIndex?: CartesianPointSpatialIndex;
     orientation?: CartesianXYOrientation;
     pointSpatialIndex?: CartesianPointSpatialIndex;
+    primaryXAxisId?: string;
+    primaryYAxisId?: string;
     series: readonly ChartSeriesScene[];
     stackConfiguration?: readonly CartesianStackSceneConfig[];
     stackSignature?: string;
