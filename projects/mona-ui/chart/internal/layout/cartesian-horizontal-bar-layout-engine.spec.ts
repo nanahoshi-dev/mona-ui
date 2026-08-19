@@ -597,4 +597,65 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
         expect(s2Scene.bars[0].stackStartValue).toBe(10);
         expect(s2Scene.bars[0].stackEndValue).toBe(30);
     });
+
+    it("supports multiple X value axes bound to separate horizontal bar series", () => {
+        const barSeries1 = createMockBarSeries({
+            id: "b-usd",
+            name: signal("Revenue USD"),
+            data: signal([{ cat: "Q1", val: 500 }]),
+            xAxisId: signal("x-usd")
+        });
+        const barSeries2 = createMockBarSeries({
+            id: "b-units",
+            name: signal("Units Sold"),
+            data: signal([{ cat: "Q1", val: 50 }]),
+            xAxisId: signal("x-units")
+        });
+        const xAxisUsd = createMockXAxis({
+            axisId: signal("x-usd"),
+            title: signal("USD ($)"),
+            position: signal("bottom"),
+            min: signal(0),
+            max: signal(1000)
+        });
+        const xAxisUnits = createMockXAxis({
+            axisId: signal("x-units"),
+            title: signal("Units"),
+            position: signal("top"),
+            min: signal(0),
+            max: signal(100)
+        });
+        const yAxis = createMockYAxis({
+            title: signal("Quarters")
+        });
+
+        const scene = CartesianHorizontalBarLayoutEngine.computeLayout({
+            containerHeight: 300,
+            containerWidth: 500,
+            effectiveSeries: [barSeries1, barSeries2],
+            xAxes: [xAxisUsd, xAxisUnits],
+            yAxes: [yAxis]
+        });
+
+        expect(scene.axes.length).toBe(3); // 2 X axes + 1 Y axis
+        const s1 = scene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+        const s2 = scene.series[1] as import("../scene/cartesian-scene").ChartBarSeriesScene;
+
+        expect(s1.bars.length).toBe(1);
+        expect(s2.bars.length).toBe(1);
+
+        // 500 on [0, 1000] is 50% width
+        expect(s1.bars[0].width).toBeCloseTo(scene.plotRect.width / 2, 1);
+        // 50 on [0, 100] is 50% width
+        expect(s2.bars[0].width).toBeCloseTo(scene.plotRect.width / 2, 1);
+
+        // Hit targets carry axis identity
+        const hit1 = scene.hitTargets.find(h => h.seriesId === "b-usd");
+        const hit2 = scene.hitTargets.find(h => h.seriesId === "b-units");
+        expect(hit1?.xAxisId).toBe("x-usd");
+        expect(hit1?.xAxisTitle).toBe("USD ($)");
+        expect(hit2?.xAxisId).toBe("x-units");
+        expect(hit2?.xAxisTitle).toBe("Units");
+    });
 });
+

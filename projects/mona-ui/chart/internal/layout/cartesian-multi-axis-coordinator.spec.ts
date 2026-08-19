@@ -282,4 +282,26 @@ describe("CartesianMultiAxisCoordinator", () => {
         expect(measuredYScene.gutter).toBe(initialYScene.gutter);
         expect(measuredXScene.gutter).toBe(initialXScene.gutter);
     });
+
+    it("should guarantee scale ranges in ScaleRegistry match the committed plotRect exactly (MAX-005)", () => {
+        const x1 = createMockXAxis({ axisId: signal("x1") });
+        const y1 = createMockYAxis({ axisId: signal("y1") });
+        const axisResolution = CartesianAxisRegistryResolver.resolve([x1], [y1]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([], axisResolution);
+
+        const res = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 400,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            rootData: [{ x1: "A", y1: 100 }]
+        });
+
+        const xScale = res.scaleRegistry.getXScale("x1")!;
+        const yScale = res.scaleRegistry.getYScale("y1")!;
+
+        expect(xScale.range()).toEqual([res.plotRect.x, res.plotRect.x + res.plotRect.width]);
+        expect(yScale.range()).toEqual([res.plotRect.y + res.plotRect.height, res.plotRect.y]);
+    });
 });

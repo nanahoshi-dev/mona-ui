@@ -5,6 +5,7 @@ import type {
     ChartFinancialSeriesRegistration,
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
+import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 import { resolveFiniteRangeValues } from "./chart-range-resolver";
 import { FinancialDataResolver } from "./financial-data-resolver";
@@ -26,7 +27,7 @@ const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)
 
 export function isCartesianSeriesCompatibleWithXAxisType(
     seriesType: string,
-    xAxisType: ChartXAxisType
+    xAxisType: ChartXAxisType | ResolvedChartCartesianAxisType
 ): boolean {
     if (xAxisType === "category") {
         return (
@@ -50,8 +51,14 @@ export function isCartesianSeriesCompatibleWithXAxisType(
     );
 }
 
-export function isContinuousXValid(val: unknown, xAxisType: ChartXAxisType): boolean {
-    if (xAxisType === "linear") {
+export function isContinuousXValid(val: unknown, xAxisType: ChartXAxisType | ResolvedChartCartesianAxisType): boolean {
+    if (
+        xAxisType === "linear" ||
+        xAxisType === "log" ||
+        xAxisType === "symlog" ||
+        xAxisType === "pow" ||
+        xAxisType === "sqrt"
+    ) {
         return isFiniteNumber(val);
     }
     if (xAxisType === "time" || xAxisType === "utc") {
@@ -99,15 +106,15 @@ export function normalizeContinuousNumericDomain(
         }
     } else if (hasExplicitMin && !hasExplicitMax) {
         if (!Number.isFinite(max)) {
-            max = min === 0 ? 1 : (min > 0 ? min * 1.1 : min * 0.9);
+            max = min === 0 ? 1 : min > 0 ? min * 1.1 : min * 0.9;
         } else if (min >= max) {
-            max = min === 0 ? 1 : (min > 0 ? min * 1.1 : min * 0.9);
+            max = min === 0 ? 1 : min > 0 ? min * 1.1 : min * 0.9;
         }
     } else if (!hasExplicitMin && hasExplicitMax) {
         if (!Number.isFinite(min)) {
-            min = max === 0 ? -1 : (max > 0 ? 0 : max * 1.1);
+            min = max === 0 ? -1 : max > 0 ? 0 : max * 1.1;
         } else if (min >= max) {
-            min = max === 0 ? -1 : (max > 0 ? (max <= 0 ? max * 1.1 : 0) : max * 1.1);
+            min = max === 0 ? -1 : max > 0 ? (max <= 0 ? max * 1.1 : 0) : max * 1.1;
         }
     }
 
@@ -168,10 +175,14 @@ export function inferXAxisType(
                 const lowVal = resolveValue(data[i], lowField, i);
                 const closeVal = resolveValue(data[i], closeField, i);
                 if (
-                    typeof openVal !== "number" || !Number.isFinite(openVal) ||
-                    typeof highVal !== "number" || !Number.isFinite(highVal) ||
-                    typeof lowVal !== "number" || !Number.isFinite(lowVal) ||
-                    typeof closeVal !== "number" || !Number.isFinite(closeVal)
+                    typeof openVal !== "number" ||
+                    !Number.isFinite(openVal) ||
+                    typeof highVal !== "number" ||
+                    !Number.isFinite(highVal) ||
+                    typeof lowVal !== "number" ||
+                    !Number.isFinite(lowVal) ||
+                    typeof closeVal !== "number" ||
+                    !Number.isFinite(closeVal)
                 ) {
                     continue;
                 }
@@ -324,8 +335,8 @@ export function calculateTimeDomain(
     let maxTime = Number.NEGATIVE_INFINITY;
 
     const visibleSeries = seriesList.filter(s => s.visible());
-    const seriesToScan = (visibleSeries.length > 0 ? visibleSeries : seriesList).filter(
-        s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType)
+    const seriesToScan = (visibleSeries.length > 0 ? visibleSeries : seriesList).filter(s =>
+        isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType)
     );
 
     const financialTimes: number[] = [];
@@ -479,8 +490,8 @@ export function calculateLinearXDomain(
     let max = Number.NEGATIVE_INFINITY;
 
     const visibleSeries = seriesList.filter(s => s.visible());
-    const seriesToScan = (visibleSeries.length > 0 ? visibleSeries : seriesList).filter(
-        s => isCartesianSeriesCompatibleWithXAxisType(s.type, "linear")
+    const seriesToScan = (visibleSeries.length > 0 ? visibleSeries : seriesList).filter(s =>
+        isCartesianSeriesCompatibleWithXAxisType(s.type, "linear")
     );
 
     const financialX: number[] = [];
@@ -595,9 +606,8 @@ export function calculateContinuousYDomain(
         }
     }
 
-    const stackAnalysis = stackLayoutOrAnalysis && "configuration" in stackLayoutOrAnalysis
-        ? stackLayoutOrAnalysis
-        : undefined;
+    const stackAnalysis =
+        stackLayoutOrAnalysis && "configuration" in stackLayoutOrAnalysis ? stackLayoutOrAnalysis : undefined;
 
     if (stackAnalysis?.visibleYUnitMode === "invalid") {
         return normalizeContinuousNumericDomain(0, 1, normalizedExpMin, normalizedExpMax).domain as [number, number];
@@ -610,9 +620,8 @@ export function calculateContinuousYDomain(
     const invalidSeriesIds = stackAnalysis?.invalidSeriesIds;
 
     const visibleSeries = seriesList.filter(s => s.visible() && !invalidSeriesIds?.has(s.id));
-    const allSeriesToScan = visibleSeries.length > 0
-        ? visibleSeries
-        : seriesList.filter(s => !invalidSeriesIds?.has(s.id));
+    const allSeriesToScan =
+        visibleSeries.length > 0 ? visibleSeries : seriesList.filter(s => !invalidSeriesIds?.has(s.id));
     const seriesToScan = xAxisType
         ? allSeriesToScan.filter(s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType))
         : allSeriesToScan;
@@ -623,9 +632,7 @@ export function calculateContinuousYDomain(
         Boolean(stackLayout && stackLayout.groups.length > 0);
 
     const hasPercentStacks = Boolean(
-        stackAnalysis
-            ? stackAnalysis.axisUnitMode === "percent"
-            : stackLayout?.hasPercentStacks
+        stackAnalysis ? stackAnalysis.axisUnitMode === "percent" : stackLayout?.hasPercentStacks
     );
     const regPercentGroups = stackAnalysis?.configuration.groups.filter(g => g.mode === "percent" && g.valid) ?? [];
 
@@ -702,7 +709,10 @@ export function calculateContinuousYDomain(
                 const toField = (s as { toField: () => ChartField }).toField();
                 for (let i = 0; i < data.length; i++) {
                     const xVal = resolveValue(data[i], xField, i);
-                    if (s.type === "rangeArea" && (xAxisType === "linear" || xAxisType === "time" || xAxisType === "utc")) {
+                    if (
+                        s.type === "rangeArea" &&
+                        (xAxisType === "linear" || xAxisType === "time" || xAxisType === "utc")
+                    ) {
                         if (!isContinuousXValid(xVal, xAxisType)) {
                             continue;
                         }
@@ -794,7 +804,12 @@ export function calculateContinuousYDomain(
         resMax = (normalizedExpMin as number) === 0 ? 1 : (normalizedExpMin as number) * 1.1;
     }
     if (!hasExplicitMin && hasExplicitMax && (normalizedExpMax as number) <= min) {
-        resMin = (normalizedExpMax as number) === 0 ? -1 : (normalizedExpMax as number) < 0 ? (normalizedExpMax as number) * 1.1 : 0;
+        resMin =
+            (normalizedExpMax as number) === 0
+                ? -1
+                : (normalizedExpMax as number) < 0
+                  ? (normalizedExpMax as number) * 1.1
+                  : 0;
     }
 
     if (requiresZeroBaseline) {
@@ -842,9 +857,7 @@ export function hasRenderableData(
             continue;
         }
         const xField =
-            "xField" in s
-                ? ((s as { xField: () => ChartField | undefined }).xField?.() ?? rootXField)
-                : rootXField;
+            "xField" in s ? ((s as { xField: () => ChartField | undefined }).xField?.() ?? rootXField) : rootXField;
 
         if (s.type === "candlestick" || s.type === "ohlc") {
             const finReg = s as ChartFinancialSeriesRegistration;

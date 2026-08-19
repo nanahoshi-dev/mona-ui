@@ -6,6 +6,7 @@ import type {
 import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartField } from "../../models/chart.models";
 import type { ChartStackMode } from "../../models/chart-stack.models";
+import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ChartInteractionXKey } from "../scene/scene-geometry";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { isFiniteNumber } from "../utils/number-utils";
@@ -40,7 +41,9 @@ export interface CartesianStackGroup {
     readonly mode: ChartStackMode;
     readonly name: string;
     readonly seriesIds: readonly string[];
+    readonly xAxisId: string;
     readonly xKeys: readonly ChartInteractionXKey[];
+    readonly yAxisId: string;
 }
 
 export interface RegisteredStackMembership {
@@ -50,6 +53,8 @@ export interface RegisteredStackMembership {
     readonly mode: ChartStackMode;
     readonly seriesId: string;
     readonly valid: boolean;
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export interface RegisteredCartesianStackGroup {
@@ -61,6 +66,8 @@ export interface RegisteredCartesianStackGroup {
     readonly registeredHasPositive: boolean;
     readonly registeredSeriesIds: readonly string[];
     readonly valid: boolean;
+    readonly xAxisId: string;
+    readonly yAxisId: string;
 }
 
 export interface CartesianStackConfiguration {
@@ -81,12 +88,7 @@ export interface CartesianStackLayout {
     readonly yExtent: readonly [number, number];
 }
 
-export type CartesianVisibleYUnitMode =
-    | "invalid"
-    | "none"
-    | "normal-stack"
-    | "percent-stack"
-    | "raw";
+export type CartesianVisibleYUnitMode = "invalid" | "none" | "normal-stack" | "percent-stack" | "raw";
 
 export type CartesianAxisUnitMode = "percent" | "raw";
 
@@ -103,10 +105,16 @@ export interface CartesianStackAnalysis {
 }
 
 export interface CartesianStackEngineOptions {
+    readonly primaryXAxisId?: string;
+    readonly primaryYAxisId?: string;
+    readonly resolvedXAxisTypeByAxisId?: ReadonlyMap<
+        string,
+        import("../scale/chart-scale").ResolvedChartCartesianAxisType
+    >;
     readonly rootData: readonly unknown[];
     readonly rootXField?: ChartField;
     readonly series: readonly ChartCartesianSeriesRegistration[];
-    readonly xAxisType: ChartXAxisType;
+    readonly xAxisType?: ChartXAxisType;
 }
 
 interface RawDatumRecord {
@@ -120,13 +128,11 @@ interface RawDatumRecord {
 
 export class CartesianStackEngine {
     public static computeAnalysis(options: CartesianStackEngineOptions): CartesianStackAnalysis {
-        const { rootData, rootXField, series, xAxisType } = options;
+        const { rootData, rootXField, series, xAxisType = "category" } = options;
         const diagnostics: ChartDiagnostic[] = [];
 
         // 1. Filter series by X-axis compatibility (STK-002)
-        const compatibleSeries = series.filter(s =>
-            isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType)
-        );
+        const compatibleSeries = series.filter(s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType));
 
         // 2. Discover registered stack groups across ALL compatible series (visible + hidden) (STK-007, STK-016)
         const registeredGroupMap = new Map<
@@ -135,6 +141,8 @@ export class CartesianStackEngine {
                 geometryType: "area" | "bar";
                 name: string;
                 seriesList: StackableCartesianSeriesRegistration[];
+                xAxisId: string;
+                yAxisId: string;
             }
         >();
 
@@ -168,13 +176,24 @@ export class CartesianStackEngine {
                 continue;
             }
 
-            const groupKey = `${stackable.type}:${trimmedStack}`;
+            const xAxisId =
+                ("xAxisId" in stackable && typeof stackable.xAxisId === "function" ? stackable.xAxisId() : undefined) ??
+                options.primaryXAxisId ??
+                "default-x";
+            const yAxisId =
+                ("yAxisId" in stackable && typeof stackable.yAxisId === "function" ? stackable.yAxisId() : undefined) ??
+                options.primaryYAxisId ??
+                "default-y";
+            const groupKey = `${stackable.type}:${xAxisId}:${yAxisId}:${trimmedStack}`;
+
             let groupRecord = registeredGroupMap.get(groupKey);
             if (!groupRecord) {
                 groupRecord = {
                     geometryType: stackable.type,
                     name: trimmedStack,
-                    seriesList: []
+                    seriesList: [],
+                    xAxisId,
+                    yAxisId
                 };
                 registeredGroupMap.set(groupKey, groupRecord);
             }
@@ -187,7 +206,7 @@ export class CartesianStackEngine {
         const invalidSeriesIds = new Set<string>();
 
         for (const [groupKey, groupInfo] of registeredGroupMap) {
-            const { geometryType, name, seriesList } = groupInfo;
+            const { geometryType, name, seriesList, xAxisId, yAxisId } = groupInfo;
             const firstMode: ChartStackMode = seriesList[0]?.stackMode?.() ?? "normal";
             const hasConflict = seriesList.some(s => (s.stackMode?.() ?? "normal") !== firstMode);
 
@@ -226,7 +245,9 @@ export class CartesianStackEngine {
                 registeredHasNegative: regHasNeg,
                 registeredHasPositive: regHasPos,
                 registeredSeriesIds: seriesList.map(s => s.id),
-                valid: !hasConflict
+                valid: !hasConflict,
+                xAxisId,
+                yAxisId
             };
             registeredGroups.push(regGroup);
 
@@ -237,7 +258,9 @@ export class CartesianStackEngine {
                     groupName: name,
                     mode: firstMode,
                     seriesId: s.id,
-                    valid: !hasConflict
+                    valid: !hasConflict,
+                    xAxisId,
+                    yAxisId
                 });
             }
         }
@@ -277,7 +300,7 @@ export class CartesianStackEngine {
                 continue;
             }
 
-            const { geometryType, name, seriesList } = groupInfo;
+            const { geometryType, name, seriesList, xAxisId, yAxisId } = groupInfo;
             const visibleMembers = seriesList.filter(s => s.visible());
             if (visibleMembers.length === 0) {
                 continue;
@@ -289,6 +312,9 @@ export class CartesianStackEngine {
             } else {
                 hasNormalStacks = true;
             }
+
+            const groupXAxisType =
+                xAxisType === "category" ? "category" : (options.resolvedXAxisTypeByAxisId?.get(xAxisId) ?? xAxisType);
 
             // Extract records per series with 1 resolver per series (STK-005) & first-valid duplicate (STK-006)
             const seriesRecordsMap = new Map<string, Map<ChartInteractionXKey, RawDatumRecord>>();
@@ -307,7 +333,7 @@ export class CartesianStackEngine {
                     const xVal = resolveValue(datum, sXField, dIdx);
                     const yVal = resolveValue(datum, sField, dIdx);
 
-                    const xKey = this.resolveNormalizedXKey(xVal, dIdx, xAxisType);
+                    const xKey = this.resolveNormalizedXKey(xVal, dIdx, groupXAxisType as any);
                     if (xKey === undefined) {
                         continue;
                     }
@@ -350,7 +376,15 @@ export class CartesianStackEngine {
             }
 
             let sortedXKeys: readonly ChartInteractionXKey[];
-            if (xAxisType === "linear" || xAxisType === "time" || xAxisType === "utc") {
+            if (
+                groupXAxisType === "linear" ||
+                groupXAxisType === "log" ||
+                groupXAxisType === "symlog" ||
+                groupXAxisType === "pow" ||
+                groupXAxisType === "sqrt" ||
+                groupXAxisType === "time" ||
+                groupXAxisType === "utc"
+            ) {
                 sortedXKeys = [...groupXKeyOrder].sort((a, b) => Number(a) - Number(b));
             } else {
                 sortedXKeys = groupXKeyOrder;
@@ -398,46 +432,41 @@ export class CartesianStackEngine {
                     if (record) {
                         const rawVal = record.rawValue;
                         const isPositive = rawVal >= 0;
-                        let stackStart = 0;
-                        let stackEnd = 0;
-                        let visualVal = 0;
+                        let stackStart: number;
+                        let stackEnd: number;
                         let stackPercentage: number | undefined;
                         let stackTotal: number | undefined;
 
-                        if (groupMode === "normal") {
-                            visualVal = rawVal;
+                        if (groupMode === "percent") {
+                            const total = isPositive ? positiveSum : negativeAbsSum;
+                            stackTotal = total;
+                            if (total === 0) {
+                                stackStart = 0;
+                                stackEnd = 0;
+                                stackPercentage = 0;
+                            } else {
+                                const currentAccum = isPositive ? posAccum : negAccum;
+                                const valAbs = Math.abs(rawVal);
+                                const startPct = (currentAccum / total) * 100;
+                                const endPct = ((currentAccum + valAbs) / total) * 100;
+
+                                stackStart = isPositive ? startPct : startPct === 0 ? 0 : -startPct;
+                                stackEnd = isPositive ? endPct : endPct === 0 ? 0 : -endPct;
+                                stackPercentage = isPositive ? (valAbs / total) * 100 : -((valAbs / total) * 100);
+
+                                if (isPositive) posAccum += valAbs;
+                                else negAccum += valAbs;
+                            }
+                        } else {
                             stackTotal = isPositive ? positiveSum : -negativeAbsSum;
                             if (isPositive) {
                                 stackStart = posAccum;
                                 stackEnd = posAccum + rawVal;
-                                posAccum = stackEnd;
+                                posAccum += rawVal;
                             } else {
-                                stackStart = negAccum;
-                                stackEnd = negAccum + rawVal;
-                                negAccum = stackEnd;
-                            }
-                        } else {
-                            // Percent mode
-                            if (rawVal > 0) {
-                                stackPercentage = positiveSum > 0 ? (rawVal / positiveSum) * 100 : 0;
-                                stackTotal = positiveSum;
-                                visualVal = stackPercentage;
-                                stackStart = posAccum;
-                                stackEnd = Math.min(100, posAccum + stackPercentage);
-                                posAccum = stackEnd;
-                            } else if (rawVal < 0) {
-                                stackPercentage = negativeAbsSum > 0 ? -((Math.abs(rawVal) / negativeAbsSum) * 100) : 0;
-                                stackTotal = negativeAbsSum;
-                                visualVal = stackPercentage;
-                                stackStart = negAccum;
-                                stackEnd = Math.max(-100, negAccum + stackPercentage);
-                                negAccum = stackEnd;
-                            } else {
-                                visualVal = 0;
-                                stackPercentage = 0;
-                                stackTotal = positiveSum > 0 ? positiveSum : 0;
-                                stackStart = 0;
-                                stackEnd = 0;
+                                stackStart = negAccum === 0 ? 0 : -negAccum;
+                                stackEnd = negAccum + Math.abs(rawVal) === 0 ? 0 : -(negAccum + Math.abs(rawVal));
+                                negAccum += Math.abs(rawVal);
                             }
                         }
 
@@ -452,71 +481,81 @@ export class CartesianStackEngine {
                             stackStart,
                             stackTotal,
                             synthetic: false,
-                            visualValue: visualVal,
+                            visualValue: rawVal,
                             xKey,
                             xValue: record.xValue
                         };
-
                         segmentEntriesAtX.push({ entry, isPositive, seriesId: s.id });
                     } else {
+                        // Synthetic gap entry for unaligned series (STK-003)
+                        const synthKey = JSON.stringify([s.id, "stack-synthetic", typeof xKey, xKey]);
                         if (geometryType === "area") {
-                            const stackStart = posAccum;
-                            const stackEnd = posAccum;
-                            const animationKey = JSON.stringify([s.id, "stack-synthetic", typeof xKey, xKey]);
-
                             entry = {
-                                animationKey,
+                                animationKey: synthKey,
                                 dataIndex: -1,
                                 datum: undefined,
                                 defined: true,
                                 rawValue: 0,
-                                stackEnd,
-                                stackPercentage: groupMode === "percent" ? 0 : undefined,
-                                stackStart,
-                                stackTotal: groupMode === "percent" ? 0 : undefined,
+                                stackEnd: posAccum,
+                                stackPercentage: 0,
+                                stackPosition: "single",
+                                stackStart: posAccum,
+                                stackTotal: 0,
                                 synthetic: true,
                                 visualValue: 0,
                                 xKey,
                                 xValue: xKey
                             };
                         } else {
-                            continue;
+                            entry = {
+                                animationKey: synthKey,
+                                dataIndex: -1,
+                                datum: undefined,
+                                defined: false,
+                                rawValue: 0,
+                                stackEnd: 0,
+                                stackPercentage: 0,
+                                stackPosition: "single",
+                                stackStart: 0,
+                                stackTotal: 0,
+                                synthetic: true,
+                                visualValue: 0,
+                                xKey,
+                                xValue: xKey
+                            };
                         }
                     }
-
-                    globalMinY = Math.min(globalMinY, entry.stackStart, entry.stackEnd);
-                    globalMaxY = Math.max(globalMaxY, entry.stackStart, entry.stackEnd);
 
                     bySeriesId.get(s.id)!.set(xKey, entry);
                     orderedBySeriesId.get(s.id)!.push(entry);
                 }
 
-                // Corner caps assignment for bar segments (STK-004, STK-011)
-                if (geometryType === "bar" && segmentEntriesAtX.length > 0) {
-                    const posSegments = segmentEntriesAtX.filter(s => s.isPositive && s.entry.rawValue > 0);
-                    const negSegments = segmentEntriesAtX.filter(s => !s.isPositive && s.entry.rawValue < 0);
+                // Compute inner/outer/single positions for rounded corners
+                const posSegments = segmentEntriesAtX.filter(e => e.isPositive);
+                const negSegments = segmentEntriesAtX.filter(e => !e.isPositive);
 
-                    if (posSegments.length === 1) {
-                        (posSegments[0].entry as { stackPosition?: "inner" | "outer" | "single" }).stackPosition = "single";
-                    } else if (posSegments.length > 1) {
-                        for (let i = 0; i < posSegments.length; i++) {
-                            const pos = i === posSegments.length - 1 ? "outer" : "inner";
-                            (posSegments[i].entry as { stackPosition?: "inner" | "outer" | "single" }).stackPosition = pos;
+                for (const segList of [posSegments, negSegments]) {
+                    if (segList.length === 1) {
+                        (segList[0].entry as any).stackPosition = "single";
+                    } else if (segList.length > 1) {
+                        (segList[0].entry as any).stackPosition = "inner";
+                        for (let i = 1; i < segList.length - 1; i++) {
+                            (segList[i].entry as any).stackPosition = "inner";
                         }
+                        (segList[segList.length - 1].entry as any).stackPosition = "outer";
                     }
+                }
 
-                    if (negSegments.length === 1) {
-                        (negSegments[0].entry as { stackPosition?: "inner" | "outer" | "single" }).stackPosition = "single";
-                    } else if (negSegments.length > 1) {
-                        for (let i = 0; i < negSegments.length; i++) {
-                            const pos = i === negSegments.length - 1 ? "outer" : "inner";
-                            (negSegments[i].entry as { stackPosition?: "inner" | "outer" | "single" }).stackPosition = pos;
-                        }
-                    }
+                if (groupMode === "percent") {
+                    if (positiveSum > 0) globalMaxY = Math.max(globalMaxY, 100);
+                    if (negativeAbsSum > 0) globalMinY = Math.min(globalMinY, -100);
+                } else {
+                    globalMaxY = Math.max(globalMaxY, posAccum);
+                    globalMinY = Math.min(globalMinY, negAccum === 0 ? 0 : -negAccum);
                 }
             }
 
-            const visibleGroup: CartesianStackGroup = {
+            const stackGroup: CartesianStackGroup = {
                 geometryType,
                 hasNegative: groupHasNegative,
                 hasPositive: groupHasPositive,
@@ -524,29 +563,23 @@ export class CartesianStackEngine {
                 mode: groupMode,
                 name,
                 seriesIds: visibleMembers.map(s => s.id),
-                xKeys: sortedXKeys
+                xAxisId,
+                xKeys: sortedXKeys,
+                yAxisId
             };
-            visibleGroups.push(visibleGroup);
+            visibleGroups.push(stackGroup);
 
             for (const s of visibleMembers) {
-                groupBySeriesId.set(s.id, visibleGroup);
+                groupBySeriesId.set(s.id, stackGroup);
             }
         }
 
-        // 4. Validate Single-Y-Axis Percent vs Raw Unit Integrity (STK-001, PRE-001, PRE-002, PRE-003, PRE-004)
-        const visibleCompatibleSeries = compatibleSeries.filter(s => s.visible());
+        // 4. Determine Y axis unit mode & validate (STK-009, STK-010)
         let visibleYUnitMode: CartesianVisibleYUnitMode = "none";
         let axisUnitMode: CartesianAxisUnitMode = "raw";
 
-        if (visibleCompatibleSeries.length === 0) {
-            visibleYUnitMode = "none";
-            const regPercentGroups = registeredGroups.filter(g => g.valid && g.mode === "percent");
-            if (regPercentGroups.length > 0) {
-                axisUnitMode = "percent";
-            } else {
-                axisUnitMode = "raw";
-            }
-        } else {
+        const visibleCompatibleSeries = compatibleSeries.filter(s => s.visible());
+        if (visibleCompatibleSeries.length > 0) {
             const visiblePercentSeries = visibleCompatibleSeries.filter(s => {
                 const membership = membershipBySeriesId.get(s.id);
                 return membership?.valid && membership.mode === "percent";
@@ -578,6 +611,11 @@ export class CartesianStackEngine {
                 visibleYUnitMode = "raw";
                 axisUnitMode = "raw";
             }
+        } else {
+            const regPercentGroups = registeredGroups.filter(g => g.valid && g.mode === "percent");
+            if (regPercentGroups.length > 0) {
+                axisUnitMode = "percent";
+            }
         }
 
         const yUnitMode: "invalid" | "normal" | "percent" | "raw" =
@@ -598,7 +636,7 @@ export class CartesianStackEngine {
             orderedBySeriesId,
             visibleHasNegative,
             visibleHasPositive,
-            yExtent: [globalMinY, globalMaxY]
+            yExtent: [globalMinY === 0 ? 0 : globalMinY, globalMaxY === 0 ? 0 : globalMaxY]
         };
 
         return {
@@ -621,12 +659,18 @@ export class CartesianStackEngine {
     public static resolveNormalizedXKey(
         xVal: unknown,
         dataIndex: number,
-        xAxisType: ChartXAxisType
+        xAxisType: ChartXAxisType | ResolvedChartCartesianAxisType
     ): ChartInteractionXKey | undefined {
         if (xAxisType === "category") {
             return xVal !== undefined && xVal !== null ? String(xVal) : String(dataIndex);
         }
-        if (xAxisType === "linear") {
+        if (
+            xAxisType === "linear" ||
+            xAxisType === "log" ||
+            xAxisType === "symlog" ||
+            xAxisType === "pow" ||
+            xAxisType === "sqrt"
+        ) {
             return isFiniteNumber(xVal) ? Number(xVal) : undefined;
         }
         if (xAxisType === "time" || xAxisType === "utc") {

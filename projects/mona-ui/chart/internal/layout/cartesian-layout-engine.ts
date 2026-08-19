@@ -1,4 +1,4 @@
-import type { ChartAxisTick, ChartXAxisType } from "../../models/chart-axis.models";
+import type { ChartAxisTick, ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
 import type { ChartField, ChartPadding, ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
@@ -196,10 +196,13 @@ export class CartesianLayoutEngine {
         });
 
         const { axisScenes, plotRect, scaleRegistry, stackAnalysesByYAxis } = coordResult;
-        const primaryXAxis = axisResolution.axisById.get(axisResolution.primaryXAxisId) as ResolvedCartesianAxisDescriptor<"x"> | undefined;
-        const primaryYAxis = axisResolution.axisById.get(axisResolution.primaryYAxisId) as ResolvedCartesianAxisDescriptor<"y"> | undefined;
-        const primaryXType = primaryXAxis?.type ?? "category";
-        const primaryYType = primaryYAxis?.type ?? "linear";
+        if (warnedDiagnosticSignatures) {
+            for (const w of coordResult.warnings) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
+            }
+        }
+        const primaryXType = (scaleRegistry.getXScale(axisResolution.primaryXAxisId)?.type as ChartXAxisType) ?? "category";
+        const primaryYType = (scaleRegistry.getYScale(axisResolution.primaryYAxisId)?.type as ChartYAxisType) ?? "linear";
 
         const primaryStackAnalysis = stackAnalysesByYAxis.get(axisResolution.primaryYAxisId);
         const stackConfigForScene = primaryStackAnalysis

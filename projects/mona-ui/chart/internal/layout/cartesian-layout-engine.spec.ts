@@ -570,7 +570,7 @@ describe("CartesianLayoutEngine", () => {
 
             expect(scene.stackConfiguration).toBeDefined();
             expect(scene.stackConfiguration?.length).toBe(1);
-            expect(scene.stackConfiguration?.[0].groupId).toBe("bar:rev");
+            expect(scene.stackConfiguration?.[0].groupId).toBe("bar:default-x:default-y:rev");
             expect(scene.stackConfiguration?.[0].mode).toBe("percent");
             expect(scene.stackSignature).toBeDefined();
         });

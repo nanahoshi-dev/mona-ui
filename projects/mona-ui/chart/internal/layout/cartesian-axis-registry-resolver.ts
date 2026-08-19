@@ -51,12 +51,16 @@ export interface ResolvedCartesianAxisDescriptor<D extends "x" | "y" = "x" | "y"
 }
 
 export interface CartesianAxisRegistryResolution {
-    readonly axisById: ReadonlyMap<string, ResolvedCartesianAxisDescriptor>;
     readonly primaryXAxisId: string;
     readonly primaryYAxisId: string;
     readonly warnings: readonly string[];
     readonly xAxes: readonly ResolvedCartesianAxisDescriptor<"x">[];
+    readonly xAxisById: ReadonlyMap<string, ResolvedCartesianAxisDescriptor<"x">>;
     readonly yAxes: readonly ResolvedCartesianAxisDescriptor<"y">[];
+    readonly yAxisById: ReadonlyMap<string, ResolvedCartesianAxisDescriptor<"y">>;
+    getAxis(dimension: "x", axisId: string): ResolvedCartesianAxisDescriptor<"x"> | undefined;
+    getAxis(dimension: "y", axisId: string): ResolvedCartesianAxisDescriptor<"y"> | undefined;
+    getAxis(dimension: "x" | "y", axisId: string): ResolvedCartesianAxisDescriptor | undefined;
 }
 
 export class CartesianAxisRegistryResolver {
@@ -76,7 +80,8 @@ export class CartesianAxisRegistryResolver {
 
         const resolvedX: ResolvedCartesianAxisDescriptor<"x">[] = [];
         const resolvedY: ResolvedCartesianAxisDescriptor<"y">[] = [];
-        const axisById = new Map<string, ResolvedCartesianAxisDescriptor>();
+        const xAxisById = new Map<string, ResolvedCartesianAxisDescriptor<"x">>();
+        const yAxisById = new Map<string, ResolvedCartesianAxisDescriptor<"y">>();
 
         const rawX = xRegistrations && xRegistrations.length > 0 ? xRegistrations : [];
         const rawY = yRegistrations && yRegistrations.length > 0 ? yRegistrations : [];
@@ -99,18 +104,21 @@ export class CartesianAxisRegistryResolver {
                 visible: true
             };
             resolvedX.push(syntheticX);
-            axisById.set("default-x", syntheticX);
+            xAxisById.set("default-x", syntheticX);
             sideCounts.bottom++;
         } else {
             for (let i = 0; i < rawX.length; i++) {
                 const reg = rawX[i];
-                let id = reg.axisId?.()?.trim();
+                const rawExplicitId = reg.axisId?.()?.trim();
+                let id = rawExplicitId;
                 if (!id) {
-                    id = i === 0 ? "default-x" : `__mona_x_${i}__`;
+                    const regId = reg.registrationId ?? `mona-x-${i}`;
+                    id = i === 0 ? "default-x" : `__mona_x_${encodeURIComponent(regId)}__`;
                 }
-                if (seenXIds.has(id)) {
-                    warnings.push(`[MonaChart] Duplicate X axis ID "${id}" detected. Assigning fallback identity.`);
-                    id = `__mona_x_dup_${i}__`;
+
+                if (rawExplicitId && seenXIds.has(rawExplicitId)) {
+                    warnings.push(`[MonaChart] Duplicate X axis ID "${rawExplicitId}" detected. Later duplicate axis remains inactive.`);
+                    continue;
                 }
                 seenXIds.add(id);
 
@@ -127,7 +135,7 @@ export class CartesianAxisRegistryResolver {
                     field: reg.field?.(),
                     formatter: reg.formatter?.(),
                     gridLines: reg.gridLines?.(),
-                    isPrimary: i === 0,
+                    isPrimary: resolvedX.length === 0,
                     isSynthetic: false,
                     labelMaxWidth: reg.labelMaxWidth?.(),
                     labelPadding: reg.labelPadding?.(),
@@ -136,7 +144,7 @@ export class CartesianAxisRegistryResolver {
                     labelTemplate: reg.labelTemplate?.(),
                     logBase: reg.logBase?.(),
                     nice: reg.nice?.() ?? true,
-                    order: i,
+                    order: resolvedX.length,
                     position: pos,
                     registration: reg,
                     registrationId: reg.registrationId ?? `mona-x-${i}`,
@@ -152,7 +160,7 @@ export class CartesianAxisRegistryResolver {
                     visible: reg.visible?.() ?? true
                 };
                 resolvedX.push(desc);
-                axisById.set(id, desc);
+                xAxisById.set(id, desc);
             }
         }
 
@@ -174,18 +182,21 @@ export class CartesianAxisRegistryResolver {
                 visible: true
             };
             resolvedY.push(syntheticY);
-            axisById.set("default-y", syntheticY);
+            yAxisById.set("default-y", syntheticY);
             sideCounts.left++;
         } else {
             for (let i = 0; i < rawY.length; i++) {
                 const reg = rawY[i];
-                let id = reg.axisId?.()?.trim();
+                const rawExplicitId = reg.axisId?.()?.trim();
+                let id = rawExplicitId;
                 if (!id) {
-                    id = i === 0 ? "default-y" : `__mona_y_${i}__`;
+                    const regId = reg.registrationId ?? `mona-y-${i}`;
+                    id = i === 0 ? "default-y" : `__mona_y_${encodeURIComponent(regId)}__`;
                 }
-                if (seenYIds.has(id)) {
-                    warnings.push(`[MonaChart] Duplicate Y axis ID "${id}" detected. Assigning fallback identity.`);
-                    id = `__mona_y_dup_${i}__`;
+
+                if (rawExplicitId && seenYIds.has(rawExplicitId)) {
+                    warnings.push(`[MonaChart] Duplicate Y axis ID "${rawExplicitId}" detected. Later duplicate axis remains inactive.`);
+                    continue;
                 }
                 seenYIds.add(id);
 
@@ -201,7 +212,7 @@ export class CartesianAxisRegistryResolver {
                     exponent: reg.exponent?.(),
                     formatter: reg.formatter?.(),
                     gridLines: reg.gridLines?.(),
-                    isPrimary: i === 0,
+                    isPrimary: resolvedY.length === 0,
                     isSynthetic: false,
                     labelMaxWidth: reg.labelMaxWidth?.(),
                     labelPadding: reg.labelPadding?.(),
@@ -210,7 +221,7 @@ export class CartesianAxisRegistryResolver {
                     labelTemplate: reg.labelTemplate?.(),
                     logBase: reg.logBase?.(),
                     nice: reg.nice?.() ?? true,
-                    order: resolvedX.length + i,
+                    order: resolvedX.length + resolvedY.length,
                     position: pos,
                     registration: reg,
                     registrationId: reg.registrationId ?? `mona-y-${i}`,
@@ -226,20 +237,26 @@ export class CartesianAxisRegistryResolver {
                     visible: reg.visible?.() ?? true
                 };
                 resolvedY.push(desc);
-                axisById.set(id, desc);
+                yAxisById.set(id, desc);
             }
         }
 
         const primaryXAxisId = resolvedX.find(a => a.isPrimary)?.axisId ?? resolvedX[0].axisId;
         const primaryYAxisId = resolvedY.find(a => a.isPrimary)?.axisId ?? resolvedY[0].axisId;
 
+        const getAxis = ((dimension: "x" | "y", axisId: string) => {
+            return dimension === "x" ? xAxisById.get(axisId) : yAxisById.get(axisId);
+        }) as CartesianAxisRegistryResolution["getAxis"];
+
         return {
-            axisById,
+            getAxis,
             primaryXAxisId,
             primaryYAxisId,
             warnings,
             xAxes: resolvedX,
-            yAxes: resolvedY
+            xAxisById,
+            yAxes: resolvedY,
+            yAxisById
         };
     }
 }

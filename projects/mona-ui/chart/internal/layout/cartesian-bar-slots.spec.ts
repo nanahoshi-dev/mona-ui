@@ -70,7 +70,7 @@ describe("CartesianBarSlots", () => {
         const slots = CartesianBarSlots.computeSlots(series, stackLayout);
         expect(slots.length).toBe(2);
         expect(slots[0]).toEqual({
-            id: "bar:sales",
+            id: "bar:default-x:default-y:sales",
             kind: "stack",
             maxBarWidth: undefined,
             seriesIds: ["s1", "s2"],
@@ -101,10 +101,30 @@ describe("CartesianBarSlots", () => {
 
         const slots = CartesianBarSlots.computeSlots(series, stackLayout);
         expect(slots.length).toBe(2);
-        expect(slots[0].id).toBe("bar:X");
+        expect(slots[0].id).toBe("bar:default-x:default-y:X");
         expect(slots[0].seriesIds).toEqual(["s1", "s3"]);
-        expect(slots[1].id).toBe("bar:Y");
+        expect(slots[1].id).toBe("bar:default-x:default-y:Y");
         expect(slots[1].seriesIds).toEqual(["s2", "s4"]);
+    });
+
+    it("should isolate stack slots when series have different axis bindings with same stack name", () => {
+        const s1 = createMockBarSeries({ field: "a", id: "s1", stack: "sales" });
+        (s1.yAxisId as any).set("y1");
+        const s2 = createMockBarSeries({ field: "b", id: "s2", stack: "sales" });
+        (s2.yAxisId as any).set("y2");
+
+        const series = [s1, s2];
+        const stackLayout = CartesianStackEngine.computeLayout({
+            rootData: [{ cat: "Jan", a: 10, b: 20 }],
+            rootXField: "cat",
+            series,
+            xAxisType: "category"
+        });
+
+        const slots = CartesianBarSlots.computeSlots(series, stackLayout);
+        expect(slots.length).toBe(2);
+        expect(slots[0].id).toBe("bar:default-x:y1:sales");
+        expect(slots[1].id).toBe("bar:default-x:y2:sales");
     });
 
     it("should use the minimum finite maxBarWidth among members of the stack", () => {

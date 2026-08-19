@@ -147,5 +147,28 @@ describe("CartesianScaleFactory and Scale Adapters", () => {
             });
             expect(sqrt.type).toBe("sqrt");
         });
+
+        it("should safely handle invalid explicit min/max on positive log scale with nice=true", () => {
+            const log = CartesianScaleFactory.createNumericScale({
+                domain: [1, 100],
+                explicitMin: 0, // invalid for positive log
+                nice: true,
+                range: [0, 200],
+                type: "log"
+            });
+            expect(log.domain()[0]).toBeGreaterThan(0);
+        });
+
+        it("should swap min and max when explicitMin > explicitMax", () => {
+            const linear = CartesianScaleFactory.createNumericScale({
+                domain: [0, 100],
+                explicitMax: 10,
+                explicitMin: 80,
+                nice: true,
+                range: [0, 200],
+                type: "linear"
+            });
+            expect(linear.domain()[0]).toBeLessThanOrEqual(linear.domain()[1]);
+        });
     });
 });

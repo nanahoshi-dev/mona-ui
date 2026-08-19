@@ -48,9 +48,11 @@ export class CartesianBarSlots {
             }
 
             const rawStack = s.stack?.()?.trim();
-            const groupKey = rawStack ? `bar:${rawStack}` : undefined;
+            const xAxisId = ("xAxisId" in s && typeof s.xAxisId === "function" ? s.xAxisId() : undefined) ?? "default-x";
+            const yAxisId = ("yAxisId" in s && typeof s.yAxisId === "function" ? s.yAxisId() : undefined) ?? "default-y";
+            const groupKey = rawStack ? `bar:${xAxisId}:${yAxisId}:${rawStack}` : undefined;
             const stackGroup = groupKey && stackLayout
-                ? stackLayout.groups.find(g => g.id === groupKey)
+                ? (stackLayout.groups.find(g => g.id === groupKey) ?? stackLayout.groupBySeriesId.get(s.id))
                 : undefined;
 
             if (rawStack) {
@@ -59,7 +61,7 @@ export class CartesianBarSlots {
                     if (!seenStackGroups.has(stackGroup.id)) {
                         seenStackGroups.add(stackGroup.id);
                         const groupMembers = visibleBarSeries.filter(
-                            member => "stack" in member && (member as ChartBarSeriesRegistration).stack?.()?.trim() === stackGroup.name
+                            member => stackGroup.seriesIds.includes(member.id)
                         );
                         let minMaxBarWidth: number | undefined;
                         for (const member of groupMembers) {

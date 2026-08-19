@@ -656,8 +656,12 @@ export class SceneTransitionSampler {
                 anchor,
                 hits: bucketHits,
                 order: targetBucket.order,
+                xAxisId: targetBucket.xAxisId,
+                xAxisTitle: targetBucket.xAxisTitle,
                 xKey: targetBucket.xKey,
-                xValue: targetBucket.xValue
+                xValue: targetBucket.xValue,
+                yAxisId: targetBucket.yAxisId,
+                yAxisTitle: targetBucket.yAxisTitle
             });
         }
 

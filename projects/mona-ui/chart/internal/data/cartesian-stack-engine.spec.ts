@@ -389,7 +389,7 @@ describe("CartesianStackEngine", () => {
 
             expect(layout.groups.length).toBe(0);
             expect(layout.bySeriesId.size).toBe(0);
-            expect(analysis.invalidGroupIds.has("bar:sales")).toBe(true);
+            expect(analysis.invalidGroupIds.has("bar:default-x:default-y:sales")).toBe(true);
             expect(analysis.invalidSeriesIds.has("s1")).toBe(true);
             expect(analysis.invalidSeriesIds.has("s2")).toBe(true);
             expect(analysis.diagnostics.some(d => d.code === "conflicting-stack-mode")).toBe(true);
@@ -412,8 +412,8 @@ describe("CartesianStackEngine", () => {
             });
 
             expect(layout.groups.length).toBe(2);
-            expect(layout.groups.map(g => g.id)).toContain("bar:rev");
-            expect(layout.groups.map(g => g.id)).toContain("area:rev");
+            expect(layout.groups.map(g => g.id)).toContain("bar:default-x:default-y:rev");
+            expect(layout.groups.map(g => g.id)).toContain("area:default-x:default-y:rev");
         });
     });
 

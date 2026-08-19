@@ -29,6 +29,7 @@ export interface MultiAxisCoordinatorOptions {
     readonly chartWidth: number;
     readonly insets?: { bottom?: number; left?: number; right?: number; top?: number };
     readonly labelMeasurements: ReadonlyMap<string, ChartLabelMeasurement>;
+    readonly orientation?: "horizontal" | "vertical";
     readonly rootData?: readonly unknown[];
     readonly rootXField?: ChartField;
     readonly warnedDiagnosticSignatures?: Set<string>;
@@ -52,6 +53,7 @@ export class CartesianMultiAxisCoordinator {
             chartWidth,
             insets = {},
             labelMeasurements,
+            orientation = "vertical",
             rootData,
             rootXField
         } = options;
@@ -75,7 +77,8 @@ export class CartesianMultiAxisCoordinator {
                 xAxis,
                 boundSeries,
                 rootData,
-                effectiveRootXField
+                effectiveRootXField,
+                orientation
             );
             warnings.push(...compat.warnings);
             resolvedTypesByAxisId.set(xAxis.axisId, compat.resolvedType);
@@ -87,18 +90,22 @@ export class CartesianMultiAxisCoordinator {
                 yAxis,
                 boundSeries,
                 rootData,
-                effectiveRootXField
+                effectiveRootXField,
+                orientation
             );
             warnings.push(...compat.warnings);
             resolvedTypesByAxisId.set(yAxis.axisId, compat.resolvedType);
 
             // Compute stack analysis for this Y axis
-            const primaryXType = resolvedTypesByAxisId.get(axisResolution.primaryXAxisId) ?? "category";
+            const primaryXType = resolvedTypesByAxisId.get(axisResolution.primaryXAxisId) ?? (orientation === "horizontal" ? "linear" : "category");
             const stackAnalysis = CartesianStackEngine.computeAnalysis({
+                primaryXAxisId: axisResolution.primaryXAxisId,
+                primaryYAxisId: yAxis.axisId,
+                resolvedXAxisTypeByAxisId: resolvedTypesByAxisId,
                 rootData: rootData ?? [],
                 rootXField: effectiveRootXField,
                 series: boundSeries.filter(s => "color" in s) as import("../context/chart-registration-context").ChartCartesianSeriesRegistration[],
-                xAxisType: primaryXType === "time" || primaryXType === "utc" ? primaryXType : primaryXType === "linear" ? "linear" : "category"
+                xAxisType: orientation === "horizontal" ? "category" : (primaryXType === "time" || primaryXType === "utc" ? primaryXType : primaryXType === "linear" ? "linear" : "category")
             });
             stackAnalysesByYAxis.set(yAxis.axisId, stackAnalysis);
             axisUnitModes.set(yAxis.axisId, stackAnalysis.axisUnitMode);
@@ -110,12 +117,22 @@ export class CartesianMultiAxisCoordinator {
         for (const xAxis of axisResolution.xAxes) {
             const resolvedType = resolvedTypesByAxisId.get(xAxis.axisId)!;
             const boundSeries = bindingResolution.seriesByXAxis.get(xAxis.axisId) ?? [];
+            const stackAnalysis = orientation === "horizontal"
+                ? stackAnalysesByYAxis.get(axisResolution.primaryYAxisId)
+                : undefined;
+            const stackedExtents = stackAnalysis && stackAnalysis.layout.groups.length > 0
+                ? { min: stackAnalysis.layout.yExtent[0], max: stackAnalysis.layout.yExtent[1] }
+                : undefined;
+
             const domainRes = CartesianAxisDomainResolver.resolveDomain(
                 xAxis,
                 resolvedType,
                 boundSeries,
                 rootData,
-                effectiveRootXField
+                effectiveRootXField,
+                stackedExtents,
+                stackAnalysis,
+                orientation
             );
             warnings.push(...domainRes.warnings);
             domainsByAxisId.set(xAxis.axisId, domainRes.domain);
@@ -124,7 +141,9 @@ export class CartesianMultiAxisCoordinator {
         for (const yAxis of axisResolution.yAxes) {
             const resolvedType = resolvedTypesByAxisId.get(yAxis.axisId)!;
             const boundSeries = bindingResolution.seriesByYAxis.get(yAxis.axisId) ?? [];
-            const stackAnalysis = stackAnalysesByYAxis.get(yAxis.axisId);
+            const stackAnalysis = orientation === "horizontal"
+                ? undefined
+                : stackAnalysesByYAxis.get(yAxis.axisId);
             const stackedExtents = stackAnalysis && stackAnalysis.layout.groups.length > 0
                 ? { min: stackAnalysis.layout.yExtent[0], max: stackAnalysis.layout.yExtent[1] }
                 : undefined;
@@ -136,7 +155,8 @@ export class CartesianMultiAxisCoordinator {
                 rootData,
                 effectiveRootXField,
                 stackedExtents,
-                stackAnalysis
+                stackAnalysis,
+                orientation
             );
             warnings.push(...domainRes.warnings);
             domainsByAxisId.set(yAxis.axisId, domainRes.domain);
@@ -152,73 +172,13 @@ export class CartesianMultiAxisCoordinator {
 
         const guttersByAxisId = new Map<string, number>();
         const sideOffsetsByAxisId = new Map<string, number>();
-        const xScales = new Map<string, ChartPositionScale>();
-        const yScales = new Map<string, ChartPositionScale>();
+        let currentScales = this.#buildScales(axisResolution, resolvedTypesByAxisId, domainsByAxisId, plotRect);
 
         const axisSpacing = 8;
         const maxIterations = 3;
 
         for (let iter = 0; iter < maxIterations; iter++) {
-            // Build scales with current plotRect
-            for (const xAxis of axisResolution.xAxes) {
-                const type = resolvedTypesByAxisId.get(xAxis.axisId)!;
-                const domain = domainsByAxisId.get(xAxis.axisId)!;
-                const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
-
-                let scale: ChartPositionScale;
-                if (type === "category") {
-                    scale = CartesianScaleFactory.createBandScale(domain as readonly string[], range);
-                } else if (type === "time" || type === "utc") {
-                    scale = CartesianScaleFactory.createTemporalScale({
-                        domain: domain as readonly [Date, Date],
-                        explicitMax: xAxis.explicitMax,
-                        explicitMin: xAxis.explicitMin,
-                        nice: xAxis.nice,
-                        range,
-                        tickCount: xAxis.tickCount,
-                        type
-                    });
-                } else {
-                    scale = CartesianScaleFactory.createNumericScale({
-                        domain: domain as readonly [number, number],
-                        explicitMax: typeof xAxis.explicitMax === "number" ? xAxis.explicitMax : undefined,
-                        explicitMin: typeof xAxis.explicitMin === "number" ? xAxis.explicitMin : undefined,
-                        exponent: xAxis.exponent,
-                        logBase: xAxis.logBase,
-                        nice: xAxis.nice,
-                        range,
-                        symlogConstant: xAxis.symlogConstant,
-                        tickCount: xAxis.tickCount,
-                        type
-                    });
-                }
-                xScales.set(xAxis.axisId, scale);
-            }
-
-            for (const yAxis of axisResolution.yAxes) {
-                const type = resolvedTypesByAxisId.get(yAxis.axisId)!;
-                const domain = domainsByAxisId.get(yAxis.axisId)!;
-                const range: readonly [number, number] = [plotRect.y + plotRect.height, plotRect.y];
-
-                let scale: ChartPositionScale;
-                if (type === "category") {
-                    scale = CartesianScaleFactory.createBandScale(domain as readonly string[], range);
-                } else {
-                    scale = CartesianScaleFactory.createNumericScale({
-                        domain: domain as readonly [number, number],
-                        explicitMax: typeof yAxis.explicitMax === "number" ? yAxis.explicitMax : undefined,
-                        explicitMin: typeof yAxis.explicitMin === "number" ? yAxis.explicitMin : undefined,
-                        exponent: yAxis.exponent,
-                        logBase: yAxis.logBase,
-                        nice: yAxis.nice,
-                        range,
-                        symlogConstant: yAxis.symlogConstant,
-                        tickCount: yAxis.tickCount,
-                        type: type as "linear" | "log" | "symlog" | "pow" | "sqrt"
-                    });
-                }
-                yScales.set(yAxis.axisId, scale);
-            }
+            currentScales = this.#buildScales(axisResolution, resolvedTypesByAxisId, domainsByAxisId, plotRect);
 
             // Measure gutters per axis
             const allAxes: ResolvedCartesianAxisDescriptor[] = [
@@ -227,7 +187,7 @@ export class CartesianMultiAxisCoordinator {
             ];
 
             for (const axis of allAxes) {
-                const scale = (axis.dimension === "x" ? xScales.get(axis.axisId) : yScales.get(axis.axisId))!;
+                const scale = (axis.dimension === "x" ? currentScales.xScales.get(axis.axisId) : currentScales.yScales.get(axis.axisId))!;
                 const resolvedType = resolvedTypesByAxisId.get(axis.axisId)!;
                 const unitMode = axisUnitModes.get(axis.axisId) ?? "raw";
                 const gutter = this.#estimateAxisGutter(axis, scale, resolvedType, labelMeasurements, unitMode);
@@ -284,12 +244,13 @@ export class CartesianMultiAxisCoordinator {
             }
         }
 
-        // 4. Construct final ScaleRegistry & ChartAxisScenes
+        // 4. Construct final synchronized ScaleRegistry & ChartAxisScenes from committed plotRect
+        const finalScales = this.#buildScales(axisResolution, resolvedTypesByAxisId, domainsByAxisId, plotRect);
         const scaleRegistry = new CartesianScaleRegistry({
             primaryXAxisId: axisResolution.primaryXAxisId,
             primaryYAxisId: axisResolution.primaryYAxisId,
-            xScales,
-            yScales
+            xScales: finalScales.xScales,
+            yScales: finalScales.yScales
         });
 
         const axisScenes: ChartAxisScene[] = [];
@@ -299,7 +260,7 @@ export class CartesianMultiAxisCoordinator {
         ];
 
         for (const axis of allAxes) {
-            const scale = (axis.dimension === "x" ? xScales.get(axis.axisId) : yScales.get(axis.axisId))!;
+            const scale = (axis.dimension === "x" ? finalScales.xScales.get(axis.axisId) : finalScales.yScales.get(axis.axisId))!;
             const resolvedType = resolvedTypesByAxisId.get(axis.axisId)!;
             const unitMode = axisUnitModes.get(axis.axisId) ?? "raw";
             const gutter = guttersByAxisId.get(axis.axisId) ?? 32;
@@ -347,6 +308,80 @@ export class CartesianMultiAxisCoordinator {
             stackAnalysesByYAxis,
             warnings
         };
+    }
+
+    static #buildScales(
+        axisResolution: CartesianAxisRegistryResolution,
+        resolvedTypesByAxisId: ReadonlyMap<string, ResolvedChartCartesianAxisType>,
+        domainsByAxisId: ReadonlyMap<string, readonly unknown[]>,
+        plotRect: ChartRect
+    ): { xScales: Map<string, ChartPositionScale>; yScales: Map<string, ChartPositionScale> } {
+        const xScales = new Map<string, ChartPositionScale>();
+        const yScales = new Map<string, ChartPositionScale>();
+
+        for (const xAxis of axisResolution.xAxes) {
+            const type = resolvedTypesByAxisId.get(xAxis.axisId)!;
+            const domain = domainsByAxisId.get(xAxis.axisId)!;
+            const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
+
+            let scale: ChartPositionScale;
+            if (type === "category") {
+                scale = CartesianScaleFactory.createBandScale(domain as readonly string[], range);
+            } else if (type === "time" || type === "utc") {
+                scale = CartesianScaleFactory.createTemporalScale({
+                    domain: domain as readonly [Date, Date],
+                    explicitMax: xAxis.explicitMax,
+                    explicitMin: xAxis.explicitMin,
+                    nice: xAxis.nice,
+                    range,
+                    tickCount: xAxis.tickCount,
+                    type
+                });
+            } else {
+                scale = CartesianScaleFactory.createNumericScale({
+                    domain: domain as readonly [number, number],
+                    explicitMax: typeof xAxis.explicitMax === "number" ? xAxis.explicitMax : undefined,
+                    explicitMin: typeof xAxis.explicitMin === "number" ? xAxis.explicitMin : undefined,
+                    exponent: xAxis.exponent,
+                    logBase: xAxis.logBase,
+                    nice: xAxis.nice,
+                    range,
+                    symlogConstant: xAxis.symlogConstant,
+                    tickCount: xAxis.tickCount,
+                    type
+                });
+            }
+            xScales.set(xAxis.axisId, scale);
+        }
+
+        for (const yAxis of axisResolution.yAxes) {
+            const type = resolvedTypesByAxisId.get(yAxis.axisId)!;
+            const domain = domainsByAxisId.get(yAxis.axisId)!;
+            const range: readonly [number, number] = type === "category"
+                ? [plotRect.y, plotRect.y + plotRect.height]
+                : [plotRect.y + plotRect.height, plotRect.y];
+
+            let scale: ChartPositionScale;
+            if (type === "category") {
+                scale = CartesianScaleFactory.createBandScale(domain as readonly string[], range);
+            } else {
+                scale = CartesianScaleFactory.createNumericScale({
+                    domain: domain as readonly [number, number],
+                    explicitMax: typeof yAxis.explicitMax === "number" ? yAxis.explicitMax : undefined,
+                    explicitMin: typeof yAxis.explicitMin === "number" ? yAxis.explicitMin : undefined,
+                    exponent: yAxis.exponent,
+                    logBase: yAxis.logBase,
+                    nice: yAxis.nice,
+                    range,
+                    symlogConstant: yAxis.symlogConstant,
+                    tickCount: yAxis.tickCount,
+                    type: type as "linear" | "log" | "symlog" | "pow" | "sqrt"
+                });
+            }
+            yScales.set(yAxis.axisId, scale);
+        }
+
+        return { xScales, yScales };
     }
 
     static #estimateAxisGutter(
