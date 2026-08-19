@@ -28,20 +28,39 @@ function mapXCoordinate(
     xScaleValue: string | number | Date,
     xAxisType: ChartXAxisType,
     xScale: ChartBandScale | ChartContinuousScale
-): number {
+): number | undefined {
     if (xAxisType === "category") {
         const bandScale = xScale as ChartBandScale;
         const mapped = bandScale.map(String(xScaleValue));
+        if (mapped === undefined || !Number.isFinite(mapped)) {
+            return undefined;
+        }
         const bandwidth = bandScale.bandwidth ? bandScale.bandwidth() : 0;
-        return (mapped ?? 0) + bandwidth / 2;
+        return mapped + bandwidth / 2;
     }
     if (xAxisType === "time" || xAxisType === "utc") {
         const timeScale = xScale as ChartContinuousScale<Date>;
-        const date = xScaleValue instanceof Date ? xScaleValue : new Date(xScaleValue as string | number);
-        return timeScale.map(date) ?? 0;
+        let date: Date | undefined;
+        if (xScaleValue instanceof Date && !Number.isNaN(xScaleValue.getTime())) {
+            date = xScaleValue;
+        } else if (typeof xScaleValue === "number" && Number.isFinite(xScaleValue)) {
+            date = new Date(xScaleValue);
+        } else if (typeof xScaleValue === "string") {
+            const parsed = Date.parse(xScaleValue);
+            if (!Number.isNaN(parsed)) {
+                date = new Date(parsed);
+            }
+        }
+        if (!date) return undefined;
+        const mapped = timeScale.map(date);
+        return mapped !== undefined && Number.isFinite(mapped) ? mapped : undefined;
     }
-    const linearScale = xScale as ChartContinuousScale<number>;
-    return linearScale.map(Number(xScaleValue)) ?? 0;
+    if (isFiniteNumber(xScaleValue)) {
+        const linearScale = xScale as ChartContinuousScale<number>;
+        const mapped = linearScale.map(Number(xScaleValue));
+        return mapped !== undefined && Number.isFinite(mapped) ? mapped : undefined;
+    }
+    return undefined;
 }
 
 function formatValue(
@@ -53,6 +72,15 @@ function formatValue(
         return String(value);
     }
     return (formatter as (val: unknown, idx?: number) => string)(value, index);
+}
+
+interface ValidCandleMarkData {
+    readonly centerX: number;
+    readonly closeY: number;
+    readonly highY: number;
+    readonly lowY: number;
+    readonly mark: ResolvedFinancialDataset["marks"][number];
+    readonly openY: number;
 }
 
 export class FinancialLayoutEngine {
@@ -72,9 +100,38 @@ export class FinancialLayoutEngine {
         const explicitMaxBodyWidth = series.maxBodyWidth?.();
         const bandwidth = "bandwidth" in xScale ? (xScale as ChartBandScale).bandwidth() : undefined;
 
-        // Map all marks to pixel X coordinates using canonical xScaleValue
-        const markCoordinates = resolvedDataset.marks.map(m => mapXCoordinate(m.xScaleValue, xAxisType, xScale));
+        // Filter to marks that are valid and completely mappable
+        const validMarks: ValidCandleMarkData[] = [];
+        for (const mark of resolvedDataset.marks) {
+            const centerX = mapXCoordinate(mark.xScaleValue, xAxisType, xScale);
+            if (centerX === undefined || !Number.isFinite(centerX)) {
+                continue;
+            }
+            const openY = yScale.map(mark.open);
+            const highY = yScale.map(mark.high);
+            const lowY = yScale.map(mark.low);
+            const closeY = yScale.map(mark.close);
 
+            if (
+                openY === undefined || !Number.isFinite(openY) ||
+                highY === undefined || !Number.isFinite(highY) ||
+                lowY === undefined || !Number.isFinite(lowY) ||
+                closeY === undefined || !Number.isFinite(closeY)
+            ) {
+                continue;
+            }
+
+            validMarks.push({
+                centerX,
+                closeY,
+                highY,
+                lowY,
+                mark,
+                openY
+            });
+        }
+
+        const markCoordinates = validMarks.map(v => v.centerX);
         const markWidths = FinancialWidthEngine.resolveBodyWidths({
             bandwidth,
             explicitBodyWidth,
@@ -92,13 +149,9 @@ export class FinancialLayoutEngine {
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
 
-        const sceneMarks: SceneCandlestickMark[] = resolvedDataset.marks.map((mark, i) => {
-            const centerX = markCoordinates[i];
+        const sceneMarks: SceneCandlestickMark[] = validMarks.map((v, i) => {
+            const { centerX, closeY, highY, lowY, mark, openY } = v;
             const bodyWidth = markWidths[i] ?? nominalBodyWidth;
-            const openY = yScale.map(mark.open) ?? 0;
-            const highY = yScale.map(mark.high) ?? 0;
-            const lowY = yScale.map(mark.low) ?? 0;
-            const closeY = yScale.map(mark.close) ?? 0;
 
             const bodyTopY = Math.min(openY, closeY);
             const rawBodyHeight = Math.abs(closeY - openY);
@@ -174,9 +227,38 @@ export class FinancialLayoutEngine {
                 : undefined;
         const bandwidth = "bandwidth" in xScale ? (xScale as ChartBandScale).bandwidth() : undefined;
 
-        // Map all marks to pixel X coordinates using canonical xScaleValue
-        const markCoordinates = resolvedDataset.marks.map(m => mapXCoordinate(m.xScaleValue, xAxisType, xScale));
+        // Filter to marks that are valid and completely mappable
+        const validMarks: ValidCandleMarkData[] = [];
+        for (const mark of resolvedDataset.marks) {
+            const centerX = mapXCoordinate(mark.xScaleValue, xAxisType, xScale);
+            if (centerX === undefined || !Number.isFinite(centerX)) {
+                continue;
+            }
+            const openY = yScale.map(mark.open);
+            const highY = yScale.map(mark.high);
+            const lowY = yScale.map(mark.low);
+            const closeY = yScale.map(mark.close);
 
+            if (
+                openY === undefined || !Number.isFinite(openY) ||
+                highY === undefined || !Number.isFinite(highY) ||
+                lowY === undefined || !Number.isFinite(lowY) ||
+                closeY === undefined || !Number.isFinite(closeY)
+            ) {
+                continue;
+            }
+
+            validMarks.push({
+                centerX,
+                closeY,
+                highY,
+                lowY,
+                mark,
+                openY
+            });
+        }
+
+        const markCoordinates = validMarks.map(v => v.centerX);
         const markWidths = FinancialWidthEngine.resolveBodyWidths({
             bandwidth,
             explicitBodyWidth,
@@ -194,19 +276,14 @@ export class FinancialLayoutEngine {
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
 
-        const sceneMarks: SceneOhlcMark[] = resolvedDataset.marks.map((mark, i) => {
-            const centerX = markCoordinates[i];
+        const sceneMarks: SceneOhlcMark[] = validMarks.map((v, i) => {
+            const { centerX, closeY, highY, lowY, mark, openY } = v;
             const bodyWidth = markWidths[i] ?? nominalBodyWidth;
             const maxTick = bodyWidth / 2;
             const tickWidth = (explicitTickLength !== undefined && isFiniteNumber(explicitTickLength) && (explicitTickLength as number) > 0)
                 ? Math.min(explicitTickLength as number, maxTick)
                 : maxTick;
             const totalWidth = tickWidth * 2;
-
-            const openY = yScale.map(mark.open) ?? 0;
-            const highY = yScale.map(mark.high) ?? 0;
-            const lowY = yScale.map(mark.low) ?? 0;
-            const closeY = yScale.map(mark.close) ?? 0;
 
             const formattedOpen = formatValue(mark.open, seriesFormatter, mark.dataIndex);
             const formattedHigh = formatValue(mark.high, seriesFormatter, mark.dataIndex);

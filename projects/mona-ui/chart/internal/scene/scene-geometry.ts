@@ -251,6 +251,8 @@ export interface SceneHitTarget {
 
 export interface ChartInteractionBucket {
     readonly anchor: ChartPoint;
+    readonly axisDimension?: "x" | "y";
+    readonly axisId?: string;
     readonly hits: readonly SceneHitTarget[];
     readonly order: number;
     readonly xAxisId?: string;

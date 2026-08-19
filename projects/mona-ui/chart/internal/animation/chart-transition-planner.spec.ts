@@ -437,4 +437,37 @@ describe("ChartTransitionPlanner", () => {
             expect(plan.mode).toBe("crossfade");
         });
     });
+
+    describe("Multi-Axis Topology & Re-binding Transitions (MAXR-025, MAXR-026)", () => {
+        it("should fallback to crossfade when Cartesian axisTopologySignature changes (MAXR-025)", () => {
+            const prev = createMockCartesianSceneWithBars();
+            prev.axisTopologySignature = "sig-1-axis";
+
+            const next = createMockCartesianSceneWithBars();
+            next.axisTopologySignature = "sig-2-axes";
+
+            const options = normalizeChartAnimationOptions(true);
+            const plan = ChartTransitionPlanner.plan(prev, next, "data", options);
+
+            expect(plan.mode).toBe("crossfade");
+        });
+
+        it("should fallback to crossfade when a series is rebound to a different axis (MAXR-026)", () => {
+            const baseScene = createMockCartesianSceneWithBars();
+            const prev: CartesianXYChartScene = {
+                ...baseScene,
+                series: [{ ...baseScene.series[0], xAxisId: "x-primary", yAxisId: "y-left" }]
+            };
+
+            const next: CartesianXYChartScene = {
+                ...baseScene,
+                series: [{ ...baseScene.series[0], xAxisId: "x-primary", yAxisId: "y-right" }] // Rebound from y-left to y-right
+            };
+
+            const options = normalizeChartAnimationOptions(true);
+            const plan = ChartTransitionPlanner.plan(prev, next, "data", options);
+
+            expect(plan.mode).toBe("crossfade");
+        });
+    });
 });

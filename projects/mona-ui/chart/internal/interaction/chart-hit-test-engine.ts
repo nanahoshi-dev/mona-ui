@@ -152,6 +152,18 @@ export class ChartHitTestEngine {
             ? pointSpatialIndex.query(pointer, maxHoverDistance)
             : hitTargets;
 
+        const getBucketForHit = (target: SceneHitTarget): ChartInteractionBucket | undefined => {
+            const axisId = target.xAxisId ?? (cartesianScene.interactionAxis === "y" ? target.yAxisId : undefined);
+            if (axisId && cartesianScene.interactionBucketsByAxisId) {
+                const axisLookup = cartesianScene.interactionBucketsByAxisId.get(axisId);
+                if (axisLookup?.has(target.xKey)) {
+                    return axisLookup.get(target.xKey);
+                }
+            }
+            return cartesianScene.interactionBucketLookup?.get(target.xKey) ??
+                interactionBuckets?.find(b => b.xKey === target.xKey);
+        };
+
         // Cartesian shared mode
         if (shared) {
             // 1. Direct bar hit test
@@ -160,8 +172,7 @@ export class ChartHitTestEngine {
                     (target.bounds !== undefined && isPointInRect(pointer, target.bounds)) ||
                     (target.visualBounds !== undefined && isPointInRect(pointer, target.visualBounds));
                 if (isHit) {
-                    const bucket = cartesianScene.interactionBucketLookup?.get(target.xKey) ??
-                        interactionBuckets?.find(b => b.xKey === target.xKey);
+                    const bucket = getBucketForHit(target);
                     const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === target.xKey);
                     return {
                         activeHitTarget: target,
@@ -185,8 +196,7 @@ export class ChartHitTestEngine {
                             topFinHit = candidate;
                         }
                     }
-                    const bucket = cartesianScene.interactionBucketLookup?.get(topFinHit.xKey) ??
-                        interactionBuckets?.find(b => b.xKey === topFinHit.xKey);
+                    const bucket = getBucketForHit(topFinHit);
                     const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === topFinHit.xKey);
                     return {
                         activeHitTarget: topFinHit,
@@ -232,8 +242,7 @@ export class ChartHitTestEngine {
             }
 
             if (topContainedMarker) {
-                const bucket = cartesianScene.interactionBucketLookup?.get(topContainedMarker.xKey) ??
-                    interactionBuckets?.find(b => b.xKey === topContainedMarker?.xKey);
+                const bucket = getBucketForHit(topContainedMarker);
                 const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === topContainedMarker?.xKey);
                 return {
                     activeHitTarget: topContainedMarker,
@@ -242,9 +251,58 @@ export class ChartHitTestEngine {
                 };
             }
 
-            // 4. Nearest category bucket (by X or Y based on interactionAxis)
-            if (interactionBuckets && interactionBuckets.length > 0) {
-                const isAxisY = cartesianScene.interactionAxis === "y";
+            // 4. Nearest category bucket (namespaced by axis if multiple axes exist)
+            const isAxisY = cartesianScene.interactionAxis === "y";
+            if (cartesianScene.interactionBucketsByAxisId && cartesianScene.interactionBucketsByAxisId.size > 0) {
+                let bestBucket: ChartInteractionBucket | null = null;
+                let bestDistance = Number.POSITIVE_INFINITY;
+
+                for (const [, axisBucketsMap] of cartesianScene.interactionBucketsByAxisId) {
+                    const axisBuckets = Array.from(axisBucketsMap.values());
+                    const nearest = isAxisY
+                        ? findNearestInteractionBucketByY(axisBuckets, pointer.y)
+                        : findNearestInteractionBucketByX(axisBuckets, pointer.x);
+                    if (nearest) {
+                        const dist = isAxisY
+                            ? Math.abs(pointer.y - nearest.anchor.y)
+                            : Math.abs(pointer.x - nearest.anchor.x);
+                        if (dist < bestDistance) {
+                            bestDistance = dist;
+                            bestBucket = nearest;
+                        }
+                    }
+                }
+
+                if (bestBucket && bestDistance <= maxHoverDistance) {
+                    let nearestHit = bestBucket.hits[0];
+                    let minHitDist = Number.POSITIVE_INFINITY;
+                    for (const hit of bestBucket.hits) {
+                        let hx = hit.point?.x;
+                        let hy = hit.point?.y;
+                        if (hit.seriesType === "rangeArea" && hit.rangeBand) {
+                            hx = hit.rangeBand.fromPoint.x;
+                            const minY = Math.min(hit.rangeBand.fromPoint.y, hit.rangeBand.toPoint.y);
+                            const maxY = Math.max(hit.rangeBand.fromPoint.y, hit.rangeBand.toPoint.y);
+                            hy = Math.max(minY, Math.min(maxY, pointer.y));
+                        } else if (hit.bounds) {
+                            hx = hit.bounds.x + hit.bounds.width / 2;
+                            hy = hit.bounds.y + hit.bounds.height / 2;
+                        }
+                        hx = hx ?? bestBucket.anchor.x;
+                        hy = hy ?? pointer.y;
+                        const d = distance(pointer.x, pointer.y, hx, hy);
+                        if (d < minHitDist) {
+                            minHitDist = d;
+                            nearestHit = hit;
+                        }
+                    }
+                    return {
+                        activeHitTarget: nearestHit ?? null,
+                        activeHits: bestBucket.hits,
+                        pointerPosition: pointer
+                    };
+                }
+            } else if (interactionBuckets && interactionBuckets.length > 0) {
                 const nearestBucket = isAxisY
                     ? findNearestInteractionBucketByY(interactionBuckets, pointer.y)
                     : findNearestInteractionBucketByX(interactionBuckets, pointer.x);

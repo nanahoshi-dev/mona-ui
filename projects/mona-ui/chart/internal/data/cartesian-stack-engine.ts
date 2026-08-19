@@ -105,12 +105,11 @@ export interface CartesianStackAnalysis {
 }
 
 export interface CartesianStackEngineOptions {
+    readonly orientation?: "horizontal" | "vertical";
     readonly primaryXAxisId?: string;
     readonly primaryYAxisId?: string;
-    readonly resolvedXAxisTypeByAxisId?: ReadonlyMap<
-        string,
-        import("../scale/chart-scale").ResolvedChartCartesianAxisType
-    >;
+    readonly resolvedXAxisTypeByAxisId?: ReadonlyMap<string, ResolvedChartCartesianAxisType>;
+    readonly resolvedYAxisTypeByAxisId?: ReadonlyMap<string, ResolvedChartCartesianAxisType>;
     readonly rootData: readonly unknown[];
     readonly rootXField?: ChartField;
     readonly series: readonly ChartCartesianSeriesRegistration[];
@@ -128,13 +127,16 @@ interface RawDatumRecord {
 
 export class CartesianStackEngine {
     public static computeAnalysis(options: CartesianStackEngineOptions): CartesianStackAnalysis {
-        const { rootData, rootXField, series, xAxisType = "category" } = options;
+        const {
+            orientation = "vertical",
+            rootData,
+            rootXField,
+            series,
+            xAxisType = "category"
+        } = options;
         const diagnostics: ChartDiagnostic[] = [];
 
-        // 1. Filter series by X-axis compatibility (STK-002)
-        const compatibleSeries = series.filter(s => isCartesianSeriesCompatibleWithXAxisType(s.type, xAxisType));
-
-        // 2. Discover registered stack groups across ALL compatible series (visible + hidden) (STK-007, STK-016)
+        // 1. Discover registered stack groups across stackable series
         const registeredGroupMap = new Map<
             string,
             {
@@ -146,7 +148,7 @@ export class CartesianStackEngine {
             }
         >();
 
-        for (const s of compatibleSeries) {
+        for (const s of series) {
             if (s.type !== "bar" && s.type !== "area") {
                 continue;
             }
@@ -184,6 +186,16 @@ export class CartesianStackEngine {
                 ("yAxisId" in stackable && typeof stackable.yAxisId === "function" ? stackable.yAxisId() : undefined) ??
                 options.primaryYAxisId ??
                 "default-y";
+
+            // Check compatibility with group's independent axis type
+            const indepType = orientation === "horizontal"
+                ? (options.resolvedYAxisTypeByAxisId?.get(yAxisId) ?? "category")
+                : (options.resolvedXAxisTypeByAxisId?.get(xAxisId) ?? xAxisType ?? "category");
+
+            if (!isCartesianSeriesCompatibleWithXAxisType(s.type, indepType as any)) {
+                continue;
+            }
+
             const groupKey = `${stackable.type}:${xAxisId}:${yAxisId}:${trimmedStack}`;
 
             let groupRecord = registeredGroupMap.get(groupKey);
@@ -223,6 +235,27 @@ export class CartesianStackEngine {
                 });
             }
 
+            // Enforce linear scale on actual value axis (MAXR-023)
+            const valueAxisId = orientation === "horizontal" ? xAxisId : yAxisId;
+            const valueAxisType = orientation === "horizontal"
+                ? (options.resolvedXAxisTypeByAxisId?.get(xAxisId) ?? "linear")
+                : (options.resolvedYAxisTypeByAxisId?.get(yAxisId) ?? "linear");
+
+            if (valueAxisType !== "linear") {
+                invalidGroupIds.add(groupKey);
+                for (const s of seriesList) {
+                    invalidSeriesIds.add(s.id);
+                }
+                diagnostics.push({
+                    code: "nonlinear-stack-value-axis",
+                    message: `Stack group "${name}" on axis "${valueAxisId}" uses non-linear scale "${valueAxisType}". Stacking is only supported on linear value axes.`,
+                    severity: "warning",
+                    signature: `nonlinear-stack:${groupKey}`
+                });
+            }
+
+            const isValid = !hasConflict && valueAxisType === "linear";
+
             let regHasPos = false;
             let regHasNeg = false;
             for (const s of seriesList) {
@@ -245,7 +278,7 @@ export class CartesianStackEngine {
                 registeredHasNegative: regHasNeg,
                 registeredHasPositive: regHasPos,
                 registeredSeriesIds: seriesList.map(s => s.id),
-                valid: !hasConflict,
+                valid: isValid,
                 xAxisId,
                 yAxisId
             };
@@ -258,7 +291,7 @@ export class CartesianStackEngine {
                     groupName: name,
                     mode: firstMode,
                     seriesId: s.id,
-                    valid: !hasConflict,
+                    valid: isValid,
                     xAxisId,
                     yAxisId
                 });
@@ -313,17 +346,20 @@ export class CartesianStackEngine {
                 hasNormalStacks = true;
             }
 
-            const groupXAxisType =
-                xAxisType === "category" ? "category" : (options.resolvedXAxisTypeByAxisId?.get(xAxisId) ?? xAxisType);
+            const groupIndepAxisType = orientation === "horizontal"
+                ? (options.resolvedYAxisTypeByAxisId?.get(yAxisId) ?? "category")
+                : (options.resolvedXAxisTypeByAxisId?.get(xAxisId) ?? xAxisType ?? "category");
 
-            // Extract records per series with 1 resolver per series (STK-005) & first-valid duplicate (STK-006)
+            // Extract records per series
             const seriesRecordsMap = new Map<string, Map<ChartInteractionXKey, RawDatumRecord>>();
             const groupXKeyOrder: ChartInteractionXKey[] = [];
             const groupXKeySet = new Set<ChartInteractionXKey>();
 
             for (const s of visibleMembers) {
                 const sData = resolveData(s.data(), rootData);
-                const sXField = s.xField() ?? rootXField;
+                const sXField = orientation === "horizontal"
+                    ? (s.xField?.() ?? rootXField)
+                    : (s.xField?.() ?? rootXField);
                 const sField = s.field();
                 const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
                 const sRecords = new Map<ChartInteractionXKey, RawDatumRecord>();
@@ -333,7 +369,7 @@ export class CartesianStackEngine {
                     const xVal = resolveValue(datum, sXField, dIdx);
                     const yVal = resolveValue(datum, sField, dIdx);
 
-                    const xKey = this.resolveNormalizedXKey(xVal, dIdx, groupXAxisType as any);
+                    const xKey = this.resolveNormalizedXKey(xVal, dIdx, groupIndepAxisType as any);
                     if (xKey === undefined) {
                         continue;
                     }
@@ -354,7 +390,7 @@ export class CartesianStackEngine {
                             warnedDuplicateKeys.add(warnId);
                             diagnostics.push({
                                 code: "duplicate-x-mark",
-                                message: `Series "${s.name()}" has duplicate valid X coordinate "${String(xKey)}". Later duplicates are skipped for stack layout.`,
+                                message: `Series "${s.name()}" has duplicate valid coordinate "${String(xKey)}". Later duplicates are skipped for stack layout.`,
                                 severity: "warning",
                                 signature: `duplicate-x:${warnId}`
                             });
@@ -377,13 +413,13 @@ export class CartesianStackEngine {
 
             let sortedXKeys: readonly ChartInteractionXKey[];
             if (
-                groupXAxisType === "linear" ||
-                groupXAxisType === "log" ||
-                groupXAxisType === "symlog" ||
-                groupXAxisType === "pow" ||
-                groupXAxisType === "sqrt" ||
-                groupXAxisType === "time" ||
-                groupXAxisType === "utc"
+                groupIndepAxisType === "linear" ||
+                groupIndepAxisType === "log" ||
+                groupIndepAxisType === "symlog" ||
+                groupIndepAxisType === "pow" ||
+                groupIndepAxisType === "sqrt" ||
+                groupIndepAxisType === "time" ||
+                groupIndepAxisType === "utc"
             ) {
                 sortedXKeys = [...groupXKeyOrder].sort((a, b) => Number(a) - Number(b));
             } else {
@@ -487,7 +523,7 @@ export class CartesianStackEngine {
                         };
                         segmentEntriesAtX.push({ entry, isPositive, seriesId: s.id });
                     } else {
-                        // Synthetic gap entry for unaligned series (STK-003)
+                        // Synthetic gap entry for unaligned series
                         const synthKey = JSON.stringify([s.id, "stack-synthetic", typeof xKey, xKey]);
                         if (geometryType === "area") {
                             entry = {
@@ -574,17 +610,18 @@ export class CartesianStackEngine {
             }
         }
 
-        // 4. Determine Y axis unit mode & validate (STK-009, STK-010)
+        // 4. Determine value axis unit mode & validate (STK-009, STK-010)
         let visibleYUnitMode: CartesianVisibleYUnitMode = "none";
         let axisUnitMode: CartesianAxisUnitMode = "raw";
 
-        const visibleCompatibleSeries = compatibleSeries.filter(s => s.visible());
-        if (visibleCompatibleSeries.length > 0) {
-            const visiblePercentSeries = visibleCompatibleSeries.filter(s => {
+        const visibleSeriesList = series.filter(s => s.visible());
+        const visibleStackableSeries = visibleSeriesList.filter(s => s.type === "bar" || s.type === "area");
+        if (visibleStackableSeries.length > 0) {
+            const visiblePercentSeries = visibleStackableSeries.filter(s => {
                 const membership = membershipBySeriesId.get(s.id);
                 return membership?.valid && membership.mode === "percent";
             });
-            const visibleRawSeries = visibleCompatibleSeries.filter(s => {
+            const visibleRawSeries = visibleStackableSeries.filter(s => {
                 const membership = membershipBySeriesId.get(s.id);
                 return !membership || !membership.valid || membership.mode !== "percent";
             });
@@ -592,14 +629,15 @@ export class CartesianStackEngine {
             if (visiblePercentSeries.length > 0 && visibleRawSeries.length > 0) {
                 visibleYUnitMode = "invalid";
                 axisUnitMode = "raw";
-                for (const s of visibleCompatibleSeries) {
+                for (const s of visibleStackableSeries) {
                     invalidSeriesIds.add(s.id);
                 }
+                const valueDim = orientation === "horizontal" ? "X" : "Y";
                 diagnostics.push({
                     code: "mixed-y-axis-units",
-                    message: `Percent stacked series and raw value series cannot share the same Y axis. Conflicting series geometry was omitted.`,
+                    message: `Percent stacked series and raw value series cannot share the same ${valueDim} value axis. Conflicting series geometry was omitted.`,
                     severity: "warning",
-                    signature: "unit-mix:percent-raw"
+                    signature: `unit-mix:percent-raw:${valueDim}`
                 });
             } else if (visiblePercentSeries.length > 0) {
                 visibleYUnitMode = "percent-stack";
@@ -611,6 +649,9 @@ export class CartesianStackEngine {
                 visibleYUnitMode = "raw";
                 axisUnitMode = "raw";
             }
+        } else if (visibleSeriesList.length > 0) {
+            visibleYUnitMode = "raw";
+            axisUnitMode = "raw";
         } else {
             const regPercentGroups = registeredGroups.filter(g => g.valid && g.mode === "percent");
             if (regPercentGroups.length > 0) {
@@ -680,10 +721,12 @@ export class CartesianStackEngine {
             if (typeof xVal === "number" && Number.isFinite(xVal)) {
                 return xVal;
             }
-            if (typeof xVal === "string") {
-                const parsed = Date.parse(xVal);
-                if (!Number.isNaN(parsed)) {
-                    return parsed;
+            if (typeof xVal === "string" && xVal.trim().length > 0) {
+                if (!/^\s*-?\d+(\.\d+)?\s*$/.test(xVal)) {
+                    const parsed = Date.parse(xVal);
+                    if (!Number.isNaN(parsed)) {
+                        return parsed;
+                    }
                 }
             }
             return undefined;

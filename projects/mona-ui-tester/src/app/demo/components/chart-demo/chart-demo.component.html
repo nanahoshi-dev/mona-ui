@@ -2022,7 +2022,7 @@
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
+                        <mona-chart-x-axis [type]="'category'" [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
                         <mona-chart-y-axis
                             [axisLine]="yAxisLine()"
                             [gridLines]="yGridLines()"
@@ -2065,7 +2065,7 @@
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
+                        <mona-chart-x-axis [type]="'category'" [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
                         <mona-chart-y-axis
                             [axisLine]="yAxisLine()"
                             [gridLines]="yGridLines()"

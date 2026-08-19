@@ -1,5 +1,6 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import { calculateCategoryDomain } from "../data/chart-domain";
 import { resolveData, resolveValue } from "../data/chart-value-resolver";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
@@ -20,6 +21,9 @@ function parseTemporalValue(val: unknown): number | undefined {
         return val;
     }
     if (typeof val === "string" && val.trim().length > 0) {
+        if (/^\s*-?\d+(\.\d+)?\s*$/.test(val)) {
+            return undefined;
+        }
         const parsed = Date.parse(val);
         return Number.isNaN(parsed) ? undefined : parsed;
     }
@@ -78,28 +82,16 @@ export class CartesianAxisDomainResolver {
         rootXField?: ChartField,
         orientation: "horizontal" | "vertical" = "vertical"
     ): readonly string[] {
-        const seen = new Set<string>();
-        const categories: string[] = [];
         const isCategoryAxis = orientation === "horizontal" ? axis.dimension === "y" : axis.dimension === "x";
-
-        for (const s of boundSeries) {
-            const data = resolveData("data" in s && typeof (s as any).data === "function" ? ((s as any).data() as readonly unknown[] | undefined) : undefined, rootData);
-            const field = isCategoryAxis
-                ? (("xField" in s && typeof s.xField === "function" && s.xField() !== undefined) ? s.xField() : (axis.field !== undefined ? axis.field : rootXField))
-                : ("field" in s && typeof s.field === "function" ? s.field() : undefined);
-
-            for (let i = 0; i < data.length; i++) {
-                const item = data[i];
-                const catVal = resolveValue(item, field, i);
-                const str = catVal !== null && catVal !== undefined ? String(catVal) : "";
-                if (!seen.has(str)) {
-                    seen.add(str);
-                    categories.push(str);
-                }
-            }
+        if (!isCategoryAxis) {
+            return [];
         }
-
-        return categories;
+        const effectiveRootXField = orientation === "vertical" && axis.field !== undefined ? axis.field : rootXField;
+        return calculateCategoryDomain(
+            boundSeries as readonly import("../context/chart-registration-context").ChartCartesianSeriesRegistration[],
+            rootData ?? [],
+            effectiveRootXField
+        );
     }
 
     static #resolveTemporalDomain(
@@ -129,11 +121,44 @@ export class CartesianAxisDomainResolver {
         for (const s of boundSeries) {
             const data = resolveData("data" in s && typeof (s as any).data === "function" ? ((s as any).data() as readonly unknown[] | undefined) : undefined, rootData);
             const field = isTemporalAxis
-                ? (("xField" in s && typeof s.xField === "function" && s.xField() !== undefined) ? s.xField() : (axis.field !== undefined ? axis.field : rootXField))
+                ? (("xField" in s && typeof s.xField === "function" && s.xField() !== undefined)
+                    ? s.xField()
+                    : (orientation === "vertical" && axis.field !== undefined ? axis.field : rootXField))
                 : ("field" in s && typeof s.field === "function" ? s.field() : undefined);
 
             for (let i = 0; i < data.length; i++) {
                 const item = data[i];
+                if (isTemporalAxis) {
+                    if (s.type === "bubble") {
+                        const bReg = s as import("../context/chart-registration-context").ChartBubbleSeriesRegistration;
+                        const sz = resolveValue(item, bReg.sizeField?.(), i);
+                        if (typeof sz !== "number" || !Number.isFinite(sz) || sz <= 0) continue;
+                        const yv = resolveValue(item, bReg.field?.(), i);
+                        if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
+                    } else if (s.type === "rangeBar" || s.type === "rangeArea") {
+                        const fv = resolveValue(item, (s as any).fromField?.(), i);
+                        const tv = resolveValue(item, (s as any).toField?.(), i);
+                        if (typeof fv !== "number" || !Number.isFinite(fv) || typeof tv !== "number" || !Number.isFinite(tv)) continue;
+                    } else if (s.type === "candlestick" || s.type === "ohlc") {
+                        const fReg = s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
+                        const ov = resolveValue(item, fReg.openField(), i);
+                        const cv = resolveValue(item, fReg.closeField(), i);
+                        const lv = resolveValue(item, fReg.lowField(), i);
+                        const hv = resolveValue(item, fReg.highField(), i);
+                        if (
+                            typeof ov !== "number" || !Number.isFinite(ov) ||
+                            typeof cv !== "number" || !Number.isFinite(cv) ||
+                            typeof lv !== "number" || !Number.isFinite(lv) ||
+                            typeof hv !== "number" || !Number.isFinite(hv) ||
+                            lv > Math.min(ov, cv) ||
+                            hv < Math.max(ov, cv)
+                        ) continue;
+                    } else if ("field" in s && typeof s.field === "function") {
+                        const yv = resolveValue(item, s.field(), i);
+                        if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
+                    }
+                }
+
                 const val = resolveValue(item, field, i);
                 const t = parseTemporalValue(val);
                 if (t !== undefined) {
@@ -169,8 +194,47 @@ export class CartesianAxisDomainResolver {
         warnings: string[] = []
     ): AxisDomainResult {
         if (stackAnalysis && stackAnalysis.axisUnitMode === "percent") {
-            const min = axis.explicitMin !== undefined ? Number(axis.explicitMin) : 0;
-            const max = axis.explicitMax !== undefined ? Number(axis.explicitMax) : 100;
+            const hasPos = stackAnalysis.visibleLayout.visibleHasPositive;
+            const hasNeg = stackAnalysis.visibleLayout.visibleHasNegative;
+            let defaultMin = 0;
+            let defaultMax = 100;
+
+            if (hasPos && !hasNeg) {
+                defaultMin = 0;
+                defaultMax = 100;
+            } else if (hasNeg && !hasPos) {
+                defaultMin = -100;
+                defaultMax = 0;
+            } else if (hasPos && hasNeg) {
+                defaultMin = -100;
+                defaultMax = 100;
+            } else {
+                const regPos = stackAnalysis.configuration.groups.some(g => g.registeredHasPositive);
+                const regNeg = stackAnalysis.configuration.groups.some(g => g.registeredHasNegative);
+                if (regPos && !regNeg) {
+                    defaultMin = 0;
+                    defaultMax = 100;
+                } else if (regNeg && !regPos) {
+                    defaultMin = -100;
+                    defaultMax = 0;
+                } else if (regPos && regNeg) {
+                    defaultMin = -100;
+                    defaultMax = 100;
+                } else {
+                    defaultMin = 0;
+                    defaultMax = 100;
+                }
+            }
+
+            let min = axis.explicitMin !== undefined ? Number(axis.explicitMin) : defaultMin;
+            let max = axis.explicitMax !== undefined ? Number(axis.explicitMax) : defaultMax;
+
+            if (min > max) {
+                const temp = min;
+                min = max;
+                max = temp;
+            }
+
             return {
                 domain: [min, max],
                 isValid: true,
@@ -195,9 +259,39 @@ export class CartesianAxisDomainResolver {
             if (!isValueAxis) {
                 const field = ("xField" in s && typeof s.xField === "function" && s.xField() !== undefined)
                     ? s.xField()
-                    : (axis.field !== undefined ? axis.field : rootXField);
+                    : (orientation === "vertical" && axis.field !== undefined ? axis.field : rootXField);
                 for (let i = 0; i < data.length; i++) {
                     const item = data[i];
+                    // Verify paired value validity before expanding independent domain
+                    if (s.type === "bubble") {
+                        const bReg = s as import("../context/chart-registration-context").ChartBubbleSeriesRegistration;
+                        const sz = resolveValue(item, bReg.sizeField?.(), i);
+                        if (typeof sz !== "number" || !Number.isFinite(sz) || sz <= 0) continue;
+                        const yv = resolveValue(item, bReg.field?.(), i);
+                        if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
+                    } else if (s.type === "rangeBar" || s.type === "rangeArea") {
+                        const fv = resolveValue(item, (s as any).fromField?.(), i);
+                        const tv = resolveValue(item, (s as any).toField?.(), i);
+                        if (typeof fv !== "number" || !Number.isFinite(fv) || typeof tv !== "number" || !Number.isFinite(tv)) continue;
+                    } else if (s.type === "candlestick" || s.type === "ohlc") {
+                        const fReg = s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
+                        const ov = resolveValue(item, fReg.openField(), i);
+                        const cv = resolveValue(item, fReg.closeField(), i);
+                        const lv = resolveValue(item, fReg.lowField(), i);
+                        const hv = resolveValue(item, fReg.highField(), i);
+                        if (
+                            typeof ov !== "number" || !Number.isFinite(ov) ||
+                            typeof cv !== "number" || !Number.isFinite(cv) ||
+                            typeof lv !== "number" || !Number.isFinite(lv) ||
+                            typeof hv !== "number" || !Number.isFinite(hv) ||
+                            lv > Math.min(ov, cv) ||
+                            hv < Math.max(ov, cv)
+                        ) continue;
+                    } else if ("field" in s && typeof s.field === "function") {
+                        const yv = resolveValue(item, s.field(), i);
+                        if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
+                    }
+
                     const val = resolveValue(item, field, i);
                     if (typeof val === "number" && Number.isFinite(val)) {
                         rawValues.push(val);
@@ -221,17 +315,7 @@ export class CartesianAxisDomainResolver {
                             rawValues.push(val);
                         }
                     }
-                } else if ("field" in s && typeof s.field === "function") {
-                    const f = s.field();
-                    for (let i = 0; i < data.length; i++) {
-                        const item = data[i];
-                        const val = resolveValue(item, f, i);
-                        if (typeof val === "number" && Number.isFinite(val)) {
-                            rawValues.push(val);
-                        }
-                    }
-                }
-                if ("fromField" in s && "toField" in s && typeof (s as any).fromField === "function" && typeof (s as any).toField === "function") {
+                } else if ("fromField" in s && "toField" in s && typeof (s as any).fromField === "function" && typeof (s as any).toField === "function") {
                     const ff = (s as any).fromField();
                     const tf = (s as any).toField();
                     for (let i = 0; i < data.length; i++) {
@@ -242,8 +326,7 @@ export class CartesianAxisDomainResolver {
                             rawValues.push(fv, tv);
                         }
                     }
-                }
-                if ("openField" in s && "closeField" in s && "lowField" in s && "highField" in s) {
+                } else if ("openField" in s && "closeField" in s && "lowField" in s && "highField" in s) {
                     const finReg = s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
                     const of = finReg.openField();
                     const cf = finReg.closeField();
@@ -264,6 +347,15 @@ export class CartesianAxisDomainResolver {
                             hv >= Math.max(ov, cv)
                         ) {
                             rawValues.push(ov, cv, lv, hv);
+                        }
+                    }
+                } else if ("field" in s && typeof s.field === "function") {
+                    const f = s.field();
+                    for (let i = 0; i < data.length; i++) {
+                        const item = data[i];
+                        const val = resolveValue(item, f, i);
+                        if (typeof val === "number" && Number.isFinite(val)) {
+                            rawValues.push(val);
                         }
                     }
                 }
@@ -306,27 +398,30 @@ export class CartesianAxisDomainResolver {
                 );
             }
 
-            const activeValues = posValues.length > 0 ? posValues : negValues;
+            const isPositive = posValues.length > 0;
+            const activeValues = isPositive ? posValues : negValues;
             let min = Math.min(...activeValues);
             let max = Math.max(...activeValues);
 
             if (axis.explicitMin !== undefined) {
                 const em = Number(axis.explicitMin);
                 if (Number.isFinite(em)) {
-                    if ((posValues.length > 0 && em > 0) || (negValues.length > 0 && em < 0)) {
+                    if ((isPositive && em > 0) || (!isPositive && em < 0)) {
                         min = em;
                     } else {
-                        warnings.push(`[MonaChart] Log axis "${axis.axisId}" has invalid explicit min ${axis.explicitMin}; positive log scale requires min > 0.`);
+                        const req = isPositive ? "positive log scale requires min > 0" : "negative log scale requires min < 0";
+                        warnings.push(`[MonaChart] Log axis "${axis.axisId}" has invalid explicit min ${axis.explicitMin}; ${req}.`);
                     }
                 }
             }
             if (axis.explicitMax !== undefined) {
                 const em = Number(axis.explicitMax);
                 if (Number.isFinite(em)) {
-                    if ((posValues.length > 0 && em > 0) || (negValues.length > 0 && em < 0)) {
+                    if ((isPositive && em > 0) || (!isPositive && em < 0)) {
                         max = em;
                     } else {
-                        warnings.push(`[MonaChart] Log axis "${axis.axisId}" has invalid explicit max ${axis.explicitMax}; negative log scale requires max < 0.`);
+                        const req = isPositive ? "positive log scale requires max > 0" : "negative log scale requires max < 0";
+                        warnings.push(`[MonaChart] Log axis "${axis.axisId}" has invalid explicit max ${axis.explicitMax}; ${req}.`);
                     }
                 }
             }

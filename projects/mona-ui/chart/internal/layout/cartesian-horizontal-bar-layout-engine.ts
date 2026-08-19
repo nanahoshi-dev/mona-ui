@@ -503,7 +503,9 @@ export class CartesianHorizontalBarLayoutEngine {
                         opacity: 1,
                         pointRadius: 0
                     },
-                    type: "bar"
+                    type: "bar",
+                    xAxisId: binding.xAxisId,
+                    yAxisId: binding.yAxisId
                 } as ChartBarSeriesScene);
             } else if (series.type === "rangeBar") {
                 const rangeBarSeries = series as ChartRangeBarSeriesRegistration;
@@ -655,7 +657,9 @@ export class CartesianHorizontalBarLayoutEngine {
                         opacity: 1,
                         pointRadius: 0
                     },
-                    type: "rangeBar"
+                    type: "rangeBar",
+                    xAxisId: binding.xAxisId,
+                    yAxisId: binding.yAxisId
                 } as ChartRangeBarSeriesScene);
             }
         }
@@ -675,17 +679,56 @@ export class CartesianHorizontalBarLayoutEngine {
                     x: plotRect.x + plotRect.width / 2,
                     y: centerY
                 },
+                axisDimension: "y",
+                axisId: hits[0]?.yAxisId ?? axisResolution.primaryYAxisId,
                 hits,
                 order: i,
+                xAxisId: hits[0]?.xAxisId,
+                xAxisTitle: hits[0]?.xAxisTitle,
                 xKey: catKey,
-                xValue: catKey
+                xValue: catKey,
+                yAxisId: hits[0]?.yAxisId,
+                yAxisTitle: hits[0]?.yAxisTitle
             };
             interactionBuckets.push(bucket);
             interactionBucketLookup.set(catKey, bucket);
         }
 
+        // Build namespaced interaction buckets per Y axis ID
+        const interactionBucketsByAxisId = new Map<string, Map<ChartInteractionXKey, ChartInteractionBucket>>();
+        for (const bucket of interactionBuckets) {
+            const axisId = bucket.yAxisId ?? axisResolution.primaryYAxisId;
+            let axisMap = interactionBucketsByAxisId.get(axisId);
+            if (!axisMap) {
+                axisMap = new Map();
+                interactionBucketsByAxisId.set(axisId, axisMap);
+            }
+            axisMap.set(bucket.xKey, bucket);
+        }
+
+        // Build axis topology
+        const axisTopology = [
+            ...axisResolution.xAxes.map(ax => ({
+                axisId: ax.axisId,
+                dimension: "x" as const,
+                position: ax.position,
+                resolvedType: coordResult.resolvedTypesByAxisId.get(ax.axisId) ?? "linear",
+                stackIndex: ax.stackIndex
+            })),
+            ...axisResolution.yAxes.map(ay => ({
+                axisId: ay.axisId,
+                dimension: "y" as const,
+                position: ay.position,
+                resolvedType: coordResult.resolvedTypesByAxisId.get(ay.axisId) ?? "category",
+                stackIndex: ay.stackIndex
+            }))
+        ];
+        const axisTopologySignature = JSON.stringify(axisTopology);
+
         return {
             axes: axisScenes,
+            axisTopology,
+            axisTopologySignature,
             barHitTargets,
             cartesianKind: "xy",
             coordinateSystem: "cartesian",
@@ -695,9 +738,12 @@ export class CartesianHorizontalBarLayoutEngine {
             interactionAxis: "y",
             interactionBucketLookup,
             interactionBuckets,
+            interactionBucketsByAxisId,
             legendItems,
             orientation: "horizontal",
             plotRect,
+            primaryXAxisId: axisResolution.primaryXAxisId,
+            primaryYAxisId: axisResolution.primaryYAxisId,
             series: seriesScenes,
             stackConfiguration: stackConfigForScene,
             stackSignature,

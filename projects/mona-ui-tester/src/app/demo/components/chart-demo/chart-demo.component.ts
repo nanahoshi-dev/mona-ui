@@ -259,14 +259,14 @@ export class ChartDemoComponent {
     protected readonly candlestickData = signal<
         readonly { close: number; date: string; high: number; low: number; open: number }[]
     >([
-        { close: 104, date: "2026-03-01", high: 108, low: 98, open: 100 },
-        { close: 102, date: "2026-03-02", high: 107, low: 100, open: 105 },
-        { close: 112, date: "2026-03-03", high: 115, low: 101, open: 102 },
-        { close: 110, date: "2026-03-04", high: 116, low: 108, open: 112 },
-        { close: 118, date: "2026-03-05", high: 122, low: 109, open: 110 },
-        { close: 118, date: "2026-03-06", high: 121, low: 114, open: 118 },
-        { close: 114, date: "2026-03-07", high: 120, low: 112, open: 119 },
-        { close: 125, date: "2026-03-08", high: 128, low: 113, open: 114 }
+        { close: 104, date: "Mar 1", high: 108, low: 98, open: 100 },
+        { close: 102, date: "Mar 2", high: 107, low: 100, open: 105 },
+        { close: 112, date: "Mar 3", high: 115, low: 101, open: 102 },
+        { close: 110, date: "Mar 4", high: 116, low: 108, open: 112 },
+        { close: 118, date: "Mar 5", high: 122, low: 109, open: 110 },
+        { close: 118, date: "Mar 6", high: 121, low: 114, open: 118 },
+        { close: 114, date: "Mar 7", high: 120, low: 112, open: 119 },
+        { close: 125, date: "Mar 8", high: 128, low: 113, open: 114 }
     ]);
     protected readonly candlestickFillMode = signal<ChartFinancialFillMode>("filled");
     protected readonly candlestickWickWidth = signal<number>(1);
@@ -275,14 +275,14 @@ export class ChartDemoComponent {
     protected readonly ohlcData = signal<
         readonly { close: number; date: string; high: number; low: number; open: number }[]
     >([
-        { close: 1850, date: "2026-03-01", high: 1880, low: 1820, open: 1830 },
-        { close: 1820, date: "2026-03-02", high: 1860, low: 1810, open: 1850 },
-        { close: 1910, date: "2026-03-03", high: 1930, low: 1815, open: 1820 },
-        { close: 1890, date: "2026-03-04", high: 1920, low: 1870, open: 1905 },
-        { close: 1960, date: "2026-03-05", high: 1980, low: 1880, open: 1890 },
-        { close: 1960, date: "2026-03-06", high: 1990, low: 1940, open: 1960 },
-        { close: 1920, date: "2026-03-07", high: 1970, low: 1910, open: 1965 },
-        { close: 2010, date: "2026-03-08", high: 2040, low: 1915, open: 1920 }
+        { close: 1850, date: "Mar 1", high: 1880, low: 1820, open: 1830 },
+        { close: 1820, date: "Mar 2", high: 1860, low: 1810, open: 1850 },
+        { close: 1910, date: "Mar 3", high: 1930, low: 1815, open: 1820 },
+        { close: 1890, date: "Mar 4", high: 1920, low: 1870, open: 1905 },
+        { close: 1960, date: "Mar 5", high: 1980, low: 1880, open: 1890 },
+        { close: 1960, date: "Mar 6", high: 1990, low: 1940, open: 1960 },
+        { close: 1920, date: "Mar 7", high: 1970, low: 1910, open: 1965 },
+        { close: 2010, date: "Mar 8", high: 2040, low: 1915, open: 1920 }
     ]);
     protected readonly ohlcWickWidth = signal<number>(1);
 
@@ -1283,12 +1283,12 @@ export class ChartDemoComponent {
             { actual: 8100, forecast: 7500, month: "Jun", target: 7600 }
         ]);
         this.candlestickData.set([
-            { close: 104, date: "2026-03-01", high: 108, low: 98, open: 100 },
-            { close: 112, date: "2026-03-02", high: 115, low: 102, open: 105 },
-            { close: 108, date: "2026-03-03", high: 114, low: 106, open: 111 },
-            { close: 118, date: "2026-03-04", high: 120, low: 107, open: 109 },
-            { close: 115, date: "2026-03-05", high: 122, low: 113, open: 119 },
-            { close: 125, date: "2026-03-06", high: 128, low: 114, open: 116 }
+            { close: 104, date: "Mar 1", high: 108, low: 98, open: 100 },
+            { close: 112, date: "Mar 2", high: 115, low: 102, open: 105 },
+            { close: 108, date: "Mar 3", high: 114, low: 106, open: 111 },
+            { close: 118, date: "Mar 4", high: 120, low: 107, open: 109 },
+            { close: 115, date: "Mar 5", high: 122, low: 113, open: 119 },
+            { close: 125, date: "Mar 6", high: 128, low: 114, open: 116 }
         ]);
         this.radialBarData.set([
             { category: "CPU Usage", color: "#3b82f6", value: 78 },

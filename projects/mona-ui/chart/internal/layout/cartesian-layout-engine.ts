@@ -810,7 +810,9 @@ export class CartesianLayoutEngine {
                     points,
                     showPoints: lineReg.showPoints?.() ?? false,
                     style: sStyle,
-                    type: "line"
+                    type: "line",
+                    xAxisId: binding.xAxisId,
+                    yAxisId: binding.yAxisId
                 };
                 seriesScenes.push(lineScene);
             } else if (s.type === "area") {
@@ -1030,7 +1032,9 @@ export class CartesianLayoutEngine {
                     points,
                     showPoints: areaReg.showPoints?.() ?? false,
                     style: sStyle,
-                    type: "area"
+                    type: "area",
+                    xAxisId: binding.xAxisId,
+                    yAxisId: binding.yAxisId
                 };
                 seriesScenes.push(areaScene);
             }
@@ -1057,6 +1061,8 @@ export class CartesianLayoutEngine {
                     const centerX = (bPos ?? plotRect.x) + primaryBandScale.bandwidth() / 2;
                     interactionBuckets.push({
                         anchor: { x: centerX, y: plotRect.y + plotRect.height / 2 },
+                        axisDimension: "x",
+                        axisId: hits[0].xAxisId,
                         hits,
                         order: bucketIdx++,
                         xAxisId: hits[0].xAxisId,
@@ -1103,6 +1109,8 @@ export class CartesianLayoutEngine {
                 const [xKey, bucket] = sortedEntries[i];
                 interactionBuckets.push({
                     anchor: bucket.anchor,
+                    axisDimension: "x",
+                    axisId: bucket.hits[0]?.xAxisId,
                     hits: bucket.hits,
                     order: i,
                     xAxisId: bucket.hits[0]?.xAxisId,
@@ -1119,6 +1127,37 @@ export class CartesianLayoutEngine {
         for (const bucket of interactionBuckets) {
             interactionBucketLookup.set(bucket.xKey, bucket);
         }
+
+        // Build namespaced interaction buckets per axis ID (MAXR-001)
+        const interactionBucketsByAxisId = new Map<string, Map<ChartInteractionXKey, ChartInteractionBucket>>();
+        for (const bucket of interactionBuckets) {
+            const axisId = bucket.xAxisId ?? axisResolution.primaryXAxisId;
+            let axisMap = interactionBucketsByAxisId.get(axisId);
+            if (!axisMap) {
+                axisMap = new Map();
+                interactionBucketsByAxisId.set(axisId, axisMap);
+            }
+            axisMap.set(bucket.xKey, bucket);
+        }
+
+        // Build axis topology
+        const axisTopology = [
+            ...axisResolution.xAxes.map(ax => ({
+                axisId: ax.axisId,
+                dimension: "x" as const,
+                position: ax.position,
+                resolvedType: coordResult.resolvedTypesByAxisId.get(ax.axisId) ?? "category",
+                stackIndex: ax.stackIndex
+            })),
+            ...axisResolution.yAxes.map(ay => ({
+                axisId: ay.axisId,
+                dimension: "y" as const,
+                position: ay.position,
+                resolvedType: coordResult.resolvedTypesByAxisId.get(ay.axisId) ?? "linear",
+                stackIndex: ay.stackIndex
+            }))
+        ];
+        const axisTopologySignature = JSON.stringify(axisTopology);
 
         const hasRenderedElements =
             seriesScenes.some(s => {
@@ -1139,6 +1178,8 @@ export class CartesianLayoutEngine {
 
         return {
             axes: axisScenes,
+            axisTopology,
+            axisTopologySignature,
             barHitTargets,
             cartesianKind: "xy",
             coordinateSystem: "cartesian",
@@ -1149,11 +1190,14 @@ export class CartesianLayoutEngine {
             interactionAxis: "x",
             interactionBucketLookup,
             interactionBuckets,
+            interactionBucketsByAxisId,
             legendItems,
             markerSpatialIndex: pointSpatialIndex,
             orientation: "vertical",
             plotRect,
             pointSpatialIndex,
+            primaryXAxisId: axisResolution.primaryXAxisId,
+            primaryYAxisId: axisResolution.primaryYAxisId,
             series: seriesScenes,
             stackConfiguration: stackConfigForScene,
             stackSignature,

@@ -304,4 +304,98 @@ describe("CartesianMultiAxisCoordinator", () => {
         expect(xScale.range()).toEqual([res.plotRect.x, res.plotRect.x + res.plotRect.width]);
         expect(yScale.range()).toEqual([res.plotRect.y + res.plotRect.height, res.plotRect.y]);
     });
+
+    it("should issue diagnostic warnings for invalid logBase, symlogConstant, and exponent (MAXR-032)", () => {
+        const xLog = createMockXAxis({
+            axisId: signal("x-log"),
+            logBase: signal(0), // Invalid logBase <= 0
+            type: signal("log")
+        });
+        const ySym = createMockYAxis({
+            axisId: signal("y-sym"),
+            symlogConstant: signal(-2), // Invalid symlogConstant <= 0
+            type: signal("symlog")
+        });
+        const yPow = createMockYAxis({
+            axisId: signal("y-pow"),
+            exponent: signal(0), // Invalid exponent <= 0
+            type: signal("pow")
+        });
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve([xLog], [ySym, yPow]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([], axisResolution);
+
+        const res = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 400,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            rootData: [{ "x-log": 10, "y-pow": 10, "y-sym": 10 }]
+        });
+
+        expect(res.warnings.some(w => w.includes("invalid logBase"))).toBe(true);
+        expect(res.warnings.some(w => w.includes("invalid symlogConstant"))).toBe(true);
+        expect(res.warnings.some(w => w.includes("invalid exponent"))).toBe(true);
+    });
+
+    it("should allocate 0 gutter and 0 spacing for hidden axes (MAXR-018)", () => {
+        const y1 = createMockYAxis({ axisId: signal("y1"), position: signal("left"), visible: signal(false) });
+        const y2 = createMockYAxis({ axisId: signal("y2"), position: signal("left"), visible: signal(true) });
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve([], [y1, y2]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([], axisResolution);
+
+        const res = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 300,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            rootData: [{ y1: 10, y2: 20 }]
+        });
+
+        const s1 = res.axisScenes.find(a => a.axisId === "y1")!;
+        const s2 = res.axisScenes.find(a => a.axisId === "y2")!;
+
+        expect(s1.gutter).toBe(0);
+        expect(s1.sideOffset).toBe(0);
+        expect(s2.sideOffset).toBe(0); // y1 is hidden so y2 starts at offset 0
+    });
+
+    it("should set orientation-aware gridLine defaults (MAXR-017)", () => {
+        const x1 = createMockXAxis({ axisId: signal("x1") });
+        const y1 = createMockYAxis({ axisId: signal("y1") });
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve([x1], [y1]);
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([], axisResolution);
+
+        // Vertical orientation: Y axis has gridLines=true, X axis has gridLines=false by default
+        const vertRes = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 300,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            orientation: "vertical",
+            rootData: []
+        });
+
+        expect(vertRes.axisScenes.find(a => a.axisId === "y1")?.gridLines).toBe(true);
+        expect(vertRes.axisScenes.find(a => a.axisId === "x1")?.gridLines).toBe(false);
+
+        // Horizontal orientation: X axis has gridLines=true, Y axis has gridLines=false by default
+        const horizRes = CartesianMultiAxisCoordinator.coordinate({
+            axisResolution,
+            bindingResolution,
+            chartHeight: 300,
+            chartWidth: 600,
+            labelMeasurements: new Map(),
+            orientation: "horizontal",
+            rootData: []
+        });
+
+        expect(horizRes.axisScenes.find(a => a.axisId === "x1")?.gridLines).toBe(true);
+        expect(horizRes.axisScenes.find(a => a.axisId === "y1")?.gridLines).toBe(false);
+    });
 });

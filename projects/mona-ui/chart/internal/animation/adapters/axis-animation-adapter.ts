@@ -29,9 +29,16 @@ export class AxisAnimationAdapter {
                 }
 
                 return targetAxes.map(targetAxis => {
-                    const prevAxis = previousAxes.find(
-                        a => (a.axisId && a.axisId === targetAxis.axisId) || (a.axis === targetAxis.axis && a.position === targetAxis.position)
-                    );
+                    const prevAxis = previousAxes.find(a => {
+                        if (targetAxis.axisId && a.axisId) {
+                            return a.axisId === targetAxis.axisId && a.axis === targetAxis.axis;
+                        }
+                        if (targetAxis.axisId || a.axisId) {
+                            return (targetAxis.axisId ?? a.axisId) === (a.axisId ?? targetAxis.axisId) && a.axis === targetAxis.axis;
+                        }
+                        return a.axis === targetAxis.axis && a.position === targetAxis.position;
+                    });
+
                     if (!prevAxis) {
                         return targetAxis;
                     }
@@ -49,8 +56,18 @@ export class AxisAnimationAdapter {
                         };
                     });
 
+                    const interpolatedGutter = prevAxis.gutter !== undefined && targetAxis.gutter !== undefined
+                        ? lerp(prevAxis.gutter, targetAxis.gutter, progress)
+                        : targetAxis.gutter;
+
+                    const interpolatedSideOffset = prevAxis.sideOffset !== undefined && targetAxis.sideOffset !== undefined
+                        ? lerp(prevAxis.sideOffset, targetAxis.sideOffset, progress)
+                        : targetAxis.sideOffset;
+
                     return {
                         ...targetAxis,
+                        gutter: interpolatedGutter,
+                        sideOffset: interpolatedSideOffset,
                         ticks: interpolatedTicks
                     };
                 });

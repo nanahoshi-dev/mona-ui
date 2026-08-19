@@ -500,21 +500,63 @@ export class ChartTransitionPlanner {
                     };
                 }
 
+                if (
+                    prevCartesian.cartesianKind === "xy" &&
+                    targetCartesian.cartesianKind === "xy" &&
+                    (prevCartesian as CartesianXYChartScene).axisTopologySignature !== undefined &&
+                    (targetCartesian as CartesianXYChartScene).axisTopologySignature !== undefined &&
+                    (prevCartesian as CartesianXYChartScene).axisTopologySignature !== (targetCartesian as CartesianXYChartScene).axisTopologySignature
+                ) {
+                    return {
+                        complexity,
+                        duration: options.duration,
+                        easing: options.easing,
+                        fromScene: previous,
+                        mode: "crossfade",
+                        seriesPlans: [],
+                        toScene: target,
+                        trigger
+                    };
+                }
+
                 const prevSeriesById = new Map(prevCartesian.series.map(s => [s.id, s]));
 
                 for (const targetSeries of targetCartesian.series) {
                     const prevSeries = prevSeriesById.get(targetSeries.id);
-                    if (prevSeries && prevSeries.type !== targetSeries.type) {
-                        return {
-                            complexity,
-                            duration: options.duration,
-                            easing: options.easing,
-                            fromScene: previous,
-                            mode: "crossfade",
-                            seriesPlans: [],
-                            toScene: target,
-                            trigger
-                        };
+                    if (prevSeries) {
+                        if (prevSeries.type !== targetSeries.type) {
+                            return {
+                                complexity,
+                                duration: options.duration,
+                                easing: options.easing,
+                                fromScene: previous,
+                                mode: "crossfade",
+                                seriesPlans: [],
+                                toScene: target,
+                                trigger
+                            };
+                        }
+
+                        const prevHasX = "xAxisId" in prevSeries && (prevSeries as any).xAxisId !== undefined;
+                        const targetHasX = "xAxisId" in targetSeries && (targetSeries as any).xAxisId !== undefined;
+                        const prevHasY = "yAxisId" in prevSeries && (prevSeries as any).yAxisId !== undefined;
+                        const targetHasY = "yAxisId" in targetSeries && (targetSeries as any).yAxisId !== undefined;
+
+                        if (
+                            (prevHasX && targetHasX && (targetSeries as any).xAxisId !== (prevSeries as any).xAxisId) ||
+                            (prevHasY && targetHasY && (targetSeries as any).yAxisId !== (prevSeries as any).yAxisId)
+                        ) {
+                            return {
+                                complexity,
+                                duration: options.duration,
+                                easing: options.easing,
+                                fromScene: previous,
+                                mode: "crossfade",
+                                seriesPlans: [],
+                                toScene: target,
+                                trigger
+                            };
+                        }
                     }
 
                     if (targetSeries.type === "line" || targetSeries.type === "area" || targetSeries.type === "rangeArea") {
