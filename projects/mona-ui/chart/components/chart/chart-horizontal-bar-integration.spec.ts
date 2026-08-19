@@ -470,4 +470,31 @@ describe("Horizontal Bar Chart Integration", () => {
         expect(scene.orientation).toBe("horizontal");
         expect(chartCmp.isAnimating()).toBe(true);
     });
+
+    it("preserves all Y-axis category labels without collision thinning when categories fit within plot height", () => {
+        host.data.set([
+            { category: "Jan", revenue: 100 },
+            { category: "Feb", revenue: 120 },
+            { category: "Mar", revenue: 140 },
+            { category: "Apr", revenue: 160 },
+            { category: "May", revenue: 180 },
+            { category: "Jun", revenue: 200 }
+        ]);
+        host.orientation.set("horizontal");
+        fixture.detectChanges();
+
+        const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
+        chartCmp.recomputeScene(ChartInvalidationReason.Data);
+        const scene = chartCmp.scene() as CartesianXYChartScene;
+
+        const yAxisScene = scene.axes.find(a => a.axis === "y");
+        expect(yAxisScene).toBeDefined();
+        expect(yAxisScene?.ticks.length).toBe(6);
+        for (const tick of yAxisScene!.ticks) {
+            expect(tick.labelVisible).toBe(true);
+        }
+        expect(yAxisScene!.ticks.map(t => t.formattedValue)).toEqual([
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun"
+        ]);
+    });
 });

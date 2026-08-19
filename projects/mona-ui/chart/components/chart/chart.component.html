@@ -23,16 +23,17 @@
             (pointermove)="onPointerMove($event)"
             (pointerup)="onPointerUp($event)"
             (pointercancel)="onPointerCancel($event)"
-            (pointerleave)="onPointerLeave()"
+            (lostpointercapture)="onLostPointerCapture($event)"
+            (pointerleave)="onPointerLeave($event)"
             (wheel)="onWheel($event)"
             (click)="onCanvasClick($event)"></canvas>
 
         <!-- DOM Cartesian Axis Labels & Titles -->
         @if (cartesianScene(); as cart) {
-            @for (axisScene of cart.axes; track axisScene.axisId ?? axisScene.axis) {
+            @for (axisScene of cart.axes; track (axisScene.axis + ':' + (axisScene.axisId ?? ''))) {
                 @if (axisScene.visible) {
                     @if (axisScene.labels !== false) {
-                        @for (tick of axisScene.ticks; track tick.tickKey ?? tick.index) {
+                        @for (tick of axisScene.ticks; track (tick.tickKey ? (tick.tickKey + ':' + tick.index) : tick.index)) {
                             @if (tick.labelVisible !== false) {
                                 <div
                                     [class]="axisLabelClasses()"

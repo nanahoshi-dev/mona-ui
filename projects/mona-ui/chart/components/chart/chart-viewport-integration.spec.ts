@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChartNavigationInput, ChartViewportChangeEvent, ChartViewportState } from "../../models/chart-viewport.models";
 import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
+import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
@@ -273,5 +274,43 @@ describe("ChartComponent Viewport Integration", () => {
         const currentScene = chart.scene() as CartesianXYChartScene;
         expect(currentScene.plotRect.x).toBe(initialPlotRect.x);
         expect(currentScene.axes.find(a => a.axisId === "y-main")?.gutter).toBe(initialGutter);
+    });
+
+    it("should reconcile uncontrolled viewport during structural data change and emit data-reconcile", () => {
+        const chart = host.chart();
+        // Zoom into [20, 80]
+        chart.setViewportWindow({
+            axis: "x",
+            axisId: "x-main",
+            kind: "continuous",
+            min: 20,
+            max: 80
+        });
+        fixture.detectChanges();
+
+        host.emittedEvents.length = 0;
+
+        // Modify data causing domain shift to [50, 200]
+        host.data.set([
+            { x: 50, y: 15 },
+            { x: 125, y: 35 },
+            { x: 200, y: 55 }
+        ]);
+        fixture.detectChanges();
+        chart.recomputeScene(ChartInvalidationReason.Data);
+        fixture.detectChanges();
+
+        const reconcileEvents = host.emittedEvents.filter(e => e.source === "data-reconcile");
+        expect(reconcileEvents.length).toBeGreaterThanOrEqual(1);
+        expect(reconcileEvents[0].phase).toBe("end");
+
+        const vp = chart.getViewport();
+        const xAxis = vp?.axes.find(a => a.axisId === "x-main");
+        expect(xAxis).toBeDefined();
+        if (xAxis && xAxis.kind === "continuous") {
+            // Span 60 shifted to [40, 100] within niced base domain [40, 200]
+            expect(xAxis.min).toBe(40);
+            expect(xAxis.max).toBe(100);
+        }
     });
 });
