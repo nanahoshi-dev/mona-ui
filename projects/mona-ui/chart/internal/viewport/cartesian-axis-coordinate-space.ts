@@ -135,6 +135,16 @@ export class CartesianAxisCoordinateSpace {
         return { x: xMap, y: yMap };
     }
 
+    /**
+     * Resolves the category at the specified pixel coordinate.
+     *
+     * Category resolution contract:
+     * 1. Exact band containment: If the pixel falls inside [bandStart, bandStart + bandwidth), that category is returned.
+     *    For the final category in the domain, the right/bottom edge [bandStart, bandStart + bandwidth] is inclusive.
+     * 2. Inner/outer padding gap fallback: If the pixel lies in padding, the category whose band center is nearest
+     *    (min abs(pixel - bandCenter)) is returned. Ties break deterministically to the lower viewport index.
+     * 3. Category domain keys within a single axis domain are contracted to be unique.
+     */
     public resolveCategoryAtPixel(
         ref: ChartViewportAxisRef,
         pixel: number
@@ -146,16 +156,19 @@ export class CartesianAxisCoordinateSpace {
         if (catDomain.length === 0) return undefined;
 
         const catBaseDomain = snap.baseDomain as readonly string[];
-
         const bandScale = snap.viewportScale as import("../scale/chart-scale").ChartBandPositionScale<string>;
         const bandwidth = bandScale.bandwidth();
-        const step = bandScale.step();
 
+        // Pass 1: Actual painted band containment
         for (let i = 0; i < catDomain.length; i++) {
             const key = String(catDomain[i]);
             const bandStart = bandScale.map(key);
             if (bandStart !== undefined) {
-                if (pixel >= bandStart && pixel <= bandStart + (step > 0 ? step : bandwidth)) {
+                const bStart = Math.min(bandStart, bandStart + bandwidth);
+                const bEnd = Math.max(bandStart, bandStart + bandwidth);
+                const isLast = i === catDomain.length - 1;
+                const insideBand = pixel >= bStart && (isLast ? pixel <= bEnd : pixel < bEnd);
+                if (insideBand) {
                     const baseIndex = catBaseDomain.indexOf(key);
                     return {
                         bandCenter: bandStart + bandwidth / 2,
@@ -170,6 +183,7 @@ export class CartesianAxisCoordinateSpace {
             }
         }
 
+        // Pass 2: Inner padding / outer padding fallback to nearest band center
         let closestIndex = 0;
         let closestDist = Infinity;
         let closestStart = 0;

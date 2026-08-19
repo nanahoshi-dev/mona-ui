@@ -86,14 +86,15 @@ export class ChartViewportGestureController {
             this.#currentAuthorityToken !== undefined &&
             context.authorityToken !== undefined &&
             this.#currentAuthorityToken !== context.authorityToken;
-        this.#context = context;
-        this.#currentAuthorityToken = context.authorityToken;
 
         if (tokenChanged) {
             if (this.#dragSession || this.#pinchSession || this.#wheelSession) {
-                this.cancel("authority-change");
+                this.abortForAuthorityChange();
             }
         }
+
+        this.#context = context;
+        this.#currentAuthorityToken = context.authorityToken;
     }
 
     public flushPendingFrame(): void {
@@ -448,7 +449,7 @@ export class ChartViewportGestureController {
         }
     }
 
-    public cancel(reason?: ViewportGestureCancelReason | string): void {
+    public abortForAuthorityChange(): void {
         if (this.#gestureFrameId !== null) {
             this.#cancelFrame(this.#gestureFrameId);
             this.#gestureFrameId = null;
@@ -456,10 +457,72 @@ export class ChartViewportGestureController {
 
         this.#activePointers.clear();
 
-        if (reason === "destroy" || reason === "authority-change") {
+        if (this.#wheelSession) {
+            if (this.#wheelSession.endTimerId !== null) {
+                clearTimeout(this.#wheelSession.endTimerId);
+                this.#wheelSession.endTimerId = null;
+            }
+            const finalViewport = this.#wheelSession.latestViewport;
+            this.#dispatchChangeEvent(
+                "wheel",
+                "end",
+                finalViewport,
+                finalViewport,
+                []
+            );
+            this.#wheelSession = null;
+        }
+
+        if (this.#pinchSession) {
+            this.#context.releasePointerCapture?.(this.#pinchSession.pointer1Id, this.#targetElement);
+            this.#context.releasePointerCapture?.(this.#pinchSession.pointer2Id, this.#targetElement);
+            const finalViewport = this.#pinchSession.latestViewport;
+            this.#dispatchChangeEvent(
+                "pinch",
+                "end",
+                finalViewport,
+                finalViewport,
+                []
+            );
+            this.#pinchSession = null;
+        }
+
+        if (this.#dragSession) {
+            if (this.#dragSession.isThresholdMet) {
+                this.#context.releasePointerCapture?.(this.#dragSession.pointerId, this.#targetElement);
+                const finalViewport = this.#dragSession.latestViewport;
+                this.#dispatchChangeEvent(
+                    "drag",
+                    "end",
+                    finalViewport,
+                    finalViewport,
+                    []
+                );
+            }
+            this.#dragSession = null;
+        }
+
+        this.#context.onCursorChange(null);
+    }
+
+    public cancel(reason?: ViewportGestureCancelReason | string): void {
+        if (reason === "authority-change") {
+            this.abortForAuthorityChange();
+            return;
+        }
+
+        if (this.#gestureFrameId !== null) {
+            this.#cancelFrame(this.#gestureFrameId);
+            this.#gestureFrameId = null;
+        }
+
+        this.#activePointers.clear();
+
+        if (reason === "destroy") {
             // Silent teardown: do not emit user-facing viewportChange lifecycle output
             if (this.#wheelSession && this.#wheelSession.endTimerId !== null) {
                 clearTimeout(this.#wheelSession.endTimerId);
+                this.#wheelSession.endTimerId = null;
             }
             if (this.#dragSession && this.#dragSession.isThresholdMet) {
                 this.#context.releasePointerCapture?.(this.#dragSession.pointerId, this.#targetElement);
@@ -479,6 +542,7 @@ export class ChartViewportGestureController {
         if (this.#wheelSession) {
             if (this.#wheelSession.endTimerId !== null) {
                 clearTimeout(this.#wheelSession.endTimerId);
+                this.#wheelSession.endTimerId = null;
             }
             const finalViewport = this.#wheelSession.latestViewport;
             this.#dispatchChangeEvent(
@@ -610,19 +674,7 @@ export class ChartViewportGestureController {
                 elementPoint.y - this.#wheelSession.anchor.y
             );
             if (distFromAnchor > 8) {
-                this.#flushPendingGestureFrame();
-                const prevProposal = this.#wheelSession.latestViewport;
-                this.#wheelSession = {
-                    anchor: elementPoint,
-                    changedAxes: [],
-                    endTimerId: null,
-                    hasChanged: false,
-                    initialViewport: prevProposal,
-                    latestAnchor: elementPoint,
-                    latestViewport: prevProposal,
-                    sourceAxes: validSourceAxes,
-                    totalNormalizedDeltaY: 0
-                };
+                this.#rebaseWheelSession(elementPoint, validSourceAxes);
             }
         }
 
@@ -650,6 +702,27 @@ export class ChartViewportGestureController {
 
         this.#requestGestureFrame();
         return true;
+    }
+
+    #rebaseWheelSession(newAnchor: ChartPoint, sourceAxes: readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[]): void {
+        if (!this.#wheelSession) return;
+        if (this.#wheelSession.endTimerId !== null) {
+            clearTimeout(this.#wheelSession.endTimerId);
+            this.#wheelSession.endTimerId = null;
+        }
+        this.#flushPendingGestureFrame();
+        const prevProposal = this.#wheelSession.latestViewport;
+        this.#wheelSession = {
+            anchor: newAnchor,
+            changedAxes: [],
+            endTimerId: null,
+            hasChanged: false,
+            initialViewport: prevProposal,
+            latestAnchor: newAnchor,
+            latestViewport: prevProposal,
+            sourceAxes,
+            totalNormalizedDeltaY: 0
+        };
     }
 
     #requestGestureFrame(): void {

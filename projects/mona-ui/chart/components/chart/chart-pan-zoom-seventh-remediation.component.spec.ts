@@ -10,7 +10,12 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
 import { CartesianStageTracker } from "../../internal/layout/cartesian-stage-instrumentation";
 import { ChartViewportGestureController } from "../../internal/viewport/chart-viewport-gesture-controller";
 import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
-import { createEmptyInternalViewportState } from "../../internal/viewport/cartesian-viewport-normalizer";
+import { CartesianScaleFactory } from "../../internal/scale/cartesian-scale-factory";
+import { CartesianAxisCoordinateSpace } from "../../internal/viewport/cartesian-axis-coordinate-space";
+import {
+    createEmptyInternalViewportState,
+    type InternalCartesianViewportState
+} from "../../internal/viewport/cartesian-viewport-normalizer";
 import { DEFAULT_NAVIGATION_OPTIONS } from "../../internal/viewport/chart-navigation-options";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
@@ -62,16 +67,45 @@ describe("Seventh Final Stability Remediation Suite", () => {
     let fixture: ComponentFixture<SeventhRemediationHostComponent>;
     let host: SeventhRemediationHostComponent;
 
+    let seriesPolicyCount = 0;
+    let orientationPolicyCount = 0;
+    let axisRegistryCount = 0;
+    let bindingResolutionCount = 0;
+    let stackAnalysisCount = 0;
     let stageACount = 0;
     let stageBCount = 0;
     let stageCCount = 0;
 
-    beforeEach(async () => {
+    function resetStageCounters(): void {
+        seriesPolicyCount = 0;
+        orientationPolicyCount = 0;
+        axisRegistryCount = 0;
+        bindingResolutionCount = 0;
+        stackAnalysisCount = 0;
         stageACount = 0;
         stageBCount = 0;
         stageCCount = 0;
+    }
+
+    beforeEach(async () => {
+        resetStageCounters();
 
         CartesianStageTracker.current = {
+            onSeriesPolicy: () => {
+                seriesPolicyCount++;
+            },
+            onOrientationPolicy: () => {
+                orientationPolicyCount++;
+            },
+            onAxisRegistry: () => {
+                axisRegistryCount++;
+            },
+            onBindingResolution: () => {
+                bindingResolutionCount++;
+            },
+            onStackAnalysis: () => {
+                stackAnalysisCount++;
+            },
             onStageA: () => {
                 stageACount++;
             },
@@ -96,23 +130,36 @@ describe("Seventh Final Stability Remediation Suite", () => {
         CartesianStageTracker.current = null;
     });
 
-    describe("PZV7-001 / WP0 & WP6: Two-Step Cartesian Split & Stage Counting", () => {
-        it("should execute exactly Stage A=1, Stage B=1, and Stage C=1 in a single structural layout computation", () => {
-            stageACount = 0;
-            stageBCount = 0;
-            stageCCount = 0;
-
-            host.chart().recomputeScene(ChartInvalidationReason.Data);
-
+    describe("PZV8-009 / PZV8-010: Stage & Upstream Semantic Pass Accounting", () => {
+        it("should execute exactly 1 of each semantic pass and Stage A=1, B=1, C=1 on initial creation and render", () => {
+            // Evaluates from TestBed initialization
+            expect(seriesPolicyCount).toBe(1);
+            expect(orientationPolicyCount).toBe(1);
+            expect(axisRegistryCount).toBe(1);
+            expect(bindingResolutionCount).toBe(1);
+            expect(stackAnalysisCount).toBe(1);
             expect(stageACount).toBe(1);
             expect(stageBCount).toBe(1);
             expect(stageCCount).toBe(1);
         });
 
-        it("should execute Stage A=1, Stage B=1, and Stage C=1 on structural data change", () => {
-            stageACount = 0;
-            stageBCount = 0;
-            stageCCount = 0;
+        it("should execute exactly 1 of each semantic pass and Stage A=1, B=1, C=1 on structural layout computation", () => {
+            resetStageCounters();
+
+            host.chart().recomputeScene(ChartInvalidationReason.Data);
+
+            expect(seriesPolicyCount).toBe(1);
+            expect(orientationPolicyCount).toBe(1);
+            expect(axisRegistryCount).toBe(1);
+            expect(bindingResolutionCount).toBe(1);
+            expect(stackAnalysisCount).toBe(1);
+            expect(stageACount).toBe(1);
+            expect(stageBCount).toBe(1);
+            expect(stageCCount).toBe(1);
+        });
+
+        it("should execute 1 of each pass on structural data change", () => {
+            resetStageCounters();
 
             host.data.set([
                 { x: 0, y: 20 },
@@ -122,34 +169,45 @@ describe("Seventh Final Stability Remediation Suite", () => {
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
+            expect(seriesPolicyCount).toBe(1);
+            expect(orientationPolicyCount).toBe(1);
+            expect(axisRegistryCount).toBe(1);
+            expect(bindingResolutionCount).toBe(1);
+            expect(stackAnalysisCount).toBe(1);
             expect(stageACount).toBe(1);
             expect(stageBCount).toBe(1);
             expect(stageCCount).toBe(1);
         });
 
-        it("should execute Stage A=0, Stage B=0, and Stage C=1 on viewport-only zoom", () => {
-            stageACount = 0;
-            stageBCount = 0;
-            stageCCount = 0;
+        it("should execute 0 semantic passes, Stage A=0, Stage B=0, and Stage C=1 on viewport-only zoom", () => {
+            resetStageCounters();
 
             host.chart().zoom(1.5);
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
+            expect(seriesPolicyCount).toBe(0);
+            expect(orientationPolicyCount).toBe(0);
+            expect(axisRegistryCount).toBe(0);
+            expect(bindingResolutionCount).toBe(0);
+            expect(stackAnalysisCount).toBe(0);
             expect(stageACount).toBe(0);
             expect(stageBCount).toBe(0);
             expect(stageCCount).toBe(1);
         });
 
-        it("should execute Stage A=0, Stage B=1, and Stage C=1 on Chrome-only invalidation", () => {
-            stageACount = 0;
-            stageBCount = 0;
-            stageCCount = 0;
+        it("should execute 0 semantic passes, Stage A=0, Stage B=1, and Stage C=1 on Chrome-only invalidation", () => {
+            resetStageCounters();
 
             host.chart().invalidate(ChartInvalidationReason.Chrome);
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
+            expect(seriesPolicyCount).toBe(0);
+            expect(orientationPolicyCount).toBe(0);
+            expect(axisRegistryCount).toBe(0);
+            expect(bindingResolutionCount).toBe(0);
+            expect(stackAnalysisCount).toBe(0);
             expect(stageACount).toBe(0);
             expect(stageBCount).toBe(1);
             expect(stageCCount).toBe(1);
@@ -291,6 +349,103 @@ describe("Seventh Final Stability Remediation Suite", () => {
 
             // Zero additional update events after clamp was hit
             expect(emitted.length).toBe(countAfterFirstClamp);
+
+            controller.destroy();
+        });
+
+        it("should handle real update -> hit boundary -> continued physical movement with 0 extra updates", () => {
+            const chart = host.chart();
+            const sc = chart.scene() as CartesianXYChartScene;
+            const coordinateSpace = sc.coordinateSpace!;
+
+            // Seed with zoomed viewport [20, 80]
+            const zoomedXScale = CartesianScaleFactory.createExactPositionScale({
+                type: "linear",
+                domain: [20, 80],
+                range: [sc.plotRect.x, sc.plotRect.x + sc.plotRect.width]
+            });
+            const zoomedCoordSpace = new CartesianAxisCoordinateSpace(
+                new Map([
+                    [
+                        "x-main",
+                        {
+                            baseDomain: [0, 100],
+                            baseScale: coordinateSpace.get({ axis: "x", axisId: "x-main" })!.baseScale,
+                            range: [sc.plotRect.x, sc.plotRect.x + sc.plotRect.width],
+                            ref: { axis: "x", axisId: "x-main" },
+                            resolvedType: "linear",
+                            valid: true,
+                            viewportDomain: [20, 80],
+                            viewportScale: zoomedXScale
+                        }
+                    ]
+                ]),
+                new Map()
+            );
+
+            const initialZoomedVp: InternalCartesianViewportState = {
+                x: new Map([["x-main", { axis: "x", axisId: "x-main", kind: "continuous", min: 20, max: 80 }]]),
+                y: new Map()
+            };
+
+            const emitted: ChartViewportChangeEvent[] = [];
+            let currentVp = initialZoomedVp;
+
+            let rafCallback: (() => void) | null = null;
+            const mockRequestFrame = (cb: () => void) => {
+                rafCallback = cb;
+                return 1;
+            };
+
+            const controller = new ChartViewportGestureController(
+                {
+                    axisScenes: sc.axes,
+                    coordinateSpace: zoomedCoordSpace,
+                    currentViewport: currentVp,
+                    navigationOptions: {
+                        ...DEFAULT_NAVIGATION_OPTIONS,
+                        clampToData: true,
+                        dragPan: true,
+                        enabled: true,
+                        panAxes: "xy",
+                        pinchZoom: true,
+                        wheelSensitivity: 0.0015,
+                        wheelZoom: true,
+                        zoomAxes: "xy"
+                    },
+                    onCursorChange: () => {},
+                    onViewportChange: (next, ev) => {
+                        currentVp = next;
+                        emitted.push(ev);
+                    },
+                    orientation: "vertical",
+                    plotRect: sc.plotRect
+                },
+                mockRequestFrame,
+                () => {}
+            );
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 200, y: 150 });
+
+            // Move right +30px (valid pan)
+            controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 230, y: 150 });
+            rafCallback!();
+            const updateCountAtMid = emitted.filter(e => e.phase === "update").length;
+            expect(updateCountAtMid).toBe(1);
+
+            // Move further right to hit the [0, 60] clamp boundary
+            controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 400, y: 150 });
+            rafCallback!();
+            const updateCountAtBoundary = emitted.filter(e => e.phase === "update").length;
+            expect(updateCountAtBoundary).toBe(2);
+
+            // Move even further right past boundary (+200px)
+            controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 600, y: 150 });
+            rafCallback!();
+
+            // Additional movement emits 0 extra updates
+            const finalUpdateCount = emitted.filter(e => e.phase === "update").length;
+            expect(finalUpdateCount).toBe(updateCountAtBoundary);
 
             controller.destroy();
         });

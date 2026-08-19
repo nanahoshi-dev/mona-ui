@@ -221,6 +221,7 @@ export class CartesianMultiAxisCoordinator {
 
         const allCartesianSeries = bindingResolution.activeSeries.filter(s => "color" in s) as import("../context/chart-registration-context").ChartCartesianSeriesRegistration[];
         const primaryXType = resolvedXTypes.get(axisResolution.primaryXAxisId) ?? (orientation === "horizontal" ? "linear" : "category");
+        CartesianStageTracker.current?.onStackAnalysis?.();
         const stackCoordination = CartesianStackEngine.computeCoordination({
             orientation,
             primaryXAxisId: axisResolution.primaryXAxisId,

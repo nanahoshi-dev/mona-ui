@@ -313,4 +313,208 @@ describe("ChartViewportGestureController", () => {
         expect(lastEvent.source).toBe("drag");
         expect(lastEvent.phase).toBe("end");
     });
+
+    describe("Wheel Anchor Rebasing & Timer Ownership (PZV8-002)", () => {
+        it("should clear old debounce timer on anchor rebase so session is not terminated prematurely", () => {
+            vi.useFakeTimers();
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            // t = 0: first wheel event
+            controller.handleWheel({ deltaY: -50 } as WheelEvent, { x: 200, y: 150 });
+            expect(events.length).toBe(1);
+            expect(events[0].phase).toBe("start");
+
+            // t = 80ms: pointer moves > 8px and fires second wheel event (rebase anchor)
+            vi.advanceTimersByTime(80);
+            controller.handleWheel({ deltaY: -50 } as WheelEvent, { x: 230, y: 150 });
+
+            // t = 151ms (151ms after first event, 71ms after second event)
+            vi.advanceTimersByTime(71);
+            const endEventsAt151 = events.filter(e => e.phase === "end");
+            expect(endEventsAt151.length).toBe(0); // Session must NOT have ended!
+
+            // t = 230ms (150ms after second event)
+            vi.advanceTimersByTime(79);
+            const endEventsAt230 = events.filter(e => e.phase === "end");
+            expect(endEventsAt230.length).toBe(1);
+            expect(endEventsAt230[0].source).toBe("wheel");
+
+            vi.useRealTimers();
+        });
+
+        it("should handle multiple anchor rebases (A -> B -> C) with exactly one final end event", () => {
+            vi.useFakeTimers();
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handleWheel({ deltaY: -30 } as WheelEvent, { x: 100, y: 100 }); // Session A
+            vi.advanceTimersByTime(50);
+            controller.handleWheel({ deltaY: -30 } as WheelEvent, { x: 150, y: 100 }); // Rebase to B
+            vi.advanceTimersByTime(50);
+            controller.handleWheel({ deltaY: -30 } as WheelEvent, { x: 200, y: 100 }); // Rebase to C
+
+            // 100ms after C: still active
+            vi.advanceTimersByTime(100);
+            expect(events.filter(e => e.phase === "end").length).toBe(0);
+
+            // 150ms after C: ends cleanly exactly once
+            vi.advanceTimersByTime(50);
+            expect(events.filter(e => e.phase === "end").length).toBe(1);
+
+            vi.useRealTimers();
+        });
+    });
+
+    describe("Authority-Change Lifecycle & Click Suppression (PZV8-003)", () => {
+        it("should emit exactly one end event and retain click suppression for active drag", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 100 });
+            controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 130, y: 100 });
+            controller.flushPendingFrame();
+
+            expect(controller.isDragging).toBe(true);
+            expect(controller.isClickSuppressed).toBe(true);
+            const startEvents = events.filter(e => e.phase === "start");
+            expect(startEvents.length).toBe(1);
+
+            // Authority change abort
+            controller.abortForAuthorityChange();
+
+            expect(controller.isDragging).toBe(false);
+            const endEvents = events.filter(e => e.phase === "end");
+            expect(endEvents.length).toBe(1);
+            expect(endEvents[0].source).toBe("drag");
+            // Click suppression must be preserved across authority change!
+            expect(controller.isClickSuppressed).toBe(true);
+            expect(controller.consumeClickSuppression()).toBe(true);
+            expect(controller.isClickSuppressed).toBe(false);
+        });
+
+        it("should stay completely silent for pre-threshold drag on authority change", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 100 });
+            controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 102, y: 100 }); // 2px < 4px
+
+            expect(controller.isDragging).toBe(false);
+            expect(controller.isClickSuppressed).toBe(false);
+
+            controller.abortForAuthorityChange();
+
+            expect(events.length).toBe(0);
+            expect(controller.isClickSuppressed).toBe(false);
+        });
+
+        it("should emit exactly one end event and retain click suppression for active pinch", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2 } as PointerEvent, { x: 200, y: 150 });
+
+            expect(controller.isPinching).toBe(true);
+            expect(controller.isClickSuppressed).toBe(true);
+
+            controller.abortForAuthorityChange();
+
+            expect(controller.isPinching).toBe(false);
+            const endEvents = events.filter(e => e.phase === "end");
+            expect(endEvents.length).toBe(1);
+            expect(endEvents[0].source).toBe("pinch");
+            expect(controller.consumeClickSuppression()).toBe(true);
+        });
+
+        it("should emit exactly one end event and clear debounce timer for active wheel on authority change", () => {
+            vi.useFakeTimers();
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handleWheel({ deltaY: -50 } as WheelEvent, { x: 200, y: 150 });
+            expect(events.length).toBe(1);
+            expect(events[0].phase).toBe("start");
+
+            controller.abortForAuthorityChange();
+
+            const endEvents = events.filter(e => e.phase === "end");
+            expect(endEvents.length).toBe(1);
+            expect(endEvents[0].source).toBe("wheel");
+
+            // Advance timers: ensure no duplicate end event is fired
+            vi.advanceTimersByTime(300);
+            expect(events.filter(e => e.phase === "end").length).toBe(1);
+
+            vi.useRealTimers();
+        });
+    });
+
+    describe("Gesture Reversibility & Event Partition Invariance (PZV8-012)", () => {
+        it("restores initial viewport when wheel delta is inverted within active session", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handleWheel({ deltaY: -100 } as WheelEvent, { x: 250, y: 180 });
+            controller.flushPendingFrame();
+            const zoomedOut = events[events.length - 1];
+            expect(zoomedOut.phase).toBe("update");
+
+            // Invert delta back (+100)
+            controller.handleWheel({ deltaY: 100 } as WheelEvent, { x: 250, y: 180 });
+            controller.flushPendingFrame();
+            const restored = events[events.length - 1];
+            expect(restored.phase).toBe("update");
+            expect(restored.viewport).toEqual(events[0].viewport);
+        });
+
+        it("produces identical final viewport for partitioned drag events (1x100px vs 10x10px)", () => {
+            // Drag 1: 1 x 100px
+            const ctx1 = createMockContext();
+            const ctrl1 = new ChartViewportGestureController(ctx1.context);
+            ctrl1.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 100 });
+            ctrl1.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 200, y: 100 });
+            ctrl1.flushPendingFrame();
+            const finalVp1 = ctx1.events[ctx1.events.length - 1].viewport;
+
+            // Drag 2: 10 x 10px
+            const ctx2 = createMockContext();
+            const ctrl2 = new ChartViewportGestureController(ctx2.context);
+            ctrl2.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 100 });
+            for (let px = 110; px <= 200; px += 10) {
+                ctrl2.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: px, y: 100 });
+            }
+            ctrl2.flushPendingFrame();
+            const finalVp2 = ctx2.events[ctx2.events.length - 1].viewport;
+
+            expect(finalVp1).toEqual(finalVp2);
+        });
+
+        it("transitions from 2-pointer pinch to 1-pointer drag seeded from pinch viewport", () => {
+            const { context, events } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2 } as PointerEvent, { x: 200, y: 150 });
+            controller.handlePointerMove({ pointerId: 2 } as PointerEvent, { x: 260, y: 150 });
+            controller.flushPendingFrame();
+
+            const pinchUpdate = events[events.length - 1];
+            expect(pinchUpdate.source).toBe("pinch");
+            expect(pinchUpdate.phase).toBe("update");
+
+            // Release pointer 1 -> pinch ends, remaining pointer 2 initiates drag seeded from pinch proposal
+            controller.handlePointerUp({ pointerId: 1 } as PointerEvent);
+            expect(controller.isPinching).toBe(false);
+
+            // Move pointer 2
+            controller.handlePointerMove({ pointerId: 2 } as PointerEvent, { x: 280, y: 150 });
+            controller.flushPendingFrame();
+
+            expect(controller.isDragging).toBe(true);
+            const dragEvents = events.filter(e => e.source === "drag");
+            expect(dragEvents.length).toBeGreaterThanOrEqual(1);
+        });
+    });
 });

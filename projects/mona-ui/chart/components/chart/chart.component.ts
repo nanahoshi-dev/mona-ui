@@ -355,6 +355,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #hasPendingSizeReflow: boolean = false;
     #interactionRevision: number = 0;
 
+    #beginInteractionAuthorityChange(): void {
+        this.#gestureController?.abortForAuthorityChange();
+        this.#interactionRevision++;
+    }
+
     public readonly isAnimating = this.#isAnimating.asReadonly();
     public readonly isStructuralAnimation = this.#isStructuralAnimation.asReadonly();
     public readonly animationMode = this.#animationMode.asReadonly();
@@ -811,12 +816,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         });
 
         afterNextRender(() => {
+            const oldWidth = this.#currentWidth;
+            const oldHeight = this.#currentHeight;
             this.#initCanvasAndObserver();
             this.#canvasReady = true;
-            this.#recomputeAndPaint(ChartInvalidationReason.Size);
+            if (!this.scene()) {
+                this.#recomputeAndPaint(ChartInvalidationReason.Data | ChartInvalidationReason.Size);
+            } else if (this.#currentWidth !== oldWidth || this.#currentHeight !== oldHeight) {
+                this.#recomputeAndPaint(ChartInvalidationReason.Size);
+            } else {
+                this.#paint();
+            }
         });
-
-        this.#recomputeAndPaint(ChartInvalidationReason.Data);
     }
 
     public invalidate(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
@@ -1794,13 +1805,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             );
             newScene = computation.scene;
         } else if (isChromeOnly && this.#cartesianLayoutRuntime) {
+            this.#beginInteractionAuthorityChange();
             this.#cartesianLayoutRuntime = CartesianLayoutEngine.recomputeChrome(
                 this.#cartesianLayoutRuntime,
                 this.#currentWidth,
                 this.#currentHeight,
                 this.#labelMeasurements
             );
-            this.#interactionRevision++;
             const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
             const rawControlled = this.viewport();
             let canonicalViewport: InternalCartesianViewportState;
@@ -1873,8 +1884,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             });
 
             if (preparation.kind === "cartesian-xy") {
+                this.#beginInteractionAuthorityChange();
                 this.#cartesianLayoutRuntime = preparation.runtime;
-                this.#interactionRevision++;
                 const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
                 const rawControlled = this.viewport();
 
@@ -1936,8 +1947,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 newScene = projectedComp.scene;
                 this.#renderScheduler.consume(ChartInvalidationReason.Viewport);
             } else {
+                this.#beginInteractionAuthorityChange();
                 this.#cartesianLayoutRuntime = null;
-                this.#interactionRevision++;
                 newScene = preparation.scene;
             }
         } else {
