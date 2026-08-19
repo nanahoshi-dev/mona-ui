@@ -2200,7 +2200,11 @@
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis [type]="'category'" [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
+                        <mona-chart-x-axis
+                            [type]="'category'"
+                            [axisLine]="xAxisLine()"
+                            [nice]="true"
+                            title="Trading Day" />
                         <mona-chart-y-axis
                             [axisLine]="yAxisLine()"
                             [gridLines]="yGridLines()"
@@ -2243,7 +2247,11 @@
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)"
                         (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
-                        <mona-chart-x-axis [type]="'category'" [axisLine]="xAxisLine()" [nice]="true" title="Trading Day" />
+                        <mona-chart-x-axis
+                            [type]="'category'"
+                            [axisLine]="xAxisLine()"
+                            [nice]="true"
+                            title="Trading Day" />
                         <mona-chart-y-axis
                             [axisLine]="yAxisLine()"
                             [gridLines]="yGridLines()"
@@ -2573,10 +2581,12 @@
                                 High-Density Telemetry Stream (Interactive Pan & Zoom Studio)
                             </h3>
                             <p class="text-xs text-muted-foreground">
-                                Drag to pan along axes, scroll wheel to zoom at mouse position, use touch pinch, or use Shift+Arrow keys.
+                                Drag to pan along axes, scroll wheel to zoom at mouse position, use touch pinch, or use
+                                Shift+Arrow keys.
                             </p>
                         </div>
-                        <div class="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border border-border text-xs font-mono">
+                        <div
+                            class="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border border-border text-xs font-mono">
                             <span class="text-muted-foreground">Viewport:</span>
                             <span class="text-foreground font-semibold">{{ activeViewportSummary() }}</span>
                         </div>
@@ -2628,18 +2638,33 @@
                         <mona-chart-tooltip [shared]="true" />
                     </mona-chart>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-muted-foreground bg-muted/20 p-3 rounded-lg border border-border/60">
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-muted-foreground bg-muted/20 p-3 rounded-lg border border-border/60">
                         <div class="flex items-start gap-2">
                             <span class="font-bold text-foreground">🖱️ Mouse:</span>
-                            <span>Drag to pan. Wheel scroll zooms in/out at pointer coordinates. Drag on axis gutter to isolate single axis.</span>
+                            <span
+                                >Drag to pan. Wheel scroll zooms in/out at pointer coordinates. Drag on axis gutter to
+                                isolate single axis.</span
+                            >
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="font-bold text-foreground">🖐️ Touch:</span>
-                            <span>Two-finger pinch to zoom & pan centroid simultaneously. Single finger drag to pan.</span>
+                            <span
+                                >Two-finger pinch to zoom & pan centroid simultaneously. Single finger drag to
+                                pan.</span
+                            >
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="font-bold text-foreground">⌨️ Keyboard:</span>
-                            <span>Shift + Left/Right/Up/Down to pan, <kbd class="px-1 py-0.5 bg-muted rounded border border-border">+</kbd>/<kbd class="px-1 py-0.5 bg-muted rounded border border-border">-</kbd> to zoom, <kbd class="px-1 py-0.5 bg-muted rounded border border-border">0</kbd> to reset.</span>
+                            <span
+                                >Shift + Left/Right/Up/Down to pan,
+                                <kbd class="px-1 py-0.5 bg-muted rounded border border-border">+</kbd>/<kbd
+                                    class="px-1 py-0.5 bg-muted rounded border border-border"
+                                    >-</kbd
+                                >
+                                to zoom, <kbd class="px-1 py-0.5 bg-muted rounded border border-border">0</kbd> to
+                                reset.</span
+                            >
                         </div>
                     </div>
                 </div>
@@ -2652,7 +2677,8 @@
                                 Enterprise Performance Dashboard (Multi-Axis Cartesian Layout)
                             </h3>
                             <p class="text-xs text-muted-foreground">
-                                Dual Y-axes (Revenue $k vs Profit Margin & Load %) with independent scales and dual hierarchical X-axes.
+                                Dual Y-axes (Revenue $k vs Profit Margin & Load %) with independent scales and dual
+                                hierarchical X-axes.
                             </p>
                         </div>
                         <div class="text-xs text-muted-foreground">
