@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, inject, input, OnInit, output } from "@angular/core";
+import { Component, computed, DestroyRef, effect, inject, input, OnInit, output } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type {
@@ -111,7 +111,7 @@ export class ChartSelectionComponent implements OnInit {
             this.strokeWidth();
             this.fillOpacity();
             if (this.#registered) {
-                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+                this.#chartContext?.invalidate(ChartInvalidationReason.Interaction);
             }
         });
     }
@@ -130,12 +130,18 @@ export class ChartSelectionComponent implements OnInit {
             defaultSelectedMarkIds: this.defaultSelectedMarkIds,
             emitSelectionChange: event => this.selectionChange.emit(event),
             enabled: this.enabled,
-            fillOpacity: this.fillOpacity,
+            fillOpacity: computed(() => {
+                const o = this.fillOpacity();
+                return o !== undefined ? Math.max(0, Math.min(1, o)) : undefined;
+            }),
             keyboardSelection: this.keyboardSelection,
             mode: this.mode,
             retainOnDataChange: this.retainOnDataChange,
             selectedMarkIds: this.selectedMarkIds,
-            strokeWidth: this.strokeWidth
+            strokeWidth: computed(() => {
+                const w = this.strokeWidth();
+                return w !== undefined ? Math.max(0, w) : undefined;
+            })
         });
 
         this.#destroyRef.onDestroy(() => {
