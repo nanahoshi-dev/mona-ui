@@ -3,7 +3,7 @@ import type { ChartFinancialDirection } from "../../models/chart-financial.model
 import type { ChartField } from "../../models/chart.models";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ChartInteractionXKey } from "../scene/scene-geometry";
-import { serializeKeyPart } from "../animation/animation-identity";
+import { normalizeSeriesKey, serializeKeyPart } from "../animation/animation-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { resolveValue } from "./chart-value-resolver";
 
@@ -32,6 +32,7 @@ export interface FinancialResolutionOptions {
     readonly lowField: ChartField;
     readonly openField: ChartField;
     readonly seriesId: string;
+    readonly seriesKey?: string;
     readonly seriesName: string;
     readonly warnedDiagnosticSignatures?: Set<string>;
     readonly xAxisType?: ChartXAxisType;
@@ -228,8 +229,9 @@ export class FinancialDataResolver {
                 continue;
             }
 
+            const identityPrefix = normalizeSeriesKey(options.seriesKey) ?? seriesId;
             let customKeyIdentifier: string | undefined;
-            let animationKey = `${seriesId}:fin:x:${String(resolvedX.key)}`;
+            let animationKey = `${identityPrefix}:fin:x:${String(resolvedX.key)}`;
             if (keyField !== undefined) {
                 const customKey = resolveValue(row, keyField, i);
                 const keyPart = serializeKeyPart(customKey);
@@ -245,7 +247,7 @@ export class FinancialDataResolver {
                         }
                         continue;
                     }
-                    animationKey = `${seriesId}:fin:key:${customKeyIdentifier}`;
+                    animationKey = `${identityPrefix}:fin:key:${customKeyIdentifier}`;
                 }
             }
 

@@ -398,7 +398,7 @@ export class CartesianStackEngine {
                     ? (s.xField?.() ?? rootXField)
                     : (s.xField?.() ?? rootXField);
                 const sField = s.field();
-                const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
+                const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.(), s.seriesKey?.());
                 const sRecords = new Map<ChartInteractionXKey, RawDatumRecord>();
 
                 for (let dIdx = 0; dIdx < sData.length; dIdx++) {

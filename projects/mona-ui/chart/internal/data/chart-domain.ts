@@ -296,6 +296,7 @@ export function calculateCategoryDomain(
                 lowField: finReg.lowField(),
                 openField: finReg.openField(),
                 seriesId: finReg.id,
+                seriesKey: finReg.seriesKey?.(),
                 seriesName: finReg.name(),
                 xAxisType: "category",
                 xField
@@ -363,6 +364,7 @@ export function calculateTimeDomain(
                 lowField: finReg.lowField(),
                 openField: finReg.openField(),
                 seriesId: finReg.id,
+                seriesKey: finReg.seriesKey?.(),
                 seriesName: finReg.name(),
                 xAxisType,
                 xField
@@ -518,6 +520,7 @@ export function calculateLinearXDomain(
                 lowField: finReg.lowField(),
                 openField: finReg.openField(),
                 seriesId: finReg.id,
+                seriesKey: finReg.seriesKey?.(),
                 seriesName: finReg.name(),
                 xAxisType: "linear",
                 xField
@@ -688,6 +691,7 @@ export function calculateContinuousYDomain(
                     lowField: finReg.lowField(),
                     openField: finReg.openField(),
                     seriesId: finReg.id,
+                    seriesKey: finReg.seriesKey?.(),
                     seriesName: finReg.name(),
                     xAxisType,
                     xField
@@ -869,6 +873,7 @@ export function hasRenderableData(
                 lowField: finReg.lowField(),
                 openField: finReg.openField(),
                 seriesId: finReg.id,
+                seriesKey: finReg.seriesKey?.(),
                 seriesName: finReg.name(),
                 xAxisType,
                 xField
