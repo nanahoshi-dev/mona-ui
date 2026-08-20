@@ -1,13 +1,15 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartComponent } from "./chart.component";
 import { BarSeriesComponent } from "../bar-series/bar-series.component";
+import { LineSeriesComponent } from "../line-series/line-series.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { ChartSelectionComponent } from "../chart-selection/chart-selection.component";
 import { ChartDataLabelTemplateDirective } from "../../directives/chart-data-label-template.directive";
-import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer";
+import { CanvasChartRenderer, type ChartRenderOverlayState } from "../../internal/render/canvas-chart-renderer";
+import type { ChartAnimationInput } from "../../models/chart-animation.models";
 
 @Component({
     imports: [
@@ -20,19 +22,24 @@ import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer
     ],
     template: `
         <mona-chart
-            [animation]="animationConfig"
+            [animation]="animationConfig()"
             [data]="data()"
             [xField]="'name'"
             [style.width.px]="600"
             [style.height.px]="400">
-            <mona-chart-x-axis />
+            <mona-chart-x-axis [type]="xAxisType()" />
             <mona-chart-y-axis />
-            <mona-bar-series [field]="'value'" [name]="'Bars'">
+            <mona-bar-series
+                [field]="'value'"
+                [name]="'Bars'"
+                [dataLabels]="true">
                 <ng-template monaChartDataLabel let-ctx>
-                    <span>{{ ctx.formattedValue }}</span>
+                    <span class="custom-dom-label">{{ ctx.formattedValue }}</span>
                 </ng-template>
             </mona-bar-series>
-            <mona-chart-selection [mode]="'single'" />
+            <mona-chart-selection
+                [mode]="'multiple'"
+                [selectedMarkIds]="selectedMarkIds()" />
         </mona-chart>
     `
 })
@@ -42,14 +49,18 @@ class AnimationOverlayHostComponent {
         { name: "A", value: 10 },
         { name: "B", value: 20 }
     ]);
-    public animationConfig = { duration: 200, easing: "linear" as const };
+    public readonly animationConfig = signal<ChartAnimationInput>({ duration: 200, easing: "linear" });
+    public readonly xAxisType = signal<import("../../models/chart-axis.models").ChartXAxisType>("category");
+    public readonly selectedMarkIds = signal<readonly string[]>(["s0:0"]);
 }
 
-describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB-R2-015)", () => {
+describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB-R4-003)", () => {
     let fixture: ComponentFixture<AnimationOverlayHostComponent>;
     let host: AnimationOverlayHostComponent;
 
     beforeEach(async () => {
+        vi.useFakeTimers();
+
         vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
             bottom: 400,
             height: 400,
@@ -83,7 +94,8 @@ describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB
             setLineDash: vi.fn(),
             setTransform: vi.fn(),
             stroke: vi.fn(),
-            strokeRect: vi.fn()
+            strokeRect: vi.fn(),
+            strokeText: vi.fn()
         } as any);
 
         await TestBed.configureTestingModule({
@@ -96,31 +108,116 @@ describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB
         await fixture.whenStable();
     });
 
-    it("suppresses data labels and selection overlays during intermediate animation frames and restores them upon completion", () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it("deterministic morph: suppresses Canvas labels, selection visuals, and DOM templates at intermediate frame and restores them upon completion", () => {
         const renderSpy = vi.spyOn(CanvasChartRenderer, "render");
 
-        // Trigger data animation
+        // Trigger data morph transition
         host.data.set([
             { name: "A", value: 30 },
             { name: "B", value: 40 }
         ]);
         fixture.detectChanges();
 
-        // Check calls
+        // 1. Assert animation started and mode is morph
+        expect(host.chart().isAnimating()).toBe(true);
+        expect(host.chart().animationMode()).toBe("morph");
+
+        // 2. Advance clock to intermediate progress (100ms into 200ms duration)
+        vi.advanceTimersByTime(100);
+        fixture.detectChanges();
+
+        expect(host.chart().isAnimating()).toBe(true);
+
+        // Assert intermediate suppressed state on the render spy
         expect(renderSpy).toHaveBeenCalled();
-        for (const call of renderSpy.mock.calls) {
-            const overlayState = call[2] as import("../../internal/render/canvas-chart-renderer").ChartRenderOverlayState | null;
-            if (overlayState && overlayState.cartesianDataLabels === null) {
-                expect(overlayState.selectionScene).toBeNull();
-                expect(overlayState.activeBrushBounds).toBeNull();
-            }
+        const suppressedCalls = renderSpy.mock.calls.filter(call => {
+            const overlay = call[2] as ChartRenderOverlayState | null;
+            return overlay?.cartesianDataLabels === null;
+        });
+        expect(suppressedCalls.length).toBeGreaterThan(0);
+
+        for (const call of suppressedCalls) {
+            const overlayState = call[2] as ChartRenderOverlayState;
+            expect(overlayState.cartesianDataLabels).toBeNull();
+            expect(overlayState.selectionScene).toBeNull();
+            expect(overlayState.activeBrushBounds).toBeNull();
+        }
+
+        // Authoritative selection state remains durable during visual suppression
+        expect(host.selectedMarkIds()).toEqual(["s0:0"]);
+
+        // Custom DOM template labels are visually suppressed (opacity-0 class)
+        const domLabelWrapper = fixture.nativeElement.querySelector(".custom-dom-label")?.parentElement;
+        if (domLabelWrapper) {
+            expect(domLabelWrapper.classList.contains("opacity-0")).toBe(true);
+        }
+
+        // 3. Advance clock to completion
+        vi.advanceTimersByTime(150);
+        fixture.detectChanges();
+
+        expect(host.chart().isAnimating()).toBe(false);
+
+        // Target persistent presentation is restored on the final render call
+        const lastCall = renderSpy.mock.calls[renderSpy.mock.calls.length - 1];
+        const finalOverlay = lastCall[2] as ChartRenderOverlayState;
+        expect(finalOverlay.cartesianDataLabels).not.toBeNull();
+        expect(finalOverlay.selectionScene).not.toBeNull();
+        expect(host.selectedMarkIds()).toEqual(["s0:0"]);
+
+        if (domLabelWrapper) {
+            expect(domLabelWrapper.classList.contains("opacity-0")).toBe(false);
         }
 
         renderSpy.mockRestore();
     });
 
-    it("does not suppress overlays when animation is disabled (instant transition)", async () => {
-        host.animationConfig = { duration: 0, easing: "linear" as const };
+    it("deterministic crossfade: suppresses persistent presentation during crossfade animation and restores upon completion", () => {
+        const renderSpy = vi.spyOn(CanvasChartRenderer, "render");
+        const crossfadeSpy = vi.spyOn(CanvasChartRenderer, "renderCrossfade");
+
+        // Trigger large dataset data update which plans a crossfade (>2000 complexity cost)
+        host.data.set(Array.from({ length: 2100 }, (_, i) => ({ name: `Cat ${i}`, value: (i + 1) * 10 })));
+        fixture.detectChanges();
+
+        expect(host.chart().isAnimating()).toBe(true);
+        expect(host.chart().animationMode()).toBe("crossfade");
+
+        // Step intermediate frame
+        vi.advanceTimersByTime(100);
+        fixture.detectChanges();
+
+        expect(host.chart().isAnimating()).toBe(true);
+
+        expect(crossfadeSpy).toHaveBeenCalled();
+        for (const call of crossfadeSpy.mock.calls) {
+            const overlay = call[4] as ChartRenderOverlayState | undefined;
+            expect(overlay?.cartesianDataLabels).toBeUndefined();
+            expect(overlay?.selectionScene).toBeUndefined();
+            expect(overlay?.activeBrushBounds).toBeUndefined();
+        }
+
+        // Advance to completion
+        vi.advanceTimersByTime(150);
+        fixture.detectChanges();
+
+        expect(host.chart().isAnimating()).toBe(false);
+
+        const lastCall = renderSpy.mock.calls[renderSpy.mock.calls.length - 1];
+        const finalOverlay = lastCall[2] as ChartRenderOverlayState;
+        expect(finalOverlay.cartesianDataLabels).not.toBeNull();
+        expect(finalOverlay.selectionScene).not.toBeNull();
+
+        renderSpy.mockRestore();
+        crossfadeSpy.mockRestore();
+    });
+
+    it("does not suppress overlays when animation is disabled (duration: 0)", async () => {
+        host.animationConfig.set({ duration: 0, easing: "linear" });
         fixture.detectChanges();
 
         const renderSpy = vi.spyOn(CanvasChartRenderer, "render");
@@ -132,11 +229,14 @@ describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB
         fixture.detectChanges();
         host.chart().flushPendingRender();
 
+        expect(host.chart().isAnimating()).toBe(false);
         expect(renderSpy).toHaveBeenCalled();
+
         const lastCall = renderSpy.mock.calls[renderSpy.mock.calls.length - 1];
-        const overlayState = lastCall[2] as import("../../internal/render/canvas-chart-renderer").ChartRenderOverlayState | null;
+        const overlayState = lastCall[2] as ChartRenderOverlayState;
         expect(overlayState).toBeDefined();
-        expect(overlayState?.cartesianDataLabels).not.toBeNull();
+        expect(overlayState.cartesianDataLabels).not.toBeNull();
+        expect(overlayState.selectionScene).not.toBeNull();
 
         renderSpy.mockRestore();
     });

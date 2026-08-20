@@ -152,4 +152,200 @@ describe("Chart Data Label Semantic Context & Color Fallback (GDSB-R2-012, GDSB-
         expect(ctx.formattedX).toBe("Date: 2026-08-20");
         expect(ctx.formattedY).toBe("$45.50");
     });
+
+    it("populates physical accumulated yValue and formattedY for vertical normal stacked data label context (GDSB-R4-004)", () => {
+        const axisYScene = {
+            axis: "y" as const,
+            axisId: "customY",
+            axisLine: true,
+            formatter: (v: unknown) => `$${Number(v).toFixed(2)}`,
+            gridLines: true,
+            isPrimary: true,
+            position: "left" as const,
+            ticks: [],
+            title: "",
+            visible: true
+        };
+
+        const scene: CartesianXYChartScene = {
+            ...mockScene,
+            axes: [axisYScene],
+            orientation: "vertical",
+            primaryYAxisId: "customY"
+        };
+
+        const hit: SceneHitTarget = {
+            category: "Q1",
+            dataIndex: 0,
+            datum: { period: "Q1", segment: 30 },
+            formattedValue: "30",
+            index: 0,
+            seriesId: "s2",
+            seriesName: "Segment 2",
+            seriesType: "bar",
+            stackEnd: 70,
+            stackMode: "normal",
+            stackStart: 40,
+            value: 30,
+            xKey: "Q1",
+            xValue: "Q1",
+            yAxisId: "customY"
+        };
+
+        const ctx = ChartDataLabelContextBuilder.buildContext(hit, false, "#3b82f6", scene);
+
+        expect(ctx.value).toBe(30);
+        expect(ctx.xValue).toBe("Q1");
+        expect(ctx.yValue).toBe(70);
+        expect(ctx.formattedY).toBe("$70.00");
+        expect(ctx.formattedValue).toBe("30");
+    });
+
+    it("populates physical accumulated xValue and formattedX for horizontal normal stacked data label context (GDSB-R4-004)", () => {
+        const axisXScene = {
+            axis: "x" as const,
+            axisId: "customX",
+            axisLine: true,
+            formatter: (v: unknown) => `$${Number(v).toFixed(2)}`,
+            gridLines: true,
+            isPrimary: true,
+            position: "bottom" as const,
+            ticks: [],
+            title: "",
+            visible: true
+        };
+
+        const scene: CartesianXYChartScene = {
+            ...mockScene,
+            axes: [axisXScene],
+            orientation: "horizontal",
+            primaryXAxisId: "customX"
+        };
+
+        const hit: SceneHitTarget = {
+            barOrientation: "horizontal",
+            category: "Q1",
+            dataIndex: 0,
+            datum: { period: "Q1", segment: 30 },
+            formattedValue: "30",
+            index: 0,
+            seriesId: "s2",
+            seriesName: "Segment 2",
+            seriesType: "bar",
+            stackEnd: 70,
+            stackMode: "normal",
+            stackStart: 40,
+            value: 30,
+            xAxisId: "customX",
+            xKey: "Q1",
+            xValue: 70
+        };
+
+        const ctx = ChartDataLabelContextBuilder.buildContext(hit, false, "#3b82f6", scene);
+
+        expect(ctx.value).toBe(30);
+        expect(ctx.xValue).toBe(70);
+        expect(ctx.yValue).toBe("Q1");
+        expect(ctx.formattedX).toBe("$70.00");
+        expect(ctx.formattedValue).toBe("30");
+    });
+
+    it("populates physical percentage yValue and formattedY for vertical percent stacked data label context (GDSB-R4-004)", () => {
+        const axisYScene = {
+            axis: "y" as const,
+            axisId: "percentY",
+            axisLine: true,
+            formatter: (v: unknown) => `${Number(v).toFixed(0)}%`,
+            gridLines: true,
+            isPrimary: true,
+            position: "left" as const,
+            ticks: [],
+            title: "",
+            visible: true
+        };
+
+        const scene: CartesianXYChartScene = {
+            ...mockScene,
+            axes: [axisYScene],
+            orientation: "vertical",
+            primaryYAxisId: "percentY"
+        };
+
+        const hit: SceneHitTarget = {
+            category: "2026",
+            dataIndex: 0,
+            datum: { year: "2026", segment: 30 },
+            formattedValue: "30",
+            index: 0,
+            seriesId: "s2",
+            seriesName: "Segment 2",
+            seriesType: "bar",
+            stackEnd: 75,
+            stackMode: "percent",
+            stackPercentage: 0.75,
+            stackStart: 45,
+            value: 30,
+            xKey: "2026",
+            xValue: "2026",
+            yAxisId: "percentY"
+        };
+
+        const ctx = ChartDataLabelContextBuilder.buildContext(hit, false, "#3b82f6", scene);
+
+        expect(ctx.value).toBe(30);
+        expect(ctx.xValue).toBe("2026");
+        expect(ctx.yValue).toBe(75);
+        expect(ctx.formattedY).toBe("75%");
+        expect(ctx.stackPercentage).toBe(0.75);
+    });
+
+    it("populates physical percentage xValue and formattedX for horizontal percent stacked data label context (GDSB-R4-004)", () => {
+        const axisXScene = {
+            axis: "x" as const,
+            axisId: "percentX",
+            axisLine: true,
+            formatter: (v: unknown) => `${Number(v).toFixed(0)}%`,
+            gridLines: true,
+            isPrimary: true,
+            position: "bottom" as const,
+            ticks: [],
+            title: "",
+            visible: true
+        };
+
+        const scene: CartesianXYChartScene = {
+            ...mockScene,
+            axes: [axisXScene],
+            orientation: "horizontal",
+            primaryXAxisId: "percentX"
+        };
+
+        const hit: SceneHitTarget = {
+            barOrientation: "horizontal",
+            category: "2026",
+            dataIndex: 0,
+            datum: { year: "2026", segment: 30 },
+            formattedValue: "30",
+            index: 0,
+            seriesId: "s2",
+            seriesName: "Segment 2",
+            seriesType: "bar",
+            stackEnd: 75,
+            stackMode: "percent",
+            stackPercentage: 0.75,
+            stackStart: 45,
+            value: 30,
+            xAxisId: "percentX",
+            xKey: "2026",
+            xValue: 75
+        };
+
+        const ctx = ChartDataLabelContextBuilder.buildContext(hit, false, "#3b82f6", scene);
+
+        expect(ctx.value).toBe(30);
+        expect(ctx.xValue).toBe(75);
+        expect(ctx.yValue).toBe("2026");
+        expect(ctx.formattedX).toBe("75%");
+        expect(ctx.stackPercentage).toBe(0.75);
+    });
 });

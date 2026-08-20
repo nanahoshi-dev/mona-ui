@@ -728,6 +728,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#cancelPendingBrushFrame();
         this.#hasEmittedBrushStart = false;
 
+        const session = this.#brushGestureController.activeSession;
         const brushReg = this.#brush();
         const hadBounds = this.#activeBrushBounds() !== null;
         const wasBrushing = this.#brushGestureController.cancel(options?.element ?? this.canvasElement()?.nativeElement);
@@ -736,7 +737,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (!options?.silent && (wasBrushing || hadBounds) && brushReg) {
             brushReg.emitBrushChange?.({
                 cancelReason: reason,
-                mode: brushReg.mode?.() ?? "xy",
+                mode: session?.target.mode ?? session?.mode ?? brushReg.mode?.() ?? "xy",
                 phase: "cancel",
                 pixelBounds: null
             });

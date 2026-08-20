@@ -6,7 +6,14 @@ import { BarSeriesComponent } from "../bar-series/bar-series.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { ChartBrushComponent } from "../chart-brush/chart-brush.component";
-import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
+import type {
+    ChartBrushActivation,
+    ChartBrushChangeEvent,
+    ChartBrushHitPolicy,
+    ChartBrushLineStyle,
+    ChartBrushMode,
+    ChartBrushSelectionBehavior
+} from "../../models/chart-brush.models";
 
 @Component({
     imports: [
@@ -23,8 +30,8 @@ import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
             [xField]="'name'"
             [style.width.px]="600"
             [style.height.px]="400">
-            <mona-chart-x-axis [id]="'xPrimary'" />
-            <mona-chart-y-axis [id]="'yPrimary'" />
+            <mona-chart-x-axis />
+            <mona-chart-y-axis />
             <mona-bar-series [field]="'value'" [name]="'Bars'" />
             <mona-chart-brush
                 [enabled]="brushEnabled()"
@@ -36,6 +43,10 @@ import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
                 [xAxisId]="brushXAxisId()"
                 [yAxisId]="brushYAxisId()"
                 [fillColor]="brushFillColor()"
+                [fillOpacity]="brushFillOpacity()"
+                [borderColor]="brushBorderColor()"
+                [borderWidth]="brushBorderWidth()"
+                [lineStyle]="brushLineStyle()"
                 (brushChange)="onBrushChange($event)" />
         </mona-chart>
     `
@@ -48,14 +59,18 @@ class BrushAuthorityHostComponent {
         { name: "C", value: 30 }
     ]);
     public readonly brushEnabled = signal(true);
-    public readonly brushActivation = signal<import("../../models/chart-brush.models").ChartBrushActivation>("drag");
-    public readonly brushMode = signal<import("../../models/chart-brush.models").ChartBrushMode>("xy");
-    public readonly brushHitPolicy = signal<import("../../models/chart-brush.models").ChartBrushHitPolicy>("intersect");
-    public readonly brushSelectionBehavior = signal<import("../../models/chart-brush.models").ChartBrushSelectionBehavior>("none");
+    public readonly brushActivation = signal<ChartBrushActivation>("drag");
+    public readonly brushMode = signal<ChartBrushMode>("xy");
+    public readonly brushHitPolicy = signal<ChartBrushHitPolicy>("intersect");
+    public readonly brushSelectionBehavior = signal<ChartBrushSelectionBehavior>("none");
     public readonly brushMinDragDistance = signal<number>(4);
     public readonly brushXAxisId = signal<string | undefined>(undefined);
     public readonly brushYAxisId = signal<string | undefined>(undefined);
     public readonly brushFillColor = signal<string | undefined>(undefined);
+    public readonly brushFillOpacity = signal<number | undefined>(undefined);
+    public readonly brushBorderColor = signal<string | undefined>(undefined);
+    public readonly brushBorderWidth = signal<number | undefined>(undefined);
+    public readonly brushLineStyle = signal<ChartBrushLineStyle | undefined>(undefined);
     public brushEvents: ChartBrushChangeEvent[] = [];
 
     public onBrushChange(evt: ChartBrushChangeEvent): void {
@@ -63,7 +78,7 @@ class BrushAuthorityHostComponent {
     }
 }
 
-describe("Chart Brush Authority & Lifecycle Release Gate (GDSB-R2-002, GDSB-R2-003, GDSB-R2-004, GDSB-R3-001)", () => {
+describe("Chart Brush Authority & Lifecycle Release Gate (GDSB-R4-001, GDSB-R4-005)", () => {
     let fixture: ComponentFixture<BrushAuthorityHostComponent>;
     let host: BrushAuthorityHostComponent;
 
@@ -81,6 +96,31 @@ describe("Chart Brush Authority & Lifecycle Release Gate (GDSB-R2-002, GDSB-R2-0
         });
         HTMLElement.prototype.setPointerCapture = vi.fn();
         HTMLElement.prototype.releasePointerCapture = vi.fn();
+        vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+            arc: vi.fn(),
+            beginPath: vi.fn(),
+            bezierCurveTo: vi.fn(),
+            clearRect: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            createLinearGradient: vi.fn().mockReturnValue({ addColorStop: vi.fn() }),
+            createRadialGradient: vi.fn().mockReturnValue({ addColorStop: vi.fn() }),
+            fill: vi.fn(),
+            fillRect: vi.fn(),
+            fillText: vi.fn(),
+            lineTo: vi.fn(),
+            measureText: vi.fn().mockReturnValue({ width: 20 }),
+            moveTo: vi.fn(),
+            quadraticCurveTo: vi.fn(),
+            rect: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+            setLineDash: vi.fn(),
+            setTransform: vi.fn(),
+            stroke: vi.fn(),
+            strokeRect: vi.fn(),
+            strokeText: vi.fn()
+        } as any);
 
         await TestBed.configureTestingModule({
             imports: [BrushAuthorityHostComponent]
@@ -294,8 +334,11 @@ describe("Chart Brush Authority & Lifecycle Release Gate (GDSB-R2-002, GDSB-R2-0
         expect(host.brushEvents[1].cancelReason).toBe("data-change");
     });
 
-    it("emits cancel event with cancelReason 'disabled' when brush enabled becomes false", () => {
+    it("emits cancel event with cancelReason 'disabled' and reports frozen session mode when brush enabled becomes false", () => {
         const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+
+        host.brushMode.set("x");
+        fixture.detectChanges();
 
         chartEl.dispatchEvent(
             new PointerEvent("pointerdown", {
@@ -327,201 +370,188 @@ describe("Chart Brush Authority & Lifecycle Release Gate (GDSB-R2-002, GDSB-R2-0
         expect(host.brushEvents.length).toBe(2);
         expect(host.brushEvents[1].phase).toBe("cancel");
         expect(host.brushEvents[1].cancelReason).toBe("disabled");
+        expect(host.brushEvents[1].mode).toBe("x");
     });
 
-    it("silently discards pre-threshold candidate when configuration mode changes before threshold", () => {
-        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+    describe("Pre-threshold candidate silent discard matrix", () => {
+        const testPreThresholdDiscard = (label: string, mutate: () => void) => {
+            it(`silently discards pre-threshold candidate when ${label} changes`, () => {
+                const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
 
-        host.brushMode.set("x");
-        fixture.detectChanges();
+                // Pointer down
+                chartEl.dispatchEvent(
+                    new PointerEvent("pointerdown", {
+                        clientX: 50,
+                        clientY: 50,
+                        pointerId: 1,
+                        pointerType: "mouse",
+                        bubbles: true
+                    })
+                );
+                fixture.detectChanges();
 
-        // Pointer down
-        chartEl.dispatchEvent(
-            new PointerEvent("pointerdown", {
-                clientX: 50,
-                clientY: 50,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        fixture.detectChanges();
+                // Move 1px (< 4px threshold)
+                chartEl.dispatchEvent(
+                    new PointerEvent("pointermove", {
+                        clientX: 51,
+                        clientY: 51,
+                        pointerId: 1,
+                        pointerType: "mouse",
+                        bubbles: true
+                    })
+                );
+                fixture.detectChanges();
 
-        // Move 1px (< 4px threshold)
-        chartEl.dispatchEvent(
-            new PointerEvent("pointermove", {
-                clientX: 51,
-                clientY: 51,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        fixture.detectChanges();
+                // Mutate authority input while pre-threshold
+                mutate();
+                fixture.detectChanges();
 
-        // Mode changes to 'y' while pre-threshold
-        host.brushMode.set("y");
-        fixture.detectChanges();
+                // Subsequent move exceeding threshold
+                chartEl.dispatchEvent(
+                    new PointerEvent("pointermove", {
+                        clientX: 150,
+                        clientY: 150,
+                        pointerId: 1,
+                        pointerType: "mouse",
+                        bubbles: true
+                    })
+                );
+                host.chart().flushPendingRender();
+                fixture.detectChanges();
 
-        // Move beyond threshold with the old pointer
-        chartEl.dispatchEvent(
-            new PointerEvent("pointermove", {
-                clientX: 150,
-                clientY: 150,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        host.chart().flushPendingRender();
-        fixture.detectChanges();
+                // Pointer up
+                chartEl.dispatchEvent(
+                    new PointerEvent("pointerup", {
+                        clientX: 150,
+                        clientY: 150,
+                        pointerId: 1,
+                        pointerType: "mouse",
+                        bubbles: true
+                    })
+                );
+                fixture.detectChanges();
 
-        // Pointer up
-        chartEl.dispatchEvent(
-            new PointerEvent("pointerup", {
-                clientX: 150,
-                clientY: 150,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        fixture.detectChanges();
+                // Must NOT have emitted any brush events
+                expect(host.brushEvents.length).toBe(0);
+            });
+        };
 
-        // Must NOT have emitted any start, update, end, or cancel events
-        expect(host.brushEvents.length).toBe(0);
+        testPreThresholdDiscard("activation", () => host.brushActivation.set("shift-drag"));
+        testPreThresholdDiscard("mode", () => host.brushMode.set("y"));
+        testPreThresholdDiscard("xAxisId", () => host.brushXAxisId.set("x2"));
+        testPreThresholdDiscard("yAxisId", () => host.brushYAxisId.set("y2"));
+        testPreThresholdDiscard("minDragDistance", () => host.brushMinDragDistance.set(20));
+        testPreThresholdDiscard("hitPolicy", () => host.brushHitPolicy.set("center"));
+        testPreThresholdDiscard("selectionBehavior", () => host.brushSelectionBehavior.set("replace"));
     });
 
-    it("emits authority-change cancel when mode changes during post-threshold active brush", () => {
-        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+    describe("Post-threshold active brush authority cancel matrix", () => {
+        const testPostThresholdCancel = (
+            label: string,
+            mutate: () => void,
+            expectedCancelMode: ChartBrushMode = "x"
+        ) => {
+            it(`cancels active brush with cancelReason 'authority-change' and frozen session mode when ${label} changes (GDSB-R4-001)`, () => {
+                const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
 
-        host.brushMode.set("x");
-        fixture.detectChanges();
+                host.brushMode.set("x");
+                fixture.detectChanges();
 
-        chartEl.dispatchEvent(
-            new PointerEvent("pointerdown", {
-                clientX: 50,
-                clientY: 50,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        chartEl.dispatchEvent(
-            new PointerEvent("pointermove", {
-                clientX: 100,
-                clientY: 100,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        host.chart().flushPendingRender();
-        fixture.detectChanges();
+                chartEl.dispatchEvent(
+                    new PointerEvent("pointerdown", {
+                        clientX: 50,
+                        clientY: 50,
+                        pointerId: 1,
+                        pointerType: "mouse",
+                        bubbles: true
+                    })
+                );
+                chartEl.dispatchEvent(
+                    new PointerEvent("pointermove", {
+                        clientX: 100,
+                        clientY: 100,
+                        pointerId: 1,
+                        pointerType: "mouse",
+                        bubbles: true
+                    })
+                );
+                host.chart().flushPendingRender();
+                fixture.detectChanges();
 
-        expect(host.brushEvents.length).toBe(1);
-        expect(host.brushEvents[0].phase).toBe("start");
-        expect(host.brushEvents[0].mode).toBe("x");
+                expect(host.brushEvents.length).toBe(1);
+                expect(host.brushEvents[0].phase).toBe("start");
+                expect(host.brushEvents[0].mode).toBe("x");
 
-        // Change mode to 'y'
-        host.brushMode.set("y");
-        fixture.detectChanges();
+                // Mutate authority input
+                mutate();
+                fixture.detectChanges();
 
-        expect(host.brushEvents.length).toBe(2);
-        expect(host.brushEvents[1].phase).toBe("cancel");
-        expect(host.brushEvents[1].cancelReason).toBe("authority-change");
+                expect(host.brushEvents.length).toBe(2);
+                expect(host.brushEvents[1].phase).toBe("cancel");
+                expect(host.brushEvents[1].cancelReason).toBe("authority-change");
+                expect(host.brushEvents[1].mode).toBe(expectedCancelMode);
 
-        // Subsequent pointerup emits no end event
-        chartEl.dispatchEvent(
-            new PointerEvent("pointerup", {
-                clientX: 100,
-                clientY: 100,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        fixture.detectChanges();
-        expect(host.brushEvents.length).toBe(2);
+                // Subsequent pointerup emits no end event
+                chartEl.dispatchEvent(
+                    new PointerEvent("pointerup", {
+                        clientX: 100,
+                        clientY: 100,
+                        pointerId: 1,
+                        pointerType: "mouse",
+                        bubbles: true
+                    })
+                );
+                fixture.detectChanges();
+                expect(host.brushEvents.length).toBe(2);
+            });
+        };
+
+        testPostThresholdCancel("activation", () => host.brushActivation.set("shift-drag"), "x");
+        testPostThresholdCancel("mode (x -> y)", () => host.brushMode.set("y"), "x");
+        testPostThresholdCancel("xAxisId", () => host.brushXAxisId.set("x2"), "x");
+        testPostThresholdCancel("yAxisId", () => host.brushYAxisId.set("y2"), "x");
+        testPostThresholdCancel("minDragDistance", () => host.brushMinDragDistance.set(20), "x");
+        testPostThresholdCancel("hitPolicy", () => host.brushHitPolicy.set("center"), "x");
+        testPostThresholdCancel("selectionBehavior", () => host.brushSelectionBehavior.set("replace"), "x");
     });
 
-    it("silently discards pre-threshold candidate when minDragDistance changes before threshold", () => {
-        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+    describe("Presentation style non-cancellation", () => {
+        it("does not cancel active brush when presentation style inputs change", () => {
+            const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
 
-        host.brushMinDragDistance.set(20);
-        fixture.detectChanges();
+            chartEl.dispatchEvent(
+                new PointerEvent("pointerdown", {
+                    clientX: 50,
+                    clientY: 50,
+                    pointerId: 1,
+                    pointerType: "mouse",
+                    bubbles: true
+                })
+            );
+            chartEl.dispatchEvent(
+                new PointerEvent("pointermove", {
+                    clientX: 100,
+                    clientY: 100,
+                    pointerId: 1,
+                    pointerType: "mouse",
+                    bubbles: true
+                })
+            );
+            host.chart().flushPendingRender();
+            fixture.detectChanges();
 
-        chartEl.dispatchEvent(
-            new PointerEvent("pointerdown", {
-                clientX: 50,
-                clientY: 50,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        chartEl.dispatchEvent(
-            new PointerEvent("pointermove", {
-                clientX: 55,
-                clientY: 55,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        fixture.detectChanges();
+            expect(host.brushEvents.length).toBe(1);
 
-        // Change minDragDistance to 2
-        host.brushMinDragDistance.set(2);
-        fixture.detectChanges();
+            // Update fill color, fill opacity, border color, border width, and line style
+            host.brushFillColor.set("rgba(255, 0, 0, 0.3)");
+            host.brushFillOpacity.set(0.5);
+            host.brushBorderColor.set("#3b82f6");
+            host.brushBorderWidth.set(2);
+            host.brushLineStyle.set("dashed");
+            fixture.detectChanges();
 
-        // Old candidate was retired, so continued move should not trigger brush
-        chartEl.dispatchEvent(
-            new PointerEvent("pointermove", {
-                clientX: 60,
-                clientY: 60,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        host.chart().flushPendingRender();
-        fixture.detectChanges();
-
-        expect(host.brushEvents.length).toBe(0);
-    });
-
-    it("does not cancel active brush when presentation style inputs change", () => {
-        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
-
-        chartEl.dispatchEvent(
-            new PointerEvent("pointerdown", {
-                clientX: 50,
-                clientY: 50,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        chartEl.dispatchEvent(
-            new PointerEvent("pointermove", {
-                clientX: 100,
-                clientY: 100,
-                pointerId: 1,
-                pointerType: "mouse",
-                bubbles: true
-            })
-        );
-        host.chart().flushPendingRender();
-        fixture.detectChanges();
-
-        expect(host.brushEvents.length).toBe(1);
-
-        // Update fill color (style property)
-        host.brushFillColor.set("rgba(255, 0, 0, 0.3)");
-        fixture.detectChanges();
-
-        // Active brush must remain uncancelled
-        expect(host.brushEvents.length).toBe(1);
+            // Active brush must remain uncancelled
+            expect(host.brushEvents.length).toBe(1);
+        });
     });
 });
