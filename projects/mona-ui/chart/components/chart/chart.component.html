@@ -320,8 +320,9 @@
                         aria-hidden="true"
                         [class]="referenceLabelClasses() + (line.label.labelClass ? ' ' + line.label.labelClass : '')"
                         [class.hidden]="!line.label.formattedText && !resolveReferenceLineTemplate(line.id)"
-                        [style.left.px]="line.label.anchor.x"
-                        [style.top.px]="line.label.anchor.y"
+                        [monaChartOverlayLabelMeasure]="'overlay:line:' + line.id"
+                        [style.left.px]="referenceLineLabelLeft(line)"
+                        [style.top.px]="referenceLineLabelTop(line)"
                         [style.transform]="referenceLineLabelTransform(line)">
                         @if (resolveReferenceLineTemplate(line.id); as template) {
                             @if (resolveReferenceLineRegistration(line.id); as reg) {
@@ -332,7 +333,7 @@
                                         axis: line.axis,
                                         axisId: line.axisId,
                                         coordinate: line.coordinate,
-                                        formattedValue: line.label.formattedText,
+                                        formattedValue: line.formattedValue,
                                         kind: 'line',
                                         value: reg.value()
                                     }" />
@@ -351,9 +352,10 @@
                         aria-hidden="true"
                         [class]="referenceLabelClasses() + (band.label.labelClass ? ' ' + band.label.labelClass : '')"
                         [class.hidden]="!band.label.formattedText && !resolveReferenceBandTemplate(band.id)"
-                        [style.left.px]="band.label.anchor.x"
-                        [style.top.px]="band.label.anchor.y"
-                        [style.transform]="'translate(-50%, -50%)'">
+                        [monaChartOverlayLabelMeasure]="'overlay:band:' + band.id"
+                        [style.left.px]="referenceBandLabelLeft(band)"
+                        [style.top.px]="referenceBandLabelTop(band)"
+                        [style.transform]="referenceBandLabelTransform(band)">
                         @if (resolveReferenceBandTemplate(band.id); as template) {
                             @if (resolveReferenceBandRegistration(band.id); as reg) {
                                 <ng-container
@@ -363,8 +365,8 @@
                                         axis: band.axis,
                                         axisId: band.axisId,
                                         bounds: band.bounds,
-                                        formattedFrom: '' + reg.from(),
-                                        formattedTo: '' + reg.to(),
+                                        formattedFrom: band.formattedFrom,
+                                        formattedTo: band.formattedTo,
                                         from: reg.from(),
                                         kind: 'band',
                                         to: reg.to()
@@ -384,8 +386,9 @@
                         aria-hidden="true"
                         [class]="annotationLabelClasses() + (ann.label.labelClass ? ' ' + ann.label.labelClass : '')"
                         [class.hidden]="!ann.label.formattedText && !resolveAnnotationTemplate(ann.id)"
-                        [style.left.px]="ann.label.anchor.x"
-                        [style.top.px]="ann.label.anchor.y"
+                        [monaChartOverlayLabelMeasure]="'overlay:ann:' + ann.id"
+                        [style.left.px]="annotationLabelLeft(ann)"
+                        [style.top.px]="annotationLabelTop(ann)"
                         [style.transform]="annotationLabelTransform(ann)">
                         @if (resolveAnnotationTemplate(ann.id); as template) {
                             @if (resolveAnnotationRegistration(ann.id); as reg) {
@@ -394,13 +397,13 @@
                                     [ngTemplateOutletContext]="{
                                         $implicit: ann.data,
                                         data: ann.data,
-                                        formattedX: '' + reg.x(),
-                                        formattedY: '' + reg.y(),
+                                        formattedX: ann.formattedX,
+                                        formattedY: ann.formattedY,
                                         point: ann.point,
                                         x: reg.x(),
-                                        xAxisId: reg.xAxisId() ?? cartesianXYScene()?.primaryXAxisId ?? '',
+                                        xAxisId: ann.xAxisId,
                                         y: reg.y(),
-                                        yAxisId: reg.yAxisId() ?? cartesianXYScene()?.primaryYAxisId ?? ''
+                                        yAxisId: ann.yAxisId
                                     }" />
                             }
                         } @else {
@@ -415,56 +418,60 @@
         @if (crosshairState(); as chState) {
             @if (cartesianXYScene(); as cart) {
                 @if (resolveCrosshairRegistration(); as chReg) {
-                    @if (chState.x && chReg.showAxisLabels() !== false && chReg.showXLabel() !== false) {
-                        <div
-                            aria-hidden="true"
-                            [class]="crosshairLabelClasses()"
-                            [style.left.px]="crosshairXLabelLeft(cart, chState)"
-                            [style.top.px]="crosshairXLabelTop(cart, chState)"
-                            [style.transform]="crosshairXLabelTransform(cart, chState)">
-                            @if (chReg.template?.(); as template) {
-                                <ng-container
-                                    [ngTemplateOutlet]="template.templateRef"
-                                    [ngTemplateOutletContext]="{
-                                        $implicit: chState.x.value,
-                                        axis: 'x',
-                                        axisId: chState.x.axisId,
-                                        coordinate: chState.x.coordinate,
-                                        formattedValue: chState.x.formattedValue,
-                                        snapped: chState.snapped,
-                                        source: chState.source,
-                                        value: chState.x.value
-                                    }" />
-                            } @else {
-                                {{ chState.x.formattedValue }}
-                            }
-                        </div>
-                    }
+                    @if (chReg.enabled() !== false) {
+                        @if (chState.x && chReg.showAxisLabels() !== false && chReg.showXLabel() !== false) {
+                            <div
+                                aria-hidden="true"
+                                [class]="crosshairLabelClasses()"
+                                [monaChartOverlayLabelMeasure]="'crosshair:x'"
+                                [style.left.px]="crosshairXLabelLeft(cart, chState)"
+                                [style.top.px]="crosshairXLabelTop(cart, chState)"
+                                [style.transform]="crosshairXLabelTransform(cart, chState)">
+                                @if (chReg.template?.(); as template) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="template.templateRef"
+                                        [ngTemplateOutletContext]="{
+                                            $implicit: chState.x.value,
+                                            axis: 'x',
+                                            axisId: chState.x.axisId,
+                                            coordinate: chState.x.coordinate,
+                                            formattedValue: chState.x.formattedValue,
+                                            snapped: chState.snapped,
+                                            source: chState.source,
+                                            value: chState.x.value
+                                        }" />
+                                } @else {
+                                    {{ chState.x.formattedValue }}
+                                }
+                            </div>
+                        }
 
-                    @if (chState.y && chReg.showAxisLabels() !== false && chReg.showYLabel() !== false) {
-                        <div
-                            aria-hidden="true"
-                            [class]="crosshairLabelClasses()"
-                            [style.left.px]="crosshairYLabelLeft(cart, chState)"
-                            [style.top.px]="crosshairYLabelTop(cart, chState)"
-                            [style.transform]="crosshairYLabelTransform(cart, chState)">
-                            @if (chReg.template?.(); as template) {
-                                <ng-container
-                                    [ngTemplateOutlet]="template.templateRef"
-                                    [ngTemplateOutletContext]="{
-                                        $implicit: chState.y.value,
-                                        axis: 'y',
-                                        axisId: chState.y.axisId,
-                                        coordinate: chState.y.coordinate,
-                                        formattedValue: chState.y.formattedValue,
-                                        snapped: chState.snapped,
-                                        source: chState.source,
-                                        value: chState.y.value
-                                    }" />
-                            } @else {
-                                {{ chState.y.formattedValue }}
-                            }
-                        </div>
+                        @if (chState.y && chReg.showAxisLabels() !== false && chReg.showYLabel() !== false) {
+                            <div
+                                aria-hidden="true"
+                                [class]="crosshairLabelClasses()"
+                                [monaChartOverlayLabelMeasure]="'crosshair:y'"
+                                [style.left.px]="crosshairYLabelLeft(cart, chState)"
+                                [style.top.px]="crosshairYLabelTop(cart, chState)"
+                                [style.transform]="crosshairYLabelTransform(cart, chState)">
+                                @if (chReg.template?.(); as template) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="template.templateRef"
+                                        [ngTemplateOutletContext]="{
+                                            $implicit: chState.y.value,
+                                            axis: 'y',
+                                            axisId: chState.y.axisId,
+                                            coordinate: chState.y.coordinate,
+                                            formattedValue: chState.y.formattedValue,
+                                            snapped: chState.snapped,
+                                            source: chState.source,
+                                            value: chState.y.value
+                                        }" />
+                                } @else {
+                                    {{ chState.y.formattedValue }}
+                                }
+                            </div>
+                        }
                     }
                 }
             }
