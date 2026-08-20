@@ -25,6 +25,7 @@ export interface ChartAxisScene {
     axis: "x" | "y";
     axisId?: string;
     axisLine: boolean;
+    formatter?: import("../../models/chart-axis.models").ChartAxisFormatter<unknown>;
     gridLines: boolean;
     gutter?: number;
     isPrimary?: boolean;
