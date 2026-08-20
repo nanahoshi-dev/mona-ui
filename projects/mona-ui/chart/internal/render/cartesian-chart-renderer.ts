@@ -1,6 +1,7 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import type { ChartRect } from "../../models/chart.models";
 import { crispPixel } from "../utils/canvas-utils";
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
@@ -25,36 +26,17 @@ export interface ChartRenderOverlayState {
 }
 
 export class CartesianChartRenderer {
-    public static render(
+    public static renderGridLayer(
         context: CanvasRenderingContext2D,
         scene: CartesianXYChartScene,
-        overlayState: ChartRenderOverlayState | ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        const { axes, plotRect, series } = scene;
-
-        if (plotRect.width <= 0 || plotRect.height <= 0) {
-            return;
-        }
-
-        const interactionState: ChartInteractionState | null =
-            overlayState && "interaction" in overlayState
-                ? (overlayState.interaction ?? null)
-                : (overlayState as ChartInteractionState | null);
-        const cartesianOverlay: CartesianOverlayScene | null =
-            overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
-        const crosshairState: ChartCrosshairState | null =
-            overlayState && "crosshair" in overlayState ? (overlayState.crosshair ?? null) : null;
-        const crosshairRegistration: ChartCrosshairRegistration | null =
-            overlayState && "crosshairRegistration" in overlayState ? (overlayState.crosshairRegistration ?? null) : null;
-
-        context.save();
-
-        // 1. Draw Grid Lines (Muted, subtle lines behind series)
+        const { axes, plotRect } = scene;
         const gridColor =
             styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
             "rgba(148, 163, 184, 0.2)";
 
+        context.save();
         context.strokeStyle = gridColor;
         context.lineWidth = 1;
 
@@ -80,11 +62,22 @@ export class CartesianChartRenderer {
                 }
             }
         }
+        context.restore();
+    }
 
-        // 2. Draw Static Underlay Reference Bands and Lines
+    public static renderStaticUnderlayLayer(
+        context: CanvasRenderingContext2D,
+        cartesianOverlay: CartesianOverlayScene | null,
+        plotRect: ChartRect
+    ): void {
         CartesianOverlayRenderer.renderUnderlays(context, cartesianOverlay, plotRect);
+    }
 
-        // 3. Draw Series in declaration order clipped to plot area
+    public static renderSeriesLayer(
+        context: CanvasRenderingContext2D,
+        scene: CartesianXYChartScene
+    ): void {
+        const { plotRect, series } = scene;
         context.save();
         context.beginPath();
         context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
@@ -120,16 +113,28 @@ export class CartesianChartRenderer {
             }
         }
         context.restore();
+    }
 
-        // 4. Draw Static Overlay Reference Bands, Lines, and Annotations
+    public static renderStaticOverlayLayer(
+        context: CanvasRenderingContext2D,
+        cartesianOverlay: CartesianOverlayScene | null,
+        plotRect: ChartRect
+    ): void {
         CartesianOverlayRenderer.renderOverlays(context, cartesianOverlay, plotRect);
+    }
 
-        // 5. Draw Axis Baseline Lines & Outward Tick Marks
+    public static renderAxisLayer(
+        context: CanvasRenderingContext2D,
+        scene: CartesianXYChartScene,
+        styleResolver: ChartStyleResolver
+    ): void {
+        const { axes, plotRect } = scene;
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
             styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(148, 163, 184, 0.45)";
 
+        context.save();
         for (const axisScene of axes) {
             if (!axisScene.visible) {
                 continue;
@@ -189,30 +194,17 @@ export class CartesianChartRenderer {
                 context.stroke();
             }
         }
-
-        // 6. Draw Explicit Crosshair Lines
-        CartesianCrosshairRenderer.render(
-            context,
-            crosshairState,
-            crosshairRegistration,
-            plotRect,
-            styleResolver
-        );
-
-        // 7. Draw Active Interaction Highlights (Active Markers, Range Connectors, Bar Outlines)
-        CartesianInteractionOverlayRenderer.render(context, scene, interactionState, styleResolver);
-
         context.restore();
     }
 
-    public static renderOverlaysOnly(
+    public static renderTransientLayer(
         context: CanvasRenderingContext2D,
         scene: CartesianXYChartScene,
         overlayState: ChartRenderOverlayState | ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
         const { plotRect } = scene;
-        if (plotRect.width <= 0 || plotRect.height <= 0 || !overlayState) {
+        if (!overlayState) {
             return;
         }
 
@@ -220,17 +212,13 @@ export class CartesianChartRenderer {
             "interaction" in overlayState
                 ? (overlayState.interaction ?? null)
                 : (overlayState as ChartInteractionState | null);
-        const cartesianOverlay: CartesianOverlayScene | null =
-            "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
         const crosshairState: ChartCrosshairState | null =
             "crosshair" in overlayState ? (overlayState.crosshair ?? null) : null;
         const crosshairRegistration: ChartCrosshairRegistration | null =
             "crosshairRegistration" in overlayState ? (overlayState.crosshairRegistration ?? null) : null;
 
         context.save();
-        if (cartesianOverlay) {
-            CartesianOverlayRenderer.renderOverlays(context, cartesianOverlay, plotRect);
-        }
+        // Crosshair Lines
         if (crosshairState && crosshairRegistration) {
             CartesianCrosshairRenderer.render(
                 context,
@@ -240,9 +228,114 @@ export class CartesianChartRenderer {
                 styleResolver
             );
         }
+
+        // Active Highlights
         if (interactionState) {
             CartesianInteractionOverlayRenderer.render(context, scene, interactionState, styleResolver);
         }
+        context.restore();
+    }
+
+    public static render(
+        context: CanvasRenderingContext2D,
+        scene: CartesianXYChartScene,
+        overlayState: ChartRenderOverlayState | ChartInteractionState | null,
+        styleResolver: ChartStyleResolver
+    ): void {
+        const { plotRect } = scene;
+
+        if (plotRect.width <= 0 || plotRect.height <= 0) {
+            return;
+        }
+
+        const cartesianOverlay: CartesianOverlayScene | null =
+            overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
+
+        context.save();
+        // 1. Grid
+        this.renderGridLayer(context, scene, styleResolver);
+        // 2. Static Underlays
+        this.renderStaticUnderlayLayer(context, cartesianOverlay, plotRect);
+        // 3. Series
+        this.renderSeriesLayer(context, scene);
+        // 4. Static Overlays & Annotations
+        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect);
+        // 5. Axes
+        this.renderAxisLayer(context, scene, styleResolver);
+        // 6. Transient (Crosshair + Highlights)
+        this.renderTransientLayer(context, scene, overlayState, styleResolver);
+        context.restore();
+    }
+
+    public static renderCrossfade(
+        context: CanvasRenderingContext2D,
+        fromScene: CartesianXYChartScene | null,
+        toScene: CartesianXYChartScene,
+        progress: number,
+        overlayState: ChartRenderOverlayState | ChartInteractionState | null,
+        styleResolver: ChartStyleResolver
+    ): void {
+        const { plotRect } = toScene;
+        if (plotRect.width <= 0 || plotRect.height <= 0) {
+            return;
+        }
+
+        const cartesianOverlay: CartesianOverlayScene | null =
+            overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
+
+        context.save();
+
+        // 1. Grid crossfade
+        if (fromScene && progress < 1) {
+            context.save();
+            context.globalAlpha = Math.max(0, Math.min(1, 1 - progress));
+            this.renderGridLayer(context, fromScene, styleResolver);
+            context.restore();
+        }
+        if (progress > 0) {
+            context.save();
+            context.globalAlpha = Math.max(0, Math.min(1, progress));
+            this.renderGridLayer(context, toScene, styleResolver);
+            context.restore();
+        }
+
+        // 2. Target static underlay once (at full own opacity)
+        this.renderStaticUnderlayLayer(context, cartesianOverlay, plotRect);
+
+        // 3. Series crossfade
+        if (fromScene && progress < 1) {
+            context.save();
+            context.globalAlpha = Math.max(0, Math.min(1, 1 - progress));
+            this.renderSeriesLayer(context, fromScene);
+            context.restore();
+        }
+        if (progress > 0) {
+            context.save();
+            context.globalAlpha = Math.max(0, Math.min(1, progress));
+            this.renderSeriesLayer(context, toScene);
+            context.restore();
+        }
+
+        // 4. Target static overlay once (at full own opacity)
+        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect);
+
+        // 5. Axes crossfade
+        if (fromScene && progress < 1) {
+            context.save();
+            context.globalAlpha = Math.max(0, Math.min(1, 1 - progress));
+            this.renderAxisLayer(context, fromScene, styleResolver);
+            context.restore();
+        }
+        if (progress > 0) {
+            context.save();
+            context.globalAlpha = Math.max(0, Math.min(1, progress));
+            this.renderAxisLayer(context, toScene, styleResolver);
+            context.restore();
+        }
+
+        // 6. Target transient layer once
+        this.renderTransientLayer(context, toScene, overlayState, styleResolver);
+
         context.restore();
     }
 }

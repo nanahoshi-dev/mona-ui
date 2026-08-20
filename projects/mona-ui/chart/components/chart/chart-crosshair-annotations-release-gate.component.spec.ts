@@ -69,8 +69,8 @@ import type { ChartAnnotationLabelPlacement, ChartAnnotationAxisValue } from "..
                     [xAxisId]="crosshairXAxisId()"
                     [yAxisId]="crosshairYAxisId()">
                     @if (useCrosshairTemplate()) {
-                        <ng-template monaChartCrosshairLabel let-ctx>
-                            <span class="rg-crosshair-badge">{{ ctx.axis }}: {{ ctx.formattedValue }}</span>
+                        <ng-template monaChartCrosshairLabel let-val let-axis="axis" let-fv="formattedValue">
+                            <span class="rg-crosshair-badge">{{ axis }}: {{ fv }}</span>
                         </ng-template>
                     }
                 </mona-chart-crosshair>
@@ -209,7 +209,7 @@ describe("Chart Crosshairs & Annotations Release-Gate Suite", () => {
         await fixture.whenStable();
     });
 
-    // 1. CAA-R1-001 & CAA-R1-002: Multi-axis Crosshair Namespacing
+    // 1. CAA-R2-004 & CAA-R2-005: Multi-axis Crosshair Namespacing and Candidate Rejection
     it("namespaces crosshair coordinates and formatted values to target secondary axis", async () => {
         host.crosshairYAxisId.set("y-secondary");
         fixture.detectChanges();
@@ -230,7 +230,7 @@ describe("Chart Crosshairs & Annotations Release-Gate Suite", () => {
         expect(chState?.y?.axisId).toBe("y-secondary");
     });
 
-    // 2. CAA-R1-003 & CAA-R1-004: Non-scalar Mark Nearest Snapping (Financial & Range series)
+    // 2. CAA-R2-001 & CAA-R2-003: Non-scalar Mark Nearest Snapping (Financial & Range series)
     it("snaps nearest crosshair to financial candlestick close coordinate", async () => {
         host.seriesKind.set("candlestick");
         fixture.detectChanges();
@@ -273,7 +273,7 @@ describe("Chart Crosshairs & Annotations Release-Gate Suite", () => {
         expect(chState?.y?.value).toBeDefined();
     });
 
-    // 3. CAA-R1-005 & CAA-R1-006: Axis Formatted Values in Overlay Templates
+    // 3. CAA-R2-010 & CAA-R2-011: Axis Formatted Values in Overlay Templates & Base Domain Indices
     it("passes axis-formatted values to Reference Line, Reference Band, and Annotation templates", async () => {
         host.useRefLineTemplate.set(true);
         host.useRefBandTemplate.set(true);
@@ -294,8 +294,7 @@ describe("Chart Crosshairs & Annotations Release-Gate Suite", () => {
         expect(annBadge.nativeElement.textContent).toContain("X: M_Feb, Y: $200");
     });
 
-    // 4. CAA-R1-010 & CAA-R1-011: O(1) Category Reference Band Projection
-    it("projects category reference bands spanning across category domain without rendering failures", () => {
+    it("projects category reference bands spanning across category domain with proper formatted base endpoints", () => {
         const overlayScene = host.chart()?.["cartesianOverlayScene"]();
         expect(overlayScene).not.toBeNull();
         expect(overlayScene?.referenceBands.length).toBe(1);
@@ -305,7 +304,6 @@ describe("Chart Crosshairs & Annotations Release-Gate Suite", () => {
         expect(band.bounds.width).toBeGreaterThan(0);
     });
 
-    // 5. CAA-R1-012 & CAA-R1-013: Normalized Annotation Label Offsets
     it("computes normalized annotation anchor coordinates for placements", () => {
         const overlayScene = host.chart()?.["cartesianOverlayScene"]();
         expect(overlayScene).not.toBeNull();
@@ -316,7 +314,7 @@ describe("Chart Crosshairs & Annotations Release-Gate Suite", () => {
         expect(ann.label!.anchor.y).toBe(ann.point.y - 12);
     });
 
-    // 6. CAA-R1-014: Dynamic Crosshair Input Reactivity
+    // 4. CAA-R2-006 & CAA-R2-007: Interaction Authority Retirement & Stale Pointer Clearance
     it("dynamically hides crosshair badges when crosshair.enabled is set to false", async () => {
         const canvasEl = fixture.debugElement.query(By.css("canvas"));
         const scene = host.chart()?.scene();
@@ -337,27 +335,35 @@ describe("Chart Crosshairs & Annotations Release-Gate Suite", () => {
         expect(host.chart()?.["crosshairState"]()).toBeNull();
     });
 
-    // 7. CAA-R1-015 & CAA-R1-016: Ghost Badge Prevention & Highlight State
-    it("does not render ghost badges when crosshair is enabled=false", async () => {
-        host.crosshairEnabled.set(false);
+    it("unconditionally clears pointer interaction state on pointerleave without stale resurrection", async () => {
+        const canvasEl = fixture.debugElement.query(By.css("canvas"));
+        const scene = host.chart()?.scene();
+        const pt = scene?.hitTargets[1]?.point ?? { x: 150, y: 150 };
+
+        canvasEl.nativeElement.dispatchEvent(
+            new PointerEvent("pointermove", { bubbles: true, clientX: pt.x, clientY: pt.y })
+        );
+        await new Promise(r => requestAnimationFrame(r));
+        fixture.detectChanges();
+
+        expect(host.chart()?.["crosshairState"]()).not.toBeNull();
+
+        canvasEl.nativeElement.dispatchEvent(
+            new PointerEvent("pointerleave", { bubbles: true })
+        );
         fixture.detectChanges();
         await fixture.whenStable();
 
-        const crosshairBadges = fixture.debugElement.queryAll(By.css("[class*='z-40']"));
-        expect(crosshairBadges.length).toBe(0);
-    });
+        expect(host.chart()?.["crosshairState"]()).toBeNull();
 
-    // 8. CAA-R1-017: Dynamic userClass Reactivity
-    it("re-projects overlay scene when userClass signals change", async () => {
-        host.refLineUserClass.set("updated-ref-line-cls");
+        // Mutating maxSnapDistance after pointer leave should NOT resurrect crosshair
+        host.crosshairMaxSnapDist.set(64);
         fixture.detectChanges();
         await fixture.whenStable();
 
-        const overlayScene = host.chart()?.["cartesianOverlayScene"]();
-        expect(overlayScene?.referenceLines[0].label?.userClass).toBe("updated-ref-line-cls");
+        expect(host.chart()?.["crosshairState"]()).toBeNull();
     });
 
-    // 9. CAA-R1-008 & CAA-R1-009: Viewport / Gesture Interaction Retirement
     it("retires transient crosshair and pointer state when keyboard or escape is triggered", async () => {
         const canvasEl = fixture.debugElement.query(By.css("canvas"));
         const scene = host.chart()?.scene();

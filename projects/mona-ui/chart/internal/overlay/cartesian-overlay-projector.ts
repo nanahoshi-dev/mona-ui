@@ -82,7 +82,7 @@ export class CartesianOverlayProjector {
                     continue;
                 }
                 coordinate = geom.bandCenter;
-                semanticIndex = geom.viewportIndex ?? 0;
+                semanticIndex = geom.baseIndex ?? geom.viewportIndex ?? 0;
             } else {
                 const coord = coordinateSpace.mapContinuousValue(ref, reg.value(), "viewport");
                 if (coord === undefined || !Number.isFinite(coord)) {
@@ -213,6 +213,9 @@ export class CartesianOverlayProjector {
                     continue;
                 }
 
+                idxFrom = bIdxFrom;
+                idxTo = bIdxTo;
+
                 const minBaseIdx = Math.min(bIdxFrom, bIdxTo);
                 const maxBaseIdx = Math.max(bIdxFrom, bIdxTo);
                 const vDomain = snap.categoryIndex?.viewportDomain ?? [];
@@ -249,8 +252,6 @@ export class CartesianOverlayProjector {
 
                 pixelStart = Math.min(firstGeom.bandStart, lastGeom.bandStart, firstGeom.bandEnd, lastGeom.bandEnd);
                 pixelEnd = Math.max(firstGeom.bandStart, lastGeom.bandStart, firstGeom.bandEnd, lastGeom.bandEnd);
-                idxFrom = firstGeom.viewportIndex ?? 0;
-                idxTo = lastGeom.viewportIndex ?? 0;
             } else {
                 const p0 = coordinateSpace.mapContinuousValue(ref, reg.from(), "viewport");
                 const p1 = coordinateSpace.mapContinuousValue(ref, reg.to(), "viewport");
@@ -410,7 +411,7 @@ export class CartesianOverlayProjector {
                     continue;
                 }
                 px = geom.bandCenter;
-                xIdx = geom.viewportIndex ?? 0;
+                xIdx = geom.baseIndex ?? geom.viewportIndex ?? 0;
             } else {
                 const coord = coordinateSpace.mapContinuousValue(xRef, reg.x(), "viewport");
                 if (coord === undefined || !Number.isFinite(coord)) {
@@ -427,7 +428,7 @@ export class CartesianOverlayProjector {
                     continue;
                 }
                 py = geom.bandCenter;
-                yIdx = geom.viewportIndex ?? 0;
+                yIdx = geom.baseIndex ?? geom.viewportIndex ?? 0;
             } else {
                 const coord = coordinateSpace.mapContinuousValue(yRef, reg.y(), "viewport");
                 if (coord === undefined || !Number.isFinite(coord)) {

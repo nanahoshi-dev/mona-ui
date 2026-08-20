@@ -10,7 +10,7 @@ export class CartesianInteractionOverlayRenderer {
         interactionState: ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        if (!interactionState || (!interactionState.activeHitTarget && interactionState.activeHits.length === 0)) {
+        if (!interactionState || (!interactionState.activeHitTarget && (!interactionState.activeHits || interactionState.activeHits.length === 0))) {
             return;
         }
 
@@ -20,7 +20,7 @@ export class CartesianInteractionOverlayRenderer {
         }
 
         const hits =
-            interactionState.activeHits.length > 0
+            interactionState.activeHits && interactionState.activeHits.length > 0
                 ? interactionState.activeHits
                 : interactionState.activeHitTarget
                   ? [interactionState.activeHitTarget]

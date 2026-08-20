@@ -13,91 +13,7 @@ import {
     findNearestInteractionBucketByX,
     findNearestInteractionBucketByY
 } from "./chart-hit-test-engine";
-
-function resolveNearestMarkSemantic(
-    hit: SceneHitTarget,
-    scene: CartesianXYChartScene,
-    pointer: ChartPoint
-): {
-    semanticIndexX: number;
-    semanticIndexY: number;
-    semanticX: unknown;
-    semanticY: unknown;
-} {
-    const isHorizontal = hit.barOrientation === "horizontal" || scene.orientation === "horizontal";
-    const dataIndex = hit.index ?? hit.dataIndex ?? 0;
-
-    // 1. Financial series (Candlestick, OHLC)
-    if (hit.financial || hit.seriesType === "candlestick" || hit.seriesType === "ohlc") {
-        const finClose = hit.close ?? hit.financial?.close ?? hit.yValue;
-        const markX = hit.xValue ?? hit.category ?? hit.categoryX;
-        return {
-            semanticIndexX: dataIndex,
-            semanticIndexY: dataIndex,
-            semanticX: markX,
-            semanticY: finClose
-        };
-    }
-
-    // 2. Range series (RangeBar, RangeArea)
-    if (hit.seriesType === "rangeBar" || hit.seriesType === "rangeArea" || hit.valueKind === "range" || hit.range !== undefined) {
-        const fromVal = hit.fromValue ?? hit.range?.fromValue ?? 0;
-        const toVal = hit.toValue ?? hit.range?.toValue ?? 0;
-
-        if (isHorizontal) {
-            // Horizontal range: category Y, range values X
-            const chosenX = Math.abs(pointer.x - (hit.point?.x ?? 0)) < Math.abs(pointer.x - (hit.highPoint?.x ?? 0))
-                ? fromVal
-                : toVal;
-            return {
-                semanticIndexX: dataIndex,
-                semanticIndexY: dataIndex,
-                semanticX: chosenX,
-                semanticY: hit.category ?? hit.categoryY ?? hit.yValue
-            };
-        } else {
-            // Vertical range: category X, range values Y
-            const yFrom = hit.point?.y ?? 0;
-            const yTo = hit.highPoint?.y ?? hit.lowPoint?.y ?? 0;
-            const chosenY = Math.abs(pointer.y - yFrom) <= Math.abs(pointer.y - yTo)
-                ? fromVal
-                : toVal;
-            return {
-                semanticIndexX: dataIndex,
-                semanticIndexY: dataIndex,
-                semanticX: hit.category ?? hit.categoryX ?? hit.xValue,
-                semanticY: chosenY
-            };
-        }
-    }
-
-    // 3. Scalar Bar series
-    if (hit.seriesType === "bar") {
-        if (isHorizontal) {
-            return {
-                semanticIndexX: dataIndex,
-                semanticIndexY: dataIndex,
-                semanticX: hit.xValue ?? hit.value,
-                semanticY: hit.category ?? hit.categoryY ?? hit.yValue
-            };
-        } else {
-            return {
-                semanticIndexX: dataIndex,
-                semanticIndexY: dataIndex,
-                semanticX: hit.category ?? hit.categoryX ?? hit.xValue,
-                semanticY: hit.yValue ?? hit.value
-            };
-        }
-    }
-
-    // 4. Point-like marks (Line, Area, Scatter, Bubble)
-    return {
-        semanticIndexX: dataIndex,
-        semanticIndexY: dataIndex,
-        semanticX: hit.xValue ?? hit.category ?? hit.categoryX,
-        semanticY: hit.yValue ?? hit.value
-    };
-}
+import { CartesianMarkSemanticResolver } from "./cartesian-mark-semantic-resolver";
 
 export class CartesianCrosshairResolver {
     public static resolve(
@@ -169,7 +85,7 @@ export class CartesianCrosshairResolver {
         const targetYAxis = scene.axes.find(a => a.axis === "y" && a.axisId === yAxisId);
 
         if (snapMode === "nearest") {
-            // 1. Try finding matching hit from resolution
+            // 1. Try finding matching hit from resolution strictly bound to target axis namespace
             let selectedHit: SceneHitTarget | null = null;
             const candidateHits = [
                 ...(resolution?.hitState?.activeHits ?? []),
@@ -177,13 +93,14 @@ export class CartesianCrosshairResolver {
             ];
 
             if (candidateHits.length > 0) {
-                // Filter / sort by target axis compatibility
                 const compatible = candidateHits.filter(h => {
-                    const matchX = !registration.xAxisId() || !h.xAxisId || h.xAxisId === registration.xAxisId();
-                    const matchY = !registration.yAxisId() || !h.yAxisId || h.yAxisId === registration.yAxisId();
+                    const hitXAxisId = h.xAxisId ?? scene.primaryXAxisId;
+                    const hitYAxisId = h.yAxisId ?? scene.primaryYAxisId;
+                    const matchX = !needX || hitXAxisId === xAxisId;
+                    const matchY = !needY || hitYAxisId === yAxisId;
                     return matchX && matchY;
                 });
-                selectedHit = compatible[0] ?? candidateHits[0];
+                selectedHit = compatible[0] ?? null;
             }
 
             if (selectedHit && source === "pointer" && pointer) {
@@ -207,10 +124,12 @@ export class CartesianCrosshairResolver {
 
             if (selectedHit) {
                 isSnapped = true;
-                const semantics = resolveNearestMarkSemantic(
+                const semantics = CartesianMarkSemanticResolver.resolve(
                     selectedHit,
                     scene,
-                    pointer ?? selectedHit.point ?? { x: 0, y: 0 }
+                    pointer ?? selectedHit.point ?? { x: 0, y: 0 },
+                    xAxisId,
+                    yAxisId
                 );
 
                 if (needX && isXValid && xRef && xSnap) {
@@ -275,30 +194,42 @@ export class CartesianCrosshairResolver {
                     }
                 }
             } else if (source === "pointer" && pointer) {
-                const directAnchor = resolution?.snappedAnchor ?? resolution?.nearestAnchor;
+                const isHoriz = scene.interactionAxis === "y";
+                const interactionAxisId = isHoriz ? yAxisId : xAxisId;
+                const isTargetPrimary = interactionAxisId === (isHoriz ? scene.primaryYAxisId : scene.primaryXAxisId);
+
+                // Only consume global directAnchor if primary hit is compatible or target is primary
+                const primaryCompatible = resolution?.primaryHit ? (
+                    (!needX || (resolution.primaryHit.xAxisId ?? scene.primaryXAxisId) === xAxisId) &&
+                    (!needY || (resolution.primaryHit.yAxisId ?? scene.primaryYAxisId) === yAxisId)
+                ) : isTargetPrimary;
+
+                const directAnchor = primaryCompatible ? (resolution?.snappedAnchor ?? resolution?.nearestAnchor) : null;
                 let targetAnchor: ChartPoint | null = null;
 
                 if (directAnchor) {
                     const dist = Math.hypot(pointer.x - directAnchor.x, pointer.y - directAnchor.y);
-                    const isHoriz = scene.interactionAxis === "y";
                     const distAlongAxis = isHoriz
                         ? Math.abs(pointer.y - directAnchor.y)
                         : Math.abs(pointer.x - directAnchor.x);
                     if (dist <= maxSnapDistance || distAlongAxis <= maxSnapDistance) {
                         targetAnchor = directAnchor;
                     }
-                } else {
-                    const map = xAxisId ? scene.interactionBucketsByAxisId?.get(xAxisId) : undefined;
+                }
+
+                if (!targetAnchor) {
+                    const map = interactionAxisId ? scene.interactionBucketsByAxisId?.get(interactionAxisId) : undefined;
                     const axisBuckets: readonly ChartInteractionBucket[] | undefined = map
                         ? Array.from(map.values())
-                        : scene.interactionBuckets;
+                        : (isTargetPrimary ? scene.interactionBuckets : undefined);
+
                     if (axisBuckets && axisBuckets.length > 0) {
-                        const nearestBucket = scene.interactionAxis === "y"
+                        const nearestBucket = isHoriz
                             ? findNearestInteractionBucketByY(axisBuckets, pointer.y)
                             : findNearestInteractionBucketByX(axisBuckets, pointer.x);
 
                         if (nearestBucket) {
-                            const dist = scene.interactionAxis === "y"
+                            const dist = isHoriz
                                 ? Math.abs(pointer.y - nearestBucket.anchor.y)
                                 : Math.abs(pointer.x - nearestBucket.anchor.x);
 

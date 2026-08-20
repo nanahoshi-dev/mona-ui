@@ -446,9 +446,24 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#pendingPointerEvent = null;
     }
 
-    #retireTransientInteractionForViewportChange(): void {
-        this.#cancelPendingPointerInteraction();
+    #retireInteractionAuthority(options?: { repaintIfVisual?: boolean }): boolean {
+        const hadVisual =
+            this.#interactionState !== null ||
+            this.crosshairState() !== null ||
+            this.tooltipPosition() !== null ||
+            this.tooltipContext() !== null;
+
         this.#clearInteractionState();
+
+        if (hadVisual && options?.repaintIfVisual !== false && !this.#isDestroyed) {
+            this.#paint();
+        }
+        return hadVisual;
+    }
+
+    #retireTransientInteractionForViewportChange(): boolean {
+        this.#cancelPendingPointerInteraction();
+        return this.#retireInteractionAuthority({ repaintIfVisual: true });
     }
 
     #takeGestureClickSuppression(): void {
@@ -1911,15 +1926,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #clearInteraction(): void {
-        if (
-            this.#interactionState !== null ||
-            this.crosshairState() !== null ||
-            this.tooltipPosition() !== null ||
-            this.tooltipContext() !== null
-        ) {
-            this.#clearInteractionState();
-            this.#paint();
-        }
+        this.#retireInteractionAuthority({ repaintIfVisual: true });
     }
 
     #initCanvasAndObserver(): void {
@@ -2603,7 +2610,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     protected crosshairXLabelLeft(cart: CartesianXYChartScene, state: ChartCrosshairState): number {
         if (!state.x) return 0;
-        return clamp(state.x.coordinate, cart.plotRect.x, cart.plotRect.x + cart.plotRect.width);
+        const w = this.#labelMeasurements.get("crosshair:x")?.width ?? 40;
+        const halfW = w / 2;
+        const minX = Math.max(0, halfW);
+        const maxX = Math.max(minX, this.#currentWidth - halfW);
+        return clamp(state.x.coordinate, minX, maxX);
     }
 
     protected crosshairXLabelTop(cart: CartesianXYChartScene, state: ChartCrosshairState): number {
@@ -2611,9 +2622,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const targetAxis = cart.axes.find(a => a.axis === "x" && a.axisId === state.x?.axisId);
         const sideOffset = targetAxis?.sideOffset ?? 0;
         const offset = this.#crosshair()?.labelOffset() ?? 4;
-        return targetAxis?.position === "top"
-            ? cart.plotRect.y - sideOffset - offset
-            : cart.plotRect.y + cart.plotRect.height + sideOffset + offset;
+        const h = this.#labelMeasurements.get("crosshair:x")?.height ?? 20;
+        if (targetAxis?.position === "top") {
+            const rawTop = cart.plotRect.y - sideOffset - offset;
+            return Math.max(h, Math.min(this.#currentHeight, rawTop));
+        } else {
+            const rawTop = cart.plotRect.y + cart.plotRect.height + sideOffset + offset;
+            return Math.max(0, Math.min(this.#currentHeight - h, rawTop));
+        }
     }
 
     protected crosshairXLabelTransform(cart: CartesianXYChartScene, state: ChartCrosshairState): string {
@@ -2627,20 +2643,49 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const targetAxis = cart.axes.find(a => a.axis === "y" && a.axisId === state.y?.axisId);
         const sideOffset = targetAxis?.sideOffset ?? 0;
         const offset = this.#crosshair()?.labelOffset() ?? 4;
-        return targetAxis?.position === "right"
-            ? cart.plotRect.x + cart.plotRect.width + sideOffset + offset
-            : cart.plotRect.x - sideOffset - offset;
+        const w = this.#labelMeasurements.get("crosshair:y")?.width ?? 40;
+        if (targetAxis?.position === "right") {
+            const rawLeft = cart.plotRect.x + cart.plotRect.width + sideOffset + offset;
+            return Math.max(0, Math.min(this.#currentWidth - w, rawLeft));
+        } else {
+            const rawLeft = cart.plotRect.x - sideOffset - offset;
+            return Math.max(w, Math.min(this.#currentWidth, rawLeft));
+        }
     }
 
     protected crosshairYLabelTop(cart: CartesianXYChartScene, state: ChartCrosshairState): number {
         if (!state.y) return 0;
-        return clamp(state.y.coordinate, cart.plotRect.y, cart.plotRect.y + cart.plotRect.height);
+        const h = this.#labelMeasurements.get("crosshair:y")?.height ?? 20;
+        const halfH = h / 2;
+        const minY = Math.max(0, halfH);
+        const maxY = Math.max(minY, this.#currentHeight - halfH);
+        return clamp(state.y.coordinate, minY, maxY);
     }
 
     protected crosshairYLabelTransform(cart: CartesianXYChartScene, state: ChartCrosshairState): string {
         if (!state.y) return "";
         const targetAxis = cart.axes.find(a => a.axis === "y" && a.axisId === state.y?.axisId);
         return targetAxis?.position === "right" ? "translate(0, -50%)" : "translate(-100%, -50%)";
+    }
+
+    protected referenceLineLabelLeft(line: SceneReferenceLine): number {
+        if (!line.label) return 0;
+        const w = this.#labelMeasurements.get("overlay:line:" + line.id)?.width ?? 40;
+        const halfW = w / 2;
+        if (line.axis === "x") {
+            return clamp(line.label.anchor.x, halfW, Math.max(halfW, this.#currentWidth - halfW));
+        }
+        return clamp(line.label.anchor.x, 0, this.#currentWidth);
+    }
+
+    protected referenceLineLabelTop(line: SceneReferenceLine): number {
+        if (!line.label) return 0;
+        const h = this.#labelMeasurements.get("overlay:line:" + line.id)?.height ?? 20;
+        const halfH = h / 2;
+        if (line.axis === "y") {
+            return clamp(line.label.anchor.y, halfH, Math.max(halfH, this.#currentHeight - halfH));
+        }
+        return clamp(line.label.anchor.y, 0, this.#currentHeight);
     }
 
     protected referenceLineLabelTransform(line: SceneReferenceLine): string {
@@ -2664,6 +2709,52 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 default:
                     return "translate(-100%, -50%)";
             }
+        }
+    }
+
+    protected referenceBandLabelLeft(band: SceneReferenceBand): number {
+        if (!band.label) return 0;
+        const w = this.#labelMeasurements.get("overlay:band:" + band.id)?.width ?? 40;
+        const halfW = w / 2;
+        return clamp(band.label.anchor.x, halfW, Math.max(halfW, this.#currentWidth - halfW));
+    }
+
+    protected referenceBandLabelTop(band: SceneReferenceBand): number {
+        if (!band.label) return 0;
+        const h = this.#labelMeasurements.get("overlay:band:" + band.id)?.height ?? 20;
+        const halfH = h / 2;
+        return clamp(band.label.anchor.y, halfH, Math.max(halfH, this.#currentHeight - halfH));
+    }
+
+    protected annotationLabelLeft(ann: ScenePointAnnotation): number {
+        if (!ann.label) return 0;
+        const w = this.#labelMeasurements.get("overlay:ann:" + ann.id)?.width ?? 40;
+        const halfW = w / 2;
+        switch (ann.label.placement) {
+            case "left":
+                return clamp(ann.label.anchor.x, w, this.#currentWidth);
+            case "right":
+                return clamp(ann.label.anchor.x, 0, Math.max(0, this.#currentWidth - w));
+            case "bottom":
+            case "top":
+            default:
+                return clamp(ann.label.anchor.x, halfW, Math.max(halfW, this.#currentWidth - halfW));
+        }
+    }
+
+    protected annotationLabelTop(ann: ScenePointAnnotation): number {
+        if (!ann.label) return 0;
+        const h = this.#labelMeasurements.get("overlay:ann:" + ann.id)?.height ?? 20;
+        const halfH = h / 2;
+        switch (ann.label.placement) {
+            case "top":
+                return clamp(ann.label.anchor.y, h, this.#currentHeight);
+            case "bottom":
+                return clamp(ann.label.anchor.y, 0, Math.max(0, this.#currentHeight - h));
+            case "left":
+            case "right":
+            default:
+                return clamp(ann.label.anchor.y, halfH, Math.max(halfH, this.#currentHeight - halfH));
         }
     }
 

@@ -1578,7 +1578,7 @@ export class ChartStyleResolver {
             fillColor =
                 this.resolveCssVariable("--mona-chart-reference-band-color", el) ||
                 this.resolveCssVariable("--color-muted", el) ||
-                "rgba(148, 163, 184, 0.15)";
+                "rgb(148, 163, 184)";
         }
 
         let fillOpacity = explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity) ? Math.max(0, Math.min(1, explicitFillOpacity)) : undefined;
