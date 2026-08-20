@@ -2,6 +2,8 @@ import type { ChartPoint } from "../../models/chart.models";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 
+import { formatCartesianAxisSemanticValue } from "../utils/chart-formatter";
+
 export interface ResolvedCartesianMarkSemantics {
     readonly semanticIndexX: number;
     readonly semanticIndexY: number;
@@ -9,7 +11,110 @@ export interface ResolvedCartesianMarkSemantics {
     readonly semanticY: unknown;
 }
 
+export interface ResolvedCartesianScalarAxes {
+    readonly formattedX?: string;
+    readonly formattedY?: string;
+    readonly xValue?: unknown;
+    readonly yValue?: unknown;
+}
+
 export class CartesianMarkSemanticResolver {
+    public static resolveScalarAxes(
+        hit: SceneHitTarget,
+        scene?: CartesianXYChartScene | null
+    ): ResolvedCartesianScalarAxes {
+        const isHorizontal = hit.barOrientation === "horizontal" || scene?.orientation === "horizontal";
+        const isRange =
+            hit.seriesType === "rangeBar" ||
+            hit.seriesType === "rangeArea" ||
+            hit.valueKind === "range" ||
+            hit.range !== undefined;
+
+        let xValue: unknown;
+        let yValue: unknown;
+
+        if (hit.financial || hit.seriesType === "candlestick" || hit.seriesType === "ohlc") {
+            const close = hit.close ?? hit.financial?.close ?? hit.yValue ?? hit.value;
+            if (isHorizontal) {
+                xValue = close;
+                yValue = hit.category ?? hit.categoryY ?? hit.yCategory ?? hit.xValue;
+            } else {
+                xValue = hit.category ?? hit.categoryX ?? hit.xValue;
+                yValue = close;
+            }
+        } else if (isRange) {
+            if (isHorizontal) {
+                xValue = undefined;
+                yValue = hit.category ?? hit.categoryY ?? hit.yCategory ?? hit.yValue ?? hit.xValue;
+            } else {
+                xValue = hit.category ?? hit.categoryX ?? hit.xValue;
+                yValue = undefined;
+            }
+        } else if (hit.seriesType === "bar" || hit.seriesType === "area") {
+            if (isHorizontal) {
+                xValue = hit.stackEnd ?? hit.xValue ?? hit.value ?? hit.rawValue ?? hit.yValue;
+                yValue = hit.category ?? hit.categoryY ?? hit.yCategory ?? hit.yValue ?? hit.xValue;
+            } else {
+                xValue = hit.category ?? hit.categoryX ?? hit.xValue;
+                yValue = hit.stackEnd ?? hit.yValue ?? hit.value ?? hit.rawValue;
+            }
+        } else {
+            // Line, scatter, bubble, etc.
+            if (isHorizontal) {
+                xValue = hit.xValue ?? hit.value ?? hit.rawValue;
+                yValue = hit.category ?? hit.categoryY ?? hit.yCategory ?? hit.yValue;
+            } else {
+                xValue = hit.xValue ?? hit.category ?? hit.categoryX;
+                yValue = hit.yValue ?? hit.value ?? hit.rawValue;
+            }
+        }
+
+        const effXId = hit.xAxisId ?? scene?.primaryXAxisId;
+        const effYId = hit.yAxisId ?? scene?.primaryYAxisId;
+        const axisSceneX =
+            scene?.axes?.find(a => a.axis === "x" && (effXId !== undefined ? a.axisId === effXId : a.isPrimary)) ??
+            scene?.axes?.find(a => a.axis === "x");
+        const axisSceneY =
+            scene?.axes?.find(a => a.axis === "y" && (effYId !== undefined ? a.axisId === effYId : a.isPrimary)) ??
+            scene?.axes?.find(a => a.axis === "y");
+        const dataIndex = hit.dataIndex ?? hit.index ?? 0;
+
+        let formattedX: string | undefined;
+        let formattedY: string | undefined;
+
+        if (xValue !== undefined && xValue !== null) {
+            if (axisSceneX) {
+                formattedX = formatCartesianAxisSemanticValue({
+                    axisScene: axisSceneX,
+                    index: dataIndex,
+                    value: xValue,
+                    xTimeSpanMs: scene?.xTimeSpanMs
+                });
+            } else {
+                formattedX = hit.formattedXValue ?? hit.formattedCategory ?? String(xValue);
+            }
+        }
+
+        if (yValue !== undefined && yValue !== null) {
+            if (axisSceneY) {
+                formattedY = formatCartesianAxisSemanticValue({
+                    axisScene: axisSceneY,
+                    index: dataIndex,
+                    value: yValue
+                });
+            } else {
+                formattedY = hit.formattedYCategory ?? hit.formattedValue ?? String(yValue);
+            }
+        }
+
+        return {
+            formattedX,
+            formattedY,
+            xValue,
+            yValue
+        };
+    }
+
     public static resolve(
         hit: SceneHitTarget,
         scene: CartesianXYChartScene,
