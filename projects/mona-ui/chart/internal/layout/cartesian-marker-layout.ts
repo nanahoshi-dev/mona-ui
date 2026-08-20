@@ -221,7 +221,7 @@ export class CartesianMarkerLayout {
         const sData = resolveData(s.data(), rootData);
         const sXField = s.xField() ?? rootXField;
         const sField = s.field();
-        const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
+        const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.(), s.seriesKey?.());
 
         let bubbleScale: ((val: number) => number) | undefined;
         let normalizedMinRadius = 4;

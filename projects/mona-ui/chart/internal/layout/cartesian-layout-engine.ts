@@ -583,7 +583,7 @@ export class CartesianLayoutEngine {
             const sStyle = styleResolver.resolveSeriesStyle(s, sIdx);
             const sData = resolveData(s.data(), rootData);
             const sXField = sCtx.effectiveXField;
-            const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
+            const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.(), s.seriesKey?.());
 
             if (s.type === "candlestick" || s.type === "ohlc") {
                 const financialLayoutResult = computeFinancialLayout({
@@ -1065,6 +1065,11 @@ export class CartesianLayoutEngine {
                     points.push(point);
 
                     if (defined) {
+                        const lineReg = s as ChartLineSeriesRegistration;
+                        const showPoints = lineReg.showPoints?.() ?? false;
+                        const pointRadius = lineReg.pointRadius?.() ?? 4;
+                        const visualRadius = showPoints ? pointRadius : 0;
+
                         const currentRenderOrder = ++renderOrderCounter.value;
                         const pointTarget: SceneHitTarget = {
                             animationKey,
@@ -1083,6 +1088,7 @@ export class CartesianLayoutEngine {
                             seriesId: s.id,
                             seriesName: seriesDisplayName,
                             seriesType: "line",
+                            visualRadius,
                             xAxisId: binding.xAxisId,
                             xAxisTitle: seriesXAxis?.title,
                             xKey: normalizedXKey,
@@ -1175,6 +1181,11 @@ export class CartesianLayoutEngine {
                                 effectiveRawFormatter
                             );
 
+                            const areaReg = s as ChartAreaSeriesRegistration;
+                            const showPoints = areaReg.showPoints?.() ?? false;
+                            const pointRadius = areaReg.pointRadius?.() ?? 4;
+                            const visualRadius = showPoints ? pointRadius : 0;
+
                             const pointTarget: SceneHitTarget = {
                                 animationKey: entry.animationKey,
                                 datum: entry.datum,
@@ -1200,6 +1211,7 @@ export class CartesianLayoutEngine {
                                 stackPercentage: entry.stackPercentage,
                                 stackStart: entry.stackStart,
                                 stackTotal: entry.stackTotal,
+                                visualRadius,
                                 xAxisId: binding.xAxisId,
                                 xAxisTitle: seriesXAxis?.title,
                                 xKey: entry.xKey,
@@ -1283,6 +1295,11 @@ export class CartesianLayoutEngine {
                         points.push(point);
 
                         if (defined) {
+                            const areaReg = s as ChartAreaSeriesRegistration;
+                            const showPoints = areaReg.showPoints?.() ?? false;
+                            const pointRadius = areaReg.pointRadius?.() ?? 4;
+                            const visualRadius = showPoints ? pointRadius : 0;
+
                             const currentRenderOrder = ++renderOrderCounter.value;
                             const pointTarget: SceneHitTarget = {
                                 animationKey,
@@ -1301,6 +1318,7 @@ export class CartesianLayoutEngine {
                                 seriesId: s.id,
                                 seriesName: seriesDisplayName,
                                 seriesType: s.type,
+                                visualRadius,
                                 xAxisId: binding.xAxisId,
                                 xAxisTitle: seriesXAxis?.title,
                                 xKey: normalizedXKey,

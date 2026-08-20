@@ -105,6 +105,7 @@ export function computeFinancialLayout(
         lowField: s.lowField(),
         openField: s.openField(),
         seriesId: s.id,
+        seriesKey: s.seriesKey?.(),
         seriesName: seriesDisplayName,
         warnedDiagnosticSignatures,
         xAxisType: effectiveXAxisType,

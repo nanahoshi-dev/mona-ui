@@ -456,7 +456,7 @@ export class CartesianHorizontalBarLayoutEngine {
                 const stackGroup = stackLayout?.groupBySeriesId.get(series.id);
                 const valueFormatter = series.valueFormatter?.();
                 const baselineX = clamp(seriesXScale.map(0) ?? plotRect.x, plotRect.x, plotRect.x + plotRect.width);
-                const keyResolver = new ChartMarkKeyResolver(series.id, series.keyField?.());
+                const keyResolver = new ChartMarkKeyResolver(series.id, series.keyField?.(), series.seriesKey?.());
 
                 const sceneBars: SceneBar[] = [];
 
@@ -521,6 +521,7 @@ export class CartesianHorizontalBarLayoutEngine {
                         if (!stackEntry.synthetic) {
                             recordHit({
                                 animationKey,
+                                barOrientation: "horizontal",
                                 bounds: isZeroBar ? undefined : { height: effectiveBarHeight, width: barW, x: barX, y: barY },
                                 cornerRadii,
                                 dataIndex: stackEntry.dataIndex,
@@ -614,6 +615,7 @@ export class CartesianHorizontalBarLayoutEngine {
 
                         recordHit({
                             animationKey,
+                            barOrientation: "horizontal",
                             bounds: isZeroBar ? undefined : { height: effectiveBarHeight, width: barW, x: barX, y: barY },
                             cornerRadii,
                             dataIndex: datumIndex,
@@ -655,18 +657,21 @@ export class CartesianHorizontalBarLayoutEngine {
                     yAxisId: binding.yAxisId ?? primaryYAxisId
                 });
             } else if (series.type === "rangeBar") {
-                const rangeBarSeries = series as ChartRangeBarSeriesRegistration;
-                const fromField = rangeBarSeries.fromField?.() || "from";
-                const toField = rangeBarSeries.toField?.() || "to";
-                const keyResolver = new ChartMarkKeyResolver(series.id, series.keyField?.());
+                const rangeSeries = series as ChartRangeBarSeriesRegistration;
+                const rangeFromField = rangeSeries.fromField();
+                const rangeToField = rangeSeries.toField();
+                const keyResolver = new ChartMarkKeyResolver(series.id, series.keyField?.(), series.seriesKey?.());
                 const sceneRangeBars: SceneRangeBar[] = [];
 
                 for (let datumIndex = 0; datumIndex < seriesData.length; datumIndex++) {
                     const datum = seriesData[datumIndex];
                     const categoryField = ("categoryField" in series && typeof series.categoryField === "function" && series.categoryField()) || ("xField" in series && typeof series.xField === "function" && series.xField()) || (seriesYAxis?.field as ChartField) || runtime.effectiveRootXField || "category";
                     const yKey = resolveValue(datum, categoryField);
-                    const rangeVals = resolveFiniteRangeValues(datum, fromField, toField, datumIndex);
-                    if (yKey === undefined || !rangeVals) continue;
+
+                    if (yKey === undefined) continue;
+
+                    const rangeVals = resolveFiniteRangeValues(datum, rangeFromField, rangeToField, datumIndex);
+                    if (!rangeVals) continue;
 
                     const yBandStart = seriesYScale.map(String(yKey));
                     if (yBandStart === undefined) continue;
@@ -681,14 +686,18 @@ export class CartesianHorizontalBarLayoutEngine {
                     const isZeroRange = barW === 0;
 
                     const animationKey = keyResolver.resolveKey(datum, yKey, datumIndex);
+                    const formattedFrom = formatCompactNumber(rangeVals.fromValue);
+                    const formattedTo = formatCompactNumber(rangeVals.toValue);
+                    const formattedValue = `${formattedFrom} – ${formattedTo}`;
+
                     const sceneRangeBar: SceneRangeBar = {
                         animationKey,
                         categorySize: 16,
                         categoryStartPixel: barY,
                         cornerRadii: { bottomLeft: 4, bottomRight: 4, topLeft: 4, topRight: 4 },
                         datum,
-                        formattedFrom: formatCompactNumber(rangeVals.fromValue),
-                        formattedTo: formatCompactNumber(rangeVals.toValue),
+                        formattedFrom,
+                        formattedTo,
                         fromValue: rangeVals.fromValue,
                         fromValuePixel: rawFromX,
                         fromY: barY,
@@ -711,23 +720,35 @@ export class CartesianHorizontalBarLayoutEngine {
                     sceneRangeBars.push(sceneRangeBar);
 
                     recordHit({
+                        animationKey,
+                        barOrientation: "horizontal",
                         bounds: isZeroRange ? undefined : { height: 16, width: barW, x: barX, y: barY },
                         dataIndex: datumIndex,
                         datum,
                         formattedCategory: String(yKey),
-                        formattedTo: formatCompactNumber(rangeVals.toValue),
-                        formattedValue: `${formatCompactNumber(rangeVals.fromValue)} - ${formatCompactNumber(rangeVals.toValue)}`,
+                        formattedFrom,
+                        formattedTo,
+                        formattedValue,
                         formattedYCategory: String(yKey),
                         fromValue: rangeVals.fromValue,
                         highValue: rangeVals.highValue,
                         index: datumIndex,
                         lowValue: rangeVals.lowValue,
-                        rawValue: rangeVals.toValue,
+                        range: {
+                            formattedFrom,
+                            formattedTo,
+                            fromValue: rangeVals.fromValue,
+                            highValue: rangeVals.highValue,
+                            lowValue: rangeVals.lowValue,
+                            toValue: rangeVals.toValue
+                        },
+                        rawValue: [rangeVals.fromValue, rangeVals.toValue],
                         seriesId: series.id,
                         seriesName: resolveSeriesDisplayName(series, seriesIdx),
                         seriesType: "rangeBar",
                         toValue: rangeVals.toValue,
-                        value: rangeVals.toValue,
+                        value: [rangeVals.fromValue, rangeVals.toValue],
+                        valueKind: "range",
                         visualBounds: { height: 16, width: Math.max(4, barW), x: isZeroRange ? barX - 2 : barX, y: barY },
                         xAxisId: binding.xAxisId ?? primaryXAxisId,
                         xAxisTitle: seriesXAxis?.title,
