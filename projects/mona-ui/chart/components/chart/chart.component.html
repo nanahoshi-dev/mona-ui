@@ -311,6 +311,165 @@
             }
         }
 
+        <!-- DOM Cartesian Overlays (Reference Lines, Reference Bands, Point Annotations) -->
+        @if (cartesianOverlayScene(); as overlays) {
+            <!-- Reference Lines -->
+            @for (line of overlays.referenceLines; track line.id) {
+                @if (line.label) {
+                    <div
+                        aria-hidden="true"
+                        [class]="referenceLabelClasses() + (line.label.labelClass ? ' ' + line.label.labelClass : '')"
+                        [class.hidden]="!line.label.formattedText && !resolveReferenceLineTemplate(line.id)"
+                        [style.left.px]="line.label.anchor.x"
+                        [style.top.px]="line.label.anchor.y"
+                        [style.transform]="referenceLineLabelTransform(line)">
+                        @if (resolveReferenceLineTemplate(line.id); as template) {
+                            @if (resolveReferenceLineRegistration(line.id); as reg) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: reg.value(),
+                                        axis: line.axis,
+                                        axisId: line.axisId,
+                                        coordinate: line.coordinate,
+                                        formattedValue: line.label.formattedText,
+                                        kind: 'line',
+                                        value: reg.value()
+                                    }" />
+                            }
+                        } @else {
+                            {{ line.label.formattedText }}
+                        }
+                    </div>
+                }
+            }
+
+            <!-- Reference Bands -->
+            @for (band of overlays.referenceBands; track band.id) {
+                @if (band.label) {
+                    <div
+                        aria-hidden="true"
+                        [class]="referenceLabelClasses() + (band.label.labelClass ? ' ' + band.label.labelClass : '')"
+                        [class.hidden]="!band.label.formattedText && !resolveReferenceBandTemplate(band.id)"
+                        [style.left.px]="band.label.anchor.x"
+                        [style.top.px]="band.label.anchor.y"
+                        [style.transform]="'translate(-50%, -50%)'">
+                        @if (resolveReferenceBandTemplate(band.id); as template) {
+                            @if (resolveReferenceBandRegistration(band.id); as reg) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: { from: reg.from(), to: reg.to() },
+                                        axis: band.axis,
+                                        axisId: band.axisId,
+                                        bounds: band.bounds,
+                                        formattedFrom: '' + reg.from(),
+                                        formattedTo: '' + reg.to(),
+                                        from: reg.from(),
+                                        kind: 'band',
+                                        to: reg.to()
+                                    }" />
+                            }
+                        } @else {
+                            {{ band.label.formattedText }}
+                        }
+                    </div>
+                }
+            }
+
+            <!-- Point Annotations -->
+            @for (ann of overlays.annotations; track ann.id) {
+                @if (ann.label) {
+                    <div
+                        aria-hidden="true"
+                        [class]="annotationLabelClasses() + (ann.label.labelClass ? ' ' + ann.label.labelClass : '')"
+                        [class.hidden]="!ann.label.formattedText && !resolveAnnotationTemplate(ann.id)"
+                        [style.left.px]="ann.label.anchor.x"
+                        [style.top.px]="ann.label.anchor.y"
+                        [style.transform]="annotationLabelTransform(ann)">
+                        @if (resolveAnnotationTemplate(ann.id); as template) {
+                            @if (resolveAnnotationRegistration(ann.id); as reg) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: ann.data,
+                                        data: ann.data,
+                                        formattedX: '' + reg.x(),
+                                        formattedY: '' + reg.y(),
+                                        point: ann.point,
+                                        x: reg.x(),
+                                        xAxisId: reg.xAxisId() ?? cartesianXYScene()?.primaryXAxisId ?? '',
+                                        y: reg.y(),
+                                        yAxisId: reg.yAxisId() ?? cartesianXYScene()?.primaryYAxisId ?? ''
+                                    }" />
+                            }
+                        } @else {
+                            {{ ann.label.formattedText }}
+                        }
+                    </div>
+                }
+            }
+        }
+
+        <!-- Crosshair DOM Axis Labels -->
+        @if (crosshairState(); as chState) {
+            @if (cartesianXYScene(); as cart) {
+                @if (resolveCrosshairRegistration(); as chReg) {
+                    @if (chState.x && chReg.showAxisLabels() !== false && chReg.showXLabel() !== false) {
+                        <div
+                            aria-hidden="true"
+                            [class]="crosshairLabelClasses()"
+                            [style.left.px]="crosshairXLabelLeft(cart, chState)"
+                            [style.top.px]="crosshairXLabelTop(cart, chState)"
+                            [style.transform]="crosshairXLabelTransform(cart, chState)">
+                            @if (chReg.template?.(); as template) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: chState.x.value,
+                                        axis: 'x',
+                                        axisId: chState.x.axisId,
+                                        coordinate: chState.x.coordinate,
+                                        formattedValue: chState.x.formattedValue,
+                                        snapped: chState.snapped,
+                                        source: chState.source,
+                                        value: chState.x.value
+                                    }" />
+                            } @else {
+                                {{ chState.x.formattedValue }}
+                            }
+                        </div>
+                    }
+
+                    @if (chState.y && chReg.showAxisLabels() !== false && chReg.showYLabel() !== false) {
+                        <div
+                            aria-hidden="true"
+                            [class]="crosshairLabelClasses()"
+                            [style.left.px]="crosshairYLabelLeft(cart, chState)"
+                            [style.top.px]="crosshairYLabelTop(cart, chState)"
+                            [style.transform]="crosshairYLabelTransform(cart, chState)">
+                            @if (chReg.template?.(); as template) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: chState.y.value,
+                                        axis: 'y',
+                                        axisId: chState.y.axisId,
+                                        coordinate: chState.y.coordinate,
+                                        formattedValue: chState.y.formattedValue,
+                                        snapped: chState.snapped,
+                                        source: chState.source,
+                                        value: chState.y.value
+                                    }" />
+                            } @else {
+                                {{ chState.y.formattedValue }}
+                            }
+                        </div>
+                    }
+                }
+            }
+        }
+
         <!-- Tooltip overlay in plot-local coordinates -->
         <ng-content select="mona-chart-tooltip"></ng-content>
 

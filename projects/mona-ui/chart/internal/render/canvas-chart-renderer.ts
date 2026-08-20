@@ -1,12 +1,14 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { CartesianChartRenderer } from "./cartesian-chart-renderer";
+import { CartesianChartRenderer, type ChartRenderOverlayState } from "./cartesian-chart-renderer";
 import { FunnelChartRenderer } from "./funnel-chart-renderer";
 import { HeatmapChartRenderer } from "./heatmap-chart-renderer";
 import { PolarChartRenderer } from "./polar-chart-renderer";
 import { TreemapChartRenderer } from "./treemap-chart-renderer";
 import { WaterfallChartRenderer } from "./waterfall-chart-renderer";
+
+export type { ChartRenderOverlayState } from "./cartesian-chart-renderer";
 
 export class CanvasChartRenderer {
     public static clear(context: CanvasRenderingContext2D, width: number, height: number): void {
@@ -16,23 +18,28 @@ export class CanvasChartRenderer {
     public static render(
         context: CanvasRenderingContext2D,
         scene: ChartScene,
-        interactionState: ChartInteractionState | null,
+        overlayState: ChartRenderOverlayState | ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
         this.clear(context, scene.width, scene.height);
-        this.renderContent(context, scene, interactionState, styleResolver);
+        this.renderContent(context, scene, overlayState, styleResolver);
     }
 
     public static renderContent(
         context: CanvasRenderingContext2D,
         scene: ChartScene,
-        interactionState: ChartInteractionState | null,
+        overlayState: ChartRenderOverlayState | ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
+        const interactionState: ChartInteractionState | null =
+            overlayState && "interaction" in overlayState
+                ? (overlayState.interaction ?? null)
+                : (overlayState as ChartInteractionState | null);
+
         switch (scene.coordinateSystem) {
             case "cartesian":
                 if (scene.cartesianKind === "xy") {
-                    CartesianChartRenderer.render(context, scene, interactionState, styleResolver);
+                    CartesianChartRenderer.render(context, scene, overlayState, styleResolver);
                     return;
                 }
                 if (scene.cartesianKind === "heatmap") {
@@ -65,7 +72,7 @@ export class CanvasChartRenderer {
         fromScene: ChartScene | null,
         toScene: ChartScene,
         progress: number,
-        interactionState: ChartInteractionState | null,
+        overlayState: ChartRenderOverlayState | ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
         this.clear(context, toScene.width, toScene.height);
@@ -80,7 +87,7 @@ export class CanvasChartRenderer {
         if (progress > 0) {
             context.save();
             context.globalAlpha = Math.max(0, Math.min(1, progress));
-            this.renderContent(context, toScene, interactionState, styleResolver);
+            this.renderContent(context, toScene, overlayState, styleResolver);
             context.restore();
         }
     }

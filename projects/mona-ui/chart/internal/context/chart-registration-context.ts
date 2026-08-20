@@ -1,12 +1,23 @@
 import type { ElementRef, Signal } from "@angular/core";
+import type { ChartAnnotationLabelTemplateDirective } from "../../directives/chart-annotation-label-template.directive";
 import type { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import type { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
+import type { ChartCrosshairLabelTemplateDirective } from "../../directives/chart-crosshair-label-template.directive";
 import type { ChartGaugeCenterTemplateDirective } from "../../directives/chart-gauge-center-template.directive";
 import type { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
+import type { ChartReferenceLabelTemplateDirective } from "../../directives/chart-reference-label-template.directive";
 import type { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import type { ChartTreemapLabelTemplateDirective } from "../../directives/chart-treemap-label-template.directive";
 import type { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
 import type { ChartTreemapSort, ChartTreemapTile } from "../../models/chart-treemap.models";
+import type {
+    ChartAnnotationAxisValue,
+    ChartAnnotationLabelPlacement,
+    ChartAnnotationMarker,
+    ChartOverlayLayer,
+    ChartReferenceLabelPosition,
+    ChartReferenceLineStyle
+} from "../../models/chart-annotation.models";
 import type {
     ChartAxisFormatter,
     ChartAxisLabelRotation,
@@ -17,6 +28,11 @@ import type {
     ChartYAxisType
 } from "../../models/chart-axis.models";
 import type { ChartBarOrientation } from "../../models/chart-bar.models";
+import type {
+    ChartCrosshairLineStyle,
+    ChartCrosshairMode,
+    ChartCrosshairSnapMode
+} from "../../models/chart-crosshair.models";
 import type {
     ChartPolarFillMode,
     ChartPolarLabelContent,
@@ -581,14 +597,98 @@ export type ChartSeriesRegistration =
     | ChartSectorSeriesRegistration
     | ChartWaterfallSeriesRegistration;
 
+export interface ChartCartesianOverlayRegistrationBase {
+    readonly element: ElementRef<HTMLElement>;
+    readonly id: string;
+    readonly userClass: Signal<string>;
+    readonly visible: Signal<boolean>;
+}
+
+export interface ChartCrosshairRegistration {
+    readonly color: Signal<string | undefined>;
+    readonly element: ElementRef<HTMLElement>;
+    readonly enabled: Signal<boolean>;
+    readonly labelOffset: Signal<number>;
+    readonly lineStyle: Signal<ChartCrosshairLineStyle>;
+    readonly lineWidth: Signal<number | undefined>;
+    readonly maxSnapDistance: Signal<number>;
+    readonly mode: Signal<ChartCrosshairMode>;
+    readonly opacity: Signal<number | undefined>;
+    readonly showAxisLabels: Signal<boolean>;
+    readonly showXLabel: Signal<boolean | undefined>;
+    readonly showYLabel: Signal<boolean | undefined>;
+    readonly snap: Signal<ChartCrosshairSnapMode>;
+    readonly template: Signal<ChartCrosshairLabelTemplateDirective | undefined>;
+    readonly userClass: Signal<string>;
+    readonly xAxisId: Signal<string | undefined>;
+    readonly yAxisId: Signal<string | undefined>;
+}
+
+export interface ChartReferenceLineRegistration extends ChartCartesianOverlayRegistrationBase {
+    readonly axis: Signal<"x" | "y">;
+    readonly axisId: Signal<string | undefined>;
+    readonly color: Signal<string | undefined>;
+    readonly label: Signal<string>;
+    readonly labelClass: Signal<string>;
+    readonly labelOffset: Signal<number>;
+    readonly labelPosition: Signal<ChartReferenceLabelPosition>;
+    readonly layer: Signal<ChartOverlayLayer>;
+    readonly lineStyle: Signal<ChartReferenceLineStyle>;
+    readonly opacity: Signal<number | undefined>;
+    readonly template: Signal<ChartReferenceLabelTemplateDirective | undefined>;
+    readonly value: Signal<ChartAnnotationAxisValue>;
+    readonly width: Signal<number | undefined>;
+}
+
+export interface ChartReferenceBandRegistration extends ChartCartesianOverlayRegistrationBase {
+    readonly axis: Signal<"x" | "y">;
+    readonly axisId: Signal<string | undefined>;
+    readonly borderColor: Signal<string | undefined>;
+    readonly borderWidth: Signal<number | undefined>;
+    readonly fillColor: Signal<string | undefined>;
+    readonly fillOpacity: Signal<number | undefined>;
+    readonly from: Signal<ChartAnnotationAxisValue>;
+    readonly label: Signal<string>;
+    readonly labelClass: Signal<string>;
+    readonly labelOffset: Signal<number>;
+    readonly labelPosition: Signal<ChartReferenceLabelPosition>;
+    readonly layer: Signal<ChartOverlayLayer>;
+    readonly template: Signal<ChartReferenceLabelTemplateDirective | undefined>;
+    readonly to: Signal<ChartAnnotationAxisValue>;
+}
+
+export interface ChartAnnotationRegistration extends ChartCartesianOverlayRegistrationBase {
+    readonly color: Signal<string | undefined>;
+    readonly connector: Signal<boolean>;
+    readonly connectorWidth: Signal<number>;
+    readonly data: Signal<unknown>;
+    readonly label: Signal<string>;
+    readonly labelClass: Signal<string>;
+    readonly labelPlacement: Signal<ChartAnnotationLabelPlacement>;
+    readonly marker: Signal<ChartAnnotationMarker>;
+    readonly markerRadius: Signal<number>;
+    readonly markerStrokeWidth: Signal<number>;
+    readonly offsetX: Signal<number>;
+    readonly offsetY: Signal<number>;
+    readonly template: Signal<ChartAnnotationLabelTemplateDirective | undefined>;
+    readonly x: Signal<ChartAnnotationAxisValue>;
+    readonly xAxisId: Signal<string | undefined>;
+    readonly y: Signal<ChartAnnotationAxisValue>;
+    readonly yAxisId: Signal<string | undefined>;
+}
+
 export interface ChartRegistrationContext {
     invalidate(reason?: ChartInvalidationReason): void;
     legendItems: Signal<readonly ChartLegendItem[]>;
     readonly legendScale?: Signal<ChartColorLegendScale | null>;
     observeLabelElement?(element: HTMLElement, labelId: string): void;
     registerAngularAxis(registration: ChartAngularAxisRegistration): () => void;
+    registerAnnotation(registration: ChartAnnotationRegistration): () => void;
+    registerCrosshair(registration: ChartCrosshairRegistration): () => void;
     registerLegend(registration: ChartLegendRegistration): () => void;
     registerRadialAxis(registration: ChartRadialAxisRegistration): () => void;
+    registerReferenceBand(registration: ChartReferenceBandRegistration): () => void;
+    registerReferenceLine(registration: ChartReferenceLineRegistration): () => void;
     registerSeries(registration: ChartSeriesRegistration): () => void;
     registerTooltip(registration: ChartTooltipRegistration): () => void;
     registerXAxis(registration: ChartXAxisRegistration): () => void;

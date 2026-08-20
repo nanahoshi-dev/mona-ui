@@ -25,6 +25,10 @@ export { GaugeSeriesComponent } from "./components/gauge-series/gauge-series.com
 export { TreemapSeriesComponent } from "./components/treemap-series/treemap-series.component";
 export { FunnelSeriesComponent } from "./components/funnel-series/funnel-series.component";
 export { WaterfallSeriesComponent } from "./components/waterfall-series/waterfall-series.component";
+export { ChartCrosshairComponent } from "./components/chart-crosshair/chart-crosshair.component";
+export { ChartReferenceLineComponent } from "./components/chart-reference-line/chart-reference-line.component";
+export { ChartReferenceBandComponent } from "./components/chart-reference-band/chart-reference-band.component";
+export { ChartAnnotationComponent } from "./components/chart-annotation/chart-annotation.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -38,6 +42,30 @@ export { ChartFunnelLabelTemplateDirective } from "./directives/chart-funnel-lab
 export { ChartWaterfallLabelTemplateDirective } from "./directives/chart-waterfall-label-template.directive";
 export { ChartTitleTemplateDirective } from "./directives/chart-title-template.directive";
 export { ChartSubtitleTemplateDirective } from "./directives/chart-subtitle-template.directive";
+export { ChartCrosshairLabelTemplateDirective } from "./directives/chart-crosshair-label-template.directive";
+export { ChartReferenceLabelTemplateDirective } from "./directives/chart-reference-label-template.directive";
+export { ChartAnnotationLabelTemplateDirective } from "./directives/chart-annotation-label-template.directive";
+
+export type {
+    ChartAnnotationAxisValue,
+    ChartAnnotationLabelPlacement,
+    ChartAnnotationLabelTemplateContext,
+    ChartAnnotationMarker,
+    ChartOverlayLayer,
+    ChartReferenceBandLabelContext,
+    ChartReferenceLabelPosition,
+    ChartReferenceLabelTemplateContext,
+    ChartReferenceLineLabelContext,
+    ChartReferenceLineStyle
+} from "./models/chart-annotation.models";
+
+export type {
+    ChartCrosshairAxisLabelContext,
+    ChartCrosshairLineStyle,
+    ChartCrosshairMode,
+    ChartCrosshairResolvedAxisValue,
+    ChartCrosshairSnapMode
+} from "./models/chart-crosshair.models";
 
 export type {
     ChartCoordinateSystem,

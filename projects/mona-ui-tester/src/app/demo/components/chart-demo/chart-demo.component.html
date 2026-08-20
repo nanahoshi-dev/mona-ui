@@ -201,6 +201,13 @@
             </button>
             <button
                 monaButton
+                [look]="activeTab() === 'overlays' ? 'primary' : 'ghost'"
+                size="small"
+                (click)="setTab('overlays')">
+                Crosshairs & Overlays
+            </button>
+            <button
+                monaButton
                 [look]="activeTab() === 'custom' ? 'primary' : 'ghost'"
                 size="small"
                 (click)="setTab('custom')">
@@ -219,7 +226,184 @@
             <mona-tab title="Series & Layout" [selected]="true">
                 <ng-template monaTabContentTemplate>
                     <div class="flex flex-wrap items-center gap-6 p-4">
-                        @if (activeTab() === "radar") {
+                        @if (activeTab() === "overlays") {
+                            <!-- Overlays, Crosshair, Reference & Annotations Settings -->
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Crosshair Controls</span
+                                >
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <mona-check-box
+                                        [checked]="crosshairEnabled()"
+                                        (checkedChange)="crosshairEnabled.set($event)">
+                                        Enabled
+                                    </mona-check-box>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs text-muted-foreground">Mode:</span>
+                                        <mona-dropdown-list
+                                            [data]="crosshairModeOptions"
+                                            [value]="crosshairMode()"
+                                            (valueChange)="onCrosshairModeChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-36" />
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs text-muted-foreground">Snap:</span>
+                                        <mona-dropdown-list
+                                            [data]="crosshairSnapOptions"
+                                            [value]="crosshairSnap()"
+                                            (valueChange)="onCrosshairSnapChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-40" />
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs text-muted-foreground">Style:</span>
+                                        <mona-dropdown-list
+                                            [data]="crosshairLineStyleOptions"
+                                            [value]="crosshairLineStyle()"
+                                            (valueChange)="onCrosshairLineStyleChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-28" />
+                                    </div>
+                                    <mona-check-box
+                                        [checked]="showCrosshairAxisLabels()"
+                                        (checkedChange)="showCrosshairAxisLabels.set($event)">
+                                        Axis Badges
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="useCustomCrosshairTemplate()"
+                                        (checkedChange)="useCustomCrosshairTemplate.set($event)">
+                                        Custom Badge Template
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Reference Line & Band</span
+                                >
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <mona-check-box
+                                        [checked]="showReferenceLine()"
+                                        (checkedChange)="showReferenceLine.set($event)">
+                                        Target Line ($)
+                                    </mona-check-box>
+                                    <mona-numeric-text-box
+                                        [value]="referenceLineValue()"
+                                        (valueChange)="referenceLineValue.set($event ?? 6500)"
+                                        [minValue]="1000"
+                                        [maxValue]="10000"
+                                        [step]="250"
+                                        size="small"
+                                        class="w-28" />
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs text-muted-foreground">Layer:</span>
+                                        <mona-dropdown-list
+                                            [data]="overlayLayerOptions"
+                                            [value]="referenceLineLayer()"
+                                            (valueChange)="onReferenceLineLayerChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-36" />
+                                    </div>
+                                    <mona-check-box
+                                        [checked]="useCustomRefLineTemplate()"
+                                        (checkedChange)="useCustomRefLineTemplate.set($event)">
+                                        Custom Line Template
+                                    </mona-check-box>
+
+                                    <mona-check-box
+                                        [checked]="showReferenceBand()"
+                                        (checkedChange)="showReferenceBand.set($event)">
+                                        Optimal Band ($)
+                                    </mona-check-box>
+                                    <mona-numeric-text-box
+                                        [value]="referenceBandFrom()"
+                                        (valueChange)="referenceBandFrom.set($event ?? 4800)"
+                                        [minValue]="1000"
+                                        [maxValue]="8000"
+                                        [step]="200"
+                                        size="small"
+                                        class="w-24" />
+                                    <span class="text-xs text-muted-foreground">–</span>
+                                    <mona-numeric-text-box
+                                        [value]="referenceBandTo()"
+                                        (valueChange)="referenceBandTo.set($event ?? 7000)"
+                                        [minValue]="2000"
+                                        [maxValue]="9000"
+                                        [step]="200"
+                                        size="small"
+                                        class="w-24" />
+                                    <mona-check-box
+                                        [checked]="useCustomRefBandTemplate()"
+                                        (checkedChange)="useCustomRefBandTemplate.set($event)">
+                                        Custom Band Template
+                                    </mona-check-box>
+                                </div>
+                            </div>
+
+                            <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                    >Point Annotation</span
+                                >
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <mona-check-box
+                                        [checked]="showAnnotation()"
+                                        (checkedChange)="showAnnotation.set($event)">
+                                        May Peak Annotation
+                                    </mona-check-box>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs text-muted-foreground">Marker:</span>
+                                        <mona-dropdown-list
+                                            [data]="annotationMarkerOptions"
+                                            [value]="annotationMarker()"
+                                            (valueChange)="onAnnotationMarkerChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-36" />
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs text-muted-foreground">Placement:</span>
+                                        <mona-dropdown-list
+                                            [data]="annotationPlacementOptions"
+                                            [value]="annotationPlacement()"
+                                            (valueChange)="onAnnotationPlacementChange($event)"
+                                            textField="label"
+                                            valueField="value"
+                                            [valuePrimitive]="true"
+                                            size="small"
+                                            class="w-32" />
+                                    </div>
+                                    <mona-check-box
+                                        [checked]="annotationConnector()"
+                                        (checkedChange)="annotationConnector.set($event)">
+                                        Connector
+                                    </mona-check-box>
+                                    <mona-check-box
+                                        [checked]="useCustomAnnotationTemplate()"
+                                        (checkedChange)="useCustomAnnotationTemplate.set($event)">
+                                        Custom Badge Template
+                                    </mona-check-box>
+                                </div>
+                            </div>
+                        } @else if (activeTab() === "radar") {
                             <!-- Radar Settings -->
                             <div class="flex flex-col gap-2">
                                 <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
@@ -2762,6 +2946,138 @@
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
                         <mona-chart-tooltip [shared]="true" />
+                    </mona-chart>
+                </div>
+            }
+            @case ("overlays") {
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-foreground">
+                            Enterprise Fiscal Performance with Dynamic Crosshairs, Reference Overlays & Milestone Annotations
+                        </h3>
+                        <p class="text-xs text-muted-foreground">
+                            Multi-series Cartesian Line + Bar visualization showcasing crisp crosshair guidelines, target benchmark lines, optimal interval bands, and milestone annotations.
+                        </p>
+                    </div>
+
+                    <mona-chart
+                        [data]="displayedMonthlyData()"
+                        xField="month"
+                        [animation]="animationEnabled()"
+                        class="h-96 w-full"
+                        aria-label="Fiscal Performance with Overlays"
+                        aria-description="Interactive chart illustrating crosshair snapping, benchmark reference lines, target bands, and milestone annotations."
+                        (pointClick)="onPointClick($event)"
+                        (pointFocusChange)="onPointFocusChange($event)"
+                        (seriesVisibilityChange)="onSeriesVisibilityChange($event)">
+                        <mona-chart-x-axis
+                            [axisLine]="xAxisLine()"
+                            [gridLines]="xGridLines()"
+                            [nice]="niceAxes()"
+                            [position]="xAxisPosition()"
+                            [title]="showAxisTitles() ? 'Fiscal Month' : ''" />
+                        <mona-chart-y-axis
+                            [axisLine]="yAxisLine()"
+                            [formatter]="currencyFormatter"
+                            [gridLines]="yGridLines()"
+                            [nice]="niceAxes()"
+                            [position]="yAxisPosition()"
+                            [title]="showAxisTitles() ? 'Revenue ($)' : ''" />
+
+                        <mona-bar-series
+                            field="actual"
+                            name="Actual Revenue ($)"
+                            [borderRadius]="6" />
+                        <mona-line-series
+                            field="forecast"
+                            name="Forecast Trend ($)"
+                            curve="monotone-x"
+                            [showPoints]="true" />
+
+                        @if (crosshairEnabled()) {
+                            <mona-chart-crosshair
+                                [color]="crosshairColor()"
+                                [lineStyle]="crosshairLineStyle()"
+                                [lineWidth]="crosshairLineWidth()"
+                                [mode]="crosshairMode()"
+                                [showAxisLabels]="showCrosshairAxisLabels()"
+                                [snap]="crosshairSnap()">
+                                @if (useCustomCrosshairTemplate()) {
+                                    <ng-template monaChartCrosshairLabel let-ctx>
+                                        <div class="flex items-center gap-1 bg-primary text-primary-foreground font-semibold px-2 py-0.5 rounded shadow text-xs">
+                                            <span>{{ ctx.axis === 'x' ? '📅' : '💰' }}</span>
+                                            <span>{{ ctx.formattedValue }}</span>
+                                        </div>
+                                    </ng-template>
+                                }
+                            </mona-chart-crosshair>
+                        }
+
+                        @if (showReferenceLine()) {
+                            <mona-chart-reference-line
+                                axis="y"
+                                [color]="'#ef4444'"
+                                [label]="'Target Benchmark ($' + referenceLineValue().toLocaleString() + ')'"
+                                [labelPosition]="referenceLinePosition()"
+                                [layer]="referenceLineLayer()"
+                                [lineStyle]="referenceLineStyle()"
+                                [value]="referenceLineValue()"
+                                [width]="2">
+                                @if (useCustomRefLineTemplate()) {
+                                    <ng-template monaChartReferenceLabel let-val>
+                                        <div class="bg-red-500 text-white font-bold text-[11px] px-2 py-0.5 rounded shadow">
+                                            🎯 Benchmark: {{ currencyFormatter(val) }}
+                                        </div>
+                                    </ng-template>
+                                }
+                            </mona-chart-reference-line>
+                        }
+
+                        @if (showReferenceBand()) {
+                            <mona-chart-reference-band
+                                axis="y"
+                                [borderColor]="'#60a5fa'"
+                                [borderWidth]="1"
+                                [fillColor]="'#3b82f6'"
+                                [fillOpacity]="0.12"
+                                [from]="referenceBandFrom()"
+                                [label]="'Target Range ($' + referenceBandFrom().toLocaleString() + ' – $' + referenceBandTo().toLocaleString() + ')'"
+                                [layer]="referenceBandLayer()"
+                                [to]="referenceBandTo()">
+                                @if (useCustomRefBandTemplate()) {
+                                    <ng-template monaChartReferenceLabel let-ctx>
+                                        <div class="bg-blue-500/20 text-blue-800 dark:text-blue-200 border border-blue-400 font-semibold text-[10px] px-1.5 py-0.5 rounded backdrop-blur-xs">
+                                            📊 Band: {{ currencyFormatter(ctx.from) }} – {{ currencyFormatter(ctx.to) }}
+                                        </div>
+                                    </ng-template>
+                                }
+                            </mona-chart-reference-band>
+                        }
+
+                        @if (showAnnotation()) {
+                            <mona-chart-annotation
+                                [color]="'#8b5cf6'"
+                                [connector]="annotationConnector()"
+                                [data]="{ note: 'Q2 Performance Milestone 🚀' }"
+                                [label]="'May Peak ($7,200)'"
+                                [labelPlacement]="annotationPlacement()"
+                                [marker]="annotationMarker()"
+                                [markerRadius]="6"
+                                [x]="'May'"
+                                [y]="7200">
+                                @if (useCustomAnnotationTemplate()) {
+                                    <ng-template monaChartAnnotationLabel let-d>
+                                        <div class="bg-purple-600 text-white font-bold text-xs px-2.5 py-1 rounded-md shadow-lg flex items-center gap-1.5">
+                                            <span>✨</span>
+                                            <span>{{ d.note }}</span>
+                                        </div>
+                                    </ng-template>
+                                }
+                            </mona-chart-annotation>
+                        }
+
+                        <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
+                        <mona-chart-tooltip [shared]="sharedTooltip()" />
                     </mona-chart>
                 </div>
             }

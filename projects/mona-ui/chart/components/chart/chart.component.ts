@@ -32,6 +32,8 @@ import {
     ChartInvalidationReason,
     hasInvalidationReason,
     type ChartAngularAxisRegistration,
+    type ChartAnnotationRegistration,
+    type ChartCrosshairRegistration,
     type ChartDonutSeriesRegistration,
     type ChartFunnelSeriesRegistration,
     type ChartGaugeSeriesRegistration,
@@ -40,6 +42,8 @@ import {
     type ChartPolarSeriesRegistration,
     type ChartRadialAxisRegistration,
     type ChartRadialBarSeriesRegistration,
+    type ChartReferenceBandRegistration,
+    type ChartReferenceLineRegistration,
     type ChartRegistrationContext,
     type ChartRoseSeriesRegistration,
     type ChartSectorSeriesRegistration,
@@ -53,6 +57,16 @@ import {
 import { ChartLabelMeasureDirective } from "../../internal/directives/chart-label-measure.directive";
 import { ChartHitTestEngine } from "../../internal/interaction/chart-hit-test-engine";
 import type { ChartInteractionState } from "../../internal/interaction/chart-interaction-state";
+import type { ChartCrosshairState } from "../../internal/interaction/chart-crosshair-state";
+import { CartesianCrosshairResolver } from "../../internal/interaction/cartesian-crosshair-resolver";
+import { ChartPointerInteractionResolver } from "../../internal/interaction/chart-pointer-interaction-resolver";
+import { CartesianOverlayProjector } from "../../internal/overlay/cartesian-overlay-projector";
+import type {
+    CartesianOverlayScene,
+    ScenePointAnnotation,
+    SceneReferenceBand,
+    SceneReferenceLine
+} from "../../internal/scene/cartesian-overlay-scene";
 import {
     ChartKeyboardNavigation,
     type ChartKeyboardAxisNamespace,
@@ -62,7 +76,7 @@ import {
 import { ChartLabelMeasurementPruner } from "../../internal/layout/chart-label-measurement-pruner";
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
 import { formatPolarLabelText } from "../../internal/layout/polar-label-layout";
-import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer";
+import { CanvasChartRenderer, type ChartRenderOverlayState } from "../../internal/render/canvas-chart-renderer";
 import { ChartRenderScheduler } from "../../internal/render/chart-render-scheduler";
 import type {
     CartesianChartScene,
@@ -141,10 +155,13 @@ import type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "../.
 import type { ChartField, ChartPoint } from "../../models/chart.models";
 import type { ChartHeaderAlignment } from "../../models/chart-axis.models";
 import {
+    chartAnnotationLabelBaseThemeVariants,
     chartAxisLabelBaseThemeVariants,
     chartBaseThemeVariants,
+    chartCrosshairLabelBaseThemeVariants,
     chartHeaderBaseThemeVariants,
     chartNoDataBaseThemeVariants,
+    chartReferenceLabelBaseThemeVariants,
     chartSubtitleBaseThemeVariants,
     chartTitleBaseThemeVariants
 } from "../../styles/chart.styles";
@@ -202,6 +219,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
     readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
     readonly #yAxes = signal<ChartYAxisRegistration[]>([]);
+    readonly #crosshair = signal<ChartCrosshairRegistration | null>(null);
+    readonly #referenceLines = signal<ChartReferenceLineRegistration[]>([]);
+    readonly #referenceBands = signal<ChartReferenceBandRegistration[]>([]);
+    readonly #annotations = signal<ChartAnnotationRegistration[]>([]);
 
     public ngAfterContentChecked(): void {
         if (!this.#canvasReady) {
@@ -248,7 +269,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly viewportCursor = signal<string | null>(null);
+    protected readonly crosshairState = signal<ChartCrosshairState | null>(null);
     protected readonly axisLabelClasses = computed(() => chartAxisLabelBaseThemeVariants());
+    protected readonly crosshairLabelClasses = computed(() => chartCrosshairLabelBaseThemeVariants());
+    protected readonly referenceLabelClasses = computed(() => chartReferenceLabelBaseThemeVariants());
+    protected readonly annotationLabelClasses = computed(() => chartAnnotationLabelBaseThemeVariants());
     protected readonly baseClasses = computed(() =>
         twMerge(chartBaseThemeVariants({ interactive: true }), this.userClass())
     );
@@ -260,6 +285,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     protected readonly cartesianXYScene = computed<CartesianXYChartScene | null>(() => {
         const sc = this.scene();
         return sc?.coordinateSystem === "cartesian" && sc.cartesianKind === "xy" ? (sc as CartesianXYChartScene) : null;
+    });
+    protected readonly cartesianOverlayScene = computed<CartesianOverlayScene | null>(() => {
+        const scene = this.cartesianXYScene();
+        if (!scene?.coordinateSpace) {
+            return null;
+        }
+
+        return CartesianOverlayProjector.project(
+            scene,
+            this.#referenceLines(),
+            this.#referenceBands(),
+            this.#annotations(),
+            this.#styleResolver
+        );
     });
     protected readonly heatmapScene = computed<CartesianHeatmapChartScene | null>(() => {
         const sc = this.scene();
@@ -1053,9 +1092,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         const tooltip = this.#tooltip();
-        const hoverEnabled = tooltip ? tooltip.enabled() !== false : false;
-        if (!hoverEnabled || (this.#isAnimating() && !this.#isStructuralAnimation())) {
-            if (this.#interactionState !== null) {
+        const tooltipEnabled = tooltip ? tooltip.enabled() !== false : false;
+        const crosshair = this.#crosshair();
+        const crosshairEnabled = crosshair ? crosshair.enabled() !== false : false;
+
+        if ((!tooltipEnabled && !crosshairEnabled) || (this.#isAnimating() && !this.#isStructuralAnimation())) {
+            if (this.#interactionState !== null || this.crosshairState() !== null) {
                 this.#clearInteraction();
             }
             return;
@@ -1365,10 +1407,23 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        const shared = this.#resolveSharedTooltip(currentScene);
-        const hitState = ChartHitTestEngine.testHit(pointer, currentScene, shared);
+        const tooltip = this.#tooltip();
+        const tooltipEnabled = tooltip ? tooltip.enabled() !== false : false;
+        const crosshair = this.#crosshair();
+        const crosshairEnabled = crosshair ? crosshair.enabled() !== false : false;
 
-        if (hitState.activeHitTarget || hitState.activeHits.length > 0) {
+        if (!tooltipEnabled && !crosshairEnabled) {
+            this.#clearInteraction();
+            return;
+        }
+
+        const shared = this.#resolveSharedTooltip(currentScene);
+        const resolution = ChartPointerInteractionResolver.resolve(pointer, currentScene, shared);
+        const hitState = resolution.hitState;
+
+        let hasAnyState = false;
+
+        if (tooltipEnabled && (hitState.activeHitTarget || hitState.activeHits.length > 0)) {
             this.#interactionState = {
                 ...hitState,
                 source: "pointer"
@@ -1393,7 +1448,30 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         primaryHit
                     )
                 );
+                hasAnyState = true;
             }
+        } else {
+            this.#interactionState = null;
+            this.tooltipPosition.set(null);
+            this.tooltipContext.set(null);
+        }
+
+        if (crosshairEnabled && currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "xy") {
+            const nextCrosshairState = CartesianCrosshairResolver.resolve(
+                currentScene as CartesianXYChartScene,
+                crosshair,
+                resolution,
+                "pointer"
+            );
+            this.crosshairState.set(nextCrosshairState);
+            if (nextCrosshairState !== null) {
+                hasAnyState = true;
+            }
+        } else {
+            this.crosshairState.set(null);
+        }
+
+        if (hasAnyState) {
             this.#paint();
         } else {
             this.#clearInteraction();
@@ -1467,6 +1545,45 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return () => {
             this.#yAxes.update(list => list.filter(a => a !== registration));
             this.invalidate(ChartInvalidationReason.Layout);
+        };
+    }
+
+    public registerCrosshair(registration: ChartCrosshairRegistration): () => void {
+        this.#crosshair.set(registration);
+        this.invalidate(ChartInvalidationReason.Interaction);
+        return () => {
+            if (this.#crosshair() === registration) {
+                this.#crosshair.set(null);
+                this.crosshairState.set(null);
+                this.invalidate(ChartInvalidationReason.Interaction);
+            }
+        };
+    }
+
+    public registerReferenceLine(registration: ChartReferenceLineRegistration): () => void {
+        this.#referenceLines.update(list => [...list, registration]);
+        this.invalidate(ChartInvalidationReason.Interaction);
+        return () => {
+            this.#referenceLines.update(list => list.filter(r => r !== registration));
+            this.invalidate(ChartInvalidationReason.Interaction);
+        };
+    }
+
+    public registerReferenceBand(registration: ChartReferenceBandRegistration): () => void {
+        this.#referenceBands.update(list => [...list, registration]);
+        this.invalidate(ChartInvalidationReason.Interaction);
+        return () => {
+            this.#referenceBands.update(list => list.filter(r => r !== registration));
+            this.invalidate(ChartInvalidationReason.Interaction);
+        };
+    }
+
+    public registerAnnotation(registration: ChartAnnotationRegistration): () => void {
+        this.#annotations.update(list => [...list, registration]);
+        this.invalidate(ChartInvalidationReason.Interaction);
+        return () => {
+            this.#annotations.update(list => list.filter(r => r !== registration));
+            this.invalidate(ChartInvalidationReason.Interaction);
         };
     }
 
@@ -1678,12 +1795,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#activeKeyboardNamespace = null;
         this.#activeKeyboardSeriesId = null;
         this.#interactionState = null;
+        this.crosshairState.set(null);
         this.tooltipContext.set(null);
         this.tooltipPosition.set(null);
     }
 
     #clearInteraction(): void {
-        if (this.#interactionState !== null || this.tooltipPosition() !== null || this.tooltipContext() !== null) {
+        if (
+            this.#interactionState !== null ||
+            this.crosshairState() !== null ||
+            this.tooltipPosition() !== null ||
+            this.tooltipContext() !== null
+        ) {
             this.#clearInteractionState();
             this.#paint();
         }
@@ -1766,7 +1889,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        CanvasChartRenderer.render(context, currentScene, this.#interactionState, this.#styleResolver);
+        const overlayState: ChartRenderOverlayState = {
+            cartesianOverlay: this.cartesianOverlayScene(),
+            crosshair: this.crosshairState(),
+            crosshairRegistration: this.#crosshair(),
+            interaction: this.#interactionState
+        };
+
+        CanvasChartRenderer.render(context, currentScene, overlayState, this.#styleResolver);
     }
 
     #resolveCanonicalViewportForAuthority(
@@ -2096,12 +2226,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 onFrame: (frame: ChartAnimationRenderFrame) => {
                     this.#renderScene = frame.scene;
                     if (frame.mode === "crossfade" && this.#canvasContext) {
+                        const overlayState: ChartRenderOverlayState = {
+                            cartesianOverlay: this.cartesianOverlayScene(),
+                            crosshair: this.crosshairState(),
+                            crosshairRegistration: this.#crosshair(),
+                            interaction: this.#interactionState
+                        };
                         CanvasChartRenderer.renderCrossfade(
                             this.#canvasContext,
                             frame.fromScene ?? null,
                             frame.toScene ?? newScene,
                             frame.progress,
-                            this.#interactionState,
+                            overlayState,
                             this.#styleResolver
                         );
                     } else {
@@ -2329,7 +2465,136 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
         }
 
+        if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "xy") {
+            const crosshair = this.#crosshair();
+            if (crosshair && crosshair.enabled() !== false) {
+                const resolution = {
+                    bucketHits: activeHits,
+                    hitState: this.#interactionState,
+                    nearestAnchor: bucketAnchor ?? pointPos,
+                    pointer: pointPos,
+                    primaryHit: matchingHit,
+                    snappedAnchor: pointPos
+                };
+                const crosshairState = CartesianCrosshairResolver.resolve(
+                    currentScene as CartesianXYChartScene,
+                    crosshair,
+                    resolution,
+                    "keyboard"
+                );
+                this.crosshairState.set(crosshairState);
+            }
+        }
+
         this.#paint();
+    }
+
+    protected crosshairXLabelLeft(cart: CartesianXYChartScene, state: ChartCrosshairState): number {
+        if (!state.x) return 0;
+        return clamp(state.x.coordinate, cart.plotRect.x, cart.plotRect.x + cart.plotRect.width);
+    }
+
+    protected crosshairXLabelTop(cart: CartesianXYChartScene, state: ChartCrosshairState): number {
+        if (!state.x) return 0;
+        const targetAxis = cart.axes.find(a => a.axis === "x" && a.axisId === state.x?.axisId);
+        const sideOffset = targetAxis?.sideOffset ?? 0;
+        const offset = this.#crosshair()?.labelOffset() ?? 4;
+        return targetAxis?.position === "top"
+            ? cart.plotRect.y - sideOffset - offset
+            : cart.plotRect.y + cart.plotRect.height + sideOffset + offset;
+    }
+
+    protected crosshairXLabelTransform(cart: CartesianXYChartScene, state: ChartCrosshairState): string {
+        if (!state.x) return "";
+        const targetAxis = cart.axes.find(a => a.axis === "x" && a.axisId === state.x?.axisId);
+        return targetAxis?.position === "top" ? "translate(-50%, -100%)" : "translate(-50%, 0)";
+    }
+
+    protected crosshairYLabelLeft(cart: CartesianXYChartScene, state: ChartCrosshairState): number {
+        if (!state.y) return 0;
+        const targetAxis = cart.axes.find(a => a.axis === "y" && a.axisId === state.y?.axisId);
+        const sideOffset = targetAxis?.sideOffset ?? 0;
+        const offset = this.#crosshair()?.labelOffset() ?? 4;
+        return targetAxis?.position === "right"
+            ? cart.plotRect.x + cart.plotRect.width + sideOffset + offset
+            : cart.plotRect.x - sideOffset - offset;
+    }
+
+    protected crosshairYLabelTop(cart: CartesianXYChartScene, state: ChartCrosshairState): number {
+        if (!state.y) return 0;
+        return clamp(state.y.coordinate, cart.plotRect.y, cart.plotRect.y + cart.plotRect.height);
+    }
+
+    protected crosshairYLabelTransform(cart: CartesianXYChartScene, state: ChartCrosshairState): string {
+        if (!state.y) return "";
+        const targetAxis = cart.axes.find(a => a.axis === "y" && a.axisId === state.y?.axisId);
+        return targetAxis?.position === "right" ? "translate(0, -50%)" : "translate(-100%, -50%)";
+    }
+
+    protected referenceLineLabelTransform(line: SceneReferenceLine): string {
+        if (line.axis === "x") {
+            switch (line.label?.position) {
+                case "start":
+                    return "translate(-50%, 0)";
+                case "center":
+                    return "translate(-50%, -50%)";
+                case "end":
+                default:
+                    return "translate(-50%, -100%)";
+            }
+        } else {
+            switch (line.label?.position) {
+                case "start":
+                    return "translate(0, -50%)";
+                case "center":
+                    return "translate(-50%, -50%)";
+                case "end":
+                default:
+                    return "translate(-100%, -50%)";
+            }
+        }
+    }
+
+    protected annotationLabelTransform(ann: ScenePointAnnotation): string {
+        switch (ann.label?.placement) {
+            case "bottom":
+                return "translate(-50%, 0)";
+            case "left":
+                return "translate(-100%, -50%)";
+            case "right":
+                return "translate(0, -50%)";
+            case "top":
+            default:
+                return "translate(-50%, -100%)";
+        }
+    }
+
+    protected resolveReferenceLineTemplate(lineId: string) {
+        return this.#referenceLines().find(r => r.id === lineId)?.template?.();
+    }
+
+    protected resolveReferenceBandTemplate(bandId: string) {
+        return this.#referenceBands().find(r => r.id === bandId)?.template?.();
+    }
+
+    protected resolveAnnotationTemplate(annId: string) {
+        return this.#annotations().find(r => r.id === annId)?.template?.();
+    }
+
+    protected resolveReferenceLineRegistration(lineId: string) {
+        return this.#referenceLines().find(r => r.id === lineId);
+    }
+
+    protected resolveReferenceBandRegistration(bandId: string) {
+        return this.#referenceBands().find(r => r.id === bandId);
+    }
+
+    protected resolveAnnotationRegistration(annId: string) {
+        return this.#annotations().find(r => r.id === annId);
+    }
+
+    protected resolveCrosshairRegistration() {
+        return this.#crosshair();
     }
 
     protected angularLabelTransform(tick: ChartAngularAxisTick): string {

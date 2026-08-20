@@ -3364,6 +3364,218 @@
       }
     ]
   },
+  "ChartAnnotationComponent": {
+    "name": "ChartAnnotationComponent",
+    "selector": "\"mona-chart-annotation\"",
+    "inputs": [
+      {
+        "description": "X coordinate value or category key for the annotation anchor.",
+        "kind": "input",
+        "name": "x",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
+      },
+      {
+        "description": "Y coordinate value or category key for the annotation anchor.",
+        "kind": "input",
+        "name": "y",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
+      },
+      {
+        "description": "Explicit target X axis identifier. Defaults to primary X axis.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Explicit target Y axis identifier. Defaults to primary Y axis.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Sets whether the annotation is visible.",
+        "kind": "input",
+        "name": "visible",
+        "type": "boolean"
+      },
+      {
+        "description": "Text label displayed for the annotation.",
+        "kind": "input",
+        "name": "label",
+        "type": "string"
+      },
+      {
+        "description": "Custom data object provided to template context.",
+        "kind": "input",
+        "name": "data",
+        "type": "unknown"
+      },
+      {
+        "description": "Stroke and marker color for the annotation.",
+        "kind": "input",
+        "name": "color",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Marker shape drawn at the anchor point: 'circle', 'diamond', or 'none'.",
+        "kind": "input",
+        "name": "marker",
+        "type": "ChartAnnotationMarker"
+      },
+      {
+        "description": "Marker radius in pixels.",
+        "kind": "input",
+        "name": "markerRadius",
+        "type": "number"
+      },
+      {
+        "description": "Marker stroke width in pixels.",
+        "kind": "input",
+        "name": "markerStrokeWidth",
+        "type": "number"
+      },
+      {
+        "description": "Sets whether a connector line is drawn between the anchor point and the label.",
+        "kind": "input",
+        "name": "connector",
+        "type": "boolean"
+      },
+      {
+        "description": "Connector stroke width in pixels.",
+        "kind": "input",
+        "name": "connectorWidth",
+        "type": "number"
+      },
+      {
+        "description": "Relative placement of the label from the anchor point: 'top', 'bottom', 'left', or 'right'.",
+        "kind": "input",
+        "name": "labelPlacement",
+        "type": "ChartAnnotationLabelPlacement"
+      },
+      {
+        "description": "Additional horizontal pixel offset for label positioning.",
+        "kind": "input",
+        "name": "offsetX",
+        "type": "number"
+      },
+      {
+        "description": "Additional vertical pixel offset for label positioning.",
+        "kind": "input",
+        "name": "offsetY",
+        "type": "number"
+      },
+      {
+        "description": "Custom CSS class name applied to the label badge.",
+        "kind": "input",
+        "name": "labelClass",
+        "type": "string"
+      },
+      {
+        "description": "Custom CSS class name applied to the annotation host.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string"
+      }
+    ]
+  },
+  "ChartCrosshairComponent": {
+    "name": "ChartCrosshairComponent",
+    "selector": "\"mona-chart-crosshair\"",
+    "inputs": [
+      {
+        "description": "Sets whether crosshair interaction is enabled.",
+        "kind": "input",
+        "name": "enabled",
+        "type": "boolean"
+      },
+      {
+        "description": "Crosshair display mode: auto (follows interaction axis), x, y, or xy.",
+        "kind": "input",
+        "name": "mode",
+        "type": "ChartCrosshairMode"
+      },
+      {
+        "description": "Snapping mode: nearest semantic mark or raw pointer position.",
+        "kind": "input",
+        "name": "snap",
+        "type": "ChartCrosshairSnapMode"
+      },
+      {
+        "description": "Explicit target X axis identifier.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Explicit target Y axis identifier.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Sets whether axis value badges are displayed.",
+        "kind": "input",
+        "name": "showAxisLabels",
+        "type": "boolean"
+      },
+      {
+        "description": "Sets whether the X axis label badge is displayed.",
+        "kind": "input",
+        "name": "showXLabel",
+        "type": "boolean | undefined"
+      },
+      {
+        "description": "Sets whether the Y axis label badge is displayed.",
+        "kind": "input",
+        "name": "showYLabel",
+        "type": "boolean | undefined"
+      },
+      {
+        "description": "Line dash style for the crosshair.",
+        "kind": "input",
+        "name": "lineStyle",
+        "type": "ChartCrosshairLineStyle"
+      },
+      {
+        "description": "Line stroke width in pixels.",
+        "kind": "input",
+        "name": "lineWidth",
+        "type": "number | undefined"
+      },
+      {
+        "description": "Stroke color for the crosshair line.",
+        "kind": "input",
+        "name": "color",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Stroke opacity for the crosshair line (0 to 1).",
+        "kind": "input",
+        "name": "opacity",
+        "type": "number | undefined"
+      },
+      {
+        "description": "Maximum pixel distance for nearest mark snapping.",
+        "kind": "input",
+        "name": "maxSnapDistance",
+        "type": "number"
+      },
+      {
+        "description": "Pixel offset between axis line and crosshair label badge.",
+        "kind": "input",
+        "name": "labelOffset",
+        "type": "number"
+      },
+      {
+        "description": "Custom CSS class name applied to the crosshair.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string"
+      }
+    ]
+  },
   "ChartLegendComponent": {
     "name": "ChartLegendComponent",
     "selector": "\"mona-chart-legend\"",
@@ -3492,6 +3704,197 @@
         "name": "visible",
         "type": "boolean",
         "defaultValue": "true"
+      }
+    ]
+  },
+  "ChartReferenceBandComponent": {
+    "name": "ChartReferenceBandComponent",
+    "selector": "\"mona-chart-reference-band\"",
+    "inputs": [
+      {
+        "description": "Target Cartesian axis dimension: 'x' or 'y'.",
+        "kind": "input",
+        "name": "axis",
+        "type": "\"x\" | \"y\"",
+        "required": true
+      },
+      {
+        "description": "Explicit identifier of the target axis. Defaults to primary axis for the dimension.",
+        "kind": "input",
+        "name": "axisId",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Starting coordinate value or category key for the reference band.",
+        "kind": "input",
+        "name": "from",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
+      },
+      {
+        "description": "Ending coordinate value or category key for the reference band.",
+        "kind": "input",
+        "name": "to",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
+      },
+      {
+        "description": "Sets whether the reference band is visible.",
+        "kind": "input",
+        "name": "visible",
+        "type": "boolean"
+      },
+      {
+        "description": "Fill color of the reference band.",
+        "kind": "input",
+        "name": "fillColor",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Fill opacity of the reference band (0 to 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined"
+      },
+      {
+        "description": "Border stroke color of the reference band.",
+        "kind": "input",
+        "name": "borderColor",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Border stroke width of the reference band in pixels.",
+        "kind": "input",
+        "name": "borderWidth",
+        "type": "number | undefined"
+      },
+      {
+        "description": "Render layer: 'underlay' (behind series) or 'overlay' (in front of series).",
+        "kind": "input",
+        "name": "layer",
+        "type": "ChartOverlayLayer"
+      },
+      {
+        "description": "Text label displayed inside or alongside the reference band.",
+        "kind": "input",
+        "name": "label",
+        "type": "string"
+      },
+      {
+        "description": "Alignment position for the label: 'start', 'center', or 'end'.",
+        "kind": "input",
+        "name": "labelPosition",
+        "type": "ChartReferenceLabelPosition"
+      },
+      {
+        "description": "Pixel offset between the band boundary and the label.",
+        "kind": "input",
+        "name": "labelOffset",
+        "type": "number"
+      },
+      {
+        "description": "Custom CSS class name applied to the label badge.",
+        "kind": "input",
+        "name": "labelClass",
+        "type": "string"
+      },
+      {
+        "description": "Custom CSS class name applied to the reference band host.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string"
+      }
+    ]
+  },
+  "ChartReferenceLineComponent": {
+    "name": "ChartReferenceLineComponent",
+    "selector": "\"mona-chart-reference-line\"",
+    "inputs": [
+      {
+        "description": "Target Cartesian axis dimension: 'x' or 'y'.",
+        "kind": "input",
+        "name": "axis",
+        "type": "\"x\" | \"y\"",
+        "required": true
+      },
+      {
+        "description": "Explicit identifier of the target axis. Defaults to primary axis for the dimension.",
+        "kind": "input",
+        "name": "axisId",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Semantic coordinate value or category key for the reference line.",
+        "kind": "input",
+        "name": "value",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
+      },
+      {
+        "description": "Sets whether the reference line is visible.",
+        "kind": "input",
+        "name": "visible",
+        "type": "boolean"
+      },
+      {
+        "description": "Stroke color of the reference line.",
+        "kind": "input",
+        "name": "color",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Stroke opacity of the reference line (0 to 1).",
+        "kind": "input",
+        "name": "opacity",
+        "type": "number | undefined"
+      },
+      {
+        "description": "Stroke width of the reference line in pixels.",
+        "kind": "input",
+        "name": "width",
+        "type": "number | undefined"
+      },
+      {
+        "description": "Line dash style: 'dashed', 'dotted', or 'solid'.",
+        "kind": "input",
+        "name": "lineStyle",
+        "type": "ChartReferenceLineStyle"
+      },
+      {
+        "description": "Render layer: 'underlay' (behind series) or 'overlay' (in front of series).",
+        "kind": "input",
+        "name": "layer",
+        "type": "ChartOverlayLayer"
+      },
+      {
+        "description": "Text label displayed alongside the reference line.",
+        "kind": "input",
+        "name": "label",
+        "type": "string"
+      },
+      {
+        "description": "Alignment position for the label: 'start', 'center', or 'end'.",
+        "kind": "input",
+        "name": "labelPosition",
+        "type": "ChartReferenceLabelPosition"
+      },
+      {
+        "description": "Pixel offset between the reference line and the label.",
+        "kind": "input",
+        "name": "labelOffset",
+        "type": "number"
+      },
+      {
+        "description": "Custom CSS class name applied to the label badge.",
+        "kind": "input",
+        "name": "labelClass",
+        "type": "string"
+      },
+      {
+        "description": "Custom CSS class name applied to the reference line host.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string"
       }
     ]
   },

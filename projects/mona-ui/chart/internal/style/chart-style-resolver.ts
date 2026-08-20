@@ -1,7 +1,9 @@
 import { formatRgb, parse, wcagContrast } from "culori";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {
+    ChartAnnotationRegistration,
     ChartCartesianSeriesRegistration,
+    ChartCrosshairRegistration,
     ChartFinancialSeriesRegistration,
     ChartFunnelSeriesRegistration,
     ChartGaugeSeriesRegistration,
@@ -10,6 +12,8 @@ import type {
     ChartRadialArcSeriesRegistration,
     ChartRadialBarSeriesRegistration,
     ChartRadialSeriesRegistration,
+    ChartReferenceBandRegistration,
+    ChartReferenceLineRegistration,
     ChartRoseSeriesRegistration,
     ChartSeriesRegistration,
     ChartTreemapSeriesRegistration,
@@ -1465,5 +1469,170 @@ export class ChartStyleResolver {
             subtotalColor,
             totalColor
         };
+    }
+
+    public resolveNumericCssVariable(varName: string, targetElement?: HTMLElement | null): number | undefined {
+        if (typeof window === "undefined") {
+            return undefined;
+        }
+        try {
+            const primaryEl = targetElement ?? this.#rootElement ?? (typeof document !== "undefined" ? document.body : null);
+            if (!primaryEl) {
+                return undefined;
+            }
+            let resolved = window.getComputedStyle(primaryEl).getPropertyValue(varName).trim();
+            if (!resolved && targetElement && this.#rootElement && targetElement !== this.#rootElement) {
+                resolved = window.getComputedStyle(this.#rootElement).getPropertyValue(varName).trim();
+            }
+            if (!resolved) {
+                return undefined;
+            }
+            const num = parseFloat(resolved);
+            return Number.isFinite(num) ? num : undefined;
+        } catch {
+            return undefined;
+        }
+    }
+
+    public resolveCrosshairStyle(registration: ChartCrosshairRegistration): {
+        readonly color: string;
+        readonly opacity: number;
+        readonly width: number;
+    } {
+        const el = registration.element?.nativeElement;
+        const explicitColor = registration.color();
+        const explicitWidth = registration.lineWidth();
+        const explicitOpacity = registration.opacity();
+
+        let color = explicitColor ? this.resolveCssVariable(explicitColor, el) : "";
+        if (!color) {
+            color =
+                this.resolveCssVariable("--mona-chart-crosshair-color", el) ||
+                this.resolveCssVariable("--color-focus-indicator", el) ||
+                this.resolveCssVariable("--color-muted-foreground", el) ||
+                "rgba(148, 163, 184, 0.4)";
+        }
+
+        let width = explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0 ? explicitWidth : undefined;
+        if (width === undefined) {
+            const cssWidth = this.resolveNumericCssVariable("--mona-chart-crosshair-width", el);
+            width = cssWidth !== undefined && cssWidth >= 0 ? cssWidth : 1;
+        }
+
+        let opacity = explicitOpacity !== undefined && isFiniteNumber(explicitOpacity) ? Math.max(0, Math.min(1, explicitOpacity)) : undefined;
+        if (opacity === undefined) {
+            const cssOpacity = this.resolveNumericCssVariable("--mona-chart-crosshair-opacity", el);
+            opacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 1;
+        }
+
+        return { color, opacity, width };
+    }
+
+    public resolveReferenceLineStyle(registration: ChartReferenceLineRegistration): {
+        readonly color: string;
+        readonly opacity: number;
+        readonly width: number;
+    } {
+        const el = registration.element?.nativeElement;
+        const explicitColor = registration.color();
+        const explicitWidth = registration.width();
+        const explicitOpacity = registration.opacity();
+
+        let color = explicitColor ? this.resolveCssVariable(explicitColor, el) : "";
+        if (!color) {
+            color =
+                this.resolveCssVariable("--mona-chart-reference-line-color", el) ||
+                this.resolveCssVariable("--color-muted-foreground", el) ||
+                "rgba(148, 163, 184, 0.8)";
+        }
+
+        let width = explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0 ? explicitWidth : undefined;
+        if (width === undefined) {
+            const cssWidth = this.resolveNumericCssVariable("--mona-chart-reference-line-width", el);
+            width = cssWidth !== undefined && cssWidth >= 0 ? cssWidth : 1;
+        }
+
+        let opacity = explicitOpacity !== undefined && isFiniteNumber(explicitOpacity) ? Math.max(0, Math.min(1, explicitOpacity)) : undefined;
+        if (opacity === undefined) {
+            const cssOpacity = this.resolveNumericCssVariable("--mona-chart-reference-line-opacity", el);
+            opacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 1;
+        }
+
+        return { color, opacity, width };
+    }
+
+    public resolveReferenceBandStyle(registration: ChartReferenceBandRegistration): {
+        readonly borderColor?: string;
+        readonly borderWidth: number;
+        readonly fillColor: string;
+        readonly fillOpacity: number;
+    } {
+        const el = registration.element?.nativeElement;
+        const explicitFill = registration.fillColor();
+        const explicitFillOpacity = registration.fillOpacity();
+        const explicitBorderColor = registration.borderColor();
+        const explicitBorderWidth = registration.borderWidth();
+
+        let fillColor = explicitFill ? this.resolveCssVariable(explicitFill, el) : "";
+        if (!fillColor) {
+            fillColor =
+                this.resolveCssVariable("--mona-chart-reference-band-color", el) ||
+                this.resolveCssVariable("--color-muted", el) ||
+                "rgba(148, 163, 184, 0.15)";
+        }
+
+        let fillOpacity = explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity) ? Math.max(0, Math.min(1, explicitFillOpacity)) : undefined;
+        if (fillOpacity === undefined) {
+            const cssOpacity = this.resolveNumericCssVariable("--mona-chart-reference-band-opacity", el);
+            fillOpacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.15;
+        }
+
+        let borderColor = explicitBorderColor ? this.resolveCssVariable(explicitBorderColor, el) : undefined;
+        if (!borderColor) {
+            const cssBorder = this.resolveCssVariable("--mona-chart-reference-band-border-color", el);
+            if (cssBorder) {
+                borderColor = cssBorder;
+            }
+        }
+
+        let borderWidth = explicitBorderWidth !== undefined && isFiniteNumber(explicitBorderWidth) && explicitBorderWidth >= 0 ? explicitBorderWidth : undefined;
+        if (borderWidth === undefined) {
+            const cssBorderWidth = this.resolveNumericCssVariable("--mona-chart-reference-band-border-width", el);
+            borderWidth = cssBorderWidth !== undefined && cssBorderWidth >= 0 ? cssBorderWidth : (borderColor ? 1 : 0);
+        }
+
+        return { borderColor, borderWidth, fillColor, fillOpacity };
+    }
+
+    public resolveAnnotationStyle(registration: ChartAnnotationRegistration): {
+        readonly color: string;
+        readonly connectorWidth: number;
+        readonly markerRadius: number;
+        readonly markerStrokeWidth: number;
+    } {
+        const el = registration.element?.nativeElement;
+        const explicitColor = registration.color();
+        const explicitRadius = registration.markerRadius();
+        const explicitStrokeWidth = registration.markerStrokeWidth();
+        const explicitConnectorWidth = registration.connectorWidth();
+
+        let color = explicitColor ? this.resolveCssVariable(explicitColor, el) : "";
+        if (!color) {
+            color =
+                this.resolveCssVariable("--mona-chart-annotation-color", el) ||
+                this.resolveCssVariable("--color-primary", el) ||
+                "#3b82f6";
+        }
+
+        let markerRadius = explicitRadius !== undefined && isFiniteNumber(explicitRadius) && explicitRadius >= 0 ? explicitRadius : undefined;
+        if (markerRadius === undefined) {
+            const cssRadius = this.resolveNumericCssVariable("--mona-chart-annotation-marker-radius", el);
+            markerRadius = cssRadius !== undefined && cssRadius >= 0 ? cssRadius : 4;
+        }
+
+        const markerStrokeWidth = explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0 ? explicitStrokeWidth : 1.5;
+        const connectorWidth = explicitConnectorWidth !== undefined && isFiniteNumber(explicitConnectorWidth) && explicitConnectorWidth >= 0 ? explicitConnectorWidth : 1;
+
+        return { color, connectorWidth, markerRadius, markerStrokeWidth };
     }
 }

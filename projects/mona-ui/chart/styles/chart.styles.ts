@@ -74,7 +74,20 @@ export const chartSubtitleBaseThemeVariants = cva(
     "text-xs text-muted-foreground select-none"
 );
 
+export const chartCrosshairLabelBaseThemeVariants = cva(
+    "absolute pointer-events-none z-40 rounded border border-border bg-popover px-1.5 py-0.5 text-[11px] font-medium text-popover-foreground shadow-sm select-none whitespace-nowrap"
+);
+
+export const chartReferenceLabelBaseThemeVariants = cva(
+    "absolute pointer-events-none z-30 rounded px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground select-none whitespace-nowrap"
+);
+
+export const chartAnnotationLabelBaseThemeVariants = cva(
+    "absolute pointer-events-none z-30 rounded-md border border-border bg-popover/90 backdrop-blur-xs px-2 py-1 text-xs font-medium text-popover-foreground shadow-sm select-none whitespace-nowrap"
+);
+
 export type ChartBaseVariantProps = VariantProps<typeof chartBaseThemeVariants>;
 export type ChartHeaderBaseVariantProps = VariantProps<typeof chartHeaderBaseThemeVariants>;
 export type ChartLegendBaseVariantProps = VariantProps<typeof chartLegendBaseThemeVariants>;
 export type ChartLegendItemBaseVariantProps = VariantProps<typeof chartLegendItemBaseThemeVariants>;
+

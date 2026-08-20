@@ -1,12 +1,19 @@
 import { Component, computed, inject, signal, viewChild } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
+    ChartAnnotationComponent,
+    ChartAnnotationLabelTemplateDirective,
     ChartAxisLabelTemplateDirective,
     ChartCenterTemplateDirective,
+    ChartCrosshairComponent,
+    ChartCrosshairLabelTemplateDirective,
     ChartFunnelLabelTemplateDirective,
     ChartGaugeCenterTemplateDirective,
     ChartLegendItemTemplateDirective,
     ChartNoDataTemplateDirective,
+    ChartReferenceBandComponent,
+    ChartReferenceLabelTemplateDirective,
+    ChartReferenceLineComponent,
     ChartSliceLabelTemplateDirective,
     ChartSubtitleTemplateDirective,
     ChartTitleTemplateDirective,
@@ -40,9 +47,14 @@ import {
     ScatterSeriesComponent,
     TreemapSeriesComponent,
     WaterfallSeriesComponent,
+    type ChartAnnotationLabelPlacement,
+    type ChartAnnotationMarker,
     type ChartAreaFillMode,
     type ChartAxisLabelRotation,
     type ChartBarOrientation,
+    type ChartCrosshairLineStyle,
+    type ChartCrosshairMode,
+    type ChartCrosshairSnapMode,
     type ChartCurve,
     type ChartFinancialFillMode,
     type ChartFunnelLabelContent,
@@ -52,6 +64,7 @@ import {
     type ChartHeaderAlignment,
     type ChartHeatmapColorMode,
     type ChartNavigationInput,
+    type ChartOverlayLayer,
     type ChartPointEvent,
     type ChartPointFocusEvent,
     type ChartPolarFillMode,
@@ -61,6 +74,8 @@ import {
     type ChartRadialCurve,
     type ChartRadialFillMode,
     type ChartRadialGridShape,
+    type ChartReferenceLabelPosition,
+    type ChartReferenceLineStyle,
     type ChartRoseScaleMode,
     type ChartSeriesVisibilityEvent,
     type ChartSliceVisibilityEvent,
@@ -186,6 +201,13 @@ interface MultiAxisMetric {
         ChartWaterfallLabelTemplateDirective,
         ChartLegendComponent,
         ChartTooltipComponent,
+        ChartCrosshairComponent,
+        ChartReferenceLineComponent,
+        ChartReferenceBandComponent,
+        ChartAnnotationComponent,
+        ChartCrosshairLabelTemplateDirective,
+        ChartReferenceLabelTemplateDirective,
+        ChartAnnotationLabelTemplateDirective,
         ChartAxisLabelTemplateDirective,
         ChartLegendItemTemplateDirective,
         ChartNoDataTemplateDirective,
@@ -218,6 +240,7 @@ export class ChartDemoComponent {
         | "mixed"
         | "multi-axis"
         | "ohlc"
+        | "overlays"
         | "pan-zoom"
         | "percent-area"
         | "percent-bar"
@@ -236,6 +259,122 @@ export class ChartDemoComponent {
         | "waterfall"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
+
+    // Overlays, Crosshairs & Annotations Controls
+    protected readonly crosshairColor = signal<string>("#3b82f6");
+    protected readonly crosshairEnabled = signal<boolean>(true);
+    protected readonly crosshairLineStyle = signal<ChartCrosshairLineStyle>("dashed");
+    protected readonly crosshairLineStyleOptions: readonly { label: string; value: ChartCrosshairLineStyle }[] = [
+        { label: "Dashed", value: "dashed" },
+        { label: "Solid", value: "solid" },
+        { label: "Dotted", value: "dotted" }
+    ];
+    protected readonly crosshairLineWidth = signal<number>(1.5);
+    protected readonly crosshairMode = signal<ChartCrosshairMode>("xy");
+    protected readonly crosshairModeOptions: readonly { label: string; value: ChartCrosshairMode }[] = [
+        { label: "XY (Dual Axis)", value: "xy" },
+        { label: "Auto (Primary Axis)", value: "auto" },
+        { label: "X Axis Only", value: "x" },
+        { label: "Y Axis Only", value: "y" }
+    ];
+    protected readonly crosshairSnap = signal<ChartCrosshairSnapMode>("nearest");
+    protected readonly crosshairSnapOptions: readonly { label: string; value: ChartCrosshairSnapMode }[] = [
+        { label: "Nearest Data Point", value: "nearest" },
+        { label: "Free Pointer Position", value: "pointer" }
+    ];
+    protected readonly showCrosshairAxisLabels = signal<boolean>(true);
+    protected readonly useCustomCrosshairTemplate = signal<boolean>(false);
+
+    // Reference Line Controls
+    protected readonly showReferenceLine = signal<boolean>(true);
+    protected readonly referenceLineValue = signal<number>(6500);
+    protected readonly referenceLineLayer = signal<ChartOverlayLayer>("overlay");
+    protected readonly referenceLineStyle = signal<ChartReferenceLineStyle>("dashed");
+    protected readonly referenceLinePosition = signal<ChartReferenceLabelPosition>("end");
+    protected readonly referenceLinePositionOptions: readonly { label: string; value: ChartReferenceLabelPosition }[] = [
+        { label: "End (Right / Top)", value: "end" },
+        { label: "Center", value: "center" },
+        { label: "Start (Left / Bottom)", value: "start" }
+    ];
+    protected readonly useCustomRefLineTemplate = signal<boolean>(false);
+
+    // Reference Band Controls
+    protected readonly showReferenceBand = signal<boolean>(true);
+    protected readonly referenceBandFrom = signal<number>(4800);
+    protected readonly referenceBandTo = signal<number>(7000);
+    protected readonly referenceBandLayer = signal<ChartOverlayLayer>("underlay");
+    protected readonly overlayLayerOptions: readonly { label: string; value: ChartOverlayLayer }[] = [
+        { label: "Underlay (Behind Marks)", value: "underlay" },
+        { label: "Overlay (Above Marks)", value: "overlay" }
+    ];
+    protected readonly useCustomRefBandTemplate = signal<boolean>(false);
+
+    // Annotation Controls
+    protected readonly showAnnotation = signal<boolean>(true);
+    protected readonly annotationMarker = signal<ChartAnnotationMarker>("diamond");
+    protected readonly annotationMarkerOptions: readonly { label: string; value: ChartAnnotationMarker }[] = [
+        { label: "Diamond Marker", value: "diamond" },
+        { label: "Circle Marker", value: "circle" },
+        { label: "No Marker", value: "none" }
+    ];
+    protected readonly annotationConnector = signal<boolean>(true);
+    protected readonly annotationPlacement = signal<ChartAnnotationLabelPlacement>("top");
+    protected readonly annotationPlacementOptions: readonly { label: string; value: ChartAnnotationLabelPlacement }[] = [
+        { label: "Top Anchor", value: "top" },
+        { label: "Bottom Anchor", value: "bottom" },
+        { label: "Left Anchor", value: "left" },
+        { label: "Right Anchor", value: "right" }
+    ];
+    protected readonly useCustomAnnotationTemplate = signal<boolean>(false);
+
+    public onCrosshairModeChange(mode: unknown): void {
+        if (mode === "auto" || mode === "x" || mode === "y" || mode === "xy") {
+            this.crosshairMode.set(mode);
+            this.#addLog("settingChange", `Crosshair Mode: ${mode}`);
+        }
+    }
+
+    public onCrosshairSnapChange(snap: unknown): void {
+        if (snap === "nearest" || snap === "pointer") {
+            this.crosshairSnap.set(snap);
+            this.#addLog("settingChange", `Crosshair Snap: ${snap}`);
+        }
+    }
+
+    public onCrosshairLineStyleChange(style: unknown): void {
+        if (style === "dashed" || style === "solid" || style === "dotted") {
+            this.crosshairLineStyle.set(style);
+            this.#addLog("settingChange", `Crosshair Style: ${style}`);
+        }
+    }
+
+    public onReferenceLineLayerChange(layer: unknown): void {
+        if (layer === "underlay" || layer === "overlay") {
+            this.referenceLineLayer.set(layer);
+            this.#addLog("settingChange", `Reference Line Layer: ${layer}`);
+        }
+    }
+
+    public onReferenceBandLayerChange(layer: unknown): void {
+        if (layer === "underlay" || layer === "overlay") {
+            this.referenceBandLayer.set(layer);
+            this.#addLog("settingChange", `Reference Band Layer: ${layer}`);
+        }
+    }
+
+    public onAnnotationMarkerChange(marker: unknown): void {
+        if (marker === "diamond" || marker === "circle" || marker === "none") {
+            this.annotationMarker.set(marker);
+            this.#addLog("settingChange", `Annotation Marker: ${marker}`);
+        }
+    }
+
+    public onAnnotationPlacementChange(placement: unknown): void {
+        if (placement === "top" || placement === "bottom" || placement === "left" || placement === "right") {
+            this.annotationPlacement.set(placement);
+            this.#addLog("settingChange", `Annotation Placement: ${placement}`);
+        }
+    }
 
     // Chart Title & Subtitle Controls
     protected readonly chartTitle = signal<string>("Quarterly Revenue & Targets");
@@ -1613,6 +1752,7 @@ export class ChartDemoComponent {
             | "mixed"
             | "multi-axis"
             | "ohlc"
+            | "overlays"
             | "pan-zoom"
             | "percent-area"
             | "percent-bar"

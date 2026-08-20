@@ -510,6 +510,92 @@ Renders financial cash-flow and contribution movements with positive delta incre
 | `visible` | `model(boolean)` | `true` | Controls overall visibility of the waterfall series. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor function extracting the category name for each step. |
 
+### `<mona-chart-crosshair>`
+
+Renders dynamic crosshair guide lines and axis label badges for pointer and keyboard navigation in Cartesian XY charts.
+
+| Input | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `string` | `""` | Color of the crosshair guide lines. |
+| `enabled` | `boolean` | `true` | Whether the crosshair is active. |
+| `labelOffset` | `number` | `4` | Offset in pixels between plot boundary and axis label badge. |
+| `lineStyle` | `ChartCrosshairLineStyle` | `"dashed"` | Stroke dash style (`"solid"`, `"dashed"`, or `"dotted"`). |
+| `lineWidth` | `number` | `1` | Line stroke width in pixels. |
+| `maxSnapDistance` | `number` | `32` | Maximum distance in pixels for snapping to nearest data mark in `nearest` snap mode. |
+| `mode` | `ChartCrosshairMode` | `"auto"` | Crosshair orientation (`"auto"`, `"x"`, `"y"`, or `"xy"`). |
+| `opacity` | `number` | `1` | Opacity of the crosshair lines (0 to 1). |
+| `showAxisLabels` | `boolean` | `true` | Controls overall rendering of axis coordinate badges. |
+| `showXLabel` | `boolean` | `undefined` | Per-axis override for X axis label badge visibility. |
+| `showYLabel` | `boolean` | `undefined` | Per-axis override for Y axis label badge visibility. |
+| `snap` | `ChartCrosshairSnapMode` | `"nearest"` | Snapping strategy (`"nearest"` or `"pointer"`). |
+| `xAxisId` | `string` | `undefined` | Explicit target X axis ID for multi-axis configurations. |
+| `yAxisId` | `string` | `undefined` | Explicit target Y axis ID for multi-axis configurations. |
+
+### `<mona-chart-reference-line>`
+
+Renders static horizontal or vertical benchmark lines in Cartesian XY charts.
+
+| Input | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `axis` | `"x" \| "y"` | `"y"` | Axis dimension the line is perpendicular to. |
+| `axisId` | `string` | `undefined` | Target axis ID for multi-axis charts. |
+| `color` | `string` | `""` | Line stroke color. |
+| `label` | `string` | `""` | Text label displayed on the reference line. |
+| `labelClass` | `string` | `""` | CSS classes applied to the label badge. |
+| `labelOffset` | `number` | `6` | Offset in pixels for label anchor. |
+| `labelPosition` | `ChartReferenceLabelPosition` | `"end"` | Placement along the line (`"start"`, `"center"`, or `"end"`). |
+| `layer` | `ChartOverlayLayer` | `"overlay"` | Rendering layer (`"underlay"` or `"overlay"`). |
+| `lineStyle` | `ChartReferenceLineStyle` | `"dashed"` | Line pattern (`"solid"`, `"dashed"`, or `"dotted"`). |
+| `opacity` | `number` | `1` | Stroke opacity (0 to 1). |
+| `value` | `number \| string` | required | Target coordinate value on the specified axis. |
+| `visible` | `boolean` | `true` | Controls visibility of the reference line. |
+| `width` | `number` | `1` | Stroke width in pixels. |
+
+### `<mona-chart-reference-band>`
+
+Renders highlighted threshold intervals and target regions in Cartesian XY charts.
+
+| Input | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `axis` | `"x" \| "y"` | `"y"` | Axis dimension the band spans across. |
+| `axisId` | `string` | `undefined` | Target axis ID for multi-axis charts. |
+| `borderColor` | `string` | `""` | Optional border stroke color around the band rectangle. |
+| `borderWidth` | `number` | `0` | Border stroke width in pixels. |
+| `fillColor` | `string` | `""` | Background fill color for the band region. |
+| `fillOpacity` | `number` | `0.15` | Fill opacity for the band area (0 to 1). |
+| `from` | `number \| string` | required | Lower bound value of the band interval. |
+| `label` | `string` | `""` | Text label displayed in the band. |
+| `labelClass` | `string` | `""` | CSS classes applied to the label badge. |
+| `labelOffset` | `number` | `6` | Offset in pixels for label anchor. |
+| `labelPosition` | `ChartReferenceLabelPosition` | `"center"` | Placement anchor (`"start"`, `"center"`, or `"end"`). |
+| `layer` | `ChartOverlayLayer` | `"underlay"` | Rendering layer (`"underlay"` or `"overlay"`). |
+| `to` | `number \| string` | required | Upper bound value of the band interval. |
+| `visible` | `boolean` | `true` | Controls visibility of the reference band. |
+
+### `<mona-chart-annotation>`
+
+Renders callouts, milestone badges, and outlier markers anchored to specific (X, Y) coordinates.
+
+| Input | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `string` | `""` | Marker and connector color override. |
+| `connector` | `boolean` | `true` | Whether to draw a connector leader line between the data point and label badge. |
+| `connectorWidth` | `number` | `1` | Width in pixels of the connector leader line. |
+| `data` | `unknown` | `undefined` | Custom arbitrary payload passed to the annotation template context. |
+| `label` | `string` | `""` | Text content of the annotation badge. |
+| `labelClass` | `string` | `""` | CSS classes applied to the annotation badge. |
+| `labelPlacement` | `ChartAnnotationLabelPlacement` | `"top"` | Badge placement relative to the data point (`"top"`, `"bottom"`, `"left"`, `"right"`). |
+| `marker` | `ChartAnnotationMarker` | `"circle"` | Marker symbol shape (`"circle"`, `"diamond"`, or `"none"`). |
+| `markerRadius` | `number` | `4` | Marker radius in pixels. |
+| `markerStrokeWidth` | `number` | `1.5` | Marker outline stroke width in pixels. |
+| `offsetX` | `number` | `0` | Additional X pixel offset for label positioning. |
+| `offsetY` | `number` | `0` | Additional Y pixel offset for label positioning. |
+| `visible` | `boolean` | `true` | Controls visibility of the annotation. |
+| `x` | `number \| string` | required | Target X coordinate or category key. |
+| `xAxisId` | `string` | `undefined` | Target X axis ID for multi-axis charts. |
+| `y` | `number \| string` | required | Target Y coordinate or category key. |
+| `yAxisId` | `string` | `undefined` | Target Y axis ID for multi-axis charts. |
+
 ## Template Directives
 
 - `ng-template[monaChartTooltipTemplate]`: Customizes hover and keyboard tooltip contents with `{ $implicit, point, points, shared }`.
@@ -521,6 +607,9 @@ Renders financial cash-flow and contribution movements with positive delta incre
 - `ng-template[monaChartTreemapLabelTemplate]`: Customizes DOM treemap node labels with `{ $implicit, bounds, color, datum, depth, formattedLabel, formattedPath, formattedValue, isCollapsed, isLeaf, label, node, nodeId, path, percentageOfParent, percentageOfRoot, textColor, value }`.
 - `ng-template[monaChartFunnelLabelTemplate]`: Customizes DOM funnel stage labels with `{ $implicit, bounds, category, color, conversionRate, dataIndex, datum, dropOff, formattedCategory, formattedConversionRate, formattedOverallConversionRate, formattedValue, overallConversionRate, previousValue, stage, stageId, stageIndex, textColor, value }`.
 - `ng-template[monaChartWaterfallLabelTemplate]`: Customizes DOM waterfall step labels with `{ $implicit, barEnd, barStart, bounds, category, color, cumulativeAfter, cumulativeBefore, dataIndex, datum, deltaValue, formattedCategory, formattedCumulativeAfter, formattedCumulativeBefore, formattedDelta, formattedValue, kind, step, textColor, value, visualKind }`.
+- `ng-template[monaChartCrosshairLabel]`: Customizes DOM crosshair coordinate badges with `{ $implicit, axis, axisId, coordinate, formattedValue, snapped, source, value }`.
+- `ng-template[monaChartReferenceLabel]`: Customizes DOM reference line or band labels with `{ $implicit, axis, axisId, coordinate, from, label, to, value }`.
+- `ng-template[monaChartAnnotationLabel]`: Customizes DOM point annotation callout badges with `{ $implicit, color, data, formattedText, label, point, x, y }`.
 
 ## Keyboard Navigation
 
