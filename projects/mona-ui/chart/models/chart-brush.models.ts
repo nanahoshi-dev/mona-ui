@@ -20,12 +20,15 @@ export type ChartBrushPhase = "start" | "update" | "end" | "cancel";
 
 export type ChartBrushCancelReason =
     | "authority-change"
+    | "component-disabled"
+    | "data-change"
     | "destroyed"
     | "disabled"
     | "escape"
     | "lost-pointer-capture"
     | "pointer-cancel"
-    | "pointer-leave";
+    | "pointer-leave"
+    | "viewport-change";
 
 export interface ChartBrushCategoryRange {
     readonly axis: "x" | "y";
