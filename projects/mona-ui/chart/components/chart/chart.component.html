@@ -414,6 +414,23 @@
             }
         }
 
+        <!-- DOM Cartesian Data Labels (Template Layer) -->
+        @if (cartesianDataLabelScene(); as labelScene) {
+            @for (label of labelScene.templateLabels; track (label.seriesId + ':' + label.markId)) {
+                <div
+                    aria-hidden="true"
+                    class="absolute pointer-events-none select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                    [class.opacity-0]="isAnimating() && isStructuralAnimation()"
+                    [monaChartDataLabelMeasure]="label.seriesId + ':' + label.markId"
+                    [style.left.px]="label.bounds.x"
+                    [style.top.px]="label.bounds.y">
+                    <ng-container
+                        [ngTemplateOutlet]="label.template.templateRef"
+                        [ngTemplateOutletContext]="label.context" />
+                </div>
+            }
+        }
+
         <!-- Crosshair DOM Axis Labels -->
         @if (crosshairState(); as chState) {
             @if (cartesianXYScene(); as cart) {

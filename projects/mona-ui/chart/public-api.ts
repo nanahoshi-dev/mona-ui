@@ -29,6 +29,8 @@ export { ChartCrosshairComponent } from "./components/chart-crosshair/chart-cros
 export { ChartReferenceLineComponent } from "./components/chart-reference-line/chart-reference-line.component";
 export { ChartReferenceBandComponent } from "./components/chart-reference-band/chart-reference-band.component";
 export { ChartAnnotationComponent } from "./components/chart-annotation/chart-annotation.component";
+export { ChartSelectionComponent } from "./components/chart-selection/chart-selection.component";
+export { ChartBrushComponent } from "./components/chart-brush/chart-brush.component";
 
 export { ChartAxisLabelTemplateDirective } from "./directives/chart-axis-label-template.directive";
 export { ChartLegendItemTemplateDirective } from "./directives/chart-legend-item-template.directive";
@@ -45,6 +47,7 @@ export { ChartSubtitleTemplateDirective } from "./directives/chart-subtitle-temp
 export { ChartCrosshairLabelTemplateDirective } from "./directives/chart-crosshair-label-template.directive";
 export { ChartReferenceLabelTemplateDirective } from "./directives/chart-reference-label-template.directive";
 export { ChartAnnotationLabelTemplateDirective } from "./directives/chart-annotation-label-template.directive";
+export { ChartDataLabelTemplateDirective } from "./directives/chart-data-label-template.directive";
 
 export type {
     ChartAnnotationAxisValue,
@@ -213,4 +216,35 @@ export type {
     ChartViewportState,
     ChartViewportWindow
 } from "./models/chart-viewport.models";
+
+export type {
+    ChartDataLabelContext,
+    ChartDataLabelFormatter,
+    ChartDataLabelOptions,
+    ChartDataLabelPosition,
+    ChartDataLabelsInput
+} from "./models/chart-data-label.models";
+
+export type {
+    ChartSelectedPoint,
+    ChartSelectionChangeEvent,
+    ChartSelectionChangeSource,
+    ChartSelectionMode
+} from "./models/chart-selection.models";
+
+export type {
+    ChartBrushActivation,
+    ChartBrushAxisRange,
+    ChartBrushCancelReason,
+    ChartBrushCategoryRange,
+    ChartBrushChangeEvent,
+    ChartBrushContinuousRange,
+    ChartBrushHitPolicy,
+    ChartBrushLineStyle,
+    ChartBrushMode,
+    ChartBrushPhase,
+    ChartBrushSelectionBehavior
+} from "./models/chart-brush.models";
+
+
 

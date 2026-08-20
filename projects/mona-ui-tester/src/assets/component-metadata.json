@@ -2644,6 +2644,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
+      },
+      {
         "description": "Property key or accessor extracting the Y value for each data item.",
         "kind": "input",
         "name": "field",
@@ -2783,6 +2790,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
+      },
+      {
         "description": "Property key or accessor extracting the Y/value for each bar.",
         "kind": "input",
         "name": "field",
@@ -2899,6 +2913,13 @@
         "name": "data",
         "type": "readonly unknown[] | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
       },
       {
         "description": "Property key or accessor extracting the Y value for each data item.",
@@ -3045,6 +3066,13 @@
         "name": "data",
         "type": "readonly unknown[] | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
       },
       {
         "description": "Color for falling / bearish candles (close < open).",
@@ -3480,6 +3508,109 @@
       }
     ]
   },
+  "ChartBrushComponent": {
+    "name": "ChartBrushComponent",
+    "selector": "\"mona-chart-brush\"",
+    "inputs": [
+      {
+        "description": "Whether brush gesture interaction is enabled.",
+        "kind": "input",
+        "name": "enabled",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Brush dimension constraint mode ('x', 'y', or 'xy').",
+        "kind": "input",
+        "name": "mode",
+        "type": "ChartBrushMode",
+        "defaultValue": "\"xy\""
+      },
+      {
+        "description": "Activation trigger gesture ('drag' or 'shift-drag').",
+        "kind": "input",
+        "name": "activation",
+        "type": "ChartBrushActivation",
+        "defaultValue": "\"drag\""
+      },
+      {
+        "description": "Optional Cartesian X axis ID to target.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional Cartesian Y axis ID to target.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Minimum drag distance in pixels before brush gesture activates.",
+        "kind": "input",
+        "name": "minDragDistance",
+        "type": "number",
+        "defaultValue": "4"
+      },
+      {
+        "description": "Mark spatial hit policy ('center', 'intersect', or 'contain').",
+        "kind": "input",
+        "name": "hitPolicy",
+        "type": "ChartBrushHitPolicy",
+        "defaultValue": "\"intersect\""
+      },
+      {
+        "description": "Selection interaction behavior when brushing over marks.",
+        "kind": "input",
+        "name": "selectionBehavior",
+        "type": "ChartBrushSelectionBehavior",
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Background fill color of the brush rectangle.",
+        "kind": "input",
+        "name": "fillColor",
+        "type": "string",
+        "defaultValue": "\"#3b82f6\""
+      },
+      {
+        "description": "Fill opacity of the brush rectangle.",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number",
+        "defaultValue": "0.15"
+      },
+      {
+        "description": "Border color of the brush rectangle.",
+        "kind": "input",
+        "name": "borderColor",
+        "type": "string",
+        "defaultValue": "\"#3b82f6\""
+      },
+      {
+        "description": "Border width in pixels of the brush rectangle.",
+        "kind": "input",
+        "name": "borderWidth",
+        "type": "number",
+        "defaultValue": "1"
+      },
+      {
+        "description": "Stroke dash style of the brush rectangle border ('solid', 'dashed', or 'dotted').",
+        "kind": "input",
+        "name": "lineStyle",
+        "type": "ChartBrushLineStyle",
+        "defaultValue": "\"solid\""
+      },
+      {
+        "description": "Emitted during brush lifecycle phases ('start', 'move', 'end', 'cancel').",
+        "kind": "output",
+        "name": "brushChange",
+        "type": "ChartBrushChangeEvent"
+      }
+    ]
+  },
   "ChartCrosshairComponent": {
     "name": "ChartCrosshairComponent",
     "selector": "\"mona-chart-crosshair\"",
@@ -3895,6 +4026,95 @@
         "kind": "input",
         "name": "userClass",
         "type": "string"
+      }
+    ]
+  },
+  "ChartSelectionComponent": {
+    "name": "ChartSelectionComponent",
+    "selector": "\"mona-chart-selection\"",
+    "inputs": [
+      {
+        "description": "Whether selection interaction is enabled.",
+        "kind": "input",
+        "name": "enabled",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Selection mode ('single' or 'multiple').",
+        "kind": "input",
+        "name": "mode",
+        "type": "ChartSelectionMode",
+        "defaultValue": "\"single\""
+      },
+      {
+        "description": "Controlled selected mark IDs. When defined, component acts as controlled state.",
+        "kind": "input",
+        "name": "selectedMarkIds",
+        "type": "readonly string[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Default selected mark IDs to seed initial uncontrolled selection.",
+        "kind": "input",
+        "name": "defaultSelectedMarkIds",
+        "type": "readonly string[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Whether clicking marks selects/toggles them.",
+        "kind": "input",
+        "name": "clickSelection",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Whether keyboard Enter / Space on focused marks selects/toggles them.",
+        "kind": "input",
+        "name": "keyboardSelection",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Whether clicking plot background clears active selection.",
+        "kind": "input",
+        "name": "clearOnBackgroundClick",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Whether selected mark IDs are retained across dataset changes.",
+        "kind": "input",
+        "name": "retainOnDataChange",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Selection highlight stroke color override.",
+        "kind": "input",
+        "name": "color",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Selection highlight stroke width override.",
+        "kind": "input",
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Selection highlight fill opacity override.",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Emitted when mark selection is proposed or changed.",
+        "kind": "output",
+        "name": "selectionChange",
+        "type": "ChartSelectionChangeEvent"
       }
     ]
   },
@@ -5000,6 +5220,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
+      },
+      {
         "description": "Property key or accessor extracting the Y value for each data item.",
         "kind": "input",
         "name": "field",
@@ -5116,6 +5343,13 @@
         "name": "data",
         "type": "readonly unknown[] | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
       },
       {
         "description": "Color for falling / bearish bars (close < open).",
@@ -5909,6 +6143,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
+      },
+      {
         "description": "Maximum opacity applied to the range area fill.",
         "kind": "input",
         "name": "fillOpacity",
@@ -6032,6 +6273,13 @@
         "name": "data",
         "type": "readonly unknown[] | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
       },
       {
         "description": "Fill opacity applied to the range bars.",
@@ -6309,6 +6557,13 @@
         "name": "data",
         "type": "readonly unknown[] | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Data label display options or boolean flag enabling default labels.",
+        "kind": "input",
+        "name": "dataLabels",
+        "type": "ChartDataLabelsInput",
+        "defaultValue": "false"
       },
       {
         "description": "Property key or accessor extracting the Y value for each data item.",
@@ -6803,6 +7058,19 @@
         "name": "xField",
         "type": "ChartField | undefined",
         "defaultValue": "undefined"
+      }
+    ]
+  },
+  "ChartDataLabelMeasureDirective": {
+    "name": "ChartDataLabelMeasureDirective",
+    "selector": "\"[monaChartDataLabelMeasure]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "labelId",
+        "type": "string",
+        "required": true
       }
     ]
   },

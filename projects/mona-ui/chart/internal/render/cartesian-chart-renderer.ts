@@ -14,16 +14,30 @@ import { RangeBarSeriesRenderer } from "./series/range-bar-series-renderer";
 import { CartesianOverlayRenderer } from "./cartesian-overlay-renderer";
 import { CartesianCrosshairRenderer } from "./cartesian-crosshair-renderer";
 import { CartesianInteractionOverlayRenderer } from "./cartesian-interaction-overlay-renderer";
+import { CartesianDataLabelRenderer } from "./cartesian-data-label-renderer";
+import { CartesianSelectionOverlayRenderer } from "./cartesian-selection-overlay-renderer";
+import { CartesianBrushRenderer } from "./cartesian-brush-renderer";
 import type { CartesianOverlayScene } from "../scene/cartesian-overlay-scene";
-import type { ChartCrosshairRegistration } from "../context/chart-registration-context";
+import type { CartesianDataLabelScene } from "../scene/cartesian-data-label-scene";
+import type { CartesianSelectionScene } from "../scene/cartesian-selection-scene";
+import type { ChartBrushRegistration, ChartCrosshairRegistration } from "../context/chart-registration-context";
 import type { ChartCrosshairState } from "../interaction/chart-crosshair-state";
 
 export interface ChartRenderOverlayState {
+    readonly activeBrushBounds?: ChartRect | null;
     readonly annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null;
+    readonly brushRegistration?: ChartBrushRegistration | null;
+    readonly cartesianDataLabels?: CartesianDataLabelScene | null;
     readonly cartesianOverlay?: CartesianOverlayScene | null;
     readonly crosshair?: ChartCrosshairState | null;
     readonly crosshairRegistration?: ChartCrosshairRegistration | null;
     readonly interaction?: ChartInteractionState | null;
+    readonly selectionOptions?: {
+        readonly color?: string;
+        readonly fillOpacity?: number;
+        readonly strokeWidth?: number;
+    } | null;
+    readonly selectionScene?: CartesianSelectionScene | null;
 }
 
 export class CartesianChartRenderer {
@@ -238,6 +252,43 @@ export class CartesianChartRenderer {
         context.restore();
     }
 
+    public static renderDataLabelLayer(
+        context: CanvasRenderingContext2D,
+        dataLabelScene: CartesianDataLabelScene | null,
+        plotRect: ChartRect
+    ): void {
+        if (dataLabelScene && dataLabelScene.canvasLabels.length > 0) {
+            CartesianDataLabelRenderer.render(context, dataLabelScene.canvasLabels, plotRect);
+        }
+    }
+
+    public static renderSelectionLayer(
+        context: CanvasRenderingContext2D,
+        selectionScene: CartesianSelectionScene | null,
+        options: { readonly color?: string; readonly fillOpacity?: number; readonly strokeWidth?: number } | null,
+        plotRect: ChartRect
+    ): void {
+        if (selectionScene && selectionScene.hits.length > 0) {
+            CartesianSelectionOverlayRenderer.render(context, selectionScene, {
+                color: options?.color,
+                fillOpacity: options?.fillOpacity,
+                plotRect,
+                strokeWidth: options?.strokeWidth
+            });
+        }
+    }
+
+    public static renderBrushLayer(
+        context: CanvasRenderingContext2D,
+        activeBrushBounds: ChartRect | null,
+        plotRect: ChartRect,
+        brushRegistration: ChartBrushRegistration | null
+    ): void {
+        if (activeBrushBounds && brushRegistration) {
+            CartesianBrushRenderer.render(context, activeBrushBounds, plotRect, brushRegistration);
+        }
+    }
+
     public static render(
         context: CanvasRenderingContext2D,
         scene: CartesianXYChartScene,
@@ -254,6 +305,16 @@ export class CartesianChartRenderer {
             overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
         const annotationBadgeAnchors: ReadonlyMap<string, ChartPoint> | null =
             overlayState && "annotationBadgeAnchors" in overlayState ? (overlayState.annotationBadgeAnchors ?? null) : null;
+        const cartesianDataLabels: CartesianDataLabelScene | null =
+            overlayState && "cartesianDataLabels" in overlayState ? (overlayState.cartesianDataLabels ?? null) : null;
+        const selectionScene: CartesianSelectionScene | null =
+            overlayState && "selectionScene" in overlayState ? (overlayState.selectionScene ?? null) : null;
+        const selectionOptions =
+            overlayState && "selectionOptions" in overlayState ? (overlayState.selectionOptions ?? null) : null;
+        const activeBrushBounds: ChartRect | null =
+            overlayState && "activeBrushBounds" in overlayState ? (overlayState.activeBrushBounds ?? null) : null;
+        const brushRegistration: ChartBrushRegistration | null =
+            overlayState && "brushRegistration" in overlayState ? (overlayState.brushRegistration ?? null) : null;
 
         context.save();
         // 1. Grid
@@ -264,10 +325,16 @@ export class CartesianChartRenderer {
         this.renderSeriesLayer(context, scene);
         // 4. Static Overlays & Annotations
         this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
-        // 5. Axes
+        // 5. Data Labels (Canvas default labels)
+        this.renderDataLabelLayer(context, cartesianDataLabels, plotRect);
+        // 6. Persistent Selection Highlights
+        this.renderSelectionLayer(context, selectionScene, selectionOptions, plotRect);
+        // 7. Axes
         this.renderAxisLayer(context, scene, styleResolver);
-        // 6. Transient (Crosshair + Highlights)
+        // 8. Transient (Crosshair + Highlights)
         this.renderTransientLayer(context, scene, overlayState, styleResolver);
+        // 9. Brush Marquee Overlay
+        this.renderBrushLayer(context, activeBrushBounds, plotRect, brushRegistration);
         context.restore();
     }
 
@@ -288,6 +355,16 @@ export class CartesianChartRenderer {
             overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
         const annotationBadgeAnchors: ReadonlyMap<string, ChartPoint> | null =
             overlayState && "annotationBadgeAnchors" in overlayState ? (overlayState.annotationBadgeAnchors ?? null) : null;
+        const cartesianDataLabels: CartesianDataLabelScene | null =
+            overlayState && "cartesianDataLabels" in overlayState ? (overlayState.cartesianDataLabels ?? null) : null;
+        const selectionScene: CartesianSelectionScene | null =
+            overlayState && "selectionScene" in overlayState ? (overlayState.selectionScene ?? null) : null;
+        const selectionOptions =
+            overlayState && "selectionOptions" in overlayState ? (overlayState.selectionOptions ?? null) : null;
+        const activeBrushBounds: ChartRect | null =
+            overlayState && "activeBrushBounds" in overlayState ? (overlayState.activeBrushBounds ?? null) : null;
+        const brushRegistration: ChartBrushRegistration | null =
+            overlayState && "brushRegistration" in overlayState ? (overlayState.brushRegistration ?? null) : null;
 
         context.save();
 
@@ -325,7 +402,13 @@ export class CartesianChartRenderer {
         // 4. Target static overlay once (at full own opacity)
         this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
 
-        // 5. Axes crossfade
+        // 5. Target data labels once (at full own opacity)
+        this.renderDataLabelLayer(context, cartesianDataLabels, plotRect);
+
+        // 6. Target persistent selection once (at full own opacity)
+        this.renderSelectionLayer(context, selectionScene, selectionOptions, plotRect);
+
+        // 7. Axes crossfade
         if (fromScene && progress < 1) {
             context.save();
             context.globalAlpha = Math.max(0, Math.min(1, 1 - progress));
@@ -339,8 +422,11 @@ export class CartesianChartRenderer {
             context.restore();
         }
 
-        // 6. Target transient layer once
+        // 8. Target transient layer once
         this.renderTransientLayer(context, toScene, overlayState, styleResolver);
+
+        // 9. Target brush marquee once
+        this.renderBrushLayer(context, activeBrushBounds, plotRect, brushRegistration);
 
         context.restore();
     }

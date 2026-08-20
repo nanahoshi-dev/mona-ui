@@ -1,10 +1,12 @@
-import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
+import { Component, contentChild, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
+import { ChartDataLabelTemplateDirective } from "../../directives/chart-data-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
     ChartInvalidationReason,
     type ChartCandlestickSeriesRegistration
 } from "../../internal/context/chart-registration-context";
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
+import type { ChartDataLabelsInput } from "../../models/chart-data-label.models";
 import type { ChartFinancialFillMode } from "../../models/chart-financial.models";
 import type { ChartField } from "../../models/chart.models";
 
@@ -53,6 +55,14 @@ export class CandlestickSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly data = input<readonly unknown[] | undefined>(undefined);
+
+    /**
+     * @description Data label display options or boolean flag enabling default labels.
+     * @default false
+     */
+    public readonly dataLabels = input<ChartDataLabelsInput>(false);
+
+    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
 
     /**
      * @description Color for falling / bearish candles (close < open).
@@ -215,6 +225,14 @@ export class CandlestickSeriesComponent implements OnInit {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Style);
             }
         });
+
+        effect(() => {
+            this.dataLabels();
+            this.dataLabelTemplate();
+            if (this.#registered) {
+                this.#chartContext?.invalidate(ChartInvalidationReason.Interaction);
+            }
+        });
     }
 
     public ngOnInit(): void {
@@ -224,6 +242,8 @@ export class CandlestickSeriesComponent implements OnInit {
             closeField: this.closeField,
             color: this.color,
             data: this.data,
+            dataLabels: this.dataLabels,
+            dataLabelTemplate: this.dataLabelTemplate,
             element: this.#elementRef,
             fallingColor: this.fallingColor,
             fillMode: this.fillMode,
