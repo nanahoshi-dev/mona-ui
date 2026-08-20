@@ -15,13 +15,20 @@ export interface ChartPointerCandidates {
     readonly pointer: ChartPoint;
 }
 
-import { ChartPointerCandidateEvaluator } from "./chart-pointer-candidate-evaluator";
+export interface ChartPointerEvaluationInstrumentation {
+    onBarContainmentCheck?(): void;
+    onFinancialQuery?(): void;
+    onNearestBucketSearch?(): void;
+    onPointDistanceCheck?(): void;
+    onSpatialQuery?(): void;
+}
 
 export class ChartPointerCandidateResolver {
     public static discover(
         pointer: ChartPoint,
         scene: ChartScene,
-        maxCandidateDistance: number = 32
+        maxCandidateDistance: number = 32,
+        instrumentation?: ChartPointerEvaluationInstrumentation
     ): ChartPointerCandidates {
         const { hitTargets, plotRect } = scene;
         const plotRectBoundsValid = !(
@@ -49,13 +56,13 @@ export class ChartPointerCandidateResolver {
             hitTargets.filter(t => t.bounds && (t.seriesType === "bar" || t.seriesType === "rangeBar"));
         let finHits: readonly SceneHitTarget[] = [];
         if (cartesianScene.financialIndex) {
-            ChartPointerCandidateEvaluator.operationCounts.financialQueries++;
+            instrumentation?.onFinancialQuery?.();
             finHits = cartesianScene.financialIndex.query(pointer);
         }
         const pointSpatialIndex = cartesianScene.pointSpatialIndex ?? cartesianScene.markerSpatialIndex;
         let pointCandidates: readonly SceneHitTarget[] = hitTargets;
         if (pointSpatialIndex) {
-            ChartPointerCandidateEvaluator.operationCounts.spatialQueries++;
+            instrumentation?.onSpatialQuery?.();
             pointCandidates = pointSpatialIndex.query(pointer, maxCandidateDistance);
         }
 

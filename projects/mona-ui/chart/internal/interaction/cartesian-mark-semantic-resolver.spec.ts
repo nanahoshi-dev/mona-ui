@@ -322,9 +322,9 @@ describe("CartesianMarkSemanticResolver", () => {
             seriesId: "s-pct",
             seriesName: "Percent Series",
             seriesType: "area",
-            stackEnd: 0.75,
+            stackEnd: 75,
             stackMode: "percent",
-            stackPercentage: 0.75,
+            stackPercentage: 75,
             value: 50,
             xKey: "Feb",
             xValue: "Feb"
@@ -332,7 +332,7 @@ describe("CartesianMarkSemanticResolver", () => {
 
         const result = CartesianMarkSemanticResolver.resolve(hit, mockScene, { x: 250, y: 150 });
         expect(result.semanticX).toBe("Feb");
-        expect(result.semanticY).toBe(0.75);
+        expect(result.semanticY).toBe(75);
     });
 
     it("resolves scatter and bubble points with exact scalar coordinates (Gate F)", () => {

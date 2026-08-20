@@ -280,26 +280,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #interactionState: ChartInteractionState | null = null;
     #interactionOwner: ChartTransientInteractionOwner = null;
 
-    public get interactionOwner(): ChartTransientInteractionOwner {
-        return this.#interactionOwner;
-    }
-
-    public get interactionState(): ChartInteractionState | null {
-        return this.#interactionState;
-    }
-
-    public get currentCrosshairState(): ChartCrosshairState | null {
-        return this.crosshairState();
-    }
-
-    public get currentTooltipPosition(): ChartPoint | null {
-        return this.tooltipPosition();
-    }
-
-    public get currentTooltipContext(): ChartTooltipTemplateContext | null {
-        return this.tooltipContext();
-    }
-
     #setTransientInteraction(
         state: ChartInteractionState | null,
         owner: ChartTransientInteractionOwner
@@ -1084,32 +1064,32 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
         });
 
-        // Invalidate or re-resolve tooltip when tooltip inputs change
+        // Invalidate or re-resolve tooltip when tooltip inputs or registration change
         effect(() => {
             const tt = this.#tooltip();
-            if (!tt) {
-                return;
+            if (tt) {
+                tt.enabled();
+                tt.shared();
             }
-            tt.enabled();
-            tt.shared();
-            this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
+            untracked(() => {
+                this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
+            });
         });
 
-        // Invalidate or re-resolve crosshair when crosshair inputs change
+        // Invalidate or re-resolve crosshair when crosshair inputs or registration change
         effect(() => {
             const ch = this.#crosshair();
-            if (!ch) {
-                this.crosshairState.set(null);
-                return;
+            if (ch) {
+                ch.enabled();
+                ch.mode();
+                ch.snap();
+                ch.xAxisId();
+                ch.yAxisId();
+                ch.maxSnapDistance();
             }
-            ch.enabled();
-            ch.mode();
-            ch.snap();
-            ch.xAxisId();
-            ch.yAxisId();
-            ch.maxSnapDistance();
-
-            this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
+            untracked(() => {
+                this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
+            });
         });
 
         // Update gesture controller when cartesian XY scene or navigation options change
@@ -1788,18 +1768,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     public registerTooltip(registration: ChartTooltipRegistration): () => void {
         this.#tooltip.set(registration);
-        this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
         return () => {
             if (this.#tooltip() === registration) {
                 this.#tooltip.set(null);
-                this.tooltipPosition.set(null);
-                this.tooltipContext.set(null);
-                const cleared = this.#clearTransientInteractionOwnedBy("tooltip");
-                if (cleared) {
-                    this.#paint();
-                }
-                this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
-                this.invalidate(ChartInvalidationReason.Interaction);
             }
         };
     }
@@ -1824,18 +1795,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     public registerCrosshair(registration: ChartCrosshairRegistration): () => void {
         this.#crosshair.set(registration);
-        this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
-        this.invalidate(ChartInvalidationReason.Interaction);
         return () => {
             if (this.#crosshair() === registration) {
                 this.#crosshair.set(null);
-                this.crosshairState.set(null);
-                const cleared = this.#clearTransientInteractionOwnedBy("crosshair");
-                if (cleared) {
-                    this.#paint();
-                }
-                this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
-                this.invalidate(ChartInvalidationReason.Interaction);
             }
         };
     }

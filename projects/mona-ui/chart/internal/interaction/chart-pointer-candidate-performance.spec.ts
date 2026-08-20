@@ -2,10 +2,44 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import { ChartPointerCandidateEvaluator } from "./chart-pointer-candidate-evaluator";
 import { ChartPointerInteractionResolver } from "./chart-pointer-interaction-resolver";
+import type { ChartPointerEvaluationInstrumentation } from "./chart-pointer-candidate-resolver";
 import type { SceneHitTarget, ChartInteractionBucket, ChartInteractionXKey } from "../scene/scene-geometry";
 import { CartesianPointSpatialIndex } from "./cartesian-point-spatial-index";
+
+interface OperationRecorder extends ChartPointerEvaluationInstrumentation {
+    barContainmentChecks: number;
+    financialQueries: number;
+    nearestBucketSearches: number;
+    pointDistanceChecks: number;
+    spatialQueries: number;
+}
+
+function createRecorder(): OperationRecorder {
+    const recorder: OperationRecorder = {
+        barContainmentChecks: 0,
+        financialQueries: 0,
+        nearestBucketSearches: 0,
+        onBarContainmentCheck() {
+            recorder.barContainmentChecks++;
+        },
+        onFinancialQuery() {
+            recorder.financialQueries++;
+        },
+        onNearestBucketSearch() {
+            recorder.nearestBucketSearches++;
+        },
+        onPointDistanceCheck() {
+            recorder.pointDistanceChecks++;
+        },
+        onSpatialQuery() {
+            recorder.spatialQueries++;
+        },
+        pointDistanceChecks: 0,
+        spatialQueries: 0
+    };
+    return recorder;
+}
 
 function createPerformanceScene(hitTargetCount: number = 1): CartesianXYChartScene {
     const xMap = new Map<string, CartesianAxisCoordinateSnapshot>();
@@ -131,22 +165,30 @@ function createDenseBarPerformanceScene(barCount: number): CartesianXYChartScene
 }
 
 describe("ChartPointerCandidatePerformance (CAA-R5-002 / Gates L & M)", () => {
+    let recorder: OperationRecorder;
+
     beforeEach(() => {
-        ChartPointerCandidateEvaluator.resetOperationCounts();
+        recorder = createRecorder();
     });
 
     it("executes single-pass spatial discovery and distance evaluation for tooltip + wide nearest crosshair (Case A)", () => {
         const scene = createPerformanceScene(1);
         const pointer = { x: 295, y: 150 }; // 45px away along X
-        const resolution = ChartPointerInteractionResolver.resolve(pointer, scene, false, {
-            crosshairMaxDistance: 64,
-            maxDistance: 32,
-            needCrosshairCandidates: true,
-            needHitTest: true
-        });
+        const resolution = ChartPointerInteractionResolver.resolve(
+            pointer,
+            scene,
+            false,
+            {
+                crosshairMaxDistance: 64,
+                maxDistance: 32,
+                needCrosshairCandidates: true,
+                needHitTest: true
+            },
+            recorder
+        );
 
-        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(1);
-        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBe(1);
+        expect(recorder.spatialQueries).toBe(1);
+        expect(recorder.pointDistanceChecks).toBe(1);
 
         // Tooltip radius 32 misses (45px away)
         expect(resolution.hitState.activeHitTarget).toBeNull();
@@ -158,15 +200,21 @@ describe("ChartPointerCandidatePerformance (CAA-R5-002 / Gates L & M)", () => {
     it("executes single-pass spatial discovery and distance evaluation for tooltip + narrow nearest crosshair (Case B)", () => {
         const scene = createPerformanceScene(1);
         const pointer = { x: 270, y: 150 }; // 20px away along X
-        const resolution = ChartPointerInteractionResolver.resolve(pointer, scene, false, {
-            crosshairMaxDistance: 8,
-            maxDistance: 32,
-            needCrosshairCandidates: true,
-            needHitTest: true
-        });
+        const resolution = ChartPointerInteractionResolver.resolve(
+            pointer,
+            scene,
+            false,
+            {
+                crosshairMaxDistance: 8,
+                maxDistance: 32,
+                needCrosshairCandidates: true,
+                needHitTest: true
+            },
+            recorder
+        );
 
-        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(1);
-        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBe(1);
+        expect(recorder.spatialQueries).toBe(1);
+        expect(recorder.pointDistanceChecks).toBe(1);
 
         // Tooltip radius 32 hits (20px away)
         expect(resolution.hitState.activeHitTarget).not.toBeNull();
@@ -177,14 +225,20 @@ describe("ChartPointerCandidatePerformance (CAA-R5-002 / Gates L & M)", () => {
     it("executes zero spatial discoveries and zero geometry checks for pointer-only crosshair with disabled tooltip (Case C)", () => {
         const scene = createPerformanceScene(1);
         const pointer = { x: 250, y: 150 };
-        const resolution = ChartPointerInteractionResolver.resolve(pointer, scene, false, {
-            needCrosshairCandidates: false,
-            needHitTest: false
-        });
+        const resolution = ChartPointerInteractionResolver.resolve(
+            pointer,
+            scene,
+            false,
+            {
+                needCrosshairCandidates: false,
+                needHitTest: false
+            },
+            recorder
+        );
 
-        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(0);
-        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBe(0);
-        expect(ChartPointerCandidateEvaluator.operationCounts.barContainmentChecks).toBe(0);
+        expect(recorder.spatialQueries).toBe(0);
+        expect(recorder.pointDistanceChecks).toBe(0);
+        expect(recorder.barContainmentChecks).toBe(0);
         expect(resolution.hitState.activeHitTarget).toBeNull();
         expect(resolution.crosshairCandidates?.length).toBe(0);
     });
@@ -192,14 +246,20 @@ describe("ChartPointerCandidatePerformance (CAA-R5-002 / Gates L & M)", () => {
     it("executes single candidate evaluation for nearest crosshair with disabled tooltip (Case D)", () => {
         const scene = createPerformanceScene(1);
         const pointer = { x: 250, y: 160 };
-        const resolution = ChartPointerInteractionResolver.resolve(pointer, scene, false, {
-            crosshairMaxDistance: 32,
-            needCrosshairCandidates: true,
-            needHitTest: false
-        });
+        const resolution = ChartPointerInteractionResolver.resolve(
+            pointer,
+            scene,
+            false,
+            {
+                crosshairMaxDistance: 32,
+                needCrosshairCandidates: true,
+                needHitTest: false
+            },
+            recorder
+        );
 
-        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(1);
-        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBe(1);
+        expect(recorder.spatialQueries).toBe(1);
+        expect(recorder.pointDistanceChecks).toBe(1);
         expect(resolution.hitState.activeHitTarget).toBeNull();
         expect(resolution.crosshairCandidates?.length).toBe(1);
     });
@@ -208,14 +268,20 @@ describe("ChartPointerCandidatePerformance (CAA-R5-002 / Gates L & M)", () => {
         const denseScene = createDenseBarPerformanceScene(10000);
         const pointer = { x: 250, y: 120 };
 
-        const resolution = ChartPointerInteractionResolver.resolve(pointer, denseScene, false, {
-            crosshairMaxDistance: 32,
-            maxDistance: 32,
-            needCrosshairCandidates: true,
-            needHitTest: true
-        });
+        const resolution = ChartPointerInteractionResolver.resolve(
+            pointer,
+            denseScene,
+            false,
+            {
+                crosshairMaxDistance: 32,
+                maxDistance: 32,
+                needCrosshairCandidates: true,
+                needHitTest: true
+            },
+            recorder
+        );
 
-        expect(ChartPointerCandidateEvaluator.operationCounts.barContainmentChecks).toBe(10000);
+        expect(recorder.barContainmentChecks).toBe(10000);
         expect(resolution.hitState.activeHitTarget).not.toBeNull();
         expect(resolution.crosshairCandidates?.length).toBeGreaterThan(0);
     });
@@ -224,17 +290,23 @@ describe("ChartPointerCandidatePerformance (CAA-R5-002 / Gates L & M)", () => {
         const denseScene = createPerformanceScene(1000);
         const pointer = { x: 250, y: 150 };
 
-        const resolution = ChartPointerInteractionResolver.resolve(pointer, denseScene, true, {
-            crosshairMaxDistance: 64,
-            maxDistance: 32,
-            needCrosshairCandidates: true,
-            needHitTest: true
-        });
+        const resolution = ChartPointerInteractionResolver.resolve(
+            pointer,
+            denseScene,
+            true,
+            {
+                crosshairMaxDistance: 64,
+                maxDistance: 32,
+                needCrosshairCandidates: true,
+                needHitTest: true
+            },
+            recorder
+        );
 
-        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(1);
+        expect(recorder.spatialQueries).toBe(1);
         // Distance evaluated exactly once for each discovered candidate
-        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBeLessThanOrEqual(1000);
-        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBeGreaterThan(0);
+        expect(recorder.pointDistanceChecks).toBeLessThanOrEqual(1000);
+        expect(recorder.pointDistanceChecks).toBeGreaterThan(0);
         expect(resolution.hitState.activeHits.length).toBeGreaterThan(0);
         expect(resolution.crosshairCandidates?.length).toBeGreaterThan(0);
     });

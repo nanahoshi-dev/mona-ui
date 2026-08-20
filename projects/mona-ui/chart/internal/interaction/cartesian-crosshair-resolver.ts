@@ -11,7 +11,7 @@ import { formatCartesianAxisSemanticValue } from "../utils/chart-formatter";
 import {
     findNearestInteractionBucketByX,
     findNearestInteractionBucketByY
-} from "./chart-hit-test-engine";
+} from "./chart-interaction-bucket-search";
 import { CartesianMarkSemanticResolver } from "./cartesian-mark-semantic-resolver";
 
 export interface CartesianCrosshairResolution {

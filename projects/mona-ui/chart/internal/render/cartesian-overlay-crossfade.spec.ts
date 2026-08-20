@@ -1,10 +1,12 @@
+// @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
 import { CartesianChartRenderer } from "./cartesian-chart-renderer";
 import { CartesianOverlayRenderer } from "./cartesian-overlay-renderer";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
+import type { CartesianOverlayScene } from "../scene/cartesian-overlay-scene";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 
-describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R2-008)", () => {
+describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R6-004 / Gate U)", () => {
     const mockScene: CartesianXYChartScene = {
         axes: [
             {
@@ -34,8 +36,32 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R2-008)", () => {
         width: 500
     };
 
-    const mockOverlayScene = {
-        annotations: [],
+    const mockOverlayScene: CartesianOverlayScene = {
+        annotations: [
+            {
+                color: "#3b82f6",
+                connector: true,
+                connectorWidth: 1,
+                formattedX: "100",
+                formattedY: "100",
+                id: "ann-1",
+                label: {
+                    anchor: { x: 100, y: 100 },
+                    formattedText: "Point 1",
+                    offsetX: 0,
+                    offsetY: 0,
+                    placement: "top" as const
+                },
+                marker: "circle" as const,
+                markerRadius: 4,
+                markerStrokeWidth: 1.5,
+                point: { x: 100, y: 100 },
+                xAxisId: "x-main",
+                xValue: 100,
+                yAxisId: "y-main",
+                yValue: 100
+            }
+        ],
         referenceBands: [
             {
                 axis: "y" as const,
@@ -69,68 +95,21 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R2-008)", () => {
         ]
     };
 
-    it("renders underlays and overlays at exact steady-state z-order during crossfade", () => {
-        const underlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderUnderlays");
-        const overlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderOverlays");
-
-        const mockCtx = {
-            beginPath: vi.fn(),
-            clip: vi.fn(),
-            fillRect: vi.fn(),
-            fillStyle: "",
-            fillText: vi.fn(),
-            globalAlpha: 1,
-            lineTo: vi.fn(),
-            lineWidth: 1,
-            measureText: vi.fn().mockReturnValue({ width: 50 }),
-            moveTo: vi.fn(),
-            rect: vi.fn(),
-            restore: vi.fn(),
-            save: vi.fn(),
-            setLineDash: vi.fn(),
-            stroke: vi.fn(),
-            strokeRect: vi.fn(),
-            strokeStyle: ""
-        } as unknown as CanvasRenderingContext2D;
-
-        const hostEl = document.createElement("div");
-        const styleResolver = new ChartStyleResolver(hostEl);
-
-        CartesianChartRenderer.renderCrossfade(
-            mockCtx,
-            mockScene,
-            mockScene,
-            0.5,
-            { cartesianOverlay: mockOverlayScene },
-            styleResolver
-        );
-
-        // Underlays rendered exactly once at full own opacity
-        expect(underlaySpy).toHaveBeenCalledTimes(1);
-        expect(underlaySpy).toHaveBeenCalledWith(mockCtx, mockOverlayScene, mockScene.plotRect);
-
-        // Overlays rendered exactly once at full own opacity
-        expect(overlaySpy).toHaveBeenCalledTimes(1);
-        expect(overlaySpy).toHaveBeenCalledWith(mockCtx, mockOverlayScene, mockScene.plotRect, undefined);
-
-        underlaySpy.mockRestore();
-        overlaySpy.mockRestore();
-    });
-
-    it("maintains save/restore balance and single overlay invocation across progress steps 0, 0.25, 0.5, 0.75, 1.0 (Gate U)", () => {
-        const underlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderUnderlays");
-        const overlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderOverlays");
-
+    function createMockContext() {
         let saveCount = 0;
         let restoreCount = 0;
-
-        const mockCtx = {
+        const ctx = {
+            arc: vi.fn(),
             beginPath: vi.fn(),
             clip: vi.fn(),
+            closePath: vi.fn(),
+            fill: vi.fn(),
             fillRect: vi.fn(),
             fillStyle: "",
             fillText: vi.fn(),
-            get globalAlpha() { return 1; },
+            get globalAlpha() {
+                return 1;
+            },
             set globalAlpha(_val) {},
             lineTo: vi.fn(),
             lineWidth: 1,
@@ -140,10 +119,73 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R2-008)", () => {
             restore: vi.fn(() => restoreCount++),
             save: vi.fn(() => saveCount++),
             setLineDash: vi.fn(),
+            setTransform: vi.fn(),
             stroke: vi.fn(),
             strokeRect: vi.fn(),
             strokeStyle: ""
         } as unknown as CanvasRenderingContext2D;
+
+        return { ctx, getRestoreCount: () => restoreCount, getSaveCount: () => saveCount };
+    }
+
+    it("guarantees exact layer draw order [grid -> underlays -> series -> overlays -> axes -> transient] across progress steps (Gate U)", () => {
+        const orderLog: string[] = [];
+
+        const gridSpy = vi.spyOn(CartesianChartRenderer as unknown as { renderGridLayer: () => void }, "renderGridLayer")
+            .mockImplementation(() => { orderLog.push("grid"); });
+        const underlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderUnderlays")
+            .mockImplementation(() => { orderLog.push("underlay"); });
+        const seriesSpy = vi.spyOn(CartesianChartRenderer as unknown as { renderSeriesLayer: () => void }, "renderSeriesLayer")
+            .mockImplementation(() => { orderLog.push("series"); });
+        const overlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderOverlays")
+            .mockImplementation(() => { orderLog.push("overlay"); });
+        const axisSpy = vi.spyOn(CartesianChartRenderer as unknown as { renderAxisLayer: () => void }, "renderAxisLayer")
+            .mockImplementation(() => { orderLog.push("axis"); });
+        const transientSpy = vi.spyOn(CartesianChartRenderer as unknown as { renderTransientLayer: () => void }, "renderTransientLayer")
+            .mockImplementation(() => { orderLog.push("transient"); });
+
+        const hostEl = document.createElement("div");
+        const styleResolver = new ChartStyleResolver(hostEl);
+        const { ctx } = createMockContext();
+
+        const progressSteps = [0, 0.25, 0.5, 0.75, 1.0];
+
+        for (const progress of progressSteps) {
+            orderLog.length = 0;
+
+            CartesianChartRenderer.renderCrossfade(
+                ctx,
+                mockScene,
+                mockScene,
+                progress,
+                { cartesianOverlay: mockOverlayScene },
+                styleResolver
+            );
+
+            // Filter out consecutive duplicate calls to same layer caused by from/to dual passes (e.g. series from + series to)
+            const uniqueSequence = orderLog.filter((item, idx) => idx === 0 || item !== orderLog[idx - 1]);
+
+            expect(uniqueSequence).toEqual([
+                "grid",
+                "underlay",
+                "series",
+                "overlay",
+                "axis",
+                "transient"
+            ]);
+        }
+
+        gridSpy.mockRestore();
+        underlaySpy.mockRestore();
+        seriesSpy.mockRestore();
+        overlaySpy.mockRestore();
+        axisSpy.mockRestore();
+        transientSpy.mockRestore();
+    });
+
+    it("maintains save/restore balance and single overlay invocation across progress steps (Gate U)", () => {
+        const underlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderUnderlays");
+        const overlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderOverlays");
 
         const hostEl = document.createElement("div");
         const styleResolver = new ChartStyleResolver(hostEl);
@@ -151,13 +193,12 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R2-008)", () => {
         const progressSteps = [0, 0.25, 0.5, 0.75, 1.0];
 
         for (const progress of progressSteps) {
+            const { ctx, getRestoreCount, getSaveCount } = createMockContext();
             underlaySpy.mockClear();
             overlaySpy.mockClear();
-            saveCount = 0;
-            restoreCount = 0;
 
             CartesianChartRenderer.renderCrossfade(
-                mockCtx,
+                ctx,
                 mockScene,
                 mockScene,
                 progress,
@@ -167,7 +208,7 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R2-008)", () => {
 
             expect(underlaySpy).toHaveBeenCalledTimes(1);
             expect(overlaySpy).toHaveBeenCalledTimes(1);
-            expect(saveCount).toBe(restoreCount);
+            expect(getSaveCount()).toBe(getRestoreCount());
         }
 
         underlaySpy.mockRestore();

@@ -2,12 +2,14 @@ import type { ChartPoint } from "../../models/chart.models";
 import type { CartesianXYChartScene, ChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import {
-    ChartHitTestEngine,
     findNearestInteractionBucketByX,
     findNearestInteractionBucketByY
-} from "./chart-hit-test-engine";
+} from "./chart-interaction-bucket-search";
 import { ChartPointerCandidateEvaluator } from "./chart-pointer-candidate-evaluator";
-import { ChartPointerCandidateResolver } from "./chart-pointer-candidate-resolver";
+import {
+    ChartPointerCandidateResolver,
+    type ChartPointerEvaluationInstrumentation
+} from "./chart-pointer-candidate-resolver";
 import type { ChartInteractionState } from "./chart-interaction-state";
 
 export interface ChartPointerResolution {
@@ -32,7 +34,8 @@ export class ChartPointerInteractionResolver {
         pointer: ChartPoint,
         scene: ChartScene,
         sharedTooltip: boolean,
-        maxDistanceOrDemand: number | ChartPointerInteractionDemand = 32
+        maxDistanceOrDemand: number | ChartPointerInteractionDemand = 32,
+        instrumentation?: ChartPointerEvaluationInstrumentation
     ): ChartPointerResolution {
         const demand: ChartPointerInteractionDemand = typeof maxDistanceOrDemand === "number"
             ? { maxDistance: maxDistanceOrDemand, needHitTest: true }
@@ -67,8 +70,8 @@ export class ChartPointerInteractionResolver {
             demand.needHitTest !== false ? tooltipMaxDistance : 0,
             demand.needCrosshairCandidates ? chDistance : 0
         );
-        const candidates = ChartPointerCandidateResolver.discover(pointer, scene, maxCandidateDistance);
-        const evaluator = ChartPointerCandidateEvaluator.evaluate(candidates, scene);
+        const candidates = ChartPointerCandidateResolver.discover(pointer, scene, maxCandidateDistance, instrumentation);
+        const evaluator = ChartPointerCandidateEvaluator.evaluate(candidates, scene, instrumentation);
 
         const hitState = demand.needHitTest !== false
             ? evaluator.resolveHitState(sharedTooltip, tooltipMaxDistance)

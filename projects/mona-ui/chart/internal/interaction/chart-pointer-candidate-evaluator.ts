@@ -8,27 +8,21 @@ import type {
 } from "../scene/chart-scene";
 import type {
     ChartInteractionBucket,
-    ChartInteractionXKey,
     SceneHitTarget
 } from "../scene/scene-geometry";
 import { distance, isPointInRect } from "../utils/geometry-utils";
 import type { ChartInteractionState } from "./chart-interaction-state";
-import type { ChartPointerCandidates } from "./chart-pointer-candidate-resolver";
+import type {
+    ChartPointerCandidates,
+    ChartPointerEvaluationInstrumentation
+} from "./chart-pointer-candidate-resolver";
 import {
     findNearestInteractionBucketByX,
     findNearestInteractionBucketByY
-} from "./chart-hit-test-engine";
+} from "./chart-interaction-bucket-search";
 import { HeatmapHitTester } from "./heatmap-hit-tester";
 import { PolarAxisHitTester } from "./polar-axis-hit-tester";
 import { PolarSectorHitTester } from "./polar-sector-hit-tester";
-
-export interface ChartCandidateOperationCounts {
-    barContainmentChecks: number;
-    financialQueries: number;
-    nearestBucketSearches: number;
-    pointDistanceChecks: number;
-    spatialQueries: number;
-}
 
 export interface PointCandidateMetric {
     readonly distance: number;
@@ -38,27 +32,10 @@ export interface PointCandidateMetric {
 }
 
 export class ChartPointerCandidateEvaluator {
-    public static operationCounts: ChartCandidateOperationCounts = {
-        barContainmentChecks: 0,
-        financialQueries: 0,
-        nearestBucketSearches: 0,
-        pointDistanceChecks: 0,
-        spatialQueries: 0
-    };
-
-    public static resetOperationCounts(): void {
-        ChartPointerCandidateEvaluator.operationCounts = {
-            barContainmentChecks: 0,
-            financialQueries: 0,
-            nearestBucketSearches: 0,
-            pointDistanceChecks: 0,
-            spatialQueries: 0
-        };
-    }
-
     public readonly pointer: ChartPoint;
     public readonly scene: ChartScene;
     public readonly candidates: ChartPointerCandidates;
+    readonly #instrumentation?: ChartPointerEvaluationInstrumentation;
 
     // Evaluated facts cached for the pointer frame
     public readonly containedBarHits: readonly SceneHitTarget[];
@@ -66,10 +43,15 @@ export class ChartPointerCandidateEvaluator {
     public readonly financialHits: readonly SceneHitTarget[];
     public readonly topFinancialHit: SceneHitTarget | null;
 
-    public constructor(candidates: ChartPointerCandidates, scene: ChartScene) {
+    public constructor(
+        candidates: ChartPointerCandidates,
+        scene: ChartScene,
+        instrumentation?: ChartPointerEvaluationInstrumentation
+    ) {
         this.pointer = candidates.pointer;
         this.scene = scene;
         this.candidates = candidates;
+        this.#instrumentation = instrumentation;
 
         const pointer = candidates.pointer;
 
@@ -77,7 +59,7 @@ export class ChartPointerCandidateEvaluator {
         if (candidates.barTargets && candidates.barTargets.length > 0) {
             const contained: SceneHitTarget[] = [];
             for (const target of candidates.barTargets) {
-                ChartPointerCandidateEvaluator.operationCounts.barContainmentChecks++;
+                instrumentation?.onBarContainmentCheck?.();
                 const isHit =
                     (target.bounds !== undefined && isPointInRect(pointer, target.bounds)) ||
                     (target.visualBounds !== undefined && isPointInRect(pointer, target.visualBounds));
@@ -95,7 +77,7 @@ export class ChartPointerCandidateEvaluator {
             const metrics: PointCandidateMetric[] = [];
             for (const target of candidates.pointCandidates) {
                 if (target.point) {
-                    ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks++;
+                    instrumentation?.onPointDistanceCheck?.();
                     const d = distance(pointer.x, pointer.y, target.point.x, target.point.y);
                     const visualRadius = target.visualRadius ?? target.radius ?? 4;
                     const hitRadius = target.radius ?? 10;
@@ -131,8 +113,12 @@ export class ChartPointerCandidateEvaluator {
         }
     }
 
-    public static evaluate(candidates: ChartPointerCandidates, scene: ChartScene): ChartPointerCandidateEvaluator {
-        return new ChartPointerCandidateEvaluator(candidates, scene);
+    public static evaluate(
+        candidates: ChartPointerCandidates,
+        scene: ChartScene,
+        instrumentation?: ChartPointerEvaluationInstrumentation
+    ): ChartPointerCandidateEvaluator {
+        return new ChartPointerCandidateEvaluator(candidates, scene, instrumentation);
     }
 
     public resolveHitState(
@@ -310,7 +296,7 @@ export class ChartPointerCandidateEvaluator {
 
                 for (const [, axisBucketsMap] of cartesianScene.interactionBucketsByAxisId) {
                     const axisBuckets = Array.from(axisBucketsMap.values());
-                    ChartPointerCandidateEvaluator.operationCounts.nearestBucketSearches++;
+                    this.#instrumentation?.onNearestBucketSearch?.();
                     const nearest = isAxisY
                         ? findNearestInteractionBucketByY(axisBuckets, pointer.y)
                         : findNearestInteractionBucketByX(axisBuckets, pointer.x);
@@ -355,7 +341,7 @@ export class ChartPointerCandidateEvaluator {
                     };
                 }
             } else if (interactionBuckets && interactionBuckets.length > 0) {
-                ChartPointerCandidateEvaluator.operationCounts.nearestBucketSearches++;
+                this.#instrumentation?.onNearestBucketSearch?.();
                 const nearestBucket = isAxisY
                     ? findNearestInteractionBucketByY(interactionBuckets, pointer.y)
                     : findNearestInteractionBucketByX(interactionBuckets, pointer.x);
@@ -449,7 +435,7 @@ export class ChartPointerCandidateEvaluator {
 
         // 4. Range Area band containment test
         if (interactionBuckets && interactionBuckets.length > 0) {
-            ChartPointerCandidateEvaluator.operationCounts.nearestBucketSearches++;
+            this.#instrumentation?.onNearestBucketSearch?.();
             const nearestBucket = findNearestInteractionBucketByX(interactionBuckets, pointer.x);
             if (nearestBucket) {
                 const minBucketDist = Math.abs(pointer.x - nearestBucket.anchor.x);
