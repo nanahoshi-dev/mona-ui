@@ -6,7 +6,9 @@ import type {
 } from "../../models/chart-selection.models";
 import type { ChartBrushSelectionBehavior } from "../../models/chart-brush.models";
 import type { SceneHitTarget } from "../scene/scene-geometry";
+import type { CartesianXYChartScene } from "../scene/chart-scene";
 import { ChartMarkIdentityResolver } from "../interaction/chart-mark-identity-resolver";
+import { CartesianMarkSemanticResolver } from "../interaction/cartesian-mark-semantic-resolver";
 import type { ChartVisibleMarkIndex } from "../interaction/chart-visible-mark-index";
 
 export interface SelectionMutationResult {
@@ -15,11 +17,18 @@ export interface SelectionMutationResult {
     readonly removed: readonly string[];
 }
 
-export function toSelectedPoint<T = unknown>(hit: SceneHitTarget): ChartSelectedPoint<T> {
+export function toSelectedPoint<T = unknown>(
+    hit: SceneHitTarget,
+    scene?: CartesianXYChartScene | null
+): ChartSelectedPoint<T> {
     const markId = ChartMarkIdentityResolver.resolve(hit);
     const fromValue = hit.fromValue ?? hit.range?.fromValue;
     const toValue = hit.toValue ?? hit.range?.toValue;
     const isRange = hit.valueKind === "range" || hit.range !== undefined;
+
+    const scalarAxes = CartesianMarkSemanticResolver.resolveScalarAxes(hit, scene);
+    const xValue = scalarAxes.xValue;
+    const yValue = scalarAxes.yValue;
 
     const value =
         hit.value ??
@@ -45,8 +54,8 @@ export function toSelectedPoint<T = unknown>(hit: SceneHitTarget): ChartSelected
         stackStart: hit.stackStart,
         toValue,
         value,
-        xValue: hit.xValue ?? hit.category,
-        yValue: hit.yValue
+        xValue,
+        yValue
     };
 }
 
@@ -67,6 +76,17 @@ export class ChartSelectionController {
         }
 
         return result;
+    }
+
+    public static normalizeForMode(
+        ids: readonly string[] | undefined,
+        mode: ChartSelectionMode
+    ): readonly string[] {
+        const normalized = ChartSelectionController.normalize(ids);
+        if (mode === "single" && normalized.length > 1) {
+            return [normalized[0]];
+        }
+        return normalized;
     }
 
     public static applyClick(
@@ -203,25 +223,26 @@ export class ChartSelectionController {
         mutation: SelectionMutationResult,
         previousSelectedMarkIds: readonly string[],
         visibleIndex: ChartVisibleMarkIndex,
-        changedHits?: readonly SceneHitTarget[]
+        changedHits?: readonly SceneHitTarget[],
+        scene?: CartesianXYChartScene | null
     ): ChartSelectionChangeEvent<T> {
         const visibleSelectedPoints: ChartSelectedPoint<T>[] = [];
         for (const id of mutation.next) {
             const hit = visibleIndex.get(id);
             if (hit) {
-                visibleSelectedPoints.push(toSelectedPoint<T>(hit));
+                visibleSelectedPoints.push(toSelectedPoint<T>(hit, scene));
             }
         }
 
         let changedPoints: ChartSelectedPoint<T>[] = [];
         if (changedHits && changedHits.length > 0) {
-            changedPoints = changedHits.map(h => toSelectedPoint<T>(h));
+            changedPoints = changedHits.map(h => toSelectedPoint<T>(h, scene));
         } else {
             const affectedIds = new Set([...mutation.added, ...mutation.removed]);
             for (const id of affectedIds) {
                 const hit = visibleIndex.get(id);
                 if (hit) {
-                    changedPoints.push(toSelectedPoint<T>(hit));
+                    changedPoints.push(toSelectedPoint<T>(hit, scene));
                 }
             }
         }
