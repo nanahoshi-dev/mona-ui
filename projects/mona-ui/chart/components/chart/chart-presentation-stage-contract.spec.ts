@@ -1,6 +1,6 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartComponent } from "./chart.component";
 import { BarSeriesComponent } from "../bar-series/bar-series.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
@@ -14,6 +14,50 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
 import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
 import type { ChartSelectionChangeEvent } from "../../models/chart-selection.models";
 import type { ChartDataLabelOptions, ChartDataLabelPosition } from "../../models/chart-data-label.models";
+
+class TestResizeObserver {
+    public static instances: TestResizeObserver[] = [];
+    public readonly observed = new Set<Element>();
+    public readonly unobserved = new Set<Element>();
+    public disconnected = false;
+
+    public constructor(public readonly callback: (entries: ResizeObserverEntry[]) => void) {
+        TestResizeObserver.instances.push(this);
+    }
+
+    public observe(target: Element): void {
+        this.observed.add(target);
+        this.unobserved.delete(target);
+    }
+
+    public unobserve(target: Element): void {
+        this.observed.delete(target);
+        this.unobserved.add(target);
+    }
+
+    public disconnect(): void {
+        this.disconnected = true;
+        this.observed.clear();
+    }
+
+    public emit(entries: { height: number; target: Element; width: number }[]): void {
+        const mapped = entries.map(e => ({
+            contentRect: {
+                bottom: e.height,
+                height: e.height,
+                left: 0,
+                right: e.width,
+                top: 0,
+                width: e.width,
+                x: 0,
+                y: 0,
+                toJSON: () => ({})
+            },
+            target: e.target
+        })) as unknown as ResizeObserverEntry[];
+        this.callback(mapped);
+    }
+}
 
 @Component({
     imports: [
@@ -38,11 +82,9 @@ import type { ChartDataLabelOptions, ChartDataLabelPosition } from "../../models
                 [field]="'value'"
                 [name]="'Bars'"
                 [dataLabels]="dataLabelOptions()">
-                @if (showTemplate()) {
-                    <ng-template monaChartDataLabel let-ctx>
-                        <span class="test-label">{{ ctx.formattedValue }}</span>
-                    </ng-template>
-                }
+                <ng-template monaChartDataLabel let-ctx>
+                    <span class="test-label">{{ ctx.formattedValue }}</span>
+                </ng-template>
             </mona-bar-series>
             <mona-chart-selection
                 [mode]="'multiple'"
@@ -77,7 +119,6 @@ class PresentationStageContractHostComponent {
     public readonly selectionStrokeWidth = signal<number | undefined>(undefined);
 
     public readonly dataLabelOptions = signal<boolean | ChartDataLabelOptions>(true);
-    public readonly showTemplate = signal(false);
 
     public readonly brushEnabled = signal(true);
     public readonly brushFillColor = signal<string | undefined>(undefined);
@@ -99,6 +140,7 @@ class PresentationStageContractHostComponent {
 }
 
 describe("Chart Presentation Stage Contract Invalidation Boundaries (GDSB-R4-002)", () => {
+    const origResizeObserver = typeof window !== "undefined" ? window.ResizeObserver : undefined;
     let fixture: ComponentFixture<PresentationStageContractHostComponent>;
     let host: PresentationStageContractHostComponent;
     let stageASpy: ReturnType<typeof vi.spyOn>;
@@ -106,6 +148,11 @@ describe("Chart Presentation Stage Contract Invalidation Boundaries (GDSB-R4-002
     let stageCSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(async () => {
+        TestResizeObserver.instances = [];
+        if (typeof window !== "undefined") {
+            window.ResizeObserver = TestResizeObserver as unknown as typeof ResizeObserver;
+        }
+
         vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
             bottom: 400,
             height: 400,
@@ -155,6 +202,12 @@ describe("Chart Presentation Stage Contract Invalidation Boundaries (GDSB-R4-002
         host = fixture.componentInstance;
         fixture.detectChanges();
         await fixture.whenStable();
+    });
+
+    afterEach(() => {
+        if (origResizeObserver && typeof window !== "undefined") {
+            window.ResizeObserver = origResizeObserver;
+        }
     });
 
     function expectStageDeltas(
@@ -302,12 +355,57 @@ describe("Chart Presentation Stage Contract Invalidation Boundaries (GDSB-R4-002
             expectStageDeltas(beforeA, beforeB, beforeC, { a: 0, b: 0, c: 0 });
         });
 
-        it("custom template rendering and measurement does not invoke Stage A, B, or C", () => {
+        it("custom template enablement does not invoke Stage A, B, or C", () => {
+            host.dataLabelOptions.set(false);
+            fixture.detectChanges();
+
             const beforeA = stageASpy.mock.calls.length;
             const beforeB = stageBSpy.mock.calls.length;
             const beforeC = stageCSpy.mock.calls.length;
 
-            host.showTemplate.set(true);
+            host.dataLabelOptions.set(true);
+            fixture.detectChanges();
+
+            expectStageDeltas(beforeA, beforeB, beforeC, { a: 0, b: 0, c: 0 });
+        });
+
+        it("custom template initial measurement does not invoke Stage A, B, or C", () => {
+            const labelSpan = fixture.nativeElement.querySelector(".test-label");
+            expect(labelSpan).not.toBeNull();
+            const labelEl = labelSpan?.parentElement;
+            expect(labelEl).not.toBeNull();
+            const observer = TestResizeObserver.instances.find(inst => inst.observed.has(labelEl!));
+            expect(observer).toBeDefined();
+
+            const beforeA = stageASpy.mock.calls.length;
+            const beforeB = stageBSpy.mock.calls.length;
+            const beforeC = stageCSpy.mock.calls.length;
+
+            observer!.emit([{ height: 20, target: labelEl!, width: 50 }]);
+            host.chart().flushPendingRender();
+            fixture.detectChanges();
+
+            expectStageDeltas(beforeA, beforeB, beforeC, { a: 0, b: 0, c: 0 });
+        });
+
+        it("custom template resize measurement does not invoke Stage A, B, or C", () => {
+            const labelSpan = fixture.nativeElement.querySelector(".test-label");
+            expect(labelSpan).not.toBeNull();
+            const labelEl = labelSpan?.parentElement;
+            expect(labelEl).not.toBeNull();
+            const observer = TestResizeObserver.instances.find(inst => inst.observed.has(labelEl!));
+            expect(observer).toBeDefined();
+
+            observer!.emit([{ height: 20, target: labelEl!, width: 50 }]);
+            host.chart().flushPendingRender();
+            fixture.detectChanges();
+
+            const beforeA = stageASpy.mock.calls.length;
+            const beforeB = stageBSpy.mock.calls.length;
+            const beforeC = stageCSpy.mock.calls.length;
+
+            observer!.emit([{ height: 30, target: labelEl!, width: 80 }]);
+            host.chart().flushPendingRender();
             fixture.detectChanges();
 
             expectStageDeltas(beforeA, beforeB, beforeC, { a: 0, b: 0, c: 0 });
