@@ -160,7 +160,7 @@ describe("CartesianOverlayProjector", () => {
             expect(projX.layer).toBe("overlay");
             expect(projX.dash).toEqual([4, 4]);
             expect(projX.label?.formattedText).toBe("Target X");
-            expect(projX.label?.anchor).toEqual({ x: 250, y: 50 });
+            expect(projX.label?.anchor).toEqual({ x: 250, y: 56 });
 
             const projY = result.referenceLines.find(l => l.id === "line-2")!;
             expect(projY).toBeDefined();
@@ -169,7 +169,7 @@ describe("CartesianOverlayProjector", () => {
             expect(projY.layer).toBe("underlay");
             expect(projY.dash).toEqual([2, 3]);
             expect(projY.label?.formattedText).toBe("Target Y");
-            expect(projY.label?.anchor).toEqual({ x: 450, y: 150 });
+            expect(projY.label?.anchor).toEqual({ x: 444, y: 150 });
         });
 
         it("projects category reference line resolving category center", () => {
@@ -418,7 +418,7 @@ describe("CartesianOverlayProjector", () => {
             expect(projAnn.markerRadius).toBe(5);
             expect(projAnn.color).toBe("#ec4899");
             expect(projAnn.label?.anchor.x).toBe(250);
-            expect(projAnn.label?.anchor.y).toBeCloseTo(76, 0);
+            expect(projAnn.label?.anchor.y).toBeCloseTo(64, 0);
             expect(projAnn.label?.formattedText).toBe("Peak Value");
             expect(projAnn.data).toEqual({ note: "Outlier" });
         });

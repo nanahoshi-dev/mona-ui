@@ -87,8 +87,12 @@ export class CanvasChartRenderer {
         if (progress > 0) {
             context.save();
             context.globalAlpha = Math.max(0, Math.min(1, progress));
-            this.renderContent(context, toScene, overlayState, styleResolver);
+            this.renderContent(context, toScene, null, styleResolver);
             context.restore();
+        }
+
+        if (overlayState && toScene.coordinateSystem === "cartesian" && toScene.cartesianKind === "xy") {
+            CartesianChartRenderer.renderOverlaysOnly(context, toScene, overlayState, styleResolver);
         }
     }
 }

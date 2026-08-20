@@ -128,6 +128,9 @@ export class CartesianOverlayRenderer {
         line: SceneReferenceLine,
         plotRect: ChartRect
     ): void {
+        if (line.width <= 0 || line.opacity <= 0) {
+            return;
+        }
         context.save();
         context.globalAlpha = line.opacity;
         context.strokeStyle = line.color;

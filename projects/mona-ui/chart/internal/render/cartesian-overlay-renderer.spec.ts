@@ -42,8 +42,12 @@ describe("CartesianOverlayRenderer", () => {
                     bounds: { height: 200, width: 100, x: 100, y: 50 },
                     fillColor: "#93c5fd",
                     fillOpacity: 0.2,
+                    formattedFrom: "100",
+                    formattedTo: "200",
+                    from: 100,
                     id: "band-under",
-                    layer: "underlay"
+                    layer: "underlay",
+                    to: 200
                 },
                 {
                     axis: "y",
@@ -52,8 +56,12 @@ describe("CartesianOverlayRenderer", () => {
                     bounds: { height: 50, width: 400, x: 50, y: 100 },
                     fillColor: "#fde047",
                     fillOpacity: 0.3,
+                    formattedFrom: "100",
+                    formattedTo: "150",
+                    from: 100,
                     id: "band-over",
-                    layer: "overlay"
+                    layer: "overlay",
+                    to: 150
                 }
             ],
             referenceLines: [
@@ -63,9 +71,11 @@ describe("CartesianOverlayRenderer", () => {
                     color: "#ef4444",
                     coordinate: 150,
                     dash: [4, 4],
+                    formattedValue: "150",
                     id: "line-under",
                     layer: "underlay",
                     opacity: 0.8,
+                    semanticValue: 150,
                     width: 2
                 },
                 {
@@ -74,9 +84,11 @@ describe("CartesianOverlayRenderer", () => {
                     color: "#10b981",
                     coordinate: 200,
                     dash: [],
+                    formattedValue: "200",
                     id: "line-over",
                     layer: "overlay",
                     opacity: 1,
+                    semanticValue: 200,
                     width: 1
                 }
             ]
@@ -101,6 +113,8 @@ describe("CartesianOverlayRenderer", () => {
                     color: "#8b5cf6",
                     connector: true,
                     connectorWidth: 1,
+                    formattedX: "200",
+                    formattedY: "100",
                     id: "ann-1",
                     label: {
                         anchor: { x: 200, y: 80 },
@@ -114,17 +128,27 @@ describe("CartesianOverlayRenderer", () => {
                     marker: "circle",
                     markerRadius: 4,
                     markerStrokeWidth: 1.5,
-                    point: { x: 200, y: 100 }
+                    point: { x: 200, y: 100 },
+                    xAxisId: "x-main",
+                    xValue: 200,
+                    yAxisId: "y-main",
+                    yValue: 100
                 },
                 {
                     color: "#ec4899",
                     connector: false,
                     connectorWidth: 0,
+                    formattedX: "300",
+                    formattedY: "120",
                     id: "ann-2",
                     marker: "diamond",
                     markerRadius: 5,
                     markerStrokeWidth: 2,
-                    point: { x: 300, y: 120 }
+                    point: { x: 300, y: 120 },
+                    xAxisId: "x-main",
+                    xValue: 300,
+                    yAxisId: "y-main",
+                    yValue: 120
                 }
             ],
             referenceBands: [
@@ -135,8 +159,12 @@ describe("CartesianOverlayRenderer", () => {
                     bounds: { height: 200, width: 80, x: 200, y: 50 },
                     fillColor: "#86efac",
                     fillOpacity: 0.25,
+                    formattedFrom: "200",
+                    formattedTo: "280",
+                    from: 200,
                     id: "band-over",
-                    layer: "overlay"
+                    layer: "overlay",
+                    to: 280
                 }
             ],
             referenceLines: [
@@ -146,9 +174,11 @@ describe("CartesianOverlayRenderer", () => {
                     color: "#f97316",
                     coordinate: 250,
                     dash: [2, 3],
+                    formattedValue: "250",
                     id: "line-over",
                     layer: "overlay",
                     opacity: 1,
+                    semanticValue: 250,
                     width: 1
                 }
             ]

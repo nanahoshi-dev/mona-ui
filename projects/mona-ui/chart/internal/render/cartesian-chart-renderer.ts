@@ -204,4 +204,45 @@ export class CartesianChartRenderer {
 
         context.restore();
     }
+
+    public static renderOverlaysOnly(
+        context: CanvasRenderingContext2D,
+        scene: CartesianXYChartScene,
+        overlayState: ChartRenderOverlayState | ChartInteractionState | null,
+        styleResolver: ChartStyleResolver
+    ): void {
+        const { plotRect } = scene;
+        if (plotRect.width <= 0 || plotRect.height <= 0 || !overlayState) {
+            return;
+        }
+
+        const interactionState: ChartInteractionState | null =
+            "interaction" in overlayState
+                ? (overlayState.interaction ?? null)
+                : (overlayState as ChartInteractionState | null);
+        const cartesianOverlay: CartesianOverlayScene | null =
+            "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
+        const crosshairState: ChartCrosshairState | null =
+            "crosshair" in overlayState ? (overlayState.crosshair ?? null) : null;
+        const crosshairRegistration: ChartCrosshairRegistration | null =
+            "crosshairRegistration" in overlayState ? (overlayState.crosshairRegistration ?? null) : null;
+
+        context.save();
+        if (cartesianOverlay) {
+            CartesianOverlayRenderer.renderOverlays(context, cartesianOverlay, plotRect);
+        }
+        if (crosshairState && crosshairRegistration) {
+            CartesianCrosshairRenderer.render(
+                context,
+                crosshairState,
+                crosshairRegistration,
+                plotRect,
+                styleResolver
+            );
+        }
+        if (interactionState) {
+            CartesianInteractionOverlayRenderer.render(context, scene, interactionState, styleResolver);
+        }
+        context.restore();
+    }
 }

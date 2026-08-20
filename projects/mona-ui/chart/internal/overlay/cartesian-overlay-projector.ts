@@ -14,7 +14,9 @@ import type {
 } from "../context/chart-registration-context";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
+import type { ChartXAxisType } from "../../models/chart-axis.models";
 import { getOrCreateBaseCategoryIndex } from "../viewport/cartesian-axis-coordinate-space";
+import { formatXValue, formatYValue } from "../utils/chart-formatter";
 
 const EMPTY_OVERLAY_SCENE: CartesianOverlayScene = {
     annotations: [],
@@ -55,6 +57,7 @@ export class CartesianOverlayProjector {
 
         // 1. Project Reference Lines
         for (const reg of referenceLines) {
+            reg.userClass();
             if (!reg.visible()) {
                 continue;
             }
@@ -72,12 +75,14 @@ export class CartesianOverlayProjector {
             }
 
             let coordinate: number | undefined;
+            let semanticIndex = 0;
             if (snap.resolvedType === "category") {
                 const geom = coordinateSpace.resolveCategoryByKey(ref, reg.value(), "viewport");
                 if (!geom) {
                     continue;
                 }
                 coordinate = geom.bandCenter;
+                semanticIndex = geom.viewportIndex ?? 0;
             } else {
                 const coord = coordinateSpace.mapContinuousValue(ref, reg.value(), "viewport");
                 if (coord === undefined || !Number.isFinite(coord)) {
@@ -100,37 +105,49 @@ export class CartesianOverlayProjector {
             const style = styleResolver.resolveReferenceLineStyle(reg);
             const lineStyle = reg.lineStyle();
             const dash = getLineDash(lineStyle);
+            const targetAxis = scene.axes.find(a => a.axis === axis && a.axisId === axisId);
+
+            const formattedValue = axis === "x"
+                ? formatXValue(
+                      reg.value(),
+                      semanticIndex,
+                      targetAxis?.formatter,
+                      targetAxis?.scaleType as ChartXAxisType,
+                      scene.xTimeSpanMs
+                  )
+                : formatYValue(reg.value(), semanticIndex, targetAxis?.formatter);
 
             let label: SceneReferenceLabel | undefined;
             const labelText = reg.label();
             const hasTemplate = !!reg.template?.();
             if (labelText || hasTemplate) {
                 const pos = reg.labelPosition() ?? "end";
+                const offset = reg.labelOffset() ?? 6;
                 let anchor: ChartPoint;
                 if (axis === "x") {
                     switch (pos) {
                         case "start":
-                            anchor = { x: coordinate, y: plotRect.y };
+                            anchor = { x: coordinate, y: plotRect.y + offset };
                             break;
                         case "center":
                             anchor = { x: coordinate, y: plotRect.y + plotRect.height / 2 };
                             break;
                         case "end":
                         default:
-                            anchor = { x: coordinate, y: plotRect.y + plotRect.height };
+                            anchor = { x: coordinate, y: plotRect.y + plotRect.height - offset };
                             break;
                     }
                 } else {
                     switch (pos) {
                         case "start":
-                            anchor = { x: plotRect.x, y: coordinate };
+                            anchor = { x: plotRect.x + offset, y: coordinate };
                             break;
                         case "center":
                             anchor = { x: plotRect.x + plotRect.width / 2, y: coordinate };
                             break;
                         case "end":
                         default:
-                            anchor = { x: plotRect.x + plotRect.width, y: coordinate };
+                            anchor = { x: plotRect.x + plotRect.width - offset, y: coordinate };
                             break;
                     }
                 }
@@ -139,7 +156,7 @@ export class CartesianOverlayProjector {
                     anchor,
                     formattedText: labelText,
                     labelClass: reg.labelClass(),
-                    offset: reg.labelOffset(),
+                    offset,
                     position: pos,
                     userClass: reg.userClass()
                 };
@@ -151,16 +168,19 @@ export class CartesianOverlayProjector {
                 color: style.color,
                 coordinate,
                 dash,
+                formattedValue,
                 id: reg.id,
                 label,
                 layer: reg.layer(),
                 opacity: style.opacity,
+                semanticValue: reg.value(),
                 width: style.width
             });
         }
 
         // 2. Project Reference Bands
         for (const reg of referenceBands) {
+            reg.userClass();
             if (!reg.visible()) {
                 continue;
             }
@@ -179,33 +199,47 @@ export class CartesianOverlayProjector {
 
             let pixelStart: number;
             let pixelEnd: number;
+            let idxFrom = 0;
+            let idxTo = 0;
 
             if (snap.resolvedType === "category") {
                 const baseIndexMap = getOrCreateBaseCategoryIndex(snap.baseDomain);
                 const fromStr = String(reg.from());
                 const toStr = String(reg.to());
-                const idxFrom = baseIndexMap.get(fromStr);
-                const idxTo = baseIndexMap.get(toStr);
+                const bIdxFrom = baseIndexMap.get(fromStr);
+                const bIdxTo = baseIndexMap.get(toStr);
 
-                if (idxFrom === undefined || idxTo === undefined) {
+                if (bIdxFrom === undefined || bIdxTo === undefined) {
                     continue;
                 }
 
-                const minBaseIdx = Math.min(idxFrom, idxTo);
-                const maxBaseIdx = Math.max(idxFrom, idxTo);
+                const minBaseIdx = Math.min(bIdxFrom, bIdxTo);
+                const maxBaseIdx = Math.max(bIdxFrom, bIdxTo);
                 const vDomain = snap.categoryIndex?.viewportDomain ?? [];
-
-                const visibleKeysInRange = vDomain.filter(k => {
-                    const bIdx = baseIndexMap.get(k);
-                    return bIdx !== undefined && bIdx >= minBaseIdx && bIdx <= maxBaseIdx;
-                });
-
-                if (visibleKeysInRange.length === 0) {
+                if (vDomain.length === 0) {
                     continue;
                 }
 
-                const firstKey = visibleKeysInRange[0];
-                const lastKey = visibleKeysInRange[visibleKeysInRange.length - 1];
+                const firstVKey = vDomain[0];
+                const lastVKey = vDomain[vDomain.length - 1];
+                const vpMin = baseIndexMap.get(firstVKey);
+                const vpMax = baseIndexMap.get(lastVKey);
+                if (vpMin === undefined || vpMax === undefined) {
+                    continue;
+                }
+
+                const minVpIdx = Math.min(vpMin, vpMax);
+                const maxVpIdx = Math.max(vpMin, vpMax);
+
+                const visMin = Math.max(minBaseIdx, minVpIdx);
+                const visMax = Math.min(maxBaseIdx, maxVpIdx);
+
+                if (visMin > visMax) {
+                    continue;
+                }
+
+                const firstKey = String(snap.baseDomain[visMin]);
+                const lastKey = String(snap.baseDomain[visMax]);
                 const firstGeom = snap.categoryIndex?.byKey.get(firstKey);
                 const lastGeom = snap.categoryIndex?.byKey.get(lastKey);
 
@@ -215,6 +249,8 @@ export class CartesianOverlayProjector {
 
                 pixelStart = Math.min(firstGeom.bandStart, lastGeom.bandStart, firstGeom.bandEnd, lastGeom.bandEnd);
                 pixelEnd = Math.max(firstGeom.bandStart, lastGeom.bandStart, firstGeom.bandEnd, lastGeom.bandEnd);
+                idxFrom = firstGeom.viewportIndex ?? 0;
+                idxTo = lastGeom.viewportIndex ?? 0;
             } else {
                 const p0 = coordinateSpace.mapContinuousValue(ref, reg.from(), "viewport");
                 const p1 = coordinateSpace.mapContinuousValue(ref, reg.to(), "viewport");
@@ -259,20 +295,42 @@ export class CartesianOverlayProjector {
             }
 
             const style = styleResolver.resolveReferenceBandStyle(reg);
+            const targetAxis = scene.axes.find(a => a.axis === axis && a.axisId === axisId);
+
+            const formattedFrom = axis === "x"
+                ? formatXValue(
+                      reg.from(),
+                      idxFrom,
+                      targetAxis?.formatter,
+                      targetAxis?.scaleType as ChartXAxisType,
+                      scene.xTimeSpanMs
+                  )
+                : formatYValue(reg.from(), idxFrom, targetAxis?.formatter);
+
+            const formattedTo = axis === "x"
+                ? formatXValue(
+                      reg.to(),
+                      idxTo,
+                      targetAxis?.formatter,
+                      targetAxis?.scaleType as ChartXAxisType,
+                      scene.xTimeSpanMs
+                  )
+                : formatYValue(reg.to(), idxTo, targetAxis?.formatter);
 
             let label: SceneReferenceLabel | undefined;
             const labelText = reg.label();
             const hasTemplate = !!reg.template?.();
             if (labelText || hasTemplate) {
                 const pos = reg.labelPosition() ?? "center";
+                const offset = reg.labelOffset() ?? 6;
                 let anchor: ChartPoint;
                 if (axis === "x") {
                     switch (pos) {
                         case "start":
-                            anchor = { x: bounds.x + bounds.width / 2, y: bounds.y };
+                            anchor = { x: bounds.x + bounds.width / 2, y: bounds.y + offset };
                             break;
                         case "end":
-                            anchor = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height };
+                            anchor = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height - offset };
                             break;
                         case "center":
                         default:
@@ -282,10 +340,10 @@ export class CartesianOverlayProjector {
                 } else {
                     switch (pos) {
                         case "start":
-                            anchor = { x: bounds.x, y: bounds.y + bounds.height / 2 };
+                            anchor = { x: bounds.x + offset, y: bounds.y + bounds.height / 2 };
                             break;
                         case "end":
-                            anchor = { x: bounds.x + bounds.width, y: bounds.y + bounds.height / 2 };
+                            anchor = { x: bounds.x + bounds.width - offset, y: bounds.y + bounds.height / 2 };
                             break;
                         case "center":
                         default:
@@ -298,7 +356,7 @@ export class CartesianOverlayProjector {
                     anchor,
                     formattedText: labelText,
                     labelClass: reg.labelClass(),
-                    offset: reg.labelOffset(),
+                    offset,
                     position: pos,
                     userClass: reg.userClass()
                 };
@@ -312,14 +370,19 @@ export class CartesianOverlayProjector {
                 bounds,
                 fillColor: style.fillColor,
                 fillOpacity: style.fillOpacity,
+                formattedFrom,
+                formattedTo,
+                from: reg.from(),
                 id: reg.id,
                 label,
-                layer: reg.layer()
+                layer: reg.layer(),
+                to: reg.to()
             });
         }
 
         // 3. Project Point Annotations
         for (const reg of annotations) {
+            reg.userClass();
             if (!reg.visible()) {
                 continue;
             }
@@ -340,12 +403,14 @@ export class CartesianOverlayProjector {
             }
 
             let px: number | undefined;
+            let xIdx = 0;
             if (xSnap.resolvedType === "category") {
                 const geom = coordinateSpace.resolveCategoryByKey(xRef, reg.x(), "viewport");
                 if (!geom) {
                     continue;
                 }
                 px = geom.bandCenter;
+                xIdx = geom.viewportIndex ?? 0;
             } else {
                 const coord = coordinateSpace.mapContinuousValue(xRef, reg.x(), "viewport");
                 if (coord === undefined || !Number.isFinite(coord)) {
@@ -355,12 +420,14 @@ export class CartesianOverlayProjector {
             }
 
             let py: number | undefined;
+            let yIdx = 0;
             if (ySnap.resolvedType === "category") {
                 const geom = coordinateSpace.resolveCategoryByKey(yRef, reg.y(), "viewport");
                 if (!geom) {
                     continue;
                 }
                 py = geom.bandCenter;
+                yIdx = geom.viewportIndex ?? 0;
             } else {
                 const coord = coordinateSpace.mapContinuousValue(yRef, reg.y(), "viewport");
                 if (coord === undefined || !Number.isFinite(coord)) {
@@ -380,6 +447,17 @@ export class CartesianOverlayProjector {
 
             const style = styleResolver.resolveAnnotationStyle(reg);
             const point: ChartPoint = { x: px, y: py };
+            const targetXAxis = scene.axes.find(a => a.axis === "x" && a.axisId === xAxisId);
+            const targetYAxis = scene.axes.find(a => a.axis === "y" && a.axisId === yAxisId);
+
+            const formattedX = formatXValue(
+                reg.x(),
+                xIdx,
+                targetXAxis?.formatter,
+                targetXAxis?.scaleType as ChartXAxisType,
+                scene.xTimeSpanMs
+            );
+            const formattedY = formatYValue(reg.y(), yIdx, targetYAxis?.formatter);
 
             let label: SceneAnnotationLabel | undefined;
             const labelText = reg.label();
@@ -400,12 +478,12 @@ export class CartesianOverlayProjector {
                         break;
                     case "top":
                     default:
-                        dy = 0;
+                        dy = -12;
                         break;
                 }
 
                 const userDx = reg.offsetX() ?? 0;
-                const userDy = placement === "top" ? (reg.offsetY() ?? -12) : (reg.offsetY() ?? 0);
+                const userDy = reg.offsetY() ?? 0;
 
                 const anchor: ChartPoint = {
                     x: px + dx + userDx,
@@ -428,12 +506,18 @@ export class CartesianOverlayProjector {
                 connector: reg.connector(),
                 connectorWidth: style.connectorWidth,
                 data: reg.data(),
+                formattedX,
+                formattedY,
                 id: reg.id,
                 label,
                 marker: reg.marker(),
                 markerRadius: style.markerRadius,
                 markerStrokeWidth: style.markerStrokeWidth,
-                point
+                point,
+                xAxisId,
+                xValue: reg.x(),
+                yAxisId,
+                yValue: reg.y()
             });
         }
 

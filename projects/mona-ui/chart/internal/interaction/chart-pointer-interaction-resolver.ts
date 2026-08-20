@@ -17,14 +17,43 @@ export interface ChartPointerResolution {
     readonly snappedAnchor: ChartPoint | null;
 }
 
+export interface ChartPointerInteractionDemand {
+    readonly maxDistance?: number;
+    readonly needHitTest?: boolean;
+}
+
 export class ChartPointerInteractionResolver {
     public static resolve(
         pointer: ChartPoint,
         scene: ChartScene,
         sharedTooltip: boolean,
-        maxDistance: number = 32
+        maxDistanceOrDemand: number | ChartPointerInteractionDemand = 32
     ): ChartPointerResolution {
-        const hitState = ChartHitTestEngine.testHit(pointer, scene, sharedTooltip, maxDistance);
+        const demand = typeof maxDistanceOrDemand === "number"
+            ? { maxDistance: maxDistanceOrDemand, needHitTest: true }
+            : { maxDistance: 32, needHitTest: true, ...maxDistanceOrDemand };
+
+        const effectiveMaxDistance = Number.isFinite(demand.maxDistance) && demand.maxDistance! >= 0
+            ? demand.maxDistance!
+            : 32;
+
+        if (demand.needHitTest === false) {
+            const emptyHitState: ChartInteractionState = {
+                activeHitTarget: null,
+                activeHits: [],
+                pointerPosition: pointer
+            };
+            return {
+                bucketHits: [],
+                hitState: emptyHitState,
+                nearestAnchor: null,
+                pointer,
+                primaryHit: null,
+                snappedAnchor: null
+            };
+        }
+
+        const hitState = ChartHitTestEngine.testHit(pointer, scene, sharedTooltip, effectiveMaxDistance);
         const primaryHit = hitState.activeHitTarget ?? hitState.activeHits[0] ?? null;
         const bucketHits = hitState.activeHits;
 

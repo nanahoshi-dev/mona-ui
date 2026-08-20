@@ -59,7 +59,10 @@ import { ChartHitTestEngine } from "../../internal/interaction/chart-hit-test-en
 import type { ChartInteractionState } from "../../internal/interaction/chart-interaction-state";
 import type { ChartCrosshairState } from "../../internal/interaction/chart-crosshair-state";
 import { CartesianCrosshairResolver } from "../../internal/interaction/cartesian-crosshair-resolver";
-import { ChartPointerInteractionResolver } from "../../internal/interaction/chart-pointer-interaction-resolver";
+import {
+    ChartPointerInteractionResolver,
+    type ChartPointerResolution
+} from "../../internal/interaction/chart-pointer-interaction-resolver";
 import { CartesianOverlayProjector } from "../../internal/overlay/cartesian-overlay-projector";
 import type {
     CartesianOverlayScene,
@@ -257,6 +260,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #layoutReady: boolean = false;
     #suppressNextCanvasClick: boolean = false;
     readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
+    #lastPointerResolution: ChartPointerResolution | null = null;
+    #lastInteractionSource: "pointer" | "keyboard" | null = null;
     #interactionState: ChartInteractionState | null = null;
     #labelResizeObserver: ResizeObserver | null = null;
     #mediaQueryList: MediaQueryList | null = null;
@@ -266,6 +271,30 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #renderScene: ChartScene | null = null;
     #resizeObserver: ResizeObserver | null = null;
     #themeObserver: MutationObserver | null = null;
+
+    readonly #referenceLineById = computed(() => {
+        const map = new Map<string, ChartReferenceLineRegistration>();
+        for (const r of this.#referenceLines()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
+
+    readonly #referenceBandById = computed(() => {
+        const map = new Map<string, ChartReferenceBandRegistration>();
+        for (const r of this.#referenceBands()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
+
+    readonly #annotationById = computed(() => {
+        const map = new Map<string, ChartAnnotationRegistration>();
+        for (const r of this.#annotations()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
 
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly viewportCursor = signal<string | null>(null);
@@ -409,6 +438,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #hasPendingSizeReflow: boolean = false;
     #interactionRevision: number = 0;
 
+    #cancelPendingPointerInteraction(): void {
+        if (this.#pointerFrameId !== null) {
+            cancelAnimationFrame(this.#pointerFrameId);
+            this.#pointerFrameId = null;
+        }
+        this.#pendingPointerEvent = null;
+    }
+
+    #retireTransientInteractionForViewportChange(): void {
+        this.#cancelPendingPointerInteraction();
+        this.#clearInteractionState();
+    }
+
     #takeGestureClickSuppression(): void {
         if (this.#gestureController?.consumeClickSuppression()) {
             this.#suppressNextCanvasClick = true;
@@ -416,6 +458,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #beginInteractionAuthorityChange(): void {
+        this.#cancelPendingPointerInteraction();
         this.#gestureController?.abortForAuthorityChange();
         this.#takeGestureClickSuppression();
         this.#interactionRevision++;
@@ -710,6 +753,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         this.#destroyRef.onDestroy(() => {
             this.#isDestroyed = true;
+            this.#cancelPendingPointerInteraction();
             this.#renderScheduler.cancel();
             this.#gestureController?.destroy();
             this.#gestureController = null;
@@ -798,15 +842,54 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     if (prev && areInternalViewportStatesEqual(prev, normalized)) {
                         return;
                     }
+                    this.#retireTransientInteractionForViewportChange();
                     this.#lastNormalizedControlledViewport = normalized;
                     this.invalidate(ChartInvalidationReason.Viewport);
                 }
             } else {
                 if (this.#lastNormalizedControlledViewport !== null) {
+                    this.#retireTransientInteractionForViewportChange();
                     this.#uncontrolledViewportState.set(this.#lastNormalizedControlledViewport);
                     this.#lastNormalizedControlledViewport = null;
                     this.invalidate(ChartInvalidationReason.Viewport);
                 }
+            }
+        });
+
+        // Invalidate or re-resolve crosshair when crosshair inputs change
+        effect(() => {
+            const ch = this.#crosshair();
+            if (!ch) {
+                this.crosshairState.set(null);
+                return;
+            }
+            const enabled = ch.enabled() !== false;
+            ch.mode();
+            ch.snap();
+            ch.xAxisId();
+            ch.yAxisId();
+            ch.maxSnapDistance();
+
+            if (!enabled) {
+                if (this.crosshairState() !== null) {
+                    this.crosshairState.set(null);
+                    this.#paint();
+                }
+                return;
+            }
+
+            const currentScene = this.cartesianXYScene();
+            const lastRes = this.#lastPointerResolution;
+            const lastSrc = this.#lastInteractionSource;
+            if (currentScene && lastRes && lastSrc) {
+                const nextState = CartesianCrosshairResolver.resolve(
+                    currentScene,
+                    ch,
+                    lastRes,
+                    lastSrc
+                );
+                this.crosshairState.set(nextState);
+                this.#paint();
             }
         });
 
@@ -932,6 +1015,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (!pointer) return;
         if (this.#gestureController?.handleWheel(event, pointer)) {
             event.preventDefault();
+            this.#cancelPendingPointerInteraction();
+            this.#clearInteraction();
         }
     }
 
@@ -967,6 +1052,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public onFocusOut(event: FocusEvent): void {
         const related = event.relatedTarget as Node | null;
         if (!related || !this.#elementRef.nativeElement.contains(related)) {
+            this.#cancelPendingPointerInteraction();
             this.#clearInteraction();
             this.activeAccessibilityText.set("");
         }
@@ -1069,6 +1155,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
         } else if (event.key === "Escape") {
             event.preventDefault();
+            this.#cancelPendingPointerInteraction();
             this.#gestureController?.cancel("escape");
             this.#clearInteraction();
             this.activeAccessibilityText.set("");
@@ -1076,6 +1163,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public onPointerLeave(event?: PointerEvent): void {
+        this.#cancelPendingPointerInteraction();
         if (event) {
             this.#gestureController?.handlePointerLeave(event);
         }
@@ -1085,7 +1173,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public onPointerMove(event: PointerEvent): void {
         const pointer = this.#normalizePointer(event);
         if (pointer && this.#gestureController?.handlePointerMove(event, pointer)) {
-            if (this.#interactionState !== null) {
+            this.#cancelPendingPointerInteraction();
+            if (this.#interactionState !== null || this.crosshairState() !== null) {
                 this.#clearInteraction();
             }
             return;
@@ -1097,6 +1186,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const crosshairEnabled = crosshair ? crosshair.enabled() !== false : false;
 
         if ((!tooltipEnabled && !crosshairEnabled) || (this.#isAnimating() && !this.#isStructuralAnimation())) {
+            this.#cancelPendingPointerInteraction();
             if (this.#interactionState !== null || this.crosshairState() !== null) {
                 this.#clearInteraction();
             }
@@ -1107,8 +1197,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (this.#pointerFrameId === null) {
             this.#pointerFrameId = requestAnimationFrame(() => {
                 this.#pointerFrameId = null;
-                if (this.#pendingPointerEvent) {
-                    this.#processPointerMove(this.#pendingPointerEvent);
+                const pending = this.#pendingPointerEvent;
+                this.#pendingPointerEvent = null;
+                if (pending) {
+                    this.#processPointerMove(pending);
                 }
             });
         }
@@ -1333,6 +1425,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         event: ChartViewportChangeEvent
     ): void {
         if (this.#isDestroyed) return;
+        this.#retireTransientInteractionForViewportChange();
         this.viewportChange.emit(event);
 
         const isControlled = this.viewport() !== undefined;
@@ -1349,6 +1442,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         changedAxes?: readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[]
     ): void {
         if (this.#isDestroyed) return;
+        this.#retireTransientInteractionForViewportChange();
         const sc = this.cartesianXYScene();
         if (!sc || !sc.coordinateSpace) return;
         const resolvedAxisMap = sc.coordinateSpace.toResolvedAxisInfoMap();
@@ -1418,7 +1512,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         const shared = this.#resolveSharedTooltip(currentScene);
-        const resolution = ChartPointerInteractionResolver.resolve(pointer, currentScene, shared);
+        const needHitTest = tooltipEnabled || (crosshairEnabled && crosshair?.snap() === "nearest");
+        const crosshairDist = crosshair?.maxSnapDistance() ?? 32;
+        const demand = { needHitTest, maxDistance: Math.max(32, crosshairDist) };
+        const resolution = ChartPointerInteractionResolver.resolve(pointer, currentScene, shared, demand);
+        this.#lastPointerResolution = resolution;
+        this.#lastInteractionSource = "pointer";
         const hitState = resolution.hitState;
 
         let hasAnyState = false;
@@ -1450,6 +1549,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 );
                 hasAnyState = true;
             }
+        } else if (!tooltipEnabled && crosshairEnabled && (resolution.primaryHit || resolution.bucketHits.length > 0)) {
+            this.#interactionState = {
+                ...hitState,
+                activeHitTarget: resolution.primaryHit,
+                activeHits: resolution.bucketHits,
+                source: "pointer"
+            };
+            this.tooltipPosition.set(null);
+            this.tooltipContext.set(null);
         } else {
             this.#interactionState = null;
             this.tooltipPosition.set(null);
@@ -1794,6 +1902,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#activeKeyboardHitKey = null;
         this.#activeKeyboardNamespace = null;
         this.#activeKeyboardSeriesId = null;
+        this.#lastPointerResolution = null;
+        this.#lastInteractionSource = null;
         this.#interactionState = null;
         this.crosshairState.set(null);
         this.tooltipContext.set(null);
@@ -2476,6 +2586,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     primaryHit: matchingHit,
                     snappedAnchor: pointPos
                 };
+                this.#lastPointerResolution = resolution;
+                this.#lastInteractionSource = "keyboard";
                 const crosshairState = CartesianCrosshairResolver.resolve(
                     currentScene as CartesianXYChartScene,
                     crosshair,
@@ -2570,27 +2682,27 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     protected resolveReferenceLineTemplate(lineId: string) {
-        return this.#referenceLines().find(r => r.id === lineId)?.template?.();
+        return this.#referenceLineById().get(lineId)?.template?.();
     }
 
     protected resolveReferenceBandTemplate(bandId: string) {
-        return this.#referenceBands().find(r => r.id === bandId)?.template?.();
+        return this.#referenceBandById().get(bandId)?.template?.();
     }
 
     protected resolveAnnotationTemplate(annId: string) {
-        return this.#annotations().find(r => r.id === annId)?.template?.();
+        return this.#annotationById().get(annId)?.template?.();
     }
 
     protected resolveReferenceLineRegistration(lineId: string) {
-        return this.#referenceLines().find(r => r.id === lineId);
+        return this.#referenceLineById().get(lineId);
     }
 
     protected resolveReferenceBandRegistration(bandId: string) {
-        return this.#referenceBands().find(r => r.id === bandId);
+        return this.#referenceBandById().get(bandId);
     }
 
     protected resolveAnnotationRegistration(annId: string) {
-        return this.#annotations().find(r => r.id === annId);
+        return this.#annotationById().get(annId);
     }
 
     protected resolveCrosshairRegistration() {

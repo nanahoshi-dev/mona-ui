@@ -31,10 +31,12 @@ export interface SceneReferenceLine {
     readonly color: string;
     readonly coordinate: number;
     readonly dash: readonly number[];
+    readonly formattedValue: string;
     readonly id: string;
     readonly label?: SceneReferenceLabel;
     readonly layer: ChartOverlayLayer;
     readonly opacity: number;
+    readonly semanticValue: unknown;
     readonly width: number;
 }
 
@@ -46,9 +48,13 @@ export interface SceneReferenceBand {
     readonly bounds: ChartRect;
     readonly fillColor: string;
     readonly fillOpacity: number;
+    readonly formattedFrom: string;
+    readonly formattedTo: string;
+    readonly from: unknown;
     readonly id: string;
     readonly label?: SceneReferenceLabel;
     readonly layer: ChartOverlayLayer;
+    readonly to: unknown;
 }
 
 export interface ScenePointAnnotation {
@@ -56,12 +62,18 @@ export interface ScenePointAnnotation {
     readonly connector: boolean;
     readonly connectorWidth: number;
     readonly data?: unknown;
+    readonly formattedX: string;
+    readonly formattedY: string;
     readonly id: string;
     readonly label?: SceneAnnotationLabel;
     readonly marker: ChartAnnotationMarker;
     readonly markerRadius: number;
     readonly markerStrokeWidth: number;
     readonly point: ChartPoint;
+    readonly xAxisId: string;
+    readonly xValue: unknown;
+    readonly yAxisId: string;
+    readonly yValue: unknown;
 }
 
 export interface CartesianOverlayScene {
