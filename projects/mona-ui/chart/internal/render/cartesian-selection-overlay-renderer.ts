@@ -1,4 +1,5 @@
 import type { ChartRect } from "../../models/chart.models";
+import { CartesianMarkVisualGeometry } from "../interaction/cartesian-mark-visual-geometry";
 import type { CartesianSelectionScene } from "../scene/cartesian-selection-scene";
 
 export interface CartesianSelectionRenderOptions {
@@ -37,7 +38,7 @@ export class CartesianSelectionOverlayRenderer {
             const type = hit.seriesType;
 
             if (type === "bar" || type === "rangeBar") {
-                const b = hit.visualBounds ?? hit.bounds;
+                const b = CartesianMarkVisualGeometry.getVisualBounds(hit);
                 if (b) {
                     if (fillOpacity > 0) {
                         ctx.fillStyle = color;
@@ -67,7 +68,7 @@ export class CartesianSelectionOverlayRenderer {
                     ctx.stroke();
                 }
             } else if (type === "candlestick" || type === "ohlc") {
-                const b = hit.visualBounds ?? hit.bounds;
+                const b = CartesianMarkVisualGeometry.getVisualBounds(hit);
                 if (b) {
                     if (fillOpacity > 0) {
                         ctx.fillStyle = color;
@@ -83,27 +84,22 @@ export class CartesianSelectionOverlayRenderer {
                 }
             } else {
                 // Point-like (line, area, scatter, bubble)
-                const pt = hit.point ?? (hit.bounds
-                    ? { x: hit.bounds.x + hit.bounds.width / 2, y: hit.bounds.y + hit.bounds.height / 2 }
-                    : null);
+                const pt = CartesianMarkVisualGeometry.getVisualCenter(hit);
+                const baseRadius = CartesianMarkVisualGeometry.getVisualRadius(hit, 4);
+                const ringRadius = baseRadius + 3;
 
-                if (pt) {
-                    const baseRadius = hit.radius ?? (hit.bounds ? hit.bounds.width / 2 : 4);
-                    const ringRadius = baseRadius + 3;
-
-                    if (fillOpacity > 0) {
-                        ctx.fillStyle = color;
-                        ctx.globalAlpha = fillOpacity;
-                        ctx.beginPath();
-                        ctx.arc(pt.x, pt.y, ringRadius, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.globalAlpha = 1.0;
-                    }
-
+                if (fillOpacity > 0) {
+                    ctx.fillStyle = color;
+                    ctx.globalAlpha = fillOpacity;
                     ctx.beginPath();
                     ctx.arc(pt.x, pt.y, ringRadius, 0, Math.PI * 2);
-                    ctx.stroke();
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
                 }
+
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, ringRadius, 0, Math.PI * 2);
+                ctx.stroke();
             }
         }
 

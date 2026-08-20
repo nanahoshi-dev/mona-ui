@@ -1,3 +1,4 @@
+import type { ChartBrushLineStyle } from "../../models/chart-brush.models";
 import type { ChartRect } from "../../models/chart.models";
 import type { ChartBrushRegistration } from "../context/chart-registration-context";
 
@@ -6,13 +7,20 @@ export class CartesianBrushRenderer {
         ctx: CanvasRenderingContext2D,
         brushRect: ChartRect,
         plotRect: ChartRect,
-        registration: ChartBrushRegistration
+        registration: ChartBrushRegistration,
+        resolvedStyle?: {
+            readonly borderColor: string;
+            readonly borderWidth: number;
+            readonly fillColor: string;
+            readonly fillOpacity: number;
+            readonly lineStyle: ChartBrushLineStyle;
+        }
     ): void {
-        const fillColor = registration.fillColor?.() ?? "#3b82f6";
-        const fillOpacity = registration.fillOpacity?.() ?? 0.15;
-        const borderColor = registration.borderColor?.() ?? "#3b82f6";
-        const borderWidth = registration.borderWidth?.() ?? 1;
-        const lineStyle = registration.lineStyle?.() ?? "solid";
+        const fillColor = registration.fillColor?.() ?? resolvedStyle?.fillColor ?? "#3b82f6";
+        const fillOpacity = registration.fillOpacity?.() ?? resolvedStyle?.fillOpacity ?? 0.15;
+        const borderColor = registration.borderColor?.() ?? resolvedStyle?.borderColor ?? "#3b82f6";
+        const borderWidth = registration.borderWidth?.() ?? resolvedStyle?.borderWidth ?? 1;
+        const lineStyle = registration.lineStyle?.() ?? resolvedStyle?.lineStyle ?? "solid";
 
         ctx.save();
         ctx.beginPath();
