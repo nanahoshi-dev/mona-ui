@@ -80,7 +80,7 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
     const centerOffset = (slotWidth - barWidth) / 2;
     const subX = nestedBarScale.map(slot.id) ?? 0;
 
-    const keyResolver = new ChartMarkKeyResolver(s.id, sKeyField);
+    const keyResolver = new ChartMarkKeyResolver(s.id, sKeyField, s.seriesKey?.());
     const bars: SceneRangeBar[] = [];
 
     for (let dIdx = 0; dIdx < sData.length; dIdx++) {
@@ -286,7 +286,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
     const strokeWidth = normalizeNonNegativeNumber(sStrokeWidth, sStyle.lineWidth ?? 2);
     const fillOpacity = normalizeOpacity(sFillOpacity, sStyle.fillOpacity ?? 0.18);
 
-    const keyResolver = new ChartMarkKeyResolver(s.id, sKeyField);
+    const keyResolver = new ChartMarkKeyResolver(s.id, sKeyField, s.seriesKey?.());
     const points: SceneRangeAreaPoint[] = [];
 
     const effectiveXScale = xScale ?? bandScale ?? linearXScale ?? timeScale;

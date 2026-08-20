@@ -85,6 +85,12 @@ export class RangeBarSeriesComponent implements OnInit {
     public readonly orientation = input<ChartBarOrientation>("vertical");
 
     /**
+     * @description Optional stable key identifying this series for mark identity and selection across updates.
+     * @default undefined
+     */
+    public readonly seriesKey = input<string | undefined>(undefined);
+
+    /**
      * @description Property key or accessor extracting the ending range value for each bar.
      */
     public readonly toField = input.required<ChartField>();
@@ -140,6 +146,7 @@ export class RangeBarSeriesComponent implements OnInit {
             this.fromField();
             this.keyField();
             this.orientation();
+            this.seriesKey();
             this.toField();
             this.xField();
             if (this.#registered) {
@@ -198,6 +205,7 @@ export class RangeBarSeriesComponent implements OnInit {
             maxBarWidth: this.maxBarWidth,
             name: this.name,
             orientation: this.orientation,
+            seriesKey: this.seriesKey,
             toField: this.toField,
             toggleVisibility: () => {
                 const next = !this.visible();

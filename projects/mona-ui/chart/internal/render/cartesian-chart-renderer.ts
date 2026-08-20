@@ -266,14 +266,16 @@ export class CartesianChartRenderer {
         context: CanvasRenderingContext2D,
         selectionScene: CartesianSelectionScene | null,
         options: { readonly color?: string; readonly fillOpacity?: number; readonly strokeWidth?: number } | null,
-        plotRect: ChartRect
+        plotRect: ChartRect,
+        styleResolver?: ChartStyleResolver
     ): void {
         if (selectionScene && selectionScene.hits.length > 0) {
+            const fallback = styleResolver?.resolveSelectionStyle(null);
             CartesianSelectionOverlayRenderer.render(context, selectionScene, {
-                color: options?.color,
-                fillOpacity: options?.fillOpacity,
+                color: options?.color ?? fallback?.color,
+                fillOpacity: options?.fillOpacity ?? fallback?.fillOpacity,
                 plotRect,
-                strokeWidth: options?.strokeWidth
+                strokeWidth: options?.strokeWidth ?? fallback?.strokeWidth
             });
         }
     }
@@ -282,10 +284,12 @@ export class CartesianChartRenderer {
         context: CanvasRenderingContext2D,
         activeBrushBounds: ChartRect | null,
         plotRect: ChartRect,
-        brushRegistration: ChartBrushRegistration | null
+        brushRegistration: ChartBrushRegistration | null,
+        styleResolver?: ChartStyleResolver
     ): void {
         if (activeBrushBounds && brushRegistration) {
-            CartesianBrushRenderer.render(context, activeBrushBounds, plotRect, brushRegistration);
+            const resolved = styleResolver?.resolveBrushStyle(brushRegistration);
+            CartesianBrushRenderer.render(context, activeBrushBounds, plotRect, brushRegistration, resolved);
         }
     }
 
@@ -323,18 +327,18 @@ export class CartesianChartRenderer {
         this.renderStaticUnderlayLayer(context, cartesianOverlay, plotRect);
         // 3. Series
         this.renderSeriesLayer(context, scene);
-        // 4. Static Overlays & Annotations
-        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
+        // 4. Persistent Selection Highlights
+        this.renderSelectionLayer(context, selectionScene, selectionOptions, plotRect, styleResolver);
         // 5. Data Labels (Canvas default labels)
         this.renderDataLabelLayer(context, cartesianDataLabels, plotRect);
-        // 6. Persistent Selection Highlights
-        this.renderSelectionLayer(context, selectionScene, selectionOptions, plotRect);
+        // 6. Static Overlays & Annotations
+        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
         // 7. Axes
         this.renderAxisLayer(context, scene, styleResolver);
         // 8. Transient (Crosshair + Highlights)
         this.renderTransientLayer(context, scene, overlayState, styleResolver);
         // 9. Brush Marquee Overlay
-        this.renderBrushLayer(context, activeBrushBounds, plotRect, brushRegistration);
+        this.renderBrushLayer(context, activeBrushBounds, plotRect, brushRegistration, styleResolver);
         context.restore();
     }
 
@@ -399,14 +403,8 @@ export class CartesianChartRenderer {
             context.restore();
         }
 
-        // 4. Target static overlay once (at full own opacity)
+        // 4. Static overlay (at full own opacity)
         this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
-
-        // 5. Target data labels once (at full own opacity)
-        this.renderDataLabelLayer(context, cartesianDataLabels, plotRect);
-
-        // 6. Target persistent selection once (at full own opacity)
-        this.renderSelectionLayer(context, selectionScene, selectionOptions, plotRect);
 
         // 7. Axes crossfade
         if (fromScene && progress < 1) {
@@ -426,7 +424,7 @@ export class CartesianChartRenderer {
         this.renderTransientLayer(context, toScene, overlayState, styleResolver);
 
         // 9. Target brush marquee once
-        this.renderBrushLayer(context, activeBrushBounds, plotRect, brushRegistration);
+        this.renderBrushLayer(context, activeBrushBounds, plotRect, brushRegistration, styleResolver);
 
         context.restore();
     }

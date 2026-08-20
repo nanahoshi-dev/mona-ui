@@ -17,8 +17,8 @@ export class CartesianBrushRangeResolver {
         bounds: ChartRect,
         coordinateSpace: CartesianAxisCoordinateSpace,
         mode: ChartBrushMode,
-        xAxisId?: string,
-        yAxisId?: string
+        targetXAxisId?: string,
+        targetYAxisId?: string
     ): ResolvedBrushRanges {
         if (
             !coordinateSpace?.x ||
@@ -32,27 +32,27 @@ export class CartesianBrushRangeResolver {
         let yRange: ChartBrushAxisRange | undefined;
 
         if (mode === "x" || mode === "xy") {
-            const effectiveXAxisId = xAxisId ?? coordinateSpace.x.keys().next().value;
-            if (effectiveXAxisId) {
+            const axisId = targetXAxisId ?? coordinateSpace.x.keys().next().value;
+            if (axisId) {
                 xRange = CartesianBrushRangeResolver.#resolveAxisRange(
                     bounds.x,
                     bounds.x + bounds.width,
                     "x",
-                    effectiveXAxisId,
+                    axisId,
                     coordinateSpace
                 );
             }
         }
 
         if (mode === "y" || mode === "xy") {
-            const effectiveYAxisId = yAxisId ?? coordinateSpace.y.keys().next().value;
-            if (effectiveYAxisId) {
+            const axisId = targetYAxisId ?? coordinateSpace.y.keys().next().value;
+            if (axisId) {
                 // In canvas coords, top is smaller Y, bottom is larger Y
                 yRange = CartesianBrushRangeResolver.#resolveAxisRange(
                     bounds.y + bounds.height,
                     bounds.y,
                     "y",
-                    effectiveYAxisId,
+                    axisId,
                     coordinateSpace
                 );
             }
@@ -78,24 +78,53 @@ export class CartesianBrushRangeResolver {
         if (snap.resolvedType === "category") {
             const minPx = Math.min(pixel1, pixel2);
             const maxPx = Math.max(pixel1, pixel2);
-            const catFrom = coordinateSpace.resolveCategoryAtPixel(ref, minPx);
-            const catTo = coordinateSpace.resolveCategoryAtPixel(ref, maxPx);
 
-            if (!catFrom && !catTo) {
+            const categoryIndex = snap.categoryIndex;
+            if (!categoryIndex || !categoryIndex.viewportDomain) {
                 return undefined;
             }
 
-            const fromIdx = Math.min(catFrom?.baseIndex ?? 0, catTo?.baseIndex ?? 0);
-            const toIdx = Math.max(catFrom?.baseIndex ?? 0, catTo?.baseIndex ?? 0);
+            const intersected: Array<{ baseIndex: number; key: string }> = [];
+
+            for (const key of categoryIndex.viewportDomain) {
+                const geom = categoryIndex.byKey.get(key);
+                if (!geom) {
+                    continue;
+                }
+
+                const bStart = Math.min(geom.bandStart, geom.bandEnd);
+                const bEnd = Math.max(geom.bandStart, geom.bandEnd);
+
+                // Check actual band intersection (inclusive)
+                if (bStart <= maxPx && bEnd >= minPx) {
+                    intersected.push({
+                        baseIndex: geom.baseIndex,
+                        key: geom.key
+                    });
+                }
+            }
+
+            if (intersected.length === 0) {
+                return undefined;
+            }
+
+            const firstIntersected = intersected[0];
+            const lastIntersected = intersected[intersected.length - 1];
+
+            const fromIndex = Math.min(firstIntersected.baseIndex, lastIntersected.baseIndex);
+            const toIndex = Math.max(firstIntersected.baseIndex, lastIntersected.baseIndex);
+
+            const fromValue = snap.baseDomain[fromIndex] ?? firstIntersected.key;
+            const toValue = snap.baseDomain[toIndex] ?? lastIntersected.key;
 
             const result: ChartBrushCategoryRange = {
                 axis: ref.axis,
                 axisId,
-                fromIndex: fromIdx,
-                fromValue: catFrom?.key,
+                fromIndex,
+                fromValue,
                 kind: "category",
-                toIndex: toIdx,
-                toValue: catTo?.key
+                toIndex,
+                toValue
             };
             return result;
         }
@@ -128,12 +157,18 @@ export class CartesianBrushRangeResolver {
             to = temp;
         }
 
+        const scaleType =
+            res1?.resolvedType ??
+            res2?.resolvedType ??
+            (snap.resolvedType as ChartBrushContinuousRange["scaleType"]) ??
+            "linear";
+
         const continuousResult: ChartBrushContinuousRange = {
             axis: ref.axis,
             axisId,
             from: from!,
             kind: "continuous",
-            scaleType: res1?.resolvedType ?? "linear",
+            scaleType,
             to: to!
         };
         return continuousResult;

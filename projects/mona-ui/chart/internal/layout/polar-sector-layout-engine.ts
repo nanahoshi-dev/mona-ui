@@ -197,7 +197,7 @@ export class PolarSectorLayoutEngine {
 
             const pieArcs = pieGen(dataResult.visibleData as PolarDatum[]);
             const labelRadius = innerRadius + (outerRadius - innerRadius) * 0.55;
-            const keyResolver = new ChartMarkKeyResolver(targetSeries.id, targetSeries.keyField?.());
+            const keyResolver = new ChartMarkKeyResolver(targetSeries.id, targetSeries.keyField?.(), targetSeries.seriesKey?.());
 
             for (const arc of pieArcs) {
                 const d = arc.data;

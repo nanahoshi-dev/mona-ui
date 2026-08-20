@@ -2700,6 +2700,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Named stack group to participate in. Series with matching trimmed stack names stack together.",
         "kind": "input",
         "name": "stack",
@@ -2839,6 +2846,13 @@
         "defaultValue": "\"vertical\""
       },
       {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Named stack group to participate in. Series with matching trimmed stack names stack together.",
         "kind": "input",
         "name": "stack",
@@ -2962,6 +2976,13 @@
         "name": "name",
         "type": "string",
         "defaultValue": "\"Bubble\""
+      },
+      {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Property key or accessor extracting the size magnitude for each bubble.",
@@ -3152,6 +3173,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Additional CSS classes applied to the series host element.",
         "kind": "input",
         "name": "userClass",
@@ -3166,21 +3194,21 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Whether the series is currently visible.",
+        "description": "Whether the series is currently visible on the chart and in calculations.",
         "kind": "model",
         "name": "visible",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Optional color override for the upper and lower wicks.",
+        "description": "Explicit stroke color for the upper and lower wicks.",
         "kind": "input",
         "name": "wickColor",
-        "type": "string | undefined",
-        "defaultValue": "undefined"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
-        "description": "Stroke width in pixels for the upper and lower wicks.",
+        "description": "Pixel stroke width for candle wicks.",
         "kind": "input",
         "name": "wickWidth",
         "type": "number",
@@ -3194,7 +3222,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Property key or accessor extracting the X-axis coordinate or timestamp for each data item.",
+        "description": "Property key or accessor extracting the X coordinate, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
@@ -3531,7 +3559,7 @@
         "kind": "input",
         "name": "activation",
         "type": "ChartBrushActivation",
-        "defaultValue": "\"drag\""
+        "defaultValue": "\"shift-drag\""
       },
       {
         "description": "Optional Cartesian X axis ID to target.",
@@ -3555,7 +3583,7 @@
         "defaultValue": "4"
       },
       {
-        "description": "Mark spatial hit policy ('center', 'intersect', or 'contain').",
+        "description": "Mark spatial hit policy ('center' or 'intersect').",
         "kind": "input",
         "name": "hitPolicy",
         "type": "ChartBrushHitPolicy",
@@ -3572,39 +3600,39 @@
         "description": "Background fill color of the brush rectangle.",
         "kind": "input",
         "name": "fillColor",
-        "type": "string",
-        "defaultValue": "\"#3b82f6\""
+        "type": "string | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Fill opacity of the brush rectangle.",
         "kind": "input",
         "name": "fillOpacity",
-        "type": "number",
-        "defaultValue": "0.15"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Border color of the brush rectangle.",
         "kind": "input",
         "name": "borderColor",
-        "type": "string",
-        "defaultValue": "\"#3b82f6\""
+        "type": "string | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Border width in pixels of the brush rectangle.",
         "kind": "input",
         "name": "borderWidth",
-        "type": "number",
-        "defaultValue": "1"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Stroke dash style of the brush rectangle border ('solid', 'dashed', or 'dotted').",
         "kind": "input",
         "name": "lineStyle",
-        "type": "ChartBrushLineStyle",
-        "defaultValue": "\"solid\""
+        "type": "ChartBrushLineStyle | undefined",
+        "defaultValue": "undefined"
       },
       {
-        "description": "Emitted during brush lifecycle phases ('start', 'move', 'end', 'cancel').",
+        "description": "Emitted during brush lifecycle phases ('start', 'update', 'end', 'cancel').",
         "kind": "output",
         "name": "brushChange",
         "type": "ChartBrushChangeEvent"
@@ -5255,6 +5283,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether to draw point markers at each data coordinate along the line.",
         "kind": "input",
         "name": "showPoints",
@@ -5422,6 +5457,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Length in pixels for horizontal open and close tick arms.",
         "kind": "input",
         "name": "tickLength",
@@ -5450,21 +5492,21 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Whether the series is currently visible.",
+        "description": "Whether the series is currently visible on the chart and in calculations.",
         "kind": "model",
         "name": "visible",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Optional color override for the vertical high-low stem.",
+        "description": "Explicit stroke color for the central vertical stem.",
         "kind": "input",
         "name": "wickColor",
-        "type": "string | undefined",
-        "defaultValue": "undefined"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
-        "description": "Stroke width in pixels for the vertical high-low stem.",
+        "description": "Pixel stroke width for OHLC stems and tick arms.",
         "kind": "input",
         "name": "wickWidth",
         "type": "number",
@@ -5478,7 +5520,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Property key or accessor extracting the X-axis coordinate or timestamp for each data item.",
+        "description": "Property key or accessor extracting the X coordinate, overriding the root chart X field.",
         "kind": "input",
         "name": "xField",
         "type": "ChartField | undefined",
@@ -6185,6 +6227,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether to draw point markers at each data coordinate along both boundary curves.",
         "kind": "input",
         "name": "showPoints",
@@ -6322,6 +6371,13 @@
         "name": "orientation",
         "type": "ChartBarOrientation",
         "defaultValue": "\"vertical\""
+      },
+      {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Property key or accessor extracting the ending range value for each bar.",
@@ -6598,6 +6654,13 @@
         "kind": "input",
         "name": "pointRadius",
         "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional stable key identifying this series for mark identity and selection across updates.",
+        "kind": "input",
+        "name": "seriesKey",
+        "type": "string | undefined",
         "defaultValue": "undefined"
       },
       {

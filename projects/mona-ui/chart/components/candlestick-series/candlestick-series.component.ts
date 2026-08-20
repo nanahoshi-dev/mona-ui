@@ -128,6 +128,12 @@ export class CandlestickSeriesComponent implements OnInit {
     public readonly risingColor = input("");
 
     /**
+     * @description Optional stable key identifying this series for mark identity and selection across updates.
+     * @default undefined
+     */
+    public readonly seriesKey = input<string | undefined>(undefined);
+
+    /**
      * @description Additional CSS classes applied to the series host element.
      * @default ""
      */
@@ -140,19 +146,19 @@ export class CandlestickSeriesComponent implements OnInit {
     public readonly valueFormatter = input<ChartAxisFormatter | undefined>(undefined);
 
     /**
-     * @description Whether the series is currently visible.
+     * @description Whether the series is currently visible on the chart and in calculations.
      * @default true
      */
     public readonly visible = model(true);
 
     /**
-     * @description Optional color override for the upper and lower wicks.
-     * @default undefined
+     * @description Explicit stroke color for the upper and lower wicks.
+     * @default ""
      */
-    public readonly wickColor = input<string | undefined>(undefined);
+    public readonly wickColor = input("");
 
     /**
-     * @description Stroke width in pixels for the upper and lower wicks.
+     * @description Pixel stroke width for candle wicks.
      * @default 1
      */
     public readonly wickWidth = input(1);
@@ -164,7 +170,7 @@ export class CandlestickSeriesComponent implements OnInit {
     public readonly xAxisId = input<string | undefined>(undefined);
 
     /**
-     * @description Property key or accessor extracting the X-axis coordinate or timestamp for each data item.
+     * @description Property key or accessor extracting the X coordinate, overriding the root chart X field.
      * @default undefined
      */
     public readonly xField = input<ChartField | undefined>(undefined);
@@ -185,6 +191,7 @@ export class CandlestickSeriesComponent implements OnInit {
             this.keyField();
             this.lowField();
             this.openField();
+            this.seriesKey();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -257,6 +264,7 @@ export class CandlestickSeriesComponent implements OnInit {
             opacity: this.opacity,
             openField: this.openField,
             risingColor: this.risingColor,
+            seriesKey: this.seriesKey,
             type: "candlestick",
             userClass: this.userClass,
             valueFormatter: this.valueFormatter,

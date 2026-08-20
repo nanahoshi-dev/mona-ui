@@ -27,6 +27,7 @@ export interface CartesianDataLabelProjectorOptions {
     readonly haloColor?: string;
     readonly haloWidth?: number;
     readonly hitTargets: readonly SceneHitTarget[];
+    readonly orientation?: "horizontal" | "vertical";
     readonly plotRect: ChartRect;
     readonly selectedMarkIds: ReadonlySet<string>;
     readonly seriesRegistrations: readonly ChartSeriesRegistration[];
@@ -41,6 +42,7 @@ export class CartesianDataLabelProjector {
             haloColor = "rgba(255, 255, 255, 0.85)",
             haloWidth = 2,
             hitTargets,
+            orientation,
             plotRect,
             selectedMarkIds,
             seriesRegistrations,
@@ -84,13 +86,17 @@ export class CartesianDataLabelProjector {
                 continue;
             }
 
+            const seriesColor = "color" in cartesianReg && typeof (cartesianReg as ChartCartesianSeriesRegistrationBase).color === "function"
+                ? (cartesianReg as ChartCartesianSeriesRegistrationBase).color()
+                : undefined;
+
             const template = cartesianReg.dataLabelTemplate?.();
             const sampledHits = CartesianDataLabelProjector.#sampleHits(seriesHits, normalizedOptions.maxLabels);
 
             for (const hit of sampledHits) {
                 const markId = ChartMarkIdentityResolver.resolve(hit);
                 const isSelected = selectedMarkIds.has(markId);
-                const context = ChartDataLabelContextBuilder.buildContext(hit, isSelected);
+                const context = ChartDataLabelContextBuilder.buildContext(hit, isSelected, seriesColor);
 
                 if (template) {
                     const measureKey1 = `${hit.seriesId}:${markId}`;
@@ -104,7 +110,8 @@ export class CartesianDataLabelProjector {
                         normalizedOptions,
                         measured.width,
                         measured.height,
-                        plotRect
+                        plotRect,
+                        orientation
                     );
 
                     for (const placement of placements) {
@@ -138,7 +145,8 @@ export class CartesianDataLabelProjector {
                         normalizedOptions,
                         measured.width,
                         measured.height,
-                        plotRect
+                        plotRect,
+                        orientation
                     );
 
                     for (const placement of placements) {

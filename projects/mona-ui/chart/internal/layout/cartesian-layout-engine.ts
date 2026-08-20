@@ -583,7 +583,7 @@ export class CartesianLayoutEngine {
             const sStyle = styleResolver.resolveSeriesStyle(s, sIdx);
             const sData = resolveData(s.data(), rootData);
             const sXField = sCtx.effectiveXField;
-            const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.());
+            const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.(), s.seriesKey?.());
 
             if (s.type === "candlestick" || s.type === "ohlc") {
                 const financialLayoutResult = computeFinancialLayout({

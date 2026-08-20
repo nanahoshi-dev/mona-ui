@@ -1,7 +1,9 @@
 import { formatRgb, parse, wcagContrast } from "culori";
+import type { ChartBrushLineStyle } from "../../models/chart-brush.models";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {
     ChartAnnotationRegistration,
+    ChartBrushRegistration,
     ChartCartesianSeriesRegistration,
     ChartCrosshairRegistration,
     ChartFinancialSeriesRegistration,
@@ -15,6 +17,7 @@ import type {
     ChartReferenceBandRegistration,
     ChartReferenceLineRegistration,
     ChartRoseSeriesRegistration,
+    ChartSelectionRegistration,
     ChartSeriesRegistration,
     ChartTreemapSeriesRegistration,
     ChartWaterfallSeriesRegistration
@@ -1634,5 +1637,109 @@ export class ChartStyleResolver {
         const connectorWidth = explicitConnectorWidth !== undefined && isFiniteNumber(explicitConnectorWidth) && explicitConnectorWidth >= 0 ? explicitConnectorWidth : 1;
 
         return { color, connectorWidth, markerRadius, markerStrokeWidth };
+    }
+
+    public resolveSelectionStyle(registration?: ChartSelectionRegistration | null): {
+        readonly color: string;
+        readonly fillOpacity: number;
+        readonly strokeWidth: number;
+    } {
+        const explicitColor = registration?.color?.();
+        const explicitWidth = registration?.strokeWidth?.();
+        const explicitOpacity = registration?.fillOpacity?.();
+
+        let color = explicitColor ? this.resolveCssVariable(explicitColor) : "";
+        if (!color) {
+            color =
+                this.resolveCssVariable("--mona-chart-selection-color") ||
+                this.resolveCssVariable("--color-primary") ||
+                "#3b82f6";
+        }
+
+        let strokeWidth = explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0 ? explicitWidth : undefined;
+        if (strokeWidth === undefined) {
+            const cssWidth = this.resolveNumericCssVariable("--mona-chart-selection-stroke-width");
+            strokeWidth = cssWidth !== undefined && cssWidth >= 0 ? cssWidth : 2;
+        }
+
+        let fillOpacity = explicitOpacity !== undefined && isFiniteNumber(explicitOpacity) ? Math.max(0, Math.min(1, explicitOpacity)) : undefined;
+        if (fillOpacity === undefined) {
+            const cssOpacity = this.resolveNumericCssVariable("--mona-chart-selection-fill-opacity");
+            fillOpacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.12;
+        }
+
+        return { color, fillOpacity, strokeWidth };
+    }
+
+    public resolveBrushStyle(registration?: ChartBrushRegistration | null): {
+        readonly borderColor: string;
+        readonly borderWidth: number;
+        readonly fillColor: string;
+        readonly fillOpacity: number;
+        readonly lineStyle: ChartBrushLineStyle;
+    } {
+        const explicitFill = registration?.fillColor?.();
+        const explicitFillOpacity = registration?.fillOpacity?.();
+        const explicitBorderColor = registration?.borderColor?.();
+        const explicitBorderWidth = registration?.borderWidth?.();
+        const explicitLineStyle = registration?.lineStyle?.();
+
+        let fillColor = explicitFill ? this.resolveCssVariable(explicitFill) : "";
+        if (!fillColor) {
+            fillColor =
+                this.resolveCssVariable("--mona-chart-brush-fill-color") ||
+                this.resolveCssVariable("--color-primary") ||
+                "#3b82f6";
+        }
+
+        let fillOpacity = explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity) ? Math.max(0, Math.min(1, explicitFillOpacity)) : undefined;
+        if (fillOpacity === undefined) {
+            const cssOpacity = this.resolveNumericCssVariable("--mona-chart-brush-fill-opacity");
+            fillOpacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.15;
+        }
+
+        let borderColor = explicitBorderColor ? this.resolveCssVariable(explicitBorderColor) : "";
+        if (!borderColor) {
+            borderColor =
+                this.resolveCssVariable("--mona-chart-brush-border-color") ||
+                this.resolveCssVariable("--color-primary") ||
+                "#3b82f6";
+        }
+
+        let borderWidth = explicitBorderWidth !== undefined && isFiniteNumber(explicitBorderWidth) && explicitBorderWidth >= 0 ? explicitBorderWidth : undefined;
+        if (borderWidth === undefined) {
+            const cssBorderWidth = this.resolveNumericCssVariable("--mona-chart-brush-border-width");
+            borderWidth = cssBorderWidth !== undefined && cssBorderWidth >= 0 ? cssBorderWidth : 1;
+        }
+
+        const lineStyle = explicitLineStyle ?? "solid";
+
+        return { borderColor, borderWidth, fillColor, fillOpacity, lineStyle };
+    }
+
+    public resolveDataLabelStyle(): {
+        readonly color: string;
+        readonly font: string;
+        readonly haloColor: string;
+        readonly haloWidth: number;
+    } {
+        let color = this.resolveCssVariable("--mona-chart-data-label-color");
+        if (!color) {
+            color = this.resolveCssVariable("--color-text-primary") || "#1e293b";
+        }
+
+        let font = this.resolveCssVariable("--mona-chart-data-label-font");
+        if (!font) {
+            font = "500 11px system-ui, sans-serif";
+        }
+
+        let haloColor = this.resolveCssVariable("--mona-chart-data-label-halo-color");
+        if (!haloColor) {
+            haloColor = "rgba(255, 255, 255, 0.85)";
+        }
+
+        const haloWidth = this.resolveNumericCssVariable("--mona-chart-data-label-halo-width") ?? 2;
+
+        return { color, font, haloColor, haloWidth };
     }
 }

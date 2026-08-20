@@ -79,6 +79,12 @@ export class BubbleSeriesComponent implements OnInit {
     public readonly name = input("Bubble");
 
     /**
+     * @description Optional stable key identifying this series for mark identity and selection across updates.
+     * @default undefined
+     */
+    public readonly seriesKey = input<string | undefined>(undefined);
+
+    /**
      * @description Property key or accessor extracting the size magnitude for each bubble.
      * @default "size"
      */
@@ -146,6 +152,7 @@ export class BubbleSeriesComponent implements OnInit {
             this.data();
             this.field();
             this.keyField();
+            this.seriesKey();
             this.sizeField();
             this.xField();
             if (this.#registered) {
@@ -205,6 +212,7 @@ export class BubbleSeriesComponent implements OnInit {
             maxRadius: this.maxRadius,
             minRadius: this.minRadius,
             name: this.name,
+            seriesKey: this.seriesKey,
             sizeField: this.sizeField,
             sizeFormatter: this.sizeFormatter,
             strokeColor: this.strokeColor,

@@ -20,12 +20,24 @@ export function toSelectedPoint<T = unknown>(hit: SceneHitTarget): ChartSelected
     const fromValue = hit.fromValue ?? hit.range?.fromValue;
     const toValue = hit.toValue ?? hit.range?.toValue;
     const isRange = hit.valueKind === "range" || hit.range !== undefined;
+    const isHorizontal = hit.barOrientation === "horizontal";
 
     const value =
         hit.value ??
         (isRange && fromValue !== undefined && toValue !== undefined
             ? [fromValue, toValue]
             : (hit.hierarchy?.aggregateValue ?? hit.yValue));
+
+    let xValue: unknown;
+    let yValue: unknown;
+
+    if (isHorizontal) {
+        xValue = hit.yValue ?? hit.value;
+        yValue = hit.xValue ?? hit.category ?? hit.yCategory;
+    } else {
+        xValue = hit.xValue ?? hit.category;
+        yValue = hit.yValue;
+    }
 
     return {
         close: hit.close ?? hit.financial?.close,
@@ -45,8 +57,8 @@ export function toSelectedPoint<T = unknown>(hit: SceneHitTarget): ChartSelected
         stackStart: hit.stackStart,
         toValue,
         value,
-        xValue: hit.xValue ?? hit.category,
-        yValue: hit.yValue
+        xValue,
+        yValue
     };
 }
 
@@ -67,6 +79,17 @@ export class ChartSelectionController {
         }
 
         return result;
+    }
+
+    public static normalizeForMode(
+        ids: readonly string[] | undefined,
+        mode: ChartSelectionMode
+    ): readonly string[] {
+        const normalized = ChartSelectionController.normalize(ids);
+        if (mode === "single" && normalized.length > 1) {
+            return [normalized[0]];
+        }
+        return normalized;
     }
 
     public static applyClick(

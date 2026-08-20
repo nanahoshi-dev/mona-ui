@@ -3,11 +3,16 @@ import type { ChartSelectedPoint } from "./chart-selection.models";
 
 export type ChartBrushMode = "x" | "y" | "xy";
 
-export type ChartBrushActivation = "drag" | "shift-drag";
+export type ChartBrushActivation =
+    | "alt-drag"
+    | "ctrl-drag"
+    | "drag"
+    | "meta-drag"
+    | "shift-drag";
 
 export type ChartBrushLineStyle = "solid" | "dashed" | "dotted";
 
-export type ChartBrushHitPolicy = "center" | "intersect";
+export type ChartBrushHitPolicy = "center" | "contains" | "intersect";
 
 export type ChartBrushSelectionBehavior =
     | "none"
@@ -20,12 +25,15 @@ export type ChartBrushPhase = "start" | "update" | "end" | "cancel";
 
 export type ChartBrushCancelReason =
     | "authority-change"
+    | "component-disabled"
+    | "data-change"
     | "destroyed"
     | "disabled"
     | "escape"
     | "lost-pointer-capture"
     | "pointer-cancel"
-    | "pointer-leave";
+    | "pointer-leave"
+    | "viewport-change";
 
 export interface ChartBrushCategoryRange {
     readonly axis: "x" | "y";

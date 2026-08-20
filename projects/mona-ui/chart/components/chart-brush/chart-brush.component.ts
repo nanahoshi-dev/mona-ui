@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, inject, input, OnInit, output } from "@angular/core";
+import { Component, computed, DestroyRef, effect, inject, input, OnInit, output } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type {
@@ -36,9 +36,9 @@ export class ChartBrushComponent implements OnInit {
 
     /**
      * @description Activation trigger gesture ('drag' or 'shift-drag').
-     * @default "drag"
+     * @default "shift-drag"
      */
-    public readonly activation = input<ChartBrushActivation>("drag");
+    public readonly activation = input<ChartBrushActivation>("shift-drag");
 
     /**
      * @description Optional Cartesian X axis ID to target.
@@ -59,7 +59,7 @@ export class ChartBrushComponent implements OnInit {
     public readonly minDragDistance = input(4);
 
     /**
-     * @description Mark spatial hit policy ('center', 'intersect', or 'contain').
+     * @description Mark spatial hit policy ('center' or 'intersect').
      * @default "intersect"
      */
     public readonly hitPolicy = input<ChartBrushHitPolicy>("intersect");
@@ -72,36 +72,36 @@ export class ChartBrushComponent implements OnInit {
 
     /**
      * @description Background fill color of the brush rectangle.
-     * @default "#3b82f6"
+     * @default undefined
      */
-    public readonly fillColor = input("#3b82f6");
+    public readonly fillColor = input<string | undefined>(undefined);
 
     /**
      * @description Fill opacity of the brush rectangle.
-     * @default 0.15
+     * @default undefined
      */
-    public readonly fillOpacity = input(0.15);
+    public readonly fillOpacity = input<number | undefined>(undefined);
 
     /**
      * @description Border color of the brush rectangle.
-     * @default "#3b82f6"
+     * @default undefined
      */
-    public readonly borderColor = input("#3b82f6");
+    public readonly borderColor = input<string | undefined>(undefined);
 
     /**
      * @description Border width in pixels of the brush rectangle.
-     * @default 1
+     * @default undefined
      */
-    public readonly borderWidth = input(1);
+    public readonly borderWidth = input<number | undefined>(undefined);
 
     /**
      * @description Stroke dash style of the brush rectangle border ('solid', 'dashed', or 'dotted').
-     * @default "solid"
+     * @default undefined
      */
-    public readonly lineStyle = input<ChartBrushLineStyle>("solid");
+    public readonly lineStyle = input<ChartBrushLineStyle | undefined>(undefined);
 
     /**
-     * @description Emitted during brush lifecycle phases ('start', 'move', 'end', 'cancel').
+     * @description Emitted during brush lifecycle phases ('start', 'update', 'end', 'cancel').
      */
     public readonly brushChange = output<ChartBrushChangeEvent>();
 
@@ -129,7 +129,7 @@ export class ChartBrushComponent implements OnInit {
             this.borderWidth();
             this.lineStyle();
             if (this.#registered) {
-                this.#chartContext?.invalidate(ChartInvalidationReason.Style);
+                this.#chartContext?.invalidate(ChartInvalidationReason.Interaction);
             }
         });
     }
@@ -144,14 +144,20 @@ export class ChartBrushComponent implements OnInit {
         const unregister = this.#chartContext.registerBrush({
             activation: this.activation,
             borderColor: this.borderColor,
-            borderWidth: this.borderWidth,
+            borderWidth: computed(() => {
+                const w = this.borderWidth();
+                return w !== undefined ? Math.max(0, w) : undefined;
+            }),
             emitBrushChange: event => this.brushChange.emit(event),
             enabled: this.enabled,
             fillColor: this.fillColor,
-            fillOpacity: this.fillOpacity,
+            fillOpacity: computed(() => {
+                const o = this.fillOpacity();
+                return o !== undefined ? Math.max(0, Math.min(1, o)) : undefined;
+            }),
             hitPolicy: this.hitPolicy,
-            lineStyle: this.lineStyle,
-            minDragDistance: this.minDragDistance,
+            lineStyle: computed(() => this.lineStyle() ?? "solid"),
+            minDragDistance: computed(() => Math.max(0, this.minDragDistance())),
             mode: this.mode,
             selectionBehavior: this.selectionBehavior,
             xAxisId: this.xAxisId,

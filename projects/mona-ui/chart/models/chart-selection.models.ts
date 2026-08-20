@@ -27,7 +27,7 @@ export interface ChartSelectedPoint<T = unknown> {
     readonly toValue?: number;
     readonly value?: unknown;
     readonly xValue: unknown;
-    readonly yValue?: number;
+    readonly yValue?: unknown;
 }
 
 export interface ChartSelectionChangeEvent<T = unknown> {

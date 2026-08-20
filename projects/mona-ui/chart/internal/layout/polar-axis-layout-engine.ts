@@ -288,7 +288,7 @@ export class PolarAxisLayoutEngine {
             if (reg.type === "radar" && radarDataResult) {
                 const sData = radarDataResult.seriesList.find(s => s.series.id === reg.id);
                 const points: SceneRadialPoint[] = [];
-                const keyResolver = new ChartMarkKeyResolver(reg.id, reg.keyField?.());
+                const keyResolver = new ChartMarkKeyResolver(reg.id, reg.keyField?.(), reg.seriesKey?.());
 
                 if (sData) {
                     for (let i = 0; i < sData.points.length; i++) {
@@ -386,7 +386,7 @@ export class PolarAxisLayoutEngine {
             } else if (reg.type === "polar" && polarDataResult) {
                 const sData = polarDataResult.seriesList.find(s => s.series.id === reg.id);
                 const points: SceneRadialPoint[] = [];
-                const keyResolver = new ChartMarkKeyResolver(reg.id, reg.keyField?.());
+                const keyResolver = new ChartMarkKeyResolver(reg.id, reg.keyField?.(), reg.seriesKey?.());
 
                 if (sData) {
                     for (let i = 0; i < sData.points.length; i++) {

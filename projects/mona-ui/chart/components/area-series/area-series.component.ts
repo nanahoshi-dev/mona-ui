@@ -99,6 +99,12 @@ export class AreaSeriesComponent implements OnInit {
     public readonly showPoints = input(false);
 
     /**
+     * @description Optional stable key identifying this series for mark identity and selection across updates.
+     * @default undefined
+     */
+    public readonly seriesKey = input<string | undefined>(undefined);
+
+    /**
      * @description Named stack group to participate in. Series with matching trimmed stack names stack together.
      * @default undefined
      */
@@ -166,6 +172,7 @@ export class AreaSeriesComponent implements OnInit {
             this.data();
             this.field();
             this.keyField();
+            this.seriesKey();
             this.stack();
             this.stackMode();
             this.xField();
@@ -230,6 +237,7 @@ export class AreaSeriesComponent implements OnInit {
             keyField: this.keyField,
             name: this.name,
             pointRadius: this.pointRadius,
+            seriesKey: this.seriesKey,
             showPoints: this.showPoints,
             stack: this.stack,
             stackMode: this.stackMode,
