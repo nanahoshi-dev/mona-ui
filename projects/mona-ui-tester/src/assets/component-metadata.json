@@ -6819,6 +6819,19 @@
       }
     ]
   },
+  "ChartOverlayLabelMeasureDirective": {
+    "name": "ChartOverlayLabelMeasureDirective",
+    "selector": "\"[monaChartOverlayLabelMeasure]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "labelId",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
   "CheckBoxComponent": {
     "name": "CheckBoxComponent",
     "selector": "\"mona-check-box\"",
