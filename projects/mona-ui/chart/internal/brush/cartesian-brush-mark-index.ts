@@ -1,27 +1,54 @@
 import type { ChartBrushHitPolicy, ChartBrushMode } from "../../models/chart-brush.models";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import { CartesianHitAxisCompatibility } from "../interaction/cartesian-hit-axis-compatibility";
+import { CartesianMarkVisualGeometry } from "../interaction/cartesian-mark-visual-geometry";
 import type { SceneHitTarget } from "../scene/scene-geometry";
+import type { ResolvedCartesianBrushTarget } from "./cartesian-brush-target-resolver";
+
+export interface IndexedBrushMark {
+    readonly bounds: ChartRect;
+    readonly hit: SceneHitTarget;
+    readonly ordinal: number;
+}
+
+export interface BrushIndexInstrumentation {
+    onCandidateExamined?(): void;
+    onCellVisited?(): void;
+    onIndexBuildHit?(): void;
+}
 
 export class CartesianBrushMarkIndex {
     readonly #cellSize: number;
-    readonly #grid = new Map<string, SceneHitTarget[]>();
-    readonly #allHits: SceneHitTarget[] = [];
+    readonly #grid = new Map<string, IndexedBrushMark[]>();
+    #totalHits = 0;
 
     public constructor(cellSize: number = 48) {
         this.#cellSize = Math.max(16, cellSize);
     }
 
-    public build(hits: readonly SceneHitTarget[]): void {
-        this.#grid.clear();
-        this.#allHits.length = 0;
+    public get totalHits(): number {
+        return this.#totalHits;
+    }
 
+    public build(hits: readonly SceneHitTarget[], instrumentation?: BrushIndexInstrumentation): void {
+        this.#grid.clear();
+        this.#totalHits = hits.length;
+
+        let ordinal = 0;
         for (const hit of hits) {
-            this.#allHits.push(hit);
+            instrumentation?.onIndexBuildHit?.();
             const bounds = CartesianBrushMarkIndex.#getHitBounds(hit);
             if (!bounds) {
+                ordinal++;
                 continue;
             }
+
+            const item: IndexedBrushMark = {
+                bounds,
+                hit,
+                ordinal
+            };
+            ordinal++;
 
             const minCellX = Math.floor(bounds.x / this.#cellSize);
             const maxCellX = Math.floor((bounds.x + bounds.width) / this.#cellSize);
@@ -36,7 +63,7 @@ export class CartesianBrushMarkIndex {
                         cellHits = [];
                         this.#grid.set(key, cellHits);
                     }
-                    cellHits.push(hit);
+                    cellHits.push(item);
                 }
             }
         }
@@ -45,11 +72,14 @@ export class CartesianBrushMarkIndex {
     public query(
         brushBounds: ChartRect,
         hitPolicy: ChartBrushHitPolicy = "intersect",
-        mode: ChartBrushMode = "xy",
+        targetOrMode: ResolvedCartesianBrushTarget | ChartBrushMode = "xy",
         targetXAxisId?: string,
-        targetYAxisId?: string
+        targetYAxisId?: string,
+        instrumentation?: BrushIndexInstrumentation,
+        primaryXAxisId?: string,
+        primaryYAxisId?: string
     ): readonly SceneHitTarget[] {
-        if (this.#allHits.length === 0) {
+        if (this.#totalHits === 0 || this.#grid.size === 0) {
             return [];
         }
 
@@ -58,104 +88,55 @@ export class CartesianBrushMarkIndex {
         const minCellY = Math.floor(brushBounds.y / this.#cellSize);
         const maxCellY = Math.floor((brushBounds.y + brushBounds.height) / this.#cellSize);
 
-        const candidates = new Set<SceneHitTarget>();
+        const candidates = new Set<IndexedBrushMark>();
 
         for (let cx = minCellX; cx <= maxCellX; cx++) {
             for (let cy = minCellY; cy <= maxCellY; cy++) {
+                instrumentation?.onCellVisited?.();
                 const key = `${cx}:${cy}`;
                 const cellHits = this.#grid.get(key);
                 if (cellHits) {
-                    for (const hit of cellHits) {
-                        candidates.add(hit);
+                    for (const item of cellHits) {
+                        candidates.add(item);
                     }
                 }
             }
         }
 
-        const results: SceneHitTarget[] = [];
+        const matched: IndexedBrushMark[] = [];
 
-        for (const hit of this.#allHits) {
-            if (!candidates.has(hit)) {
+        for (const item of candidates) {
+            instrumentation?.onCandidateExamined?.();
+            const hit = item.hit;
+
+            if (!CartesianHitAxisCompatibility.isCompatible(hit, targetOrMode, targetXAxisId, targetYAxisId, primaryXAxisId, primaryYAxisId)) {
                 continue;
             }
 
-            if (!CartesianHitAxisCompatibility.isCompatible(hit, mode, targetXAxisId, targetYAxisId)) {
-                continue;
-            }
-
-            if (CartesianBrushMarkIndex.#matches(hit, brushBounds, hitPolicy)) {
-                results.push(hit);
+            if (CartesianBrushMarkIndex.#matches(item, brushBounds, hitPolicy)) {
+                matched.push(item);
             }
         }
 
-        return results;
+        matched.sort((a, b) => a.ordinal - b.ordinal);
+        return matched.map(m => m.hit);
     }
 
     static #getHitBounds(hit: SceneHitTarget): ChartRect | null {
-        if (hit.visualBounds) {
-            return hit.visualBounds;
-        }
-        if (hit.bounds) {
-            return hit.bounds;
-        }
-        if (hit.highPoint && hit.lowPoint) {
-            const minX = Math.min(hit.highPoint.x, hit.lowPoint.x);
-            const maxX = Math.max(hit.highPoint.x, hit.lowPoint.x);
-            const minY = Math.min(hit.highPoint.y, hit.lowPoint.y);
-            const maxY = Math.max(hit.highPoint.y, hit.lowPoint.y);
-            return {
-                height: Math.max(4, maxY - minY),
-                width: Math.max(4, maxX - minX),
-                x: minX,
-                y: minY
-            };
-        }
-        if (hit.point) {
-            const r = hit.radius ?? 4;
-            return {
-                height: r * 2,
-                width: r * 2,
-                x: hit.point.x - r,
-                y: hit.point.y - r
-            };
-        }
-        return null;
+        return CartesianMarkVisualGeometry.getVisualBounds(hit);
     }
 
     static #getHitCenter(hit: SceneHitTarget): ChartPoint {
-        if (hit.point) {
-            return hit.point;
-        }
-        if (hit.highPoint && hit.lowPoint) {
-            return {
-                x: (hit.highPoint.x + hit.lowPoint.x) / 2,
-                y: (hit.highPoint.y + hit.lowPoint.y) / 2
-            };
-        }
-        if (hit.visualBounds) {
-            return {
-                x: hit.visualBounds.x + hit.visualBounds.width / 2,
-                y: hit.visualBounds.y + hit.visualBounds.height / 2
-            };
-        }
-        if (hit.bounds) {
-            return {
-                x: hit.bounds.x + hit.bounds.width / 2,
-                y: hit.bounds.y + hit.bounds.height / 2
-            };
-        }
-        return { x: 0, y: 0 };
+        return CartesianMarkVisualGeometry.getVisualCenter(hit);
     }
 
     static #matches(
-        hit: SceneHitTarget,
+        item: IndexedBrushMark,
         brush: ChartRect,
         policy: ChartBrushHitPolicy
     ): boolean {
-        const hitBounds = CartesianBrushMarkIndex.#getHitBounds(hit);
-        if (!hitBounds) {
-            return false;
-        }
+        const hit = item.hit;
+        const hitBounds = item.bounds;
 
         if (policy === "center") {
             const center = CartesianBrushMarkIndex.#getHitCenter(hit);
@@ -168,6 +149,17 @@ export class CartesianBrushMarkIndex {
         }
 
         // policy === "intersect"
+        // For point-like marks (line/area without markers), intersect means center containment
+        if ((hit.seriesType === "line" || hit.seriesType === "area") && !hit.visualRadius) {
+            const center = CartesianBrushMarkIndex.#getHitCenter(hit);
+            return (
+                center.x >= brush.x &&
+                center.x <= brush.x + brush.width &&
+                center.y >= brush.y &&
+                center.y <= brush.y + brush.height
+            );
+        }
+
         return (
             hitBounds.x < brush.x + brush.width &&
             hitBounds.x + hitBounds.width > brush.x &&

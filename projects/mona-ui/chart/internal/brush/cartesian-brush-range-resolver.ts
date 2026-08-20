@@ -6,6 +6,7 @@ import type {
 } from "../../models/chart-brush.models";
 import type { ChartRect } from "../../models/chart.models";
 import type { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
+import type { ResolvedCartesianBrushTarget } from "./cartesian-brush-target-resolver";
 
 export interface ResolvedBrushRanges {
     readonly xRange?: ChartBrushAxisRange;
@@ -16,9 +17,9 @@ export class CartesianBrushRangeResolver {
     public static resolve(
         bounds: ChartRect,
         coordinateSpace: CartesianAxisCoordinateSpace,
-        mode: ChartBrushMode,
-        xAxisId?: string,
-        yAxisId?: string
+        targetOrMode: ResolvedCartesianBrushTarget | ChartBrushMode,
+        targetXAxisId?: string,
+        targetYAxisId?: string
     ): ResolvedBrushRanges {
         if (
             !coordinateSpace?.x ||
@@ -28,34 +29,46 @@ export class CartesianBrushRangeResolver {
             return {};
         }
 
+        let mode: ChartBrushMode;
+        let axisX: string | undefined;
+        let axisY: string | undefined;
+        let isValidX = true;
+        let isValidY = true;
+
+        if (typeof targetOrMode === "object") {
+            mode = targetOrMode.mode;
+            axisX = targetOrMode.xAxisId;
+            axisY = targetOrMode.yAxisId;
+            isValidX = targetOrMode.isValidX;
+            isValidY = targetOrMode.isValidY;
+        } else {
+            mode = targetOrMode;
+            axisX = targetXAxisId ?? coordinateSpace.x.keys().next().value;
+            axisY = targetYAxisId ?? coordinateSpace.y.keys().next().value;
+        }
+
         let xRange: ChartBrushAxisRange | undefined;
         let yRange: ChartBrushAxisRange | undefined;
 
-        if (mode === "x" || mode === "xy") {
-            const effectiveXAxisId = xAxisId ?? coordinateSpace.x.keys().next().value;
-            if (effectiveXAxisId) {
-                xRange = CartesianBrushRangeResolver.#resolveAxisRange(
-                    bounds.x,
-                    bounds.x + bounds.width,
-                    "x",
-                    effectiveXAxisId,
-                    coordinateSpace
-                );
-            }
+        if ((mode === "x" || mode === "xy") && isValidX && axisX) {
+            xRange = CartesianBrushRangeResolver.#resolveAxisRange(
+                bounds.x,
+                bounds.x + bounds.width,
+                "x",
+                axisX,
+                coordinateSpace
+            );
         }
 
-        if (mode === "y" || mode === "xy") {
-            const effectiveYAxisId = yAxisId ?? coordinateSpace.y.keys().next().value;
-            if (effectiveYAxisId) {
-                // In canvas coords, top is smaller Y, bottom is larger Y
-                yRange = CartesianBrushRangeResolver.#resolveAxisRange(
-                    bounds.y + bounds.height,
-                    bounds.y,
-                    "y",
-                    effectiveYAxisId,
-                    coordinateSpace
-                );
-            }
+        if ((mode === "y" || mode === "xy") && isValidY && axisY) {
+            // In canvas coords, top is smaller Y, bottom is larger Y
+            yRange = CartesianBrushRangeResolver.#resolveAxisRange(
+                bounds.y + bounds.height,
+                bounds.y,
+                "y",
+                axisY,
+                coordinateSpace
+            );
         }
 
         return { xRange, yRange };
@@ -76,26 +89,19 @@ export class CartesianBrushRangeResolver {
         const ref = { axis, axisId };
 
         if (snap.resolvedType === "category") {
-            const minPx = Math.min(pixel1, pixel2);
-            const maxPx = Math.max(pixel1, pixel2);
-            const catFrom = coordinateSpace.resolveCategoryAtPixel(ref, minPx);
-            const catTo = coordinateSpace.resolveCategoryAtPixel(ref, maxPx);
-
-            if (!catFrom && !catTo) {
+            const extent = coordinateSpace.resolveCategoryExtentAtPixels(ref, pixel1, pixel2);
+            if (!extent) {
                 return undefined;
             }
-
-            const fromIdx = Math.min(catFrom?.baseIndex ?? 0, catTo?.baseIndex ?? 0);
-            const toIdx = Math.max(catFrom?.baseIndex ?? 0, catTo?.baseIndex ?? 0);
 
             const result: ChartBrushCategoryRange = {
                 axis: ref.axis,
                 axisId,
-                fromIndex: fromIdx,
-                fromValue: catFrom?.key,
+                fromIndex: extent.fromBaseIndex,
+                fromValue: extent.fromValue,
                 kind: "category",
-                toIndex: toIdx,
-                toValue: catTo?.key
+                toIndex: extent.toBaseIndex,
+                toValue: extent.toValue
             };
             return result;
         }
@@ -128,12 +134,18 @@ export class CartesianBrushRangeResolver {
             to = temp;
         }
 
+        const scaleType =
+            res1?.resolvedType ??
+            res2?.resolvedType ??
+            (snap.resolvedType as ChartBrushContinuousRange["scaleType"]) ??
+            "linear";
+
         const continuousResult: ChartBrushContinuousRange = {
             axis: ref.axis,
             axisId,
             from: from!,
             kind: "continuous",
-            scaleType: res1?.resolvedType ?? "linear",
+            scaleType,
             to: to!
         };
         return continuousResult;
