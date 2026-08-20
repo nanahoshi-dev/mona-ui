@@ -10,6 +10,7 @@ import type { ChartInteractionState } from "./chart-interaction-state";
 
 export interface ChartPointerResolution {
     readonly bucketHits: readonly SceneHitTarget[];
+    readonly crosshairCandidates?: readonly SceneHitTarget[];
     readonly hitState: ChartInteractionState;
     readonly nearestAnchor: ChartPoint | null;
     readonly pointer: ChartPoint;
@@ -18,7 +19,9 @@ export interface ChartPointerResolution {
 }
 
 export interface ChartPointerInteractionDemand {
+    readonly crosshairMaxDistance?: number;
     readonly maxDistance?: number;
+    readonly needCrosshairCandidates?: boolean;
     readonly needHitTest?: boolean;
 }
 
@@ -29,11 +32,11 @@ export class ChartPointerInteractionResolver {
         sharedTooltip: boolean,
         maxDistanceOrDemand: number | ChartPointerInteractionDemand = 32
     ): ChartPointerResolution {
-        const demand = typeof maxDistanceOrDemand === "number"
+        const demand: ChartPointerInteractionDemand = typeof maxDistanceOrDemand === "number"
             ? { maxDistance: maxDistanceOrDemand, needHitTest: true }
             : { maxDistance: 32, needHitTest: true, ...maxDistanceOrDemand };
 
-        const effectiveMaxDistance = Number.isFinite(demand.maxDistance) && demand.maxDistance! >= 0
+        const tooltipMaxDistance = Number.isFinite(demand.maxDistance) && demand.maxDistance! >= 0
             ? demand.maxDistance!
             : 32;
 
@@ -45,6 +48,7 @@ export class ChartPointerInteractionResolver {
             };
             return {
                 bucketHits: [],
+                crosshairCandidates: [],
                 hitState: emptyHitState,
                 nearestAnchor: null,
                 pointer,
@@ -53,9 +57,36 @@ export class ChartPointerInteractionResolver {
             };
         }
 
-        const hitState = ChartHitTestEngine.testHit(pointer, scene, sharedTooltip, effectiveMaxDistance);
+        const hitState = ChartHitTestEngine.testHit(pointer, scene, sharedTooltip, tooltipMaxDistance);
         const primaryHit = hitState.activeHitTarget ?? hitState.activeHits[0] ?? null;
         const bucketHits = hitState.activeHits;
+
+        let crosshairCandidates: readonly SceneHitTarget[] = [];
+        if (demand.needCrosshairCandidates) {
+            const chDistance = Number.isFinite(demand.crosshairMaxDistance) && demand.crosshairMaxDistance! >= 0
+                ? demand.crosshairMaxDistance!
+                : 32;
+            if (chDistance > tooltipMaxDistance) {
+                const chHitState = ChartHitTestEngine.testHit(pointer, scene, false, chDistance);
+                const candidates = new Set<SceneHitTarget>();
+                for (const h of chHitState.activeHits) {
+                    candidates.add(h);
+                }
+                if (chHitState.activeHitTarget) {
+                    candidates.add(chHitState.activeHitTarget);
+                }
+                crosshairCandidates = Array.from(candidates);
+            } else {
+                const candidates = new Set<SceneHitTarget>();
+                for (const h of bucketHits) {
+                    candidates.add(h);
+                }
+                if (primaryHit) {
+                    candidates.add(primaryHit);
+                }
+                crosshairCandidates = Array.from(candidates);
+            }
+        }
 
         let snappedAnchor: ChartPoint | null = null;
         if (primaryHit) {
@@ -86,6 +117,7 @@ export class ChartPointerInteractionResolver {
 
         return {
             bucketHits,
+            crosshairCandidates,
             hitState,
             nearestAnchor,
             pointer,

@@ -95,3 +95,31 @@ export function formatPercentagePoint(value: number, digits: number = 1): string
     const fixed = Number(value.toFixed(digits));
     return `${fixed}%`;
 }
+
+export interface CartesianAxisSemanticFormatOptions {
+    readonly axisScene?: import("../scene/cartesian-scene").ChartAxisScene;
+    readonly index?: number;
+    readonly value: unknown;
+    readonly xTimeSpanMs?: number;
+}
+
+export function formatCartesianAxisSemanticValue(options: CartesianAxisSemanticFormatOptions): string {
+    const { axisScene, index = 0, value, xTimeSpanMs } = options;
+    if (axisScene?.formatter) {
+        return axisScene.formatter(value, index);
+    }
+    if (axisScene?.unitMode === "percent" && isFiniteNumber(value)) {
+        return formatPercentagePoint(value);
+    }
+    if (axisScene?.axis === "x") {
+        return formatXValue(
+            value,
+            index,
+            undefined,
+            axisScene.scaleType as ChartXAxisType,
+            xTimeSpanMs
+        );
+    }
+    return formatYValue(value, index, undefined);
+}
+

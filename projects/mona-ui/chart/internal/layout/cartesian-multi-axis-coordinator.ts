@@ -653,6 +653,7 @@ export class CartesianMultiAxisCoordinator {
                 tickSize: xAxis.tickSize ?? 6,
                 title: xAxis.title,
                 titlePadding: xAxis.titlePadding ?? 8,
+                unitMode: unitMode === "percent" ? "percent" : "raw",
                 visible: xAxis.visible
             });
         }
@@ -707,6 +708,7 @@ export class CartesianMultiAxisCoordinator {
                 tickSize: yAxis.tickSize ?? 6,
                 title: yAxis.title,
                 titlePadding: yAxis.titlePadding ?? 8,
+                unitMode: unitMode === "percent" ? "percent" : "raw",
                 visible: yAxis.visible
             });
         }
@@ -882,6 +884,7 @@ export class CartesianMultiAxisCoordinator {
                 tickSize: xAxis.tickSize ?? 6,
                 title: xAxis.title,
                 titlePadding: xAxis.titlePadding ?? 8,
+                unitMode: unitMode === "percent" ? "percent" : "raw",
                 visible: xAxis.visible
             });
         }
@@ -932,6 +935,7 @@ export class CartesianMultiAxisCoordinator {
                 tickSize: yAxis.tickSize ?? 6,
                 title: yAxis.title,
                 titlePadding: yAxis.titlePadding ?? 8,
+                unitMode: unitMode === "percent" ? "percent" : "raw",
                 visible: yAxis.visible
             });
         }

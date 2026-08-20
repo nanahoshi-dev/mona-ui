@@ -1,7 +1,7 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import type { ChartRect } from "../../models/chart.models";
+import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import { crispPixel } from "../utils/canvas-utils";
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
@@ -19,6 +19,7 @@ import type { ChartCrosshairRegistration } from "../context/chart-registration-c
 import type { ChartCrosshairState } from "../interaction/chart-crosshair-state";
 
 export interface ChartRenderOverlayState {
+    readonly annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null;
     readonly cartesianOverlay?: CartesianOverlayScene | null;
     readonly crosshair?: ChartCrosshairState | null;
     readonly crosshairRegistration?: ChartCrosshairRegistration | null;
@@ -118,9 +119,10 @@ export class CartesianChartRenderer {
     public static renderStaticOverlayLayer(
         context: CanvasRenderingContext2D,
         cartesianOverlay: CartesianOverlayScene | null,
-        plotRect: ChartRect
+        plotRect: ChartRect,
+        annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null
     ): void {
-        CartesianOverlayRenderer.renderOverlays(context, cartesianOverlay, plotRect);
+        CartesianOverlayRenderer.renderOverlays(context, cartesianOverlay, plotRect, annotationBadgeAnchors ?? undefined);
     }
 
     public static renderAxisLayer(
@@ -250,6 +252,8 @@ export class CartesianChartRenderer {
 
         const cartesianOverlay: CartesianOverlayScene | null =
             overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
+        const annotationBadgeAnchors: ReadonlyMap<string, ChartPoint> | null =
+            overlayState && "annotationBadgeAnchors" in overlayState ? (overlayState.annotationBadgeAnchors ?? null) : null;
 
         context.save();
         // 1. Grid
@@ -259,7 +263,7 @@ export class CartesianChartRenderer {
         // 3. Series
         this.renderSeriesLayer(context, scene);
         // 4. Static Overlays & Annotations
-        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect);
+        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
         // 5. Axes
         this.renderAxisLayer(context, scene, styleResolver);
         // 6. Transient (Crosshair + Highlights)
@@ -282,6 +286,8 @@ export class CartesianChartRenderer {
 
         const cartesianOverlay: CartesianOverlayScene | null =
             overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
+        const annotationBadgeAnchors: ReadonlyMap<string, ChartPoint> | null =
+            overlayState && "annotationBadgeAnchors" in overlayState ? (overlayState.annotationBadgeAnchors ?? null) : null;
 
         context.save();
 
@@ -317,7 +323,7 @@ export class CartesianChartRenderer {
         }
 
         // 4. Target static overlay once (at full own opacity)
-        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect);
+        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
 
         // 5. Axes crossfade
         if (fromScene && progress < 1) {

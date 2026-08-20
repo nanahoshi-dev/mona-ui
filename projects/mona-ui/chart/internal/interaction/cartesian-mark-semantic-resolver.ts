@@ -143,17 +143,37 @@ export class CartesianMarkSemanticResolver {
 
         // 4. Area series (Stacked or regular)
         if (hit.seriesType === "area") {
-            const markX = hit.xValue ?? hit.category ?? hit.categoryX;
-            const markY = hit.stackEnd ?? hit.yValue ?? hit.value;
-            return {
-                semanticIndexX: dataIndex,
-                semanticIndexY: dataIndex,
-                semanticX: markX,
-                semanticY: markY
-            };
+            if (isHorizontal) {
+                const markX = hit.stackEnd ?? hit.value ?? hit.rawValue ?? hit.xValue;
+                const markY = hit.yCategory ?? hit.categoryY ?? hit.category ?? hit.yValue;
+                return {
+                    semanticIndexX: dataIndex,
+                    semanticIndexY: dataIndex,
+                    semanticX: markX,
+                    semanticY: markY
+                };
+            } else {
+                const markX = hit.xValue ?? hit.category ?? hit.categoryX;
+                const markY = hit.stackEnd ?? hit.yValue ?? hit.value;
+                return {
+                    semanticIndexX: dataIndex,
+                    semanticIndexY: dataIndex,
+                    semanticX: markX,
+                    semanticY: markY
+                };
+            }
         }
 
         // 5. Point-like marks (Line, Scatter, Bubble)
+        if (isHorizontal) {
+            return {
+                semanticIndexX: dataIndex,
+                semanticIndexY: dataIndex,
+                semanticX: hit.xValue ?? hit.value ?? hit.rawValue,
+                semanticY: hit.yCategory ?? hit.categoryY ?? hit.category ?? hit.yValue
+            };
+        }
+
         return {
             semanticIndexX: dataIndex,
             semanticIndexY: dataIndex,

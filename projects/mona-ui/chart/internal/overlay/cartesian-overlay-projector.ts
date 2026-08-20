@@ -16,7 +16,7 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartXAxisType } from "../../models/chart-axis.models";
 import { getOrCreateBaseCategoryIndex } from "../viewport/cartesian-axis-coordinate-space";
-import { formatXValue, formatYValue } from "../utils/chart-formatter";
+import { formatCartesianAxisSemanticValue } from "../utils/chart-formatter";
 
 const EMPTY_OVERLAY_SCENE: CartesianOverlayScene = {
     annotations: [],
@@ -106,16 +106,12 @@ export class CartesianOverlayProjector {
             const lineStyle = reg.lineStyle();
             const dash = getLineDash(lineStyle);
             const targetAxis = scene.axes.find(a => a.axis === axis && a.axisId === axisId);
-
-            const formattedValue = axis === "x"
-                ? formatXValue(
-                      reg.value(),
-                      semanticIndex,
-                      targetAxis?.formatter,
-                      targetAxis?.scaleType as ChartXAxisType,
-                      scene.xTimeSpanMs
-                  )
-                : formatYValue(reg.value(), semanticIndex, targetAxis?.formatter);
+            const formattedValue = formatCartesianAxisSemanticValue({
+                axisScene: targetAxis,
+                index: semanticIndex,
+                value: reg.value(),
+                xTimeSpanMs: scene.xTimeSpanMs
+            });
 
             let label: SceneReferenceLabel | undefined;
             const labelText = reg.label();
@@ -298,25 +294,19 @@ export class CartesianOverlayProjector {
             const style = styleResolver.resolveReferenceBandStyle(reg);
             const targetAxis = scene.axes.find(a => a.axis === axis && a.axisId === axisId);
 
-            const formattedFrom = axis === "x"
-                ? formatXValue(
-                      reg.from(),
-                      idxFrom,
-                      targetAxis?.formatter,
-                      targetAxis?.scaleType as ChartXAxisType,
-                      scene.xTimeSpanMs
-                  )
-                : formatYValue(reg.from(), idxFrom, targetAxis?.formatter);
+            const formattedFrom = formatCartesianAxisSemanticValue({
+                axisScene: targetAxis,
+                index: idxFrom,
+                value: reg.from(),
+                xTimeSpanMs: scene.xTimeSpanMs
+            });
 
-            const formattedTo = axis === "x"
-                ? formatXValue(
-                      reg.to(),
-                      idxTo,
-                      targetAxis?.formatter,
-                      targetAxis?.scaleType as ChartXAxisType,
-                      scene.xTimeSpanMs
-                  )
-                : formatYValue(reg.to(), idxTo, targetAxis?.formatter);
+            const formattedTo = formatCartesianAxisSemanticValue({
+                axisScene: targetAxis,
+                index: idxTo,
+                value: reg.to(),
+                xTimeSpanMs: scene.xTimeSpanMs
+            });
 
             let label: SceneReferenceLabel | undefined;
             const labelText = reg.label();
@@ -451,14 +441,18 @@ export class CartesianOverlayProjector {
             const targetXAxis = scene.axes.find(a => a.axis === "x" && a.axisId === xAxisId);
             const targetYAxis = scene.axes.find(a => a.axis === "y" && a.axisId === yAxisId);
 
-            const formattedX = formatXValue(
-                reg.x(),
-                xIdx,
-                targetXAxis?.formatter,
-                targetXAxis?.scaleType as ChartXAxisType,
-                scene.xTimeSpanMs
-            );
-            const formattedY = formatYValue(reg.y(), yIdx, targetYAxis?.formatter);
+            const formattedX = formatCartesianAxisSemanticValue({
+                axisScene: targetXAxis,
+                index: xIdx,
+                value: reg.x(),
+                xTimeSpanMs: scene.xTimeSpanMs
+            });
+            const formattedY = formatCartesianAxisSemanticValue({
+                axisScene: targetYAxis,
+                index: yIdx,
+                value: reg.y(),
+                xTimeSpanMs: scene.xTimeSpanMs
+            });
 
             let label: SceneAnnotationLabel | undefined;
             const labelText = reg.label();

@@ -43,6 +43,7 @@ export interface ChartAxisScene {
     tickSize?: number;
     title: string;
     titlePadding?: number;
+    unitMode?: "percent" | "raw";
     visible: boolean;
 }
 

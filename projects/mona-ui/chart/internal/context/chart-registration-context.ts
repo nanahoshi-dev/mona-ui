@@ -682,6 +682,7 @@ export interface ChartRegistrationContext {
     legendItems: Signal<readonly ChartLegendItem[]>;
     readonly legendScale?: Signal<ChartColorLegendScale | null>;
     observeLabelElement?(element: HTMLElement, labelId: string): void;
+    observeOverlayLabelElement?(element: HTMLElement, labelId: string): void;
     registerAngularAxis(registration: ChartAngularAxisRegistration): () => void;
     registerAnnotation(registration: ChartAnnotationRegistration): () => void;
     registerCrosshair(registration: ChartCrosshairRegistration): () => void;
@@ -700,4 +701,5 @@ export interface ChartRegistrationContext {
     tooltipContext: Signal<ChartTooltipTemplateContext | null>;
     tooltipPosition: Signal<ChartPoint | null>;
     unobserveLabelElement?(element: HTMLElement, labelId: string): void;
+    unobserveOverlayLabelElement?(element: HTMLElement, labelId: string): void;
 }

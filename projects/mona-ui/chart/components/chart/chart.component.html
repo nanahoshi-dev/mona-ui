@@ -320,7 +320,7 @@
                         aria-hidden="true"
                         [class]="referenceLabelClasses() + (line.label.labelClass ? ' ' + line.label.labelClass : '')"
                         [class.hidden]="!line.label.formattedText && !resolveReferenceLineTemplate(line.id)"
-                        [monaChartLabelMeasure]="'overlay:line:' + line.id"
+                        [monaChartOverlayLabelMeasure]="'overlay:line:' + line.id"
                         [style.left.px]="referenceLineLabelLeft(line)"
                         [style.top.px]="referenceLineLabelTop(line)"
                         [style.transform]="referenceLineLabelTransform(line)">
@@ -352,10 +352,10 @@
                         aria-hidden="true"
                         [class]="referenceLabelClasses() + (band.label.labelClass ? ' ' + band.label.labelClass : '')"
                         [class.hidden]="!band.label.formattedText && !resolveReferenceBandTemplate(band.id)"
-                        [monaChartLabelMeasure]="'overlay:band:' + band.id"
+                        [monaChartOverlayLabelMeasure]="'overlay:band:' + band.id"
                         [style.left.px]="referenceBandLabelLeft(band)"
                         [style.top.px]="referenceBandLabelTop(band)"
-                        [style.transform]="'translate(-50%, -50%)'">
+                        [style.transform]="referenceBandLabelTransform(band)">
                         @if (resolveReferenceBandTemplate(band.id); as template) {
                             @if (resolveReferenceBandRegistration(band.id); as reg) {
                                 <ng-container
@@ -386,7 +386,7 @@
                         aria-hidden="true"
                         [class]="annotationLabelClasses() + (ann.label.labelClass ? ' ' + ann.label.labelClass : '')"
                         [class.hidden]="!ann.label.formattedText && !resolveAnnotationTemplate(ann.id)"
-                        [monaChartLabelMeasure]="'overlay:ann:' + ann.id"
+                        [monaChartOverlayLabelMeasure]="'overlay:ann:' + ann.id"
                         [style.left.px]="annotationLabelLeft(ann)"
                         [style.top.px]="annotationLabelTop(ann)"
                         [style.transform]="annotationLabelTransform(ann)">
@@ -423,7 +423,7 @@
                             <div
                                 aria-hidden="true"
                                 [class]="crosshairLabelClasses()"
-                                [monaChartLabelMeasure]="'crosshair:x'"
+                                [monaChartOverlayLabelMeasure]="'crosshair:x'"
                                 [style.left.px]="crosshairXLabelLeft(cart, chState)"
                                 [style.top.px]="crosshairXLabelTop(cart, chState)"
                                 [style.transform]="crosshairXLabelTransform(cart, chState)">
@@ -450,7 +450,7 @@
                             <div
                                 aria-hidden="true"
                                 [class]="crosshairLabelClasses()"
-                                [monaChartLabelMeasure]="'crosshair:y'"
+                                [monaChartOverlayLabelMeasure]="'crosshair:y'"
                                 [style.left.px]="crosshairYLabelLeft(cart, chState)"
                                 [style.top.px]="crosshairYLabelTop(cart, chState)"
                                 [style.transform]="crosshairYLabelTransform(cart, chState)">

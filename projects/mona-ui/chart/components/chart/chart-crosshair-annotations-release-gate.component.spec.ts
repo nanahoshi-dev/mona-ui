@@ -42,7 +42,7 @@ import type { ChartAnnotationLabelPlacement, ChartAnnotationAxisValue } from "..
             <mona-chart-y-axis [axisId]="'y-secondary'" [position]="'right'" [min]="0" [max]="500" [formatter]="ySecFormatter" />
 
             @if (seriesKind() === 'line') {
-                <mona-line-series [data]="categoryData()" [xField]="'category'" [field]="'value'" [name]="'Line A'" [xAxisId]="'x-main'" [yAxisId]="'y-main'" />
+                <mona-line-series [data]="categoryData()" [xField]="'category'" [field]="'value'" [name]="'Line A'" [xAxisId]="'x-main'" [yAxisId]="seriesYAxisId()" />
             }
             @if (seriesKind() === 'range') {
                 <mona-range-bar-series [data]="rangeData()" [xField]="'category'" [fromField]="'from'" [toField]="'to'" [name]="'Range A'" [xAxisId]="'x-main'" [yAxisId]="'y-main'" />
@@ -132,6 +132,7 @@ class ReleaseGateHostComponent {
     public readonly chart = viewChild(ChartComponent);
 
     public readonly seriesKind = signal<"line" | "range" | "candlestick">("line");
+    public readonly seriesYAxisId = signal<string | undefined>("y-main");
 
     public readonly categoryData = signal([
         { category: "Jan", value: 100 },
@@ -211,6 +212,7 @@ describe("Chart Crosshairs & Annotations Release-Gate Suite", () => {
 
     // 1. CAA-R2-004 & CAA-R2-005: Multi-axis Crosshair Namespacing and Candidate Rejection
     it("namespaces crosshair coordinates and formatted values to target secondary axis", async () => {
+        host.seriesYAxisId.set("y-secondary");
         host.crosshairYAxisId.set("y-secondary");
         fixture.detectChanges();
         await fixture.whenStable();

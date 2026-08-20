@@ -111,7 +111,7 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R2-008)", () => {
 
         // Overlays rendered exactly once at full own opacity
         expect(overlaySpy).toHaveBeenCalledTimes(1);
-        expect(overlaySpy).toHaveBeenCalledWith(mockCtx, mockOverlayScene, mockScene.plotRect);
+        expect(overlaySpy).toHaveBeenCalledWith(mockCtx, mockOverlayScene, mockScene.plotRect, undefined);
 
         underlaySpy.mockRestore();
         overlaySpy.mockRestore();
