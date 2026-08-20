@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import {
     CartesianAxisCoordinateSpace,
+    getOrCreateBaseCategoryIndex,
     type CartesianAxisCoordinateSnapshot
 } from "./cartesian-axis-coordinate-space";
 
@@ -610,6 +611,56 @@ describe("CartesianAxisCoordinateSpace", () => {
                 const opt = space.resolveCategoryAtPixel({ axis: "x", axisId: "x-equiv" }, px);
                 const ref = referenceResolveAtPixel(px);
                 expect(opt?.key).toBe(ref);
+            }
+        });
+
+        it("reuses retained base category index map across 100 Stage C viewport projections on same base authority", () => {
+            const baseCount = 10_000;
+            const baseDomain: string[] = [];
+            for (let i = 0; i < baseCount; i++) {
+                baseDomain.push(`cat_${i}`);
+            }
+
+            const baseScale = CartesianScaleFactory.createBandScale({
+                domain: baseDomain,
+                range: [0, 50000]
+            });
+
+            // Get initial reference to cached base index map
+            const initialMap = getOrCreateBaseCategoryIndex(baseDomain);
+            expect(initialMap.size).toBe(baseCount);
+
+            // Project 100 different viewports on this exact baseDomain array reference
+            for (let v = 0; v < 100; v++) {
+                const startIndex = v * 50;
+                const viewportDomain = baseDomain.slice(startIndex, startIndex + 50);
+                const viewportScale = CartesianScaleFactory.createBandScale({
+                    domain: viewportDomain,
+                    range: [0, 500]
+                });
+
+                const snap: CartesianAxisCoordinateSnapshot = {
+                    baseDomain,
+                    baseScale,
+                    range: [0, 500],
+                    ref: { axis: "x", axisId: "x-cat" },
+                    resolvedType: "category",
+                    valid: true,
+                    viewportDomain,
+                    viewportScale
+                };
+
+                const space = new CartesianAxisCoordinateSpace(new Map([["x-cat", snap]]), new Map());
+                const catSnap = space.get({ axis: "x", axisId: "x-cat" });
+                expect(catSnap?.categoryIndex?.byKey.size).toBe(50);
+
+                // Base index map must be identically cached (same reference)
+                const currentMap = getOrCreateBaseCategoryIndex(baseDomain);
+                expect(currentMap).toBe(initialMap);
+
+                // Verify base indices are accurately resolved from cached map
+                const geom = space.resolveCategoryByKey({ axis: "x", axisId: "x-cat" }, `cat_${startIndex}`);
+                expect(geom?.baseIndex).toBe(startIndex);
             }
         });
     });

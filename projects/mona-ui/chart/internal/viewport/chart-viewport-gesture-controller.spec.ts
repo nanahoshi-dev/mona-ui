@@ -759,4 +759,146 @@ describe("ChartViewportGestureController", () => {
             expect(controller.isPinching).toBe(true);
         });
     });
+
+    describe("Eleventh Remediation Terminal Pointer State Cleanup (PZV11-002 / PZV11-003)", () => {
+        it("deletes active pointer in buttons === 0 started drag recovery and admits subsequent fresh drag", () => {
+            const captured = new Set<number>();
+            const { context, events } = createMockContext({
+                setPointerCapture: (id: number) => captured.add(id),
+                releasePointerCapture: (id: number) => captured.delete(id)
+            });
+            const controller = new ChartViewportGestureController(context);
+
+            // Start drag
+            controller.handlePointerDown(
+                { button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 100, y: 100 }
+            );
+            expect(controller.activePointersCount).toBe(1);
+
+            // Cross threshold (>= 4px)
+            controller.handlePointerMove(
+                { button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 150, y: 100 }
+            );
+            expect(controller.isDragging).toBe(true);
+            expect(captured.has(1)).toBe(true);
+
+            // Mouse moves with buttons = 0 (missed pointerup outside canvas)
+            const moveRes = controller.handlePointerMove(
+                { button: 0, buttons: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 160, y: 100 }
+            );
+            expect(moveRes).toBe(false);
+            expect(controller.isDragging).toBe(false);
+            expect(controller.activePointersCount).toBe(0); // Old pointer MUST be deleted!
+            expect(captured.has(1)).toBe(false); // Capture released!
+
+            const endEvents = events.filter(e => e.source === "drag" && e.phase === "end");
+            expect(endEvents.length).toBe(1); // Exact 1 end event
+
+            // Fresh primary pointerdown arrives -> must be admitted as pointer #1
+            const freshDown = controller.handlePointerDown(
+                { button: 0, pointerId: 2, pointerType: "mouse" } as PointerEvent,
+                { x: 100, y: 100 }
+            );
+            expect(freshDown).toBe(true);
+            expect(controller.activePointersCount).toBe(1);
+
+            // Fresh drag starts normally
+            controller.handlePointerMove(
+                { button: 0, buttons: 1, pointerId: 2, pointerType: "mouse" } as PointerEvent,
+                { x: 130, y: 100 }
+            );
+            expect(controller.isDragging).toBe(true);
+        });
+
+        it("clears active pointers on navigation transform policy changes during active drag", () => {
+            const captured = new Set<number>();
+            const { context, events } = createMockContext({
+                setPointerCapture: (id: number) => captured.add(id),
+                releasePointerCapture: (id: number) => captured.delete(id)
+            });
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown(
+                { button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 100, y: 100 }
+            );
+            controller.handlePointerMove(
+                { button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 150, y: 100 }
+            );
+            expect(controller.isDragging).toBe(true);
+            expect(controller.activePointersCount).toBe(1);
+
+            // Change navigation policy: dragPan = false
+            controller.updateContext({
+                ...context,
+                navigationOptions: normalizeChartNavigationOptions({
+                    dragPan: false,
+                    pinchZoom: true
+                })
+            });
+
+            expect(controller.isDragging).toBe(false);
+            expect(controller.activePointersCount).toBe(0); // Active pointers retired!
+            expect(captured.has(1)).toBe(false);
+
+            const endEvents = events.filter(e => e.source === "drag" && e.phase === "end");
+            expect(endEvents.length).toBe(1);
+
+            // Re-enable policy and admit fresh pointer
+            controller.updateContext({
+                ...context,
+                navigationOptions: normalizeChartNavigationOptions({
+                    dragPan: true,
+                    pinchZoom: true
+                })
+            });
+
+            const freshDown = controller.handlePointerDown(
+                { button: 0, pointerId: 3, pointerType: "mouse" } as PointerEvent,
+                { x: 100, y: 100 }
+            );
+            expect(freshDown).toBe(true);
+            expect(controller.activePointersCount).toBe(1);
+        });
+
+        it("clears active pointers on navigation policy changes during active pinch", () => {
+            const captured = new Set<number>();
+            const { context, events } = createMockContext({
+                setPointerCapture: (id: number) => captured.add(id),
+                releasePointerCapture: (id: number) => captured.delete(id)
+            });
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown(
+                { button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent,
+                { x: 100, y: 150 }
+            );
+            controller.handlePointerDown(
+                { button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent,
+                { x: 200, y: 150 }
+            );
+            expect(controller.isPinching).toBe(true);
+            expect(controller.activePointersCount).toBe(2);
+
+            // Change policy: pinchZoom = false
+            controller.updateContext({
+                ...context,
+                navigationOptions: normalizeChartNavigationOptions({
+                    pinchZoom: false,
+                    wheelZoom: true
+                })
+            });
+
+            expect(controller.isPinching).toBe(false);
+            expect(controller.activePointersCount).toBe(0); // Both pointers retired!
+            expect(captured.size).toBe(0);
+
+            const endEvents = events.filter(e => e.source === "pinch" && e.phase === "end");
+            expect(endEvents.length).toBe(1);
+        });
+    });
 });

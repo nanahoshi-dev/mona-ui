@@ -1,6 +1,6 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
     ChartNavigationInput,
     ChartViewportChangeEvent,
@@ -8,9 +8,10 @@ import type {
 } from "../../models/chart-viewport.models";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import { CartesianStageTracker } from "../../internal/layout/cartesian-stage-instrumentation";
-import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
+import type { CartesianXYChartScene, PolarSectorChartScene } from "../../internal/scene/chart-scene";
 import type { ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
 import type { ChartPointEvent } from "../../models/chart-event.models";
+import type { ChartAnimationInput } from "../../models/chart-animation.models";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
@@ -23,6 +24,49 @@ interface FlexibleDataItem {
     x: number | string | Date;
     y: number;
     cat?: string;
+}
+
+class FakeResizeObserver {
+    public static instances: FakeResizeObserver[] = [];
+    public readonly observedElements = new Set<Element>();
+
+    public constructor(public readonly callback: ResizeObserverCallback) {
+        FakeResizeObserver.instances.push(this);
+    }
+
+    public observe(target: Element): void {
+        this.observedElements.add(target);
+    }
+
+    public unobserve(target: Element): void {
+        this.observedElements.delete(target);
+    }
+
+    public disconnect(): void {
+        this.observedElements.clear();
+    }
+
+    public emit(target: Element, width: number, height: number): void {
+        this.callback(
+            [
+                {
+                    target,
+                    contentRect: {
+                        bottom: height,
+                        height,
+                        left: 0,
+                        right: width,
+                        top: 0,
+                        width,
+                        x: 0,
+                        y: 0,
+                        toJSON: () => ({})
+                    } as DOMRectReadOnly
+                } as ResizeObserverEntry
+            ],
+            this as unknown as ResizeObserver
+        );
+    }
 }
 
 @Component({
@@ -40,6 +84,7 @@ interface FlexibleDataItem {
             [data]="data()"
             [xField]="xField()"
             [navigation]="navigation()"
+            [animation]="animation()"
             [viewport]="viewport()"
             [defaultViewport]="defaultViewport()"
             (viewportChange)="onViewportChange($event)"
@@ -67,7 +112,7 @@ interface FlexibleDataItem {
         </mona-chart>
     `
 })
-class TenthRemediationHostComponent {
+class EleventhRemediationHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
     public readonly yField = "y";
     public readonly chartKind = signal<"xy" | "bar" | "pie">("xy");
@@ -90,13 +135,30 @@ class TenthRemediationHostComponent {
     public readonly secondXAxisId = signal("x-sec");
     public readonly secondXAxisType = signal<ChartXAxisType>("linear");
     public readonly navigation = signal<ChartNavigationInput>(true);
+    public readonly animation = signal<ChartAnimationInput>(false);
     public readonly viewport = signal<ChartViewportState | undefined>(undefined);
     public readonly defaultViewport = signal<ChartViewportState | undefined>(undefined);
+    public readonly mode = signal<"immediate" | "delayed" | "end-only" | "reject" | "equal-clone">("reject");
+    public readonly delayedQueue: ChartViewportState[] = [];
     public readonly emittedEvents: ChartViewportChangeEvent[] = [];
     public readonly clickedPoints: ChartPointEvent[] = [];
 
     public onViewportChange(event: ChartViewportChangeEvent): void {
         this.emittedEvents.push(event);
+        const m = this.mode();
+        if (m === "immediate") {
+            this.viewport.set({ axes: event.viewport.axes.map(a => ({ ...a })) });
+        } else if (m === "delayed") {
+            this.delayedQueue.push({ axes: event.viewport.axes.map(a => ({ ...a })) });
+        } else if (m === "end-only") {
+            if (event.phase === "end") {
+                this.viewport.set({ axes: event.viewport.axes.map(a => ({ ...a })) });
+            }
+        } else if (m === "equal-clone") {
+            this.viewport.set({ axes: event.viewport.axes.map(a => ({ ...a })) });
+        } else if (m === "reject") {
+            // Do not update viewport
+        }
     }
 
     public onPointClick(event: ChartPointEvent): void {
@@ -104,9 +166,10 @@ class TenthRemediationHostComponent {
     }
 }
 
-describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => {
-    let fixture: ComponentFixture<TenthRemediationHostComponent>;
-    let host: TenthRemediationHostComponent;
+describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix", () => {
+    let fixture: ComponentFixture<EleventhRemediationHostComponent>;
+    let host: EleventhRemediationHostComponent;
+    let originalResizeObserver: typeof ResizeObserver | undefined;
 
     let seriesPolicyCount = 0;
     let orientationPolicyCount = 0;
@@ -142,20 +205,29 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             onStageC: () => stageCCount++
         };
 
+        if (typeof globalThis !== "undefined") {
+            originalResizeObserver = globalThis.ResizeObserver;
+            FakeResizeObserver.instances = [];
+            globalThis.ResizeObserver = FakeResizeObserver as unknown as typeof ResizeObserver;
+        }
+
         await TestBed.configureTestingModule({
-            imports: [TenthRemediationHostComponent]
+            imports: [EleventhRemediationHostComponent]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TenthRemediationHostComponent);
+        fixture = TestBed.createComponent(EleventhRemediationHostComponent);
         host = fixture.componentInstance;
         fixture.detectChanges();
     });
 
     afterEach(() => {
         CartesianStageTracker.current = null;
+        if (typeof globalThis !== "undefined" && originalResizeObserver !== undefined) {
+            globalThis.ResizeObserver = originalResizeObserver;
+        }
     });
 
-    describe("Section 1 / PZV10-WP1: Initial Render Acceptance Across Responsive Sizes", () => {
+    describe("Section 1 / PZV11-WP0: Initial Render Acceptance Across Responsive Sizes", () => {
         const sizes = [
             { width: 500, height: 300 },
             { width: 800, height: 400 },
@@ -164,8 +236,20 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
         ];
 
         for (const { width, height } of sizes) {
-            it(`executes exactly one unified initial semantic pass for ${width}x${height} chart`, () => {
-                const f = TestBed.createComponent(TenthRemediationHostComponent);
+            it(`executes exactly one unified initial semantic pass for ${width}x${height} chart with mocked DOM geometry`, () => {
+                const rectSpy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+                    bottom: height,
+                    height,
+                    left: 0,
+                    right: width,
+                    top: 0,
+                    width,
+                    x: 0,
+                    y: 0,
+                    toJSON: () => ({})
+                } as DOMRect);
+
+                const f = TestBed.createComponent(EleventhRemediationHostComponent);
                 const h = f.componentInstance;
                 h.chartWidth.set(width);
                 h.chartHeight.set(height);
@@ -182,11 +266,30 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
                 expect(stageACount).toBe(1);
                 expect(stageBCount).toBe(1);
                 expect(stageCCount).toBe(1);
+
+                const sc = h.chart().scene();
+                expect(sc).toBeDefined();
+                expect(sc?.width).toBe(width);
+                expect(sc?.height).toBe(height);
+
+                rectSpy.mockRestore();
             });
         }
 
-        it("projects initial defaultViewport atomically in first Stage C pass (A=1, B=1, C=1)", () => {
-            const f = TestBed.createComponent(TenthRemediationHostComponent);
+        it("projects initial defaultViewport atomically in first Stage C pass (A=1, B=1, C=1) at 800x400", () => {
+            const rectSpy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+                bottom: 400,
+                height: 400,
+                left: 0,
+                right: 800,
+                top: 0,
+                width: 800,
+                x: 0,
+                y: 0,
+                toJSON: () => ({})
+            } as DOMRect);
+
+            const f = TestBed.createComponent(EleventhRemediationHostComponent);
             const h = f.componentInstance;
             h.chartWidth.set(800);
             h.chartHeight.set(400);
@@ -202,14 +305,32 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             expect(stageBCount).toBe(1);
             expect(stageCCount).toBe(1);
 
+            const sc = h.chart().scene();
+            expect(sc?.width).toBe(800);
+            expect(sc?.height).toBe(400);
+
             const vp = h.chart().getViewport();
             const axis0 = vp?.axes[0] as { min: number; max: number };
             expect(axis0.min).toBe(10);
             expect(axis0.max).toBe(60);
+
+            rectSpy.mockRestore();
         });
 
-        it("projects initial controlled [viewport] atomically in first Stage C pass (A=1, B=1, C=1)", () => {
-            const f = TestBed.createComponent(TenthRemediationHostComponent);
+        it("projects initial controlled [viewport] atomically in first Stage C pass (A=1, B=1, C=1) at 800x400", () => {
+            const rectSpy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+                bottom: 400,
+                height: 400,
+                left: 0,
+                right: 800,
+                top: 0,
+                width: 800,
+                x: 0,
+                y: 0,
+                toJSON: () => ({})
+            } as DOMRect);
+
+            const f = TestBed.createComponent(EleventhRemediationHostComponent);
             const h = f.componentInstance;
             h.chartWidth.set(800);
             h.chartHeight.set(400);
@@ -225,14 +346,20 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             expect(stageBCount).toBe(1);
             expect(stageCCount).toBe(1);
 
+            const sc = h.chart().scene();
+            expect(sc?.width).toBe(800);
+            expect(sc?.height).toBe(400);
+
             const vp = h.chart().getViewport();
             const axis0 = vp?.axes[0] as { min: number; max: number };
             expect(axis0.min).toBe(25);
             expect(axis0.max).toBe(75);
+
+            rectSpy.mockRestore();
         });
 
         it("projects horizontal bar chart atomically in first pass (A=1, B=1, C=1)", () => {
-            const f = TestBed.createComponent(TenthRemediationHostComponent);
+            const f = TestBed.createComponent(EleventhRemediationHostComponent);
             const h = f.componentInstance;
             h.chartKind.set("bar");
             h.orientation.set("horizontal");
@@ -253,16 +380,40 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
         });
     });
 
-    describe("Section 2 / PZV10-WP2: Click Suppression Sequence Lifetime", () => {
-        it("suppresses synthetic click after drag but permits subsequent genuine click", () => {
+    describe("Section 2 / PZV11-WP2: Click Suppression Sequence Lifetime", () => {
+        it("suppresses synthetic click after drag and emits exactly one click for subsequent genuine interaction", () => {
+            const sc = host.chart().scene() as CartesianXYChartScene;
+            const hit = sc.hitTargets[1]; // x=50, y=25
+            const hitPoint = hit.point!;
+
             // Drag on canvas
             host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
-            // Move beyond threshold (4px)
+            host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 150, clientY: 100, pointerId: 1 }));
+            host.chart().flushPendingRender();
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 150, clientY: 100, pointerId: 1 }));
+
+            // Synthetic click follows drag pointerup -> must be suppressed!
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: 150, clientY: 100 }));
+            expect(host.clickedPoints.length).toBe(0);
+
+            // Fresh subsequent genuine click sequence on known data point
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: hitPoint.x, clientY: hitPoint.y, pointerId: 2 }));
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: hitPoint.x, clientY: hitPoint.y, pointerId: 2 }));
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: hitPoint.x, clientY: hitPoint.y }));
+
+            // Exactly 1 genuine click is emitted
+            expect(host.clickedPoints.length).toBe(1);
+            expect(host.clickedPoints[0].yValue).toBe(25);
+        });
+
+        it("suppresses synthetic click when genuine authority change aborts drag and emits subsequent genuine click", () => {
+            // Drag on canvas
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
             host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 150, clientY: 100, pointerId: 1 }));
             host.chart().flushPendingRender();
 
-            // Authority change aborts interaction
-            host.xAxisType.set("linear");
+            // Genuine authority change (linear -> symlog) aborts interaction
+            host.xAxisType.set("symlog");
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
@@ -273,88 +424,138 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             host.chart().onCanvasClick(new MouseEvent("click", { clientX: 150, clientY: 100 }));
             expect(host.clickedPoints.length).toBe(0);
 
-            // Fresh subsequent genuine click sequence
-            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 2 }));
-            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 100, clientY: 100, pointerId: 2 }));
-            host.chart().onCanvasClick(new MouseEvent("click", { clientX: 100, clientY: 100 }));
+            // Fresh subsequent genuine click sequence on recomputed scene hit target
+            const newSc = host.chart().scene() as CartesianXYChartScene;
+            const newHit = newSc.hitTargets[1];
+            const newPt = newHit.point!;
 
-            // The fresh click is NOT suppressed
-            expect(host.clickedPoints.length).toBeGreaterThanOrEqual(0);
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: newPt.x, clientY: newPt.y, pointerId: 3 }));
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: newPt.x, clientY: newPt.y, pointerId: 3 }));
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: newPt.x, clientY: newPt.y }));
+
+            expect(host.clickedPoints.length).toBe(1);
+            expect(host.clickedPoints[0].yValue).toBe(25);
         });
 
         it("preserves genuine click when navigation is disabled during drag and re-enabled", () => {
             // Drag starts
             host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
-            host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 160, clientY: 100, pointerId: 1 }));
+            host.chart().onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 160, clientY: 100, pointerId: 1 }));
 
             // Disable navigation mid-drag
             host.navigation.set(false);
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 160, clientY: 100, pointerId: 1 }));
+
             // Re-enable navigation
             host.navigation.set(true);
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
-            // Fresh genuine click
-            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 2 }));
-            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 100, clientY: 100, pointerId: 2 }));
-            host.chart().onCanvasClick(new MouseEvent("click", { clientX: 100, clientY: 100 }));
+            // Fresh genuine click on known hit target
+            const sc = host.chart().scene() as CartesianXYChartScene;
+            const hit = sc.hitTargets[0];
+            const pt = hit.point!;
 
-            // Click is not swallowed by stale suppression
-            expect(host.clickedPoints.length).toBeGreaterThanOrEqual(0);
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: pt.x, clientY: pt.y, pointerId: 2 }));
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: pt.x, clientY: pt.y, pointerId: 2 }));
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: pt.x, clientY: pt.y }));
+
+            expect(host.clickedPoints.length).toBe(1);
+            expect(host.clickedPoints[0].yValue).toBe(10);
         });
 
         it("preserves datum click when Cartesian chart switches to polar chart during drag", () => {
             // Drag on Cartesian chart
             host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
-            host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 160, clientY: 100, pointerId: 1 }));
+            host.chart().onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 160, clientY: 100, pointerId: 1 }));
+            host.chart().flushPendingRender();
 
             // Switch to polar pie chart
             host.chartKind.set("pie");
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
-            // Fresh click on polar chart
-            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 250, clientY: 150, pointerId: 2 }));
-            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 250, clientY: 150, pointerId: 2 }));
-            host.chart().onCanvasClick(new MouseEvent("click", { clientX: 250, clientY: 150 }));
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 160, clientY: 100, pointerId: 1 }));
 
-            // Click was not swallowed
-            expect(host.clickedPoints.length).toBeGreaterThanOrEqual(0);
+            // Synthetic click on canvas is suppressed
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: 160, clientY: 100 }));
+            expect(host.clickedPoints.length).toBe(0);
+
+            // Fresh click on polar pie slice
+            const polarSc = host.chart().scene() as PolarSectorChartScene;
+            const slice = polarSc.series[0].slices[0];
+            const centroid = slice.centroid;
+
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: centroid.x, clientY: centroid.y, pointerId: 2 }));
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: centroid.x, clientY: centroid.y, pointerId: 2 }));
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: centroid.x, clientY: centroid.y }));
+
+            expect(host.clickedPoints.length).toBe(1);
+            expect(host.clickedPoints[0].yValue).toBe(10);
         });
     });
 
-    describe("Section 3 / PZV10-WP6: Real Controlled-Parent Gesture Matrix", () => {
-        it("Archetype 1 (Immediate): Proposal history is strictly invariant and chains previousViewport", () => {
-            // Controlled before gesture begins
-            host.viewport.set({
+    describe("Section 3 / PZV11-WP3: Real Controlled-Parent Gesture Matrix", () => {
+        function runStandardGesture(chart: ChartComponent): void {
+            chart.onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
+            chart.onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 125, clientY: 100, pointerId: 1 }));
+            chart.flushPendingRender();
+            chart.onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 150, clientY: 100, pointerId: 1 }));
+            chart.flushPendingRender();
+            chart.onPointerUp(new PointerEvent("pointerup", { clientX: 150, clientY: 100, pointerId: 1 }));
+            chart.flushPendingRender();
+        }
+
+        it("produces invariant proposal stream across immediate, delayed, end-only, and reject modes", () => {
+            const initialVp: ChartViewportState = {
                 axes: [{ axis: "x", axisId: "x-main", kind: "continuous", min: 0, max: 100 }]
-            });
-            fixture.detectChanges();
-            host.chart().flushPendingRender();
+            };
 
-            // Perform drag gesture
-            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
-            host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 120, clientY: 100, pointerId: 1 }));
-            host.chart().flushPendingRender();
+            const modes: ("immediate" | "delayed" | "end-only" | "reject")[] = [
+                "immediate",
+                "delayed",
+                "end-only",
+                "reject"
+            ];
 
-            // Immediate echo: update host signal upon each viewport change
-            for (const event of host.emittedEvents) {
-                host.viewport.set(event.viewport);
+            const modeProposals: Record<string, string[]> = {};
+
+            for (const m of modes) {
+                host.mode.set(m);
+                host.viewport.set(initialVp);
+                host.emittedEvents.length = 0;
+                host.delayedQueue.length = 0;
+                fixture.detectChanges();
+                host.chart().flushPendingRender();
+
+                runStandardGesture(host.chart());
+
+                // If delayed mode, process queue
+                if (m === "delayed") {
+                    while (host.delayedQueue.length > 0) {
+                        host.viewport.set(host.delayedQueue.shift());
+                        fixture.detectChanges();
+                    }
+                }
+
+                expect(host.emittedEvents.length).toBeGreaterThanOrEqual(2);
+
+                // Proposal previousViewport chaining invariant
+                for (let i = 1; i < host.emittedEvents.length; i++) {
+                    expect(host.emittedEvents[i].previousViewport).toEqual(host.emittedEvents[i - 1].viewport);
+                }
+
+                modeProposals[m] = host.emittedEvents.map(e =>
+                    JSON.stringify({ phase: e.phase, source: e.source, viewport: e.viewport })
+                );
             }
-            fixture.detectChanges();
 
-            host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 140, clientY: 100, pointerId: 1 }));
-            host.chart().flushPendingRender();
-            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 140, clientY: 100, pointerId: 1 }));
-            host.chart().flushPendingRender();
-
-            expect(host.emittedEvents.length).toBeGreaterThanOrEqual(2);
-            // Verify proposal-to-proposal chaining
-            for (let i = 1; i < host.emittedEvents.length; i++) {
-                expect(host.emittedEvents[i].previousViewport).toEqual(host.emittedEvents[i - 1].viewport);
+            // Invariance: All modes must produce identical proposal stream
+            for (let i = 1; i < modes.length; i++) {
+                expect(modeProposals[modes[i]]).toEqual(modeProposals[modes[0]]);
             }
         });
 
@@ -362,16 +563,12 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             const canonicalInitial: ChartViewportState = {
                 axes: [{ axis: "x", axisId: "x-main", kind: "continuous", min: 10, max: 90 }]
             };
+            host.mode.set("reject");
             host.viewport.set(canonicalInitial);
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
-            // Perform drag gesture - parent rejects and never updates [viewport]
-            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
-            host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 150, clientY: 100, pointerId: 1 }));
-            host.chart().flushPendingRender();
-            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 150, clientY: 100, pointerId: 1 }));
-            host.chart().flushPendingRender();
+            runStandardGesture(host.chart());
 
             expect(host.emittedEvents.length).toBeGreaterThan(0);
 
@@ -380,7 +577,7 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
-            // Uncontrolled seed must be canonicalInitial, NOT the rejected lastProposal!
+            // Uncontrolled seed must be canonicalInitial, NOT the rejected proposal!
             const vp = host.chart().getViewport();
             const axis0 = vp?.axes[0] as { min: number; max: number };
             expect(axis0.min).toBe(10);
@@ -388,6 +585,7 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
         });
 
         it("Archetype 5 (Equal Clone): Cloned identical viewport object creates zero redundant Stage C passes", () => {
+            host.mode.set("equal-clone");
             host.viewport.set({
                 axes: [{ axis: "x", axisId: "x-main", kind: "continuous", min: 20, max: 80 }]
             });
@@ -406,16 +604,21 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
         });
     });
 
-    describe("Section 4 / PZV10-WP7: Real ResizeObserver Measurement Provenance", () => {
-        it("triggers Chrome invalidation on Cartesian base label measurement change", () => {
+    describe("Section 4 / PZV11-WP4: Real ResizeObserver Measurement Provenance", () => {
+        it("triggers Chrome invalidation (A=0, B=1, C=1) on Cartesian base label measurement change", () => {
+            const sc = host.chart().scene() as CartesianXYChartScene;
+            const baseTickKey = sc.axes[0].ticks[0]?.tickKey ?? "axis:x-main:tick:0";
+
+            const labelEl = document.createElement("div");
+            host.chart().observeLabelElement(labelEl, baseTickKey);
+
+            const obs = FakeResizeObserver.instances.find(i => i.observedElements.has(labelEl));
+            expect(obs).toBeDefined();
+
             resetStageCounters();
 
-            // Trigger ResizeObserver observation on base label
-            const labelEl = document.createElement("div");
-            host.chart().observeLabelElement(labelEl, "axis:x-main:label:0");
-
-            // Invalidate Chrome
-            host.chart().invalidate(ChartInvalidationReason.Chrome);
+            // Emit measurement change through the ResizeObserver callback
+            obs!.emit(labelEl, 100, 40);
             host.chart().flushPendingRender();
 
             expect(stageACount).toBe(0);
@@ -423,10 +626,28 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             expect(stageCCount).toBe(1);
         });
 
-        it("triggers Viewport invalidation on Cartesian viewport tick measurement change", () => {
+        it("triggers Viewport invalidation (A=0, B=0, C=1) on Cartesian viewport tick measurement change", () => {
+            const initialSc = host.chart().scene() as CartesianXYChartScene;
+            const baseTickKeys = new Set(initialSc.axes[0].ticks.map(t => t.tickKey));
+
+            // Zoom in viewport so viewport-only ticks are generated
+            host.chart().setViewportWindow({ axis: "x", axisId: "x-main", kind: "continuous", min: 20, max: 40 });
+            host.chart().flushPendingRender();
+
+            const zoomedSc = host.chart().scene() as CartesianXYChartScene;
+            const vpTick = zoomedSc.axes[0].ticks.find(t => t.tickKey && !baseTickKeys.has(t.tickKey)) ?? zoomedSc.axes[0].ticks[0];
+            const vpTickKey = vpTick.tickKey ?? "axis:x-main:tick:0";
+
+            const vpEl = document.createElement("div");
+            host.chart().observeLabelElement(vpEl, vpTickKey);
+
+            const obs = FakeResizeObserver.instances.find(i => i.observedElements.has(vpEl));
+            expect(obs).toBeDefined();
+
             resetStageCounters();
 
-            host.chart().invalidate(ChartInvalidationReason.Viewport);
+            // Emit viewport-only tick measurement change through ResizeObserver
+            obs!.emit(vpEl, 90, 45);
             host.chart().flushPendingRender();
 
             expect(stageACount).toBe(0);
@@ -439,11 +660,13 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
-            const dummyEl = document.createElement("div");
-            host.chart().observeLabelElement(dummyEl, "sector:0");
+            const pieEl = document.createElement("div");
+            host.chart().observeLabelElement(pieEl, "sector:0");
 
-            // Measurement change
-            host.chart().invalidate(ChartInvalidationReason.Layout);
+            const obs = FakeResizeObserver.instances.find(i => i.observedElements.has(pieEl));
+            expect(obs).toBeDefined();
+
+            obs!.emit(pieEl, 120, 60);
             host.chart().flushPendingRender();
 
             const sc = host.chart().scene();
@@ -451,7 +674,7 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
         });
     });
 
-    describe("Section 5 / PZV10-WP8: Structural Authority Mutation Matrix", () => {
+    describe("Section 5 / PZV11-WP5: Structural Authority & Validity Matrix", () => {
         it("removes an axis cleanly, preserving remaining axis viewports with A=1, B=1, C=1", () => {
             host.showSecondXAxis.set(true);
             fixture.detectChanges();
@@ -480,9 +703,65 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
 
             const sc = host.chart().scene() as CartesianXYChartScene;
             expect(sc.axes.some(a => a.axisId === "x-sec")).toBe(false);
+
+            const vp = host.chart().getViewport();
+            expect(vp?.axes.some(a => a.axisId === "x-sec")).toBe(false);
+            const xMainWindow = vp?.axes.find(a => a.axisId === "x-main") as { min: number; max: number };
+            expect(xMainWindow.min).toBe(10);
+            expect(xMainWindow.max).toBe(90);
         });
 
-        it("handles scale type transitions between linear, log, symlog, and pow", () => {
+        it("handles valid -> invalid -> valid transitions safely without NaN geometry", () => {
+            host.xAxisType.set("log");
+            host.data.set([
+                { x: 1, y: 10 },
+                { x: 10, y: 20 },
+                { x: 100, y: 30 }
+            ]);
+            fixture.detectChanges();
+            host.chart().flushPendingRender();
+
+            const validSc = host.chart().scene() as CartesianXYChartScene;
+            expect(validSc.coordinateSpace?.get({ axis: "x", axisId: "x-main" })?.valid).toBe(true);
+            expect(validSc.coordinateSpace?.resolveContinuousAtPixel({ axis: "x", axisId: "x-main" }, 250)).toBeDefined();
+
+            // Valid -> Invalid: Log scale with mixed positive and negative data domain
+            resetStageCounters();
+            host.data.set([
+                { x: -10, y: 10 },
+                { x: 10, y: 20 }
+            ]);
+            fixture.detectChanges();
+            host.chart().flushPendingRender();
+
+            expect(stageACount).toBe(1);
+            expect(stageBCount).toBe(1);
+            expect(stageCCount).toBe(1);
+
+            const invalidSc = host.chart().scene() as CartesianXYChartScene;
+            expect(invalidSc.coordinateSpace?.get({ axis: "x", axisId: "x-main" })?.valid).toBe(false);
+            expect(invalidSc.coordinateSpace?.resolveContinuousAtPixel({ axis: "x", axisId: "x-main" }, 250)).toBeUndefined();
+
+            // Invalid -> Valid: Restore positive data
+            resetStageCounters();
+            host.data.set([
+                { x: 1, y: 10 },
+                { x: 10, y: 20 },
+                { x: 100, y: 30 }
+            ]);
+            fixture.detectChanges();
+            host.chart().flushPendingRender();
+
+            expect(stageACount).toBe(1);
+            expect(stageBCount).toBe(1);
+            expect(stageCCount).toBe(1);
+
+            const restoredSc = host.chart().scene() as CartesianXYChartScene;
+            expect(restoredSc.coordinateSpace?.get({ axis: "x", axisId: "x-main" })?.valid).toBe(true);
+            expect(restoredSc.coordinateSpace?.resolveContinuousAtPixel({ axis: "x", axisId: "x-main" }, 250)).toBeDefined();
+        });
+
+        it("handles scale type transitions between linear, log, symlog, and pow with exact A=1, B=1, C=1", () => {
             const types: ChartXAxisType[] = ["linear", "log", "symlog", "pow", "linear"];
 
             for (const t of types) {
@@ -525,9 +804,8 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             expect(stageACount).toBe(0);
             expect(stageCCount).toBe(1);
 
-            const sc = host.chart().scene() as CartesianXYChartScene;
-            expect(sc).toBeDefined();
-            expect(sc.coordinateSpace).toBeDefined();
+            const vp = host.chart().getViewport();
+            expect(vp?.axes.some(a => a.kind === "category")).toBe(false);
         });
 
         it("safely normalizes continuous viewport window supplied to category axis", () => {
@@ -550,8 +828,8 @@ describe("Tenth Remediation Comprehensive Acceptance & Invariant Matrix", () => 
             host.chart().flushPendingRender();
 
             expect(stageCCount).toBe(1);
-            const sc = host.chart().scene() as CartesianXYChartScene;
-            expect(sc).toBeDefined();
+            const vp = host.chart().getViewport();
+            expect(vp?.axes.some(a => a.kind === "continuous")).toBe(false);
         });
 
         it("preserves independent X and Y viewports sharing identical raw axisId 'shared'", () => {

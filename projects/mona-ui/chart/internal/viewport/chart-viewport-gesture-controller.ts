@@ -141,6 +141,7 @@ export class ChartViewportGestureController {
                     silent: this.#dragSession ? !this.#dragSession.isThresholdMet : false
                 });
             }
+            this.#activePointers.clear();
         }
 
         this.#context = context;
@@ -313,6 +314,7 @@ export class ChartViewportGestureController {
             if (this.#dragSession && this.#dragSession.pointerId === event.pointerId) {
                 if (this.#dragSession.isThresholdMet) {
                     this.#flushPendingGestureFrame();
+                    this.#activePointers.delete(event.pointerId);
                     this.#finalizeDrag({ releaseCapture: true });
                 } else {
                     const captureOwned = this.#dragSession.captureOwned;
@@ -508,6 +510,10 @@ export class ChartViewportGestureController {
 
         this.#dragSession = null;
 
+        if (session.isThresholdMet) {
+            this.#isClickSuppressed = true;
+        }
+
         const shouldEmitEnd = session.isThresholdMet && !options.silent;
         const finalViewport = session.latestViewport;
 
@@ -533,16 +539,16 @@ export class ChartViewportGestureController {
         if (!session) return;
 
         this.#pinchSession = null;
-        const ptr1 = session.pointer1Id;
-        const ptr2 = session.pointer2Id;
+
+        const shouldEmitEnd = !options.silent;
         const finalViewport = session.latestViewport;
 
         if (options.releaseCapture) {
-            this.#context.releasePointerCapture?.(ptr1, this.#targetElement);
-            this.#context.releasePointerCapture?.(ptr2, this.#targetElement);
+            this.#context.releasePointerCapture?.(session.pointer1Id, this.#targetElement);
+            this.#context.releasePointerCapture?.(session.pointer2Id, this.#targetElement);
         }
 
-        if (!options.silent) {
+        if (shouldEmitEnd) {
             this.#dispatchChangeEvent(
                 "pinch",
                 "end",
@@ -587,6 +593,9 @@ export class ChartViewportGestureController {
         this.#finalizeWheel({ silent: false });
         this.#finalizePinch({ releaseCapture: true, silent: false });
         this.#finalizeDrag({ releaseCapture: true, silent: !wasDragThresholdMet });
+        if (wasDragThresholdMet) {
+            this.#isClickSuppressed = true;
+        }
     }
 
     public cancel(reason?: ViewportGestureCancelReason | string): void {
@@ -600,6 +609,7 @@ export class ChartViewportGestureController {
             this.#gestureFrameId = null;
         }
 
+        const wasDragThresholdMet = this.#dragSession?.isThresholdMet ?? false;
         this.#activePointers.clear();
 
         if (reason === "destroy") {
@@ -612,10 +622,12 @@ export class ChartViewportGestureController {
         }
 
         // Non-destroy cancel (e.g. "escape", "navigation-disabled"): balanced end
-        const wasDragThresholdMet = this.#dragSession?.isThresholdMet ?? false;
         this.#finalizeWheel({ silent: false });
         this.#finalizePinch({ releaseCapture: true, silent: false });
         this.#finalizeDrag({ releaseCapture: true, silent: !wasDragThresholdMet });
+        if (wasDragThresholdMet) {
+            this.#isClickSuppressed = true;
+        }
     }
 
     public destroy(): void {

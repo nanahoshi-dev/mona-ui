@@ -204,6 +204,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #yAxes = signal<ChartYAxisRegistration[]>([]);
 
     public ngAfterContentChecked(): void {
+        if (!this.#canvasReady) {
+            const canvasRef = this.canvasElement();
+            const plotEl = canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
+            const rect = plotEl.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                this.#currentWidth = rect.width;
+                this.#currentHeight = rect.height;
+                this.#updateCanvasBackingStore(rect.width, rect.height);
+                this.#layoutReady = true;
+            }
+        }
+
         this.#renderScheduler.flushStructural();
     }
 
@@ -761,54 +773,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         // Update gesture controller when cartesian XY scene or navigation options change
         effect(() => {
-            const sc = this.cartesianXYScene();
-            const nav = this.normalizedNavigation();
-            if (sc && nav.enabled) {
-                const gestureContext = {
-                    authorityToken: this.#interactionRevision,
-                    axisScenes: sc.axes,
-                    constraints: nav.constraints,
-                    coordinateSpace: sc.coordinateSpace,
-                    currentViewport: this.#effectiveViewportState(),
-                    linkGroups: nav.linkGroups,
-                    navigationOptions: nav,
-                    navigationProfile: this.#cartesianLayoutRuntime?.navigationProfile,
-                    onCursorChange: (cursor: string | null) => this.viewportCursor.set(cursor),
-                    onViewportChange: (nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent) => {
-                        this.#applyGestureViewportEvent(nextState, event);
-                    },
-                    orientation: sc.orientation ?? "vertical",
-                    plotRect: sc.plotRect,
-                    releasePointerCapture: (pointerId: number, target?: Element | null) => {
-                        try {
-                            const el = target ?? this.canvasElement()?.nativeElement;
-                            el?.releasePointerCapture?.(pointerId);
-                        } catch {}
-                    },
-                    setPointerCapture: (pointerId: number, target?: Element | null) => {
-                        try {
-                            const el = target ?? this.canvasElement()?.nativeElement;
-                            el?.setPointerCapture?.(pointerId);
-                        } catch {}
-                    },
-                    warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures
-                };
-                if (!this.#gestureController) {
-                    this.#gestureController = new ChartViewportGestureController(gestureContext);
-                } else {
-                    this.#gestureController.updateContext(gestureContext);
-                }
-            } else {
-                if (this.#gestureController) {
-                    if (!nav.enabled) {
-                        this.#gestureController.cancel("navigation-disabled");
-                    }
-                    this.#takeGestureClickSuppression();
-                    this.#gestureController.destroy();
-                    this.#gestureController = null;
-                    this.viewportCursor.set(null);
-                }
-            }
+            this.#updateGestureController();
         });
 
         afterNextRender(() => {
@@ -828,6 +793,55 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         });
     }
 
+    #updateGestureController(): void {
+        const sc = this.cartesianXYScene();
+        const nav = this.normalizedNavigation();
+        if (sc && nav.enabled) {
+            const gestureContext = {
+                authorityToken: this.#interactionRevision,
+                axisScenes: sc.axes,
+                constraints: nav.constraints,
+                coordinateSpace: sc.coordinateSpace,
+                currentViewport: this.#effectiveViewportState(),
+                linkGroups: nav.linkGroups,
+                navigationOptions: nav,
+                navigationProfile: this.#cartesianLayoutRuntime?.navigationProfile,
+                onCursorChange: (cursor: string | null) => this.viewportCursor.set(cursor),
+                onViewportChange: (nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent) => {
+                    this.#applyGestureViewportEvent(nextState, event);
+                },
+                orientation: sc.orientation ?? "vertical",
+                plotRect: sc.plotRect,
+                releasePointerCapture: (pointerId: number, target?: Element | null) => {
+                    try {
+                        const el = target ?? this.canvasElement()?.nativeElement;
+                        el?.releasePointerCapture?.(pointerId);
+                    } catch {}
+                },
+                setPointerCapture: (pointerId: number, target?: Element | null) => {
+                    try {
+                        const el = target ?? this.canvasElement()?.nativeElement;
+                        el?.setPointerCapture?.(pointerId);
+                    } catch {}
+                },
+                warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures
+            };
+            if (!this.#gestureController) {
+                this.#gestureController = new ChartViewportGestureController(gestureContext);
+            } else {
+                this.#gestureController.updateContext(gestureContext);
+            }
+        } else {
+            if (this.#gestureController) {
+                this.#gestureController.cancel("navigation-disabled");
+                this.#takeGestureClickSuppression();
+                this.#gestureController.destroy();
+                this.#gestureController = null;
+                this.viewportCursor.set(null);
+            }
+        }
+    }
+
     public invalidate(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         this.#renderScheduler.schedule(reason);
     }
@@ -844,12 +858,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             if (canvasRef?.nativeElement) {
                 this.#initCanvasAndObserver();
                 this.#canvasReady = true;
+                this.#layoutReady = true;
             }
         }
         this.#recomputeAndPaint(reason);
     }
 
     public onPointerDown(event: PointerEvent): void {
+        if (!this.#gestureController) {
+            this.#updateGestureController();
+        }
         if (!this.#gestureController || this.#gestureController.activePointersCount === 0) {
             this.#suppressNextCanvasClick = false;
         }
@@ -1845,6 +1863,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#currentWidth = rect.width;
                 this.#currentHeight = rect.height;
                 this.#updateCanvasBackingStore(rect.width, rect.height);
+                this.#layoutReady = true;
             }
         }
 
@@ -1973,6 +1992,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         // Commit semantic target scene immediately
         this.scene.set(newScene);
+        this.#updateGestureController();
 
         const isInitial = !this.#hasCommittedVisualScene;
         const isVisibility = hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
