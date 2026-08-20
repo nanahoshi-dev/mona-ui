@@ -1,6 +1,6 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { describe, expect, it, beforeEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartComponent } from "../../components/chart/chart.component";
 import { ChartCrosshairComponent } from "../../components/chart-crosshair/chart-crosshair.component";
 import { ChartReferenceLineComponent } from "../../components/chart-reference-line/chart-reference-line.component";
@@ -45,13 +45,33 @@ class OverlayMeasurementPaintHostComponent {
 }
 
 describe("ChartOverlayMeasurementPaint (WP3 / Gates N & O)", () => {
+    let capturedCallbacks: ((entries: ResizeObserverEntry[]) => void)[] = [];
+    const origResizeObserver = typeof window !== "undefined" ? window.ResizeObserver : undefined;
+
     beforeEach(async () => {
+        capturedCallbacks = [];
+        class TestResizeObserver {
+            public constructor(cb: (entries: ResizeObserverEntry[]) => void) {
+                capturedCallbacks.push(cb);
+            }
+            public observe() {}
+            public unobserve() {}
+            public disconnect() {}
+        }
+        window.ResizeObserver = TestResizeObserver as unknown as typeof ResizeObserver;
+
         TestBed.configureTestingModule({
             imports: [OverlayMeasurementPaintHostComponent]
         });
     });
 
-    it("does not repaint canvas for crosshair badge resize", async () => {
+    afterEach(() => {
+        if (origResizeObserver) {
+            window.ResizeObserver = origResizeObserver;
+        }
+    });
+
+    it("does not repaint canvas when crosshair badge element resizes via ResizeObserver callback (Gate N)", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -59,19 +79,28 @@ describe("ChartOverlayMeasurementPaint (WP3 / Gates N & O)", () => {
         const chart = fixture.componentInstance.chart();
         const renderSpy = vi.spyOn(CanvasChartRenderer, "render");
 
-        renderSpy.mockClear();
-
-        // Simulate observing a crosshair badge element resize
         const dummyEl = document.createElement("div");
         chart.observeOverlayLabelElement(dummyEl, "crosshair:x");
 
-        // The initial observe does not trigger canvas paint
+        renderSpy.mockClear();
+
+        // Simulate ResizeObserver firing a size update for crosshair:x
+        for (const cb of capturedCallbacks) {
+            cb([
+                {
+                    contentRect: { height: 24, width: 80, x: 0, y: 0, bottom: 24, left: 0, right: 80, top: 0, toJSON: () => ({}) },
+                    target: dummyEl
+                } as unknown as ResizeObserverEntry
+            ]);
+        }
+
+        // Canvas paint is NOT triggered
         expect(renderSpy).not.toHaveBeenCalled();
 
         chart.unobserveOverlayLabelElement(dummyEl, "crosshair:x");
     });
 
-    it("does not repaint canvas for reference line or reference band badge resize", async () => {
+    it("does not repaint canvas when reference line or band badge element resizes (Gate N)", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -79,20 +108,35 @@ describe("ChartOverlayMeasurementPaint (WP3 / Gates N & O)", () => {
         const chart = fixture.componentInstance.chart();
         const renderSpy = vi.spyOn(CanvasChartRenderer, "render");
 
-        renderSpy.mockClear();
-
         const lineEl = document.createElement("div");
         chart.observeOverlayLabelElement(lineEl, "overlay:line:ref-1");
-        expect(renderSpy).not.toHaveBeenCalled();
-        chart.unobserveOverlayLabelElement(lineEl, "overlay:line:ref-1");
 
         const bandEl = document.createElement("div");
         chart.observeOverlayLabelElement(bandEl, "overlay:band:band-1");
+
+        renderSpy.mockClear();
+
+        for (const cb of capturedCallbacks) {
+            cb([
+                {
+                    contentRect: { height: 20, width: 60, x: 0, y: 0, bottom: 20, left: 0, right: 60, top: 0, toJSON: () => ({}) },
+                    target: lineEl
+                } as unknown as ResizeObserverEntry,
+                {
+                    contentRect: { height: 22, width: 70, x: 0, y: 0, bottom: 22, left: 0, right: 70, top: 0, toJSON: () => ({}) },
+                    target: bandEl
+                } as unknown as ResizeObserverEntry
+            ]);
+        }
+
+        // Neither line nor band badge resize triggers canvas render
         expect(renderSpy).not.toHaveBeenCalled();
+
+        chart.unobserveOverlayLabelElement(lineEl, "overlay:line:ref-1");
         chart.unobserveOverlayLabelElement(bandEl, "overlay:band:band-1");
     });
 
-    it("cleans up overlay measurements on unobserve (Gate O)", async () => {
+    it("cleans up overlay measurements and unobserves elements (Gate O)", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -111,7 +155,6 @@ describe("ChartOverlayMeasurementPaint (WP3 / Gates N & O)", () => {
             chart.unobserveOverlayLabelElement(item.el, item.id);
         }
 
-        // Cleaned up without leaking entries
         expect(elements.length).toBe(50);
     });
 });

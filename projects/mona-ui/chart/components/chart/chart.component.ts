@@ -280,6 +280,26 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #interactionState: ChartInteractionState | null = null;
     #interactionOwner: ChartTransientInteractionOwner = null;
 
+    public get interactionOwner(): ChartTransientInteractionOwner {
+        return this.#interactionOwner;
+    }
+
+    public get interactionState(): ChartInteractionState | null {
+        return this.#interactionState;
+    }
+
+    public get currentCrosshairState(): ChartCrosshairState | null {
+        return this.crosshairState();
+    }
+
+    public get currentTooltipPosition(): ChartPoint | null {
+        return this.tooltipPosition();
+    }
+
+    public get currentTooltipContext(): ChartTooltipTemplateContext | null {
+        return this.tooltipContext();
+    }
+
     #setTransientInteraction(
         state: ChartInteractionState | null,
         owner: ChartTransientInteractionOwner
@@ -515,20 +535,29 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#interactionRevision++;
     }
 
-    #reconcileCrosshairFromRetainedPointer(): void {
-        const ch = this.#crosshair();
-        if (!ch) {
-            this.crosshairState.set(null);
-            const cleared = this.#clearTransientInteractionOwnedBy("crosshair");
-            if (cleared) {
-                this.#paint();
-            }
-            return;
-        }
-        const enabled = ch.enabled() !== false;
+    #reconcilePointerInteractionFeaturesFromRetainedPointer(): void {
+        const tooltip = this.#tooltip();
+        const tooltipEnabled = tooltip ? tooltip.enabled() !== false : false;
+        const crosshair = this.#crosshair();
+        const crosshairEnabled = crosshair ? crosshair.enabled() !== false : false;
 
-        if (!enabled) {
-            let changed = false;
+        let changed = false;
+
+        if (!tooltipEnabled) {
+            if (this.tooltipPosition() !== null) {
+                this.tooltipPosition.set(null);
+                changed = true;
+            }
+            if (this.tooltipContext() !== null) {
+                this.tooltipContext.set(null);
+                changed = true;
+            }
+            if (this.#clearTransientInteractionOwnedBy("tooltip")) {
+                changed = true;
+            }
+        }
+
+        if (!crosshairEnabled) {
             if (this.crosshairState() !== null) {
                 this.crosshairState.set(null);
                 changed = true;
@@ -536,37 +565,124 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             if (this.#clearTransientInteractionOwnedBy("crosshair")) {
                 changed = true;
             }
+        }
+
+        if (!tooltipEnabled && !crosshairEnabled) {
             if (changed) {
                 this.#paint();
             }
             return;
         }
 
-        const currentScene = this.cartesianXYScene();
+        let currentScene = this.#renderScene ?? this.scene();
+        if (!currentScene) {
+            if (changed) {
+                this.#paint();
+            }
+            return;
+        }
+
         const lastRes = this.#lastPointerResolution;
         const lastSrc = this.#lastInteractionSource;
-        if (currentScene && lastRes && lastSrc) {
-            const nextRes = CartesianCrosshairResolver.resolve(
-                currentScene,
-                ch,
-                lastRes,
-                lastSrc
-            );
-            this.crosshairState.set(nextRes.state);
-            if (this.#interactionOwner !== "tooltip") {
-                if (nextRes.snapKind === "mark" && (nextRes.activeHitTarget || nextRes.activeHits.length > 0)) {
-                    this.#setTransientInteraction({
-                        ...lastRes.hitState,
-                        activeHitTarget: nextRes.activeHitTarget,
-                        activeHits: nextRes.activeHits,
-                        pointerPosition: lastRes.pointer,
-                        source: lastSrc
-                    }, "crosshair");
-                } else {
-                    this.#clearTransientInteractionOwnedBy("crosshair");
-                }
+        if (!lastRes || !lastRes.pointer || !lastSrc) {
+            if (changed) {
+                this.#paint();
             }
+            return;
+        }
+
+        const pointer = lastRes.pointer;
+        const shared = this.#resolveSharedTooltip(currentScene);
+        const isCrosshairSnapNearest = crosshair?.snap() === "nearest" || lastSrc === "keyboard";
+        const needHitTest = tooltipEnabled || (crosshairEnabled && isCrosshairSnapNearest);
+        const crosshairDist = crosshair?.maxSnapDistance() ?? 32;
+        const demand: ChartPointerInteractionDemand = {
+            crosshairMaxDistance: crosshairDist,
+            maxDistance: 32,
+            needCrosshairCandidates: crosshairEnabled && isCrosshairSnapNearest,
+            needHitTest
+        };
+
+        const resolution = ChartPointerInteractionResolver.resolve(pointer, currentScene, shared, demand);
+        this.#lastPointerResolution = resolution;
+        const hitState = resolution.hitState;
+
+        let hasAnyState = false;
+
+        const nextCrosshairRes =
+            crosshairEnabled && currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "xy"
+                ? CartesianCrosshairResolver.resolve(
+                      currentScene as CartesianXYChartScene,
+                      crosshair,
+                      resolution,
+                      lastSrc
+                  )
+                : null;
+
+        this.crosshairState.set(nextCrosshairRes?.state ?? null);
+        if (nextCrosshairRes?.state !== null && nextCrosshairRes?.state !== undefined) {
+            hasAnyState = true;
+        }
+
+        if (tooltipEnabled && (hitState.activeHitTarget || hitState.activeHits.length > 0)) {
+            this.#setTransientInteraction(
+                {
+                    ...hitState,
+                    source: lastSrc
+                },
+                "tooltip"
+            );
+            const primaryHit = hitState.activeHitTarget ?? hitState.activeHits[0];
+            if (primaryHit) {
+                const rawX =
+                    primaryHit.point?.x ??
+                    (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : pointer.x);
+                const rawY = primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : pointer.y);
+                const clampedX = Math.max(10, Math.min(this.#currentWidth - 10, rawX));
+                const clampedY = Math.max(10, Math.min(this.#currentHeight - 10, rawY));
+                const tooltipPos: ChartPoint = {
+                    x: clampedX,
+                    y: clampedY
+                };
+                this.tooltipPosition.set(tooltipPos);
+                this.tooltipContext.set(
+                    this.#buildTooltipContext(
+                        hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit],
+                        shared,
+                        primaryHit
+                    )
+                );
+                hasAnyState = true;
+            }
+        } else if (
+            crosshairEnabled &&
+            nextCrosshairRes &&
+            nextCrosshairRes.snapKind === "mark" &&
+            (nextCrosshairRes.activeHitTarget || nextCrosshairRes.activeHits.length > 0)
+        ) {
+            this.#setTransientInteraction(
+                {
+                    ...hitState,
+                    activeHitTarget: nextCrosshairRes.activeHitTarget,
+                    activeHits: nextCrosshairRes.activeHits,
+                    pointerPosition: pointer,
+                    source: lastSrc
+                },
+                "crosshair"
+            );
+            this.tooltipPosition.set(null);
+            this.tooltipContext.set(null);
+            hasAnyState = true;
+        } else {
+            this.#setTransientInteraction(null, null);
+            this.tooltipPosition.set(null);
+            this.tooltipContext.set(null);
+        }
+
+        if (hasAnyState || changed) {
             this.#paint();
+        } else {
+            this.#clearInteraction();
         }
     }
 
@@ -968,6 +1084,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
         });
 
+        // Invalidate or re-resolve tooltip when tooltip inputs change
+        effect(() => {
+            const tt = this.#tooltip();
+            if (!tt) {
+                return;
+            }
+            tt.enabled();
+            tt.shared();
+            this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
+        });
+
         // Invalidate or re-resolve crosshair when crosshair inputs change
         effect(() => {
             const ch = this.#crosshair();
@@ -982,7 +1109,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             ch.yAxisId();
             ch.maxSnapDistance();
 
-            this.#reconcileCrosshairFromRetainedPointer();
+            this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
         });
 
         // Update gesture controller when cartesian XY scene or navigation options change
@@ -1197,7 +1324,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         const isHierarchical = currentScene.coordinateSystem === "hierarchical";
         const isHeatmap = currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap";
-        const buckets = currentScene.interactionBuckets;
+        const buckets = resolveInteractionBuckets(currentScene, this.#activeKeyboardNamespace);
         if (!isHierarchical && !isHeatmap && (!buckets || buckets.length === 0)) {
             return;
         }
@@ -1599,91 +1726,21 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        const shared = this.#resolveSharedTooltip(currentScene);
-        const needHitTest = tooltipEnabled || (crosshairEnabled && crosshair?.snap() === "nearest");
-        const crosshairDist = crosshair?.maxSnapDistance() ?? 32;
-        const demand: ChartPointerInteractionDemand = {
-            crosshairMaxDistance: crosshairDist,
-            maxDistance: 32,
-            needCrosshairCandidates: crosshairEnabled && crosshair?.snap() === "nearest",
-            needHitTest
+        this.#lastPointerResolution = {
+            bucketHits: [],
+            hitState: {
+                activeHitTarget: null,
+                activeHits: [],
+                pointerPosition: pointer
+            },
+            nearestAnchor: null,
+            pointer,
+            primaryHit: null,
+            snappedAnchor: null
         };
-        const resolution = ChartPointerInteractionResolver.resolve(pointer, currentScene, shared, demand);
-        this.#lastPointerResolution = resolution;
         this.#lastInteractionSource = "pointer";
-        const hitState = resolution.hitState;
 
-        let hasAnyState = false;
-
-        const nextCrosshairRes = crosshairEnabled && currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "xy"
-            ? CartesianCrosshairResolver.resolve(
-                  currentScene as CartesianXYChartScene,
-                  crosshair,
-                  resolution,
-                  "pointer"
-              )
-            : null;
-
-        this.crosshairState.set(nextCrosshairRes?.state ?? null);
-        if (nextCrosshairRes?.state !== null && nextCrosshairRes?.state !== undefined) {
-            hasAnyState = true;
-        }
-
-        if (tooltipEnabled && (hitState.activeHitTarget || hitState.activeHits.length > 0)) {
-            this.#setTransientInteraction({
-                ...hitState,
-                source: "pointer"
-            }, "tooltip");
-            const primaryHit = hitState.activeHitTarget ?? hitState.activeHits[0];
-            if (primaryHit) {
-                const rawX =
-                    primaryHit.point?.x ??
-                    (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : pointer.x);
-                const rawY = primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : pointer.y);
-                const clampedX = Math.max(10, Math.min(this.#currentWidth - 10, rawX));
-                const clampedY = Math.max(10, Math.min(this.#currentHeight - 10, rawY));
-                const tooltipPos: ChartPoint = {
-                    x: clampedX,
-                    y: clampedY
-                };
-                this.tooltipPosition.set(tooltipPos);
-                this.tooltipContext.set(
-                    this.#buildTooltipContext(
-                        hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit],
-                        shared,
-                        primaryHit
-                    )
-                );
-                hasAnyState = true;
-            }
-        } else if (
-            !tooltipEnabled &&
-            crosshairEnabled &&
-            nextCrosshairRes &&
-            nextCrosshairRes.snapKind === "mark" &&
-            (nextCrosshairRes.activeHitTarget || nextCrosshairRes.activeHits.length > 0)
-        ) {
-            this.#setTransientInteraction({
-                ...hitState,
-                activeHitTarget: nextCrosshairRes.activeHitTarget,
-                activeHits: nextCrosshairRes.activeHits,
-                pointerPosition: pointer,
-                source: "pointer"
-            }, "crosshair");
-            this.tooltipPosition.set(null);
-            this.tooltipContext.set(null);
-            hasAnyState = true;
-        } else {
-            this.#setTransientInteraction(null, null);
-            this.tooltipPosition.set(null);
-            this.tooltipContext.set(null);
-        }
-
-        if (hasAnyState) {
-            this.#paint();
-        } else {
-            this.#clearInteraction();
-        }
+        this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
     }
 
     public registerAngularAxis(registration: ChartAngularAxisRegistration): () => void {
@@ -1731,9 +1788,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     public registerTooltip(registration: ChartTooltipRegistration): () => void {
         this.#tooltip.set(registration);
+        this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
         return () => {
             if (this.#tooltip() === registration) {
                 this.#tooltip.set(null);
+                this.tooltipPosition.set(null);
+                this.tooltipContext.set(null);
+                const cleared = this.#clearTransientInteractionOwnedBy("tooltip");
+                if (cleared) {
+                    this.#paint();
+                }
+                this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
+                this.invalidate(ChartInvalidationReason.Interaction);
             }
         };
     }
@@ -1758,6 +1824,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     public registerCrosshair(registration: ChartCrosshairRegistration): () => void {
         this.#crosshair.set(registration);
+        this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
         this.invalidate(ChartInvalidationReason.Interaction);
         return () => {
             if (this.#crosshair() === registration) {
@@ -1767,6 +1834,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 if (cleared) {
                     this.#paint();
                 }
+                this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
                 this.invalidate(ChartInvalidationReason.Interaction);
             }
         };
@@ -1865,9 +1933,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         pointerPosition: this.#interactionState.pointerPosition,
                         source: this.#interactionState.source
                     }, this.#interactionOwner);
-                    const currentScene = this.#renderScene ?? this.scene();
-                    const shared = currentScene ? this.#resolveSharedTooltip(currentScene) : false;
-                    this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, primary));
+                    if (this.#interactionOwner === "tooltip" || this.#interactionOwner === "keyboard") {
+                        const currentScene = this.#renderScene ?? this.scene();
+                        const shared = currentScene ? this.#resolveSharedTooltip(currentScene) : false;
+                        this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, primary));
+                    }
                 }
             }
         }
@@ -2685,6 +2755,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 };
                 const resolution: ChartPointerResolution = {
                     bucketHits: activeHits,
+                    crosshairCandidates: activeHits,
                     hitState: keyboardHitState,
                     nearestAnchor: bucketAnchor ?? pointPos,
                     pointer: pointPos,

@@ -6,6 +6,7 @@ import {
     findNearestInteractionBucketByX,
     findNearestInteractionBucketByY
 } from "./chart-hit-test-engine";
+import { ChartPointerCandidateEvaluator } from "./chart-pointer-candidate-evaluator";
 import { ChartPointerCandidateResolver } from "./chart-pointer-candidate-resolver";
 import type { ChartInteractionState } from "./chart-interaction-state";
 
@@ -66,11 +67,11 @@ export class ChartPointerInteractionResolver {
             demand.needHitTest !== false ? tooltipMaxDistance : 0,
             demand.needCrosshairCandidates ? chDistance : 0
         );
-
         const candidates = ChartPointerCandidateResolver.discover(pointer, scene, maxCandidateDistance);
+        const evaluator = ChartPointerCandidateEvaluator.evaluate(candidates, scene);
 
         const hitState = demand.needHitTest !== false
-            ? ChartHitTestEngine.evaluateCandidateHit(candidates, scene, sharedTooltip, tooltipMaxDistance)
+            ? evaluator.resolveHitState(sharedTooltip, tooltipMaxDistance)
             : {
                   activeHitTarget: null,
                   activeHits: [],
@@ -82,15 +83,7 @@ export class ChartPointerInteractionResolver {
 
         let crosshairCandidates: readonly SceneHitTarget[] = [];
         if (demand.needCrosshairCandidates) {
-            const chHitState = ChartHitTestEngine.evaluateCandidateHit(candidates, scene, false, chDistance);
-            const candidateSet = new Set<SceneHitTarget>();
-            for (const h of chHitState.activeHits) {
-                candidateSet.add(h);
-            }
-            if (chHitState.activeHitTarget) {
-                candidateSet.add(chHitState.activeHitTarget);
-            }
-            crosshairCandidates = Array.from(candidateSet);
+            crosshairCandidates = evaluator.resolveCrosshairCandidates(scene, chDistance);
         }
 
         let snappedAnchor: ChartPoint | null = null;

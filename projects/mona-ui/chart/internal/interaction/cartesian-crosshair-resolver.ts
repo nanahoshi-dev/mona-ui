@@ -98,21 +98,59 @@ function findNearestCompatibleHitAcrossNamespaces(
 
     let bestHit: SceneHitTarget | null = null;
     let bestBucket: ChartInteractionBucket | null = null;
-    let minDistance = Number.POSITIVE_INFINITY;
+    let minAxisDist = Number.POSITIVE_INFINITY;
+    let minGeomDist = Number.POSITIVE_INFINITY;
+
+    const targetCoord = isHoriz ? pointer.y : pointer.x;
 
     for (const buckets of candidateBucketLists) {
         if (!buckets || buckets.length === 0) continue;
-        const nearestBucket = isHoriz
-            ? findNearestInteractionBucketByY(buckets, pointer.y)
-            : findNearestInteractionBucketByX(buckets, pointer.x);
-        if (!nearestBucket) continue;
 
-        const distAlongAxis = isHoriz
-            ? Math.abs(pointer.y - nearestBucket.anchor.y)
-            : Math.abs(pointer.x - nearestBucket.anchor.x);
+        // Binary search insertion index
+        let low = 0;
+        let high = buckets.length - 1;
+        while (low <= high) {
+            const mid = (low + high) >> 1;
+            const midCoord = isHoriz ? buckets[mid].anchor.y : buckets[mid].anchor.x;
+            if (midCoord < targetCoord) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
 
-        if (distAlongAxis <= maxSnapDistance) {
-            const bucketHit = findNearestCompatibleHitInBucket(nearestBucket, pointer, scene, targetAxes);
+        let left = low - 1;
+        let right = low;
+
+        while (left >= 0 || right < buckets.length) {
+            const distLeft = left >= 0
+                ? Math.abs(targetCoord - (isHoriz ? buckets[left].anchor.y : buckets[left].anchor.x))
+                : Number.POSITIVE_INFINITY;
+            const distRight = right < buckets.length
+                ? Math.abs(targetCoord - (isHoriz ? buckets[right].anchor.y : buckets[right].anchor.x))
+                : Number.POSITIVE_INFINITY;
+
+            if (distLeft > maxSnapDistance && distRight > maxSnapDistance) {
+                break;
+            }
+
+            let inspectBucket: ChartInteractionBucket;
+            let axisDist: number;
+            if (distLeft <= distRight) {
+                inspectBucket = buckets[left];
+                axisDist = distLeft;
+                left--;
+            } else {
+                inspectBucket = buckets[right];
+                axisDist = distRight;
+                right++;
+            }
+
+            if (axisDist > maxSnapDistance) {
+                continue;
+            }
+
+            const bucketHit = findNearestCompatibleHitInBucket(inspectBucket, pointer, scene, targetAxes);
             if (bucketHit) {
                 const hitPos = bucketHit.point ?? (bucketHit.visualBounds ? {
                     x: bucketHit.visualBounds.x + bucketHit.visualBounds.width / 2,
@@ -120,12 +158,21 @@ function findNearestCompatibleHitAcrossNamespaces(
                 } : (bucketHit.bounds ? {
                     x: bucketHit.bounds.x + bucketHit.bounds.width / 2,
                     y: bucketHit.bounds.y + bucketHit.bounds.height / 2
-                } : nearestBucket.anchor));
-                const dist = Math.hypot(pointer.x - hitPos.x, pointer.y - hitPos.y);
-                if (dist < minDistance) {
-                    minDistance = dist;
+                } : inspectBucket.anchor));
+                const geomDist = Math.hypot(pointer.x - hitPos.x, pointer.y - hitPos.y);
+
+                if (
+                    axisDist < minAxisDist ||
+                    (axisDist === minAxisDist && geomDist < minGeomDist)
+                ) {
+                    minAxisDist = axisDist;
+                    minGeomDist = geomDist;
                     bestHit = bucketHit;
-                    bestBucket = nearestBucket;
+                    bestBucket = inspectBucket;
+                }
+
+                if (distLeft > minAxisDist && distRight > minAxisDist) {
+                    break;
                 }
             }
         }

@@ -1,13 +1,13 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import { ChartPointerCandidateResolver } from "./chart-pointer-candidate-resolver";
+import { ChartPointerCandidateEvaluator } from "./chart-pointer-candidate-evaluator";
 import { ChartPointerInteractionResolver } from "./chart-pointer-interaction-resolver";
-import type { SceneHitTarget, ChartInteractionBucket } from "../scene/scene-geometry";
+import type { SceneHitTarget, ChartInteractionBucket, ChartInteractionXKey } from "../scene/scene-geometry";
 import { CartesianPointSpatialIndex } from "./cartesian-point-spatial-index";
 
-function createPerformanceScene(): CartesianXYChartScene {
+function createPerformanceScene(hitTargetCount: number = 1): CartesianXYChartScene {
     const xMap = new Map<string, CartesianAxisCoordinateSnapshot>();
     const yMap = new Map<string, CartesianAxisCoordinateSnapshot>();
 
@@ -45,30 +45,41 @@ function createPerformanceScene(): CartesianXYChartScene {
 
     const space = new CartesianAxisCoordinateSpace(xMap, yMap);
 
-    const hitTarget: SceneHitTarget = {
-        datum: {},
-        index: 0,
-        point: { x: 250, y: 150 },
-        seriesId: "s1",
-        seriesName: "Series 1",
-        seriesType: "line",
-        xAxisId: "x-main",
-        xKey: "x-0",
-        xValue: 50,
-        yAxisId: "y-main",
-        yValue: 50
-    };
+    const hitTargets: SceneHitTarget[] = [];
+    const buckets: ChartInteractionBucket[] = [];
 
-    const bucket: ChartInteractionBucket = {
-        anchor: { x: 250, y: 150 },
-        hits: [hitTarget],
-        order: 0,
-        xKey: "x-0",
-        xValue: 50
-    };
+    for (let i = 0; i < hitTargetCount; i++) {
+        const xPos = hitTargetCount === 1 ? 250 : 50 + (i / (hitTargetCount - 1)) * 400;
+        const target: SceneHitTarget = {
+            datum: { id: i },
+            index: i,
+            point: { x: xPos, y: 150 },
+            seriesId: `s-${i}`,
+            seriesName: `Series ${i}`,
+            seriesType: "line",
+            xAxisId: "x-main",
+            xKey: `x-${i}`,
+            xValue: i,
+            yAxisId: "y-main",
+            yValue: 50
+        };
+        hitTargets.push(target);
+        buckets.push({
+            anchor: { x: xPos, y: 150 },
+            hits: [target],
+            order: i,
+            xKey: `x-${i}`,
+            xValue: i
+        });
+    }
 
     const spatialIndex = new CartesianPointSpatialIndex();
-    spatialIndex.insertAll([hitTarget]);
+    spatialIndex.insertAll(hitTargets);
+
+    const bucketMap = new Map<ChartInteractionXKey, ChartInteractionBucket>();
+    for (const b of buckets) {
+        bucketMap.set(b.xKey, b);
+    }
 
     return {
         axes: [
@@ -80,10 +91,10 @@ function createPerformanceScene(): CartesianXYChartScene {
         coordinateSystem: "cartesian",
         hasRenderableData: true,
         height: 300,
-        hitTargets: [hitTarget],
+        hitTargets,
         interactionAxis: "x",
-        interactionBuckets: [bucket],
-        interactionBucketsByAxisId: new Map([["x-main", new Map([["b-0", bucket]])]]),
+        interactionBuckets: buckets,
+        interactionBucketsByAxisId: new Map([["x-main", bucketMap]]),
         legendItems: [],
         plotRect: { height: 200, width: 400, x: 50, y: 50 },
         pointSpatialIndex: spatialIndex,
@@ -94,15 +105,39 @@ function createPerformanceScene(): CartesianXYChartScene {
     };
 }
 
-describe("ChartPointerCandidatePerformance (CAA-R4-002 / Gates L & M)", () => {
+function createDenseBarPerformanceScene(barCount: number): CartesianXYChartScene {
+    const scene = createPerformanceScene(1);
+    const bars: SceneHitTarget[] = [];
+    for (let i = 0; i < barCount; i++) {
+        bars.push({
+            bounds: { height: 50, width: 4, x: 50 + (i % 400), y: 100 },
+            datum: { id: i },
+            index: i,
+            seriesId: `bar-${i}`,
+            seriesName: `Bar ${i}`,
+            seriesType: "bar",
+            xAxisId: "x-main",
+            xKey: `b-${i}`,
+            xValue: i,
+            yAxisId: "y-main",
+            yValue: 50
+        });
+    }
+    return {
+        ...scene,
+        barHitTargets: bars,
+        hitTargets: bars
+    };
+}
+
+describe("ChartPointerCandidatePerformance (CAA-R5-002 / Gates L & M)", () => {
     beforeEach(() => {
-        ChartPointerCandidateResolver.resetDiscoveryCount();
+        ChartPointerCandidateEvaluator.resetOperationCounts();
     });
 
-    it("executes candidate discovery at most once for tooltip + wide nearest crosshair (Case A)", () => {
-        const scene = createPerformanceScene();
-        // Pointer 45px away along X: x=295, y=150 (target is at 250, 150)
-        const pointer = { x: 295, y: 150 };
+    it("executes single-pass spatial discovery and distance evaluation for tooltip + wide nearest crosshair (Case A)", () => {
+        const scene = createPerformanceScene(1);
+        const pointer = { x: 295, y: 150 }; // 45px away along X
         const resolution = ChartPointerInteractionResolver.resolve(pointer, scene, false, {
             crosshairMaxDistance: 64,
             maxDistance: 32,
@@ -110,7 +145,9 @@ describe("ChartPointerCandidatePerformance (CAA-R4-002 / Gates L & M)", () => {
             needHitTest: true
         });
 
-        expect(ChartPointerCandidateResolver.discoveryCount).toBe(1);
+        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(1);
+        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBe(1);
+
         // Tooltip radius 32 misses (45px away)
         expect(resolution.hitState.activeHitTarget).toBeNull();
         expect(resolution.hitState.activeHits.length).toBe(0);
@@ -118,10 +155,9 @@ describe("ChartPointerCandidatePerformance (CAA-R4-002 / Gates L & M)", () => {
         expect(resolution.crosshairCandidates?.length).toBe(1);
     });
 
-    it("executes candidate discovery at most once for tooltip + narrow nearest crosshair (Case B)", () => {
-        const scene = createPerformanceScene();
-        // Pointer 20px away along X: x=270, y=150 (target is at 250, 150)
-        const pointer = { x: 270, y: 150 };
+    it("executes single-pass spatial discovery and distance evaluation for tooltip + narrow nearest crosshair (Case B)", () => {
+        const scene = createPerformanceScene(1);
+        const pointer = { x: 270, y: 150 }; // 20px away along X
         const resolution = ChartPointerInteractionResolver.resolve(pointer, scene, false, {
             crosshairMaxDistance: 8,
             maxDistance: 32,
@@ -129,28 +165,32 @@ describe("ChartPointerCandidatePerformance (CAA-R4-002 / Gates L & M)", () => {
             needHitTest: true
         });
 
-        expect(ChartPointerCandidateResolver.discoveryCount).toBe(1);
+        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(1);
+        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBe(1);
+
         // Tooltip radius 32 hits (20px away)
         expect(resolution.hitState.activeHitTarget).not.toBeNull();
         // Crosshair radius 8 misses (20px away > 8px)
         expect(resolution.crosshairCandidates?.length).toBe(0);
     });
 
-    it("executes zero candidate discoveries for pointer-only crosshair with disabled tooltip (Case C)", () => {
-        const scene = createPerformanceScene();
+    it("executes zero spatial discoveries and zero geometry checks for pointer-only crosshair with disabled tooltip (Case C)", () => {
+        const scene = createPerformanceScene(1);
         const pointer = { x: 250, y: 150 };
         const resolution = ChartPointerInteractionResolver.resolve(pointer, scene, false, {
             needCrosshairCandidates: false,
             needHitTest: false
         });
 
-        expect(ChartPointerCandidateResolver.discoveryCount).toBe(0);
+        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(0);
+        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBe(0);
+        expect(ChartPointerCandidateEvaluator.operationCounts.barContainmentChecks).toBe(0);
         expect(resolution.hitState.activeHitTarget).toBeNull();
         expect(resolution.crosshairCandidates?.length).toBe(0);
     });
 
-    it("executes one candidate discovery for nearest crosshair with disabled tooltip (Case D)", () => {
-        const scene = createPerformanceScene();
+    it("executes single candidate evaluation for nearest crosshair with disabled tooltip (Case D)", () => {
+        const scene = createPerformanceScene(1);
         const pointer = { x: 250, y: 160 };
         const resolution = ChartPointerInteractionResolver.resolve(pointer, scene, false, {
             crosshairMaxDistance: 32,
@@ -158,8 +198,44 @@ describe("ChartPointerCandidatePerformance (CAA-R4-002 / Gates L & M)", () => {
             needHitTest: false
         });
 
-        expect(ChartPointerCandidateResolver.discoveryCount).toBe(1);
+        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(1);
+        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBe(1);
         expect(resolution.hitState.activeHitTarget).toBeNull();
         expect(resolution.crosshairCandidates?.length).toBe(1);
+    });
+
+    it("evaluates dense 10,000 bars containment strictly once across dual tooltip + crosshair demand (Case E)", () => {
+        const denseScene = createDenseBarPerformanceScene(10000);
+        const pointer = { x: 250, y: 120 };
+
+        const resolution = ChartPointerInteractionResolver.resolve(pointer, denseScene, false, {
+            crosshairMaxDistance: 32,
+            maxDistance: 32,
+            needCrosshairCandidates: true,
+            needHitTest: true
+        });
+
+        expect(ChartPointerCandidateEvaluator.operationCounts.barContainmentChecks).toBe(10000);
+        expect(resolution.hitState.activeHitTarget).not.toBeNull();
+        expect(resolution.crosshairCandidates?.length).toBeGreaterThan(0);
+    });
+
+    it("evaluates dense 1,000 point candidates distances strictly once across dual tooltip + crosshair demand (Case F)", () => {
+        const denseScene = createPerformanceScene(1000);
+        const pointer = { x: 250, y: 150 };
+
+        const resolution = ChartPointerInteractionResolver.resolve(pointer, denseScene, true, {
+            crosshairMaxDistance: 64,
+            maxDistance: 32,
+            needCrosshairCandidates: true,
+            needHitTest: true
+        });
+
+        expect(ChartPointerCandidateEvaluator.operationCounts.spatialQueries).toBe(1);
+        // Distance evaluated exactly once for each discovered candidate
+        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBeLessThanOrEqual(1000);
+        expect(ChartPointerCandidateEvaluator.operationCounts.pointDistanceChecks).toBeGreaterThan(0);
+        expect(resolution.hitState.activeHits.length).toBeGreaterThan(0);
+        expect(resolution.crosshairCandidates?.length).toBeGreaterThan(0);
     });
 });
