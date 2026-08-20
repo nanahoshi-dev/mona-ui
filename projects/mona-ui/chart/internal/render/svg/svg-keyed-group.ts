@@ -33,21 +33,36 @@ export class SvgKeyedGroup<T = unknown, E extends SVGElement = SVGElement> {
             return;
         }
 
+        const keyOccurrences = new Map<string, number>();
         const seenKeys = new Set<string>();
         const nextElements = new Map<string, E>();
         let currentChild = container.firstElementChild as SVGElement | null;
 
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            const key = options.key(item, i);
+            const rawKey = options.key(item, i);
+            const count = keyOccurrences.get(rawKey) ?? 0;
+            keyOccurrences.set(rawKey, count + 1);
+            const key = count === 0 ? rawKey : `${rawKey}__dup_${count}`;
+
             seenKeys.add(key);
 
             let element = this.#elementsByKey.get(key);
-            if (!element) {
+            const requestedTag = typeof options.tag === "function" ? options.tag(item, i) : (options.tag ?? (options.create ? undefined : "g"));
+
+            if (element && requestedTag && element.localName.toLowerCase() !== requestedTag.toLowerCase()) {
+                const replacement = createSvgElement<E>(requestedTag as keyof SVGElementTagNameMap);
+                replacement.setAttribute("data-key", key);
+                if (currentChild === element) {
+                    currentChild = element.nextElementSibling as SVGElement | null;
+                }
+                element.replaceWith(replacement);
+                element = replacement;
+            } else if (!element) {
                 if (options.create) {
                     element = options.create(item, i);
                 } else {
-                    const tag = typeof options.tag === "function" ? options.tag(item, i) : (options.tag ?? "g");
+                    const tag = requestedTag ?? "g";
                     element = createSvgElement<E>(tag as keyof SVGElementTagNameMap);
                 }
                 element.setAttribute("data-key", key);

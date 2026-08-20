@@ -11,7 +11,8 @@ export class SvgOhlcSeriesRenderer {
     }
 
     public render(scene: ChartOhlcSeriesScene): void {
-        const { marks, style } = scene;
+        const marks = scene.marks ?? [];
+        const { style } = scene;
         if (marks.length === 0) {
             this.#keyedGroup.clear();
             return;

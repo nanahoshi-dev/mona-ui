@@ -1,9 +1,24 @@
 import type { ChartInteractionState } from "../../../interaction/chart-interaction-state";
-import type { CartesianWaterfallChartScene } from "../../../scene/waterfall-scene";
+import type { CartesianWaterfallChartScene, SceneWaterfallBar, SceneWaterfallConnector } from "../../../scene/waterfall-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import { buildRoundedRectPath } from "../../geometry/rounded-rect-path-builder";
 import { setSvgAttribute } from "../svg-attribute-utils";
 import { createSvgElement } from "../svg-element-utils";
+import { SvgKeyedGroup } from "../svg-keyed-group";
+
+interface WaterfallRenderBarItem {
+    readonly alpha: number;
+    readonly bar: SceneWaterfallBar;
+    readonly key: string;
+    readonly strokeColor?: string;
+    readonly strokeWidth: number;
+}
+
+interface WaterfallRenderConnectorItem {
+    readonly alpha: number;
+    readonly conn: SceneWaterfallConnector;
+    readonly key: string;
+}
 
 export class SvgWaterfallRenderer {
     readonly #container: SVGGElement;
@@ -12,6 +27,12 @@ export class SvgWaterfallRenderer {
     readonly #barsGroup: SVGGElement;
     readonly #axesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
+
+    #gridPath: SVGPathElement | null = null;
+    #axisPath: SVGPathElement | null = null;
+
+    readonly #connectorKeyedGroup: SvgKeyedGroup<WaterfallRenderConnectorItem, SVGLineElement>;
+    readonly #barKeyedGroup: SvgKeyedGroup<WaterfallRenderBarItem, SVGElement>;
 
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -35,6 +56,9 @@ export class SvgWaterfallRenderer {
         this.#highlightGroup = createSvgElement("g");
         this.#highlightGroup.setAttribute("data-waterfall-layer", "highlight");
         this.#container.appendChild(this.#highlightGroup);
+
+        this.#connectorKeyedGroup = new SvgKeyedGroup<WaterfallRenderConnectorItem, SVGLineElement>(this.#connectorsGroup);
+        this.#barKeyedGroup = new SvgKeyedGroup<WaterfallRenderBarItem, SVGElement>(this.#barsGroup);
     }
 
     public render(
@@ -49,7 +73,6 @@ export class SvgWaterfallRenderer {
         }
 
         // 1. Grid
-        while (this.#gridGroup.firstChild) this.#gridGroup.firstChild.remove();
         const gridColor =
             styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
             "rgba(148, 163, 184, 0.2)";
@@ -70,52 +93,79 @@ export class SvgWaterfallRenderer {
             }
         }
         if (gridSegments.length > 0) {
-            const gridPath = createSvgElement("path");
-            setSvgAttribute(gridPath, "d", gridSegments.join(" "));
-            setSvgAttribute(gridPath, "fill", "none");
-            setSvgAttribute(gridPath, "stroke", gridColor);
-            setSvgAttribute(gridPath, "stroke-width", 1);
-            setSvgAttribute(gridPath, "shape-rendering", "crispEdges");
-            this.#gridGroup.appendChild(gridPath);
+            if (!this.#gridPath) {
+                this.#gridPath = createSvgElement("path");
+                this.#gridGroup.appendChild(this.#gridPath);
+            }
+            setSvgAttribute(this.#gridPath, "d", gridSegments.join(" "));
+            setSvgAttribute(this.#gridPath, "fill", "none");
+            setSvgAttribute(this.#gridPath, "stroke", gridColor);
+            setSvgAttribute(this.#gridPath, "stroke-width", 1);
+            setSvgAttribute(this.#gridPath, "shape-rendering", "crispEdges");
+        } else if (this.#gridPath) {
+            this.#gridPath.remove();
+            this.#gridPath = null;
         }
 
         // 2. Connectors & Bars
-        while (this.#connectorsGroup.firstChild) this.#connectorsGroup.firstChild.remove();
-        while (this.#barsGroup.firstChild) this.#barsGroup.firstChild.remove();
+        const connectorItems: WaterfallRenderConnectorItem[] = [];
+        const barItems: WaterfallRenderBarItem[] = [];
 
         for (const s of series) {
             const { bars, connectors, renderOpacity = 1, style } = s;
             if (bars.length === 0 || renderOpacity <= 0) continue;
 
-            const strokeWidth = style.strokeWidth ?? 0;
-            const strokeColor = style.strokeColor;
-            const fillOpacity = style.fillOpacity ?? 1;
+            const strokeWidth = style?.strokeWidth ?? 0;
+            const strokeColor = style?.strokeColor;
+            const fillOpacity = style?.fillOpacity ?? 1;
 
             // Connectors
             for (const conn of connectors) {
                 const connOpacity = conn.renderOpacity ?? 1;
                 if (connOpacity <= 0 || conn.width <= 0 || conn.fromX >= conn.toX) continue;
 
-                const lineEl = createSvgElement("line");
-                setSvgAttribute(lineEl, "x1", conn.fromX);
-                setSvgAttribute(lineEl, "y1", conn.y);
-                setSvgAttribute(lineEl, "x2", conn.toX);
-                setSvgAttribute(lineEl, "y2", conn.y);
-                setSvgAttribute(lineEl, "stroke", conn.color);
-                setSvgAttribute(lineEl, "stroke-width", conn.width);
-                setSvgAttribute(lineEl, "stroke-dasharray", "4 4");
-                setSvgAttribute(lineEl, "opacity", renderOpacity * connOpacity);
-                this.#connectorsGroup.appendChild(lineEl);
+                connectorItems.push({
+                    alpha: renderOpacity * connOpacity,
+                    conn,
+                    key: `${s.id}:${conn.animationKey || `conn:${conn.fromAnimationKey}:${conn.toAnimationKey}`}`
+                });
             }
 
             // Bars
             for (const bar of bars) {
                 const barOpacity = bar.renderOpacity ?? 1;
-                if (barOpacity <= 0 || bar.bounds.width <= 0 || bar.bounds.height <= 0) continue;
+                if (barOpacity <= 0 || (bar.bounds && (bar.bounds.width <= 0 || bar.bounds.height <= 0))) continue;
 
-                const alpha = renderOpacity * barOpacity * fillOpacity;
-                const rectEl = bar.borderRadius > 0 && !bar.isZeroChange ? createSvgElement("path") : createSvgElement("rect");
+                barItems.push({
+                    alpha: renderOpacity * barOpacity * fillOpacity,
+                    bar,
+                    key: `${s.id}:${bar.animationKey || String(bar.dataIndex)}`,
+                    strokeColor,
+                    strokeWidth
+                });
+            }
+        }
 
+        this.#connectorKeyedGroup.reconcile(connectorItems, {
+            key: item => item.key,
+            tag: "line",
+            update: (lineEl, item) => {
+                setSvgAttribute(lineEl, "x1", item.conn.fromX);
+                setSvgAttribute(lineEl, "y1", item.conn.y);
+                setSvgAttribute(lineEl, "x2", item.conn.toX);
+                setSvgAttribute(lineEl, "y2", item.conn.y);
+                setSvgAttribute(lineEl, "stroke", item.conn.color);
+                setSvgAttribute(lineEl, "stroke-width", item.conn.width);
+                setSvgAttribute(lineEl, "stroke-dasharray", "4 4");
+                setSvgAttribute(lineEl, "opacity", item.alpha);
+            }
+        });
+
+        this.#barKeyedGroup.reconcile(barItems, {
+            key: item => item.key,
+            tag: item => (item.bar.borderRadius > 0 && !item.bar.isZeroChange ? "path" : "rect"),
+            update: (element, item) => {
+                const bar = item.bar;
                 if (bar.borderRadius > 0 && !bar.isZeroChange) {
                     const d = buildRoundedRectPath(bar.bounds.x, bar.bounds.y, bar.bounds.width, bar.bounds.height, {
                         bottomLeft: bar.borderRadius,
@@ -123,31 +173,28 @@ export class SvgWaterfallRenderer {
                         topLeft: bar.borderRadius,
                         topRight: bar.borderRadius
                     });
-                    setSvgAttribute(rectEl, "d", d);
+                    setSvgAttribute(element, "d", d);
                 } else {
-                    setSvgAttribute(rectEl, "x", bar.bounds.x);
-                    setSvgAttribute(rectEl, "y", bar.bounds.y);
-                    setSvgAttribute(rectEl, "width", bar.bounds.width);
-                    setSvgAttribute(rectEl, "height", bar.bounds.height);
+                    setSvgAttribute(element, "x", bar.bounds.x);
+                    setSvgAttribute(element, "y", bar.bounds.y);
+                    setSvgAttribute(element, "width", bar.bounds.width);
+                    setSvgAttribute(element, "height", bar.bounds.height);
                 }
 
-                setSvgAttribute(rectEl, "fill", bar.color);
-                setSvgAttribute(rectEl, "opacity", alpha);
+                setSvgAttribute(element, "fill", bar.color);
+                setSvgAttribute(element, "opacity", item.alpha);
 
-                if (strokeWidth > 0 && strokeColor) {
-                    setSvgAttribute(rectEl, "stroke", strokeColor);
-                    setSvgAttribute(rectEl, "stroke-width", strokeWidth);
+                if (item.strokeWidth > 0 && item.strokeColor) {
+                    setSvgAttribute(element, "stroke", item.strokeColor);
+                    setSvgAttribute(element, "stroke-width", item.strokeWidth);
                 } else {
-                    setSvgAttribute(rectEl, "stroke", "none");
-                    setSvgAttribute(rectEl, "stroke-width", 0);
+                    setSvgAttribute(element, "stroke", "none");
+                    setSvgAttribute(element, "stroke-width", 0);
                 }
-
-                this.#barsGroup.appendChild(rectEl);
             }
-        }
+        });
 
         // 3. Axes
-        while (this.#axesGroup.firstChild) this.#axesGroup.firstChild.remove();
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
             styleResolver.resolveCssVariable("--color-border-control") ||
@@ -171,13 +218,18 @@ export class SvgWaterfallRenderer {
             }
         }
         if (axisSegments.length > 0) {
-            const axisPath = createSvgElement("path");
-            setSvgAttribute(axisPath, "d", axisSegments.join(" "));
-            setSvgAttribute(axisPath, "fill", "none");
-            setSvgAttribute(axisPath, "stroke", axisLineColor);
-            setSvgAttribute(axisPath, "stroke-width", 1);
-            setSvgAttribute(axisPath, "shape-rendering", "crispEdges");
-            this.#axesGroup.appendChild(axisPath);
+            if (!this.#axisPath) {
+                this.#axisPath = createSvgElement("path");
+                this.#axesGroup.appendChild(this.#axisPath);
+            }
+            setSvgAttribute(this.#axisPath, "d", axisSegments.join(" "));
+            setSvgAttribute(this.#axisPath, "fill", "none");
+            setSvgAttribute(this.#axisPath, "stroke", axisLineColor);
+            setSvgAttribute(this.#axisPath, "stroke-width", 1);
+            setSvgAttribute(this.#axisPath, "shape-rendering", "crispEdges");
+        } else if (this.#axisPath) {
+            this.#axisPath.remove();
+            this.#axisPath = null;
         }
 
         // 4. Highlight
@@ -230,15 +282,23 @@ export class SvgWaterfallRenderer {
     }
 
     public clear(): void {
-        while (this.#gridGroup.firstChild) this.#gridGroup.firstChild.remove();
-        while (this.#connectorsGroup.firstChild) this.#connectorsGroup.firstChild.remove();
-        while (this.#barsGroup.firstChild) this.#barsGroup.firstChild.remove();
-        while (this.#axesGroup.firstChild) this.#axesGroup.firstChild.remove();
+        this.#connectorKeyedGroup.clear();
+        this.#barKeyedGroup.clear();
+        if (this.#gridPath) {
+            this.#gridPath.remove();
+            this.#gridPath = null;
+        }
+        if (this.#axisPath) {
+            this.#axisPath.remove();
+            this.#axisPath = null;
+        }
         while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
     }
 
     public destroy(): void {
         this.clear();
+        this.#connectorKeyedGroup.destroy();
+        this.#barKeyedGroup.destroy();
         this.#gridGroup.remove();
         this.#connectorsGroup.remove();
         this.#barsGroup.remove();

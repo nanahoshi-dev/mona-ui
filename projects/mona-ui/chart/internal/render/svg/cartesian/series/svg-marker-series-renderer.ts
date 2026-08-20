@@ -14,7 +14,8 @@ export class SvgMarkerSeriesRenderer {
     }
 
     public render(scene: ChartBubbleSeriesScene | ChartScatterSeriesScene): void {
-        const { markers, renderOpacity = 1, style } = scene;
+        const markers = scene.markers ?? [];
+        const { renderOpacity = 1, style } = scene;
         if (markers.length === 0 || renderOpacity <= 0) {
             this.#keyedGroup.clear();
             return;

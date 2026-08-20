@@ -29,9 +29,7 @@ export class SvgCartesianDataLabelRenderer {
                 setSvgAttribute(element, "dominant-baseline", "middle");
                 setSvgAttribute(element, "fill", label.color);
 
-                if (label.font) {
-                    element.style.font = label.font;
-                }
+                element.style.font = label.font ?? "";
 
                 if (label.haloWidth && label.haloWidth > 0 && label.haloColor) {
                     setSvgAttribute(element, "paint-order", "stroke fill");

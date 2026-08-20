@@ -12,7 +12,8 @@ export class SvgBarSeriesRenderer {
     }
 
     public render(scene: ChartBarSeriesScene): void {
-        const { bars, borderRadius, fillOpacity, style } = scene;
+        const bars = scene.bars ?? [];
+        const { borderRadius, fillOpacity, style } = scene;
         if (bars.length === 0) {
             this.#keyedGroup.clear();
             return;
@@ -29,7 +30,7 @@ export class SvgBarSeriesRenderer {
                     cornerRadii: bar.cornerRadii,
                     height: bar.height,
                     isPositive: bar.isPositive,
-                    orientation: "vertical",
+                    orientation: bar.orientation ?? scene.orientation ?? "vertical",
                     radius: bar.radius ?? borderRadius,
                     width: bar.width,
                     x: bar.x,

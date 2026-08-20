@@ -16,7 +16,8 @@ export class SvgLineSeriesRenderer {
     }
 
     public render(scene: ChartLineSeriesScene): void {
-        const { connectNulls, curve, points, showPoints, style } = scene;
+        const points = scene.points ?? [];
+        const { connectNulls, curve, showPoints, style } = scene;
         const validPoints = connectNulls ? points.filter(p => p.defined) : points;
 
         if (validPoints.length === 0) {
