@@ -115,6 +115,13 @@ describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB
     it("deterministic morph: suppresses Canvas labels, selection visuals, and DOM templates at intermediate frame and restores them upon completion", () => {
         const renderSpy = vi.spyOn(CanvasChartRenderer, "render");
 
+        // Verify pre-animation DOM template exists and is visible (not suppressed)
+        const domLabel = fixture.nativeElement.querySelector(".custom-dom-label");
+        expect(domLabel).not.toBeNull();
+        const domLabelWrapper = domLabel?.parentElement;
+        expect(domLabelWrapper).not.toBeNull();
+        expect(domLabelWrapper!.classList.contains("opacity-0")).toBe(false);
+
         // Trigger data morph transition
         host.data.set([
             { name: "A", value: 30 },
@@ -150,11 +157,8 @@ describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB
         // Authoritative selection state remains durable during visual suppression
         expect(host.selectedMarkIds()).toEqual(["s0:0"]);
 
-        // Custom DOM template labels are visually suppressed (opacity-0 class)
-        const domLabelWrapper = fixture.nativeElement.querySelector(".custom-dom-label")?.parentElement;
-        if (domLabelWrapper) {
-            expect(domLabelWrapper.classList.contains("opacity-0")).toBe(true);
-        }
+        // Custom DOM template labels are visually suppressed (opacity-0 class) - unconditional
+        expect(domLabelWrapper!.classList.contains("opacity-0")).toBe(true);
 
         // 3. Advance clock to completion
         vi.advanceTimersByTime(150);
@@ -169,9 +173,8 @@ describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB
         expect(finalOverlay.selectionScene).not.toBeNull();
         expect(host.selectedMarkIds()).toEqual(["s0:0"]);
 
-        if (domLabelWrapper) {
-            expect(domLabelWrapper.classList.contains("opacity-0")).toBe(false);
-        }
+        // Custom DOM template labels are restored - unconditional
+        expect(domLabelWrapper!.classList.contains("opacity-0")).toBe(false);
 
         renderSpy.mockRestore();
     });

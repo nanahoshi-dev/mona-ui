@@ -1,7 +1,8 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toSelectedPoint } from "../../internal/selection/chart-selection-controller";
+import { ChartDataLabelContextBuilder } from "../../internal/data-label/chart-data-label-context-builder";
 import type { SceneHitTarget } from "../../internal/scene/scene-geometry";
 import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
 import { ChartComponent } from "./chart.component";
@@ -12,6 +13,7 @@ import { ChartSelectionComponent } from "../chart-selection/chart-selection.comp
 import type { ChartSelectionChangeEvent } from "../../models/chart-selection.models";
 
 @Component({
+    selector: "test-stacked-host",
     imports: [
         ChartComponent,
         BarSeriesComponent,
@@ -48,6 +50,54 @@ class StackedSelectionHostComponent {
     public readonly data = signal([
         { category: "2026-Q1", s1: 40, s2: 30 },
         { category: "2026-Q2", s1: 50, s2: 20 }
+    ]);
+    public lastSelectionEvent: ChartSelectionChangeEvent | null = null;
+
+    public onSelectionChange(event: ChartSelectionChangeEvent): void {
+        this.lastSelectionEvent = event;
+    }
+}
+
+@Component({
+    selector: "test-percent-stacked-host",
+    imports: [
+        ChartComponent,
+        BarSeriesComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartSelectionComponent
+    ],
+    template: `
+        <mona-chart
+            [data]="data()"
+            [xField]="'category'"
+            [style.width.px]="600"
+            [style.height.px]="400">
+            <mona-chart-x-axis />
+            <mona-chart-y-axis [axisId]="'yPrimary'" />
+            <mona-bar-series
+                [field]="'s1'"
+                [name]="'Series 1'"
+                [stack]="'stack1'"
+                [stackMode]="'percent'"
+                [yAxisId]="'yPrimary'" />
+            <mona-bar-series
+                [field]="'s2'"
+                [name]="'Series 2'"
+                [stack]="'stack1'"
+                [stackMode]="'percent'"
+                [yAxisId]="'yPrimary'" />
+            <mona-chart-selection
+                [mode]="'single'"
+                (selectionChange)="onSelectionChange($event)" />
+        </mona-chart>
+    `
+})
+class PercentStackedSelectionHostComponent {
+    public readonly chart = viewChild.required(ChartComponent);
+    public readonly data = signal([
+        { category: "2026-Q1", s1: 25, s2: 75 },
+        { category: "2026-Q2", s1: 40, s2: 60 }
     ]);
     public lastSelectionEvent: ChartSelectionChangeEvent | null = null;
 
@@ -326,10 +376,7 @@ describe("Chart Selected Point Semantic Context (GDSB-R4-004)", () => {
     });
 
     describe("Real Stacked Component Bed Integration", () => {
-        let fixture: ComponentFixture<StackedSelectionHostComponent>;
-        let host: StackedSelectionHostComponent;
-
-        it("emits exact stacked scalar properties through selection change event", async () => {
+        beforeEach(async () => {
             vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
                 bottom: 400,
                 height: 400,
@@ -368,23 +415,92 @@ describe("Chart Selected Point Semantic Context (GDSB-R4-004)", () => {
             } as any);
 
             await TestBed.configureTestingModule({
-                imports: [StackedSelectionHostComponent]
+                imports: [StackedSelectionHostComponent, PercentStackedSelectionHostComponent]
             }).compileComponents();
+        });
 
-            fixture = TestBed.createComponent(StackedSelectionHostComponent);
-            host = fixture.componentInstance;
+        it("emits exact normal stacked scalar properties and maintains data-label parity for real generated scene", async () => {
+            const fixture = TestBed.createComponent(StackedSelectionHostComponent);
+            const host = fixture.componentInstance;
             fixture.detectChanges();
             await fixture.whenStable();
 
-            const chartEl = fixture.nativeElement.querySelector("mona-chart");
-            chartEl.dispatchEvent(new MouseEvent("click", { clientX: 200, clientY: 200, bubbles: true }));
+            const scene = host.chart().scene() as CartesianXYChartScene;
+            expect(scene).not.toBeNull();
+
+            const hitTarget = scene.hitTargets.find(t => t.seriesName === "Series 2" && (t.xKey === "2026-Q1" || t.category === "2026-Q1"));
+            expect(hitTarget).toBeDefined();
+            expect(hitTarget!.bounds).toBeDefined();
+
+            const clickX = hitTarget!.bounds!.x + hitTarget!.bounds!.width / 2;
+            const clickY = hitTarget!.bounds!.y + hitTarget!.bounds!.height / 2;
+
+            const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+            chartEl.dispatchEvent(new MouseEvent("click", { clientX: clickX, clientY: clickY, bubbles: true }));
             fixture.detectChanges();
 
-            if (host.lastSelectionEvent && host.lastSelectionEvent.visibleSelectedPoints.length > 0) {
-                const pt = host.lastSelectionEvent.visibleSelectedPoints[0];
-                expect(pt.markId).toBeDefined();
-                expect(pt.seriesId).toBeDefined();
-            }
+            expect(host.lastSelectionEvent).not.toBeNull();
+            expect(host.lastSelectionEvent!.visibleSelectedPoints.length).toBeGreaterThan(0);
+
+            const pt = host.lastSelectionEvent!.visibleSelectedPoints.find(p => p.seriesName === "Series 2");
+            expect(pt).toBeDefined();
+            expect(pt!.markId).toBeDefined();
+            expect(pt!.seriesId).toBeDefined();
+            expect(pt!.value).toBe(30);
+            expect(pt!.yValue).toBe(70);
+            expect(pt!.stackStart).toBe(40);
+            expect(pt!.stackEnd).toBe(70);
+
+            // Parity with data-label semantic context builder
+            const dlCtx = ChartDataLabelContextBuilder.buildContext(hitTarget!, false, "#3b82f6", scene);
+            expect(dlCtx.value).toBe(pt!.value);
+            expect(dlCtx.yValue).toBe(pt!.yValue);
+            expect(dlCtx.xValue).toBe(pt!.xValue);
+            expect(dlCtx.stackStart).toBe(pt!.stackStart);
+            expect(dlCtx.stackEnd).toBe(pt!.stackEnd);
+        });
+
+        it("emits exact percent stacked scalar properties and maintains data-label parity for real generated scene", async () => {
+            const fixture = TestBed.createComponent(PercentStackedSelectionHostComponent);
+            const host = fixture.componentInstance;
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const scene = host.chart().scene() as CartesianXYChartScene;
+            expect(scene).not.toBeNull();
+
+            const hitTarget = scene.hitTargets.find(t => t.seriesName === "Series 2" && (t.xKey === "2026-Q1" || t.category === "2026-Q1"));
+            expect(hitTarget).toBeDefined();
+            expect(hitTarget!.bounds).toBeDefined();
+
+            const clickX = hitTarget!.bounds!.x + hitTarget!.bounds!.width / 2;
+            const clickY = hitTarget!.bounds!.y + hitTarget!.bounds!.height / 2;
+
+            const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+            chartEl.dispatchEvent(new MouseEvent("click", { clientX: clickX, clientY: clickY, bubbles: true }));
+            fixture.detectChanges();
+
+            expect(host.lastSelectionEvent).not.toBeNull();
+            expect(host.lastSelectionEvent!.visibleSelectedPoints.length).toBeGreaterThan(0);
+
+            const pt = host.lastSelectionEvent!.visibleSelectedPoints.find(p => p.seriesName === "Series 2");
+            expect(pt).toBeDefined();
+            expect(pt!.markId).toBeDefined();
+            expect(pt!.seriesId).toBeDefined();
+            expect(pt!.value).toBe(75);
+            expect(pt!.yValue).toBe(100);
+            expect(pt!.stackStart).toBe(25);
+            expect(pt!.stackEnd).toBe(100);
+            expect(pt!.stackPercentage).toBe(75);
+
+            // Parity with data-label semantic context builder
+            const dlCtx = ChartDataLabelContextBuilder.buildContext(hitTarget!, false, "#3b82f6", scene);
+            expect(dlCtx.value).toBe(pt!.value);
+            expect(dlCtx.yValue).toBe(pt!.yValue);
+            expect(dlCtx.xValue).toBe(pt!.xValue);
+            expect(dlCtx.stackStart).toBe(pt!.stackStart);
+            expect(dlCtx.stackEnd).toBe(pt!.stackEnd);
+            expect(dlCtx.stackPercentage).toBe(pt!.stackPercentage);
         });
     });
 });
