@@ -7,7 +7,7 @@ import type {
 } from "../context/chart-registration-context";
 import type {
     CartesianDataLabelScene,
-    SceneCanvasDataLabel,
+    SceneDefaultDataLabel,
     SceneTemplateDataLabel
 } from "../scene/cartesian-data-label-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
@@ -54,7 +54,7 @@ export class CartesianDataLabelProjector {
         } = options;
 
         if (hitTargets.length === 0 || seriesRegistrations.length === 0) {
-            return { canvasLabels: [], templateLabels: [] };
+            return { defaultLabels: [], templateLabels: [] };
         }
 
         const seriesMap = new Map<string, ChartSeriesRegistration>();
@@ -73,7 +73,7 @@ export class CartesianDataLabelProjector {
         }
 
         const collisionIndex = new ChartDataLabelCollisionIndex(48);
-        const canvasLabels: SceneCanvasDataLabel[] = [];
+        const defaultLabels: SceneDefaultDataLabel[] = [];
         const templateLabels: SceneTemplateDataLabel[] = [];
 
         for (const [seriesId, seriesHits] of hitsBySeries.entries()) {
@@ -163,7 +163,7 @@ export class CartesianDataLabelProjector {
 
                         if (!collides) {
                             collisionIndex.insert(placement.bounds, normalizedOptions.collisionPadding);
-                            canvasLabels.push({
+                            defaultLabels.push({
                                 anchor: placement.anchor,
                                 bounds: placement.bounds,
                                 color: normalizedOptions.color ?? defaultColor,
@@ -182,7 +182,7 @@ export class CartesianDataLabelProjector {
             }
         }
 
-        return { canvasLabels, templateLabels };
+        return { defaultLabels, templateLabels };
     }
 
     static #sampleHits(hits: readonly SceneHitTarget[], maxLabels: number): readonly SceneHitTarget[] {

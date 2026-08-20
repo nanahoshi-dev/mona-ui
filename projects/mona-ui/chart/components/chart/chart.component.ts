@@ -116,6 +116,10 @@ import { ChartLabelMeasurementPruner } from "../../internal/layout/chart-label-m
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
 import { formatPolarLabelText } from "../../internal/layout/polar-label-layout";
 import { CanvasChartRenderer, type ChartRenderOverlayState } from "../../internal/render/canvas-chart-renderer";
+import type { ChartRendererMode } from "../../models/chart-renderer.models";
+import type { ChartRenderBackend } from "../../internal/render/chart-render-backend";
+import { createChartRenderBackend } from "../../internal/render/chart-render-backend-factory";
+import type { ChartRenderPresentationState } from "../../internal/render/chart-render-presentation-state";
 import { ChartRenderScheduler } from "../../internal/render/chart-render-scheduler";
 import type {
     CartesianChartScene,
@@ -308,8 +312,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     public ngAfterContentChecked(): void {
         if (!this.#canvasReady) {
-            const canvasRef = this.canvasElement();
-            const plotEl = canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
+            const plotEl =
+                this.plotSurfaceElement()?.nativeElement ||
+                this.canvasElement()?.nativeElement.parentElement ||
+                this.#elementRef.nativeElement;
             const rect = plotEl.getBoundingClientRect();
             if (rect.width > 0 && rect.height > 0) {
                 this.#currentWidth = rect.width;
@@ -327,6 +333,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #activeKeyboardNamespace: ChartKeyboardAxisNamespace | null = null;
     #activeKeyboardSeriesId: string | null = null;
     #canvasContext: CanvasRenderingContext2D | null = null;
+    #renderBackend: ChartRenderBackend | null = null;
     #canvasReady: boolean = false;
     #cartesianLayoutRuntime: CartesianXYLayoutRuntime | null = null;
     #currentHeight: number = 300;
@@ -406,6 +413,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         twMerge(chartBaseThemeVariants({ interactive: true }), this.userClass())
     );
     protected readonly canvasElement = viewChild<ElementRef<HTMLCanvasElement>>("canvas");
+    protected readonly svgElement = viewChild<ElementRef<SVGSVGElement>>("svgSurface");
+    protected readonly plotSurfaceElement = viewChild<ElementRef<HTMLElement>>("plotSurface");
     protected readonly cartesianScene = computed<CartesianChartScene | null>(() => {
         const sc = this.scene();
         return sc?.coordinateSystem === "cartesian" ? (sc as CartesianChartScene) : null;
@@ -731,7 +740,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const session = this.#brushGestureController.activeSession;
         const brushReg = this.#brush();
         const hadBounds = this.#activeBrushBounds() !== null;
-        const wasBrushing = this.#brushGestureController.cancel(options?.element ?? this.canvasElement()?.nativeElement);
+        const wasBrushing = this.#brushGestureController.cancel(options?.element ?? this.#getSurfaceElement() ?? undefined);
         this.#activeBrushBounds.set(null);
 
         if (!options?.silent && (wasBrushing || hadBounds) && brushReg) {
@@ -985,6 +994,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     });
     public readonly scene = signal<ChartScene | null>(null);
     protected readonly styleRevision = signal(0);
+
+    /**
+     * The rendering engine used to draw the chart surface.
+     * Defaults to `"canvas"`. Set to `"svg"` for vector-based retained DOM rendering.
+     * @description The rendering engine used to draw the chart surface ("canvas" | "svg").
+     * @default "canvas"
+     */
+    public readonly renderer = input<ChartRendererMode>("canvas");
 
     /**
      * @description Animation settings for initial render and subsequent data or visibility transitions.
@@ -1285,6 +1302,27 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#themeObserver.disconnect();
                 this.#themeObserver = null;
             }
+            if (this.#renderBackend) {
+                this.#renderBackend.destroy();
+                this.#renderBackend = null;
+            }
+        });
+
+        // Dynamic backend synchronization
+        effect(() => {
+            const mode = this.renderer();
+            const canvas = this.canvasElement()?.nativeElement ?? null;
+            const svg = this.svgElement()?.nativeElement ?? null;
+
+            untracked(() => {
+                if (this.#renderBackend && this.#renderBackend.kind === mode) {
+                    return;
+                }
+
+                if ((mode === "canvas" && canvas) || (mode === "svg" && svg)) {
+                    this.#setupRenderBackend(mode, canvas, svg);
+                }
+            });
         });
 
         // Diagnostic duplicate seriesKey check
@@ -1547,6 +1585,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const oldWidth = this.#currentWidth;
             const oldHeight = this.#currentHeight;
             this.#initCanvasAndObserver();
+            const mode = this.renderer();
+            const canvas = this.canvasElement()?.nativeElement ?? null;
+            const svg = this.svgElement()?.nativeElement ?? null;
+            this.#setupRenderBackend(mode, canvas, svg);
             this.#canvasReady = true;
             this.#layoutReady = true;
             if (!this.scene()) {
@@ -1581,13 +1623,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 plotRect: sc.plotRect,
                 releasePointerCapture: (pointerId: number, target?: Element | null) => {
                     try {
-                        const el = target ?? this.canvasElement()?.nativeElement;
+                        const el = target ?? this.#getSurfaceElement();
                         el?.releasePointerCapture?.(pointerId);
                     } catch {}
                 },
                 setPointerCapture: (pointerId: number, target?: Element | null) => {
                     try {
-                        const el = target ?? this.canvasElement()?.nativeElement;
+                        const el = target ?? this.#getSurfaceElement();
                         el?.setPointerCapture?.(pointerId);
                     } catch {}
                 },
@@ -1623,8 +1665,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public recomputeScene(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         this.#renderScheduler.cancel();
         if (!this.#canvasReady) {
-            const canvasRef = this.canvasElement();
-            if (canvasRef?.nativeElement) {
+            const surfaceRef = this.#getSurfaceElement();
+            if (surfaceRef) {
                 this.#initCanvasAndObserver();
                 this.#canvasReady = true;
                 this.#layoutReady = true;
@@ -1662,7 +1704,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 plotRect,
                 brushReg,
                 target,
-                this.canvasElement()?.nativeElement
+                this.#getSurfaceElement() ?? undefined
             );
             if (started) {
                 return;
@@ -1700,7 +1742,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const result = this.#brushGestureController.onPointerUp(
                 event,
                 plotRect,
-                this.canvasElement()?.nativeElement
+                this.#getSurfaceElement() ?? undefined
             );
             if (result) {
                 this.#activeBrushBounds.set(null);
@@ -2068,7 +2110,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const result = this.#brushGestureController.onPointerMove(
                 event,
                 plotRect,
-                this.canvasElement()?.nativeElement
+                this.#getSurfaceElement() ?? undefined
             );
             if (result) {
                 const xyScene = currentScene as CartesianXYChartScene;
@@ -2807,16 +2849,35 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#retireInteractionAuthority({ repaintIfVisual: true });
     }
 
+    #getSurfaceElement(): HTMLElement | null {
+        return this.plotSurfaceElement()?.nativeElement ?? this.canvasElement()?.nativeElement ?? null;
+    }
+
+    #setupRenderBackend(mode: ChartRendererMode, canvas: HTMLCanvasElement | null, svg: SVGSVGElement | null): void {
+        if (this.#renderBackend) {
+            this.#renderBackend.destroy();
+            this.#renderBackend = null;
+        }
+        try {
+            this.#renderBackend = createChartRenderBackend(mode, canvas, svg);
+            if (this.#currentWidth > 0 && this.#currentHeight > 0) {
+                const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+                this.#renderBackend.resize({ devicePixelRatio: dpr, height: this.#currentHeight, width: this.#currentWidth });
+            }
+            this.#paint();
+        } catch {
+            // Ignored if elements are not mounted yet
+        }
+    }
+
     #initCanvasAndObserver(): void {
+        const plotSurfaceRef = this.plotSurfaceElement();
         const canvasRef = this.canvasElement();
-        if (!canvasRef) {
-            return;
+        if (canvasRef?.nativeElement) {
+            this.#canvasContext = canvasRef.nativeElement.getContext("2d");
         }
 
-        const canvas = canvasRef.nativeElement;
-        this.#canvasContext = canvas.getContext("2d");
-
-        const plotEl = canvas.parentElement || this.#elementRef.nativeElement;
+        const plotEl = plotSurfaceRef?.nativeElement || canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
 
         if (typeof ResizeObserver !== "undefined") {
             this.#resizeObserver = new ResizeObserver(entries => {
@@ -2866,11 +2927,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #normalizePointer(event: MouseEvent | PointerEvent): ChartPoint | null {
-        const canvasRef = this.canvasElement();
-        if (!canvasRef) {
+        const element = this.#getSurfaceElement();
+        if (!element) {
             return null;
         }
-        const rect = canvasRef.nativeElement.getBoundingClientRect();
+        const rect = element.getBoundingClientRect();
         return {
             x: event.clientX - rect.left,
             y: event.clientY - rect.top
@@ -2878,15 +2939,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #paint(): void {
-        const context = this.#canvasContext;
         const currentScene = this.#renderScene ?? this.scene();
-        if (!context || !currentScene) {
+        if (!currentScene) {
             return;
         }
 
         const isAnimating = this.#isAnimating();
         const selReg = this.#selection();
-        const overlayState: ChartRenderOverlayState = {
+        const presentation: ChartRenderPresentationState = {
             activeBrushBounds: isAnimating ? null : this.#activeBrushBounds(),
             annotationBadgeAnchors: this.annotationBadgeAnchors(),
             brushRegistration: this.#brush(),
@@ -2905,7 +2965,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             selectionScene: isAnimating ? null : this.cartesianSelectionScene()
         };
 
-        CanvasChartRenderer.render(context, currentScene, overlayState, this.#styleResolver);
+        if (this.#renderBackend) {
+            this.#renderBackend.render({
+                presentation,
+                scene: currentScene,
+                styleResolver: this.#styleResolver
+            });
+        } else if (this.#canvasContext) {
+            CanvasChartRenderer.render(this.#canvasContext, currentScene, presentation, this.#styleResolver);
+        }
     }
 
     #resolveCanonicalViewportForAuthority(
@@ -2995,8 +3063,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         if (this.#currentWidth <= 0 || this.#currentHeight <= 0) {
-            const canvasRef = this.canvasElement();
-            const plotEl = canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
+            const plotEl =
+                this.plotSurfaceElement()?.nativeElement ||
+                this.canvasElement()?.nativeElement.parentElement ||
+                this.#elementRef.nativeElement;
             const rect = plotEl.getBoundingClientRect();
             if (rect.width > 0 && rect.height > 0) {
                 this.#currentWidth = rect.width;
@@ -3296,22 +3366,32 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 },
                 onFrame: (frame: ChartAnimationRenderFrame) => {
                     this.#renderScene = frame.scene;
-                    if (frame.mode === "crossfade" && this.#canvasContext) {
-                        const overlayState: ChartRenderOverlayState = {
+                    if (frame.mode === "crossfade") {
+                        const presentation: ChartRenderPresentationState = {
                             annotationBadgeAnchors: this.annotationBadgeAnchors(),
                             cartesianOverlay: this.cartesianOverlayScene(),
                             crosshair: this.crosshairState(),
                             crosshairRegistration: this.#crosshair(),
                             interaction: this.#interactionState
                         };
-                        CanvasChartRenderer.renderCrossfade(
-                            this.#canvasContext,
-                            frame.fromScene ?? null,
-                            frame.toScene ?? newScene,
-                            frame.progress,
-                            overlayState,
-                            this.#styleResolver
-                        );
+                        if (this.#renderBackend) {
+                            this.#renderBackend.renderCrossfade({
+                                fromScene: frame.fromScene ?? null,
+                                presentation,
+                                progress: frame.progress,
+                                styleResolver: this.#styleResolver,
+                                toScene: frame.toScene ?? newScene
+                            });
+                        } else if (this.#canvasContext) {
+                            CanvasChartRenderer.renderCrossfade(
+                                this.#canvasContext,
+                                frame.fromScene ?? null,
+                                frame.toScene ?? newScene,
+                                frame.progress,
+                                presentation,
+                                this.#styleResolver
+                            );
+                        }
                     } else {
                         this.#paint();
                     }
@@ -4389,14 +4469,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #updateCanvasBackingStore(width: number, height: number): void {
+        const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+        if (this.#renderBackend) {
+            this.#renderBackend.resize({ devicePixelRatio: dpr, height, width });
+            return;
+        }
+
         const canvasRef = this.canvasElement();
         if (!canvasRef) {
             return;
         }
 
         const canvas = canvasRef.nativeElement;
-        const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-
         canvas.width = Math.round(width * dpr);
         canvas.height = Math.round(height * dpr);
         canvas.style.width = `${width}px`;

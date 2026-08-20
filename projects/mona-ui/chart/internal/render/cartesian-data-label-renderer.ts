@@ -1,10 +1,10 @@
 import type { ChartRect } from "../../models/chart.models";
-import type { SceneCanvasDataLabel } from "../scene/cartesian-data-label-scene";
+import type { SceneDefaultDataLabel } from "../scene/cartesian-data-label-scene";
 
 export class CartesianDataLabelRenderer {
     public static render(
         ctx: CanvasRenderingContext2D,
-        labels: readonly SceneCanvasDataLabel[],
+        labels: readonly SceneDefaultDataLabel[],
         plotRect: ChartRect
     ): void {
         if (labels.length === 0) {

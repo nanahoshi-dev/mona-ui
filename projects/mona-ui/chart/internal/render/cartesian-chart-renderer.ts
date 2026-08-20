@@ -22,23 +22,9 @@ import type { CartesianDataLabelScene } from "../scene/cartesian-data-label-scen
 import type { CartesianSelectionScene } from "../scene/cartesian-selection-scene";
 import type { ChartBrushRegistration, ChartCrosshairRegistration } from "../context/chart-registration-context";
 import type { ChartCrosshairState } from "../interaction/chart-crosshair-state";
+import type { ChartRenderPresentationState } from "./chart-render-presentation-state";
 
-export interface ChartRenderOverlayState {
-    readonly activeBrushBounds?: ChartRect | null;
-    readonly annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null;
-    readonly brushRegistration?: ChartBrushRegistration | null;
-    readonly cartesianDataLabels?: CartesianDataLabelScene | null;
-    readonly cartesianOverlay?: CartesianOverlayScene | null;
-    readonly crosshair?: ChartCrosshairState | null;
-    readonly crosshairRegistration?: ChartCrosshairRegistration | null;
-    readonly interaction?: ChartInteractionState | null;
-    readonly selectionOptions?: {
-        readonly color?: string;
-        readonly fillOpacity?: number;
-        readonly strokeWidth?: number;
-    } | null;
-    readonly selectionScene?: CartesianSelectionScene | null;
-}
+export type ChartRenderOverlayState = ChartRenderPresentationState;
 
 export class CartesianChartRenderer {
     public static renderGridLayer(
@@ -257,8 +243,8 @@ export class CartesianChartRenderer {
         dataLabelScene: CartesianDataLabelScene | null,
         plotRect: ChartRect
     ): void {
-        if (dataLabelScene && dataLabelScene.canvasLabels.length > 0) {
-            CartesianDataLabelRenderer.render(context, dataLabelScene.canvasLabels, plotRect);
+        if (dataLabelScene && dataLabelScene.defaultLabels.length > 0) {
+            CartesianDataLabelRenderer.render(context, dataLabelScene.defaultLabels, plotRect);
         }
     }
 

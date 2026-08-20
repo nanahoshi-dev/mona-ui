@@ -1,0 +1,70 @@
+import type { ChartBrushLineStyle } from "../../../../models/chart-brush.models";
+import type { ChartRect } from "../../../../models/chart.models";
+import type { ChartBrushRegistration } from "../../../context/chart-registration-context";
+import { resolveStrokeDashArray, setSvgAttribute } from "../svg-attribute-utils";
+import { createSvgElement } from "../svg-element-utils";
+
+export class SvgCartesianBrushRenderer {
+    readonly #container: SVGGElement;
+    #rectElement: SVGRectElement | null = null;
+
+    public constructor(container: SVGGElement) {
+        this.#container = container;
+    }
+
+    public render(
+        brushRect: ChartRect | null,
+        registration: ChartBrushRegistration | null,
+        plotClipUrl?: string,
+        resolvedStyle?: {
+            readonly borderColor: string;
+            readonly borderWidth: number;
+            readonly fillColor: string;
+            readonly fillOpacity: number;
+            readonly lineStyle: ChartBrushLineStyle;
+        }
+    ): void {
+        if (!brushRect || !registration) {
+            this.clear();
+            return;
+        }
+
+        const fillColor = registration.fillColor?.() ?? resolvedStyle?.fillColor ?? "#3b82f6";
+        const fillOpacity = registration.fillOpacity?.() ?? resolvedStyle?.fillOpacity ?? 0.15;
+        const borderColor = registration.borderColor?.() ?? resolvedStyle?.borderColor ?? "#3b82f6";
+        const borderWidth = registration.borderWidth?.() ?? resolvedStyle?.borderWidth ?? 1;
+        const lineStyle = registration.lineStyle?.() ?? resolvedStyle?.lineStyle ?? "solid";
+
+        if (!this.#rectElement) {
+            this.#rectElement = createSvgElement("rect");
+            this.#container.appendChild(this.#rectElement);
+        }
+
+        setSvgAttribute(this.#rectElement, "x", brushRect.x);
+        setSvgAttribute(this.#rectElement, "y", brushRect.y);
+        setSvgAttribute(this.#rectElement, "width", brushRect.width);
+        setSvgAttribute(this.#rectElement, "height", brushRect.height);
+        setSvgAttribute(this.#rectElement, "fill", fillColor);
+        setSvgAttribute(this.#rectElement, "fill-opacity", fillOpacity);
+        setSvgAttribute(this.#rectElement, "stroke", borderWidth > 0 ? borderColor : "none");
+        setSvgAttribute(this.#rectElement, "stroke-width", borderWidth);
+        setSvgAttribute(this.#rectElement, "stroke-dasharray", resolveStrokeDashArray(lineStyle));
+
+        if (plotClipUrl) {
+            setSvgAttribute(this.#rectElement, "clip-path", plotClipUrl);
+        } else {
+            this.#rectElement.removeAttribute("clip-path");
+        }
+    }
+
+    public clear(): void {
+        if (this.#rectElement) {
+            this.#rectElement.remove();
+            this.#rectElement = null;
+        }
+    }
+
+    public destroy(): void {
+        this.clear();
+    }
+}

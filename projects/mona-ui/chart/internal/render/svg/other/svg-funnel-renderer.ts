@@ -1,0 +1,122 @@
+import type { ChartInteractionState } from "../../../interaction/chart-interaction-state";
+import type { CartesianFunnelChartScene } from "../../../scene/funnel-scene";
+import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
+import { setSvgAttribute } from "../svg-attribute-utils";
+import { createSvgElement } from "../svg-element-utils";
+
+export class SvgFunnelRenderer {
+    readonly #container: SVGGElement;
+    readonly #stagesGroup: SVGGElement;
+    readonly #highlightGroup: SVGGElement;
+
+    public constructor(container: SVGGElement) {
+        this.#container = container;
+
+        this.#stagesGroup = createSvgElement("g");
+        this.#stagesGroup.setAttribute("data-funnel-layer", "stages");
+        this.#container.appendChild(this.#stagesGroup);
+
+        this.#highlightGroup = createSvgElement("g");
+        this.#highlightGroup.setAttribute("data-funnel-layer", "highlight");
+        this.#container.appendChild(this.#highlightGroup);
+    }
+
+    public render(
+        scene: CartesianFunnelChartScene,
+        interactionState: ChartInteractionState | null,
+        styleResolver: ChartStyleResolver
+    ): void {
+        const { plotRect, series } = scene;
+        if (plotRect.width <= 0 || plotRect.height <= 0 || series.length === 0) {
+            this.clear();
+            return;
+        }
+
+        // 1. Stages
+        while (this.#stagesGroup.firstChild) this.#stagesGroup.firstChild.remove();
+        for (const s of series) {
+            const { renderOpacity = 1, stages, style } = s;
+            if (stages.length === 0 || renderOpacity <= 0) continue;
+
+            const strokeWidth = style.strokeWidth ?? 1;
+            const strokeColor = style.strokeColor;
+            const fillOpacity = style.fillOpacity ?? 1;
+
+            for (const stage of stages) {
+                const stageOpacity = stage.renderOpacity ?? 1;
+                if (stageOpacity <= 0 || stage.bounds.width <= 0 || stage.bounds.height <= 0) continue;
+
+                const [p0, p1, p2, p3] = stage.polygon;
+                const d = `M ${p0.x} ${p0.y} L ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} Z`;
+
+                const pathEl = createSvgElement("path");
+                setSvgAttribute(pathEl, "d", d);
+                setSvgAttribute(pathEl, "fill", stage.fillColor);
+                setSvgAttribute(pathEl, "fill-opacity", fillOpacity);
+                setSvgAttribute(pathEl, "opacity", renderOpacity * stageOpacity);
+
+                if (strokeWidth > 0 && strokeColor) {
+                    setSvgAttribute(pathEl, "stroke", strokeColor);
+                    setSvgAttribute(pathEl, "stroke-width", strokeWidth);
+                } else {
+                    setSvgAttribute(pathEl, "stroke", "none");
+                    setSvgAttribute(pathEl, "stroke-width", 0);
+                }
+
+                this.#stagesGroup.appendChild(pathEl);
+            }
+        }
+
+        // 2. Highlight
+        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
+        if (interactionState) {
+            const isKeyboard = interactionState.source === "keyboard";
+            const hit = interactionState.activeHitTarget ?? interactionState.activeHits[0];
+            if (hit && hit.seriesType === "funnel") {
+                const s = series[0];
+                const stage = s?.stages.find(
+                    st => st.animationKey === hit.animationKey || st.stageId === hit.itemId || st.dataIndex === hit.dataIndex
+                );
+
+                if (stage && stage.polygon) {
+                    const [p0, p1, p2, p3] = stage.polygon;
+                    const d = `M ${p0.x} ${p0.y} L ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} Z`;
+
+                    const highlightPath = createSvgElement("path");
+                    setSvgAttribute(highlightPath, "d", d);
+                    setSvgAttribute(highlightPath, "fill", "none");
+
+                    if (isKeyboard) {
+                        const focusColor =
+                            styleResolver.resolveCssVariable("--color-ring") ||
+                            styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                            styleResolver.resolveCssVariable("--color-primary") ||
+                            "#3b82f6";
+                        setSvgAttribute(highlightPath, "stroke", focusColor);
+                        setSvgAttribute(highlightPath, "stroke-width", 2.5);
+                    } else {
+                        const hoverColor =
+                            styleResolver.resolveCssVariable("--mona-chart-funnel-hover-outline-color") ||
+                            styleResolver.resolveCssVariable("--color-border-control") ||
+                            "rgba(255, 255, 255, 0.85)";
+                        setSvgAttribute(highlightPath, "stroke", hoverColor);
+                        setSvgAttribute(highlightPath, "stroke-width", 1.5);
+                    }
+
+                    this.#highlightGroup.appendChild(highlightPath);
+                }
+            }
+        }
+    }
+
+    public clear(): void {
+        while (this.#stagesGroup.firstChild) this.#stagesGroup.firstChild.remove();
+        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#stagesGroup.remove();
+        this.#highlightGroup.remove();
+    }
+}
