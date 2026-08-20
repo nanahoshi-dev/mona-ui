@@ -112,7 +112,7 @@ describe("CartesianCrosshairResolver", () => {
         } as ChartCrosshairRegistration;
     }
 
-    it("returns null when crosshair is disabled or scene is null", () => {
+    it("returns null state when crosshair is disabled or scene is null", () => {
         const space = createMockCoordSpace();
         const scene = createMockScene(space);
         const disabledReg = createRegistration({ enabled: signal(false) });
@@ -125,8 +125,8 @@ describe("CartesianCrosshairResolver", () => {
             snappedAnchor: { x: 250, y: 150 }
         };
 
-        expect(CartesianCrosshairResolver.resolve(null, disabledReg, resolution)).toBeNull();
-        expect(CartesianCrosshairResolver.resolve(scene, disabledReg, resolution)).toBeNull();
+        expect(CartesianCrosshairResolver.resolve(null, disabledReg, resolution).state).toBeNull();
+        expect(CartesianCrosshairResolver.resolve(scene, disabledReg, resolution).state).toBeNull();
     });
 
     it("resolves mode 'auto' to 'x' on vertical chart and 'y' on horizontal chart", () => {
@@ -145,18 +145,18 @@ describe("CartesianCrosshairResolver", () => {
         };
 
         const resVert = CartesianCrosshairResolver.resolve(vertScene, reg, resolution, "pointer");
-        expect(resVert).not.toBeNull();
-        expect(resVert?.x).toBeDefined();
-        expect(resVert?.y).toBeUndefined();
-        expect(resVert?.x?.coordinate).toBe(250);
-        expect(resVert?.x?.value).toBe(50);
+        expect(resVert.state).not.toBeNull();
+        expect(resVert.state?.x).toBeDefined();
+        expect(resVert.state?.y).toBeUndefined();
+        expect(resVert.state?.x?.coordinate).toBe(250);
+        expect(resVert.state?.x?.value).toBe(50);
 
         const resHoriz = CartesianCrosshairResolver.resolve(horizScene, reg, resolution, "pointer");
-        expect(resHoriz).not.toBeNull();
-        expect(resHoriz?.x).toBeUndefined();
-        expect(resHoriz?.y).toBeDefined();
-        expect(resHoriz?.y?.coordinate).toBe(150);
-        expect(resHoriz?.y?.value).toBe(500);
+        expect(resHoriz.state).not.toBeNull();
+        expect(resHoriz.state?.x).toBeUndefined();
+        expect(resHoriz.state?.y).toBeDefined();
+        expect(resHoriz.state?.y?.coordinate).toBe(150);
+        expect(resHoriz.state?.y?.value).toBe(500);
     });
 
     it("resolves mode 'xy' providing both X and Y axis states", () => {
@@ -174,13 +174,13 @@ describe("CartesianCrosshairResolver", () => {
         };
 
         const res = CartesianCrosshairResolver.resolve(scene, reg, resolution, "pointer");
-        expect(res).not.toBeNull();
-        expect(res?.x).toBeDefined();
-        expect(res?.y).toBeDefined();
-        expect(res?.x?.coordinate).toBe(250);
-        expect(res?.x?.value).toBe(50);
-        expect(res?.y?.coordinate).toBe(150);
-        expect(res?.y?.value).toBe(500);
+        expect(res.state).not.toBeNull();
+        expect(res.state?.x).toBeDefined();
+        expect(res.state?.y).toBeDefined();
+        expect(res.state?.x?.coordinate).toBe(250);
+        expect(res.state?.x?.value).toBe(50);
+        expect(res.state?.y?.coordinate).toBe(150);
+        expect(res.state?.y?.value).toBe(500);
     });
 
     it("snaps to nearest mark anchor when snap mode is 'nearest'", () => {
@@ -189,25 +189,39 @@ describe("CartesianCrosshairResolver", () => {
         const reg = createRegistration({ mode: signal("xy"), snap: signal("nearest") });
 
         const markAnchor = { x: 250, y: 100 };
+        const primaryHit = {
+            datum: {},
+            index: 0,
+            point: markAnchor,
+            seriesId: "s1",
+            seriesName: "Series 1",
+            seriesType: "line" as const,
+            xAxisId: "x-main",
+            xKey: "x-0",
+            xValue: 50,
+            yAxisId: "y-main",
+            yValue: 750
+        };
         const resolution: ChartPointerResolution = {
-            bucketHits: [],
-            hitState: { activeHitTarget: null, activeHits: [], pointerPosition: { x: 260, y: 110 }, source: "pointer" },
+            bucketHits: [primaryHit],
+            hitState: { activeHitTarget: primaryHit, activeHits: [primaryHit], pointerPosition: { x: 260, y: 110 }, source: "pointer" },
             nearestAnchor: markAnchor,
             pointer: { x: 260, y: 110 },
-            primaryHit: null,
+            primaryHit,
             snappedAnchor: markAnchor
         };
 
         const res = CartesianCrosshairResolver.resolve(scene, reg, resolution, "pointer");
-        expect(res).not.toBeNull();
-        expect(res?.snapped).toBe(true);
-        expect(res?.x?.coordinate).toBe(250);
-        expect(res?.y?.coordinate).toBe(100);
-        expect(res?.x?.value).toBe(50);
-        expect(res?.y?.value).toBe(750);
+        expect(res.state).not.toBeNull();
+        expect(res.snapKind).toBe("mark");
+        expect(res.state?.snapped).toBe(true);
+        expect(res.state?.x?.coordinate).toBe(250);
+        expect(res.state?.y?.coordinate).toBe(100);
+        expect(res.state?.x?.value).toBe(50);
+        expect(res.state?.y?.value).toBe(750);
     });
 
-    it("returns null in nearest snap mode when pointer exceeds maxSnapDistance", () => {
+    it("returns null state in nearest snap mode when pointer exceeds maxSnapDistance", () => {
         const space = createMockCoordSpace();
         const scene = createMockScene(space, "x");
         const reg = createRegistration({ maxSnapDistance: signal(20), mode: signal("x"), snap: signal("nearest") });
@@ -223,7 +237,7 @@ describe("CartesianCrosshairResolver", () => {
         };
 
         const res = CartesianCrosshairResolver.resolve(scene, reg, resolution, "pointer");
-        expect(res).toBeNull();
+        expect(res.state).toBeNull();
     });
 
     it("resolves from keyboard source snapping to authoritative keyboard selection", () => {
@@ -244,18 +258,20 @@ describe("CartesianCrosshairResolver", () => {
                 seriesId: "s1",
                 seriesName: "Series 1",
                 seriesType: "line",
+                xAxisId: "x-main",
                 xKey: "x-0",
                 xValue: 50,
+                yAxisId: "y-main",
                 yValue: 750
             },
             snappedAnchor: kbPoint
         };
 
         const res = CartesianCrosshairResolver.resolve(scene, reg, resolution, "keyboard");
-        expect(res).not.toBeNull();
-        expect(res?.source).toBe("keyboard");
-        expect(res?.snapped).toBe(true);
-        expect(res?.x?.coordinate).toBe(250);
-        expect(res?.y?.coordinate).toBe(100);
+        expect(res.state).not.toBeNull();
+        expect(res.state?.source).toBe("keyboard");
+        expect(res.state?.snapped).toBe(true);
+        expect(res.state?.x?.coordinate).toBe(250);
+        expect(res.state?.y?.coordinate).toBe(100);
     });
 });
