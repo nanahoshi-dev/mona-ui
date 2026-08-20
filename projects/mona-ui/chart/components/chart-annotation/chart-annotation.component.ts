@@ -114,7 +114,7 @@ export class ChartAnnotationComponent {
     /**
      * @description Additional vertical pixel offset for label positioning.
      */
-    public readonly offsetY = input(-12);
+    public readonly offsetY = input(0);
 
     /**
      * @description Custom CSS class name applied to the label badge.
