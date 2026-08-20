@@ -4,9 +4,11 @@ import {
     ChartAnnotationComponent,
     ChartAnnotationLabelTemplateDirective,
     ChartAxisLabelTemplateDirective,
+    ChartBrushComponent,
     ChartCenterTemplateDirective,
     ChartCrosshairComponent,
     ChartCrosshairLabelTemplateDirective,
+    ChartDataLabelTemplateDirective,
     ChartFunnelLabelTemplateDirective,
     ChartGaugeCenterTemplateDirective,
     ChartLegendItemTemplateDirective,
@@ -14,6 +16,7 @@ import {
     ChartReferenceBandComponent,
     ChartReferenceLabelTemplateDirective,
     ChartReferenceLineComponent,
+    ChartSelectionComponent,
     ChartSliceLabelTemplateDirective,
     ChartSubtitleTemplateDirective,
     ChartTitleTemplateDirective,
@@ -52,10 +55,16 @@ import {
     type ChartAreaFillMode,
     type ChartAxisLabelRotation,
     type ChartBarOrientation,
+    type ChartBrushActivation,
+    type ChartBrushChangeEvent,
+    type ChartBrushHitPolicy,
+    type ChartBrushMode,
+    type ChartBrushSelectionBehavior,
     type ChartCrosshairLineStyle,
     type ChartCrosshairMode,
     type ChartCrosshairSnapMode,
     type ChartCurve,
+    type ChartDataLabelPosition,
     type ChartFinancialFillMode,
     type ChartFunnelLabelContent,
     type ChartFunnelOrientation,
@@ -77,6 +86,8 @@ import {
     type ChartReferenceLabelPosition,
     type ChartReferenceLineStyle,
     type ChartRoseScaleMode,
+    type ChartSelectionChangeEvent,
+    type ChartSelectionMode,
     type ChartSeriesVisibilityEvent,
     type ChartSliceVisibilityEvent,
     type ChartTreemapLabelTemplateContext,
@@ -216,6 +227,9 @@ interface MultiAxisMetric {
         ChartCenterTemplateDirective,
         ChartTitleTemplateDirective,
         ChartSubtitleTemplateDirective,
+        ChartSelectionComponent,
+        ChartBrushComponent,
+        ChartDataLabelTemplateDirective,
         TabsComponent,
         TabComponent,
         TabContentTemplateDirective
@@ -252,6 +266,7 @@ export class ChartDemoComponent {
         | "range-bar"
         | "rose"
         | "scatter"
+        | "selection-brush"
         | "stacked-area"
         | "stacked-bar"
         | "time"
@@ -259,6 +274,68 @@ export class ChartDemoComponent {
         | "waterfall"
     >("mixed");
     protected readonly animationEnabled = signal<boolean>(true);
+
+    // Selection, Brush & Data Labels Controls
+    protected readonly selectionEnabled = signal<boolean>(true);
+    protected readonly selectionMode = signal<ChartSelectionMode>("multiple");
+    protected readonly selectionRetainOnDataChange = signal<boolean>(true);
+    protected readonly selectedMarkIds = signal<string[]>([]);
+    protected readonly selectionModeOptions: readonly { label: string; value: ChartSelectionMode }[] = [
+        { label: "Multiple Marks", value: "multiple" },
+        { label: "Single Mark", value: "single" }
+    ];
+
+    protected readonly brushEnabled = signal<boolean>(true);
+    protected readonly brushMode = signal<ChartBrushMode>("xy");
+    protected readonly brushActivation = signal<ChartBrushActivation>("drag");
+    protected readonly brushSelectionBehavior = signal<ChartBrushSelectionBehavior>("replace");
+    protected readonly brushHitPolicy = signal<ChartBrushHitPolicy>("intersect");
+
+    protected readonly brushModeOptions: readonly { label: string; value: ChartBrushMode }[] = [
+        { label: "XY (2D Box)", value: "xy" },
+        { label: "X-Axis Only", value: "x" },
+        { label: "Y-Axis Only", value: "y" }
+    ];
+    protected readonly brushActivationOptions: readonly { label: string; value: ChartBrushActivation }[] = [
+        { label: "Direct Drag", value: "drag" },
+        { label: "Shift + Drag", value: "shift-drag" }
+    ];
+    protected readonly brushSelectionBehaviorOptions: readonly { label: string; value: ChartBrushSelectionBehavior }[] = [
+        { label: "Replace Selection", value: "replace" },
+        { label: "Add to Selection", value: "add" },
+        { label: "Remove from Selection", value: "remove" },
+        { label: "Toggle Selection", value: "toggle" },
+        { label: "None (Range Only)", value: "none" }
+    ];
+    protected readonly brushHitPolicyOptions: readonly { label: string; value: ChartBrushHitPolicy }[] = [
+        { label: "Intersect (Overlaps)", value: "intersect" },
+        { label: "Center (Point Enclosed)", value: "center" }
+    ];
+
+    protected readonly dataLabelsEnabled = signal<boolean>(true);
+    protected readonly dataLabelsPosition = signal<ChartDataLabelPosition>("auto");
+    protected readonly dataLabelsAllowOverlap = signal<boolean>(false);
+    protected readonly useCustomDataLabelTemplate = signal<boolean>(false);
+    protected readonly dataLabelsPositionOptions: readonly { label: string; value: ChartDataLabelPosition }[] = [
+        { label: "Auto (Smart Fit)", value: "auto" },
+        { label: "Top", value: "top" },
+        { label: "Bottom", value: "bottom" },
+        { label: "Left", value: "left" },
+        { label: "Right", value: "right" },
+        { label: "Inside Center", value: "inside-center" },
+        { label: "Inside End", value: "inside-end" },
+        { label: "Outside End", value: "outside-end" }
+    ];
+
+    protected readonly dataLabelOptions = computed(() => {
+        if (!this.dataLabelsEnabled()) {
+            return false;
+        }
+        return {
+            allowOverlap: this.dataLabelsAllowOverlap(),
+            position: this.dataLabelsPosition()
+        };
+    });
 
     // Overlays, Crosshairs & Annotations Controls
     protected readonly crosshairColor = signal<string>("#3b82f6");
@@ -1764,6 +1841,7 @@ export class ChartDemoComponent {
             | "range-bar"
             | "rose"
             | "scatter"
+            | "selection-brush"
             | "stacked-area"
             | "stacked-bar"
             | "time"
@@ -1771,6 +1849,48 @@ export class ChartDemoComponent {
             | "waterfall"
     ): void {
         this.activeTab.set(tab);
+    }
+
+    protected onSelectionChange(event: ChartSelectionChangeEvent): void {
+        this.selectedMarkIds.set([...event.selectedMarkIds]);
+        this.#addLog(
+            "selectionChange",
+            `Source: ${event.source} | Selected (${event.selectedMarkIds.length}): [${event.selectedMarkIds.join(", ")}] | Added: [${event.addedMarkIds.join(", ")}] | Removed: [${event.removedMarkIds.join(", ")}]`
+        );
+    }
+
+    protected onBrushChange(event: ChartBrushChangeEvent): void {
+        const formatVal = (v: number | Date) =>
+            v instanceof Date
+                ? v.toISOString().slice(0, 10)
+                : typeof v === "number"
+                  ? v.toFixed(1)
+                  : String(v);
+
+        const xInfo = event.xRange
+            ? event.xRange.kind === "continuous"
+                ? `X: [${formatVal(event.xRange.from)}, ${formatVal(event.xRange.to)}]`
+                : `X: [${event.xRange.fromValue ?? ""}..${event.xRange.toValue ?? ""}]`
+            : "";
+        const yInfo = event.yRange
+            ? event.yRange.kind === "continuous"
+                ? `Y: [${formatVal(event.yRange.from)}, ${formatVal(event.yRange.to)}]`
+                : ""
+            : "";
+        const matchedInfo = event.matchedMarkIds ? ` | Matched: ${event.matchedMarkIds.length}` : "";
+        const boundsInfo = event.pixelBounds
+            ? `Bounds: {x:${Math.round(event.pixelBounds.x)}, y:${Math.round(event.pixelBounds.y)}, w:${Math.round(event.pixelBounds.width)}, h:${Math.round(event.pixelBounds.height)}}`
+            : "";
+
+        this.#addLog(
+            "brushChange",
+            `Phase: ${event.phase} | Mode: ${event.mode} | ${boundsInfo} ${xInfo} ${yInfo}${matchedInfo}${event.cancelReason ? ` | Cancel: ${event.cancelReason}` : ""}`
+        );
+    }
+
+    protected clearSelection(): void {
+        this.selectedMarkIds.set([]);
+        this.#addLog("selectionClear", "Cleared all selected marks.");
     }
 
     #addLog(eventType: string, details: string): void {

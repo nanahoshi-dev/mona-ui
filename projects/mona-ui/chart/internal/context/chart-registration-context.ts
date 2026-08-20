@@ -3,6 +3,7 @@ import type { ChartAnnotationLabelTemplateDirective } from "../../directives/cha
 import type { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import type { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
 import type { ChartCrosshairLabelTemplateDirective } from "../../directives/chart-crosshair-label-template.directive";
+import type { ChartDataLabelTemplateDirective } from "../../directives/chart-data-label-template.directive";
 import type { ChartGaugeCenterTemplateDirective } from "../../directives/chart-gauge-center-template.directive";
 import type { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
 import type { ChartReferenceLabelTemplateDirective } from "../../directives/chart-reference-label-template.directive";
@@ -29,10 +30,22 @@ import type {
 } from "../../models/chart-axis.models";
 import type { ChartBarOrientation } from "../../models/chart-bar.models";
 import type {
+    ChartBrushActivation,
+    ChartBrushChangeEvent,
+    ChartBrushHitPolicy,
+    ChartBrushMode,
+    ChartBrushSelectionBehavior
+} from "../../models/chart-brush.models";
+import type {
     ChartCrosshairLineStyle,
     ChartCrosshairMode,
     ChartCrosshairSnapMode
 } from "../../models/chart-crosshair.models";
+import type { ChartDataLabelsInput } from "../../models/chart-data-label.models";
+import type {
+    ChartSelectionChangeEvent,
+    ChartSelectionMode
+} from "../../models/chart-selection.models";
 import type {
     ChartPolarFillMode,
     ChartPolarLabelContent,
@@ -179,6 +192,8 @@ export interface ChartScalarSeriesRegistrationBase extends ChartSeriesRegistrati
 
 export interface ChartCartesianSeriesRegistrationBase extends ChartSeriesRegistrationBase {
     color: Signal<string>;
+    dataLabels?: Signal<ChartDataLabelsInput>;
+    dataLabelTemplate?: Signal<ChartDataLabelTemplateDirective | undefined>;
     toggleVisibility?: () => boolean;
     xAxisId: Signal<string | undefined>;
     xField: Signal<ChartField | undefined>;
@@ -360,6 +375,8 @@ export interface ChartFinancialSeriesRegistrationBase {
     readonly closeField: Signal<ChartField>;
     readonly color?: Signal<string | undefined>;
     readonly data: Signal<readonly unknown[] | undefined>;
+    readonly dataLabels?: Signal<ChartDataLabelsInput>;
+    readonly dataLabelTemplate?: Signal<ChartDataLabelTemplateDirective | undefined>;
     readonly element?: ElementRef<HTMLElement>;
     readonly fallingColor: Signal<string>;
     readonly highField: Signal<ChartField>;
@@ -677,19 +694,54 @@ export interface ChartAnnotationRegistration extends ChartCartesianOverlayRegist
     readonly yAxisId: Signal<string | undefined>;
 }
 
+export interface ChartSelectionRegistration {
+    readonly clearOnBackgroundClick: Signal<boolean>;
+    readonly clickSelection: Signal<boolean>;
+    readonly color: Signal<string | undefined>;
+    readonly defaultSelectedMarkIds: Signal<readonly string[]>;
+    readonly enabled: Signal<boolean>;
+    readonly fillOpacity: Signal<number | undefined>;
+    readonly keyboardSelection: Signal<boolean>;
+    readonly mode: Signal<ChartSelectionMode>;
+    readonly retainOnDataChange: Signal<boolean>;
+    readonly selectedMarkIds: Signal<readonly string[] | undefined>;
+    readonly strokeWidth: Signal<number | undefined>;
+    emitSelectionChange(event: ChartSelectionChangeEvent): void;
+}
+
+export interface ChartBrushRegistration {
+    readonly activation: Signal<ChartBrushActivation>;
+    readonly borderColor: Signal<string | undefined>;
+    readonly borderWidth: Signal<number | undefined>;
+    readonly enabled: Signal<boolean>;
+    readonly fillColor: Signal<string | undefined>;
+    readonly fillOpacity: Signal<number | undefined>;
+    readonly hitPolicy: Signal<ChartBrushHitPolicy>;
+    readonly lineStyle: Signal<"dashed" | "dotted" | "solid">;
+    readonly minDragDistance: Signal<number>;
+    readonly mode: Signal<ChartBrushMode>;
+    readonly selectionBehavior: Signal<ChartBrushSelectionBehavior>;
+    readonly xAxisId: Signal<string | undefined>;
+    readonly yAxisId: Signal<string | undefined>;
+    emitBrushChange(event: ChartBrushChangeEvent): void;
+}
+
 export interface ChartRegistrationContext {
     invalidate(reason?: ChartInvalidationReason): void;
     legendItems: Signal<readonly ChartLegendItem[]>;
     readonly legendScale?: Signal<ChartColorLegendScale | null>;
+    observeDataLabelElement?(element: HTMLElement, labelId: string): void;
     observeLabelElement?(element: HTMLElement, labelId: string): void;
     observeOverlayLabelElement?(element: HTMLElement, labelId: string): void;
     registerAngularAxis(registration: ChartAngularAxisRegistration): () => void;
     registerAnnotation(registration: ChartAnnotationRegistration): () => void;
+    registerBrush(registration: ChartBrushRegistration): () => void;
     registerCrosshair(registration: ChartCrosshairRegistration): () => void;
     registerLegend(registration: ChartLegendRegistration): () => void;
     registerRadialAxis(registration: ChartRadialAxisRegistration): () => void;
     registerReferenceBand(registration: ChartReferenceBandRegistration): () => void;
     registerReferenceLine(registration: ChartReferenceLineRegistration): () => void;
+    registerSelection(registration: ChartSelectionRegistration): () => void;
     registerSeries(registration: ChartSeriesRegistration): () => void;
     registerTooltip(registration: ChartTooltipRegistration): () => void;
     registerXAxis(registration: ChartXAxisRegistration): () => void;
@@ -700,6 +752,7 @@ export interface ChartRegistrationContext {
     toggleSeriesVisibility(seriesId: string): void;
     tooltipContext: Signal<ChartTooltipTemplateContext | null>;
     tooltipPosition: Signal<ChartPoint | null>;
+    unobserveDataLabelElement?(element: HTMLElement, labelId: string): void;
     unobserveLabelElement?(element: HTMLElement, labelId: string): void;
     unobserveOverlayLabelElement?(element: HTMLElement, labelId: string): void;
 }

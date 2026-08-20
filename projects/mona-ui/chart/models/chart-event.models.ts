@@ -31,6 +31,7 @@ export interface ChartPointEvent<T = unknown> {
     hierarchy?: ChartHierarchyPointMetadata;
     high?: number;
     low?: number;
+    markId?: string;
     open?: number;
     percentage?: number;
     rawValue?: unknown;
@@ -85,6 +86,7 @@ export interface ChartPointFocusEvent<T = unknown> {
     hierarchy?: ChartHierarchyPointMetadata;
     high?: number;
     low?: number;
+    markId?: string;
     open?: number;
     percentage?: number;
     rawValue?: unknown;
