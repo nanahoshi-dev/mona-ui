@@ -1,5 +1,6 @@
 import type { ChartDataLabelPosition } from "../../models/chart-data-label.models";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
+import { CartesianMarkVisualGeometry } from "../interaction/cartesian-mark-visual-geometry";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import type { NormalizedChartDataLabelOptions } from "./chart-data-label-options";
 
@@ -10,14 +11,17 @@ export interface DataLabelPlacementResult {
 }
 
 export class ChartDataLabelPlacement {
+    static readonly #warnedPositions = new Set<string>();
+
     public static resolvePlacements(
         hit: SceneHitTarget,
         options: NormalizedChartDataLabelOptions,
         labelWidth: number,
         labelHeight: number,
-        plotRect: ChartRect
+        plotRect: ChartRect,
+        orientation?: "horizontal" | "vertical"
     ): readonly DataLabelPlacementResult[] {
-        const positions = ChartDataLabelPlacement.#getCandidatePositions(hit, options.position);
+        const positions = ChartDataLabelPlacement.#getCandidatePositions(hit, options.position, orientation);
         const results: DataLabelPlacementResult[] = [];
 
         for (const pos of positions) {
@@ -27,7 +31,8 @@ export class ChartDataLabelPlacement {
                 options.offset,
                 labelWidth,
                 labelHeight,
-                plotRect
+                plotRect,
+                orientation
             );
             if (placement) {
                 if (options.overflow === "clip" || ChartDataLabelPlacement.isInside(placement.bounds, plotRect)) {
@@ -51,13 +56,16 @@ export class ChartDataLabelPlacement {
 
     static #getCandidatePositions(
         hit: SceneHitTarget,
-        requested: ChartDataLabelPosition
+        requested: ChartDataLabelPosition,
+        orientation?: "horizontal" | "vertical"
     ): readonly ChartDataLabelPosition[] {
         if (requested !== "auto") {
-            return [requested];
+            return [ChartDataLabelPlacement.#normalizePosition(hit, requested, orientation)];
         }
 
         const type = hit.seriesType;
+        const isHorizontal = hit.barOrientation === "horizontal" || orientation === "horizontal";
+
         if (type === "bar") {
             if (hit.stackMode) {
                 return ["inside-center", "inside-end", "outside-end"];
@@ -66,6 +74,9 @@ export class ChartDataLabelPlacement {
         }
 
         if (type === "rangeBar") {
+            if (isHorizontal) {
+                return ["inside-center", "outside-end", "inside-end"];
+            }
             return ["inside-center", "outside-end", "inside-end"];
         }
 
@@ -81,15 +92,59 @@ export class ChartDataLabelPlacement {
         return ["top", "bottom", "right", "left", "center"];
     }
 
+    static #normalizePosition(
+        hit: SceneHitTarget,
+        requested: ChartDataLabelPosition,
+        orientation?: "horizontal" | "vertical"
+    ): ChartDataLabelPosition {
+        const type = hit.seriesType;
+        if (type === "line" || type === "area" || type === "scatter" || type === "bubble") {
+            if (requested === "inside-start" || requested === "inside-end" || requested === "inside-center") {
+                ChartDataLabelPlacement.#warnUnsupportedPosition(type, requested, "center");
+                return "center";
+            }
+            if (requested === "outside-start") {
+                return "bottom";
+            }
+            if (requested === "outside-end") {
+                return "top";
+            }
+        }
+
+        if (type === "candlestick" || type === "ohlc") {
+            if (requested === "inside-start" || requested === "inside-end" || requested === "inside-center") {
+                ChartDataLabelPlacement.#warnUnsupportedPosition(type, requested, "right");
+                return "right";
+            }
+        }
+
+        return requested;
+    }
+
+    static #warnUnsupportedPosition(seriesType: string, requested: string, fallback: string): void {
+        if (typeof ngDevMode !== "undefined" && ngDevMode) {
+            const key = `${seriesType}:${requested}`;
+            if (!ChartDataLabelPlacement.#warnedPositions.has(key)) {
+                ChartDataLabelPlacement.#warnedPositions.add(key);
+                // eslint-disable-next-line no-console
+                console.warn(
+                    `[Mona Chart] Data label position "${requested}" is not supported for "${seriesType}" series. Falling back to "${fallback}".`
+                );
+            }
+        }
+    }
+
     static #computePlacement(
         hit: SceneHitTarget,
         position: ChartDataLabelPosition,
         offset: number,
         width: number,
         height: number,
-        plotRect: ChartRect
+        plotRect: ChartRect,
+        orientation?: "horizontal" | "vertical"
     ): DataLabelPlacementResult | null {
         const type = hit.seriesType;
+        const isHorizontal = hit.barOrientation === "horizontal" || orientation === "horizontal";
 
         if (type === "bar" || type === "rangeBar") {
             return ChartDataLabelPlacement.#computeBarPlacement(
@@ -97,7 +152,8 @@ export class ChartDataLabelPlacement {
                 position,
                 offset,
                 width,
-                height
+                height,
+                isHorizontal
             );
         }
 
@@ -128,12 +184,9 @@ export class ChartDataLabelPlacement {
         width: number,
         height: number
     ): DataLabelPlacementResult {
-        const center = hit.point ?? (hit.bounds
-            ? { x: hit.bounds.x + hit.bounds.width / 2, y: hit.bounds.y + hit.bounds.height / 2 }
-            : { x: 0, y: 0 });
-
-        const radius = hit.radius ?? (hit.bounds ? hit.bounds.width / 2 : 0);
-        const effectiveOffset = Math.max(0, radius) + offset;
+        const center = CartesianMarkVisualGeometry.getVisualCenter(hit);
+        const visualRadius = CartesianMarkVisualGeometry.getVisualRadius(hit, 0);
+        const effectiveOffset = Math.max(0, visualRadius) + offset;
 
         let boundsX = center.x - width / 2;
         let boundsY = center.y - height / 2;
@@ -177,10 +230,10 @@ export class ChartDataLabelPlacement {
         position: ChartDataLabelPosition,
         offset: number,
         width: number,
-        height: number
+        height: number,
+        isHorizontal: boolean = false
     ): DataLabelPlacementResult {
         const b = hit.visualBounds ?? hit.bounds ?? { height: 0, width: 0, x: 0, y: 0 };
-        const isHorizontal = hit.barOrientation === "horizontal";
         const isPositive = hit.isPositive !== false;
 
         const centerX = b.x + b.width / 2;
