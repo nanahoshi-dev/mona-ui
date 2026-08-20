@@ -6,6 +6,7 @@ import type {
 } from "../../models/chart-brush.models";
 import type { ChartRect } from "../../models/chart.models";
 import type { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
+import type { ResolvedCartesianBrushTarget } from "./cartesian-brush-target-resolver";
 
 export interface ResolvedBrushRanges {
     readonly xRange?: ChartBrushAxisRange;
@@ -16,7 +17,7 @@ export class CartesianBrushRangeResolver {
     public static resolve(
         bounds: ChartRect,
         coordinateSpace: CartesianAxisCoordinateSpace,
-        mode: ChartBrushMode,
+        targetOrMode: ResolvedCartesianBrushTarget | ChartBrushMode,
         targetXAxisId?: string,
         targetYAxisId?: string
     ): ResolvedBrushRanges {
@@ -28,34 +29,46 @@ export class CartesianBrushRangeResolver {
             return {};
         }
 
+        let mode: ChartBrushMode;
+        let axisX: string | undefined;
+        let axisY: string | undefined;
+        let isValidX = true;
+        let isValidY = true;
+
+        if (typeof targetOrMode === "object") {
+            mode = targetOrMode.mode;
+            axisX = targetOrMode.xAxisId;
+            axisY = targetOrMode.yAxisId;
+            isValidX = targetOrMode.isValidX;
+            isValidY = targetOrMode.isValidY;
+        } else {
+            mode = targetOrMode;
+            axisX = targetXAxisId ?? coordinateSpace.x.keys().next().value;
+            axisY = targetYAxisId ?? coordinateSpace.y.keys().next().value;
+        }
+
         let xRange: ChartBrushAxisRange | undefined;
         let yRange: ChartBrushAxisRange | undefined;
 
-        if (mode === "x" || mode === "xy") {
-            const axisId = targetXAxisId ?? coordinateSpace.x.keys().next().value;
-            if (axisId) {
-                xRange = CartesianBrushRangeResolver.#resolveAxisRange(
-                    bounds.x,
-                    bounds.x + bounds.width,
-                    "x",
-                    axisId,
-                    coordinateSpace
-                );
-            }
+        if ((mode === "x" || mode === "xy") && isValidX && axisX) {
+            xRange = CartesianBrushRangeResolver.#resolveAxisRange(
+                bounds.x,
+                bounds.x + bounds.width,
+                "x",
+                axisX,
+                coordinateSpace
+            );
         }
 
-        if (mode === "y" || mode === "xy") {
-            const axisId = targetYAxisId ?? coordinateSpace.y.keys().next().value;
-            if (axisId) {
-                // In canvas coords, top is smaller Y, bottom is larger Y
-                yRange = CartesianBrushRangeResolver.#resolveAxisRange(
-                    bounds.y + bounds.height,
-                    bounds.y,
-                    "y",
-                    axisId,
-                    coordinateSpace
-                );
-            }
+        if ((mode === "y" || mode === "xy") && isValidY && axisY) {
+            // In canvas coords, top is smaller Y, bottom is larger Y
+            yRange = CartesianBrushRangeResolver.#resolveAxisRange(
+                bounds.y + bounds.height,
+                bounds.y,
+                "y",
+                axisY,
+                coordinateSpace
+            );
         }
 
         return { xRange, yRange };
@@ -76,55 +89,19 @@ export class CartesianBrushRangeResolver {
         const ref = { axis, axisId };
 
         if (snap.resolvedType === "category") {
-            const minPx = Math.min(pixel1, pixel2);
-            const maxPx = Math.max(pixel1, pixel2);
-
-            const categoryIndex = snap.categoryIndex;
-            if (!categoryIndex || !categoryIndex.viewportDomain) {
+            const extent = coordinateSpace.resolveCategoryExtentAtPixels(ref, pixel1, pixel2);
+            if (!extent) {
                 return undefined;
             }
-
-            const intersected: Array<{ baseIndex: number; key: string }> = [];
-
-            for (const key of categoryIndex.viewportDomain) {
-                const geom = categoryIndex.byKey.get(key);
-                if (!geom) {
-                    continue;
-                }
-
-                const bStart = Math.min(geom.bandStart, geom.bandEnd);
-                const bEnd = Math.max(geom.bandStart, geom.bandEnd);
-
-                // Check actual band intersection (inclusive)
-                if (bStart <= maxPx && bEnd >= minPx) {
-                    intersected.push({
-                        baseIndex: geom.baseIndex,
-                        key: geom.key
-                    });
-                }
-            }
-
-            if (intersected.length === 0) {
-                return undefined;
-            }
-
-            const firstIntersected = intersected[0];
-            const lastIntersected = intersected[intersected.length - 1];
-
-            const fromIndex = Math.min(firstIntersected.baseIndex, lastIntersected.baseIndex);
-            const toIndex = Math.max(firstIntersected.baseIndex, lastIntersected.baseIndex);
-
-            const fromValue = snap.baseDomain[fromIndex] ?? firstIntersected.key;
-            const toValue = snap.baseDomain[toIndex] ?? lastIntersected.key;
 
             const result: ChartBrushCategoryRange = {
                 axis: ref.axis,
                 axisId,
-                fromIndex,
-                fromValue,
+                fromIndex: extent.fromBaseIndex,
+                fromValue: extent.fromValue,
                 kind: "category",
-                toIndex,
-                toValue
+                toIndex: extent.toBaseIndex,
+                toValue: extent.toValue
             };
             return result;
         }

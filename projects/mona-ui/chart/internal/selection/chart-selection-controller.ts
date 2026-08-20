@@ -6,7 +6,9 @@ import type {
 } from "../../models/chart-selection.models";
 import type { ChartBrushSelectionBehavior } from "../../models/chart-brush.models";
 import type { SceneHitTarget } from "../scene/scene-geometry";
+import type { CartesianXYChartScene } from "../scene/chart-scene";
 import { ChartMarkIdentityResolver } from "../interaction/chart-mark-identity-resolver";
+import { CartesianMarkSemanticResolver } from "../interaction/cartesian-mark-semantic-resolver";
 import type { ChartVisibleMarkIndex } from "../interaction/chart-visible-mark-index";
 
 export interface SelectionMutationResult {
@@ -15,29 +17,24 @@ export interface SelectionMutationResult {
     readonly removed: readonly string[];
 }
 
-export function toSelectedPoint<T = unknown>(hit: SceneHitTarget): ChartSelectedPoint<T> {
+export function toSelectedPoint<T = unknown>(
+    hit: SceneHitTarget,
+    scene?: CartesianXYChartScene | null
+): ChartSelectedPoint<T> {
     const markId = ChartMarkIdentityResolver.resolve(hit);
     const fromValue = hit.fromValue ?? hit.range?.fromValue;
     const toValue = hit.toValue ?? hit.range?.toValue;
     const isRange = hit.valueKind === "range" || hit.range !== undefined;
-    const isHorizontal = hit.barOrientation === "horizontal";
+
+    const scalarAxes = CartesianMarkSemanticResolver.resolveScalarAxes(hit, scene);
+    const xValue = scalarAxes.xValue;
+    const yValue = scalarAxes.yValue;
 
     const value =
         hit.value ??
         (isRange && fromValue !== undefined && toValue !== undefined
             ? [fromValue, toValue]
             : (hit.hierarchy?.aggregateValue ?? hit.yValue));
-
-    let xValue: unknown;
-    let yValue: unknown;
-
-    if (isHorizontal) {
-        xValue = hit.yValue ?? hit.value;
-        yValue = hit.xValue ?? hit.category ?? hit.yCategory;
-    } else {
-        xValue = hit.xValue ?? hit.category;
-        yValue = hit.yValue;
-    }
 
     return {
         close: hit.close ?? hit.financial?.close,

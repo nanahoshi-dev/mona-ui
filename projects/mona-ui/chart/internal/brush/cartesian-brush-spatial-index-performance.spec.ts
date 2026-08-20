@@ -44,7 +44,7 @@ describe("CartesianBrushMarkIndex Candidate-Local Spatial Indexing & Performance
         index.build(hits);
 
         // Query bounding box that only contains the first mark
-        const query1 = index.query({ x: 5, y: 5, width: 30, height: 60 }, "contains");
+        const query1 = index.query({ x: 5, y: 5, width: 30, height: 60 }, "center");
         expect(query1.length).toBe(1);
         expect(query1[0].index).toBe(0);
 
@@ -73,7 +73,7 @@ describe("CartesianBrushMarkIndex Candidate-Local Spatial Indexing & Performance
         index.build([hit]);
 
         // Query rectangle that includes point visual radius (92 to 108)
-        const matched = index.query({ x: 90, y: 90, width: 25, height: 25 }, "contains");
+        const matched = index.query({ x: 90, y: 90, width: 25, height: 25 }, "intersect");
         expect(matched.length).toBe(1);
         expect(matched[0].seriesId).toBe("s2");
     });

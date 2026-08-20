@@ -104,16 +104,14 @@ describe("Chart Stage 0 Stability Closure", () => {
             expect(host.clickedEvents.length).toBe(2);
             const enterPayload = host.clickedEvents[1];
 
-            // 3. Keyboard Space
+            // 3. Keyboard Space (does not emit pointClick per GDSB-R2-010)
             container.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: " " }));
             fixture.detectChanges();
 
-            expect(host.clickedEvents.length).toBe(3);
-            const spacePayload = host.clickedEvents[2];
+            expect(host.clickedEvents.length).toBe(2);
 
-            // Verify parity across all three
+            // Verify parity between pointer and enter
             expect(pointerPayload).toEqual(enterPayload);
-            expect(pointerPayload).toEqual(spacePayload);
 
             // Verify Heatmap-specific fields are present in pointer payload
             expect(pointerPayload.formattedXValue).toBe("Mon");

@@ -6,7 +6,7 @@ import { BarSeriesComponent } from "../bar-series/bar-series.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { ChartBrushComponent } from "../chart-brush/chart-brush.component";
-import type { ChartBrushActivation, ChartBrushChangeEvent } from "../../models/chart-brush.models";
+import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
 
 @Component({
     imports: [
@@ -17,23 +17,28 @@ import type { ChartBrushActivation, ChartBrushChangeEvent } from "../../models/c
         ChartBrushComponent
     ],
     template: `
-        <mona-chart [animation]="false" [data]="data()" [xField]="'name'" [style.width.px]="600" [style.height.px]="400">
+        <mona-chart
+            [animation]="false"
+            [data]="data()"
+            [xField]="'name'"
+            [style.width.px]="600"
+            [style.height.px]="400">
             <mona-chart-x-axis />
             <mona-chart-y-axis />
             <mona-bar-series [field]="'value'" [name]="'Bars'" />
             <mona-chart-brush
-                [activation]="activation()"
+                [activation]="'drag'"
                 (brushChange)="onBrushChange($event)" />
         </mona-chart>
     `
 })
-class BrushActivationHostComponent {
+class BrushRafHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
     public readonly data = signal([
         { name: "A", value: 10 },
-        { name: "B", value: 20 }
+        { name: "B", value: 20 },
+        { name: "C", value: 30 }
     ]);
-    public readonly activation = signal<ChartBrushActivation>("shift-drag");
     public brushEvents: ChartBrushChangeEvent[] = [];
 
     public onBrushChange(evt: ChartBrushChangeEvent): void {
@@ -41,9 +46,9 @@ class BrushActivationHostComponent {
     }
 }
 
-describe("Chart Brush Activation Modifier & Touch Rejection", () => {
-    let fixture: ComponentFixture<BrushActivationHostComponent>;
-    let host: BrushActivationHostComponent;
+describe("Chart Brush RAF Coalescing Release Gate (GDSB-R2-001)", () => {
+    let fixture: ComponentFixture<BrushRafHostComponent>;
+    let host: BrushRafHostComponent;
 
     beforeEach(async () => {
         vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
@@ -59,99 +64,115 @@ describe("Chart Brush Activation Modifier & Touch Rejection", () => {
         });
 
         await TestBed.configureTestingModule({
-            imports: [BrushActivationHostComponent]
+            imports: [BrushRafHostComponent]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(BrushActivationHostComponent);
+        fixture = TestBed.createComponent(BrushRafHostComponent);
         host = fixture.componentInstance;
         fixture.detectChanges();
         await fixture.whenStable();
     });
 
-    it("rejects touch pointers for brush activation", async () => {
+    it("coalesces multiple intermediate pointermove events into a single presentation frame", () => {
         const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
-        expect(chartEl).toBeDefined();
 
-        chartEl.dispatchEvent(
-            new PointerEvent("pointerdown", {
-                clientX: 50,
-                clientY: 50,
-                pointerType: "touch",
-                shiftKey: true,
-                bubbles: true
-            })
-        );
-        fixture.detectChanges();
-
-        chartEl.dispatchEvent(
-            new PointerEvent("pointermove", {
-                clientX: 150,
-                clientY: 150,
-                pointerType: "touch",
-                shiftKey: true,
-                bubbles: true
-            })
-        );
-        fixture.detectChanges();
-
-        expect(host.brushEvents.length).toBe(0);
-    });
-
-    it("requires shift key when activation is shift-drag", async () => {
-        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
-        host.activation.set("shift-drag");
-        fixture.detectChanges();
-        await fixture.whenStable();
-
-        // Drag without shift
+        // Pointer down
         chartEl.dispatchEvent(
             new PointerEvent("pointerdown", {
                 clientX: 50,
                 clientY: 50,
                 pointerType: "mouse",
-                shiftKey: false,
                 bubbles: true
             })
         );
         fixture.detectChanges();
 
+        // 3 rapid pointermove events in the same tick
+        chartEl.dispatchEvent(
+            new PointerEvent("pointermove", {
+                clientX: 70,
+                clientY: 70,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        chartEl.dispatchEvent(
+            new PointerEvent("pointermove", {
+                clientX: 100,
+                clientY: 100,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
         chartEl.dispatchEvent(
             new PointerEvent("pointermove", {
                 clientX: 150,
                 clientY: 150,
                 pointerType: "mouse",
-                shiftKey: false,
                 bubbles: true
             })
         );
-        fixture.detectChanges();
 
+        // Before RAF flush, no intermediate uncoalesced emissions
         expect(host.brushEvents.length).toBe(0);
 
-        // Drag with shift
-        chartEl.dispatchEvent(
-            new PointerEvent("pointerdown", {
-                clientX: 50,
-                clientY: 50,
-                pointerType: "mouse",
-                shiftKey: true,
-                bubbles: true
-            })
-        );
-        fixture.detectChanges();
-
-        chartEl.dispatchEvent(
-            new PointerEvent("pointermove", {
-                clientX: 150,
-                clientY: 150,
-                pointerType: "mouse",
-                shiftKey: true,
-                bubbles: true
-            })
-        );
+        // Flush RAF presentation frame
         host.chart().flushPendingRender();
         fixture.detectChanges();
 
-        expect(host.brushEvents.length).toBeGreaterThan(0);
+        // Should have emitted a single start/update frame with the latest bounds
+        expect(host.brushEvents.length).toBe(1);
+        expect(host.brushEvents[0].phase).toBe("start");
+        expect(host.brushEvents[0].pixelBounds).toEqual({
+            x: 50,
+            y: 50,
+            width: 100,
+            height: 100
+        });
+    });
+
+    it("preserves start phase when moves are coalesced and pointerup terminates the gesture", () => {
+        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+
+        chartEl.dispatchEvent(
+            new PointerEvent("pointerdown", {
+                clientX: 50,
+                clientY: 50,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        fixture.detectChanges();
+
+        chartEl.dispatchEvent(
+            new PointerEvent("pointermove", {
+                clientX: 120,
+                clientY: 120,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+
+        // Pointer up immediately without manual flush in between
+        chartEl.dispatchEvent(
+            new PointerEvent("pointerup", {
+                clientX: 120,
+                clientY: 120,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        fixture.detectChanges();
+
+        // Should emit start then end cleanly without swallowed start event
+        expect(host.brushEvents.length).toBe(2);
+        expect(host.brushEvents[0].phase).toBe("start");
+        expect(host.brushEvents[1].phase).toBe("end");
+        expect(host.brushEvents[1].pixelBounds).toEqual({
+            x: 50,
+            y: 50,
+            width: 70,
+            height: 70
+        });
     });
 });

@@ -29,6 +29,8 @@ export interface CartesianDataLabelProjectorOptions {
     readonly hitTargets: readonly SceneHitTarget[];
     readonly orientation?: "horizontal" | "vertical";
     readonly plotRect: ChartRect;
+    readonly resolvedSeriesColors?: ReadonlyMap<string, string>;
+    readonly scene?: import("../scene/chart-scene").CartesianXYChartScene | null;
     readonly selectedMarkIds: ReadonlySet<string>;
     readonly seriesRegistrations: readonly ChartSeriesRegistration[];
     readonly templateMeasurements?: ReadonlyMap<string, ChartSize>;
@@ -44,6 +46,8 @@ export class CartesianDataLabelProjector {
             hitTargets,
             orientation,
             plotRect,
+            resolvedSeriesColors,
+            scene,
             selectedMarkIds,
             seriesRegistrations,
             templateMeasurements
@@ -86,9 +90,12 @@ export class CartesianDataLabelProjector {
                 continue;
             }
 
-            const seriesColor = "color" in cartesianReg && typeof (cartesianReg as ChartCartesianSeriesRegistrationBase).color === "function"
+            const rawColor = "color" in cartesianReg && typeof (cartesianReg as ChartCartesianSeriesRegistrationBase).color === "function"
                 ? (cartesianReg as ChartCartesianSeriesRegistrationBase).color()
                 : undefined;
+            const seriesColor = (rawColor && rawColor.trim() !== "")
+                ? rawColor
+                : (resolvedSeriesColors?.get(seriesId) ?? undefined);
 
             const template = cartesianReg.dataLabelTemplate?.();
             const sampledHits = CartesianDataLabelProjector.#sampleHits(seriesHits, normalizedOptions.maxLabels);
@@ -96,7 +103,7 @@ export class CartesianDataLabelProjector {
             for (const hit of sampledHits) {
                 const markId = ChartMarkIdentityResolver.resolve(hit);
                 const isSelected = selectedMarkIds.has(markId);
-                const context = ChartDataLabelContextBuilder.buildContext(hit, isSelected, seriesColor);
+                const context = ChartDataLabelContextBuilder.buildContext(hit, isSelected, seriesColor, scene);
 
                 if (template) {
                     const measureKey1 = `${hit.seriesId}:${markId}`;

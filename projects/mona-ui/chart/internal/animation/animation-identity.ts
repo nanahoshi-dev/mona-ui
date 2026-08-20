@@ -30,6 +30,14 @@ export function serializeKeyPart(value: unknown): TypedKeyPart | null {
     return null;
 }
 
+export function normalizeSeriesKey(value: string | undefined | null): string | undefined {
+    if (value === undefined || value === null) {
+        return undefined;
+    }
+    const trimmed = String(value).trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export class ChartMarkKeyResolver {
     readonly #occurrenceTracker = new Map<string, number>();
     readonly #warnedDuplicateKeys = new Set<string>();
@@ -39,7 +47,8 @@ export class ChartMarkKeyResolver {
 
     public constructor(seriesId: string, keyField?: ChartField, seriesKey?: string) {
         this.#seriesId = seriesId;
-        this.#seriesPrefix = seriesKey ?? seriesId;
+        const normKey = normalizeSeriesKey(seriesKey);
+        this.#seriesPrefix = normKey ?? seriesId;
         this.#keyField = keyField;
     }
 

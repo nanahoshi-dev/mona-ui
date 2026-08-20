@@ -1,13 +1,16 @@
 import type { ChartDataLabelContext } from "../../models/chart-data-label.models";
 import type { NormalizedChartDataLabelOptions } from "./chart-data-label-options";
 import type { SceneHitTarget } from "../scene/scene-geometry";
+import type { CartesianXYChartScene } from "../scene/chart-scene";
 import { ChartMarkIdentityResolver } from "../interaction/chart-mark-identity-resolver";
+import { CartesianMarkSemanticResolver } from "../interaction/cartesian-mark-semantic-resolver";
 
 export class ChartDataLabelContextBuilder {
     public static buildContext<T = unknown>(
         hit: SceneHitTarget,
         selected: boolean = false,
-        fallbackColor?: string
+        fallbackColor?: string,
+        scene?: CartesianXYChartScene | null
     ): ChartDataLabelContext<T> {
         const markId = ChartMarkIdentityResolver.resolve(hit);
         const fromValue = hit.fromValue ?? hit.range?.fromValue;
@@ -15,7 +18,13 @@ export class ChartDataLabelContextBuilder {
         const formattedFrom = hit.formattedFrom ?? hit.range?.formattedFrom;
         const formattedTo = hit.formattedTo ?? hit.range?.formattedTo;
         const isRange = hit.valueKind === "range" || hit.range !== undefined;
-        const isHorizontal = hit.barOrientation === "horizontal";
+        const isHorizontal = hit.barOrientation === "horizontal" || scene?.orientation === "horizontal";
+
+        const scalarAxes = CartesianMarkSemanticResolver.resolveScalarAxes(hit, scene);
+        const xValue = scalarAxes.xValue;
+        const yValue = scalarAxes.yValue;
+        const formattedX = scalarAxes.formattedX ?? "";
+        const formattedY = scalarAxes.formattedY ?? "";
 
         const value =
             hit.value ??
@@ -23,38 +32,17 @@ export class ChartDataLabelContextBuilder {
                 ? [fromValue, toValue]
                 : (hit.hierarchy?.aggregateValue ?? hit.yValue));
 
-        let xValue: unknown;
-        let yValue: unknown;
-        let formattedX: string;
-        let formattedY: string;
-
-        if (isHorizontal) {
-            xValue = hit.yValue ?? hit.value;
-            yValue = hit.xValue ?? hit.category ?? hit.yCategory;
-            formattedX = hit.formattedValue ?? (xValue !== undefined && xValue !== null ? String(xValue) : "");
-            formattedY = hit.formattedCategory ?? hit.formattedYCategory ?? (yValue !== undefined && yValue !== null ? String(yValue) : "");
-        } else {
-            xValue = hit.xValue ?? hit.category;
-            yValue = hit.yValue;
-            formattedX =
-                hit.formattedXValue ??
-                hit.formattedCategory ??
-                (xValue !== undefined && xValue !== null ? String(xValue) : "");
-            formattedY =
-                hit.formattedValue ??
-                (isRange && formattedFrom && formattedTo
-                    ? `${formattedFrom} – ${formattedTo}`
-                    : yValue !== undefined && yValue !== null
-                      ? String(yValue)
-                      : "");
-        }
-
         const formattedValue =
             isRange && formattedFrom && formattedTo
                 ? `${formattedFrom} – ${formattedTo}`
                 : (hit.formattedValue ?? (isHorizontal ? formattedX : formattedY));
 
-        const color = hit.color ?? fallbackColor ?? "#000000";
+        const color =
+            hit.color && hit.color.trim() !== ""
+                ? hit.color
+                : fallbackColor && fallbackColor.trim() !== ""
+                  ? fallbackColor
+                  : "#000000";
 
         const context: ChartDataLabelContext<T> = {
             $implicit: undefined as unknown as ChartDataLabelContext<T>,

@@ -139,7 +139,7 @@ export interface ChartDataLabelContext<T = unknown> {
 
     readonly value?: unknown;
 
-    readonly xValue: unknown;
+    readonly xValue?: unknown;
 
     readonly yValue?: unknown;
 }

@@ -107,14 +107,6 @@ export class ChartBrushGestureController {
             thresholdMet: false
         };
 
-        if (element && typeof element.setPointerCapture === "function") {
-            try {
-                element.setPointerCapture(event.pointerId);
-            } catch {
-                // Ignore in synthetic/headless environments
-            }
-        }
-
         return true;
     }
 

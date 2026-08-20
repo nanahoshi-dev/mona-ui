@@ -3,6 +3,7 @@ import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import { CartesianHitAxisCompatibility } from "../interaction/cartesian-hit-axis-compatibility";
 import { CartesianMarkVisualGeometry } from "../interaction/cartesian-mark-visual-geometry";
 import type { SceneHitTarget } from "../scene/scene-geometry";
+import type { ResolvedCartesianBrushTarget } from "./cartesian-brush-target-resolver";
 
 export interface IndexedBrushMark {
     readonly bounds: ChartRect;
@@ -71,10 +72,12 @@ export class CartesianBrushMarkIndex {
     public query(
         brushBounds: ChartRect,
         hitPolicy: ChartBrushHitPolicy = "intersect",
-        mode: ChartBrushMode = "xy",
+        targetOrMode: ResolvedCartesianBrushTarget | ChartBrushMode = "xy",
         targetXAxisId?: string,
         targetYAxisId?: string,
-        instrumentation?: BrushIndexInstrumentation
+        instrumentation?: BrushIndexInstrumentation,
+        primaryXAxisId?: string,
+        primaryYAxisId?: string
     ): readonly SceneHitTarget[] {
         if (this.#totalHits === 0 || this.#grid.size === 0) {
             return [];
@@ -106,7 +109,7 @@ export class CartesianBrushMarkIndex {
             instrumentation?.onCandidateExamined?.();
             const hit = item.hit;
 
-            if (!CartesianHitAxisCompatibility.isCompatible(hit, mode, targetXAxisId, targetYAxisId)) {
+            if (!CartesianHitAxisCompatibility.isCompatible(hit, targetOrMode, targetXAxisId, targetYAxisId, primaryXAxisId, primaryYAxisId)) {
                 continue;
             }
 
