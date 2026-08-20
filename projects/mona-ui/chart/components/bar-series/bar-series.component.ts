@@ -87,6 +87,12 @@ export class BarSeriesComponent implements OnInit {
     public readonly orientation = input<ChartBarOrientation>("vertical");
 
     /**
+     * @description Optional stable key identifying this series for mark identity and selection across updates.
+     * @default undefined
+     */
+    public readonly seriesKey = input<string | undefined>(undefined);
+
+    /**
      * @description Named stack group to participate in. Series with matching trimmed stack names stack together.
      * @default undefined
      */
@@ -137,26 +143,38 @@ export class BarSeriesComponent implements OnInit {
     #registered = false;
 
     public constructor() {
+        let initialVisible = true;
         effect(() => {
             this.visible();
+            if (initialVisible) {
+                initialVisible = false;
+                return;
+            }
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
             }
         });
 
+        let initialData = true;
         effect(() => {
             this.data();
             this.field();
             this.keyField();
             this.orientation();
+            this.seriesKey();
             this.stack();
             this.stackMode();
             this.xField();
+            if (initialData) {
+                initialData = false;
+                return;
+            }
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
             }
         });
 
+        let initialLayout = true;
         effect(() => {
             this.borderRadius();
             this.fillOpacity();
@@ -165,6 +183,10 @@ export class BarSeriesComponent implements OnInit {
             this.valueFormatter();
             this.xAxisId();
             this.yAxisId();
+            if (initialLayout) {
+                initialLayout = false;
+                return;
+            }
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Layout);
             }
@@ -208,6 +230,7 @@ export class BarSeriesComponent implements OnInit {
             maxBarWidth: this.maxBarWidth,
             name: this.name,
             orientation: this.orientation,
+            seriesKey: this.seriesKey,
             stack: this.stack,
             stackMode: this.stackMode,
             toggleVisibility: () => {
