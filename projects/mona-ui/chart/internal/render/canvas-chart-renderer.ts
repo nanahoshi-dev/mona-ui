@@ -1,5 +1,5 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
-import type { ChartScene } from "../scene/chart-scene";
+import type { CartesianXYChartScene, ChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianChartRenderer, type ChartRenderOverlayState } from "./cartesian-chart-renderer";
 import { FunnelChartRenderer } from "./funnel-chart-renderer";
@@ -77,6 +77,21 @@ export class CanvasChartRenderer {
     ): void {
         this.clear(context, toScene.width, toScene.height);
 
+        if (toScene.coordinateSystem === "cartesian" && toScene.cartesianKind === "xy") {
+            const fromXY = fromScene && fromScene.coordinateSystem === "cartesian" && fromScene.cartesianKind === "xy"
+                ? (fromScene as CartesianXYChartScene)
+                : null;
+            CartesianChartRenderer.renderCrossfade(
+                context,
+                fromXY,
+                toScene as CartesianXYChartScene,
+                progress,
+                overlayState,
+                styleResolver
+            );
+            return;
+        }
+
         if (fromScene && progress < 1) {
             context.save();
             context.globalAlpha = Math.max(0, Math.min(1, 1 - progress));
@@ -87,7 +102,7 @@ export class CanvasChartRenderer {
         if (progress > 0) {
             context.save();
             context.globalAlpha = Math.max(0, Math.min(1, progress));
-            this.renderContent(context, toScene, overlayState, styleResolver);
+            this.renderContent(context, toScene, null, styleResolver);
             context.restore();
         }
     }

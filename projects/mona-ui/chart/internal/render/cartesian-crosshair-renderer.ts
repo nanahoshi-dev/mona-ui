@@ -37,6 +37,9 @@ export class CartesianCrosshairRenderer {
         }
 
         const style = styleResolver.resolveCrosshairStyle(registration);
+        if (style.width <= 0 || style.opacity <= 0) {
+            return;
+        }
         const dash = getCrosshairDash(registration.lineStyle());
 
         context.save();

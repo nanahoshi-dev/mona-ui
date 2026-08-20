@@ -1,4 +1,4 @@
-import type { ChartRect } from "../../models/chart.models";
+import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type {
     CartesianOverlayScene,
     ScenePointAnnotation,
@@ -70,7 +70,8 @@ export class CartesianOverlayRenderer {
     public static renderOverlays(
         context: CanvasRenderingContext2D,
         overlayScene: CartesianOverlayScene | null,
-        plotRect: ChartRect
+        plotRect: ChartRect,
+        annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null
     ): void {
         if (!overlayScene) {
             return;
@@ -97,7 +98,8 @@ export class CartesianOverlayRenderer {
 
         // 3. Annotations (connectors then markers)
         for (const ann of overlayScene.annotations) {
-            this.renderAnnotation(context, ann);
+            const effectiveAnchor = annotationBadgeAnchors?.get(ann.id) ?? ann.label?.anchor;
+            this.renderAnnotation(context, ann, effectiveAnchor);
         }
 
         context.restore();
@@ -128,6 +130,9 @@ export class CartesianOverlayRenderer {
         line: SceneReferenceLine,
         plotRect: ChartRect
     ): void {
+        if (line.width <= 0 || line.opacity <= 0) {
+            return;
+        }
         context.save();
         context.globalAlpha = line.opacity;
         context.strokeStyle = line.color;
@@ -151,16 +156,18 @@ export class CartesianOverlayRenderer {
 
     private static renderAnnotation(
         context: CanvasRenderingContext2D,
-        ann: ScenePointAnnotation
+        ann: ScenePointAnnotation,
+        effectiveAnchor?: ChartPoint
     ): void {
         // Connector line
-        if (ann.connector && ann.label && ann.connectorWidth > 0) {
+        const anchor = effectiveAnchor ?? ann.label?.anchor;
+        if (ann.connector && anchor && ann.connectorWidth > 0) {
             context.save();
             context.strokeStyle = ann.color;
             context.lineWidth = ann.connectorWidth;
             context.beginPath();
             context.moveTo(ann.point.x, ann.point.y);
-            context.lineTo(ann.label.anchor.x, ann.label.anchor.y);
+            context.lineTo(anchor.x, anchor.y);
             context.stroke();
             context.restore();
         }
