@@ -9,11 +9,16 @@ export function createChartRenderBackend(
     svg: SVGSVGElement | null,
     instanceId?: number
 ): ChartRenderBackend {
-    if (mode === "svg" && svg) {
-        return new SvgChartRenderBackend(svg, instanceId);
+    switch (mode) {
+        case "canvas":
+            if (!canvas) {
+                throw new Error(`Unable to create ChartRenderBackend for mode "canvas": canvas element not found.`);
+            }
+            return new CanvasChartRenderBackend(canvas);
+        case "svg":
+            if (!svg) {
+                throw new Error(`Unable to create ChartRenderBackend for mode "svg": svg element not found.`);
+            }
+            return new SvgChartRenderBackend(svg, instanceId);
     }
-    if (canvas) {
-        return new CanvasChartRenderBackend(canvas);
-    }
-    throw new Error(`Unable to create ChartRenderBackend for mode "${mode}": required DOM element not found.`);
 }

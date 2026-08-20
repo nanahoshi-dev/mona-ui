@@ -83,6 +83,9 @@ export class SvgPolarArcRenderer {
 
         // 3. Foreground Axis for Rose
         this.#renderRoseForeground(scene, roseStartAngleRad, roseEndAngleRad, styleResolver);
+
+        // 4. Interaction Highlight
+        this.#renderHighlight(scene, interactionState, styleResolver);
     }
 
     public clear(): void {
@@ -256,8 +259,8 @@ export class SvgPolarArcRenderer {
                         series.style.fillOpacity
                     );
                     const gradUrl = defs.useRadialGradient(`radial-bar-grad-${series.id}-${arcData.itemId}`, {
-                        cx: center.x,
-                        cy: center.y,
+                        cx: 0,
+                        cy: 0,
                         gradientUnits: "userSpaceOnUse",
                         r: spec.outerRadius,
                         stops: spec.stops
@@ -266,6 +269,15 @@ export class SvgPolarArcRenderer {
                 } else {
                     setSvgAttribute(arcPath, "fill", arcData.color);
                     setSvgAttribute(arcPath, "fill-opacity", series.style.fillOpacity);
+                }
+
+                const strokeColor = series.style.strokeSource === "explicit" ? series.style.strokeColor : arcData.color;
+                if (series.style.strokeWidth > 0 && strokeColor && strokeColor !== "none") {
+                    setSvgAttribute(arcPath, "stroke", strokeColor);
+                    setSvgAttribute(arcPath, "stroke-width", series.style.strokeWidth);
+                } else {
+                    setSvgAttribute(arcPath, "stroke", "none");
+                    setSvgAttribute(arcPath, "stroke-width", 0);
                 }
 
                 setSvgAttribute(arcPath, "opacity", arcData.renderOpacity ?? 1);
@@ -312,8 +324,8 @@ export class SvgPolarArcRenderer {
                         series.style.fillOpacity
                     );
                     const gradUrl = defs.useRadialGradient(`rose-grad-${series.id}-${petal.itemId}`, {
-                        cx: center.x,
-                        cy: center.y,
+                        cx: 0,
+                        cy: 0,
                         gradientUnits: "userSpaceOnUse",
                         r: spec.outerRadius,
                         stops: spec.stops
@@ -322,6 +334,15 @@ export class SvgPolarArcRenderer {
                 } else {
                     setSvgAttribute(petalPath, "fill", petal.color);
                     setSvgAttribute(petalPath, "fill-opacity", series.style.fillOpacity);
+                }
+
+                const strokeColor = series.style.strokeSource === "explicit" ? series.style.strokeColor : petal.color;
+                if (series.style.strokeWidth > 0 && strokeColor && strokeColor !== "none") {
+                    setSvgAttribute(petalPath, "stroke", strokeColor);
+                    setSvgAttribute(petalPath, "stroke-width", series.style.strokeWidth);
+                } else {
+                    setSvgAttribute(petalPath, "stroke", "none");
+                    setSvgAttribute(petalPath, "stroke-width", 0);
                 }
 
                 setSvgAttribute(petalPath, "opacity", petal.renderOpacity ?? 1);
@@ -389,8 +410,8 @@ export class SvgPolarArcRenderer {
                         style.fillOpacity
                     );
                     const gradUrl = defs.useRadialGradient(`gauge-grad-${series.id}`, {
-                        cx: center.x,
-                        cy: center.y,
+                        cx: 0,
+                        cy: 0,
                         gradientUnits: "userSpaceOnUse",
                         r: spec.outerRadius,
                         stops: spec.stops
@@ -428,5 +449,73 @@ export class SvgPolarArcRenderer {
         }
 
         this.#seriesGroup.appendChild(seriesContainer);
+    }
+
+    #renderHighlight(
+        scene: PolarArcChartScene,
+        interactionState: ChartInteractionState | null,
+        styleResolver: ChartStyleResolver
+    ): void {
+        while (this.#highlightGroup.firstChild) {
+            this.#highlightGroup.firstChild.remove();
+        }
+        if (!interactionState?.activeHitTarget) {
+            return;
+        }
+
+        const activeHit = interactionState.activeHitTarget;
+        const targetSeries = scene.series.find(s => s.id === activeHit.seriesId);
+        if (!targetSeries) {
+            return;
+        }
+
+        const center = scene.center;
+        let arcGeometry: { cornerRadius?: number; endAngle: number; innerRadius: number; outerRadius: number; padAngle?: number; startAngle: number } | null = null;
+
+        if (activeHit.arc) {
+            arcGeometry = activeHit.arc;
+        } else if (targetSeries.type === "radialBar" || targetSeries.type === "rose") {
+            const mark = (targetSeries as ChartRadialBarSeriesScene | ChartRoseSeriesScene).marks.find(
+                m => m.itemId === activeHit.itemId || m.dataIndex === activeHit.index
+            );
+            if (mark) {
+                arcGeometry = mark;
+            }
+        }
+
+        if (!arcGeometry) {
+            return;
+        }
+
+        const d = buildArcPath({
+            cornerRadius: arcGeometry.cornerRadius ?? 0,
+            endAngle: arcGeometry.endAngle,
+            innerRadius: arcGeometry.innerRadius,
+            outerRadius: arcGeometry.outerRadius,
+            padAngle: arcGeometry.padAngle ?? 0,
+            startAngle: arcGeometry.startAngle
+        });
+
+        if (d) {
+            const highlightPath = createSvgElement("path");
+            setSvgAttribute(highlightPath, "d", d);
+            setSvgAttribute(highlightPath, "transform", `translate(${center.x}, ${center.y})`);
+
+            if (interactionState.source === "keyboard") {
+                const focusIndicatorColor =
+                    styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                    styleResolver.resolveCssVariable("--color-primary") ||
+                    "#3b82f6";
+                setSvgAttribute(highlightPath, "fill", "rgba(255, 255, 255, 0.15)");
+                setSvgAttribute(highlightPath, "stroke", focusIndicatorColor);
+                setSvgAttribute(highlightPath, "stroke-width", 3);
+            } else {
+                setSvgAttribute(highlightPath, "fill", "rgba(255, 255, 255, 0.2)");
+                setSvgAttribute(highlightPath, "stroke", "none");
+                setSvgAttribute(highlightPath, "stroke-width", 0);
+            }
+
+            this.#highlightGroup.appendChild(highlightPath);
+        }
     }
 }

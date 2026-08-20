@@ -73,8 +73,8 @@ export class SvgPolarSectorRenderer {
                         style.fillOpacity
                     );
                     const gradUrl = defs.useRadialGradient(`polar-slice-grad-${series.id}-${slice.sliceId}`, {
-                        cx: center.x,
-                        cy: center.y,
+                        cx: 0,
+                        cy: 0,
                         gradientUnits: "userSpaceOnUse",
                         r: spec.outerRadius,
                         stops: spec.stops

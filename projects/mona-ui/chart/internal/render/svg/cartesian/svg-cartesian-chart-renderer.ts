@@ -36,15 +36,26 @@ export class SvgCartesianChartRenderer {
     readonly #seriesContainers = new Map<string, SVGGElement>();
     readonly #seriesRenderers = new Map<
         string,
-        | SvgAreaSeriesRenderer
-        | SvgBarSeriesRenderer
-        | SvgCandlestickSeriesRenderer
-        | SvgLineSeriesRenderer
-        | SvgMarkerSeriesRenderer
-        | SvgOhlcSeriesRenderer
-        | SvgRangeAreaSeriesRenderer
-        | SvgRangeBarSeriesRenderer
+        {
+            renderer:
+                | SvgAreaSeriesRenderer
+                | SvgBarSeriesRenderer
+                | SvgCandlestickSeriesRenderer
+                | SvgLineSeriesRenderer
+                | SvgMarkerSeriesRenderer
+                | SvgOhlcSeriesRenderer
+                | SvgRangeAreaSeriesRenderer
+                | SvgRangeBarSeriesRenderer;
+            type: string;
+        }
     >();
+
+    #crossfadeFromScope: SVGGElement | null = null;
+    #crossfadeToScope: SVGGElement | null = null;
+    readonly #crossfadeFromContainers = new Map<string, SVGGElement>();
+    readonly #crossfadeFromRenderers = new Map<string, { renderer: any; type: string }>();
+    readonly #crossfadeToContainers = new Map<string, SVGGElement>();
+    readonly #crossfadeToRenderers = new Map<string, { renderer: any; type: string }>();
 
     public constructor(layers: SvgRootLayers) {
         this.#layers = layers;
@@ -70,6 +81,8 @@ export class SvgCartesianChartRenderer {
             return;
         }
 
+        this.#clearCrossfadeScopes();
+
         const plotClipUrl = defs.useClipRect("plot-clip", plotRect.x, plotRect.y, plotRect.width, plotRect.height);
 
         // 1. Grid
@@ -80,16 +93,17 @@ export class SvgCartesianChartRenderer {
 
         // 3. Series (clipped to plot rectangle)
         setSvgAttribute(this.#layers.series, "clip-path", plotClipUrl);
-        this.#renderSeries(series, defs);
+        this.#renderSeriesInto(this.#layers.series, series, defs, this.#seriesContainers, this.#seriesRenderers);
 
         // 4. Persistent Selection
         if (presentation?.selectionScene) {
+            const fallback = styleResolver.resolveSelectionStyle(null);
             this.#selectionRenderer.render(presentation.selectionScene, {
-                color: presentation.selectionOptions?.color,
-                fillOpacity: presentation.selectionOptions?.fillOpacity,
+                color: presentation.selectionOptions?.color ?? fallback.color,
+                fillOpacity: presentation.selectionOptions?.fillOpacity ?? fallback.fillOpacity,
                 plotClipUrl,
                 plotRect,
-                strokeWidth: presentation.selectionOptions?.strokeWidth
+                strokeWidth: presentation.selectionOptions?.strokeWidth ?? fallback.strokeWidth
             });
         } else {
             this.#selectionRenderer.clear();
@@ -124,11 +138,17 @@ export class SvgCartesianChartRenderer {
         );
 
         // 9. Brush
-        this.#brushRenderer.render(
-            presentation?.activeBrushBounds ?? null,
-            presentation?.brushRegistration ?? null,
-            plotClipUrl
-        );
+        if (presentation?.activeBrushBounds && presentation.brushRegistration) {
+            const resolved = styleResolver.resolveBrushStyle(presentation.brushRegistration);
+            this.#brushRenderer.render(
+                presentation.activeBrushBounds,
+                presentation.brushRegistration,
+                plotClipUrl,
+                resolved
+            );
+        } else {
+            this.#brushRenderer.clear();
+        }
     }
 
     public renderCrossfade(
@@ -139,6 +159,12 @@ export class SvgCartesianChartRenderer {
         styleResolver: ChartStyleResolver,
         defs: SvgDefinitionRegistry
     ): void {
+        if (progress >= 1 || !fromScene) {
+            this.#clearCrossfadeScopes();
+            this.render(toScene, presentation, styleResolver, defs);
+            return;
+        }
+
         const plotRect = toScene.plotRect;
         const plotClipUrl = defs.useClipRect("plot-clip", plotRect.x, plotRect.y, plotRect.width, plotRect.height);
 
@@ -146,15 +172,54 @@ export class SvgCartesianChartRenderer {
         this.#selectionRenderer.clear();
         this.#dataLabelRenderer.clear();
 
+        // Clear direct series if any
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.clear();
+        }
+        for (const container of this.#seriesContainers.values()) {
+            container.remove();
+        }
+        this.#seriesContainers.clear();
+        this.#seriesRenderers.clear();
+
         // 1. Grid
         this.#gridRenderer.render(toScene, styleResolver);
 
         // 2. Underlays
         this.#overlayRenderer.renderUnderlays(presentation?.cartesianOverlay ?? null, plotRect, plotClipUrl);
 
-        // 3. Series
+        // 3. Series crossfade scopes
         setSvgAttribute(this.#layers.series, "clip-path", plotClipUrl);
-        this.#renderSeries(toScene.series, defs);
+
+        if (!this.#crossfadeFromScope) {
+            this.#crossfadeFromScope = createSvgElement("g");
+            this.#crossfadeFromScope.setAttribute("data-crossfade-scope", "from");
+            this.#layers.series.appendChild(this.#crossfadeFromScope);
+        }
+        if (!this.#crossfadeToScope) {
+            this.#crossfadeToScope = createSvgElement("g");
+            this.#crossfadeToScope.setAttribute("data-crossfade-scope", "to");
+            this.#layers.series.appendChild(this.#crossfadeToScope);
+        }
+
+        setSvgAttribute(this.#crossfadeFromScope, "opacity", Math.max(0, Math.min(1, 1 - progress)));
+        setSvgAttribute(this.#crossfadeToScope, "opacity", Math.max(0, Math.min(1, progress)));
+
+        this.#renderSeriesInto(
+            this.#crossfadeFromScope,
+            fromScene.series,
+            defs,
+            this.#crossfadeFromContainers,
+            this.#crossfadeFromRenderers
+        );
+
+        this.#renderSeriesInto(
+            this.#crossfadeToScope,
+            toScene.series,
+            defs,
+            this.#crossfadeToContainers,
+            this.#crossfadeToRenderers
+        );
 
         // 6. Overlays
         this.#overlayRenderer.renderOverlays(
@@ -178,11 +243,17 @@ export class SvgCartesianChartRenderer {
         );
 
         // 9. Brush
-        this.#brushRenderer.render(
-            presentation?.activeBrushBounds ?? null,
-            presentation?.brushRegistration ?? null,
-            plotClipUrl
-        );
+        if (presentation?.activeBrushBounds && presentation.brushRegistration) {
+            const resolved = styleResolver.resolveBrushStyle(presentation.brushRegistration);
+            this.#brushRenderer.render(
+                presentation.activeBrushBounds,
+                presentation.brushRegistration,
+                plotClipUrl,
+                resolved
+            );
+        } else {
+            this.#brushRenderer.clear();
+        }
     }
 
     public clear(): void {
@@ -195,6 +266,11 @@ export class SvgCartesianChartRenderer {
         this.#interactionRenderer.clear();
         this.#brushRenderer.clear();
 
+        this.#clearCrossfadeScopes();
+
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.clear();
+        }
         for (const container of this.#seriesContainers.values()) {
             container.remove();
         }
@@ -214,23 +290,63 @@ export class SvgCartesianChartRenderer {
         this.#brushRenderer.destroy();
     }
 
-    #renderSeries(seriesList: readonly import("../../../scene/cartesian-scene").ChartSeriesScene[], defs: SvgDefinitionRegistry): void {
+    #clearCrossfadeScopes(): void {
+        if (this.#crossfadeFromScope) {
+            for (const r of this.#crossfadeFromRenderers.values()) {
+                r.renderer.clear();
+            }
+            this.#crossfadeFromScope.remove();
+            this.#crossfadeFromScope = null;
+            this.#crossfadeFromContainers.clear();
+            this.#crossfadeFromRenderers.clear();
+        }
+        if (this.#crossfadeToScope) {
+            for (const r of this.#crossfadeToRenderers.values()) {
+                r.renderer.clear();
+            }
+            this.#crossfadeToScope.remove();
+            this.#crossfadeToScope = null;
+            this.#crossfadeToContainers.clear();
+            this.#crossfadeToRenderers.clear();
+        }
+    }
+
+    #renderSeriesInto(
+        targetContainer: SVGGElement,
+        seriesList: readonly import("../../../scene/cartesian-scene").ChartSeriesScene[],
+        defs: SvgDefinitionRegistry,
+        containersMap: Map<string, SVGGElement>,
+        renderersMap: Map<string, { renderer: any; type: string }>
+    ): void {
         const activeIds = new Set<string>();
 
         for (let i = 0; i < seriesList.length; i++) {
             const s = seriesList[i];
             activeIds.add(s.id);
 
-            let group = this.#seriesContainers.get(s.id);
+            let group = containersMap.get(s.id);
             if (!group) {
                 group = createSvgElement("g");
                 group.setAttribute("data-series-id", s.id);
-                this.#layers.series.appendChild(group);
-                this.#seriesContainers.set(s.id, group);
+                targetContainer.appendChild(group);
+                containersMap.set(s.id, group);
             }
 
-            let renderer = this.#seriesRenderers.get(s.id);
-            if (!renderer) {
+            // Ensure correct DOM order in series layer (SVG-R1-012)
+            const currentNthChild = targetContainer.children[i];
+            if (currentNthChild !== group) {
+                targetContainer.insertBefore(group, currentNthChild ?? null);
+            }
+
+            let entry = renderersMap.get(s.id);
+            if (entry && entry.type !== s.type) {
+                entry.renderer.clear();
+                entry = undefined;
+                renderersMap.delete(s.id);
+            }
+
+            if (!entry) {
+                let renderer: any = null;
                 switch (s.type) {
                     case "area":
                         renderer = new SvgAreaSeriesRenderer(group);
@@ -259,26 +375,27 @@ export class SvgCartesianChartRenderer {
                         break;
                 }
                 if (renderer) {
-                    this.#seriesRenderers.set(s.id, renderer);
+                    entry = { renderer, type: s.type };
+                    renderersMap.set(s.id, entry);
                 }
             }
 
-            if (renderer) {
+            if (entry) {
                 if (s.type === "area") {
-                    (renderer as SvgAreaSeriesRenderer).render(s, defs);
+                    (entry.renderer as SvgAreaSeriesRenderer).render(s, defs);
                 } else {
-                    (renderer as any).render(s);
+                    entry.renderer.render(s);
                 }
             }
         }
 
         // Cleanup stale series
-        for (const [id, group] of this.#seriesContainers.entries()) {
+        for (const [id, group] of containersMap.entries()) {
             if (!activeIds.has(id)) {
-                this.#seriesRenderers.get(id)?.clear();
-                this.#seriesRenderers.delete(id);
+                renderersMap.get(id)?.renderer.clear();
+                renderersMap.delete(id);
                 group.remove();
-                this.#seriesContainers.delete(id);
+                containersMap.delete(id);
             }
         }
     }

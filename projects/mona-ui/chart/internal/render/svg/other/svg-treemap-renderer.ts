@@ -1,14 +1,29 @@
 import type { ChartInteractionState } from "../../../interaction/chart-interaction-state";
-import type { TreemapChartScene } from "../../../scene/hierarchical-scene";
+import type { SceneTreemapNode, TreemapChartScene } from "../../../scene/hierarchical-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import { buildRoundedRectPath } from "../../geometry/rounded-rect-path-builder";
 import { setSvgAttribute } from "../svg-attribute-utils";
 import { createSvgElement } from "../svg-element-utils";
+import { SvgKeyedGroup } from "../svg-keyed-group";
+
+interface TreemapRenderNodeItem {
+    readonly alpha: number;
+    readonly borderRadius: number;
+    readonly fillColor: string;
+    readonly isHeader: boolean;
+    readonly key: string;
+    readonly node: SceneTreemapNode;
+    readonly rect: { readonly height: number; readonly width: number; readonly x: number; readonly y: number };
+    readonly strokeColor?: string;
+    readonly strokeWidth: number;
+}
 
 export class SvgTreemapRenderer {
     readonly #container: SVGGElement;
     readonly #nodesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
+
+    readonly #nodeKeyedGroup: SvgKeyedGroup<TreemapRenderNodeItem, SVGElement>;
 
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -20,6 +35,8 @@ export class SvgTreemapRenderer {
         this.#highlightGroup = createSvgElement("g");
         this.#highlightGroup.setAttribute("data-treemap-layer", "highlight");
         this.#container.appendChild(this.#highlightGroup);
+
+        this.#nodeKeyedGroup = new SvgKeyedGroup<TreemapRenderNodeItem, SVGElement>(this.#nodesGroup);
     }
 
     public render(
@@ -33,8 +50,9 @@ export class SvgTreemapRenderer {
             return;
         }
 
-        // 1. Nodes
-        while (this.#nodesGroup.firstChild) this.#nodesGroup.firstChild.remove();
+        // 1. Collect render items
+        const renderItems: TreemapRenderNodeItem[] = [];
+
         for (const s of series) {
             const { nodes, renderOpacity = 1, style } = s;
             if (nodes.length === 0 || renderOpacity <= 0) continue;
@@ -53,64 +71,66 @@ export class SvgTreemapRenderer {
                 const fillAlpha = isRenderTerminal ? leafFillOpacity : parentFillOpacity;
                 const alpha = renderOpacity * nodeOpacity * fillAlpha;
 
-                const rectEl = borderRadius > 0 ? createSvgElement("path") : createSvgElement("rect");
-                if (borderRadius > 0) {
-                    const d = buildRoundedRectPath(node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, {
-                        bottomLeft: borderRadius,
-                        bottomRight: borderRadius,
-                        topLeft: borderRadius,
-                        topRight: borderRadius
-                    });
-                    setSvgAttribute(rectEl, "d", d);
-                } else {
-                    setSvgAttribute(rectEl, "x", node.bounds.x);
-                    setSvgAttribute(rectEl, "y", node.bounds.y);
-                    setSvgAttribute(rectEl, "width", node.bounds.width);
-                    setSvgAttribute(rectEl, "height", node.bounds.height);
-                }
+                renderItems.push({
+                    alpha,
+                    borderRadius,
+                    fillColor: node.fillColor,
+                    isHeader: false,
+                    key: node.animationKey || node.nodeId,
+                    node,
+                    rect: node.bounds,
+                    strokeColor,
+                    strokeWidth
+                });
 
-                setSvgAttribute(rectEl, "fill", node.fillColor);
-                setSvgAttribute(rectEl, "opacity", alpha);
-
-                if (strokeWidth > 0 && strokeColor) {
-                    setSvgAttribute(rectEl, "stroke", strokeColor);
-                    setSvgAttribute(rectEl, "stroke-width", strokeWidth);
-                } else {
-                    setSvgAttribute(rectEl, "stroke", "none");
-                    setSvgAttribute(rectEl, "stroke-width", 0);
-                }
-                this.#nodesGroup.appendChild(rectEl);
-
-                // Parent header bar if present
                 if (!isRenderTerminal && node.headerBounds && node.headerBounds.width > 0 && node.headerBounds.height > 0) {
                     const headerAlpha = renderOpacity * nodeOpacity * (parentFillOpacity * 2);
-                    const headerEl = borderRadius > 0 ? createSvgElement("path") : createSvgElement("rect");
-                    if (borderRadius > 0) {
-                        const d = buildRoundedRectPath(
-                            node.headerBounds.x,
-                            node.headerBounds.y,
-                            node.headerBounds.width,
-                            node.headerBounds.height,
-                            {
-                                bottomLeft: borderRadius,
-                                bottomRight: borderRadius,
-                                topLeft: borderRadius,
-                                topRight: borderRadius
-                            }
-                        );
-                        setSvgAttribute(headerEl, "d", d);
-                    } else {
-                        setSvgAttribute(headerEl, "x", node.headerBounds.x);
-                        setSvgAttribute(headerEl, "y", node.headerBounds.y);
-                        setSvgAttribute(headerEl, "width", node.headerBounds.width);
-                        setSvgAttribute(headerEl, "height", node.headerBounds.height);
-                    }
-                    setSvgAttribute(headerEl, "fill", node.fillColor);
-                    setSvgAttribute(headerEl, "opacity", headerAlpha);
-                    this.#nodesGroup.appendChild(headerEl);
+                    renderItems.push({
+                        alpha: headerAlpha,
+                        borderRadius,
+                        fillColor: node.fillColor,
+                        isHeader: true,
+                        key: `hdr:${node.animationKey || node.nodeId}`,
+                        node,
+                        rect: node.headerBounds,
+                        strokeColor: undefined,
+                        strokeWidth: 0
+                    });
                 }
             }
         }
+
+        this.#nodeKeyedGroup.reconcile(renderItems, {
+            key: item => item.key,
+            tag: item => (item.borderRadius > 0 ? "path" : "rect"),
+            update: (element, item) => {
+                if (item.borderRadius > 0) {
+                    const d = buildRoundedRectPath(item.rect.x, item.rect.y, item.rect.width, item.rect.height, {
+                        bottomLeft: item.borderRadius,
+                        bottomRight: item.borderRadius,
+                        topLeft: item.borderRadius,
+                        topRight: item.borderRadius
+                    });
+                    setSvgAttribute(element, "d", d);
+                } else {
+                    setSvgAttribute(element, "x", item.rect.x);
+                    setSvgAttribute(element, "y", item.rect.y);
+                    setSvgAttribute(element, "width", item.rect.width);
+                    setSvgAttribute(element, "height", item.rect.height);
+                }
+
+                setSvgAttribute(element, "fill", item.fillColor);
+                setSvgAttribute(element, "opacity", item.alpha);
+
+                if (item.strokeWidth > 0 && item.strokeColor) {
+                    setSvgAttribute(element, "stroke", item.strokeColor);
+                    setSvgAttribute(element, "stroke-width", item.strokeWidth);
+                } else {
+                    setSvgAttribute(element, "stroke", "none");
+                    setSvgAttribute(element, "stroke-width", 0);
+                }
+            }
+        });
 
         // 2. Highlight
         while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
@@ -162,12 +182,13 @@ export class SvgTreemapRenderer {
     }
 
     public clear(): void {
-        while (this.#nodesGroup.firstChild) this.#nodesGroup.firstChild.remove();
+        this.#nodeKeyedGroup.clear();
         while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
     }
 
     public destroy(): void {
         this.clear();
+        this.#nodeKeyedGroup.destroy();
         this.#nodesGroup.remove();
         this.#highlightGroup.remove();
     }

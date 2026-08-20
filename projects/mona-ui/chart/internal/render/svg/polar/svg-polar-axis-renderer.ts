@@ -191,8 +191,8 @@ export class SvgPolarAxisRenderer {
                     if (s.fillMode === "gradient") {
                         const spec = createRadialSeriesGradientSpec(s.maxRenderedRadius, s.color, s.fillOpacity);
                         const gradUrl = defs.useRadialGradient(`polar-axis-grad-${s.id}`, {
-                            cx: center.x,
-                            cy: center.y,
+                            cx: 0,
+                            cy: 0,
                             gradientUnits: "userSpaceOnUse",
                             r: spec.outerRadius,
                             stops: spec.stops
@@ -235,8 +235,8 @@ export class SvgPolarAxisRenderer {
                     if (pointAlpha <= 0) continue;
 
                     const circle = createSvgElement("circle");
-                    setSvgAttribute(circle, "cx", pt.point.x);
-                    setSvgAttribute(circle, "cy", pt.point.y);
+                    setSvgAttribute(circle, "cx", Math.sin(pt.angle) * pt.radius);
+                    setSvgAttribute(circle, "cy", -Math.cos(pt.angle) * pt.radius);
                     setSvgAttribute(circle, "r", s.pointRadius);
                     setSvgAttribute(circle, "fill", s.color);
                     setSvgAttribute(circle, "stroke", surfaceColor);

@@ -29,7 +29,7 @@ export class SvgBarSeriesRenderer {
                     cornerRadii: bar.cornerRadii,
                     height: bar.height,
                     isPositive: bar.isPositive,
-                    orientation: "vertical",
+                    orientation: bar.orientation ?? scene.orientation ?? "vertical",
                     radius: bar.radius ?? borderRadius,
                     width: bar.width,
                     x: bar.x,

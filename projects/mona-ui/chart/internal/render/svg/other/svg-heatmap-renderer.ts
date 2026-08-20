@@ -1,16 +1,25 @@
 import type { ChartInteractionState } from "../../../interaction/chart-interaction-state";
 import type { CartesianHeatmapChartScene } from "../../../scene/chart-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
+import type { SceneHeatmapCell } from "../../../../models/chart-heatmap.models";
 import { buildRoundedRectPath } from "../../geometry/rounded-rect-path-builder";
 import { setSvgAttribute } from "../svg-attribute-utils";
 import { createSvgElement } from "../svg-element-utils";
+import { SvgKeyedGroup } from "../svg-keyed-group";
 
 export class SvgHeatmapRenderer {
     readonly #container: SVGGElement;
     readonly #gridGroup: SVGGElement;
     readonly #cellsGroup: SVGGElement;
+    readonly #labelsGroup: SVGGElement;
     readonly #axesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
+
+    #gridPath: SVGPathElement | null = null;
+    #axisPath: SVGPathElement | null = null;
+
+    readonly #cellKeyedGroup: SvgKeyedGroup<SceneHeatmapCell, SVGElement>;
+    readonly #labelKeyedGroup: SvgKeyedGroup<SceneHeatmapCell, SVGTextElement>;
 
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -23,6 +32,10 @@ export class SvgHeatmapRenderer {
         this.#cellsGroup.setAttribute("data-heatmap-layer", "cells");
         this.#container.appendChild(this.#cellsGroup);
 
+        this.#labelsGroup = createSvgElement("g");
+        this.#labelsGroup.setAttribute("data-heatmap-layer", "labels");
+        this.#container.appendChild(this.#labelsGroup);
+
         this.#axesGroup = createSvgElement("g");
         this.#axesGroup.setAttribute("data-heatmap-layer", "axes");
         this.#container.appendChild(this.#axesGroup);
@@ -30,6 +43,9 @@ export class SvgHeatmapRenderer {
         this.#highlightGroup = createSvgElement("g");
         this.#highlightGroup.setAttribute("data-heatmap-layer", "highlight");
         this.#container.appendChild(this.#highlightGroup);
+
+        this.#cellKeyedGroup = new SvgKeyedGroup<SceneHeatmapCell, SVGElement>(this.#cellsGroup);
+        this.#labelKeyedGroup = new SvgKeyedGroup<SceneHeatmapCell, SVGTextElement>(this.#labelsGroup);
     }
 
     public render(
@@ -44,7 +60,6 @@ export class SvgHeatmapRenderer {
         }
 
         // 1. Grid
-        while (this.#gridGroup.firstChild) this.#gridGroup.firstChild.remove();
         const gridColor =
             styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
             "rgba(148, 163, 184, 0.2)";
@@ -68,71 +83,83 @@ export class SvgHeatmapRenderer {
             }
         }
         if (gridSegments.length > 0) {
-            const gridPath = createSvgElement("path");
-            setSvgAttribute(gridPath, "d", gridSegments.join(" "));
-            setSvgAttribute(gridPath, "fill", "none");
-            setSvgAttribute(gridPath, "stroke", gridColor);
-            setSvgAttribute(gridPath, "stroke-width", 1);
-            setSvgAttribute(gridPath, "shape-rendering", "crispEdges");
-            this.#gridGroup.appendChild(gridPath);
+            if (!this.#gridPath) {
+                this.#gridPath = createSvgElement("path");
+                this.#gridGroup.appendChild(this.#gridPath);
+            }
+            setSvgAttribute(this.#gridPath, "d", gridSegments.join(" "));
+            setSvgAttribute(this.#gridPath, "fill", "none");
+            setSvgAttribute(this.#gridPath, "stroke", gridColor);
+            setSvgAttribute(this.#gridPath, "stroke-width", 1);
+            setSvgAttribute(this.#gridPath, "shape-rendering", "crispEdges");
+        } else if (this.#gridPath) {
+            this.#gridPath.remove();
+            this.#gridPath = null;
         }
 
         // 2. Cells
-        while (this.#cellsGroup.firstChild) this.#cellsGroup.firstChild.remove();
+        const allCells: SceneHeatmapCell[] = [];
+        const labelCells: SceneHeatmapCell[] = [];
+
         for (const s of series) {
             for (const cell of s.cells) {
                 if (cell.width <= 0 || cell.height <= 0) continue;
+                allCells.push(cell);
+                if ((s.showLabels || cell.showLabel) && cell.width >= 20 && cell.height >= 12 && Boolean(cell.formattedValue)) {
+                    labelCells.push(cell);
+                }
+            }
+        }
 
+        this.#cellKeyedGroup.reconcile(allCells, {
+            key: (cell, i) => cell.animationKey || `${cell.xIndex}:${cell.yIndex}`,
+            tag: cell => (cell.borderRadius > 0 ? "path" : "rect"),
+            update: (element, cell) => {
                 const alpha = Math.max(0, Math.min(1, cell.opacity ?? 1));
-
                 if (cell.borderRadius <= 0) {
-                    const rect = createSvgElement("rect");
-                    setSvgAttribute(rect, "x", cell.x);
-                    setSvgAttribute(rect, "y", cell.y);
-                    setSvgAttribute(rect, "width", cell.width);
-                    setSvgAttribute(rect, "height", cell.height);
-                    setSvgAttribute(rect, "fill", cell.backgroundColor);
-                    setSvgAttribute(rect, "opacity", alpha);
-                    if (cell.borderWidth > 0 && cell.borderColor) {
-                        setSvgAttribute(rect, "stroke", cell.borderColor);
-                        setSvgAttribute(rect, "stroke-width", cell.borderWidth);
-                    }
-                    this.#cellsGroup.appendChild(rect);
+                    setSvgAttribute(element, "x", cell.x);
+                    setSvgAttribute(element, "y", cell.y);
+                    setSvgAttribute(element, "width", cell.width);
+                    setSvgAttribute(element, "height", cell.height);
                 } else {
-                    const path = createSvgElement("path");
                     const d = buildRoundedRectPath(cell.x, cell.y, cell.width, cell.height, {
                         bottomLeft: cell.borderRadius,
                         bottomRight: cell.borderRadius,
                         topLeft: cell.borderRadius,
                         topRight: cell.borderRadius
                     });
-                    setSvgAttribute(path, "d", d);
-                    setSvgAttribute(path, "fill", cell.backgroundColor);
-                    setSvgAttribute(path, "opacity", alpha);
-                    if (cell.borderWidth > 0 && cell.borderColor) {
-                        setSvgAttribute(path, "stroke", cell.borderColor);
-                        setSvgAttribute(path, "stroke-width", cell.borderWidth);
-                    }
-                    this.#cellsGroup.appendChild(path);
+                    setSvgAttribute(element, "d", d);
                 }
-
-                if ((s.showLabels || cell.showLabel) && cell.width >= 20 && cell.height >= 12 && cell.formattedValue) {
-                    const text = createSvgElement("text");
-                    text.textContent = cell.formattedValue;
-                    setSvgAttribute(text, "x", cell.x + cell.width / 2);
-                    setSvgAttribute(text, "y", cell.y + cell.height / 2);
-                    setSvgAttribute(text, "text-anchor", "middle");
-                    setSvgAttribute(text, "dominant-baseline", "middle");
-                    setSvgAttribute(text, "fill", cell.labelColor || "#ffffff");
-                    setSvgAttribute(text, "opacity", alpha);
-                    text.style.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-                    this.#cellsGroup.appendChild(text);
+                setSvgAttribute(element, "fill", cell.backgroundColor);
+                setSvgAttribute(element, "opacity", alpha);
+                if (cell.borderWidth > 0 && cell.borderColor) {
+                    setSvgAttribute(element, "stroke", cell.borderColor);
+                    setSvgAttribute(element, "stroke-width", cell.borderWidth);
+                } else {
+                    setSvgAttribute(element, "stroke", "none");
+                    setSvgAttribute(element, "stroke-width", 0);
                 }
             }
-        }
+        });
+
+        // 2b. Labels
+        this.#labelKeyedGroup.reconcile(labelCells, {
+            key: (cell, i) => `lbl:${cell.animationKey || `${cell.xIndex}:${cell.yIndex}`}`,
+            tag: "text",
+            update: (text, cell) => {
+                const alpha = Math.max(0, Math.min(1, cell.opacity ?? 1));
+                text.textContent = cell.formattedValue;
+                setSvgAttribute(text, "x", cell.x + cell.width / 2);
+                setSvgAttribute(text, "y", cell.y + cell.height / 2);
+                setSvgAttribute(text, "text-anchor", "middle");
+                setSvgAttribute(text, "dominant-baseline", "middle");
+                setSvgAttribute(text, "fill", cell.labelColor || "#ffffff");
+                setSvgAttribute(text, "opacity", alpha);
+                text.style.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            }
+        });
 
         // 3. Axes
-        while (this.#axesGroup.firstChild) this.#axesGroup.firstChild.remove();
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
             styleResolver.resolveCssVariable("--color-border-control") ||
@@ -156,13 +183,18 @@ export class SvgHeatmapRenderer {
             }
         }
         if (axisSegments.length > 0) {
-            const axisPath = createSvgElement("path");
-            setSvgAttribute(axisPath, "d", axisSegments.join(" "));
-            setSvgAttribute(axisPath, "fill", "none");
-            setSvgAttribute(axisPath, "stroke", axisLineColor);
-            setSvgAttribute(axisPath, "stroke-width", 1);
-            setSvgAttribute(axisPath, "shape-rendering", "crispEdges");
-            this.#axesGroup.appendChild(axisPath);
+            if (!this.#axisPath) {
+                this.#axisPath = createSvgElement("path");
+                this.#axesGroup.appendChild(this.#axisPath);
+            }
+            setSvgAttribute(this.#axisPath, "d", axisSegments.join(" "));
+            setSvgAttribute(this.#axisPath, "fill", "none");
+            setSvgAttribute(this.#axisPath, "stroke", axisLineColor);
+            setSvgAttribute(this.#axisPath, "stroke-width", 1);
+            setSvgAttribute(this.#axisPath, "shape-rendering", "crispEdges");
+        } else if (this.#axisPath) {
+            this.#axisPath.remove();
+            this.#axisPath = null;
         }
 
         // 4. Highlight
@@ -210,16 +242,26 @@ export class SvgHeatmapRenderer {
     }
 
     public clear(): void {
-        while (this.#gridGroup.firstChild) this.#gridGroup.firstChild.remove();
-        while (this.#cellsGroup.firstChild) this.#cellsGroup.firstChild.remove();
-        while (this.#axesGroup.firstChild) this.#axesGroup.firstChild.remove();
+        this.#cellKeyedGroup.clear();
+        this.#labelKeyedGroup.clear();
+        if (this.#gridPath) {
+            this.#gridPath.remove();
+            this.#gridPath = null;
+        }
+        if (this.#axisPath) {
+            this.#axisPath.remove();
+            this.#axisPath = null;
+        }
         while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
     }
 
     public destroy(): void {
         this.clear();
+        this.#cellKeyedGroup.destroy();
+        this.#labelKeyedGroup.destroy();
         this.#gridGroup.remove();
         this.#cellsGroup.remove();
+        this.#labelsGroup.remove();
         this.#axesGroup.remove();
         this.#highlightGroup.remove();
     }

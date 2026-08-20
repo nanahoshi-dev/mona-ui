@@ -105,8 +105,16 @@ export class SvgDefinitionRegistry {
         setSvgAttribute(grad, "cx", def.cx ?? 0);
         setSvgAttribute(grad, "cy", def.cy ?? 0);
         setSvgAttribute(grad, "r", def.r ?? 0);
-        if (def.fx !== undefined) setSvgAttribute(grad, "fx", def.fx);
-        if (def.fy !== undefined) setSvgAttribute(grad, "fy", def.fy);
+        if (def.fx !== undefined) {
+            setSvgAttribute(grad, "fx", def.fx);
+        } else {
+            grad.removeAttribute("fx");
+        }
+        if (def.fy !== undefined) {
+            setSvgAttribute(grad, "fy", def.fy);
+        } else {
+            grad.removeAttribute("fy");
+        }
 
         this.#syncStops(grad, def.stops);
 

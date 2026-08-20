@@ -103,6 +103,16 @@ export class SvgRootLayers {
         return this.#layers.get(name)!;
     }
 
+    public resetRootAttributes(): void {
+        for (const group of this.#layers.values()) {
+            group.removeAttribute("clip-path");
+            group.removeAttribute("transform");
+            group.removeAttribute("opacity");
+            group.removeAttribute("filter");
+            group.removeAttribute("mask");
+        }
+    }
+
     public clearLayers(): void {
         for (const group of this.#layers.values()) {
             while (group.firstChild) {

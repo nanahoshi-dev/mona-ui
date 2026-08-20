@@ -1,13 +1,25 @@
 import type { ChartInteractionState } from "../../../interaction/chart-interaction-state";
-import type { CartesianFunnelChartScene } from "../../../scene/funnel-scene";
+import type { CartesianFunnelChartScene, SceneFunnelStage } from "../../../scene/funnel-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import { setSvgAttribute } from "../svg-attribute-utils";
 import { createSvgElement } from "../svg-element-utils";
+import { SvgKeyedGroup } from "../svg-keyed-group";
+
+interface FunnelRenderStageItem {
+    readonly alpha: number;
+    readonly fillOpacity: number;
+    readonly key: string;
+    readonly stage: SceneFunnelStage;
+    readonly strokeColor?: string;
+    readonly strokeWidth: number;
+}
 
 export class SvgFunnelRenderer {
     readonly #container: SVGGElement;
     readonly #stagesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
+
+    readonly #stageKeyedGroup: SvgKeyedGroup<FunnelRenderStageItem, SVGPathElement>;
 
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -19,6 +31,8 @@ export class SvgFunnelRenderer {
         this.#highlightGroup = createSvgElement("g");
         this.#highlightGroup.setAttribute("data-funnel-layer", "highlight");
         this.#container.appendChild(this.#highlightGroup);
+
+        this.#stageKeyedGroup = new SvgKeyedGroup<FunnelRenderStageItem, SVGPathElement>(this.#stagesGroup);
     }
 
     public render(
@@ -33,7 +47,8 @@ export class SvgFunnelRenderer {
         }
 
         // 1. Stages
-        while (this.#stagesGroup.firstChild) this.#stagesGroup.firstChild.remove();
+        const renderItems: FunnelRenderStageItem[] = [];
+
         for (const s of series) {
             const { renderOpacity = 1, stages, style } = s;
             if (stages.length === 0 || renderOpacity <= 0) continue;
@@ -46,26 +61,38 @@ export class SvgFunnelRenderer {
                 const stageOpacity = stage.renderOpacity ?? 1;
                 if (stageOpacity <= 0 || stage.bounds.width <= 0 || stage.bounds.height <= 0) continue;
 
-                const [p0, p1, p2, p3] = stage.polygon;
+                renderItems.push({
+                    alpha: renderOpacity * stageOpacity,
+                    fillOpacity,
+                    key: stage.animationKey || stage.stageId || String(stage.dataIndex),
+                    stage,
+                    strokeColor,
+                    strokeWidth
+                });
+            }
+        }
+
+        this.#stageKeyedGroup.reconcile(renderItems, {
+            key: item => item.key,
+            tag: "path",
+            update: (pathEl, item) => {
+                const [p0, p1, p2, p3] = item.stage.polygon;
                 const d = `M ${p0.x} ${p0.y} L ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} Z`;
 
-                const pathEl = createSvgElement("path");
                 setSvgAttribute(pathEl, "d", d);
-                setSvgAttribute(pathEl, "fill", stage.fillColor);
-                setSvgAttribute(pathEl, "fill-opacity", fillOpacity);
-                setSvgAttribute(pathEl, "opacity", renderOpacity * stageOpacity);
+                setSvgAttribute(pathEl, "fill", item.stage.fillColor);
+                setSvgAttribute(pathEl, "fill-opacity", item.fillOpacity);
+                setSvgAttribute(pathEl, "opacity", item.alpha);
 
-                if (strokeWidth > 0 && strokeColor) {
-                    setSvgAttribute(pathEl, "stroke", strokeColor);
-                    setSvgAttribute(pathEl, "stroke-width", strokeWidth);
+                if (item.strokeWidth > 0 && item.strokeColor) {
+                    setSvgAttribute(pathEl, "stroke", item.strokeColor);
+                    setSvgAttribute(pathEl, "stroke-width", item.strokeWidth);
                 } else {
                     setSvgAttribute(pathEl, "stroke", "none");
                     setSvgAttribute(pathEl, "stroke-width", 0);
                 }
-
-                this.#stagesGroup.appendChild(pathEl);
             }
-        }
+        });
 
         // 2. Highlight
         while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
@@ -110,12 +137,13 @@ export class SvgFunnelRenderer {
     }
 
     public clear(): void {
-        while (this.#stagesGroup.firstChild) this.#stagesGroup.firstChild.remove();
+        this.#stageKeyedGroup.clear();
         while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
     }
 
     public destroy(): void {
         this.clear();
+        this.#stageKeyedGroup.destroy();
         this.#stagesGroup.remove();
         this.#highlightGroup.remove();
     }
