@@ -1616,6 +1616,153 @@
                     </div>
                 </ng-template>
             </mona-tab>
+
+            <mona-tab title="Selection & Brush">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex flex-wrap items-center gap-6 p-4">
+                        <!-- Persistent Selection Controls -->
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Selection Controls</span
+                            >
+                            <div class="flex flex-wrap items-center gap-3">
+                                <mona-check-box
+                                    [checked]="selectionEnabled()"
+                                    (checkedChange)="selectionEnabled.set($event)">
+                                    Enabled
+                                </mona-check-box>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs text-muted-foreground">Mode:</span>
+                                    <mona-dropdown-list
+                                        [data]="selectionModeOptions"
+                                        [value]="selectionMode()"
+                                        (valueChange)="$event && selectionMode.set($event)"
+                                        textField="label"
+                                        valueField="value"
+                                        [valuePrimitive]="true"
+                                        size="small"
+                                        class="w-36" />
+                                </div>
+                                <mona-check-box
+                                    [checked]="selectionRetainOnDataChange()"
+                                    (checkedChange)="selectionRetainOnDataChange.set($event)">
+                                    Retain on Data Update
+                                </mona-check-box>
+                                <button
+                                    monaButton
+                                    size="small"
+                                    look="secondary"
+                                    [disabled]="selectedMarkIds().length === 0"
+                                    (click)="clearSelection()">
+                                    Clear ({{ selectedMarkIds().length }})
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <!-- Range / Brush Controls -->
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Brush Controls</span
+                            >
+                            <div class="flex flex-wrap items-center gap-3">
+                                <mona-check-box
+                                    [checked]="brushEnabled()"
+                                    (checkedChange)="brushEnabled.set($event)">
+                                    Enabled
+                                </mona-check-box>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs text-muted-foreground">Mode:</span>
+                                    <mona-dropdown-list
+                                        [data]="brushModeOptions"
+                                        [value]="brushMode()"
+                                        (valueChange)="$event && brushMode.set($event)"
+                                        textField="label"
+                                        valueField="value"
+                                        [valuePrimitive]="true"
+                                        size="small"
+                                        class="w-36" />
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs text-muted-foreground">Activation:</span>
+                                    <mona-dropdown-list
+                                        [data]="brushActivationOptions"
+                                        [value]="brushActivation()"
+                                        (valueChange)="$event && brushActivation.set($event)"
+                                        textField="label"
+                                        valueField="value"
+                                        [valuePrimitive]="true"
+                                        size="small"
+                                        class="w-36" />
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs text-muted-foreground">Behavior:</span>
+                                    <mona-dropdown-list
+                                        [data]="brushSelectionBehaviorOptions"
+                                        [value]="brushSelectionBehavior()"
+                                        (valueChange)="$event && brushSelectionBehavior.set($event)"
+                                        textField="label"
+                                        valueField="value"
+                                        [valuePrimitive]="true"
+                                        size="small"
+                                        class="w-44" />
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs text-muted-foreground">Hit:</span>
+                                    <mona-dropdown-list
+                                        [data]="brushHitPolicyOptions"
+                                        [value]="brushHitPolicy()"
+                                        (valueChange)="$event && brushHitPolicy.set($event)"
+                                        textField="label"
+                                        valueField="value"
+                                        [valuePrimitive]="true"
+                                        size="small"
+                                        class="w-44" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="h-8 w-px bg-border hidden md:block"></div>
+
+                        <!-- Data Labels Controls -->
+                        <div class="flex flex-col gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >Data Labels</span
+                            >
+                            <div class="flex flex-wrap items-center gap-3">
+                                <mona-check-box
+                                    [checked]="dataLabelsEnabled()"
+                                    (checkedChange)="dataLabelsEnabled.set($event)">
+                                    Enabled
+                                </mona-check-box>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs text-muted-foreground">Placement:</span>
+                                    <mona-dropdown-list
+                                        [data]="dataLabelsPositionOptions"
+                                        [value]="dataLabelsPosition()"
+                                        (valueChange)="$event && dataLabelsPosition.set($event)"
+                                        textField="label"
+                                        valueField="value"
+                                        [valuePrimitive]="true"
+                                        size="small"
+                                        class="w-36" />
+                                </div>
+                                <mona-check-box
+                                    [checked]="dataLabelsAllowOverlap()"
+                                    (checkedChange)="dataLabelsAllowOverlap.set($event)">
+                                    Allow Overlap
+                                </mona-check-box>
+                                <mona-check-box
+                                    [checked]="useCustomDataLabelTemplate()"
+                                    (checkedChange)="useCustomDataLabelTemplate.set($event)">
+                                    Custom Template
+                                </mona-check-box>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </mona-tab>
         </mona-tabs>
     </div>
 
@@ -1871,7 +2018,8 @@
                             <mona-bar-series
                                 [field]="useIndependentSeriesData() ? 'target' : 'actual'"
                                 [name]="useIndependentSeriesData() ? 'Target Budget (Bar)' : 'Bar Series'"
-                                [borderRadius]="6" />
+                                [borderRadius]="6"
+                                [dataLabels]="dataLabelOptions()" />
                         }
                         @if (showArea()) {
                             <mona-area-series
@@ -1886,7 +2034,25 @@
                                 [field]="useIndependentSeriesData() ? 'forecast' : 'actual'"
                                 [name]="useIndependentSeriesData() ? 'Forecast Trend (Line)' : 'Line Series'"
                                 [curve]="curveType()"
-                                [showPoints]="showPoints()" />
+                                [showPoints]="showPoints()"
+                                [dataLabels]="dataLabelOptions()" />
+                        }
+
+                        @if (selectionEnabled()) {
+                            <mona-chart-selection
+                                [mode]="selectionMode()"
+                                [retainOnDataChange]="selectionRetainOnDataChange()"
+                                [selectedMarkIds]="selectedMarkIds()"
+                                (selectionChange)="onSelectionChange($event)" />
+                        }
+
+                        @if (brushEnabled()) {
+                            <mona-chart-brush
+                                [mode]="brushMode()"
+                                [activation]="brushActivation()"
+                                [selectionBehavior]="brushSelectionBehavior()"
+                                [hitPolicy]="brushHitPolicy()"
+                                (brushChange)="onBrushChange($event)" />
                         }
 
                         <mona-chart-legend [position]="legendPosition()" [interactive]="true" />
@@ -3314,6 +3480,7 @@
                             <mona-chart-selection
                                 [mode]="selectionMode()"
                                 [retainOnDataChange]="selectionRetainOnDataChange()"
+                                [selectedMarkIds]="selectedMarkIds()"
                                 (selectionChange)="onSelectionChange($event)" />
                         }
 

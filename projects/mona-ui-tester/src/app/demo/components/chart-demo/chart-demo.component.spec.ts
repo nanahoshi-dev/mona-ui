@@ -247,4 +247,67 @@ describe("ChartDemoComponent", () => {
         expect(horizChart.scene()?.hasRenderableData).toBe(true);
         expect((horizChart.scene() as any)?.orientation).toBe("horizontal");
     });
+
+    it("should switch to selection-brush tab and perform selection and brush marquee", async () => {
+        (component as any).animationEnabled.set(false);
+        component.setTab("selection-brush");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(fixture.nativeElement.textContent).toContain("Cartesian Data Labels, Persistent Mark Selection");
+
+        const chartDe = fixture.debugElement.query(By.directive(ChartComponent));
+        expect(chartDe).toBeTruthy();
+        const chart = chartDe.componentInstance as ChartComponent;
+        const canvasEl = chartDe.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+        expect(canvasEl).toBeTruthy();
+
+        canvasEl.getBoundingClientRect = () => ({
+            bottom: 400,
+            height: 400,
+            left: 0,
+            right: 600,
+            top: 0,
+            width: 600,
+            x: 0,
+            y: 0,
+            toJSON: () => {}
+        });
+
+        // Test Brush Marquee
+        canvasEl.dispatchEvent(
+            new PointerEvent("pointerdown", {
+                clientX: 150,
+                clientY: 150,
+                pointerId: 1,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        canvasEl.dispatchEvent(
+            new PointerEvent("pointermove", {
+                clientX: 350,
+                clientY: 300,
+                pointerId: 1,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        fixture.detectChanges();
+
+        canvasEl.dispatchEvent(
+            new PointerEvent("pointerup", {
+                clientX: 350,
+                clientY: 300,
+                pointerId: 1,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const brushLogs = component.eventLogs().filter(l => l.eventType === "brushChange");
+        expect(brushLogs.length).toBeGreaterThan(0);
+    });
 });
