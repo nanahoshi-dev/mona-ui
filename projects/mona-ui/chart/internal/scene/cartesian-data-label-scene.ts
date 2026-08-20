@@ -2,7 +2,7 @@ import type { ChartDataLabelTemplateDirective } from "../../directives/chart-dat
 import type { ChartDataLabelContext, ChartDataLabelPosition } from "../../models/chart-data-label.models";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 
-export interface SceneCanvasDataLabel {
+export interface SceneDefaultDataLabel {
     readonly anchor: ChartPoint;
     readonly bounds: ChartRect;
     readonly color: string;
@@ -15,6 +15,8 @@ export interface SceneCanvasDataLabel {
     readonly text: string;
 }
 
+export type SceneCanvasDataLabel = SceneDefaultDataLabel;
+
 export interface SceneTemplateDataLabel {
     readonly anchor: ChartPoint;
     readonly bounds: ChartRect;
@@ -26,6 +28,6 @@ export interface SceneTemplateDataLabel {
 }
 
 export interface CartesianDataLabelScene {
-    readonly canvasLabels: readonly SceneCanvasDataLabel[];
+    readonly defaultLabels: readonly SceneDefaultDataLabel[];
     readonly templateLabels: readonly SceneTemplateDataLabel[];
 }

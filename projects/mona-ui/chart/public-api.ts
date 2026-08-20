@@ -246,5 +246,4 @@ export type {
     ChartBrushSelectionBehavior
 } from "./models/chart-brush.models";
 
-
-
+export type { ChartRendererMode } from "./models/chart-renderer.models";

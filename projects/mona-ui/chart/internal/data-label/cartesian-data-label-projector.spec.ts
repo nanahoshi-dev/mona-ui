@@ -32,7 +32,7 @@ describe("CartesianDataLabelProjector", () => {
             templateMeasurements: new Map()
         });
 
-        expect(scene.canvasLabels).toHaveLength(0);
+        expect(scene.defaultLabels).toHaveLength(0);
         expect(scene.templateLabels).toHaveLength(0);
     });
 
@@ -61,9 +61,9 @@ describe("CartesianDataLabelProjector", () => {
             templateMeasurements: new Map()
         });
 
-        expect(scene.canvasLabels).toHaveLength(1);
-        expect(scene.canvasLabels[0].text).toBe("42");
-        expect(scene.canvasLabels[0].markId).toBe("m1");
+        expect(scene.defaultLabels).toHaveLength(1);
+        expect(scene.defaultLabels[0].text).toBe("42");
+        expect(scene.defaultLabels[0].markId).toBe("m1");
     });
 
     it("should set selected = true in template data label context when markId is in selectedMarkIds", () => {
@@ -132,7 +132,7 @@ describe("CartesianDataLabelProjector", () => {
         });
 
         // Second label collides with first and is hidden
-        expect(scene.canvasLabels).toHaveLength(1);
-        expect(scene.canvasLabels[0].markId).toBe("m1");
+        expect(scene.defaultLabels).toHaveLength(1);
+        expect(scene.defaultLabels[0].markId).toBe("m1");
     });
 });

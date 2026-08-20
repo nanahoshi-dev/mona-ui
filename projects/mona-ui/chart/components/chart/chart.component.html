@@ -13,20 +13,30 @@
     </div>
 }
 <div [class]="layoutClasses()">
-    <div class="relative flex-1 min-h-0 min-w-0 w-full h-full overflow-hidden" [style.order]="plotOrder()">
-        <canvas
-            #canvas
-            class="absolute inset-0 block h-full w-full"
-            [style.touch-action]="touchActionStyle()"
-            [style.cursor]="viewportCursor() ?? 'default'"
-            (pointerdown)="onPointerDown($event)"
-            (pointermove)="onPointerMove($event)"
-            (pointerup)="onPointerUp($event)"
-            (pointercancel)="onPointerCancel($event)"
-            (lostpointercapture)="onLostPointerCapture($event)"
-            (pointerleave)="onPointerLeave($event)"
-            (wheel)="onWheel($event)"
-            (click)="onCanvasClick($event)"></canvas>
+    <div
+        #plotSurface
+        class="relative flex-1 min-h-0 min-w-0 w-full h-full overflow-hidden"
+        [style.order]="plotOrder()"
+        [style.touch-action]="touchActionStyle()"
+        [style.cursor]="viewportCursor() ?? 'default'"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerCancel($event)"
+        (lostpointercapture)="onLostPointerCapture($event)"
+        (pointerleave)="onPointerLeave($event)"
+        (wheel)="onWheel($event)"
+        (click)="onCanvasClick($event)">
+        @if (renderer() === "canvas") {
+            <canvas
+                #canvas
+                class="absolute inset-0 block h-full w-full pointer-events-none"></canvas>
+        } @else {
+            <svg
+                #svgSurface
+                class="absolute inset-0 block h-full w-full pointer-events-none"
+                xmlns="http://www.w3.org/2000/svg"></svg>
+        }
 
         <!-- DOM Cartesian Axis Labels & Titles -->
         @if (cartesianScene(); as cart) {

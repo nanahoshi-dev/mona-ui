@@ -3242,6 +3242,13 @@
     "selector": "\"mona-chart\"",
     "inputs": [
       {
+        "description": "The rendering engine used to draw the chart surface (\"canvas\" | \"svg\").",
+        "kind": "input",
+        "name": "renderer",
+        "type": "ChartRendererMode",
+        "defaultValue": "\"canvas\""
+      },
+      {
         "description": "Animation settings for initial render and subsequent data or visibility transitions.",
         "kind": "input",
         "name": "animation",
