@@ -420,7 +420,7 @@
                 <div
                     aria-hidden="true"
                     class="absolute pointer-events-none select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
-                    [class.opacity-0]="isAnimating() && isStructuralAnimation()"
+                    [class.opacity-0]="isAnimating()"
                     [monaChartDataLabelMeasure]="label.seriesId + ':' + label.markId"
                     [style.left.px]="label.bounds.x"
                     [style.top.px]="label.bounds.y">
