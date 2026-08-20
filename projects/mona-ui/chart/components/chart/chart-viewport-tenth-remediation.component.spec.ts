@@ -164,9 +164,16 @@ class EleventhRemediationHostComponent {
     public onPointClick(event: ChartPointEvent): void {
         this.clickedPoints.push(event);
     }
+
+    public flushDelayedParentFrame(): void {
+        const next = this.delayedQueue.shift();
+        if (next) {
+            this.viewport.set(next);
+        }
+    }
 }
 
-describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix", () => {
+describe("Twelfth Remediation Final Release-Gate Acceptance & Invariant Matrix", () => {
     let fixture: ComponentFixture<EleventhRemediationHostComponent>;
     let host: EleventhRemediationHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;
@@ -222,8 +229,13 @@ describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix"
 
     afterEach(() => {
         CartesianStageTracker.current = null;
-        if (typeof globalThis !== "undefined" && originalResizeObserver !== undefined) {
-            globalThis.ResizeObserver = originalResizeObserver;
+        vi.restoreAllMocks();
+        if (typeof globalThis !== "undefined") {
+            if (originalResizeObserver !== undefined) {
+                globalThis.ResizeObserver = originalResizeObserver;
+            } else {
+                delete (globalThis as Partial<typeof globalThis>).ResizeObserver;
+            }
         }
     });
 
@@ -388,7 +400,7 @@ describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix"
 
             // Drag on canvas
             host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
-            host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 150, clientY: 100, pointerId: 1 }));
+            host.chart().onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 150, clientY: 100, pointerId: 1 }));
             host.chart().flushPendingRender();
             host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 150, clientY: 100, pointerId: 1 }));
 
@@ -406,10 +418,69 @@ describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix"
             expect(host.clickedPoints[0].yValue).toBe(25);
         });
 
+        it("preserves genuine click when dragPan is dynamically disabled after drag threshold (no synthetic click arrives)", () => {
+            // 1. Drag starts and crosses threshold
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
+            host.chart().onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 160, clientY: 100, pointerId: 1 }));
+            host.chart().flushPendingRender();
+
+            // 2. Navigation dynamically disables dragPan while remaining enabled
+            host.navigation.set({ dragPan: false, pinchZoom: true, wheelZoom: true });
+            fixture.detectChanges();
+            host.chart().flushPendingRender();
+
+            // 3. Old sequence ends (pointerup)
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 160, clientY: 100, pointerId: 1 }));
+
+            // 4. Fresh pointer sequence on known data point (x=50, y=25) WITHOUT prior synthetic click
+            const sc = host.chart().scene() as CartesianXYChartScene;
+            const hit = sc.hitTargets[1];
+            const pt = hit.point!;
+
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: pt.x, clientY: pt.y, pointerId: 2 }));
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: pt.x, clientY: pt.y, pointerId: 2 }));
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: pt.x, clientY: pt.y }));
+
+            // Genuine point click is preserved and emitted!
+            expect(host.clickedPoints.length).toBe(1);
+            expect(host.clickedPoints[0].yValue).toBe(25);
+        });
+
+        it("preserves genuine click after synthetic click when dragPan is dynamically disabled after drag threshold", () => {
+            // 1. Drag starts and crosses threshold
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
+            host.chart().onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 160, clientY: 100, pointerId: 1 }));
+            host.chart().flushPendingRender();
+
+            // 2. Navigation dynamically disables dragPan
+            host.navigation.set({ dragPan: false, pinchZoom: true, wheelZoom: true });
+            fixture.detectChanges();
+            host.chart().flushPendingRender();
+
+            // 3. Old sequence ends (pointerup)
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 160, clientY: 100, pointerId: 1 }));
+
+            // 4. Synthetic click arrives from old sequence -> must be swallowed
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: 160, clientY: 100 }));
+            expect(host.clickedPoints.length).toBe(0);
+
+            // 5. Fresh pointer sequence on known data point (x=50, y=25)
+            const sc = host.chart().scene() as CartesianXYChartScene;
+            const hit = sc.hitTargets[1];
+            const pt = hit.point!;
+
+            host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: pt.x, clientY: pt.y, pointerId: 2 }));
+            host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: pt.x, clientY: pt.y, pointerId: 2 }));
+            host.chart().onCanvasClick(new MouseEvent("click", { clientX: pt.x, clientY: pt.y }));
+
+            expect(host.clickedPoints.length).toBe(1);
+            expect(host.clickedPoints[0].yValue).toBe(25);
+        });
+
         it("suppresses synthetic click when genuine authority change aborts drag and emits subsequent genuine click", () => {
             // Drag on canvas
             host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
-            host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 150, clientY: 100, pointerId: 1 }));
+            host.chart().onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 150, clientY: 100, pointerId: 1 }));
             host.chart().flushPendingRender();
 
             // Genuine authority change (linear -> symlog) aborts interaction
@@ -498,18 +569,21 @@ describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix"
         });
     });
 
-    describe("Section 3 / PZV11-WP3: Real Controlled-Parent Gesture Matrix", () => {
-        function runStandardGesture(chart: ChartComponent): void {
+    describe("Section 3 / PZV11-WP3 / PZV12-WP2: Real Controlled-Parent Gesture Matrix", () => {
+        function runStandardGesture(chart: ChartComponent, onStep?: () => void): void {
             chart.onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 100, pointerId: 1 }));
             chart.onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 125, clientY: 100, pointerId: 1 }));
             chart.flushPendingRender();
+            onStep?.();
             chart.onPointerMove(new PointerEvent("pointermove", { buttons: 1, clientX: 150, clientY: 100, pointerId: 1 }));
             chart.flushPendingRender();
+            onStep?.();
             chart.onPointerUp(new PointerEvent("pointerup", { clientX: 150, clientY: 100, pointerId: 1 }));
             chart.flushPendingRender();
+            onStep?.();
         }
 
-        it("produces invariant proposal stream across immediate, delayed, end-only, and reject modes", () => {
+        it("produces invariant proposal stream across immediate, delayed (during gesture), end-only, and reject modes", () => {
             const initialVp: ChartViewportState = {
                 axes: [{ axis: "x", axisId: "x-main", kind: "continuous", min: 0, max: 100 }]
             };
@@ -531,15 +605,13 @@ describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix"
                 fixture.detectChanges();
                 host.chart().flushPendingRender();
 
-                runStandardGesture(host.chart());
-
-                // If delayed mode, process queue
-                if (m === "delayed") {
-                    while (host.delayedQueue.length > 0) {
-                        host.viewport.set(host.delayedQueue.shift());
+                runStandardGesture(host.chart(), () => {
+                    if (m === "delayed") {
+                        host.flushDelayedParentFrame();
                         fixture.detectChanges();
+                        host.chart().flushPendingRender();
                     }
-                }
+                });
 
                 expect(host.emittedEvents.length).toBeGreaterThanOrEqual(2);
 
@@ -554,6 +626,141 @@ describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix"
             }
 
             // Invariance: All modes must produce identical proposal stream
+            for (let i = 1; i < modes.length; i++) {
+                expect(modeProposals[modes[i]]).toEqual(modeProposals[modes[0]]);
+            }
+        });
+
+        it("produces invariant wheel proposal stream across immediate, delayed, end-only, and reject modes", () => {
+            vi.useFakeTimers();
+            try {
+                const initialVp: ChartViewportState = {
+                    axes: [{ axis: "x", axisId: "x-main", kind: "continuous", min: 0, max: 100 }]
+                };
+
+                const modes: ("immediate" | "delayed" | "end-only" | "reject")[] = [
+                    "immediate",
+                    "delayed",
+                    "end-only",
+                    "reject"
+                ];
+
+                const modeProposals: Record<string, string[]> = {};
+
+                for (const m of modes) {
+                    host.mode.set(m);
+                    host.viewport.set(initialVp);
+                    host.emittedEvents.length = 0;
+                    host.delayedQueue.length = 0;
+                    fixture.detectChanges();
+                    host.chart().flushPendingRender();
+
+                    // Step 1: Wheel zoom in
+                    host.chart().onWheel(new WheelEvent("wheel", { clientX: 100, clientY: 100, deltaY: -50 }));
+                    host.chart().flushPendingRender();
+                    if (m === "delayed") {
+                        host.flushDelayedParentFrame();
+                        fixture.detectChanges();
+                        host.chart().flushPendingRender();
+                    }
+
+                    // Step 2: Wheel zoom in again
+                    host.chart().onWheel(new WheelEvent("wheel", { clientX: 100, clientY: 100, deltaY: -50 }));
+                    host.chart().flushPendingRender();
+                    if (m === "delayed") {
+                        host.flushDelayedParentFrame();
+                        fixture.detectChanges();
+                        host.chart().flushPendingRender();
+                    }
+
+                    // Complete wheel session via debounce timer
+                    vi.advanceTimersByTime(200);
+                    host.chart().flushPendingRender();
+
+                    expect(host.emittedEvents.length).toBeGreaterThanOrEqual(1);
+
+                    // Proposal previousViewport chaining invariant
+                    for (let i = 1; i < host.emittedEvents.length; i++) {
+                        expect(host.emittedEvents[i].previousViewport).toEqual(host.emittedEvents[i - 1].viewport);
+                    }
+
+                    modeProposals[m] = host.emittedEvents.map(e =>
+                        JSON.stringify({ phase: e.phase, source: e.source, viewport: e.viewport })
+                    );
+                }
+
+                // Invariance: All modes must produce identical wheel proposal stream
+                for (let i = 1; i < modes.length; i++) {
+                    expect(modeProposals[modes[i]]).toEqual(modeProposals[modes[0]]);
+                }
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("produces invariant pinch proposal stream across immediate, delayed, end-only, and reject modes", () => {
+            const initialVp: ChartViewportState = {
+                axes: [{ axis: "x", axisId: "x-main", kind: "continuous", min: 0, max: 100 }]
+            };
+
+            const modes: ("immediate" | "delayed" | "end-only" | "reject")[] = [
+                "immediate",
+                "delayed",
+                "end-only",
+                "reject"
+            ];
+
+            const modeProposals: Record<string, string[]> = {};
+
+            for (const m of modes) {
+                host.mode.set(m);
+                host.viewport.set(initialVp);
+                host.emittedEvents.length = 0;
+                host.delayedQueue.length = 0;
+                fixture.detectChanges();
+                host.chart().flushPendingRender();
+
+                // Touch 1 down
+                host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 100, clientY: 150, pointerId: 1, pointerType: "touch" }));
+                // Touch 2 down (starts pinch)
+                host.chart().onPointerDown(new PointerEvent("pointerdown", { button: 0, clientX: 200, clientY: 150, pointerId: 2, pointerType: "touch" }));
+                host.chart().flushPendingRender();
+
+                // Touch 2 moves (spread distance)
+                host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 250, clientY: 150, pointerId: 2, pointerType: "touch" }));
+                host.chart().flushPendingRender();
+                if (m === "delayed") {
+                    host.flushDelayedParentFrame();
+                    fixture.detectChanges();
+                    host.chart().flushPendingRender();
+                }
+
+                // Touch 2 moves further
+                host.chart().onPointerMove(new PointerEvent("pointermove", { clientX: 300, clientY: 150, pointerId: 2, pointerType: "touch" }));
+                host.chart().flushPendingRender();
+                if (m === "delayed") {
+                    host.flushDelayedParentFrame();
+                    fixture.detectChanges();
+                    host.chart().flushPendingRender();
+                }
+
+                // Touch 2 up
+                host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 300, clientY: 150, pointerId: 2, pointerType: "touch" }));
+                // Touch 1 up
+                host.chart().onPointerUp(new PointerEvent("pointerup", { clientX: 100, clientY: 150, pointerId: 1, pointerType: "touch" }));
+                host.chart().flushPendingRender();
+
+                expect(host.emittedEvents.length).toBeGreaterThanOrEqual(2);
+
+                for (let i = 1; i < host.emittedEvents.length; i++) {
+                    expect(host.emittedEvents[i].previousViewport).toEqual(host.emittedEvents[i - 1].viewport);
+                }
+
+                modeProposals[m] = host.emittedEvents.map(e =>
+                    JSON.stringify({ phase: e.phase, source: e.source, viewport: e.viewport })
+                );
+            }
+
             for (let i = 1; i < modes.length; i++) {
                 expect(modeProposals[modes[i]]).toEqual(modeProposals[modes[0]]);
             }
@@ -660,8 +867,12 @@ describe("Eleventh Remediation Final Release-Gate Acceptance & Invariant Matrix"
             fixture.detectChanges();
             host.chart().flushPendingRender();
 
+            const polarSc = host.chart().scene() as PolarSectorChartScene;
+            const sliceId = polarSc.series[0].slices[0].sliceId;
+            const labelKey = `sector:${sliceId}`;
+
             const pieEl = document.createElement("div");
-            host.chart().observeLabelElement(pieEl, "sector:0");
+            host.chart().observeLabelElement(pieEl, labelKey);
 
             const obs = FakeResizeObserver.instances.find(i => i.observedElements.has(pieEl));
             expect(obs).toBeDefined();

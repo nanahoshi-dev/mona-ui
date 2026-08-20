@@ -172,6 +172,15 @@ export class ChartViewportGestureController {
     }
 
     public handlePointerDown(event: PointerEvent, elementPoint: ChartPoint, targetElement?: Element | null): boolean {
+        const isFreshPointerSequence =
+            this.#activePointers.size === 0 &&
+            this.#dragSession === null &&
+            this.#pinchSession === null;
+
+        if (isFreshPointerSequence) {
+            this.#isClickSuppressed = false;
+        }
+
         const nav = this.#context.navigationOptions;
         if (!nav.enabled) return false;
 

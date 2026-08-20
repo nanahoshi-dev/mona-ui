@@ -901,4 +901,112 @@ describe("ChartViewportGestureController", () => {
             expect(endEvents.length).toBe(1);
         });
     });
+
+    describe("Twelfth Remediation Click Suppression Sequence Lifetime (PZV12-001)", () => {
+        it("retires stale click suppression on fresh pointerdown when dragPan is dynamically disabled", () => {
+            const { context } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            // 1. Start drag and cross threshold
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
+            controller.handlePointerMove({ button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 150, y: 100 });
+            expect(controller.isDragging).toBe(true);
+            expect(controller.isClickSuppressed).toBe(true);
+
+            // 2. Dynamically disable dragPan while navigation remains enabled
+            controller.updateContext({
+                ...context,
+                navigationOptions: normalizeChartNavigationOptions({
+                    dragPan: false,
+                    pinchZoom: true
+                })
+            });
+            expect(controller.isDragging).toBe(false);
+            expect(controller.isClickSuppressed).toBe(true); // Suppression armed for old sequence
+
+            // 3. Old sequence ends (pointerup)
+            controller.handlePointerUp({ pointerId: 1, pointerType: "mouse" } as PointerEvent);
+            expect(controller.isClickSuppressed).toBe(true); // Still armed if synthetic click arrives
+
+            // 4. Fresh pointer sequence begins (e.g. mouse click on data point)
+            // Even though dragPan is false and handlePointerDown returns false, suppression is retired!
+            const admitted = controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
+            expect(admitted).toBe(false);
+            expect(controller.isClickSuppressed).toBe(false); // Stale suppression retired!
+            expect(controller.consumeClickSuppression()).toBe(false);
+        });
+
+        it("retires stale click suppression on fresh single-touch pointerdown in pinch-only configuration", () => {
+            const { context } = createMockContext({
+                navigationOptions: normalizeChartNavigationOptions({
+                    dragPan: false,
+                    pinchZoom: true
+                })
+            });
+            const controller = new ChartViewportGestureController(context);
+
+            // 1. Perform 2-finger pinch
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, { x: 200, y: 150 });
+            expect(controller.isPinching).toBe(true);
+            expect(controller.isClickSuppressed).toBe(true);
+
+            // 2. Pinch ends (both touch pointers lifted)
+            controller.handlePointerUp({ pointerId: 1, pointerType: "touch" } as PointerEvent);
+            controller.handlePointerUp({ pointerId: 2, pointerType: "touch" } as PointerEvent);
+            expect(controller.isClickSuppressed).toBe(true); // Armed for old sequence
+
+            // 3. Fresh single-finger tap arrives (touch pointer retained only as future pinch candidate)
+            controller.handlePointerDown({ button: 0, pointerId: 3, pointerType: "touch" } as PointerEvent, { x: 120, y: 150 });
+            expect(controller.isClickSuppressed).toBe(false); // Retired on fresh pointer sequence!
+            expect(controller.consumeClickSuppression()).toBe(false);
+        });
+
+        it("preserves same-sequence synthetic click suppression when no new pointerdown arrives", () => {
+            const { context } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
+            controller.handlePointerMove({ button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 150, y: 100 });
+            controller.handlePointerUp({ pointerId: 1, pointerType: "mouse" } as PointerEvent);
+
+            expect(controller.consumeClickSuppression()).toBe(true); // First consume swallows synthetic click
+            expect(controller.consumeClickSuppression()).toBe(false); // Subsequent consume returns false
+        });
+
+        it("preserves suppression across authority abort until fresh pointerdown arrives", () => {
+            const { context } = createMockContext();
+            const controller = new ChartViewportGestureController(context);
+
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
+            controller.handlePointerMove({ button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 150, y: 100 });
+            expect(controller.isClickSuppressed).toBe(true);
+
+            // Authority change aborts gesture
+            controller.abortForAuthorityChange();
+            expect(controller.isClickSuppressed).toBe(true);
+
+            // Fresh pointer down arrives
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
+            // Since it's a fresh drag candidate, suppression was retired at start of handlePointerDown
+            expect(controller.isClickSuppressed).toBe(false);
+        });
+
+        it("does not clear suppression when second pointer arrives for pinch in same sequence", () => {
+            const { context } = createMockContext({
+                navigationOptions: normalizeChartNavigationOptions({
+                    dragPan: true,
+                    pinchZoom: true
+                })
+            });
+            const controller = new ChartViewportGestureController(context);
+
+            // 1st pointer touches
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
+            // 2nd pointer touches -> same physical sequence, starts pinch and arms click suppression
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, { x: 200, y: 150 });
+            expect(controller.isPinching).toBe(true);
+            expect(controller.isClickSuppressed).toBe(true);
+        });
+    });
 });
