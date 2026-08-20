@@ -48,6 +48,13 @@ export interface ResolvedCategoryAtPixel {
     readonly viewportIndex: number;
 }
 
+export interface ResolvedCategoryExtent {
+    readonly fromBaseIndex: number;
+    readonly fromValue: unknown;
+    readonly toBaseIndex: number;
+    readonly toValue: unknown;
+}
+
 export interface ResolvedContinuousCoordinate {
     readonly axis: "x" | "y";
     readonly axisId: string;
@@ -545,6 +552,163 @@ export class CartesianAxisCoordinateSpace {
             index: bestIndex,
             key: bestGeom.key,
             viewportIndex: bestIndex
+        };
+    }
+
+    /**
+     * Resolves the category extent intersecting the pixel interval [pixelA, pixelB] in sublinear / O(log C) time.
+     * Returns undefined if no category band intersects the interval (e.g. interval entirely within padding gap).
+     * Preserves raw base domain values.
+     */
+    public resolveCategoryExtentAtPixels(
+        ref: ChartViewportAxisRef,
+        pixelA: number,
+        pixelB: number
+    ): ResolvedCategoryExtent | undefined {
+        const snap = this.get(ref);
+        if (!snap || snap.resolvedType !== "category" || snap.valid === false) {
+            return undefined;
+        }
+
+        const categoryIndex = snap.categoryIndex;
+        if (!categoryIndex || categoryIndex.viewportDomain.length === 0) {
+            return undefined;
+        }
+
+        const vDomain = categoryIndex.viewportDomain;
+        const count = vDomain.length;
+        const byKey = categoryIndex.byKey;
+        const minPx = Math.min(pixelA, pixelB);
+        const maxPx = Math.max(pixelA, pixelB);
+
+        const geomFirst = byKey.get(vDomain[0]);
+        const geomLast = byKey.get(vDomain[count - 1]);
+        if (!geomFirst || !geomLast) {
+            return undefined;
+        }
+
+        const axisMin = Math.min(geomFirst.bandStart, geomLast.bandStart, geomFirst.bandEnd, geomLast.bandEnd);
+        const axisMax = Math.max(geomFirst.bandStart, geomLast.bandStart, geomFirst.bandEnd, geomLast.bandEnd);
+
+        if (maxPx < axisMin || minPx > axisMax) {
+            return undefined;
+        }
+
+        const signedStep = categoryIndex.signedStep;
+
+        const intersects = (idx: number): boolean => {
+            if (idx < 0 || idx >= count) return false;
+            const geom = byKey.get(vDomain[idx]);
+            if (!geom) return false;
+            const bStart = Math.min(geom.bandStart, geom.bandEnd);
+            const bEnd = Math.max(geom.bandStart, geom.bandEnd);
+            return bStart <= maxPx && bEnd >= minPx;
+        };
+
+        let firstIdx = -1;
+        let lastIdx = -1;
+
+        if (count === 1) {
+            if (intersects(0)) {
+                firstIdx = 0;
+                lastIdx = 0;
+            }
+        } else {
+            const isAscending = signedStep >= 0;
+
+            // Binary search for lowest viewport index (0..count-1) that intersects [minPx, maxPx]
+            let low = 0;
+            let high = count - 1;
+            let foundFirst = -1;
+
+            if (isAscending) {
+                while (low <= high) {
+                    const mid = (low + high) >> 1;
+                    const geom = byKey.get(vDomain[mid]);
+                    const bEnd = geom ? Math.max(geom.bandStart, geom.bandEnd) : 0;
+                    if (bEnd >= minPx) {
+                        foundFirst = mid;
+                        high = mid - 1;
+                    } else {
+                        low = mid + 1;
+                    }
+                }
+            } else {
+                while (low <= high) {
+                    const mid = (low + high) >> 1;
+                    const geom = byKey.get(vDomain[mid]);
+                    const bStart = geom ? Math.min(geom.bandStart, geom.bandEnd) : 0;
+                    if (bStart <= maxPx) {
+                        foundFirst = mid;
+                        high = mid - 1;
+                    } else {
+                        low = mid + 1;
+                    }
+                }
+            }
+
+            if (foundFirst !== -1 && intersects(foundFirst)) {
+                firstIdx = foundFirst;
+            } else if (foundFirst !== -1 && foundFirst + 1 < count && intersects(foundFirst + 1)) {
+                firstIdx = foundFirst + 1;
+            }
+
+            // Binary search for highest viewport index (0..count-1) that intersects [minPx, maxPx]
+            low = 0;
+            high = count - 1;
+            let foundLast = -1;
+
+            if (isAscending) {
+                while (low <= high) {
+                    const mid = (low + high) >> 1;
+                    const geom = byKey.get(vDomain[mid]);
+                    const bStart = geom ? Math.min(geom.bandStart, geom.bandEnd) : 0;
+                    if (bStart <= maxPx) {
+                        foundLast = mid;
+                        low = mid + 1;
+                    } else {
+                        high = mid - 1;
+                    }
+                }
+            } else {
+                while (low <= high) {
+                    const mid = (low + high) >> 1;
+                    const geom = byKey.get(vDomain[mid]);
+                    const bEnd = geom ? Math.max(geom.bandStart, geom.bandEnd) : 0;
+                    if (bEnd >= minPx) {
+                        foundLast = mid;
+                        low = mid + 1;
+                    } else {
+                        high = mid - 1;
+                    }
+                }
+            }
+
+            if (foundLast !== -1 && intersects(foundLast)) {
+                lastIdx = foundLast;
+            } else if (foundLast !== -1 && foundLast - 1 >= 0 && intersects(foundLast - 1)) {
+                lastIdx = foundLast - 1;
+            }
+        }
+
+        if (firstIdx === -1 || lastIdx === -1 || firstIdx > lastIdx) {
+            return undefined;
+        }
+
+        const geomA = byKey.get(vDomain[firstIdx]);
+        const geomB = byKey.get(vDomain[lastIdx]);
+        if (!geomA || !geomB) {
+            return undefined;
+        }
+
+        const fromBaseIndex = Math.min(geomA.baseIndex, geomB.baseIndex);
+        const toBaseIndex = Math.max(geomA.baseIndex, geomB.baseIndex);
+
+        return {
+            fromBaseIndex,
+            fromValue: snap.baseDomain[fromBaseIndex],
+            toBaseIndex,
+            toValue: snap.baseDomain[toBaseIndex]
         };
     }
 
