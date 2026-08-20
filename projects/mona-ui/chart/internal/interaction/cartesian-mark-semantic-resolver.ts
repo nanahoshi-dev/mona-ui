@@ -2,6 +2,8 @@ import type { ChartPoint } from "../../models/chart.models";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 
+import { formatCartesianAxisSemanticValue } from "../utils/chart-formatter";
+
 export interface ResolvedCartesianMarkSemantics {
     readonly semanticIndexX: number;
     readonly semanticIndexY: number;
@@ -67,27 +69,42 @@ export class CartesianMarkSemanticResolver {
             }
         }
 
+        const effXId = hit.xAxisId ?? scene?.primaryXAxisId;
+        const effYId = hit.yAxisId ?? scene?.primaryYAxisId;
+        const axisSceneX =
+            scene?.axes?.find(a => a.axis === "x" && (effXId !== undefined ? a.axisId === effXId : a.isPrimary)) ??
+            scene?.axes?.find(a => a.axis === "x");
+        const axisSceneY =
+            scene?.axes?.find(a => a.axis === "y" && (effYId !== undefined ? a.axisId === effYId : a.isPrimary)) ??
+            scene?.axes?.find(a => a.axis === "y");
+        const dataIndex = hit.dataIndex ?? hit.index ?? 0;
+
         let formattedX: string | undefined;
         let formattedY: string | undefined;
 
-        if (isHorizontal) {
-            formattedX =
-                hit.formattedXValue ??
-                (isRange ? undefined : hit.formattedValue) ??
-                (xValue !== undefined && xValue !== null ? String(xValue) : undefined);
-            formattedY =
-                hit.formattedYCategory ??
-                hit.formattedCategory ??
-                hit.formattedValue ??
-                (yValue !== undefined && yValue !== null ? String(yValue) : undefined);
-        } else {
-            formattedX =
-                hit.formattedXValue ??
-                hit.formattedCategory ??
-                (xValue !== undefined && xValue !== null ? String(xValue) : undefined);
-            formattedY =
-                (isRange ? undefined : hit.formattedValue) ??
-                (yValue !== undefined && yValue !== null ? String(yValue) : undefined);
+        if (xValue !== undefined && xValue !== null) {
+            if (axisSceneX) {
+                formattedX = formatCartesianAxisSemanticValue({
+                    axisScene: axisSceneX,
+                    index: dataIndex,
+                    value: xValue,
+                    xTimeSpanMs: scene?.xTimeSpanMs
+                });
+            } else {
+                formattedX = hit.formattedXValue ?? hit.formattedCategory ?? String(xValue);
+            }
+        }
+
+        if (yValue !== undefined && yValue !== null) {
+            if (axisSceneY) {
+                formattedY = formatCartesianAxisSemanticValue({
+                    axisScene: axisSceneY,
+                    index: dataIndex,
+                    value: yValue
+                });
+            } else {
+                formattedY = hit.formattedYCategory ?? hit.formattedValue ?? String(yValue);
+            }
         }
 
         return {

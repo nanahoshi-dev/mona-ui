@@ -135,4 +135,66 @@ describe("Chart Presentation Stage Contract Integration (GDSB-R2-001 through GDS
             expect(host.selectionEvents[host.selectionEvents.length - 1].source).toBe("brush");
         }
     });
+
+    it("Stage A/B/C isolation: brush drag does not alter selection state until end phase (GDSB-R3-006)", () => {
+        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+
+        // Pointer down inside plot rect
+        chartEl.dispatchEvent(
+            new PointerEvent("pointerdown", {
+                clientX: 60,
+                clientY: 60,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        chartEl.dispatchEvent(
+            new PointerEvent("pointermove", {
+                clientX: 250,
+                clientY: 250,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        host.chart().flushPendingRender();
+        fixture.detectChanges();
+
+        // During drag (Stage C active), selection (Stage B) must remain unmutated
+        expect(host.brushEvents.length).toBe(1);
+        expect(host.brushEvents[0].phase).toBe("start");
+        expect(host.selectionEvents.length).toBe(0);
+
+        // Pointer move further
+        chartEl.dispatchEvent(
+            new PointerEvent("pointermove", {
+                clientX: 350,
+                clientY: 350,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        host.chart().flushPendingRender();
+        fixture.detectChanges();
+
+        expect(host.brushEvents.length).toBe(2);
+        expect(host.brushEvents[1].phase).toBe("update");
+        expect(host.selectionEvents.length).toBe(0);
+
+        // Terminate gesture
+        chartEl.dispatchEvent(
+            new PointerEvent("pointerup", {
+                clientX: 350,
+                clientY: 350,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        fixture.detectChanges();
+
+        // Now phase="end" fires and synchronizes into selection
+        expect(host.brushEvents.length).toBe(3);
+        expect(host.brushEvents[2].phase).toBe("end");
+        expect(host.selectionEvents.length).toBe(1);
+        expect(host.selectionEvents[0].source).toBe("brush");
+    });
 });

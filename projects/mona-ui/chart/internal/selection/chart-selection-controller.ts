@@ -223,25 +223,26 @@ export class ChartSelectionController {
         mutation: SelectionMutationResult,
         previousSelectedMarkIds: readonly string[],
         visibleIndex: ChartVisibleMarkIndex,
-        changedHits?: readonly SceneHitTarget[]
+        changedHits?: readonly SceneHitTarget[],
+        scene?: CartesianXYChartScene | null
     ): ChartSelectionChangeEvent<T> {
         const visibleSelectedPoints: ChartSelectedPoint<T>[] = [];
         for (const id of mutation.next) {
             const hit = visibleIndex.get(id);
             if (hit) {
-                visibleSelectedPoints.push(toSelectedPoint<T>(hit));
+                visibleSelectedPoints.push(toSelectedPoint<T>(hit, scene));
             }
         }
 
         let changedPoints: ChartSelectedPoint<T>[] = [];
         if (changedHits && changedHits.length > 0) {
-            changedPoints = changedHits.map(h => toSelectedPoint<T>(h));
+            changedPoints = changedHits.map(h => toSelectedPoint<T>(h, scene));
         } else {
             const affectedIds = new Set([...mutation.added, ...mutation.removed]);
             for (const id of affectedIds) {
                 const hit = visibleIndex.get(id);
                 if (hit) {
-                    changedPoints.push(toSelectedPoint<T>(hit));
+                    changedPoints.push(toSelectedPoint<T>(hit, scene));
                 }
             }
         }

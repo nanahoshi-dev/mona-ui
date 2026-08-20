@@ -46,4 +46,57 @@ describe("Chart Selected Point Semantic Context (GDSB-R2-012)", () => {
         expect(pt.close).toBe(150);
         expect(pt.markId).toBeDefined();
     });
+
+    it("extracts scalar xValue and yValue for Cartesian marks (GDSB-R3-003)", () => {
+        const axisXScene = {
+            axis: "x" as const,
+            axisId: "customX",
+            axisLine: true,
+            formatter: (v: unknown) => `[${v}]`,
+            gridLines: true,
+            isPrimary: true,
+            position: "bottom" as const,
+            ticks: [],
+            title: "",
+            visible: true
+        };
+        const axisYScene = {
+            axis: "y" as const,
+            axisId: "customY",
+            axisLine: true,
+            formatter: (v: unknown) => `${Number(v).toFixed(1)}k`,
+            gridLines: true,
+            isPrimary: true,
+            position: "left" as const,
+            ticks: [],
+            title: "",
+            visible: true
+        };
+
+        const sceneWithAxes: CartesianXYChartScene = {
+            ...mockScene,
+            axes: [axisXScene, axisYScene],
+            primaryXAxisId: "customX",
+            primaryYAxisId: "customY"
+        };
+
+        const hit: SceneHitTarget = {
+            category: "Q1",
+            datum: { period: "Q1", sales: 12.34 },
+            index: 0,
+            seriesId: "s1",
+            seriesName: "Sales",
+            seriesType: "bar",
+            value: 12.34,
+            xAxisId: "customX",
+            xKey: "Q1",
+            xValue: "Q1",
+            yAxisId: "customY"
+        };
+
+        const pt = toSelectedPoint(hit, sceneWithAxes);
+
+        expect(pt.xValue).toBe("Q1");
+        expect(pt.yValue).toBe(12.34);
+    });
 });

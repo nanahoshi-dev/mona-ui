@@ -64,21 +64,26 @@ describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB
         vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
             arc: vi.fn(),
             beginPath: vi.fn(),
+            bezierCurveTo: vi.fn(),
             clearRect: vi.fn(),
             clip: vi.fn(),
             closePath: vi.fn(),
+            createLinearGradient: vi.fn().mockReturnValue({ addColorStop: vi.fn() }),
+            createRadialGradient: vi.fn().mockReturnValue({ addColorStop: vi.fn() }),
             fill: vi.fn(),
             fillRect: vi.fn(),
             fillText: vi.fn(),
             lineTo: vi.fn(),
             measureText: vi.fn().mockReturnValue({ width: 20 }),
             moveTo: vi.fn(),
+            quadraticCurveTo: vi.fn(),
             rect: vi.fn(),
             restore: vi.fn(),
             save: vi.fn(),
             setLineDash: vi.fn(),
             setTransform: vi.fn(),
-            stroke: vi.fn()
+            stroke: vi.fn(),
+            strokeRect: vi.fn()
         } as any);
 
         await TestBed.configureTestingModule({
@@ -110,6 +115,28 @@ describe("Chart Persistent Presentation Animation Suppression Release Gate (GDSB
                 expect(overlayState.activeBrushBounds).toBeNull();
             }
         }
+
+        renderSpy.mockRestore();
+    });
+
+    it("does not suppress overlays when animation is disabled (instant transition)", async () => {
+        host.animationConfig = { duration: 0, easing: "linear" as const };
+        fixture.detectChanges();
+
+        const renderSpy = vi.spyOn(CanvasChartRenderer, "render");
+
+        host.data.set([
+            { name: "A", value: 50 },
+            { name: "B", value: 60 }
+        ]);
+        fixture.detectChanges();
+        host.chart().flushPendingRender();
+
+        expect(renderSpy).toHaveBeenCalled();
+        const lastCall = renderSpy.mock.calls[renderSpy.mock.calls.length - 1];
+        const overlayState = lastCall[2] as import("../../internal/render/canvas-chart-renderer").ChartRenderOverlayState | null;
+        expect(overlayState).toBeDefined();
+        expect(overlayState?.cartesianDataLabels).not.toBeNull();
 
         renderSpy.mockRestore();
     });

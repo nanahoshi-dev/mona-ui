@@ -23,9 +23,9 @@ import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
             [xField]="'name'"
             [style.width.px]="600"
             [style.height.px]="400">
-            <mona-chart-x-axis [id]="'xPrimary'" />
-            <mona-chart-y-axis [id]="'yLeft'" [position]="'left'" />
-            <mona-chart-y-axis [id]="'yRight'" [position]="'right'" />
+            <mona-chart-x-axis [axisId]="'xPrimary'" />
+            <mona-chart-y-axis [axisId]="'yLeft'" [position]="'left'" />
+            <mona-chart-y-axis [axisId]="'yRight'" [position]="'right'" />
             <mona-line-series [field]="'v1'" [name]="'Series 1'" [yAxisId]="'yLeft'" />
             <mona-line-series [field]="'v2'" [name]="'Series 2'" [yAxisId]="'yRight'" />
             <mona-chart-brush
@@ -120,7 +120,7 @@ describe("Chart Brush Multi-Axis Target Resolution Release Gate (GDSB-R2-005, GD
         }
     });
 
-    it("warns in dev mode and falls back to primary axis when an invalid yAxisId is provided", () => {
+    it("warns in dev mode and does not match marks on invalid yAxisId dimension (GDSB-R3-009)", () => {
         const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
         const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
 
@@ -154,8 +154,96 @@ describe("Chart Brush Multi-Axis Target Resolution Release Gate (GDSB-R2-005, GD
         fixture.detectChanges();
 
         expect(warnSpy).toHaveBeenCalled();
+        expect(warnSpy.mock.calls[0][0]).toContain('Brush yAxisId "nonExistentAxis" does not exist');
         const endEvent = host.brushEvents.find(e => e.phase === "end");
         expect(endEvent).toBeDefined();
+        // Since Y axis is invalid, yRange must be undefined and no marks matched
+        expect(endEvent?.yRange).toBeUndefined();
+        expect(endEvent?.matchedMarkIds?.length).toBe(0);
+        expect(endEvent?.matchedPoints?.length).toBe(0);
         warnSpy.mockRestore();
+    });
+
+    it("resolves primary axes when axis IDs are omitted and matches only primary-bound marks", () => {
+        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+
+        host.brushYAxisId.set(undefined);
+        fixture.detectChanges();
+
+        chartEl.dispatchEvent(
+            new PointerEvent("pointerdown", {
+                clientX: 60,
+                clientY: 60,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        chartEl.dispatchEvent(
+            new PointerEvent("pointermove", {
+                clientX: 450,
+                clientY: 300,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        chartEl.dispatchEvent(
+            new PointerEvent("pointerup", {
+                clientX: 450,
+                clientY: 300,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        fixture.detectChanges();
+
+        const endEvent = host.brushEvents.find(e => e.phase === "end");
+        expect(endEvent).toBeDefined();
+        expect(endEvent?.xRange?.axisId).toBe("xPrimary");
+        expect(endEvent?.yRange?.axisId).toBe("yLeft");
+        expect(endEvent?.matchedPoints?.length).toBeGreaterThan(0);
+        for (const pt of endEvent!.matchedPoints!) {
+            expect(pt.seriesName).toBe("Series 1");
+        }
+    });
+
+    it("targets explicit secondary Y axis and matches only secondary series marks", () => {
+        const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
+
+        host.brushYAxisId.set("yRight");
+        fixture.detectChanges();
+
+        chartEl.dispatchEvent(
+            new PointerEvent("pointerdown", {
+                clientX: 60,
+                clientY: 60,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        chartEl.dispatchEvent(
+            new PointerEvent("pointermove", {
+                clientX: 450,
+                clientY: 300,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        chartEl.dispatchEvent(
+            new PointerEvent("pointerup", {
+                clientX: 450,
+                clientY: 300,
+                pointerType: "mouse",
+                bubbles: true
+            })
+        );
+        fixture.detectChanges();
+
+        const endEvent = host.brushEvents.find(e => e.phase === "end");
+        expect(endEvent).toBeDefined();
+        expect(endEvent?.yRange?.axisId).toBe("yRight");
+        expect(endEvent?.matchedPoints?.length).toBeGreaterThan(0);
+        for (const pt of endEvent!.matchedPoints!) {
+            expect(pt.seriesName).toBe("Series 2");
+        }
     });
 });

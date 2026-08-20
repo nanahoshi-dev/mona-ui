@@ -1,24 +1,31 @@
 import type {
     ChartBrushActivation,
+    ChartBrushHitPolicy,
     ChartBrushMode,
-    ChartBrushPhase
+    ChartBrushPhase,
+    ChartBrushSelectionBehavior
 } from "../../models/chart-brush.models";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartBrushRegistration } from "../context/chart-registration-context";
+import type { ResolvedCartesianBrushTarget } from "./cartesian-brush-target-resolver";
 
 export interface BrushSession {
     readonly activation: ChartBrushActivation;
+    readonly hitPolicy: ChartBrushHitPolicy;
     latestPoint: ChartPoint;
     readonly minDragDistance: number;
     readonly mode: ChartBrushMode;
     readonly pointerId: number;
+    readonly selectionBehavior: ChartBrushSelectionBehavior;
     readonly startPoint: ChartPoint;
+    readonly target: ResolvedCartesianBrushTarget;
     thresholdMet: boolean;
 }
 
 export interface BrushGestureResult {
     readonly bounds: ChartRect;
     readonly phase: ChartBrushPhase;
+    readonly session: BrushSession;
 }
 
 export class ChartBrushGestureController {
@@ -50,6 +57,7 @@ export class ChartBrushGestureController {
         event: PointerEvent,
         plotRect: ChartRect,
         registration: ChartBrushRegistration,
+        target?: ResolvedCartesianBrushTarget,
         element?: HTMLElement
     ): boolean {
         if (this.#session !== null) {
@@ -94,16 +102,26 @@ export class ChartBrushGestureController {
             y: Math.max(plotRect.y, Math.min(plotRect.y + plotRect.height, coords.y))
         };
 
+        const resolvedTarget: ResolvedCartesianBrushTarget = target ?? {
+            isValidX: true,
+            isValidY: true,
+            mode: registration.mode?.() ?? "xy"
+        };
         const minDragDistance = Math.max(0, registration.minDragDistance?.() ?? 4);
-        const mode = registration.mode?.() ?? "xy";
+        const hitPolicy = registration.hitPolicy?.() ?? "intersect";
+        const selectionBehavior = registration.selectionBehavior?.() ?? "none";
+        const mode = resolvedTarget.mode;
 
         this.#session = {
             activation,
+            hitPolicy,
             latestPoint: clampedStart,
             minDragDistance,
             mode,
             pointerId: event.pointerId,
+            selectionBehavior,
             startPoint: clampedStart,
+            target: resolvedTarget,
             thresholdMet: false
         };
 
@@ -154,13 +172,13 @@ export class ChartBrushGestureController {
                     }
                 }
                 const bounds = this.computeBounds(this.#session.startPoint, clampedPoint, this.#session.mode, plotRect);
-                return { bounds, phase: "start" };
+                return { bounds, phase: "start", session: this.#session };
             }
             return null;
         }
 
         const bounds = this.computeBounds(this.#session.startPoint, clampedPoint, this.#session.mode, plotRect);
-        return { bounds, phase: "update" };
+        return { bounds, phase: "update", session: this.#session };
     }
 
     public onPointerUp(
@@ -190,7 +208,7 @@ export class ChartBrushGestureController {
                 y: Math.max(plotRect.y, Math.min(plotRect.y + plotRect.height, coords.y))
             };
             const bounds = this.computeBounds(session.startPoint, clampedPoint, session.mode, plotRect);
-            return { bounds, phase: "end" };
+            return { bounds, phase: "end", session };
         }
 
         return null;

@@ -92,4 +92,64 @@ describe("Chart Data Label Semantic Context & Color Fallback (GDSB-R2-012, GDSB-
         );
         expect(ctxUndefined.color).toBe("#000000");
     });
+
+    it("formats xValue and yValue consistently using matching axis scene formatters (GDSB-R3-003)", () => {
+        const axisXScene = {
+            axis: "x" as const,
+            axisId: "customX",
+            axisLine: true,
+            formatter: (v: unknown) => `Date: ${v}`,
+            gridLines: true,
+            isPrimary: true,
+            position: "bottom" as const,
+            ticks: [],
+            title: "",
+            visible: true
+        };
+        const axisYScene = {
+            axis: "y" as const,
+            axisId: "customY",
+            axisLine: true,
+            formatter: (v: unknown) => `$${Number(v).toFixed(2)}`,
+            gridLines: true,
+            isPrimary: true,
+            position: "left" as const,
+            ticks: [],
+            title: "",
+            visible: true
+        };
+
+        const sceneWithAxes: CartesianXYChartScene = {
+            ...mockScene,
+            axes: [axisXScene, axisYScene],
+            primaryXAxisId: "customX",
+            primaryYAxisId: "customY"
+        };
+
+        const hit: SceneHitTarget = {
+            category: "2026-08-20",
+            datum: { date: "2026-08-20", revenue: 45.5 },
+            index: 0,
+            seriesId: "s1",
+            seriesName: "Revenue",
+            seriesType: "bar",
+            value: 45.5,
+            xAxisId: "customX",
+            xKey: "2026-08-20",
+            xValue: "2026-08-20",
+            yAxisId: "customY"
+        };
+
+        const ctx = ChartDataLabelContextBuilder.buildContext(
+            hit,
+            false,
+            "#10b981",
+            sceneWithAxes
+        );
+
+        expect(ctx.xValue).toBe("2026-08-20");
+        expect(ctx.yValue).toBe(45.5);
+        expect(ctx.formattedX).toBe("Date: 2026-08-20");
+        expect(ctx.formattedY).toBe("$45.50");
+    });
 });

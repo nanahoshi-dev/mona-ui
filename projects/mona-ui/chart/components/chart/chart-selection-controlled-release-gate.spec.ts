@@ -117,4 +117,45 @@ describe("Chart Controlled Selection Release Gate (GDSB-R2-008, GDSB-R2-009)", (
         expect(host.selectionEvents[0].selectedMarkIds).toEqual([]);
         expect(host.selectionEvents[0].removedMarkIds).toEqual(["bar:0:0", "bar:0:1"]);
     });
+
+    it("emits proposal describing effective single-selection rather than raw controlled IDs (GDSB-R3-002)", () => {
+        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+        host.mode.set("single");
+        // Supply 3 raw IDs to single mode
+        host.selectedMarkIds.set(["bar:0:0", "bar:0:1", "bar:0:2"]);
+        host.retainOnDataChange.set(false);
+        fixture.detectChanges();
+
+        // Effective selection before data change is only ["bar:0:0"]
+        const effectiveBefore = (host.chart() as any).effectiveSelectedMarkIds();
+        expect(effectiveBefore).toEqual(["bar:0:0"]);
+
+        // Mutate chart data
+        host.data.set([
+            { name: "D", value: 40 },
+            { name: "E", value: 50 }
+        ]);
+        fixture.detectChanges();
+
+        // Emitted proposal event must reflect effective selection ["bar:0:0"], NOT raw ["bar:0:0", "bar:0:1", "bar:0:2"]
+        expect(host.selectionEvents.length).toBe(1);
+        const evt = host.selectionEvents[0];
+        expect(evt.source).toBe("programmatic");
+        expect(evt.previousSelectedMarkIds).toEqual(["bar:0:0"]);
+        expect(evt.removedMarkIds).toEqual(["bar:0:0"]);
+        expect(evt.selectedMarkIds).toEqual([]);
+        expect(evt.addedMarkIds).toEqual([]);
+
+        // If parent does not adopt (controlled input remains unchanged), effective selection remains ["bar:0:0"]
+        const effectiveAfterRejection = (host.chart() as any).effectiveSelectedMarkIds();
+        expect(effectiveAfterRejection).toEqual(["bar:0:0"]);
+
+        // If parent adopts the proposal
+        host.selectedMarkIds.set([]);
+        fixture.detectChanges();
+        const effectiveAfterAdoption = (host.chart() as any).effectiveSelectedMarkIds();
+        expect(effectiveAfterAdoption).toEqual([]);
+
+        warnSpy.mockRestore();
+    });
 });
