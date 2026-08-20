@@ -194,6 +194,8 @@ function easingToCss(easing: string): string {
     }
 }
 
+type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | null;
+
 @Component({
     selector: "mona-chart",
     templateUrl: "./chart.component.html",
@@ -276,6 +278,26 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #lastPointerResolution: ChartPointerResolution | null = null;
     #lastInteractionSource: "pointer" | "keyboard" | null = null;
     #interactionState: ChartInteractionState | null = null;
+    #interactionOwner: ChartTransientInteractionOwner = null;
+
+    #setTransientInteraction(
+        state: ChartInteractionState | null,
+        owner: ChartTransientInteractionOwner
+    ): void {
+        this.#interactionState = state;
+        this.#interactionOwner = state !== null ? owner : null;
+    }
+
+    #clearTransientInteractionOwnedBy(
+        owner: Exclude<ChartTransientInteractionOwner, null>
+    ): boolean {
+        if (this.#interactionOwner === owner) {
+            this.#interactionState = null;
+            this.#interactionOwner = null;
+            return true;
+        }
+        return false;
+    }
     #labelResizeObserver: ResizeObserver | null = null;
     #mediaQueryList: MediaQueryList | null = null;
     #mediaQueryListener: ((e: MediaQueryListEvent) => void) | null = null;
@@ -497,18 +519,24 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const ch = this.#crosshair();
         if (!ch) {
             this.crosshairState.set(null);
+            const cleared = this.#clearTransientInteractionOwnedBy("crosshair");
+            if (cleared) {
+                this.#paint();
+            }
             return;
         }
         const enabled = ch.enabled() !== false;
-        const tooltip = this.#tooltip();
-        const tooltipEnabled = tooltip ? tooltip.enabled() !== false : false;
 
         if (!enabled) {
+            let changed = false;
             if (this.crosshairState() !== null) {
                 this.crosshairState.set(null);
-                if (!tooltipEnabled && this.#interactionState !== null) {
-                    this.#interactionState = null;
-                }
+                changed = true;
+            }
+            if (this.#clearTransientInteractionOwnedBy("crosshair")) {
+                changed = true;
+            }
+            if (changed) {
                 this.#paint();
             }
             return;
@@ -525,17 +553,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 lastSrc
             );
             this.crosshairState.set(nextRes.state);
-            if (!tooltipEnabled) {
+            if (this.#interactionOwner !== "tooltip") {
                 if (nextRes.snapKind === "mark" && (nextRes.activeHitTarget || nextRes.activeHits.length > 0)) {
-                    this.#interactionState = {
+                    this.#setTransientInteraction({
                         ...lastRes.hitState,
                         activeHitTarget: nextRes.activeHitTarget,
                         activeHits: nextRes.activeHits,
                         pointerPosition: lastRes.pointer,
                         source: lastSrc
-                    };
+                    }, "crosshair");
                 } else {
-                    this.#interactionState = null;
+                    this.#clearTransientInteractionOwnedBy("crosshair");
                 }
             }
             this.#paint();
@@ -1602,10 +1630,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         if (tooltipEnabled && (hitState.activeHitTarget || hitState.activeHits.length > 0)) {
-            this.#interactionState = {
+            this.#setTransientInteraction({
                 ...hitState,
                 source: "pointer"
-            };
+            }, "tooltip");
             const primaryHit = hitState.activeHitTarget ?? hitState.activeHits[0];
             if (primaryHit) {
                 const rawX =
@@ -1635,18 +1663,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             nextCrosshairRes.snapKind === "mark" &&
             (nextCrosshairRes.activeHitTarget || nextCrosshairRes.activeHits.length > 0)
         ) {
-            this.#interactionState = {
+            this.#setTransientInteraction({
                 ...hitState,
                 activeHitTarget: nextCrosshairRes.activeHitTarget,
                 activeHits: nextCrosshairRes.activeHits,
                 pointerPosition: pointer,
                 source: "pointer"
-            };
+            }, "crosshair");
             this.tooltipPosition.set(null);
             this.tooltipContext.set(null);
             hasAnyState = true;
         } else {
-            this.#interactionState = null;
+            this.#setTransientInteraction(null, null);
             this.tooltipPosition.set(null);
             this.tooltipContext.set(null);
         }
@@ -1735,6 +1763,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             if (this.#crosshair() === registration) {
                 this.#crosshair.set(null);
                 this.crosshairState.set(null);
+                const cleared = this.#clearTransientInteractionOwnedBy("crosshair");
+                if (cleared) {
+                    this.#paint();
+                }
                 this.invalidate(ChartInvalidationReason.Interaction);
             }
         };
@@ -1827,12 +1859,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         activeHits.find(
                             (h: SceneHitTarget) => h.seriesId === this.#interactionState?.activeHitTarget?.seriesId
                         ) ?? activeHits[0];
-                    this.#interactionState = {
+                    this.#setTransientInteraction({
                         activeHitTarget: primary,
                         activeHits,
                         pointerPosition: this.#interactionState.pointerPosition,
                         source: this.#interactionState.source
-                    };
+                    }, this.#interactionOwner);
                     const currentScene = this.#renderScene ?? this.scene();
                     const shared = currentScene ? this.#resolveSharedTooltip(currentScene) : false;
                     this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, primary));
@@ -1977,6 +2009,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#lastPointerResolution = null;
         this.#lastInteractionSource = null;
         this.#interactionState = null;
+        this.#interactionOwner = null;
         this.crosshairState.set(null);
         this.tooltipContext.set(null);
         this.tooltipPosition.set(null);
@@ -2494,12 +2527,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 ? resolvedBuckets[this.#activeKeyboardBucketIndex].hits
                 : [matchingHit];
 
-        this.#interactionState = {
+        this.#setTransientInteraction({
             activeHitTarget: matchingHit,
             activeHits,
             pointerPosition: pointPos,
             source: "keyboard"
-        };
+        }, "keyboard");
 
         this.tooltipPosition.set(pointPos);
         this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, matchingHit));
@@ -2644,9 +2677,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "xy") {
             const crosshair = this.#crosshair();
             if (crosshair && crosshair.enabled() !== false) {
-                const resolution = {
+                const keyboardHitState: ChartInteractionState = this.#interactionState ?? {
+                    activeHitTarget: matchingHit,
+                    activeHits,
+                    pointerPosition: pointPos,
+                    source: "keyboard"
+                };
+                const resolution: ChartPointerResolution = {
                     bucketHits: activeHits,
-                    hitState: this.#interactionState,
+                    hitState: keyboardHitState,
                     nearestAnchor: bucketAnchor ?? pointPos,
                     pointer: pointPos,
                     primaryHit: matchingHit,
@@ -3239,6 +3278,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (!this.#overlayLabelResizeObserver) {
             this.#overlayLabelResizeObserver = new ResizeObserver(entries => {
                 let changed = false;
+                let needsCanvasPaint = false;
+                const prevAnchors = this.annotationBadgeAnchors();
+
                 for (const entry of entries) {
                     const targetId = this.#observedOverlayLabelElements.get(entry.target);
                     if (targetId) {
@@ -3249,12 +3291,58 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         if (widthDiff > 1 || heightDiff > 1 || !prev) {
                             this.#overlayLabelMeasurements.set(targetId, { width, height });
                             changed = true;
+
+                            if (targetId.startsWith("overlay:ann:")) {
+                                const annId = targetId.slice("overlay:ann:".length);
+                                const prevAnchor = prevAnchors.get(annId);
+                                const overlays = this.cartesianOverlayScene();
+                                const ann = overlays?.annotations.find(a => a.id === annId);
+                                if (ann && ann.label) {
+                                    let fraction: LabelAnchorFraction;
+                                    switch (ann.label.placement) {
+                                        case "top":
+                                            fraction = { x: 0.5, y: 1 };
+                                            break;
+                                        case "bottom":
+                                            fraction = { x: 0.5, y: 0 };
+                                            break;
+                                        case "left":
+                                            fraction = { x: 1, y: 0.5 };
+                                            break;
+                                        case "right":
+                                        default:
+                                            fraction = { x: 0, y: 0.5 };
+                                            break;
+                                    }
+                                    const newPos = ChartOverlayLabelPositioner.position({
+                                        anchorFraction: fraction,
+                                        containerRect: {
+                                            height: this.#currentHeight,
+                                            width: this.#currentWidth,
+                                            x: 0,
+                                            y: 0
+                                        },
+                                        desiredAnchor: ann.label.anchor,
+                                        measurement: { width, height },
+                                        padding: 0
+                                    });
+                                    if (
+                                        !prevAnchor ||
+                                        Math.abs(prevAnchor.x - newPos.anchor.x) > 0.5 ||
+                                        Math.abs(prevAnchor.y - newPos.anchor.y) > 0.5
+                                    ) {
+                                        needsCanvasPaint = true;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
                 if (changed) {
                     this.#overlayLabelMeasurementRevision.update(v => v + 1);
-                    this.#paint();
+                    if (needsCanvasPaint && !this.#isAnimating() && !this.#isDestroyed) {
+                        this.#paint();
+                    }
                 }
             });
         }

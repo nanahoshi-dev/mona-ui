@@ -137,4 +137,48 @@ describe("ChartCrosshairFinalReleaseGate (WP8)", () => {
         expect(anchors).toBeDefined();
         expect(anchors?.size).toBeGreaterThan(0);
     });
+
+    it("synchronizes crosshair synchronously during keyboard navigation (Gate R)", async () => {
+        const chartEl = fixture.debugElement.query(By.css("mona-chart"));
+
+        // Dispatch keydown ArrowRight to select first mark
+        chartEl.nativeElement.dispatchEvent(
+            new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
+        );
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        let chState = host.chart()?.["crosshairState"]();
+        expect(chState).not.toBeNull();
+        expect(chState?.x?.axisId).toBe("x-main");
+
+        // Dispatch ArrowRight again to advance to next mark
+        chartEl.nativeElement.dispatchEvent(
+            new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
+        );
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        chState = host.chart()?.["crosshairState"]();
+        expect(chState).not.toBeNull();
+        expect(chState?.x?.formattedValue).toBe("Feb");
+    });
+
+    it("handles full multi-series, multi-axis, crosshair, and annotation composition (Gate T)", async () => {
+        // Change crosshair settings and trigger multiple pointer moves
+        host.crosshairMode.set("xy");
+        host.crosshairSnap.set("nearest");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const canvasEl = fixture.debugElement.query(By.css("canvas"));
+        canvasEl.nativeElement.dispatchEvent(
+            new PointerEvent("pointermove", { bubbles: true, clientX: 250, clientY: 150 })
+        );
+        await new Promise(r => requestAnimationFrame(r));
+        fixture.detectChanges();
+
+        expect(host.chart()?.["crosshairState"]()).not.toBeNull();
+        expect(host.chart()?.["annotationBadgeAnchors"]().size).toBeGreaterThan(0);
+    });
 });

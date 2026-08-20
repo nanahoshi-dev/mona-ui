@@ -79,6 +79,61 @@ export function findNearestCompatibleHitInBucket(
     return bestHit ?? compatible[0] ?? null;
 }
 
+function findNearestCompatibleHitAcrossNamespaces(
+    scene: CartesianXYChartScene,
+    pointer: ChartPoint,
+    isHoriz: boolean,
+    maxSnapDistance: number,
+    targetAxes: CartesianTargetAxisSelection
+): { bucket: ChartInteractionBucket; hit: SceneHitTarget } | null {
+    const candidateBucketLists: (readonly ChartInteractionBucket[])[] = [];
+
+    if (scene.interactionBucketsByAxisId && scene.interactionBucketsByAxisId.size > 0) {
+        for (const [, map] of scene.interactionBucketsByAxisId) {
+            candidateBucketLists.push(Array.from(map.values()));
+        }
+    } else if (scene.interactionBuckets && scene.interactionBuckets.length > 0) {
+        candidateBucketLists.push(scene.interactionBuckets);
+    }
+
+    let bestHit: SceneHitTarget | null = null;
+    let bestBucket: ChartInteractionBucket | null = null;
+    let minDistance = Number.POSITIVE_INFINITY;
+
+    for (const buckets of candidateBucketLists) {
+        if (!buckets || buckets.length === 0) continue;
+        const nearestBucket = isHoriz
+            ? findNearestInteractionBucketByY(buckets, pointer.y)
+            : findNearestInteractionBucketByX(buckets, pointer.x);
+        if (!nearestBucket) continue;
+
+        const distAlongAxis = isHoriz
+            ? Math.abs(pointer.y - nearestBucket.anchor.y)
+            : Math.abs(pointer.x - nearestBucket.anchor.x);
+
+        if (distAlongAxis <= maxSnapDistance) {
+            const bucketHit = findNearestCompatibleHitInBucket(nearestBucket, pointer, scene, targetAxes);
+            if (bucketHit) {
+                const hitPos = bucketHit.point ?? (bucketHit.visualBounds ? {
+                    x: bucketHit.visualBounds.x + bucketHit.visualBounds.width / 2,
+                    y: bucketHit.visualBounds.y + bucketHit.visualBounds.height / 2
+                } : (bucketHit.bounds ? {
+                    x: bucketHit.bounds.x + bucketHit.bounds.width / 2,
+                    y: bucketHit.bounds.y + bucketHit.bounds.height / 2
+                } : nearestBucket.anchor));
+                const dist = Math.hypot(pointer.x - hitPos.x, pointer.y - hitPos.y);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    bestHit = bucketHit;
+                    bestBucket = nearestBucket;
+                }
+            }
+        }
+    }
+
+    return bestHit && bestBucket ? { bucket: bestBucket, hit: bestHit } : null;
+}
+
 export class CartesianCrosshairResolver {
     public static resolve(
         scene: CartesianXYChartScene | null,
@@ -208,111 +263,127 @@ export class CartesianCrosshairResolver {
                 activeHits = [selectedHit];
             } else if (source === "pointer" && pointer) {
                 // 2. Bucket fallback
-                const interactionAxisId = isHoriz ? yAxisId : xAxisId;
-                const isTargetPrimary = interactionAxisId === (isHoriz ? scene.primaryYAxisId : scene.primaryXAxisId);
+                const independentRequested = isHoriz ? needY : needX;
 
-                const map = interactionAxisId ? scene.interactionBucketsByAxisId?.get(interactionAxisId) : undefined;
-                const axisBuckets: readonly ChartInteractionBucket[] | undefined = map
-                    ? Array.from(map.values())
-                    : (isTargetPrimary ? scene.interactionBuckets : undefined);
+                if (!independentRequested) {
+                    // Value-only mode: independent axis is irrelevant, search all available independent bucket namespaces
+                    const match = findNearestCompatibleHitAcrossNamespaces(scene, pointer, isHoriz, maxSnapDistance, targetAxes);
+                    if (match) {
+                        selectedHit = match.hit;
+                        snapKind = "mark";
+                        activeHitTarget = match.hit;
+                        activeHits = match.bucket.hits
+                            ? match.bucket.hits.filter(h => isHitCompatibleWithTargetAxes(h, scene, targetAxes))
+                            : [match.hit];
+                    }
+                } else {
+                    // Independent axis is requested: constrain to target independent axis ID
+                    const interactionAxisId = isHoriz ? yAxisId : xAxisId;
+                    const isTargetPrimary = interactionAxisId === (isHoriz ? scene.primaryYAxisId : scene.primaryXAxisId);
 
-                let nearestBucket: ChartInteractionBucket | null = null;
-                if (axisBuckets && axisBuckets.length > 0) {
-                    nearestBucket = isHoriz
-                        ? findNearestInteractionBucketByY(axisBuckets, pointer.y)
-                        : findNearestInteractionBucketByX(axisBuckets, pointer.x);
-                }
+                    const map = interactionAxisId ? scene.interactionBucketsByAxisId?.get(interactionAxisId) : undefined;
+                    const axisBuckets: readonly ChartInteractionBucket[] | undefined = map
+                        ? Array.from(map.values())
+                        : (isTargetPrimary ? scene.interactionBuckets : undefined);
 
-                if (nearestBucket) {
-                    const distAlongAxis = isHoriz
-                        ? Math.abs(pointer.y - nearestBucket.anchor.y)
-                        : Math.abs(pointer.x - nearestBucket.anchor.x);
+                    let nearestBucket: ChartInteractionBucket | null = null;
+                    if (axisBuckets && axisBuckets.length > 0) {
+                        nearestBucket = isHoriz
+                            ? findNearestInteractionBucketByY(axisBuckets, pointer.y)
+                            : findNearestInteractionBucketByX(axisBuckets, pointer.x);
+                    }
 
-                    if (distAlongAxis <= maxSnapDistance) {
-                        if (!isHoriz) {
-                            // Vertical chart: interaction axis is X
-                            if (!needY && needX) {
-                                // Mode="x": independent category bucket snap alone is valid
-                                snapKind = "bucket";
-                                let coordX = nearestBucket.anchor.x;
-                                let valX: unknown = undefined;
-                                if (xSnap?.resolvedType === "category" && xRef) {
-                                    const geom = coordinateSpace.resolveCategoryAtPixel(xRef, coordX);
-                                    if (geom) {
-                                        coordX = geom.bandCenter;
-                                        valX = geom.key;
+                    if (nearestBucket) {
+                        const distAlongAxis = isHoriz
+                            ? Math.abs(pointer.y - nearestBucket.anchor.y)
+                            : Math.abs(pointer.x - nearestBucket.anchor.x);
+
+                        if (distAlongAxis <= maxSnapDistance) {
+                            if (!isHoriz) {
+                                // Vertical chart: interaction axis is X
+                                if (!needY && needX) {
+                                    // Mode="x": independent category bucket snap alone is valid
+                                    snapKind = "bucket";
+                                    let coordX = nearestBucket.anchor.x;
+                                    let valX: unknown = undefined;
+                                    if (xSnap?.resolvedType === "category" && xRef) {
+                                        const geom = coordinateSpace.resolveCategoryAtPixel(xRef, coordX);
+                                        if (geom) {
+                                            coordX = geom.bandCenter;
+                                            valX = geom.key;
+                                        }
+                                    } else if (xRef) {
+                                        valX = coordinateSpace.resolveContinuousAtPixel(xRef, coordX)?.value;
                                     }
-                                } else if (xRef) {
-                                    valX = coordinateSpace.resolveContinuousAtPixel(xRef, coordX)?.value;
-                                }
 
-                                if (valX !== undefined && coordX >= plotRect.x && coordX <= plotRect.x + plotRect.width) {
-                                    resolvedX = {
-                                        axis: "x",
-                                        axisId: xAxisId!,
-                                        coordinate: coordX,
-                                        formattedValue: formatCartesianAxisSemanticValue({
-                                            axisScene: targetXAxis,
-                                            index: 0,
-                                            value: valX,
-                                            xTimeSpanMs: scene.xTimeSpanMs
-                                        }),
-                                        value: valX
-                                    };
+                                    if (valX !== undefined && coordX >= plotRect.x && coordX <= plotRect.x + plotRect.width) {
+                                        resolvedX = {
+                                            axis: "x",
+                                            axisId: xAxisId!,
+                                            coordinate: coordX,
+                                            formattedValue: formatCartesianAxisSemanticValue({
+                                                axisScene: targetXAxis,
+                                                index: 0,
+                                                value: valX,
+                                                xTimeSpanMs: scene.xTimeSpanMs
+                                            }),
+                                            value: valX
+                                        };
+                                    }
+                                } else {
+                                    // Mode="y" or "xy": value-axis requires a compatible mark in bucket
+                                    const bucketHit = findNearestCompatibleHitInBucket(nearestBucket, pointer, scene, targetAxes);
+                                    if (bucketHit) {
+                                        selectedHit = bucketHit;
+                                        snapKind = "mark";
+                                        activeHitTarget = bucketHit;
+                                        activeHits = nearestBucket.hits
+                                            ? nearestBucket.hits.filter(h => isHitCompatibleWithTargetAxes(h, scene, targetAxes))
+                                            : [bucketHit];
+                                    }
                                 }
                             } else {
-                                // Mode="y" or "xy": value-axis requires a compatible mark in bucket
-                                const bucketHit = findNearestCompatibleHitInBucket(nearestBucket, pointer, scene, targetAxes);
-                                if (bucketHit) {
-                                    selectedHit = bucketHit;
-                                    snapKind = "mark";
-                                    activeHitTarget = bucketHit;
-                                    activeHits = nearestBucket.hits
-                                        ? nearestBucket.hits.filter(h => isHitCompatibleWithTargetAxes(h, scene, targetAxes))
-                                        : [bucketHit];
-                                }
-                            }
-                        } else {
-                            // Horizontal chart: interaction axis is Y
-                            if (!needX && needY) {
-                                // Mode="y": independent category bucket snap alone is valid
-                                snapKind = "bucket";
-                                let coordY = nearestBucket.anchor.y;
-                                let valY: unknown = undefined;
-                                if (ySnap?.resolvedType === "category" && yRef) {
-                                    const geom = coordinateSpace.resolveCategoryAtPixel(yRef, coordY);
-                                    if (geom) {
-                                        coordY = geom.bandCenter;
-                                        valY = geom.key;
+                                // Horizontal chart: interaction axis is Y
+                                if (!needX && needY) {
+                                    // Mode="y": independent category bucket snap alone is valid
+                                    snapKind = "bucket";
+                                    let coordY = nearestBucket.anchor.y;
+                                    let valY: unknown = undefined;
+                                    if (ySnap?.resolvedType === "category" && yRef) {
+                                        const geom = coordinateSpace.resolveCategoryAtPixel(yRef, coordY);
+                                        if (geom) {
+                                            coordY = geom.bandCenter;
+                                            valY = geom.key;
+                                        }
+                                    } else if (yRef) {
+                                        valY = coordinateSpace.resolveContinuousAtPixel(yRef, coordY)?.value;
                                     }
-                                } else if (yRef) {
-                                    valY = coordinateSpace.resolveContinuousAtPixel(yRef, coordY)?.value;
-                                }
 
-                                if (valY !== undefined && coordY >= plotRect.y && coordY <= plotRect.y + plotRect.height) {
-                                    resolvedY = {
-                                        axis: "y",
-                                        axisId: yAxisId!,
-                                        coordinate: coordY,
-                                        formattedValue: formatCartesianAxisSemanticValue({
-                                            axisScene: targetYAxis,
-                                            index: 0,
-                                            value: valY,
-                                            xTimeSpanMs: scene.xTimeSpanMs
-                                        }),
-                                        value: valY
-                                    };
-                                }
-                            } else {
-                                // Mode="x" or "xy": value-axis requires a compatible mark in bucket
-                                const bucketHit = findNearestCompatibleHitInBucket(nearestBucket, pointer, scene, targetAxes);
-                                if (bucketHit) {
-                                    selectedHit = bucketHit;
-                                    snapKind = "mark";
-                                    activeHitTarget = bucketHit;
-                                    activeHits = nearestBucket.hits
-                                        ? nearestBucket.hits.filter(h => isHitCompatibleWithTargetAxes(h, scene, targetAxes))
-                                        : [bucketHit];
+                                    if (valY !== undefined && coordY >= plotRect.y && coordY <= plotRect.y + plotRect.height) {
+                                        resolvedY = {
+                                            axis: "y",
+                                            axisId: yAxisId!,
+                                            coordinate: coordY,
+                                            formattedValue: formatCartesianAxisSemanticValue({
+                                                axisScene: targetYAxis,
+                                                index: 0,
+                                                value: valY,
+                                                xTimeSpanMs: scene.xTimeSpanMs
+                                            }),
+                                            value: valY
+                                        };
+                                    }
+                                } else {
+                                    // Mode="x" or "xy": value-axis requires a compatible mark in bucket
+                                    const bucketHit = findNearestCompatibleHitInBucket(nearestBucket, pointer, scene, targetAxes);
+                                    if (bucketHit) {
+                                        selectedHit = bucketHit;
+                                        snapKind = "mark";
+                                        activeHitTarget = bucketHit;
+                                        activeHits = nearestBucket.hits
+                                            ? nearestBucket.hits.filter(h => isHitCompatibleWithTargetAxes(h, scene, targetAxes))
+                                            : [bucketHit];
+                                    }
                                 }
                             }
                         }

@@ -70,4 +70,54 @@ describe("CartesianOverlaySemanticFormatting (CAA-R3-009)", () => {
         expect(typeof formatted).toBe("string");
         expect(formatted.length).toBeGreaterThan(0);
     });
+
+    it("formats log axis values with standard or exponential notations (Gate J)", () => {
+        const axisScene: ChartAxisScene = {
+            axis: "y",
+            axisId: "y-log",
+            axisLine: true,
+            gridLines: false,
+            position: "left",
+            scaleType: "log",
+            ticks: [],
+            title: "Log Y",
+            visible: true
+        };
+
+        const formattedSmall = formatCartesianAxisSemanticValue({
+            axisScene,
+            value: 100
+        });
+        expect(formattedSmall).toBe("100");
+
+        const formattedLarge = formatCartesianAxisSemanticValue({
+            axisScene,
+            value: 1000000
+        });
+        expect(formattedLarge).toBeDefined();
+    });
+
+    it("formats category values accurately using category index when value is numeric index (Gate K)", () => {
+        const axisScene: ChartAxisScene = {
+            axis: "x",
+            axisId: "x-cat",
+            axisLine: true,
+            gridLines: false,
+            position: "bottom",
+            scaleType: "category",
+            ticks: [
+                { coordinate: 100, formattedValue: "Q1", index: 0, tickKey: "0", value: "Q1" },
+                { coordinate: 200, formattedValue: "Q2", index: 1, tickKey: "1", value: "Q2" }
+            ],
+            title: "Quarter",
+            visible: true
+        };
+
+        const formatted = formatCartesianAxisSemanticValue({
+            axisScene,
+            index: 1,
+            value: "Q2"
+        });
+        expect(formatted).toBe("Q2");
+    });
 });

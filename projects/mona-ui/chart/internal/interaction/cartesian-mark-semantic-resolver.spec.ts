@@ -247,4 +247,111 @@ describe("CartesianMarkSemanticResolver", () => {
         expect(result.semanticX).toBe("Jan");
         expect(result.semanticY).toBe(340);
     });
+
+    it("resolves horizontal RangeBar mapping from/to via continuous X scale (Gate H)", () => {
+        const horizScene: CartesianXYChartScene = {
+            ...mockScene,
+            interactionAxis: "y",
+            orientation: "horizontal"
+        };
+
+        const hit: SceneHitTarget = {
+            barOrientation: "horizontal",
+            categoryY: "Feb",
+            dataIndex: 1,
+            datum: { category: "Feb", from: 20, to: 80 },
+            fromValue: 20,
+            index: 1,
+            seriesId: "s-hrange",
+            seriesName: "HRangeBar 1",
+            seriesType: "rangeBar",
+            toValue: 80,
+            valueKind: "range",
+            xAxisId: "x-cont",
+            xKey: "Feb",
+            xValue: "Feb",
+            yValue: 1
+        };
+
+        // In continuous X scale [0, 100] -> [50, 450], 20 is at 130px, 80 is at 370px.
+        const resNearFrom = CartesianMarkSemanticResolver.resolve(hit, horizScene, { x: 140, y: 150 });
+        expect(resNearFrom.semanticY).toBe("Feb");
+        expect(resNearFrom.semanticX).toBe(20);
+
+        const resNearTo = CartesianMarkSemanticResolver.resolve(hit, horizScene, { x: 360, y: 150 });
+        expect(resNearTo.semanticY).toBe("Feb");
+        expect(resNearTo.semanticX).toBe(80);
+    });
+
+    it("resolves RangeArea near lower vs upper boundary (Gate H)", () => {
+        const hit: SceneHitTarget = {
+            category: "Feb",
+            dataIndex: 1,
+            datum: { category: "Feb", from: 50, to: 200 },
+            fromValue: 50,
+            index: 1,
+            rangeBand: {
+                fromPoint: { x: 250, y: 230 },
+                toPoint: { x: 250, y: 170 }
+            },
+            seriesId: "s-range-area",
+            seriesName: "RangeArea 1",
+            seriesType: "rangeArea",
+            toValue: 200,
+            valueKind: "range",
+            xKey: "Feb",
+            xValue: "Feb"
+        };
+
+        const resNearTo = CartesianMarkSemanticResolver.resolve(hit, mockScene, { x: 250, y: 160 });
+        expect(resNearTo.semanticX).toBe("Feb");
+        expect(resNearTo.semanticY).toBe(200);
+
+        const resNearFrom = CartesianMarkSemanticResolver.resolve(hit, mockScene, { x: 250, y: 240 });
+        expect(resNearFrom.semanticX).toBe("Feb");
+        expect(resNearFrom.semanticY).toBe(50);
+    });
+
+    it("resolves stacked area and percent stacked mark semantics (Gate G)", () => {
+        const hit: SceneHitTarget = {
+            category: "Feb",
+            dataIndex: 1,
+            datum: { category: "Feb", value: 50 },
+            index: 1,
+            point: { x: 250, y: 150 },
+            seriesId: "s-pct",
+            seriesName: "Percent Series",
+            seriesType: "area",
+            stackEnd: 0.75,
+            stackMode: "percent",
+            stackPercentage: 0.75,
+            value: 50,
+            xKey: "Feb",
+            xValue: "Feb"
+        };
+
+        const result = CartesianMarkSemanticResolver.resolve(hit, mockScene, { x: 250, y: 150 });
+        expect(result.semanticX).toBe("Feb");
+        expect(result.semanticY).toBe(0.75);
+    });
+
+    it("resolves scatter and bubble points with exact scalar coordinates (Gate F)", () => {
+        const scatterHit: SceneHitTarget = {
+            dataIndex: 0,
+            datum: { x: 42, y: 180 },
+            index: 0,
+            point: { x: 218, y: 178 },
+            radius: 8,
+            seriesId: "s-scatter",
+            seriesName: "Scatter 1",
+            seriesType: "scatter",
+            xKey: "42",
+            xValue: 42,
+            yValue: 180
+        };
+
+        const result = CartesianMarkSemanticResolver.resolve(scatterHit, mockScene, { x: 218, y: 178 });
+        expect(result.semanticX).toBe(42);
+        expect(result.semanticY).toBe(180);
+    });
 });

@@ -3,6 +3,10 @@ import type { CartesianHeatmapChartScene, CartesianXYChartScene, ChartScene, Pol
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { distance, isPointInRect } from "../utils/geometry-utils";
 import type { ChartInteractionState } from "./chart-interaction-state";
+import {
+    ChartPointerCandidateResolver,
+    type ChartPointerCandidates
+} from "./chart-pointer-candidate-resolver";
 import { HeatmapHitTester } from "./heatmap-hit-tester";
 import { PolarAxisHitTester } from "./polar-axis-hit-tester";
 import { PolarSectorHitTester } from "./polar-sector-hit-tester";
@@ -80,9 +84,21 @@ export class ChartHitTestEngine {
         shared: boolean = false,
         maxHoverDistance: number = 32
     ): ChartInteractionState {
+        const candidates = ChartPointerCandidateResolver.discover(pointer, scene, maxHoverDistance);
+        return ChartHitTestEngine.evaluateCandidateHit(candidates, scene, shared, maxHoverDistance);
+    }
+
+    public static evaluateCandidateHit(
+        candidateSet: ChartPointerCandidates,
+        scene: ChartScene,
+        shared: boolean = false,
+        maxHoverDistance: number = 32
+    ): ChartInteractionState {
+        const pointer = candidateSet.pointer;
         const { hitTargets, interactionBuckets, plotRect } = scene;
 
         if (
+            !candidateSet.plotRectBoundsValid ||
             pointer.x < plotRect.x - 5 ||
             pointer.x > plotRect.x + plotRect.width + 5 ||
             pointer.y < plotRect.y - 5 ||
@@ -146,11 +162,8 @@ export class ChartHitTestEngine {
         }
 
         const cartesianScene = scene as CartesianXYChartScene;
-        const barTargets = cartesianScene.barHitTargets ?? hitTargets.filter(t => t.bounds && (t.seriesType === "bar" || t.seriesType === "rangeBar"));
-        const pointSpatialIndex = cartesianScene.pointSpatialIndex ?? cartesianScene.markerSpatialIndex;
-        const candidates = pointSpatialIndex
-            ? pointSpatialIndex.query(pointer, maxHoverDistance)
-            : hitTargets;
+        const barTargets = candidateSet.barTargets;
+        const candidates = candidateSet.pointCandidates;
 
         const getBucketForHit = (target: SceneHitTarget): ChartInteractionBucket | undefined => {
             const axisId =
@@ -195,27 +208,25 @@ export class ChartHitTestEngine {
             }
 
             // 2. Direct Financial indexed hit test
-            if (cartesianScene.financialIndex) {
-                const finHits = cartesianScene.financialIndex.query(pointer);
-                if (finHits.length > 0) {
-                    let topFinHit = finHits[0];
-                    let maxRenderOrder = topFinHit.renderOrder ?? 0;
-                    for (let i = 1; i < finHits.length; i++) {
-                        const candidate = finHits[i];
-                        const order = candidate.renderOrder ?? 0;
-                        if (order >= maxRenderOrder) {
-                            maxRenderOrder = order;
-                            topFinHit = candidate;
-                        }
+            if (candidateSet.financialHits.length > 0) {
+                const finHits = candidateSet.financialHits;
+                let topFinHit = finHits[0];
+                let maxRenderOrder = topFinHit.renderOrder ?? 0;
+                for (let i = 1; i < finHits.length; i++) {
+                    const candidate = finHits[i];
+                    const order = candidate.renderOrder ?? 0;
+                    if (order >= maxRenderOrder) {
+                        maxRenderOrder = order;
+                        topFinHit = candidate;
                     }
-                    const bucket = getBucketForHit(topFinHit);
-                    const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === topFinHit.xKey);
-                    return {
-                        activeHitTarget: topFinHit,
-                        activeHits: sameXHits,
-                        pointerPosition: pointer
-                    };
                 }
+                const bucket = getBucketForHit(topFinHit);
+                const sameXHits = bucket?.hits ?? hitTargets.filter(t => t.xKey === topFinHit.xKey);
+                return {
+                    activeHitTarget: topFinHit,
+                    activeHits: sameXHits,
+                    pointerPosition: pointer
+                };
             }
 
             // 3. Direct marker circle containment test (visual radius)
@@ -377,25 +388,23 @@ export class ChartHitTestEngine {
         }
 
         // 2. Direct Financial indexed hit test
-        if (cartesianScene.financialIndex) {
-            const finHits = cartesianScene.financialIndex.query(pointer);
-            if (finHits.length > 0) {
-                let topFinHit = finHits[0];
-                let maxRenderOrder = topFinHit.renderOrder ?? 0;
-                for (let i = 1; i < finHits.length; i++) {
-                    const candidate = finHits[i];
-                    const order = candidate.renderOrder ?? 0;
-                    if (order >= maxRenderOrder) {
-                        maxRenderOrder = order;
-                        topFinHit = candidate;
-                    }
+        if (candidateSet.financialHits.length > 0) {
+            const finHits = candidateSet.financialHits;
+            let topFinHit = finHits[0];
+            let maxRenderOrder = topFinHit.renderOrder ?? 0;
+            for (let i = 1; i < finHits.length; i++) {
+                const candidate = finHits[i];
+                const order = candidate.renderOrder ?? 0;
+                if (order >= maxRenderOrder) {
+                    maxRenderOrder = order;
+                    topFinHit = candidate;
                 }
-                return {
-                    activeHitTarget: topFinHit,
-                    activeHits: [topFinHit],
-                    pointerPosition: pointer
-                };
             }
+            return {
+                activeHitTarget: topFinHit,
+                activeHits: [topFinHit],
+                pointerPosition: pointer
+            };
         }
 
         // 3. Direct marker circle containment test (with top renderOrder selection for overlapping markers)
@@ -431,7 +440,7 @@ export class ChartHitTestEngine {
                 const minBucketDist = Math.abs(pointer.x - nearestBucket.anchor.x);
                 if (minBucketDist <= maxHoverDistance) {
                     const rangeCandidates = nearestBucket.hits.filter(
-                        h => h.seriesType === "rangeArea" && h.rangeBand
+                        (h: SceneHitTarget) => h.seriesType === "rangeArea" && h.rangeBand
                     );
                     let selectedRangeHit: SceneHitTarget | null = null;
                     let selectedRenderOrder = Number.NEGATIVE_INFINITY;
@@ -469,7 +478,7 @@ export class ChartHitTestEngine {
         for (const target of candidates) {
             if (target.point) {
                 const dist = distance(pointer.x, pointer.y, target.point.x, target.point.y);
-                const maxDist = target.radius ?? maxHoverDistance;
+                const maxDist = Math.min(target.radius ?? maxHoverDistance, maxHoverDistance);
                 if (dist < minDistance && dist <= maxDist) {
                     minDistance = dist;
                     nearestTarget = target;

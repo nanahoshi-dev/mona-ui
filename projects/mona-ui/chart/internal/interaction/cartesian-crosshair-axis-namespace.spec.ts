@@ -225,4 +225,272 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
         expect(result.state?.x?.coordinate).toBe(250);
         expect(result.state?.y).toBeUndefined();
     });
+
+    it("resolves value-only nearest mode='y' even with irrelevant xAxisId (Gate C / CAA-R4-003)", () => {
+        const space = createMultiAxisCoordSpace();
+        const secHit: SceneHitTarget = {
+            datum: {},
+            index: 0,
+            point: { x: 250, y: 100 },
+            seriesId: "s-secondary",
+            seriesName: "Secondary Series",
+            seriesType: "line",
+            xAxisId: "x-main",
+            xKey: "x-0",
+            xValue: 50,
+            yAxisId: "y-sec",
+            yValue: 37.5
+        };
+        const secBucket: ChartInteractionBucket = {
+            anchor: { x: 250, y: 100 },
+            hits: [secHit],
+            order: 0,
+            xKey: "x-0",
+            xValue: 50
+        };
+        const scene: CartesianXYChartScene = {
+            ...createMultiAxisScene(),
+            hitTargets: [secHit],
+            interactionBuckets: [secBucket],
+            interactionBucketsByAxisId: new Map([["x-main", new Map([["b-0", secBucket]])]])
+        };
+
+        // Mode is "y", targeting y-sec, but given an irrelevant xAxisId "x-unrelated"
+        const reg = createRegistration({
+            mode: signal("y"),
+            xAxisId: signal("x-unrelated"),
+            yAxisId: signal("y-sec")
+        });
+        const resolution: ChartPointerResolution = {
+            bucketHits: [],
+            crosshairCandidates: [],
+            hitState: { activeHitTarget: null, activeHits: [], pointerPosition: { x: 252, y: 98 }, source: "pointer" },
+            nearestAnchor: { x: 250, y: 100 },
+            pointer: { x: 252, y: 98 },
+            primaryHit: null,
+            snappedAnchor: { x: 250, y: 100 }
+        };
+
+        const result = CartesianCrosshairResolver.resolve(scene, reg, resolution, "pointer");
+        expect(result.state).not.toBeNull();
+        expect(result.snapKind).toBe("mark");
+        expect(result.state?.y?.axisId).toBe("y-sec");
+        expect(result.state?.y?.value).toBe(37.5);
+        expect(result.state?.x).toBeUndefined();
+    });
+
+    it("mirrors value-only nearest resolution for horizontal charts mode='x' (Gate D / CAA-R4-003)", () => {
+        const xMap = new Map<string, CartesianAxisCoordinateSnapshot>();
+        const yMap = new Map<string, CartesianAxisCoordinateSnapshot>();
+
+        const xScalePrimary = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 1000],
+            range: [50, 450],
+            type: "linear"
+        });
+        const xScaleSecondary = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 50],
+            range: [50, 450],
+            type: "linear"
+        });
+        const yScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 100],
+            range: [250, 50],
+            type: "linear"
+        });
+
+        xMap.set("x-main", {
+            baseDomain: [0, 1000],
+            baseScale: xScalePrimary,
+            range: [50, 450],
+            ref: { axis: "x", axisId: "x-main" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 1000],
+            viewportScale: xScalePrimary
+        });
+        xMap.set("x-sec", {
+            baseDomain: [0, 50],
+            baseScale: xScaleSecondary,
+            range: [50, 450],
+            ref: { axis: "x", axisId: "x-sec" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 50],
+            viewportScale: xScaleSecondary
+        });
+        yMap.set("y-main", {
+            baseDomain: [0, 100],
+            baseScale: yScale,
+            range: [250, 50],
+            ref: { axis: "y", axisId: "y-main" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 100],
+            viewportScale: yScale
+        });
+
+        const coordSpace = new CartesianAxisCoordinateSpace(xMap, yMap);
+        const horizHit: SceneHitTarget = {
+            datum: {},
+            index: 0,
+            point: { x: 350, y: 150 },
+            seriesId: "s-horiz-sec",
+            seriesName: "Horizontal Secondary",
+            seriesType: "bar",
+            xAxisId: "x-sec",
+            xKey: "y-0",
+            xValue: 37.5,
+            yAxisId: "y-main",
+            yValue: 50
+        };
+        const horizBucket: ChartInteractionBucket = {
+            anchor: { x: 350, y: 150 },
+            hits: [horizHit],
+            order: 0,
+            xKey: "y-0",
+            xValue: 50
+        };
+
+        const horizScene: CartesianXYChartScene = {
+            axes: [
+                { axis: "x", axisId: "x-main", axisLine: true, gridLines: false, position: "bottom", ticks: [], title: "X Main", visible: true },
+                { axis: "x", axisId: "x-sec", axisLine: true, gridLines: false, position: "top", ticks: [], title: "X Sec", visible: true },
+                { axis: "y", axisId: "y-main", axisLine: true, gridLines: false, position: "left", ticks: [], title: "Y Main", visible: true }
+            ],
+            cartesianKind: "xy",
+            coordinateSpace: coordSpace,
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [horizHit],
+            interactionAxis: "y",
+            interactionBuckets: [horizBucket],
+            interactionBucketsByAxisId: new Map([["y-main", new Map([["b-0", horizBucket]])]]),
+            legendItems: [],
+            plotRect: { height: 200, width: 400, x: 50, y: 50 },
+            primaryXAxisId: "x-main",
+            primaryYAxisId: "y-main",
+            series: [],
+            width: 500
+        };
+
+        // Crosshair is mode="x" targeting x-sec with an irrelevant yAxisId
+        const reg = createRegistration({
+            mode: signal("x"),
+            xAxisId: signal("x-sec"),
+            yAxisId: signal("y-unrelated")
+        });
+        const resolution: ChartPointerResolution = {
+            bucketHits: [],
+            crosshairCandidates: [],
+            hitState: { activeHitTarget: null, activeHits: [], pointerPosition: { x: 348, y: 152 }, source: "pointer" },
+            nearestAnchor: { x: 350, y: 150 },
+            pointer: { x: 348, y: 152 },
+            primaryHit: null,
+            snappedAnchor: { x: 350, y: 150 }
+        };
+
+        const result = CartesianCrosshairResolver.resolve(horizScene, reg, resolution, "pointer");
+        expect(result.state).not.toBeNull();
+        expect(result.snapKind).toBe("mark");
+        expect(result.state?.x?.axisId).toBe("x-sec");
+        expect(result.state?.x?.value).toBe(37.5);
+        expect(result.state?.y).toBeUndefined();
+    });
+
+    it("handles identical raw axisId across X and Y dimensions safely (Gate E)", () => {
+        const xMap = new Map<string, CartesianAxisCoordinateSnapshot>();
+        const yMap = new Map<string, CartesianAxisCoordinateSnapshot>();
+
+        const scaleX = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 100],
+            range: [50, 450],
+            type: "linear"
+        });
+        const scaleY = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 500],
+            range: [250, 50],
+            type: "linear"
+        });
+
+        xMap.set("shared-id", {
+            baseDomain: [0, 100],
+            baseScale: scaleX,
+            range: [50, 450],
+            ref: { axis: "x", axisId: "shared-id" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 100],
+            viewportScale: scaleX
+        });
+        yMap.set("shared-id", {
+            baseDomain: [0, 500],
+            baseScale: scaleY,
+            range: [250, 50],
+            ref: { axis: "y", axisId: "shared-id" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 500],
+            viewportScale: scaleY
+        });
+
+        const coordSpace = new CartesianAxisCoordinateSpace(xMap, yMap);
+        const hit: SceneHitTarget = {
+            datum: {},
+            index: 0,
+            point: { x: 250, y: 150 },
+            seriesId: "s-shared",
+            seriesName: "Shared Series",
+            seriesType: "line",
+            xAxisId: "shared-id",
+            xKey: "x-0",
+            xValue: 50,
+            yAxisId: "shared-id",
+            yValue: 250
+        };
+
+        const scene: CartesianXYChartScene = {
+            axes: [
+                { axis: "x", axisId: "shared-id", axisLine: true, gridLines: false, position: "bottom", ticks: [], title: "X", visible: true },
+                { axis: "y", axisId: "shared-id", axisLine: true, gridLines: false, position: "left", ticks: [], title: "Y", visible: true }
+            ],
+            cartesianKind: "xy",
+            coordinateSpace: coordSpace,
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [hit],
+            interactionAxis: "x",
+            interactionBuckets: [{ anchor: { x: 250, y: 150 }, hits: [hit], order: 0, xKey: "x-0", xValue: 50 }],
+            legendItems: [],
+            plotRect: { height: 200, width: 400, x: 50, y: 50 },
+            primaryXAxisId: "shared-id",
+            primaryYAxisId: "shared-id",
+            series: [],
+            width: 500
+        };
+
+        const reg = createRegistration({
+            mode: signal("xy"),
+            xAxisId: signal("shared-id"),
+            yAxisId: signal("shared-id")
+        });
+        const resolution: ChartPointerResolution = {
+            bucketHits: [hit],
+            crosshairCandidates: [hit],
+            hitState: { activeHitTarget: hit, activeHits: [hit], pointerPosition: { x: 250, y: 150 }, source: "pointer" },
+            nearestAnchor: { x: 250, y: 150 },
+            pointer: { x: 250, y: 150 },
+            primaryHit: hit,
+            snappedAnchor: { x: 250, y: 150 }
+        };
+
+        const result = CartesianCrosshairResolver.resolve(scene, reg, resolution, "pointer");
+        expect(result.state).not.toBeNull();
+        expect(result.state?.x?.axisId).toBe("shared-id");
+        expect(result.state?.x?.value).toBe(50);
+        expect(result.state?.y?.axisId).toBe("shared-id");
+        expect(result.state?.y?.value).toBe(250);
+    });
 });

@@ -116,4 +116,61 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R2-008)", () => {
         underlaySpy.mockRestore();
         overlaySpy.mockRestore();
     });
+
+    it("maintains save/restore balance and single overlay invocation across progress steps 0, 0.25, 0.5, 0.75, 1.0 (Gate U)", () => {
+        const underlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderUnderlays");
+        const overlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderOverlays");
+
+        let saveCount = 0;
+        let restoreCount = 0;
+
+        const mockCtx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            fillRect: vi.fn(),
+            fillStyle: "",
+            fillText: vi.fn(),
+            get globalAlpha() { return 1; },
+            set globalAlpha(_val) {},
+            lineTo: vi.fn(),
+            lineWidth: 1,
+            measureText: vi.fn().mockReturnValue({ width: 50 }),
+            moveTo: vi.fn(),
+            rect: vi.fn(),
+            restore: vi.fn(() => restoreCount++),
+            save: vi.fn(() => saveCount++),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            strokeRect: vi.fn(),
+            strokeStyle: ""
+        } as unknown as CanvasRenderingContext2D;
+
+        const hostEl = document.createElement("div");
+        const styleResolver = new ChartStyleResolver(hostEl);
+
+        const progressSteps = [0, 0.25, 0.5, 0.75, 1.0];
+
+        for (const progress of progressSteps) {
+            underlaySpy.mockClear();
+            overlaySpy.mockClear();
+            saveCount = 0;
+            restoreCount = 0;
+
+            CartesianChartRenderer.renderCrossfade(
+                mockCtx,
+                mockScene,
+                mockScene,
+                progress,
+                { cartesianOverlay: mockOverlayScene },
+                styleResolver
+            );
+
+            expect(underlaySpy).toHaveBeenCalledTimes(1);
+            expect(overlaySpy).toHaveBeenCalledTimes(1);
+            expect(saveCount).toBe(restoreCount);
+        }
+
+        underlaySpy.mockRestore();
+        overlaySpy.mockRestore();
+    });
 });
