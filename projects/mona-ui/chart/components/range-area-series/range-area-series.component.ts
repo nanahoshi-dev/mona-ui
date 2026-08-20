@@ -85,6 +85,12 @@ export class RangeAreaSeriesComponent implements OnInit {
     public readonly pointRadius = input<number | undefined>(undefined);
 
     /**
+     * @description Optional stable key identifying this series for mark identity and selection across updates.
+     * @default undefined
+     */
+    public readonly seriesKey = input<string | undefined>(undefined);
+
+    /**
      * @description Whether to draw point markers at each data coordinate along both boundary curves.
      * @default false
      */
@@ -152,6 +158,7 @@ export class RangeAreaSeriesComponent implements OnInit {
             this.fromField();
             this.toField();
             this.keyField();
+            this.seriesKey();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -212,6 +219,7 @@ export class RangeAreaSeriesComponent implements OnInit {
             keyField: this.keyField,
             name: this.name,
             pointRadius: this.pointRadius,
+            seriesKey: this.seriesKey,
             showPoints: this.showPoints,
             strokeWidth: this.strokeWidth,
             toField: this.toField,
