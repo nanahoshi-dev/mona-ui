@@ -73,6 +73,12 @@ export class ScatterSeriesComponent implements OnInit {
     public readonly pointRadius = input<number | undefined>(undefined);
 
     /**
+     * @description Optional stable key identifying this series for mark identity and selection across updates.
+     * @default undefined
+     */
+    public readonly seriesKey = input<string | undefined>(undefined);
+
+    /**
      * @description Stroke outline color for scatter point markers.
      * @default ""
      */
@@ -128,6 +134,7 @@ export class ScatterSeriesComponent implements OnInit {
             this.data();
             this.field();
             this.keyField();
+            this.seriesKey();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -183,6 +190,7 @@ export class ScatterSeriesComponent implements OnInit {
             keyField: this.keyField,
             name: this.name,
             pointRadius: this.pointRadius,
+            seriesKey: this.seriesKey,
             strokeColor: this.strokeColor,
             strokeWidth: this.strokeWidth,
             toggleVisibility: () => {
