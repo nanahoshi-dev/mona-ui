@@ -181,6 +181,7 @@ export interface ChartSeriesRegistrationBase {
     id: string;
     keyField?: Signal<ChartField | undefined>;
     name: Signal<string>;
+    seriesKey?: Signal<string | undefined>;
     type: ChartSeriesType;
     userClass?: Signal<string>;
     visible: Signal<boolean>;
@@ -389,6 +390,7 @@ export interface ChartFinancialSeriesRegistrationBase {
     readonly opacity: Signal<number | undefined>;
     readonly openField: Signal<ChartField>;
     readonly risingColor: Signal<string>;
+    readonly seriesKey?: Signal<string | undefined>;
     readonly userClass?: Signal<string>;
     readonly valueFormatter: Signal<ChartAxisFormatter | undefined>;
     readonly visible: Signal<boolean>;
