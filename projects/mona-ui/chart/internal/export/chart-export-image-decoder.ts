@@ -48,16 +48,18 @@ function resolveEnvironment(overrides?: RasterDecodeEnvironment): ResolvedDecode
         ? URL.revokeObjectURL.bind(URL)
         : undefined;
 
-    // The object-URL image strategy requires a real image decoding stack: an Image
-    // constructor, object URLs, and HTMLImageElement.decode. Environments without a
-    // decode-capable Image (e.g. jsdom) fail closed to "no decoder available"
-    // instead of staging loads that can never complete.
-    const hasDecodeCapableImage =
-        typeof Image === "function" && typeof Image.prototype?.decode === "function";
+    // The object-URL image strategy decodes through load/error events, so it only
+    // requires an Image constructor plus object URL support (R7-03). Environments
+    // without those primitives (e.g. jsdom) fail closed to "no decoder available"
+    // instead of staging loads that can never complete. HTMLImageElement.decode is
+    // not required and not invoked by the event-based fallback.
+    const hasImageConstructor = typeof Image === "function";
 
+    // Explicit undefined overrides disable a strategy deterministically (same
+    // semantics as the createImageBitmap override) so tests can pin environments
+    // without relying on platform globals.
     const createHtmlImage =
-        overrides?.createHtmlImage ??
-        (hasDecodeCapableImage ? () => new Image() : undefined);
+        overrides && "createHtmlImage" in overrides ? overrides.createHtmlImage : hasImageConstructor ? () => new Image() : undefined;
     const createObjectURL = overrides?.createObjectURL ?? globalCreateObjectURL;
     const revokeObjectURL = overrides?.revokeObjectURL ?? globalRevokeObjectURL;
 
