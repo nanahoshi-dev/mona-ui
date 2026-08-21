@@ -119,9 +119,86 @@ export function toCanvasColor(colorStr: string, documentRef?: Document | null): 
 
 export class ChartStyleResolver {
     readonly #rootElement: HTMLElement | null;
+    readonly #styleSnapshot: ReadonlyMap<string, string> | null;
 
-    public constructor(rootElement: HTMLElement | null = null) {
+    public constructor(
+        rootElement: HTMLElement | null = null,
+        styleSnapshot: ReadonlyMap<string, string> | null = null
+    ) {
         this.#rootElement = rootElement;
+        this.#styleSnapshot = styleSnapshot;
+    }
+
+    public static captureStyleSnapshot(element: HTMLElement | null): ReadonlyMap<string, string> {
+        const snapshot = new Map<string, string>();
+        if (typeof window === "undefined" || !element) {
+            return snapshot;
+        }
+        try {
+            const computed = window.getComputedStyle(element);
+            for (let i = 0; i < computed.length; i++) {
+                const prop = computed[i];
+                if (prop.startsWith("--")) {
+                    const val = computed.getPropertyValue(prop).trim();
+                    if (val) {
+                        snapshot.set(prop, val);
+                    }
+                }
+            }
+            const knownVars = [
+                "--mona-chart-surface",
+                "--mona-chart-grid-color",
+                "--mona-chart-axis-color",
+                "--mona-chart-label-color",
+                "--mona-chart-tooltip-background",
+                "--mona-chart-tooltip-text",
+                "--mona-chart-crosshair-color",
+                "--mona-chart-slice-stroke-color",
+                "--mona-chart-slice-fill-opacity",
+                "--mona-chart-radial-track-color",
+                "--color-surface",
+                "--color-card",
+                "--color-background",
+                "--color-foreground",
+                "--color-muted",
+                "--color-muted-foreground",
+                "--color-border",
+                "--color-primary",
+                "--color-primary-foreground",
+                ...DEFAULT_CHART_PALETTE_VARIABLES
+            ];
+            for (const varName of knownVars) {
+                const val = computed.getPropertyValue(varName).trim();
+                if (val) {
+                    snapshot.set(varName, val);
+                }
+            }
+
+            const textProps = [
+                "font-family",
+                "font-size",
+                "font-weight",
+                "font-style",
+                "line-height",
+                "letter-spacing",
+                "color",
+                "background-color"
+            ];
+            for (const prop of textProps) {
+                const val = computed.getPropertyValue(prop).trim();
+                if (val) {
+                    snapshot.set(prop, val);
+                }
+            }
+        } catch {
+            // Ignore capture errors
+        }
+        return snapshot;
+    }
+
+    public createSnapshotResolver(): ChartStyleResolver {
+        const snapshot = this.#styleSnapshot ?? ChartStyleResolver.captureStyleSnapshot(this.#rootElement);
+        return new ChartStyleResolver(null, snapshot);
     }
 
     public resolvePaletteColor(
@@ -669,6 +746,39 @@ export class ChartStyleResolver {
         const isVariable = trimmed.startsWith("var(") || trimmed.startsWith("--");
         if (!isVariable) {
             return toCanvasColor(trimmed, (targetElement ?? this.#rootElement)?.ownerDocument);
+        }
+        if (this.#styleSnapshot) {
+            let current = trimmed;
+            for (let i = 0; i < 5; i++) {
+                if (!current.startsWith("var(") && !current.startsWith("--")) {
+                    break;
+                }
+                let rawVar = current;
+                let fallback: string | undefined;
+                if (current.startsWith("var(")) {
+                    const inner = current.slice(4, -1).trim();
+                    const commaIdx = inner.indexOf(",");
+                    if (commaIdx !== -1) {
+                        rawVar = inner.slice(0, commaIdx).trim();
+                        fallback = inner.slice(commaIdx + 1).trim();
+                    } else {
+                        rawVar = inner;
+                    }
+                }
+                let resolved = this.#styleSnapshot.get(rawVar)?.trim();
+                if (!resolved && fallback) {
+                    current = fallback;
+                    continue;
+                }
+                if (!resolved) {
+                    return "";
+                }
+                current = resolved;
+            }
+            if (current.startsWith("var(") || current.startsWith("--")) {
+                return "";
+            }
+            return toCanvasColor(current);
         }
         if (typeof window === "undefined") {
             if (trimmed.startsWith("var(")) {

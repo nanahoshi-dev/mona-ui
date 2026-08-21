@@ -1,3 +1,4 @@
+import { formatRgb, parse } from "culori";
 import { createSvgElement } from "./svg-element-utils";
 import { formatSvgNumber, setSvgAttribute } from "./svg-attribute-utils";
 import type { SvgIdNamespace } from "./svg-id-namespace";
@@ -179,7 +180,21 @@ export class SvgDefinitionRegistry {
                 gradient.appendChild(stop);
             }
             setSvgAttribute(stop, "offset", `${formatSvgNumber(stops[i].offset * 100)}%`);
-            setSvgAttribute(stop, "stop-color", stops[i].color);
+
+            const rawColor = stops[i].color;
+            const parsed = parse(rawColor);
+            if (parsed) {
+                const rgbOnly = formatRgb({ ...parsed, alpha: undefined });
+                setSvgAttribute(stop, "stop-color", rgbOnly || rawColor);
+                if (parsed.alpha !== undefined) {
+                    setSvgAttribute(stop, "stop-opacity", formatSvgNumber(parsed.alpha));
+                } else {
+                    setSvgAttribute(stop, "stop-opacity", "1");
+                }
+            } else {
+                setSvgAttribute(stop, "stop-color", rawColor);
+                setSvgAttribute(stop, "stop-opacity", "1");
+            }
         }
     }
 }

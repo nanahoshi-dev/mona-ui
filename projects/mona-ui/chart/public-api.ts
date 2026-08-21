@@ -247,3 +247,22 @@ export type {
 } from "./models/chart-brush.models";
 
 export type { ChartRendererMode } from "./models/chart-renderer.models";
+
+export { ChartExportError } from "./models/chart-export.models";
+export type {
+    ChartDownloadOptions,
+    ChartExportBackground,
+    ChartExportBaseOptions,
+    ChartExportErrorCode,
+    ChartExportFormat,
+    ChartExportOptions,
+    ChartExportPresentationOptions,
+    ChartExportResult,
+    ChartPdfExportOptions,
+    ChartPdfMargins,
+    ChartPdfPageOptions,
+    ChartPdfPageSize,
+    ChartPdfRenderMode,
+    ChartPngExportOptions,
+    ChartSvgExportOptions
+} from "./models/chart-export.models";

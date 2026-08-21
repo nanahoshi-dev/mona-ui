@@ -121,6 +121,19 @@ import type { ChartRenderBackend } from "../../internal/render/chart-render-back
 import { createChartRenderBackend } from "../../internal/render/chart-render-backend-factory";
 import type { ChartRenderPresentationState } from "../../internal/render/chart-render-presentation-state";
 import { ChartRenderScheduler } from "../../internal/render/chart-render-scheduler";
+import {
+    ChartExportError,
+    type ChartDownloadOptions,
+    type ChartExportOptions,
+    type ChartExportResult
+} from "../../models/chart-export.models";
+import {
+    normalizeChartDownloadOptions,
+    normalizeChartExportOptions
+} from "../../internal/export/chart-export-options";
+import { ChartExportSnapshotBuilder } from "../../internal/export/chart-export-snapshot-builder";
+import { ChartExportCoordinator } from "../../internal/export/chart-export-coordinator";
+import { ChartDownloadHelper } from "../../internal/export/chart-download-helper";
 import type {
     CartesianChartScene,
     CartesianFunnelChartScene,
@@ -309,6 +322,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #lastControlledSelection: readonly string[] | undefined = undefined;
     #lastSelectionMode: ChartSelectionMode | undefined = undefined;
     readonly #activeBrushBounds = signal<ChartRect | null>(null);
+    readonly #activeExportControllers = new Set<AbortController>();
 
     public ngAfterContentChecked(): void {
         if (!this.#canvasReady) {
@@ -1306,6 +1320,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#renderBackend.destroy();
                 this.#renderBackend = null;
             }
+            for (const ctrl of this.#activeExportControllers) {
+                ctrl.abort();
+            }
+            this.#activeExportControllers.clear();
         });
 
         // Dynamic backend synchronization
@@ -2362,6 +2380,111 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (res.changed) {
             this.#applyViewportUpdate(res.viewport, "reset", "end", res.changedAxes);
         }
+    }
+
+    /**
+     * @description Exports the chart as a binary Blob in PNG, SVG, or PDF format.
+     * @param options Export configuration including format, dimensions, background, and presentation options.
+     */
+    public async exportChart(options: ChartExportOptions): Promise<ChartExportResult> {
+        if (typeof window === "undefined" || typeof document === "undefined") {
+            throw new ChartExportError(
+                "unsupported-environment",
+                "Chart export operations are only supported in browser environments."
+            );
+        }
+
+        if (this.#isDestroyed) {
+            throw new ChartExportError("not-ready", "Cannot export a destroyed chart.");
+        }
+
+        this.#renderScheduler.flushStructural();
+
+        const hostEl = this.#elementRef.nativeElement;
+        const rect = hostEl.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) {
+            throw new ChartExportError("not-ready", "Chart is not ready or has zero dimensions.");
+        }
+
+        const request = normalizeChartExportOptions(options, rect.width, rect.height);
+
+        const localController = new AbortController();
+        this.#activeExportControllers.add(localController);
+
+        let combinedSignal: AbortSignal;
+        if (options.signal) {
+            if (options.signal.aborted) {
+                this.#activeExportControllers.delete(localController);
+                throw new DOMException("Export was aborted", "AbortError");
+            }
+            combinedSignal = AbortSignal.any([options.signal, localController.signal]);
+        } else {
+            combinedSignal = localController.signal;
+        }
+
+        const effectiveRequest = {
+            ...request,
+            signal: combinedSignal
+        };
+
+        try {
+            const snapshot = ChartExportSnapshotBuilder.build(
+                {
+                    activeBrushBounds: this.#activeBrushBounds(),
+                    annotationBadgeAnchors: this.annotationBadgeAnchors(),
+                    ariaDescription: this.effectiveAriaDescription(),
+                    ariaLabel: this.effectiveAriaLabel(),
+                    brushRegistration: this.#brush(),
+                    cartesianDataLabels: this.cartesianDataLabelScene(),
+                    cartesianOverlay: this.cartesianOverlayScene(),
+                    cartesianSelectionScene: this.cartesianSelectionScene(),
+                    crosshairRegistration: this.#crosshair(),
+                    crosshairState: this.crosshairState(),
+                    elementRef: hostEl,
+                    hasNoData: this.hasNoData(),
+                    plotSurfaceElement: this.plotSurfaceElement()?.nativeElement ?? null,
+                    scene: this.scene(),
+                    selectionOptions: this.#selection()
+                        ? {
+                              color: this.#selection()?.color?.(),
+                              fillOpacity: this.#selection()?.fillOpacity?.(),
+                              strokeWidth: this.#selection()?.strokeWidth?.()
+                          }
+                        : null
+                },
+                effectiveRequest
+            );
+
+            return await ChartExportCoordinator.export(snapshot, effectiveRequest);
+        } finally {
+            this.#activeExportControllers.delete(localController);
+        }
+    }
+
+    /**
+     * @description Exports and triggers a browser file download of the chart in PNG, SVG, or PDF format.
+     * @param options Download options including export format, file name, dimensions, and presentation options.
+     */
+    public async downloadChart(options: ChartDownloadOptions): Promise<ChartExportResult> {
+        if (typeof window === "undefined" || typeof document === "undefined") {
+            throw new ChartExportError(
+                "unsupported-environment",
+                "Chart download operations are only supported in browser environments."
+            );
+        }
+
+        const hostEl = this.#elementRef.nativeElement;
+        const rect = hostEl.getBoundingClientRect();
+        const { fileName } = normalizeChartDownloadOptions(
+            options,
+            rect.width > 0 ? rect.width : 500,
+            rect.height > 0 ? rect.height : 300,
+            this.title()
+        );
+
+        const result = await this.exportChart(options);
+        ChartDownloadHelper.download(result.blob, fileName);
+        return result;
     }
 
     #applyGestureViewportEvent(
