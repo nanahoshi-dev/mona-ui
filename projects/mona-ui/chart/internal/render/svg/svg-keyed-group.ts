@@ -48,11 +48,21 @@ export class SvgKeyedGroup<T = unknown, E extends SVGElement = SVGElement> {
             seenKeys.add(key);
 
             let element = this.#elementsByKey.get(key);
-            if (!element) {
+            const requestedTag = typeof options.tag === "function" ? options.tag(item, i) : (options.tag ?? (options.create ? undefined : "g"));
+
+            if (element && requestedTag && element.localName.toLowerCase() !== requestedTag.toLowerCase()) {
+                const replacement = createSvgElement<E>(requestedTag as keyof SVGElementTagNameMap);
+                replacement.setAttribute("data-key", key);
+                if (currentChild === element) {
+                    currentChild = element.nextElementSibling as SVGElement | null;
+                }
+                element.replaceWith(replacement);
+                element = replacement;
+            } else if (!element) {
                 if (options.create) {
                     element = options.create(item, i);
                 } else {
-                    const tag = typeof options.tag === "function" ? options.tag(item, i) : (options.tag ?? "g");
+                    const tag = requestedTag ?? "g";
                     element = createSvgElement<E>(tag as keyof SVGElementTagNameMap);
                 }
                 element.setAttribute("data-key", key);

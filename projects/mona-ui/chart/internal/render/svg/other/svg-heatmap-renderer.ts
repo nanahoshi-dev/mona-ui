@@ -7,6 +7,12 @@ import { setSvgAttribute } from "../svg-attribute-utils";
 import { createSvgElement } from "../svg-element-utils";
 import { SvgKeyedGroup } from "../svg-keyed-group";
 
+interface HeatmapRenderCellItem {
+    readonly cell: SceneHeatmapCell;
+    readonly key: string;
+    readonly seriesId: string;
+}
+
 export class SvgHeatmapRenderer {
     readonly #container: SVGGElement;
     readonly #gridGroup: SVGGElement;
@@ -18,8 +24,8 @@ export class SvgHeatmapRenderer {
     #gridPath: SVGPathElement | null = null;
     #axisPath: SVGPathElement | null = null;
 
-    readonly #cellKeyedGroup: SvgKeyedGroup<SceneHeatmapCell, SVGElement>;
-    readonly #labelKeyedGroup: SvgKeyedGroup<SceneHeatmapCell, SVGTextElement>;
+    readonly #cellKeyedGroup: SvgKeyedGroup<HeatmapRenderCellItem, SVGElement>;
+    readonly #labelKeyedGroup: SvgKeyedGroup<HeatmapRenderCellItem, SVGTextElement>;
 
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -44,8 +50,8 @@ export class SvgHeatmapRenderer {
         this.#highlightGroup.setAttribute("data-heatmap-layer", "highlight");
         this.#container.appendChild(this.#highlightGroup);
 
-        this.#cellKeyedGroup = new SvgKeyedGroup<SceneHeatmapCell, SVGElement>(this.#cellsGroup);
-        this.#labelKeyedGroup = new SvgKeyedGroup<SceneHeatmapCell, SVGTextElement>(this.#labelsGroup);
+        this.#cellKeyedGroup = new SvgKeyedGroup<HeatmapRenderCellItem, SVGElement>(this.#cellsGroup);
+        this.#labelKeyedGroup = new SvgKeyedGroup<HeatmapRenderCellItem, SVGTextElement>(this.#labelsGroup);
     }
 
     public render(
@@ -98,23 +104,26 @@ export class SvgHeatmapRenderer {
         }
 
         // 2. Cells
-        const allCells: SceneHeatmapCell[] = [];
-        const labelCells: SceneHeatmapCell[] = [];
+        const allCells: HeatmapRenderCellItem[] = [];
+        const labelCells: HeatmapRenderCellItem[] = [];
 
         for (const s of series) {
             for (const cell of s.cells) {
                 if (cell.width <= 0 || cell.height <= 0) continue;
-                allCells.push(cell);
+                const key = `${s.id}:${cell.animationKey || `${cell.xIndex}:${cell.yIndex}`}`;
+                const item: HeatmapRenderCellItem = { cell, key, seriesId: s.id };
+                allCells.push(item);
                 if ((s.showLabels || cell.showLabel) && cell.width >= 20 && cell.height >= 12 && Boolean(cell.formattedValue)) {
-                    labelCells.push(cell);
+                    labelCells.push({ cell, key: `lbl:${key}`, seriesId: s.id });
                 }
             }
         }
 
         this.#cellKeyedGroup.reconcile(allCells, {
-            key: (cell, i) => cell.animationKey || `${cell.xIndex}:${cell.yIndex}`,
-            tag: cell => (cell.borderRadius > 0 ? "path" : "rect"),
-            update: (element, cell) => {
+            key: item => item.key,
+            tag: item => (item.cell.borderRadius > 0 ? "path" : "rect"),
+            update: (element, item) => {
+                const cell = item.cell;
                 const alpha = Math.max(0, Math.min(1, cell.opacity ?? 1));
                 if (cell.borderRadius <= 0) {
                     setSvgAttribute(element, "x", cell.x);
@@ -144,9 +153,10 @@ export class SvgHeatmapRenderer {
 
         // 2b. Labels
         this.#labelKeyedGroup.reconcile(labelCells, {
-            key: (cell, i) => `lbl:${cell.animationKey || `${cell.xIndex}:${cell.yIndex}`}`,
+            key: item => item.key,
             tag: "text",
-            update: (text, cell) => {
+            update: (text, item) => {
+                const cell = item.cell;
                 const alpha = Math.max(0, Math.min(1, cell.opacity ?? 1));
                 text.textContent = cell.formattedValue;
                 setSvgAttribute(text, "x", cell.x + cell.width / 2);
@@ -201,9 +211,9 @@ export class SvgHeatmapRenderer {
         while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
         if (interactionState) {
             const isKeyboard = interactionState.source === "keyboard";
-            const hit = interactionState.activeHitTarget;
-            if (hit?.bounds) {
-                const b = hit.bounds;
+            const hit = interactionState.activeHitTarget ?? interactionState.activeHits[0];
+            const b = hit?.visualBounds ?? hit?.bounds ?? (hit as any)?.rect;
+            if (hit && b) {
                 const radius = hit.borderRadius ?? 0;
                 const highlightEl = radius > 0 ? createSvgElement("path") : createSvgElement("rect");
 
@@ -231,9 +241,13 @@ export class SvgHeatmapRenderer {
                     setSvgAttribute(highlightEl, "stroke", focusIndicatorColor);
                     setSvgAttribute(highlightEl, "stroke-width", 2.5);
                 } else {
+                    const hoverColor =
+                        styleResolver.resolveCssVariable("--mona-chart-heatmap-hover-outline-color") ||
+                        styleResolver.resolveCssVariable("--color-border-control") ||
+                        "rgba(255, 255, 255, 0.85)";
                     setSvgAttribute(highlightEl, "fill", "none");
-                    setSvgAttribute(highlightEl, "stroke", "rgba(255, 255, 255, 0.9)");
-                    setSvgAttribute(highlightEl, "stroke-width", 2);
+                    setSvgAttribute(highlightEl, "stroke", hoverColor);
+                    setSvgAttribute(highlightEl, "stroke-width", 1.5);
                 }
 
                 this.#highlightGroup.appendChild(highlightEl);

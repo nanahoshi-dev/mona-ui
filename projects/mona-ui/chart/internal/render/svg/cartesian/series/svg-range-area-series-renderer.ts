@@ -22,7 +22,8 @@ export class SvgRangeAreaSeriesRenderer {
     }
 
     public render(scene: ChartRangeAreaSeriesScene): void {
-        const { connectNulls, curve, fillOpacity, pointRadius, points, showPoints, strokeWidth, style } = scene;
+        const points = scene.points ?? [];
+        const { connectNulls, curve, fillOpacity, pointRadius, showPoints, strokeWidth, style } = scene;
         const validPoints = connectNulls ? points.filter(p => p.defined) : points;
 
         if (validPoints.length === 0) {

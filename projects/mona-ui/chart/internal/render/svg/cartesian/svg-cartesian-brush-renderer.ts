@@ -1,7 +1,7 @@
 import type { ChartBrushLineStyle } from "../../../../models/chart-brush.models";
 import type { ChartRect } from "../../../../models/chart.models";
 import type { ChartBrushRegistration } from "../../../context/chart-registration-context";
-import { resolveStrokeDashArray, setSvgAttribute } from "../svg-attribute-utils";
+import { resolveBrushDashArray, setSvgAttribute } from "../svg-attribute-utils";
 import { createSvgElement } from "../svg-element-utils";
 
 export class SvgCartesianBrushRenderer {
@@ -48,7 +48,7 @@ export class SvgCartesianBrushRenderer {
         setSvgAttribute(this.#rectElement, "fill-opacity", fillOpacity);
         setSvgAttribute(this.#rectElement, "stroke", borderWidth > 0 ? borderColor : "none");
         setSvgAttribute(this.#rectElement, "stroke-width", borderWidth);
-        setSvgAttribute(this.#rectElement, "stroke-dasharray", resolveStrokeDashArray(lineStyle));
+        setSvgAttribute(this.#rectElement, "stroke-dasharray", resolveBrushDashArray(lineStyle));
 
         if (plotClipUrl) {
             setSvgAttribute(this.#rectElement, "clip-path", plotClipUrl);

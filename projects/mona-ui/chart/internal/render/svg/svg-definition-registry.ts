@@ -24,12 +24,33 @@ export interface RadialGradientDefinition {
 export class SvgDefinitionRegistry {
     #defsElement: SVGDefsElement | null;
     readonly #namespace: SvgIdNamespace;
-    #usedIds = new Set<string>();
-    #elementsById = new Map<string, SVGElement>();
+    readonly #prefix: string;
+    readonly #usedIds: Set<string>;
+    readonly #elementsById: Map<string, SVGElement>;
 
-    public constructor(defsElement: SVGDefsElement, namespace: SvgIdNamespace) {
+    public constructor(
+        defsElement: SVGDefsElement,
+        namespace: SvgIdNamespace,
+        prefix = "",
+        elementsById?: Map<string, SVGElement>,
+        usedIds?: Set<string>
+    ) {
         this.#defsElement = defsElement;
         this.#namespace = namespace;
+        this.#prefix = prefix;
+        this.#elementsById = elementsById ?? new Map<string, SVGElement>();
+        this.#usedIds = usedIds ?? new Set<string>();
+    }
+
+    public withScope(prefix: string): SvgDefinitionRegistry {
+        const fullPrefix = this.#prefix ? `${this.#prefix}-${prefix}` : prefix;
+        return new SvgDefinitionRegistry(
+            this.#defsElement as SVGDefsElement,
+            this.#namespace,
+            fullPrefix,
+            this.#elementsById,
+            this.#usedIds
+        );
     }
 
     public beginFrame(): void {
@@ -37,7 +58,8 @@ export class SvgDefinitionRegistry {
     }
 
     public useClipRect(idSuffix: string, x: number, y: number, width: number, height: number): string {
-        const fullId = this.#namespace.id(idSuffix);
+        const scopedSuffix = this.#prefix ? `${this.#prefix}-${idSuffix}` : idSuffix;
+        const fullId = this.#namespace.id(scopedSuffix);
         this.#usedIds.add(fullId);
 
         let clipPath = this.#elementsById.get(fullId) as SVGClipPathElement | undefined;
@@ -67,7 +89,8 @@ export class SvgDefinitionRegistry {
     }
 
     public useLinearGradient(idSuffix: string, def: LinearGradientDefinition): string {
-        const fullId = this.#namespace.id(idSuffix);
+        const scopedSuffix = this.#prefix ? `${this.#prefix}-${idSuffix}` : idSuffix;
+        const fullId = this.#namespace.id(scopedSuffix);
         this.#usedIds.add(fullId);
 
         let grad = this.#elementsById.get(fullId) as SVGLinearGradientElement | undefined;
@@ -90,7 +113,8 @@ export class SvgDefinitionRegistry {
     }
 
     public useRadialGradient(idSuffix: string, def: RadialGradientDefinition): string {
-        const fullId = this.#namespace.id(idSuffix);
+        const scopedSuffix = this.#prefix ? `${this.#prefix}-${idSuffix}` : idSuffix;
+        const fullId = this.#namespace.id(scopedSuffix);
         this.#usedIds.add(fullId);
 
         let grad = this.#elementsById.get(fullId) as SVGRadialGradientElement | undefined;

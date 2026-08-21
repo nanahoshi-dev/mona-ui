@@ -11,7 +11,8 @@ export class SvgCandlestickSeriesRenderer {
     }
 
     public render(scene: ChartCandlestickSeriesScene): void {
-        const { marks, style } = scene;
+        const marks = scene.marks ?? [];
+        const { style } = scene;
         if (marks.length === 0) {
             this.#keyedGroup.clear();
             return;

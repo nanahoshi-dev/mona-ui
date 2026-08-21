@@ -12,7 +12,8 @@ export class SvgBarSeriesRenderer {
     }
 
     public render(scene: ChartBarSeriesScene): void {
-        const { bars, borderRadius, fillOpacity, style } = scene;
+        const bars = scene.bars ?? [];
+        const { borderRadius, fillOpacity, style } = scene;
         if (bars.length === 0) {
             this.#keyedGroup.clear();
             return;

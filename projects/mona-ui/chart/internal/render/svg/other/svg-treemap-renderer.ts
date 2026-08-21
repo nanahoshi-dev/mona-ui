@@ -57,15 +57,15 @@ export class SvgTreemapRenderer {
             const { nodes, renderOpacity = 1, style } = s;
             if (nodes.length === 0 || renderOpacity <= 0) continue;
 
-            const borderRadius = style.borderRadius ?? 0;
-            const strokeWidth = style.strokeWidth ?? 0;
-            const strokeColor = style.strokeColor;
-            const parentFillOpacity = style.parentFillOpacity ?? 0.15;
-            const leafFillOpacity = style.fillOpacity ?? 1;
+            const borderRadius = style?.borderRadius ?? 0;
+            const strokeWidth = style?.strokeWidth ?? 0;
+            const strokeColor = style?.strokeColor;
+            const parentFillOpacity = style?.parentFillOpacity ?? 0.15;
+            const leafFillOpacity = style?.fillOpacity ?? 1;
 
             for (const node of nodes) {
                 const nodeOpacity = node.renderOpacity ?? 1;
-                if (nodeOpacity <= 0 || node.bounds.width <= 0 || node.bounds.height <= 0) continue;
+                if (nodeOpacity <= 0 || (node.bounds && (node.bounds.width <= 0 || node.bounds.height <= 0))) continue;
 
                 const isRenderTerminal = node.isLeaf || node.isCollapsed;
                 const fillAlpha = isRenderTerminal ? leafFillOpacity : parentFillOpacity;
@@ -76,7 +76,7 @@ export class SvgTreemapRenderer {
                     borderRadius,
                     fillColor: node.fillColor,
                     isHeader: false,
-                    key: node.animationKey || node.nodeId,
+                    key: `${s.id}:${node.animationKey || node.nodeId}`,
                     node,
                     rect: node.bounds,
                     strokeColor,
@@ -90,7 +90,7 @@ export class SvgTreemapRenderer {
                         borderRadius,
                         fillColor: node.fillColor,
                         isHeader: true,
-                        key: `hdr:${node.animationKey || node.nodeId}`,
+                        key: `${s.id}:hdr:${node.animationKey || node.nodeId}`,
                         node,
                         rect: node.headerBounds,
                         strokeColor: undefined,

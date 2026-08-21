@@ -32,12 +32,26 @@ export function setSvgAttribute(
     }
 }
 
+export function resolveBrushDashArray(
+    lineStyle?: "solid" | "dashed" | "dotted" | null
+): string | undefined {
+    switch (lineStyle) {
+        case "dashed":
+            return "4 4";
+        case "dotted":
+            return "2 2";
+        case "solid":
+        default:
+            return undefined;
+    }
+}
+
 export function resolveStrokeDashArray(
     lineStyle?: "solid" | "dashed" | "dotted" | null
 ): string | undefined {
     switch (lineStyle) {
         case "dashed":
-            return "6 6";
+            return "4 4";
         case "dotted":
             return "2 2";
         case "solid":

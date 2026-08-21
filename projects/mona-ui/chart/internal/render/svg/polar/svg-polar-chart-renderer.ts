@@ -43,10 +43,7 @@ export class SvgPolarChartRenderer {
                     this.#container.appendChild(this.#sectorContainer);
                     this.#sectorRenderer = new SvgPolarSectorRenderer(this.#sectorContainer);
                 }
-                const sectorScene = scene as PolarSectorChartScene;
-                for (const s of sectorScene.series) {
-                    this.#sectorRenderer.render(s, interactionState, styleResolver, defs);
-                }
+                this.#sectorRenderer.render(scene as PolarSectorChartScene, interactionState, styleResolver, defs);
                 break;
             }
             case "axis": {

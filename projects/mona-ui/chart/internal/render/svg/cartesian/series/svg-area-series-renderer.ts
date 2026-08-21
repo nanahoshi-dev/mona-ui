@@ -19,7 +19,8 @@ export class SvgAreaSeriesRenderer {
     }
 
     public render(scene: ChartAreaSeriesScene, defs: SvgDefinitionRegistry): void {
-        const { baselineY, connectNulls, curve, fillMode, fillOpacity, points, showPoints, style } = scene;
+        const points = scene.points ?? [];
+        const { baselineY, connectNulls, curve, fillMode, fillOpacity, showPoints, style } = scene;
         const validPoints = connectNulls ? points.filter(p => p.defined) : points;
 
         if (validPoints.length === 0) {

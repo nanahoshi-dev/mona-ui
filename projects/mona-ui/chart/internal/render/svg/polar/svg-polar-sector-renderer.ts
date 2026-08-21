@@ -1,4 +1,5 @@
 import type { ChartInteractionState } from "../../../interaction/chart-interaction-state";
+import type { PolarSectorChartScene } from "../../../scene/chart-scene";
 import type { ChartSectorSeriesScene, SceneSectorSlice } from "../../../scene/polar-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import { buildArcPath } from "../../geometry/arc-path-builder";
@@ -8,13 +9,15 @@ import type { SvgDefinitionRegistry } from "../svg-definition-registry";
 import { createSvgElement } from "../svg-element-utils";
 import { SvgKeyedGroup } from "../svg-keyed-group";
 
-export class SvgPolarSectorRenderer {
+export class SvgPolarSectorSeriesRenderer {
     readonly #container: SVGGElement;
     readonly #slicesGroup: SVGGElement;
     readonly #linesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
 
     readonly #sliceKeyedGroup: SvgKeyedGroup<SceneSectorSlice, SVGPathElement>;
+    #linePath: SVGPathElement | null = null;
+    #highlightPath: SVGPathElement | null = null;
 
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -36,11 +39,13 @@ export class SvgPolarSectorRenderer {
 
     public render(
         series: ChartSectorSeriesScene,
+        sceneCenter: { readonly x: number; readonly y: number } | undefined,
         interactionState: ChartInteractionState | null,
         styleResolver: ChartStyleResolver,
         defs: SvgDefinitionRegistry
     ): void {
-        const { center, fillMode, slices, style } = series;
+        const { fillMode, slices, style } = series;
+        const center = series.center ?? sceneCenter ?? { x: 0, y: 0 };
         if (!slices || slices.length === 0) {
             this.clear();
             return;
@@ -99,10 +104,6 @@ export class SvgPolarSectorRenderer {
         });
 
         // 2. Leader Lines
-        while (this.#linesGroup.firstChild) {
-            this.#linesGroup.firstChild.remove();
-        }
-
         if (series.showLabels && series.labelPosition === "outside") {
             const lineColor =
                 styleResolver.resolveCssVariable("--mona-chart-label-line-color") ||
@@ -119,20 +120,24 @@ export class SvgPolarSectorRenderer {
             }
 
             if (pathSegments.length > 0) {
-                const linePath = createSvgElement("path");
-                setSvgAttribute(linePath, "d", pathSegments.join(" "));
-                setSvgAttribute(linePath, "fill", "none");
-                setSvgAttribute(linePath, "stroke", lineColor);
-                setSvgAttribute(linePath, "stroke-width", 1);
-                this.#linesGroup.appendChild(linePath);
+                if (!this.#linePath) {
+                    this.#linePath = createSvgElement("path");
+                    this.#linesGroup.appendChild(this.#linePath);
+                }
+                setSvgAttribute(this.#linePath, "d", pathSegments.join(" "));
+                setSvgAttribute(this.#linePath, "fill", "none");
+                setSvgAttribute(this.#linePath, "stroke", lineColor);
+                setSvgAttribute(this.#linePath, "stroke-width", 1);
+            } else if (this.#linePath) {
+                this.#linePath.remove();
+                this.#linePath = null;
             }
+        } else if (this.#linePath) {
+            this.#linePath.remove();
+            this.#linePath = null;
         }
 
         // 3. Highlight
-        while (this.#highlightGroup.firstChild) {
-            this.#highlightGroup.firstChild.remove();
-        }
-
         const activeHit = interactionState?.activeHitTarget;
         if (activeHit && activeHit.seriesId === series.id) {
             const activeSlice = slices.find(s => s.sliceId === activeHit.sliceId || s.dataIndex === activeHit.index);
@@ -146,36 +151,47 @@ export class SvgPolarSectorRenderer {
                     startAngle: activeSlice.startAngle
                 }) ?? "";
 
-                const highlightPath = createSvgElement("path");
-                setSvgAttribute(highlightPath, "d", d);
-                setSvgAttribute(highlightPath, "transform", `translate(${center.x}, ${center.y})`);
+                if (!this.#highlightPath) {
+                    this.#highlightPath = createSvgElement("path");
+                    this.#highlightGroup.appendChild(this.#highlightPath);
+                }
+                setSvgAttribute(this.#highlightPath, "d", d);
+                setSvgAttribute(this.#highlightPath, "transform", `translate(${center.x}, ${center.y})`);
 
-                if (interactionState.source === "keyboard") {
+                if (interactionState?.source === "keyboard") {
                     const focusIndicatorColor =
                         styleResolver.resolveCssVariable("--color-focus-indicator") ||
                         styleResolver.resolveCssVariable("--color-primary") ||
                         "#3b82f6";
-                    setSvgAttribute(highlightPath, "fill", "rgba(255, 255, 255, 0.15)");
-                    setSvgAttribute(highlightPath, "stroke", focusIndicatorColor);
-                    setSvgAttribute(highlightPath, "stroke-width", 3);
+                    setSvgAttribute(this.#highlightPath, "fill", "rgba(255, 255, 255, 0.15)");
+                    setSvgAttribute(this.#highlightPath, "stroke", focusIndicatorColor);
+                    setSvgAttribute(this.#highlightPath, "stroke-width", 3);
                 } else {
-                    setSvgAttribute(highlightPath, "fill", "rgba(255, 255, 255, 0.2)");
-                    setSvgAttribute(highlightPath, "stroke", "none");
-                    setSvgAttribute(highlightPath, "stroke-width", 0);
+                    const hoverOverlayColor =
+                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
+                    setSvgAttribute(this.#highlightPath, "fill", hoverOverlayColor);
+                    setSvgAttribute(this.#highlightPath, "stroke", "none");
+                    setSvgAttribute(this.#highlightPath, "stroke-width", 0);
                 }
-
-                this.#highlightGroup.appendChild(highlightPath);
+            } else if (this.#highlightPath) {
+                this.#highlightPath.remove();
+                this.#highlightPath = null;
             }
+        } else if (this.#highlightPath) {
+            this.#highlightPath.remove();
+            this.#highlightPath = null;
         }
     }
 
     public clear(): void {
         this.#sliceKeyedGroup.clear();
-        while (this.#linesGroup.firstChild) {
-            this.#linesGroup.firstChild.remove();
+        if (this.#linePath) {
+            this.#linePath.remove();
+            this.#linePath = null;
         }
-        while (this.#highlightGroup.firstChild) {
-            this.#highlightGroup.firstChild.remove();
+        if (this.#highlightPath) {
+            this.#highlightPath.remove();
+            this.#highlightPath = null;
         }
     }
 
@@ -185,5 +201,61 @@ export class SvgPolarSectorRenderer {
         this.#slicesGroup.remove();
         this.#linesGroup.remove();
         this.#highlightGroup.remove();
+        this.#container.remove();
+    }
+}
+
+export class SvgPolarSectorRenderer {
+    readonly #container: SVGGElement;
+    readonly #seriesRenderers = new Map<string, SvgPolarSectorSeriesRenderer>();
+
+    public constructor(container: SVGGElement) {
+        this.#container = container;
+    }
+
+    public render(
+        scene: PolarSectorChartScene,
+        interactionState: ChartInteractionState | null,
+        styleResolver: ChartStyleResolver,
+        defs: SvgDefinitionRegistry
+    ): void {
+        const activeIds = new Set<string>();
+
+        for (let i = 0; i < scene.series.length; i++) {
+            const s = scene.series[i];
+            activeIds.add(s.id);
+
+            let renderer = this.#seriesRenderers.get(s.id);
+            if (!renderer) {
+                const group = createSvgElement("g");
+                group.setAttribute("data-series-id", s.id);
+                this.#container.appendChild(group);
+                renderer = new SvgPolarSectorSeriesRenderer(group);
+                this.#seriesRenderers.set(s.id, renderer);
+            }
+
+            renderer.render(s, scene.center, interactionState, styleResolver, defs);
+        }
+
+        // Cleanup stale series
+        for (const [id, r] of this.#seriesRenderers.entries()) {
+            if (!activeIds.has(id)) {
+                r.destroy();
+                this.#seriesRenderers.delete(id);
+            }
+        }
+    }
+
+    public clear(): void {
+        for (const r of this.#seriesRenderers.values()) {
+            r.clear();
+        }
+    }
+
+    public destroy(): void {
+        for (const r of this.#seriesRenderers.values()) {
+            r.destroy();
+        }
+        this.#seriesRenderers.clear();
     }
 }

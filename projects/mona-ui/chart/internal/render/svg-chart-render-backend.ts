@@ -15,6 +15,7 @@ import { SvgDefinitionRegistry } from "./svg/svg-definition-registry";
 import { SvgIdNamespace } from "./svg/svg-id-namespace";
 import { SvgRootLayers } from "./svg/svg-root-layers";
 import { SvgCartesianChartRenderer } from "./svg/cartesian/svg-cartesian-chart-renderer";
+import { SvgCartesianContentRenderer } from "./svg/cartesian/svg-cartesian-content-renderer";
 import { SvgPolarChartRenderer } from "./svg/polar/svg-polar-chart-renderer";
 import { SvgHeatmapRenderer } from "./svg/other/svg-heatmap-renderer";
 import { SvgTreemapRenderer } from "./svg/other/svg-treemap-renderer";
@@ -41,6 +42,8 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
     #lastRenderedKind: string | null = null;
     #genericFromScope: SVGGElement | null = null;
     #genericToScope: SVGGElement | null = null;
+    #fromCartesianRenderer: SvgCartesianContentRenderer | null = null;
+    #toCartesianRenderer: SvgCartesianContentRenderer | null = null;
     #fromPolarRenderer: SvgPolarChartRenderer | null = null;
     #toPolarRenderer: SvgPolarChartRenderer | null = null;
     #fromHeatmapRenderer: SvgHeatmapRenderer | null = null;
@@ -99,6 +102,77 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
         }
         this.#lastRenderedKind = kind;
 
+        this.#renderDirect(scene, presentation, styleResolver, this.#defs);
+
+        this.#defs.endFrame();
+    }
+
+    public renderCrossfade(frame: ChartCrossfadeRenderFrame): void {
+        const { fromScene, presentation, progress, styleResolver, toScene } = frame;
+        this.#defs.beginFrame();
+
+        const toKind = this.#resolveSceneKind(toScene);
+        if (this.#lastRenderedKind && this.#lastRenderedKind !== toKind) {
+            this.#clearAllRenderers();
+            this.#layers.resetRootAttributes();
+        }
+        this.#lastRenderedKind = toKind;
+
+        const isBothCartesianXY =
+            fromScene?.coordinateSystem === "cartesian" &&
+            fromScene.cartesianKind === "xy" &&
+            toScene.coordinateSystem === "cartesian" &&
+            toScene.cartesianKind === "xy";
+
+        if (isBothCartesianXY) {
+            this.#clearGenericCrossfade();
+            this.#cartesianRenderer.renderCrossfade(
+                fromScene as CartesianXYChartScene,
+                toScene as CartesianXYChartScene,
+                progress,
+                presentation,
+                styleResolver,
+                this.#defs
+            );
+        } else {
+            if (fromScene && progress < 1) {
+                this.#clearAllRenderers();
+
+                if (!this.#genericFromScope) {
+                    this.#genericFromScope = createSvgElement("g");
+                    this.#genericFromScope.setAttribute("data-crossfade-scope", "from");
+                    this.#layers.series.appendChild(this.#genericFromScope);
+                }
+                if (!this.#genericToScope) {
+                    this.#genericToScope = createSvgElement("g");
+                    this.#genericToScope.setAttribute("data-crossfade-scope", "to");
+                    this.#layers.series.appendChild(this.#genericToScope);
+                }
+
+                const p = Math.max(0, Math.min(1, progress));
+                setSvgAttribute(this.#genericFromScope, "opacity", Math.max(0, Math.min(1, 1 - p)));
+                setSvgAttribute(this.#genericToScope, "opacity", Math.max(0, Math.min(1, p)));
+
+                const fromDefs = this.#defs.withScope("cf-from");
+                const toDefs = this.#defs.withScope("cf-to");
+
+                this.#renderSceneIntoContainer(fromScene, this.#genericFromScope, styleResolver, fromDefs, true);
+                this.#renderSceneIntoContainer(toScene, this.#genericToScope, styleResolver, toDefs, false);
+            } else {
+                this.#clearGenericCrossfade();
+                this.#renderDirect(toScene, presentation, styleResolver, this.#defs);
+            }
+        }
+
+        this.#defs.endFrame();
+    }
+
+    #renderDirect(
+        scene: ChartScene,
+        presentation: ChartRenderPresentationState | null,
+        styleResolver: ChartStyleResolver,
+        defs: SvgDefinitionRegistry
+    ): void {
         switch (scene.coordinateSystem) {
             case "cartesian":
                 if (scene.cartesianKind === "xy") {
@@ -106,7 +180,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
                         scene as CartesianXYChartScene,
                         presentation,
                         styleResolver,
-                        this.#defs
+                        defs
                     );
                     break;
                 }
@@ -149,70 +223,10 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
                     scene as PolarChartScene,
                     presentation?.interaction ?? null,
                     styleResolver,
-                    this.#defs
+                    defs
                 );
                 break;
         }
-
-        this.#defs.endFrame();
-    }
-
-    public renderCrossfade(frame: ChartCrossfadeRenderFrame): void {
-        const { fromScene, presentation, progress, styleResolver, toScene } = frame;
-        this.#defs.beginFrame();
-
-        const toKind = this.#resolveSceneKind(toScene);
-        if (this.#lastRenderedKind && this.#lastRenderedKind !== toKind) {
-            this.#clearAllRenderers();
-            this.#layers.resetRootAttributes();
-        }
-        this.#lastRenderedKind = toKind;
-
-        if (toScene.coordinateSystem === "cartesian" && toScene.cartesianKind === "xy") {
-            this.#clearGenericCrossfade();
-            const fromXY =
-                fromScene && fromScene.coordinateSystem === "cartesian" && fromScene.cartesianKind === "xy"
-                    ? (fromScene as CartesianXYChartScene)
-                    : null;
-            this.#cartesianRenderer.renderCrossfade(
-                fromXY,
-                toScene as CartesianXYChartScene,
-                progress,
-                presentation,
-                styleResolver,
-                this.#defs
-            );
-        } else {
-            if (fromScene && progress < 1) {
-                this.#clearAllRenderers();
-
-                if (!this.#genericFromScope) {
-                    this.#genericFromScope = createSvgElement("g");
-                    this.#genericFromScope.setAttribute("data-crossfade-scope", "from");
-                    this.#layers.series.appendChild(this.#genericFromScope);
-                }
-                if (!this.#genericToScope) {
-                    this.#genericToScope = createSvgElement("g");
-                    this.#genericToScope.setAttribute("data-crossfade-scope", "to");
-                    this.#layers.series.appendChild(this.#genericToScope);
-                }
-
-                setSvgAttribute(this.#genericFromScope, "opacity", Math.max(0, Math.min(1, 1 - progress)));
-                setSvgAttribute(this.#genericToScope, "opacity", Math.max(0, Math.min(1, progress)));
-
-                this.#renderSceneIntoContainer(fromScene, this.#genericFromScope, presentation, styleResolver, this.#defs, true);
-                this.#renderSceneIntoContainer(toScene, this.#genericToScope, presentation, styleResolver, this.#defs, false);
-            } else {
-                this.#clearGenericCrossfade();
-                this.render({
-                    presentation,
-                    scene: toScene,
-                    styleResolver
-                });
-            }
-        }
-
-        this.#defs.endFrame();
     }
 
     #resolveSceneKind(scene: ChartScene): string {
@@ -259,6 +273,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
 
     #clearGenericCrossfade(): void {
         if (this.#genericFromScope) {
+            this.#fromCartesianRenderer?.clear();
             this.#fromPolarRenderer?.clear();
             this.#fromHeatmapRenderer?.clear();
             this.#fromTreemapRenderer?.clear();
@@ -266,6 +281,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
             this.#fromWaterfallRenderer?.clear();
             this.#genericFromScope.remove();
             this.#genericFromScope = null;
+            this.#fromCartesianRenderer = null;
             this.#fromPolarRenderer = null;
             this.#fromHeatmapRenderer = null;
             this.#fromTreemapRenderer = null;
@@ -273,6 +289,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
             this.#fromWaterfallRenderer = null;
         }
         if (this.#genericToScope) {
+            this.#toCartesianRenderer?.clear();
             this.#toPolarRenderer?.clear();
             this.#toHeatmapRenderer?.clear();
             this.#toTreemapRenderer?.clear();
@@ -280,6 +297,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
             this.#toWaterfallRenderer?.clear();
             this.#genericToScope.remove();
             this.#genericToScope = null;
+            this.#toCartesianRenderer = null;
             this.#toPolarRenderer = null;
             this.#toHeatmapRenderer = null;
             this.#toTreemapRenderer = null;
@@ -291,34 +309,40 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
     #renderSceneIntoContainer(
         scene: ChartScene,
         container: SVGGElement,
-        presentation: ChartRenderPresentationState | null,
         styleResolver: ChartStyleResolver,
         defs: SvgDefinitionRegistry,
         isFrom: boolean
     ): void {
         switch (scene.coordinateSystem) {
             case "cartesian":
-                if (scene.cartesianKind === "heatmap") {
+                if (scene.cartesianKind === "xy") {
+                    let r = isFrom ? this.#fromCartesianRenderer : this.#toCartesianRenderer;
+                    if (!r) {
+                        r = new SvgCartesianContentRenderer(container);
+                        if (isFrom) this.#fromCartesianRenderer = r; else this.#toCartesianRenderer = r;
+                    }
+                    r.render(scene as CartesianXYChartScene, defs, styleResolver);
+                } else if (scene.cartesianKind === "heatmap") {
                     let r = isFrom ? this.#fromHeatmapRenderer : this.#toHeatmapRenderer;
                     if (!r) {
                         r = new SvgHeatmapRenderer(container);
                         if (isFrom) this.#fromHeatmapRenderer = r; else this.#toHeatmapRenderer = r;
                     }
-                    r.render(scene as CartesianHeatmapChartScene, presentation?.interaction ?? null, styleResolver);
+                    r.render(scene as CartesianHeatmapChartScene, null, styleResolver);
                 } else if (scene.cartesianKind === "funnel") {
                     let r = isFrom ? this.#fromFunnelRenderer : this.#toFunnelRenderer;
                     if (!r) {
                         r = new SvgFunnelRenderer(container);
                         if (isFrom) this.#fromFunnelRenderer = r; else this.#toFunnelRenderer = r;
                     }
-                    r.render(scene as CartesianFunnelChartScene, presentation?.interaction ?? null, styleResolver);
+                    r.render(scene as CartesianFunnelChartScene, null, styleResolver);
                 } else if (scene.cartesianKind === "waterfall") {
                     let r = isFrom ? this.#fromWaterfallRenderer : this.#toWaterfallRenderer;
                     if (!r) {
                         r = new SvgWaterfallRenderer(container);
                         if (isFrom) this.#fromWaterfallRenderer = r; else this.#toWaterfallRenderer = r;
                     }
-                    r.render(scene as CartesianWaterfallChartScene, presentation?.interaction ?? null, styleResolver);
+                    r.render(scene as CartesianWaterfallChartScene, null, styleResolver);
                 }
                 break;
             case "hierarchical":
@@ -328,7 +352,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
                         r = new SvgTreemapRenderer(container);
                         if (isFrom) this.#fromTreemapRenderer = r; else this.#toTreemapRenderer = r;
                     }
-                    r.render(scene as TreemapChartScene, presentation?.interaction ?? null, styleResolver);
+                    r.render(scene as TreemapChartScene, null, styleResolver);
                 }
                 break;
             case "polar": {
@@ -337,9 +361,10 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
                     r = new SvgPolarChartRenderer(container);
                     if (isFrom) this.#fromPolarRenderer = r; else this.#toPolarRenderer = r;
                 }
-                r.render(scene as PolarChartScene, presentation?.interaction ?? null, styleResolver, defs);
+                r.render(scene as PolarChartScene, null, styleResolver, defs);
                 break;
             }
         }
     }
 }
+

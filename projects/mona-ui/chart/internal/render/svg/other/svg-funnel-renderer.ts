@@ -53,18 +53,18 @@ export class SvgFunnelRenderer {
             const { renderOpacity = 1, stages, style } = s;
             if (stages.length === 0 || renderOpacity <= 0) continue;
 
-            const strokeWidth = style.strokeWidth ?? 1;
-            const strokeColor = style.strokeColor;
-            const fillOpacity = style.fillOpacity ?? 1;
+            const strokeWidth = style?.strokeWidth ?? 1;
+            const strokeColor = style?.strokeColor;
+            const fillOpacity = style?.fillOpacity ?? 1;
 
             for (const stage of stages) {
                 const stageOpacity = stage.renderOpacity ?? 1;
-                if (stageOpacity <= 0 || stage.bounds.width <= 0 || stage.bounds.height <= 0) continue;
+                if (stageOpacity <= 0 || (stage.bounds && (stage.bounds.width <= 0 || stage.bounds.height <= 0))) continue;
 
                 renderItems.push({
                     alpha: renderOpacity * stageOpacity,
                     fillOpacity,
-                    key: stage.animationKey || stage.stageId || String(stage.dataIndex),
+                    key: `${s.id}:${stage.animationKey || stage.stageId || stage.dataIndex}`,
                     stage,
                     strokeColor,
                     strokeWidth
@@ -100,8 +100,8 @@ export class SvgFunnelRenderer {
             const isKeyboard = interactionState.source === "keyboard";
             const hit = interactionState.activeHitTarget ?? interactionState.activeHits[0];
             if (hit && hit.seriesType === "funnel") {
-                const s = series[0];
-                const stage = s?.stages.find(
+                const targetSeries = series.find(s => s.id === hit.seriesId) ?? series[0];
+                const stage = targetSeries?.stages.find(
                     st => st.animationKey === hit.animationKey || st.stageId === hit.itemId || st.dataIndex === hit.dataIndex
                 );
 

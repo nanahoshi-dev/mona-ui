@@ -115,9 +115,9 @@ export class SvgWaterfallRenderer {
             const { bars, connectors, renderOpacity = 1, style } = s;
             if (bars.length === 0 || renderOpacity <= 0) continue;
 
-            const strokeWidth = style.strokeWidth ?? 0;
-            const strokeColor = style.strokeColor;
-            const fillOpacity = style.fillOpacity ?? 1;
+            const strokeWidth = style?.strokeWidth ?? 0;
+            const strokeColor = style?.strokeColor;
+            const fillOpacity = style?.fillOpacity ?? 1;
 
             // Connectors
             for (const conn of connectors) {
@@ -127,19 +127,19 @@ export class SvgWaterfallRenderer {
                 connectorItems.push({
                     alpha: renderOpacity * connOpacity,
                     conn,
-                    key: conn.animationKey || `conn:${conn.fromAnimationKey}:${conn.toAnimationKey}`
+                    key: `${s.id}:${conn.animationKey || `conn:${conn.fromAnimationKey}:${conn.toAnimationKey}`}`
                 });
             }
 
             // Bars
             for (const bar of bars) {
                 const barOpacity = bar.renderOpacity ?? 1;
-                if (barOpacity <= 0 || bar.bounds.width <= 0 || bar.bounds.height <= 0) continue;
+                if (barOpacity <= 0 || (bar.bounds && (bar.bounds.width <= 0 || bar.bounds.height <= 0))) continue;
 
                 barItems.push({
                     alpha: renderOpacity * barOpacity * fillOpacity,
                     bar,
-                    key: bar.animationKey || String(bar.dataIndex),
+                    key: `${s.id}:${bar.animationKey || String(bar.dataIndex)}`,
                     strokeColor,
                     strokeWidth
                 });
