@@ -25,6 +25,25 @@ function effectiveScaleOf(scale: number): number {
     return Math.max(0.25, scale);
 }
 
+let stagingNamespaceFallbackCounter = 0;
+
+/**
+ * Creates a staging namespace that is unique across overlapping renderIslands
+ * invocations (R7-01). Primitive IDs (mona-export-prim-N) restart from zero per
+ * snapshot, so they are only unique within one export transaction. The
+ * transaction token composes with the primitive identity to guarantee that no
+ * two concurrently staged trees can introduce the same temporary DOM/SVG ID
+ * into the shared staging document.
+ */
+function createExportStagingTransactionNamespace(): string {
+    const cryptoRef = globalThis.crypto;
+    if (cryptoRef && typeof cryptoRef.randomUUID === "function") {
+        return `mona-export-${cryptoRef.randomUUID()}`;
+    }
+    stagingNamespaceFallbackCounter += 1;
+    return `mona-export-${stagingNamespaceFallbackCounter}`;
+}
+
 /**
  * Transaction-wide raster pixel preflight (R6-06 / INV-08). Computes the exact
  * allocation formula used per island for every island and rejects before any
@@ -108,10 +127,12 @@ export class ChartExportRasterIslandRenderer {
             throw new DOMException("Export was aborted", "AbortError");
         }
 
-        // 2.5 Namespace fragment IDs per island so same-document staging cannot
-        // resolve any preserved fragment to an element outside the island (R6-02)
+        // 2.5 Namespace fragment IDs under a transaction-unique prefix composed with
+        // the island identity so overlapping export transactions can never stage the
+        // same ID, and no staged fragment can resolve outside its own island (R6-02 / R7-01)
+        const transactionNamespace = createExportStagingTransactionNamespace();
         for (const island of islands) {
-            isolateFragmentIds(island.frozenRoot, island.id);
+            isolateFragmentIds(island.frozenRoot, `${transactionNamespace}--${island.id}`);
         }
 
         if (signal?.aborted) {
