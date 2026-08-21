@@ -14,8 +14,7 @@ import { chartLegendBaseThemeVariants, chartLegendItemBaseThemeVariants } from "
     imports: [NgTemplateOutlet],
     host: {
         "[class]": "hostClasses()",
-        "[style.order]": "hostOrder()",
-        "[attr.data-mona-chart-export-role]": "'legend'"
+        "[style.order]": "hostOrder()"
     }
 })
 export class ChartLegendComponent implements OnInit {
