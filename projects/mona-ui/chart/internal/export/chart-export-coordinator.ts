@@ -68,7 +68,7 @@ export class ChartExportCoordinator {
                 case "pdf":
                     return await ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request);
                 default:
-                    throw new ChartExportError("not-ready", `Unsupported format: ${request.format}`);
+                    throw new ChartExportError("not-ready", `Unsupported format: ${(request as any).format}`);
             }
         } catch (err: any) {
             if (err instanceof ChartExportError || err?.name === "AbortError") {
@@ -76,7 +76,7 @@ export class ChartExportCoordinator {
             }
             throw new ChartExportError(
                 "svg-composition-failed",
-                `Chart export failed during composition: ${err?.message ?? err}`,
+                `Chart export failed: ${err?.message ?? err}`,
                 { cause: err }
             );
         }

@@ -13,7 +13,7 @@ import {
 export class ChartPngExporter {
     public static async exportPng(
         finalizedSvg: FinalizedSvgOutput,
-        snapshot: ChartExportSnapshot,
+        _snapshot: ChartExportSnapshot,
         request: NormalizedChartExportRequest
     ): Promise<ChartExportResult> {
         if (request.signal?.aborted) {
@@ -106,8 +106,33 @@ export class ChartPngExporter {
             // Draw contained SVG image
             ctx.drawImage(img, 0, 0, physicalWidth, physicalHeight);
 
+            // Abort-aware toBlob promise (EXP-08)
             const pngBlob = await new Promise<Blob>((resolve, reject) => {
+                let settled = false;
+                const onAbort = () => {
+                    if (settled) return;
+                    settled = true;
+                    reject(new DOMException("Export was aborted", "AbortError"));
+                };
+
+                if (request.signal) {
+                    if (request.signal.aborted) {
+                        reject(new DOMException("Export was aborted", "AbortError"));
+                        return;
+                    }
+                    request.signal.addEventListener("abort", onAbort, { once: true });
+                }
+
                 canvas.toBlob(blob => {
+                    if (settled) return;
+                    settled = true;
+                    if (request.signal) {
+                        request.signal.removeEventListener("abort", onAbort);
+                    }
+                    if (request.signal?.aborted) {
+                        reject(new DOMException("Export was aborted", "AbortError"));
+                        return;
+                    }
                     if (blob) {
                         resolve(blob);
                     } else {

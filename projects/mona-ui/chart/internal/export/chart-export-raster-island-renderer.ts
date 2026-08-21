@@ -1,7 +1,10 @@
 import type { ChartExportRasterIslandSnapshot } from "./chart-export-snapshot";
+import type { ChartRect } from "../../models/chart.models";
+import { ChartExportResourceManager } from "./chart-export-resource-manager";
 import { ChartExportError } from "../../models/chart-export.models";
 
 export interface RenderedRasterIsland {
+    readonly clipRect?: ChartRect;
     readonly dataUrl: string;
     readonly height: number;
     readonly width: number;
@@ -13,7 +16,7 @@ export interface RenderedRasterIsland {
 export class ChartExportRasterIslandRenderer {
     public static async renderIslands(
         islands: readonly ChartExportRasterIslandSnapshot[],
-        styleSnapshot: ReadonlyMap<string, string>,
+        _styleSnapshot: ReadonlyMap<string, string>,
         scale: number = 2,
         signal?: AbortSignal
     ): Promise<readonly RenderedRasterIsland[]> {
@@ -32,6 +35,17 @@ export class ChartExportRasterIslandRenderer {
             );
         }
 
+        // 1. Preflight and validate all resources (fonts, images, media)
+        await ChartExportResourceManager.preflightIslandResources(
+            islands.map(i => i.frozenRoot),
+            signal
+        );
+
+        if (signal?.aborted) {
+            throw new DOMException("Export was aborted", "AbortError");
+        }
+
+        // 2. Dynamically import html2canvas-pro
         let html2canvas: any;
         try {
             const mod = await import("html2canvas-pro");
@@ -48,6 +62,19 @@ export class ChartExportRasterIslandRenderer {
             throw new DOMException("Export was aborted", "AbortError");
         }
 
+        // 3. Create off-screen staging container for rendering detached frozen elements
+        const stagingContainer = document.createElement("div");
+        stagingContainer.setAttribute("aria-hidden", "true");
+        stagingContainer.style.position = "fixed";
+        stagingContainer.style.left = "-99999px";
+        stagingContainer.style.top = "-99999px";
+        stagingContainer.style.width = "auto";
+        stagingContainer.style.height = "auto";
+        stagingContainer.style.pointerEvents = "none";
+        stagingContainer.style.opacity = "1";
+        stagingContainer.style.zIndex = "-1";
+        document.body.appendChild(stagingContainer);
+
         const results: RenderedRasterIsland[] = [];
 
         try {
@@ -56,26 +83,50 @@ export class ChartExportRasterIslandRenderer {
                     throw new DOMException("Export was aborted", "AbortError");
                 }
 
-                const canvas = await html2canvas(island.element, {
-                    backgroundColor: null,
-                    logging: false,
-                    scale: Math.max(2, Math.min(4, scale)),
-                    useCORS: true
-                });
+                // Attach frozen node to staging root so html2canvas can measure and render
+                island.frozenRoot.style.boxSizing = "border-box";
+                island.frozenRoot.style.width = `${island.bounds.width}px`;
+                island.frozenRoot.style.height = `${island.bounds.height}px`;
+                island.frozenRoot.style.minWidth = `${island.bounds.width}px`;
+                island.frozenRoot.style.maxWidth = `${island.bounds.width}px`;
+                island.frozenRoot.style.minHeight = `${island.bounds.height}px`;
+                island.frozenRoot.style.maxHeight = `${island.bounds.height}px`;
+                stagingContainer.appendChild(island.frozenRoot);
 
-                const dataUrl = canvas.toDataURL("image/png");
+                try {
+                    const canvas = await html2canvas(island.frozenRoot, {
+                        backgroundColor: null,
+                        height: island.bounds.height,
+                        logging: false,
+                        scale: Math.max(1, Math.min(8, scale)),
+                        useCORS: true,
+                        width: island.bounds.width,
+                        windowHeight: island.bounds.height,
+                        windowWidth: island.bounds.width,
+                        signal
+                    });
 
-                results.push({
-                    dataUrl,
-                    height: island.bounds.height,
-                    width: island.bounds.width,
-                    x: island.bounds.x,
-                    y: island.bounds.y,
-                    zOrder: island.zOrder
-                });
+                    if (signal?.aborted) {
+                        throw new DOMException("Export was aborted", "AbortError");
+                    }
+
+                    const dataUrl = canvas.toDataURL("image/png");
+
+                    results.push({
+                        clipRect: island.clipRect,
+                        dataUrl,
+                        height: island.bounds.height,
+                        width: island.bounds.width,
+                        x: island.bounds.x,
+                        y: island.bounds.y,
+                        zOrder: island.zOrder
+                    });
+                } finally {
+                    island.frozenRoot.remove();
+                }
             }
         } catch (err: any) {
-            if (err?.name === "AbortError") {
+            if (err?.name === "AbortError" || err instanceof ChartExportError) {
                 throw err;
             }
             throw new ChartExportError(
@@ -83,6 +134,8 @@ export class ChartExportRasterIslandRenderer {
                 `Failed to rasterize template DOM island: ${err?.message ?? err}`,
                 { cause: err }
             );
+        } finally {
+            stagingContainer.remove();
         }
 
         return results;

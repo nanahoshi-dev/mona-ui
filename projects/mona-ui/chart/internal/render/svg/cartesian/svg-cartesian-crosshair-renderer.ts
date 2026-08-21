@@ -1,5 +1,6 @@
 import type { ChartRect } from "../../../../models/chart.models";
 import type { ChartCrosshairRegistration } from "../../../context/chart-registration-context";
+import type { ChartCrosshairRenderSnapshot } from "../../../export/chart-export-snapshot";
 import type { ChartCrosshairState } from "../../../interaction/chart-crosshair-state";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import { setSvgAttribute } from "../svg-attribute-utils";
@@ -37,11 +38,19 @@ export class SvgCartesianCrosshairRenderer {
         registration: ChartCrosshairRegistration | null,
         plotRect: ChartRect,
         styleResolver: ChartStyleResolver,
-        plotClipUrl?: string
+        plotClipUrl?: string,
+        snapshot?: ChartCrosshairRenderSnapshot | null
     ): void {
-        if (!crosshairState || !registration || registration.enabled() === false) {
-            this.#keyedGroup.clear();
-            return;
+        if (snapshot) {
+            if (!crosshairState || snapshot.enabled === false) {
+                this.#keyedGroup.clear();
+                return;
+            }
+        } else {
+            if (!crosshairState || !registration || registration.enabled() === false) {
+                this.#keyedGroup.clear();
+                return;
+            }
         }
 
         if (!crosshairState.x && !crosshairState.y) {
@@ -54,13 +63,19 @@ export class SvgCartesianCrosshairRenderer {
             return;
         }
 
-        const style = styleResolver.resolveCrosshairStyle(registration);
+        const style = snapshot
+            ? { color: snapshot.color, opacity: snapshot.opacity, width: snapshot.width }
+            : styleResolver.resolveCrosshairStyle(registration!);
+
         if (style.width <= 0 || style.opacity <= 0) {
             this.#keyedGroup.clear();
             return;
         }
 
-        const dash = getCrosshairDash(registration.lineStyle());
+        const dash = snapshot
+            ? snapshot.dashArray ?? getCrosshairDash(snapshot.lineStyle)
+            : getCrosshairDash(registration!.lineStyle());
+
         const items: CrosshairLineItem[] = [];
 
         if (crosshairState.x) {

@@ -1,11 +1,13 @@
 import type { ChartExportSnapshot } from "./chart-export-snapshot";
 import type { NormalizedChartExportRequest } from "./chart-export-options";
 import type { RenderedRasterIsland } from "./chart-export-raster-island-renderer";
+import type { ChartRenderPresentationState } from "../render/chart-render-presentation-state";
 import { SvgChartRenderBackend } from "../render/svg-chart-render-backend";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { setSvgAttribute } from "../render/svg/svg-attribute-utils";
-import { createSvgElement } from "../render/svg/svg-element-utils";
 import { ChartExportError } from "../../models/chart-export.models";
+
+let clipIdCounter = 0;
 
 export class ChartExportCompositor {
     public static compose(
@@ -20,11 +22,16 @@ export class ChartExportCompositor {
             );
         }
 
+        const outW = request.width;
+        const outH = request.height;
+        const srcW = snapshot.sourceWidth;
+        const srcH = snapshot.sourceHeight;
+
         const rootSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         rootSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-        rootSvg.setAttribute("width", String(request.width));
-        rootSvg.setAttribute("height", String(request.height));
-        rootSvg.setAttribute("viewBox", `0 0 ${snapshot.sourceWidth} ${snapshot.sourceHeight}`);
+        rootSvg.setAttribute("width", String(outW));
+        rootSvg.setAttribute("height", String(outH));
+        rootSvg.setAttribute("viewBox", `0 0 ${outW} ${outH}`);
         rootSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
         if (request.accessibility) {
@@ -35,168 +42,217 @@ export class ChartExportCompositor {
         const defsContainer = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         rootSvg.appendChild(defsContainer);
 
-        // Render Vector Graphics via detached SvgChartRenderBackend if scene is present
+        // Compute contain scaling and centering for mismatched aspect ratios (EXP-09)
+        const scale = Math.min(outW / srcW, outH / srcH);
+        const offsetX = Math.round(((outW - srcW * scale) / 2) * 100) / 100;
+        const offsetY = Math.round(((outH - srcH * scale) / 2) * 100) / 100;
+
+        const chartRootGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        chartRootGroup.setAttribute("data-export-layer", "chart-root");
+        if (offsetX !== 0 || offsetY !== 0 || scale !== 1) {
+            chartRootGroup.setAttribute(
+                "transform",
+                `translate(${offsetX}, ${offsetY}) scale(${scale})`
+            );
+        }
+        rootSvg.appendChild(chartRootGroup);
+
+        // 1. Render Vector Graphics via detached SvgChartRenderBackend if scene is present
         if (snapshot.scene && snapshot.scene.hasRenderableData) {
             const detachedSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             const backend = new SvgChartRenderBackend(detachedSvg);
             const styleResolver = new ChartStyleResolver(null, snapshot.styleSnapshot);
 
-            backend.resize({
-                devicePixelRatio: 1,
-                height: snapshot.plotSurfaceRect.height,
-                width: snapshot.plotSurfaceRect.width
-            });
+            try {
+                backend.resize({
+                    devicePixelRatio: 1,
+                    height: snapshot.plotSurfaceRect.height,
+                    width: snapshot.plotSurfaceRect.width
+                });
 
-            backend.render({
-                presentation: snapshot.presentation,
-                scene: snapshot.scene,
-                styleResolver
-            });
+                // Pass frozen presentation snapshot (EXP-02)
+                const presentationState: ChartRenderPresentationState = {
+                    activeBrushBounds: snapshot.presentation.activeBrushBounds,
+                    annotationBadgeAnchors: snapshot.presentation.annotationBadgeAnchors,
+                    brushRegistration: null,
+                    brushSnapshot: snapshot.presentation.brush,
+                    cartesianDataLabels: snapshot.presentation.cartesianDataLabels,
+                    cartesianOverlay: snapshot.presentation.cartesianOverlay,
+                    crosshair: snapshot.presentation.crosshair,
+                    crosshairRegistration: null,
+                    crosshairSnapshot: snapshot.presentation.crosshairStyle,
+                    interaction: null,
+                    selectionOptions: snapshot.presentation.selectionOptions,
+                    selectionScene: snapshot.presentation.selectionScene
+                };
 
-            // Move defs from detached backend to composed root defs
-            const detachedDefs = detachedSvg.querySelector("defs");
-            if (detachedDefs) {
-                while (detachedDefs.firstChild) {
-                    defsContainer.appendChild(detachedDefs.firstChild);
+                backend.render({
+                    presentation: presentationState,
+                    scene: snapshot.scene,
+                    styleResolver
+                });
+
+                // Move defs from detached backend to composed root defs
+                const detachedDefs = detachedSvg.querySelector("defs");
+                if (detachedDefs) {
+                    while (detachedDefs.firstChild) {
+                        defsContainer.appendChild(detachedDefs.firstChild);
+                    }
                 }
-            }
 
-            // Create graphics container group translated by plot surface offset
-            const graphicsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            graphicsGroup.setAttribute("data-export-layer", "graphics");
-            if (snapshot.plotSurfaceRect.x !== 0 || snapshot.plotSurfaceRect.y !== 0) {
-                graphicsGroup.setAttribute(
-                    "transform",
-                    `translate(${snapshot.plotSurfaceRect.x}, ${snapshot.plotSurfaceRect.y})`
-                );
-            }
-
-            // Clone layers from detached SVG (except defs)
-            const children = Array.from(detachedSvg.childNodes);
-            for (const child of children) {
-                if (child.nodeName.toLowerCase() !== "defs") {
-                    graphicsGroup.appendChild(child);
+                // Create graphics container group translated by plot surface offset
+                const graphicsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                graphicsGroup.setAttribute("data-export-layer", "graphics");
+                if (snapshot.plotSurfaceRect.x !== 0 || snapshot.plotSurfaceRect.y !== 0) {
+                    graphicsGroup.setAttribute(
+                        "transform",
+                        `translate(${snapshot.plotSurfaceRect.x}, ${snapshot.plotSurfaceRect.y})`
+                    );
                 }
-            }
 
-            rootSvg.appendChild(graphicsGroup);
+                // Clone layers from detached SVG (except defs)
+                const children = Array.from(detachedSvg.childNodes);
+                for (const child of children) {
+                    if (child.nodeName.toLowerCase() !== "defs") {
+                        graphicsGroup.appendChild(child.cloneNode(true));
+                    }
+                }
+
+                chartRootGroup.appendChild(graphicsGroup);
+            } finally {
+                backend.destroy();
+            }
         }
 
-        // Vector text & badge layers
-        const domVectorGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        domVectorGroup.setAttribute("data-export-layer", "dom-vector");
+        // 2. Render DOM Overlays in unified document stacking order (EXP-05)
+        const domOverlayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        domOverlayGroup.setAttribute("data-export-layer", "dom-overlay");
 
-        // Render Badges
-        for (const badge of snapshot.domLayers.badges) {
-            const badgeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            badgeGroup.setAttribute("data-export-role", badge.role);
+        let rasterIslandIndex = 0;
 
-            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            setSvgAttribute(rect, "x", badge.bounds.x);
-            setSvgAttribute(rect, "y", badge.bounds.y);
-            setSvgAttribute(rect, "width", badge.bounds.width);
-            setSvgAttribute(rect, "height", badge.bounds.height);
-            if (badge.borderRadius) {
-                setSvgAttribute(rect, "rx", badge.borderRadius);
-            }
-            rect.setAttribute("fill", badge.backgroundColor);
-            if (badge.borderColor && badge.borderWidth) {
-                rect.setAttribute("stroke", badge.borderColor);
-                setSvgAttribute(rect, "stroke-width", badge.borderWidth);
-            }
-            if (badge.opacity < 1) {
-                setSvgAttribute(rect, "opacity", badge.opacity);
-            }
-            badgeGroup.appendChild(rect);
+        for (const prim of snapshot.domLayers.primitives) {
+            if (prim.kind === "badge") {
+                const badgeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                badgeGroup.setAttribute("data-export-role", prim.role);
 
-            if (badge.text) {
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                setSvgAttribute(rect, "x", prim.bounds.x);
+                setSvgAttribute(rect, "y", prim.bounds.y);
+                setSvgAttribute(rect, "width", prim.bounds.width);
+                setSvgAttribute(rect, "height", prim.bounds.height);
+                if (prim.borderRadius) {
+                    setSvgAttribute(rect, "rx", prim.borderRadius);
+                }
+                rect.setAttribute("fill", prim.backgroundColor);
+                if (prim.borderColor && prim.borderWidth) {
+                    rect.setAttribute("stroke", prim.borderColor);
+                    setSvgAttribute(rect, "stroke-width", prim.borderWidth);
+                }
+                if (prim.opacity < 1) {
+                    setSvgAttribute(rect, "opacity", prim.opacity);
+                }
+                badgeGroup.appendChild(rect);
+
+                if (prim.text) {
+                    const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    setSvgAttribute(textEl, "x", prim.bounds.x + prim.bounds.width / 2);
+                    setSvgAttribute(textEl, "y", prim.bounds.y + prim.bounds.height / 2);
+                    textEl.setAttribute("dominant-baseline", "central");
+                    textEl.setAttribute("text-anchor", "middle");
+                    textEl.setAttribute("fill", prim.textColor);
+                    textEl.setAttribute("font-family", prim.fontFamily);
+                    setSvgAttribute(textEl, "font-size", `${prim.fontSize}px`);
+                    textEl.setAttribute("font-weight", prim.fontWeight);
+                    if (prim.fontStyle && prim.fontStyle !== "normal") {
+                        textEl.setAttribute("font-style", prim.fontStyle);
+                    }
+                    textEl.textContent = prim.text;
+                    badgeGroup.appendChild(textEl);
+                }
+
+                domOverlayGroup.appendChild(badgeGroup);
+            } else if (prim.kind === "text") {
+                if (!prim.text) {
+                    continue;
+                }
                 const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                setSvgAttribute(textEl, "x", badge.bounds.x + badge.bounds.width / 2);
-                setSvgAttribute(textEl, "y", badge.bounds.y + badge.bounds.height / 2);
-                textEl.setAttribute("dominant-baseline", "central");
-                textEl.setAttribute("text-anchor", "middle");
-                textEl.setAttribute("fill", badge.textColor);
-                textEl.setAttribute("font-family", badge.fontFamily);
-                setSvgAttribute(textEl, "font-size", `${badge.fontSize}px`);
-                textEl.setAttribute("font-weight", badge.fontWeight);
-                if (badge.fontStyle && badge.fontStyle !== "normal") {
-                    textEl.setAttribute("font-style", badge.fontStyle);
+                textEl.setAttribute("data-export-role", prim.role);
+
+                let anchorX = prim.bounds.x + prim.bounds.width / 2;
+                let textAnchor = "middle";
+
+                if (prim.textAlign === "left") {
+                    anchorX = prim.bounds.x;
+                    textAnchor = "start";
+                } else if (prim.textAlign === "right") {
+                    anchorX = prim.bounds.x + prim.bounds.width;
+                    textAnchor = "end";
                 }
-                textEl.textContent = badge.text;
-                badgeGroup.appendChild(textEl);
-            }
 
-            domVectorGroup.appendChild(badgeGroup);
+                const anchorY = prim.bounds.y + prim.bounds.height / 2;
+
+                setSvgAttribute(textEl, "x", anchorX);
+                setSvgAttribute(textEl, "y", anchorY);
+                textEl.setAttribute("dominant-baseline", "central");
+                textEl.setAttribute("text-anchor", textAnchor);
+                textEl.setAttribute("fill", prim.color);
+                textEl.setAttribute("font-family", prim.fontFamily);
+                setSvgAttribute(textEl, "font-size", `${prim.fontSize}px`);
+                textEl.setAttribute("font-weight", prim.fontWeight);
+                if (prim.fontStyle && prim.fontStyle !== "normal") {
+                    textEl.setAttribute("font-style", prim.fontStyle);
+                }
+                if (prim.letterSpacing) {
+                    setSvgAttribute(textEl, "letter-spacing", `${prim.letterSpacing}px`);
+                }
+                if (prim.opacity < 1) {
+                    setSvgAttribute(textEl, "opacity", prim.opacity);
+                }
+
+                // Accurate transform matrix or rotation (EXP-06)
+                if (prim.transformMatrix) {
+                    textEl.setAttribute("transform", `matrix(${prim.transformMatrix.join(" ")})`);
+                } else if (prim.rotation) {
+                    textEl.setAttribute(
+                        "transform",
+                        `rotate(${prim.rotation.angle} ${prim.rotation.cx} ${prim.rotation.cy})`
+                    );
+                }
+
+                textEl.textContent = prim.text;
+                domOverlayGroup.appendChild(textEl);
+            } else if (prim.kind === "raster") {
+                const island = renderedIslands[rasterIslandIndex++];
+                if (island) {
+                    const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                    img.setAttribute("data-export-role", prim.role);
+                    setSvgAttribute(img, "x", island.x);
+                    setSvgAttribute(img, "y", island.y);
+                    setSvgAttribute(img, "width", island.width);
+                    setSvgAttribute(img, "height", island.height);
+                    img.setAttribute("href", island.dataUrl);
+
+                    // Plot-local clipping if clipRect is present (EXP-14)
+                    if (island.clipRect) {
+                        const clipId = `mona-export-clip-${++clipIdCounter}`;
+                        const clipPath = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
+                        clipPath.setAttribute("id", clipId);
+                        const clipRectEl = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                        setSvgAttribute(clipRectEl, "x", island.clipRect.x);
+                        setSvgAttribute(clipRectEl, "y", island.clipRect.y);
+                        setSvgAttribute(clipRectEl, "width", island.clipRect.width);
+                        setSvgAttribute(clipRectEl, "height", island.clipRect.height);
+                        clipPath.appendChild(clipRectEl);
+                        defsContainer.appendChild(clipPath);
+                        img.setAttribute("clip-path", `url(#${clipId})`);
+                    }
+
+                    domOverlayGroup.appendChild(img);
+                }
+            }
         }
 
-        // Render Vector Texts
-        for (const vt of snapshot.domLayers.vectorTexts) {
-            if (!vt.text) {
-                continue;
-            }
-            const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            textEl.setAttribute("data-export-role", vt.role);
-
-            let anchorX = vt.bounds.x + vt.bounds.width / 2;
-            let textAnchor = "middle";
-
-            if (vt.textAlign === "left") {
-                anchorX = vt.bounds.x;
-                textAnchor = "start";
-            } else if (vt.textAlign === "right") {
-                anchorX = vt.bounds.x + vt.bounds.width;
-                textAnchor = "end";
-            }
-
-            const anchorY = vt.bounds.y + vt.bounds.height / 2;
-
-            setSvgAttribute(textEl, "x", anchorX);
-            setSvgAttribute(textEl, "y", anchorY);
-            textEl.setAttribute("dominant-baseline", "central");
-            textEl.setAttribute("text-anchor", textAnchor);
-            textEl.setAttribute("fill", vt.color);
-            textEl.setAttribute("font-family", vt.fontFamily);
-            setSvgAttribute(textEl, "font-size", `${vt.fontSize}px`);
-            textEl.setAttribute("font-weight", vt.fontWeight);
-            if (vt.fontStyle && vt.fontStyle !== "normal") {
-                textEl.setAttribute("font-style", vt.fontStyle);
-            }
-            if (vt.letterSpacing) {
-                setSvgAttribute(textEl, "letter-spacing", `${vt.letterSpacing}px`);
-            }
-            if (vt.opacity < 1) {
-                setSvgAttribute(textEl, "opacity", vt.opacity);
-            }
-            if (vt.rotation) {
-                textEl.setAttribute(
-                    "transform",
-                    `rotate(${vt.rotation.angle} ${vt.rotation.cx} ${vt.rotation.cy})`
-                );
-            }
-
-            textEl.textContent = vt.text;
-            domVectorGroup.appendChild(textEl);
-        }
-
-        rootSvg.appendChild(domVectorGroup);
-
-        // Render Raster Islands
-        if (renderedIslands.length > 0) {
-            const domRasterGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            domRasterGroup.setAttribute("data-export-layer", "dom-raster");
-
-            for (const island of renderedIslands) {
-                const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
-                setSvgAttribute(img, "x", island.x);
-                setSvgAttribute(img, "y", island.y);
-                setSvgAttribute(img, "width", island.width);
-                setSvgAttribute(img, "height", island.height);
-                img.setAttribute("href", island.dataUrl);
-                domRasterGroup.appendChild(img);
-            }
-
-            rootSvg.appendChild(domRasterGroup);
-        }
+        chartRootGroup.appendChild(domOverlayGroup);
 
         return rootSvg;
     }

@@ -23,13 +23,13 @@ export class ChartExportSvgFinalizer {
             );
         }
 
-        // Apply background rectangle if specified
+        // Apply background rectangle spanning full requested output viewport (EXP-09)
         if (snapshot.background) {
             const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
             setSvgAttribute(bgRect, "x", 0);
             setSvgAttribute(bgRect, "y", 0);
-            setSvgAttribute(bgRect, "width", snapshot.sourceWidth);
-            setSvgAttribute(bgRect, "height", snapshot.sourceHeight);
+            setSvgAttribute(bgRect, "width", request.width);
+            setSvgAttribute(bgRect, "height", request.height);
             bgRect.setAttribute("fill", snapshot.background);
 
             const defs = svgElement.querySelector("defs");
@@ -40,21 +40,32 @@ export class ChartExportSvgFinalizer {
             }
         }
 
-        // Apply Accessibility Metadata
+        // Apply Accessibility Metadata with stable IDs and ARIA attributes (EXP-16)
         if (request.accessibility) {
+            const titleId = "mona-chart-export-title";
+            const descId = "mona-chart-export-desc";
             const titleText = snapshot.ariaLabel || "Chart";
+
             const titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
+            titleEl.setAttribute("id", titleId);
             titleEl.textContent = titleText;
             svgElement.insertBefore(titleEl, svgElement.firstChild);
 
             if (snapshot.ariaDescription) {
                 const descEl = document.createElementNS("http://www.w3.org/2000/svg", "desc");
+                descEl.setAttribute("id", descId);
                 descEl.textContent = snapshot.ariaDescription;
                 svgElement.insertBefore(descEl, titleEl.nextSibling);
+                svgElement.setAttribute("aria-describedby", descId);
             }
+            svgElement.setAttribute("aria-labelledby", titleId);
+        } else {
+            svgElement.removeAttribute("role");
+            svgElement.removeAttribute("aria-labelledby");
+            svgElement.removeAttribute("aria-describedby");
         }
 
-        // Sanitize internal attributes, scripts, foreignObject
+        // Sanitize internal attributes, scripts, foreignObject, and unsafe resources
         ChartExportSvgSanitizer.sanitize(svgElement);
 
         let rawXml = "";

@@ -41,12 +41,19 @@ describe("ChartExportOptions", () => {
             expect(normalized.background).toBe("#123456");
         });
 
-        it("clamps pixelRatio within safe limits (1 to 8)", () => {
+        it("accepts valid pixelRatio (0.25 to 8) and rejects out-of-bounds values (EXP-15)", () => {
             const low = normalizeChartExportOptions({ format: "png", pixelRatio: 0.5 }, 500, 300);
-            expect(low.pixelRatio).toBe(1);
+            expect(low.pixelRatio).toBe(0.5);
 
-            const high = normalizeChartExportOptions({ format: "png", pixelRatio: 12 }, 500, 300);
-            expect(high.pixelRatio).toBe(8);
+            const high = normalizeChartExportOptions({ format: "png", pixelRatio: 4 }, 500, 300);
+            expect(high.pixelRatio).toBe(4);
+
+            expect(() => normalizeChartExportOptions({ format: "png", pixelRatio: 0.1 }, 500, 300)).toThrow(
+                ChartExportError
+            );
+            expect(() => normalizeChartExportOptions({ format: "png", pixelRatio: 12 }, 500, 300)).toThrow(
+                ChartExportError
+            );
         });
 
         it("normalizes PDF page size and margins", () => {

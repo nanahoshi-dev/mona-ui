@@ -1,5 +1,10 @@
 @if (isColorScaleMode() && legendScale(); as scale) {
-    <div [class]="containerClasses()" [attr.aria-label]="legendAriaLabel()" role="region">
+    <div
+        [class]="containerClasses()"
+        [attr.aria-label]="legendAriaLabel()"
+        role="region"
+        data-mona-chart-export-role="legend-color-scale"
+        data-mona-chart-export-mode="raster">
         @if (position() === "left" || position() === "right") {
             <div class="flex flex-col items-center gap-1.5 px-1 py-2">
                 @if (scale.title) {
@@ -59,7 +64,9 @@
                     [class]="itemClasses(item)"
                     [attr.role]="isItemInteractive(item) ? 'button' : null"
                     [attr.tabindex]="isItemInteractive(item) ? 0 : null"
-                    [attr.aria-pressed]="isItemInteractive(item) ? item.visible : null">
+                    [attr.aria-pressed]="isItemInteractive(item) ? item.visible : null"
+                    data-mona-chart-export-role="legend-item-template"
+                    data-mona-chart-export-mode="raster">
                     <ng-container
                         [ngTemplateOutlet]="template.templateRef"
                         [ngTemplateOutletContext]="{
@@ -89,15 +96,19 @@
                         [attr.aria-pressed]="item.visible">
                         <span
                             class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                            [style.background]="item.secondaryColor ? ('linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)') : item.color"></span>
-                        <span class="text-xs font-medium">{{ item.name }}</span>
+                            [style.background]="item.secondaryColor ? ('linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)') : item.color"
+                            [style.backgroundColor]="item.color"
+                            data-mona-chart-export-role="legend-bullet"></span>
+                        <span class="text-xs font-medium" data-mona-chart-export-role="legend-text">{{ item.name }}</span>
                     </button>
                 } @else {
                     <div [class]="itemClasses(item)">
                         <span
                             class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                            [style.background]="item.secondaryColor ? ('linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)') : item.color"></span>
-                        <span class="text-xs font-medium">{{ item.name }}</span>
+                            [style.background]="item.secondaryColor ? ('linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)') : item.color"
+                            [style.backgroundColor]="item.color"
+                            data-mona-chart-export-role="legend-bullet"></span>
+                        <span class="text-xs font-medium" data-mona-chart-export-role="legend-text">{{ item.name }}</span>
                     </div>
                 }
             }

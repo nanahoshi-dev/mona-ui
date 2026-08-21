@@ -4,73 +4,78 @@ import type { ChartExportSnapshot } from "./chart-export-snapshot";
 import type { NormalizedChartExportRequest } from "./chart-export-options";
 
 describe("ChartExportCompositor", () => {
+    const badgeItem = {
+        backgroundColor: "#ff0000",
+        borderColor: "#000000",
+        borderRadius: 4,
+        borderWidth: 1,
+        bounds: { height: 20, width: 60, x: 100, y: 50 },
+        fontFamily: "Arial",
+        fontSize: 12,
+        fontStyle: "normal",
+        fontWeight: "bold",
+        opacity: 1,
+        role: "reference-badge",
+        text: "Target",
+        textColor: "#ffffff",
+        zOrder: 10
+    };
+
+    const textItem1 = {
+        bounds: { height: 16, width: 120, x: 20, y: 10 },
+        color: "#333333",
+        fontFamily: "sans-serif",
+        fontSize: 14,
+        fontStyle: "normal",
+        fontWeight: "600",
+        letterSpacing: 0,
+        opacity: 1,
+        role: "title",
+        text: "Main Chart Title",
+        textAlign: "left" as const,
+        zOrder: 11
+    };
+
+    const textItem2 = {
+        bounds: { height: 14, width: 40, x: 50, y: 300 },
+        color: "#666666",
+        fontFamily: "sans-serif",
+        fontSize: 11,
+        fontStyle: "normal",
+        fontWeight: "400",
+        letterSpacing: 0,
+        opacity: 0.9,
+        role: "axis-label",
+        rotation: { angle: -45, cx: 70, cy: 307 },
+        text: "2026-Q1",
+        textAlign: "center" as const,
+        zOrder: 12
+    };
+
     const createTestSnapshot = (overrides?: Partial<ChartExportSnapshot>): ChartExportSnapshot => ({
         ariaDescription: null,
         ariaLabel: "Test Chart",
         background: null,
         domLayers: {
-            badges: [
-                {
-                    backgroundColor: "#ff0000",
-                    borderColor: "#000000",
-                    borderRadius: 4,
-                    borderWidth: 1,
-                    bounds: { height: 20, width: 60, x: 100, y: 50 },
-                    fontFamily: "Arial",
-                    fontSize: 12,
-                    fontStyle: "normal",
-                    fontWeight: "bold",
-                    opacity: 1,
-                    role: "reference-badge",
-                    text: "Target",
-                    textColor: "#ffffff",
-                    zOrder: 10
-                }
+            badges: [badgeItem],
+            primitives: [
+                { kind: "badge", ...badgeItem },
+                { kind: "text", ...textItem1 },
+                { kind: "text", ...textItem2 }
             ],
             rasterIslands: [],
-            vectorTexts: [
-                {
-                    bounds: { height: 16, width: 120, x: 20, y: 10 },
-                    color: "#333333",
-                    fontFamily: "sans-serif",
-                    fontSize: 14,
-                    fontStyle: "normal",
-                    fontWeight: "600",
-                    letterSpacing: 0,
-                    opacity: 1,
-                    role: "title",
-                    text: "Main Chart Title",
-                    textAlign: "left",
-                    zOrder: 11
-                },
-                {
-                    bounds: { height: 14, width: 40, x: 50, y: 300 },
-                    color: "#666666",
-                    fontFamily: "sans-serif",
-                    fontSize: 11,
-                    fontStyle: "normal",
-                    fontWeight: "400",
-                    letterSpacing: 0,
-                    opacity: 0.9,
-                    role: "axis-label",
-                    rotation: { angle: -45, cx: 70, cy: 307 },
-                    text: "2026-Q1",
-                    textAlign: "center",
-                    zOrder: 12
-                }
-            ]
+            vectorTexts: [textItem1, textItem2]
         },
         hasNoData: false,
         plotSurfaceRect: { height: 300, width: 500, x: 40, y: 40 },
         presentation: {
             activeBrushBounds: null,
             annotationBadgeAnchors: null,
-            brushRegistration: null,
+            brush: null,
             cartesianDataLabels: null,
             cartesianOverlay: null,
             crosshair: null,
-            crosshairRegistration: null,
-            interaction: null,
+            crosshairStyle: null,
             selectionOptions: null,
             selectionScene: null
         },
@@ -154,7 +159,21 @@ describe("ChartExportCompositor", () => {
     });
 
     it("composes raster islands as SVG image elements", () => {
-        const snapshot = createTestSnapshot();
+        const rasterIslandItem = {
+            bounds: { height: 80, width: 150, x: 200, y: 100 },
+            frozenRoot: document.createElement("div"),
+            role: "custom-template",
+            zOrder: 15
+        };
+
+        const snapshot = createTestSnapshot({
+            domLayers: {
+                badges: [],
+                primitives: [{ kind: "raster", ...rasterIslandItem }],
+                rasterIslands: [rasterIslandItem],
+                vectorTexts: []
+            }
+        });
         const request = createTestRequest();
 
         const renderedIslands = [

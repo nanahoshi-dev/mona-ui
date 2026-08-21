@@ -1,6 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartComponent } from "./chart.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
 import { BarSeriesComponent } from "../bar-series/bar-series.component";
@@ -9,17 +9,27 @@ import { GaugeSeriesComponent } from "../gauge-series/gauge-series.component";
 import { TreemapSeriesComponent } from "../treemap-series/treemap-series.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
+import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
 import { ChartExportError } from "../../models/chart-export.models";
 import { ChartDownloadHelper } from "../../internal/export/chart-download-helper";
+import { setPdfExportInstrumentation } from "../../internal/export/chart-pdf-exporter";
+import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 
 interface DataItem {
     category: string;
     value: number;
 }
 
+const VALID_1X1_PNG_BYTES = new Uint8Array([
+    137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21,
+    196, 137, 0, 0, 0, 10, 73, 68, 65, 84, 120, 156, 99, 0, 1, 0, 0, 5, 0, 1, 13, 10, 45, 180, 0, 0, 0, 0, 73, 69,
+    78, 68, 174, 66, 96, 130
+]);
+
 @Component({
     template: `
         <mona-chart
+            [animation]="false"
             [data]="data()"
             [title]="title()"
             [subtitle]="subtitle()"
@@ -28,10 +38,11 @@ interface DataItem {
             style="display: block; width: 600px; height: 400px;">
             <mona-chart-x-axis />
             <mona-chart-y-axis />
-            <mona-line-series [field]="'value'" />
+            <mona-line-series [name]="'Revenue'" [field]="'value'" />
+            <mona-chart-legend />
         </mona-chart>
     `,
-    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent]
+    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent, ChartLegendComponent]
 })
 class CartesianTestHostComponent {
     public readonly data = signal<DataItem[]>([
@@ -47,6 +58,7 @@ class CartesianTestHostComponent {
 @Component({
     template: `
         <mona-chart
+            [animation]="false"
             [data]="data()"
             [title]="'Distribution'"
             style="display: block; width: 500px; height: 500px;">
@@ -66,6 +78,7 @@ class PolarPieTestHostComponent {
 @Component({
     template: `
         <mona-chart
+            [animation]="false"
             style="display: block; width: 400px; height: 300px;">
             <mona-gauge-series [value]="75" />
         </mona-chart>
@@ -77,6 +90,7 @@ class GaugeTestHostComponent {}
 @Component({
     template: `
         <mona-chart
+            [animation]="false"
             [data]="data()"
             style="display: block; width: 500px; height: 400px;">
             <mona-treemap-series [field]="'value'" [labelField]="'category'" />
@@ -92,48 +106,118 @@ class TreemapTestHostComponent {
     ]);
 }
 
-function mockHostLayout(fixture: ComponentFixture<any>, width: number = 600, height: number = 400): void {
-    const hostEl = fixture.nativeElement.querySelector("mona-chart") as HTMLElement;
-    if (hostEl) {
-        hostEl.getBoundingClientRect = () =>
-            ({
-                bottom: height,
-                height,
-                left: 0,
-                right: width,
-                top: 0,
-                width,
-                x: 0,
-                y: 0,
-                toJSON: () => ({})
-            }) as DOMRect;
-    }
-    const plotSurface = hostEl?.querySelector(".flex-1") as HTMLElement;
-    if (plotSurface) {
-        plotSurface.getBoundingClientRect = () =>
-            ({
-                bottom: height,
-                height: height - 60,
-                left: 40,
-                right: width - 20,
-                top: 40,
-                width: width - 60,
-                x: 40,
-                y: 40,
-                toJSON: () => ({})
-            }) as DOMRect;
-    }
-}
-
 describe("ChartExportCertification", () => {
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    const originalToBlob = HTMLCanvasElement.prototype.toBlob;
+    const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+    const originalImage = window.Image;
+
+    beforeEach(() => {
+        vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+            bottom: 400,
+            height: 400,
+            left: 0,
+            right: 600,
+            top: 0,
+            width: 600,
+            x: 0,
+            y: 0,
+            toJSON: () => ({})
+        } as DOMRect);
+
+        if (!(SVGElement.prototype as any).getBBox) {
+            (SVGElement.prototype as any).getBBox = function () {
+                return {
+                    bottom: 16,
+                    height: 16,
+                    left: 0,
+                    right: 50,
+                    top: 0,
+                    width: 50,
+                    x: 0,
+                    y: 0,
+                    toJSON: () => ({})
+                } as DOMRect;
+            };
+        }
+        if (typeof SVGGraphicsElement !== "undefined" && !(SVGGraphicsElement.prototype as any).getBBox) {
+            (SVGGraphicsElement.prototype as any).getBBox = (SVGElement.prototype as any).getBBox;
+        }
+
+        HTMLCanvasElement.prototype.getContext = function (type: string) {
+            if (type === "2d") {
+                return {
+                    arc: () => {},
+                    beginPath: () => {},
+                    clearRect: () => {},
+                    clip: () => {},
+                    closePath: () => {},
+                    createLinearGradient: () => ({ addColorStop: () => {} }),
+                    createPattern: () => null,
+                    createRadialGradient: () => ({ addColorStop: () => {} }),
+                    drawImage: () => {},
+                    fill: () => {},
+                    fillRect: () => {},
+                    fillText: () => {},
+                    getImageData: () => ({ data: new Uint8ClampedArray(4) }),
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: "high",
+                    lineTo: () => {},
+                    measureText: () => ({ width: 50 }),
+                    moveTo: () => {},
+                    putImageData: () => {},
+                    quadraticCurveTo: () => {},
+                    rect: () => {},
+                    restore: () => {},
+                    save: () => {},
+                    scale: () => {},
+                    setLineDash: () => {},
+                    setTransform: () => {},
+                    stroke: () => {},
+                    strokeRect: () => {},
+                    strokeText: () => {},
+                    transform: () => {},
+                    translate: () => {}
+                } as any;
+            }
+            return null;
+        } as any;
+
+        HTMLCanvasElement.prototype.toBlob = function (callback: (blob: Blob | null) => void) {
+            callback(new Blob([VALID_1X1_PNG_BYTES], { type: "image/png" }));
+        };
+
+        HTMLCanvasElement.prototype.toDataURL = function () {
+            return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+        };
+
+        class MockImage {
+            public crossOrigin = "";
+            public set src(_v: string) {
+                setTimeout(() => this.onload?.(new Event("load")), 0);
+            }
+            public onload: ((ev: Event) => void) | null = null;
+            public onerror: ((ev: any) => void) | null = null;
+        }
+
+        (window as any).Image = MockImage;
+    });
+
+    afterEach(() => {
+        HTMLCanvasElement.prototype.getContext = originalGetContext;
+        HTMLCanvasElement.prototype.toBlob = originalToBlob;
+        HTMLCanvasElement.prototype.toDataURL = originalToDataURL;
+        (window as any).Image = originalImage;
+        setPdfExportInstrumentation(null);
+    });
+
     describe("Cartesian Chart Export (Canvas and SVG renderers)", () => {
         it("exports standalone SVG document with metadata, vector text, and graphics from Canvas renderer", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 600, 400);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
             const result = await chartComponent.exportChart({
                 format: "svg",
@@ -149,20 +233,20 @@ describe("ChartExportCertification", () => {
 
             const text = await result.blob.text();
             expect(text.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
-            expect(text).toContain("<title>Sales Overview</title>");
-            expect(text).toContain("<desc>Quarterly Trends</desc>");
+            expect(text).toContain("<title id=\"mona-chart-export-title\">Sales Overview</title>");
+            expect(text).toContain("<desc id=\"mona-chart-export-desc\">Quarterly Trends</desc>");
             expect(text).toContain("<path");
             expect(text).toContain("#3b82f6");
+            expect(text).toContain("Revenue");
         });
 
         it("exports SVG document identically when renderer is SVG", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.componentInstance.renderer.set("svg");
             fixture.detectChanges();
-            mockHostLayout(fixture, 600, 400);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
             const result = await chartComponent.exportChart({ format: "svg" });
             expect(result.format).toBe("svg");
@@ -175,64 +259,28 @@ describe("ChartExportCertification", () => {
         it("exports raster PNG from cartesian chart", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 600, 400);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
-            const originalImage = window.Image;
-            const originalToBlob = HTMLCanvasElement.prototype.toBlob;
-            const originalGetContext = HTMLCanvasElement.prototype.getContext;
+            const result = await chartComponent.exportChart({
+                format: "png",
+                pixelRatio: 2
+            });
 
-            class MockImage {
-                public crossOrigin = "";
-                public set src(_v: string) {
-                    setTimeout(() => this.onload?.(new Event("load")), 0);
-                }
-                public onload: ((ev: Event) => void) | null = null;
-                public onerror: ((ev: any) => void) | null = null;
-            }
-
-            (window as any).Image = MockImage;
-            HTMLCanvasElement.prototype.getContext = function (type: string) {
-                if (type === "2d") {
-                    return {
-                        drawImage: () => {},
-                        imageSmoothingEnabled: true,
-                        imageSmoothingQuality: "high"
-                    } as any;
-                }
-                return null;
-            } as any;
-            HTMLCanvasElement.prototype.toBlob = function (callback: (blob: Blob | null) => void) {
-                callback(new Blob(["mock-png-data"], { type: "image/png" }));
-            };
-
-            try {
-                const result = await chartComponent.exportChart({
-                    format: "png",
-                    pixelRatio: 2
-                });
-
-                expect(result.format).toBe("png");
-                expect(result.mimeType).toBe("image/png");
-                expect(result.width).toBe(600);
-                expect(result.height).toBe(400);
-                expect(result.blob).toBeInstanceOf(Blob);
-            } finally {
-                (window as any).Image = originalImage;
-                HTMLCanvasElement.prototype.toBlob = originalToBlob;
-                HTMLCanvasElement.prototype.getContext = originalGetContext;
-            }
+            expect(result.format).toBe("png");
+            expect(result.mimeType).toBe("image/png");
+            expect(result.width).toBe(600);
+            expect(result.height).toBe(400);
+            expect(result.blob).toBeInstanceOf(Blob);
         });
 
         it("exports PDF from cartesian chart", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 600, 400);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
             const result = await chartComponent.exportChart({
                 format: "pdf",
@@ -247,16 +295,102 @@ describe("ChartExportCertification", () => {
             expect(result.blob).toBeInstanceOf(Blob);
             expect(result.blob.size).toBeGreaterThan(0);
         });
+
+        it("scales and centers chart when output dimensions have mismatched aspect ratio (EXP-09)", async () => {
+            const fixture = TestBed.createComponent(CartesianTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
+
+            // Export with 1000 x 400 (aspect ratio differs from source 600 x 400)
+            const result = await chartComponent.exportChart({
+                background: "#f8fafc",
+                format: "svg",
+                height: 400,
+                width: 1000
+            });
+
+            const text = await result.blob.text();
+            expect(text).toContain('viewBox="0 0 1000 400"');
+            expect(text).toContain('width="1000"');
+            expect(text).toContain('height="400"');
+            // Background covers full output rect 1000 x 400
+            expect(text).toContain('<rect x="0" y="0" width="1000" height="400" fill="#f8fafc"');
+            // Content group is translated and centered
+            expect(text).toContain('transform="translate(200, 0) scale(1)"');
+        });
+
+        it("rejects invalid pixelRatio values (EXP-15)", async () => {
+            const fixture = TestBed.createComponent(CartesianTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+
+            await expect(
+                chartComponent.exportChart({
+                    format: "png",
+                    pixelRatio: 0
+                })
+            ).rejects.toThrow(ChartExportError);
+
+            await expect(
+                chartComponent.exportChart({
+                    format: "png",
+                    pixelRatio: 10 // > 8
+                })
+            ).rejects.toThrow(ChartExportError);
+        });
+
+        it("validates PDF custom paper margins (EXP-10)", async () => {
+            const fixture = TestBed.createComponent(CartesianTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+
+            await expect(
+                chartComponent.exportChart({
+                    format: "pdf",
+                    page: {
+                        margin: { bottom: 200, left: 150, right: 150, top: 200 },
+                        size: { height: 300, width: 200 } // Total margins exceed dimensions
+                    }
+                })
+            ).rejects.toThrow(ChartExportError);
+        });
+
+        it("falls back to raster PDF when SVG contains CJK characters in auto mode (EXP-04, EXP-26)", async () => {
+            const fixture = TestBed.createComponent(CartesianTestHostComponent);
+            fixture.componentInstance.title.set("売上データ 2026"); // CJK text
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
+
+            let didRasterize = false;
+            setPdfExportInstrumentation({
+                onFullRasterize: () => {
+                    didRasterize = true;
+                }
+            });
+
+            const result = await chartComponent.exportChart({
+                format: "pdf",
+                mode: "auto"
+            });
+
+            expect(result.format).toBe("pdf");
+            expect(didRasterize).toBe(true);
+        });
     });
 
     describe("Polar and Radial Family Export", () => {
         it("exports Polar Pie chart to SVG", async () => {
             const fixture = TestBed.createComponent(PolarPieTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 500, 500);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
             const result = await chartComponent.exportChart({ format: "svg" });
             expect(result.format).toBe("svg");
@@ -268,10 +402,9 @@ describe("ChartExportCertification", () => {
         it("exports Gauge chart to SVG", async () => {
             const fixture = TestBed.createComponent(GaugeTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 400, 300);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
             const result = await chartComponent.exportChart({ format: "svg" });
             expect(result.format).toBe("svg");
@@ -283,10 +416,9 @@ describe("ChartExportCertification", () => {
         it("exports Treemap chart to SVG", async () => {
             const fixture = TestBed.createComponent(TreemapTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 500, 400);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
             const result = await chartComponent.exportChart({ format: "svg" });
             expect(result.format).toBe("svg");
@@ -298,10 +430,9 @@ describe("ChartExportCertification", () => {
         it("triggers downloadChart with sanitized filename", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 600, 400);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
             let downloadedBlob: Blob | null = null;
             let downloadedFileName: string | null = null;
@@ -328,10 +459,9 @@ describe("ChartExportCertification", () => {
         it("cancels export when AbortSignal is aborted", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 600, 400);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
-            chartComponent.recomputeScene();
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
 
             const controller = new AbortController();
             controller.abort();
@@ -347,7 +477,6 @@ describe("ChartExportCertification", () => {
         it("throws not-ready when exporting a destroyed chart component", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.detectChanges();
-            mockHostLayout(fixture, 600, 400);
 
             const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
             fixture.destroy();
