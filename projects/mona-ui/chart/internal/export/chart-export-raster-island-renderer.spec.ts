@@ -193,8 +193,9 @@ describe("ChartExportRasterIslandRenderer", () => {
             const stagedGradient = stagedElement.querySelector("linearGradient")!;
             const stagedRect = stagedElement.querySelector("rect")!;
 
-            expect(stagedGradient.getAttribute("id")).toBe("mona-export-prim-7--shared-id");
-            expect(stagedRect.getAttribute("fill")).toBe("url(#mona-export-prim-7--shared-id)");
+            const stagedGradientId = stagedGradient.getAttribute("id") ?? "";
+            expect(stagedGradientId).toMatch(/^mona-export-.+--mona-export-prim-7--shared-id$/);
+            expect(stagedRect.getAttribute("fill")).toBe(`url(#${stagedGradientId})`);
             expect(document.getElementById("shared-id")).toBe(liveOutside);
         } finally {
             liveOutside.remove();

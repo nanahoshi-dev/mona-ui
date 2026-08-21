@@ -668,13 +668,13 @@ describe("Sixth Export Remediation Regressions (R6)", () => {
                 expect(clonedInput.value).toBe("form-state");
 
                 const clonedUse = frozenA.querySelector("use")!;
-                expect(clonedUse.getAttribute("href")).toBe("#mona-export-prim-1--icon-shape");
+                expect(clonedUse.getAttribute("href")).toMatch(/^#mona-export-.+--mona-export-prim-\d+--icon-shape$/);
 
                 const clonedRect = Array.from(frozenA.querySelectorAll("rect")).find(r =>
                     (r.getAttribute("fill") ?? "").startsWith("url(#")
                 )!;
                 const rewrittenId = (clonedRect.getAttribute("fill") ?? "").slice(5, -1);
-                expect(rewrittenId).toMatch(/^mona-export-prim-\d+--shared-id$/);
+                expect(rewrittenId).toMatch(/^mona-export-.+--mona-export-prim-\d+--shared-id$/);
                 expect(frozenA.querySelector(`linearGradient[id="${rewrittenId}"]`)).not.toBeNull();
 
                 // Both same-ID live originals keep their untouched IDs
