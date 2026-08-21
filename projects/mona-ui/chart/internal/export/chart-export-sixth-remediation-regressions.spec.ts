@@ -258,13 +258,18 @@ describe("Sixth Export Remediation Regressions (R6)", () => {
     // R6-03: true image decode (no synthetic structural success)
     // -------------------------------------------------------------------------
     describe("R6-03: malformed containers are not certified by structure alone", () => {
+        const noDecodeEnvironment: RasterDecodeEnvironment = {
+            createImageBitmap: undefined,
+            createHtmlImage: undefined
+        };
+
         // Baseline gap 7a: JPEG SOI prefix without any SOF marker must not be accepted
         it("rejects malformed JPEG payloads that carry only the SOI prefix", async () => {
             const jpegSoiOnly = Uint8Array.from([0xff, 0xd8, 0xff, 0x00, 0x12, 0x34]);
 
-            await expect(validateRasterImageDecode(jpegSoiOnly, "image/jpeg")).rejects.toThrowError(
-                ChartExportError
-            );
+            await expect(
+                validateRasterImageDecode(jpegSoiOnly, "image/jpeg", undefined, noDecodeEnvironment)
+            ).rejects.toThrowError(ChartExportError);
         });
 
         // Baseline gap 7b: WebP RIFF/WEBP container without a valid bitstream chunk must not be accepted
@@ -277,17 +282,17 @@ describe("Sixth Export Remediation Regressions (R6)", () => {
                 0x08, 0x09, 0x0a, 0x0b
             ]);
 
-            await expect(validateRasterImageDecode(webpPrefixOnly, "image/webp")).rejects.toThrowError(
-                ChartExportError
-            );
+            await expect(
+                validateRasterImageDecode(webpPrefixOnly, "image/webp", undefined, noDecodeEnvironment)
+            ).rejects.toThrowError(ChartExportError);
         });
 
         // Baseline gap 6: environments with neither decode capability must not certify structurally
         it("does not admit any payload in an environment without a real decoder", async () => {
-            // This environment (jsdom) has neither createImageBitmap nor object-URL image decoding;
-            // admission must fail explicitly instead of trusting header bytes.
+            // With both decode strategies explicitly unavailable, admission must fail
+            // explicitly instead of trusting header bytes.
             await expect(
-                validateRasterImageDecode(ONE_PX_PNG_BYTES, "image/png")
+                validateRasterImageDecode(ONE_PX_PNG_BYTES, "image/png", undefined, noDecodeEnvironment)
             ).rejects.toThrowError(ChartExportError);
         });
     });

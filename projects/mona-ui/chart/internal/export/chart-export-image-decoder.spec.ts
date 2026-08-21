@@ -386,9 +386,12 @@ describe("chart-export-image-decoder", () => {
             expect(lateOnload).toBeNull();
         });
 
-        it("does not admit any payload when the environment has no decode capability", async () => {
+        it("does not admit any payload when no decode strategy is available", async () => {
             await expect(
-                validateRasterImageDecode(ONE_PX_PNG_BYTES, "image/png", undefined, {})
+                validateRasterImageDecode(ONE_PX_PNG_BYTES, "image/png", undefined, {
+                    createImageBitmap: undefined,
+                    createHtmlImage: undefined
+                })
             ).rejects.toMatchObject({ code: "unsupported-environment" });
         });
     });
