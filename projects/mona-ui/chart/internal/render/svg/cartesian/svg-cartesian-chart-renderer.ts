@@ -144,15 +144,18 @@ export class SvgCartesianChartRenderer {
             presentation?.crosshairRegistration ?? null,
             plotRect,
             styleResolver,
-            plotClipUrl
+            plotClipUrl,
+            presentation?.crosshairSnapshot ?? null
         );
 
         // 9. Brush
-        if (presentation?.activeBrushBounds && presentation.brushRegistration) {
-            const resolved = styleResolver.resolveBrushStyle(presentation.brushRegistration);
+        if (presentation?.activeBrushBounds && (presentation.brushRegistration || presentation.brushSnapshot)) {
+            const resolved =
+                presentation.brushSnapshot ??
+                (presentation.brushRegistration ? styleResolver.resolveBrushStyle(presentation.brushRegistration) : undefined);
             this.#brushRenderer.render(
                 presentation.activeBrushBounds,
-                presentation.brushRegistration,
+                presentation.brushRegistration ?? null,
                 plotClipUrl,
                 resolved
             );

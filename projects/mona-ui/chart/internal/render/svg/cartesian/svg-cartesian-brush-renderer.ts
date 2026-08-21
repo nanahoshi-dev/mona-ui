@@ -24,16 +24,16 @@ export class SvgCartesianBrushRenderer {
             readonly lineStyle: ChartBrushLineStyle;
         }
     ): void {
-        if (!brushRect || !registration) {
+        if (!brushRect || (!registration && !resolvedStyle)) {
             this.clear();
             return;
         }
 
-        const fillColor = registration.fillColor?.() ?? resolvedStyle?.fillColor ?? "#3b82f6";
-        const fillOpacity = registration.fillOpacity?.() ?? resolvedStyle?.fillOpacity ?? 0.15;
-        const borderColor = registration.borderColor?.() ?? resolvedStyle?.borderColor ?? "#3b82f6";
-        const borderWidth = registration.borderWidth?.() ?? resolvedStyle?.borderWidth ?? 1;
-        const lineStyle = registration.lineStyle?.() ?? resolvedStyle?.lineStyle ?? "solid";
+        const fillColor = resolvedStyle?.fillColor ?? registration?.fillColor?.() ?? "#3b82f6";
+        const fillOpacity = resolvedStyle?.fillOpacity ?? registration?.fillOpacity?.() ?? 0.15;
+        const borderColor = resolvedStyle?.borderColor ?? registration?.borderColor?.() ?? "#3b82f6";
+        const borderWidth = resolvedStyle?.borderWidth ?? registration?.borderWidth?.() ?? 1;
+        const lineStyle = resolvedStyle?.lineStyle ?? registration?.lineStyle?.() ?? "solid";
 
         if (!this.#rectElement) {
             this.#rectElement = createSvgElement("rect");
