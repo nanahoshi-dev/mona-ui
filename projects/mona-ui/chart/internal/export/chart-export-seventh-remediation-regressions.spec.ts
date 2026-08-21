@@ -9,6 +9,7 @@ import {
 } from "./chart-export-image-decoder";
 import type { ChartExportRasterIslandSnapshot } from "./chart-export-snapshot";
 import type { ChartExportRasterMediaType } from "./chart-export-resource-policy";
+import { MAX_EXPORT_RESOURCE_DIMENSION, MAX_EXPORT_RESOURCE_PIXELS } from "./chart-export-resource-policy";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -156,48 +157,40 @@ function imageContainer(url: string): HTMLElement {
     return container;
 }
 
-interface FakeFallbackImageConfig {
+interface FakeFallbackImageRoute {
     height: number;
     outcome: "error" | "load";
+    urlSuffix: string;
     width: number;
 }
 
-class FakeFallbackImage {
-    public crossOrigin = "";
-    public height = 0;
-    public naturalHeight = 0;
-    public naturalWidth = 0;
-    public onerror: ((e: unknown) => void) | null = null;
-    public onload: (() => void) | null = null;
-    public width = 0;
-    readonly #config: FakeFallbackImageConfig;
+function installFakeFallbackImage(routes: readonly FakeFallbackImageRoute[]): void {
+    class RoutedFakeImage {
+        public crossOrigin = "";
+        public height = 0;
+        public naturalHeight = 0;
+        public naturalWidth = 0;
+        public onerror: ((e: unknown) => void) | null = null;
+        public onload: (() => void) | null = null;
+        public width = 0;
 
-    public constructor(config: FakeFallbackImageConfig) {
-        this.#config = config;
-    }
-
-    public set src(_value: string) {
-        queueMicrotask(() => {
-            if (this.#config.outcome === "error") {
-                this.onerror?.(new Event("error"));
-                return;
-            }
-            this.naturalWidth = this.#config.width;
-            this.naturalHeight = this.#config.height;
-            this.width = this.#config.width;
-            this.height = this.#config.height;
-            this.onload?.();
-        });
-    }
-}
-
-function installFakeFallbackImage(config: FakeFallbackImageConfig): void {
-    class ConfiguredFakeImage extends FakeFallbackImage {
-        public constructor() {
-            super(config);
+        public set src(value: string) {
+            const target = String(value);
+            const route = routes.find(candidate => target.endsWith(candidate.urlSuffix));
+            queueMicrotask(() => {
+                if (!route || route.outcome === "error") {
+                    this.onerror?.(new Event("error"));
+                    return;
+                }
+                this.naturalWidth = route.width;
+                this.naturalHeight = route.height;
+                this.width = route.width;
+                this.height = route.height;
+                this.onload?.();
+            });
         }
     }
-    vi.stubGlobal("Image", ConfiguredFakeImage);
+    vi.stubGlobal("Image", RoutedFakeImage);
 }
 
 interface CanvasAllocationProbe {
@@ -458,9 +451,165 @@ describe("Seventh Export Remediation Regressions (R7)", () => {
         expect(document.querySelectorAll("[id^='mona-export']")).toHaveLength(0);
     });
 
+    it("disambiguates identical fragment IDs across two islands staged in one transaction", async () => {
+        const islandA = makeFragmentIsland("mona-export-prim-1", "a", "https://cdn.example/resource-a.png");
+        const islandB = makeFragmentIsland("mona-export-prim-2", "b", "https://cdn.example/resource-b.png");
+
+        window.fetch = vi.fn().mockImplementation(async () => new Response(ONE_PX_PNG_BYTES, { status: 200 }));
+
+        await ChartExportRasterIslandRenderer.renderIslands(
+            [islandA, islandB],
+            new Map(),
+            1,
+            undefined,
+            fakeBitmapDecodeEnvironment()
+        );
+
+        const idsA = collectIds(islandA.frozenRoot);
+        const idsB = collectIds(islandB.frozenRoot);
+        expect(idsA.size).toBeGreaterThan(0);
+        expect([...idsA].filter(id => idsB.has(id))).toEqual([]);
+
+        assertSelfContained(islandA.frozenRoot, idsA);
+        assertSelfContained(islandB.frozenRoot, idsB);
+
+        const clipA = [...idsA].find(id => id.endsWith("--clip"));
+        const clipB = [...idsB].find(id => id.endsWith("--clip"));
+        expect(clipA).not.toBe(clipB);
+    });
+
+    it("aborts one overlapping transaction without disturbing the other's staged tree", async () => {
+        const controllerA = new AbortController();
+        const controllerB = new AbortController();
+
+        const allCaptured = deferred();
+        const fetchGate = {
+            a: deferred(),
+            b: deferred()
+        };
+        let heldRequests = 0;
+
+        window.fetch = vi.fn().mockImplementation(async (url: unknown) => {
+            const target = String(url);
+            if (target.endsWith("/resource-a.png")) {
+                heldRequests += 1;
+                if (heldRequests === 2) {
+                    allCaptured.resolve();
+                }
+                await fetchGate.a.promise;
+                return new Response(ONE_PX_PNG_BYTES, { status: 200 });
+            }
+            if (target.endsWith("/resource-b.png")) {
+                heldRequests += 1;
+                if (heldRequests === 2) {
+                    allCaptured.resolve();
+                }
+                await fetchGate.b.promise;
+                return new Response(ONE_PX_PNG_BYTES, { status: 200 });
+            }
+            return new Response(ONE_PX_PNG_BYTES, { status: 200 });
+        });
+
+        const staged = {
+            a: deferred<HTMLElement>(),
+            b: deferred<HTMLElement>()
+        };
+        const completion = {
+            b: deferred()
+        };
+
+        mockHtml2canvas.mockImplementation(async (element: HTMLElement, options?: { signal?: AbortSignal }) => {
+            const tag = element.getAttribute("data-mona-export-transaction");
+            if (tag === "a") {
+                staged.a.resolve(element);
+                await new Promise<never>((_resolve, reject) => {
+                    options?.signal?.addEventListener(
+                        "abort",
+                        () => reject(new DOMException("Export was aborted", "AbortError")),
+                        { once: true }
+                    );
+                });
+            } else if (tag === "b") {
+                staged.b.resolve(element);
+                await completion.b.promise;
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = 100;
+            canvas.height = 50;
+            return canvas;
+        });
+
+        const pendingA = ChartExportRasterIslandRenderer.renderIslands(
+            [makeFragmentIsland("mona-export-prim-1", "a", "https://cdn.example/resource-a.png")],
+            new Map(),
+            1,
+            controllerA.signal,
+            fakeBitmapDecodeEnvironment()
+        );
+        const pendingB = ChartExportRasterIslandRenderer.renderIslands(
+            [makeFragmentIsland("mona-export-prim-1", "b", "https://cdn.example/resource-b.png")],
+            new Map(),
+            1,
+            controllerB.signal,
+            fakeBitmapDecodeEnvironment()
+        );
+
+        await allCaptured.promise;
+        expect(heldRequests).toBe(2);
+
+        fetchGate.a.resolve();
+        const elementA = await staged.a.promise;
+
+        fetchGate.b.resolve();
+        const elementB = await staged.b.promise;
+
+        expect(elementA.isConnected).toBe(true);
+        expect(elementB.isConnected).toBe(true);
+
+        const idsBeforeAbort = [...collectIds(elementB)];
+
+        controllerA.abort();
+
+        await expect(pendingA).rejects.toMatchObject({ name: "AbortError" });
+
+        expect(elementA.isConnected).toBe(false);
+        expect(elementB.isConnected).toBe(true);
+        expect([...collectIds(elementB)]).toEqual(idsBeforeAbort);
+
+        completion.b.resolve();
+
+        const results = await pendingB;
+        expect(results).toHaveLength(1);
+        expect(elementB.isConnected).toBe(false);
+        expect(document.querySelectorAll("[id^='mona-export']")).toHaveLength(0);
+    });
+
+    it("captures the same external URL independently in two overlapping resource transactions", async () => {
+        let fetchCount = 0;
+        window.fetch = vi.fn().mockImplementation(async () => {
+            fetchCount += 1;
+            return new Response(ONE_PX_PNG_BYTES, { status: 200 });
+        });
+
+        const sharedUrl = "https://cdn.example/shared-concurrent.png";
+        const rootA = imageContainer(sharedUrl);
+        const rootB = imageContainer(sharedUrl);
+
+        await Promise.all([
+            ChartExportResourceManager.captureAndInlineIslandResources([rootA], undefined, fakeBitmapDecodeEnvironment()),
+            ChartExportResourceManager.captureAndInlineIslandResources([rootB], undefined, fakeBitmapDecodeEnvironment())
+        ]);
+
+        expect(fetchCount).toBe(2);
+        expect(rootA.querySelector("img")!.src.startsWith("data:image/png")).toBe(true);
+        expect(rootB.querySelector("img")!.src.startsWith("data:image/png")).toBe(true);
+    });
+
     it("rejects an oversized CORS-fallback image before any canvas allocation (R7-02)", async () => {
         window.fetch = vi.fn().mockRejectedValue(new TypeError("network path unavailable"));
-        installFakeFallbackImage({ height: 20000, outcome: "load", width: 20000 });
+        installFakeFallbackImage([
+            { height: 20000, outcome: "load", urlSuffix: "hostile-fallback.png", width: 20000 }
+        ]);
         const probe = installCanvasAllocationProbe();
 
         try {
@@ -480,7 +629,7 @@ describe("Seventh Export Remediation Regressions (R7)", () => {
 
     it("captures an in-budget CORS-fallback image through the canvas path (R7-02 control)", async () => {
         window.fetch = vi.fn().mockRejectedValue(new TypeError("network path unavailable"));
-        installFakeFallbackImage({ height: 10, outcome: "load", width: 10 });
+        installFakeFallbackImage([{ height: 10, outcome: "load", urlSuffix: "small-fallback.png", width: 10 }]);
         const probe = installCanvasAllocationProbe();
 
         try {
@@ -496,6 +645,89 @@ describe("Seventh Export Remediation Regressions (R7)", () => {
         } finally {
             probe.restore();
         }
+    });
+
+    it("keeps fallback canvas allocation isolated when an oversized capture overlaps a valid one", async () => {
+        window.fetch = vi.fn().mockRejectedValue(new TypeError("network path unavailable"));
+        installFakeFallbackImage([
+            { height: 20000, outcome: "load", urlSuffix: "hostile-overlap.png", width: 20000 },
+            { height: 10, outcome: "load", urlSuffix: "valid-overlap.png", width: 10 }
+        ]);
+        const probe = installCanvasAllocationProbe();
+
+        try {
+            const [hostile, valid] = await Promise.allSettled([
+                ChartExportResourceManager.captureAndInlineIslandResources([
+                    imageContainer("https://cdn.example/hostile-overlap.png")
+                ]),
+                ChartExportResourceManager.captureAndInlineIslandResources([
+                    imageContainer("https://cdn.example/valid-overlap.png")
+                ])
+            ]);
+
+            expect(hostile.status).toBe("rejected");
+            expect((hostile as PromiseRejectedResult).reason).toMatchObject({ code: "too-large" });
+            expect(valid.status).toBe("fulfilled");
+
+            expect(probe.sizedWrites).toEqual([{ width: 10 }, { height: 10 }]);
+            expect(probe.drawImage).toHaveBeenCalledTimes(1);
+            expect(probe.toDataURL).toHaveBeenCalledTimes(1);
+        } finally {
+            probe.restore();
+        }
+    });
+
+    describe("fallback decoded-image budget boundaries (R7-02)", () => {
+        interface CanvasSizeWrite {
+            height?: number;
+            width?: number;
+        }
+
+        async function captureWithDimensions(width: number, height: number): Promise<readonly CanvasSizeWrite[]> {
+            window.fetch = vi.fn().mockRejectedValue(new TypeError("network path unavailable"));
+            installFakeFallbackImage([{ height, outcome: "load", urlSuffix: "boundary.png", width }]);
+            const probe = installCanvasAllocationProbe();
+            try {
+                await ChartExportResourceManager.captureAndInlineIslandResources([
+                    imageContainer("https://cdn.example/boundary.png")
+                ]);
+                return probe.sizedWrites;
+            } finally {
+                probe.restore();
+            }
+        }
+
+        it("allows a decoded width exactly at the maximum dimension", async () => {
+            const writes = await captureWithDimensions(MAX_EXPORT_RESOURCE_DIMENSION, 1);
+            expect(writes).toEqual([{ width: MAX_EXPORT_RESOURCE_DIMENSION }, { height: 1 }]);
+        });
+
+        it("rejects a decoded width above the maximum dimension before allocation", async () => {
+            await expect(
+                captureWithDimensions(MAX_EXPORT_RESOURCE_DIMENSION + 1, 1)
+            ).rejects.toMatchObject({ code: "too-large" });
+        });
+
+        it("allows a decoded pixel count exactly at the maximum pixel budget", async () => {
+            const height = MAX_EXPORT_RESOURCE_PIXELS / MAX_EXPORT_RESOURCE_DIMENSION;
+            const writes = await captureWithDimensions(MAX_EXPORT_RESOURCE_DIMENSION, height);
+            expect(writes).toEqual([{ width: MAX_EXPORT_RESOURCE_DIMENSION }, { height }]);
+        });
+
+        it("rejects a decoded pixel count above the maximum pixel budget before allocation", async () => {
+            const height = MAX_EXPORT_RESOURCE_PIXELS / MAX_EXPORT_RESOURCE_DIMENSION + 1;
+            await expect(captureWithDimensions(MAX_EXPORT_RESOURCE_DIMENSION, height)).rejects.toMatchObject({
+                code: "too-large"
+            });
+        });
+
+        it("rejects non-finite and empty decoded dimensions before allocation", async () => {
+            await expect(captureWithDimensions(Number.NaN, Number.NaN)).rejects.toMatchObject({
+                code: "resource-load-failed"
+            });
+            await expect(captureWithDimensions(0, 0)).rejects.toMatchObject({ code: "resource-load-failed" });
+            await expect(captureWithDimensions(-5, 10)).rejects.toMatchObject({ code: "resource-load-failed" });
+        });
     });
 
     it("uses the event-driven HTML image strategy when decode() is absent (R7-03)", async () => {
