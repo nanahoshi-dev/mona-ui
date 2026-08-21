@@ -14,7 +14,10 @@ describe("ChartExportRasterIslandRenderer", () => {
 
         const island: ChartExportRasterIslandSnapshot = {
             bounds: { height: 50, width: 100, x: 0, y: 0 },
+            documentOrder: 1,
             frozenRoot: document.createElement("div"),
+            id: "island-1",
+            plane: "plot-overlays",
             role: "test",
             zOrder: 1
         };

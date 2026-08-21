@@ -3,10 +3,16 @@ import type { ChartRect } from "../../models/chart.models";
 import { ChartExportResourceManager } from "./chart-export-resource-manager";
 import { ChartExportError } from "../../models/chart-export.models";
 
+import {
+    MAX_RASTER_DIMENSION,
+    MAX_RASTER_TOTAL_PIXELS
+} from "./chart-export-options";
+
 export interface RenderedRasterIsland {
     readonly clipRect?: ChartRect;
     readonly dataUrl: string;
     readonly height: number;
+    readonly id: string;
     readonly width: number;
     readonly x: number;
     readonly y: number;
@@ -83,6 +89,21 @@ export class ChartExportRasterIslandRenderer {
                     throw new DOMException("Export was aborted", "AbortError");
                 }
 
+                const effectiveScale = Math.max(0.25, scale);
+                const physicalWidth = Math.ceil(island.bounds.width * effectiveScale);
+                const physicalHeight = Math.ceil(island.bounds.height * effectiveScale);
+
+                if (
+                    physicalWidth > MAX_RASTER_DIMENSION ||
+                    physicalHeight > MAX_RASTER_DIMENSION ||
+                    physicalWidth * physicalHeight > MAX_RASTER_TOTAL_PIXELS
+                ) {
+                    throw new ChartExportError(
+                        "too-large",
+                        `Template raster island dimensions (${physicalWidth}x${physicalHeight}px) exceed maximum supported size.`
+                    );
+                }
+
                 // Attach frozen node to staging root so html2canvas can measure and render
                 island.frozenRoot.style.boxSizing = "border-box";
                 island.frozenRoot.style.width = `${island.bounds.width}px`;
@@ -98,7 +119,7 @@ export class ChartExportRasterIslandRenderer {
                         backgroundColor: null,
                         height: island.bounds.height,
                         logging: false,
-                        scale: Math.max(1, Math.min(8, scale)),
+                        scale: effectiveScale,
                         useCORS: true,
                         width: island.bounds.width,
                         windowHeight: island.bounds.height,
@@ -116,6 +137,7 @@ export class ChartExportRasterIslandRenderer {
                         clipRect: island.clipRect,
                         dataUrl,
                         height: island.bounds.height,
+                        id: island.id,
                         width: island.bounds.width,
                         x: island.bounds.x,
                         y: island.bounds.y,

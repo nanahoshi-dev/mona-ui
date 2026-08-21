@@ -132,6 +132,10 @@ export class ChartPdfExporter {
             );
         }
 
+        if (request.signal?.aborted) {
+            throw new DOMException("Export was aborted", "AbortError");
+        }
+
         const jsPDF = jsPdfModule.jsPDF ?? jsPdfModule.default ?? jsPdfModule;
         const layout = resolvePdfLayout(request);
 
@@ -159,6 +163,10 @@ export class ChartPdfExporter {
                     );
                 }
                 // In auto mode, fallback to raster PDF if svg2pdf cannot be loaded
+            }
+
+            if (request.signal?.aborted) {
+                throw new DOMException("Export was aborted", "AbortError");
             }
 
             const svg2pdfFn = svg2pdfModule?.svg2pdf ?? svg2pdfModule?.default ?? svg2pdfModule;

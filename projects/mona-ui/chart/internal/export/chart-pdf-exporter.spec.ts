@@ -86,4 +86,27 @@ describe("ChartPdfExporter", () => {
 
         await expect(ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request)).rejects.toThrow();
     });
+
+    it("throws pdf-vector-unsupported in strict vector mode when SVG has uncertified fonts or glyphs", async () => {
+        const snapshot = createTestSnapshot();
+        const request = createTestRequest({
+            pdfMode: "vector"
+        });
+
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("font-family", "CustomBrandFont");
+        text.textContent = "Sales";
+        svg.appendChild(text);
+
+        const finalizedSvg: FinalizedSvgOutput = {
+            blob: new Blob(['<svg xmlns="http://www.w3.org/2000/svg"></svg>'], { type: "image/svg+xml" }),
+            svgElement: svg,
+            xml: '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
+        };
+
+        await expect(ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request)).rejects.toThrow(
+            ChartExportError
+        );
+    });
 });

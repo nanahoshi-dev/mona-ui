@@ -11,6 +11,7 @@ import {
     type ChartPdfRenderMode
 } from "../../models/chart-export.models";
 import { isFiniteNumber } from "../utils/number-utils";
+import { ChartExportColorNormalizer } from "./chart-export-color-normalizer";
 
 /**
  * PDF points per standard CSS pixel (72 pt / 96 px = 0.75).
@@ -78,11 +79,7 @@ function normalizeBackground(bg: unknown): ChartExportBackground {
     if (!trimmed) {
         return "auto";
     }
-    // Reject url(...), paint server references, or script expressions (EXP-12)
-    if (/url\s*\(|javascript:|blob:|gradient/i.test(trimmed)) {
-        throw new ChartExportError("invalid-size", `Invalid background color: '${trimmed}'. URL or complex paint expressions are not allowed.`);
-    }
-    return trimmed;
+    return ChartExportColorNormalizer.normalizeColor(trimmed);
 }
 
 function normalizeMargins(margin?: number | ChartPdfMargins): NormalizedChartPdfMargins {

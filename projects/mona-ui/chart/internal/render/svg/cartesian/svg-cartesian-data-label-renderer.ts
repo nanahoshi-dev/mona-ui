@@ -89,6 +89,7 @@ export class SvgCartesianDataLabelRenderer {
                 } else {
                     haloText.style.display = "none";
                 }
+                haloText.style.font = label.font ?? "";
 
                 mainText.textContent = label.text;
                 setSvgAttribute(mainText, "x", cx);
@@ -103,6 +104,7 @@ export class SvgCartesianDataLabelRenderer {
                 if (parsedFont.fontStyle !== "normal") {
                     setSvgAttribute(mainText, "font-style", parsedFont.fontStyle);
                 }
+                mainText.style.font = label.font ?? "";
 
                 if (plotClipUrl) {
                     setSvgAttribute(group, "clip-path", plotClipUrl);

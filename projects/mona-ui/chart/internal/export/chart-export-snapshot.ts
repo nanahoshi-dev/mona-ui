@@ -7,7 +7,20 @@ import type { CartesianDataLabelScene } from "../scene/cartesian-data-label-scen
 import type { CartesianOverlayScene } from "../scene/cartesian-overlay-scene";
 import type { CartesianSelectionScene } from "../scene/cartesian-selection-scene";
 
-export interface ChartExportVectorTextSnapshot {
+export type ChartExportDomPlane =
+    | "plot-labels"
+    | "plot-overlays"
+    | "host-chrome";
+
+export interface ChartExportPrimitiveBase {
+    readonly documentOrder: number;
+    readonly id: string;
+    readonly plane: ChartExportDomPlane;
+    readonly role: string;
+    readonly zOrder: number;
+}
+
+export interface ChartExportVectorTextSnapshot extends ChartExportPrimitiveBase {
     readonly bounds: ChartRect;
     readonly color: string;
     readonly fontFamily: string;
@@ -16,19 +29,11 @@ export interface ChartExportVectorTextSnapshot {
     readonly fontWeight: string;
     readonly letterSpacing: number;
     readonly opacity: number;
-    readonly role: string;
-    readonly rotation?: {
-        readonly angle: number;
-        readonly cx: number;
-        readonly cy: number;
-    };
     readonly text: string;
     readonly textAlign: "left" | "center" | "right";
-    readonly transformMatrix?: readonly [number, number, number, number, number, number];
-    readonly zOrder: number;
 }
 
-export interface ChartExportBadgeSnapshot {
+export interface ChartExportBadgeSnapshot extends ChartExportPrimitiveBase {
     readonly backgroundColor: string;
     readonly borderColor?: string;
     readonly borderRadius?: number;
@@ -39,18 +44,14 @@ export interface ChartExportBadgeSnapshot {
     readonly fontStyle: string;
     readonly fontWeight: string;
     readonly opacity: number;
-    readonly role: string;
     readonly text: string;
     readonly textColor: string;
-    readonly zOrder: number;
 }
 
-export interface ChartExportRasterIslandSnapshot {
+export interface ChartExportRasterIslandSnapshot extends ChartExportPrimitiveBase {
     readonly bounds: ChartRect;
     readonly clipRect?: ChartRect;
     readonly frozenRoot: HTMLElement;
-    readonly role: string;
-    readonly zOrder: number;
 }
 
 export type ChartExportDomPrimitive =

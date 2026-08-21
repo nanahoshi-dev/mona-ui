@@ -118,4 +118,57 @@ describe("ChartExportDomCollector", () => {
             y: 50
         });
     });
+
+    it("classifies pure translation as vector text and complex rotation/matrix as raster island (R2-02)", () => {
+        const host = createMockHost();
+
+        // 1. Pure translation (e.g. matrix(1, 0, 0, 1, -50, 0))
+        const translatedText = document.createElement("div");
+        translatedText.setAttribute("data-mona-chart-export-role", "axis-label");
+        translatedText.textContent = "Pure Translate";
+        translatedText.style.transform = "matrix(1, 0, 0, 1, -50, 0)";
+        Object.defineProperty(translatedText, "getBoundingClientRect", {
+            value: () => ({ bottom: 90, height: 20, left: 120, right: 220, top: 70, width: 100, x: 120, y: 70 })
+        });
+        host.appendChild(translatedText);
+
+        // 2. Rotated text (e.g. rotate(-45deg))
+        const rotatedText = document.createElement("div");
+        rotatedText.setAttribute("data-mona-chart-export-role", "rotated-axis-label");
+        rotatedText.textContent = "Rotated Label";
+        rotatedText.style.transform = "rotate(-45deg)";
+        Object.defineProperty(rotatedText, "getBoundingClientRect", {
+            value: () => ({ bottom: 200, height: 30, left: 150, right: 250, top: 170, width: 100, x: 150, y: 170 })
+        });
+        host.appendChild(rotatedText);
+
+        const layers = ChartExportDomCollector.collect(host, host);
+
+        // Pure translate stays vector text
+        const vectorItem = layers.vectorTexts.find(t => t.text === "Pure Translate");
+        expect(vectorItem).toBeDefined();
+
+        // Rotated text is safely rasterized as a raster island
+        const rasterItem = layers.rasterIslands.find(r => r.role === "rotated-axis-label");
+        expect(rasterItem).toBeDefined();
+        expect(rasterItem?.frozenRoot.textContent).toContain("Rotated Label");
+    });
+
+    it("preserves opacity 0 for consumer elements without explicit Mona suppression marker (R2-09)", () => {
+        const host = createMockHost();
+
+        const consumerHiddenEl = document.createElement("div");
+        consumerHiddenEl.setAttribute("data-mona-chart-export-role", "consumer-label");
+        consumerHiddenEl.classList.add("opacity-0");
+        consumerHiddenEl.textContent = "Hidden Label";
+        consumerHiddenEl.style.opacity = "0";
+        Object.defineProperty(consumerHiddenEl, "getBoundingClientRect", {
+            value: () => ({ bottom: 100, height: 20, left: 150, right: 250, top: 80, width: 100, x: 150, y: 80 })
+        });
+        host.appendChild(consumerHiddenEl);
+
+        const layers = ChartExportDomCollector.collect(host, host);
+        expect(layers.vectorTexts.length).toBe(1);
+        expect(layers.vectorTexts[0].opacity).toBe(0); // Kept as 0 because no Mona suppression marker
+    });
 });

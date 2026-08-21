@@ -7,6 +7,8 @@ import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { setSvgAttribute } from "../render/svg/svg-attribute-utils";
 import { ChartExportError } from "../../models/chart-export.models";
 
+import { resolveChartExportContainTransform } from "./chart-export-geometry";
+
 let clipIdCounter = 0;
 
 export class ChartExportCompositor {
@@ -43,16 +45,14 @@ export class ChartExportCompositor {
         rootSvg.appendChild(defsContainer);
 
         // Compute contain scaling and centering for mismatched aspect ratios (EXP-09)
-        const scale = Math.min(outW / srcW, outH / srcH);
-        const offsetX = Math.round(((outW - srcW * scale) / 2) * 100) / 100;
-        const offsetY = Math.round(((outH - srcH * scale) / 2) * 100) / 100;
+        const contain = resolveChartExportContainTransform(srcW, srcH, outW, outH);
 
         const chartRootGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         chartRootGroup.setAttribute("data-export-layer", "chart-root");
-        if (offsetX !== 0 || offsetY !== 0 || scale !== 1) {
+        if (contain.offsetX !== 0 || contain.offsetY !== 0 || contain.scale !== 1) {
             chartRootGroup.setAttribute(
                 "transform",
-                `translate(${offsetX}, ${offsetY}) scale(${scale})`
+                `translate(${contain.offsetX}, ${contain.offsetY}) scale(${contain.scale})`
             );
         }
         rootSvg.appendChild(chartRootGroup);
@@ -92,11 +92,11 @@ export class ChartExportCompositor {
                     styleResolver
                 });
 
-                // Move defs from detached backend to composed root defs
+                // Move defs from detached backend to composed root defs (clone so backend.destroy does not delete)
                 const detachedDefs = detachedSvg.querySelector("defs");
                 if (detachedDefs) {
-                    while (detachedDefs.firstChild) {
-                        defsContainer.appendChild(detachedDefs.firstChild);
+                    for (const child of Array.from(detachedDefs.childNodes)) {
+                        defsContainer.appendChild(child.cloneNode(true));
                     }
                 }
 
@@ -128,7 +128,10 @@ export class ChartExportCompositor {
         const domOverlayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
         domOverlayGroup.setAttribute("data-export-layer", "dom-overlay");
 
-        let rasterIslandIndex = 0;
+        const islandMap = new Map<string, RenderedRasterIsland>();
+        for (const island of renderedIslands) {
+            islandMap.set(island.id, island);
+        }
 
         for (const prim of snapshot.domLayers.primitives) {
             if (prim.kind === "badge") {
@@ -209,20 +212,10 @@ export class ChartExportCompositor {
                     setSvgAttribute(textEl, "opacity", prim.opacity);
                 }
 
-                // Accurate transform matrix or rotation (EXP-06)
-                if (prim.transformMatrix) {
-                    textEl.setAttribute("transform", `matrix(${prim.transformMatrix.join(" ")})`);
-                } else if (prim.rotation) {
-                    textEl.setAttribute(
-                        "transform",
-                        `rotate(${prim.rotation.angle} ${prim.rotation.cx} ${prim.rotation.cy})`
-                    );
-                }
-
                 textEl.textContent = prim.text;
                 domOverlayGroup.appendChild(textEl);
             } else if (prim.kind === "raster") {
-                const island = renderedIslands[rasterIslandIndex++];
+                const island = islandMap.get(prim.id);
                 if (island) {
                     const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
                     img.setAttribute("data-export-role", prim.role);

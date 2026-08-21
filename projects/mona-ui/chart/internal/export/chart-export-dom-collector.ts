@@ -1,23 +1,22 @@
 import type {
     ChartExportBadgeSnapshot,
     ChartExportDomLayerSnapshot,
+    ChartExportDomPlane,
     ChartExportDomPrimitive,
     ChartExportRasterIslandSnapshot,
     ChartExportVectorTextSnapshot
 } from "./chart-export-snapshot";
 import type { ChartRect } from "../../models/chart.models";
 import { isFiniteNumber } from "../utils/number-utils";
+import { ChartExportDomFreezer } from "./chart-export-dom-freezer";
 
-function parseTransform(
-    transformStr: string
-): {
-    angle?: number;
-    matrix?: readonly [number, number, number, number, number, number];
-} | undefined {
+function isComplexTransform(node: HTMLElement, computed: CSSStyleDeclaration): boolean {
+    const transformStr = (node.style.transform || computed.transform || "").trim();
     if (!transformStr || transformStr === "none") {
-        return undefined;
+        return false;
     }
-    const matMatch = /^matrix\(([-0-9.]+),\s*([-0-9.]+),\s*([-0-9.]+),\s*([-0-9.]+),\s*([-0-9.]+),\s*([-0-9.]+)\)$/i.exec(
+    // Check matrix(a, b, c, d, tx, ty)
+    const matMatch = /^matrix\(([-0-9.eE+]+),\s*([-0-9.eE+]+),\s*([-0-9.eE+]+),\s*([-0-9.eE+]+),\s*([-0-9.eE+]+),\s*([-0-9.eE+]+)\)$/i.exec(
         transformStr
     );
     if (matMatch) {
@@ -25,142 +24,47 @@ function parseTransform(
         const b = parseFloat(matMatch[2]);
         const c = parseFloat(matMatch[3]);
         const d = parseFloat(matMatch[4]);
-        const tx = parseFloat(matMatch[5]);
-        const ty = parseFloat(matMatch[6]);
-        const angle = Math.round(Math.atan2(b, a) * (180 / Math.PI) * 100) / 100;
-        return {
-            angle: angle !== 0 ? angle : undefined,
-            matrix: [a, b, c, d, tx, ty]
-        };
-    }
-    const rotMatch = /rotate\(([-0-9.]+)deg\)/i.exec(transformStr);
-    if (rotMatch) {
-        const angle = parseFloat(rotMatch[1]);
-        if (isFiniteNumber(angle) && angle !== 0) {
-            return { angle };
+        // Pure translation: a ≈ 1, b ≈ 0, c ≈ 0, d ≈ 1
+        if (Math.abs(a - 1) < 1e-3 && Math.abs(b) < 1e-3 && Math.abs(c) < 1e-3 && Math.abs(d - 1) < 1e-3) {
+            return false;
         }
+        return true;
     }
-    return undefined;
+    // Check if contains rotate, skew, or scale
+    if (/rotate|skew|scale/i.test(transformStr)) {
+        const rotMatch = /rotate\(([-0-9.]+)deg\)/i.exec(transformStr);
+        if (rotMatch) {
+            const angle = parseFloat(rotMatch[1]);
+            if (Math.abs(angle) < 1e-3) return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 function normalizeFontFamily(rawFontFamily?: string): string {
-    if (!rawFontFamily) {
+    const trimmed = rawFontFamily?.trim();
+    if (!trimmed || trimmed === "depends on user agent") {
         return "Helvetica, Arial, sans-serif";
     }
-    const lower = rawFontFamily.toLowerCase();
-    if (
-        lower.includes("sans-serif") ||
-        lower.includes("inter") ||
-        lower.includes("roboto") ||
-        lower.includes("system-ui") ||
-        lower.includes("segoe ui") ||
-        lower.includes("arial") ||
-        lower.includes("helvetica")
-    ) {
-        return `${rawFontFamily}, Helvetica, Arial, sans-serif`;
-    }
-    if (lower.includes("mono") || lower.includes("courier") || lower.includes("consolas")) {
-        return `${rawFontFamily}, Courier, monospace`;
-    }
-    if (lower.includes("serif") || lower.includes("times") || lower.includes("georgia")) {
-        return `${rawFontFamily}, Times, serif`;
-    }
-    return `${rawFontFamily}, Helvetica, Arial, sans-serif`;
+    return trimmed;
 }
 
-function freezeElementTree(sourceNode: HTMLElement, cloneNode: HTMLElement): void {
-    const sourceElements = [sourceNode, ...Array.from(sourceNode.querySelectorAll<HTMLElement>("*"))];
-    const cloneElements = [cloneNode, ...Array.from(cloneNode.querySelectorAll<HTMLElement>("*"))];
-
-    for (let i = 0; i < sourceElements.length && i < cloneElements.length; i++) {
-        const src = sourceElements[i];
-        const dst = cloneElements[i];
-        if (!src || !dst) continue;
-
-        if (dst.tagName.toLowerCase() === "script") {
-            dst.remove();
-            continue;
+function resolvePlane(role: string, isPlotLocal: boolean): ChartExportDomPlane {
+    if (isPlotLocal) {
+        if (role.includes("label") || role === "data-label-template" || role.startsWith("polar-label")) {
+            return "plot-labels";
         }
-
-        try {
-            const computed = window.getComputedStyle(src);
-
-            // Copy typography & layout styles
-            dst.style.fontFamily = computed.fontFamily;
-            dst.style.fontSize = computed.fontSize;
-            dst.style.fontWeight = computed.fontWeight;
-            dst.style.fontStyle = computed.fontStyle;
-            dst.style.lineHeight = computed.lineHeight;
-            dst.style.letterSpacing = computed.letterSpacing;
-            dst.style.color = computed.color;
-            dst.style.textAlign = computed.textAlign;
-            dst.style.textTransform = computed.textTransform;
-            dst.style.textDecoration = computed.textDecoration;
-            dst.style.whiteSpace = computed.whiteSpace;
-            dst.style.wordBreak = computed.wordBreak;
-
-            // Box model & colors
-            dst.style.backgroundColor = computed.backgroundColor;
-            dst.style.backgroundImage = computed.backgroundImage;
-            dst.style.backgroundPosition = computed.backgroundPosition;
-            dst.style.backgroundSize = computed.backgroundSize;
-            dst.style.backgroundRepeat = computed.backgroundRepeat;
-            dst.style.boxSizing = computed.boxSizing;
-            dst.style.padding = computed.padding;
-            dst.style.margin = computed.margin;
-            dst.style.border = computed.border;
-            dst.style.borderRadius = computed.borderRadius;
-            dst.style.boxShadow = computed.boxShadow;
-
-            // Layout
-            dst.style.display = computed.display;
-            dst.style.flexDirection = computed.flexDirection;
-            dst.style.flexWrap = computed.flexWrap;
-            dst.style.justifyContent = computed.justifyContent;
-            dst.style.alignItems = computed.alignItems;
-            dst.style.gap = computed.gap;
-
-            // Animation suppression override (EXP-03)
-            const isSuppressed =
-                src.getAttribute("data-mona-chart-export-animation-suppression") === "opacity" ||
-                src.classList.contains("opacity-0");
-
-            if (isSuppressed) {
-                dst.style.opacity = "1";
-                dst.classList.remove("opacity-0");
-            } else {
-                dst.style.opacity = computed.opacity;
-            }
-
-            // Media & input state capture
-            if (src instanceof HTMLInputElement && dst instanceof HTMLInputElement) {
-                dst.value = src.value;
-                if (src.type === "checkbox" || src.type === "radio") {
-                    dst.checked = src.checked;
-                }
-            } else if (src instanceof HTMLTextAreaElement && dst instanceof HTMLTextAreaElement) {
-                dst.value = src.value;
-            } else if (src instanceof HTMLSelectElement && dst instanceof HTMLSelectElement) {
-                dst.selectedIndex = src.selectedIndex;
-            } else if (src instanceof HTMLImageElement && dst instanceof HTMLImageElement) {
-                dst.src = src.currentSrc || src.src;
-            } else if (src instanceof HTMLCanvasElement && dst instanceof HTMLCanvasElement) {
-                try {
-                    const ctx = dst.getContext("2d");
-                    if (ctx) {
-                        dst.width = src.width;
-                        dst.height = src.height;
-                        ctx.drawImage(src, 0, 0);
-                    }
-                } catch {
-                    // Tainted canvas - preflight check will handle
-                }
-            }
-        } catch {
-            // Ignore per-element computed style exceptions
-        }
+        return "plot-overlays";
     }
+    return "host-chrome";
 }
+
+const PLANE_ORDER: Record<ChartExportDomPlane, number> = {
+    "plot-labels": 1,
+    "plot-overlays": 2,
+    "host-chrome": 3
+};
 
 export class ChartExportDomCollector {
     public static collect(
@@ -193,6 +97,8 @@ export class ChartExportDomCollector {
         const exportNodes = chartHost.querySelectorAll<HTMLElement>("[data-mona-chart-export-role]");
 
         let zIndexCounter = 10;
+        let primitiveCounter = 0;
+        let documentOrder = 0;
 
         for (let i = 0; i < exportNodes.length; i++) {
             const node = exportNodes[i];
@@ -239,13 +145,18 @@ export class ChartExportDomCollector {
                 role.startsWith("overlay:");
 
             const clipRect = isPlotLocal ? plotSurfaceClipRect : undefined;
+            const id = `mona-export-prim-${++primitiveCounter}`;
+            const docOrder = ++documentOrder;
+            const plane = resolvePlane(role, isPlotLocal);
 
-            if (mode === "raster" || role.endsWith("-template") || role === "legend-color-scale") {
-                // Synchronously clone and freeze raster island DOM (EXP-01)
+            const hasComplexTransform = isComplexTransform(node, computed);
+
+            if (mode === "raster" || role.endsWith("-template") || role === "legend-color-scale" || hasComplexTransform) {
+                // Synchronously clone and freeze raster island DOM (EXP-01, EXP-06, R2-02, R2-03)
                 const frozenRoot = node.cloneNode(true) as HTMLElement;
-                freezeElementTree(node, frozenRoot);
+                ChartExportDomFreezer.freeze(node, frozenRoot);
 
-                // Enforce strict bounding dimensions on the frozen root so it measures identically in staging DOM
+                // Enforce strict bounding dimensions on the frozen root
                 frozenRoot.style.boxSizing = "border-box";
                 frozenRoot.style.width = `${bounds.width}px`;
                 frozenRoot.style.height = `${bounds.height}px`;
@@ -253,12 +164,14 @@ export class ChartExportDomCollector {
                 frozenRoot.style.maxWidth = `${bounds.width}px`;
                 frozenRoot.style.minHeight = `${bounds.height}px`;
                 frozenRoot.style.maxHeight = `${bounds.height}px`;
-                frozenRoot.style.overflow = "hidden";
 
                 const rasterSnapshot: ChartExportRasterIslandSnapshot = {
                     bounds,
                     clipRect,
+                    documentOrder: docOrder,
                     frozenRoot,
+                    id,
+                    plane,
                     role,
                     zOrder
                 };
@@ -285,10 +198,9 @@ export class ChartExportDomCollector {
             const letterSpacing = parseFloat(computed.letterSpacing) || 0;
             const color = computed.color || "#000000";
 
-            // Animation suppression check (EXP-03)
+            // Animation suppression check (EXP-03 / R2-09): Only explicit Mona suppression marker
             const isAnimationSuppressed =
-                node.getAttribute("data-mona-chart-export-animation-suppression") === "opacity" ||
-                node.classList.contains("opacity-0");
+                node.getAttribute("data-mona-chart-export-animation-suppression") === "opacity";
 
             let opacity = 1;
             if (!isAnimationSuppressed) {
@@ -304,11 +216,14 @@ export class ChartExportDomCollector {
                     borderRadius,
                     borderWidth: hasBorder ? borderW : undefined,
                     bounds,
+                    documentOrder: docOrder,
                     fontFamily,
                     fontSize,
                     fontStyle,
                     fontWeight,
+                    id,
                     opacity,
+                    plane,
                     role,
                     text,
                     textColor: color,
@@ -317,7 +232,6 @@ export class ChartExportDomCollector {
                 badges.push(badgeSnapshot);
                 primitives.push({ kind: "badge", ...badgeSnapshot });
             } else {
-                const parsedTransform = parseTransform(node.style.transform || computed.transform);
                 let textAlign: "left" | "center" | "right" = "center";
                 if (computed.textAlign === "left" || computed.textAlign === "start") {
                     textAlign = "left";
@@ -328,24 +242,18 @@ export class ChartExportDomCollector {
                 const vectorSnapshot: ChartExportVectorTextSnapshot = {
                     bounds,
                     color,
+                    documentOrder: docOrder,
                     fontFamily,
                     fontSize,
                     fontStyle,
                     fontWeight,
+                    id,
                     letterSpacing,
                     opacity,
+                    plane,
                     role,
-                    rotation:
-                        parsedTransform?.angle !== undefined
-                            ? {
-                                  angle: parsedTransform.angle,
-                                  cx: bounds.x + bounds.width / 2,
-                                  cy: bounds.y + bounds.height / 2
-                              }
-                            : undefined,
                     text,
                     textAlign,
-                    transformMatrix: parsedTransform?.matrix,
                     zOrder
                 };
                 vectorTexts.push(vectorSnapshot);
@@ -353,8 +261,12 @@ export class ChartExportDomCollector {
             }
         }
 
-        // Sort primitives strictly by z-order / document order (EXP-05)
-        primitives.sort((a, b) => a.zOrder - b.zOrder);
+        // Sort primitives strictly by plane order and document order (EXP-05 / R2-04)
+        primitives.sort((a, b) => {
+            const planeDiff = PLANE_ORDER[a.plane] - PLANE_ORDER[b.plane];
+            if (planeDiff !== 0) return planeDiff;
+            return a.documentOrder - b.documentOrder;
+        });
 
         return {
             badges,

@@ -5,8 +5,10 @@ import { ChartExportCompositor } from "./chart-export-compositor";
 import { ChartExportSvgFinalizer } from "./chart-export-svg-finalizer";
 import { ChartPngExporter } from "./chart-png-exporter";
 import { ChartPdfExporter } from "./chart-pdf-exporter";
+import { resolveEffectiveIslandScale } from "./chart-export-geometry";
 import {
     ChartExportError,
+    type ChartExportErrorCode,
     type ChartExportResult
 } from "../../models/chart-export.models";
 
@@ -26,12 +28,15 @@ export class ChartExportCoordinator {
             throw new DOMException("Export was aborted", "AbortError");
         }
 
+        let stage: "raster-islands" | "composition" | "finalization" | "output-generation" = "raster-islands";
+
         try {
-            // 1. Render template DOM raster islands if any exist
+            // 1. Render template DOM raster islands at effective output density (EXP-01 / R2-05)
+            const effectiveIslandScale = resolveEffectiveIslandScale(request);
             const renderedIslands = await ChartExportRasterIslandRenderer.renderIslands(
                 snapshot.domLayers.rasterIslands,
                 snapshot.styleSnapshot,
-                request.format === "png" ? request.pixelRatio : 2,
+                effectiveIslandScale,
                 request.signal
             );
 
@@ -40,6 +45,7 @@ export class ChartExportCoordinator {
             }
 
             // 2. Compose full-host standalone SVG
+            stage = "composition";
             const composedSvg = ChartExportCompositor.compose(snapshot, request, renderedIslands);
 
             if (request.signal?.aborted) {
@@ -47,6 +53,7 @@ export class ChartExportCoordinator {
             }
 
             // 3. Finalize, sanitize, and serialize SVG
+            stage = "finalization";
             const finalizedSvg = ChartExportSvgFinalizer.finalize(composedSvg, snapshot, request);
 
             if (request.signal?.aborted) {
@@ -54,6 +61,7 @@ export class ChartExportCoordinator {
             }
 
             // 4. Format-specific dispatch
+            stage = "output-generation";
             switch (request.format) {
                 case "svg":
                     return {
@@ -74,9 +82,19 @@ export class ChartExportCoordinator {
             if (err instanceof ChartExportError || err?.name === "AbortError") {
                 throw err;
             }
+
+            let fallbackCode: ChartExportErrorCode = "svg-composition-failed";
+            if (stage === "raster-islands") {
+                fallbackCode = "template-rasterization-failed";
+            } else if (stage === "finalization") {
+                fallbackCode = "svg-serialization-failed";
+            } else if (stage === "output-generation") {
+                fallbackCode = request.format === "png" ? "png-rasterization-failed" : request.format === "pdf" ? "pdf-generation-failed" : "svg-composition-failed";
+            }
+
             throw new ChartExportError(
-                "svg-composition-failed",
-                `Chart export failed: ${err?.message ?? err}`,
+                fallbackCode,
+                `Chart export failed during ${stage}: ${err?.message ?? err}`,
                 { cause: err }
             );
         }

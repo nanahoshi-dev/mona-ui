@@ -13,6 +13,7 @@ import type { CartesianOverlayScene } from "../scene/cartesian-overlay-scene";
 import type { CartesianSelectionScene } from "../scene/cartesian-selection-scene";
 import { ChartExportDomCollector } from "./chart-export-dom-collector";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
+import { ChartExportColorNormalizer } from "./chart-export-color-normalizer";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import { ChartExportError } from "../../models/chart-export.models";
 
@@ -111,13 +112,7 @@ export class ChartExportSnapshotBuilder {
 
         let resolvedBackground: string | null = null;
         if (request.background === "auto") {
-            resolvedBackground =
-                styleSnapshot.get("--mona-chart-surface") ||
-                styleSnapshot.get("--color-surface") ||
-                styleSnapshot.get("--color-card") ||
-                styleSnapshot.get("--color-background") ||
-                styleSnapshot.get("background-color") ||
-                "#ffffff";
+            resolvedBackground = ChartExportColorNormalizer.resolveAutoBackground(hostEl, styleSnapshot);
         } else if (request.background === "transparent") {
             resolvedBackground = null;
         } else {
