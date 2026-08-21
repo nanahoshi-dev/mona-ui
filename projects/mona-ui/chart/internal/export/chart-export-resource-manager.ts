@@ -5,6 +5,7 @@ import {
     ChartExportRasterMediaType,
     MAX_EXPORT_RESOURCE_BYTES,
     MAX_EXPORT_RESOURCE_TOTAL_BYTES,
+    assertResourcePixelBudget,
     bytesToBase64,
     decodeDataUrlPayload,
     isSupportedRasterMediaType,
@@ -494,12 +495,12 @@ class ChartExportResourceTransaction {
                 try {
                     const width = testImg.naturalWidth || testImg.width;
                     const height = testImg.naturalHeight || testImg.height;
-                    if (width <= 0 || height <= 0) {
-                        throw new ChartExportError(
-                            "resource-load-failed",
-                            `Template image resource '${url}' decoded to an empty image.`
-                        );
-                    }
+
+                    // R7-02: the shared decoded-image budget must approve the dimensions
+                    // BEFORE any canvas backing store can be allocated for the fallback
+                    // path, exactly as the fetch/decode paths already enforce (R6-06).
+                    assertResourcePixelBudget(width, height, url);
+
                     const canvas = document.createElement("canvas");
                     canvas.width = width;
                     canvas.height = height;
