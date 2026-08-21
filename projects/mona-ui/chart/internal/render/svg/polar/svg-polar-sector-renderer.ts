@@ -85,6 +85,7 @@ export class SvgPolarSectorSeriesRenderer {
                         stops: spec.stops
                     });
                     setSvgAttribute(element, "fill", gradUrl);
+                    element.removeAttribute("fill-opacity");
                 } else {
                     setSvgAttribute(element, "fill", slice.color);
                     setSvgAttribute(element, "fill-opacity", style.fillOpacity);
@@ -205,9 +206,14 @@ export class SvgPolarSectorSeriesRenderer {
     }
 }
 
+interface SvgPolarSectorSeriesEntry {
+    readonly container: SVGGElement;
+    readonly renderer: SvgPolarSectorSeriesRenderer;
+}
+
 export class SvgPolarSectorRenderer {
     readonly #container: SVGGElement;
-    readonly #seriesRenderers = new Map<string, SvgPolarSectorSeriesRenderer>();
+    readonly #seriesRenderers = new Map<string, SvgPolarSectorSeriesEntry>();
 
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -225,36 +231,45 @@ export class SvgPolarSectorRenderer {
             const s = scene.series[i];
             activeIds.add(s.id);
 
-            let renderer = this.#seriesRenderers.get(s.id);
-            if (!renderer) {
-                const group = createSvgElement("g");
-                group.setAttribute("data-series-id", s.id);
-                this.#container.appendChild(group);
-                renderer = new SvgPolarSectorSeriesRenderer(group);
-                this.#seriesRenderers.set(s.id, renderer);
+            let entry = this.#seriesRenderers.get(s.id);
+            if (!entry) {
+                const container = createSvgElement("g");
+                container.setAttribute("data-series-id", s.id);
+                this.#container.appendChild(container);
+                const renderer = new SvgPolarSectorSeriesRenderer(container);
+                entry = { container, renderer };
+                this.#seriesRenderers.set(s.id, entry);
             }
 
-            renderer.render(s, scene.center, interactionState, styleResolver, defs);
+            // Ensure DOM ordering
+            const currentNthChild = this.#container.children[i];
+            if (currentNthChild !== entry.container) {
+                this.#container.insertBefore(entry.container, currentNthChild ?? null);
+            }
+
+            entry.renderer.render(s, scene.center, interactionState, styleResolver, defs);
         }
 
         // Cleanup stale series
-        for (const [id, r] of this.#seriesRenderers.entries()) {
+        for (const [id, entry] of this.#seriesRenderers.entries()) {
             if (!activeIds.has(id)) {
-                r.destroy();
+                entry.renderer.destroy();
+                entry.container.remove();
                 this.#seriesRenderers.delete(id);
             }
         }
     }
 
     public clear(): void {
-        for (const r of this.#seriesRenderers.values()) {
-            r.clear();
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.clear();
         }
     }
 
     public destroy(): void {
-        for (const r of this.#seriesRenderers.values()) {
-            r.destroy();
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.destroy();
+            entry.container.remove();
         }
         this.#seriesRenderers.clear();
     }

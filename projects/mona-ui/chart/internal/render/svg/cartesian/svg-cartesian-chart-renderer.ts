@@ -169,7 +169,7 @@ export class SvgCartesianChartRenderer {
         styleResolver: ChartStyleResolver,
         defs: SvgDefinitionRegistry
     ): void {
-        if (progress >= 1 || !fromScene) {
+        if (progress >= 1) {
             this.#clearCrossfadeScopes();
             this.render(toScene, presentation, styleResolver, defs);
             return;
@@ -179,16 +179,7 @@ export class SvgCartesianChartRenderer {
         const fromOpacity = Math.max(0, Math.min(1, 1 - p));
         const toOpacity = Math.max(0, Math.min(1, p));
 
-        const fromDefs = defs.withScope("cf-from");
         const toDefs = defs.withScope("cf-to");
-
-        const fromPlotClipUrl = fromDefs.useClipRect(
-            "plot-clip",
-            fromScene.plotRect.x,
-            fromScene.plotRect.y,
-            fromScene.plotRect.width,
-            fromScene.plotRect.height
-        );
         const toPlotClipUrl = toDefs.useClipRect(
             "plot-clip",
             toScene.plotRect.x,
@@ -213,22 +204,29 @@ export class SvgCartesianChartRenderer {
 
         // 1. Grid crossfade
         this.#gridRenderer.clear();
-        if (!this.#crossfadeFromGridScope) {
-            this.#crossfadeFromGridScope = createSvgElement("g");
-            this.#crossfadeFromGridScope.setAttribute("data-crossfade-scope", "from");
-            this.#layers.grid.appendChild(this.#crossfadeFromGridScope);
-            this.#fromGridRenderer = new SvgCartesianGridRenderer(this.#crossfadeFromGridScope);
+        if (fromScene) {
+            if (!this.#crossfadeFromGridScope) {
+                this.#crossfadeFromGridScope = createSvgElement("g");
+                this.#crossfadeFromGridScope.setAttribute("data-crossfade-scope", "from");
+                this.#layers.grid.appendChild(this.#crossfadeFromGridScope);
+                this.#fromGridRenderer = new SvgCartesianGridRenderer(this.#crossfadeFromGridScope);
+            }
+            setSvgAttribute(this.#crossfadeFromGridScope, "opacity", fromOpacity);
+            this.#fromGridRenderer?.render(fromScene, styleResolver);
+        } else if (this.#crossfadeFromGridScope) {
+            this.#fromGridRenderer?.clear();
+            this.#crossfadeFromGridScope.remove();
+            this.#crossfadeFromGridScope = null;
+            this.#fromGridRenderer = null;
         }
+
         if (!this.#crossfadeToGridScope) {
             this.#crossfadeToGridScope = createSvgElement("g");
             this.#crossfadeToGridScope.setAttribute("data-crossfade-scope", "to");
             this.#layers.grid.appendChild(this.#crossfadeToGridScope);
             this.#toGridRenderer = new SvgCartesianGridRenderer(this.#crossfadeToGridScope);
         }
-
-        setSvgAttribute(this.#crossfadeFromGridScope, "opacity", fromOpacity);
         setSvgAttribute(this.#crossfadeToGridScope, "opacity", toOpacity);
-        this.#fromGridRenderer?.render(fromScene, styleResolver);
         this.#toGridRenderer?.render(toScene, styleResolver);
 
         // 2. Underlays (Target static underlay once at full own opacity)
@@ -237,29 +235,49 @@ export class SvgCartesianChartRenderer {
         // 3. Series crossfade scopes
         this.#layers.series.removeAttribute("clip-path");
 
-        if (!this.#crossfadeFromScope) {
-            this.#crossfadeFromScope = createSvgElement("g");
-            this.#crossfadeFromScope.setAttribute("data-crossfade-scope", "from");
-            this.#layers.series.appendChild(this.#crossfadeFromScope);
+        if (fromScene) {
+            const fromDefs = defs.withScope("cf-from");
+            const fromPlotClipUrl = fromDefs.useClipRect(
+                "plot-clip",
+                fromScene.plotRect.x,
+                fromScene.plotRect.y,
+                fromScene.plotRect.width,
+                fromScene.plotRect.height
+            );
+
+            if (!this.#crossfadeFromScope) {
+                this.#crossfadeFromScope = createSvgElement("g");
+                this.#crossfadeFromScope.setAttribute("data-crossfade-scope", "from");
+                this.#layers.series.appendChild(this.#crossfadeFromScope);
+            }
+            setSvgAttribute(this.#crossfadeFromScope, "clip-path", fromPlotClipUrl);
+            setSvgAttribute(this.#crossfadeFromScope, "opacity", fromOpacity);
+
+            this.#renderSeriesInto(
+                this.#crossfadeFromScope,
+                fromScene.series,
+                fromDefs,
+                this.#crossfadeFromContainers,
+                this.#crossfadeFromRenderers
+            );
+        } else if (this.#crossfadeFromScope) {
+            for (const r of this.#crossfadeFromRenderers.values()) {
+                r.renderer.clear();
+            }
+            this.#crossfadeFromScope.remove();
+            this.#crossfadeFromScope = null;
+            this.#crossfadeFromContainers.clear();
+            this.#crossfadeFromRenderers.clear();
         }
+
         if (!this.#crossfadeToScope) {
             this.#crossfadeToScope = createSvgElement("g");
             this.#crossfadeToScope.setAttribute("data-crossfade-scope", "to");
             this.#layers.series.appendChild(this.#crossfadeToScope);
         }
 
-        setSvgAttribute(this.#crossfadeFromScope, "clip-path", fromPlotClipUrl);
         setSvgAttribute(this.#crossfadeToScope, "clip-path", toPlotClipUrl);
-        setSvgAttribute(this.#crossfadeFromScope, "opacity", fromOpacity);
         setSvgAttribute(this.#crossfadeToScope, "opacity", toOpacity);
-
-        this.#renderSeriesInto(
-            this.#crossfadeFromScope,
-            fromScene.series,
-            fromDefs,
-            this.#crossfadeFromContainers,
-            this.#crossfadeFromRenderers
-        );
 
         this.#renderSeriesInto(
             this.#crossfadeToScope,
@@ -279,12 +297,22 @@ export class SvgCartesianChartRenderer {
 
         // 5. Axes crossfade
         this.#axisRenderer.clear();
-        if (!this.#crossfadeFromAxesScope) {
-            this.#crossfadeFromAxesScope = createSvgElement("g");
-            this.#crossfadeFromAxesScope.setAttribute("data-crossfade-scope", "from");
-            this.#layers.axes.appendChild(this.#crossfadeFromAxesScope);
-            this.#fromAxesRenderer = new SvgCartesianAxisRenderer(this.#crossfadeFromAxesScope);
+        if (fromScene) {
+            if (!this.#crossfadeFromAxesScope) {
+                this.#crossfadeFromAxesScope = createSvgElement("g");
+                this.#crossfadeFromAxesScope.setAttribute("data-crossfade-scope", "from");
+                this.#layers.axes.appendChild(this.#crossfadeFromAxesScope);
+                this.#fromAxesRenderer = new SvgCartesianAxisRenderer(this.#crossfadeFromAxesScope);
+            }
+            setSvgAttribute(this.#crossfadeFromAxesScope, "opacity", fromOpacity);
+            this.#fromAxesRenderer?.render(fromScene, styleResolver);
+        } else if (this.#crossfadeFromAxesScope) {
+            this.#fromAxesRenderer?.clear();
+            this.#crossfadeFromAxesScope.remove();
+            this.#crossfadeFromAxesScope = null;
+            this.#fromAxesRenderer = null;
         }
+
         if (!this.#crossfadeToAxesScope) {
             this.#crossfadeToAxesScope = createSvgElement("g");
             this.#crossfadeToAxesScope.setAttribute("data-crossfade-scope", "to");
@@ -292,9 +320,7 @@ export class SvgCartesianChartRenderer {
             this.#toAxesRenderer = new SvgCartesianAxisRenderer(this.#crossfadeToAxesScope);
         }
 
-        setSvgAttribute(this.#crossfadeFromAxesScope, "opacity", fromOpacity);
         setSvgAttribute(this.#crossfadeToAxesScope, "opacity", toOpacity);
-        this.#fromAxesRenderer?.render(fromScene, styleResolver);
         this.#toAxesRenderer?.render(toScene, styleResolver);
 
         // 6. Transient (Target transient layer once)

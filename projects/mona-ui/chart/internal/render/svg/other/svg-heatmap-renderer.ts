@@ -234,8 +234,9 @@ export class SvgHeatmapRenderer {
 
                 if (isKeyboard) {
                     const focusIndicatorColor =
-                        styleResolver.resolveCssVariable("--color-focus-indicator") ||
                         styleResolver.resolveCssVariable("--color-ring") ||
+                        styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                        styleResolver.resolveCssVariable("--color-primary") ||
                         "#3b82f6";
                     setSvgAttribute(highlightEl, "fill", "none");
                     setSvgAttribute(highlightEl, "stroke", focusIndicatorColor);

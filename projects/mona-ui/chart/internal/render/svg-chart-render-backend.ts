@@ -118,16 +118,21 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
         }
         this.#lastRenderedKind = toKind;
 
-        const isBothCartesianXY =
-            fromScene?.coordinateSystem === "cartesian" &&
-            fromScene.cartesianKind === "xy" &&
+        const canUseCartesianStructuralCrossfade =
             toScene.coordinateSystem === "cartesian" &&
-            toScene.cartesianKind === "xy";
+            toScene.cartesianKind === "xy" &&
+            (
+                fromScene === null ||
+                (
+                    fromScene.coordinateSystem === "cartesian" &&
+                    fromScene.cartesianKind === "xy"
+                )
+            );
 
-        if (isBothCartesianXY) {
+        if (canUseCartesianStructuralCrossfade) {
             this.#clearGenericCrossfade();
             this.#cartesianRenderer.renderCrossfade(
-                fromScene as CartesianXYChartScene,
+                fromScene as CartesianXYChartScene | null,
                 toScene as CartesianXYChartScene,
                 progress,
                 presentation,
@@ -135,28 +140,44 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
                 this.#defs
             );
         } else {
-            if (fromScene && progress < 1) {
+            if (progress < 1) {
                 this.#clearAllRenderers();
 
-                if (!this.#genericFromScope) {
-                    this.#genericFromScope = createSvgElement("g");
-                    this.#genericFromScope.setAttribute("data-crossfade-scope", "from");
-                    this.#layers.series.appendChild(this.#genericFromScope);
+                const p = Math.max(0, Math.min(1, progress));
+
+                if (fromScene) {
+                    if (!this.#genericFromScope) {
+                        this.#genericFromScope = createSvgElement("g");
+                        this.#genericFromScope.setAttribute("data-crossfade-scope", "from");
+                        this.#layers.series.appendChild(this.#genericFromScope);
+                    }
+                    setSvgAttribute(this.#genericFromScope, "opacity", Math.max(0, Math.min(1, 1 - p)));
+                    const fromDefs = this.#defs.withScope("cf-from");
+                    this.#renderSceneIntoContainer(fromScene, this.#genericFromScope, styleResolver, fromDefs, true);
+                } else if (this.#genericFromScope) {
+                    this.#fromCartesianRenderer?.clear();
+                    this.#fromPolarRenderer?.clear();
+                    this.#fromHeatmapRenderer?.clear();
+                    this.#fromTreemapRenderer?.clear();
+                    this.#fromFunnelRenderer?.clear();
+                    this.#fromWaterfallRenderer?.clear();
+                    this.#genericFromScope.remove();
+                    this.#genericFromScope = null;
+                    this.#fromCartesianRenderer = null;
+                    this.#fromPolarRenderer = null;
+                    this.#fromHeatmapRenderer = null;
+                    this.#fromTreemapRenderer = null;
+                    this.#fromFunnelRenderer = null;
+                    this.#fromWaterfallRenderer = null;
                 }
+
                 if (!this.#genericToScope) {
                     this.#genericToScope = createSvgElement("g");
                     this.#genericToScope.setAttribute("data-crossfade-scope", "to");
                     this.#layers.series.appendChild(this.#genericToScope);
                 }
-
-                const p = Math.max(0, Math.min(1, progress));
-                setSvgAttribute(this.#genericFromScope, "opacity", Math.max(0, Math.min(1, 1 - p)));
                 setSvgAttribute(this.#genericToScope, "opacity", Math.max(0, Math.min(1, p)));
-
-                const fromDefs = this.#defs.withScope("cf-from");
                 const toDefs = this.#defs.withScope("cf-to");
-
-                this.#renderSceneIntoContainer(fromScene, this.#genericFromScope, styleResolver, fromDefs, true);
                 this.#renderSceneIntoContainer(toScene, this.#genericToScope, styleResolver, toDefs, false);
             } else {
                 this.#clearGenericCrossfade();

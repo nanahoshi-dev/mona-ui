@@ -8,9 +8,13 @@ import { SvgChartRenderBackend } from "../svg-chart-render-backend";
 import { resolveBrushDashArray, resolveStrokeDashArray } from "./svg-attribute-utils";
 import { createSvgElement } from "./svg-element-utils";
 
-function createMockStyleResolver(): ChartStyleResolver {
+function createMockStyleResolver(vars: Record<string, string> = {}): ChartStyleResolver {
     const el = document.createElement("div");
-    return new ChartStyleResolver(el);
+    const resolver = new ChartStyleResolver(el);
+    if (Object.keys(vars).length > 0) {
+        resolver.resolveCssVariable = (name: string) => vars[name] ?? "";
+    }
+    return resolver;
 }
 
 function createMockSeriesStyle(color: string): ChartSeriesStyle {
@@ -48,7 +52,95 @@ function createMockInteraction(partial: Partial<ChartInteractionState> = {}): Ch
     };
 }
 
-describe("SVG Style Parity Release Gate (WP5: SVG-R2-009)", () => {
+describe("SVG Style Parity Release Gate (WP5: SVG-R3-005)", () => {
+    // --- Heatmap Keyboard Focus Style Precedence ---
+    describe("SVG-R3-005: Heatmap Keyboard Focus Precedence Parity with Canvas", () => {
+        const heatmapScene = {
+            axes: [],
+            cartesianKind: "heatmap",
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            plotRect: { height: 200, width: 200, x: 20, y: 20 },
+            series: [
+                {
+                    cells: [
+                        { color: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: 10, valueText: "10", width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }
+                    ],
+                    id: "heat-1",
+                    labels: [],
+                    name: "Heatmap",
+                    type: "heatmap"
+                }
+            ],
+            width: 300
+        } as unknown as CartesianHeatmapChartScene;
+
+        const keyboardInteraction = createMockInteraction({
+            activeHitTarget: createMockHitTarget({
+                index: 0,
+                point: { x: 45, y: 45 },
+                rect: { height: 50, width: 50, x: 20, y: 20 },
+                seriesId: "heat-1",
+                xIndex: 0,
+                yIndex: 0
+            } as any),
+            source: "keyboard"
+        });
+
+        it("resolves --color-ring as top precedence when multiple variables exist", () => {
+            const svg = createSvgElement("svg");
+            const backend = new SvgChartRenderBackend(svg, 1);
+            const styleResolver = createMockStyleResolver({
+                "--color-focus-indicator": "#00ff00",
+                "--color-primary": "#0000ff",
+                "--color-ring": "#ff0000"
+            });
+
+            backend.render({ presentation: { cartesianOverlay: null, interaction: keyboardInteraction }, scene: heatmapScene, styleResolver });
+            const rect = svg.querySelector("g[data-heatmap-layer='highlight'] rect");
+            expect(rect?.getAttribute("stroke")).toBe("#ff0000");
+        });
+
+        it("resolves --color-focus-indicator when --color-ring is absent", () => {
+            const svg = createSvgElement("svg");
+            const backend = new SvgChartRenderBackend(svg, 1);
+            const styleResolver = createMockStyleResolver({
+                "--color-focus-indicator": "#00ff00",
+                "--color-primary": "#0000ff"
+            });
+
+            backend.render({ presentation: { cartesianOverlay: null, interaction: keyboardInteraction }, scene: heatmapScene, styleResolver });
+            const rect = svg.querySelector("g[data-heatmap-layer='highlight'] rect");
+            expect(rect?.getAttribute("stroke")).toBe("#00ff00");
+        });
+
+        it("resolves --color-primary when both --color-ring and --color-focus-indicator are absent", () => {
+            const svg = createSvgElement("svg");
+            const backend = new SvgChartRenderBackend(svg, 1);
+            const styleResolver = createMockStyleResolver({
+                "--color-primary": "#0000ff"
+            });
+
+            backend.render({ presentation: { cartesianOverlay: null, interaction: keyboardInteraction }, scene: heatmapScene, styleResolver });
+            const rect = svg.querySelector("g[data-heatmap-layer='highlight'] rect");
+            expect(rect?.getAttribute("stroke")).toBe("#0000ff");
+        });
+
+        it("falls back to #3b82f6 when no CSS variables are resolved", () => {
+            const svg = createSvgElement("svg");
+            const backend = new SvgChartRenderBackend(svg, 1);
+            const styleResolver = createMockStyleResolver();
+
+            backend.render({ presentation: { cartesianOverlay: null, interaction: keyboardInteraction }, scene: heatmapScene, styleResolver });
+            const rect = svg.querySelector("g[data-heatmap-layer='highlight'] rect");
+            expect(rect?.getAttribute("stroke")).toBe("#3b82f6");
+        });
+    });
+
     // --- Heatmap Hover Outline Parity ---
     describe("Heatmap Hover Outline Style Parity", () => {
         it("renders hover outline with stroke-width 1.5 and correct fallback color", () => {
@@ -216,4 +308,3 @@ describe("SVG Style Parity Release Gate (WP5: SVG-R2-009)", () => {
         });
     });
 });
-

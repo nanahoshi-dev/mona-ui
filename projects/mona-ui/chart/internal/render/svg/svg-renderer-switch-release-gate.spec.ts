@@ -22,7 +22,7 @@ function createMockSeriesStyle(color: string): ChartSeriesStyle {
     };
 }
 
-describe("SVG / Canvas Renderer Switching Release Gate", () => {
+describe("SVG / Canvas Renderer Switching Release Gate (WP6: Section 73 & 74)", () => {
     it("switches back and forth between Canvas and SVG backends seamlessly with identical scene input", () => {
         const canvas = document.createElement("canvas");
         const svg = createSvgElement("svg");
@@ -100,5 +100,35 @@ describe("SVG / Canvas Renderer Switching Release Gate", () => {
         expect(() => svgBackend.render({ presentation: null, scene, styleResolver })).not.toThrow();
         expect(svg.querySelector("[data-series-id='s1']")).not.toBeNull();
         svgBackend.destroy();
+    });
+
+    it("ensures single active graphics surface per backend instance without cross-contamination", () => {
+        const svg = createSvgElement("svg");
+        const styleResolver = createMockStyleResolver();
+
+        const scene: CartesianXYChartScene = {
+            axes: [],
+            cartesianKind: "xy",
+            coordinateSystem: "cartesian",
+            hasRenderableData: true,
+            height: 300,
+            hitTargets: [],
+            interactionBuckets: [],
+            legendItems: [],
+            plotRect: { height: 200, width: 400, x: 20, y: 20 },
+            series: [],
+            width: 500
+        };
+
+        const backend = createChartRenderBackend("svg", null, svg, 1);
+        backend.render({ presentation: null, scene, styleResolver });
+
+        // Ensure exactly one root SVG hierarchy
+        expect(svg.querySelectorAll("g[data-layer]").length).toBeGreaterThan(0);
+
+        backend.destroy();
+        for (const layer of svg.querySelectorAll("g[data-layer]")) {
+            expect(layer.children.length).toBe(0);
+        }
     });
 });

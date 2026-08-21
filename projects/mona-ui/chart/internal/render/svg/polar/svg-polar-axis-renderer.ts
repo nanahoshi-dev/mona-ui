@@ -80,8 +80,10 @@ class SvgPolarAxisSeriesRenderer {
                         stops: spec.stops
                     });
                     setSvgAttribute(this.#fillPath, "fill", gradUrl);
+                    this.#fillPath.removeAttribute("fill-opacity");
                 } else {
                     setSvgAttribute(this.#fillPath, "fill", withAlpha(series.color, series.fillOpacity));
+                    this.#fillPath.removeAttribute("fill-opacity");
                 }
             } else if (this.#fillPath) {
                 this.#fillPath.remove();
@@ -127,7 +129,7 @@ class SvgPolarAxisSeriesRenderer {
         if (series.showPoints && series.pointRadius > 0 && definedPoints.length >= 1) {
             const activePoints = definedPoints.filter(pt => (pt.renderOpacity ?? 1) > 0);
             this.#pointsKeyedGroup.reconcile(activePoints, {
-                key: (pt, i) => `${pt.dataIndex}:${pt.angle}:${pt.radius}`,
+                key: (pt, i) => pt.animationKey ?? pt.categoryKey ?? String(pt.dataIndex ?? i),
                 tag: "circle",
                 update: (circle, pt) => {
                     const pointAlpha = pt.renderOpacity ?? 1;
@@ -165,6 +167,11 @@ class SvgPolarAxisSeriesRenderer {
     }
 }
 
+interface SvgPolarAxisSeriesEntry {
+    readonly container: SVGGElement;
+    readonly renderer: SvgPolarAxisSeriesRenderer;
+}
+
 export class SvgPolarAxisRenderer {
     readonly #container: SVGGElement;
     readonly #backgroundGroup: SVGGElement;
@@ -178,7 +185,7 @@ export class SvgPolarAxisRenderer {
     #radialRefSpokeLine: SVGLineElement | null = null;
     #highlightCircle: SVGCircleElement | null = null;
 
-    readonly #seriesRenderers = new Map<string, SvgPolarAxisSeriesRenderer>();
+    readonly #seriesRenderers = new Map<string, SvgPolarAxisSeriesEntry>();
 
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -233,8 +240,8 @@ export class SvgPolarAxisRenderer {
             this.#angularSpokesPath.remove();
             this.#angularSpokesPath = null;
         }
-        for (const r of this.#seriesRenderers.values()) {
-            r.clear();
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.clear();
         }
         if (this.#outerBoundaryElement) {
             this.#outerBoundaryElement.remove();
@@ -253,8 +260,9 @@ export class SvgPolarAxisRenderer {
     public destroy(): void {
         this.clear();
         this.#radialGridKeyedGroup.destroy();
-        for (const r of this.#seriesRenderers.values()) {
-            r.destroy();
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.destroy();
+            entry.container.remove();
         }
         this.#seriesRenderers.clear();
         this.#backgroundGroup.remove();
@@ -282,7 +290,7 @@ export class SvgPolarAxisRenderer {
             const isPolygon = radialAxis.gridShape === "polygon" && angularAxis.ticks.length >= 3;
 
             this.#radialGridKeyedGroup.reconcile(validTicks, {
-                key: (tick, i) => `${tick.value}:${tick.radius}`,
+                key: (tick, i) => tick.tickKey ?? (tick.index !== undefined ? String(tick.index) : (tick.formattedValue ?? String(tick.value))),
                 tag: isPolygon ? "path" : "circle",
                 update: (element, tick) => {
                     if (isPolygon) {
@@ -351,29 +359,30 @@ export class SvgPolarAxisRenderer {
             const s = seriesList[i];
             activeIds.add(s.id);
 
-            let renderer = this.#seriesRenderers.get(s.id);
-            if (!renderer) {
-                const group = createSvgElement("g");
-                group.setAttribute("data-series-id", s.id);
-                this.#seriesGroup.appendChild(group);
-                renderer = new SvgPolarAxisSeriesRenderer(group);
-                this.#seriesRenderers.set(s.id, renderer);
+            let entry = this.#seriesRenderers.get(s.id);
+            if (!entry) {
+                const container = createSvgElement("g");
+                container.setAttribute("data-series-id", s.id);
+                this.#seriesGroup.appendChild(container);
+                const renderer = new SvgPolarAxisSeriesRenderer(container);
+                entry = { container, renderer };
+                this.#seriesRenderers.set(s.id, entry);
             }
 
             // Ensure DOM ordering
             const currentNthChild = this.#seriesGroup.children[i];
-            const rendererContainer = (renderer as any).container ?? this.#seriesGroup.querySelector(`[data-series-id="${s.id}"]`);
-            if (rendererContainer && currentNthChild !== rendererContainer) {
-                this.#seriesGroup.insertBefore(rendererContainer, currentNthChild ?? null);
+            if (currentNthChild !== entry.container) {
+                this.#seriesGroup.insertBefore(entry.container, currentNthChild ?? null);
             }
 
-            renderer.render(s, center, styleResolver, defs);
+            entry.renderer.render(s, center, styleResolver, defs);
         }
 
         // Cleanup stale series
-        for (const [id, r] of this.#seriesRenderers.entries()) {
+        for (const [id, entry] of this.#seriesRenderers.entries()) {
             if (!activeIds.has(id)) {
-                r.destroy();
+                entry.renderer.destroy();
+                entry.container.remove();
                 this.#seriesRenderers.delete(id);
             }
         }

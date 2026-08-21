@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
-import type { CartesianHeatmapChartScene, PolarAxisChartScene } from "../../scene/chart-scene";
+import type { CartesianHeatmapChartScene, PolarAxisChartScene, PolarSectorChartScene } from "../../scene/chart-scene";
+import type { PolarArcChartScene } from "../../scene/polar-arc-scene";
 import type { SceneHitTarget } from "../../scene/scene-geometry";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
 import { SvgChartRenderBackend } from "../svg-chart-render-backend";
@@ -35,7 +36,7 @@ function createMockInteraction(partial: Partial<ChartInteractionState> = {}): Ch
     };
 }
 
-describe("SVG Retained DOM & Tag Replacement Release Gate (WP3 & WP4: SVG-R2-006, SVG-R2-008, SVG-R2-010, SVG-R2-011)", () => {
+describe("SVG Retained DOM & Structural Mark Release Gate (WP2 & WP6: SVG-R3-002, SVG-R3-007)", () => {
     // --- SVG-R2-010: Dynamic Tag Replacement in SvgKeyedGroup ---
     describe("SVG-R2-010: SvgKeyedGroup Tag Replacement", () => {
         it("replaces DOM node when requested tag changes (e.g. rect -> path) preserving key and without orphan nodes", () => {
@@ -88,9 +89,9 @@ describe("SVG Retained DOM & Tag Replacement Release Gate (WP3 & WP4: SVG-R2-006
         });
     });
 
-    // --- SVG-R2-006: Retained DOM in Polar Axis & Arc Renderers ---
-    describe("SVG-R2-006: Retained DOM in Polar Radar / Polar Axis Renderer", () => {
-        it("retains series container and points across animation/render frames without recreating DOM nodes", () => {
+    // --- SVG-R3-002: Retained Structural Mark References ---
+    describe("SVG-R3-002: Structural Mark Reference Equality Across Animation Frames", () => {
+        it("retains radar point circles and grid ring elements when geometry changes", () => {
             const svg = createSvgElement("svg");
             const backend = new SvgChartRenderBackend(svg, 1);
             const styleResolver = createMockStyleResolver();
@@ -147,8 +148,8 @@ describe("SVG Retained DOM & Tag Replacement Release Gate (WP3 & WP4: SVG-R2-006
                             name: "Radar Series",
                             pointRadius: 4,
                             points: [
-                                { angle: 0, dataIndex: 0, datum: {}, defined: true, formattedValue: String(val1), point: { x: 150, y: 150 - val1 }, radius: val1, value: val1 },
-                                { angle: Math.PI, dataIndex: 1, datum: {}, defined: true, formattedValue: String(val2), point: { x: 150, y: 150 + val2 }, radius: val2, value: val2 }
+                                { angle: 0, animationKey: "p1", categoryKey: "A", dataIndex: 0, datum: {}, defined: true, formattedValue: String(val1), point: { x: 150, y: 150 - val1 }, radius: val1, value: val1 },
+                                { angle: Math.PI, animationKey: "p2", categoryKey: "B", dataIndex: 1, datum: {}, defined: true, formattedValue: String(val2), point: { x: 150, y: 150 + val2 }, radius: val2, value: val2 }
                             ],
                             showPoints: true,
                             strokeWidth: 2,
@@ -160,13 +161,199 @@ describe("SVG Retained DOM & Tag Replacement Release Gate (WP3 & WP4: SVG-R2-006
 
             // Frame 1
             backend.render({ presentation: null, scene: createScene(40, 60), styleResolver });
-            const seriesGroup = svg.querySelector("g[data-series-id='radar-1']");
-            expect(seriesGroup).not.toBeNull();
+            const seriesGroup1 = svg.querySelector("g[data-series-id='radar-1']");
+            const pointCircle1 = seriesGroup1?.querySelector("circle");
+            const gridCircle1 = svg.querySelector("g[data-polar-layer='background'] circle");
 
-            // Frame 2
+            expect(pointCircle1).not.toBeNull();
+            expect(gridCircle1).not.toBeNull();
+
+            // Frame 2: morph radius values
             backend.render({ presentation: null, scene: createScene(50, 70), styleResolver });
             const seriesGroup2 = svg.querySelector("g[data-series-id='radar-1']");
-            expect(seriesGroup2).toBe(seriesGroup); // same retained DOM element
+            const pointCircle2 = seriesGroup2?.querySelector("circle");
+            const gridCircle2 = svg.querySelector("g[data-polar-layer='background'] circle");
+
+            expect(seriesGroup2).toBe(seriesGroup1);
+            expect(pointCircle2).toBe(pointCircle1); // Point element retained
+            expect(gridCircle2).toBe(gridCircle1); // Grid element retained
+        });
+
+        it("retains radial-bar tracks and marks when angles update", () => {
+            const svg = createSvgElement("svg");
+            const backend = new SvgChartRenderBackend(svg, 1);
+            const styleResolver = createMockStyleResolver();
+
+            const createScene = (endAngle: number): PolarArcChartScene =>
+                ({
+                    arcMode: "radialBar",
+                    center: { x: 150, y: 150 },
+                    coordinateSystem: "polar",
+                    hasRenderableData: true,
+                    height: 300,
+                    hitTargets: [],
+                    innerRadius: 40,
+                    interactionBuckets: [],
+                    legendItems: [],
+                    outerRadius: 100,
+                    plotRect: { height: 300, width: 300, x: 0, y: 0 },
+                    polarKind: "arc",
+                    series: [
+                        {
+                            fillMode: "solid",
+                            id: "rb-1",
+                            marks: [
+                                {
+                                    animationKey: "rb-m1",
+                                    color: "#3b82f6",
+                                    cornerRadius: 0,
+                                    dataIndex: 0,
+                                    datum: {},
+                                    endAngle,
+                                    innerRadius: 60,
+                                    itemId: "item-1",
+                                    outerRadius: 80,
+                                    padAngle: 0,
+                                    startAngle: 0,
+                                    value: 50,
+                                    visible: true
+                                }
+                            ],
+                            name: "Radial Bar",
+                            style: { color: "#3b82f6", fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
+                            tracks: [
+                                {
+                                    animationKey: "rb-t1",
+                                    color: "#e5e7eb",
+                                    endAngle: Math.PI * 2,
+                                    innerRadius: 60,
+                                    itemId: "track-1",
+                                    opacity: 1,
+                                    outerRadius: 80,
+                                    startAngle: 0
+                                }
+                            ],
+                            type: "radialBar"
+                        }
+                    ],
+                    width: 300
+                }) as unknown as PolarArcChartScene;
+
+            // Frame 1
+            backend.render({ presentation: null, scene: createScene(Math.PI), styleResolver });
+            const markPath1 = svg.querySelector("g[data-series-id='rb-1'] g[data-radial-layer='marks'] path");
+            const trackPath1 = svg.querySelector("g[data-series-id='rb-1'] g[data-radial-layer='tracks'] path");
+            expect(markPath1).not.toBeNull();
+            expect(trackPath1).not.toBeNull();
+
+            // Frame 2
+            backend.render({ presentation: null, scene: createScene(Math.PI * 1.5), styleResolver });
+            const markPath2 = svg.querySelector("g[data-series-id='rb-1'] g[data-radial-layer='marks'] path");
+            const trackPath2 = svg.querySelector("g[data-series-id='rb-1'] g[data-radial-layer='tracks'] path");
+
+            expect(markPath2).toBe(markPath1); // Mark path retained
+            expect(trackPath2).toBe(trackPath1); // Track path retained
+        });
+
+        it("retains polar sector slices across data updates", () => {
+            const svg = createSvgElement("svg");
+            const backend = new SvgChartRenderBackend(svg, 1);
+            const styleResolver = createMockStyleResolver();
+
+            const createScene = (angle: number): PolarSectorChartScene =>
+                ({
+                    center: { x: 150, y: 150 },
+                    coordinateSystem: "polar",
+                    hasRenderableData: true,
+                    height: 300,
+                    hitTargets: [],
+                    interactionBuckets: [],
+                    legendItems: [],
+                    outerRadius: 100,
+                    plotRect: { height: 300, width: 300, x: 0, y: 0 },
+                    polarKind: "sector",
+                    series: [
+                        {
+                            fillMode: "solid",
+                            id: "pie-1",
+                            name: "Pie",
+                            slices: [
+                                {
+                                    color: "#ff0000",
+                                    cornerRadius: 0,
+                                    dataIndex: 0,
+                                    datum: {},
+                                    endAngle: angle,
+                                    innerRadius: 0,
+                                    outerRadius: 100,
+                                    padAngle: 0,
+                                    percentage: 50,
+                                    rawValue: 10,
+                                    renderOpacity: 1,
+                                    sliceId: "slice-A",
+                                    startAngle: 0,
+                                    value: 10,
+                                    visible: true
+                                }
+                            ],
+                            style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
+                            type: "pie"
+                        }
+                    ],
+                    width: 300
+                }) as unknown as PolarSectorChartScene;
+
+            // Frame 1
+            backend.render({ presentation: null, scene: createScene(Math.PI), styleResolver });
+            const slicePath1 = svg.querySelector("g[data-series-id='pie-1'] path");
+            expect(slicePath1).not.toBeNull();
+
+            // Frame 2
+            backend.render({ presentation: null, scene: createScene(Math.PI * 1.5), styleResolver });
+            const slicePath2 = svg.querySelector("g[data-series-id='pie-1'] path");
+
+            expect(slicePath2).toBe(slicePath1); // Slice element retained
+        });
+
+        it("maintains bounded DOM node count across repeated renders", () => {
+            const svg = createSvgElement("svg");
+            const backend = new SvgChartRenderBackend(svg, 1);
+            const styleResolver = createMockStyleResolver();
+
+            const createScene = (val: number): CartesianHeatmapChartScene =>
+                ({
+                    axes: [],
+                    cartesianKind: "heatmap",
+                    coordinateSystem: "cartesian",
+                    hasRenderableData: true,
+                    height: 300,
+                    hitTargets: [],
+                    interactionBuckets: [],
+                    legendItems: [],
+                    plotRect: { height: 200, width: 200, x: 20, y: 20 },
+                    series: [
+                        {
+                            cells: [
+                                { backgroundColor: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: val, valueText: String(val), width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }
+                            ],
+                            id: "heat-series-A",
+                            labels: [],
+                            name: "Series A",
+                            type: "heatmap"
+                        }
+                    ],
+                    width: 300
+                }) as unknown as CartesianHeatmapChartScene;
+
+            backend.render({ presentation: null, scene: createScene(1), styleResolver });
+            const initialCount = svg.querySelectorAll("*").length;
+
+            for (let i = 2; i <= 10; i++) {
+                backend.render({ presentation: null, scene: createScene(i), styleResolver });
+            }
+
+            const finalCount = svg.querySelectorAll("*").length;
+            expect(finalCount).toBe(initialCount); // Zero DOM growth
         });
     });
 
@@ -291,4 +478,3 @@ describe("SVG Retained DOM & Tag Replacement Release Gate (WP3 & WP4: SVG-R2-006
         });
     });
 });
-
