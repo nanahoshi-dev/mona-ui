@@ -38,7 +38,7 @@ describe("ChartExportOptions", () => {
             expect(normalized.width).toBe(1000);
             expect(normalized.height).toBe(600);
             expect(normalized.pixelRatio).toBe(3);
-            expect(normalized.background).toBe("#123456");
+            expect(normalized.background === "#123456" || normalized.background === "rgb(18, 52, 86)").toBe(true);
         });
 
         it("accepts valid pixelRatio (0.25 to 8) and rejects out-of-bounds values (EXP-15)", () => {

@@ -9,20 +9,7 @@ import {
     type ChartExportResult
 } from "../../models/chart-export.models";
 
-const A4_WIDTH_PT = 595.28;
-const A4_HEIGHT_PT = 841.89;
-const LETTER_WIDTH_PT = 612;
-const LETTER_HEIGHT_PT = 792;
-
-interface ResolvedPdfLayout {
-    readonly contentHeight: number;
-    readonly contentWidth: number;
-    readonly contentX: number;
-    readonly contentY: number;
-    readonly orientation: "portrait" | "landscape";
-    readonly pageHeight: number;
-    readonly pageWidth: number;
-}
+import { resolvePdfLayout } from "./chart-export-geometry";
 
 export interface ChartExportPdfInstrumentation {
     onPdfVectorConvert?(): void;
@@ -33,75 +20,6 @@ let activePdfInstrumentation: ChartExportPdfInstrumentation | null = null;
 
 export function setPdfExportInstrumentation(instrumentation: ChartExportPdfInstrumentation | null): void {
     activePdfInstrumentation = instrumentation;
-}
-
-function resolvePdfLayout(
-    request: NormalizedChartExportRequest
-): ResolvedPdfLayout {
-    const chartWidthPt = request.width * PDF_POINTS_PER_PX;
-    const chartHeightPt = request.height * PDF_POINTS_PER_PX;
-    const pageSize = request.pdfPage.size;
-    const margins = request.pdfPage.margin;
-
-    // EXP-10: Exact chart-page dimensions including explicit margins
-    if (pageSize === "chart") {
-        const orientation = chartWidthPt >= chartHeightPt ? "landscape" : "portrait";
-        return {
-            contentHeight: chartHeightPt,
-            contentWidth: chartWidthPt,
-            contentX: margins.left,
-            contentY: margins.top,
-            orientation,
-            pageHeight: margins.top + chartHeightPt + margins.bottom,
-            pageWidth: margins.left + chartWidthPt + margins.right
-        };
-    }
-
-    let baseWidth = A4_WIDTH_PT;
-    let baseHeight = A4_HEIGHT_PT;
-
-    if (pageSize === "letter") {
-        baseWidth = LETTER_WIDTH_PT;
-        baseHeight = LETTER_HEIGHT_PT;
-    } else if (typeof pageSize === "object") {
-        baseWidth = pageSize.width;
-        baseHeight = pageSize.height;
-    }
-
-    let orientation: "portrait" | "landscape" = "portrait";
-    if (request.pdfPage.orientation === "auto") {
-        orientation = chartWidthPt > chartHeightPt ? "landscape" : "portrait";
-    } else {
-        orientation = request.pdfPage.orientation;
-    }
-
-    const pageWidth = orientation === "landscape" ? Math.max(baseWidth, baseHeight) : Math.min(baseWidth, baseHeight);
-    const pageHeight = orientation === "landscape" ? Math.min(baseWidth, baseHeight) : Math.max(baseWidth, baseHeight);
-
-    // EXP-10: Reject invalid over-large paper margins
-    if (margins.left + margins.right >= pageWidth || margins.top + margins.bottom >= pageHeight) {
-        throw new ChartExportError("invalid-size", "PDF margins must be smaller than total page dimensions.");
-    }
-
-    const availWidth = pageWidth - margins.left - margins.right;
-    const availHeight = pageHeight - margins.top - margins.bottom;
-
-    const scale = Math.min(availWidth / chartWidthPt, availHeight / chartHeightPt);
-    const contentWidth = chartWidthPt * scale;
-    const contentHeight = chartHeightPt * scale;
-
-    const contentX = margins.left + (availWidth - contentWidth) / 2;
-    const contentY = margins.top + (availHeight - contentHeight) / 2;
-
-    return {
-        contentHeight,
-        contentWidth,
-        contentX,
-        contentY,
-        orientation,
-        pageHeight,
-        pageWidth
-    };
 }
 
 export class ChartPdfExporter {

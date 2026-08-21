@@ -130,6 +130,12 @@ export class ChartExportCompositor {
 
         const islandMap = new Map<string, RenderedRasterIsland>();
         for (const island of renderedIslands) {
+            if (islandMap.has(island.id)) {
+                throw new ChartExportError(
+                    "svg-composition-failed",
+                    `Duplicate rendered raster island ID detected: '${island.id}'.`
+                );
+            }
             islandMap.set(island.id, island);
         }
 
@@ -216,32 +222,37 @@ export class ChartExportCompositor {
                 domOverlayGroup.appendChild(textEl);
             } else if (prim.kind === "raster") {
                 const island = islandMap.get(prim.id);
-                if (island) {
-                    const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
-                    img.setAttribute("data-export-role", prim.role);
-                    setSvgAttribute(img, "x", island.x);
-                    setSvgAttribute(img, "y", island.y);
-                    setSvgAttribute(img, "width", island.width);
-                    setSvgAttribute(img, "height", island.height);
-                    img.setAttribute("href", island.dataUrl);
-
-                    // Plot-local clipping if clipRect is present (EXP-14)
-                    if (island.clipRect) {
-                        const clipId = `mona-export-clip-${++clipIdCounter}`;
-                        const clipPath = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
-                        clipPath.setAttribute("id", clipId);
-                        const clipRectEl = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                        setSvgAttribute(clipRectEl, "x", island.clipRect.x);
-                        setSvgAttribute(clipRectEl, "y", island.clipRect.y);
-                        setSvgAttribute(clipRectEl, "width", island.clipRect.width);
-                        setSvgAttribute(clipRectEl, "height", island.clipRect.height);
-                        clipPath.appendChild(clipRectEl);
-                        defsContainer.appendChild(clipPath);
-                        img.setAttribute("clip-path", `url(#${clipId})`);
-                    }
-
-                    domOverlayGroup.appendChild(img);
+                if (!island) {
+                    throw new ChartExportError(
+                        "svg-composition-failed",
+                        `Missing rendered raster island result for primitive ID '${prim.id}'.`
+                    );
                 }
+
+                const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                img.setAttribute("data-export-role", prim.role);
+                setSvgAttribute(img, "x", island.x);
+                setSvgAttribute(img, "y", island.y);
+                setSvgAttribute(img, "width", island.width);
+                setSvgAttribute(img, "height", island.height);
+                img.setAttribute("href", island.dataUrl);
+
+                // Plot-local clipping if clipRect is present (EXP-14)
+                if (island.clipRect) {
+                    const clipId = `mona-export-clip-${++clipIdCounter}`;
+                    const clipPath = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
+                    clipPath.setAttribute("id", clipId);
+                    const clipRectEl = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                    setSvgAttribute(clipRectEl, "x", island.clipRect.x);
+                    setSvgAttribute(clipRectEl, "y", island.clipRect.y);
+                    setSvgAttribute(clipRectEl, "width", island.clipRect.width);
+                    setSvgAttribute(clipRectEl, "height", island.clipRect.height);
+                    clipPath.appendChild(clipRectEl);
+                    defsContainer.appendChild(clipPath);
+                    img.setAttribute("clip-path", `url(#${clipId})`);
+                }
+
+                domOverlayGroup.appendChild(img);
             }
         }
 

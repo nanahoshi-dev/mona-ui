@@ -41,8 +41,8 @@ export class ChartExportRasterIslandRenderer {
             );
         }
 
-        // 1. Preflight and validate all resources (fonts, images, media)
-        await ChartExportResourceManager.preflightIslandResources(
+        // 1. Capture and inline all resources (fonts, images, media, CSS URLs)
+        await ChartExportResourceManager.captureAndInlineIslandResources(
             islands.map(i => i.frozenRoot),
             signal
         );
@@ -104,18 +104,76 @@ export class ChartExportRasterIslandRenderer {
                     );
                 }
 
-                // Attach frozen node to staging root so html2canvas can measure and render
-                island.frozenRoot.style.boxSizing = "border-box";
-                island.frozenRoot.style.width = `${island.bounds.width}px`;
-                island.frozenRoot.style.height = `${island.bounds.height}px`;
-                island.frozenRoot.style.minWidth = `${island.bounds.width}px`;
-                island.frozenRoot.style.maxWidth = `${island.bounds.width}px`;
-                island.frozenRoot.style.minHeight = `${island.bounds.height}px`;
-                island.frozenRoot.style.maxHeight = `${island.bounds.height}px`;
-                stagingContainer.appendChild(island.frozenRoot);
+                let targetElement: HTMLElement;
+                let cleanupElement: HTMLElement;
+
+                if (island.hasComplexTransform) {
+                    // Complex transform: create capture wrapper matching visual AABB (R3-03)
+                    const wrapper = document.createElement("div");
+                    wrapper.style.position = "relative";
+                    wrapper.style.boxSizing = "border-box";
+                    wrapper.style.width = `${island.bounds.width}px`;
+                    wrapper.style.height = `${island.bounds.height}px`;
+                    wrapper.style.overflow = "visible";
+
+                    island.frozenRoot.style.position = "absolute";
+                    island.frozenRoot.style.boxSizing = "border-box";
+                    island.frozenRoot.style.width = `${island.layoutWidth}px`;
+                    island.frozenRoot.style.height = `${island.layoutHeight}px`;
+                    island.frozenRoot.style.minWidth = `${island.layoutWidth}px`;
+                    island.frozenRoot.style.maxWidth = `${island.layoutWidth}px`;
+                    island.frozenRoot.style.minHeight = `${island.layoutHeight}px`;
+                    island.frozenRoot.style.maxHeight = `${island.layoutHeight}px`;
+                    if (island.transform) {
+                        island.frozenRoot.style.transform = island.transform;
+                    }
+                    if (island.transformOrigin) {
+                        island.frozenRoot.style.transformOrigin = island.transformOrigin;
+                    }
+
+                    wrapper.appendChild(island.frozenRoot);
+                    stagingContainer.appendChild(wrapper);
+
+                    // Align transformed child visual bounding box to (0,0) of wrapper
+                    try {
+                        const wrapperRect = wrapper.getBoundingClientRect();
+                        const childRect = island.frozenRoot.getBoundingClientRect();
+                        if (wrapperRect.width > 0 && childRect.width > 0) {
+                            const offsetX = wrapperRect.left - childRect.left;
+                            const offsetY = wrapperRect.top - childRect.top;
+                            island.frozenRoot.style.left = `${offsetX}px`;
+                            island.frozenRoot.style.top = `${offsetY}px`;
+                        }
+                    } catch {}
+
+                    targetElement = wrapper;
+                    cleanupElement = wrapper;
+                } else {
+                    // Non-transformed element: direct bounding dimensions
+                    island.frozenRoot.style.boxSizing = "border-box";
+                    island.frozenRoot.style.width = `${island.bounds.width}px`;
+                    island.frozenRoot.style.height = `${island.bounds.height}px`;
+                    island.frozenRoot.style.minWidth = `${island.bounds.width}px`;
+                    island.frozenRoot.style.maxWidth = `${island.bounds.width}px`;
+                    island.frozenRoot.style.minHeight = `${island.bounds.height}px`;
+                    island.frozenRoot.style.maxHeight = `${island.bounds.height}px`;
+
+                    stagingContainer.appendChild(island.frozenRoot);
+                    targetElement = island.frozenRoot;
+                    cleanupElement = island.frozenRoot;
+                }
+
+                // Restore scroll positions after attaching to staging DOM (R3-09)
+                const allStagedElements = [targetElement, ...Array.from(targetElement.querySelectorAll<HTMLElement>("*"))];
+                for (const el of allStagedElements) {
+                    const top = (el as any).__monaScrollTop ?? (el.hasAttribute("data-mona-scroll-top") ? parseFloat(el.getAttribute("data-mona-scroll-top")!) : 0);
+                    const left = (el as any).__monaScrollLeft ?? (el.hasAttribute("data-mona-scroll-left") ? parseFloat(el.getAttribute("data-mona-scroll-left")!) : 0);
+                    if (top > 0) el.scrollTop = top;
+                    if (left > 0) el.scrollLeft = left;
+                }
 
                 try {
-                    const canvas = await html2canvas(island.frozenRoot, {
+                    const canvas = await html2canvas(targetElement, {
                         backgroundColor: null,
                         height: island.bounds.height,
                         logging: false,
@@ -144,7 +202,7 @@ export class ChartExportRasterIslandRenderer {
                         zOrder: island.zOrder
                     });
                 } finally {
-                    island.frozenRoot.remove();
+                    cleanupElement.remove();
                 }
             }
         } catch (err: any) {

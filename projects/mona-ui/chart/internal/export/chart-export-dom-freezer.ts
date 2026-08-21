@@ -1,3 +1,5 @@
+import { ChartExportError } from "../../models/chart-export.models";
+
 export class ChartExportDomFreezer {
     /**
      * Deeply freezes a cloned DOM tree by copying all computed styles and runtime state
@@ -20,6 +22,14 @@ export class ChartExportDomFreezer {
             if (tagName === "script") {
                 dst.remove();
                 continue;
+            }
+
+            // Preserve scroll position (R3-09)
+            if (src.scrollTop > 0 || src.scrollLeft > 0) {
+                (dst as any).__monaScrollTop = src.scrollTop;
+                (dst as any).__monaScrollLeft = src.scrollLeft;
+                dst.setAttribute("data-mona-scroll-top", String(src.scrollTop));
+                dst.setAttribute("data-mona-scroll-left", String(src.scrollLeft));
             }
 
             try {
@@ -90,18 +100,39 @@ export class ChartExportDomFreezer {
                 } else if (src instanceof HTMLImageElement && dst instanceof HTMLImageElement) {
                     dst.src = src.currentSrc || src.src;
                 } else if (src instanceof HTMLCanvasElement && dst instanceof HTMLCanvasElement) {
+                    // Check for tainted canvas and copy bitmap synchronously (R3-02)
                     try {
-                        const ctx = dst.getContext("2d");
-                        if (ctx && src.width > 0 && src.height > 0) {
+                        const srcCtx = src.getContext("2d");
+                        if (srcCtx && src.width > 0 && src.height > 0) {
+                            srcCtx.getImageData(0, 0, 1, 1);
+                        }
+                    } catch (err) {
+                        throw new ChartExportError(
+                            "resource-load-failed",
+                            "Template canvas is cross-origin tainted and cannot be exported.",
+                            { cause: err }
+                        );
+                    }
+
+                    try {
+                        const dstCtx = dst.getContext("2d");
+                        if (dstCtx && src.width > 0 && src.height > 0) {
                             dst.width = src.width;
                             dst.height = src.height;
-                            ctx.drawImage(src, 0, 0);
+                            dstCtx.drawImage(src, 0, 0);
                         }
-                    } catch {
-                        // Tainted canvas - preflight check in resource manager will handle
+                    } catch (err) {
+                        throw new ChartExportError(
+                            "resource-load-failed",
+                            "Failed to copy template canvas bitmap for export.",
+                            { cause: err }
+                        );
                     }
                 }
-            } catch {
+            } catch (err) {
+                if (err instanceof ChartExportError) {
+                    throw err;
+                }
                 // Ignore per-element computed style exceptions
             }
         }

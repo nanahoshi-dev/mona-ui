@@ -156,23 +156,35 @@ export class ChartExportDomCollector {
                 const frozenRoot = node.cloneNode(true) as HTMLElement;
                 ChartExportDomFreezer.freeze(node, frozenRoot);
 
-                // Enforce strict bounding dimensions on the frozen root
-                frozenRoot.style.boxSizing = "border-box";
-                frozenRoot.style.width = `${bounds.width}px`;
-                frozenRoot.style.height = `${bounds.height}px`;
-                frozenRoot.style.minWidth = `${bounds.width}px`;
-                frozenRoot.style.maxWidth = `${bounds.width}px`;
-                frozenRoot.style.minHeight = `${bounds.height}px`;
-                frozenRoot.style.maxHeight = `${bounds.height}px`;
+                const layoutWidth = node.offsetWidth || parseFloat(computed.width) || bounds.width;
+                const layoutHeight = node.offsetHeight || parseFloat(computed.height) || bounds.height;
+                const transform = computed.transform || node.style.transform || "none";
+                const transformOrigin = computed.transformOrigin || node.style.transformOrigin || "50% 50%";
+
+                if (!hasComplexTransform) {
+                    // Enforce strict bounding dimensions on the non-transformed frozen root
+                    frozenRoot.style.boxSizing = "border-box";
+                    frozenRoot.style.width = `${bounds.width}px`;
+                    frozenRoot.style.height = `${bounds.height}px`;
+                    frozenRoot.style.minWidth = `${bounds.width}px`;
+                    frozenRoot.style.maxWidth = `${bounds.width}px`;
+                    frozenRoot.style.minHeight = `${bounds.height}px`;
+                    frozenRoot.style.maxHeight = `${bounds.height}px`;
+                }
 
                 const rasterSnapshot: ChartExportRasterIslandSnapshot = {
                     bounds,
                     clipRect,
                     documentOrder: docOrder,
                     frozenRoot,
+                    hasComplexTransform,
                     id,
+                    layoutHeight,
+                    layoutWidth,
                     plane,
                     role,
+                    transform,
+                    transformOrigin,
                     zOrder
                 };
                 rasterIslands.push(rasterSnapshot);

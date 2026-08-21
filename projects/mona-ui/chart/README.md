@@ -500,11 +500,11 @@ const result: ChartExportResult = await chart.exportChart(options);
 const result: ChartExportResult = await chart.downloadChart(options);
 ```
 
-### Export Formats & Options
+### Export Formats & Behavior
 
 #### Standalone SVG Vector (`format: "svg"`)
 
-Generates a clean standalone SVG document with resolved styling, vector typography, and full WCAG accessibility metadata.
+Generates a standalone, self-contained SVG document with resolved styling, embedded raster islands for custom templates and complex transformed DOM labels, accessible SVG `<title>` and `<desc>` metadata with ARIA attributes, and zero external resource dependencies.
 
 ```typescript
 const result = await chart.exportChart({
@@ -516,7 +516,7 @@ const result = await chart.exportChart({
 
 #### High-Resolution PNG (`format: "png"`)
 
-Rasterizes the chart graphics and DOM overlays to a PNG blob at the desired pixel density.
+Rasterizes chart graphics and DOM overlay layers to a PNG blob at the desired pixel density. Supports `pixelRatio` between `0.25` and `8.0` (defaults to `2`). Values outside this range throw `ChartExportError("invalid-size")`.
 
 ```typescript
 await chart.downloadChart({
@@ -529,7 +529,12 @@ await chart.downloadChart({
 
 #### Document PDF (`format: "pdf"`)
 
-Generates a PDF document with automatic vector conversion and high-res raster fallback.
+Generates a PDF document fitted to standard paper sizes (`"a4"`, `"letter"`), custom dimensions, or exact chart boundaries (`"chart"`).
+
+- **Standard 14 Vector Fonts:** Vector conversion supports built-in PDF standard font families (`Helvetica`, `Times`, `Courier`) with standard ASCII characters (`0x20..0x7E`).
+- **Auto Mode (`mode: "auto"`):** Automatically converts certified standard vector graphics and fonts to vector PDF; safely falls back to high-resolution raster PDF when custom web fonts, non-ASCII Unicode glyphs, or complex SVG constructs are detected.
+- **Strict Vector Mode (`mode: "vector"`):** Enforces direct vector conversion; throws `ChartExportError("pdf-vector-unsupported")` if custom fonts, uncertified glyphs, or unsupported SVG features are present.
+- **Raster Mode (`mode: "raster"`):** Directly generates a raster PDF without attempting vector conversion.
 
 ```typescript
 await chart.downloadChart({
@@ -550,18 +555,24 @@ await chart.downloadChart({
 | :--- | :--- | :--- | :--- |
 | `format` | `"svg" \| "png" \| "pdf"` | *Required* | Target export format. |
 | `fileName` | `string` | `chart.title` or `"chart"` | Filename for `downloadChart()` (sanitized automatically). |
-| `width` | `number` | Chart width | Output logical width in CSS pixels. |
+| `width` | `number` | Chart width | Output logical width in CSS pixels. When aspect ratio differs from source, chart content is centered using contain scaling. |
 | `height` | `number` | Chart height | Output logical height in CSS pixels. |
-| `background` | `"auto" \| "transparent" \| string` | `"auto"` | Background fill policy or custom CSS color. |
-| `pixelRatio` | `number` | `2` | Raster scaling ratio (clamped 1 to 8) for PNG export. |
-| `accessibility` | `boolean` | `true` | Embeds `<title>`, `<desc>`, and ARIA attributes in SVG. |
-| `mode` | `"auto" \| "vector" \| "raster"` | `"auto"` | PDF rendering path (vector with raster fallback). |
+| `background` | `"auto" \| "transparent" \| string` | `"auto"` | Background fill policy or concrete CSS color. CSS-wide keywords (`inherit`, `initial`, `unset`) are rejected. |
+| `pixelRatio` | `number` | `2` | Raster scaling density (accepted range `0.25` to `8.0`) for PNG export. |
+| `accessibility` | `boolean` | `true` | Embeds accessible `<title>`, `<desc>`, and ARIA attributes in SVG. |
+| `mode` | `"auto" \| "vector" \| "raster"` | `"auto"` | PDF rendering path (auto vector with raster fallback, strict vector, or raster). |
 | `page.size` | `"chart" \| "a4" \| "letter" \| { width, height }` | `"chart"` | PDF page sizing in points (1 CSS px = 0.75 pt). |
 | `page.orientation` | `"auto" \| "portrait" \| "landscape"` | `"auto"` | PDF page orientation. |
 | `page.margin` | `number \| { top, right, bottom, left }` | `0` (chart) / `24` (A4/Letter) | PDF page margins in points. |
 | `presentation.selection` | `boolean` | `true` | Include persistent selection mark styling. |
 | `presentation.crosshair` | `boolean` | `false` | Include active crosshair lines and axis badges. |
 | `presentation.brush` | `boolean` | `false` | Include active brush marquee rectangle. |
-| `signal` | `AbortSignal` | `undefined` | AbortSignal to cancel in-flight export transactions. |
+| `signal` | `AbortSignal` | `undefined` | AbortSignal to cancel in-flight export operations. |
+
+### Technical Considerations & Limitations
+
+- **Custom Templates & Transformed DOM:** Custom Angular template content (e.g. `monaChartLegendItemTemplate`, `monaChartCenterTemplate`) and complex CSS transformed DOM labels (e.g. rotated axis labels) are captured as isolated raster islands and embedded as data URIs within SVG and hybrid PDF artifacts.
+- **Resource Capture & CORS:** External template images (`<img>`, SVG `<image>`, CSS `background-image`) are fetched and converted to embedded data URLs during export. Cross-origin images must be CORS-accessible (`crossOrigin="anonymous"`).
+- **Snapshot Isolation:** Export captures a frozen semantic and visual snapshot synchronously at invocation time; subsequent data, theme, or signal changes on the live chart do not mutate ongoing exports.
 
 

@@ -6,6 +6,8 @@ describe("ChartExportSvgSanitizer", () => {
     it("removes internal angular and debug attributes from clean SVGs", () => {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("viewBox", "0 0 100 100");
+        svg.setAttribute("width", "100");
+        svg.setAttribute("height", "100");
         svg.setAttribute("ng-reflect-mode", "svg");
         svg.setAttribute("_nghost-c12", "");
         svg.setAttribute("data-mona-chart-export-role", "header");

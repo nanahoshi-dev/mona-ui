@@ -171,6 +171,8 @@ describe("ChartExportCompositor", () => {
             documentOrder: 1,
             frozenRoot: document.createElement("div"),
             id: "island-A",
+            layoutHeight: 80,
+            layoutWidth: 150,
             plane: "plot-overlays" as const,
             role: "template-a",
             zOrder: 15
@@ -181,6 +183,8 @@ describe("ChartExportCompositor", () => {
             documentOrder: 2,
             frozenRoot: document.createElement("div"),
             id: "island-B",
+            layoutHeight: 60,
+            layoutWidth: 120,
             plane: "plot-overlays" as const,
             role: "template-b",
             zOrder: 16

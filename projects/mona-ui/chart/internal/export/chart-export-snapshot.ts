@@ -52,6 +52,11 @@ export interface ChartExportRasterIslandSnapshot extends ChartExportPrimitiveBas
     readonly bounds: ChartRect;
     readonly clipRect?: ChartRect;
     readonly frozenRoot: HTMLElement;
+    readonly hasComplexTransform?: boolean;
+    readonly layoutHeight: number;
+    readonly layoutWidth: number;
+    readonly transform?: string;
+    readonly transformOrigin?: string;
 }
 
 export type ChartExportDomPrimitive =

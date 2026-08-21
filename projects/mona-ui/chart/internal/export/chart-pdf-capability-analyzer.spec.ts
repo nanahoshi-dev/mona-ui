@@ -17,10 +17,10 @@ describe("ChartPdfCapabilityAnalyzer", () => {
     it("reports vector safe for standard serif and monospace fonts", () => {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         const text1 = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text1.setAttribute("font-family", "Times New Roman, serif");
+        text1.setAttribute("font-family", "Times, serif");
         text1.textContent = "Report";
         const text2 = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text2.setAttribute("font-family", "Courier New, monospace");
+        text2.setAttribute("font-family", "Courier, monospace");
         text2.textContent = "12345";
         svg.appendChild(text1);
         svg.appendChild(text2);

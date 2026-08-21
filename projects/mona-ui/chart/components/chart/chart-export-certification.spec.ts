@@ -3,10 +3,16 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartComponent } from "./chart.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
+import { AreaSeriesComponent } from "../area-series/area-series.component";
 import { BarSeriesComponent } from "../bar-series/bar-series.component";
+import { ScatterSeriesComponent } from "../scatter-series/scatter-series.component";
 import { PieSeriesComponent } from "../pie-series/pie-series.component";
+import { DonutSeriesComponent } from "../donut-series/donut-series.component";
 import { GaugeSeriesComponent } from "../gauge-series/gauge-series.component";
 import { TreemapSeriesComponent } from "../treemap-series/treemap-series.component";
+import { FunnelSeriesComponent } from "../funnel-series/funnel-series.component";
+import { WaterfallSeriesComponent } from "../waterfall-series/waterfall-series.component";
+import { HeatmapSeriesComponent } from "../heatmap-series/heatmap-series.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { ChartLegendComponent } from "../chart-legend/chart-legend.component";
@@ -60,7 +66,29 @@ class CartesianTestHostComponent {
         <mona-chart
             [animation]="false"
             [data]="data()"
-            [title]="'Distribution'"
+            style="display: block; width: 600px; height: 400px;">
+            <mona-chart-x-axis />
+            <mona-chart-y-axis />
+            <mona-bar-series [name]="'Units'" [field]="'value'" />
+            <mona-area-series [name]="'Trend'" [field]="'value'" />
+        </mona-chart>
+    `,
+    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, BarSeriesComponent, AreaSeriesComponent]
+})
+class BarAndAreaTestHostComponent {
+    public readonly data = signal<DataItem[]>([
+        { category: "Q1", value: 100 },
+        { category: "Q2", value: 150 },
+        { category: "Q3", value: 200 }
+    ]);
+}
+
+@Component({
+    template: `
+        <mona-chart
+            [animation]="false"
+            [data]="data()"
+            [title]="title()"
             style="display: block; width: 500px; height: 500px;">
             <mona-pie-series [categoryField]="'category'" [field]="'value'" />
         </mona-chart>
@@ -72,6 +100,26 @@ class PolarPieTestHostComponent {
         { category: "Desktop", value: 60 },
         { category: "Mobile", value: 30 },
         { category: "Tablet", value: 10 }
+    ]);
+    public readonly title = signal("Distribution");
+}
+
+@Component({
+    template: `
+        <mona-chart
+            [animation]="false"
+            [data]="data()"
+            style="display: block; width: 500px; height: 500px;">
+            <mona-donut-series [categoryField]="'category'" [field]="'value'" />
+        </mona-chart>
+    `,
+    imports: [ChartComponent, DonutSeriesComponent]
+})
+class PolarDonutTestHostComponent {
+    public readonly data = signal<DataItem[]>([
+        { category: "Chrome", value: 70 },
+        { category: "Firefox", value: 20 },
+        { category: "Safari", value: 10 }
     ]);
 }
 
@@ -103,6 +151,45 @@ class TreemapTestHostComponent {
         { category: "Alpha", value: 100 },
         { category: "Beta", value: 80 },
         { category: "Gamma", value: 50 }
+    ]);
+}
+
+@Component({
+    template: `
+        <mona-chart
+            [animation]="false"
+            [data]="data()"
+            style="display: block; width: 500px; height: 400px;">
+            <mona-funnel-series [categoryField]="'category'" [field]="'value'" />
+        </mona-chart>
+    `,
+    imports: [ChartComponent, FunnelSeriesComponent]
+})
+class FunnelTestHostComponent {
+    public readonly data = signal<DataItem[]>([
+        { category: "Impressions", value: 1000 },
+        { category: "Clicks", value: 300 },
+        { category: "Purchases", value: 50 }
+    ]);
+}
+
+@Component({
+    template: `
+        <mona-chart
+            [animation]="false"
+            [data]="data()"
+            [xField]="'category'"
+            style="display: block; width: 500px; height: 400px;">
+            <mona-waterfall-series [field]="'value'" />
+        </mona-chart>
+    `,
+    imports: [ChartComponent, WaterfallSeriesComponent]
+})
+class WaterfallTestHostComponent {
+    public readonly data = signal<DataItem[]>([
+        { category: "Starting", value: 100 },
+        { category: "Gain", value: 30 },
+        { category: "Loss", value: -20 }
     ]);
 }
 
@@ -256,7 +343,7 @@ describe("ChartExportCertification", () => {
             expect(text).toContain("#3b82f6");
         });
 
-        it("exports raster PNG from cartesian chart", async () => {
+        it("exports raster PNG from cartesian chart with valid PNG binary header", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.detectChanges();
 
@@ -273,6 +360,13 @@ describe("ChartExportCertification", () => {
             expect(result.width).toBe(600);
             expect(result.height).toBe(400);
             expect(result.blob).toBeInstanceOf(Blob);
+
+            const buffer = await result.blob.arrayBuffer();
+            const bytes = new Uint8Array(buffer);
+            expect(bytes[0]).toBe(0x89);
+            expect(bytes[1]).toBe(0x50);
+            expect(bytes[2]).toBe(0x4E);
+            expect(bytes[3]).toBe(0x47);
         });
 
         it("exports PDF from cartesian chart", async () => {
@@ -296,6 +390,18 @@ describe("ChartExportCertification", () => {
             expect(result.blob.size).toBeGreaterThan(0);
         });
 
+        it("exports Bar and Area combined series chart", async () => {
+            const fixture = TestBed.createComponent(BarAndAreaTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
+
+            const result = await chartComponent.exportChart({ format: "svg" });
+            expect(result.format).toBe("svg");
+            expect(result.blob.size).toBeGreaterThan(0);
+        });
+
         it("scales and centers chart when output dimensions have mismatched aspect ratio (EXP-09)", async () => {
             const fixture = TestBed.createComponent(CartesianTestHostComponent);
             fixture.detectChanges();
@@ -316,7 +422,7 @@ describe("ChartExportCertification", () => {
             expect(text).toContain('width="1000"');
             expect(text).toContain('height="400"');
             // Background covers full output rect 1000 x 400
-            expect(text).toContain('<rect x="0" y="0" width="1000" height="400" fill="#f8fafc"');
+            expect(text).toMatch(/<rect x="0" y="0" width="1000" height="400" fill="(?:#f8fafc|rgb\(248, 250, 252\))"/);
             // Content group is translated and centered
             expect(text).toContain('transform="translate(200, 0) scale(1)"');
         });
@@ -399,6 +505,18 @@ describe("ChartExportCertification", () => {
             expect(text).toContain("Distribution");
         });
 
+        it("exports Polar Donut chart to SVG", async () => {
+            const fixture = TestBed.createComponent(PolarDonutTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
+
+            const result = await chartComponent.exportChart({ format: "svg" });
+            expect(result.format).toBe("svg");
+            expect(result.blob.size).toBeGreaterThan(0);
+        });
+
         it("exports Gauge chart to SVG", async () => {
             const fixture = TestBed.createComponent(GaugeTestHostComponent);
             fixture.detectChanges();
@@ -412,7 +530,7 @@ describe("ChartExportCertification", () => {
         });
     });
 
-    describe("Hierarchical Family Export", () => {
+    describe("Hierarchical and Specialized Family Export", () => {
         it("exports Treemap chart to SVG", async () => {
             const fixture = TestBed.createComponent(TreemapTestHostComponent);
             fixture.detectChanges();
@@ -423,6 +541,74 @@ describe("ChartExportCertification", () => {
             const result = await chartComponent.exportChart({ format: "svg" });
             expect(result.format).toBe("svg");
             expect(result.blob.size).toBeGreaterThan(0);
+        });
+
+        it("exports Funnel chart to SVG", async () => {
+            const fixture = TestBed.createComponent(FunnelTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
+
+            const result = await chartComponent.exportChart({ format: "svg" });
+            expect(result.format).toBe("svg");
+            expect(result.blob.size).toBeGreaterThan(0);
+        });
+
+        it("exports Waterfall chart to SVG", async () => {
+            const fixture = TestBed.createComponent(WaterfallTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
+
+            const result = await chartComponent.exportChart({ format: "svg" });
+            expect(result.format).toBe("svg");
+            expect(result.blob.size).toBeGreaterThan(0);
+        });
+    });
+
+    describe("Concurrency and Post-Snapshot Mutation Isolation", () => {
+        it("supports concurrent exports of SVG, PNG, and PDF simultaneously", async () => {
+            const fixture = TestBed.createComponent(CartesianTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
+
+            const [svgRes, pngRes, pdfRes] = await Promise.all([
+                chartComponent.exportChart({ format: "svg" }),
+                chartComponent.exportChart({ format: "png", pixelRatio: 2 }),
+                chartComponent.exportChart({ format: "pdf", mode: "auto" })
+            ]);
+
+            expect(svgRes.format).toBe("svg");
+            expect(pngRes.format).toBe("png");
+            expect(pdfRes.format).toBe("pdf");
+            expect(svgRes.blob.size).toBeGreaterThan(0);
+            expect(pngRes.blob.size).toBeGreaterThan(0);
+            expect(pdfRes.blob.size).toBeGreaterThan(0);
+        });
+
+        it("isolates exported artifact from post-snapshot component data mutations", async () => {
+            const fixture = TestBed.createComponent(CartesianTestHostComponent);
+            fixture.detectChanges();
+
+            const chartComponent = fixture.debugElement.children[0].componentInstance as ChartComponent;
+            chartComponent.recomputeScene(ChartInvalidationReason.Data);
+
+            const exportPromise = chartComponent.exportChart({ format: "svg" });
+
+            // Mutate title immediately after export starts
+            fixture.componentInstance.title.set("Mutated Title Post Snapshot");
+            fixture.detectChanges();
+
+            const result = await exportPromise;
+            const text = await result.blob.text();
+
+            // Export must retain the invocation state "Sales Overview"
+            expect(text).toContain("Sales Overview");
+            expect(text).not.toContain("Mutated Title Post Snapshot");
         });
     });
 

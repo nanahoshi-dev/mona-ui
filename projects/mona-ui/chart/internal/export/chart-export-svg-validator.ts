@@ -9,6 +9,16 @@ const FORBIDDEN_METADATA_ATTRIBUTES = [
     "data-polar-layer"
 ];
 
+const ALLOWED_DATA_URI_PREFIXES = [
+    "data:image/png",
+    "data:image/jpeg",
+    "data:image/webp"
+];
+
+function isAllowedDataUri(uri: string): boolean {
+    return ALLOWED_DATA_URI_PREFIXES.some(prefix => uri.startsWith(prefix));
+}
+
 export class ChartExportSvgMetadataStripper {
     /**
      * Strips harmless framework, debug, and internal engine attributes without modifying visual content.
@@ -50,12 +60,37 @@ export class ChartExportSvgValidator {
             );
         }
 
-        // 1. Validate root dimensions and viewBox
+        // 1. Validate root dimensions and viewBox strictly (R3-04)
         const viewBox = svgElement.getAttribute("viewBox");
         if (!viewBox) {
             throw new ChartExportError(
                 "svg-composition-failed",
                 "SVG export root is missing a viewBox attribute."
+            );
+        }
+
+        const vbParts = viewBox.trim().split(/[\s,]+/).map(Number);
+        if (
+            vbParts.length !== 4 ||
+            !vbParts.every(Number.isFinite) ||
+            vbParts[2] <= 0 ||
+            vbParts[3] <= 0
+        ) {
+            throw new ChartExportError(
+                "svg-composition-failed",
+                `SVG export root has invalid viewBox dimensions: '${viewBox}'.`
+            );
+        }
+
+        const widthAttr = svgElement.getAttribute("width");
+        const heightAttr = svgElement.getAttribute("height");
+        const widthNum = widthAttr ? Number(widthAttr) : NaN;
+        const heightNum = heightAttr ? Number(heightAttr) : NaN;
+
+        if (!Number.isFinite(widthNum) || widthNum <= 0 || !Number.isFinite(heightNum) || heightNum <= 0) {
+            throw new ChartExportError(
+                "svg-composition-failed",
+                `SVG export root width ('${widthAttr}') and height ('${heightAttr}') must be positive finite numbers.`
             );
         }
 
@@ -80,11 +115,13 @@ export class ChartExportSvgValidator {
         const referencedIds = new Set<string>();
 
         for (const el of allElements) {
-            // Check event attributes (onclick, onload, etc.)
             const attrNames = el.getAttributeNames();
             for (const name of attrNames) {
                 const lower = name.toLowerCase();
+                const rawVal = el.getAttribute(name)?.trim() ?? "";
+                const valLower = rawVal.toLowerCase();
 
+                // Check event attributes (onclick, onload, etc.)
                 if (lower.startsWith("on")) {
                     throw new ChartExportError(
                         "svg-composition-failed",
@@ -94,73 +131,59 @@ export class ChartExportSvgValidator {
 
                 // Check ID uniqueness
                 if (lower === "id") {
-                    const idVal = el.getAttribute(name)?.trim();
-                    if (idVal) {
-                        if (declaredIds.has(idVal)) {
+                    if (rawVal) {
+                        if (declaredIds.has(rawVal)) {
                             throw new ChartExportError(
                                 "svg-composition-failed",
-                                `SVG document contains duplicate ID '${idVal}'.`
+                                `SVG document contains duplicate ID '${rawVal}'.`
                             );
                         }
-                        declaredIds.add(idVal);
+                        declaredIds.add(rawVal);
                     }
                 }
 
-                // Check links and image sources
+                // Check links and image sources via strict allowlist: only local #id or approved data:image
                 if (lower === "href" || lower === "xlink:href" || lower === "src") {
-                    const rawVal = el.getAttribute(name)?.trim() ?? "";
-                    const val = rawVal.toLowerCase();
-
-                    if (val.startsWith("#")) {
-                        referencedIds.add(rawVal.slice(1));
-                    } else if (
-                        val.startsWith("javascript:") ||
-                        val.startsWith("vbscript:") ||
-                        val.startsWith("blob:") ||
-                        val.startsWith("http://") ||
-                        val.startsWith("https://")
-                    ) {
+                    if (rawVal.startsWith("#")) {
+                        referencedIds.add(rawVal.slice(1).trim());
+                    } else if (isAllowedDataUri(valLower)) {
+                        // Valid approved embedded data URI
+                    } else {
                         throw new ChartExportError(
                             "svg-composition-failed",
-                            `SVG contains forbidden external or script URI '${rawVal}'.`
+                            `SVG contains forbidden non-standalone or external resource reference in '${name}': '${rawVal}'.`
                         );
-                    } else if (val.startsWith("data:")) {
-                        if (
-                            !val.startsWith("data:image/png") &&
-                            !val.startsWith("data:image/jpeg") &&
-                            !val.startsWith("data:image/webp")
-                        ) {
+                    }
+                }
+
+                // Check url(...) references in style and presentation attributes
+                if (rawVal.includes("url(")) {
+                    const urlRegex = /url\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
+                    let m: RegExpExecArray | null;
+                    while ((m = urlRegex.exec(rawVal)) !== null) {
+                        const target = m[1].trim();
+                        if (target.startsWith("#")) {
+                            referencedIds.add(target.slice(1).trim());
+                        } else if (isAllowedDataUri(target.toLowerCase())) {
+                            // Allowed data URI
+                        } else {
                             throw new ChartExportError(
                                 "svg-composition-failed",
-                                `SVG contains forbidden or uncertified data URI in '${name}'.`
+                                `SVG attribute '${name}' contains forbidden external URL expression: '${target}'.`
                             );
                         }
                     }
                 }
 
-                // Check url(#id) references in style and presentation attributes
-                const attrVal = el.getAttribute(name) || "";
-                if (attrVal.includes("url(")) {
-                    if (/url\(\s*['"]?(?:https?:|blob:|javascript:|vbscript:)/i.test(attrVal)) {
-                        throw new ChartExportError(
-                            "svg-composition-failed",
-                            `SVG attribute '${name}' contains forbidden external URL expression.`
-                        );
-                    }
-                    const urlMatch = /url\(\s*['"]?#([^'")]+)['"]?\s*\)/gi;
-                    let m: RegExpExecArray | null;
-                    while ((m = urlMatch.exec(attrVal)) !== null) {
-                        if (m[1]) {
-                            referencedIds.add(m[1].trim());
-                        }
-                    }
-                }
-
-                // Check unresolved CSS variables or currentColor
-                if (attrVal.includes("var(") || attrVal.includes("currentcolor")) {
+                // Check case-insensitive unresolved CSS variables, currentColor, or calc expressions
+                if (
+                    valLower.includes("var(") ||
+                    valLower.includes("currentcolor") ||
+                    valLower.includes("calc(")
+                ) {
                     throw new ChartExportError(
                         "svg-composition-failed",
-                        `SVG attribute '${name}' contains unresolved CSS variable or currentColor.`
+                        `SVG attribute '${name}' contains unresolved CSS variable, currentColor, or calc expression: '${rawVal}'.`
                     );
                 }
             }
@@ -193,6 +216,17 @@ export class ChartExportSvgValidator {
             throw new ChartExportError(
                 "svg-serialization-failed",
                 `Generated SVG contains XML syntax errors: ${parserError.textContent || "Unknown parser error"}`
+            );
+        }
+
+        if (
+            !doc.documentElement ||
+            doc.documentElement.namespaceURI !== "http://www.w3.org/2000/svg" ||
+            doc.documentElement.localName.toLowerCase() !== "svg"
+        ) {
+            throw new ChartExportError(
+                "svg-serialization-failed",
+                "Serialized XML root is not a valid SVG document."
             );
         }
     }

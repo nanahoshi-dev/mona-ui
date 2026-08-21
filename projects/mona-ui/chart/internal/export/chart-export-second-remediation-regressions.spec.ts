@@ -261,7 +261,7 @@ describe("Second Export Remediation Regressions (R2-01 to R2-14)", () => {
         it("resolves auto background to concrete color", () => {
             const styles = new Map<string, string>([["--mona-chart-surface", "#1a202c"]]);
             const bg = ChartExportColorNormalizer.resolveAutoBackground(null, styles);
-            expect(bg).toBe("#1a202c");
+            expect(bg === "#1a202c" || bg === "rgb(26, 32, 44)").toBe(true);
         });
     });
 

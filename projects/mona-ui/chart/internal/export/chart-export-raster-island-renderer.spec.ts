@@ -17,6 +17,8 @@ describe("ChartExportRasterIslandRenderer", () => {
             documentOrder: 1,
             frozenRoot: document.createElement("div"),
             id: "island-1",
+            layoutHeight: 50,
+            layoutWidth: 100,
             plane: "plot-overlays",
             role: "test",
             zOrder: 1

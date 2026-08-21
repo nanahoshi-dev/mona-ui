@@ -14,14 +14,9 @@ export interface PdfCapabilityResult {
 
 const CERTIFIED_PRIMARY_PDF_FONTS = new Set([
     "helvetica",
-    "arial",
-    "sans-serif",
     "times",
-    "times new roman",
-    "serif",
-    "courier",
-    "courier new",
-    "monospace"
+    "times roman",
+    "courier"
 ]);
 
 /**

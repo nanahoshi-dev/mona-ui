@@ -104,6 +104,8 @@ describe("ChartExportSvgValidator & MetadataStripper", () => {
     it("passes when all references resolve correctly", () => {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("viewBox", "0 0 100 100");
+        svg.setAttribute("width", "100");
+        svg.setAttribute("height", "100");
 
         const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         const clip = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
