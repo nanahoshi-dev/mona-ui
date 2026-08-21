@@ -1,11 +1,14 @@
 import type { ChartExportRasterIslandSnapshot } from "./chart-export-snapshot";
 import type { ChartRect } from "../../models/chart.models";
 import { ChartExportResourceManager } from "./chart-export-resource-manager";
+import { isolateFragmentIds } from "./chart-export-fragment-isolator";
+import type { RasterDecodeEnvironment } from "./chart-export-image-decoder";
 import { ChartExportError } from "../../models/chart-export.models";
 
 import {
     MAX_RASTER_DIMENSION,
-    MAX_RASTER_TOTAL_PIXELS
+    MAX_RASTER_TOTAL_PIXELS,
+    MAX_RASTER_TRANSACTION_PIXELS
 } from "./chart-export-options";
 
 export interface RenderedRasterIsland {
@@ -18,12 +21,62 @@ export interface RenderedRasterIsland {
     readonly y: number;
 }
 
+function effectiveScaleOf(scale: number): number {
+    return Math.max(0.25, scale);
+}
+
+/**
+ * Transaction-wide raster pixel preflight (R6-06 / INV-08). Computes the exact
+ * allocation formula used per island for every island and rejects before any
+ * expensive resource or rasterizer work when the aggregate budget is exceeded.
+ */
+export function assertRasterTransactionBudget(
+    islands: readonly ChartExportRasterIslandSnapshot[],
+    scale: number
+): void {
+    const effectiveScale = effectiveScaleOf(scale);
+    let totalPixels = 0;
+
+    for (const island of islands) {
+        const physicalWidth = Math.ceil(island.bounds.width * effectiveScale);
+        const physicalHeight = Math.ceil(island.bounds.height * effectiveScale);
+
+        if (!Number.isSafeInteger(physicalWidth) || !Number.isSafeInteger(physicalHeight)) {
+            throw new ChartExportError(
+                "too-large",
+                `Template raster island '${island.id}' has physical dimensions beyond safe integer range.`
+            );
+        }
+
+        if (
+            physicalWidth > MAX_RASTER_DIMENSION ||
+            physicalHeight > MAX_RASTER_DIMENSION ||
+            physicalWidth * physicalHeight > MAX_RASTER_TOTAL_PIXELS
+        ) {
+            throw new ChartExportError(
+                "too-large",
+                `Template raster island dimensions (${physicalWidth}x${physicalHeight}px) exceed maximum supported size.`
+            );
+        }
+
+        totalPixels += physicalWidth * physicalHeight;
+    }
+
+    if (totalPixels > MAX_RASTER_TRANSACTION_PIXELS) {
+        throw new ChartExportError(
+            "too-large",
+            `Aggregate raster transaction pixels (${totalPixels} across ${islands.length} islands) exceed the maximum (${MAX_RASTER_TRANSACTION_PIXELS} pixels).`
+        );
+    }
+}
+
 export class ChartExportRasterIslandRenderer {
     public static async renderIslands(
         islands: readonly ChartExportRasterIslandSnapshot[],
         _styleSnapshot: ReadonlyMap<string, string>,
         scale: number = 2,
-        signal?: AbortSignal
+        signal?: AbortSignal,
+        decodeEnvironment?: RasterDecodeEnvironment
     ): Promise<readonly RenderedRasterIsland[]> {
         if (islands.length === 0) {
             return [];
@@ -40,11 +93,26 @@ export class ChartExportRasterIslandRenderer {
             );
         }
 
-        // 1. Capture and inline all resources (fonts, images, media, CSS URLs)
+        // 1. Cheap geometry budget first: per-island and aggregate pixel guards run
+        // before resource capture or rasterizer loading (R6-06 §34.1)
+        assertRasterTransactionBudget(islands, scale);
+
+        // 2. Capture and inline all resources (fonts, images, media, CSS URLs)
         await ChartExportResourceManager.captureAndInlineIslandResources(
             islands.map(i => i.frozenRoot),
-            signal
+            signal,
+            decodeEnvironment
         );
+
+        if (signal?.aborted) {
+            throw new DOMException("Export was aborted", "AbortError");
+        }
+
+        // 2.5 Namespace fragment IDs per island so same-document staging cannot
+        // resolve any preserved fragment to an element outside the island (R6-02)
+        for (const island of islands) {
+            isolateFragmentIds(island.frozenRoot, island.id);
+        }
 
         if (signal?.aborted) {
             throw new DOMException("Export was aborted", "AbortError");
@@ -88,20 +156,7 @@ export class ChartExportRasterIslandRenderer {
                     throw new DOMException("Export was aborted", "AbortError");
                 }
 
-                const effectiveScale = Math.max(0.25, scale);
-                const physicalWidth = Math.ceil(island.bounds.width * effectiveScale);
-                const physicalHeight = Math.ceil(island.bounds.height * effectiveScale);
-
-                if (
-                    physicalWidth > MAX_RASTER_DIMENSION ||
-                    physicalHeight > MAX_RASTER_DIMENSION ||
-                    physicalWidth * physicalHeight > MAX_RASTER_TOTAL_PIXELS
-                ) {
-                    throw new ChartExportError(
-                        "too-large",
-                        `Template raster island dimensions (${physicalWidth}x${physicalHeight}px) exceed maximum supported size.`
-                    );
-                }
+                const effectiveScale = effectiveScaleOf(scale);
 
                 let targetElement: HTMLElement;
                 let cleanupElement: HTMLElement;

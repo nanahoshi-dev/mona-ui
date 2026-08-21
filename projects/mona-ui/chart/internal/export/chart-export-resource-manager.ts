@@ -1,17 +1,17 @@
-import { ChartExportError } from "../../models/chart-export.models";
+import { ChartExportError, type ChartExportErrorCode } from "../../models/chart-export.models";
 import { abortable } from "./chart-export-abort-utils";
+import { discoverResourceDependencies, type ChartExportResourceDependency } from "./chart-export-resource-dependency-scanner";
 import {
     ChartExportRasterMediaType,
     MAX_EXPORT_RESOURCE_BYTES,
     MAX_EXPORT_RESOURCE_TOTAL_BYTES,
-    SUPPORTED_RASTER_MEDIA_TYPES,
     bytesToBase64,
     decodeDataUrlPayload,
     isSupportedRasterMediaType,
-    parseDataUrlMediaType,
+    parseDataUri,
     sniffRasterImageType
 } from "./chart-export-resource-policy";
-import { validateRasterImageDecode } from "./chart-export-image-decoder";
+import { RasterDecodeEnvironment, validateRasterImageDecode } from "./chart-export-image-decoder";
 
 export interface ChartExportCapturedImageResource {
     readonly dataUrl: string;
@@ -19,13 +19,29 @@ export interface ChartExportCapturedImageResource {
     readonly originalUrl: string;
 }
 
+/**
+ * Explicit first-release visual URI policy (R6-01 §6.10). Discovery is generic;
+ * this table decides capture vs owned-fragment vs inert vs reject. Unknown visual
+ * surfaces fail closed instead of being silently left live (INV-05).
+ */
+type DependencyAction =
+    | { readonly kind: "capture" }
+    | { readonly kind: "owned-fragment" }
+    | { readonly kind: "inert" }
+    | { readonly kind: "reject"; readonly code: ChartExportErrorCode; readonly message: string };
+
 const ALLOWED_CSS_URL_PROPERTIES = new Set([
     "backgroundimage",
     "background-image",
+    "background",
     "borderimagesource",
     "border-image-source",
+    "borderimage",
+    "border-image",
     "liststyleimage",
-    "list-style-image"
+    "list-style-image",
+    "liststyle",
+    "list-style"
 ]);
 
 const FORBIDDEN_CSS_URL_PROPERTIES = new Set([
@@ -43,19 +59,30 @@ const FORBIDDEN_CSS_URL_PROPERTIES = new Set([
     "-webkit-filter"
 ]);
 
-function extractCssUrls(styleValue: string): string[] {
-    if (!styleValue || !styleValue.includes("url(")) {
-        return [];
-    }
-    const urls: string[] = [];
-    const urlRegex = /url\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
-    let match: RegExpExecArray | null;
-    while ((match = urlRegex.exec(styleValue)) !== null) {
-        if (match[1]) {
-            urls.push(match[1].trim());
-        }
-    }
-    return urls;
+/** SVG presentation attributes whose url() references participate in rendering. */
+const SVG_PRESENTATION_URL_ATTRIBUTES = new Set([
+    "fill",
+    "stroke",
+    "clip-path",
+    "mask",
+    "filter",
+    "marker-start",
+    "marker-mid",
+    "marker-end"
+]);
+
+/** Elements whose href/src never render a resource inside a frozen island. */
+const NON_VISUAL_URI_ELEMENTS = new Set(["a", "area", "base", "link", "html", "head"]);
+
+/** Active SVG timing surfaces that violate frozen-snapshot semantics (R6-04 / INV-06). */
+const ACTIVE_TIMING_ELEMENTS = new Set(["animate", "animatetransform", "animatemotion", "set", "mpath"]);
+
+function normalizePropertyName(property: string): string {
+    return property.toLowerCase().trim();
+}
+
+function propertyNameKey(property: string): string {
+    return normalizePropertyName(property).replace(/[^a-z-]/g, "");
 }
 
 function escapeCssId(id: string): string {
@@ -101,14 +128,235 @@ function assertOwnedFragment(root: Element, rawFragment: string): Element {
 }
 
 /**
+ * Central visual URI policy switch (R6-01 §21.4). Pure classification: no fetching,
+ * no mutation. Every recognized surface resolves to exactly one explicit outcome.
+ */
+function classifyDependency(dependency: ChartExportResourceDependency): DependencyAction {
+    const element = dependency.element;
+    const tagName = element.tagName.toLowerCase();
+
+    if (dependency.source.kind === "attribute") {
+        const attributeName = dependency.source.name.toLowerCase();
+        const isDirectUriAttribute = attributeName === "href" || attributeName === "xlink:href" || attributeName === "src" || attributeName === "poster";
+
+        if (!isDirectUriAttribute) {
+            return classifyCssUrlSurface(tagName, attributeName, dependency);
+        }
+
+        if (NON_VISUAL_URI_ELEMENTS.has(tagName)) {
+            // Navigation/metadata links do not render resources in a frozen island.
+            return { kind: "inert" };
+        }
+
+        switch (tagName) {
+            case "img":
+                if (dependency.isLocalFragment) {
+                    return {
+                        kind: "reject",
+                        code: "resource-load-failed",
+                        message: `Template <img> source '${dependency.url}' is a fragment URI and cannot identify raster image bytes.`
+                    };
+                }
+                return { kind: "capture" };
+
+            case "input":
+                if ((element.getAttribute("type") ?? "").toLowerCase() === "image") {
+                    if (dependency.isLocalFragment) {
+                        return {
+                            kind: "reject",
+                            code: "resource-load-failed",
+                            message: `Template <input type="image"> source '${dependency.url}' is a fragment URI and cannot identify raster image bytes.`
+                        };
+                    }
+                    return { kind: "capture" };
+                }
+                return {
+                    kind: "reject",
+                    code: "unsupported-template",
+                    message: `Template element <${tagName}> carries an unsupported visual source attribute '${attributeName}'.`
+                };
+
+            case "image":
+                return dependency.isLocalFragment ? { kind: "owned-fragment" } : { kind: "capture" };
+
+            case "use":
+                if (!dependency.isLocalFragment) {
+                    return {
+                        kind: "reject",
+                        code: "resource-load-failed",
+                        message: `Template SVG <use> contains unsupported external reference: '${dependency.url}'.`
+                    };
+                }
+                return { kind: "owned-fragment" };
+
+            case "textpath":
+                if (!dependency.isLocalFragment) {
+                    return {
+                        kind: "reject",
+                        code: "unsupported-template",
+                        message: `Template SVG <textPath> contains unsupported external reference: '${dependency.url}'.`
+                    };
+                }
+                return { kind: "owned-fragment" };
+
+            case "lineargradient":
+            case "radialgradient":
+            case "pattern":
+                if (!dependency.isLocalFragment) {
+                    return {
+                        kind: "reject",
+                        code: "unsupported-template",
+                        message: `Template SVG <${tagName}> inheritance reference must stay island-local; external target '${dependency.url}' is not supported.`
+                    };
+                }
+                return { kind: "owned-fragment" };
+
+            case "feimage":
+                return {
+                    kind: "reject",
+                    code: "unsupported-template",
+                    message: "Template SVG contains <feImage>, which is not supported for export."
+                };
+
+            case "video":
+            case "audio":
+            case "iframe":
+            case "object":
+            case "embed":
+                return {
+                    kind: "reject",
+                    code: "resource-load-failed",
+                    message: `Template DOM contains unsupported <${tagName}> media element for export.`
+                };
+
+            case "script":
+                return {
+                    kind: "reject",
+                    code: "unsupported-template",
+                    message: "Template DOM contains a <script> element, which is not supported for export."
+                };
+
+            default:
+                return {
+                    kind: "reject",
+                    code: "unsupported-template",
+                    message: `Template element <${tagName}> contains an unrecognized visual resource reference in '${attributeName}': '${dependency.url}'.`
+                };
+        }
+    }
+
+    // Inline style declarations
+    const propertyKey = propertyNameKey(dependency.source.property);
+    return classifyCssUrlSurface(tagName, propertyKey, dependency);
+}
+
+function classifyCssUrlSurface(_tagName: string, propertyOrAttributeKey: string, dependency: ChartExportResourceDependency): DependencyAction {
+    if (FORBIDDEN_CSS_URL_PROPERTIES.has(propertyOrAttributeKey)) {
+        return {
+            kind: "reject",
+            code: "unsupported-template",
+            message: `Template uses CSS '${dependency.source.kind === "style" ? dependency.source.property : dependency.source.name}' with a URL dependency, which is not supported for export.`
+        };
+    }
+
+    const isPresentationAttribute =
+        dependency.source.kind === "attribute" &&
+        SVG_PRESENTATION_URL_ATTRIBUTES.has(dependency.source.name.toLowerCase());
+
+    if (ALLOWED_CSS_URL_PROPERTIES.has(propertyOrAttributeKey)) {
+        // A local fragment inside an allowed capture property is an island-owned
+        // reference, not fetchable raster bytes; it must never reach fetch() (R6-01 §29.4).
+        return dependency.isLocalFragment ? { kind: "owned-fragment" } : { kind: "capture" };
+    }
+
+    if (isPresentationAttribute) {
+        return dependency.isLocalFragment ? { kind: "owned-fragment" } : {
+            kind: "reject",
+            code: "unsupported-template",
+            message: `Template SVG attribute '${dependency.source.name}' contains unsupported external URL reference: '${dependency.url}'.`
+        };
+    }
+
+    return {
+        kind: "reject",
+        code: "unsupported-template",
+        message: `Template ${dependency.source.kind === "style" ? "style property" : "attribute"} '${dependency.source.kind === "style" ? dependency.source.property : dependency.source.name}' contains an unclassified URL expression: '${dependency.rawValue}'.`
+    };
+}
+
+/**
+ * Reads a response body under a hard byte budget before pathological allocation (R6-06 / INV-07):
+ * Content-Length enables early rejection, and streaming reads cancel as soon as the
+ * byte limit is exceeded instead of buffering an arbitrarily large response.
+ */
+async function readResponseBytesBounded(response: Response, maxBytes: number): Promise<Uint8Array> {
+    const contentLength = response.headers.get("content-length");
+    if (contentLength !== null) {
+        const declared = Number(contentLength);
+        if (Number.isFinite(declared) && declared >= 0 && declared > maxBytes) {
+            throw new ChartExportError(
+                "too-large",
+                `Template resource Content-Length (${declared} bytes) exceeds maximum single resource limit (${maxBytes} bytes).`
+            );
+        }
+    }
+
+    if (!response.body || typeof response.body.getReader !== "function") {
+        const buffer = await response.arrayBuffer();
+        if (buffer.byteLength > maxBytes) {
+            throw new ChartExportError(
+                "too-large",
+                `Template resource byte size (${buffer.byteLength} bytes) exceeds maximum single resource limit (${maxBytes} bytes).`
+            );
+        }
+        return new Uint8Array(buffer);
+    }
+
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                break;
+            }
+            total += value.byteLength;
+            if (total > maxBytes) {
+                await reader.cancel();
+                throw new ChartExportError(
+                    "too-large",
+                    `Template resource exceeded maximum single resource limit (${maxBytes} bytes) while streaming.`
+                );
+            }
+            chunks.push(value);
+        }
+    } finally {
+        reader.releaseLock();
+    }
+
+    const result = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+        result.set(chunk, offset);
+        offset += chunk.byteLength;
+    }
+    return result;
+}
+
+/**
  * Per-export transaction manager that coordinates resource capture, deduplication,
- * media validation, and aggregate byte budget tracking (R5-02 / R5-03 / R5-12).
+ * media validation, and aggregate byte budget tracking (R5-02 / R5-03 / R5-12 / R6-01 / R6-03 / R6-06).
  */
 class ChartExportResourceTransaction {
     #totalBytes = 0;
     readonly #cache = new Map<string, Promise<ChartExportCapturedImageResource>>();
 
-    public constructor(private readonly signal?: AbortSignal) {}
+    public constructor(
+        private readonly signal?: AbortSignal,
+        private readonly decodeEnvironment?: RasterDecodeEnvironment
+    ) {}
 
     public capture(url: string): Promise<ChartExportCapturedImageResource> {
         const cached = this.#cache.get(url);
@@ -135,7 +383,7 @@ class ChartExportResourceTransaction {
 
         // Data URI path
         if (url.startsWith("data:")) {
-            const parsedMedia = parseDataUrlMediaType(url);
+            const parsedMedia = parseDataUri(url)?.mediaType ?? null;
             if (parsedMedia === "image/svg+xml") {
                 throw new ChartExportError(
                     "resource-load-failed",
@@ -160,8 +408,8 @@ class ChartExportResourceTransaction {
                 );
             }
 
-            // Real decode validation (R5-02)
-            await validateRasterImageDecode(bytes, sniffed, this.signal);
+            // Real decode validation (R5-02 / R6-03)
+            await validateRasterImageDecode(bytes, sniffed, this.signal, this.decodeEnvironment);
 
             this.#recordBytes(bytes.length, url);
 
@@ -183,22 +431,15 @@ class ChartExportResourceTransaction {
                     );
                 }
 
-                const blob = await res.blob();
-                if (blob.size === 0) {
+                // Bounded read enforces the size limit before full materialization (R6-06).
+                const bytes = await readResponseBytesBounded(res, MAX_EXPORT_RESOURCE_BYTES);
+                if (bytes.length === 0) {
                     throw new ChartExportError(
                         "resource-load-failed",
                         `Template image resource '${url}' returned an empty response.`
                     );
                 }
 
-                if (blob.size > MAX_EXPORT_RESOURCE_BYTES) {
-                    throw new ChartExportError(
-                        "too-large",
-                        `Template image resource '${url}' (${blob.size} bytes) exceeds maximum single resource limit (${MAX_EXPORT_RESOURCE_BYTES} bytes).`
-                    );
-                }
-
-                const bytes = new Uint8Array(await blob.arrayBuffer());
                 const sniffed = sniffRasterImageType(bytes);
                 if (!sniffed) {
                     throw new ChartExportError(
@@ -207,8 +448,8 @@ class ChartExportResourceTransaction {
                     );
                 }
 
-                // Real decode validation (R5-02)
-                await validateRasterImageDecode(bytes, sniffed, this.signal);
+                // Real decode validation (R5-02 / R6-03)
+                await validateRasterImageDecode(bytes, sniffed, this.signal, this.decodeEnvironment);
 
                 this.#recordBytes(bytes.length, url);
 
@@ -453,15 +694,115 @@ async function certifyTemplateFontReadiness(root: HTMLElement, signal?: AbortSig
     }
 }
 
+/**
+ * Executes one classified capture against the transaction and rewrites the
+ * dependency's owning surface to the embedded representation.
+ */
+async function captureDependency(
+    dependency: ChartExportResourceDependency,
+    transaction: ChartExportResourceTransaction
+): Promise<void> {
+    const element = dependency.element;
+    const tagName = element.tagName.toLowerCase();
+
+    if (dependency.source.kind === "style") {
+        const captured = await transaction.capture(dependency.url);
+        const property = dependency.source.property;
+        const style = (element as HTMLElement).style;
+        const currentValue = style.getPropertyValue(property);
+        const updatedValue = (currentValue || dependency.rawValue).split(dependency.url).join(captured.dataUrl);
+        style.setProperty(property, updatedValue);
+        return;
+    }
+
+    const attributeName = dependency.source.name;
+
+    if (tagName === "img") {
+        const selectedSource = ((element as HTMLImageElement).currentSrc || element.getAttribute("src") || "").trim();
+        const captured = await transaction.capture(selectedSource || dependency.url);
+        (element as HTMLImageElement).src = captured.dataUrl;
+        return;
+    }
+
+    if (tagName === "input") {
+        const captured = await transaction.capture(element.getAttribute("src") ?? dependency.url);
+        element.setAttribute("src", captured.dataUrl);
+        return;
+    }
+
+    if (tagName === "image") {
+        const captured = await transaction.capture(element.getAttribute(attributeName) ?? dependency.url);
+        element.setAttribute("href", captured.dataUrl);
+        if (element.hasAttribute("xlink:href")) {
+            element.setAttribute("xlink:href", captured.dataUrl);
+        }
+        return;
+    }
+
+    // Generic fallback: rewrite every occurrence of the URL within the owning attribute.
+    const capturedGeneric = await transaction.capture(dependency.url);
+    const rawAttribute = element.getAttribute(attributeName) ?? dependency.rawValue;
+    element.setAttribute(attributeName, rawAttribute.split(dependency.url).join(capturedGeneric.dataUrl));
+}
+
+/**
+ * Final residual assertion pass (R6-01 §29.3): after all rewrites, no external
+ * visual URI may remain and every local fragment ref must resolve inside the
+ * island. Catches implementation drift instead of silently exporting live URLs.
+ */
+function assertNoResidualDependencies(root: Element): void {
+    const dependencies = discoverResourceDependencies(root);
+
+    for (const dependency of dependencies) {
+        const action = classifyDependency(dependency);
+
+        if (action.kind === "inert") {
+            continue;
+        }
+
+        if (action.kind === "reject") {
+            throw new ChartExportError(action.code, action.message);
+        }
+
+        if (action.kind === "owned-fragment") {
+            assertOwnedFragment(root, dependency.url);
+            continue;
+        }
+
+        // capture: everything must now be self-contained
+        if (dependency.isLocalFragment) {
+            assertOwnedFragment(root, dependency.url);
+            continue;
+        }
+
+        if (dependency.url.startsWith("data:")) {
+            const parsedMedia = parseDataUri(dependency.url)?.mediaType ?? null;
+            if (!parsedMedia || !isSupportedRasterMediaType(parsedMedia)) {
+                throw new ChartExportError(
+                    "resource-load-failed",
+                    `Frozen island retains an unsupported embedded data URI (${parsedMedia ?? "unknown"}) after resource capture.`
+                );
+            }
+            continue;
+        }
+
+        throw new ChartExportError(
+            "resource-load-failed",
+            `Frozen island still references an external visual resource '${dependency.url}' after resource capture.`
+        );
+    }
+}
+
 export class ChartExportResourceManager {
     /**
      * Captures and inlines all external resources (blob, images, CSS URLs) inside frozen raster islands,
-     * rewriting the frozen DOM tree to use self-contained data URLs (R4-02 / R5-02 / R5-03 / R5-04 / R5-05).
-     * Unsupported resource surfaces fail explicitly instead of silently disappearing.
+     * rewriting the frozen DOM tree to use self-contained data URLs (R4-02 / R5-02 / R5-03 / R5-04 / R5-05 / R6-01).
+     * Generic dependency discovery classifies every visual URI surface; unknown surfaces fail explicitly.
      */
     public static async captureAndInlineIslandResources(
         frozenRoots: readonly HTMLElement[],
-        signal?: AbortSignal
+        signal?: AbortSignal,
+        decodeEnvironment?: RasterDecodeEnvironment
     ): Promise<void> {
         if (signal?.aborted) {
             throw new DOMException("Export was aborted", "AbortError");
@@ -486,7 +827,7 @@ export class ChartExportResourceManager {
             throw new DOMException("Export was aborted", "AbortError");
         }
 
-        const transaction = new ChartExportResourceTransaction(signal);
+        const transaction = new ChartExportResourceTransaction(signal, decodeEnvironment);
 
         for (const root of frozenRoots) {
             // 2. Reject unsupported active/external embedding media (EXP-07)
@@ -505,120 +846,56 @@ export class ChartExportResourceManager {
             // 4. Freeze responsive-image selection so no live URL can be reselected after staging (R4-02)
             neutralizeResponsiveImageSelection(root);
 
-            // 5. Inspect and classify every element in the frozen island
-            const allElements = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
-
+            // 5. Reject active SVG timing/execution surfaces in the frozen island (R6-04 defense-in-depth)
+            const allElements = [root, ...Array.from(root.querySelectorAll("*"))];
             for (const el of allElements) {
-                const tag = el.tagName.toLowerCase();
-
-                // 5.1 HTML <img> elements
-                if (el instanceof HTMLImageElement) {
-                    const src = (el.currentSrc || el.src || "").trim();
-                    if (src) {
-                        const captured = await transaction.capture(src);
-                        el.src = captured.dataUrl;
-                    }
+                const localName = el.tagName.toLowerCase();
+                if (ACTIVE_TIMING_ELEMENTS.has(localName)) {
+                    throw new ChartExportError(
+                        "unsupported-template",
+                        `Template contains SVG timing element <${localName}>, which can advance after the export snapshot boundary.`
+                    );
                 }
-
-                // 5.2 SVG <image> elements
-                if (tag === "image") {
-                    const href = (el.getAttribute("href") || el.getAttribute("xlink:href") || "").trim();
-                    if (href) {
-                        if (href.startsWith("#")) {
-                            assertOwnedFragment(root, href);
-                        } else {
-                            const captured = await transaction.capture(href);
-                            el.setAttribute("href", captured.dataUrl);
-                            if (el.hasAttribute("xlink:href")) {
-                                el.setAttribute("xlink:href", captured.dataUrl);
-                            }
-                        }
-                    }
+                if (localName === "script") {
+                    throw new ChartExportError(
+                        "unsupported-template",
+                        "Template DOM contains a <script> element, which is not supported for export."
+                    );
                 }
-
-                // 5.3 SVG <use> elements (R5-05): local references must be island-owned; external references rejected
-                if (tag === "use") {
-                    const href = (el.getAttribute("href") || el.getAttribute("xlink:href") || "").trim();
-                    if (href) {
-                        if (href.startsWith("#")) {
-                            assertOwnedFragment(root, href);
-                        } else {
-                            throw new ChartExportError(
-                                "resource-load-failed",
-                                `Template SVG <use> contains unsupported external reference: '${href}'.`
-                            );
-                        }
-                    }
-                }
-
-                // 5.4 SVG <feImage> elements (R5-05): rejected in first-release custom templates
-                if (tag === "feimage") {
+                if (localName === "feimage") {
                     throw new ChartExportError(
                         "unsupported-template",
                         "Template SVG contains <feImage>, which is not supported for export."
                     );
                 }
-
-                // 5.5 SVG presentation attributes with url(...)
-                for (const attr of ["fill", "stroke", "clip-path", "mask", "filter", "marker-start", "marker-mid", "marker-end"] as const) {
-                    const attrVal = el.getAttribute(attr);
-                    if (attrVal && attrVal.includes("url(")) {
-                        const urls = extractCssUrls(attrVal);
-                        for (const u of urls) {
-                            if (u.startsWith("#")) {
-                                assertOwnedFragment(root, u);
-                            } else {
-                                throw new ChartExportError(
-                                    "unsupported-template",
-                                    `Template SVG attribute '${attr}' contains unsupported external URL reference: '${u}'.`
-                                );
-                            }
-                        }
-                    }
-                }
-
-                // 5.6 Inspect CSS inline styles for URL dependencies (R5-04)
-                const style = el.style;
-                if (style) {
-                    for (let i = 0; i < style.length; i++) {
-                        const prop = style[i];
-                        const propVal = style.getPropertyValue(prop);
-                        if (!propVal || !propVal.includes("url(")) {
-                            continue;
-                        }
-
-                        const normalizedProp = prop.toLowerCase().replace(/[^a-z-]/g, "");
-                        const normalizedNoHyphen = normalizedProp.replace(/-/g, "");
-
-                        if (FORBIDDEN_CSS_URL_PROPERTIES.has(normalizedProp) || FORBIDDEN_CSS_URL_PROPERTIES.has(normalizedNoHyphen)) {
-                            throw new ChartExportError(
-                                "unsupported-template",
-                                `Template uses CSS '${prop}' with a URL dependency, which is not supported for export.`
-                            );
-                        }
-
-                        if (ALLOWED_CSS_URL_PROPERTIES.has(normalizedProp) || ALLOWED_CSS_URL_PROPERTIES.has(normalizedNoHyphen)) {
-                            const urls = extractCssUrls(propVal);
-                            let updatedVal = propVal;
-                            for (const u of urls) {
-                                const captured = await transaction.capture(u);
-                                updatedVal = updatedVal.replace(u, captured.dataUrl);
-                            }
-                            style.setProperty(prop, updatedVal);
-                        } else {
-                            throw new ChartExportError(
-                                "unsupported-template",
-                                `Template style property '${prop}' contains an unclassified URL expression: '${propVal}'.`
-                            );
-                        }
-                    }
-                }
             }
 
-            // 6. Certify that fonts actually used by the frozen template are ready (R4-07)
+            // 6. Generic dependency discovery, classification, and execution (R6-01)
+            const dependencies = discoverResourceDependencies(root);
+
+            for (const dependency of dependencies) {
+                const action = classifyDependency(dependency);
+
+                if (action.kind === "reject") {
+                    throw new ChartExportError(action.code, action.message);
+                }
+
+                if (action.kind === "owned-fragment") {
+                    assertOwnedFragment(root, dependency.url);
+                    continue;
+                }
+
+                if (action.kind === "inert") {
+                    continue;
+                }
+
+                await captureDependency(dependency, transaction);
+            }
+
+            // 7. Certify that fonts actually used by the frozen template are ready (R4-07)
             await certifyTemplateFontReadiness(root, signal);
 
-            // 7. Validate canvases for tainted state (R4-03)
+            // 8. Validate canvases for tainted state (R4-03)
             const canvases = Array.from(root.querySelectorAll<HTMLCanvasElement>("canvas"));
             if (root instanceof HTMLCanvasElement) {
                 canvases.push(root);
@@ -638,6 +915,9 @@ export class ChartExportResourceManager {
                     );
                 }
             }
+
+            // 9. Residual closure assertion: nothing visual remains unclassified/live (R6-01 §29.3)
+            assertNoResidualDependencies(root);
         }
     }
 
@@ -646,8 +926,9 @@ export class ChartExportResourceManager {
      */
     public static async preflightIslandResources(
         frozenRoots: readonly HTMLElement[],
-        signal?: AbortSignal
+        signal?: AbortSignal,
+        decodeEnvironment?: RasterDecodeEnvironment
     ): Promise<void> {
-        return ChartExportResourceManager.captureAndInlineIslandResources(frozenRoots, signal);
+        return ChartExportResourceManager.captureAndInlineIslandResources(frozenRoots, signal, decodeEnvironment);
     }
 }

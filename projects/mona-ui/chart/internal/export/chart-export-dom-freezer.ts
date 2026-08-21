@@ -1,4 +1,37 @@
 import { ChartExportError } from "../../models/chart-export.models";
+import { MAX_EXPORT_RESOURCE_DIMENSION, MAX_EXPORT_RESOURCE_PIXELS } from "./chart-export-resource-policy";
+
+/**
+ * Validates that a source canvas backing store is within the bitmap budget
+ * BEFORE any destination backing-store allocation occurs (R6-06 / INV-07).
+ * A visually small canvas can describe an enormous bitmap; CSS display size
+ * never bounds the backing store.
+ */
+function assertCanvasBackingStoreBudget(canvas: HTMLCanvasElement): void {
+    const width = canvas.width;
+    const height = canvas.height;
+
+    if (!Number.isFinite(width) || !Number.isFinite(height)) {
+        return;
+    }
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
+    const pixels = width * height;
+    if (
+        width > MAX_EXPORT_RESOURCE_DIMENSION ||
+        height > MAX_EXPORT_RESOURCE_DIMENSION ||
+        !Number.isSafeInteger(pixels) ||
+        pixels > MAX_EXPORT_RESOURCE_PIXELS
+    ) {
+        throw new ChartExportError(
+            "too-large",
+            `Template canvas backing store (${width}x${height}) exceeds the export bitmap budget ` +
+                `(max ${MAX_EXPORT_RESOURCE_DIMENSION}px edge, ${MAX_EXPORT_RESOURCE_PIXELS} pixels).`
+        );
+    }
+}
 
 export class ChartExportDomFreezer {
     /**
@@ -101,6 +134,9 @@ export class ChartExportDomFreezer {
                 } else if (src instanceof HTMLImageElement && dst instanceof HTMLImageElement) {
                     dst.src = src.currentSrc || src.src;
                 } else if (src instanceof HTMLCanvasElement && dst instanceof HTMLCanvasElement) {
+                    // Backing-store budget must be enforced before any bitmap allocation (R6-06)
+                    assertCanvasBackingStoreBudget(src);
+
                     // Check for tainted canvas and copy bitmap synchronously (R3-02)
                     try {
                         const srcCtx = src.getContext("2d");

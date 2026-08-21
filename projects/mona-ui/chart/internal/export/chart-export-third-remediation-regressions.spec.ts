@@ -16,12 +16,32 @@ import { ChartExportError } from "../../models/chart-export.models";
 import { normalizeChartExportOptions } from "./chart-export-options";
 import { ChartExportResourceManager } from "./chart-export-resource-manager";
 import { ChartExportCompositor } from "./chart-export-compositor";
+import { getStructuralImageDimensions, RasterDecodeEnvironment } from "./chart-export-image-decoder";
 import type { ChartExportSnapshot } from "./chart-export-snapshot";
+import type { ChartExportRasterMediaType } from "./chart-export-resource-policy";
 
 const R4_PNG_BYTES = Uint8Array.from(
     atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="),
     c => c.charCodeAt(0)
 );
+
+/**
+ * Deterministic bitmap-decode fake mirroring real-browser admission on the
+ * fixtures used here (jsdom has no real image decoder).
+ */
+function fakeBitmapDecodeEnvironment(): RasterDecodeEnvironment {
+    const decode = async (blob: Blob): Promise<ImageBitmap> => {
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        const dims = getStructuralImageDimensions(bytes, blob.type as ChartExportRasterMediaType);
+        if (!dims) {
+            throw new Error("Fake decoder cannot certify payload without structural dimensions.");
+        }
+        return { width: dims.width, height: dims.height, close: () => undefined } as ImageBitmap;
+    };
+    return {
+        createImageBitmap: decode as unknown as typeof createImageBitmap
+    };
+}
 
 describe("Third Export Remediation Regressions (R3-01 to R3-15)", () => {
     // -------------------------------------------------------------------------
@@ -56,7 +76,7 @@ describe("Third Export Remediation Regressions (R3-01 to R3-15)", () => {
             (window as any).FileReader = MockFileReader;
 
             try {
-                await ChartExportResourceManager.captureAndInlineIslandResources([container]);
+                await ChartExportResourceManager.captureAndInlineIslandResources([container], undefined, fakeBitmapDecodeEnvironment());
                 expect(img.src.startsWith("data:image/png")).toBe(true);
             } finally {
                 window.fetch = originalFetch;
@@ -88,7 +108,7 @@ describe("Third Export Remediation Regressions (R3-01 to R3-15)", () => {
             (window as any).FileReader = MockFileReader;
 
             try {
-                await ChartExportResourceManager.captureAndInlineIslandResources([container]);
+                await ChartExportResourceManager.captureAndInlineIslandResources([container], undefined, fakeBitmapDecodeEnvironment());
                 expect(child.style.backgroundImage).toContain("data:image/png");
             } finally {
                 window.fetch = originalFetch;

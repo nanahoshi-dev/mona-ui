@@ -1,5 +1,12 @@
 import { ChartExportError } from "../../models/chart-export.models";
-import { isSupportedRasterMediaType, parseDataUrlMediaType } from "./chart-export-resource-policy";
+import {
+    MAX_EXPORT_RESOURCE_BYTES,
+    containsCssUrl,
+    decodeBase64Payload,
+    isSupportedRasterMediaType,
+    parseDataUri,
+    sniffRasterImageType
+} from "./chart-export-resource-policy";
 
 const FORBIDDEN_METADATA_ATTRIBUTES = [
     "data-layer",
@@ -11,15 +18,50 @@ const FORBIDDEN_METADATA_ATTRIBUTES = [
 ];
 
 /**
- * Checks whether a URI is a valid embedded data URI of an approved media type (R5-13).
- * Uses exact MIME parsing rather than prefix heuristics.
+ * Validates an embedded raster data URI exactly (R6-07 / INV-10):
+ * exact supported MIME, base64-only encoding, syntactically valid payload,
+ * magic bytes matching the declared media type, and bounded byte size.
+ * The URI must be passed in its original raw form: base64 payloads are
+ * case-sensitive, so callers may not lowercase them before validation.
+ *
+ * No browser bitmap decode is performed here; island producers already
+ * decoded/certified the source bytes.
  */
-function isAllowedDataUri(uri: string): boolean {
-    if (!uri.startsWith("data:")) {
-        return false;
+function assertAllowedDataUri(uri: string): void {
+    const parsed = parseDataUri(uri);
+
+    if (!parsed || !parsed.mediaType || !isSupportedRasterMediaType(parsed.mediaType)) {
+        throw new ChartExportError(
+            "svg-composition-failed",
+            `SVG contains forbidden non-standalone or external resource reference: '${uri.slice(0, 64)}'.`
+        );
     }
-    const mediaType = parseDataUrlMediaType(uri);
-    return mediaType !== null && isSupportedRasterMediaType(mediaType);
+
+    if (!parsed.isBase64) {
+        throw new ChartExportError(
+            "svg-composition-failed",
+            "SVG embedded raster resources must use base64 data URI encoding."
+        );
+    }
+
+    // Reject obviously oversized payloads before materializing decoded bytes (R6-06).
+    const approxDecodedBytes = Math.floor((parsed.payload.length * 3) / 4);
+    if (approxDecodedBytes > MAX_EXPORT_RESOURCE_BYTES) {
+        throw new ChartExportError(
+            "too-large",
+            `SVG embedded resource decoded size (~${approxDecodedBytes} bytes) exceeds maximum limit (${MAX_EXPORT_RESOURCE_BYTES} bytes).`
+        );
+    }
+
+    const bytes = decodeBase64Payload(parsed.payload, "embedded SVG image resource");
+
+    const sniffed = sniffRasterImageType(bytes);
+    if (!sniffed || sniffed !== parsed.mediaType) {
+        throw new ChartExportError(
+            "svg-composition-failed",
+            `SVG embedded resource bytes do not match its declared media type '${parsed.mediaType}'.`
+        );
+    }
 }
 
 export class ChartExportSvgMetadataStripper {
@@ -155,12 +197,13 @@ export class ChartExportSvgValidator {
                     }
                 }
 
-                // Check links and image sources via strict allowlist: only local #id or approved data:image
+                // Check links and image sources via strict allowlist: only local #id or validated embedded data URI
                 if (lower === "href" || lower === "xlink:href" || lower === "src") {
                     if (rawVal.startsWith("#")) {
                         referencedIds.add(rawVal.slice(1).trim());
-                    } else if (isAllowedDataUri(valLower)) {
-                        // Valid approved embedded data URI
+                    } else if (rawVal.toLowerCase().startsWith("data:")) {
+                        // Exact, byte-preserving payload validation (R6-07)
+                        assertAllowedDataUri(rawVal);
                     } else {
                         throw new ChartExportError(
                             "svg-composition-failed",
@@ -169,16 +212,16 @@ export class ChartExportSvgValidator {
                     }
                 }
 
-                // Check url(...) references in style and presentation attributes
-                if (rawVal.includes("url(")) {
-                    const urlRegex = /url\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
+                // Check url(...) references case-insensitively in style and presentation attributes (R6-07)
+                if (containsCssUrl(rawVal)) {
+                    const urlRegex = /\burl\s*\(\s*['"]?([^'")]+?)['"]?\s*\)/gi;
                     let m: RegExpExecArray | null;
                     while ((m = urlRegex.exec(rawVal)) !== null) {
                         const target = m[1].trim();
                         if (target.startsWith("#")) {
                             referencedIds.add(target.slice(1).trim());
-                        } else if (isAllowedDataUri(target.toLowerCase())) {
-                            // Allowed data URI
+                        } else if (target.toLowerCase().startsWith("data:")) {
+                            assertAllowedDataUri(target);
                         } else {
                             throw new ChartExportError(
                                 "svg-composition-failed",

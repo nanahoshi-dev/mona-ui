@@ -13,11 +13,31 @@ import { classifyTransform } from "./chart-export-transform";
 import { resolvePdfLayout, resolvePdfRasterPixelRatio } from "./chart-export-geometry";
 import { ChartExportError } from "../../models/chart-export.models";
 import { normalizeChartExportOptions } from "./chart-export-options";
+import { getStructuralImageDimensions, RasterDecodeEnvironment } from "./chart-export-image-decoder";
+import type { ChartExportRasterMediaType } from "./chart-export-resource-policy";
 
 const ONE_PX_PNG_BYTES = Uint8Array.from(
     atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="),
     c => c.charCodeAt(0)
 );
+
+/**
+ * Deterministic bitmap-decode fake mirroring real-browser admission on the
+ * fixtures used here (jsdom has no real image decoder).
+ */
+function fakeBitmapDecodeEnvironment(): RasterDecodeEnvironment {
+    const decode = async (blob: Blob): Promise<ImageBitmap> => {
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        const dims = getStructuralImageDimensions(bytes, blob.type as ChartExportRasterMediaType);
+        if (!dims) {
+            throw new Error("Fake decoder cannot certify payload without structural dimensions.");
+        }
+        return { width: dims.width, height: dims.height, close: () => undefined } as ImageBitmap;
+    };
+    return {
+        createImageBitmap: decode as unknown as typeof createImageBitmap
+    };
+}
 
 vi.mock("jspdf", () => ({
     jsPDF: class {
@@ -105,7 +125,11 @@ describe("Fourth Export Remediation Regressions (R4)", () => {
                 picture.appendChild(img);
                 container.appendChild(picture);
 
-                await ChartExportResourceManager.captureAndInlineIslandResources([container]);
+                await ChartExportResourceManager.captureAndInlineIslandResources(
+                    [container],
+                    undefined,
+                    fakeBitmapDecodeEnvironment()
+                );
 
                 expect(container.querySelectorAll("source").length).toBe(0);
                 expect((img as HTMLImageElement).getAttribute("srcset")).toBeNull();

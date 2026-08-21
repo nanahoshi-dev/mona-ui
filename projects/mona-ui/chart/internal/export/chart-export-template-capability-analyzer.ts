@@ -13,7 +13,9 @@ export type ChartExportTemplateUnsupportedReason =
     | "shadow-dom"
     | "unsupported-transform"
     | "unsupported-shadow"
-    | "unsupported-outline";
+    | "unsupported-outline"
+    | "active-timing"
+    | "script";
 
 export interface ChartExportTemplateCapabilityResult {
     readonly reason?: string;
@@ -22,6 +24,13 @@ export interface ChartExportTemplateCapabilityResult {
 }
 
 const INVISIBLE_PSEUDO_CONTENT = new Set(["none", "normal", ""]);
+
+/**
+ * Active SVG timing/execution surfaces (R6-04 / INV-06). SMIL timing elements are
+ * an independent animation system the CSS animation freezer cannot stop; a staged
+ * clone can keep animating after the snapshot boundary, violating determinism.
+ */
+const ACTIVE_TIMING_ELEMENTS = new Set(["animate", "animatetransform", "animatemotion", "set", "mpath"]);
 
 /**
  * Tolerance in CSS pixels for descendant layout overflow detection.
@@ -199,6 +208,24 @@ export class ChartExportTemplateCapabilityAnalyzer {
             const elements = [source, ...Array.from(source.querySelectorAll<HTMLElement>("*"))];
 
             for (const el of elements) {
+                // 0. Active timing/execution surfaces (R6-04 / R5-10-adjacent): SMIL timing and
+                // scripts cannot be frozen; they must not survive the snapshot boundary.
+                const localName = el.tagName.toLowerCase();
+                if (ACTIVE_TIMING_ELEMENTS.has(localName)) {
+                    return {
+                        reason: `Template contains SVG timing element <${localName}>, which can advance after the export snapshot boundary.`,
+                        reasonCode: "active-timing",
+                        supported: false
+                    };
+                }
+                if (localName === "script") {
+                    return {
+                        reason: "Template contains a <script> element, which is not supported for export.",
+                        reasonCode: "script",
+                        supported: false
+                    };
+                }
+
                 // 1. Shadow DOM check (R5-10): Shadow roots cannot be cloned by cloneNode(true)
                 if (el.shadowRoot) {
                     return {

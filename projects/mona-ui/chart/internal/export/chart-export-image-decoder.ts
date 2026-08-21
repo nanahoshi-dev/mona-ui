@@ -1,5 +1,9 @@
 import { ChartExportError } from "../../models/chart-export.models";
-import { ChartExportRasterMediaType, bytesToBase64 } from "./chart-export-resource-policy";
+import {
+    ChartExportRasterMediaType,
+    assertResourcePixelBudget,
+    sniffRasterImageType
+} from "./chart-export-resource-policy";
 
 export interface DecodedImageDimensions {
     readonly height: number;
@@ -7,9 +11,68 @@ export interface DecodedImageDimensions {
 }
 
 /**
+ * Internal decode-capability seam. Production resolution derives every field from
+ * platform globals; tests may inject deterministic fakes for either strategy
+ * without touching global mutable state (R6-03 / R6-05).
+ */
+export interface RasterDecodeEnvironment {
+    readonly createHtmlImage?: (() => HTMLImageElement) | undefined;
+    readonly createImageBitmap?: typeof createImageBitmap | undefined;
+    readonly createObjectURL?: ((blob: Blob) => string) | undefined;
+    readonly revokeObjectURL?: ((url: string) => void) | undefined;
+}
+
+interface ResolvedDecodeEnvironment {
+    readonly bitmapDecode: typeof createImageBitmap | undefined;
+    readonly htmlImageDecode:
+        | {
+              readonly createHtmlImage: () => HTMLImageElement;
+              readonly createObjectURL: (blob: Blob) => string;
+              readonly revokeObjectURL: (url: string) => void;
+          }
+        | undefined;
+}
+
+function resolveEnvironment(overrides?: RasterDecodeEnvironment): ResolvedDecodeEnvironment {
+    const bitmapDecode =
+        overrides && "createImageBitmap" in overrides
+            ? overrides.createImageBitmap
+            : typeof createImageBitmap === "function"
+                ? createImageBitmap
+                : undefined;
+
+    const globalCreateObjectURL = typeof URL !== "undefined" && typeof URL.createObjectURL === "function"
+        ? URL.createObjectURL.bind(URL)
+        : undefined;
+    const globalRevokeObjectURL = typeof URL !== "undefined" && typeof URL.revokeObjectURL === "function"
+        ? URL.revokeObjectURL.bind(URL)
+        : undefined;
+
+    // The object-URL image strategy requires a real image decoding stack: an Image
+    // constructor, object URLs, and HTMLImageElement.decode. Environments without a
+    // decode-capable Image (e.g. jsdom) fail closed to "no decoder available"
+    // instead of staging loads that can never complete.
+    const hasDecodeCapableImage =
+        typeof Image === "function" && typeof Image.prototype?.decode === "function";
+
+    const createHtmlImage =
+        overrides?.createHtmlImage ??
+        (hasDecodeCapableImage ? () => new Image() : undefined);
+    const createObjectURL = overrides?.createObjectURL ?? globalCreateObjectURL;
+    const revokeObjectURL = overrides?.revokeObjectURL ?? globalRevokeObjectURL;
+
+    const htmlImageDecode =
+        createHtmlImage && createObjectURL && revokeObjectURL
+            ? { createHtmlImage, createObjectURL, revokeObjectURL }
+            : undefined;
+
+    return { bitmapDecode, htmlImageDecode };
+}
+
+/**
  * Validates PNG structural chunks and extracts dimensions (IHDR chunk).
  */
-function validatePngIntegrity(bytes: Uint8Array): DecodedImageDimensions {
+function parsePngDimensions(bytes: Uint8Array): DecodedImageDimensions {
     if (bytes.length < 24) {
         throw new ChartExportError("resource-load-failed", "PNG image payload is truncated.");
     }
@@ -47,8 +110,10 @@ function validatePngIntegrity(bytes: Uint8Array): DecodedImageDimensions {
 
 /**
  * Validates JPEG structural markers and extracts dimensions (SOF marker).
+ * Returns null when no supported SOF marker exists; a real browser decoder must
+ * then decide admission. Synthetic dimensions are never fabricated (R6-03).
  */
-function validateJpegIntegrity(bytes: Uint8Array): DecodedImageDimensions {
+function parseJpegDimensions(bytes: Uint8Array): DecodedImageDimensions | null {
     if (bytes.length < 4) {
         throw new ChartExportError("resource-load-failed", "JPEG image payload is truncated.");
     }
@@ -83,8 +148,8 @@ function validateJpegIntegrity(bytes: Uint8Array): DecodedImageDimensions {
 
         // Skip marker segment
         if (marker === 0xd9 || marker === 0xda) {
-            // EOI or SOS (start of scan)
-            break;
+            // EOI or SOS (start of scan) reached without a supported SOF marker
+            return null;
         }
 
         if (offset + 4 > bytes.length) {
@@ -98,14 +163,17 @@ function validateJpegIntegrity(bytes: Uint8Array): DecodedImageDimensions {
         offset += 2 + length;
     }
 
-    return { height: 1, width: 1 };
+    return null;
 }
 
 /**
- * Validates WebP structural format and extracts dimensions.
+ * Validates the WebP container and extracts dimensions from the VP8 / VP8L / VP8X
+ * bitstream chunk when parsable. Returns null when the chunk kind is unrecognized
+ * or its header cannot be trusted; a real browser decoder must then decide
+ * admission. Synthetic dimensions are never fabricated (R6-03).
  */
-function validateWebpIntegrity(bytes: Uint8Array): DecodedImageDimensions {
-    if (bytes.length < 30) {
+function parseWebpDimensions(bytes: Uint8Array): DecodedImageDimensions | null {
+    if (bytes.length < 20) {
         throw new ChartExportError("resource-load-failed", "WebP image payload is truncated.");
     }
 
@@ -123,20 +191,236 @@ function validateWebpIntegrity(bytes: Uint8Array): DecodedImageDimensions {
         throw new ChartExportError("resource-load-failed", "Invalid WebP signature.");
     }
 
-    return { height: 1, width: 1 };
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const chunkFourcc = String.fromCharCode(bytes[12], bytes[13], bytes[14], bytes[15]);
+    const view2 = (offset: number): number => view.getUint16(offset, true);
+
+    if (chunkFourcc === "VP8 ") {
+        // Lossy bitstream: frame tag (3 bytes), sync code (0x9D 0x01 0x2A), then LE dimensions.
+        if (bytes.length < 30 || bytes[23] !== 0x9d || bytes[24] !== 0x01 || bytes[25] !== 0x2a) {
+            return null;
+        }
+        const width = view2(26) & 0x3fff;
+        const height = view2(28) & 0x3fff;
+        return width > 0 && height > 0 ? { height, width } : null;
+    }
+
+    if (chunkFourcc === "VP8L") {
+        // Lossless bitstream: signature byte 0x2F then packed 14-bit width-1 / height-1.
+        if (bytes.length < 25 || bytes[20] !== 0x2f) {
+            return null;
+        }
+        const b0 = bytes[21];
+        const b1 = bytes[22];
+        const b2 = bytes[23];
+        const b3 = bytes[24];
+        const width = 1 + (((b1 & 0x3f) << 8 | b0) & 0x3fff);
+        const height = 1 + (((b3 << 10 | b2 << 2 | b1 >> 6)) & 0x3fff);
+        return width > 0 && height > 0 ? { height, width } : null;
+    }
+
+    if (chunkFourcc === "VP8X") {
+        // Extended format: 4 reserved bytes then 24-bit LE canvas width-1 / height-1.
+        if (bytes.length < 30) {
+            return null;
+        }
+        const width = 1 + (bytes[24] | bytes[25] << 8 | bytes[26] << 16);
+        const height = 1 + (bytes[27] | bytes[28] << 8 | bytes[29] << 16);
+        return width > 0 && height > 0 ? { height, width } : null;
+    }
+
+    return null;
 }
 
 /**
- * Validates that the provided image bytes can actually be decoded by the browser
- * as a valid raster image with positive dimensions (R5-02).
+ * Fast structural gate: verifies magic/container integrity and extracts trustworthy
+ * dimensions when possible. Returns null for containers whose pixel dimensions can
+ * only be determined by a real browser decoder. Structural parsing is never the
+ * final admission criterion (R6-03 / INV-02).
+ */
+export function getStructuralImageDimensions(
+    bytes: Uint8Array,
+    mediaType: ChartExportRasterMediaType
+): DecodedImageDimensions | null {
+    switch (mediaType) {
+        case "image/png":
+            return parsePngDimensions(bytes);
+        case "image/jpeg":
+            return parseJpegDimensions(bytes);
+        case "image/webp":
+            return parseWebpDimensions(bytes);
+        default:
+            throw new ChartExportError("resource-load-failed", `Unsupported media type for decoding: '${mediaType}'.`);
+    }
+}
+
+function abortError(): DOMException {
+    return new DOMException("Export was aborted", "AbortError");
+}
+
+/**
+ * Races a bitmap decode against abort with deterministic lifecycle cleanup (R6-05):
+ * the abort listener is removed on every completion path and a bitmap that resolves
+ * after a public abort is closed exactly once instead of leaking.
+ */
+function decodeBitmapAbortably(
+    blob: Blob,
+    bitmapDecode: typeof createImageBitmap,
+    signal?: AbortSignal
+): Promise<ImageBitmap> {
+    return new Promise<ImageBitmap>((resolve, reject) => {
+        let settled = false;
+        let aborted = false;
+
+        const removeAbortListener = () => {
+            signal?.removeEventListener("abort", onAbort);
+        };
+
+        const settle = (run: () => void) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            try {
+                run();
+            } catch (err: unknown) {
+                reject(err instanceof Error ? err : new Error(String(err)));
+            }
+        };
+
+        const onAbort = () => {
+            aborted = true;
+            removeAbortListener();
+            settle(() => reject(abortError()));
+        };
+
+        signal?.addEventListener("abort", onAbort, { once: true });
+
+        bitmapDecode(blob).then(
+            bitmap => {
+                removeAbortListener();
+                if (aborted || signal?.aborted) {
+                    bitmap.close();
+                    return;
+                }
+                settle(() => resolve(bitmap));
+            },
+            (error: unknown) => {
+                removeAbortListener();
+                settle(() => reject(error));
+            }
+        );
+    });
+}
+
+/**
+ * HTMLImageElement decode fallback via an export-owned object URL (R6-03).
+ * The original external URL is never used for decoding. Object URL revocation,
+ * listener cleanup, and late-completion discards after abort are deterministic.
+ */
+function decodeWithHtmlImage(
+    bytes: Uint8Array,
+    mediaType: ChartExportRasterMediaType,
+    env: NonNullable<ResolvedDecodeEnvironment["htmlImageDecode"]>,
+    signal?: AbortSignal
+): Promise<DecodedImageDimensions> {
+    return new Promise<DecodedImageDimensions>((resolve, reject) => {
+        let settled = false;
+        let aborted = false;
+        let objectUrl: string | null = null;
+
+        const img = env.createHtmlImage();
+
+        const revokeObjectUrl = () => {
+            if (objectUrl !== null) {
+                env.revokeObjectURL(objectUrl);
+                objectUrl = null;
+            }
+        };
+
+        const cleanupListeners = () => {
+            img.onload = null;
+            img.onerror = null;
+            signal?.removeEventListener("abort", onAbort);
+        };
+
+        const finishOk = (dimensions: DecodedImageDimensions) => {
+            if (settled || aborted || signal?.aborted) {
+                return;
+            }
+            settled = true;
+            cleanupListeners();
+            revokeObjectUrl();
+            resolve(dimensions);
+        };
+
+        const finishErr = (error: unknown) => {
+            if (settled || aborted) {
+                return;
+            }
+            settled = true;
+            cleanupListeners();
+            revokeObjectUrl();
+            reject(error);
+        };
+
+        const onAbort = () => {
+            if (settled) {
+                return;
+            }
+            aborted = true;
+            settled = true;
+            cleanupListeners();
+            revokeObjectUrl();
+            reject(abortError());
+        };
+
+        signal?.addEventListener("abort", onAbort, { once: true });
+
+        try {
+            const blob = new Blob([bytes as unknown as BlobPart], { type: mediaType });
+            objectUrl = env.createObjectURL(blob);
+            img.onload = () => {
+                const width = img.naturalWidth || img.width;
+                const height = img.naturalHeight || img.height;
+                finishOk({ height, width });
+            };
+            img.onerror = e => {
+                finishErr(
+                    new ChartExportError("resource-load-failed", "Template image resource failed image element decoding.", {
+                        cause: e
+                    })
+                );
+            };
+            img.src = objectUrl;
+        } catch (err: unknown) {
+            settled = true;
+            cleanupListeners();
+            revokeObjectUrl();
+            reject(
+                new ChartExportError("resource-load-failed", "Failed to stage image element decoding.", { cause: err })
+            );
+        }
+    });
+}
+
+/**
+ * Validates that the provided image bytes actually decode in the current browser
+ * as a valid raster image with positive, budget-safe dimensions (R5-02 / R6-03).
  *
- * Magic-byte sniffing alone is necessary but not sufficient; corrupted or truncated
- * payloads that carry valid headers must fail validation before export acceptance.
+ * Admission policy (INV-02):
+ * - structural parsing only gates fast-rejection and dimension extraction;
+ * - acceptance requires a real decode via createImageBitmap when available,
+ *   otherwise via an export-owned object URL + HTMLImageElement decode;
+ * - environments with neither capability fail explicitly instead of trusting headers.
+ *
+ * When structural dimensions are known they must match decoded dimensions (R6-03 §23.6).
  */
 export async function validateRasterImageDecode(
     bytes: Uint8Array,
     mediaType: ChartExportRasterMediaType,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    environment?: RasterDecodeEnvironment
 ): Promise<DecodedImageDimensions> {
     if (signal?.aborted) {
         throw new DOMException("Export was aborted", "AbortError");
@@ -146,83 +430,84 @@ export async function validateRasterImageDecode(
         throw new ChartExportError("resource-load-failed", "Template image resource has empty byte content.");
     }
 
-    // 1. First enforce structural container and chunk integrity (fast, deterministic in all environments)
-    let structuralDimensions: DecodedImageDimensions;
-    switch (mediaType) {
-        case "image/png":
-            structuralDimensions = validatePngIntegrity(bytes);
-            break;
-        case "image/jpeg":
-            structuralDimensions = validateJpegIntegrity(bytes);
-            break;
-        case "image/webp":
-            structuralDimensions = validateWebpIntegrity(bytes);
-            break;
-        default:
-            throw new ChartExportError("resource-load-failed", `Unsupported media type for decoding: '${mediaType}'.`);
+    const sniffed = sniffRasterImageType(bytes);
+    if (!sniffed || sniffed !== mediaType) {
+        throw new ChartExportError(
+            "resource-load-failed",
+            `Template image resource bytes do not match ${mediaType} image format.`
+        );
     }
 
-    // 2. In browser environments with createImageBitmap, perform bitmap decode verification
-    if (typeof createImageBitmap === "function" && typeof Blob !== "undefined") {
-        let bitmapPromise: Promise<ImageBitmap>;
+    // 1. Structural container integrity and trustworthy early dimensions.
+    const structuralDimensions = getStructuralImageDimensions(bytes, mediaType);
+
+    if (structuralDimensions) {
+        assertResourcePixelBudget(structuralDimensions.width, structuralDimensions.height, mediaType);
+    }
+
+    // 2. Select the decode strategy.
+    const env = resolveEnvironment(environment);
+
+    let decoded: DecodedImageDimensions;
+    if (env.bitmapDecode) {
+        let blob: Blob;
         try {
-            const blob = new Blob([bytes as unknown as BlobPart], { type: mediaType });
-            bitmapPromise = createImageBitmap(blob);
+            blob = new Blob([bytes as unknown as BlobPart], { type: mediaType });
         } catch (err: unknown) {
             throw new ChartExportError("resource-load-failed", "Failed to create ImageBitmap from image payload.", {
                 cause: err
             });
         }
-
-        if (signal) {
-            const abortPromise = new Promise<never>((_, reject) => {
-                const onAbort = () => reject(new DOMException("Export was aborted", "AbortError"));
-                signal.addEventListener("abort", onAbort, { once: true });
+        try {
+            const bitmap = await decodeBitmapAbortably(blob, env.bitmapDecode, signal);
+            decoded = { height: bitmap.height, width: bitmap.width };
+            bitmap.close();
+        } catch (err: unknown) {
+            if ((err as { name?: string })?.name === "AbortError" || signal?.aborted) {
+                throw new DOMException("Export was aborted", "AbortError");
+            }
+            if (err instanceof ChartExportError) {
+                throw err;
+            }
+            throw new ChartExportError("resource-load-failed", "Template image resource failed image bitmap decoding.", {
+                cause: err
             });
-
-            try {
-                const bitmap = await Promise.race([bitmapPromise, abortPromise]);
-                const width = bitmap.width;
-                const height = bitmap.height;
-                bitmap.close();
-
-                if (width <= 0 || height <= 0) {
-                    throw new ChartExportError("resource-load-failed", "Template image resource decoded to empty dimensions.");
-                }
-                return { height, width };
-            } catch (err: unknown) {
-                if ((err as { name?: string })?.name === "AbortError" || signal.aborted) {
-                    throw new DOMException("Export was aborted", "AbortError");
-                }
-                if (err instanceof ChartExportError) {
-                    throw err;
-                }
-                throw new ChartExportError("resource-load-failed", "Template image resource failed image bitmap decoding.", {
-                    cause: err
-                });
-            }
-        } else {
-            try {
-                const bitmap = await bitmapPromise;
-                const width = bitmap.width;
-                const height = bitmap.height;
-                bitmap.close();
-
-                if (width <= 0 || height <= 0) {
-                    throw new ChartExportError("resource-load-failed", "Template image resource decoded to empty dimensions.");
-                }
-                return { height, width };
-            } catch (err: unknown) {
-                if (err instanceof ChartExportError) {
-                    throw err;
-                }
-                throw new ChartExportError("resource-load-failed", "Template image resource failed image bitmap decoding.", {
-                    cause: err
-                });
-            }
         }
+    } else if (env.htmlImageDecode) {
+        try {
+            decoded = await decodeWithHtmlImage(bytes, mediaType, env.htmlImageDecode, signal);
+        } catch (err: unknown) {
+            if ((err as { name?: string })?.name === "AbortError" || signal?.aborted) {
+                throw new DOMException("Export was aborted", "AbortError");
+            }
+            if (err instanceof ChartExportError) {
+                throw err;
+            }
+            throw new ChartExportError("resource-load-failed", "Template image resource failed image element decoding.", {
+                cause: err
+            });
+        }
+    } else {
+        throw new ChartExportError(
+            "unsupported-environment",
+            "No raster image decoder is available in this environment; template images cannot be certified."
+        );
     }
 
-    // 3. Fallback for non-browser / jsdom testing: structural chunk dimensions are certified
-    return structuralDimensions;
+    // 3. Decoded dimensions must satisfy the safety budget and match known structure.
+    assertResourcePixelBudget(decoded.width, decoded.height, mediaType);
+
+    if (
+        structuralDimensions &&
+        (structuralDimensions.width !== decoded.width || structuralDimensions.height !== decoded.height)
+    ) {
+        throw new ChartExportError(
+            "resource-load-failed",
+            `Template image resource is inconsistent: structural dimensions ` +
+                `${structuralDimensions.width}x${structuralDimensions.height} do not match decoded dimensions ` +
+                `${decoded.width}x${decoded.height}.`
+        );
+    }
+
+    return decoded;
 }

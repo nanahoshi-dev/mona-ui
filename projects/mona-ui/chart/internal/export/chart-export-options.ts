@@ -21,6 +21,13 @@ export const PDF_POINTS_PER_PX = 0.75;
 export const MAX_RASTER_DIMENSION = 16384;
 export const MAX_RASTER_TOTAL_PIXELS = 67108864; // 64 Mi-pixels
 
+/**
+ * Maximum aggregate physical pixel work allowed across all raster islands in one
+ * export transaction (128 Mi-pixels). Per-island legality alone does not bound a
+ * transaction containing many individually legal islands (R6-06 / INV-08).
+ */
+export const MAX_RASTER_TRANSACTION_PIXELS = 134217728;
+
 export interface NormalizedChartPdfMargins {
     readonly bottom: number;
     readonly left: number;
