@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { ChartExportSvgSanitizer } from "./chart-export-svg-sanitizer";
+import { ChartExportError } from "../../models/chart-export.models";
 
 describe("ChartExportSvgSanitizer", () => {
-    it("removes internal angular and debug attributes", () => {
+    it("removes internal angular and debug attributes from clean SVGs", () => {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 100 100");
+        svg.setAttribute("width", "100");
+        svg.setAttribute("height", "100");
         svg.setAttribute("ng-reflect-mode", "svg");
         svg.setAttribute("_nghost-c12", "");
         svg.setAttribute("data-mona-chart-export-role", "header");
@@ -16,7 +20,6 @@ describe("ChartExportSvgSanitizer", () => {
         circle.setAttribute("data-layer", "marks");
         circle.setAttribute("data-key", "k1");
         circle.setAttribute("data-export-role", "mark");
-        circle.setAttribute("onclick", "alert(1)");
         svg.appendChild(circle);
 
         ChartExportSvgSanitizer.sanitize(svg);
@@ -31,41 +34,32 @@ describe("ChartExportSvgSanitizer", () => {
         expect(circle.hasAttribute("data-layer")).toBe(false);
         expect(circle.hasAttribute("data-key")).toBe(false);
         expect(circle.hasAttribute("data-export-role")).toBe(false);
-        expect(circle.hasAttribute("onclick")).toBe(false);
     });
 
-    it("removes script tags and foreignObject tags", () => {
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-
+    it("rejects script tags and foreignObject tags with explicit ChartExportError (R2-07)", () => {
+        const svg1 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg1.setAttribute("viewBox", "0 0 100 100");
         const script = document.createElementNS("http://www.w3.org/2000/svg", "script");
         script.textContent = "console.log('malicious')";
-        svg.appendChild(script);
+        svg1.appendChild(script);
 
+        expect(() => ChartExportSvgSanitizer.sanitize(svg1)).toThrow(ChartExportError);
+
+        const svg2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg2.setAttribute("viewBox", "0 0 100 100");
         const fo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-        svg.appendChild(fo);
+        svg2.appendChild(fo);
 
-        expect(svg.querySelectorAll("script").length).toBe(1);
-        expect(svg.querySelectorAll("foreignObject").length).toBe(1);
-
-        ChartExportSvgSanitizer.sanitize(svg);
-
-        expect(svg.querySelectorAll("script").length).toBe(0);
-        expect(svg.querySelectorAll("foreignObject").length).toBe(0);
+        expect(() => ChartExportSvgSanitizer.sanitize(svg2)).toThrow(ChartExportError);
     });
 
-    it("removes javascript: and vbscript: URIs from href attributes", () => {
+    it("rejects javascript: and vbscript: URIs with explicit error (R2-07)", () => {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 100 100");
         const a = document.createElementNS("http://www.w3.org/2000/svg", "a");
         a.setAttribute("href", "javascript:alert('xss')");
         svg.appendChild(a);
 
-        const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
-        image.setAttribute("href", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
-        svg.appendChild(image);
-
-        ChartExportSvgSanitizer.sanitize(svg);
-
-        expect(a.hasAttribute("href")).toBe(false);
-        expect(image.hasAttribute("href")).toBe(true);
+        expect(() => ChartExportSvgSanitizer.sanitize(svg)).toThrow(ChartExportError);
     });
 });

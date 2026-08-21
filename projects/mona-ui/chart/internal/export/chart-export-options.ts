@@ -11,6 +11,7 @@ import {
     type ChartPdfRenderMode
 } from "../../models/chart-export.models";
 import { isFiniteNumber } from "../utils/number-utils";
+import { ChartExportColorNormalizer } from "./chart-export-color-normalizer";
 
 /**
  * PDF points per standard CSS pixel (72 pt / 96 px = 0.75).
@@ -19,6 +20,13 @@ export const PDF_POINTS_PER_PX = 0.75;
 
 export const MAX_RASTER_DIMENSION = 16384;
 export const MAX_RASTER_TOTAL_PIXELS = 67108864; // 64 Mi-pixels
+
+/**
+ * Maximum aggregate physical pixel work allowed across all raster islands in one
+ * export transaction (128 Mi-pixels). Per-island legality alone does not bound a
+ * transaction containing many individually legal islands (R6-06 / INV-08).
+ */
+export const MAX_RASTER_TRANSACTION_PIXELS = 134217728;
 
 export interface NormalizedChartPdfMargins {
     readonly bottom: number;
@@ -64,6 +72,23 @@ function normalizeDimension(value: unknown, name: string): number | undefined {
     return value;
 }
 
+function normalizeBackground(bg: unknown): ChartExportBackground {
+    if (bg === undefined || bg === null || bg === "auto") {
+        return "auto";
+    }
+    if (bg === "transparent") {
+        return "transparent";
+    }
+    if (typeof bg !== "string") {
+        throw new ChartExportError("invalid-size", "Background option must be 'auto', 'transparent', or a valid CSS color string.");
+    }
+    const trimmed = bg.trim();
+    if (!trimmed) {
+        return "auto";
+    }
+    return ChartExportColorNormalizer.normalizeColor(trimmed);
+}
+
 function normalizeMargins(margin?: number | ChartPdfMargins): NormalizedChartPdfMargins {
     if (typeof margin === "number") {
         if (!isFiniteNumber(margin) || margin < 0) {
@@ -98,12 +123,16 @@ export function normalizeChartExportOptions(
     sourceWidth: number,
     sourceHeight: number
 ): NormalizedChartExportRequest {
-    if (options.signal?.aborted) {
-        const abortError = new DOMException("Export was aborted", "AbortError");
-        throw abortError;
+    // EXP-19: Runtime object validation before property access
+    if (!options || typeof options !== "object") {
+        throw new ChartExportError("not-ready", "Invalid export options: options object is required.");
     }
 
-    if (!options || typeof options !== "object" || !options.format) {
+    if (options.signal?.aborted) {
+        throw new DOMException("Export was aborted", "AbortError");
+    }
+
+    if (!options.format) {
         throw new ChartExportError("not-ready", "Invalid export options: format is required.");
     }
 
@@ -138,7 +167,7 @@ export function normalizeChartExportOptions(
         height = sourceHeight;
     }
 
-    const background: ChartExportBackground = options.background ?? "auto";
+    const background = normalizeBackground(options.background);
 
     const presentation: NormalizedChartExportPresentationOptions = {
         brush: options.presentation?.brush ?? false,
@@ -150,13 +179,14 @@ export function normalizeChartExportOptions(
     if (format === "png") {
         const pr = (options as { pixelRatio?: number }).pixelRatio;
         if (pr !== undefined) {
-            if (typeof pr !== "number" || !isFiniteNumber(pr) || pr <= 0) {
+            // EXP-15: Strict pixelRatio range 0.25 .. 8 without silent clamping
+            if (typeof pr !== "number" || !isFiniteNumber(pr) || pr < 0.25 || pr > 8) {
                 throw new ChartExportError(
                     "invalid-size",
-                    `PNG pixelRatio must be a positive finite number. Received: ${pr}`
+                    `PNG pixelRatio must be a positive finite number between 0.25 and 8. Received: ${pr}`
                 );
             }
-            pixelRatio = Math.max(1, Math.min(8, pr));
+            pixelRatio = pr;
         }
     }
 
@@ -205,6 +235,13 @@ export function normalizeChartExportOptions(
             throw new ChartExportError("not-ready", `Invalid PDF orientation: '${orientation}'.`);
         }
 
+        // Validate custom paper size margins if explicitly specified (EXP-10)
+        if (typeof pageSize === "object") {
+            if (margin.left + margin.right >= pageSize.width || margin.top + margin.bottom >= pageSize.height) {
+                throw new ChartExportError("invalid-size", "PDF margins must be smaller than total page dimensions.");
+            }
+        }
+
         pdfPage = {
             margin,
             orientation,
@@ -234,24 +271,22 @@ export function sanitizeFileName(
     defaultTitle?: string | null
 ): string {
     const ext = `.${format}`;
-    let name = fileName?.trim();
-    if (!name) {
-        if (defaultTitle?.trim()) {
-            name = defaultTitle.trim();
-        } else {
-            name = "chart";
-        }
-    }
+    let name = (fileName ?? defaultTitle ?? "chart").trim();
 
-    // Strip path navigation and forbidden filename chars: / \ : * ? " < > | \0
-    name = name.replace(/[/\\?%*:|"<>]/g, "_").replace(/[\0]/g, "").replace(/^\.+/, "");
+    // Strip ASCII control characters (0x00-0x1F, 0x7F) and invalid path chars: / \ ? % * : | " < > (EXP-20)
+    name = name.replace(/[\x00-\x1f\x7f/\\?%*:|"<>]/g, "_").trim();
 
-    if (name.toLowerCase().endsWith(".png")) {
-        name = name.slice(0, -4);
+    // Strip leading and trailing dots and spaces
+    name = name.replace(/^[.\s]+/, "").replace(/[.\s]+$/, "");
+
+    if (name.toLowerCase().endsWith(`.${format}`)) {
+        name = name.slice(0, -(format.length + 1)).trim();
+    } else if (name.toLowerCase().endsWith(".png")) {
+        name = name.slice(0, -4).trim();
     } else if (name.toLowerCase().endsWith(".svg")) {
-        name = name.slice(0, -4);
+        name = name.slice(0, -4).trim();
     } else if (name.toLowerCase().endsWith(".pdf")) {
-        name = name.slice(0, -4);
+        name = name.slice(0, -4).trim();
     }
 
     if (!name) {

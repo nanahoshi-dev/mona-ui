@@ -8,18 +8,17 @@ describe("ChartExportSvgFinalizer", () => {
         ariaDescription: "Revenue by quarter description",
         ariaLabel: "Quarterly Revenue",
         background: "#ffffff",
-        domLayers: { badges: [], rasterIslands: [], vectorTexts: [] },
+        domLayers: { badges: [], primitives: [], rasterIslands: [], vectorTexts: [] },
         hasNoData: false,
         plotSurfaceRect: { height: 400, width: 600, x: 50, y: 50 },
         presentation: {
             activeBrushBounds: null,
             annotationBadgeAnchors: null,
-            brushRegistration: null,
+            brush: null,
             cartesianDataLabels: null,
             cartesianOverlay: null,
             crosshair: null,
-            crosshairRegistration: null,
-            interaction: null,
+            crosshairStyle: null,
             selectionOptions: null,
             selectionScene: null
         },
@@ -66,7 +65,7 @@ describe("ChartExportSvgFinalizer", () => {
         expect(bgRect?.getAttribute("height")).toBe("500");
     });
 
-    it("inserts accessibility title and desc when accessibility is enabled", () => {
+    it("inserts accessibility title and desc with stable IDs when accessibility is enabled", () => {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         const snapshot = createTestSnapshot({
             ariaDescription: "Detailed report",
@@ -81,8 +80,12 @@ describe("ChartExportSvgFinalizer", () => {
 
         expect(titleEl).not.toBeNull();
         expect(titleEl?.textContent).toBe("Sales Chart");
+        expect(titleEl?.getAttribute("id")).toBe("mona-chart-export-title");
         expect(descEl).not.toBeNull();
         expect(descEl?.textContent).toBe("Detailed report");
+        expect(descEl?.getAttribute("id")).toBe("mona-chart-export-desc");
+        expect(output.svgElement.getAttribute("aria-labelledby")).toBe("mona-chart-export-title");
+        expect(output.svgElement.getAttribute("aria-describedby")).toBe("mona-chart-export-desc");
     });
 
     it("serializes SVG to standard XML with declaration and produces valid Blob", () => {
