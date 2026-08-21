@@ -1,14 +1,18 @@
 @if (hasHeader()) {
     <div [class]="headerClasses()" [style.text-align]="titleAlign()">
         @if (titleTemplate(); as tpl) {
-            <ng-container [ngTemplateOutlet]="tpl.templateRef" [ngTemplateOutletContext]="{ $implicit: title(), title: title() }" />
+            <div data-mona-chart-export-role="title-template">
+                <ng-container [ngTemplateOutlet]="tpl.templateRef" [ngTemplateOutletContext]="{ $implicit: title(), title: title() }" />
+            </div>
         } @else if (title()) {
-            <div [class]="titleClasses()">{{ title() }}</div>
+            <div [class]="titleClasses()" data-mona-chart-export-role="title">{{ title() }}</div>
         }
         @if (subtitleTemplate(); as subTpl) {
-            <ng-container [ngTemplateOutlet]="subTpl.templateRef" [ngTemplateOutletContext]="{ $implicit: subtitle(), subtitle: subtitle() }" />
+            <div data-mona-chart-export-role="subtitle-template">
+                <ng-container [ngTemplateOutlet]="subTpl.templateRef" [ngTemplateOutletContext]="{ $implicit: subtitle(), subtitle: subtitle() }" />
+            </div>
         } @else if (subtitle()) {
-            <div [class]="subtitleClasses()">{{ subtitle() }}</div>
+            <div [class]="subtitleClasses()" data-mona-chart-export-role="subtitle">{{ subtitle() }}</div>
         }
     </div>
 }
@@ -50,6 +54,8 @@
                                 <div
                                     [class]="axisLabelClasses()"
                                     [monaChartLabelMeasure]="tick.tickKey ?? ''"
+                                    data-mona-chart-export-role="axis-label"
+                                    [attr.data-mona-chart-export-mode]="resolveAxisLabelTemplate(axisScene) ? 'raster' : 'vector'"
                                     [style.left.px]="axisLabelLeft(cart, axisScene, tick)"
                                     [style.top.px]="axisLabelTop(cart, axisScene, tick)"
                                     [style.max-width.px]="axisScene.labelMaxWidth ?? null"
@@ -79,6 +85,8 @@
                     @if (axisScene.title) {
                         <div
                             class="mona-chart-axis-title absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+                            data-mona-chart-export-role="axis-title"
+                            data-mona-chart-export-mode="vector"
                             [style.left.px]="axisTitleLeft(cart, axisScene)"
                             [style.top.px]="axisTitleTop(cart, axisScene)"
                             [style.transform]="axisScene.axis === 'x' ? (axisScene.position === 'top' ? 'translate(-50%, 0)' : 'translate(-50%, -100%)') : (axisScene.position === 'right' ? 'translate(-50%, -50%) rotate(90deg)' : 'translate(-50%, -50%) rotate(-90deg)')">
@@ -100,6 +108,8 @@
                                 class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
                                 [class.opacity-0]="isAnimating() && isStructuralAnimation()"
                                 [monaChartLabelMeasure]="'sector:' + slice.sliceId"
+                                data-mona-chart-export-role="sector-label"
+                                [attr.data-mona-chart-export-mode]="polarSeriesRegistration()?.sliceLabelTemplate?.() ? 'raster' : 'vector'"
                                 [style.left.px]="slice.label.position.x"
                                 [style.top.px]="slice.label.position.y"
                                 [style.transform]="slice.label.side === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
@@ -116,6 +126,8 @@
                                 aria-hidden="true"
                                 class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
                                 [class.opacity-0]="isAnimating() && isStructuralAnimation()"
+                                data-mona-chart-export-role="sector-label"
+                                [attr.data-mona-chart-export-mode]="polarSeriesRegistration()?.sliceLabelTemplate?.() ? 'raster' : 'vector'"
                                 [style.left.px]="slice.insideLabelPoint.x"
                                 [style.top.px]="slice.insideLabelPoint.y"
                                 [style.transform]="'translate(-50%, -50%)'"
@@ -138,6 +150,8 @@
                 @if (seriesScene.type === 'donut' && pol.hasRenderableData && seriesScene.slices.length > 0 && donutSeriesRegistration()?.centerTemplate?.(); as centerTemplate) {
                     <div
                         class="absolute pointer-events-none flex flex-col items-center justify-center text-center overflow-hidden"
+                        data-mona-chart-export-role="donut-center"
+                        data-mona-chart-export-mode="raster"
                         [style.left.px]="pol.center.x"
                         [style.top.px]="pol.center.y"
                         [style.transform]="'translate(-50%, -50%)'"
@@ -164,6 +178,8 @@
                 @if (gaugeSeriesRegistration()?.centerTemplate?.(); as centerTemplate) {
                     <div
                         class="absolute pointer-events-none flex flex-col items-center justify-center text-center overflow-hidden"
+                        data-mona-chart-export-role="gauge-center"
+                        data-mona-chart-export-mode="raster"
                         [style.left.px]="arcScene.center.x"
                         [style.top.px]="arcScene.center.y"
                         [style.transform]="'translate(-50%, -50%)'"
@@ -176,6 +192,8 @@
                 } @else if (gaugeSeries.showValue) {
                     <div
                         class="absolute pointer-events-none flex flex-col items-center justify-center text-center font-bold text-foreground select-none"
+                        data-mona-chart-export-role="gauge-value"
+                        data-mona-chart-export-mode="vector"
                         [style.left.px]="arcScene.center.x"
                         [style.top.px]="arcScene.center.y"
                         [style.transform]="'translate(-50%, -50%)'"
@@ -196,6 +214,8 @@
                             aria-hidden="true"
                             class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
                             [monaChartLabelMeasure]="'angular:' + tick.tickKey"
+                            data-mona-chart-export-role="polar-angular-label"
+                            [attr.data-mona-chart-export-mode]="angularAxisRegistration()?.labelTemplate?.() ? 'raster' : 'vector'"
                             [style.left.px]="tick.labelPoint.x"
                             [style.top.px]="tick.labelPoint.y"
                             [style.transform]="angularLabelTransform(tick)">
@@ -224,6 +244,8 @@
                             aria-hidden="true"
                             class="absolute pointer-events-none text-xs text-muted-foreground select-none whitespace-nowrap"
                             [monaChartLabelMeasure]="'radial:' + tick.tickKey"
+                            data-mona-chart-export-role="polar-radial-label"
+                            [attr.data-mona-chart-export-mode]="radialAxisRegistration()?.labelTemplate?.() ? 'raster' : 'vector'"
                             [style.left.px]="tick.labelPoint.x"
                             [style.top.px]="tick.labelPoint.y"
                             [style.transform]="radialLabelTransform(tick, radScene.radialAxis.labelAngle)">
@@ -253,6 +275,8 @@
                         aria-hidden="true"
                         class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap px-1.5 py-0.5 flex flex-col justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
                         [class.opacity-0]="isAnimating()"
+                        data-mona-chart-export-role="treemap-label"
+                        data-mona-chart-export-mode="raster"
                         [style.left.px]="lbl.bounds.x"
                         [style.top.px]="lbl.bounds.y"
                         [style.width.px]="lbl.bounds.width"
@@ -281,6 +305,8 @@
                         aria-hidden="true"
                         class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap flex flex-col items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
                         [class.opacity-0]="isAnimating()"
+                        data-mona-chart-export-role="funnel-label"
+                        data-mona-chart-export-mode="raster"
                         [style.left.px]="lbl.bounds.x"
                         [style.top.px]="lbl.bounds.y"
                         [style.width.px]="lbl.bounds.width"
@@ -306,6 +332,8 @@
                         aria-hidden="true"
                         class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
                         [class.opacity-0]="isAnimating()"
+                        data-mona-chart-export-role="waterfall-label"
+                        data-mona-chart-export-mode="raster"
                         [style.left.px]="lbl.bounds.x"
                         [style.top.px]="lbl.bounds.y"
                         [style.width.px]="lbl.bounds.width"
@@ -333,6 +361,8 @@
                         [class]="referenceLabelClasses() + (line.label.labelClass ? ' ' + line.label.labelClass : '')"
                         [class.hidden]="!line.label.formattedText && !resolveReferenceLineTemplate(line.id)"
                         [monaChartOverlayLabelMeasure]="'overlay:line:' + line.id"
+                        data-mona-chart-export-role="reference-label"
+                        [attr.data-mona-chart-export-mode]="resolveReferenceLineTemplate(line.id) ? 'raster' : 'vector'"
                         [style.left.px]="referenceLineLabelLeft(line)"
                         [style.top.px]="referenceLineLabelTop(line)"
                         [style.transform]="referenceLineLabelTransform(line)">
@@ -365,6 +395,8 @@
                         [class]="referenceLabelClasses() + (band.label.labelClass ? ' ' + band.label.labelClass : '')"
                         [class.hidden]="!band.label.formattedText && !resolveReferenceBandTemplate(band.id)"
                         [monaChartOverlayLabelMeasure]="'overlay:band:' + band.id"
+                        data-mona-chart-export-role="reference-label"
+                        [attr.data-mona-chart-export-mode]="resolveReferenceBandTemplate(band.id) ? 'raster' : 'vector'"
                         [style.left.px]="referenceBandLabelLeft(band)"
                         [style.top.px]="referenceBandLabelTop(band)"
                         [style.transform]="referenceBandLabelTransform(band)">
@@ -399,6 +431,8 @@
                         [class]="annotationLabelClasses() + (ann.label.labelClass ? ' ' + ann.label.labelClass : '')"
                         [class.hidden]="!ann.label.formattedText && !resolveAnnotationTemplate(ann.id)"
                         [monaChartOverlayLabelMeasure]="'overlay:ann:' + ann.id"
+                        data-mona-chart-export-role="annotation-label"
+                        [attr.data-mona-chart-export-mode]="resolveAnnotationTemplate(ann.id) ? 'raster' : 'vector'"
                         [style.left.px]="annotationLabelLeft(ann)"
                         [style.top.px]="annotationLabelTop(ann)"
                         [style.transform]="annotationLabelTransform(ann)">
@@ -434,6 +468,8 @@
                     class="absolute pointer-events-none select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
                     [class.opacity-0]="isAnimating()"
                     [monaChartDataLabelMeasure]="label.seriesId + ':' + label.markId"
+                    data-mona-chart-export-role="data-label-template"
+                    data-mona-chart-export-mode="raster"
                     [style.left.px]="label.bounds.x"
                     [style.top.px]="label.bounds.y">
                     <ng-container
@@ -453,6 +489,8 @@
                                 aria-hidden="true"
                                 [class]="crosshairLabelClasses()"
                                 [monaChartOverlayLabelMeasure]="'crosshair:x'"
+                                data-mona-chart-export-role="crosshair-label"
+                                [attr.data-mona-chart-export-mode]="chReg.template?.() ? 'raster' : 'vector'"
                                 [style.left.px]="crosshairXLabelLeft(cart, chState)"
                                 [style.top.px]="crosshairXLabelTop(cart, chState)"
                                 [style.transform]="crosshairXLabelTransform(cart, chState)">
@@ -480,6 +518,8 @@
                                 aria-hidden="true"
                                 [class]="crosshairLabelClasses()"
                                 [monaChartOverlayLabelMeasure]="'crosshair:y'"
+                                data-mona-chart-export-role="crosshair-label"
+                                [attr.data-mona-chart-export-mode]="chReg.template?.() ? 'raster' : 'vector'"
                                 [style.left.px]="crosshairYLabelLeft(cart, chState)"
                                 [style.top.px]="crosshairYLabelTop(cart, chState)"
                                 [style.transform]="crosshairYLabelTransform(cart, chState)">
@@ -511,7 +551,7 @@
 
         <!-- No Data Placeholder -->
         @if (hasNoData()) {
-            <div [class]="noDataClasses()">
+            <div [class]="noDataClasses()" data-mona-chart-export-role="no-data" [attr.data-mona-chart-export-mode]="noDataTemplate() ? 'raster' : 'vector'">
                 @if (noDataTemplate(); as template) {
                     <ng-container [ngTemplateOutlet]="template.templateRef" />
                 } @else {

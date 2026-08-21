@@ -484,3 +484,84 @@ Renders a 2D matrix heatmap visualization with perceptual Culori color scale int
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter function for cell numeric values. |
 
+---
+
+## Export & Download API
+
+The chart component provides programmatic methods to export charts into high-fidelity standalone SVG vector documents, crisp PNG raster images, and formatted PDF documents.
+
+### Public Component Methods
+
+```typescript
+// Export as a binary Blob
+const result: ChartExportResult = await chart.exportChart(options);
+
+// Export and trigger a browser file download
+const result: ChartExportResult = await chart.downloadChart(options);
+```
+
+### Export Formats & Options
+
+#### Standalone SVG Vector (`format: "svg"`)
+
+Generates a clean standalone SVG document with resolved styling, vector typography, and full WCAG accessibility metadata.
+
+```typescript
+const result = await chart.exportChart({
+    format: "svg",
+    accessibility: true,
+    background: "auto"
+});
+```
+
+#### High-Resolution PNG (`format: "png"`)
+
+Rasterizes the chart graphics and DOM overlays to a PNG blob at the desired pixel density.
+
+```typescript
+await chart.downloadChart({
+    format: "png",
+    fileName: "revenue-report",
+    pixelRatio: 2,
+    background: "#ffffff"
+});
+```
+
+#### Document PDF (`format: "pdf"`)
+
+Generates a PDF document with automatic vector conversion and high-res raster fallback.
+
+```typescript
+await chart.downloadChart({
+    format: "pdf",
+    fileName: "quarterly-presentation",
+    mode: "auto",
+    page: {
+        size: "a4",
+        orientation: "landscape",
+        margin: 24
+    }
+});
+```
+
+### Export Options Reference
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `format` | `"svg" \| "png" \| "pdf"` | *Required* | Target export format. |
+| `fileName` | `string` | `chart.title` or `"chart"` | Filename for `downloadChart()` (sanitized automatically). |
+| `width` | `number` | Chart width | Output logical width in CSS pixels. |
+| `height` | `number` | Chart height | Output logical height in CSS pixels. |
+| `background` | `"auto" \| "transparent" \| string` | `"auto"` | Background fill policy or custom CSS color. |
+| `pixelRatio` | `number` | `2` | Raster scaling ratio (clamped 1 to 8) for PNG export. |
+| `accessibility` | `boolean` | `true` | Embeds `<title>`, `<desc>`, and ARIA attributes in SVG. |
+| `mode` | `"auto" \| "vector" \| "raster"` | `"auto"` | PDF rendering path (vector with raster fallback). |
+| `page.size` | `"chart" \| "a4" \| "letter" \| { width, height }` | `"chart"` | PDF page sizing in points (1 CSS px = 0.75 pt). |
+| `page.orientation` | `"auto" \| "portrait" \| "landscape"` | `"auto"` | PDF page orientation. |
+| `page.margin` | `number \| { top, right, bottom, left }` | `0` (chart) / `24` (A4/Letter) | PDF page margins in points. |
+| `presentation.selection` | `boolean` | `true` | Include persistent selection mark styling. |
+| `presentation.crosshair` | `boolean` | `false` | Include active crosshair lines and axis badges. |
+| `presentation.brush` | `boolean` | `false` | Include active brush marquee rectangle. |
+| `signal` | `AbortSignal` | `undefined` | AbortSignal to cancel in-flight export transactions. |
+
+

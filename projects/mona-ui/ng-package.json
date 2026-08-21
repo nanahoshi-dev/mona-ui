@@ -9,8 +9,11 @@
         "^d3-hierarchy$",
         "^d3-scale$",
         "^d3-shape$",
+        "^html2canvas-pro$",
+        "^jspdf$",
         "^luxon$",
         "^remixicon$",
+        "^svg2pdf\\.js$",
         "^tailwind-merge$",
         "^uuid$"
     ],

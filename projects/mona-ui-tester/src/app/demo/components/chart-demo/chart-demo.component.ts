@@ -1620,8 +1620,20 @@ export class ChartDemoComponent {
         }
     }
 
+    protected readonly mixedChart = viewChild<ChartComponent>("mixedChart");
     protected readonly panZoomChart = viewChild<ChartComponent>("panZoomChart");
     protected readonly multiAxisChart = viewChild<ChartComponent>("multiAxisChart");
+
+    protected async exportMixedChart(format: "png" | "svg" | "pdf"): Promise<void> {
+        const chart = this.mixedChart();
+        if (!chart) return;
+        await chart.downloadChart({
+            fileName: "mixed-studio-chart",
+            format,
+            mode: "auto",
+            pixelRatio: 2
+        });
+    }
 
     // Pan & Zoom Viewport Controls & State
     protected readonly panZoomEnabled = signal<boolean>(true);
