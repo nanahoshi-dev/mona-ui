@@ -4,6 +4,7 @@ export class ChartExportDomFreezer {
     /**
      * Deeply freezes a cloned DOM tree by copying all computed styles and runtime state
      * from the source tree, making it completely independent of subsequent live DOM or CSS changes.
+     * Freeze-critical failures throw explicit ChartExportErrors instead of silently producing half-frozen subtrees (R5-11).
      */
     public static freeze(sourceNode: HTMLElement, cloneNode: HTMLElement): void {
         if (!sourceNode || !cloneNode || typeof window === "undefined") {
@@ -26,8 +27,8 @@ export class ChartExportDomFreezer {
 
             // Preserve scroll position (R3-09)
             if (src.scrollTop > 0 || src.scrollLeft > 0) {
-                (dst as any).__monaScrollTop = src.scrollTop;
-                (dst as any).__monaScrollLeft = src.scrollLeft;
+                (dst as unknown as Record<string, number>)["__monaScrollTop"] = src.scrollTop;
+                (dst as unknown as Record<string, number>)["__monaScrollLeft"] = src.scrollLeft;
                 dst.setAttribute("data-mona-scroll-top", String(src.scrollTop));
                 dst.setAttribute("data-mona-scroll-left", String(src.scrollLeft));
             }
@@ -106,7 +107,7 @@ export class ChartExportDomFreezer {
                         if (srcCtx && src.width > 0 && src.height > 0) {
                             srcCtx.getImageData(0, 0, 1, 1);
                         }
-                    } catch (err) {
+                    } catch (err: unknown) {
                         throw new ChartExportError(
                             "resource-load-failed",
                             "Template canvas is cross-origin tainted and cannot be exported.",
@@ -121,7 +122,7 @@ export class ChartExportDomFreezer {
                             dst.height = src.height;
                             dstCtx.drawImage(src, 0, 0);
                         }
-                    } catch (err) {
+                    } catch (err: unknown) {
                         throw new ChartExportError(
                             "resource-load-failed",
                             "Failed to copy template canvas bitmap for export.",
@@ -129,11 +130,15 @@ export class ChartExportDomFreezer {
                         );
                     }
                 }
-            } catch (err) {
+            } catch (err: unknown) {
                 if (err instanceof ChartExportError) {
                     throw err;
                 }
-                // Ignore per-element computed style exceptions
+                throw new ChartExportError(
+                    "template-rasterization-failed",
+                    `Failed to freeze element computed styles or runtime state: ${(err as Error)?.message ?? err}`,
+                    { cause: err }
+                );
             }
         }
 
@@ -147,7 +152,7 @@ export class ChartExportDomFreezer {
      * <picture><source> candidates are deleted and img srcset/sizes attributes removed,
      * so attaching the clone to a staging document cannot trigger new resource selection.
      */
-    private static neutralizeResponsiveImageSelection(cloneRoot: HTMLElement): void {
+    public static neutralizeResponsiveImageSelection(cloneRoot: HTMLElement): void {
         const rootTag = cloneRoot.tagName.toLowerCase();
 
         const pictures =

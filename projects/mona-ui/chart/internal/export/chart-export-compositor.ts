@@ -9,8 +9,6 @@ import { ChartExportError } from "../../models/chart-export.models";
 
 import { resolveChartExportContainTransform } from "./chart-export-geometry";
 
-let clipIdCounter = 0;
-
 export class ChartExportCompositor {
     public static compose(
         snapshot: ChartExportSnapshot,
@@ -23,6 +21,9 @@ export class ChartExportCompositor {
                 "Cannot compose SVG in a non-browser environment."
             );
         }
+
+        // Local clip ID counter to guarantee deterministic output across export transactions (R5-14)
+        let clipIdCounter = 0;
 
         const outW = request.width;
         const outH = request.height;

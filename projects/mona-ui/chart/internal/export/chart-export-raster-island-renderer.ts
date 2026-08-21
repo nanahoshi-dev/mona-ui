@@ -51,11 +51,11 @@ export class ChartExportRasterIslandRenderer {
         }
 
         // 2. Dynamically import html2canvas-pro
-        let html2canvas: any;
+        let html2canvas: (element: HTMLElement, options?: Record<string, unknown>) => Promise<HTMLCanvasElement>;
         try {
             const mod = await import("html2canvas-pro");
-            html2canvas = (mod as any).default ?? mod;
-        } catch (err) {
+            html2canvas = (mod as unknown as { default?: unknown }).default as typeof html2canvas ?? mod as unknown as typeof html2canvas;
+        } catch (err: unknown) {
             throw new ChartExportError(
                 "template-rasterization-failed",
                 "Failed to dynamically load DOM rasterizer (html2canvas-pro).",
@@ -106,8 +106,11 @@ export class ChartExportRasterIslandRenderer {
                 let targetElement: HTMLElement;
                 let cleanupElement: HTMLElement;
 
+                const layoutW = island.layoutBorderBoxWidth ?? island.layoutWidth;
+                const layoutH = island.layoutBorderBoxHeight ?? island.layoutHeight;
+
                 if (island.hasComplexTransform) {
-                    // Complex transform: create capture wrapper matching visual AABB (R3-03)
+                    // Complex 2D affine transform: create capture wrapper matching visual AABB (R3-03 / R5-01 / R5-08)
                     const wrapper = document.createElement("div");
                     wrapper.style.position = "relative";
                     wrapper.style.boxSizing = "border-box";
@@ -117,12 +120,12 @@ export class ChartExportRasterIslandRenderer {
 
                     island.frozenRoot.style.position = "absolute";
                     island.frozenRoot.style.boxSizing = "border-box";
-                    island.frozenRoot.style.width = `${island.layoutWidth}px`;
-                    island.frozenRoot.style.height = `${island.layoutHeight}px`;
-                    island.frozenRoot.style.minWidth = `${island.layoutWidth}px`;
-                    island.frozenRoot.style.maxWidth = `${island.layoutWidth}px`;
-                    island.frozenRoot.style.minHeight = `${island.layoutHeight}px`;
-                    island.frozenRoot.style.maxHeight = `${island.layoutHeight}px`;
+                    island.frozenRoot.style.width = `${layoutW}px`;
+                    island.frozenRoot.style.height = `${layoutH}px`;
+                    island.frozenRoot.style.minWidth = `${layoutW}px`;
+                    island.frozenRoot.style.maxWidth = `${layoutW}px`;
+                    island.frozenRoot.style.minHeight = `${layoutH}px`;
+                    island.frozenRoot.style.maxHeight = `${layoutH}px`;
                     if (island.transform) {
                         island.frozenRoot.style.transform = island.transform;
                     }
@@ -143,7 +146,9 @@ export class ChartExportRasterIslandRenderer {
                             island.frozenRoot.style.left = `${offsetX}px`;
                             island.frozenRoot.style.top = `${offsetY}px`;
                         }
-                    } catch {}
+                    } catch {
+                        // Ignore rect measuring if detached
+                    }
 
                     targetElement = wrapper;
                     cleanupElement = wrapper;
@@ -165,17 +170,19 @@ export class ChartExportRasterIslandRenderer {
                 // Restore scroll positions after attaching to staging DOM (R3-09)
                 const allStagedElements = [targetElement, ...Array.from(targetElement.querySelectorAll<HTMLElement>("*"))];
                 for (const el of allStagedElements) {
-                    const top = (el as any).__monaScrollTop ?? (el.hasAttribute("data-mona-scroll-top") ? parseFloat(el.getAttribute("data-mona-scroll-top")!) : 0);
-                    const left = (el as any).__monaScrollLeft ?? (el.hasAttribute("data-mona-scroll-left") ? parseFloat(el.getAttribute("data-mona-scroll-left")!) : 0);
+                    const top = (el as unknown as Record<string, number>)["__monaScrollTop"] ?? (el.hasAttribute("data-mona-scroll-top") ? parseFloat(el.getAttribute("data-mona-scroll-top")!) : 0);
+                    const left = (el as unknown as Record<string, number>)["__monaScrollLeft"] ?? (el.hasAttribute("data-mona-scroll-left") ? parseFloat(el.getAttribute("data-mona-scroll-left")!) : 0);
                     if (top > 0) el.scrollTop = top;
                     if (left > 0) el.scrollLeft = left;
                 }
 
                 try {
+                    // R5-01: Pass normalizeDom: false so html2canvas-pro does not reset Mona's frozen transforms
                     const canvas = await html2canvas(targetElement, {
                         backgroundColor: null,
                         height: island.bounds.height,
                         logging: false,
+                        normalizeDom: false,
                         scale: effectiveScale,
                         useCORS: true,
                         width: island.bounds.width,
@@ -203,13 +210,13 @@ export class ChartExportRasterIslandRenderer {
                     cleanupElement.remove();
                 }
             }
-        } catch (err: any) {
-            if (err?.name === "AbortError" || err instanceof ChartExportError) {
+        } catch (err: unknown) {
+            if ((err as { name?: string })?.name === "AbortError" || err instanceof ChartExportError) {
                 throw err;
             }
             throw new ChartExportError(
                 "template-rasterization-failed",
-                `Failed to rasterize template DOM island: ${err?.message ?? err}`,
+                `Failed to rasterize template DOM island: ${(err as Error)?.message ?? err}`,
                 { cause: err }
             );
         } finally {

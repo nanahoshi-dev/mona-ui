@@ -6,6 +6,7 @@ import type { ChartCrosshairState } from "../interaction/chart-crosshair-state";
 import type { CartesianDataLabelScene } from "../scene/cartesian-data-label-scene";
 import type { CartesianOverlayScene } from "../scene/cartesian-overlay-scene";
 import type { CartesianSelectionScene } from "../scene/cartesian-selection-scene";
+import type { ChartExportTransformKind } from "./chart-export-transform";
 
 export type ChartExportDomPlane =
     | "plot-labels"
@@ -52,9 +53,12 @@ export interface ChartExportRasterIslandSnapshot extends ChartExportPrimitiveBas
     readonly clipRect?: ChartRect;
     readonly frozenRoot: HTMLElement;
     readonly hasComplexTransform?: boolean;
+    readonly layoutBorderBoxHeight?: number;
+    readonly layoutBorderBoxWidth?: number;
     readonly layoutHeight: number;
     readonly layoutWidth: number;
     readonly transform?: string;
+    readonly transformKind?: ChartExportTransformKind;
     readonly transformOrigin?: string;
 }
 

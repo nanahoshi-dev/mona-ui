@@ -574,7 +574,7 @@ await chart.downloadChart({
 - **Browser-only:** Export operations run entirely in the browser and require `document`, `fetch`, canvas, and image decoding support. Server-side invocation throws `ChartExportError("unsupported-environment")`.
 - **Snapshot Semantics:** Export captures a frozen semantic and visual snapshot synchronously at the `exportChart()` call boundary. After that boundary, live chart data, theme, and signal changes do not affect an in-flight export. Supported external resources referenced by the snapshot are then captured into export-owned embedded representations before rasterization begins.
 - **Custom Templates & Transformed DOM:** Custom Angular template content (e.g. `monaChartLegendItemTemplate`, `monaChartCenterTemplate`) and complex CSS transformed DOM labels (e.g. rotated axis labels) are captured as isolated raster islands and embedded as data URIs within SVG and hybrid PDF artifacts.
-- **Resource Capture & CORS:** External template images (`<img>`, SVG `<image>`, CSS `background-image`/`mask-image`/`border-image`/`list-style-image`) are fetched, validated as decodable PNG/JPEG/WebP bytes, and rewritten to embedded data URLs before rasterization. Cross-origin images must be CORS-accessible. A response that is empty, non-image, or undecodable fails the export explicitly instead of silently producing missing content.
+- **Resource Capture & CORS:** External template images (`<img>`, SVG `<image>`, CSS `background-image`/`border-image-source`/`list-style-image`) are fetched, validated as decodable PNG/JPEG/WebP bytes, and rewritten to embedded data URLs before rasterization. Cross-origin images must be CORS-accessible. A response that is empty, non-image, or undecodable fails the export explicitly instead of silently producing missing content.
 - **Responsive Images:** For `<img srcset>` and `<picture><source>` structures, the currently displayed image (`currentSrc`) is captured and responsive reselection is disabled in the exported copy; the artifact always shows the image selected at export time.
 - **Embedded SVG Images:** SVG resources embedded via data URI are rejected for export because nested SVG documents can reference additional external resources.
 - **Template Font Readiness:** After the document font-loading barrier, a custom template whose entire font stack consists of registered web fonts that failed to load fails the export explicitly rather than silently substituting fallback typography. Stacks that resolve to any loaded web font or system font export exactly what the live chart displays.
@@ -585,18 +585,23 @@ Custom templates must be fully freezable: every visual feature is either support
 
 **Supported:**
 
-- Plain text, inline styles, element/class-scoped CSS that resolves to computed styles
-- `<img>` (including `srcset`/`<picture>`, frozen to the selected source), CSS background/mask/border/list images, SVG `<image>` with internal `#references`
+- Light DOM elements, plain text, inline styles, and element/class-scoped CSS that resolves to computed styles
+- `<img>` (including `srcset`/`<picture>`, frozen to the selected source), CSS background/border/list images, SVG `<image>` with island-owned `#references`
 - Canvas elements (must not be cross-origin tainted)
-- Box shadows and descendants contained within the template bounds
+- Inset-only box shadows contained within the template bounds
+- 2D affine CSS transforms (rotation, scale, skew, 2D matrix) via raster islands
+- Contained light-DOM descendants
 
 **Rejected:**
 
-- Visible `::before` / `::after` pseudo-element content (not part of the clonable subtree)
+- Visible `::before` / `::after` pseudo-element content or painted pseudo styling (borders, outlines, shadows)
 - `<style>` elements and external stylesheet `<link rel="stylesheet">` inside the template
-- `backdrop-filter` (depends on content outside the isolated island) and CSS `filter`
-- Descendants painting outside the template bounds (would be cropped by island rasterization)
-- `video`, `audio`, `iframe`, `object`, `embed`, and external SVG references (`<use href="...">`, `<feImage href="...">`)
+- CSS `mask-image`, `mask`, `backdrop-filter`, CSS `filter`, and non-inset `box-shadow`
+- CSS `outline` and `text-shadow`
+- Custom elements backed by Shadow DOM
+- 3D CSS transforms (`matrix3d`, `perspective`, `rotate3d`, etc.) and unparseable/unknown transform syntax
+- Descendants with layout overflow outside the template bounds
+- `video`, `audio`, `iframe`, `object`, `embed`, external SVG references (`<use href="...">`, `<feImage href="...">`), and local SVG references resolving outside the frozen island
 
 Clipping applied by ancestors *outside* the captured template node is intentionally represented by the plot-area clip rectangle; arbitrary nested consumer clipping cannot be reproduced and should wrap the chart accordingly.
 

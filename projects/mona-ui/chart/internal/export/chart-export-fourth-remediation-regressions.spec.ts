@@ -241,26 +241,19 @@ describe("Fourth Export Remediation Regressions (R4)", () => {
             return host;
         }
 
-        it("routes matrix3d() transforms to the raster path, never generic vector text", () => {
+        it("rejects matrix3d() transforms fail-closed", () => {
             const host = createTransformFixture("matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 0, 1)");
-            const layers = ChartExportDomCollector.collect(host, host);
-            expect(layers.vectorTexts.length).toBe(0);
-            expect(layers.rasterIslands.length).toBe(1);
-            expect(layers.rasterIslands[0].hasComplexTransform).toBe(true);
+            expect(() => ChartExportDomCollector.collect(host, host)).toThrowError(ChartExportError);
         });
 
-        it("routes perspective() transforms to the raster path", () => {
+        it("rejects perspective() transforms fail-closed", () => {
             const host = createTransformFixture("perspective(10px)");
-            const layers = ChartExportDomCollector.collect(host, host);
-            expect(layers.vectorTexts.length).toBe(0);
-            expect(layers.rasterIslands.length).toBe(1);
+            expect(() => ChartExportDomCollector.collect(host, host)).toThrowError(ChartExportError);
         });
 
-        it("routes rotate3d() transforms to the raster path", () => {
+        it("rejects rotate3d() transforms fail-closed", () => {
             const host = createTransformFixture("rotate3d(1, 1, 0, 45deg)");
-            const layers = ChartExportDomCollector.collect(host, host);
-            expect(layers.vectorTexts.length).toBe(0);
-            expect(layers.rasterIslands.length).toBe(1);
+            expect(() => ChartExportDomCollector.collect(host, host)).toThrowError(ChartExportError);
         });
 
         it("classifies unparseable/unknown transform syntax as complex (fail closed)", () => {
@@ -504,7 +497,7 @@ describe("Fourth Export Remediation Regressions (R4)", () => {
             });
 
             expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(
-                /paints outside the template bounds/
+                /overflows the template bounds|paints outside the template bounds/
             );
         });
 

@@ -1,4 +1,5 @@
 import { ChartExportError } from "../../models/chart-export.models";
+import { isSupportedRasterMediaType, parseDataUrlMediaType } from "./chart-export-resource-policy";
 
 const FORBIDDEN_METADATA_ATTRIBUTES = [
     "data-layer",
@@ -9,14 +10,16 @@ const FORBIDDEN_METADATA_ATTRIBUTES = [
     "data-polar-layer"
 ];
 
-const ALLOWED_DATA_URI_PREFIXES = [
-    "data:image/png",
-    "data:image/jpeg",
-    "data:image/webp"
-];
-
+/**
+ * Checks whether a URI is a valid embedded data URI of an approved media type (R5-13).
+ * Uses exact MIME parsing rather than prefix heuristics.
+ */
 function isAllowedDataUri(uri: string): boolean {
-    return ALLOWED_DATA_URI_PREFIXES.some(prefix => uri.startsWith(prefix));
+    if (!uri.startsWith("data:")) {
+        return false;
+    }
+    const mediaType = parseDataUrlMediaType(uri);
+    return mediaType !== null && isSupportedRasterMediaType(mediaType);
 }
 
 export class ChartExportSvgMetadataStripper {

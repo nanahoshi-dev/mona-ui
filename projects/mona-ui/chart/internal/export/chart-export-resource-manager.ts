@@ -1,17 +1,47 @@
 import { ChartExportError } from "../../models/chart-export.models";
 import { abortable } from "./chart-export-abort-utils";
-
-export type ChartExportCapturedImageMediaType = "image/png" | "image/jpeg" | "image/webp";
+import {
+    ChartExportRasterMediaType,
+    MAX_EXPORT_RESOURCE_BYTES,
+    MAX_EXPORT_RESOURCE_TOTAL_BYTES,
+    SUPPORTED_RASTER_MEDIA_TYPES,
+    bytesToBase64,
+    decodeDataUrlPayload,
+    isSupportedRasterMediaType,
+    parseDataUrlMediaType,
+    sniffRasterImageType
+} from "./chart-export-resource-policy";
+import { validateRasterImageDecode } from "./chart-export-image-decoder";
 
 export interface ChartExportCapturedImageResource {
-    readonly originalUrl: string;
-    readonly mediaType: ChartExportCapturedImageMediaType;
     readonly dataUrl: string;
+    readonly mediaType: ChartExportRasterMediaType;
+    readonly originalUrl: string;
 }
 
-const SUPPORTED_MEDIA_TYPES: readonly string[] = ["image/png", "image/jpeg", "image/webp"];
+const ALLOWED_CSS_URL_PROPERTIES = new Set([
+    "backgroundimage",
+    "background-image",
+    "borderimagesource",
+    "border-image-source",
+    "liststyleimage",
+    "list-style-image"
+]);
 
-const CSS_URL_PROPERTIES = ["backgroundImage", "maskImage", "borderImageSource", "listStyleImage"] as const;
+const FORBIDDEN_CSS_URL_PROPERTIES = new Set([
+    "maskimage",
+    "mask-image",
+    "mask",
+    "webkitmaskimage",
+    "-webkit-mask-image",
+    "webkitmask",
+    "-webkit-mask",
+    "clippath",
+    "clip-path",
+    "filter",
+    "webkitfilter",
+    "-webkit-filter"
+]);
 
 function extractCssUrls(styleValue: string): string[] {
     if (!styleValue || !styleValue.includes("url(")) {
@@ -28,231 +58,268 @@ function extractCssUrls(styleValue: string): string[] {
     return urls;
 }
 
-function parseDataUrlMediaType(url: string): string | null {
-    const match = /^data:([^;,]+)(?:;[^,]*)?,/.exec(url);
-    return match ? match[1].toLowerCase() : null;
+function escapeCssId(id: string): string {
+    if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+        return CSS.escape(id);
+    }
+    return id.replace(/["\\]/g, "\\$&");
 }
 
-function decodeDataUrlPayload(url: string): Uint8Array {
-    const commaIndex = url.indexOf(",");
-    if (commaIndex < 0) {
-        throw new ChartExportError("resource-load-failed", "Malformed data URI resource.");
+function assertOwnedFragment(root: Element, rawFragment: string): Element {
+    const id = rawFragment.startsWith("#") ? rawFragment.slice(1).trim() : rawFragment.trim();
+    if (!id) {
+        throw new ChartExportError("resource-load-failed", "Template fragment reference is empty.");
     }
-    const payload = url.slice(commaIndex + 1);
-    const isBase64 = /;base64,/i.test(url.slice(0, commaIndex + 1));
-    if (isBase64) {
-        try {
-            const binary = atob(payload);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return bytes;
-        } catch (err) {
-            throw new ChartExportError("resource-load-failed", "Malformed base64 data URI resource.", { cause: err });
-        }
-    }
+
+    let matches: Element[];
     try {
-        const decoded = decodeURIComponent(payload);
-        return new TextEncoder().encode(decoded);
-    } catch (err) {
-        throw new ChartExportError("resource-load-failed", "Malformed percent-encoded data URI resource.", { cause: err });
+        matches = Array.from(root.querySelectorAll(`[id="${escapeCssId(id)}"]`));
+    } catch {
+        const all = [root, ...Array.from(root.querySelectorAll("*"))];
+        matches = all.filter(el => el.getAttribute("id") === id);
     }
+
+    if (root.getAttribute("id") === id && !matches.includes(root)) {
+        matches.push(root);
+    }
+
+    if (matches.length === 0) {
+        throw new ChartExportError(
+            "resource-load-failed",
+            `Template SVG reference '#${id}' is not contained inside the isolated frozen export template.`
+        );
+    }
+
+    if (matches.length > 1) {
+        throw new ChartExportError(
+            "resource-load-failed",
+            `Template SVG document contains duplicate ID '#${id}'.`
+        );
+    }
+
+    return matches[0];
 }
 
 /**
- * Detects the actual raster image type from magic bytes so a lying Content-Type
- * (or a text/html / JSON error page) can never become nominal image data.
+ * Per-export transaction manager that coordinates resource capture, deduplication,
+ * media validation, and aggregate byte budget tracking (R5-02 / R5-03 / R5-12).
  */
-function sniffRasterImageType(bytes: Uint8Array): ChartExportCapturedImageMediaType | null {
-    if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
-        return "image/png";
-    }
-    if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
-        return "image/jpeg";
-    }
-    if (
-        bytes.length >= 12 &&
-        bytes[0] === 0x52 &&
-        bytes[1] === 0x49 &&
-        bytes[2] === 0x46 &&
-        bytes[3] === 0x46 &&
-        bytes[8] === 0x57 &&
-        bytes[9] === 0x45 &&
-        bytes[10] === 0x42 &&
-        bytes[11] === 0x50
-    ) {
-        return "image/webp";
-    }
-    return null;
-}
+class ChartExportResourceTransaction {
+    #totalBytes = 0;
+    readonly #cache = new Map<string, Promise<ChartExportCapturedImageResource>>();
 
-function bytesToBase64(bytes: Uint8Array): string {
-    let binary = "";
-    const chunkSize = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-    }
-    return btoa(binary);
-}
+    public constructor(private readonly signal?: AbortSignal) {}
 
-function toValidatedDataUrl(bytes: Uint8Array, originalUrl: string): ChartExportCapturedImageResource {
-    const sniffed = sniffRasterImageType(bytes);
-    if (!sniffed) {
-        throw new ChartExportError(
-            "resource-load-failed",
-            `Template image resource '${originalUrl}' is not a decodable PNG, JPEG, or WebP image.`
-        );
-    }
-    return {
-        dataUrl: `data:${sniffed};base64,${bytesToBase64(bytes)}`,
-        mediaType: sniffed,
-        originalUrl
-    };
-}
+    public capture(url: string): Promise<ChartExportCapturedImageResource> {
+        const cached = this.#cache.get(url);
+        if (cached) {
+            return cached;
+        }
 
-function rejectSvgDataUrl(mediaType: string | null, originalUrl: string): void {
-    if (mediaType === "image/svg+xml") {
-        throw new ChartExportError(
-            "resource-load-failed",
-            `Template image resource '${originalUrl}' uses an embedded SVG data URI. ` +
-                "Nested SVG images can reference external resources and are not treated as self-contained for export."
-        );
-    }
-}
-
-async function captureImageResource(url: string, signal?: AbortSignal): Promise<ChartExportCapturedImageResource> {
-    if (signal?.aborted) {
-        throw new DOMException("Export was aborted", "AbortError");
+        const promise = this.#doCapture(url);
+        this.#cache.set(url, promise);
+        return promise;
     }
 
-    if (url.startsWith("data:")) {
-        const mediaType = parseDataUrlMediaType(url);
-        if (!mediaType || (!SUPPORTED_MEDIA_TYPES.includes(mediaType) && mediaType !== "image/svg+xml")) {
+    async #doCapture(url: string): Promise<ChartExportCapturedImageResource> {
+        if (this.signal?.aborted) {
+            throw new DOMException("Export was aborted", "AbortError");
+        }
+
+        if (url.startsWith("javascript:") || url.startsWith("vbscript:")) {
             throw new ChartExportError(
                 "resource-load-failed",
-                `Template data URI has unsupported or forbidden media type: '${mediaType ?? url.slice(0, 32)}'.`
+                `Template resource uses forbidden script URI: '${url}'.`
             );
         }
-        rejectSvgDataUrl(mediaType, url);
-        return toValidatedDataUrl(decodeDataUrlPayload(url), url);
-    }
 
-    if (url.startsWith("javascript:") || url.startsWith("vbscript:")) {
-        throw new ChartExportError(
-            "resource-load-failed",
-            `Template resource uses forbidden script URI: '${url}'.`
-        );
-    }
-
-    // Primary path: fetch bytes and validate them as a supported raster image
-    if (typeof fetch !== "undefined") {
-        try {
-            const res = await fetch(url, { signal });
-            if (!res.ok) {
+        // Data URI path
+        if (url.startsWith("data:")) {
+            const parsedMedia = parseDataUrlMediaType(url);
+            if (parsedMedia === "image/svg+xml") {
                 throw new ChartExportError(
                     "resource-load-failed",
-                    `Failed to load template image resource '${url}': HTTP ${res.status}.`
+                    `Template image resource '${url.slice(0, 48)}...' uses an embedded SVG data URI. ` +
+                        "Nested SVG images can reference external resources and are not treated as self-contained for export."
                 );
             }
-            const blob = await res.blob();
-            if (blob.size === 0) {
+
+            if (!parsedMedia || !isSupportedRasterMediaType(parsedMedia)) {
                 throw new ChartExportError(
                     "resource-load-failed",
-                    `Template image resource '${url}' returned an empty response.`
+                    `Template data URI has unsupported or forbidden media type: '${parsedMedia ?? url.slice(0, 32)}'.`
                 );
             }
-            const bytes = new Uint8Array(await blob.arrayBuffer());
-            return toValidatedDataUrl(bytes, url);
-        } catch (err: any) {
-            if (err?.name === "AbortError" || signal?.aborted) {
-                throw new DOMException("Export was aborted", "AbortError");
-            }
-            if (err instanceof ChartExportError) {
-                throw err;
-            }
-            // Network-level fetch failure: fall through to the Image-based capture path
-        }
-    }
 
-    // Fallback: load via Image with crossOrigin="anonymous" and render to canvas.
-    // A successful decode plus a non-empty bitmap is the validation criterion here.
-    return new Promise<ChartExportCapturedImageResource>((resolve, reject) => {
-        const onAbort = () => {
-            testImg.src = "";
-            reject(new DOMException("Export was aborted", "AbortError"));
-        };
-
-        if (signal) {
-            if (signal.aborted) {
-                reject(new DOMException("Export was aborted", "AbortError"));
-                return;
+            const { bytes, mediaType } = decodeDataUrlPayload(url);
+            const sniffed = sniffRasterImageType(bytes);
+            if (!sniffed || sniffed !== mediaType) {
+                throw new ChartExportError(
+                    "resource-load-failed",
+                    `Template image resource data URI content does not match decodable ${mediaType} image format.`
+                );
             }
-            signal.addEventListener("abort", onAbort, { once: true });
+
+            // Real decode validation (R5-02)
+            await validateRasterImageDecode(bytes, sniffed, this.signal);
+
+            this.#recordBytes(bytes.length, url);
+
+            return {
+                dataUrl: `data:${sniffed};base64,${bytesToBase64(bytes)}`,
+                mediaType: sniffed,
+                originalUrl: url
+            };
         }
 
-        const testImg = new Image();
-        testImg.crossOrigin = "anonymous";
-
-        testImg.onload = () => {
-            if (signal) {
-                signal.removeEventListener("abort", onAbort);
-            }
+        // External URL (http / https / blob)
+        if (typeof fetch !== "undefined") {
             try {
-                const width = testImg.naturalWidth || testImg.width;
-                const height = testImg.naturalHeight || testImg.height;
-                if (width <= 0 || height <= 0) {
+                const res = await fetch(url, { signal: this.signal });
+                if (!res.ok) {
                     throw new ChartExportError(
                         "resource-load-failed",
-                        `Template image resource '${url}' decoded to an empty image.`
+                        `Failed to load template image resource '${url}': HTTP ${res.status}.`
                     );
                 }
-                const canvas = document.createElement("canvas");
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext("2d");
-                if (!ctx) {
-                    throw new ChartExportError("resource-load-failed", "Could not create 2D canvas for resource capture.");
-                }
-                ctx.drawImage(testImg, 0, 0);
-                const dataUrl = canvas.toDataURL("image/png");
-                if (!dataUrl.startsWith("data:image/png")) {
+
+                const blob = await res.blob();
+                if (blob.size === 0) {
                     throw new ChartExportError(
                         "resource-load-failed",
-                        `Failed to encode captured template image resource: '${url}'.`
+                        `Template image resource '${url}' returned an empty response.`
                     );
                 }
-                resolve({ dataUrl, mediaType: "image/png", originalUrl: url });
-            } catch (err) {
+
+                if (blob.size > MAX_EXPORT_RESOURCE_BYTES) {
+                    throw new ChartExportError(
+                        "too-large",
+                        `Template image resource '${url}' (${blob.size} bytes) exceeds maximum single resource limit (${MAX_EXPORT_RESOURCE_BYTES} bytes).`
+                    );
+                }
+
+                const bytes = new Uint8Array(await blob.arrayBuffer());
+                const sniffed = sniffRasterImageType(bytes);
+                if (!sniffed) {
+                    throw new ChartExportError(
+                        "resource-load-failed",
+                        `Template image resource '${url}' is not a decodable PNG, JPEG, or WebP image.`
+                    );
+                }
+
+                // Real decode validation (R5-02)
+                await validateRasterImageDecode(bytes, sniffed, this.signal);
+
+                this.#recordBytes(bytes.length, url);
+
+                return {
+                    dataUrl: `data:${sniffed};base64,${bytesToBase64(bytes)}`,
+                    mediaType: sniffed,
+                    originalUrl: url
+                };
+            } catch (err: unknown) {
+                if ((err as { name?: string })?.name === "AbortError" || this.signal?.aborted) {
+                    throw new DOMException("Export was aborted", "AbortError");
+                }
                 if (err instanceof ChartExportError) {
-                    reject(err);
+                    throw err;
+                }
+                // Fall through to Image-based CORS capture fallback
+            }
+        }
+
+        // Fallback: load via Image with crossOrigin="anonymous" and render to canvas
+        return new Promise<ChartExportCapturedImageResource>((resolve, reject) => {
+            const onAbort = () => {
+                testImg.src = "";
+                reject(new DOMException("Export was aborted", "AbortError"));
+            };
+
+            if (this.signal) {
+                if (this.signal.aborted) {
+                    reject(new DOMException("Export was aborted", "AbortError"));
                     return;
+                }
+                this.signal.addEventListener("abort", onAbort, { once: true });
+            }
+
+            const testImg = new Image();
+            testImg.crossOrigin = "anonymous";
+
+            testImg.onload = async () => {
+                if (this.signal) {
+                    this.signal.removeEventListener("abort", onAbort);
+                }
+                try {
+                    const width = testImg.naturalWidth || testImg.width;
+                    const height = testImg.naturalHeight || testImg.height;
+                    if (width <= 0 || height <= 0) {
+                        throw new ChartExportError(
+                            "resource-load-failed",
+                            `Template image resource '${url}' decoded to an empty image.`
+                        );
+                    }
+                    const canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    if (!ctx) {
+                        throw new ChartExportError("resource-load-failed", "Could not create 2D canvas for resource capture.");
+                    }
+                    ctx.drawImage(testImg, 0, 0);
+                    const dataUrl = canvas.toDataURL("image/png");
+                    if (!dataUrl.startsWith("data:image/png")) {
+                        throw new ChartExportError(
+                            "resource-load-failed",
+                            `Failed to encode captured template image resource: '${url}'.`
+                        );
+                    }
+
+                    const { bytes } = decodeDataUrlPayload(dataUrl);
+                    this.#recordBytes(bytes.length, url);
+
+                    resolve({ dataUrl, mediaType: "image/png", originalUrl: url });
+                } catch (err) {
+                    if (err instanceof ChartExportError) {
+                        reject(err);
+                        return;
+                    }
+                    reject(
+                        new ChartExportError(
+                            "resource-load-failed",
+                            `Failed to capture template image resource: '${url}'.`,
+                            { cause: err }
+                        )
+                    );
+                }
+            };
+
+            testImg.onerror = e => {
+                if (this.signal) {
+                    this.signal.removeEventListener("abort", onAbort);
                 }
                 reject(
                     new ChartExportError(
                         "resource-load-failed",
-                        `Failed to capture template image resource: '${url}'.`,
-                        { cause: err }
+                        `Failed to load template image resource: '${url}'.`,
+                        { cause: e }
                     )
                 );
-            }
-        };
+            };
 
-        testImg.onerror = e => {
-            if (signal) {
-                signal.removeEventListener("abort", onAbort);
-            }
-            reject(
-                new ChartExportError(
-                    "resource-load-failed",
-                    `Failed to load template image resource: '${url}'.`,
-                    { cause: e }
-                )
+            testImg.src = url;
+        });
+    }
+
+    #recordBytes(byteCount: number, url: string): void {
+        this.#totalBytes += byteCount;
+        if (this.#totalBytes > MAX_EXPORT_RESOURCE_TOTAL_BYTES) {
+            throw new ChartExportError(
+                "too-large",
+                `Total template image resources (${this.#totalBytes} bytes) exceeded transaction limit (${MAX_EXPORT_RESOURCE_TOTAL_BYTES} bytes) after capturing '${url}'.`
             );
-        };
-
-        testImg.src = url;
-    });
+        }
+    }
 }
 
 function rejectStylesheetDescendants(root: Element): void {
@@ -312,7 +379,6 @@ function collectTemplateFontChecks(
         if (!(el instanceof HTMLElement)) {
             continue;
         }
-        // Only leaf-ish text carriers produce reliable font shorthand + sample pairs
         if (el.children.length > 0) {
             continue;
         }
@@ -350,8 +416,6 @@ async function certifyTemplateFontReadiness(root: HTMLElement, signal?: AbortSig
         return;
     }
 
-    // Families registered through @font-face / FontFace are the only ones whose load state
-    // can be pending; pure system-font names always resolve locally.
     const declaredFamilies = new Set<string>();
     fontFaceSet.forEach(face => {
         declaredFamilies.add(face.family.replace(/^['"]|['"]$/g, "").toLowerCase());
@@ -362,11 +426,6 @@ async function certifyTemplateFontReadiness(root: HTMLElement, signal?: AbortSig
 
     for (const usage of usages) {
         try {
-            // After the fonts.ready barrier, a declared face that is still unloaded has
-            // permanently failed; live rendering already falls through to the next family.
-            // The export therefore only fails when the ENTIRE stack consists of declared
-            // webfonts with no loaded face and no system-font candidate at all - otherwise
-            // the rasterizer reproduces exactly what the live chart displays.
             const hasResolvableCandidate = usage.families.some(family => {
                 if (!declaredFamilies.has(family)) {
                     return true;
@@ -381,8 +440,7 @@ async function certifyTemplateFontReadiness(root: HTMLElement, signal?: AbortSig
                 unavailable.push(usage.font);
             }
         } catch {
-            // Checker limitations must not fail the export; the rasterizer will still
-            // fall back per its own font resolution.
+            // Checker limitations must not fail the export
         }
     }
 
@@ -398,8 +456,8 @@ async function certifyTemplateFontReadiness(root: HTMLElement, signal?: AbortSig
 export class ChartExportResourceManager {
     /**
      * Captures and inlines all external resources (blob, images, CSS URLs) inside frozen raster islands,
-     * rewriting the frozen DOM tree to use self-contained data URLs.
-     * Unsupported resource surfaces fail explicitly instead of silently disappearing (R4-02).
+     * rewriting the frozen DOM tree to use self-contained data URLs (R4-02 / R5-02 / R5-03 / R5-04 / R5-05).
+     * Unsupported resource surfaces fail explicitly instead of silently disappearing.
      */
     public static async captureAndInlineIslandResources(
         frozenRoots: readonly HTMLElement[],
@@ -414,20 +472,21 @@ export class ChartExportResourceManager {
         }
 
         // 1. Await document fonts readiness if available (abortable)
-        if ("fonts" in document && (document as any).fonts?.ready) {
+        if ("fonts" in document && (document as unknown as { fonts?: { ready?: Promise<unknown> } }).fonts?.ready) {
             try {
-                await abortable((document as any).fonts.ready, signal);
-            } catch (err: any) {
-                if (err?.name === "AbortError") {
+                await abortable((document as unknown as { fonts: { ready: Promise<unknown> } }).fonts.ready, signal);
+            } catch (err: unknown) {
+                if ((err as { name?: string })?.name === "AbortError") {
                     throw err;
                 }
-                // Ignore general font timeout/rejection
             }
         }
 
         if (signal?.aborted) {
             throw new DOMException("Export was aborted", "AbortError");
         }
+
+        const transaction = new ChartExportResourceTransaction(signal);
 
         for (const root of frozenRoots) {
             // 2. Reject unsupported active/external embedding media (EXP-07)
@@ -446,80 +505,111 @@ export class ChartExportResourceManager {
             // 4. Freeze responsive-image selection so no live URL can be reselected after staging (R4-02)
             neutralizeResponsiveImageSelection(root);
 
-            // 5. Collect and inline image URLs from <img> and SVG <image> elements
+            // 5. Inspect and classify every element in the frozen island
             const allElements = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
 
             for (const el of allElements) {
+                const tag = el.tagName.toLowerCase();
+
+                // 5.1 HTML <img> elements
                 if (el instanceof HTMLImageElement) {
                     const src = (el.currentSrc || el.src || "").trim();
-                    if (src && !src.startsWith("data:")) {
-                        const captured = await captureImageResource(src, signal);
+                    if (src) {
+                        const captured = await transaction.capture(src);
                         el.src = captured.dataUrl;
-                    } else if (src.startsWith("data:")) {
-                        const mediaType = parseDataUrlMediaType(src);
-                        rejectSvgDataUrl(mediaType, src);
-                        if (mediaType && SUPPORTED_MEDIA_TYPES.includes(mediaType)) {
-                            // Validate embedded bytes so a corrupt data URL cannot silently vanish
-                            toValidatedDataUrl(decodeDataUrlPayload(src), src);
+                    }
+                }
+
+                // 5.2 SVG <image> elements
+                if (tag === "image") {
+                    const href = (el.getAttribute("href") || el.getAttribute("xlink:href") || "").trim();
+                    if (href) {
+                        if (href.startsWith("#")) {
+                            assertOwnedFragment(root, href);
+                        } else {
+                            const captured = await transaction.capture(href);
+                            el.setAttribute("href", captured.dataUrl);
+                            if (el.hasAttribute("xlink:href")) {
+                                el.setAttribute("xlink:href", captured.dataUrl);
+                            }
                         }
                     }
                 }
 
-                // SVG image elements
-                if (el.tagName.toLowerCase() === "image") {
+                // 5.3 SVG <use> elements (R5-05): local references must be island-owned; external references rejected
+                if (tag === "use") {
                     const href = (el.getAttribute("href") || el.getAttribute("xlink:href") || "").trim();
-                    if (href && !href.startsWith("#") && !href.startsWith("data:")) {
-                        const captured = await captureImageResource(href, signal);
-                        el.setAttribute("href", captured.dataUrl);
-                        if (el.hasAttribute("xlink:href")) {
-                            el.setAttribute("xlink:href", captured.dataUrl);
+                    if (href) {
+                        if (href.startsWith("#")) {
+                            assertOwnedFragment(root, href);
+                        } else {
+                            throw new ChartExportError(
+                                "resource-load-failed",
+                                `Template SVG <use> contains unsupported external reference: '${href}'.`
+                            );
                         }
-                    } else if (href.startsWith("data:")) {
-                        const mediaType = parseDataUrlMediaType(href);
-                        rejectSvgDataUrl(mediaType, href);
                     }
                 }
 
-                // SVG <use> elements: reject external URLs (internal #references are preserved)
-                if (el.tagName.toLowerCase() === "use") {
-                    const href = (el.getAttribute("href") || el.getAttribute("xlink:href") || "").trim();
-                    if (href && !href.startsWith("#")) {
-                        throw new ChartExportError(
-                            "resource-load-failed",
-                            `Template SVG <use> contains unsupported external reference: '${href}'.`
-                        );
+                // 5.4 SVG <feImage> elements (R5-05): rejected in first-release custom templates
+                if (tag === "feimage") {
+                    throw new ChartExportError(
+                        "unsupported-template",
+                        "Template SVG contains <feImage>, which is not supported for export."
+                    );
+                }
+
+                // 5.5 SVG presentation attributes with url(...)
+                for (const attr of ["fill", "stroke", "clip-path", "mask", "filter", "marker-start", "marker-mid", "marker-end"] as const) {
+                    const attrVal = el.getAttribute(attr);
+                    if (attrVal && attrVal.includes("url(")) {
+                        const urls = extractCssUrls(attrVal);
+                        for (const u of urls) {
+                            if (u.startsWith("#")) {
+                                assertOwnedFragment(root, u);
+                            } else {
+                                throw new ChartExportError(
+                                    "unsupported-template",
+                                    `Template SVG attribute '${attr}' contains unsupported external URL reference: '${u}'.`
+                                );
+                            }
+                        }
                     }
                 }
 
-                // SVG <feImage>: external references are unsupported for first release (R4-02)
-                if (el.tagName.toLowerCase() === "feimage") {
-                    const href = (el.getAttribute("href") || el.getAttribute("xlink:href") || "").trim();
-                    if (href && !href.startsWith("#")) {
-                        throw new ChartExportError(
-                            "resource-load-failed",
-                            `Template SVG <feImage> contains unsupported external reference: '${href}'.`
-                        );
-                    }
-                }
-
-                // Inspect CSS background-image and other url-bearing style properties (EXP-07 / R2-03)
+                // 5.6 Inspect CSS inline styles for URL dependencies (R5-04)
                 const style = el.style;
                 if (style) {
-                    for (const prop of CSS_URL_PROPERTIES) {
-                        const propVal = (style as any)[prop];
-                        if (propVal && typeof propVal === "string" && propVal.includes("url(")) {
+                    for (let i = 0; i < style.length; i++) {
+                        const prop = style[i];
+                        const propVal = style.getPropertyValue(prop);
+                        if (!propVal || !propVal.includes("url(")) {
+                            continue;
+                        }
+
+                        const normalizedProp = prop.toLowerCase().replace(/[^a-z-]/g, "");
+                        const normalizedNoHyphen = normalizedProp.replace(/-/g, "");
+
+                        if (FORBIDDEN_CSS_URL_PROPERTIES.has(normalizedProp) || FORBIDDEN_CSS_URL_PROPERTIES.has(normalizedNoHyphen)) {
+                            throw new ChartExportError(
+                                "unsupported-template",
+                                `Template uses CSS '${prop}' with a URL dependency, which is not supported for export.`
+                            );
+                        }
+
+                        if (ALLOWED_CSS_URL_PROPERTIES.has(normalizedProp) || ALLOWED_CSS_URL_PROPERTIES.has(normalizedNoHyphen)) {
                             const urls = extractCssUrls(propVal);
                             let updatedVal = propVal;
                             for (const u of urls) {
-                                if (u.startsWith("data:")) {
-                                    const mediaType = parseDataUrlMediaType(u);
-                                    rejectSvgDataUrl(mediaType, u);
-                                } else {
-                                    const captured = await captureImageResource(u, signal);
-                                    updatedVal = updatedVal.replace(u, captured.dataUrl);
-                                }
+                                const captured = await transaction.capture(u);
+                                updatedVal = updatedVal.replace(u, captured.dataUrl);
                             }
-                            (style as any)[prop] = updatedVal;
+                            style.setProperty(prop, updatedVal);
+                        } else {
+                            throw new ChartExportError(
+                                "unsupported-template",
+                                `Template style property '${prop}' contains an unclassified URL expression: '${propVal}'.`
+                            );
                         }
                     }
                 }
@@ -528,7 +618,7 @@ export class ChartExportResourceManager {
             // 6. Certify that fonts actually used by the frozen template are ready (R4-07)
             await certifyTemplateFontReadiness(root, signal);
 
-            // 7. Validate canvases for tainted state
+            // 7. Validate canvases for tainted state (R4-03)
             const canvases = Array.from(root.querySelectorAll<HTMLCanvasElement>("canvas"));
             if (root instanceof HTMLCanvasElement) {
                 canvases.push(root);
@@ -540,7 +630,7 @@ export class ChartExportResourceManager {
                     if (ctx && canvas.width > 0 && canvas.height > 0) {
                         ctx.getImageData(0, 0, 1, 1);
                     }
-                } catch (err) {
+                } catch (err: unknown) {
                     throw new ChartExportError(
                         "resource-load-failed",
                         "Template canvas is cross-origin tainted and cannot be exported.",

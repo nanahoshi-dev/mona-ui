@@ -1,19 +1,32 @@
 /**
- * Fail-closed transform classification for export DOM collection (R4-04).
+ * Fail-closed transform classification for export DOM collection (R4-04 / R5-09).
  *
  * A transform is "simple" (vector-eligible for generic DOM text reconstruction)
  * only when it is provably an identity or pure 2D translation matrix.
- * Everything else - 3D matrices, perspective, rotation, scale, skew,
- * unparseable or unknown future syntax - is classified as "complex"
- * and must be routed through the transformed raster-island path.
+ * Finite 2D affine transforms (rotation, scale, skew, 2D matrix) are routed to the raster path.
+ * 3D transforms (matrix3d, perspective, rotate3d, etc.) and unparseable/unknown syntax
+ * are classified as unsupported for template export.
  */
 
+export type ChartExportTransformKind =
+    | "none"
+    | "translation-2d"
+    | "affine-2d"
+    | "three-dimensional"
+    | "unknown";
+
 export type ChartExportTransformClassification = "simple" | "complex";
+
+export interface ChartExportTransformAnalysis {
+    readonly kind: ChartExportTransformKind;
+    readonly matrix?: DOMMatrixReadOnly;
+    readonly rasterEligible: boolean;
+    readonly vectorEligible: boolean;
+}
 
 const EPSILON = 1e-3;
 
 interface Matrix2x2Linear {
-    readonly is2D: boolean;
     readonly m11: number;
     readonly m12: number;
     readonly m21: number;
@@ -82,38 +95,56 @@ function angleToRadians(token: string): number | null {
     }
 }
 
-function lengthIsZero(token: string): boolean {
-    const match = /^([-+0-9.eE]+)(px|em|rem|%|vw|vh|vmin|vmax|cm|mm|in|pt|pc|q)?$/.exec(token);
-    if (!match) {
-        return false;
-    }
-    return Math.abs(parseFloat(match[1])) <= EPSILON;
-}
-
 function isValidLengthToken(token: string): boolean {
     return /^[-+0-9.eE]+(px|em|rem|%|vw|vh|vmin|vmax|cm|mm|in|pt|pc|q)?$/.test(token);
 }
 
+const THREE_D_FUNCTION_NAMES = new Set([
+    "matrix3d",
+    "perspective",
+    "rotate3d",
+    "rotatex",
+    "rotatey",
+    "rotatez",
+    "scale3d",
+    "scalez",
+    "translate3d",
+    "translatez"
+]);
+
 /**
- * Conservative syntactic fallback used only when DOMMatrixReadOnly is unavailable
- * (e.g. non-browser test environments). Certifies only forms that are provably
- * identity or pure 2D translation; every unknown construct fails closed.
+ * Fallback syntactic analyzer when DOMMatrixReadOnly is not available.
  */
-function classifyWithoutDomMatrix(value: string): ChartExportTransformClassification {
+function analyzeWithoutDomMatrix(value: string): ChartExportTransformAnalysis {
     const functions = parseTransformFunctions(value);
     if (!functions || functions.length === 0) {
-        return "complex";
+        return {
+            kind: "unknown",
+            rasterEligible: false,
+            vectorEligible: false
+        };
     }
 
+    let isPureTranslation = true;
+    let is2dAffine = true;
+
     for (const fn of functions) {
+        if (THREE_D_FUNCTION_NAMES.has(fn.name)) {
+            return {
+                kind: "three-dimensional",
+                rasterEligible: false,
+                vectorEligible: false
+            };
+        }
+
         switch (fn.name) {
             case "matrix": {
                 if (fn.args.length !== 6) {
-                    return "complex";
+                    return { kind: "unknown", rasterEligible: false, vectorEligible: false };
                 }
-                const [a, b, c, d] = fn.args.map(parseFloat);
-                if (![a, b, c, d].every(Number.isFinite)) {
-                    return "complex";
+                const [a, b, c, d, e, f] = fn.args.map(parseFloat);
+                if (![a, b, c, d, e, f].every(Number.isFinite)) {
+                    return { kind: "unknown", rasterEligible: false, vectorEligible: false };
                 }
                 if (
                     Math.abs(a - 1) > EPSILON ||
@@ -121,7 +152,7 @@ function classifyWithoutDomMatrix(value: string): ChartExportTransformClassifica
                     Math.abs(c) > EPSILON ||
                     Math.abs(d - 1) > EPSILON
                 ) {
-                    return "complex";
+                    isPureTranslation = false;
                 }
                 break;
             }
@@ -129,16 +160,19 @@ function classifyWithoutDomMatrix(value: string): ChartExportTransformClassifica
             case "translatey":
             case "translate":
                 if (!fn.args.every(isValidLengthToken)) {
-                    return "complex";
+                    return { kind: "unknown", rasterEligible: false, vectorEligible: false };
                 }
                 break;
             case "rotate": {
                 if (fn.args.length !== 1) {
-                    return "complex";
+                    return { kind: "unknown", rasterEligible: false, vectorEligible: false };
                 }
                 const radians = angleToRadians(fn.args[0]);
-                if (radians === null || Math.abs(radians) > EPSILON) {
-                    return "complex";
+                if (radians === null) {
+                    return { kind: "unknown", rasterEligible: false, vectorEligible: false };
+                }
+                if (Math.abs(radians) > EPSILON) {
+                    isPureTranslation = false;
                 }
                 break;
             }
@@ -149,8 +183,11 @@ function classifyWithoutDomMatrix(value: string): ChartExportTransformClassifica
                     const numeric = parseFloat(arg);
                     return Number.isFinite(numeric) ? numeric : NaN;
                 });
-                if (scales.length === 0 || !scales.every(s => Math.abs(s - 1) <= EPSILON)) {
-                    return "complex";
+                if (scales.length === 0 || scales.some(Number.isNaN)) {
+                    return { kind: "unknown", rasterEligible: false, vectorEligible: false };
+                }
+                if (!scales.every(s => Math.abs(s - 1) <= EPSILON)) {
+                    isPureTranslation = false;
                 }
                 break;
             }
@@ -159,24 +196,54 @@ function classifyWithoutDomMatrix(value: string): ChartExportTransformClassifica
             case "skew": {
                 for (const arg of fn.args) {
                     const radians = angleToRadians(arg);
-                    if (radians === null || Math.abs(radians) > EPSILON) {
-                        return "complex";
+                    if (radians === null) {
+                        return { kind: "unknown", rasterEligible: false, vectorEligible: false };
+                    }
+                    if (Math.abs(radians) > EPSILON) {
+                        isPureTranslation = false;
                     }
                 }
                 break;
             }
             default:
-                return "complex";
+                return { kind: "unknown", rasterEligible: false, vectorEligible: false };
         }
     }
 
-    return "simple";
+    if (isPureTranslation) {
+        return {
+            kind: "translation-2d",
+            rasterEligible: true,
+            vectorEligible: true
+        };
+    }
+
+    if (is2dAffine) {
+        return {
+            kind: "affine-2d",
+            rasterEligible: true,
+            vectorEligible: false
+        };
+    }
+
+    return {
+        kind: "unknown",
+        rasterEligible: false,
+        vectorEligible: false
+    };
 }
 
-export function classifyTransform(rawTransform: string | null | undefined): ChartExportTransformClassification {
+/**
+ * Analyzes a CSS transform string and returns a detailed capability analysis.
+ */
+export function analyzeTransform(rawTransform: string | null | undefined): ChartExportTransformAnalysis {
     const trimmed = (rawTransform ?? "").trim();
     if (!trimmed || trimmed.toLowerCase() === "none") {
-        return "simple";
+        return {
+            kind: "none",
+            rasterEligible: true,
+            vectorEligible: true
+        };
     }
 
     const domMatrixCtor = (globalThis as { DOMMatrixReadOnly?: unknown }).DOMMatrixReadOnly;
@@ -184,13 +251,56 @@ export function classifyTransform(rawTransform: string | null | undefined): Char
         try {
             const matrix = new (domMatrixCtor as new (init?: string) => DOMMatrixReadOnly)(trimmed);
             if (!matrix.is2D) {
-                return "complex";
+                return {
+                    kind: "three-dimensional",
+                    matrix,
+                    rasterEligible: false,
+                    vectorEligible: false
+                };
             }
-            return isIdentityLinearPart(matrix) ? "simple" : "complex";
+
+            const components = [matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f];
+            if (!components.every(Number.isFinite)) {
+                return {
+                    kind: "unknown",
+                    matrix,
+                    rasterEligible: false,
+                    vectorEligible: false
+                };
+            }
+
+            if (isIdentityLinearPart(matrix)) {
+                const isIdentity = Math.abs(matrix.e) <= EPSILON && Math.abs(matrix.f) <= EPSILON;
+                return {
+                    kind: isIdentity ? "none" : "translation-2d",
+                    matrix,
+                    rasterEligible: true,
+                    vectorEligible: true
+                };
+            }
+
+            return {
+                kind: "affine-2d",
+                matrix,
+                rasterEligible: true,
+                vectorEligible: false
+            };
         } catch {
-            return "complex";
+            return {
+                kind: "unknown",
+                rasterEligible: false,
+                vectorEligible: false
+            };
         }
     }
 
-    return classifyWithoutDomMatrix(trimmed);
+    return analyzeWithoutDomMatrix(trimmed);
+}
+
+/**
+ * Classifies a transform into "simple" (vector-eligible) or "complex" (routes away from vector text).
+ */
+export function classifyTransform(rawTransform: string | null | undefined): ChartExportTransformClassification {
+    const analysis = analyzeTransform(rawTransform);
+    return analysis.vectorEligible ? "simple" : "complex";
 }

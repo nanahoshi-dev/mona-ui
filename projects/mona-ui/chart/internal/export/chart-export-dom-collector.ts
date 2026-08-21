@@ -10,7 +10,8 @@ import type { ChartRect } from "../../models/chart.models";
 import { isFiniteNumber } from "../utils/number-utils";
 import { ChartExportDomFreezer } from "./chart-export-dom-freezer";
 import { ChartExportTemplateCapabilityAnalyzer } from "./chart-export-template-capability-analyzer";
-import { classifyTransform } from "./chart-export-transform";
+import { analyzeTransform } from "./chart-export-transform";
+import { ChartExportError } from "../../models/chart-export.models";
 
 function normalizeFontFamily(rawFontFamily?: string): string {
     const trimmed = rawFontFamily?.trim();
@@ -30,20 +31,48 @@ function resolvePlane(role: string, isPlotLocal: boolean): ChartExportDomPlane {
     return "host-chrome";
 }
 
-/**
- * Prefers the fractional computed layout size over integer offset dimensions (R4-04 9.5),
- * since percentage transforms and fractional CSS layout can depend on subpixel values.
- */
-function resolveFractionalLayoutSize(computedSize: string): number | null {
-    if (!computedSize) {
+function resolveFractionalLength(computedValue: string): number | null {
+    if (!computedValue) {
         return null;
     }
-    const match = /^([-+0-9.eE]+)px$/.exec(computedSize.trim());
+    const match = /^([-+0-9.eE]+)px$/i.exec(computedValue.trim());
     if (!match) {
         return null;
     }
     const value = parseFloat(match[1]);
     return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+/**
+ * Computes the pre-transform border-box dimensions of an element (R5-08).
+ * Ensures that content-box padding and borders are accounted for before staging,
+ * preventing accidental dimension shifts when normalizing to border-box.
+ */
+function resolveBorderBoxDimension(
+    computedSize: string,
+    boxSizing: string,
+    paddingStart: string,
+    paddingEnd: string,
+    borderStart: string,
+    borderEnd: string,
+    fallbackOffsetSize: number,
+    fallbackBoundsSize: number
+): number {
+    const sizeNum = resolveFractionalLength(computedSize);
+    if (sizeNum !== null) {
+        if (boxSizing === "border-box") {
+            return sizeNum;
+        }
+        const pStart = parseFloat(paddingStart) || 0;
+        const pEnd = parseFloat(paddingEnd) || 0;
+        const bStart = parseFloat(borderStart) || 0;
+        const bEnd = parseFloat(borderEnd) || 0;
+        return sizeNum + pStart + pEnd + bStart + bEnd;
+    }
+    if (fallbackOffsetSize > 0) {
+        return fallbackOffsetSize;
+    }
+    return fallbackBoundsSize;
 }
 
 const PLANE_ORDER: Record<ChartExportDomPlane, number> = {
@@ -131,23 +160,48 @@ export class ChartExportDomCollector {
             const docOrder = ++documentOrder;
             const plane = resolvePlane(role, isPlotLocal);
 
-            // Fail-closed transform classification (R4-04): only provably identity/pure-2D-translation
-            // transforms are vector eligible; everything else routes through the transformed raster path.
-            const hasComplexTransform = classifyTransform(computed.transform || node.style.transform) === "complex";
+            // Fail-closed transform classification (R4-04 / R5-09):
+            // 3D/unknown transforms fail explicitly; 2D affine transforms route to raster; identity/translation route to vector.
+            const transformAnalysis = analyzeTransform(computed.transform || node.style.transform);
+            if (transformAnalysis.kind === "three-dimensional" || transformAnalysis.kind === "unknown") {
+                throw new ChartExportError(
+                    "unsupported-template",
+                    `Export element '${role}' uses an unsupported 3D or unrecognized CSS transform.`
+                );
+            }
+            const hasComplexTransform = !transformAnalysis.vectorEligible;
 
             if (mode === "raster" || role.endsWith("-template") || role === "legend-color-scale" || hasComplexTransform) {
                 // Bounded template capability contract: unsupported visual features fail
-                // explicitly at the snapshot boundary instead of exporting incomplete artifacts (R4-06)
+                // explicitly at the snapshot boundary instead of exporting incomplete artifacts (R4-06 / R5-06 / R5-07)
                 ChartExportTemplateCapabilityAnalyzer.assertSupported(node);
 
                 // Synchronously clone and freeze raster island DOM (EXP-01, EXP-06, R2-02, R2-03)
                 const frozenRoot = node.cloneNode(true) as HTMLElement;
                 ChartExportDomFreezer.freeze(node, frozenRoot);
 
-                const layoutWidth =
-                    resolveFractionalLayoutSize(computed.width) || node.offsetWidth || bounds.width;
-                const layoutHeight =
-                    resolveFractionalLayoutSize(computed.height) || node.offsetHeight || bounds.height;
+                const layoutBorderBoxWidth = resolveBorderBoxDimension(
+                    computed.width,
+                    computed.boxSizing,
+                    computed.paddingLeft,
+                    computed.paddingRight,
+                    computed.borderLeftWidth,
+                    computed.borderRightWidth,
+                    node.offsetWidth,
+                    bounds.width
+                );
+
+                const layoutBorderBoxHeight = resolveBorderBoxDimension(
+                    computed.height,
+                    computed.boxSizing,
+                    computed.paddingTop,
+                    computed.paddingBottom,
+                    computed.borderTopWidth,
+                    computed.borderBottomWidth,
+                    node.offsetHeight,
+                    bounds.height
+                );
+
                 const transform = computed.transform || node.style.transform || "none";
                 const transformOrigin = computed.transformOrigin || node.style.transformOrigin || "50% 50%";
 
@@ -169,11 +223,14 @@ export class ChartExportDomCollector {
                     frozenRoot,
                     hasComplexTransform,
                     id,
-                    layoutHeight,
-                    layoutWidth,
+                    layoutBorderBoxHeight,
+                    layoutBorderBoxWidth,
+                    layoutHeight: layoutBorderBoxHeight,
+                    layoutWidth: layoutBorderBoxWidth,
                     plane,
                     role,
                     transform,
+                    transformKind: transformAnalysis.kind,
                     transformOrigin,
                 };
                 rasterIslands.push(rasterSnapshot);
