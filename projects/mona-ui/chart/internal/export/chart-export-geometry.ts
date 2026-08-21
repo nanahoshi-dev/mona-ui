@@ -116,6 +116,7 @@ export function resolvePdfLayout(request: NormalizedChartExportRequest): Resolve
 
 export const DEFAULT_SVG_ISLAND_DPR = 2;
 export const TARGET_PDF_ISLAND_DPR = 2;
+export const DEFAULT_PDF_RASTER_DPR = 2;
 
 /**
  * Resolves the effective physical rasterization density for embedded template islands (EXP-01 / R2-05 / R3-06).
@@ -141,4 +142,20 @@ export function resolveEffectiveIslandScale(request: NormalizedChartExportReques
     const layout = resolvePdfLayout(request);
     const pageFitScale = layout.chartToPageScale || 1;
     return Math.max(0.25, contain.scale * pageFitScale * TARGET_PDF_ISLAND_DPR);
+}
+
+/**
+ * Resolves the whole-artifact pixel ratio used when a PDF page is fully rasterized (R4-03).
+ *
+ * The full-document PNG is produced at output logical size × returned pixelRatio; on the
+ * PDF page each output logical pixel occupies `chartToPageScale` CSS-pixel-equivalents of
+ * paper. Choosing `pageFitScale × DEFAULT_PDF_RASTER_DPR` therefore matches the effective
+ * final-page density contract of hybrid embedded islands. The result is only floored at the
+ * minimum density; allocation limits are enforced by the PNG allocation guards, which throw
+ * instead of silently reducing fidelity.
+ */
+export function resolvePdfRasterPixelRatio(request: NormalizedChartExportRequest): number {
+    const layout = resolvePdfLayout(request);
+    const pageFitScale = layout.chartToPageScale || 1;
+    return Math.max(0.25, pageFitScale * DEFAULT_PDF_RASTER_DPR);
 }

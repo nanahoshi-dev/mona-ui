@@ -110,6 +110,16 @@ export class ChartExportSvgValidator {
             );
         }
 
+        // 3.1 Reject stylesheet elements: the compositor never intentionally generates <style>,
+        // and stylesheet text can carry @import, url() references, var(), and pseudo-element
+        // rules that are not represented by validated attributes (R4-09).
+        if (svgElement.querySelector("style")) {
+            throw new ChartExportError(
+                "svg-composition-failed",
+                "SVG export cannot contain <style> elements; standalone exports must not depend on contextual CSS."
+            );
+        }
+
         const allElements = [svgElement, ...Array.from(svgElement.querySelectorAll("*"))];
         const declaredIds = new Set<string>();
         const referencedIds = new Set<string>();
@@ -206,6 +216,14 @@ export class ChartExportSvgValidator {
     public static validateXml(xml: string): void {
         if (typeof DOMParser === "undefined") {
             return;
+        }
+
+        // Reject stylesheet processing instructions, which can introduce external dependencies (R4-09)
+        if (/<\?xml-stylesheet/i.test(xml)) {
+            throw new ChartExportError(
+                "svg-serialization-failed",
+                "Generated SVG contains a forbidden xml-stylesheet processing instruction."
+            );
         }
 
         const parser = new DOMParser();

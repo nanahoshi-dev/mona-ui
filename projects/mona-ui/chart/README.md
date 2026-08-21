@@ -531,7 +531,7 @@ await chart.downloadChart({
 
 Generates a PDF document fitted to standard paper sizes (`"a4"`, `"letter"`), custom dimensions, or exact chart boundaries (`"chart"`).
 
-- **Standard 14 Vector Fonts:** Vector conversion supports built-in PDF standard font families (`Helvetica`, `Times`, `Courier`) with standard ASCII characters (`0x20..0x7E`).
+- **Standard 14 Vector Fonts:** Vector conversion supports built-in PDF standard font families (`Helvetica`, `Times`, `Courier`) with standard ASCII characters (`0x20..0x7E`). Font safety is resolved from the *effective* font of each text node, including fonts inherited from ancestor SVG elements and inline `font`/`font-family` declarations; uncertified inherited fonts trigger raster fallback exactly like direct ones. Text with no font declaration anywhere is treated as the converter default (Helvetica).
 - **Auto Mode (`mode: "auto"`):** Automatically converts certified standard vector graphics and fonts to vector PDF; safely falls back to high-resolution raster PDF when custom web fonts, non-ASCII Unicode glyphs, or complex SVG constructs are detected.
 - **Strict Vector Mode (`mode: "vector"`):** Enforces direct vector conversion; throws `ChartExportError("pdf-vector-unsupported")` if custom fonts, uncertified glyphs, or unsupported SVG features are present.
 - **Raster Mode (`mode: "raster"`):** Directly generates a raster PDF without attempting vector conversion.
@@ -571,8 +571,37 @@ await chart.downloadChart({
 
 ### Technical Considerations & Limitations
 
+- **Browser-only:** Export operations run entirely in the browser and require `document`, `fetch`, canvas, and image decoding support. Server-side invocation throws `ChartExportError("unsupported-environment")`.
+- **Snapshot Semantics:** Export captures a frozen semantic and visual snapshot synchronously at the `exportChart()` call boundary. After that boundary, live chart data, theme, and signal changes do not affect an in-flight export. Supported external resources referenced by the snapshot are then captured into export-owned embedded representations before rasterization begins.
 - **Custom Templates & Transformed DOM:** Custom Angular template content (e.g. `monaChartLegendItemTemplate`, `monaChartCenterTemplate`) and complex CSS transformed DOM labels (e.g. rotated axis labels) are captured as isolated raster islands and embedded as data URIs within SVG and hybrid PDF artifacts.
-- **Resource Capture & CORS:** External template images (`<img>`, SVG `<image>`, CSS `background-image`) are fetched and converted to embedded data URLs during export. Cross-origin images must be CORS-accessible (`crossOrigin="anonymous"`).
-- **Snapshot Isolation:** Export captures a frozen semantic and visual snapshot synchronously at invocation time; subsequent data, theme, or signal changes on the live chart do not mutate ongoing exports.
+- **Resource Capture & CORS:** External template images (`<img>`, SVG `<image>`, CSS `background-image`/`mask-image`/`border-image`/`list-style-image`) are fetched, validated as decodable PNG/JPEG/WebP bytes, and rewritten to embedded data URLs before rasterization. Cross-origin images must be CORS-accessible. A response that is empty, non-image, or undecodable fails the export explicitly instead of silently producing missing content.
+- **Responsive Images:** For `<img srcset>` and `<picture><source>` structures, the currently displayed image (`currentSrc`) is captured and responsive reselection is disabled in the exported copy; the artifact always shows the image selected at export time.
+- **Embedded SVG Images:** SVG resources embedded via data URI are rejected for export because nested SVG documents can reference additional external resources.
+- **Template Font Readiness:** After the document font-loading barrier, a custom template whose entire font stack consists of registered web fonts that failed to load fails the export explicitly rather than silently substituting fallback typography. Stacks that resolve to any loaded web font or system font export exactly what the live chart displays.
+
+### Custom Template Support Contract
+
+Custom templates must be fully freezable: every visual feature is either supported or explicitly rejected with `ChartExportError("unsupported-template")`. An export never succeeds with silently omitted visual content.
+
+**Supported:**
+
+- Plain text, inline styles, element/class-scoped CSS that resolves to computed styles
+- `<img>` (including `srcset`/`<picture>`, frozen to the selected source), CSS background/mask/border/list images, SVG `<image>` with internal `#references`
+- Canvas elements (must not be cross-origin tainted)
+- Box shadows and descendants contained within the template bounds
+
+**Rejected:**
+
+- Visible `::before` / `::after` pseudo-element content (not part of the clonable subtree)
+- `<style>` elements and external stylesheet `<link rel="stylesheet">` inside the template
+- `backdrop-filter` (depends on content outside the isolated island) and CSS `filter`
+- Descendants painting outside the template bounds (would be cropped by island rasterization)
+- `video`, `audio`, `iframe`, `object`, `embed`, and external SVG references (`<use href="...">`, `<feImage href="...">`)
+
+Clipping applied by ancestors *outside* the captured template node is intentionally represented by the plot-area clip rectangle; arbitrary nested consumer clipping cannot be reproduced and should wrap the chart accordingly.
+
+### PDF Raster Fidelity
+
+Raster PDF output (both explicit `mode: "raster"` and automatic fallback) chooses its internal pixel density from the final PDF page occupancy, including paper-page fitting and upscaling, so enlarged pages do not blur a low-density bitmap. Outputs whose required pixel dimensions exceed browser allocation safety limits throw `ChartExportError("too-large")` instead of silently reducing fidelity.
 
 

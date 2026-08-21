@@ -17,7 +17,6 @@ export interface ChartExportPrimitiveBase {
     readonly id: string;
     readonly plane: ChartExportDomPlane;
     readonly role: string;
-    readonly zOrder: number;
 }
 
 export interface ChartExportVectorTextSnapshot extends ChartExportPrimitiveBase {

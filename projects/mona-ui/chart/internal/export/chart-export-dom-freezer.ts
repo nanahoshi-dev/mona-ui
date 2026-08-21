@@ -136,5 +136,33 @@ export class ChartExportDomFreezer {
                 // Ignore per-element computed style exceptions
             }
         }
+
+        // Freeze responsive-image selection so the staged clone can only display the
+        // already-selected image bytes and can never reselect a live URL (R4-02)
+        ChartExportDomFreezer.neutralizeResponsiveImageSelection(cloneNode);
+    }
+
+    /**
+     * Removes responsive-image reselection surfaces from a frozen clone:
+     * <picture><source> candidates are deleted and img srcset/sizes attributes removed,
+     * so attaching the clone to a staging document cannot trigger new resource selection.
+     */
+    private static neutralizeResponsiveImageSelection(cloneRoot: HTMLElement): void {
+        const rootTag = cloneRoot.tagName.toLowerCase();
+
+        const pictures =
+            rootTag === "picture" ? [cloneRoot] : Array.from(cloneRoot.querySelectorAll("picture"));
+        for (const picture of pictures) {
+            for (const source of Array.from(picture.querySelectorAll("source"))) {
+                source.remove();
+            }
+        }
+
+        const images =
+            rootTag === "img" ? [cloneRoot as HTMLImageElement] : Array.from(cloneRoot.querySelectorAll("img"));
+        for (const img of images) {
+            img.removeAttribute("srcset");
+            img.removeAttribute("sizes");
+        }
     }
 }

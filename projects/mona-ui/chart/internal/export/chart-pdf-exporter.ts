@@ -9,7 +9,7 @@ import {
     type ChartExportResult
 } from "../../models/chart-export.models";
 
-import { resolvePdfLayout } from "./chart-export-geometry";
+import { resolvePdfLayout, resolvePdfRasterPixelRatio } from "./chart-export-geometry";
 
 export interface ChartExportPdfInstrumentation {
     onPdfVectorConvert?(): void;
@@ -148,7 +148,14 @@ export class ChartPdfExporter {
         activePdfInstrumentation?.onFullRasterize?.();
 
         try {
-            const pngResult = await ChartPngExporter.exportPng(finalizedSvg, snapshot, request);
+            // Full-raster PDF density must derive from final PDF page occupancy (R4-03):
+            // the internal raster request carries a page-fit-aware pixel ratio instead of the
+            // PNG default, so later paper-page fitting never enlarges a lower-density bitmap.
+            const internalRasterRequest: NormalizedChartExportRequest = {
+                ...request,
+                pixelRatio: resolvePdfRasterPixelRatio(request)
+            };
+            const pngResult = await ChartPngExporter.exportPng(finalizedSvg, snapshot, internalRasterRequest);
 
             if (request.signal?.aborted) {
                 throw new DOMException("Export was aborted", "AbortError");

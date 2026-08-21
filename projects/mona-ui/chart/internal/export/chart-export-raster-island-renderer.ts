@@ -16,7 +16,6 @@ export interface RenderedRasterIsland {
     readonly width: number;
     readonly x: number;
     readonly y: number;
-    readonly zOrder: number;
 }
 
 export class ChartExportRasterIslandRenderer {
@@ -198,8 +197,7 @@ export class ChartExportRasterIslandRenderer {
                         id: island.id,
                         width: island.bounds.width,
                         x: island.bounds.x,
-                        y: island.bounds.y,
-                        zOrder: island.zOrder
+                        y: island.bounds.y
                     });
                 } finally {
                     cleanupElement.remove();

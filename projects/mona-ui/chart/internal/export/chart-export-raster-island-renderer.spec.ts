@@ -21,7 +21,6 @@ describe("ChartExportRasterIslandRenderer", () => {
             layoutWidth: 100,
             plane: "plot-overlays",
             role: "test",
-            zOrder: 1
         };
 
         await expect(

@@ -220,6 +220,7 @@ export interface ChartExportResult {
 export type ChartExportErrorCode =
     | "not-ready"
     | "unsupported-environment"
+    | "unsupported-template"
     | "invalid-size"
     | "too-large"
     | "resource-load-failed"

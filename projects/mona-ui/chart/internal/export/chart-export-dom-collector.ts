@@ -9,38 +9,8 @@ import type {
 import type { ChartRect } from "../../models/chart.models";
 import { isFiniteNumber } from "../utils/number-utils";
 import { ChartExportDomFreezer } from "./chart-export-dom-freezer";
-
-function isComplexTransform(node: HTMLElement, computed: CSSStyleDeclaration): boolean {
-    const transformStr = (node.style.transform || computed.transform || "").trim();
-    if (!transformStr || transformStr === "none") {
-        return false;
-    }
-    // Check matrix(a, b, c, d, tx, ty)
-    const matMatch = /^matrix\(([-0-9.eE+]+),\s*([-0-9.eE+]+),\s*([-0-9.eE+]+),\s*([-0-9.eE+]+),\s*([-0-9.eE+]+),\s*([-0-9.eE+]+)\)$/i.exec(
-        transformStr
-    );
-    if (matMatch) {
-        const a = parseFloat(matMatch[1]);
-        const b = parseFloat(matMatch[2]);
-        const c = parseFloat(matMatch[3]);
-        const d = parseFloat(matMatch[4]);
-        // Pure translation: a ≈ 1, b ≈ 0, c ≈ 0, d ≈ 1
-        if (Math.abs(a - 1) < 1e-3 && Math.abs(b) < 1e-3 && Math.abs(c) < 1e-3 && Math.abs(d - 1) < 1e-3) {
-            return false;
-        }
-        return true;
-    }
-    // Check if contains rotate, skew, or scale
-    if (/rotate|skew|scale/i.test(transformStr)) {
-        const rotMatch = /rotate\(([-0-9.]+)deg\)/i.exec(transformStr);
-        if (rotMatch) {
-            const angle = parseFloat(rotMatch[1]);
-            if (Math.abs(angle) < 1e-3) return false;
-        }
-        return true;
-    }
-    return false;
-}
+import { ChartExportTemplateCapabilityAnalyzer } from "./chart-export-template-capability-analyzer";
+import { classifyTransform } from "./chart-export-transform";
 
 function normalizeFontFamily(rawFontFamily?: string): string {
     const trimmed = rawFontFamily?.trim();
@@ -58,6 +28,22 @@ function resolvePlane(role: string, isPlotLocal: boolean): ChartExportDomPlane {
         return "plot-overlays";
     }
     return "host-chrome";
+}
+
+/**
+ * Prefers the fractional computed layout size over integer offset dimensions (R4-04 9.5),
+ * since percentage transforms and fractional CSS layout can depend on subpixel values.
+ */
+function resolveFractionalLayoutSize(computedSize: string): number | null {
+    if (!computedSize) {
+        return null;
+    }
+    const match = /^([-+0-9.eE]+)px$/.exec(computedSize.trim());
+    if (!match) {
+        return null;
+    }
+    const value = parseFloat(match[1]);
+    return Number.isFinite(value) && value > 0 ? value : null;
 }
 
 const PLANE_ORDER: Record<ChartExportDomPlane, number> = {
@@ -96,7 +82,6 @@ export class ChartExportDomCollector {
 
         const exportNodes = chartHost.querySelectorAll<HTMLElement>("[data-mona-chart-export-role]");
 
-        let zIndexCounter = 10;
         let primitiveCounter = 0;
         let documentOrder = 0;
 
@@ -131,9 +116,6 @@ export class ChartExportDomCollector {
                 continue;
             }
 
-            const zIndexParsed = parseInt(computed.zIndex, 10);
-            const zOrder = Number.isFinite(zIndexParsed) ? zIndexParsed : zIndexCounter++;
-
             // Plot-local clipping check (EXP-14)
             const isPlotLocal =
                 (plotSurface !== null && plotSurface.contains(node)) ||
@@ -149,15 +131,23 @@ export class ChartExportDomCollector {
             const docOrder = ++documentOrder;
             const plane = resolvePlane(role, isPlotLocal);
 
-            const hasComplexTransform = isComplexTransform(node, computed);
+            // Fail-closed transform classification (R4-04): only provably identity/pure-2D-translation
+            // transforms are vector eligible; everything else routes through the transformed raster path.
+            const hasComplexTransform = classifyTransform(computed.transform || node.style.transform) === "complex";
 
             if (mode === "raster" || role.endsWith("-template") || role === "legend-color-scale" || hasComplexTransform) {
+                // Bounded template capability contract: unsupported visual features fail
+                // explicitly at the snapshot boundary instead of exporting incomplete artifacts (R4-06)
+                ChartExportTemplateCapabilityAnalyzer.assertSupported(node);
+
                 // Synchronously clone and freeze raster island DOM (EXP-01, EXP-06, R2-02, R2-03)
                 const frozenRoot = node.cloneNode(true) as HTMLElement;
                 ChartExportDomFreezer.freeze(node, frozenRoot);
 
-                const layoutWidth = node.offsetWidth || parseFloat(computed.width) || bounds.width;
-                const layoutHeight = node.offsetHeight || parseFloat(computed.height) || bounds.height;
+                const layoutWidth =
+                    resolveFractionalLayoutSize(computed.width) || node.offsetWidth || bounds.width;
+                const layoutHeight =
+                    resolveFractionalLayoutSize(computed.height) || node.offsetHeight || bounds.height;
                 const transform = computed.transform || node.style.transform || "none";
                 const transformOrigin = computed.transformOrigin || node.style.transformOrigin || "50% 50%";
 
@@ -185,7 +175,6 @@ export class ChartExportDomCollector {
                     role,
                     transform,
                     transformOrigin,
-                    zOrder
                 };
                 rasterIslands.push(rasterSnapshot);
                 primitives.push({ kind: "raster", ...rasterSnapshot });
@@ -239,7 +228,6 @@ export class ChartExportDomCollector {
                     role,
                     text,
                     textColor: color,
-                    zOrder
                 };
                 badges.push(badgeSnapshot);
                 primitives.push({ kind: "badge", ...badgeSnapshot });
@@ -266,7 +254,6 @@ export class ChartExportDomCollector {
                     role,
                     text,
                     textAlign,
-                    zOrder
                 };
                 vectorTexts.push(vectorSnapshot);
                 primitives.push({ kind: "text", ...vectorSnapshot });

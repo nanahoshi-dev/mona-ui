@@ -18,6 +18,11 @@ import { ChartExportResourceManager } from "./chart-export-resource-manager";
 import { ChartExportCompositor } from "./chart-export-compositor";
 import type { ChartExportSnapshot } from "./chart-export-snapshot";
 
+const R4_PNG_BYTES = Uint8Array.from(
+    atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="),
+    c => c.charCodeAt(0)
+);
+
 describe("Third Export Remediation Regressions (R3-01 to R3-15)", () => {
     // -------------------------------------------------------------------------
     // R3-01: Resource Capture and Inlining (blob & CSS URLs)
@@ -34,9 +39,9 @@ describe("Third Export Remediation Regressions (R3-01 to R3-15)", () => {
             const originalFetch = window.fetch;
             window.fetch = vi.fn().mockImplementation(async (url: string) => {
                 if (url.startsWith("blob:")) {
-                    return new Response(new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }));
+                    return new Response(R4_PNG_BYTES);
                 }
-                return new Response(new Blob([], { type: "image/png" }));
+                return new Response(R4_PNG_BYTES);
             });
 
             const originalFileReader = window.FileReader;
@@ -68,7 +73,7 @@ describe("Third Export Remediation Regressions (R3-01 to R3-15)", () => {
             const mockPngDataUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
             const originalFetch = window.fetch;
             window.fetch = vi.fn().mockImplementation(async () => {
-                return new Response(new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }));
+                return new Response(R4_PNG_BYTES);
             });
 
             const originalFileReader = window.FileReader;
@@ -348,7 +353,6 @@ describe("Third Export Remediation Regressions (R3-01 to R3-15)", () => {
                             layoutWidth: 50,
                             plane: "host-chrome",
                             role: "legend-template",
-                            zOrder: 1
                         }
                     ],
                     rasterIslands: [],
@@ -414,8 +418,8 @@ describe("Third Export Remediation Regressions (R3-01 to R3-15)", () => {
             const request = normalizeChartExportOptions({ format: "svg" }, 600, 400);
 
             const duplicateIslands = [
-                { dataUrl: "data:image/png;base64,123", height: 50, id: "island-1", width: 50, x: 0, y: 0, zOrder: 1 },
-                { dataUrl: "data:image/png;base64,456", height: 50, id: "island-1", width: 50, x: 0, y: 0, zOrder: 2 }
+                { dataUrl: "data:image/png;base64,123", height: 50, id: "island-1", width: 50, x: 0, y: 0 },
+                { dataUrl: "data:image/png;base64,456", height: 50, id: "island-1", width: 50, x: 0, y: 0 }
             ];
 
             expect(() => {

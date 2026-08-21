@@ -26,13 +26,151 @@ const CERTIFIED_PRIMARY_PDF_FONTS = new Set([
  */
 const NON_ASCII_GLYPH_REGEX = /[^\x20-\x7E\t\n\r]/;
 
+/**
+ * Sentinel returned when a font declaration exists but cannot be parsed confidently
+ * (e.g. an unparseable `font` shorthand). Unknown effective font state is unsafe (R4-05).
+ */
+const UNKNOWN_FONT_SENTINEL = "__mona_unknown_font__";
+
+/**
+ * Explicit documented default: SVG text with no font declaration anywhere inherits the
+ * converter default family (Helvetica), which is part of the certified set for ASCII glyphs.
+ */
+const DEFAULT_EFFECTIVE_FONT_FAMILY = "helvetica";
+
 function parsePrimaryFontFamily(fontFamilyStr: string): string {
     const firstFamily = fontFamilyStr.split(",")[0] ?? "";
     const clean = firstFamily.trim().replace(/^['"]|['"]$/g, "").toLowerCase();
     if (clean === "depends on user agent" || !clean) {
-        return "helvetica";
+        return DEFAULT_EFFECTIVE_FONT_FAMILY;
     }
     return clean;
+}
+
+const FONT_SHORTHAND_REGEX = /(?:^|;)\s*font\s*:\s*([^;]+)/i;
+
+/**
+ * Conservatively extracts the family list from a CSS `font` shorthand value.
+ * Returns null when the shorthand cannot be parsed confidently, which callers
+ * must treat as an unsafe unknown font state.
+ */
+function extractFamilyFromFontShorthand(shorthandValue: string): string | null {
+    const match = FONT_SHORTHAND_REGEX.exec(shorthandValue);
+    if (!match) {
+        return null;
+    }
+    const value = match[1].trim();
+    if (!value) {
+        return null;
+    }
+
+    // Strip leading style/variant/weight tokens and the required size (with optional /line-height).
+    const familyMatch =
+        /^(?:(?:normal|italic|oblique|small-caps|bold(?:er)?|lighter|[1-9]00|\d+)\s+)*(?:(?:xx?-)?small|medium|(?:xx?-)?large|smaller|larger|\d+(?:\.\d+)?(?:px|pt|pc|mm|cm|in|em|rem|q|vw|vh|vmin|vmax|%))(?:\s*\/\s*(?:normal|\d+(?:\.\d+)?(?:%|[a-z]+)?))?\s+(.+)$/i.exec(
+            value
+        );
+    if (!familyMatch) {
+        return null;
+    }
+    const family = familyMatch[1].trim();
+    return family || null;
+}
+
+interface EffectiveFontDeclaration {
+    readonly uncertain: boolean;
+    readonly value: string | null;
+}
+
+function readInlineStyleDeclarations(el: Element): EffectiveFontDeclaration {
+    const style = (el as SVGElement).style;
+    if (!style) {
+        return { uncertain: false, value: null };
+    }
+
+    try {
+        const shorthand = style.font;
+        if (shorthand && shorthand.trim() && shorthand.trim().toLowerCase() !== "initial") {
+            const family = extractFamilyFromFontShorthand(shorthand);
+            if (family === null) {
+                return { uncertain: true, value: null };
+            }
+            return { uncertain: false, value: family };
+        }
+    } catch {
+        // Shorthand access unsupported in this environment; fall through to longhand.
+    }
+
+    try {
+        const fontFamily = style.fontFamily;
+        if (fontFamily && fontFamily.trim()) {
+            return { uncertain: false, value: fontFamily.trim() };
+        }
+    } catch {
+        // Ignore environments without CSSOM support.
+    }
+
+    return { uncertain: false, value: null };
+}
+
+function readPresentationAttributeDeclaration(el: Element): EffectiveFontDeclaration {
+    const attr = el.getAttribute("font-family");
+    if (attr && attr.trim()) {
+        return { uncertain: false, value: attr.trim() };
+    }
+    return { uncertain: false, value: null };
+}
+
+function readRawStyleAttributeShorthand(el: Element): EffectiveFontDeclaration {
+    const styleAttr = el.getAttribute("style");
+    if (!styleAttr) {
+        return { uncertain: false, value: null };
+    }
+    if (!FONT_SHORTHAND_REGEX.test(styleAttr.toLowerCase())) {
+        return { uncertain: false, value: null };
+    }
+    const family = extractFamilyFromFontShorthand(styleAttr);
+    if (family === null) {
+        return { uncertain: true, value: null };
+    }
+    return { uncertain: false, value: family };
+}
+
+/**
+ * Resolves the effective font-family for an SVG text element using pure SVG
+ * inheritance semantics (no getComputedStyle): nearest declaration wins, inline
+ * styles beat presentation attributes, ancestors inherit downward (R4-05).
+ * Returns null only when no declaration exists anywhere on the ancestor chain.
+ */
+export function resolveEffectiveSvgFontFamily(element: Element): string | null {
+    let current: Element | null = element;
+
+    while (current) {
+        // Inline style wins over presentation attributes at the same element.
+        const inline = readInlineStyleDeclarations(current);
+        if (inline.uncertain) {
+            return UNKNOWN_FONT_SENTINEL;
+        }
+        if (inline.value) {
+            return inline.value;
+        }
+
+        const rawShorthand = readRawStyleAttributeShorthand(current);
+        if (rawShorthand.uncertain) {
+            return UNKNOWN_FONT_SENTINEL;
+        }
+        if (rawShorthand.value) {
+            return rawShorthand.value;
+        }
+
+        const presentationAttr = readPresentationAttributeDeclaration(current);
+        if (presentationAttr.value) {
+            return presentationAttr.value;
+        }
+
+        current = current.parentElement;
+    }
+
+    return null;
 }
 
 export class ChartPdfCapabilityAnalyzer {
@@ -85,7 +223,7 @@ export class ChartPdfCapabilityAnalyzer {
             };
         }
 
-        // 5. Check text and tspan elements for certified fonts and supported glyph sets (EXP-04, EXP-26)
+        // 5. Check text and tspan elements for certified fonts and supported glyph sets (EXP-04, EXP-26, R4-05)
         const textElements = Array.from(svgElement.querySelectorAll("text, tspan"));
         for (const textEl of textElements) {
             const textContent = textEl.textContent || "";
@@ -99,17 +237,19 @@ export class ChartPdfCapabilityAnalyzer {
                 };
             }
 
-            // Check font family certification (EXP-17)
-            const rawFontFamily = textEl.getAttribute("font-family") || (textEl as SVGElement).style.fontFamily || "";
-            if (rawFontFamily) {
-                const primaryFont = parsePrimaryFontFamily(rawFontFamily);
-                if (!CERTIFIED_PRIMARY_PDF_FONTS.has(primaryFont)) {
-                    return {
-                        isVectorSafe: false,
-                        reason: `SVG text uses uncertified custom font family '${rawFontFamily}'.`,
-                        reasonCode: "custom-font"
-                    };
-                }
+            // Resolve the EFFECTIVE font including presentation/style inheritance (R4-05).
+            const effectiveFamily = resolveEffectiveSvgFontFamily(textEl);
+            const declaredFamily = effectiveFamily ?? DEFAULT_EFFECTIVE_FONT_FAMILY;
+            const primaryFont = parsePrimaryFontFamily(declaredFamily);
+            if (!CERTIFIED_PRIMARY_PDF_FONTS.has(primaryFont)) {
+                return {
+                    isVectorSafe: false,
+                    reason:
+                        primaryFont === UNKNOWN_FONT_SENTINEL
+                            ? "SVG text has a font declaration that cannot be resolved confidently."
+                            : `SVG text uses uncertified custom font family '${declaredFamily}'.`,
+                    reasonCode: "custom-font"
+                };
             }
         }
 

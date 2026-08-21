@@ -21,7 +21,6 @@ describe("ChartExportCompositor", () => {
         role: "reference-badge",
         text: "Target",
         textColor: "#ffffff",
-        zOrder: 10
     };
 
     const textItem1 = {
@@ -39,7 +38,6 @@ describe("ChartExportCompositor", () => {
         role: "title",
         text: "Main Chart Title",
         textAlign: "left" as const,
-        zOrder: 11
     };
 
     const textItem2 = {
@@ -57,7 +55,6 @@ describe("ChartExportCompositor", () => {
         role: "axis-label",
         text: "2026-Q1",
         textAlign: "center" as const,
-        zOrder: 12
     };
 
     const createTestSnapshot = (overrides?: Partial<ChartExportSnapshot>): ChartExportSnapshot => ({
@@ -175,7 +172,6 @@ describe("ChartExportCompositor", () => {
             layoutWidth: 150,
             plane: "plot-overlays" as const,
             role: "template-a",
-            zOrder: 15
         };
 
         const rasterIslandB = {
@@ -187,7 +183,6 @@ describe("ChartExportCompositor", () => {
             layoutWidth: 120,
             plane: "plot-overlays" as const,
             role: "template-b",
-            zOrder: 16
         };
 
         const snapshot = createTestSnapshot({
@@ -213,7 +208,6 @@ describe("ChartExportCompositor", () => {
                 width: 150,
                 x: 200,
                 y: 100,
-                zOrder: 15
             },
             {
                 dataUrl: "data:image/png;base64,dataB",
@@ -222,7 +216,6 @@ describe("ChartExportCompositor", () => {
                 width: 120,
                 x: 50,
                 y: 50,
-                zOrder: 16
             }
         ];
 
