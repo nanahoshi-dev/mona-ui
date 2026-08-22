@@ -188,6 +188,8 @@ import type {
     ChartViewportState,
     ChartViewportWindow
 } from "../../models/chart-viewport.models";
+import type { ChartSynchronizationInput } from "../../models/chart-synchronization.models";
+import { normalizeChartSynchronizationOptions } from "../../internal/synchronization/chart-synchronization-options";
 import { normalizeChartNavigationOptions } from "../../internal/viewport/chart-navigation-options";
 import {
     areInternalViewportStatesEqual,
@@ -1105,6 +1107,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @description Emits when the chart viewport changes via pan, zoom, fit, reset, or keyboard navigation.
      */
     public readonly viewportChange = output<ChartViewportChangeEvent>();
+
+    /**
+     * @description Cross-chart synchronization configuration. Accepts `false`, a group name shorthand, or full options.
+     * @default false
+     */
+    public readonly synchronization = input<ChartSynchronizationInput>(false);
+    protected readonly normalizedSynchronization = computed(() =>
+        normalizeChartSynchronizationOptions(this.synchronization(), this.#warnedDiagnosticSignatures)
+    );
 
     public readonly tooltipContext = signal<ChartTooltipTemplateContext | null>(null);
     public readonly tooltipPosition = signal<ChartPoint | null>(null);

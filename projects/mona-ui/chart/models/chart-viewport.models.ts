@@ -78,6 +78,7 @@ export type ChartViewportChangeSource =
     | "pinch"
     | "programmatic"
     | "reset"
+    | "sync"
     | "wheel";
 
 export type ChartViewportChangePhase =

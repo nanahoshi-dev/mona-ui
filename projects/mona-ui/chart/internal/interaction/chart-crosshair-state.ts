@@ -11,7 +11,7 @@ export interface ResolvedCrosshairAxisState {
 export interface ChartCrosshairState {
     readonly anchor: ChartPoint;
     readonly snapped: boolean;
-    readonly source: "keyboard" | "pointer";
+    readonly source: "keyboard" | "pointer" | "sync";
     readonly x?: ResolvedCrosshairAxisState;
     readonly y?: ResolvedCrosshairAxisState;
 }

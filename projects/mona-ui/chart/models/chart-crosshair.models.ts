@@ -11,7 +11,7 @@ export interface ChartCrosshairAxisLabelContext<T = unknown> {
     readonly coordinate: number;
     readonly formattedValue: string;
     readonly snapped: boolean;
-    readonly source: "keyboard" | "pointer";
+    readonly source: "keyboard" | "pointer" | "sync";
     readonly value: T;
 }
 

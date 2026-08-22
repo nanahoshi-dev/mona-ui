@@ -218,6 +218,15 @@ export type {
 } from "./models/chart-viewport.models";
 
 export type {
+    ChartCrosshairSynchronizationOptions,
+    ChartSynchronizationAxisMapping,
+    ChartSynchronizationInput,
+    ChartSynchronizationMode,
+    ChartSynchronizationOptions,
+    ChartViewportSynchronizationOptions
+} from "./models/chart-synchronization.models";
+
+export type {
     ChartDataLabelContext,
     ChartDataLabelFormatter,
     ChartDataLabelOptions,
