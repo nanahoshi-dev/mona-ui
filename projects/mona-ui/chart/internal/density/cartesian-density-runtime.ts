@@ -1,7 +1,7 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ChartCartesianSeriesRegistration } from "../context/chart-registration-context";
-import { resolveData } from "../data/chart-value-resolver";
+import { resolveData, resolveValue } from "../data/chart-value-resolver";
 import type { CartesianAxisResolvedContext } from "../layout/cartesian-axis-resolved-context";
 import type { CartesianDomainPreparation } from "../layout/cartesian-multi-axis-coordinator";
 import type { CartesianXYLayoutRuntime } from "../layout/cartesian-layout-engine";
@@ -12,10 +12,13 @@ import { buildScalarDensityData, type CartesianScalarDensityData } from "./carte
 
 export interface CartesianSeriesDensityEntry {
     readonly capability: CartesianDensityCapability;
+    /** Populated for connected-range series: normalized low/high arrays. */
+    readonly range?: { readonly from: Float64Array; readonly to: Float64Array };
     readonly scalar: CartesianScalarDensityData | null;
 }
 
 export interface CartesianDensityRuntime {
+    readonly policy: NormalizedChartDownsamplingOptions;
     readonly seriesById: ReadonlyMap<string, CartesianSeriesDensityEntry>;
 }
 
@@ -83,12 +86,12 @@ export function buildDensityRuntime(
         }
 
         const temporal = xType === "time" || xType === "utc";
-        const yField = spec.type === "rangeArea"
-            ? spec.fromField?.() ?? ""
-            : spec.field?.() ?? "";
+        const isRange = spec.type === "rangeArea";
+        const yField = isRange ? spec.fromField?.() ?? "" : spec.field?.() ?? "";
+        const seriesData = resolveData(registration.data(), rootData);
 
         const scalar = buildScalarDensityData({
-            data: resolveData(registration.data(), rootData),
+            data: seriesData,
             temporal,
             xField: context.effectiveXField ?? effectiveRootXField,
             yField
@@ -98,11 +101,23 @@ export function buildDensityRuntime(
             continue;
         }
 
-        seriesById.set(spec.id, { capability, scalar });
+        let range: CartesianSeriesDensityEntry["range"];
+        if (isRange) {
+            const toField = spec.toField?.() ?? "";
+            const from = scalar.y;
+            const to = new Float64Array(seriesData.length);
+            for (let i = 0; i < seriesData.length; i++) {
+                const rawTo = resolveValue(seriesData[i], toField, i);
+                to[i] = typeof rawTo === "number" && Number.isFinite(rawTo) ? rawTo : Number.NaN;
+            }
+            range = { from, to };
+        }
+
+        seriesById.set(spec.id, { capability, range, scalar });
         builtAny = true;
     }
 
-    return builtAny ? { seriesById } : null;
+    return builtAny ? { policy: chartPolicy, seriesById } : null;
 }
 
 export function attachDensityRuntime(

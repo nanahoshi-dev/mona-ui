@@ -28,6 +28,8 @@ export function normalizeScalarXValue(value: unknown): number {
 export interface CartesianScalarDensityData {
     readonly extremaIndex: CartesianMinMaxBlockIndex;
     readonly monotonicity: CartesianXMonotonicity;
+    /** Source index → containing segment ordinal; -1 marks invalid entries. */
+    readonly segmentIds: Int32Array;
     readonly segments: readonly { readonly endIndexExclusive: number; readonly startIndex: number }[];
     readonly sourceData: readonly unknown[];
     readonly validCount: number;
@@ -71,6 +73,12 @@ export function buildScalarDensityData(input: CartesianScalarDensityInput): Cart
     ChartDensityTracker.current?.onRawPointsNormalized?.(count);
 
     const segments = buildDefinedSegments(x, y);
+    const segmentIds = new Int32Array(count).fill(-1);
+    for (let s = 0; s < segments.length; s++) {
+        for (let i = segments[s].startIndex; i < segments[s].endIndexExclusive; i++) {
+            segmentIds[i] = s;
+        }
+    }
     const monotonicity = detectMonotonicity(x, segments);
     const extremaIndex = new CartesianMinMaxBlockIndex(y);
 
@@ -79,6 +87,7 @@ export function buildScalarDensityData(input: CartesianScalarDensityInput): Cart
     return {
         extremaIndex,
         monotonicity,
+        segmentIds,
         segments,
         sourceData: data,
         validCount,

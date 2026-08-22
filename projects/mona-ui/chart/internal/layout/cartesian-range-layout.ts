@@ -219,7 +219,13 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
 
 export interface RangeAreaLayoutContext {
     bandScale?: ChartBandScale;
+    /** Sampled source-index view; null renders every datum (ordinary layout). */
+    indexView?: readonly number[] | null;
     linearXScale?: ChartContinuousScale;
+    /** Segment ordinal per source index (-1 = invalid) for gap topology when sampled. */
+    scalarSegmentIds?: Int32Array;
+    /** endIndexExclusive per segment ordinal for gap-marker lookup when sampled. */
+    scalarSegmentEnds?: readonly number[];
     plotRect: ChartRect;
     recordHitTarget: (target: SceneHitTarget, isBar: boolean, isPoint: boolean) => void;
     renderOrderCounter: { value: number };
@@ -245,12 +251,15 @@ export interface RangeAreaLayoutContext {
 export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeAreaSeriesScene {
     const {
         bandScale,
+        indexView,
         linearXScale,
         plotRect,
         recordHitTarget,
         renderOrderCounter,
         rootData,
         rootXField,
+        scalarSegmentEnds,
+        scalarSegmentIds,
         series: s,
         seriesDisplayName,
         style: sStyle,
@@ -291,7 +300,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
 
     const effectiveXScale = xScale ?? bandScale ?? linearXScale ?? timeScale;
 
-    for (let dIdx = 0; dIdx < sData.length; dIdx++) {
+    const visitRangeDatum = (dIdx: number): void => {
         const datum = sData[dIdx];
         const xVal = resolveValue(datum, sXField, dIdx);
 
@@ -359,7 +368,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
                 x: xPos,
                 xValue: xVal
             });
-            continue;
+            return;
         }
 
         const rawFromY = yScale.map(range.fromValue);
@@ -377,7 +386,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
                 x: xPos,
                 xValue: xVal
             });
-            continue;
+            return;
         }
         const fromY = rawFromY;
         const toY = rawToY;
@@ -465,6 +474,35 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
             yAxisTitle: yAxisTitle ?? (yAxis?.title?.() ?? "")
         };
         recordHitTarget(rangeTarget, false, true);
+    };
+
+    if (indexView) {
+        let previousSegmentId = -1;
+        let hasPrevious = false;
+        for (const dIdx of indexView) {
+            const segmentId = scalarSegmentIds ? scalarSegmentIds[dIdx] : -2;
+            if (
+                !sConnectNulls &&
+                hasPrevious &&
+                previousSegmentId >= 0 &&
+                segmentId >= 0 &&
+                segmentId !== previousSegmentId
+            ) {
+                const markerIdx = scalarSegmentEnds?.[previousSegmentId] ?? -1;
+                if (markerIdx >= 0 && markerIdx < sData.length && scalarSegmentIds?.[markerIdx] === -1) {
+                    visitRangeDatum(markerIdx);
+                }
+            }
+            if (segmentId >= 0) {
+                previousSegmentId = segmentId;
+                hasPrevious = true;
+            }
+            visitRangeDatum(dIdx);
+        }
+    } else {
+        for (let dIdx = 0; dIdx < sData.length; dIdx++) {
+            visitRangeDatum(dIdx);
+        }
     }
 
     return {

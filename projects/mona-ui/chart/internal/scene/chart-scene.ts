@@ -30,6 +30,15 @@ export interface CartesianStackSceneConfig {
     readonly registeredSeriesIds: readonly string[];
 }
 
+/** Internal diagnostics describing per-series render reduction for one projection. */
+export interface ChartSeriesDensityMetadata {
+    readonly algorithm: string;
+    readonly renderedCount: number;
+    readonly sampled: boolean;
+    readonly sourceCount: number;
+    readonly visibleSourceCount: number;
+}
+
 export interface ChartSceneBase {
     coordinateSystem: ChartCoordinateSystem;
     hasRenderableData: boolean;
@@ -80,6 +89,7 @@ export interface CartesianXYChartScene extends CartesianSceneBase {
     primaryXAxisId?: string;
     primaryYAxisId?: string;
     series: readonly ChartSeriesScene[];
+    seriesDensityMetadataById?: ReadonlyMap<string, ChartSeriesDensityMetadata>;
     stackConfiguration?: readonly CartesianStackSceneConfig[];
     stackSignature?: string;
     viewport?: ChartViewportState;
