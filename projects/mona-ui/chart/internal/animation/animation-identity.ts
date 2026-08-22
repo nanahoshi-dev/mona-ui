@@ -38,6 +38,42 @@ export function normalizeSeriesKey(value: string | undefined | null): string | u
     return trimmed.length > 0 ? trimmed : undefined;
 }
 
+export function resolveMarkKeyPart(
+    datum: unknown,
+    keyField: ChartField | undefined,
+    naturalKey: unknown,
+    dataIndex: number
+): { readonly isExplicit: boolean; readonly part: TypedKeyPart } {
+    let part: TypedKeyPart | null = null;
+    let isExplicit = false;
+
+    if (keyField) {
+        const explicitVal = resolveValue(datum, keyField, dataIndex);
+        part = serializeKeyPart(explicitVal);
+        if (part !== null) {
+            isExplicit = true;
+        }
+    }
+
+    if (part === null) {
+        part = serializeKeyPart(naturalKey);
+    }
+
+    if (part === null) {
+        part = { type: "i", value: dataIndex };
+    }
+
+    return { isExplicit, part };
+}
+
+export function composeMarkKey(
+    seriesPrefix: string,
+    part: TypedKeyPart,
+    occurrenceRank: number
+): ChartAnimationMarkKey {
+    return JSON.stringify([seriesPrefix, part.type, part.value, occurrenceRank]);
+}
+
 export class ChartMarkKeyResolver {
     readonly #occurrenceTracker = new Map<string, number>();
     readonly #warnedDuplicateKeys = new Set<string>();
@@ -67,24 +103,7 @@ export class ChartMarkKeyResolver {
     }
 
     #composeKey(datum: unknown, naturalKey: unknown, dataIndex: number, forcedRank: number | null): ChartAnimationMarkKey {
-        let part: TypedKeyPart | null = null;
-        let isExplicit = false;
-
-        if (this.#keyField) {
-            const explicitVal = resolveValue(datum, this.#keyField, dataIndex);
-            part = serializeKeyPart(explicitVal);
-            if (part !== null) {
-                isExplicit = true;
-            }
-        }
-
-        if (part === null) {
-            part = serializeKeyPart(naturalKey);
-        }
-
-        if (part === null) {
-            part = { type: "i", value: dataIndex };
-        }
+        const { isExplicit, part } = resolveMarkKeyPart(datum, this.#keyField, naturalKey, dataIndex);
 
         const baseKey = `${part.type}:${part.value}`;
         const count = forcedRank ?? this.#occurrenceTracker.get(baseKey) ?? 0;
@@ -102,6 +121,6 @@ export class ChartMarkKeyResolver {
             }
         }
 
-        return JSON.stringify([this.#seriesPrefix, part.type, part.value, count]);
+        return composeMarkKey(this.#seriesPrefix, part, count);
     }
 }
