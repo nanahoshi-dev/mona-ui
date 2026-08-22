@@ -3,6 +3,7 @@ import { ChartDataLabelTemplateDirective } from "../../directives/chart-data-lab
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartDataLabelsInput } from "../../models/chart-data-label.models";
+import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
 import type { ChartField } from "../../models/chart.models";
 
 let nextSeriesId = 0;
@@ -41,6 +42,12 @@ export class ScatterSeriesComponent implements OnInit {
     public readonly dataLabels = input<ChartDataLabelsInput>(false);
 
     public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
+
+    /**
+     * @description Per-series high-density downsampling override. Undefined inherits the chart policy.
+     * @default undefined
+     */
+    public readonly downsampling = input<ChartDownsamplingInput | undefined>(undefined);
 
     /**
      * @description Property key or accessor extracting the Y value for each data item.
@@ -183,6 +190,7 @@ export class ScatterSeriesComponent implements OnInit {
             data: this.data,
             dataLabels: this.dataLabels,
             dataLabelTemplate: this.dataLabelTemplate,
+            downsampling: this.downsampling,
             element: this.#elementRef,
             field: this.field,
             fillOpacity: this.fillOpacity,

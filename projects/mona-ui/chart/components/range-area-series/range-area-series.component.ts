@@ -3,6 +3,7 @@ import { ChartDataLabelTemplateDirective } from "../../directives/chart-data-lab
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartDataLabelsInput } from "../../models/chart-data-label.models";
+import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
 import type { ChartCurve } from "../../models/chart-series.models";
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
 
@@ -54,6 +55,12 @@ export class RangeAreaSeriesComponent implements OnInit {
     public readonly dataLabels = input<ChartDataLabelsInput>(false);
 
     public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
+
+    /**
+     * @description Per-series high-density downsampling override. Undefined inherits the chart policy.
+     * @default undefined
+     */
+    public readonly downsampling = input<ChartDownsamplingInput | undefined>(undefined);
 
     /**
      * @description Maximum opacity applied to the range area fill.
@@ -212,6 +219,7 @@ export class RangeAreaSeriesComponent implements OnInit {
             data: this.data,
             dataLabels: this.dataLabels,
             dataLabelTemplate: this.dataLabelTemplate,
+            downsampling: this.downsampling,
             element: this.#elementRef,
             fillOpacity: this.fillOpacity,
             fromField: this.fromField,

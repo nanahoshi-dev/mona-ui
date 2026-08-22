@@ -1,4 +1,5 @@
 import type { ElementRef, Signal } from "@angular/core";
+import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
 import type { ChartAnnotationLabelTemplateDirective } from "../../directives/chart-annotation-label-template.directive";
 import type { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import type { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
@@ -214,6 +215,7 @@ export interface ChartCartesianRangeSeriesRegistrationBase extends ChartCartesia
 export interface ChartLineSeriesRegistration extends ChartCartesianScalarSeriesRegistrationBase {
     connectNulls?: Signal<boolean>;
     curve?: Signal<ChartCurve>;
+    downsampling?: Signal<ChartDownsamplingInput | undefined>;
     pointRadius?: Signal<number | undefined>;
     showPoints?: Signal<boolean>;
     strokeWidth?: Signal<number | undefined>;
@@ -223,6 +225,7 @@ export interface ChartLineSeriesRegistration extends ChartCartesianScalarSeriesR
 export interface ChartAreaSeriesRegistration extends ChartCartesianScalarSeriesRegistrationBase {
     connectNulls?: Signal<boolean>;
     curve?: Signal<ChartCurve>;
+    downsampling?: Signal<ChartDownsamplingInput | undefined>;
     fillMode?: Signal<ChartAreaFillMode>;
     fillOpacity?: Signal<number | undefined>;
     pointRadius?: Signal<number | undefined>;
@@ -256,6 +259,7 @@ export interface ChartRangeBarSeriesRegistration extends ChartCartesianRangeSeri
 export interface ChartRangeAreaSeriesRegistration extends ChartCartesianRangeSeriesRegistrationBase {
     connectNulls?: Signal<boolean>;
     curve?: Signal<ChartCurve>;
+    downsampling?: Signal<ChartDownsamplingInput | undefined>;
     fillOpacity?: Signal<number | undefined>;
     pointRadius?: Signal<number | undefined>;
     showPoints?: Signal<boolean>;
@@ -264,6 +268,7 @@ export interface ChartRangeAreaSeriesRegistration extends ChartCartesianRangeSer
 }
 
 export interface ChartCartesianMarkerSeriesRegistrationBase extends ChartCartesianScalarSeriesRegistrationBase {
+    downsampling?: Signal<ChartDownsamplingInput | undefined>;
     fillOpacity?: Signal<number | undefined>;
     strokeColor?: Signal<string>;
     strokeWidth?: Signal<number | undefined>;

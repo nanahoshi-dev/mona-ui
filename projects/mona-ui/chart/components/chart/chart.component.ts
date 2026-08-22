@@ -190,6 +190,8 @@ import type {
     ChartViewportWindow
 } from "../../models/chart-viewport.models";
 import type { ChartSynchronizationInput } from "../../models/chart-synchronization.models";
+import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
+import { normalizeChartDownsamplingOptions } from "../../internal/density/chart-downsampling-options";
 import { normalizeChartSynchronizationOptions } from "../../internal/synchronization/chart-synchronization-options";
 import {
     ChartSynchronizationController,
@@ -1132,6 +1134,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     protected readonly normalizedSynchronization = computed(() =>
         normalizeChartSynchronizationOptions(this.synchronization(), this.#warnedDiagnosticSignatures)
     );
+
+    /**
+     * @description High-density downsampling policy for eligible dense series.
+     * @default true
+     */
+    public readonly downsampling = input<ChartDownsamplingInput>(true);
+    protected readonly normalizedDownsampling = computed(() => normalizeChartDownsamplingOptions(this.downsampling()));
 
     public readonly tooltipContext = signal<ChartTooltipTemplateContext | null>(null);
     public readonly tooltipPosition = signal<ChartPoint | null>(null);

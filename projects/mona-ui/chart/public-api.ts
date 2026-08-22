@@ -227,6 +227,12 @@ export type {
 } from "./models/chart-synchronization.models";
 
 export type {
+    ChartDownsamplingAlgorithm,
+    ChartDownsamplingInput,
+    ChartDownsamplingOptions
+} from "./models/chart-downsampling.models";
+
+export type {
     ChartDataLabelContext,
     ChartDataLabelFormatter,
     ChartDataLabelOptions,
