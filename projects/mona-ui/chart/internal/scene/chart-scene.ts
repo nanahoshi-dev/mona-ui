@@ -79,6 +79,8 @@ export interface CartesianXYChartScene extends CartesianSceneBase {
     coordinateSpace?: CartesianAxisCoordinateSpace;
     /** Retained structural density authority for this projection revision (internal). */
     densityRuntime?: import("../density/cartesian-density-runtime").CartesianDensityRuntime;
+    /** Exact raw interaction provider for dense series, frozen to this projection (internal). */
+    denseInteraction?: ReadonlyMap<string, import("../density/cartesian-dense-interaction-provider").CartesianDenseInteractionProvider>;
     financialIndex?: CartesianFinancialIndex;
     interactionAxis?: ChartInteractionAxis;
     interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;

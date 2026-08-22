@@ -38,6 +38,8 @@ import type {
 } from "../scene/cartesian-scene";
 import type { ChartSeriesDensityMetadata } from "../scene/chart-scene";
 import { projectRangeEnvelopeIndexView, projectScalarIndexView } from "../density/cartesian-density-projector";
+import { CartesianConnectedPathInteractionProvider } from "../density/cartesian-dense-interaction-provider";
+import { createDenseHitMaterializer } from "../density/cartesian-dense-hit-materializer";
 import { computeRangeAreaLayout, computeRangeBarLayout } from "./cartesian-range-layout";
 import { computeFinancialLayout } from "./cartesian-financial-layout";
 import { CartesianSeriesPolicy } from "./cartesian-series-policy";
@@ -546,6 +548,7 @@ export class CartesianLayoutEngine {
         const pointHitTargets: SceneHitTarget[] = [];
         const seriesScenes: ChartSeriesScene[] = [];
         const seriesDensityMetadataById = new Map<string, ChartSeriesDensityMetadata>();
+        const denseInteractionById = new Map<string, import("../density/cartesian-dense-interaction-provider").CartesianDenseInteractionProvider>();
         const hitsByAxisId = new Map<string, Map<ChartInteractionXKey, SceneHitTarget[]>>();
 
         const recordHitTarget = (target: SceneHitTarget, isBar: boolean, isPoint: boolean): void => {
@@ -1065,6 +1068,36 @@ export class CartesianLayoutEngine {
                     sData.length,
                     indexView
                 );
+                if (indexView?.sampled && densityEntry?.scalar && indexView.indices) {
+                    denseInteractionById.set(
+                        s.id,
+                        new CartesianConnectedPathInteractionProvider({
+                            materialize: createDenseHitMaterializer({
+                                keyResolver,
+                                scalar: densityEntry.scalar,
+                                seriesDisplayName,
+                                seriesId: s.id,
+                                seriesType: "line",
+                                temporal: resolveTemporalFlag(projection.coordinateSpace, binding.xAxisId),
+                                valueFormatter:
+                                    "valueFormatter" in s && typeof s.valueFormatter === "function"
+                                        ? (s.valueFormatter() as never)
+                                        : undefined,
+                                xAxisFormatter: seriesXAxis?.formatter,
+                                xAxisId: binding.xAxisId ?? "default-x",
+                                xAxisTitle: seriesXAxis?.title,
+                                xScale: seriesXScale as ChartContinuousPositionScale<number | Date>,
+                                yAxisFormatter: seriesYAxis?.formatter,
+                                yAxisId: binding.yAxisId ?? "default-y",
+                                yAxisTitle: seriesYAxis?.title,
+                                yScale: seriesYScale as ChartContinuousPositionScale<number | Date>
+                            }),
+                            scalar: densityEntry.scalar,
+                            xScale: seriesXScale as ChartContinuousPositionScale<number | Date>,
+                            yScale: seriesYScale as ChartContinuousPositionScale<number | Date>
+                        })
+                    );
+                }
 
                 const visitDatum = (dIdx: number): void => {
                     const datum = sData[dIdx];
@@ -1325,6 +1358,36 @@ export class CartesianLayoutEngine {
                         sData.length,
                         areaIndexView
                     );
+                    if (areaIndexView?.sampled && areaDensityEntry?.scalar && areaIndexView.indices) {
+                        denseInteractionById.set(
+                            s.id,
+                            new CartesianConnectedPathInteractionProvider({
+                                materialize: createDenseHitMaterializer({
+                                    keyResolver,
+                                    scalar: areaDensityEntry.scalar,
+                                    seriesDisplayName,
+                                    seriesId: s.id,
+                                    seriesType: "area",
+                                    temporal: resolveTemporalFlag(projection.coordinateSpace, binding.xAxisId),
+                                    valueFormatter:
+                                        "valueFormatter" in s && typeof s.valueFormatter === "function"
+                                            ? (s.valueFormatter() as never)
+                                            : undefined,
+                                    xAxisFormatter: seriesXAxis?.formatter,
+                                    xAxisId: binding.xAxisId ?? "default-x",
+                                    xAxisTitle: seriesXAxis?.title,
+                                    xScale: seriesXScale as ChartContinuousPositionScale<number | Date>,
+                                    yAxisFormatter: seriesYAxis?.formatter,
+                                    yAxisId: binding.yAxisId ?? "default-y",
+                                    yAxisTitle: seriesYAxis?.title,
+                                    yScale: seriesYScale as ChartContinuousPositionScale<number | Date>
+                                }),
+                                scalar: areaDensityEntry.scalar,
+                                xScale: seriesXScale as ChartContinuousPositionScale<number | Date>,
+                                yScale: seriesYScale as ChartContinuousPositionScale<number | Date>
+                            })
+                        );
+                    }
 
                     const visitAreaDatum = (dIdx: number): void => {
                         const datum = sData[dIdx];
@@ -1557,6 +1620,7 @@ export class CartesianLayoutEngine {
             coordinateSpace,
             coordinateSystem: "cartesian",
             densityRuntime: runtime.density,
+            denseInteraction: denseInteractionById.size > 0 ? denseInteractionById : undefined,
             financialIndex: activeFinancialIndex,
             hasRenderableData: hasData,
             height: containerHeight,
@@ -1598,6 +1662,14 @@ function toBaseExtent(
     const a = toNumber(snap.baseDomain[0]);
     const b = toNumber(snap.baseDomain[1]);
     return { max: Math.max(a, b), min: Math.min(a, b) };
+}
+
+function resolveTemporalFlag(
+    coordinateSpace: CartesianAxisCoordinateSpace | undefined,
+    axisId: string | undefined
+): boolean {
+    const resolved = axisId ? coordinateSpace?.get({ axis: "x", axisId })?.resolvedType : undefined;
+    return resolved === "time" || resolved === "utc";
 }
 
 function resolveConnectedScalarIndexView(

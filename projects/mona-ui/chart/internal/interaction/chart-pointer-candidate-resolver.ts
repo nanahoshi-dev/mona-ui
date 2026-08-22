@@ -66,6 +66,31 @@ export class ChartPointerCandidateResolver {
             pointCandidates = pointSpatialIndex.query(pointer, maxCandidateDistance);
         }
 
+        // Merge exact raw dense candidates with ordinary scene candidates (§65).
+        const denseProviders = cartesianScene.denseInteraction;
+        if (denseProviders && denseProviders.size > 0) {
+            const rawCandidates: SceneHitTarget[] = [];
+            for (const provider of denseProviders.values()) {
+                for (const target of provider.resolveNearest({ pixel: pointer })) {
+                    rawCandidates.push(target);
+                }
+            }
+            if (rawCandidates.length > 0) {
+                const seenIdentities = new Set(
+                    pointCandidates.map(t => `${t.seriesId}:${t.index ?? t.dataIndex}`)
+                );
+                const merged: SceneHitTarget[] = [...pointCandidates];
+                for (const raw of rawCandidates) {
+                    const identity = `${raw.seriesId}:${raw.index ?? raw.dataIndex}`;
+                    if (!seenIdentities.has(identity)) {
+                        seenIdentities.add(identity);
+                        merged.push(raw);
+                    }
+                }
+                pointCandidates = merged;
+            }
+        }
+
         return {
             barTargets,
             financialHits: finHits,

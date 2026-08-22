@@ -1,5 +1,6 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
 import type { ChartViewportState } from "../../models/chart-viewport.models";
@@ -217,5 +218,32 @@ describe("indexed dense projection (WP8)", () => {
         const scene = host.chart()["cartesianXYScene"]();
         const lineScene = scene?.series.find(s => s.type === "line") as { points: readonly unknown[] };
         expect(lineScene.points.length).toBeLessThan(10_000);
+    });
+
+    it("resolves an unsampled raw datum through pointer interaction (exact dense interaction)", async () => {
+        const count = 100_000;
+        const data = makeData(count);
+        const rawIndex = 61_234;
+        // A distinctive spike the visual sampler is expected to retain OR not —
+        // we assert the provider resolves the exact raw datum either way.
+        data[rawIndex] = { x: rawIndex, y: -280, high: 10, low: -290 };
+        host.data.set(data);
+        render();
+
+        const scene = host.chart()["cartesianXYScene"]();
+        expect(scene?.denseInteraction).toBeDefined();
+
+        const coordinateSpace = scene!.coordinateSpace!;
+        const snap = coordinateSpace.get({ axis: "x", axisId: "x-main" })!;
+        const semanticX = rawIndex;
+        const pixelX = snap.viewportScale.map(semanticX)!;
+        const ySnap = coordinateSpace.get({ axis: "y", axisId: "y-main" })!;
+        const pixelY = ySnap.viewportScale.map(-280)!;
+
+        const provider = scene!.denseInteraction!.get(Array.from(scene!.denseInteraction!.keys())[0])!;
+        const matches = provider.resolveNearest({ pixel: { x: pixelX, y: pixelY } });
+        expect(matches).toHaveLength(1);
+        expect(matches[0].index).toBe(rawIndex);
+        expect(matches[0].datum).toBe(data[rawIndex]);
     });
 });

@@ -53,6 +53,20 @@ export class ChartMarkKeyResolver {
     }
 
     public resolveKey(datum: unknown, naturalKey: unknown, dataIndex: number): ChartAnimationMarkKey {
+        return this.#composeKey(datum, naturalKey, dataIndex, null);
+    }
+
+    /**
+     * Resolves a mark key with an explicit occurrence rank instead of the
+     * internal tracker. Dense raw interaction uses this so repeated
+     * materialization of the same source datum stays identical to the ID the
+     * full sequential layout produced (stable mark identity).
+     */
+    public resolveKeyWithRank(datum: unknown, naturalKey: unknown, dataIndex: number, occurrenceRank: number): ChartAnimationMarkKey {
+        return this.#composeKey(datum, naturalKey, dataIndex, occurrenceRank);
+    }
+
+    #composeKey(datum: unknown, naturalKey: unknown, dataIndex: number, forcedRank: number | null): ChartAnimationMarkKey {
         let part: TypedKeyPart | null = null;
         let isExplicit = false;
 
@@ -73,8 +87,10 @@ export class ChartMarkKeyResolver {
         }
 
         const baseKey = `${part.type}:${part.value}`;
-        const count = this.#occurrenceTracker.get(baseKey) ?? 0;
-        this.#occurrenceTracker.set(baseKey, count + 1);
+        const count = forcedRank ?? this.#occurrenceTracker.get(baseKey) ?? 0;
+        if (forcedRank === null) {
+            this.#occurrenceTracker.set(baseKey, count + 1);
+        }
 
         if (count > 0 && isExplicit && typeof ngDevMode !== "undefined" && ngDevMode) {
             if (!this.#warnedDuplicateKeys.has(baseKey)) {
