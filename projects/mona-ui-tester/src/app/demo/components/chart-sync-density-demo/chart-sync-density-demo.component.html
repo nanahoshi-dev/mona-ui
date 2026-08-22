@@ -1,0 +1,133 @@
+<div class="controls">
+    <label>
+        Points:
+        <select (change)="onLineCountChange($event)">
+            @for (count of pointCounts; track count) {
+                <option [selected]="lineCount() === count" [value]="count">{{ count }}</option>
+            }
+        </select>
+    </label>
+    <label>
+        Scatter points:
+        <select (change)="onScatterCountChange($event)">
+            @for (count of pointCounts; track count) {
+                <option [selected]="scatterCount() === count" [value]="count">{{ count }}</option>
+            }
+        </select>
+    </label>
+    <mona-switch [checked]="downsamplingEnabled()" (checkedChange)="downsamplingEnabled.set($event)">
+        Downsampling
+    </mona-switch>
+    <mona-switch [checked]="showTooltips()" (checkedChange)="showTooltips.set($event)">Sync tooltips</mona-switch>
+</div>
+
+<p class="section-title">Synchronized dense dashboard — pan/zoom or hover the top chart</p>
+<div class="demo-grid">
+    <mona-chart
+        [data]="denseLineA()"
+        xField="x"
+        [navigation]="true"
+        [synchronization]="dashboardSync()"
+        [downsampling]="downsamplingInput()"
+        [renderer]="renderer()"
+        [style.height.px]="300"
+        style="display: block;"
+    >
+        <mona-chart-x-axis axisId="x-main" type="linear" />
+        <mona-chart-y-axis axisId="y-main" type="linear" />
+        <mona-line-series field="y" name="Primary" />
+        <mona-chart-crosshair [enabled]="true" mode="xy" snap="pointer" xAxisId="x-main" yAxisId="y-main" />
+        <mona-chart-tooltip [shared]="true" />
+    </mona-chart>
+
+    <mona-chart
+        [data]="denseLineB()"
+        xField="x"
+        [navigation]="true"
+        [synchronization]="dashboardSync()"
+        [downsampling]="downsamplingInput()"
+        [renderer]="renderer()"
+        [style.height.px]="300"
+        style="display: block;"
+    >
+        <mona-chart-x-axis axisId="x-main" type="linear" />
+        <mona-chart-y-axis axisId="y-main" type="linear" />
+        <mona-line-series field="y" name="Secondary" />
+        <mona-chart-crosshair [enabled]="true" mode="xy" snap="pointer" xAxisId="x-main" yAxisId="y-main" />
+        <mona-chart-tooltip [shared]="true" />
+    </mona-chart>
+</div>
+
+<p class="section-title">Relative viewport synchronization — overview drives the detail chart domain</p>
+<mona-chart
+    [data]="denseLineA()"
+    xField="x"
+    [navigation]="true"
+    [synchronization]="overviewSync()"
+    [downsampling]="downsamplingInput()"
+    [style.height.px]="160"
+    style="display: block;"
+>
+    <mona-chart-x-axis axisId="x-main" type="linear" />
+    <mona-chart-y-axis axisId="y-main" type="linear" />
+    <mona-line-series field="y" name="Overview" />
+</mona-chart>
+
+<p class="section-title">Dense scatter and bubble — spatial reduction with exact raw interaction</p>
+<div class="demo-grid">
+    <mona-chart
+        [data]="denseScatter()"
+        xField="x"
+        [navigation]="true"
+        [downsampling]="downsamplingInput()"
+        [style.height.px]="300"
+        style="display: block;"
+    >
+        <mona-chart-x-axis axisId="x-main" type="linear" />
+        <mona-chart-y-axis axisId="y-main" type="linear" />
+        <mona-scatter-series xField="x" field="y" name="Scatter" />
+    </mona-chart>
+
+    <mona-chart
+        [data]="denseBubble()"
+        xField="x"
+        [navigation]="true"
+        [downsampling]="downsamplingInput()"
+        [style.height.px]="300"
+        style="display: block;"
+    >
+        <mona-chart-x-axis axisId="x-main" type="linear" />
+        <mona-chart-y-axis axisId="y-main" type="linear" />
+        <mona-bubble-series xField="x" field="y" sizeField="size" name="Bubble" />
+    </mona-chart>
+</div>
+
+<p class="section-title">Dense range area and coordinated stacked area</p>
+<div class="demo-grid">
+    <mona-chart
+        [data]="denseRange()"
+        xField="x"
+        [navigation]="true"
+        [downsampling]="downsamplingInput()"
+        [style.height.px]="300"
+        style="display: block;"
+    >
+        <mona-chart-x-axis axisId="x-main" type="linear" />
+        <mona-chart-y-axis axisId="y-main" type="linear" />
+        <mona-range-area-series fromField="from" toField="to" name="Band" />
+    </mona-chart>
+
+    <mona-chart
+        [data]="stackedData()"
+        xField="x"
+        [navigation]="true"
+        [downsampling]="downsamplingInput()"
+        [style.height.px]="300"
+        style="display: block;"
+    >
+        <mona-chart-x-axis axisId="x-main" type="linear" />
+        <mona-chart-y-axis axisId="y-main" type="linear" />
+        <mona-area-series field="positive" stack="s" name="Positive layer" />
+        <mona-area-series field="negative" stack="s" name="Negative layer" />
+    </mona-chart>
+</div>

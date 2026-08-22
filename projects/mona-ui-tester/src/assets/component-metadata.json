@@ -2651,6 +2651,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Per-series high-density downsampling override. Undefined inherits the chart policy.",
+        "kind": "input",
+        "name": "downsampling",
+        "type": "ChartDownsamplingInput | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the Y value for each data item.",
         "kind": "input",
         "name": "field",
@@ -2934,6 +2941,13 @@
         "name": "dataLabels",
         "type": "ChartDataLabelsInput",
         "defaultValue": "false"
+      },
+      {
+        "description": "Per-series high-density downsampling override. Undefined inherits the chart policy.",
+        "kind": "input",
+        "name": "downsampling",
+        "type": "ChartDownsamplingInput | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Property key or accessor extracting the Y value for each data item.",
@@ -3320,6 +3334,20 @@
         "kind": "output",
         "name": "viewportChange",
         "type": "ChartViewportChangeEvent"
+      },
+      {
+        "description": "Cross-chart synchronization configuration. Accepts `false`, a group name shorthand, or full options.",
+        "kind": "input",
+        "name": "synchronization",
+        "type": "ChartSynchronizationInput",
+        "defaultValue": "false"
+      },
+      {
+        "description": "High-density downsampling policy for eligible dense series.",
+        "kind": "input",
+        "name": "downsampling",
+        "type": "ChartDownsamplingInput",
+        "defaultValue": "true"
       },
       {
         "description": "Title text rendered above the plot area.",
@@ -5262,6 +5290,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Per-series high-density downsampling override. Undefined inherits the chart policy.",
+        "kind": "input",
+        "name": "downsampling",
+        "type": "ChartDownsamplingInput | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Property key or accessor extracting the Y value for each data item.",
         "kind": "input",
         "name": "field",
@@ -6199,6 +6234,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Per-series high-density downsampling override. Undefined inherits the chart policy.",
+        "kind": "input",
+        "name": "downsampling",
+        "type": "ChartDownsamplingInput | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Maximum opacity applied to the range area fill.",
         "kind": "input",
         "name": "fillOpacity",
@@ -6627,6 +6669,13 @@
         "name": "dataLabels",
         "type": "ChartDataLabelsInput",
         "defaultValue": "false"
+      },
+      {
+        "description": "Per-series high-density downsampling override. Undefined inherits the chart policy.",
+        "kind": "input",
+        "name": "downsampling",
+        "type": "ChartDownsamplingInput | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Property key or accessor extracting the Y value for each data item.",
