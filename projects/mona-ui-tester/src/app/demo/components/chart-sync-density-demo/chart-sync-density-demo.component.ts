@@ -21,9 +21,12 @@ interface DensePoint {
     readonly y: number;
 }
 
-function generateDenseLine(count: number, phase: number): DensePoint[] {
+function generateDenseLine(count: number, phase: number, xExtent = 200_000): DensePoint[] {
+    const intervalCount = Math.max(1, count - 1);
     return Array.from({ length: count }, (_, i) => ({
-        x: i * 2,
+        // Keep differently sized dashboard series on the same semantic x domain
+        // so a synchronized vertical crosshair remains visible in both plots.
+        x: (i * xExtent) / intervalCount,
         y:
             Math.sin((i + phase) / 150) * 20 +
             Math.sin(i / 17) * 2 +
