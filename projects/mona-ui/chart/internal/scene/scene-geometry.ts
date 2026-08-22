@@ -225,6 +225,11 @@ export interface SceneHitTarget {
     range?: SceneRangeHitValue;
     rangeBand?: SceneRangeBandGeometry;
     rawValue?: unknown;
+    /** Internal logical painter order for raw and sampled marker parity. */
+    markerInteractionOrder?: {
+        readonly seriesOrdinal: number;
+        readonly sourceOrdinal: number;
+    };
     renderOrder?: number;
     seriesId: string;
     seriesName: string;

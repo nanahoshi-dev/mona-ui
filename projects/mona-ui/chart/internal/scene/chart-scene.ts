@@ -33,8 +33,16 @@ export interface CartesianStackSceneConfig {
 /** Internal diagnostics describing per-series render reduction for one projection. */
 export interface ChartSeriesDensityMetadata {
     readonly algorithm: string;
+    readonly actualRenderedMarkerCount?: number;
+    readonly centerVisibleCount?: number;
+    readonly renderCandidateCount?: number;
+    /** Number of selected real source marks before topology-only scene sentinels. */
+    readonly selectedDefinedCount?: number;
+    /** Number of points/markers actually materialized in the scene. */
+    readonly scenePointCount?: number;
     readonly renderedCount: number;
     readonly sampled: boolean;
+    readonly selectedCount?: number;
     readonly sourceCount: number;
     readonly visibleSourceCount: number;
 }
@@ -80,11 +88,15 @@ export interface CartesianXYChartScene extends CartesianSceneBase {
     /** Retained structural density authority for this projection revision (internal). */
     densityRuntime?: import("../density/cartesian-density-runtime").CartesianDensityRuntime;
     /** Exact raw interaction provider for dense series, frozen to this projection (internal). */
-    denseInteraction?: ReadonlyMap<string, import("../density/cartesian-dense-interaction-provider").CartesianDenseInteractionProvider>;
+    denseInteraction?: ReadonlyMap<
+        string,
+        import("../density/cartesian-dense-interaction-provider").CartesianDenseInteractionProvider
+    >;
     financialIndex?: CartesianFinancialIndex;
     interactionAxis?: ChartInteractionAxis;
     interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
     interactionBucketsByAxisId?: ReadonlyMap<string, ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>>;
+    interactionGeometryIndex?: import("../interaction/cartesian-interaction-geometry-index").CartesianInteractionGeometryIndex;
     markerSpatialIndex?: CartesianPointSpatialIndex;
     orientation?: CartesianXYOrientation;
     pointSpatialIndex?: CartesianPointSpatialIndex;
@@ -111,10 +123,7 @@ export interface CartesianHeatmapChartScene extends CartesianSceneBase {
 }
 
 export type CartesianChartScene =
-    | CartesianFunnelChartScene
-    | CartesianHeatmapChartScene
-    | CartesianWaterfallChartScene
-    | CartesianXYChartScene;
+    CartesianFunnelChartScene | CartesianHeatmapChartScene | CartesianWaterfallChartScene | CartesianXYChartScene;
 
 export interface PolarSceneBase extends ChartSceneBase {
     center: ChartPoint;
