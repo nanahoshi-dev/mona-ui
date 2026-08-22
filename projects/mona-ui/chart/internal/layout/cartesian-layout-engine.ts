@@ -88,6 +88,12 @@ import {
 import { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
 import { CartesianViewportReconciler } from "../viewport/cartesian-viewport-reconciler";
 import type { CartesianNavigationProfile } from "../viewport/cartesian-viewport-target-resolver";
+import {
+    attachDensityRuntime,
+    buildDensityRuntime,
+    type CartesianDensityRuntime
+} from "../density/cartesian-density-runtime";
+import { defaultDownsamplingOptions } from "../density/chart-downsampling-options";
 
 export interface CartesianXYLayoutRuntime {
     readonly axisResolution: CartesianAxisRegistryResolution;
@@ -98,6 +104,7 @@ export interface CartesianXYLayoutRuntime {
     readonly chrome: CartesianAxisChromeLayout;
     readonly containerHeight: number;
     readonly containerWidth: number;
+    readonly density?: CartesianDensityRuntime;
     readonly effectiveRootXField?: ChartField;
     readonly effectiveSeries: readonly ChartCartesianSeriesRegistration[];
     readonly navigationProfile: CartesianNavigationProfile;
@@ -123,6 +130,7 @@ export interface CartesianLayoutComputation {
 export interface CartesianLayoutOptions {
     containerHeight: number;
     containerWidth: number;
+    downsamplingPolicy?: import("../density/chart-downsampling-options").NormalizedChartDownsamplingOptions;
     effectiveSeries?: readonly ChartCartesianSeriesRegistration[];
     measurements?: ReadonlyMap<string, { height: number; width: number }>;
     rootData?: readonly unknown[];
@@ -358,6 +366,25 @@ export class CartesianLayoutEngine {
             stackSignature,
             styleResolver
         };
+
+        // Retained structural density runtime (WP7): built once per authority revision.
+        if (options.downsamplingPolicy?.enabled !== false) {
+            try {
+                const density = buildDensityRuntime(
+                    effectiveSeries,
+                    prep,
+                    resolvedContext,
+                    rootData,
+                    effectiveRootXField ?? "",
+                    options.downsamplingPolicy ?? defaultDownsamplingOptions,
+                    chrome.plotRect.width
+                );
+                return { runtime: attachDensityRuntime(runtime, density) };
+            } catch {
+                // Density preparation must never break ordinary layout; fall back to full layout.
+                return { runtime };
+            }
+        }
 
         return { runtime };
     }
@@ -1451,6 +1478,7 @@ export class CartesianLayoutEngine {
             cartesianKind: "xy",
             coordinateSpace,
             coordinateSystem: "cartesian",
+            densityRuntime: runtime.density,
             financialIndex: activeFinancialIndex,
             hasRenderableData: hasData,
             height: containerHeight,

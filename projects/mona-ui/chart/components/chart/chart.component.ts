@@ -3485,6 +3485,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 angularAxis: this.#angularAxis() ?? undefined,
                 containerHeight: this.#currentHeight,
                 containerWidth: this.#currentWidth,
+                downsamplingPolicy: this.normalizedDownsampling(),
                 measurements: this.#labelMeasurements,
                 radialAxis: this.#radialAxis() ?? undefined,
                 rootData: this.data(),

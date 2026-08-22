@@ -61,9 +61,8 @@ class CountingDensityInstrumentation implements ChartDensityInstrumentation {
         this.snapshot.blockExtremaVisits += blocks;
     }
 
-    public onDensityRuntimeBuild(sourceCount: number): void {
+    public onDensityRuntimeBuild(_sourceCount: number): void {
         this.snapshot.densityRuntimeBuilds += 1;
-        this.snapshot.rawPointsNormalized += sourceCount;
     }
 
     public onDenseRawHitMaterialized(): void {

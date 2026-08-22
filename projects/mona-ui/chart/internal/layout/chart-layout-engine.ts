@@ -64,6 +64,7 @@ export interface ChartLayoutOptions {
     angularAxis?: ChartAngularAxisRegistration;
     containerHeight: number;
     containerWidth: number;
+    downsamplingPolicy?: import("../density/chart-downsampling-options").NormalizedChartDownsamplingOptions;
     measurements?: ReadonlyMap<string, ChartLabelMeasurement>;
     radialAxis?: ChartRadialAxisRegistration;
     rootData: readonly unknown[];
@@ -582,6 +583,7 @@ export class ChartLayoutEngine {
         const prep = CartesianLayoutEngine.prepareRuntime({
             containerHeight: options.containerHeight,
             containerWidth: options.containerWidth,
+            downsamplingPolicy: options.downsamplingPolicy,
             measurements: options.measurements,
             rootData: options.rootData,
             rootXField: options.rootXField,
