@@ -139,6 +139,22 @@ export class ChartTransitionPlanner {
             };
         }
 
+        // Viewport-only projections commit immediately (§78/§79): sample
+        // membership can churn every pan/zoom frame and morphing between
+        // sampled topologies would lag navigation and synchronized dashboards.
+        if (trigger === "viewport") {
+            return {
+                complexity,
+                duration: 0,
+                easing: options.easing,
+                fromScene: previous,
+                mode: "immediate",
+                seriesPlans: [],
+                toScene: target,
+                trigger
+            };
+        }
+
         if (complexity.totalWeightedCost > 10000) {
             return {
                 complexity,

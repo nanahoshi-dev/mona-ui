@@ -5,7 +5,7 @@ import type { ChartScene } from "../scene/chart-scene";
 import type { CartesianAxisTransitionPlan, PolarAxisTransitionPlan } from "./adapters/axis-animation-adapter";
 import type { NormalizedChartAnimationOptions } from "./chart-animation-options";
 
-export type ChartAnimationTrigger = "data" | "initial" | "layout" | "none" | "visibility";
+export type ChartAnimationTrigger = "data" | "initial" | "layout" | "none" | "visibility" | "viewport";
 
 export type ChartTransitionMode = "crossfade" | "immediate" | "morph";
 

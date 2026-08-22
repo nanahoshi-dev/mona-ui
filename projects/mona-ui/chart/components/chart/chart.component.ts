@@ -3626,7 +3626,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
               ? "visibility"
               : isData
                 ? "data"
-                : "layout";
+                : isViewportOnly
+                  ? "viewport"
+                  : "layout";
 
         const animOptions = this.normalizedAnimationOptions();
         const prefersReducedMotion =

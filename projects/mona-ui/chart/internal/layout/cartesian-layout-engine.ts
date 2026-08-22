@@ -42,6 +42,8 @@ import { CartesianConnectedPathInteractionProvider } from "../density/cartesian-
 import { createDenseHitMaterializer } from "../density/cartesian-dense-hit-materializer";
 import { CartesianMarkerSpatialInteractionProvider } from "../density/cartesian-marker-dense-provider";
 import { ChartDensityTracker } from "./chart-density-instrumentation";
+import { computeSharedStackSampleIndices } from "../density/cartesian-stack-downsampler";
+import type { CartesianStackEntry } from "../data/cartesian-stack-engine";
 import { computeRangeAreaLayout, computeRangeBarLayout } from "./cartesian-range-layout";
 import { computeFinancialLayout } from "./cartesian-financial-layout";
 import { CartesianSeriesPolicy } from "./cartesian-series-policy";
@@ -551,6 +553,7 @@ export class CartesianLayoutEngine {
         const pointHitTargets: SceneHitTarget[] = [];
         const seriesScenes: ChartSeriesScene[] = [];
         const seriesDensityMetadataById = new Map<string, ChartSeriesDensityMetadata>();
+        const sharedStackSampleCache = new Map<string, Set<number> | null>();
         const denseInteractionById = new Map<string, import("../density/cartesian-dense-interaction-provider").CartesianDenseInteractionProvider>();
         const hitsByAxisId = new Map<string, Map<ChartInteractionXKey, SceneHitTarget[]>>();
 
@@ -1364,7 +1367,46 @@ export class CartesianLayoutEngine {
                 const stackGroup = seriesStackLayout?.groupBySeriesId.get(s.id);
 
                 if (isStacked && seriesStackLayout) {
-                    const stackEntries = seriesStackLayout.orderedBySeriesId.get(s.id) ?? [];
+                    let stackEntries = seriesStackLayout.orderedBySeriesId.get(s.id) ?? [];
+
+                    // Coordinated group-wide sampling (§54/§55): one shared index
+                    // selection per stack group per projection, derived from full
+                    // stack totals — never per-layer independent reduction.
+                    if (stackGroup && seriesXScale.type !== "category") {
+                        const cacheKey = `area:${stackGroup.id}`;
+                        let sharedSet = sharedStackSampleCache.get(cacheKey);
+                        if (sharedSet === undefined) {
+                            const entriesBySeriesId = new Map<string, readonly CartesianStackEntry[]>();
+                            for (const memberId of stackGroup.seriesIds) {
+                                const memberEntries = seriesStackLayout.orderedBySeriesId.get(memberId);
+                                if (memberEntries && memberEntries.length > 0) {
+                                    entriesBySeriesId.set(memberId, memberEntries);
+                                }
+                            }
+                            sharedSet = computeSharedStackSampleIndices({
+                                entriesBySeriesId,
+                                plotSpanPx: plotRect.width,
+                                samplesPerPixel: 1,
+                                viewportScale: seriesXScale as ChartContinuousPositionScale<number | Date>
+                            });
+                            sharedStackSampleCache.set(cacheKey, sharedSet);
+                        }
+                        if (sharedSet) {
+                            const before = stackEntries.length;
+                            stackEntries = stackEntries.filter(e => sharedSet!.has(e.dataIndex));
+                            recordSeriesDensityMetadata(seriesDensityMetadataById, s.id, before, {
+                                algorithm: "stack-envelope",
+                                indices: null,
+                                renderedCount: stackEntries.length,
+                                sampled: true,
+                                sourceCount: before,
+                                visibleSourceCount: before
+                            });
+                        } else {
+                            recordSeriesDensityMetadata(seriesDensityMetadataById, s.id, stackEntries.length, null);
+                        }
+                    }
+
                     const seriesRawFormatter = (s as ChartAreaSeriesRegistration).valueFormatter?.();
                     const effectiveRawFormatter =
                         seriesRawFormatter ?? (stackGroup?.mode === "percent" ? undefined : seriesYAxis?.formatter);

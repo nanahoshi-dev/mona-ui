@@ -19,6 +19,33 @@ import { ChartComponent } from "./chart.component";
     imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent, AreaSeriesComponent, RangeAreaSeriesComponent, ScatterSeriesComponent, BubbleSeriesComponent],
     template: `
         <mona-chart
+            #stackChart
+            [data]="stackData()"
+            xField="x"
+            [downsampling]="true"
+            [style.width.px]="600"
+            [style.height.px]="400"
+            style="display: block;"
+        >
+            <mona-chart-x-axis axisId="x-main" type="linear" />
+            <mona-chart-y-axis axisId="y-main" type="linear" />
+            @if (showStack()) {
+                <mona-area-series field="v" stack="g" name="S1" />
+                <mona-area-series field="w" stack="g" name="S2" />
+            }
+        </mona-chart>
+    `
+})
+class StackedHostComponent {
+    public readonly stackChart = viewChild.required(ChartComponent);
+    public readonly stackData = signal<readonly unknown[]>([]);
+    public readonly showStack = signal(true);
+}
+
+@Component({
+    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent, AreaSeriesComponent, RangeAreaSeriesComponent, ScatterSeriesComponent, BubbleSeriesComponent],
+    template: `
+        <mona-chart
             #chart
             [data]="data()"
             xField="x"
@@ -327,5 +354,75 @@ describe("indexed dense projection (WP8)", () => {
         expect(before!.markers.length).toBeLessThan(10_000);
         expect(after!.markers.length).toBeLessThan(10_000);
         expect(after!.markers.length).toBeGreaterThan(0);
+    });
+});
+
+describe("coordinated stacked-area sampling (WP12)", () => {
+    let fixture: ComponentFixture<StackedHostComponent>;
+    let host: StackedHostComponent;
+    let originalResizeObserver: typeof ResizeObserver | undefined;
+
+    beforeEach(async () => {
+        originalResizeObserver = globalThis.ResizeObserver;
+        globalThis.ResizeObserver = FakeResizeObserver as unknown as typeof ResizeObserver;
+        vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+            const width = Number.parseFloat(this.style?.width ?? "") || 600;
+            const height = Number.parseFloat(this.style?.height ?? "") || 400;
+            return {
+                bottom: height,
+                height,
+                left: 0,
+                right: width,
+                top: 0,
+                width,
+                x: 0,
+                y: 0,
+                toJSON: () => ({})
+            } as DOMRect;
+        });
+
+        await TestBed.configureTestingModule({
+            imports: [StackedHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(StackedHostComponent);
+        host = fixture.componentInstance;
+    });
+
+    afterEach(() => {
+        if (originalResizeObserver !== undefined) {
+            globalThis.ResizeObserver = originalResizeObserver;
+        } else {
+            delete (globalThis as Partial<typeof globalThis>).ResizeObserver;
+        }
+        vi.restoreAllMocks();
+    });
+
+    it("applies one shared sample-X set across all layers with bounded output", () => {
+        const count = 50_000;
+        const data = Array.from({ length: count }, (_, i) => ({
+            v: Math.sin(i / 200) * 10 + 20 + (i === 30_000 ? 300 : 0),
+            w: -5 - (i % 3),
+            x: i
+        }));
+        host.stackData.set(data);
+        fixture.detectChanges();
+        host.stackChart().flushPendingRender();
+
+        const scene = host.stackChart()["cartesianXYScene"]();
+        const areaScenes = scene?.series.filter(s => s.type === "area") as
+            | readonly { points: readonly { index: number; defined: boolean }[] }[]
+            | undefined;
+        expect(areaScenes?.length).toBe(2);
+
+        const firstLayerIndices = areaScenes![0].points.map(p => p.index).sort((a, b) => a - b);
+        const secondLayerIndices = areaScenes![1].points.map(p => p.index).sort((a, b) => a - b);
+        expect(firstLayerIndices.length).toBeGreaterThan(0);
+        expect(firstLayerIndices.length).toBeLessThan(10_000);
+        // Shared sample X set across the group (§54).
+        expect(firstLayerIndices).toEqual(secondLayerIndices);
+
+        // Rare combined-layer spike retained via full-data totals.
+        expect(firstLayerIndices).toContain(30_000);
     });
 });
