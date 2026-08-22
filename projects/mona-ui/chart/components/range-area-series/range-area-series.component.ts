@@ -162,6 +162,7 @@ export class RangeAreaSeriesComponent implements OnInit {
 
         effect(() => {
             this.data();
+            this.downsampling();
             this.fromField();
             this.toField();
             this.keyField();
