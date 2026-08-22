@@ -4,7 +4,8 @@ import { ChartMarkIdentityResolver } from "../interaction/chart-mark-identity-re
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { buildScalarDensityData } from "./cartesian-density-preparer";
 import { CartesianConnectedPathInteractionProvider } from "./cartesian-dense-interaction-provider";
-import type { CartesianDenseInteractionProviderWithLookup } from "./cartesian-dense-selection";
+import type { CartesianDenseInteractionProvider } from "./cartesian-dense-interaction-provider";
+import type { SceneHitTarget } from "../scene/scene-geometry";
 
 describe("dense brush range query", () => {
     const count = 40_000;
@@ -24,7 +25,7 @@ describe("dense brush range query", () => {
         type: "linear"
     });
     const keyResolver = new ChartMarkKeyResolver("s1", undefined, undefined);
-    const provider: CartesianDenseInteractionProviderWithLookup = new CartesianConnectedPathInteractionProvider({
+    const provider: CartesianDenseInteractionProvider = new CartesianConnectedPathInteractionProvider({
         materialize: (index: number) => {
             const datum = scalar.sourceData[index];
             if (datum === undefined || !Number.isFinite(scalar.y[index])) {
@@ -73,7 +74,7 @@ describe("dense brush range query", () => {
         const pixelA = { x: xScale.map(19_999)!, y: 0 };
         const pixelB = { x: xScale.map(20_001)!, y: 400 };
         const hits = provider.queryRange({ pixelA, pixelB });
-        const spike = hits.find(h => h.index === 20_000);
+        const spike = hits.find((h: SceneHitTarget) => h.index === 20_000);
         expect(spike).toBeDefined();
         expect((spike as { yValue: number }).yValue).toBe(55);
         const identity = ChartMarkIdentityResolver.resolve(spike!);
@@ -97,7 +98,7 @@ describe("lazy reverse lookup by mark id", () => {
             type: "linear"
         });
         const keyResolver = new ChartMarkKeyResolver("rev", undefined, undefined);
-        const provider: CartesianDenseInteractionProviderWithLookup = new CartesianConnectedPathInteractionProvider({
+        const provider = new CartesianConnectedPathInteractionProvider({
             materialize: (index: number) => ({
                 animationKey: keyResolver.resolveKeyWithRank(scalar.sourceData[index], scalar.x[index], index, 0),
                 datum: scalar.sourceData[index],
@@ -132,7 +133,7 @@ describe("lazy reverse lookup by mark id", () => {
         const xScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 5], range: [0, 100], type: "linear" });
         const yScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 2], range: [10, 0], type: "linear" });
         const keyResolver = new ChartMarkKeyResolver("abs", undefined, undefined);
-        const provider: CartesianDenseInteractionProviderWithLookup = new CartesianConnectedPathInteractionProvider({
+        const provider = new CartesianConnectedPathInteractionProvider({
             materialize: () => null,
             scalar,
             xScale: xScale as never,

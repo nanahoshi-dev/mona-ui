@@ -34,10 +34,10 @@ describe("CartesianSpatialDensityIndex", () => {
         index.collectRepresentatives([0, 0, 1, 1], 400, idx => fullView.push(idx));
 
         const zoomed: number[] = [];
-        index.collectRepresentatives([0, 0, 0.05, 0.05], 400, idx => zoomed.push(idx));
+        index.collectRepresentatives([0, 0, 0.2, 0.2], 400, idx => zoomed.push(idx));
 
         // Representatives of intersecting nodes concentrate in the zoomed region.
-        expect(zoomed.every(i => u[i] < 0.2 && v[i] < 0.2)).toBe(true);
+        expect(zoomed.every(i => u[i] < 0.25 && v[i] < 0.25)).toBe(true);
         // Density within the zoomed window exceeds the same-region density in the full view.
         const inRegionFull = fullView.filter(i => u[i] < 0.2 && v[i] < 0.2).length;
         expect(zoomed.length).toBeGreaterThan(inRegionFull);
@@ -98,5 +98,20 @@ describe("CartesianSpatialDensityIndex", () => {
             expect(u[idx]).toBeLessThan(0.0625);
             expect(v[idx]).toBeLessThan(0.0625);
         }
+    });
+
+    it("filters out invalid NaN and infinite coordinates during construction (SD-R30)", () => {
+        const uWithNaN = Float64Array.from([0.1, Number.NaN, 0.5, Number.POSITIVE_INFINITY, 0.8]);
+        const vWithNaN = Float64Array.from([0.2, 0.3, Number.NaN, 0.6, 0.9]);
+        const index = new CartesianSpatialDensityIndex(uWithNaN, vWithNaN);
+
+        const collected: number[] = [];
+        index.collectRepresentatives([0, 0, 1, 1], 10, idx => collected.push(idx));
+
+        expect(collected).toContain(0);
+        expect(collected).toContain(4);
+        expect(collected).not.toContain(1);
+        expect(collected).not.toContain(2);
+        expect(collected).not.toContain(3);
     });
 });

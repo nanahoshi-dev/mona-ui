@@ -1,17 +1,18 @@
 import { ChartMarkIdentityResolver } from "../interaction/chart-mark-identity-resolver";
 import type {
-    CartesianDenseInteractionProvider
+    CartesianDenseInteractionProvider,
+    CartesianDenseMarkIdentityQuery
 } from "./cartesian-dense-interaction-provider";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
-import type { ChartBrushHitPolicy } from "../../models/chart-brush.models";
 import type { ResolvedCartesianBrushTarget } from "../brush/cartesian-brush-target-resolver";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 
 /**
  * Aggregates exact raw matches from dense connected-path providers for one
- * brush rectangle (§70). Ordinary materialized-scene results are merged by the
- * caller; this returns only the unsampled raw portion.
+ * brush rectangle (§70). The returned raw dense matches may overlap with
+ * committed sampled-scene matches; the caller merges them by stable mark
+ * identity.
  */
 export function collectDenseBrushHits(
     scene: CartesianXYChartScene,
@@ -38,45 +39,89 @@ export function collectDenseBrushHits(
         if (!providerAppliesToTarget(seriesId, provider, target)) {
             continue;
         }
-        for (const hit of provider.queryRange({ hitPolicy: undefined, pixelA, pixelB })) {
+        for (const hit of provider.queryRange({ hitPolicy: target.hitPolicy, pixelA, pixelB })) {
             results.push(hit);
         }
     }
 
-    // Deterministic order: series ID, then source index.
-    results.sort((a, b) => {
-        if (a.seriesId !== b.seriesId) {
-            return a.seriesId < b.seriesId ? -1 : 1;
-        }
-        return (a.index ?? 0) - (b.index ?? 0);
-    });
     return results;
+}
+
+export interface CartesianBrushOrderContext {
+    readonly seriesOrdinalById?: ReadonlyMap<string, number>;
+}
+
+function compareBrushHitsCanonical(a: SceneHitTarget, b: SceneHitTarget, context: CartesianBrushOrderContext): number {
+    const seriesOrdinal = (hit: SceneHitTarget): number =>
+        context.seriesOrdinalById?.get(hit.seriesId) ??
+        hit.markerInteractionOrder?.seriesOrdinal ??
+        Number.MAX_SAFE_INTEGER;
+    const sourceOrdinal = (hit: SceneHitTarget): number =>
+        hit.markerInteractionOrder?.sourceOrdinal ?? hit.index ?? hit.dataIndex ?? Number.MAX_SAFE_INTEGER;
+
+    const seriesDifference = seriesOrdinal(a) - seriesOrdinal(b);
+    if (seriesDifference !== 0) {
+        return seriesDifference;
+    }
+    const sourceDifference = sourceOrdinal(a) - sourceOrdinal(b);
+    if (sourceDifference !== 0) {
+        return sourceDifference;
+    }
+    const renderDifference = (a.renderOrder ?? 0) - (b.renderOrder ?? 0);
+    if (renderDifference !== 0) {
+        return renderDifference;
+    }
+    return ChartMarkIdentityResolver.resolve(a).localeCompare(ChartMarkIdentityResolver.resolve(b));
+}
+
+/**
+ * Merges committed scene hits with exact dense hits without collapsing
+ * distinct full-source occurrence identities. Ordinary scene hits own the
+ * first occurrence when both paths resolve the same mark.
+ */
+export function mergeBrushHitsByIdentity(
+    ordinaryHits: readonly SceneHitTarget[],
+    denseHits: readonly SceneHitTarget[],
+    context: CartesianBrushOrderContext = {}
+): SceneHitTarget[] {
+    const byIdentity = new Map<string, SceneHitTarget>();
+
+    for (const hit of ordinaryHits) {
+        const identity = ChartMarkIdentityResolver.resolve(hit);
+        byIdentity.set(identity, hit);
+    }
+    for (const hit of denseHits) {
+        const identity = ChartMarkIdentityResolver.resolve(hit);
+        if (!byIdentity.has(identity)) {
+            byIdentity.set(identity, hit);
+        }
+    }
+
+    const merged = Array.from(byIdentity.values());
+    merged.sort((a, b) => compareBrushHitsCanonical(a, b, context));
+    return merged;
 }
 
 function providerAppliesToTarget(
     _seriesId: string,
-    _provider: CartesianDenseInteractionProvider,
-    _target: ResolvedCartesianBrushTarget
+    provider: CartesianDenseInteractionProvider,
+    target: ResolvedCartesianBrushTarget
 ): boolean {
-    // Connected-path providers are bound to their own series axes; axis
-    // namespace filtering happens on semantic ranges via the shared coordinate
-    // space inversion, so every dense series participates by default.
+    if (target.xAxisId && provider.xAxisId && provider.xAxisId !== target.xAxisId) {
+        return false;
+    }
+    if (target.yAxisId && provider.yAxisId && provider.yAxisId !== target.yAxisId) {
+        return false;
+    }
     return true;
-}
-
-export interface CartesianDenseInteractionProviderWithLookup extends CartesianDenseInteractionProvider {
-    locateRawIndex(semanticX: number): { readonly candidateIndices: readonly number[] } | null;
 }
 
 /**
  * Resolves a controlled/selected mark ID that is absent from the rendered
- * sample back to its raw source datum (§72/§73). Parsing is lazy per request;
- * no million-entry reverse map is built.
+ * sample back to its raw source datum (§72/§73 / SD3-R11, SD3-R12).
+ * Strictly requires typed reverse lookup; never treats occurrence rank as source index.
  */
-export function resolveDenseMarkById(
-    scene: CartesianXYChartScene,
-    markId: string
-): SceneHitTarget | null {
+export function resolveDenseMarkById(scene: CartesianXYChartScene, markId: string): SceneHitTarget | null {
     const providers = scene.denseInteraction;
     if (!providers || providers.size === 0) {
         return null;
@@ -91,25 +136,27 @@ export function resolveDenseMarkById(
     if (!Array.isArray(parsed) || parsed.length !== 4) {
         return null;
     }
-    const [, partType, rawValue, occurrenceRank] = parsed as [string, string, unknown, number];
-    if (partType !== "n" || typeof rawValue !== "number" || !Number.isFinite(rawValue)) {
-        return null;
-    }
+    const [seriesId, partType, rawValue, occurrenceRank] = parsed as [string, string, unknown, number];
 
-    // Locate the exact raw datum across providers.
-    for (const provider of providers.values()) {
-        const withLookup = provider as CartesianDenseInteractionProviderWithLookup;
-        if (typeof withLookup.locateRawIndex !== "function") {
-            continue;
-        }
-        const lookup = withLookup.locateRawIndex(rawValue);
-        if (!lookup || lookup.candidateIndices.length === 0) {
-            continue;
-        }
-        const index = lookup.candidateIndices[Math.min(Math.max(0, occurrenceRank), lookup.candidateIndices.length - 1)];
-        const resolved = provider.materializeAt(index);
-        if (resolved && ChartMarkIdentityResolver.resolve(resolved) === markId) {
-            return resolved;
+    const candidateProviders =
+        typeof seriesId === "string" && providers.has(seriesId) ? [providers.get(seriesId)!] : [...providers.values()];
+
+    const query: CartesianDenseMarkIdentityQuery = {
+        occurrenceRank: typeof occurrenceRank === "number" ? occurrenceRank : 0,
+        partType: partType as "b" | "d" | "i" | "n" | "s",
+        seriesPrefix: String(seriesId),
+        value: rawValue as boolean | number | string
+    };
+
+    for (const provider of candidateProviders) {
+        if (typeof provider.locateMarkIdentity === "function") {
+            const index = provider.locateMarkIdentity(query);
+            if (index !== null && index >= 0) {
+                const resolved = provider.materializeAt(index);
+                if (resolved && ChartMarkIdentityResolver.resolve(resolved) === markId) {
+                    return resolved;
+                }
+            }
         }
     }
     return null;

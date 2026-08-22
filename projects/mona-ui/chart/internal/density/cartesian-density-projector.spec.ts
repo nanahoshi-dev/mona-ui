@@ -169,6 +169,31 @@ describe("projectScalarIndexView", () => {
         expect(view.indices![0]).toBeLessThanOrEqual(1);
         expect(view.indices![view.indices!.length - 1]).toBeGreaterThanOrEqual(count - 2);
     });
+
+    it("lttb correctly resolves candidate source indices on multi-stage large datasets (SD-R20)", () => {
+        const count = 250_000;
+        const values = Array.from({ length: count }, (_, i) => Math.sin(i / 100) * 20);
+        const scalar = buildScalar(values);
+        const view = projectScalarIndexView({
+            ...baseInput,
+            algorithm: "lttb",
+            viewportScale: linearScale([0, count - 1], [0, 500]),
+            maxPoints: 500,
+            scalar
+        });
+        expect(view.algorithm).toBe("lttb");
+        expect(view.sampled).toBe(true);
+        expect(view.indices!.length).toBeLessThanOrEqual(500);
+        // All emitted indices are valid source indices in monotonic ascending order
+        for (let i = 0; i < view.indices!.length; i++) {
+            const idx = view.indices![i];
+            expect(idx).toBeGreaterThanOrEqual(0);
+            expect(idx).toBeLessThan(count);
+            if (i > 0) {
+                expect(idx).toBeGreaterThan(view.indices![i - 1]);
+            }
+        }
+    });
 });
 
 describe("projectRangeEnvelopeIndexView", () => {

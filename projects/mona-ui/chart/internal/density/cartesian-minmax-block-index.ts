@@ -1,6 +1,6 @@
 import type { CartesianXMonotonicity } from "./cartesian-density-segments";
 
-export function lowerBoundAscending(x: Float64Array, from: number, to: number, value: number): number {
+export function lowerBoundAscending(x: ArrayLike<number>, from: number, to: number, value: number): number {
     let low = from;
     let high = to;
     while (low < high) {
@@ -14,7 +14,7 @@ export function lowerBoundAscending(x: Float64Array, from: number, to: number, v
     return low;
 }
 
-export function upperBoundAscending(x: Float64Array, from: number, to: number, value: number): number {
+export function upperBoundAscending(x: ArrayLike<number>, from: number, to: number, value: number): number {
     let low = from;
     let high = to;
     while (low < high) {
@@ -28,7 +28,7 @@ export function upperBoundAscending(x: Float64Array, from: number, to: number, v
     return low;
 }
 
-export function lowerBoundDescending(x: Float64Array, from: number, to: number, value: number): number {
+export function lowerBoundDescending(x: ArrayLike<number>, from: number, to: number, value: number): number {
     let low = from;
     let high = to;
     while (low < high) {
@@ -42,7 +42,7 @@ export function lowerBoundDescending(x: Float64Array, from: number, to: number, 
     return low;
 }
 
-export function upperBoundDescending(x: Float64Array, from: number, to: number, value: number): number {
+export function upperBoundDescending(x: ArrayLike<number>, from: number, to: number, value: number): number {
     let low = from;
     let high = to;
     while (low < high) {
@@ -122,10 +122,12 @@ export class CartesianMinMaxBlockIndex {
             if (!Number.isFinite(v)) {
                 return;
             }
-            if (firstValidIndex === -1) {
+            if (firstValidIndex === -1 || idx < firstValidIndex) {
                 firstValidIndex = idx;
             }
-            lastValidIndex = idx;
+            if (lastValidIndex === -1 || idx > lastValidIndex) {
+                lastValidIndex = idx;
+            }
             if (v < minValue || (v === minValue && idx < minIndex)) {
                 minValue = v;
                 minIndex = idx;
@@ -189,12 +191,16 @@ export class CartesianMinMaxBlockIndex {
         valueMin: number,
         valueMax: number
     ): readonly [number, number] | null {
-        if (monotonicity === "unsorted") {
+        if (monotonicity === "unsorted" || monotonicity === "unsearchable") {
             return null;
         }
         const ascending = monotonicity === "ascending" || monotonicity === "non-decreasing";
-        const lo = ascending ? lowerBoundAscending(x, 0, x.length, valueMin) : lowerBoundDescending(x, 0, x.length, valueMax);
-        const hi = ascending ? upperBoundAscending(x, 0, x.length, valueMax) : upperBoundDescending(x, 0, x.length, valueMin);
+        const lo = ascending
+            ? lowerBoundAscending(x, 0, x.length, valueMin)
+            : lowerBoundDescending(x, 0, x.length, valueMax);
+        const hi = ascending
+            ? upperBoundAscending(x, 0, x.length, valueMax)
+            : upperBoundDescending(x, 0, x.length, valueMin);
         if (hi <= lo) {
             return null;
         }

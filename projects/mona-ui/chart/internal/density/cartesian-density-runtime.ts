@@ -7,15 +7,58 @@ import type { CartesianDomainPreparation } from "../layout/cartesian-multi-axis-
 import type { CartesianXYLayoutRuntime } from "../layout/cartesian-layout-engine";
 import type { CartesianDensityCapability } from "./cartesian-density-capability";
 import { resolveDensityCapability } from "./cartesian-density-capability";
-import { computeEffectiveDensityThreshold, type NormalizedChartDownsamplingOptions } from "./chart-downsampling-options";
-import { buildScalarDensityData, type CartesianScalarDensityData } from "./cartesian-density-preparer";
+import {
+    computeEffectiveDensityThreshold,
+    type NormalizedChartDownsamplingOptions
+} from "./chart-downsampling-options";
+import {
+    buildRangeDensityData,
+    buildRangeSegmentGeometryIndex,
+    buildScalarDensityData,
+    buildScalarPointGeometryIndex,
+    type CartesianRangeDensityData,
+    type CartesianScalarDensityData
+} from "./cartesian-density-preparer";
+import {
+    buildStackGroupDensityRuntime,
+    type CartesianStackGroupDensityRuntime
+} from "./cartesian-stack-density-runtime";
 import { CartesianSpatialDensityIndex } from "./cartesian-spatial-density-index";
-import type { ChartPositionScale } from "../scale/chart-scale";
+import { resolveCartesianNormalizedBaseMapper } from "../viewport/cartesian-normalized-base-mapper";
+
+import { ChartSeriesMarkIdentityAuthority } from "../animation/chart-series-mark-identity-authority";
+
+export interface DensityRetentionDecision {
+    readonly reason: "below-work-threshold" | "eligible-source-work" | "unsearchable";
+    readonly retain: boolean;
+}
+
+export function resolveDensityRetention(
+    sourceCount: number,
+    searchable: boolean,
+    policy: NormalizedChartDownsamplingOptions,
+    plotSpanPx: number
+): DensityRetentionDecision {
+    if (!searchable) {
+        return { reason: "unsearchable", retain: false };
+    }
+
+    const activationFloor = Math.min(
+        computeEffectiveDensityThreshold(policy, plotSpanPx),
+        policy.maxPoints ?? Number.POSITIVE_INFINITY
+    );
+    const retain = sourceCount > 0 && sourceCount >= activationFloor;
+    return {
+        reason: retain ? "eligible-source-work" : "below-work-threshold",
+        retain
+    };
+}
 
 export interface CartesianSeriesDensityEntry {
     readonly capability: CartesianDensityCapability;
-    /** Populated for connected-range series: normalized low/high arrays. */
-    readonly range?: { readonly from: Float64Array; readonly to: Float64Array };
+    readonly identity: ChartSeriesMarkIdentityAuthority;
+    /** Populated for connected-range series: normalized low/high range data. */
+    readonly range?: CartesianRangeDensityData;
     readonly scalar: CartesianScalarDensityData | null;
     /** Populated for marker series: normalized-space spatial hierarchy (§56). */
     readonly spatial?: {
@@ -29,35 +72,25 @@ export interface CartesianSeriesDensityEntry {
 export interface CartesianDensityRuntime {
     readonly policy: NormalizedChartDownsamplingOptions;
     readonly seriesById: ReadonlyMap<string, CartesianSeriesDensityEntry>;
+    readonly stack?: import("./cartesian-stack-density-runtime").CartesianStackDensityRuntime;
 }
 
 interface DensitySeriesSpec {
     curve?(): unknown;
     data(): readonly unknown[] | undefined;
-    downsampling?: import("../../models/chart-downsampling.models").ChartDownsamplingInput | undefined;
+    downsampling?:
+        | import("../../models/chart-downsampling.models").ChartDownsamplingInput
+        | (() => import("../../models/chart-downsampling.models").ChartDownsamplingInput | undefined)
+        | undefined;
     field?(): ChartField;
     fromField?(): ChartField;
     id: string;
+    keyField?(): ChartField;
+    seriesKey?(): string;
     sizeField?(): ChartField;
     stack?: () => string | undefined;
     toField?(): ChartField;
     type: string;
-}
-
-function normalizeToUnit(
-    scale: ChartPositionScale<unknown>,
-    value: unknown,
-    range: readonly [number, number]
-): number {
-    const p = scale.map(value as never);
-    if (p === undefined || !Number.isFinite(p)) {
-        return Number.NaN;
-    }
-    const [r0, r1] = range;
-    if (r1 === r0) {
-        return 0;
-    }
-    return (p - r0) / (r1 - r0);
 }
 
 /**
@@ -84,10 +117,6 @@ export function buildDensityRuntime(
         }
     }
     let builtAny = false;
-    // Sources below the smallest possible activation threshold never need indexes.
-    // The projection re-checks against the current span before sampling.
-    const minimumRetainedCount = Math.min(2000, computeEffectiveDensityThreshold(chartPolicy, plotPixelSpan));
-
     for (const registration of effectiveSeries) {
         const spec = registration as unknown as DensitySeriesSpec;
         const context = resolvedContext.resolvedSeriesContextById.get(spec.id);
@@ -95,13 +124,16 @@ export function buildDensityRuntime(
             continue;
         }
 
-        const xType: ResolvedChartCartesianAxisType | undefined = context.xType
-            ?? (context.binding.xAxisId ? preparation.resolvedTypes.x.get(context.binding.xAxisId) : undefined);
+        const xType: ResolvedChartCartesianAxisType | undefined =
+            context.xType ??
+            (context.binding.xAxisId ? preparation.resolvedTypes.x.get(context.binding.xAxisId) : undefined);
+
+        const seriesDownsampling = typeof spec.downsampling === "function" ? spec.downsampling() : spec.downsampling;
 
         const capability = resolveDensityCapability({
             chartPolicy,
             curve: typeof spec.curve === "function" ? (spec.curve() as string | undefined) : undefined,
-            seriesDownsampling: spec.downsampling,
+            seriesDownsampling,
             seriesType: spec.type as never,
             stacked: stackedAreaSeriesIds.has(spec.id),
             xResolvedType: xType
@@ -112,21 +144,75 @@ export function buildDensityRuntime(
         }
 
         const temporal = xType === "time" || xType === "utc";
-        const isRange = spec.type === "rangeArea";
-        const isMarker = capability.mode === "marker";
-        const yField = isRange ? spec.fromField?.() ?? "" : spec.field?.() ?? "";
         const seriesData = resolveData(registration.data(), rootData);
+        const isRange = spec.type === "rangeArea";
+        if (isRange) {
+            const range = buildRangeDensityData({
+                buildGeometryIndex: false,
+                data: seriesData,
+                fromField: spec.fromField?.() ?? "",
+                temporal,
+                toField: spec.toField?.() ?? "",
+                xField: context.effectiveXField ?? effectiveRootXField
+            });
+            const retention = resolveDensityRetention(
+                range.sourceData.length,
+                range.monotonicity !== "unsorted" && range.monotonicity !== "unsearchable",
+                capability.effectivePolicy,
+                plotPixelSpan
+            );
+            if (!retention.retain) {
+                continue;
+            }
+            const retainedRange: CartesianRangeDensityData = {
+                ...range,
+                segmentGeometryIndex:
+                    range.validCount > 0
+                        ? buildRangeSegmentGeometryIndex({
+                              count: seriesData.length,
+                              from: range.from,
+                              segmentIds: range.segmentIds,
+                              to: range.to,
+                              x: range.x
+                          })
+                        : null
+            };
+            const identity = new ChartSeriesMarkIdentityAuthority(spec.id, seriesData, {
+                extractNaturalKey: (_, i) => retainedRange.x[i],
+                keyField: spec.keyField?.(),
+                seriesKey: typeof spec.seriesKey === "function" ? spec.seriesKey() : spec.seriesKey
+            });
+            seriesById.set(spec.id, { capability, identity, range: retainedRange, scalar: null });
+            builtAny = true;
+            continue;
+        }
+
+        const isMarker = capability.mode === "marker";
+        const yField = spec.field?.() ?? "";
 
         const scalar = buildScalarDensityData({
+            buildGeometryIndex: false,
             data: seriesData,
             temporal,
             xField: context.effectiveXField ?? effectiveRootXField,
             yField
         });
 
-        if (scalar.validCount < minimumRetainedCount) {
+        const retention = resolveDensityRetention(
+            scalar.sourceData.length,
+            isMarker || (scalar.monotonicity !== "unsorted" && scalar.monotonicity !== "unsearchable"),
+            capability.effectivePolicy,
+            plotPixelSpan
+        );
+        if (!retention.retain) {
             continue;
         }
+
+        const identity = new ChartSeriesMarkIdentityAuthority(spec.id, seriesData, {
+            extractNaturalKey: (_, i) => scalar.x[i],
+            keyField: spec.keyField?.(),
+            seriesKey: typeof spec.seriesKey === "function" ? spec.seriesKey() : spec.seriesKey
+        });
 
         if (isMarker) {
             const spatial = buildMarkerHierarchy(
@@ -143,28 +229,65 @@ export function buildDensityRuntime(
             if (!spatial) {
                 continue;
             }
-            seriesById.set(spec.id, { capability, spatial, scalar });
+            const retainedScalar: CartesianScalarDensityData = {
+                ...scalar,
+                pointGeometryIndex:
+                    scalar.validCount > 0
+                        ? buildScalarPointGeometryIndex({
+                              count: seriesData.length,
+                              segmentIds: scalar.segmentIds,
+                              x: scalar.x,
+                              y: scalar.y
+                          })
+                        : null
+            };
+            seriesById.set(spec.id, { capability, identity, spatial, scalar: retainedScalar });
             builtAny = true;
             continue;
         }
 
-        let range: CartesianSeriesDensityEntry["range"];
-        if (isRange) {
-            const toField = spec.toField?.() ?? "";
-            const from = scalar.y;
-            const to = new Float64Array(seriesData.length);
-            for (let i = 0; i < seriesData.length; i++) {
-                const rawTo = resolveValue(seriesData[i], toField, i);
-                to[i] = typeof rawTo === "number" && Number.isFinite(rawTo) ? rawTo : Number.NaN;
-            }
-            range = { from, to };
-        }
-
-        seriesById.set(spec.id, { capability, range, scalar });
+        const retainedScalar: CartesianScalarDensityData = {
+            ...scalar,
+            pointGeometryIndex:
+                scalar.validCount > 0
+                    ? buildScalarPointGeometryIndex({
+                          count: seriesData.length,
+                          segmentIds: scalar.segmentIds,
+                          x: scalar.x,
+                          y: scalar.y
+                      })
+                    : null
+        };
+        seriesById.set(spec.id, { capability, identity, scalar: retainedScalar });
         builtAny = true;
     }
 
-    return builtAny ? { policy: chartPolicy, seriesById } : null;
+    const stackGroups = new Map<string, CartesianStackGroupDensityRuntime>();
+    if (preparation.stackCoordination) {
+        for (const group of preparation.stackCoordination.layout.groups) {
+            if (group.geometryType === "area") {
+                const seriesInGroup = effectiveSeries.filter(s => group.seriesIds.includes(s.id));
+                const stackRuntime = buildStackGroupDensityRuntime(
+                    group,
+                    preparation.stackCoordination.layout.orderedBySeriesId,
+                    seriesInGroup,
+                    chartPolicy
+                );
+                if (stackRuntime) {
+                    stackGroups.set(group.id, stackRuntime);
+                    builtAny = true;
+                }
+            }
+        }
+    }
+
+    return builtAny
+        ? {
+              policy: chartPolicy,
+              seriesById,
+              stack: stackGroups.size > 0 ? { groupsById: stackGroups } : undefined
+          }
+        : null;
 }
 
 /**
@@ -183,6 +306,14 @@ function buildMarkerHierarchy(
     xAxisId?: string,
     yAxisId?: string
 ): CartesianSeriesDensityEntry["spatial"] {
+    if (scalar.validCount === 0) {
+        return {
+            index: new CartesianSpatialDensityIndex(new Float64Array(0), new Float64Array(0)),
+            maxSize: 0,
+            sizes: null
+        };
+    }
+
     if (!baseCoordinateSpace) {
         return undefined;
     }
@@ -199,9 +330,14 @@ function buildMarkerHierarchy(
     const v = new Float64Array(count);
     let validMarkers = 0;
     const isBubble = spec.type === "bubble";
-    const sizeField = isBubble ? spec.sizeField?.() ?? "" : "";
+    const sizeField = isBubble ? (spec.sizeField?.() ?? "") : "";
     const sizes = isBubble ? new Float64Array(count) : null;
     let maxSize = Number.NEGATIVE_INFINITY;
+    const xBaseMapper = resolveCartesianNormalizedBaseMapper(xSnap);
+    const yBaseMapper = resolveCartesianNormalizedBaseMapper(ySnap);
+    if (!xBaseMapper || !yBaseMapper) {
+        return undefined;
+    }
 
     for (let i = 0; i < count; i++) {
         if (scalar.segmentIds[i] < 0) {
@@ -211,26 +347,34 @@ function buildMarkerHierarchy(
         }
         const datum = seriesData[i];
         // Reuse the already-normalized semantic values where possible.
-        const xu = normalizeToUnit(xSnap.baseScale, temporal ? new Date(scalar.x[i]) : scalar.x[i], xSnap.range);
+        const xu = xBaseMapper.map(temporal ? new Date(scalar.x[i]) : scalar.x[i]) ?? Number.NaN;
         const rawY = resolveValue(datum, yField, i);
-        const vu = Number.isFinite(rawY as number) ? normalizeToUnit(ySnap.baseScale, rawY, ySnap.range) : Number.NaN;
+        const vu = Number.isFinite(rawY as number) ? (yBaseMapper.map(rawY) ?? Number.NaN) : Number.NaN;
         u[i] = xu;
         v[i] = vu;
         if (Number.isFinite(xu) && Number.isFinite(vu)) {
-            validMarkers++;
             if (sizes) {
                 const rawSize = resolveValue(datum, sizeField, i);
-                const s = typeof rawSize === "number" && Number.isFinite(rawSize) ? rawSize : 0;
+                const s = typeof rawSize === "number" && Number.isFinite(rawSize) && rawSize > 0 ? rawSize : 0;
                 sizes[i] = s;
-                if (s > maxSize) {
-                    maxSize = s;
+                if (s > 0) {
+                    validMarkers++;
+                    if (s > maxSize) {
+                        maxSize = s;
+                    }
                 }
+            } else {
+                validMarkers++;
             }
         }
     }
 
     if (validMarkers === 0) {
-        return undefined;
+        return {
+            index: new CartesianSpatialDensityIndex(new Float64Array(0), new Float64Array(0)),
+            maxSize: 0,
+            sizes: null
+        };
     }
 
     return {

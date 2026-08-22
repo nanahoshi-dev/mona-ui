@@ -1,7 +1,11 @@
 import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
 import type { ChartSeriesType } from "../../models/chart-series.models";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
-import { normalizeChartDownsamplingOptions, type NormalizedChartDownsamplingOptions } from "./chart-downsampling-options";
+import {
+    normalizeChartDownsamplingOptions,
+    resolveEffectiveDownsamplingPolicy,
+    type NormalizedChartDownsamplingOptions
+} from "./chart-downsampling-options";
 
 export type CartesianDensityMode =
     | "connected-range"
@@ -12,6 +16,7 @@ export type CartesianDensityMode =
 
 export interface CartesianDensityCapability {
     readonly algorithmOverride: NormalizedChartDownsamplingOptions["algorithm"];
+    readonly effectivePolicy: NormalizedChartDownsamplingOptions;
     readonly eligible: boolean;
     readonly mode: CartesianDensityMode;
     readonly reason?: string;
@@ -53,21 +58,30 @@ export interface DensityCapabilityRequest {
  * reduction strategy applies. Pure function over configuration semantics.
  */
 export function resolveDensityCapability(request: DensityCapabilityRequest): CartesianDensityCapability {
-    const seriesOptions = normalizeChartDownsamplingOptions(request.seriesDownsampling);
-    const effectiveEnabled = request.chartPolicy.enabled && seriesOptions.enabled;
+    const effectivePolicy = resolveEffectiveDownsamplingPolicy(request.chartPolicy, request.seriesDownsampling);
+    const effectiveEnabled = effectivePolicy.enabled;
+
+    let algorithmOverride = effectivePolicy.algorithm;
+    if (algorithmOverride === "pixel" && request.seriesType !== "scatter" && request.seriesType !== "bubble") {
+        algorithmOverride = "auto";
+    }
 
     const base: CartesianDensityCapability = {
-        algorithmOverride: seriesOptions.enabled ? seriesOptions.algorithm : request.chartPolicy.algorithm,
+        algorithmOverride,
+        effectivePolicy: {
+            ...effectivePolicy,
+            algorithm: algorithmOverride
+        },
         eligible: false,
         mode: "none",
         reason: undefined,
-        seriesEnabled: seriesOptions.enabled
+        seriesEnabled: request.seriesDownsampling === false || (typeof request.seriesDownsampling === "object" && request.seriesDownsampling.enabled === false) ? false : true
     };
 
     if (!effectiveEnabled) {
         return {
             ...base,
-            reason: request.chartPolicy.enabled && !seriesOptions.enabled ? "series disabled" : "chart disabled"
+            reason: !request.chartPolicy.enabled ? "chart disabled" : "series disabled"
         };
     }
 

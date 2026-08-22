@@ -1,22 +1,29 @@
 import type { ChartField, ChartPoint } from "../../models/chart.models";
+import type { ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartContinuousPositionScale } from "../scale/chart-scale";
 import type { ChartMarkKeyResolver } from "../animation/animation-identity";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import { formatXValue, formatYValue } from "../utils/chart-formatter";
+import { resolveValue } from "../data/chart-value-resolver";
 import type { CartesianScalarDensityData } from "./cartesian-density-preparer";
 
+import type { ChartSeriesMarkIdentityAuthority } from "../animation/chart-series-mark-identity-authority";
+
 export interface DenseHitMaterializerContext {
-    readonly keyResolver: ChartMarkKeyResolver;
+    readonly identity?: ChartSeriesMarkIdentityAuthority;
+    readonly keyResolver?: ChartMarkKeyResolver;
     readonly scalar: CartesianScalarDensityData;
     readonly seriesDisplayName: string;
     readonly seriesId: string;
     readonly seriesType: "area" | "line";
-    readonly temporal: boolean;
     readonly valueFormatter?: (value: unknown, index: number) => string;
     readonly xAxisFormatter?: (value: unknown, index: number) => string;
     readonly xAxisId: string;
     readonly xAxisTitle?: string;
+    readonly xAxisType: ChartXAxisType;
+    readonly xField?: ChartField;
     readonly xScale: ChartContinuousPositionScale<number | Date>;
+    readonly xTimeSpanMs?: number;
     readonly yAxisFormatter?: (value: unknown, index: number) => string;
     readonly yAxisId: string;
     readonly yAxisTitle?: string;
@@ -41,27 +48,27 @@ export function createDenseHitMaterializer(context: DenseHitMaterializerContext)
             return null;
         }
 
-        const xPos = context.xScale.map(context.temporal ? new Date(xNum) : xNum);
+        const isTemporal = context.xAxisType === "time" || context.xAxisType === "utc";
+        const xPos = context.xScale.map(isTemporal ? new Date(xNum) : xNum);
         const yPos = context.yScale.map(yNum);
         if (xPos === undefined || yPos === undefined || !Number.isFinite(xPos) || !Number.isFinite(yPos)) {
             return null;
         }
 
-        // Public values preserve original temporal semantics.
-        const xValue: unknown = context.temporal ? new Date(xNum) : xNum;
-
-        // Duplicate occurrence rank within equal-X runs, matching what the full
-        // sequential layout would assign (stable mark identity across
-        // repeated raw materializations).
-        let occurrenceRank = 0;
-        for (let j = sourceIndex - 1; j >= 0; j--) {
-            if (scalar.x[j] === xNum) {
-                occurrenceRank++;
-            } else {
-                break;
-            }
+        // Public values preserve original source semantics.
+        let xValue: unknown = undefined;
+        if (context.xField !== undefined) {
+            xValue = resolveValue(datum, context.xField, sourceIndex);
+        } else if (typeof datum === "object" && datum !== null && "x" in datum) {
+            xValue = (datum as { x: unknown }).x;
         }
-        const animationKey = context.keyResolver.resolveKeyWithRank(datum, xNum, sourceIndex, occurrenceRank);
+        if (xValue === undefined) {
+            xValue = isTemporal ? new Date(xNum) : xNum;
+        }
+
+        const animationKey = context.identity
+            ? context.identity.resolveKeyAt(sourceIndex, xNum, datum)
+            : (context.keyResolver?.resolveKey(datum, xNum, sourceIndex) ?? "");
         const point: ChartPoint = { x: xPos, y: yPos };
 
         return {
@@ -71,9 +78,10 @@ export function createDenseHitMaterializer(context: DenseHitMaterializerContext)
                 xNum,
                 sourceIndex,
                 context.xAxisFormatter,
-                context.temporal ? "time" : "linear"
+                context.xAxisType,
+                context.xTimeSpanMs
             ),
-            formattedValue: formatYValue(yNum, sourceIndex, context.yAxisFormatter ?? context.valueFormatter),
+            formattedValue: formatYValue(yNum, sourceIndex, context.valueFormatter ?? context.yAxisFormatter),
             index: sourceIndex,
             point,
             radius: 16,

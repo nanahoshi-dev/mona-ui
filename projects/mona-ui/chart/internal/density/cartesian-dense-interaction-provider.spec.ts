@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
+import { ChartSeriesMarkIdentityAuthority } from "../animation/chart-series-mark-identity-authority";
 import { buildScalarDensityData } from "./cartesian-density-preparer";
 import { CartesianConnectedPathInteractionProvider } from "./cartesian-dense-interaction-provider";
 import { createDenseHitMaterializer } from "./cartesian-dense-hit-materializer";
@@ -24,14 +25,18 @@ describe("CartesianConnectedPathInteractionProvider", () => {
         type: "linear"
     });
 
+    const authority = new ChartSeriesMarkIdentityAuthority("series-1", data, {
+        extractNaturalKey: (d: any) => d.x
+    });
     const keyResolver = new ChartMarkKeyResolver("series-1", undefined, undefined);
     const materialize = createDenseHitMaterializer({
+        identity: authority,
         keyResolver,
         scalar,
         seriesDisplayName: "Dense",
         seriesId: "series-1",
         seriesType: "line",
-        temporal: false,
+        xAxisType: "linear",
         xAxisId: "x-main",
         xScale: xScale as never,
         yAxisId: "y-main",
@@ -39,6 +44,7 @@ describe("CartesianConnectedPathInteractionProvider", () => {
     });
 
     const provider = new CartesianConnectedPathInteractionProvider({
+        identity: authority,
         materialize,
         scalar,
         xScale: xScale as never,
@@ -63,7 +69,7 @@ describe("CartesianConnectedPathInteractionProvider", () => {
         expect(matches[0].seriesId).toBe("series-1");
         // Mark identity must not leak bucket/sample IDs.
         expect(String(matches[0].xKey)).not.toContain("bucket");
-        expect(matches[0].animationKey).toBe(keyResolver.resolveKey(data[targetIndex], targetIndex * 2, targetIndex));
+        expect(matches[0].animationKey).toBe(authority.resolveKeyAt(targetIndex, targetIndex * 2, data[targetIndex]));
     });
 
     it("prefers the geometrically nearest duplicate-X candidate", () => {
@@ -84,7 +90,7 @@ describe("CartesianConnectedPathInteractionProvider", () => {
                 seriesDisplayName: "Dup",
                 seriesId: "dup",
                 seriesType: "line",
-                temporal: false,
+                xAxisType: "linear",
                 xAxisId: "x",
                 xScale: dupXScale as never,
                 yAxisId: "y",
@@ -121,7 +127,7 @@ describe("CartesianConnectedPathInteractionProvider", () => {
                 seriesDisplayName: "G",
                 seriesId: "g",
                 seriesType: "line",
-                temporal: false,
+                xAxisType: "linear",
                 xAxisId: "x",
                 xScale: gX as never,
                 yAxisId: "y",

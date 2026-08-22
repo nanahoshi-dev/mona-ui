@@ -48,6 +48,44 @@ export function normalizeChartDownsamplingOptions(
     };
 }
 
+export function resolveEffectiveDownsamplingPolicy(
+    chartPolicy: NormalizedChartDownsamplingOptions,
+    seriesInput: ChartDownsamplingInput | undefined | null
+): NormalizedChartDownsamplingOptions {
+    if (!chartPolicy.enabled) {
+        return { ...chartPolicy, enabled: false };
+    }
+    if (seriesInput === undefined || seriesInput === null || seriesInput === true) {
+        return chartPolicy;
+    }
+    if (seriesInput === false) {
+        return { ...chartPolicy, enabled: false };
+    }
+
+    const enabled = seriesInput.enabled !== undefined ? Boolean(seriesInput.enabled) : chartPolicy.enabled;
+    const algorithm = seriesInput.algorithm !== undefined ? normalizeAlgorithm(seriesInput.algorithm) : chartPolicy.algorithm;
+    const samplesPerPixel =
+        typeof seriesInput.samplesPerPixel === "number" && Number.isFinite(seriesInput.samplesPerPixel) && seriesInput.samplesPerPixel >= 1
+            ? Math.floor(seriesInput.samplesPerPixel)
+            : chartPolicy.samplesPerPixel;
+    const maxPoints =
+        typeof seriesInput.maxPoints === "number" && Number.isFinite(seriesInput.maxPoints) && seriesInput.maxPoints >= 1
+            ? Math.floor(seriesInput.maxPoints)
+            : (seriesInput.maxPoints === null ? null : chartPolicy.maxPoints);
+    const threshold =
+        typeof seriesInput.threshold === "number" && Number.isFinite(seriesInput.threshold) && seriesInput.threshold >= 0
+            ? Math.floor(seriesInput.threshold)
+            : (seriesInput.threshold === null ? null : chartPolicy.threshold);
+
+    return {
+        algorithm,
+        enabled,
+        maxPoints,
+        samplesPerPixel,
+        threshold
+    };
+}
+
 export function normalizeAlgorithm(algorithm: ChartDownsamplingAlgorithm | undefined): ChartDownsamplingAlgorithm {
     return algorithm === "lttb" || algorithm === "minmax" || algorithm === "pixel" ? algorithm : "auto";
 }
