@@ -6,6 +6,7 @@ import type { ChartInteractionXKey } from "../scene/scene-geometry";
 import { normalizeSeriesKey, serializeKeyPart } from "../animation/animation-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { resolveValue } from "./chart-value-resolver";
+import { resolveCartesianTemporalValue } from "./cartesian-temporal-value-resolver";
 
 export interface ResolvedFinancialMark {
     readonly animationKey: string;
@@ -90,19 +91,8 @@ export function resolveFinancialX(
     }
 
     if (xAxisType === "time" || xAxisType === "utc") {
-        let epochMs: number | null = null;
-        if (rawX instanceof Date && !Number.isNaN(rawX.getTime())) {
-            epochMs = rawX.getTime();
-        } else if (typeof rawX === "number" && Number.isFinite(rawX)) {
-            epochMs = rawX;
-        } else if (typeof rawX === "string" && rawX.trim().length > 0) {
-            const parsed = Date.parse(rawX);
-            if (!Number.isNaN(parsed)) {
-                epochMs = parsed;
-            }
-        }
-
-        if (epochMs === null) {
+        const resolved = resolveCartesianTemporalValue(rawX);
+        if (!resolved) {
             return {
                 isContinuousInvalid: true,
                 key: 0,
@@ -112,9 +102,9 @@ export function resolveFinancialX(
         }
 
         return {
-            key: epochMs,
+            key: resolved.epochMs,
             rawValue: rawX,
-            scaleValue: new Date(epochMs)
+            scaleValue: resolved.date
         };
     }
 

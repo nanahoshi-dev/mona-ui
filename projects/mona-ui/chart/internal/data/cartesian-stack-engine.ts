@@ -13,6 +13,7 @@ import { isFiniteNumber } from "../utils/number-utils";
 import type { ChartDiagnostic } from "../utils/chart-diagnostics";
 import { resolveData, resolveValue } from "./chart-value-resolver";
 import { isCartesianSeriesCompatibleWithXAxisType } from "./chart-domain";
+import { resolveCartesianTemporalValue } from "./cartesian-temporal-value-resolver";
 
 export type StackableCartesianSeriesRegistration = ChartAreaSeriesRegistration | ChartBarSeriesRegistration;
 
@@ -875,21 +876,7 @@ export class CartesianStackEngine {
             return isFiniteNumber(xVal) ? Number(xVal) : undefined;
         }
         if (xAxisType === "time" || xAxisType === "utc") {
-            if (xVal instanceof Date && !Number.isNaN(xVal.getTime())) {
-                return xVal.getTime();
-            }
-            if (typeof xVal === "number" && Number.isFinite(xVal)) {
-                return xVal;
-            }
-            if (typeof xVal === "string" && xVal.trim().length > 0) {
-                if (!/^\s*-?\d+(\.\d+)?\s*$/.test(xVal)) {
-                    const parsed = Date.parse(xVal);
-                    if (!Number.isNaN(parsed)) {
-                        return parsed;
-                    }
-                }
-            }
-            return undefined;
+            return resolveCartesianTemporalValue(xVal)?.epochMs;
         }
         return xVal !== undefined && xVal !== null ? String(xVal) : String(dataIndex);
     }

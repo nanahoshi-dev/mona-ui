@@ -11,6 +11,10 @@ import { resolveFiniteRangeValues } from "./chart-range-resolver";
 import { FinancialDataResolver } from "./financial-data-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
 import type { CartesianStackAnalysis, CartesianStackLayout } from "./cartesian-stack-engine";
+import {
+    normalizeCartesianTemporalDomain,
+    resolveCartesianTemporalValue
+} from "./cartesian-temporal-value-resolver";
 
 export interface ContinuousDomain {
     max: number;
@@ -62,15 +66,7 @@ export function isContinuousXValid(val: unknown, xAxisType: ChartXAxisType | Res
         return isFiniteNumber(val);
     }
     if (xAxisType === "time" || xAxisType === "utc") {
-        if (val instanceof Date) {
-            return !Number.isNaN(val.getTime());
-        }
-        if (typeof val === "number") {
-            return Number.isFinite(val);
-        }
-        if (typeof val === "string") {
-            return !Number.isNaN(Date.parse(val));
-        }
+        return resolveCartesianTemporalValue(val) !== null;
     }
     return false;
 }
@@ -370,17 +366,7 @@ export function calculateTimeDomain(
                 xField
             });
             for (const mark of resolved.marks) {
-                let timeVal: number | undefined;
-                if (mark.xRaw instanceof Date && !Number.isNaN(mark.xRaw.getTime())) {
-                    timeVal = mark.xRaw.getTime();
-                } else if (typeof mark.xRaw === "number" && Number.isFinite(mark.xRaw)) {
-                    timeVal = mark.xRaw;
-                } else if (typeof mark.xRaw === "string") {
-                    const parsed = Date.parse(mark.xRaw);
-                    if (!Number.isNaN(parsed)) {
-                        timeVal = parsed;
-                    }
-                }
+                const timeVal = resolveCartesianTemporalValue(mark.xRaw)?.epochMs;
                 if (timeVal !== undefined && Number.isFinite(timeVal)) {
                     if (timeVal < minTime) minTime = timeVal;
                     if (timeVal > maxTime) maxTime = timeVal;
@@ -392,17 +378,7 @@ export function calculateTimeDomain(
 
         for (let i = 0; i < data.length; i++) {
             const xVal = resolveValue(data[i], xField, i);
-            let timeVal: number | undefined;
-            if (xVal instanceof Date && !Number.isNaN(xVal.getTime())) {
-                timeVal = xVal.getTime();
-            } else if (typeof xVal === "number" && Number.isFinite(xVal)) {
-                timeVal = xVal;
-            } else if (typeof xVal === "string") {
-                const parsed = Date.parse(xVal);
-                if (!Number.isNaN(parsed)) {
-                    timeVal = parsed;
-                }
-            }
+            const timeVal = resolveCartesianTemporalValue(xVal)?.epochMs;
             if (timeVal === undefined || !Number.isFinite(timeVal)) {
                 continue;
             }
@@ -426,27 +402,14 @@ export function calculateTimeDomain(
         }
     }
 
-    let expMinNum = explicitMin instanceof Date ? explicitMin.getTime() : explicitMin;
-    let expMaxNum = explicitMax instanceof Date ? explicitMax.getTime() : explicitMax;
-
-    if (isFiniteNumber(expMinNum) && isFiniteNumber(expMaxNum) && expMinNum > expMaxNum) {
-        const temp = expMinNum;
-        expMinNum = expMaxNum;
-        expMaxNum = temp;
-    }
-
-    if (!Number.isFinite(minTime) && !Number.isFinite(maxTime)) {
-        const defaultMin = isFiniteNumber(expMinNum) ? expMinNum : Date.now() - 86400000;
-        const defaultMax = isFiniteNumber(expMaxNum) ? expMaxNum : Date.now();
-        return [new Date(defaultMin), new Date(defaultMax)];
-    }
-
+    const expMinNum = resolveCartesianTemporalValue(explicitMin)?.epochMs;
+    const expMaxNum = resolveCartesianTemporalValue(explicitMax)?.epochMs;
     if (financialTimes.length > 0) {
         const uniqueTimes = Array.from(new Set(financialTimes)).sort((a, b) => a - b);
         const firstFin = uniqueTimes[0];
         const lastFin = uniqueTimes[uniqueTimes.length - 1];
 
-        if (!isFiniteNumber(expMinNum) && firstFin === minTime) {
+        if (expMinNum === undefined && firstFin === minTime) {
             let leftHalf = 1800000;
             if (uniqueTimes.length > 1) {
                 const diff = uniqueTimes[1] - uniqueTimes[0];
@@ -454,7 +417,7 @@ export function calculateTimeDomain(
             }
             minTime -= leftHalf;
         }
-        if (!isFiniteNumber(expMaxNum) && lastFin === maxTime) {
+        if (expMaxNum === undefined && lastFin === maxTime) {
             let rightHalf = 1800000;
             if (uniqueTimes.length > 1) {
                 const diff = uniqueTimes[uniqueTimes.length - 1] - uniqueTimes[uniqueTimes.length - 2];
@@ -464,21 +427,12 @@ export function calculateTimeDomain(
         }
     }
 
-    let resMin = isFiniteNumber(expMinNum) ? expMinNum : minTime;
-    let resMax = isFiniteNumber(expMaxNum) ? expMaxNum : maxTime;
-
-    if (isFiniteNumber(expMinNum) && !isFiniteNumber(expMaxNum) && expMinNum >= maxTime) {
-        resMax = expMinNum + 3600000;
-    }
-    if (!isFiniteNumber(expMinNum) && isFiniteNumber(expMaxNum) && expMaxNum <= minTime) {
-        resMin = expMaxNum - 3600000;
-    }
-
-    if (resMin === resMax) {
-        return [new Date(resMin - 3600000), new Date(resMax + 3600000)];
-    }
-
-    return [new Date(resMin), new Date(resMax)];
+    return normalizeCartesianTemporalDomain({
+        explicitMax,
+        explicitMin,
+        observedMaxEpoch: Number.isFinite(maxTime) ? maxTime : undefined,
+        observedMinEpoch: Number.isFinite(minTime) ? minTime : undefined
+    }).domain as [Date, Date];
 }
 
 export function calculateLinearXDomain(
