@@ -8,6 +8,8 @@ import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
 import { ChartComponent } from "./chart.component";
+import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer";
+import type { ChartRenderOverlayState } from "../../internal/render/cartesian-chart-renderer";
 
 interface DataItem {
     readonly x: number;
@@ -94,10 +96,34 @@ describe("synchronized crosshair (WP5)", () => {
     let fixture: ComponentFixture<CrosshairSyncHostComponent>;
     let host: CrosshairSyncHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;
+    let originalGetContext: typeof HTMLCanvasElement.prototype.getContext | undefined;
+    let globalRenderSpy: ReturnType<typeof vi.spyOn> | undefined;
 
     beforeEach(async () => {
         originalResizeObserver = globalThis.ResizeObserver;
         globalThis.ResizeObserver = FakeResizeObserver as unknown as typeof ResizeObserver;
+        originalGetContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+            arc: vi.fn(),
+            beginPath: vi.fn(),
+            clearRect: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            fill: vi.fn(),
+            fillRect: vi.fn(),
+            fillText: vi.fn(),
+            lineTo: vi.fn(),
+            measureText: vi.fn().mockReturnValue({ width: 0 }),
+            moveTo: vi.fn(),
+            rect: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+            setLineDash: vi.fn(),
+            setTransform: vi.fn(),
+            stroke: vi.fn(),
+            strokeRect: vi.fn()
+        } as unknown as CanvasRenderingContext2D);
+        globalRenderSpy = vi.spyOn(CanvasChartRenderer, "render").mockImplementation(() => {});
         vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
             const widthAttr = this.style?.width ? Number.parseFloat(this.style.width) : NaN;
             const heightAttr = this.style?.height ? Number.parseFloat(this.style.height) : NaN;
@@ -133,10 +159,15 @@ describe("synchronized crosshair (WP5)", () => {
         } else {
             delete (globalThis as Partial<typeof globalThis>).ResizeObserver;
         }
+        if (originalGetContext) {
+            HTMLCanvasElement.prototype.getContext = originalGetContext;
+        }
+        globalRenderSpy?.mockRestore();
         vi.restoreAllMocks();
     });
 
     it("delivers semantic crosshair position from source to recipient", async () => {
+        globalRenderSpy?.mockClear();
         const sceneA = host.chartA().scene();
         const target = sceneA?.hitTargets.find(h => h.point) ?? null;
 
@@ -162,6 +193,12 @@ describe("synchronized crosshair (WP5)", () => {
         expect(remoteState?.x?.value).toBe(localState?.x?.value);
         // Coordinates are recipient-local, not forwarded pixels.
         expect(remoteState!.anchor.x).toBeLessThanOrEqual(300 + 1e-6);
+
+        const recipientPaintedSyncCrosshair = globalRenderSpy?.mock.calls.some((call: readonly unknown[]) => {
+            const overlay = call[2] as ChartRenderOverlayState | null | undefined;
+            return overlay?.crosshair?.source === "sync";
+        });
+        expect(recipientPaintedSyncCrosshair).toBe(true);
     });
 
     it("recipient without a crosshair child ignores remote crosshair presentation", async () => {

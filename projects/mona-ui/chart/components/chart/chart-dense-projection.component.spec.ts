@@ -16,7 +16,16 @@ import { BubbleSeriesComponent } from "../bubble-series/bubble-series.component"
 import { ChartComponent } from "./chart.component";
 
 @Component({
-    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent, AreaSeriesComponent, RangeAreaSeriesComponent, ScatterSeriesComponent, BubbleSeriesComponent],
+    imports: [
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        LineSeriesComponent,
+        AreaSeriesComponent,
+        RangeAreaSeriesComponent,
+        ScatterSeriesComponent,
+        BubbleSeriesComponent
+    ],
     template: `
         <mona-chart
             #stackChart
@@ -25,8 +34,7 @@ import { ChartComponent } from "./chart.component";
             [downsampling]="true"
             [style.width.px]="600"
             [style.height.px]="400"
-            style="display: block;"
-        >
+            style="display: block;">
             <mona-chart-x-axis axisId="x-main" type="linear" />
             <mona-chart-y-axis axisId="y-main" type="linear" />
             @if (showStack()) {
@@ -43,20 +51,29 @@ class StackedHostComponent {
 }
 
 @Component({
-    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent, AreaSeriesComponent, RangeAreaSeriesComponent, ScatterSeriesComponent, BubbleSeriesComponent],
+    imports: [
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        LineSeriesComponent,
+        AreaSeriesComponent,
+        RangeAreaSeriesComponent,
+        ScatterSeriesComponent,
+        BubbleSeriesComponent
+    ],
     template: `
         <mona-chart
             #chart
             [data]="data()"
             xField="x"
             [downsampling]="downsampling()"
+            [viewport]="viewport()"
             [navigation]="true"
             [style.width.px]="600"
             [style.height.px]="400"
-            style="display: block;"
-        >
-            <mona-chart-x-axis axisId="x-main" type="linear" />
-            <mona-chart-y-axis axisId="y-main" type="linear" />
+            style="display: block;">
+            <mona-chart-x-axis axisId="x-main" type="linear" [max]="axisMax()" [min]="axisMin()" [nice]="axisNice()" />
+            <mona-chart-y-axis axisId="y-main" type="linear" [max]="axisMax()" [min]="axisMin()" [nice]="axisNice()" />
             @switch (seriesKind()) {
                 @case ("line") {
                     <mona-line-series field="y" name="L" />
@@ -65,10 +82,21 @@ class StackedHostComponent {
                     <mona-area-series field="y" name="A" />
                 }
                 @case ("range") {
-                    <mona-range-area-series fromField="low" toField="high" name="R" />
+                    <mona-range-area-series
+                        fromField="low"
+                        toField="high"
+                        name="R"
+                        [pointRadius]="rangePointRadius()"
+                        [showPoints]="rangeShowPoints()" />
                 }
                 @case ("scatter") {
-                    <mona-scatter-series xField="x" field="y" name="S" />
+                    <mona-scatter-series
+                        xAxisId="x-main"
+                        yAxisId="y-main"
+                        xField="x"
+                        field="y"
+                        [pointRadius]="markerRadius()"
+                        name="S" />
                 }
                 @case ("bubble") {
                     <mona-bubble-series xField="x" field="y" sizeField="size" name="B" />
@@ -83,6 +111,12 @@ class DenseHostComponent {
     public readonly downsampling = signal<ChartDownsamplingInput>(true);
     public readonly seriesKind = signal<"line" | "area" | "range" | "scatter" | "bubble">("line");
     public readonly viewport = signal<ChartViewportState | undefined>(undefined);
+    public readonly markerRadius = signal(60);
+    public readonly axisMin = signal<number | undefined>(undefined);
+    public readonly axisMax = signal<number | undefined>(undefined);
+    public readonly axisNice = signal(true);
+    public readonly rangePointRadius = signal(60);
+    public readonly rangeShowPoints = signal(false);
 }
 
 class FakeResizeObserver {
@@ -135,6 +169,7 @@ describe("indexed dense projection (WP8)", () => {
 
         fixture = TestBed.createComponent(DenseHostComponent);
         host = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     afterEach(() => {
@@ -207,16 +242,276 @@ describe("indexed dense projection (WP8)", () => {
         expect(areaScene?.points.length).toBeLessThan(10_000);
     });
 
+    it("forwards an explicit threshold to line and unstacked-area projection", () => {
+        host.downsampling.set({ enabled: true, samplesPerPixel: 1, threshold: 100 });
+        host.data.set(makeData(500));
+        render();
+
+        const lineScene = host.chart()["cartesianXYScene"]();
+        const lineMetadata = Array.from(lineScene!.seriesDensityMetadataById!.values())[0];
+        expect(lineMetadata.sampled).toBe(true);
+
+        host.seriesKind.set("area");
+        render();
+
+        const areaScene = host.chart()["cartesianXYScene"]();
+        const areaMetadata = Array.from(areaScene!.seriesDensityMetadataById!.values())[0];
+        expect(areaMetadata.sampled).toBe(true);
+    });
+
+    it("retains clipped LTTB detail and the interior spike through the chart scene", () => {
+        host.downsampling.set({ algorithm: "lttb", enabled: true, maxPoints: 100, threshold: 0 });
+        host.viewport.set({
+            axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 900, min: 100 }]
+        });
+        host.data.set(
+            Array.from({ length: 1_000 }, (_, index) => ({
+                x: index,
+                y: index === 500 ? 10_000 : Math.sin(index / 20)
+            }))
+        );
+        render();
+
+        const scene = host.chart()["cartesianXYScene"]();
+        const lineScene = scene?.series.find(s => s.type === "line") as
+            { points: readonly { defined: boolean; index: number; yValue: number }[] } | undefined;
+        const definedPoints = lineScene?.points.filter(point => point.defined) ?? [];
+
+        expect(definedPoints.length).toBeGreaterThan(2);
+        expect(definedPoints.length).toBeLessThanOrEqual(100);
+        expect(definedPoints.some(point => point.index === 500 && point.yValue === 10_000)).toBe(true);
+    });
+
+    it("retains a sparse million-row scalar runtime and bounds Stage-C source visits", () => {
+        const data = Array.from({ length: 1_000_000 }, (_, index) => ({
+            x: index,
+            y: index < 50 ? index : null
+        }));
+        const instrumentation = ChartDensityTracker.install();
+        try {
+            host.data.set(data);
+            render();
+
+            const scene = host.chart()["cartesianXYScene"]();
+            const entry = scene?.densityRuntime?.seriesById.values().next().value as
+                { scalar?: { validCount: number } } | undefined;
+            expect(scene?.densityRuntime).toBeDefined();
+            expect(entry?.scalar?.validCount).toBe(50);
+            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBeLessThan(1_000);
+            expect(instrumentation.snapshot.sampledProjectedRowsVisited).toBeLessThan(10_000);
+        } finally {
+            ChartDensityTracker.uninstall();
+        }
+    }, 30_000);
+
+    it("retains a sparse large range runtime and bounds Stage-C source visits", () => {
+        host.seriesKind.set("range");
+        const data = Array.from({ length: 250_000 }, (_, index) => ({
+            high: index < 50 ? index + 1 : null,
+            low: index < 50 ? index : null,
+            x: index
+        }));
+        const instrumentation = ChartDensityTracker.install();
+        try {
+            host.data.set(data);
+            render();
+
+            const scene = host.chart()["cartesianXYScene"]();
+            const entry = scene?.densityRuntime?.seriesById.values().next().value as
+                { range?: { validCount: number } } | undefined;
+            const rangeScene = scene?.series.find(s => s.type === "rangeArea") as
+                { points: readonly unknown[] } | undefined;
+            expect(entry?.range?.validCount).toBe(50);
+            expect(rangeScene?.points.length).toBeLessThan(1_000);
+            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBeLessThan(1_000);
+            expect(instrumentation.snapshot.sampledProjectedRowsVisited).toBeLessThan(10_000);
+        } finally {
+            ChartDensityTracker.uninstall();
+        }
+    }, 30_000);
+
+    it("retains a sparse large marker hierarchy and bounds Stage-C source visits", () => {
+        host.seriesKind.set("scatter");
+        const data = Array.from({ length: 250_000 }, (_, index) => ({
+            x: index,
+            y: index < 50 ? index : null
+        }));
+        const instrumentation = ChartDensityTracker.install();
+        try {
+            host.data.set(data);
+            render();
+
+            const scene = host.chart()["cartesianXYScene"]();
+            const entry = scene?.densityRuntime?.seriesById.values().next().value as
+                { spatial?: { index: { pointCount: number } } } | undefined;
+            const scatterScene = scene?.series.find(s => s.type === "scatter") as
+                { markers: readonly unknown[] } | undefined;
+            expect(entry?.spatial?.index.pointCount).toBe(50);
+            expect(scatterScene?.markers.length).toBe(50);
+            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBeLessThan(1_000);
+            expect(instrumentation.snapshot.exactProjectedRowsVisited).toBeLessThan(1_000);
+        } finally {
+            ChartDensityTracker.uninstall();
+        }
+    }, 30_000);
+
+    it("projects an all-null searchable source without a viewport full scan", () => {
+        const data = Array.from({ length: 250_000 }, (_, index) => ({ x: index, y: null }));
+        const instrumentation = ChartDensityTracker.install();
+        try {
+            host.data.set(data);
+            render();
+
+            const scene = host.chart()["cartesianXYScene"]();
+            const lineScene = scene?.series.find(s => s.type === "line") as { points: readonly unknown[] } | undefined;
+            expect(lineScene?.points).toHaveLength(0);
+            expect(scene?.hasRenderableData).toBe(false);
+            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBe(0);
+            expect(instrumentation.snapshot.sampledProjectedRowsVisited).toBe(0);
+        } finally {
+            ChartDensityTracker.uninstall();
+        }
+    }, 30_000);
+
+    it("enforces the marker hard cap through the production scene", () => {
+        host.seriesKind.set("scatter");
+        host.downsampling.set({ enabled: true, maxPoints: 100, samplesPerPixel: 1, threshold: 2000 });
+        host.data.set([
+            ...Array.from({ length: 80 }, (_, i) => ({ x: 10 + i, y: 0.5 })),
+            ...Array.from({ length: 420 }, (_, i) => ({ x: 100.5 + i * 0.01, y: 0.5 }))
+        ]);
+        render();
+
+        const scene = host.chart()["cartesianXYScene"]();
+        const scatterScene = scene?.series.find(s => s.type === "scatter") as
+            { markers: readonly unknown[] } | undefined;
+        const metadata = scene?.seriesDensityMetadataById
+            ? Array.from(scene.seriesDensityMetadataById.values())[0]
+            : undefined;
+        expect(scatterScene).toBeDefined();
+        expect(metadata?.sampled).toBe(true);
+        expect(metadata?.algorithm).toBe("pixel");
+        expect(metadata?.centerVisibleCount).toBeGreaterThan(100);
+        expect(metadata?.renderCandidateCount).toBeGreaterThan(100);
+        expect(metadata?.selectedCount).toBeLessThanOrEqual(100);
+        expect(scatterScene!.markers.length).toBeLessThanOrEqual(metadata?.selectedCount ?? 0);
+        expect(metadata?.actualRenderedMarkerCount).toBe(scatterScene!.markers.length);
+    });
+
+    it("keeps explicit-domain radius-overlap markers when density is enabled", () => {
+        host.seriesKind.set("scatter");
+        host.axisMin.set(0);
+        host.axisMax.set(100);
+        host.axisNice.set(false);
+        host.markerRadius.set(10);
+        host.downsampling.set({ enabled: true, samplesPerPixel: 1, threshold: 0 });
+        host.data.set([
+            { x: -1, y: 50 },
+            { x: 50, y: 50 },
+            { x: 101, y: 50 }
+        ]);
+        render();
+
+        const denseScene = host.chart()["cartesianXYScene"]();
+        const denseMarkers = (
+            denseScene?.series.find(s => s.type === "scatter") as { markers: readonly { index: number }[] }
+        ).markers.map(marker => marker.index);
+        const metadata = Array.from(denseScene?.seriesDensityMetadataById?.values() ?? [])[0];
+
+        host.downsampling.set(false);
+        render();
+        const fullScene = host.chart()["cartesianXYScene"]();
+        const fullMarkers = (
+            fullScene?.series.find(s => s.type === "scatter") as { markers: readonly { index: number }[] }
+        ).markers.map(marker => marker.index);
+
+        expect(metadata?.sampled).toBe(true);
+        expect(denseMarkers).toEqual(fullMarkers);
+        expect(denseMarkers).toEqual([0, 1, 2]);
+    });
+
+    it("retains an empty bubble spatial authority instead of scanning the source", () => {
+        host.seriesKind.set("bubble");
+        const data = Array.from({ length: 250_000 }, (_, index) => ({
+            size: 0,
+            x: index,
+            y: index % 100
+        }));
+        const instrumentation = ChartDensityTracker.install();
+        try {
+            host.data.set(data);
+            render();
+
+            const scene = host.chart()["cartesianXYScene"]();
+            const entry = scene?.densityRuntime?.seriesById.values().next().value as
+                { spatial?: { index: { pointCount: number } } } | undefined;
+            const bubbleScene = scene?.series.find(s => s.type === "bubble") as
+                { markers: readonly unknown[] } | undefined;
+            expect(entry?.spatial?.index.pointCount).toBe(0);
+            expect(bubbleScene?.markers).toHaveLength(0);
+            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBe(0);
+        } finally {
+            ChartDensityTracker.uninstall();
+        }
+    }, 30_000);
+
+    it("labels sampled marker projection work as sampled Stage C", () => {
+        host.seriesKind.set("scatter");
+        host.downsampling.set({ enabled: true, maxPoints: 100, samplesPerPixel: 1, threshold: 0 });
+        host.data.set(
+            Array.from({ length: 50_000 }, (_, index) => ({
+                x: index % 500,
+                y: Math.floor(index / 500)
+            }))
+        );
+        const instrumentation = ChartDensityTracker.install();
+        try {
+            render();
+            const scene = host.chart()["cartesianXYScene"]();
+            const metadata = Array.from(scene?.seriesDensityMetadataById?.values() ?? [])[0];
+            expect(metadata?.sampled).toBe(true);
+            expect(instrumentation.snapshot.sampledProjectedRowsVisited).toBeGreaterThan(0);
+            expect(instrumentation.snapshot.exactProjectedRowsVisited).toBe(0);
+        } finally {
+            ChartDensityTracker.uninstall();
+        }
+    });
+
     it("applies the range envelope to range-area series", () => {
         host.seriesKind.set("range");
         host.data.set(makeData(60_000));
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
-        const rangeScene = scene?.series.find(s => s.type === "rangeArea") as { points: readonly unknown[] } | undefined;
+        const rangeScene = scene?.series.find(s => s.type === "rangeArea") as
+            { points: readonly unknown[] } | undefined;
         expect(rangeScene).toBeDefined();
         expect(rangeScene!.points.length).toBeGreaterThan(0);
         expect(rangeScene!.points.length).toBeLessThan(15_000);
+    });
+
+    it("keeps range hit geometry identical with density enabled", () => {
+        host.seriesKind.set("range");
+        host.rangeShowPoints.set(false);
+        host.rangePointRadius.set(60);
+        host.downsampling.set({ enabled: true, samplesPerPixel: 1, threshold: 0 });
+        host.data.set([{ high: 60, low: 40, x: 50 }]);
+        render();
+
+        const denseTarget = host
+            .chart()
+            ["cartesianXYScene"]()
+            ?.hitTargets.find(target => target.seriesType === "rangeArea");
+
+        host.downsampling.set(false);
+        render();
+        const fullTarget = host
+            .chart()
+            ["cartesianXYScene"]()
+            ?.hitTargets.find(target => target.seriesType === "rangeArea");
+
+        expect(denseTarget).toMatchObject({ radius: 16, visualRadius: 0 });
+        expect(fullTarget).toMatchObject({ radius: denseTarget?.radius, visualRadius: denseTarget?.visualRadius });
     });
 
     it("avoids Stage A/B and density rebuilds on viewport-only frames", () => {
@@ -235,7 +530,9 @@ describe("indexed dense projection (WP8)", () => {
         };
 
         try {
-            host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 40_000, min: 10_000 }] });
+            host.viewport.set({
+                axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 40_000, min: 10_000 }]
+            });
             render();
             host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 45_000, min: 5_000 }] });
             render();
@@ -293,8 +590,7 @@ describe("indexed dense projection (WP8)", () => {
 
         const scene = host.chart()["cartesianXYScene"]();
         const scatterScene = scene?.series.find(s => s.type === "scatter") as
-            | { markers: readonly unknown[] }
-            | undefined;
+            { markers: readonly unknown[] } | undefined;
         expect(scatterScene).toBeDefined();
         // Central render-volume invariant for markers.
         expect(scatterScene!.markers.length).toBeLessThan(10_000);
@@ -317,8 +613,7 @@ describe("indexed dense projection (WP8)", () => {
 
         const scene = host.chart()["cartesianXYScene"]();
         const bubbleScene = scene?.series.find(s => s.type === "bubble") as
-            | { markers: readonly { radius: number; sizeValue?: number }[] }
-            | undefined;
+            { markers: readonly { radius: number; sizeValue?: number }[] } | undefined;
         expect(bubbleScene).toBeDefined();
         expect(bubbleScene!.markers.length).toBeLessThan(10_000);
 
@@ -338,15 +633,17 @@ describe("indexed dense projection (WP8)", () => {
         }));
         host.data.set(data);
         render();
-        const before = host.chart()["cartesianXYScene"]()?.series.find(s => s.type === "scatter") as
-            | { markers: readonly unknown[] }
-            | undefined;
+        const before = host
+            .chart()
+            ["cartesianXYScene"]()
+            ?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
 
         host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 20, min: 0 }] });
         render();
-        const after = host.chart()["cartesianXYScene"]()?.series.find(s => s.type === "scatter") as
-            | { markers: readonly unknown[] }
-            | undefined;
+        const after = host
+            .chart()
+            ["cartesianXYScene"]()
+            ?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
 
         expect(after).toBeDefined();
         expect(before).toBeDefined();
@@ -411,8 +708,7 @@ describe("coordinated stacked-area sampling (WP12)", () => {
 
         const scene = host.stackChart()["cartesianXYScene"]();
         const areaScenes = scene?.series.filter(s => s.type === "area") as
-            | readonly { points: readonly { index: number; defined: boolean }[] }[]
-            | undefined;
+            readonly { points: readonly { index: number; defined: boolean }[] }[] | undefined;
         expect(areaScenes?.length).toBe(2);
 
         const firstLayerIndices = areaScenes![0].points.map(p => p.index).sort((a, b) => a - b);

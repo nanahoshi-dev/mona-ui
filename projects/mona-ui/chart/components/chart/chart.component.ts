@@ -198,8 +198,10 @@ import {
     type ViewportCommitNotification
 } from "../../internal/synchronization/chart-synchronization-controller";
 import { ChartSynchronizationCoordinator } from "../../internal/synchronization/chart-synchronization-coordinator";
+import { resolveSynchronizationLocalTarget } from "../../internal/synchronization/chart-synchronization-local-target-resolver";
 import {
     collectDenseBrushHits,
+    mergeBrushHitsByIdentity,
     resolveDenseMarkById
 } from "../../internal/density/cartesian-dense-selection";
 import { normalizeChartNavigationOptions } from "../../internal/viewport/chart-navigation-options";
@@ -1339,7 +1341,29 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         plotRect: scene.plotRect,
                         primaryXAxisId: scene.primaryXAxisId ?? "default-x",
                         primaryYAxisId: scene.primaryYAxisId ?? "default-y",
+                        resolveNearestPoint: (pixel: ChartPoint, dimension: "x" | "y" | "xy" = "xy", mappedXAxisId?: string, mappedYAxisId?: string) => {
+                            const sc = this.cartesianXYScene();
+                            if (!sc) return null;
+                            const res = resolveSynchronizationLocalTarget({
+                                anchor: pixel,
+                                dimension,
+                                mappedXAxisId,
+                                mappedYAxisId,
+                                scene: sc,
+                                sharedTooltip: this.#tooltip()?.shared() ?? false
+                            });
+                            if (!res) return null;
+                            return { point: res.nearestAnchor, xValue: res.xValue, yValue: res.yValue };
+                        },
                         xTimeSpanMs: scene.xTimeSpanMs
+                    };
+                },
+                getPrimaryAxisIds: () => {
+                    const scene = this.cartesianXYScene();
+                    if (!scene) return null;
+                    return {
+                        x: scene.primaryXAxisId ?? "default-x",
+                        y: scene.primaryYAxisId ?? "default-y"
                     };
                 },
                 getViewport: () => this.#effectiveViewportState(),
@@ -1358,6 +1382,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const syncOptions = this.normalizedSynchronization();
             untracked(() => {
                 this.#synchronizationController?.setOptions(syncOptions);
+                if (!syncOptions?.crosshair.showTooltip && this.crosshairState()?.source === "sync") {
+                    this.tooltipContext.set(null);
+                    this.tooltipPosition.set(null);
+                }
             });
         });
 
@@ -1537,6 +1565,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         effect(() => {
             const curData = this.data();
             this.xField();
+            this.downsampling();
             if (initialData) {
                 initialData = false;
                 lastDataRef = curData;
@@ -1902,22 +1931,26 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 }
 
                 const markIndex = this.#getOrCreateBrushMarkIndex(xyScene);
-                const matchedHits = [
-                    ...markIndex.query(
-                        result.bounds,
-                        result.session.hitPolicy,
-                        target,
-                        undefined,
-                        undefined,
-                        undefined,
-                        xyScene.primaryXAxisId,
-                        xyScene.primaryYAxisId
-                    ),
-                    // Dense raw range providers keep exact brush semantics over
-                    // unsampled source points (§68/§70). Explicit exact results
-                    // may legitimately be O(M); they are never truncated.
-                    ...collectDenseBrushHits(xyScene, result.bounds, target)
-                ];
+                const ordinaryBrushHits = markIndex.query(
+                    result.bounds,
+                    result.session.hitPolicy,
+                    target,
+                    undefined,
+                    undefined,
+                    undefined,
+                    xyScene.primaryXAxisId,
+                    xyScene.primaryYAxisId
+                );
+                // Dense raw range providers keep exact brush semantics over
+                // unsampled source points (§68/§70). Explicit exact results
+                // may legitimately be O(M); they are never truncated.
+                const matchedHits = mergeBrushHitsByIdentity(
+                    ordinaryBrushHits,
+                    collectDenseBrushHits(xyScene, result.bounds, target),
+                    {
+                        seriesOrdinalById: new Map(xyScene.series.map((series, index) => [series.id, index]))
+                    }
+                );
                 const matchedMarkIds = matchedHits.map(h => ChartMarkIdentityResolver.resolve(h));
                 const matchedPoints = matchedHits.map(h => toSelectedPoint(h, xyScene));
 
@@ -2694,6 +2727,35 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
         this.crosshairState.set(state);
+        this.#paint();
+
+        const syncOptions = this.normalizedSynchronization();
+        if (syncOptions?.crosshair.showTooltip && state) {
+            const sc = this.cartesianXYScene();
+            if (sc) {
+                const dimension: "x" | "y" | "xy" = state.x && state.y ? "xy" : (state.x ? "x" : "y");
+                const res = resolveSynchronizationLocalTarget({
+                    anchor: state.anchor,
+                    dimension,
+                    mappedXAxisId: state.x?.axisId,
+                    mappedYAxisId: state.y?.axisId,
+                    scene: sc,
+                    sharedTooltip: this.#tooltip()?.shared() ?? false
+                });
+                if (res && res.primaryHit) {
+                    this.tooltipPosition.set(res.nearestAnchor);
+                    this.tooltipContext.set(this.#buildTooltipContext(res.sharedHits, this.#resolveSharedTooltip(sc), res.primaryHit));
+                } else {
+                    this.tooltipContext.set(null);
+                    this.tooltipPosition.set(null);
+                }
+            }
+        } else if (state === null && !localActive) {
+            if (this.tooltipContext()) {
+                this.tooltipContext.set(null);
+                this.tooltipPosition.set(null);
+            }
+        }
     }
 
     #restoreOrClearRemoteCrosshair(): void {
@@ -3345,9 +3407,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             if (canonicalChanged) {
                 // Base authority changed under a controlled chart (e.g. data-domain shrink):
                 // publish the committed canonical viewport without emitting a fake public event.
+                this.#synchronizationController?.clearPendingAcknowledgement();
                 this.#notifyCommittedViewport({
-                    acknowledgedInbound:
-                        this.#synchronizationController?.consumeAcknowledgedInbound(canonicalViewport) ?? false,
+                    acknowledgedInbound: false,
                     changedAxes: diffInternalViewportStates(previousCanonical, canonicalViewport).changedAxes,
                     phase: "end",
                     source: "data-reconcile"

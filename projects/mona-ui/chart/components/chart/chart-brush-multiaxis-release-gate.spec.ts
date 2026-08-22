@@ -75,6 +75,7 @@ describe("Chart Brush Multi-Axis Target Resolution Release Gate (GDSB-R2-005, GD
         host = fixture.componentInstance;
         fixture.detectChanges();
         await fixture.whenStable();
+        host.chart().recomputeScene();
     });
 
     it("filters matched marks to only the targeted Y axis", () => {
@@ -83,6 +84,7 @@ describe("Chart Brush Multi-Axis Target Resolution Release Gate (GDSB-R2-005, GD
         // Targeted to yLeft
         host.brushYAxisId.set("yLeft");
         fixture.detectChanges();
+        host.chart().recomputeScene();
 
         chartEl.dispatchEvent(
             new PointerEvent("pointerdown", {
@@ -126,6 +128,7 @@ describe("Chart Brush Multi-Axis Target Resolution Release Gate (GDSB-R2-005, GD
 
         host.brushYAxisId.set("nonExistentAxis");
         fixture.detectChanges();
+        host.chart().recomputeScene();
 
         chartEl.dispatchEvent(
             new PointerEvent("pointerdown", {
@@ -169,6 +172,7 @@ describe("Chart Brush Multi-Axis Target Resolution Release Gate (GDSB-R2-005, GD
 
         host.brushYAxisId.set(undefined);
         fixture.detectChanges();
+        host.chart().recomputeScene();
 
         chartEl.dispatchEvent(
             new PointerEvent("pointerdown", {
@@ -211,6 +215,7 @@ describe("Chart Brush Multi-Axis Target Resolution Release Gate (GDSB-R2-005, GD
 
         host.brushYAxisId.set("yRight");
         fixture.detectChanges();
+        host.chart().recomputeScene();
 
         chartEl.dispatchEvent(
             new PointerEvent("pointerdown", {
