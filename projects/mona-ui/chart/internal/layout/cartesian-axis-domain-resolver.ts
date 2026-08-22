@@ -6,30 +6,16 @@ import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
 import type { CartesianStackAnalysis } from "../data/cartesian-stack-engine";
 import { isFiniteNumber } from "../utils/number-utils";
+import {
+    normalizeCartesianTemporalDomain,
+    resolveCartesianTemporalValue
+} from "../data/cartesian-temporal-value-resolver";
 
 export interface AxisDomainResult {
     readonly domain: readonly [unknown, unknown] | readonly string[];
     readonly isValid: boolean;
     readonly reason?: "all-zero-log" | "invalid-explicit-domain" | "mixed-log-sign";
     readonly warnings: readonly string[];
-}
-
-function parseTemporalValue(val: unknown): number | undefined {
-    if (val instanceof Date) {
-        const t = val.getTime();
-        return Number.isNaN(t) ? undefined : t;
-    }
-    if (typeof val === "number" && Number.isFinite(val)) {
-        return val;
-    }
-    if (typeof val === "string" && val.trim().length > 0) {
-        if (/^\s*-?\d+(\.\d+)?\s*$/.test(val)) {
-            return undefined;
-        }
-        const parsed = Date.parse(val);
-        return Number.isNaN(parsed) ? undefined : parsed;
-    }
-    return undefined;
 }
 
 function scanMin(values: readonly number[]): number {
@@ -119,22 +105,9 @@ export class CartesianAxisDomainResolver {
         rootXField?: ChartField,
         orientation: "horizontal" | "vertical" = "vertical"
     ): readonly [Date, Date] {
-        let minTime = Infinity;
-        let maxTime = -Infinity;
+        let observedMinTime = Infinity;
+        let observedMaxTime = -Infinity;
         const isTemporalAxis = orientation === "horizontal" ? axis.dimension === "y" : axis.dimension === "x";
-
-        if (axis.explicitMin !== undefined) {
-            const t = parseTemporalValue(axis.explicitMin);
-            if (t !== undefined) {
-                minTime = t;
-            }
-        }
-        if (axis.explicitMax !== undefined) {
-            const t = parseTemporalValue(axis.explicitMax);
-            if (t !== undefined) {
-                maxTime = t;
-            }
-        }
 
         for (const s of boundSeries) {
             const data = resolveData("data" in s && typeof (s as any).data === "function" ? ((s as any).data() as readonly unknown[] | undefined) : undefined, rootData);
@@ -178,26 +151,20 @@ export class CartesianAxisDomainResolver {
                 }
 
                 const val = resolveValue(item, field, i);
-                const t = parseTemporalValue(val);
+                const t = resolveCartesianTemporalValue(val)?.epochMs;
                 if (t !== undefined) {
-                    if (axis.explicitMin === undefined && t < minTime) minTime = t;
-                    if (axis.explicitMax === undefined && t > maxTime) maxTime = t;
+                    if (t < observedMinTime) observedMinTime = t;
+                    if (t > observedMaxTime) observedMaxTime = t;
                 }
             }
         }
 
-        if (minTime === Infinity || maxTime === -Infinity) {
-            return [new Date(0), new Date(1)];
-        }
-        if (minTime > maxTime) {
-            const temp = minTime;
-            minTime = maxTime;
-            maxTime = temp;
-        }
-        if (minTime === maxTime) {
-            return [new Date(minTime - 86400000), new Date(maxTime + 86400000)];
-        }
-        return [new Date(minTime), new Date(maxTime)];
+        return normalizeCartesianTemporalDomain({
+            explicitMax: axis.explicitMax,
+            explicitMin: axis.explicitMin,
+            observedMaxEpoch: Number.isFinite(observedMaxTime) ? observedMaxTime : undefined,
+            observedMinEpoch: Number.isFinite(observedMinTime) ? observedMinTime : undefined
+        }).domain;
     }
 
     static #resolveNumericDomain(

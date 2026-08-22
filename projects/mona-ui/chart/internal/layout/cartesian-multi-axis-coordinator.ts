@@ -36,6 +36,7 @@ import {
     CartesianAxisCoordinateSpace,
     type CartesianAxisCoordinateSnapshot
 } from "../viewport/cartesian-axis-coordinate-space";
+import { createCartesianNormalizedBaseMapper } from "../viewport/cartesian-normalized-base-mapper";
 import type { InternalCartesianViewportState } from "../viewport/cartesian-viewport-normalizer";
 import { createCartesianAxisMeasurementKey } from "./cartesian-axis-measurement-key";
 import { CartesianStageTracker } from "./cartesian-stage-instrumentation";
@@ -730,7 +731,8 @@ export class CartesianMultiAxisCoordinator {
         preparation: CartesianDomainPreparation,
         chrome: CartesianAxisChromeLayout,
         viewport?: InternalCartesianViewportState,
-        labelMeasurements?: ReadonlyMap<string, ChartLabelMeasurement>
+        labelMeasurements?: ReadonlyMap<string, ChartLabelMeasurement>,
+        baseCoordinateSpace?: CartesianAxisCoordinateSpace
     ): MultiAxisViewportProjectionResult {
         CartesianStageTracker.current?.onStageC?.();
         const { axisResolution, baseDomains, resolvedTypes, axisUnitModes, xAxisValidityById, yAxisValidityById } = preparation;
@@ -747,6 +749,14 @@ export class CartesianMultiAxisCoordinator {
             const baseDomain = baseDomains.x.get(xAxis.axisId)!;
             const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
             const baseScale = baseScales.getXScale(xAxis.axisId)!;
+            const normalizedBaseMapper = baseCoordinateSpace?.get({ axis: "x", axisId: xAxis.axisId })?.normalizedBaseMapper
+                ?? createCartesianNormalizedBaseMapper({
+                    domain: baseDomain,
+                    exponent: xAxis.exponent,
+                    logBase: xAxis.logBase,
+                    symlogConstant: xAxis.symlogConstant,
+                    type: resolvedType
+                });
 
             const win = viewport?.x.get(xAxis.axisId);
             let effectiveDomain: readonly unknown[] = baseDomain;
@@ -775,6 +785,7 @@ export class CartesianMultiAxisCoordinator {
             xSnapshots.set(xAxis.axisId, {
                 baseDomain,
                 baseScale,
+                normalizedBaseMapper,
                 range,
                 ref: { axis: "x", axisId: xAxis.axisId },
                 resolvedType,
@@ -791,6 +802,14 @@ export class CartesianMultiAxisCoordinator {
                 ? [plotRect.y, plotRect.y + plotRect.height]
                 : [plotRect.y + plotRect.height, plotRect.y];
             const baseScale = baseScales.getYScale(yAxis.axisId)!;
+            const normalizedBaseMapper = baseCoordinateSpace?.get({ axis: "y", axisId: yAxis.axisId })?.normalizedBaseMapper
+                ?? createCartesianNormalizedBaseMapper({
+                    domain: baseDomain,
+                    exponent: yAxis.exponent,
+                    logBase: yAxis.logBase,
+                    symlogConstant: yAxis.symlogConstant,
+                    type: resolvedType
+                });
 
             const win = viewport?.y.get(yAxis.axisId);
             let effectiveDomain: readonly unknown[] = baseDomain;
@@ -819,6 +838,7 @@ export class CartesianMultiAxisCoordinator {
             ySnapshots.set(yAxis.axisId, {
                 baseDomain,
                 baseScale,
+                normalizedBaseMapper,
                 range,
                 ref: { axis: "y", axisId: yAxis.axisId },
                 resolvedType,
@@ -946,7 +966,8 @@ export class CartesianMultiAxisCoordinator {
     public static coordinate(options: MultiAxisCoordinatorOptions): MultiAxisCoordinatorResult {
         const prep = this.prepareDomains(options);
         const chrome = this.computeChrome(prep, options);
-        const proj = this.projectViewport(prep, chrome, options.viewport, options.labelMeasurements);
+        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(prep, chrome);
+        const proj = this.projectViewport(prep, chrome, options.viewport, options.labelMeasurements, baseCoordinateSpace);
 
         return {
             axisScenes: proj.axisScenes,

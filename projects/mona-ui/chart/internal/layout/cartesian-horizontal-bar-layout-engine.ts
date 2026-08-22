@@ -280,7 +280,8 @@ export class CartesianHorizontalBarLayoutEngine {
             preparation,
             chrome,
             viewport,
-            measurements
+            measurements,
+            runtime.baseCoordinateSpace
         );
 
         const scene = this.#projectSeriesGeometry(runtime, proj, viewport, warnedDiagnosticSignatures);

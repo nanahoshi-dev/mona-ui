@@ -1,5 +1,5 @@
 import type { ChartAxisFormatter, ChartXAxisType } from "../../models/chart-axis.models";
-import type { ChartField, ChartPoint, ChartRect } from "../../models/chart.models";
+import type { ChartField, ChartRect } from "../../models/chart.models";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import type {
     ChartBubbleSeriesRegistration,
@@ -11,82 +11,19 @@ import type {
 import { isContinuousXValid } from "../data/chart-domain";
 import { resolveData, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
 import type { LinearScale, TimeScale, UtcScale } from "../scale/cartesian-scale-factory";
-import { createBubbleRadiusScale, normalizeBubbleRadiusRange } from "../scale/bubble-size-scale";
-import type {
-    ChartBubbleSeriesScene,
-    ChartMarkerSeriesStyle,
-    ChartScatterSeriesScene
-} from "../scene/cartesian-scene";
+import type { ChartBubbleSeriesScene, ChartMarkerSeriesStyle, ChartScatterSeriesScene } from "../scene/cartesian-scene";
 import type { SceneHitTarget, SceneMarker } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { formatXValue, formatYValue } from "../utils/chart-formatter";
-import {
-    formatCompactNumber,
-    isFiniteNumber,
-    normalizeMarkerRadius
-} from "../utils/number-utils";
+import { isFiniteNumber } from "../utils/number-utils";
 import type { ChartPositionScale, ResolvedChartCartesianAxisType } from "../scale/chart-scale";
+import { resolveCartesianMarkerDatum } from "../density/cartesian-marker-hit-materializer";
+import { resolveCartesianMarkerGeometry } from "./cartesian-marker-geometry-resolver";
+import { ChartDensityTracker, type ChartDensityStageCVisitMode } from "./chart-density-instrumentation";
 
-export interface ResolvedCartesianXCoordinate {
-    readonly coordinate: number;
-    readonly interactionKey: number | string;
-    readonly valid: boolean;
-    readonly value: unknown;
-}
-
-export function resolveCartesianContinuousXCoordinate(
-    val: unknown,
-    linearXScale: LinearScale | undefined,
-    timeScale: TimeScale | UtcScale | undefined,
-    dataIndex: number,
-    genericXScale?: ChartPositionScale
-): ResolvedCartesianXCoordinate {
-    const activeScale = genericXScale ?? linearXScale ?? timeScale;
-    if (activeScale) {
-        if (activeScale.type === "time" || activeScale.type === "utc") {
-            let dateVal: Date | undefined;
-            if (val instanceof Date && !Number.isNaN(val.getTime())) {
-                dateVal = val;
-            } else if (typeof val === "number" && Number.isFinite(val)) {
-                dateVal = new Date(val);
-            } else if (typeof val === "string") {
-                const parsed = Date.parse(val);
-                if (!Number.isNaN(parsed)) {
-                    dateVal = new Date(parsed);
-                }
-            }
-            if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
-                const coord = (activeScale as any).map(dateVal);
-                if (coord !== undefined && Number.isFinite(coord)) {
-                    return {
-                        coordinate: coord,
-                        interactionKey: dateVal.getTime(),
-                        valid: true,
-                        value: val
-                    };
-                }
-            }
-        } else if (isFiniteNumber(val)) {
-            const num = Number(val);
-            const coord = (activeScale as any).map(num);
-            if (coord !== undefined && Number.isFinite(coord)) {
-                return {
-                    coordinate: coord,
-                    interactionKey: num,
-                    valid: true,
-                    value: val
-                };
-            }
-        }
-    }
-
-    return {
-        coordinate: 0,
-        interactionKey: dataIndex,
-        valid: false,
-        value: val
-    };
-}
+export {
+    resolveCartesianContinuousXCoordinate,
+    type ResolvedCartesianXCoordinate
+} from "./cartesian-marker-coordinate-resolver";
 
 export interface CartesianMarkerSeriesLayoutResult {
     readonly hitTargets: readonly SceneHitTarget[];
@@ -95,7 +32,8 @@ export interface CartesianMarkerSeriesLayoutResult {
 }
 
 export interface CartesianMarkerSeriesLayoutOptions {
-    readonly bubbleSizeDomain: readonly [number, number];
+    readonly bubbleSizeDomain?: readonly [number, number];
+    readonly identity?: import("../animation/chart-series-mark-identity-authority").ChartSeriesMarkIdentityAuthority;
     /** Representative source-index subset; null renders every datum (ordinary layout). */
     readonly indexView?: readonly number[] | null;
     readonly linearXScale?: LinearScale;
@@ -105,6 +43,7 @@ export interface CartesianMarkerSeriesLayoutOptions {
     readonly rootXField?: ChartField;
     readonly series: ChartCartesianSeriesRegistration;
     readonly seriesIndex: number;
+    readonly sourceVisitMode?: ChartDensityStageCVisitMode;
     readonly styleResolver: ChartStyleResolver;
     readonly timeScale?: TimeScale | UtcScale;
     readonly xAxis?: ChartXAxisRegistration;
@@ -128,19 +67,20 @@ export interface CartesianMarkerLayoutResult {
 }
 
 export interface CartesianMarkerLayoutOptions {
+    readonly bubbleSizeDomain?: readonly [number, number];
     readonly linearXScale?: LinearScale;
     readonly plotRect: ChartRect;
+    readonly renderOrderCounter?: { value: number };
     readonly rootData: readonly unknown[];
     readonly rootXField?: ChartField;
     readonly series: readonly ChartCartesianSeriesRegistration[];
-    readonly startingRenderOrder?: number;
     readonly styleResolver: ChartStyleResolver;
     readonly timeScale?: TimeScale | UtcScale;
     readonly xAxisFormatter?: ChartAxisFormatter;
     readonly xAxisType: ChartXAxisType;
     readonly xTimeSpanMs?: number;
     readonly yAxisFormatter?: ChartAxisFormatter;
-    readonly yScale: LinearScale;
+    readonly yScale: ChartPositionScale;
 }
 
 export class CartesianMarkerLayout {
@@ -149,7 +89,9 @@ export class CartesianMarkerLayout {
         rootData: readonly unknown[],
         rootXField: ChartField | undefined,
         xAxisType: ChartXAxisType,
-        seriesContextResolver?: (seriesId: string) => { effectiveXField?: ChartField; xType?: ResolvedChartCartesianAxisType } | undefined
+        seriesContextResolver?: (
+            seriesId: string
+        ) => { effectiveXField?: ChartField; xType?: ResolvedChartCartesianAxisType } | undefined
     ): readonly [number, number] {
         let globalMinSize = Number.POSITIVE_INFINITY;
         let globalMaxSize = Number.NEGATIVE_INFINITY;
@@ -185,9 +127,7 @@ export class CartesianMarkerLayout {
         return hasValidBubbleDomain ? [globalMinSize, globalMaxSize] : [1, 1];
     }
 
-    public static computeSeries(
-        options: CartesianMarkerSeriesLayoutOptions
-    ): CartesianMarkerSeriesLayoutResult | null {
+    public static computeSeries(options: CartesianMarkerSeriesLayoutOptions): CartesianMarkerSeriesLayoutResult | null {
         const {
             bubbleSizeDomain,
             linearXScale,
@@ -218,28 +158,63 @@ export class CartesianMarkerLayout {
 
         const isBubble = s.type === "bubble";
         const sStyle: ChartMarkerSeriesStyle = styleResolver.resolveMarkerSeriesStyle(s, sIdx);
-        const cssGeometry = styleResolver.resolveMarkerSeriesGeometry(s);
         const seriesDisplayName = resolveSeriesDisplayName(s, sIdx);
         const sData = resolveData(s.data(), rootData);
         const sXField = s.xField() ?? rootXField;
         const sField = s.field();
         const keyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.(), s.seriesKey?.());
 
-        let bubbleScale: ((val: number) => number) | undefined;
-        let normalizedMinRadius = 4;
-        let normalizedMaxRadius = 24;
+        const effectiveBubbleSizeDomain =
+            bubbleSizeDomain ??
+            (isBubble
+                ? CartesianMarkerLayout.calculateBubbleSizeDomain(
+                      [s as ChartBubbleSeriesRegistration],
+                      rootData,
+                      rootXField,
+                      xAxisType
+                  )
+                : [1, 1]);
 
-        if (isBubble) {
-            const bSeries = s as ChartBubbleSeriesRegistration;
-            const explicitMin = bSeries.minRadius?.();
-            const explicitMax = bSeries.maxRadius?.();
-            const rawMin = explicitMin !== undefined && isFiniteNumber(explicitMin) ? explicitMin : (cssGeometry.bubbleMinRadius ?? 4);
-            const rawMax = explicitMax !== undefined && isFiniteNumber(explicitMax) ? explicitMax : (cssGeometry.bubbleMaxRadius ?? 24);
-            const range = normalizeBubbleRadiusRange(rawMin, rawMax);
-            normalizedMinRadius = range.minRadius;
-            normalizedMaxRadius = range.maxRadius;
-            bubbleScale = createBubbleRadiusScale(bubbleSizeDomain, [range.minRadius, range.maxRadius]);
-        }
+        const markerGeometry = resolveCartesianMarkerGeometry({
+            bubbleSizeDomain: effectiveBubbleSizeDomain,
+            series: s as ChartScatterSeriesRegistration | ChartBubbleSeriesRegistration,
+            styleResolver
+        });
+
+        const bSeries = isBubble ? (s as ChartBubbleSeriesRegistration) : undefined;
+        const datumContext = {
+            bubbleRadiusScale: markerGeometry.bubbleRadiusScale ?? undefined,
+            color: sStyle.color,
+            data: sData,
+            defaultMinRadius: markerGeometry.bubbleMinRadius,
+            defaultScatterRadius: markerGeometry.scatterRadius,
+            identity: options.identity,
+            keyResolver,
+            series: s,
+            seriesOrdinal: sIdx,
+            seriesDisplayName,
+            seriesType: s.type as "bubble" | "scatter",
+            sizeField: bSeries?.sizeField(),
+            sizeFormatter: bSeries?.sizeFormatter?.(),
+            valueField: sField,
+            valueFormatter:
+                "valueFormatter" in s && typeof (s as any).valueFormatter === "function"
+                    ? ((s as any).valueFormatter() as any)
+                    : undefined,
+            xAxis: options.xAxis,
+            xAxisFormatter,
+            xAxisId: options.xAxisId ?? "default-x",
+            xAxisTitle: options.xAxisTitle,
+            xAxisType,
+            xField: sXField,
+            xScale: effectiveXScale,
+            xTimeSpanMs,
+            yAxis: options.yAxis,
+            yAxisFormatter,
+            yAxisId: options.yAxisId ?? "default-y",
+            yAxisTitle: options.yAxisTitle,
+            yScale
+        };
 
         const markers: SceneMarker[] = [];
         const hitTargets: SceneHitTarget[] = [];
@@ -250,63 +225,34 @@ export class CartesianMarkerLayout {
 
         if (iterateIndices !== null) {
             for (const dIdx of iterateIndices) {
+                recordSourceVisit(options.sourceVisitMode ?? "raw");
                 renderMarkerDatum(dIdx);
             }
         } else {
             for (let dIdx = 0; dIdx < sData.length; dIdx++) {
+                recordSourceVisit(options.sourceVisitMode ?? "raw");
                 renderMarkerDatum(dIdx);
             }
         }
 
-        function renderMarkerDatum(dIdx: number): void {
-            const datum = sData[dIdx];
-            const rawXVal = resolveValue(datum, sXField, dIdx);
-            const rawYVal = resolveValue(datum, sField, dIdx);
-
-            const resolvedX = resolveCartesianContinuousXCoordinate(
-                rawXVal,
-                linearXScale,
-                timeScale,
-                dIdx,
-                options.xScale
-            );
-            if (!resolvedX.valid) {
-                return;
-            }
-
-            if (!isFiniteNumber(rawYVal)) {
-                return;
-            }
-
-            const yVal = Number(rawYVal);
-            const xPos = resolvedX.coordinate;
-            const yPos = (yScale as any).map(yVal);
-            if (yPos === undefined || !Number.isFinite(yPos)) {
-                return;
-            }
-
-            let markerRadius: number;
-            let sizeVal: number | undefined;
-            let formattedSizeStr: string | undefined;
-
-            if (isBubble) {
-                const bSeries = s as ChartBubbleSeriesRegistration;
-                const rawSize = resolveValue(datum, bSeries.sizeField(), dIdx);
-                if (!isFiniteNumber(rawSize) || (rawSize as number) <= 0) {
-                    return;
-                }
-                sizeVal = Number(rawSize);
-                markerRadius = bubbleScale ? bubbleScale(sizeVal) : normalizedMinRadius;
-                const formatter = bSeries.sizeFormatter?.();
-                formattedSizeStr = formatter ? formatter(sizeVal, dIdx) : formatCompactNumber(sizeVal);
+        function recordSourceVisit(mode: ChartDensityStageCVisitMode): void {
+            if (mode === "raw") {
+                ChartDensityTracker.current?.onRawStageCSourceRowsVisited?.();
+            } else if (mode === "sampled") {
+                ChartDensityTracker.current?.onSampledProjectedRowsVisited?.();
             } else {
-                const scatterSeries = s as ChartScatterSeriesRegistration;
-                const explicitRadius = scatterSeries.pointRadius?.();
-                const rawRadius =
-                    explicitRadius !== undefined && isFiniteNumber(explicitRadius)
-                        ? explicitRadius
-                        : (cssGeometry.pointRadius ?? 4);
-                markerRadius = normalizeMarkerRadius(rawRadius, 4, 1, 100);
+                ChartDensityTracker.current?.onExactProjectedRowsVisited?.();
+            }
+        }
+
+        function renderMarkerDatum(dIdx: number): void {
+            const res = resolveCartesianMarkerDatum(
+                datumContext,
+                dIdx,
+                renderOrderCounter ? ++renderOrderCounter.value : 0
+            );
+            if (!res) {
+                return;
             }
 
             // Valid datum count increments for any semantically valid marker before viewport culling
@@ -314,89 +260,42 @@ export class CartesianMarkerLayout {
 
             // Off-screen culling: if circle is completely outside plot bounds
             const isFullyOutside =
-                xPos + markerRadius < plotRect.x ||
-                xPos - markerRadius > plotRect.x + plotRect.width ||
-                yPos + markerRadius < plotRect.y ||
-                yPos - markerRadius > plotRect.y + plotRect.height;
+                res.xPos + res.markerRadius < plotRect.x ||
+                res.xPos - res.markerRadius > plotRect.x + plotRect.width ||
+                res.yPos + res.markerRadius < plotRect.y ||
+                res.yPos - res.markerRadius > plotRect.y + plotRect.height;
 
             if (isFullyOutside) {
                 return;
             }
 
-            const animationKey = keyResolver.resolveKey(datum, resolvedX.interactionKey, dIdx);
-
-            const marker: SceneMarker = {
-                animationKey,
-                datum,
-                formattedSize: formattedSizeStr,
-                index: dIdx,
-                radius: markerRadius,
-                sizeValue: sizeVal,
-                x: xPos,
-                xValue: rawXVal,
-                y: yPos,
-                yValue: yVal
-            };
-            markers.push(marker);
-
-            const currentRenderOrder = renderOrderCounter ? ++renderOrderCounter.value : 0;
-            const hitRadius = isBubble ? markerRadius + 4 : Math.max(markerRadius + 6, 10);
-            const point: ChartPoint = { x: xPos, y: yPos };
-
-            hitTargets.push({
-                animationKey,
-                color: sStyle.color,
-                datum,
-                formattedCategory: formatXValue(rawXVal, dIdx, xAxisFormatter, xAxisType, xTimeSpanMs),
-                formattedSize: formattedSizeStr,
-                formattedValue: formatYValue(yVal, dIdx, yAxisFormatter),
-                index: dIdx,
-                point,
-                radius: hitRadius,
-                renderOrder: currentRenderOrder,
-                seriesId: s.id,
-                seriesName: seriesDisplayName,
-                seriesType: s.type,
-                sizeValue: sizeVal,
-                visualRadius: markerRadius,
-                xAxisId: options.xAxisId ?? (options.xAxis?.axisId?.() ?? "default-x"),
-                xAxisTitle: options.xAxisTitle ?? (options.xAxis?.title?.() ?? ""),
-                xKey: resolvedX.interactionKey,
-                xValue: rawXVal,
-                yAxisId: options.yAxisId ?? (options.yAxis?.axisId?.() ?? "default-y"),
-                yAxisTitle: options.yAxisTitle ?? (options.yAxis?.title?.() ?? ""),
-                yValue: yVal
-            });
+            markers.push(res.marker);
+            hitTargets.push(res.target);
         }
 
-        let scene: ChartBubbleSeriesScene | ChartScatterSeriesScene;        if (isBubble) {
+        let scene: ChartBubbleSeriesScene | ChartScatterSeriesScene;
+        if (isBubble) {
             scene = {
                 id: s.id,
                 markers,
-                maxRadius: normalizedMaxRadius,
-                minRadius: normalizedMinRadius,
+                maxRadius: markerGeometry.bubbleMaxRadius,
+                minRadius: markerGeometry.bubbleMinRadius,
                 name: seriesDisplayName,
                 style: sStyle,
                 type: "bubble",
-                xAxisId: options.xAxisId ?? (s.xAxisId?.() ?? "default-x"),
-                yAxisId: options.yAxisId ?? (s.yAxisId?.() ?? "default-y")
+                xAxisId: options.xAxisId ?? s.xAxisId?.() ?? "default-x",
+                yAxisId: options.yAxisId ?? s.yAxisId?.() ?? "default-y"
             };
         } else {
-            const scatterSeries = s as ChartScatterSeriesRegistration;
-            const explicitRadius = scatterSeries.pointRadius?.();
-            const rawRadius =
-                explicitRadius !== undefined && isFiniteNumber(explicitRadius)
-                    ? explicitRadius
-                    : (cssGeometry.pointRadius ?? 4);
             scene = {
                 id: s.id,
                 markers,
                 name: seriesDisplayName,
-                pointRadius: normalizeMarkerRadius(rawRadius, 4, 1, 100),
+                pointRadius: markerGeometry.scatterRadius,
                 style: sStyle,
                 type: "scatter",
-                xAxisId: options.xAxisId ?? (s.xAxisId?.() ?? "default-x"),
-                yAxisId: options.yAxisId ?? (s.yAxisId?.() ?? "default-y")
+                xAxisId: options.xAxisId ?? s.xAxisId?.() ?? "default-x",
+                yAxisId: options.yAxisId ?? s.yAxisId?.() ?? "default-y"
             };
         }
 
@@ -409,12 +308,13 @@ export class CartesianMarkerLayout {
 
     public static compute(options: CartesianMarkerLayoutOptions): CartesianMarkerLayoutResult {
         const {
+            bubbleSizeDomain,
             linearXScale,
             plotRect,
+            renderOrderCounter,
             rootData,
             rootXField,
             series,
-            startingRenderOrder = 0,
             styleResolver,
             timeScale,
             xAxisFormatter,
@@ -424,30 +324,18 @@ export class CartesianMarkerLayout {
             yScale
         } = options;
 
-        if (xAxisType === "category" || (!linearXScale && !timeScale)) {
-            return {
-                hitTargets: [],
-                seriesScenes: [],
-                validDatumCount: 0
-            };
-        }
-
-        const visibleSeries = series.filter(s => s.visible());
-        const visibleBubbleSeries = visibleSeries.filter(
-            (s): s is ChartBubbleSeriesRegistration => s.type === "bubble"
-        );
-
-        const bubbleSizeDomain = this.calculateBubbleSizeDomain(
-            visibleBubbleSeries,
-            rootData,
-            rootXField,
-            xAxisType
-        );
-
         const seriesScenes: (ChartBubbleSeriesScene | ChartScatterSeriesScene)[] = [];
         const hitTargets: SceneHitTarget[] = [];
         let totalValidDatumCount = 0;
-        const renderOrderCounter = { value: startingRenderOrder };
+
+        const effectiveBubbleSizeDomain =
+            bubbleSizeDomain ??
+            CartesianMarkerLayout.calculateBubbleSizeDomain(
+                series.filter(s => s.type === "bubble" && s.visible()) as ChartBubbleSeriesRegistration[],
+                rootData,
+                rootXField,
+                xAxisType
+            );
 
         for (let sIdx = 0; sIdx < series.length; sIdx++) {
             const s = series[sIdx];
@@ -456,7 +344,7 @@ export class CartesianMarkerLayout {
             }
 
             const res = this.computeSeries({
-                bubbleSizeDomain,
+                bubbleSizeDomain: effectiveBubbleSizeDomain,
                 linearXScale,
                 plotRect,
                 renderOrderCounter,

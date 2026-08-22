@@ -444,6 +444,85 @@ describe("CartesianLayoutEngine", () => {
         expect(scene.interactionBucketLookup?.has(10)).toBe(true);
     });
 
+    it("keeps exact Stage-C marker membership through the integrated layout path (R15-04)", () => {
+        const scatter = createMockScatter("y", "dense-scatter");
+        if (scatter.type !== "scatter") {
+            throw new Error("Expected the test registration to remain a scatter series");
+        }
+        scatter.downsampling = signal({
+            algorithm: "pixel",
+            enabled: true,
+            maxPoints: 1,
+            threshold: 0
+        });
+        const data = [
+            { x: 0, y: 0.2 },
+            { x: 5e-10, y: 0.5 },
+            { x: 1e-9, y: 0.8 }
+        ];
+        const prepared = CartesianLayoutEngine.prepareRuntime({
+            containerHeight: 300,
+            containerWidth: 500,
+            rootData: data,
+            rootXField: "x",
+            series: [scatter],
+            styleResolver,
+            xAxis: createMockXAxis({ max: 1e-9, min: 0, nice: false, type: "linear" }),
+            yAxis: createMockYAxis({ max: 1, min: 0, nice: false, type: "linear" })
+        });
+        if (!prepared.runtime) {
+            throw new Error("Expected the Cartesian runtime to be prepared");
+        }
+        const runtime = prepared.runtime;
+        const makeViewport = (targetRuntime: NonNullable<typeof runtime>, min: number, max: number) => ({
+            x: new Map([
+                [targetRuntime.primaryXAxisId, { axis: "x" as const, axisId: targetRuntime.primaryXAxisId, kind: "continuous" as const, min, max }]
+            ]),
+            y: new Map([
+                [targetRuntime.primaryYAxisId, { axis: "y" as const, axisId: targetRuntime.primaryYAxisId, kind: "continuous" as const, min: 0, max: 1 }]
+            ])
+        });
+
+        const ordinaryScatter = createMockScatter("y", "ordinary-scatter");
+        const ordinaryPrepared = CartesianLayoutEngine.prepareRuntime({
+            containerHeight: 300,
+            containerWidth: 500,
+            rootData: data,
+            rootXField: "x",
+            series: [ordinaryScatter],
+            styleResolver,
+            xAxis: createMockXAxis({ max: 1e-9, min: 0, nice: false, type: "linear" }),
+            yAxis: createMockYAxis({ max: 1, min: 0, nice: false, type: "linear" })
+        });
+        if (!ordinaryPrepared.runtime) {
+            throw new Error("Expected the ordinary runtime to be prepared");
+        }
+        const ordinaryScene = CartesianLayoutEngine.projectRuntime(
+            ordinaryPrepared.runtime,
+            makeViewport(ordinaryPrepared.runtime, 0, 1e-12)
+        ).scene;
+        const ordinarySeries = ordinaryScene.series[0];
+        expect(ordinarySeries.type).toBe("scatter");
+        if (ordinarySeries.type === "scatter") {
+            expect(ordinarySeries.markers.map(marker => marker.index)).toEqual([0]);
+        }
+
+        const fullScene = CartesianLayoutEngine.projectRuntime(runtime, makeViewport(runtime, 0, 1e-12)).scene;
+        const fullSeries = fullScene.series[0];
+        expect(fullSeries.type).toBe("scatter");
+        if (fullSeries.type === "scatter") {
+            expect(fullSeries.markers.map(marker => marker.index)).toEqual([0]);
+        }
+
+        const sampledScene = CartesianLayoutEngine.projectRuntime(runtime, makeViewport(runtime, 0, 1e-9)).scene;
+        const sampledSeries = sampledScene.series[0];
+        expect(sampledSeries.type).toBe("scatter");
+        if (sampledSeries.type === "scatter") {
+            expect(sampledSeries.markers).toHaveLength(1);
+            expect([0, 1, 2]).toContain(sampledSeries.markers[0].index);
+        }
+    });
+
     it("should compute bubble radius using sqrt scale mapping (SB-005, SB-006)", () => {
         const bubble = createMockBubble("y", "pop", "bubble-1", true, undefined, undefined, 5, 25);
         const data = [

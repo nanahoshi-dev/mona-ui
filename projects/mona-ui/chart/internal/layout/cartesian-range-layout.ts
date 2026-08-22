@@ -9,11 +9,19 @@ import type {
 } from "../context/chart-registration-context";
 import { resolveFiniteRangeValues } from "../data/chart-range-resolver";
 import { resolveValue } from "../data/chart-value-resolver";
-import type { ChartBandScale, ChartContinuousScale, ChartPositionScale, ResolvedChartCartesianAxisType } from "../scale/chart-scale";
+import type {
+    ChartBandScale,
+    ChartContinuousScale,
+    ChartPositionScale,
+    ResolvedChartCartesianAxisType
+} from "../scale/chart-scale";
 import type { ChartRangeAreaSeriesScene, ChartRangeBarSeriesScene } from "../scene/cartesian-scene";
 import type { SceneHitTarget, SceneRangeAreaPoint, SceneRangeBar } from "../scene/scene-geometry";
 import { formatXValue, formatYValue } from "../utils/chart-formatter";
 import { isFiniteNumber, normalizeNonNegativeNumber, normalizeOpacity } from "../utils/number-utils";
+import { ChartDensityTracker, type ChartDensityStageCVisitMode } from "./chart-density-instrumentation";
+import { resolveRangeAreaHitGeometry } from "./cartesian-range-hit-geometry";
+import { resolveRangeTemporalXValue } from "../density/cartesian-range-temporal";
 
 export interface RangeBarLayoutContext {
     bandScale?: ChartBandScale;
@@ -101,10 +109,7 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
 
         const rawFromY = (yScale as any).map(range.fromValue);
         const rawToY = (yScale as any).map(range.toValue);
-        if (
-            rawFromY === undefined || !Number.isFinite(rawFromY) ||
-            rawToY === undefined || !Number.isFinite(rawToY)
-        ) {
+        if (rawFromY === undefined || !Number.isFinite(rawFromY) || rawToY === undefined || !Number.isFinite(rawToY)) {
             continue;
         }
 
@@ -194,12 +199,12 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
                 x: barX,
                 y: topY
             },
-            xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
-            xAxisTitle: xAxisTitle ?? (xAxis?.title?.() ?? ""),
+            xAxisId: xAxisId ?? xAxis?.axisId?.() ?? "default-x",
+            xAxisTitle: xAxisTitle ?? xAxis?.title?.() ?? "",
             xKey: catKey,
             xValue: xVal,
-            yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y"),
-            yAxisTitle: yAxisTitle ?? (yAxis?.title?.() ?? "")
+            yAxisId: yAxisId ?? yAxis?.axisId?.() ?? "default-y",
+            yAxisTitle: yAxisTitle ?? yAxis?.title?.() ?? ""
         };
         recordHitTarget(barTarget, true, false);
     }
@@ -212,8 +217,8 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
         name: seriesDisplayName,
         style: sStyle,
         type: "rangeBar",
-        xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
-        yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y")
+        xAxisId: xAxisId ?? xAxis?.axisId?.() ?? "default-x",
+        yAxisId: yAxisId ?? yAxis?.axisId?.() ?? "default-y"
     };
 }
 
@@ -223,9 +228,16 @@ export interface RangeAreaLayoutContext {
     indexView?: readonly number[] | null;
     linearXScale?: ChartContinuousScale;
     /** Segment ordinal per source index (-1 = invalid) for gap topology when sampled. */
-    scalarSegmentIds?: Int32Array;
+    rangeSegmentIds?: Int32Array;
     /** endIndexExclusive per segment ordinal for gap-marker lookup when sampled. */
+    rangeSegmentEnds?: readonly number[];
+    /** Contiguous range slice for non-sampled visible window projection */
+    rangeSlice?: { readonly startIndex: number; readonly endIndexExclusive: number } | null;
+    /** Segment ordinal per source index (-1 = invalid) for gap topology when sampled. (deprecated alias) */
+    scalarSegmentIds?: Int32Array;
+    /** endIndexExclusive per segment ordinal for gap-marker lookup when sampled. (deprecated alias) */
     scalarSegmentEnds?: readonly number[];
+    identity?: import("../animation/chart-series-mark-identity-authority").ChartSeriesMarkIdentityAuthority;
     plotRect: ChartRect;
     recordHitTarget: (target: SceneHitTarget, isBar: boolean, isPoint: boolean) => void;
     renderOrderCounter: { value: number };
@@ -233,6 +245,7 @@ export interface RangeAreaLayoutContext {
     rootXField?: ChartField;
     series: ChartRangeAreaSeriesRegistration;
     seriesDisplayName: string;
+    readonly sourceVisitMode?: ChartDensityStageCVisitMode;
     style: ChartSeriesStyle;
     timeScale?: ChartContinuousScale;
     timeSpanMs?: number;
@@ -251,6 +264,7 @@ export interface RangeAreaLayoutContext {
 export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeAreaSeriesScene {
     const {
         bandScale,
+        identity,
         indexView,
         linearXScale,
         plotRect,
@@ -301,6 +315,13 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
     const effectiveXScale = xScale ?? bandScale ?? linearXScale ?? timeScale;
 
     const visitRangeDatum = (dIdx: number): void => {
+        if (ctx.sourceVisitMode === "sampled") {
+            ChartDensityTracker.current?.onSampledProjectedRowsVisited?.();
+        } else if (ctx.sourceVisitMode === "exact") {
+            ChartDensityTracker.current?.onExactProjectedRowsVisited?.();
+        } else {
+            ChartDensityTracker.current?.onRawStageCSourceRowsVisited?.();
+        }
         const datum = sData[dIdx];
         const xVal = resolveValue(datum, sXField, dIdx);
 
@@ -320,21 +341,11 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
                 }
             }
         } else if (xAxisType === "time" || xAxisType === "utc") {
-            let dateVal: Date | undefined;
-            if (xVal instanceof Date && !Number.isNaN(xVal.getTime())) {
-                dateVal = xVal;
-            } else if (typeof xVal === "number" && Number.isFinite(xVal)) {
-                dateVal = new Date(xVal);
-            } else if (typeof xVal === "string" && xVal.trim().length > 0 && !/^\s*-?\d+(\.\d+)?\s*$/.test(xVal)) {
-                const parsed = Date.parse(xVal);
-                if (!Number.isNaN(parsed)) {
-                    dateVal = new Date(parsed);
-                }
-            }
-            if (dateVal !== undefined && Number.isFinite(dateVal.getTime())) {
-                normalizedXKey = dateVal.getTime();
+            const temporalX = resolveRangeTemporalXValue(xVal);
+            if (temporalX) {
+                normalizedXKey = temporalX.epochMs;
                 const tScale = (effectiveXScale as ChartContinuousScale<Date>) ?? timeScale;
-                const mappedX = tScale?.map(dateVal);
+                const mappedX = tScale?.map(temporalX.date);
                 if (mappedX !== undefined && Number.isFinite(mappedX)) {
                     xPos = mappedX;
                     isXValid = true;
@@ -356,7 +367,9 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
 
         const range = resolveFiniteRangeValues(datum, sFromField, sToField, dIdx);
         const defined = isXValid && range !== null;
-        const animationKey = keyResolver.resolveKey(datum, normalizedXKey, dIdx);
+        const animationKey = identity
+            ? identity.resolveKeyAt(dIdx, normalizedXKey, datum)
+            : keyResolver.resolveKey(datum, normalizedXKey, dIdx);
 
         if (!defined || !range) {
             points.push({
@@ -373,10 +386,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
 
         const rawFromY = yScale.map(range.fromValue);
         const rawToY = yScale.map(range.toValue);
-        if (
-            rawFromY === undefined || !Number.isFinite(rawFromY) ||
-            rawToY === undefined || !Number.isFinite(rawToY)
-        ) {
+        if (rawFromY === undefined || !Number.isFinite(rawFromY) || rawToY === undefined || !Number.isFinite(rawToY)) {
             points.push({
                 animationKey,
                 datum,
@@ -423,13 +433,8 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
         points.push(point);
 
         const currentRenderOrder = ++renderOrderCounter.value;
-        const formattedCategory = formatXValue(
-            normalizedXKey,
-            dIdx,
-            xAxis?.formatter?.(),
-            xAxisType,
-            timeSpanMs
-        );
+        const formattedCategory = formatXValue(normalizedXKey, dIdx, xAxis?.formatter?.(), xAxisType, timeSpanMs);
+        const hitGeometry = resolveRangeAreaHitGeometry(sShowPoints, pointRadius);
 
         const rangeTarget: SceneHitTarget = {
             animationKey,
@@ -445,7 +450,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
             lowPoint,
             lowValue: range.lowValue,
             point: { x: xPos, y: (fromY + toY) / 2 },
-            radius: Math.max(16, pointRadius + 4),
+            radius: hitGeometry.hitRadius,
             range: {
                 formattedFrom,
                 formattedTo,
@@ -465,22 +470,25 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
             toValue: range.toValue,
             value: [range.fromValue, range.toValue],
             valueKind: "range",
-            visualRadius: pointRadius,
-            xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
-            xAxisTitle: xAxisTitle ?? (xAxis?.title?.() ?? ""),
+            visualRadius: hitGeometry.visualRadius,
+            xAxisId: xAxisId ?? xAxis?.axisId?.() ?? "default-x",
+            xAxisTitle: xAxisTitle ?? xAxis?.title?.() ?? "",
             xKey: normalizedXKey,
             xValue: xVal,
-            yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y"),
-            yAxisTitle: yAxisTitle ?? (yAxis?.title?.() ?? "")
+            yAxisId: yAxisId ?? yAxis?.axisId?.() ?? "default-y",
+            yAxisTitle: yAxisTitle ?? yAxis?.title?.() ?? ""
         };
         recordHitTarget(rangeTarget, false, true);
     };
+
+    const effectiveSegmentIds = ctx.rangeSegmentIds ?? scalarSegmentIds;
+    const effectiveSegmentEnds = ctx.rangeSegmentEnds ?? scalarSegmentEnds;
 
     if (indexView) {
         let previousSegmentId = -1;
         let hasPrevious = false;
         for (const dIdx of indexView) {
-            const segmentId = scalarSegmentIds ? scalarSegmentIds[dIdx] : -2;
+            const segmentId = effectiveSegmentIds ? effectiveSegmentIds[dIdx] : -2;
             if (
                 !sConnectNulls &&
                 hasPrevious &&
@@ -488,8 +496,8 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
                 segmentId >= 0 &&
                 segmentId !== previousSegmentId
             ) {
-                const markerIdx = scalarSegmentEnds?.[previousSegmentId] ?? -1;
-                if (markerIdx >= 0 && markerIdx < sData.length && scalarSegmentIds?.[markerIdx] === -1) {
+                const markerIdx = effectiveSegmentEnds?.[previousSegmentId] ?? -1;
+                if (markerIdx >= 0 && markerIdx < sData.length && effectiveSegmentIds?.[markerIdx] === -1) {
                     visitRangeDatum(markerIdx);
                 }
             }
@@ -497,6 +505,12 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
                 previousSegmentId = segmentId;
                 hasPrevious = true;
             }
+            visitRangeDatum(dIdx);
+        }
+    } else if (ctx.rangeSlice) {
+        const start = Math.max(0, ctx.rangeSlice.startIndex - 1);
+        const end = Math.min(sData.length, ctx.rangeSlice.endIndexExclusive + 1);
+        for (let dIdx = start; dIdx < end; dIdx++) {
             visitRangeDatum(dIdx);
         }
     } else {
@@ -518,7 +532,7 @@ export function computeRangeAreaLayout(ctx: RangeAreaLayoutContext): ChartRangeA
         strokeWidth,
         style: sStyle,
         type: "rangeArea",
-        xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
-        yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y")
+        xAxisId: xAxisId ?? xAxis?.axisId?.() ?? "default-x",
+        yAxisId: yAxisId ?? yAxis?.axisId?.() ?? "default-y"
     };
 }

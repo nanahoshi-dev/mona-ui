@@ -12,6 +12,7 @@ import type { SceneCandlestickMark, SceneOhlcMark } from "../scene/scene-geometr
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { isFiniteNumber, normalizeNonNegativeNumber } from "../utils/number-utils";
 import { FinancialWidthEngine } from "./financial-width-engine";
+import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
 
 export interface FinancialLayoutContext {
     readonly animationKeys?: readonly string[];
@@ -40,19 +41,9 @@ function mapXCoordinate(
     }
     if (xAxisType === "time" || xAxisType === "utc") {
         const timeScale = xScale as ChartContinuousScale<Date>;
-        let date: Date | undefined;
-        if (xScaleValue instanceof Date && !Number.isNaN(xScaleValue.getTime())) {
-            date = xScaleValue;
-        } else if (typeof xScaleValue === "number" && Number.isFinite(xScaleValue)) {
-            date = new Date(xScaleValue);
-        } else if (typeof xScaleValue === "string") {
-            const parsed = Date.parse(xScaleValue);
-            if (!Number.isNaN(parsed)) {
-                date = new Date(parsed);
-            }
-        }
-        if (!date) return undefined;
-        const mapped = timeScale.map(date);
+        const resolved = resolveCartesianTemporalValue(xScaleValue);
+        if (!resolved) return undefined;
+        const mapped = timeScale.map(resolved.date);
         return mapped !== undefined && Number.isFinite(mapped) ? mapped : undefined;
     }
     if (isFiniteNumber(xScaleValue)) {
