@@ -1,4 +1,5 @@
 import type { ChartAxisFormatter, ChartXAxisType } from "../../models/chart-axis.models";
+import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
 import { formatCompactNumber, isFiniteNumber } from "./number-utils";
 
 export function formatTimeRange(date: Date, spanMs: number, utc: boolean = false): string {
@@ -46,24 +47,16 @@ export function formatXValue(
         return formatter(value, index);
     }
 
-    if (value instanceof Date) {
+    const temporal = resolveCartesianTemporalValue(value);
+    if (value instanceof Date && temporal) {
         const span = timeSpanMs ?? 86400000;
-        return formatTimeRange(value, span, xAxisType === "utc");
+        return formatTimeRange(temporal.date, span, xAxisType === "utc");
     }
 
     if (xAxisType === "time" || xAxisType === "utc") {
-        let dateVal: Date | undefined;
-        if (typeof value === "number" && Number.isFinite(value)) {
-            dateVal = new Date(value);
-        } else if (typeof value === "string") {
-            const parsed = Date.parse(value);
-            if (!Number.isNaN(parsed)) {
-                dateVal = new Date(parsed);
-            }
-        }
-        if (dateVal) {
+        if (temporal) {
             const span = timeSpanMs ?? 86400000;
-            return formatTimeRange(dateVal, span, xAxisType === "utc");
+            return formatTimeRange(temporal.date, span, xAxisType === "utc");
         }
     }
 
@@ -122,4 +115,3 @@ export function formatCartesianAxisSemanticValue(options: CartesianAxisSemanticF
     }
     return formatYValue(value, index, undefined);
 }
-
