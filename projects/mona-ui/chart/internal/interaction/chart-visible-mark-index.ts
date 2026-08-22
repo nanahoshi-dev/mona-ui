@@ -59,4 +59,24 @@ export class ChartVisibleMarkIndex {
     public has(markId: string): boolean {
         return this.#byMarkId.has(markId);
     }
+
+    /**
+     * Adds a lazily resolved raw hit (dense selection overlay) without
+     * disturbing existing identities.
+     */
+    public add(hit: SceneHitTarget): void {
+        const markId = ChartMarkIdentityResolver.resolve(hit);
+        if (this.#byMarkId.has(markId)) {
+            return;
+        }
+        this.#byMarkId.set(markId, hit);
+        this.#markIds = [...this.#markIds, markId];
+        this.#hits = [...this.#hits, hit];
+        let seriesHits = this.#bySeriesId.get(hit.seriesId);
+        if (!seriesHits) {
+            seriesHits = [];
+            this.#bySeriesId.set(hit.seriesId, seriesHits);
+        }
+        seriesHits.push(hit);
+    }
 }

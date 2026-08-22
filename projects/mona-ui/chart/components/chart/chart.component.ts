@@ -198,6 +198,10 @@ import {
     type ViewportCommitNotification
 } from "../../internal/synchronization/chart-synchronization-controller";
 import { ChartSynchronizationCoordinator } from "../../internal/synchronization/chart-synchronization-coordinator";
+import {
+    collectDenseBrushHits,
+    resolveDenseMarkById
+} from "../../internal/density/cartesian-dense-selection";
 import { normalizeChartNavigationOptions } from "../../internal/viewport/chart-navigation-options";
 import {
     areInternalViewportStatesEqual,
@@ -499,6 +503,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const index = new ChartVisibleMarkIndex();
         if (scene?.hitTargets) {
             index.build(scene.hitTargets);
+        }
+        // Lazy reverse lookup: selected raw marks absent from the render sample
+        // resolve through dense providers only when selection demands it (§72/§73).
+        const xyScene = this.cartesianXYScene();
+        if (xyScene?.denseInteraction && xyScene.densityRuntime) {
+            for (const markId of this.effectiveSelectedMarkIds()) {
+                if (index.has(markId)) {
+                    continue;
+                }
+                const hit = resolveDenseMarkById(xyScene, markId);
+                if (hit) {
+                    index.add(hit);
+                }
+            }
         }
         return index;
     });
@@ -1884,16 +1902,22 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 }
 
                 const markIndex = this.#getOrCreateBrushMarkIndex(xyScene);
-                const matchedHits = markIndex.query(
-                    result.bounds,
-                    result.session.hitPolicy,
-                    target,
-                    undefined,
-                    undefined,
-                    undefined,
-                    xyScene.primaryXAxisId,
-                    xyScene.primaryYAxisId
-                );
+                const matchedHits = [
+                    ...markIndex.query(
+                        result.bounds,
+                        result.session.hitPolicy,
+                        target,
+                        undefined,
+                        undefined,
+                        undefined,
+                        xyScene.primaryXAxisId,
+                        xyScene.primaryYAxisId
+                    ),
+                    // Dense raw range providers keep exact brush semantics over
+                    // unsampled source points (§68/§70). Explicit exact results
+                    // may legitimately be O(M); they are never truncated.
+                    ...collectDenseBrushHits(xyScene, result.bounds, target)
+                ];
                 const matchedMarkIds = matchedHits.map(h => ChartMarkIdentityResolver.resolve(h));
                 const matchedPoints = matchedHits.map(h => toSelectedPoint(h, xyScene));
 

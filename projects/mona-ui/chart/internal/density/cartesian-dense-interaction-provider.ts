@@ -2,11 +2,17 @@ import type { ChartPoint } from "../../models/chart.models";
 import type { ChartContinuousPositionScale } from "../scale/chart-scale";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import type { CartesianScalarDensityData } from "./cartesian-density-preparer";
-import { lowerBoundAscending, lowerBoundDescending } from "./cartesian-minmax-block-index";
+import { lowerBoundAscending, lowerBoundDescending, upperBoundAscending, upperBoundDescending } from "./cartesian-minmax-block-index";
 import { ChartDensityTracker } from "../layout/chart-density-instrumentation";
 
 export interface CartesianDensePointerQuery {
     readonly pixel: ChartPoint;
+}
+
+export interface CartesianDenseRangeQuery {
+    readonly hitPolicy?: string;
+    readonly pixelA: ChartPoint;
+    readonly pixelB: ChartPoint;
 }
 
 /**
@@ -14,7 +20,9 @@ export interface CartesianDensePointerQuery {
  * Resolves real source datums independently of rendered samples.
  */
 export interface CartesianDenseInteractionProvider {
-    queryRange(query: CartesianDensePointerQuery & { readonly pixelB: ChartPoint }): readonly SceneHitTarget[];
+    /** Locates the raw source index behind a full-layout mark ID (lazy reverse lookup, §73). */
+    materializeAt(sourceIndex: number): SceneHitTarget | null;
+    queryRange(query: CartesianDenseRangeQuery): readonly SceneHitTarget[];
     resolveNearest(query: CartesianDensePointerQuery): readonly SceneHitTarget[];
 }
 
@@ -48,9 +56,98 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
         this.#maxNeighbors = Math.max(2, input.maxNeighbors ?? 6);
     }
 
-    public queryRange(_query: CartesianDensePointerQuery & { readonly pixelB: ChartPoint }): readonly SceneHitTarget[] {
-        // Dense brush range queries aggregate separately (WP10); not part of pointer flow.
-        return [];
+    public materializeAt(sourceIndex: number): SceneHitTarget | null {
+        return this.#materialize(sourceIndex);
+    }
+
+    /**
+     * Locates raw indices whose X equals the semantic value exactly,
+     * including duplicates in source order (lazy reverse identity lookup).
+     */
+    public locateRawIndex(semanticX: number): { readonly candidateIndices: readonly number[] } | null {
+        const scalar = this.#scalar;
+        const n = scalar.sourceData.length;
+        if (n === 0) {
+            return null;
+        }
+        const ascending = scalar.monotonicity === "ascending" || scalar.monotonicity === "non-decreasing";
+        const first = ascending
+            ? lowerBoundAscending(scalar.x, 0, n, semanticX)
+            : lowerBoundDescending(scalar.x, 0, n, semanticX);
+        if (first >= n || scalar.x[first] !== semanticX) {
+            return null;
+        }
+        const candidates: number[] = [];
+        let i = first;
+        while (i < n && scalar.x[i] === semanticX) {
+            if (Number.isFinite(scalar.y[i])) {
+                candidates.push(i);
+            }
+            i++;
+        }
+        return { candidateIndices: candidates };
+    }
+
+    /**
+     * Exact brush range query (§68/§221): brush pixel rectangle → semantic
+     * ranges → compact raw scan → exact matching source indices → lazily
+     * materialized hit targets. Explicitly requested exact results may be O(M).
+     */
+    public queryRange(query: CartesianDenseRangeQuery): readonly SceneHitTarget[] {
+        const scalar = this.#scalar;
+        const n = scalar.sourceData.length;
+        if (n === 0 || scalar.monotonicity === "unsorted") {
+            return [];
+        }
+
+        const xA = this.toSemanticX(Math.min(query.pixelA.x, query.pixelB.x));
+        const xB = this.toSemanticX(Math.max(query.pixelA.x, query.pixelB.x));
+        if (xA === null || xB === null || xB < xA) {
+            return [];
+        }
+        // Compensate only pixel→semantic round-trip floating-point error;
+        // distinct raw values are never merged (§255).
+        const epsilon = Math.max(1e-9, (xB - xA) * 1e-9);
+
+        const ascending = scalar.monotonicity === "ascending" || scalar.monotonicity === "non-decreasing";
+        let startIdx: number;
+        let endIdx: number;
+        if (ascending) {
+            startIdx = lowerBoundAscending(scalar.x, 0, n, xA - epsilon);
+            endIdx = upperBoundAscending(scalar.x, 0, n, xB + epsilon);
+        } else {
+            startIdx = lowerBoundDescending(scalar.x, 0, n, xB + epsilon);
+            endIdx = upperBoundDescending(scalar.x, 0, n, xA - epsilon);
+        }
+        if (endIdx <= startIdx) {
+            return [];
+        }
+
+        const yInvertedA = this.toSemanticY(query.pixelA.y);
+        const yInvertedB = this.toSemanticY(query.pixelB.y);
+        const hasYRange =
+            yInvertedA !== null && yInvertedB !== null && Math.abs(yInvertedB - yInvertedA) > 1e-12;
+        const yLo = hasYRange ? Math.min(yInvertedA!, yInvertedB!) : null;
+        const yHi = hasYRange ? Math.max(yInvertedA!, yInvertedB!) : null;
+
+        const matches: SceneHitTarget[] = [];
+        for (let i = startIdx; i < endIdx; i++) {
+            if (!Number.isFinite(scalar.y[i])) {
+                continue;
+            }
+            if (hasYRange) {
+                const y = scalar.y[i];
+                if (y < yLo! || y > yHi!) {
+                    continue;
+                }
+            }
+            ChartDensityTracker.current?.onDenseRawHitMaterialized?.();
+            const target = this.#materialize(i);
+            if (target) {
+                matches.push(target);
+            }
+        }
+        return matches;
     }
 
     public resolveNearest(query: CartesianDensePointerQuery): readonly SceneHitTarget[] {
@@ -106,6 +203,15 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
 
     private toSemanticX(pixel: number): number | null {
         const value = this.#xScale.invert?.(pixel);
+        if (value === undefined) {
+            return null;
+        }
+        const num = value instanceof Date ? value.getTime() : Number(value);
+        return Number.isFinite(num) ? num : null;
+    }
+
+    private toSemanticY(pixel: number): number | null {
+        const value = this.#yScale.invert?.(pixel);
         if (value === undefined) {
             return null;
         }
