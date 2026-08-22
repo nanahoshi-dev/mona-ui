@@ -157,6 +157,7 @@ export class BubbleSeriesComponent implements OnInit {
 
         effect(() => {
             this.data();
+            this.downsampling();
             this.field();
             this.keyField();
             this.seriesKey();
