@@ -170,5 +170,67 @@ describe("CartesianScaleFactory and Scale Adapters", () => {
             });
             expect(linear.domain()[0]).toBeLessThanOrEqual(linear.domain()[1]);
         });
+
+        it("canonicalizes reversed explicit time and UTC bounds after nice", () => {
+            for (const type of ["time", "utc"] as const) {
+                const scale = CartesianScaleFactory.createTemporalScale({
+                    domain: [new Date("2026-01-01"), new Date("2026-01-03")],
+                    explicitMax: new Date("2026-01-01"),
+                    explicitMin: new Date("2026-01-03"),
+                    nice: true,
+                    range: [0, 1],
+                    type
+                });
+
+                expect(scale.domain()[0].getTime()).toBeLessThan(scale.domain()[1].getTime());
+            }
+        });
+
+        it("keeps one-sided temporal bounds outside the observed domain", () => {
+            const minScale = CartesianScaleFactory.createTemporalScale({
+                domain: [new Date("2026-01-01"), new Date("2026-01-02")],
+                explicitMin: new Date("2026-02-01"),
+                nice: true,
+                range: [0, 1],
+                type: "time"
+            });
+            const maxScale = CartesianScaleFactory.createTemporalScale({
+                domain: [new Date("2026-02-01"), new Date("2026-02-02")],
+                explicitMax: new Date("2026-01-01"),
+                nice: true,
+                range: [0, 1],
+                type: "utc"
+            });
+
+            expect(minScale.domain()[0].toISOString()).toBe("2026-02-01T00:00:00.000Z");
+            expect(minScale.domain()[1].getTime()).toBeGreaterThan(minScale.domain()[0].getTime());
+            expect(maxScale.domain()[1].toISOString()).toBe("2026-01-01T00:00:00.000Z");
+            expect(maxScale.domain()[0].getTime()).toBeLessThan(maxScale.domain()[1].getTime());
+        });
+
+        it("ignores invalid temporal explicit values and expands equal Date limits safely", () => {
+            const invalid = CartesianScaleFactory.createTemporalScale({
+                domain: [new Date("2026-01-01"), new Date("2026-01-03")],
+                explicitMin: new Date(Number.NaN),
+                nice: true,
+                range: [0, 1],
+                type: "time"
+            });
+            const atDateLimit = new Date(8_640_000_000_000_000);
+            const equalLimit = CartesianScaleFactory.createTemporalScale({
+                domain: [atDateLimit, atDateLimit],
+                explicitMax: atDateLimit,
+                explicitMin: atDateLimit,
+                nice: false,
+                range: [0, 1],
+                type: "utc"
+            });
+
+            expect(invalid.domain()[0].getTime()).toBeLessThanOrEqual(new Date("2026-01-01").getTime());
+            expect(invalid.domain()[1].getTime()).toBeGreaterThanOrEqual(new Date("2026-01-03").getTime());
+            expect(equalLimit.domain()[0].getTime()).toBeLessThan(equalLimit.domain()[1].getTime());
+            expect(Number.isFinite(equalLimit.domain()[0].getTime())).toBe(true);
+            expect(Number.isFinite(equalLimit.domain()[1].getTime())).toBe(true);
+        });
     });
 });

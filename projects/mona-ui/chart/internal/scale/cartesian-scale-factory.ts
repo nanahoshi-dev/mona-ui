@@ -16,6 +16,10 @@ import type {
 } from "./chart-scale";
 import { formatCompactNumber } from "../utils/number-utils";
 import { formatTimeRange } from "../utils/chart-formatter";
+import {
+    normalizeCartesianTemporalDomain,
+    resolveRepresentableDateEpoch
+} from "../data/cartesian-temporal-value-resolver";
 
 export class LinearScale implements ChartContinuousPositionScale<number> {
     public readonly type = "linear" as const;
@@ -358,8 +362,8 @@ export class TimeScale implements ChartContinuousPositionScale<Date> {
         let min = domain[0];
         let max = domain[1];
         if (min.getTime() === max.getTime()) {
-            min = new Date(min.getTime() - 3600000);
-            max = new Date(max.getTime() + 3600000);
+            min = resolveRepresentableDateEpoch(min.getTime() - 3600000) ?? min;
+            max = resolveRepresentableDateEpoch(max.getTime() + 3600000) ?? max;
         }
         this.#scale.domain([min, max]).range(range);
     }
@@ -410,8 +414,8 @@ export class UtcScale implements ChartContinuousPositionScale<Date> {
         let min = domain[0];
         let max = domain[1];
         if (min.getTime() === max.getTime()) {
-            min = new Date(min.getTime() - 3600000);
-            max = new Date(max.getTime() + 3600000);
+            min = resolveRepresentableDateEpoch(min.getTime() - 3600000) ?? min;
+            max = resolveRepresentableDateEpoch(max.getTime() + 3600000) ?? max;
         }
         this.#scale.domain([min, max]).range(range);
     }
@@ -597,17 +601,16 @@ export class CartesianScaleFactory {
 
         if (nice) {
             scale.nice(tickCount);
-            if (explicitMin !== undefined || explicitMax !== undefined) {
-                const current = scale.domain();
-                let minD = explicitMin !== undefined ? (explicitMin instanceof Date ? explicitMin : new Date(explicitMin)) : current[0];
-                let maxD = explicitMax !== undefined ? (explicitMax instanceof Date ? explicitMax : new Date(explicitMax)) : current[1];
-                if (minD.getTime() === maxD.getTime()) {
-                    minD = new Date(minD.getTime() - 3600000);
-                    maxD = new Date(maxD.getTime() + 3600000);
-                }
-                scale.setDomain?.([minD, maxD]);
-            }
         }
+
+        const current = scale.domain();
+        const canonicalDomain = normalizeCartesianTemporalDomain({
+            explicitMax,
+            explicitMin,
+            observedMaxEpoch: current[1].getTime(),
+            observedMinEpoch: current[0].getTime()
+        }).domain;
+        scale.setDomain?.(canonicalDomain);
 
         return scale;
     }
@@ -735,5 +738,3 @@ export class CartesianScaleFactory {
         }
     }
 }
-
-
