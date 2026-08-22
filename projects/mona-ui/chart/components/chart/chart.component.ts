@@ -430,6 +430,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly viewportCursor = signal<string | null>(null);
     protected readonly crosshairState = signal<ChartCrosshairState | null>(null);
+    #remoteSyncCrosshair: ChartCrosshairState | null = null;
     protected readonly axisLabelClasses = computed(() => chartAxisLabelBaseThemeVariants());
     protected readonly crosshairLabelClasses = computed(() => chartCrosshairLabelBaseThemeVariants());
     protected readonly referenceLabelClasses = computed(() => chartReferenceLabelBaseThemeVariants());
@@ -925,6 +926,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.crosshairState.set(nextCrosshairRes?.state ?? null);
         if (nextCrosshairRes?.state !== null && nextCrosshairRes?.state !== undefined) {
             hasAnyState = true;
+            this.#synchronizationController?.publishLocalCrosshair(nextCrosshairRes.state);
+        } else {
+            const restored = this.#synchronizationController?.restoreRemoteCrosshair() ?? false;
+            if (restored) {
+                hasAnyState = true;
+            }
         }
 
         if (tooltipEnabled && (hitState.activeHitTarget || hitState.activeHits.length > 0)) {
@@ -1294,8 +1301,23 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     linkGroups: this.normalizedNavigation().linkGroups,
                     minVisibleCategories: this.normalizedNavigation().minVisibleCategories
                 }),
+                getCrosshairSceneContext: () => {
+                    const scene = this.cartesianXYScene();
+                    if (!scene || !scene.coordinateSpace) {
+                        return null;
+                    }
+                    return {
+                        axisScenes: scene.axes,
+                        coordinateSpace: scene.coordinateSpace,
+                        plotRect: scene.plotRect,
+                        primaryXAxisId: scene.primaryXAxisId ?? "default-x",
+                        primaryYAxisId: scene.primaryYAxisId ?? "default-y",
+                        xTimeSpanMs: scene.xTimeSpanMs
+                    };
+                },
                 getViewport: () => this.#effectiveViewportState(),
                 isControlled: () => this.viewport() !== undefined,
+                onRemoteCrosshairState: state => this.#applyRemoteCrosshairState(state),
                 onSyncViewportCommit: (state, changedAxes, phase) =>
                     this.#applySyncViewportCommit(state, changedAxes, phase),
                 onSyncViewportProposal: (state, changedAxes, phase) =>
@@ -1593,6 +1615,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 ch.maxSnapDistance();
             }
             untracked(() => {
+                const enabled = ch ? ch.enabled() !== false : false;
+                if (!enabled) {
+                    this.#synchronizationController?.publishLocalCrosshair(null);
+                    this.#synchronizationController?.dropRemoteCrosshairPresentation();
+                }
                 this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
             });
         });
@@ -2170,6 +2197,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
         if (!this.#brushGestureController.isBrushing) {
             this.#clearInteraction();
+            // Broadcast clear to synchronization peers, then restore the latest
+            // remote presentation if another group origin remains active.
+            this.#synchronizationController?.publishLocalCrosshair(null);
+            this.#restoreOrClearRemoteCrosshair();
         }
     }
 
@@ -2607,6 +2638,37 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #notifyCommittedViewport(notification: ViewportCommitNotification): void {
         if (this.#isDestroyed) return;
         this.#synchronizationController?.onCommittedViewportChange(notification);
+    }
+
+    /**
+     * Applies an inbound synchronized crosshair presentation.
+     * Local pointer/keyboard interaction always outranks remote state, so the
+     * remote state is cached and only displayed while no local interaction owns the crosshair.
+     */
+    #applyRemoteCrosshairState(state: ChartCrosshairState | null): void {
+        if (this.#isDestroyed) return;
+        this.#remoteSyncCrosshair = state;
+        const crosshairEnabled = this.#crosshair()?.enabled() !== false && this.#crosshair() !== null;
+        if (!crosshairEnabled) {
+            return;
+        }
+        const localActive =
+            this.#interactionOwner === "tooltip" ||
+            this.#interactionOwner === "crosshair" ||
+            this.#interactionOwner === "keyboard";
+        if (localActive || (this.crosshairState() !== null && this.crosshairState()?.source !== "sync")) {
+            // Local presentation wins; keep the remote state cached for restore on local leave.
+            return;
+        }
+        this.crosshairState.set(state);
+    }
+
+    #restoreOrClearRemoteCrosshair(): void {
+        if (this.#isDestroyed) return;
+        const restored = this.#synchronizationController?.restoreRemoteCrosshair() ?? false;
+        if (!restored && this.crosshairState()?.source === "sync") {
+            this.crosshairState.set(null);
+        }
     }
 
     #applySyncViewportCommit(

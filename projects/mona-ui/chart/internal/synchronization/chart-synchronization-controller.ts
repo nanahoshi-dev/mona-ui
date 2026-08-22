@@ -14,9 +14,12 @@ import { ChartSynchronizationTracker } from "../layout/chart-density-instrumenta
 import { ChartSynchronizationCoordinator } from "./chart-synchronization-coordinator";
 import type { NormalizedChartSynchronizationOptions } from "./chart-synchronization-options";
 import { ChartSynchronizationAxisMapper } from "./chart-synchronization-axis-mapper";
+import {
+    buildPublishedCrosshairValues,
+    mapIncomingCrosshair
+} from "./chart-synchronization-crosshair";
 import type {
-    ChartSynchronizationAxisWindow,
-    ChartSynchronizedAxisValue
+    ChartSynchronizationAxisWindow
 } from "./chart-synchronization-types";
 
 export interface ViewportCommitNotification {
@@ -30,6 +33,7 @@ export interface ViewportCommitNotification {
 export interface ChartSynchronizationHost {
     getBaseDomainSignature(): string | null;
     getCoordinateSpace(): CartesianAxisCoordinateSpace | null;
+    getCrosshairSceneContext(): import("./chart-synchronization-crosshair").CrosshairSceneContext | null;
     getNavigationOptions(): {
         readonly clampToData?: boolean;
         readonly constraints?: readonly import("../../models/chart-viewport.models").ChartViewportConstraint[];
@@ -38,6 +42,7 @@ export interface ChartSynchronizationHost {
     };
     getViewport(): InternalCartesianViewportState | null;
     isControlled(): boolean;
+    onRemoteCrosshairState(state: import("../interaction/chart-crosshair-state").ChartCrosshairState | null): void;
     onSyncViewportProposal(state: InternalCartesianViewportState, changedAxes: readonly ChartViewportAxisRef[], phase: ChartViewportChangePhase): void;
     onSyncViewportCommit(state: InternalCartesianViewportState, changedAxes: readonly ChartViewportAxisRef[], phase: ChartViewportChangePhase): void;
 }
@@ -73,6 +78,7 @@ export class ChartSynchronizationController {
     #pendingAcknowledgement: PendingAcknowledgement | null = null;
     #registration: import("./chart-synchronization-types").ChartSynchronizationRegistration | null = null;
     #activeViewportTransactionId: string | null = null;
+    #lastRemoteCrosshairState: import("../interaction/chart-crosshair-state").ChartCrosshairState | null = null;
     readonly #warnedSignatures: Set<string>;
 
     public constructor(
@@ -92,27 +98,34 @@ export class ChartSynchronizationController {
 
     public setOptions(options: NormalizedChartSynchronizationOptions | null): void {
         const previousGroup = this.#options?.group ?? null;
+        const previousCrosshairEnabled = this.#options?.crosshair.enabled ?? false;
         this.#options = options;
         if (!options) {
+            this.dropRemoteCrosshairPresentation();
             this.#registration?.destroy();
             this.#registration = null;
             return;
         }
         if (!this.#registration) {
             this.#registration = this.#coordinator.register(this.#createMember(), options.group);
-            return;
+        } else {
+            this.#registration.updateOptions(options);
         }
-        this.#registration.updateOptions(options);
-        if (previousGroup !== options.group) {
+        if (previousGroup !== options.group || (!previousCrosshairEnabled && !options.crosshair.enabled)) {
             this.#pendingAcknowledgement = null;
+        }
+        if (previousGroup !== options.group || !options.crosshair.enabled) {
+            this.dropRemoteCrosshairPresentation();
         }
     }
 
     public destroy(): void {
+        this.clearCrosshair();
         this.#registration?.destroy();
         this.#registration = null;
         this.#options = null;
         this.#pendingAcknowledgement = null;
+        this.#lastRemoteCrosshairState = null;
     }
 
     /**
@@ -173,17 +186,52 @@ export class ChartSynchronizationController {
     }
 
     public clearCrosshair(): void {
+        // Broadcasting a clear must not erase this chart's cached remote presentation;
+        // only receiving a clear from the active origin drops it (#onRemoteCrosshairClear).
         if (this.#options?.crosshair.enabled && this.#registration) {
             this.#registration.clearCrosshair();
         }
     }
 
-    public publishCrosshair(values: readonly ChartSynchronizedAxisValue[], snapped: boolean): void {
+    /**
+     * Drops the cached remote crosshair presentation without broadcasting a clear.
+     * Used when the local crosshair channel is disabled or the group is left.
+     */
+    public dropRemoteCrosshairPresentation(): void {
+        this.#lastRemoteCrosshairState = null;
+        this.#host.onRemoteCrosshairState(null);
+    }
+
+    /**
+     * Re-applies the latest remote crosshair state after a local interaction ends,
+     * provided another group origin remains active. Returns true when restored.
+     */
+    public restoreRemoteCrosshair(): boolean {
+        if (!this.#options?.crosshair.enabled || !this.#lastRemoteCrosshairState) {
+            return false;
+        }
+        this.#host.onRemoteCrosshairState(this.#lastRemoteCrosshairState);
+        return true;
+    }
+
+    public publishLocalCrosshair(state: import("../interaction/chart-crosshair-state").ChartCrosshairState | null): void {
         if (!this.#options?.crosshair.enabled || !this.#registration) {
             return;
         }
+        const context = this.#host.getCrosshairSceneContext();
+        if (!context) {
+            return;
+        }
+        if (!state || (!state.x && !state.y)) {
+            this.clearCrosshair();
+            return;
+        }
+        const values = buildPublishedCrosshairValues(state, context);
+        if (values.length === 0) {
+            return;
+        }
         ChartSynchronizationTracker.current?.onSyncMessagePublished?.("crosshair");
-        this.#registration.publishCrosshair({ axes: values, snapped });
+        this.#registration.publishCrosshair({ axes: values, snapped: state.snapped });
     }
 
     #createMember(): import("./chart-synchronization-types").ChartSynchronizationMember {
@@ -299,13 +347,22 @@ export class ChartSynchronizationController {
     }
 
     #onRemoteCrosshair(message: import("./chart-synchronization-types").ChartSynchronizationCrosshairMessage): void {
-        void message;
-        void this.#host;
+        const options = this.#options;
+        if (!options?.crosshair.enabled) {
+            return;
+        }
+        const context = this.#host.getCrosshairSceneContext();
+        if (!context) {
+            return;
+        }
+        const state = mapIncomingCrosshair(message.axes, options, context);
+        this.#lastRemoteCrosshairState = state;
+        this.#host.onRemoteCrosshairState(state);
     }
 
-    #onRemoteCrosshairClear(originMemberId: string): void {
-        void originMemberId;
-        void this.#host;
+    #onRemoteCrosshairClear(_originMemberId: string): void {
+        this.#lastRemoteCrosshairState = null;
+        this.#host.onRemoteCrosshairState(null);
     }
 }
 
