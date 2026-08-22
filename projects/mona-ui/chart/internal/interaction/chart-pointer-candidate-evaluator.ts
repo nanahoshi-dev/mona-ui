@@ -31,6 +31,21 @@ export interface PointCandidateMetric {
     readonly visualRadius: number;
 }
 
+function comparePointerPainterOrder(a: SceneHitTarget, b: SceneHitTarget): number {
+    const aMarkerOrder = a.markerInteractionOrder;
+    const bMarkerOrder = b.markerInteractionOrder;
+    if (aMarkerOrder && bMarkerOrder) {
+        if (aMarkerOrder.seriesOrdinal !== bMarkerOrder.seriesOrdinal) {
+            return aMarkerOrder.seriesOrdinal - bMarkerOrder.seriesOrdinal;
+        }
+        if (aMarkerOrder.sourceOrdinal !== bMarkerOrder.sourceOrdinal) {
+            return aMarkerOrder.sourceOrdinal - bMarkerOrder.sourceOrdinal;
+        }
+    }
+
+    return (a.renderOrder ?? 0) - (b.renderOrder ?? 0);
+}
+
 export class ChartPointerCandidateEvaluator {
     public readonly pointer: ChartPoint;
     public readonly scene: ChartScene;
@@ -247,15 +262,12 @@ export class ChartPointerCandidateEvaluator {
 
             // 3. Direct marker circle containment test (visual radius)
             let topContainedMarker: SceneHitTarget | null = null;
-            let topRenderOrder = Number.NEGATIVE_INFINITY;
 
             for (const metric of this.pointMetrics) {
                 const target = metric.target;
                 if (target.seriesType === "scatter" || target.seriesType === "bubble") {
                     if (metric.distance <= metric.visualRadius) {
-                        const order = target.renderOrder ?? 0;
-                        if (order >= topRenderOrder) {
-                            topRenderOrder = order;
+                        if (!topContainedMarker || comparePointerPainterOrder(target, topContainedMarker) >= 0) {
                             topContainedMarker = target;
                         }
                     }
@@ -268,9 +280,7 @@ export class ChartPointerCandidateEvaluator {
                     const target = metric.target;
                     if (target.seriesType === "scatter" || target.seriesType === "bubble") {
                         if (metric.distance <= metric.hitRadius) {
-                            const order = target.renderOrder ?? 0;
-                            if (order >= topRenderOrder) {
-                                topRenderOrder = order;
+                            if (!topContainedMarker || comparePointerPainterOrder(target, topContainedMarker) >= 0) {
                                 topContainedMarker = target;
                             }
                         }
@@ -410,15 +420,12 @@ export class ChartPointerCandidateEvaluator {
 
         // 3. Direct marker circle containment test
         let topContainedMarker: SceneHitTarget | null = null;
-        let topRenderOrder = Number.NEGATIVE_INFINITY;
 
         for (const metric of this.pointMetrics) {
             const target = metric.target;
             if (target.seriesType === "scatter" || target.seriesType === "bubble") {
                 if (metric.distance <= metric.visualRadius) {
-                    const order = target.renderOrder ?? 0;
-                    if (order >= topRenderOrder) {
-                        topRenderOrder = order;
+                    if (!topContainedMarker || comparePointerPainterOrder(target, topContainedMarker) >= 0) {
                         topContainedMarker = target;
                     }
                 }
@@ -480,7 +487,13 @@ export class ChartPointerCandidateEvaluator {
             const target = metric.target;
             const dist = metric.distance;
             const maxDist = Math.min(target.radius ?? maxHoverDistance, maxHoverDistance);
-            if (dist < minDistance && dist <= maxDist) {
+            if (
+                (dist < minDistance ||
+                    (Math.abs(dist - minDistance) <= 1e-9 &&
+                        nearestTarget !== null &&
+                        comparePointerPainterOrder(target, nearestTarget) > 0)) &&
+                dist <= maxDist
+            ) {
                 minDistance = dist;
                 nearestTarget = target;
             }

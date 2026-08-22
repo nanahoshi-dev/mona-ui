@@ -71,6 +71,13 @@ export class ChartPointerCandidateResolver {
         if (denseProviders && denseProviders.size > 0) {
             const rawCandidates: SceneHitTarget[] = [];
             for (const provider of denseProviders.values()) {
+                // Marker providers expose a bounded visual/hit-radius
+                // neighborhood for direct containment. Keep the exact
+                // center-nearest result as a separate fallback for nearest
+                // point and crosshair semantics.
+                for (const target of provider.resolvePointerCandidates?.({ pixel: pointer }) ?? []) {
+                    rawCandidates.push(target);
+                }
                 for (const target of provider.resolveNearest({ pixel: pointer })) {
                     rawCandidates.push(target);
                 }
