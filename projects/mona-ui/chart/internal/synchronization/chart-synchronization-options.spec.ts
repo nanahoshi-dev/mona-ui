@@ -12,6 +12,7 @@ describe("normalizeChartSynchronizationOptions", () => {
     it("normalizes string shorthand to enabled viewport and crosshair", () => {
         const options = normalizeChartSynchronizationOptions("telemetry");
         expect(options).toEqual({
+            axisMappings: [],
             crosshair: {
                 axes: "auto",
                 clearOnLeave: true,
@@ -63,6 +64,7 @@ describe("normalizeChartSynchronizationOptions", () => {
         };
         const options = normalizeChartSynchronizationOptions(input, new Set());
         expect(options?.group).toBe("g1");
+        expect(options?.axisMappings).toEqual([]);
         expect(options?.viewport).toEqual({ axes: "auto", enabled: true, mode: "relative", phase: "end" });
         expect(options?.crosshair).toEqual({
             axes: "auto",

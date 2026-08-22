@@ -1,4 +1,5 @@
 import {
+    type ChartSynchronizationAxisMapping,
     type ChartSynchronizationInput,
     type ChartSynchronizationOptions,
     type ChartCrosshairSynchronizationOptions,
@@ -24,6 +25,7 @@ export interface NormalizedChartViewportSynchronizationOptions {
 }
 
 export interface NormalizedChartSynchronizationOptions {
+    readonly axisMappings: readonly ChartSynchronizationAxisMapping[];
     readonly crosshair: NormalizedChartCrosshairSynchronizationOptions;
     readonly group: string;
     readonly viewport: NormalizedChartViewportSynchronizationOptions;
@@ -86,6 +88,59 @@ function normalizeCrosshairOptions(
     };
 }
 
+function normalizeAxisMappings(
+    raw: readonly ChartSynchronizationAxisMapping[] | undefined,
+    group: string,
+    warned: Set<string>
+): readonly ChartSynchronizationAxisMapping[] {
+    if (!raw || raw.length === 0) {
+        return [];
+    }
+    const bySource = new Map<string, ChartSynchronizationAxisMapping>();
+    const targetsByDimension = new Map<string, Set<string>>();
+    for (const mapping of raw) {
+        if (!mapping || typeof mapping !== "object") {
+            continue;
+        }
+        const source = mapping.source;
+        const target = mapping.target;
+        if (!source || !target || (source.axis !== "x" && source.axis !== "y") || (target.axis !== "x" && target.axis !== "y")) {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Invalid synchronization axis mapping in group "${group}". Mapping ignored.`,
+                `sync-mapping-invalid-${group}`
+            );
+            continue;
+        }
+        const sourceKey = `${source.axis}:${source.axisId}`;
+        if (bySource.has(sourceKey)) {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Duplicate synchronization source mapping for axis "${sourceKey}" in group "${group}". Only the first mapping is used.`,
+                `sync-mapping-duplicate-source-${group}-${sourceKey}`
+            );
+            continue;
+        }
+        const targetKey = `${target.axis}:${target.axisId}`;
+        let dimensionTargets = targetsByDimension.get(target.axis);
+        if (!dimensionTargets) {
+            dimensionTargets = new Set<string>();
+            targetsByDimension.set(target.axis, dimensionTargets);
+        }
+        if (dimensionTargets.has(targetKey)) {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Duplicate synchronization target axis "${targetKey}" in group "${group}". Mapping for "${sourceKey}" ignored.`,
+                `sync-mapping-duplicate-target-${group}-${targetKey}`
+            );
+            continue;
+        }
+        dimensionTargets.add(targetKey);
+        bySource.set(sourceKey, { source: { ...source }, target: { ...target } });
+    }
+    return Array.from(bySource.values());
+}
+
 export function normalizeChartSynchronizationOptions(
     input: ChartSynchronizationInput | undefined | null,
     warned?: Set<string>
@@ -112,6 +167,7 @@ export function normalizeChartSynchronizationOptions(
     }
 
     const normalized: NormalizedChartSynchronizationOptions = {
+        axisMappings: normalizeAxisMappings(rawOptions.axisMappings, group, warned ?? new Set<string>()),
         crosshair: normalizeCrosshairOptions(rawOptions.crosshair, warned ?? new Set<string>()),
         group,
         viewport: normalizeViewportOptions(rawOptions.viewport, warned ?? new Set<string>())

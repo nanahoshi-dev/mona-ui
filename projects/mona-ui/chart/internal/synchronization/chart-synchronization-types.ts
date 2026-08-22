@@ -16,6 +16,7 @@ export interface ChartSynchronizationAxisWindow {
     readonly normalizedWindow?: readonly [number, number];
     readonly sourceRef: ChartViewportAxisRef;
     readonly sourceType: ResolvedChartCartesianAxisType;
+    readonly visibleCategoryKeys?: readonly string[];
     readonly window: ChartViewportWindow | null;
 }
 

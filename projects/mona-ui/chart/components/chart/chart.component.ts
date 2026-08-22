@@ -182,6 +182,7 @@ import type {
 import type {
     ChartNavigationAxisTarget,
     ChartNavigationInput,
+    ChartViewportAxisRef,
     ChartViewportChangeEvent,
     ChartViewportChangePhase,
     ChartViewportChangeSource,
@@ -190,10 +191,16 @@ import type {
 } from "../../models/chart-viewport.models";
 import type { ChartSynchronizationInput } from "../../models/chart-synchronization.models";
 import { normalizeChartSynchronizationOptions } from "../../internal/synchronization/chart-synchronization-options";
+import {
+    ChartSynchronizationController,
+    type ViewportCommitNotification
+} from "../../internal/synchronization/chart-synchronization-controller";
+import { ChartSynchronizationCoordinator } from "../../internal/synchronization/chart-synchronization-coordinator";
 import { normalizeChartNavigationOptions } from "../../internal/viewport/chart-navigation-options";
 import {
     areInternalViewportStatesEqual,
     areViewportStatesEqual,
+    diffInternalViewportStates,
     normalizeViewportState,
     toPublicViewportState,
     type InternalCartesianViewportState
@@ -290,6 +297,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #registeredSeries = signal<ChartSeriesRegistration[]>([]);
     readonly #renderScheduler: ChartRenderScheduler;
     readonly #styleResolver: ChartStyleResolver;
+    readonly #synchronizationCoordinator = inject(ChartSynchronizationCoordinator);
+    #synchronizationController: ChartSynchronizationController | null = null;
     readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
     readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
     readonly #yAxes = signal<ChartYAxisRegistration[]>([]);
@@ -1273,6 +1282,35 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#styleResolver = new ChartStyleResolver(this.#elementRef.nativeElement);
         this.#animationController = new ChartAnimationController(new BrowserAnimationClock());
         this.#renderScheduler = new ChartRenderScheduler(reason => this.#recomputeAndPaint(reason));
+        this.#synchronizationController = new ChartSynchronizationController(
+            this.#synchronizationCoordinator,
+            {
+                getBaseDomainSignature: () => null,
+                getCoordinateSpace: () =>
+                    this.#cartesianLayoutRuntime?.baseCoordinateSpace ?? this.cartesianXYScene()?.coordinateSpace ?? null,
+                getNavigationOptions: () => ({
+                    clampToData: this.normalizedNavigation().clampToData,
+                    constraints: this.normalizedNavigation().constraints,
+                    linkGroups: this.normalizedNavigation().linkGroups,
+                    minVisibleCategories: this.normalizedNavigation().minVisibleCategories
+                }),
+                getViewport: () => this.#effectiveViewportState(),
+                isControlled: () => this.viewport() !== undefined,
+                onSyncViewportCommit: (state, changedAxes, phase) =>
+                    this.#applySyncViewportCommit(state, changedAxes, phase),
+                onSyncViewportProposal: (state, changedAxes, phase) =>
+                    this.#emitSyncViewportProposal(state, changedAxes, phase)
+            },
+            this.#warnedDiagnosticSignatures
+        );
+
+        // Synchronization group membership follows the normalized synchronization options
+        effect(() => {
+            const syncOptions = this.normalizedSynchronization();
+            untracked(() => {
+                this.#synchronizationController?.setOptions(syncOptions);
+            });
+        });
 
         if (typeof window !== "undefined" && window.matchMedia) {
             this.#mediaQueryList = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -1286,6 +1324,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         this.#destroyRef.onDestroy(() => {
             this.#isDestroyed = true;
+            this.#synchronizationController?.destroy();
+            this.#synchronizationController = null;
             this.#cancelPendingPointerInteraction();
             this.#cancelBrushAuthority("destroyed");
             this.#renderScheduler.cancel();
@@ -1507,9 +1547,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     if (prev && areInternalViewportStatesEqual(prev, normalized)) {
                         return;
                     }
+                    const acknowledgedInbound =
+                        this.#synchronizationController?.consumeAcknowledgedInbound(normalized) ?? false;
                     this.#retireTransientInteractionForViewportChange();
                     this.#lastNormalizedControlledViewport = normalized;
                     this.invalidate(ChartInvalidationReason.Viewport);
+                    this.#notifyCommittedViewport({
+                        acknowledgedInbound,
+                        changedAxes: diffInternalViewportStates(prev ?? undefined, normalized).changedAxes,
+                        phase: "end",
+                        source: "programmatic"
+                    });
                 }
             } else {
                 if (this.#lastNormalizedControlledViewport !== null) {
@@ -2510,6 +2558,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (!isControlled && event.phase === "update") {
             this.#uncontrolledViewportState.set(nextState);
             this.invalidate(ChartInvalidationReason.Viewport);
+            this.#notifyCommittedViewport({
+                changedAxes: event.changedAxes,
+                phase: "update",
+                source: event.source
+            });
         }
     }
 
@@ -2541,7 +2594,63 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (!isControlled) {
             this.#uncontrolledViewportState.set(nextState);
             this.invalidate(ChartInvalidationReason.Viewport);
+            this.#notifyCommittedViewport({
+                changedAxes: changedAxes ?? [],
+                phase,
+                source
+            });
+        } else {
+            // Controlled charts publish only after the parent accepts via the viewport input.
         }
+    }
+
+    #notifyCommittedViewport(notification: ViewportCommitNotification): void {
+        if (this.#isDestroyed) return;
+        this.#synchronizationController?.onCommittedViewportChange(notification);
+    }
+
+    #applySyncViewportCommit(
+        state: InternalCartesianViewportState,
+        changedAxes: readonly ChartViewportAxisRef[],
+        phase: ChartViewportChangePhase
+    ): void {
+        if (this.#isDestroyed) return;
+        const sc = this.cartesianXYScene();
+        if (!sc || !sc.coordinateSpace) return;
+        const previousState = this.#effectiveViewportState();
+        const resolvedAxisMap = sc.coordinateSpace.toResolvedAxisInfoMap();
+        const publicState = toPublicViewportState(state, resolvedAxisMap);
+
+        this.#retireTransientInteractionForViewportChange();
+        this.#uncontrolledViewportState.set(state);
+        this.viewportChange.emit({
+            changedAxes,
+            phase,
+            previousViewport: toPublicViewportState(previousState, resolvedAxisMap),
+            source: "sync",
+            viewport: publicState
+        });
+        this.invalidate(ChartInvalidationReason.Viewport);
+    }
+
+    #emitSyncViewportProposal(
+        state: InternalCartesianViewportState,
+        changedAxes: readonly ChartViewportAxisRef[],
+        phase: ChartViewportChangePhase
+    ): void {
+        if (this.#isDestroyed) return;
+        const sc = this.cartesianXYScene();
+        if (!sc || !sc.coordinateSpace) return;
+        const previousState = this.#effectiveViewportState();
+        const resolvedAxisMap = sc.coordinateSpace.toResolvedAxisInfoMap();
+
+        this.viewportChange.emit({
+            changedAxes,
+            phase,
+            previousViewport: toPublicViewportState(previousState, resolvedAxisMap),
+            source: "sync",
+            viewport: toPublicViewportState(state, resolvedAxisMap)
+        });
     }
 
     #resolveSharedTooltip(scene: ChartScene): boolean {
@@ -3133,7 +3242,23 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 baseCoordSpace,
                 normalizeOpts
             );
+            const previousCanonical = this.#lastNormalizedControlledViewport;
+            const canonicalChanged =
+                previousCanonical !== null && !areInternalViewportStatesEqual(previousCanonical, canonicalViewport);
             this.#lastNormalizedControlledViewport = canonicalViewport;
+
+            if (canonicalChanged) {
+                // Base authority changed under a controlled chart (e.g. data-domain shrink):
+                // publish the committed canonical viewport without emitting a fake public event.
+                this.#notifyCommittedViewport({
+                    acknowledgedInbound:
+                        this.#synchronizationController?.consumeAcknowledgedInbound(canonicalViewport) ?? false,
+                    changedAxes: diffInternalViewportStates(previousCanonical, canonicalViewport).changedAxes,
+                    phase: "end",
+                    source: "data-reconcile"
+                });
+            }
+
             return { viewport: canonicalViewport };
         }
 
@@ -3181,6 +3306,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     source: "data-reconcile",
                     viewport: nextPublic
                 };
+                this.#notifyCommittedViewport({
+                    changedAxes: reconcilerRes.changedAxes,
+                    phase: "end",
+                    source: "data-reconcile"
+                });
             }
         }
 

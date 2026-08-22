@@ -18,7 +18,7 @@ function createMember(memberId: string, group: string): ChartSynchronizationMemb
         cleared: [],
         crosshairs: [],
         getCoordinateSpace: () => null,
-        getOptions: () => ({ crosshair: { axes: "auto", clearOnLeave: true, enabled: true, match: "axis-value", mode: "domain", showTooltip: false }, group, viewport: { axes: "auto", enabled: true, mode: "domain", phase: "continuous" } }),
+        getOptions: () => ({ axisMappings: [], crosshair: { axes: "auto", clearOnLeave: true, enabled: true, match: "axis-value", mode: "domain", showTooltip: false }, group, viewport: { axes: "auto", enabled: true, mode: "domain", phase: "continuous" } }),
         getViewport: () => null,
         memberId,
         receiveCrosshair(message) {
@@ -44,6 +44,7 @@ const settle = (): Promise<void> =>
     });
 
 const baseOptions = (group: string): NormalizedChartSynchronizationOptions => ({
+    axisMappings: [],
     crosshair: { axes: "auto", clearOnLeave: true, enabled: true, match: "axis-value", mode: "domain", showTooltip: false },
     group,
     viewport: { axes: "auto", enabled: true, mode: "domain", phase: "continuous" }

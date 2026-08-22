@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import type { NormalizedChartSynchronizationOptions } from "./chart-synchronization-options";
 import type {
     ChartSynchronizationCrosshairClearMessage,
     ChartSynchronizationCrosshairMessage,
@@ -57,7 +58,7 @@ export class ChartSynchronizationCoordinator {
             publishViewport: (payload: ChartSynchronizationPublishViewportPayload) => {
                 this.#publishViewport(memberId, payload);
             },
-            updateOptions: (options: { group: string } | null) => {
+            updateOptions: (options: NormalizedChartSynchronizationOptions | null) => {
                 const current = this.#entriesByMemberId.get(memberId);
                 if (!current) {
                     return;
