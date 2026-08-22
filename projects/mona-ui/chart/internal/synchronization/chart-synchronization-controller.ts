@@ -5,6 +5,7 @@ import type {
     ChartViewportWindow
 } from "../../models/chart-viewport.models";
 import type { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
+import { resolveCartesianNormalizedBaseMapper } from "../viewport/cartesian-normalized-base-mapper";
 import {
     areInternalViewportStatesEqual,
     type InternalCartesianViewportState
@@ -40,6 +41,7 @@ export interface ChartSynchronizationHost {
         readonly linkGroups?: unknown;
         readonly minVisibleCategories?: number;
     };
+    getPrimaryAxisIds?(): { readonly x?: string; readonly y?: string } | null;
     getViewport(): InternalCartesianViewportState | null;
     isControlled(): boolean;
     onRemoteCrosshairState(state: import("../interaction/chart-crosshair-state").ChartCrosshairState | null): void;
@@ -47,9 +49,21 @@ export interface ChartSynchronizationHost {
     onSyncViewportCommit(state: InternalCartesianViewportState, changedAxes: readonly ChartViewportAxisRef[], phase: ChartViewportChangePhase): void;
 }
 
-interface PendingAcknowledgement {
+interface PendingSyncViewportAck {
     readonly expectedFingerprint: string;
+    readonly groupId: string;
+    readonly groupSessionId: number;
+    readonly originMemberId: string;
+    readonly proposalGeneration: number;
+    readonly sequence: number;
     readonly transactionId: string;
+}
+
+export function serializeFiniteViewportNumber(value: number): string {
+    if (!Number.isFinite(value)) {
+        return "non-finite";
+    }
+    return (Object.is(value, -0) ? 0 : value).toString();
 }
 
 function fingerprintViewport(state: InternalCartesianViewportState): string {
@@ -58,7 +72,9 @@ function fingerprintViewport(state: InternalCartesianViewportState): string {
         const map = state[dimension];
         for (const [axisId, window] of map) {
             if (window.kind === "continuous") {
-                parts.push(`${dimension}:${axisId}:c:${window.min.toFixed(9)}:${window.max.toFixed(9)}`);
+                parts.push(
+                    `${dimension}:${axisId}:c:${serializeFiniteViewportNumber(window.min)}:${serializeFiniteViewportNumber(window.max)}`
+                );
             } else {
                 parts.push(`${dimension}:${axisId}:k:${window.startIndex}:${window.endIndexExclusive}`);
             }
@@ -75,7 +91,8 @@ export class ChartSynchronizationController {
     readonly #host: ChartSynchronizationHost;
     readonly #memberId: string;
     #options: NormalizedChartSynchronizationOptions | null = null;
-    #pendingAcknowledgement: PendingAcknowledgement | null = null;
+    #pendingAcknowledgement: PendingSyncViewportAck | null = null;
+    #proposalGeneration = 0;
     #registration: import("./chart-synchronization-types").ChartSynchronizationRegistration | null = null;
     #activeViewportTransactionId: string | null = null;
     #lastRemoteCrosshairState: import("../interaction/chart-crosshair-state").ChartCrosshairState | null = null;
@@ -98,12 +115,13 @@ export class ChartSynchronizationController {
 
     public setOptions(options: NormalizedChartSynchronizationOptions | null): void {
         const previousGroup = this.#options?.group ?? null;
-        const previousCrosshairEnabled = this.#options?.crosshair.enabled ?? false;
+        const previousViewportEnabled = this.#options?.viewport.enabled ?? false;
         this.#options = options;
         if (!options) {
             this.dropRemoteCrosshairPresentation();
             this.#registration?.destroy();
             this.#registration = null;
+            this.#pendingAcknowledgement = null;
             return;
         }
         if (!this.#registration) {
@@ -111,7 +129,11 @@ export class ChartSynchronizationController {
         } else {
             this.#registration.updateOptions(options);
         }
-        if (previousGroup !== options.group || (!previousCrosshairEnabled && !options.crosshair.enabled)) {
+        if (
+            previousGroup !== options.group ||
+            (previousViewportEnabled && !options.viewport.enabled) ||
+            !options.viewport.enabled
+        ) {
             this.#pendingAcknowledgement = null;
         }
         if (previousGroup !== options.group || !options.crosshair.enabled) {
@@ -140,10 +162,8 @@ export class ChartSynchronizationController {
 
         if (
             notification.acknowledgedInbound &&
-            this.#pendingAcknowledgement !== null &&
             notification.phase === "end"
         ) {
-            this.#pendingAcknowledgement = null;
             return;
         }
 
@@ -162,13 +182,25 @@ export class ChartSynchronizationController {
         if (!this.#options || !this.#options.viewport.enabled || !this.#registration) {
             return;
         }
+
+        if (this.#options.viewport.phase === "end" && phase !== "end") {
+            return;
+        }
+
         const coordinateSpace = this.#host.getCoordinateSpace();
         const viewport = this.#host.getViewport();
         if (!coordinateSpace || !viewport) {
             return;
         }
 
-        const axes = buildAxisWindows(changedAxes, viewport, coordinateSpace, this.#host.getBaseDomainSignature());
+        const primaryIds = this.#host.getPrimaryAxisIds?.() ?? undefined;
+        const axes = buildAxisWindows(
+            changedAxes,
+            viewport,
+            coordinateSpace,
+            this.#host.getBaseDomainSignature(),
+            primaryIds ? { x: primaryIds.x, y: primaryIds.y } : undefined
+        );
         if (axes.length === 0) {
             return;
         }
@@ -181,7 +213,6 @@ export class ChartSynchronizationController {
             this.#activeViewportTransactionId = null;
         }
 
-        ChartSynchronizationTracker.current?.onSyncMessagePublished?.("viewport");
         this.#registration.publishViewport({ axes, phase, source, transactionId });
     }
 
@@ -223,14 +254,15 @@ export class ChartSynchronizationController {
             return;
         }
         if (!state || (!state.x && !state.y)) {
-            this.clearCrosshair();
+            if (this.#options.crosshair.clearOnLeave) {
+                this.clearCrosshair();
+            }
             return;
         }
         const values = buildPublishedCrosshairValues(state, context);
         if (values.length === 0) {
             return;
         }
-        ChartSynchronizationTracker.current?.onSyncMessagePublished?.("crosshair");
         this.#registration.publishCrosshair({ axes: values, snapped: state.snapped });
     }
 
@@ -263,15 +295,19 @@ export class ChartSynchronizationController {
             return;
         }
 
-        const primaryX = firstValidAxisId(coordinateSpace, "x") ?? "";
-        const primaryY = firstValidAxisId(coordinateSpace, "y") ?? "";
-
         const navOptions = this.#host.getNavigationOptions();
         const mapperOptions = {
             clampToData: navOptions.clampToData,
             constraints: navOptions.constraints as never,
             minVisibleCategories: navOptions.minVisibleCategories
         };
+
+        const primaryIds = this.#host.getPrimaryAxisIds?.() ?? {
+            x: firstValidAxisId(coordinateSpace, "x") ?? "",
+            y: firstValidAxisId(coordinateSpace, "y") ?? ""
+        };
+        const primaryX = primaryIds.x ?? firstValidAxisId(coordinateSpace, "x") ?? "";
+        const primaryY = primaryIds.y ?? firstValidAxisId(coordinateSpace, "y") ?? "";
 
         const currentViewport = this.#host.getViewport() ?? { x: new Map(), y: new Map() };
         const mapped = ChartSynchronizationAxisMapper.mapIncomingAxes(
@@ -317,6 +353,11 @@ export class ChartSynchronizationController {
             // Inbound synchronization is a proposal only; hidden authority must not mutate.
             this.#pendingAcknowledgement = {
                 expectedFingerprint: fingerprintViewport(composed),
+                groupId: message.group,
+                groupSessionId: message.groupSessionId ?? 0,
+                originMemberId: message.originMemberId,
+                proposalGeneration: ++this.#proposalGeneration,
+                sequence: message.sequence,
                 transactionId: message.transactionId
             };
             this.#host.onSyncViewportProposal(composed, changedAxes, message.phase);
@@ -335,11 +376,20 @@ export class ChartSynchronizationController {
         if (!pending) {
             return false;
         }
-        if (fingerprintViewport(nextState) === pending.expectedFingerprint) {
+        const currentGroup = this.#options?.group ?? null;
+        const currentSessionId = currentGroup ? this.#coordinator.getGroupSessionId(currentGroup) : null;
+        if (
+            !this.#options?.viewport.enabled ||
+            !currentGroup ||
+            pending.groupId !== currentGroup ||
+            (currentSessionId !== null && pending.groupSessionId !== currentSessionId) ||
+            fingerprintViewport(nextState) !== pending.expectedFingerprint
+        ) {
             this.#pendingAcknowledgement = null;
-            return true;
+            return false;
         }
-        return false;
+        this.#pendingAcknowledgement = null;
+        return true;
     }
 
     public clearPendingAcknowledgement(): void {
@@ -370,16 +420,21 @@ export function buildAxisWindows(
     changedAxes: readonly ChartViewportAxisRef[],
     viewport: InternalCartesianViewportState,
     coordinateSpace: CartesianAxisCoordinateSpace,
-    baseDomainSignature: string | null
+    baseDomainSignature: string | null,
+    primaryAxisIds?: { readonly x?: string; readonly y?: string }
 ): readonly ChartSynchronizationAxisWindow[] {
     const windows: ChartSynchronizationAxisWindow[] = [];
+    const primaryX = primaryAxisIds?.x ?? firstValidAxisId(coordinateSpace, "x");
+    const primaryY = primaryAxisIds?.y ?? firstValidAxisId(coordinateSpace, "y");
+
     for (const ref of changedAxes) {
         const snap = coordinateSpace.get(ref);
         if (!snap || !snap.valid) {
             continue;
         }
+        const isPrimary = ref.axis === "x" ? ref.axisId === primaryX : ref.axisId === primaryY;
         const internalWindow = ref.axis === "x" ? viewport.x.get(ref.axisId) : viewport.y.get(ref.axisId);
-        windows.push(buildAxisWindow(ref, snap.resolvedType, internalWindow ?? null, snap, baseDomainSignature));
+        windows.push(buildAxisWindow(ref, snap.resolvedType, internalWindow ?? null, snap, baseDomainSignature, isPrimary));
     }
     return windows;
 }
@@ -389,11 +444,13 @@ export function buildAxisWindow(
     resolvedType: import("../scale/chart-scale").ResolvedChartCartesianAxisType,
     internalWindow: import("../viewport/cartesian-viewport-normalizer").InternalAxisViewport | null,
     snap: import("../viewport/cartesian-axis-coordinate-space").CartesianAxisCoordinateSnapshot | undefined,
-    baseDomainSignature: string | null
+    baseDomainSignature: string | null,
+    sourceIsPrimary: boolean = false
 ): ChartSynchronizationAxisWindow {
     if (!internalWindow) {
         return {
             baseDomainSignature: baseDomainSignature ?? undefined,
+            sourceIsPrimary,
             sourceRef,
             sourceType: resolvedType,
             window: null
@@ -412,6 +469,7 @@ export function buildAxisWindow(
         return {
             baseDomainSignature: baseDomainSignature ?? undefined,
             normalizedWindow: computeNormalizedWindow(internalWindow, snap),
+            sourceIsPrimary,
             sourceRef,
             sourceType: resolvedType,
             window
@@ -440,6 +498,7 @@ export function buildAxisWindow(
             internalWindow.startIndex / Math.max(1, snap?.baseDomain.length ?? 1),
             internalWindow.endIndexExclusive / Math.max(1, snap?.baseDomain.length ?? 1)
         ],
+        sourceIsPrimary,
         sourceRef,
         sourceType: resolvedType,
         visibleCategoryKeys: visibleKeys,
@@ -456,13 +515,16 @@ function computeNormalizedWindow(
     }
     const pMinVal = snap.resolvedType === "time" || snap.resolvedType === "utc" ? new Date(window.min) : window.min;
     const pMaxVal = snap.resolvedType === "time" || snap.resolvedType === "utc" ? new Date(window.max) : window.max;
-    const p0 = snap.baseScale.map(pMinVal as never);
-    const p1 = snap.baseScale.map(pMaxVal as never);
-    const [r0, r1] = snap.range;
-    if (p0 === undefined || p1 === undefined || r1 === r0) {
+    const mapper = resolveCartesianNormalizedBaseMapper(snap);
+    if (!mapper) {
         return undefined;
     }
-    return [(p0 - r0) / (r1 - r0), (p1 - r0) / (r1 - r0)];
+    const u0 = mapper.map(pMinVal);
+    const u1 = mapper.map(pMaxVal);
+    if (u0 === undefined || u1 === undefined) {
+        return undefined;
+    }
+    return [u0, u1];
 }
 
 function firstValidAxisId(coordinateSpace: CartesianAxisCoordinateSpace, axis: "x" | "y"): string | null {

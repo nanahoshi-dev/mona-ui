@@ -11,6 +11,7 @@ import { formatCartesianAxisSemanticValue } from "../utils/chart-formatter";
 import type { NormalizedChartSynchronizationOptions } from "./chart-synchronization-options";
 import { ChartSynchronizationAxisMapper } from "./chart-synchronization-axis-mapper";
 import type { ChartSynchronizedAxisValue } from "./chart-synchronization-types";
+import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
 
 export interface CrosshairSceneContext {
     readonly coordinateSpace: CartesianAxisCoordinateSpace;
@@ -19,21 +20,11 @@ export interface CrosshairSceneContext {
     readonly plotRect: ChartRect;
     readonly xTimeSpanMs?: number;
     readonly axisScenes: readonly ChartAxisScene[];
+    readonly resolveNearestPoint?: (pixel: ChartPoint, dimension?: "x" | "y" | "xy", mappedXAxisId?: string, mappedYAxisId?: string) => { readonly point: ChartPoint; readonly xValue?: unknown; readonly yValue?: unknown } | null;
 }
 
 function toEpochMs(value: unknown): number | null {
-    if (value instanceof Date) {
-        const t = value.getTime();
-        return Number.isNaN(t) ? null : t;
-    }
-    if (typeof value === "number" && Number.isFinite(value)) {
-        return value;
-    }
-    if (typeof value === "string") {
-        const parsed = Date.parse(value);
-        return Number.isNaN(parsed) ? null : parsed;
-    }
-    return null;
+    return resolveCartesianTemporalValue(value)?.epochMs ?? null;
 }
 
 /**
@@ -56,8 +47,10 @@ export function buildPublishedCrosshairValues(
         if (!snap || !snap.valid) {
             continue;
         }
+        const isPrimary = dimension === "x" ? resolved.axisId === context.primaryXAxisId : resolved.axisId === context.primaryYAxisId;
         values.push({
             normalizedBasePosition: context.coordinateSpace.getNormalizedBasePosition(ref, resolved.value),
+            sourceIsPrimary: isPrimary,
             sourceRef: ref,
             sourceType: snap.resolvedType,
             value: resolved.value
@@ -81,12 +74,17 @@ export function mapIncomingCrosshair(
     let resolvedY: ResolvedCrosshairAxisState | undefined;
 
     for (const incoming of axes) {
-        const targetRef = ChartSynchronizationAxisMapper.resolveTargetAxisRef(
+        if (!crosshairChannelIncludes(options.crosshair.axes, incoming.sourceRef.axis)) {
+            continue;
+        }
+        const isPrimary = incoming.sourceIsPrimary ?? (incoming.sourceRef.axis === "x" ? incoming.sourceRef.axisId === context.primaryXAxisId : incoming.sourceRef.axisId === context.primaryYAxisId);
+        const targetRef = ChartSynchronizationAxisMapper.resolveMappedAxisIdentity(
             incoming.sourceRef,
+            isPrimary,
             context.coordinateSpace,
-            options,
-            { x: context.primaryXAxisId, y: context.primaryYAxisId },
-            new Set<string>()
+            options.axisMappings,
+            new Set<string>(),
+            { x: context.primaryXAxisId, y: context.primaryYAxisId }
         );
         if (!targetRef) {
             continue;
@@ -143,14 +141,38 @@ export function mapIncomingCrosshair(
         return null;
     }
 
-    const anchor: ChartPoint = {
+    let anchor: ChartPoint = {
         x: resolvedX ? resolvedX.coordinate : context.plotRect.x + context.plotRect.width / 2,
         y: resolvedY ? resolvedY.coordinate : context.plotRect.y + context.plotRect.height / 2
     };
+    let snapped = false;
+
+    if (options.crosshair.match === "nearest-point" && context.resolveNearestPoint) {
+        const dimension: "x" | "y" | "xy" = resolvedX && resolvedY ? "xy" : (resolvedX ? "x" : "y");
+        const nearest = context.resolveNearestPoint(anchor, dimension, resolvedX?.axisId, resolvedY?.axisId);
+        if (nearest) {
+            anchor = nearest.point;
+            snapped = true;
+            if (resolvedX && nearest.xValue !== undefined) {
+                const snapX = context.coordinateSpace.get({ axis: "x", axisId: resolvedX.axisId });
+                if (snapX && snapX.valid) {
+                    const nextX = resolveLocalAxisPresentation({ axis: "x", axisId: resolvedX.axisId }, nearest.xValue, snapX.resolvedType, context);
+                    if (nextX) resolvedX = nextX;
+                }
+            }
+            if (resolvedY && nearest.yValue !== undefined) {
+                const snapY = context.coordinateSpace.get({ axis: "y", axisId: resolvedY.axisId });
+                if (snapY && snapY.valid) {
+                    const nextY = resolveLocalAxisPresentation({ axis: "y", axisId: resolvedY.axisId }, nearest.yValue, snapY.resolvedType, context);
+                    if (nextY) resolvedY = nextY;
+                }
+            }
+        }
+    }
 
     return {
         anchor,
-        snapped: false,
+        snapped,
         source: "sync",
         x: resolvedX,
         y: resolvedY

@@ -4,8 +4,16 @@ import type { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-co
 import type { InternalCartesianViewportState } from "../viewport/cartesian-viewport-normalizer";
 import type { NormalizedChartSynchronizationOptions } from "./chart-synchronization-options";
 
+export type SynchronizationDeliveryChannel = "crosshair" | "viewport";
+export type SynchronizationMessageKind = "crosshair" | "crosshair-clear" | "viewport";
+
+export function resolveDeliveryChannel(kind: SynchronizationMessageKind): SynchronizationDeliveryChannel {
+    return kind === "viewport" ? "viewport" : "crosshair";
+}
+
 export interface ChartSynchronizationEnvelope {
     readonly group: string;
+    readonly groupSessionId?: number;
     readonly originMemberId: string;
     readonly sequence: number;
     readonly transactionId: string;
@@ -14,6 +22,7 @@ export interface ChartSynchronizationEnvelope {
 export interface ChartSynchronizationAxisWindow {
     readonly baseDomainSignature?: string;
     readonly normalizedWindow?: readonly [number, number];
+    readonly sourceIsPrimary?: boolean;
     readonly sourceRef: ChartViewportAxisRef;
     readonly sourceType: ResolvedChartCartesianAxisType;
     readonly visibleCategoryKeys?: readonly string[];
@@ -29,6 +38,7 @@ export interface ChartSynchronizationViewportMessage extends ChartSynchronizatio
 
 export interface ChartSynchronizedAxisValue {
     readonly normalizedBasePosition?: number;
+    readonly sourceIsPrimary?: boolean;
     readonly sourceRef: ChartViewportAxisRef;
     readonly sourceType: ResolvedChartCartesianAxisType;
     readonly value: unknown;
@@ -78,6 +88,7 @@ export interface ChartSynchronizationRegistration {
 
 export interface SynchronizationGroupState {
     activeCrosshairOrigin: string | null;
+    readonly groupSessionId: number;
     readonly members: Map<string, ChartSynchronizationMember>;
     sequence: number;
 }

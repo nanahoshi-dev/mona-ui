@@ -19,11 +19,13 @@ interface CoordinatorEntry {
 }
 
 let synchronizationMemberCounter = 0;
+let synchronizationGroupSessionCounter = 0;
 
 @Injectable({ providedIn: "root" })
 export class ChartSynchronizationCoordinator {
     readonly #entriesByMemberId = new Map<string, CoordinatorEntry>();
     readonly #groups = new Map<string, SynchronizationGroupState>();
+    readonly #lastDeliveredSequence = new Map<string, number>();
     readonly #scheduler = new ChartSynchronizationScheduler(() => {
         ChartSynchronizationTracker.current?.onSyncMessageCoalesced?.();
     });
@@ -34,6 +36,11 @@ export class ChartSynchronizationCoordinator {
 
     public getGroupForTesting(groupName: string): SynchronizationGroupState | undefined {
         return this.#groups.get(groupName);
+    }
+
+    public getGroupSessionId(groupName: string): number | null {
+        const group = this.#groups.get(groupName);
+        return group ? group.groupSessionId : null;
     }
 
     public register(member: ChartSynchronizationMember, initialGroup: string | null): ChartSynchronizationRegistration {
@@ -64,8 +71,17 @@ export class ChartSynchronizationCoordinator {
                     return;
                 }
                 const nextGroup = options?.group ?? null;
+                const crosshairEnabled = options?.crosshair.enabled ?? false;
+                if (!crosshairEnabled) {
+                    this.retireOutgoingCrosshair(memberId);
+                }
                 if (nextGroup === current.groupId) {
                     return;
+                }
+                this.retireOutgoingCrosshair(memberId);
+                if (current.groupId) {
+                    this.#scheduler.cancelOriginGroup(memberId, current.groupId);
+                    this.#scheduler.cancelByRecipient(memberId);
                 }
                 this.#leaveGroup(current);
                 current.groupId = "";
@@ -76,10 +92,35 @@ export class ChartSynchronizationCoordinator {
         };
     }
 
+    public retireOutgoingCrosshair(memberId: string): void {
+        const entry = this.#entriesByMemberId.get(memberId);
+        if (!entry || !entry.groupId) {
+            return;
+        }
+        const group = this.#groups.get(entry.groupId);
+        if (!group) {
+            return;
+        }
+        if (group.activeCrosshairOrigin !== memberId) {
+            return;
+        }
+        group.activeCrosshairOrigin = null;
+        this.#scheduler.cancelOriginGroup(memberId, entry.groupId, "crosshair");
+        const message: ChartSynchronizationCrosshairClearMessage = {
+            group: entry.groupId,
+            groupSessionId: group.groupSessionId,
+            kind: "crosshair-clear",
+            originMemberId: memberId,
+            sequence: ++group.sequence,
+            transactionId: `clear-${memberId}-${group.sequence}`
+        };
+        this.#deliverToGroupPeers(group, entry.groupId, memberId, message, member => member.clearCrosshair(message));
+    }
+
     #joinGroup(entry: CoordinatorEntry, groupName: string): void {
         let group = this.#groups.get(groupName);
         if (!group) {
-            group = { activeCrosshairOrigin: null, members: new Map(), sequence: 0 };
+            group = { activeCrosshairOrigin: null, groupSessionId: ++synchronizationGroupSessionCounter, members: new Map(), sequence: 0 };
             this.#groups.set(groupName, group);
         }
         group.members.set(entry.member.memberId, entry.member);
@@ -108,8 +149,9 @@ export class ChartSynchronizationCoordinator {
         if (!entry) {
             return;
         }
-        this.#scheduler.cancel(`${memberId}:crosshair`);
-        this.#scheduler.cancel(`${memberId}:viewport`);
+        this.retireOutgoingCrosshair(memberId);
+        this.#scheduler.cancelByOrigin(memberId);
+        this.#scheduler.cancelByRecipient(memberId);
         this.#leaveGroup(entry);
         this.#entriesByMemberId.delete(memberId);
     }
@@ -127,15 +169,17 @@ export class ChartSynchronizationCoordinator {
             return;
         }
         group.activeCrosshairOrigin = null;
+        this.#scheduler.cancelOriginGroup(originMemberId, entry.groupId, "crosshair");
 
         const message: ChartSynchronizationCrosshairClearMessage = {
             group: entry.groupId,
+            groupSessionId: group.groupSessionId,
             kind: "crosshair-clear",
             originMemberId,
             sequence: ++group.sequence,
             transactionId: `clear-${originMemberId}-${group.sequence}`
         };
-        this.#deliverToGroupPeers(group, entry.groupId, originMemberId, member => member.clearCrosshair(message));
+        this.#deliverToGroupPeers(group, entry.groupId, originMemberId, message, member => member.clearCrosshair(message));
     }
 
     #publishCrosshair(originMemberId: string, payload: ChartSynchronizationPublishCrosshairPayload): void {
@@ -152,6 +196,7 @@ export class ChartSynchronizationCoordinator {
         const message: ChartSynchronizationCrosshairMessage = {
             axes: payload.axes,
             group: entry.groupId,
+            groupSessionId: group.groupSessionId,
             kind: "crosshair",
             originMemberId,
             sequence: ++group.sequence,
@@ -164,6 +209,7 @@ export class ChartSynchronizationCoordinator {
             entry.groupId,
             originMemberId,
             "crosshair",
+            message.sequence,
             member => member.receiveCrosshair(message)
         );
     }
@@ -181,6 +227,7 @@ export class ChartSynchronizationCoordinator {
         const message: ChartSynchronizationViewportMessage = {
             axes: payload.axes,
             group: entry.groupId,
+            groupSessionId: group.groupSessionId,
             kind: "viewport",
             originMemberId,
             phase: payload.phase,
@@ -191,12 +238,11 @@ export class ChartSynchronizationCoordinator {
         ChartSynchronizationTracker.current?.onSyncMessagePublished?.("viewport");
 
         if (payload.phase === "end") {
-            for (const memberId of group.members.keys()) {
-                if (memberId !== originMemberId) {
-                    this.#scheduler.cancel(`${memberId}:viewport`);
-                }
-            }
-            this.#deliverToGroupPeers(group, entry.groupId, originMemberId, member => member.receiveViewport(message));
+            this.#scheduler.cancelOriginGroup(originMemberId, entry.groupId, "viewport");
+            this.#deliverToGroupPeers(group, entry.groupId, originMemberId, message, member => {
+                this.#scheduler.cancelRecipientGroup(member.memberId, entry.groupId, "viewport");
+                member.receiveViewport(message);
+            });
             return;
         }
 
@@ -205,6 +251,7 @@ export class ChartSynchronizationCoordinator {
             entry.groupId,
             originMemberId,
             "viewport",
+            message.sequence,
             member => member.receiveViewport(message)
         );
     }
@@ -213,8 +260,10 @@ export class ChartSynchronizationCoordinator {
         group: SynchronizationGroupState,
         groupName: string,
         originMemberId: string,
+        message: ChartSynchronizationViewportMessage | ChartSynchronizationCrosshairMessage | ChartSynchronizationCrosshairClearMessage,
         invoke: (member: ChartSynchronizationMember) => void
     ): void {
+        const channel = message.kind === "viewport" ? "viewport" : "crosshair";
         const recipients = [...group.members.values()];
         for (const member of recipients) {
             if (member.memberId === originMemberId) {
@@ -224,6 +273,12 @@ export class ChartSynchronizationCoordinator {
             if (currentGroup !== groupName) {
                 continue;
             }
+            const seqKey = `${group.groupSessionId}:${member.memberId}:${channel}`;
+            const lastSeq = this.#lastDeliveredSequence.get(seqKey) ?? 0;
+            if (message.sequence <= lastSeq) {
+                continue;
+            }
+            this.#lastDeliveredSequence.set(seqKey, message.sequence);
             ChartSynchronizationTracker.current?.onSyncMessageDelivered?.();
             invoke(member);
         }
@@ -233,22 +288,46 @@ export class ChartSynchronizationCoordinator {
         group: SynchronizationGroupState,
         groupName: string,
         originMemberId: string,
-        kind: "crosshair" | "viewport",
+        channel: "crosshair" | "viewport",
+        sequence: number,
         buildInvoke: (member: ChartSynchronizationMember) => void
     ): void {
         const recipients = [...group.members.values()];
+        const groupSessionId = group.groupSessionId;
         for (const member of recipients) {
             if (member.memberId === originMemberId) {
                 continue;
             }
-            const memberId = member.memberId;
-            this.#scheduler.schedule(`${memberId}:${kind}`, kind, () => {
-                const currentEntry = this.#entriesByMemberId.get(memberId);
-                if (!currentEntry || currentEntry.groupId !== groupName) {
-                    return;
-                }
-                ChartSynchronizationTracker.current?.onSyncMessageDelivered?.();
-                buildInvoke(currentEntry.member);
+            const recipientMemberId = member.memberId;
+            this.#scheduler.schedule({
+                channel,
+                deliver: () => {
+                    const originEntry = this.#entriesByMemberId.get(originMemberId);
+                    if (!originEntry || originEntry.groupId !== groupName) {
+                        return;
+                    }
+                    const currentEntry = this.#entriesByMemberId.get(recipientMemberId);
+                    if (!currentEntry || currentEntry.groupId !== groupName) {
+                        return;
+                    }
+                    const currentGroup = this.#groups.get(groupName);
+                    if (!currentGroup || currentGroup.groupSessionId !== groupSessionId) {
+                        return;
+                    }
+                    const seqKey = `${groupSessionId}:${recipientMemberId}:${channel}`;
+                    const lastSeq = this.#lastDeliveredSequence.get(seqKey) ?? 0;
+                    if (sequence <= lastSeq) {
+                        return;
+                    }
+                    this.#lastDeliveredSequence.set(seqKey, sequence);
+                    ChartSynchronizationTracker.current?.onSyncMessageDelivered?.();
+                    buildInvoke(currentEntry.member);
+                },
+                group: groupName,
+                kind: channel,
+                originMemberId,
+                recipientMemberId,
+                sequence
             });
         }
     }

@@ -1,8 +1,16 @@
-type SynchronizationDeliveryKind = "crosshair" | "viewport";
+import type { SynchronizationDeliveryChannel, SynchronizationMessageKind } from "./chart-synchronization-types";
 
-interface PendingSynchronizationDelivery {
+export type SynchronizationDeliveryKind = SynchronizationDeliveryChannel;
+
+export interface PendingSynchronizationDelivery {
+    readonly channel?: SynchronizationDeliveryChannel;
     deliver(): void;
+    readonly group: string;
     readonly kind: SynchronizationDeliveryKind;
+    readonly messageKind?: SynchronizationMessageKind;
+    readonly originMemberId: string;
+    readonly recipientMemberId: string;
+    readonly sequence: number;
 }
 
 interface FrameSchedulerHost {
@@ -41,6 +49,66 @@ export class ChartSynchronizationScheduler {
         return this.#pending.delete(key);
     }
 
+    public cancelByOrigin(originMemberId: string, channel?: SynchronizationDeliveryChannel): number {
+        let count = 0;
+        for (const [key, item] of this.#pending.entries()) {
+            const itemChannel = item.channel ?? item.kind;
+            if (item.originMemberId === originMemberId && (!channel || itemChannel === channel)) {
+                this.#pending.delete(key);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public cancelByRecipient(recipientMemberId: string, channel?: SynchronizationDeliveryChannel): number {
+        let count = 0;
+        for (const [key, item] of this.#pending.entries()) {
+            const itemChannel = item.channel ?? item.kind;
+            if (item.recipientMemberId === recipientMemberId && (!channel || itemChannel === channel)) {
+                this.#pending.delete(key);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public cancelOriginGroup(originMemberId: string, group: string, channel?: SynchronizationDeliveryChannel): number {
+        let count = 0;
+        for (const [key, item] of this.#pending.entries()) {
+            const itemChannel = item.channel ?? item.kind;
+            if (item.originMemberId === originMemberId && item.group === group && (!channel || itemChannel === channel)) {
+                this.#pending.delete(key);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public cancelRecipientGroup(recipientMemberId: string, group: string, channel?: SynchronizationDeliveryChannel): number {
+        let count = 0;
+        for (const [key, item] of this.#pending.entries()) {
+            const itemChannel = item.channel ?? item.kind;
+            if (item.recipientMemberId === recipientMemberId && item.group === group && (!channel || itemChannel === channel)) {
+                this.#pending.delete(key);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public cancelGroupChannel(group: string, channel: SynchronizationDeliveryChannel): number {
+        let count = 0;
+        for (const [key, item] of this.#pending.entries()) {
+            const itemChannel = item.channel ?? item.kind;
+            if (item.group === group && itemChannel === channel) {
+                this.#pending.delete(key);
+                count++;
+            }
+        }
+        return count;
+    }
+
     public destroy(): void {
         this.cancelFlush();
         this.#pending.clear();
@@ -55,14 +123,16 @@ export class ChartSynchronizationScheduler {
         this.deliverPending();
     }
 
-    public schedule(key: string, kind: SynchronizationDeliveryKind, deliver: () => void): void {
+    public schedule(delivery: PendingSynchronizationDelivery): void {
+        const channel = delivery.channel ?? delivery.kind;
+        const key = `${delivery.group}:${delivery.recipientMemberId}:${channel}`;
         const existing = this.#pending.get(key);
         if (existing) {
-            this.#pending.set(key, { deliver, kind });
+            this.#pending.set(key, delivery);
             this.#onCoalesced?.();
             return;
         }
-        this.#pending.set(key, { deliver, kind });
+        this.#pending.set(key, delivery);
         if (this.#frameHandle !== null) {
             return;
         }

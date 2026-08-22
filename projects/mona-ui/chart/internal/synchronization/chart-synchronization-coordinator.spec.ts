@@ -226,19 +226,69 @@ describe("ChartSynchronizationCoordinator", () => {
         regB.destroy();
     });
 
-    it("does not deliver cross-group messages", async () => {
+    it("retires outgoing crosshair when origin leaves group or disables crosshair (SD-R1)", async () => {
         const coordinator = new ChartSynchronizationCoordinator();
         const a = createMember("a", "g1");
-        const x = createMember("x", "g2");
+        const b = createMember("b", "g1");
         const regA = coordinator.register(a, "g1");
-        coordinator.register(x, "g2");
+        const regB = coordinator.register(b, "g1");
 
-        regA.publishViewport({ axes: [], phase: "update", source: "wheel" });
         regA.publishCrosshair({ axes: [], snapped: true });
         await settle();
+        expect(b.crosshairs).toHaveLength(1);
 
-        expect(x.viewports).toHaveLength(0);
-        expect(x.crosshairs).toHaveLength(0);
+        // a changes group to g2 -> b should receive an immediate clearCrosshair
+        regA.updateOptions(baseOptions("g2"));
+        expect(b.cleared).toHaveLength(1);
+        expect(coordinator.getGroupForTesting("g1")?.activeCrosshairOrigin).toBeNull();
+
         regA.destroy();
+        regB.destroy();
+    });
+
+    it("prevents crosshair resurrection when clear arrives while move is queued (SD-R2)", async () => {
+        const coordinator = new ChartSynchronizationCoordinator();
+        const a = createMember("a", "g1");
+        const b = createMember("b", "g1");
+        const regA = coordinator.register(a, "g1");
+        const regB = coordinator.register(b, "g1");
+
+        // Publish crosshair (queued)
+        regA.publishCrosshair({ axes: [], snapped: true });
+        // Clear immediately before RAF flush
+        regA.clearCrosshair();
+        expect(b.cleared).toHaveLength(1);
+
+        // Now flush RAF
+        await settle();
+
+        // b must NOT receive the queued crosshair update
+        expect(b.crosshairs).toHaveLength(0);
+        expect(b.cleared).toHaveLength(1);
+
+        regA.destroy();
+        regB.destroy();
+    });
+
+    it("cancels queued deliveries when origin leaves group before RAF flush (SD-R3)", async () => {
+        const coordinator = new ChartSynchronizationCoordinator();
+        const a = createMember("a", "g1");
+        const b = createMember("b", "g1");
+        const regA = coordinator.register(a, "g1");
+        const regB = coordinator.register(b, "g1");
+
+        // Queue a viewport update from a
+        regA.publishViewport({ axes: [], phase: "update", source: "wheel" });
+
+        // a leaves g1 before RAF flush
+        regA.updateOptions(baseOptions("g2"));
+
+        await settle();
+
+        // b should NOT receive the queued viewport update from a in g1
+        expect(b.viewports).toHaveLength(0);
+
+        regA.destroy();
+        regB.destroy();
     });
 });
