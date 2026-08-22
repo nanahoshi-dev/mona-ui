@@ -1,8 +1,13 @@
 import type { ChartViewportConstraint } from "../../models/chart-viewport.models";
-import type { ChartContinuousPositionScale } from "../scale/chart-scale";
 import { CartesianViewportConstraints } from "./cartesian-viewport-constraints";
+import { resolveCartesianNormalizedBaseMapper } from "./cartesian-normalized-base-mapper";
 import type { CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
-import type { InternalAxisViewport, InternalCategoryViewport, InternalContinuousViewport } from "./cartesian-viewport-normalizer";
+import {
+    isFullContinuousViewport,
+    type InternalAxisViewport,
+    type InternalCategoryViewport,
+    type InternalContinuousViewport
+} from "./cartesian-viewport-normalizer";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 
 export interface ViewportSemanticMapperOptions {
@@ -121,7 +126,7 @@ export function mapContinuousDomainWindow(
         targetSnap.resolvedType
     );
 
-    if (Math.abs(cMin - baseMin) < 1e-9 && Math.abs(cMax - baseMax) < 1e-9) {
+    if (isFullContinuousViewport(cMin, cMax, targetSnap)) {
         return undefined;
     }
 
@@ -152,19 +157,18 @@ export function computeSourceNormalizedWindow(
         const contWin = sourceWin as InternalContinuousViewport;
         const pMinVal = sourceSnap.resolvedType === "time" || sourceSnap.resolvedType === "utc" ? new Date(contWin.min) : contWin.min;
         const pMaxVal = sourceSnap.resolvedType === "time" || sourceSnap.resolvedType === "utc" ? new Date(contWin.max) : contWin.max;
-        const p0 = sourceSnap.baseScale.map(pMinVal as never);
-        const p1 = sourceSnap.baseScale.map(pMaxVal as never);
-        const [r0, r1] = sourceSnap.range;
-        if (p0 !== undefined && p1 !== undefined && r1 !== r0) {
-            u0 = (p0 - r0) / (r1 - r0);
-            u1 = (p1 - r0) / (r1 - r0);
+        const mapper = resolveCartesianNormalizedBaseMapper(sourceSnap);
+        if (mapper) {
+            const mapped0 = mapper.map(pMinVal);
+            const mapped1 = mapper.map(pMaxVal);
+            if (mapped0 !== undefined && mapped1 !== undefined) {
+                u0 = mapped0;
+                u1 = mapped1;
+            }
         }
     }
 
-    return {
-        u0: Math.max(0, Math.min(u0, u1)),
-        u1: Math.min(1, Math.max(u0, u1))
-    };
+    return u0 <= u1 ? { u0, u1 } : { u0: u1, u1: u0 };
 }
 
 export function mapCategoryRelativeWindow(
@@ -210,13 +214,13 @@ export function mapContinuousRelativeWindow(
     targetSnap: CartesianAxisCoordinateSnapshot,
     options: ViewportSemanticMapperOptions | undefined
 ): InternalAxisViewport | undefined {
-    const [tr0, tr1] = targetSnap.range;
-    const tp0 = tr0 + normalized.u0 * (tr1 - tr0);
-    const tp1 = tr0 + normalized.u1 * (tr1 - tr0);
+    const mapper = resolveCartesianNormalizedBaseMapper(targetSnap);
+    if (!mapper) {
+        return undefined;
+    }
 
-    const continuousScale = targetSnap.baseScale as ChartContinuousPositionScale<number | Date>;
-    const inv0 = continuousScale.invert?.(tp0);
-    const inv1 = continuousScale.invert?.(tp1);
+    const inv0 = mapper.invert(normalized.u0);
+    const inv1 = mapper.invert(normalized.u1);
     if (inv0 === undefined || inv1 === undefined) {
         return undefined;
     }
@@ -241,7 +245,7 @@ export function mapContinuousRelativeWindow(
         targetSnap.resolvedType
     );
 
-    if (Math.abs(cMin - baseMin) < 1e-9 && Math.abs(cMax - baseMax) < 1e-9) {
+    if (isFullContinuousViewport(cMin, cMax, targetSnap)) {
         return undefined;
     }
 

@@ -3,6 +3,7 @@ import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-s
 import { CartesianViewportConstraints } from "./cartesian-viewport-constraints";
 import {
     areAxisViewportsEqual,
+    isFullContinuousViewport,
     type InternalAxisViewport,
     type InternalCartesianViewportState,
     type InternalCategoryViewport,
@@ -175,7 +176,7 @@ export class CartesianViewportReconciler {
             snap.resolvedType
         );
 
-        if (Math.abs(cMin - baseMin) < 1e-9 && Math.abs(cMax - baseMax) < 1e-9) {
+        if (isFullContinuousViewport(cMin, cMax, snap)) {
             return undefined;
         }
 

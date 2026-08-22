@@ -5,15 +5,14 @@ import type {
     ChartViewportWindow
 } from "../../models/chart-viewport.models";
 import type {
-    ChartContinuousPositionScale
-} from "../scale/chart-scale";
-import type {
     CartesianAxisCoordinateSnapshot,
     CartesianAxisCoordinateSpace
 } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportConstraints } from "./cartesian-viewport-constraints";
+import { resolveCartesianNormalizedBaseMapper } from "./cartesian-normalized-base-mapper";
 import {
     areAxisViewportsEqual,
+    isFullContinuousViewport,
     type InternalAxisViewport,
     type InternalCartesianViewportState,
     type InternalCategoryViewport,
@@ -275,9 +274,7 @@ export class CartesianViewportController {
                     }
 
                     if (Array.isArray(snapshot.baseDomain) && snapshot.baseDomain.length >= 2) {
-                        const bMin = snapshot.baseDomain[0] instanceof Date ? snapshot.baseDomain[0].getTime() : Number(snapshot.baseDomain[0]);
-                        const bMax = snapshot.baseDomain[1] instanceof Date ? snapshot.baseDomain[1].getTime() : Number(snapshot.baseDomain[1]);
-                        if (Math.abs(finalMin - bMin) < 1e-9 && Math.abs(finalMax - bMax) < 1e-9) {
+                        if (isFullContinuousViewport(finalMin, finalMax, snapshot)) {
                             nextWin = undefined;
                         } else {
                             nextWin = {
@@ -399,9 +396,13 @@ export class CartesianViewportController {
         const pMinVal = snapshot.resolvedType === "time" || snapshot.resolvedType === "utc" ? new Date(curMin) : curMin;
         const pMaxVal = snapshot.resolvedType === "time" || snapshot.resolvedType === "utc" ? new Date(curMax) : curMax;
 
-        const p0 = snapshot.baseScale.map(pMinVal as never);
-        const p1 = snapshot.baseScale.map(pMaxVal as never);
-        if (p0 === undefined || p1 === undefined || !Number.isFinite(p0) || !Number.isFinite(p1)) {
+        const mapper = resolveCartesianNormalizedBaseMapper(snapshot);
+        if (!mapper) {
+            return undefined;
+        }
+        const u0 = mapper.map(pMinVal);
+        const u1 = mapper.map(pMaxVal);
+        if (u0 === undefined || u1 === undefined) {
             return undefined;
         }
 
@@ -412,12 +413,49 @@ export class CartesianViewportController {
         const t0 = (s0 - r0) / rangeSpan;
         const t1 = (s1 - r0) / rangeSpan;
 
-        const baseP0 = p0 + t0 * (p1 - p0);
-        const baseP1 = p0 + t1 * (p1 - p0);
+        let transformedU0 = u0 + t0 * (u1 - u0);
+        let transformedU1 = u0 + t1 * (u1 - u0);
+        const constraint = options?.constraints?.find(c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId);
 
-        const continuousScale = snapshot.baseScale as ChartContinuousPositionScale<number | Date>;
-        const inv0 = continuousScale.invert?.(baseP0);
-        const inv1 = continuousScale.invert?.(baseP1);
+        // A pure pan is translated in the authority mapper's normalized space.
+        // Clamp that operation in the same space before inversion so repeated
+        // over-pan frames reuse the exact boundary representation instead of
+        // accumulating one-ULP differences in the semantic endpoint.
+        const hasContinuousConstraint =
+            constraint?.minSpan !== undefined || constraint?.maxSpan !== undefined || constraint?.maxZoom !== undefined;
+        if (factor === 1 && options?.clampToData !== false && !hasContinuousConstraint) {
+            const baseDomainU0 = mapper.map(snapshot.baseDomain[0]);
+            const baseDomainU1 = mapper.map(snapshot.baseDomain[1]);
+            if (baseDomainU0 !== undefined && baseDomainU1 !== undefined) {
+                const normalizedMin = Math.min(baseDomainU0, baseDomainU1);
+                const normalizedMax = Math.max(baseDomainU0, baseDomainU1);
+                const normalizedSpan = Math.abs(u1 - u0);
+                let normalizedWindowMin = Math.min(transformedU0, transformedU1);
+                let normalizedWindowMax = Math.max(transformedU0, transformedU1);
+
+                if (normalizedSpan < normalizedMax - normalizedMin) {
+                    if (normalizedWindowMin < normalizedMin) {
+                        normalizedWindowMin = normalizedMin;
+                        normalizedWindowMax = normalizedMin + normalizedSpan;
+                    }
+                    if (normalizedWindowMax > normalizedMax) {
+                        normalizedWindowMax = normalizedMax;
+                        normalizedWindowMin = normalizedMax - normalizedSpan;
+                    }
+
+                    if (transformedU0 <= transformedU1) {
+                        transformedU0 = normalizedWindowMin;
+                        transformedU1 = normalizedWindowMax;
+                    } else {
+                        transformedU0 = normalizedWindowMax;
+                        transformedU1 = normalizedWindowMin;
+                    }
+                }
+            }
+        }
+
+        const inv0 = mapper.invert(transformedU0);
+        const inv1 = mapper.invert(transformedU1);
         if (inv0 === undefined || inv1 === undefined) return undefined;
 
         const num0 = inv0 instanceof Date ? inv0.getTime() : Number(inv0);
@@ -427,7 +465,6 @@ export class CartesianViewportController {
         const calcMin = Math.min(num0, num1);
         const calcMax = Math.max(num0, num1);
 
-        const constraint = options?.constraints?.find(c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId);
         const [cMin, cMax] = CartesianViewportConstraints.applyContinuousConstraints(
             calcMin,
             calcMax,
@@ -439,7 +476,7 @@ export class CartesianViewportController {
             snapshot.resolvedType
         );
 
-        if (Math.abs(cMin - baseMin) < 1e-9 && Math.abs(cMax - baseMax) < 1e-9) {
+        if (isFullContinuousViewport(cMin, cMax, snapshot)) {
             return undefined;
         }
 

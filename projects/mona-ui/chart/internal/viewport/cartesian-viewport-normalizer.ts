@@ -9,6 +9,8 @@ import type {
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { clamp } from "../utils/number-utils";
+import type { CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
+import { resolveCartesianNormalizedBaseMapper } from "./cartesian-normalized-base-mapper";
 
 export interface InternalContinuousViewport {
     readonly axis: "x" | "y";
@@ -63,7 +65,7 @@ export function areAxisViewportsEqual(
     if (a.axis !== b.axis || a.axisId !== b.axisId || a.kind !== b.kind) return false;
 
     if (a.kind === "continuous" && b.kind === "continuous") {
-        return Math.abs(a.min - b.min) < 1e-9 && Math.abs(a.max - b.max) < 1e-9;
+        return continuousViewportNumbersEqual(a.min, b.min) && continuousViewportNumbersEqual(a.max, b.max);
     }
 
     if (a.kind === "category" && b.kind === "category") {
@@ -71,6 +73,62 @@ export function areAxisViewportsEqual(
     }
 
     return false;
+}
+
+/**
+ * Internal continuous viewport endpoints are canonical finite numbers. State
+ * identity must not depend on the semantic magnitude of an endpoint: every
+ * distinct representable number is a distinct viewport state.
+ */
+export function continuousViewportNumbersEqual(a: number, b: number): boolean {
+    if (!Number.isFinite(a) || !Number.isFinite(b)) {
+        return false;
+    }
+    return canonicalViewportNumber(a) === canonicalViewportNumber(b);
+}
+
+/**
+ * Determines whether a continuous window is the actual base extent. When a
+ * coordinate snapshot is available, compare in its retained normalized
+ * transform space so nonlinear and temporal domains do not need semantic-unit
+ * tolerances. Resolved axis metadata without a scale falls back to exact
+ * canonical endpoint identity. The normalized comparison is intentionally
+ * separate from semantic viewport state identity.
+ */
+export function isFullContinuousViewport(
+    min: number,
+    max: number,
+    axisInfo: ResolvedAxisInfo | CartesianAxisCoordinateSnapshot
+): boolean {
+    if (!Number.isFinite(min) || !Number.isFinite(max) || !Array.isArray(axisInfo.baseDomain) || axisInfo.baseDomain.length < 2) {
+        return false;
+    }
+
+    if ("baseScale" in axisInfo) {
+        const mapper = resolveCartesianNormalizedBaseMapper(axisInfo);
+        if (mapper) {
+            const isTemporal = axisInfo.resolvedType === "time" || axisInfo.resolvedType === "utc";
+            const normalizedMin = mapper.map(isTemporal ? new Date(min) : min);
+            const normalizedMax = mapper.map(isTemporal ? new Date(max) : max);
+            if (normalizedMin !== undefined && normalizedMax !== undefined) {
+                return normalizedEndpointEquals(normalizedMin, 0) && normalizedEndpointEquals(normalizedMax, 1);
+            }
+        }
+    }
+
+    const baseMin =
+        axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
+    const baseMax =
+        axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
+    return continuousViewportNumbersEqual(min, baseMin) && continuousViewportNumbersEqual(max, baseMax);
+}
+
+function canonicalViewportNumber(value: number): number {
+    return Object.is(value, -0) ? 0 : value;
+}
+
+function normalizedEndpointEquals(value: number, endpoint: 0 | 1): boolean {
+    return Number.isFinite(value) && canonicalViewportNumber(value) === endpoint;
 }
 
 export function areInternalViewportStatesEqual(
@@ -171,7 +229,7 @@ export function areViewportStatesEqual(
             const maxA = wA.max instanceof Date ? wA.max.getTime() : Number(wA.max);
             const minB = wB.min instanceof Date ? wB.min.getTime() : Number(wB.min);
             const maxB = wB.max instanceof Date ? wB.max.getTime() : Number(wB.max);
-            if (Math.abs(minA - minB) > 1e-9 || Math.abs(maxA - maxB) > 1e-9) return false;
+            if (!continuousViewportNumbersEqual(minA, minB) || !continuousViewportNumbersEqual(maxA, maxB)) return false;
         } else if (wA.kind === "category" && wB.kind === "category") {
             if (wA.startIndex !== wB.startIndex || wA.endIndexExclusive !== wB.endIndexExclusive) return false;
         }
@@ -218,7 +276,6 @@ export function toPublicViewportState(
     return { axes };
 }
 
-import type { CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportConstraints } from "./cartesian-viewport-constraints";
 
 export function normalizeAxisWindow(
@@ -425,9 +482,7 @@ export function normalizeAxisWindow(
 
         // Full domain check
         if (Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2) {
-            const bMin = axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]);
-            const bMax = axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]);
-            if (Math.abs(minVal - bMin) < 1e-9 && Math.abs(maxVal - bMax) < 1e-9) {
+            if (isFullContinuousViewport(minVal, maxVal, axisInfo)) {
                 return undefined;
             }
         }

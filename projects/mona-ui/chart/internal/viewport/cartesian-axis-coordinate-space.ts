@@ -6,6 +6,11 @@ import type {
     ChartPositionScale,
     ResolvedChartCartesianAxisType
 } from "../scale/chart-scale";
+import {
+    createCartesianNormalizedBaseMapper,
+    resolveCartesianNormalizedBaseMapper,
+    type CartesianNormalizedBaseMapper
+} from "./cartesian-normalized-base-mapper";
 
 export interface ResolvedCategoryGeometry {
     readonly bandCenter: number;
@@ -33,6 +38,7 @@ export interface CartesianAxisCoordinateSnapshot {
     readonly range: readonly [number, number];
     readonly ref: ChartViewportAxisRef;
     readonly resolvedType: ResolvedChartCartesianAxisType;
+    readonly normalizedBaseMapper?: CartesianNormalizedBaseMapper;
     readonly valid: boolean;
     readonly viewportDomain: readonly unknown[];
     readonly viewportScale: ChartPositionScale<unknown>;
@@ -197,10 +203,18 @@ export class CartesianAxisCoordinateSpace {
             const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
             const baseScale = baseScales.getXScale(xAxis.axisId)!;
             const isValid = xAxisValidityById.get(xAxis.axisId)?.valid ?? true;
+            const normalizedBaseMapper = createCartesianNormalizedBaseMapper({
+                domain: baseDomain,
+                exponent: xAxis.exponent,
+                logBase: xAxis.logBase,
+                symlogConstant: xAxis.symlogConstant,
+                type: resolvedType
+            });
 
             const snap: CartesianAxisCoordinateSnapshot = {
                 baseDomain,
                 baseScale,
+                normalizedBaseMapper,
                 range,
                 ref: { axis: "x", axisId: xAxis.axisId },
                 resolvedType,
@@ -219,10 +233,18 @@ export class CartesianAxisCoordinateSpace {
                 : [plotRect.y + plotRect.height, plotRect.y];
             const baseScale = baseScales.getYScale(yAxis.axisId)!;
             const isValid = yAxisValidityById.get(yAxis.axisId)?.valid ?? true;
+            const normalizedBaseMapper = createCartesianNormalizedBaseMapper({
+                domain: baseDomain,
+                exponent: yAxis.exponent,
+                logBase: yAxis.logBase,
+                symlogConstant: yAxis.symlogConstant,
+                type: resolvedType
+            });
 
             const snap: CartesianAxisCoordinateSnapshot = {
                 baseDomain,
                 baseScale,
+                normalizedBaseMapper,
                 range,
                 ref: { axis: "y", axisId: yAxis.axisId },
                 resolvedType,
@@ -715,19 +737,13 @@ export class CartesianAxisCoordinateSpace {
     public getNormalizedBasePosition(ref: ChartViewportAxisRef, value: unknown): number | undefined {
         const snap = this.get(ref);
         if (!snap) return undefined;
-        const p = snap.baseScale.map(value as never);
-        if (p === undefined || !Number.isFinite(p)) return undefined;
-        const [r0, r1] = snap.range;
-        if (r1 === r0) return 0;
-        return (p - r0) / (r1 - r0);
+        return resolveCartesianNormalizedBaseMapper(snap)?.map(value);
     }
 
     public invertNormalizedBasePosition(ref: ChartViewportAxisRef, u: number): unknown | undefined {
         const snap = this.get(ref);
         if (!snap || snap.resolvedType === "category") return undefined;
-        const [r0, r1] = snap.range;
-        const pixel = r0 + u * (r1 - r0);
-        return (snap.baseScale as ChartContinuousPositionScale<number | Date>).invert?.(pixel);
+        return resolveCartesianNormalizedBaseMapper(snap)?.invert(u);
     }
 
     public static containsPlotPoint(point: ChartPoint, plotRect: ChartRect): boolean {
