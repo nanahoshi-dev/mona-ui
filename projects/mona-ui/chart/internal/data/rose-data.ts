@@ -218,7 +218,10 @@ export class RoseDataProcessor {
 
         const validEntries = categorySlots.filter((slot): slot is CategorySlot & { validDatum: NonNullable<CategorySlot["validDatum"]> } => slot.validDatum !== undefined);
 
-        const rawMax = validEntries.length > 0 ? Math.max(...validEntries.map(e => e.validDatum.value)) : 0;
+        let rawMax = 0;
+        for (const entry of validEntries) {
+            if (entry.validDatum.value > rawMax) rawMax = entry.validDatum.value;
+        }
         let domainMin = options.min !== undefined && Number.isFinite(options.min) ? options.min : 0;
         if (domainMin < 0) {
             if (warnedDiagnosticSignatures) {

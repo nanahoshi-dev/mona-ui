@@ -32,6 +32,22 @@ function parseTemporalValue(val: unknown): number | undefined {
     return undefined;
 }
 
+function scanMin(values: readonly number[]): number {
+    let min = Infinity;
+    for (let i = 0; i < values.length; i++) {
+        if (values[i] < min) min = values[i];
+    }
+    return min;
+}
+
+function scanMax(values: readonly number[]): number {
+    let max = -Infinity;
+    for (let i = 0; i < values.length; i++) {
+        if (values[i] > max) max = values[i];
+    }
+    return max;
+}
+
 export class CartesianAxisDomainResolver {
     public static resolveDomain(
         axis: ResolvedCartesianAxisDescriptor,
@@ -409,8 +425,8 @@ export class CartesianAxisDomainResolver {
 
             const isPositive = posValues.length > 0;
             const activeValues = isPositive ? posValues : negValues;
-            let min = Math.min(...activeValues);
-            let max = Math.max(...activeValues);
+            let min = scanMin(activeValues);
+            let max = scanMax(activeValues);
 
             if (axis.explicitMin !== undefined) {
                 const em = Number(axis.explicitMin);
@@ -465,8 +481,8 @@ export class CartesianAxisDomainResolver {
             rawValues.push(0);
         }
 
-        let min = rawValues.length > 0 ? Math.min(...rawValues) : 0;
-        let max = rawValues.length > 0 ? Math.max(...rawValues) : 1;
+        let min = rawValues.length > 0 ? scanMin(rawValues) : 0;
+        let max = rawValues.length > 0 ? scanMax(rawValues) : 1;
 
         if (axis.explicitMin !== undefined) {
             const em = Number(axis.explicitMin);

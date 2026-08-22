@@ -193,7 +193,10 @@ export class RadialBarDataProcessor {
             domainMin = 0;
         }
 
-        const maxVal = Math.max(...validEntries.map(e => e.value));
+        let maxVal = 0;
+        for (const entry of validEntries) {
+            if (entry.value > maxVal) maxVal = entry.value;
+        }
         let domainMax = isExplicitMax ? options.max! : maxVal;
 
         if (isExplicitMax && domainMax <= domainMin) {

@@ -273,5 +273,56 @@ describe("CartesianAxisDomainResolver", () => {
             const res = CartesianAxisDomainResolver.resolveDomain(axis, "linear", [series]);
             expect(res.domain).toEqual([45, 55]); // 50 padded
         });
+
+        it("should resolve numeric domain over very large datasets without stack overflow", () => {
+            const axis = createMockYAxis();
+            const largeData = Array.from({ length: 300_000 }, (_, i) => ({ val: (i % 997) + 1 }));
+            const series: ChartLineSeriesRegistration = {
+                color: signal("#000"),
+                curve: signal("linear"),
+                data: signal(largeData),
+                element: { nativeElement: {} as HTMLElement },
+                field: signal("val"),
+                id: "dense-1",
+                name: signal("Dense"),
+                pointRadius: signal(undefined),
+                strokeWidth: signal(undefined),
+                type: "line",
+                visible: signal(true),
+                xAxisId: signal("x1"),
+                xField: signal("x"),
+                yAxisId: signal("y1")
+            };
+
+            const res = CartesianAxisDomainResolver.resolveDomain(axis, "linear", [series]);
+            expect(res.isValid).toBe(true);
+            expect(res.domain[0]).toBe(1);
+            expect(res.domain[1]).toBe(997);
+        });
+
+        it("should resolve log domain over very large datasets without stack overflow", () => {
+            const axis = createMockYAxis({ type: signal("log") });
+            const largeData = Array.from({ length: 300_000 }, (_, i) => ({ val: ((i % 97) + 1) * 10 }));
+            const series: ChartLineSeriesRegistration = {
+                color: signal("#000"),
+                curve: signal("linear"),
+                data: signal(largeData),
+                element: { nativeElement: {} as HTMLElement },
+                field: signal("val"),
+                id: "dense-2",
+                name: signal("Dense Log"),
+                pointRadius: signal(undefined),
+                strokeWidth: signal(undefined),
+                type: "line",
+                visible: signal(true),
+                xAxisId: signal("x1"),
+                xField: signal("x"),
+                yAxisId: signal("y1")
+            };
+
+            const res = CartesianAxisDomainResolver.resolveDomain(axis, "log", [series]);
+            expect(res.isValid).toBe(true);
+            expect(res.domain).toEqual([10, 970]);
+        });
     });
 });

@@ -28,8 +28,13 @@ export function computeRadialDomain(
     let observedMax = 1;
 
     if (finiteValues.length > 0) {
-        const valMin = Math.min(...finiteValues);
-        const valMax = Math.max(...finiteValues);
+        let valMin = Infinity;
+        let valMax = -Infinity;
+        for (let i = 0; i < finiteValues.length; i++) {
+            const v = finiteValues[i];
+            if (v < valMin) valMin = v;
+            if (v > valMax) valMax = v;
+        }
         observedMin = Math.min(valMin, 0);
         observedMax = Math.max(valMax, 0);
     }

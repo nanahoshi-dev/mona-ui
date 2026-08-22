@@ -40,6 +40,14 @@ export interface PolarAxisLayoutOptions {
     styleResolver: ChartStyleResolver;
 }
 
+function computeMaxRadius(radii: readonly number[], fallback: number): number {
+    let max = -Infinity;
+    for (let i = 0; i < radii.length; i++) {
+        if (radii[i] > max) max = radii[i];
+    }
+    return max === -Infinity ? fallback : max;
+}
+
 export class PolarAxisLayoutEngine {
     public static computeScene(options: PolarAxisLayoutOptions): PolarAxisChartScene {
         const { angularAxis, containerHeight, containerWidth, measurements, radialAxis, rootData, series, styleResolver } = options;
@@ -363,7 +371,7 @@ export class PolarAxisLayoutEngine {
                 }
 
                 const definedRadii = points.filter(p => p.defined).map(p => p.radius);
-                const maxRenderedRadius = definedRadii.length > 0 ? Math.max(...definedRadii) : outerRadius;
+                const maxRenderedRadius = computeMaxRadius(definedRadii, outerRadius);
 
                 const radarScene: ChartRadarSeriesScene = {
                     color: style.color,
@@ -462,7 +470,7 @@ export class PolarAxisLayoutEngine {
                 }
 
                 const definedRadii = points.filter(p => p.defined).map(p => p.radius);
-                const maxRenderedRadius = definedRadii.length > 0 ? Math.max(...definedRadii) : outerRadius;
+                const maxRenderedRadius = computeMaxRadius(definedRadii, outerRadius);
 
                 const polarScene: ChartContinuousPolarSeriesScene = {
                     color: style.color,
