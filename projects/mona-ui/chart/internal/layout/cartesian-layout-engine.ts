@@ -40,6 +40,8 @@ import type { ChartSeriesDensityMetadata } from "../scene/chart-scene";
 import { projectRangeEnvelopeIndexView, projectScalarIndexView } from "../density/cartesian-density-projector";
 import { CartesianConnectedPathInteractionProvider } from "../density/cartesian-dense-interaction-provider";
 import { createDenseHitMaterializer } from "../density/cartesian-dense-hit-materializer";
+import { CartesianMarkerSpatialInteractionProvider } from "../density/cartesian-marker-dense-provider";
+import { ChartDensityTracker } from "./chart-density-instrumentation";
 import { computeRangeAreaLayout, computeRangeBarLayout } from "./cartesian-range-layout";
 import { computeFinancialLayout } from "./cartesian-financial-layout";
 import { CartesianSeriesPolicy } from "./cartesian-series-policy";
@@ -381,7 +383,8 @@ export class CartesianLayoutEngine {
                     rootData,
                     effectiveRootXField ?? "",
                     options.downsamplingPolicy ?? defaultDownsamplingOptions,
-                    chrome.plotRect.width
+                    chrome.plotRect.width,
+                    baseCoordinateSpace
                 );
                 return { runtime: attachDensityRuntime(runtime, density) };
             } catch {
@@ -648,8 +651,133 @@ export class CartesianLayoutEngine {
             }
 
             if (s.type === "scatter" || s.type === "bubble") {
+                // Marker density: representative subset from the normalized
+                // spatial hierarchy keeps scene volume bounded (§56/§60).
+                const markerEntry = runtime.density?.seriesById.get(s.id) ?? null;
+                let markerIndexView: readonly number[] | null = null;
+                if (markerEntry?.spatial && markerEntry.scalar && seriesXScale.type !== "category") {
+                    const xSnap = projection.coordinateSpace?.get({ axis: "x", axisId: binding.xAxisId ?? "" });
+                    const ySnap = projection.coordinateSpace?.get({ axis: "y", axisId: binding.yAxisId ?? "" });
+                    const effectiveViewport = viewport ?? { x: new Map(), y: new Map() };
+                    const xWindow = resolveViewportUnitInterval(xSnap, effectiveViewport, "x");
+                    const yWindow = resolveViewportUnitInterval(ySnap, effectiveViewport, "y");
+                    if (xWindow && yWindow) {
+                        const budget = Math.max(
+                            256,
+                            Math.min(30_000, Math.floor((plotRect.width / 8) * (plotRect.height / 8)))
+                        );
+                        const representatives: number[] = [];
+                        markerEntry.spatial.index.collectRepresentatives(
+                            [
+                                Math.max(0, Math.min(xWindow[0], xWindow[1])),
+                                Math.max(0, Math.min(yWindow[0], yWindow[1])),
+                                Math.abs(xWindow[1] - xWindow[0]),
+                                Math.abs(yWindow[1] - yWindow[0])
+                            ],
+                            budget,
+                            idx => representatives.push(idx),
+                            () => ChartDensityTracker.current?.onSpatialNodeVisited?.()
+                        );
+                        representatives.sort((a, b) => a - b);
+                        markerIndexView = representatives;
+                        recordSeriesDensityMetadata(seriesDensityMetadataById, s.id, sData.length, {
+                            algorithm: "pixel",
+                            indices: representatives,
+                            renderedCount: representatives.length,
+                            sampled: true,
+                            sourceCount: sData.length,
+                            visibleSourceCount: representatives.length
+                        });
+
+                        // Exact raw interaction over the full marker source (§64).
+                        const spatialEntry = markerEntry.spatial;
+                        const markerKeyResolver = new ChartMarkKeyResolver(s.id, s.keyField?.(), s.seriesKey?.());
+                        const markerTemporal = resolveTemporalFlag(projection.coordinateSpace, binding.xAxisId);
+                        const toPublicX = (epochOrNumber: number): number | Date =>
+                            markerTemporal ? new Date(epochOrNumber) : epochOrNumber;
+                        denseInteractionById.set(
+                            s.id,
+                            new CartesianMarkerSpatialInteractionProvider({
+                                hierarchy: spatialEntry.index,
+                                materialize: idx => {
+                                    const datum = sData[idx];
+                                    if (datum === undefined) {
+                                        return null;
+                                    }
+                                    const xVal = resolveValue(datum, sXField, idx);
+                                    const yVal = resolveValue(datum, (s as ChartScalarSeriesRegistrationBase).field(), idx);
+                                    if (!isFiniteNumber(yVal)) {
+                                        return null;
+                                    }
+                                    const xPos = seriesXScale.map(xVal as never);
+                                    const yPos = seriesYScale.map(Number(yVal));
+                                    if (
+                                        xPos === undefined || yPos === undefined ||
+                                        !Number.isFinite(xPos) || !Number.isFinite(yPos)
+                                    ) {
+                                        return null;
+                                    }
+                                    const normalizedKey = markerTemporal
+                                        ? (xVal instanceof Date ? xVal.getTime() : Number(xVal))
+                                        : Number(xVal);
+                                    return {
+                                        animationKey: markerKeyResolver.resolveKey(datum, normalizedKey, idx),
+                                        color: undefined,
+                                        datum,
+                                        formattedCategory: formatXValue(
+                                            xVal,
+                                            idx,
+                                            seriesXAxis?.formatter,
+                                            (seriesXScale.type ?? "category") as any
+                                        ),
+                                        formattedValue: formatYValue(Number(yVal), idx, seriesYAxis?.formatter),
+                                        index: idx,
+                                        point: { x: xPos, y: yPos },
+                                        radius: 16,
+                                        renderOrder: ++renderOrderCounter.value,
+                                        seriesId: s.id,
+                                        seriesName: seriesDisplayName,
+                                        seriesType: s.type,
+                                        xAxisId: binding.xAxisId,
+                                        xAxisTitle: seriesXAxis?.title,
+                                        xKey: normalizedKey,
+                                        xValue: xVal,
+                                        yAxisId: binding.yAxisId,
+                                        yAxisTitle: seriesYAxis?.title,
+                                        yValue: Number(yVal)
+                                    };
+                                },
+                                onNodeVisited: () => ChartDensityTracker.current?.onSpatialNodeVisited?.(),
+                                xBaseNormalize: semantic => {
+                                    const p = xSnap!.baseScale.map(semantic as never);
+                                    if (p === undefined || !Number.isFinite(p)) {
+                                        return Number.NaN;
+                                    }
+                                    const [r0, r1] = xSnap!.range;
+                                    return r1 === r0 ? 0 : (p - r0) / (r1 - r0);
+                                },
+                                xViewportScale: seriesXScale as ChartContinuousPositionScale<number | Date>,
+                                yBaseNormalize: semantic => {
+                                    const p = ySnap!.baseScale.map(semantic as never);
+                                    if (p === undefined || !Number.isFinite(p)) {
+                                        return Number.NaN;
+                                    }
+                                    const [r0, r1] = ySnap!.range;
+                                    return r1 === r0 ? 0 : (p - r0) / (r1 - r0);
+                                },
+                                yViewportScale: seriesYScale
+                            })
+                        );
+                    } else {
+                        recordSeriesDensityMetadata(seriesDensityMetadataById, s.id, sData.length, null);
+                    }
+                } else {
+                    recordSeriesDensityMetadata(seriesDensityMetadataById, s.id, sData.length, null);
+                }
+
                 const markerRes = CartesianMarkerLayout.computeSeries({
                     bubbleSizeDomain,
+                    indexView: markerIndexView,
                     plotRect,
                     renderOrderCounter,
                     rootData,
@@ -1670,6 +1798,58 @@ function resolveTemporalFlag(
 ): boolean {
     const resolved = axisId ? coordinateSpace?.get({ axis: "x", axisId })?.resolvedType : undefined;
     return resolved === "time" || resolved === "utc";
+}
+
+/**
+ * Current viewport window as a normalized [0,1] unit interval for one axis,
+ * or the full base extent when no explicit window is set.
+ */
+function resolveViewportUnitInterval(
+    snap: import("../viewport/cartesian-axis-coordinate-space").CartesianAxisCoordinateSnapshot | undefined,
+    viewport: InternalCartesianViewportState,
+    dimension: "x" | "y"
+): readonly [number, number] | null {
+    if (!snap || !snap.valid) {
+        return null;
+    }
+    const internalWindow = dimension === "x" ? viewport.x.get(snap.ref.axisId) : viewport.y.get(snap.ref.axisId);
+    const toUnit = (value: unknown): number =>
+        normalizeToUnitInterval(snap.baseScale, value, snap.range);
+    if (!internalWindow) {
+        return [0, 1];
+    }
+    if (internalWindow.kind === "continuous") {
+        const temporal = snap.resolvedType === "time" || snap.resolvedType === "utc";
+        const min = toUnit(temporal ? new Date(internalWindow.min) : internalWindow.min);
+        const max = toUnit(temporal ? new Date(internalWindow.max) : internalWindow.max);
+        if (!Number.isFinite(min) || !Number.isFinite(max)) {
+            return null;
+        }
+        return [Math.min(min, max), Math.max(min, max)];
+    }
+    const count = snap.baseDomain.length;
+    if (count === 0) {
+        return null;
+    }
+    const u0 = internalWindow.startIndex / count;
+    const u1 = internalWindow.endIndexExclusive / count;
+    return [Math.min(u0, u1), Math.max(u0, u1)];
+}
+
+function normalizeToUnitInterval(
+    scale: ChartPositionScale<unknown>,
+    value: unknown,
+    range: readonly [number, number]
+): number {
+    const p = scale.map(value as never);
+    if (p === undefined || !Number.isFinite(p)) {
+        return Number.NaN;
+    }
+    const [r0, r1] = range;
+    if (r1 === r0) {
+        return 0;
+    }
+    return (p - r0) / (r1 - r0);
 }
 
 function resolveConnectedScalarIndexView(

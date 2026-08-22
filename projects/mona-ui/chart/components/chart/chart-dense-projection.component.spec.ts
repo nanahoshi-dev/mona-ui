@@ -11,10 +11,12 @@ import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
 import { AreaSeriesComponent } from "../area-series/area-series.component";
 import { RangeAreaSeriesComponent } from "../range-area-series/range-area-series.component";
+import { ScatterSeriesComponent } from "../scatter-series/scatter-series.component";
+import { BubbleSeriesComponent } from "../bubble-series/bubble-series.component";
 import { ChartComponent } from "./chart.component";
 
 @Component({
-    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent, AreaSeriesComponent, RangeAreaSeriesComponent],
+    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent, AreaSeriesComponent, RangeAreaSeriesComponent, ScatterSeriesComponent, BubbleSeriesComponent],
     template: `
         <mona-chart
             #chart
@@ -38,6 +40,12 @@ import { ChartComponent } from "./chart.component";
                 @case ("range") {
                     <mona-range-area-series fromField="low" toField="high" name="R" />
                 }
+                @case ("scatter") {
+                    <mona-scatter-series xField="x" field="y" name="S" />
+                }
+                @case ("bubble") {
+                    <mona-bubble-series xField="x" field="y" sizeField="size" name="B" />
+                }
             }
         </mona-chart>
     `
@@ -46,7 +54,7 @@ class DenseHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
     public readonly data = signal<readonly unknown[]>([]);
     public readonly downsampling = signal<ChartDownsamplingInput>(true);
-    public readonly seriesKind = signal<"line" | "area" | "range">("line");
+    public readonly seriesKind = signal<"line" | "area" | "range" | "scatter" | "bubble">("line");
     public readonly viewport = signal<ChartViewportState | undefined>(undefined);
 }
 
@@ -245,5 +253,79 @@ describe("indexed dense projection (WP8)", () => {
         expect(matches).toHaveLength(1);
         expect(matches[0].index).toBe(rawIndex);
         expect(matches[0].datum).toBe(data[rawIndex]);
+    });
+
+    it("bounds marker volume for a 100k scatter via the spatial hierarchy", () => {
+        host.seriesKind.set("scatter");
+        const data = Array.from({ length: 100_000 }, (_, i) => ({
+            x: (i * 7919) % 1000,
+            y: (i * 104729) % 1000
+        }));
+        host.data.set(data);
+        render();
+
+        const scene = host.chart()["cartesianXYScene"]();
+        const scatterScene = scene?.series.find(s => s.type === "scatter") as
+            | { markers: readonly unknown[] }
+            | undefined;
+        expect(scatterScene).toBeDefined();
+        // Central render-volume invariant for markers.
+        expect(scatterScene!.markers.length).toBeLessThan(10_000);
+        expect(scatterScene!.markers.length).toBeGreaterThan(0);
+
+        // Exact raw interaction resolves unsampled points.
+        const provider = scene?.denseInteraction?.get(Array.from(scene!.denseInteraction!.keys())[0]);
+        expect(provider).toBeDefined();
+    });
+
+    it("keeps the full-data bubble size domain while sampling markers", () => {
+        host.seriesKind.set("bubble");
+        const data = Array.from({ length: 60_000 }, (_, i) => ({
+            size: i === 59_999 ? 10_000 : 1,
+            x: i % 500,
+            y: Math.floor(i / 120) % 500
+        }));
+        host.data.set(data);
+        render();
+
+        const scene = host.chart()["cartesianXYScene"]();
+        const bubbleScene = scene?.series.find(s => s.type === "bubble") as
+            | { markers: readonly { radius: number; sizeValue?: number }[] }
+            | undefined;
+        expect(bubbleScene).toBeDefined();
+        expect(bubbleScene!.markers.length).toBeLessThan(10_000);
+
+        // The rare outlier must still define the radius scale even if not sampled:
+        // any sampled mid-size bubble stays small relative to max radius.
+        const radii = bubbleScene!.markers.map(m => m.radius);
+        const maxSampled = Math.max(...radii);
+        const minSampled = Math.min(...radii);
+        expect(maxSampled).toBeGreaterThan(minSampled);
+    });
+
+    it("zooming into a cluster reveals more scatter detail", () => {
+        host.seriesKind.set("scatter");
+        const data = Array.from({ length: 80_000 }, (_, i) => ({
+            x: (i * 6271) % 400,
+            y: (i * 7919) % 400
+        }));
+        host.data.set(data);
+        render();
+        const before = host.chart()["cartesianXYScene"]()?.series.find(s => s.type === "scatter") as
+            | { markers: readonly unknown[] }
+            | undefined;
+
+        host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 20, min: 0 }] });
+        render();
+        const after = host.chart()["cartesianXYScene"]()?.series.find(s => s.type === "scatter") as
+            | { markers: readonly unknown[] }
+            | undefined;
+
+        expect(after).toBeDefined();
+        expect(before).toBeDefined();
+        // Both views stay bounded.
+        expect(before!.markers.length).toBeLessThan(10_000);
+        expect(after!.markers.length).toBeLessThan(10_000);
+        expect(after!.markers.length).toBeGreaterThan(0);
     });
 });

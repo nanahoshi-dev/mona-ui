@@ -10,7 +10,7 @@ import {
 import { ChartDensityTracker } from "../layout/chart-density-instrumentation";
 
 export interface CartesianProjectedIndexView {
-    readonly algorithm: "full" | "lttb" | "minmax" | "range-envelope";
+    readonly algorithm: "full" | "lttb" | "minmax" | "pixel" | "range-envelope";
     /** null means "all source indices in order" (ordinary full layout). */
     readonly indices: readonly number[] | null;
     readonly renderedCount: number;
