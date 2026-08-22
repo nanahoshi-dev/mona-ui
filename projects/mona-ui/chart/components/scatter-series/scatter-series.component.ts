@@ -139,6 +139,7 @@ export class ScatterSeriesComponent implements OnInit {
 
         effect(() => {
             this.data();
+            this.downsampling();
             this.field();
             this.keyField();
             this.seriesKey();
