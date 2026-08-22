@@ -1,8 +1,9 @@
-import type { ChartBrushMode } from "../../models/chart-brush.models";
+import type { ChartBrushHitPolicy, ChartBrushMode } from "../../models/chart-brush.models";
 import type { ChartBrushRegistration } from "../context/chart-registration-context";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 
 export interface ResolvedCartesianBrushTarget {
+    readonly hitPolicy?: ChartBrushHitPolicy;
     readonly isValidX: boolean;
     readonly isValidY: boolean;
     readonly mode: ChartBrushMode;
@@ -76,6 +77,7 @@ export class CartesianBrushTargetResolver {
         }
 
         return {
+            hitPolicy: registration?.hitPolicy?.(),
             isValidX,
             isValidY,
             mode,
