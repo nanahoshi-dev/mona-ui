@@ -1676,7 +1676,7 @@ export class ChartDemoComponent {
     protected readonly panZoomData = signal<readonly PanZoomTelemetryMetric[]>(this.#generateTelemetryData());
     protected readonly activeViewportSummary = signal<string>("Full Range (100% visible)");
 
-    // Deferred-parts cleanup fixture: deterministic step, range, and stack data.
+    // Deterministic density capability fixture: step, range, and stack data.
     protected readonly stepDensityEnabled = signal<boolean>(true);
     protected readonly stepDensityCurve = signal<ChartCurve>("step-after");
     protected readonly stepDensityMaxPoints = signal<number>(160);

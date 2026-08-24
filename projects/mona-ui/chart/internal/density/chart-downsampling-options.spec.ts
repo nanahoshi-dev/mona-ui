@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { ChartSeriesType } from "../../models/chart-series.models";
 import {
     computeEffectiveDensityThreshold,
     defaultDownsamplingOptions,
@@ -7,6 +8,46 @@ import {
 import { resolveDensityCapability } from "./cartesian-density-capability";
 
 const chartPolicy = normalizeChartDownsamplingOptions(true);
+
+type ExpectedDensityFamilyPolicy =
+    | "connected-range"
+    | "connected-scalar"
+    | "intentional-exclusion"
+    | "marker"
+    | "stacked-area";
+
+/** Test-only contract table: every public series type must have an explicit density policy. */
+const expectedDensityFamilyPolicy: Record<ChartSeriesType, ExpectedDensityFamilyPolicy> = {
+    area: "connected-scalar",
+    bar: "intentional-exclusion",
+    bubble: "marker",
+    candlestick: "intentional-exclusion",
+    donut: "intentional-exclusion",
+    funnel: "intentional-exclusion",
+    gauge: "intentional-exclusion",
+    heatmap: "intentional-exclusion",
+    line: "connected-scalar",
+    ohlc: "intentional-exclusion",
+    pie: "intentional-exclusion",
+    polar: "intentional-exclusion",
+    radar: "intentional-exclusion",
+    radialBar: "intentional-exclusion",
+    rangeArea: "connected-range",
+    rangeBar: "intentional-exclusion",
+    rose: "intentional-exclusion",
+    scatter: "marker",
+    treemap: "intentional-exclusion",
+    waterfall: "intentional-exclusion"
+};
+
+const continuousAxisTypes = ["linear", "log", "symlog", "pow", "sqrt", "time", "utc"] as const;
+const eligibleDensitySeriesTypes = ["line", "area", "rangeArea", "scatter", "bubble"] as const;
+const stepCapabilityCases = [
+    { seriesType: "line", stacked: false, strategy: "step-scalar" },
+    { seriesType: "area", stacked: false, strategy: "step-scalar" },
+    { seriesType: "rangeArea", stacked: false, strategy: "step-range-envelope" },
+    { seriesType: "area", stacked: true, strategy: "step-stack-envelope" }
+] as const;
 
 describe("normalizeChartDownsamplingOptions", () => {
     it("true enables auto behavior", () => {
@@ -53,6 +94,66 @@ describe("normalizeChartDownsamplingOptions", () => {
 });
 
 describe("resolveDensityCapability", () => {
+    it("covers every public series family with an explicit capability policy", () => {
+        for (const type of Object.keys(expectedDensityFamilyPolicy) as ChartSeriesType[]) {
+            const capability = resolveDensityCapability({
+                chartPolicy,
+                seriesDownsampling: undefined,
+                seriesType: type,
+                xResolvedType: "linear"
+            });
+            const expectedPolicy = expectedDensityFamilyPolicy[type];
+
+            if (expectedPolicy === "intentional-exclusion") {
+                expect(capability.eligible).toBe(false);
+                expect(capability.reason).toBe(
+                    `family "${type}" intentionally remains outside automatic point reduction because it requires family-specific semantics`
+                );
+                continue;
+            }
+
+            expect(capability.eligible).toBe(true);
+            expect(capability.mode).toBe(expectedPolicy);
+            expect(capability.reason).toBeUndefined();
+        }
+    });
+
+    it.each(continuousAxisTypes)("keeps eligible families active on %s X", xResolvedType => {
+        for (const seriesType of eligibleDensitySeriesTypes) {
+            const capability = resolveDensityCapability({
+                chartPolicy,
+                seriesDownsampling: undefined,
+                seriesType,
+                xResolvedType
+            });
+
+            expect(capability.eligible).toBe(true);
+            expect(capability.reason).toBeUndefined();
+        }
+    });
+
+    it("distinguishes category culling from an unresolved-axis fallback", () => {
+        const category = resolveDensityCapability({
+            chartPolicy,
+            seriesDownsampling: undefined,
+            seriesType: "line",
+            xResolvedType: "category"
+        });
+        const unresolved = resolveDensityCapability({
+            chartPolicy,
+            seriesDownsampling: undefined,
+            seriesType: "line",
+            xResolvedType: undefined
+        });
+
+        expect(category.eligible).toBe(false);
+        expect(category.reason).toContain("discrete viewport culling");
+        expect(category.reason).toContain("intentionally ineligible");
+        expect(unresolved.eligible).toBe(false);
+        expect(unresolved.reason).toContain("not a searchable continuous axis");
+        expect(unresolved.reason).toContain("intentionally ineligible");
+    });
+
     it("line on continuous X is eligible connected-scalar", () => {
         const capability = resolveDensityCapability({
             chartPolicy,
@@ -214,15 +315,19 @@ describe("resolveDensityCapability", () => {
         }
     );
 
-    it("unsupported families are rejected", () => {
-        for (const type of ["bar", "candlestick", "pie", "treemap"] as const) {
+    it.each(["step", "step-after"] as const)("keeps %s topology safe across eligible connected families", curve => {
+        for (const testCase of stepCapabilityCases) {
             const capability = resolveDensityCapability({
                 chartPolicy,
+                curve,
                 seriesDownsampling: undefined,
-                seriesType: type,
+                seriesType: testCase.seriesType,
+                stacked: testCase.stacked,
                 xResolvedType: "linear"
             });
-            expect(capability.eligible).toBe(false);
+
+            expect(capability.eligible).toBe(true);
+            expect(capability.strategy).toBe(testCase.strategy);
         }
     });
 

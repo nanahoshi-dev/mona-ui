@@ -43,10 +43,25 @@ Root visualization container coordinating coordinate layouts, canvas rendering, 
 | :--- | :--- | :--- | :--- |
 | `data` | `readonly unknown[]` | `[]` | Root dataset shared across child series. |
 | `xField` | `ChartField` | `undefined` | Default X/Category field identifier or accessor function. |
+| `downsampling` | `ChartDownsamplingInput` | `true` | Chart-level render-sample policy for eligible dense continuous-X Cartesian series. Per-series values can disable reduction or provide a requested algorithm preference. |
 | `class` | `string` | `""` | CSS classes applied to chart container. |
 | `pointClick` | `output<ChartPointEvent>` | - | Emitted when a data point, spoke, or slice is clicked. |
 | `pointFocusChange` | `output<ChartPointFocusEvent>` | - | Emitted when keyboard navigation moves between data points or slices. |
 | `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | - | Emitted when series visibility is toggled via legend or API. |
+
+#### High-density Cartesian downsampling
+
+`downsampling` accepts `boolean | ChartDownsamplingOptions` at the chart and eligible Cartesian-series levels. The chart policy is inherited unless a series supplies its own value. The requested `algorithm` is a preference; the family-safe strategy resolves the actual reducer, so step curves, range areas, stacked areas, and marker families keep their required geometry. Category-X data and intentionally excluded families do not become eligible through this input.
+
+| Option | Type | Meaning |
+| :--- | :--- | :--- |
+| `enabled` | `boolean` | Enables or disables reduction at the current chart or series scope. A chart-level disable wins over series settings. |
+| `algorithm` | `"auto" \| "minmax" \| "lttb" \| "pixel"` | Requested reduction preference, constrained by family semantics. |
+| `maxPoints` | `number` | Render-sample budget with family-specific meaning; it does not limit raw pointer, brush, selection, tooltip, or source-data interaction. |
+| `samplesPerPixel` | `number` | Pixel-density multiplier used when deriving the render-sample budget. |
+| `threshold` | `number` | Activation threshold for an eligible family; it does not make an otherwise ineligible axis or series family eligible. |
+
+Resolution precedence is chart disable, series disable, series preference, then the family-safe strategy. A source below the threshold uses ordinary full rendering, while an explicit `maxPoints` may activate reduction below the threshold for an eligible continuous-X family.
 
 ### `<mona-chart-angular-axis>`
 
@@ -153,6 +168,7 @@ Renders a continuous Cartesian area series supporting gradient fades, solid fill
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across null/missing data points. |
 | `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`). |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `downsampling` | `ChartDownsamplingInput` | `undefined` | Series density policy; inherits the chart policy when omitted and keeps step/stack geometry family-safe. |
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y value. |
 | `fillMode` | `ChartAreaFillMode` | `"gradient"` | Area fill style: `"gradient"` or `"solid"`. |
 | `fillOpacity` | `number` | `undefined` | Opacity ratio for area fill (0 to 1). |
@@ -173,6 +189,7 @@ Renders individual point markers across continuous numeric (linear) or temporal 
 | :--- | :--- | :--- | :--- |
 | `color` | `string` | `""` | Explicit fill color for scatter point markers. |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `downsampling` | `ChartDownsamplingInput` | `undefined` | Series density policy; continuous-X scatter uses pixel-safe marker representatives and category-X data remains ineligible. |
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y value. |
 | `fillOpacity` | `number` | `undefined` | Fill opacity for scatter markers (0 to 1). |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity. |
@@ -191,6 +208,7 @@ Renders 3-dimensional data points with position (X, Y) and proportionally-scaled
 | :--- | :--- | :--- | :--- |
 | `color` | `string` | `""` | Explicit fill color for bubble markers. |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `downsampling` | `ChartDownsamplingInput` | `undefined` | Series density policy; continuous-X bubble uses pixel-safe marker representatives while its size domain remains source-authoritative. |
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting numeric Y value. |
 | `fillOpacity` | `number` | `undefined` | Fill opacity for bubble markers (0 to 1). |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity. |
@@ -233,6 +251,7 @@ Renders continuous Cartesian vertical range bands/areas bounded between lower an
 | `connectNulls` | `boolean` | `false` | Whether to interpolate across non-finite or missing data points. |
 | `curve` | `ChartCurve` | `"linear"` | Curve interpolation algorithm applied to boundary paths (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`). |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
+| `downsampling` | `ChartDownsamplingInput` | `undefined` | Series density policy; continuous-X range areas use low/high envelope selection with step-safe adjacency. |
 | `fillOpacity` | `number` | `0.18` | Fill opacity for the range area band (0 to 1). |
 | `fromField` | `ChartField` | (required) | Property key or accessor extracting the starting boundary numeric value. |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |

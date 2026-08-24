@@ -44,10 +44,13 @@ export interface CartesianDensityCapability {
 }
 
 /**
- * Families whose semantics are not point-sampling semantics. They intentionally
- * remain outside automatic density reduction.
+ * Families that intentionally remain outside automatic point reduction.
+ *
+ * These marks are discrete, aggregated, matrix-based, non-Cartesian, or
+ * otherwise require family-specific semantics. This is an intentional policy
+ * boundary, not an implicit request to change those semantics.
  */
-const unsupportedFamilies = new Set<ChartSeriesType>([
+const intentionalExclusionFamilies = new Set<ChartSeriesType>([
     "bar",
     "rangeBar",
     "candlestick",
@@ -138,17 +141,24 @@ export function resolveDensityCapability(request: DensityCapabilityRequest): Car
         };
     }
 
-    if (unsupportedFamilies.has(request.seriesType)) {
+    if (intentionalExclusionFamilies.has(request.seriesType)) {
         return {
             ...base,
-            reason: `family "${request.seriesType}" intentionally remains outside automatic density reduction`
+            reason: `family "${request.seriesType}" intentionally remains outside automatic point reduction because it requires family-specific semantics`
         };
     }
 
-    if (request.xResolvedType === "category" || request.xResolvedType === undefined) {
+    if (request.xResolvedType === "category") {
         return {
             ...base,
-            reason: "category X uses discrete viewport culling; automatic point reduction is disabled"
+            reason: "category X uses discrete viewport culling; automatic point reduction is intentionally ineligible"
+        };
+    }
+
+    if (request.xResolvedType === undefined) {
+        return {
+            ...base,
+            reason: "X axis is not a searchable continuous axis; automatic point reduction is intentionally ineligible"
         };
     }
 

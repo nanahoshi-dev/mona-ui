@@ -98,7 +98,9 @@ interface ChartDownsamplingOptions {
 | stacked area          | coordinated shared-X selection across the whole group, strictly bounded by `maxPoints` and preserving sparse member data; any step member enables protected shared selection                                                                          |
 | scatter / bubble      | normalized spatial hierarchy with adaptive quadtree subdivision and bounded representatives                                                          |
 
-Bar, financial, heatmap, waterfall, funnel, pie/donut, polar/radar, treemap, and category-X connected paths intentionally remain outside automatic point reduction; they keep their discrete or family-specific viewport semantics. Financial marks require semantic OHLC aggregation rather than implicit point dropping. Step and step-after curves on eligible continuous-X line, area, range-area, and stacked-area series use protected adjacency selection.
+Category-X connected paths use discrete membership and viewport culling, so automatic point reduction is intentionally ineligible. A future aggregation or virtualization treatment for category data would be a separate product feature rather than an implicit density fallback.
+
+Bar and range-bar series keep discrete rectangle and interval geometry and do not use automatic point dropping. Candlestick and OHLC series keep financial marks; semantic aggregation would need to preserve open-first, high-maximum, low-minimum, and close-last values, so it is not implicit in density reduction. Heatmap series use matrix-cell semantics outside this point-density subsystem. Funnel, pie/donut, polar/radar, and treemap series retain their family-specific layout policies. Step and step-after curves on eligible continuous-X line, area, range-area, and stacked-area series use protected adjacency selection.
 
 ### Semantics preserved
 

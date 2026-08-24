@@ -38,6 +38,7 @@ Downsampling is a render-sample optimization for searchable continuous X axes. T
 | Area | Yes | No | Stacked areas use one shared X selection; step members use topology protection. |
 | Range Area | Yes | No | Uses a low/high envelope reducer, including step-safe adjacency. |
 | Scatter / Bubble | Yes | No | Uses spatial/pixel representatives; bubble size keeps its full source domain. |
+| Category-X connected paths | No | No | Discrete category membership and order use viewport culling; automatic point reduction is intentionally ineligible. |
 | Bar / Range Bar | No | No | Discrete marks are not automatically point-sampled. |
 | Candlestick / OHLC | No | No | Financial marks require semantic OHLC aggregation, which is not implicit. |
 | Heatmap / non-Cartesian | No | — | Outside the Cartesian point-density subsystem. |
@@ -52,6 +53,8 @@ Downsampling is a render-sample optimization for searchable continuous X axes. T
 Step and step-after series protect source adjacency around selected semantic anchors. Mandatory visible or crossing anchors are reserved before adjacency detail, while `maxPoints` remains a hard cap; when the cap cannot preserve every transition, detail degrades deterministically within that budget.
 
 `maxPoints` has family-specific meaning: line, area, and range area count selected defined source marks; scatter and bubble count selected marker candidates; stacked area counts shared timeline X keys for the group. Minimal invalid gap sentinels may appear internally to preserve disconnected-path topology, but they are not selected data marks. Raw pointer, brush, selection, and tooltip interaction may still resolve an unsampled source datum through the retained interaction provider. Unsorted or unsearchable X data safely keeps source-order full layout because sorting it would change connected-path semantics. Keyboard navigation intentionally remains bounded to the rendered sample.
+
+Eligibility and activation are separate. A source below the activation threshold uses ordinary full rendering; it is not a capability failure. An explicit `maxPoints` can activate reduction below that threshold for an eligible continuous-X family. Category X remains a discrete viewport-culling policy, while unsorted, unsearchable, or non-finite X remains intentionally ineligible so connected-path source order is preserved.
 
 ---
 
