@@ -40,7 +40,7 @@ describe("ChartExportRasterIslandRenderer", () => {
             layoutHeight: 50,
             layoutWidth: 100,
             plane: "plot-overlays",
-            role: "test",
+            role: "test"
         };
 
         await expect(
@@ -65,7 +65,7 @@ describe("ChartExportRasterIslandRenderer", () => {
             plane: "plot-labels",
             role: "axis-label",
             transform: "rotate(45deg)",
-            transformOrigin: "50% 50%",
+            transformOrigin: "50% 50%"
         };
 
         const results = await ChartExportRasterIslandRenderer.renderIslands([island], new Map(), 2);
@@ -80,7 +80,7 @@ describe("ChartExportRasterIslandRenderer", () => {
 
         // Verify staged wrapper contains the transformed child with transform intact
         expect(stagedElement.tagName.toLowerCase()).toBe("div");
-        const child = stagedElement.querySelector("div") || stagedElement.firstChild as HTMLElement;
+        const child = stagedElement.querySelector("div") || (stagedElement.firstChild as HTMLElement);
         expect(child).toBeTruthy();
         expect(child.style.transform).toBe("rotate(45deg)");
         expect(child.style.transformOrigin).toBe("50% 50%");
@@ -100,12 +100,12 @@ describe("ChartExportRasterIslandRenderer", () => {
             layoutHeight: 10000,
             layoutWidth: 10000,
             plane: "plot-overlays",
-            role: "test",
+            role: "test"
         };
 
-        await expect(
-            ChartExportRasterIslandRenderer.renderIslands([island], new Map(), 2)
-        ).rejects.toThrowError(ChartExportError);
+        await expect(ChartExportRasterIslandRenderer.renderIslands([island], new Map(), 2)).rejects.toThrowError(
+            ChartExportError
+        );
     });
 
     it("rejects transactions whose aggregate raster pixels exceed the transaction budget before rasterizing", async () => {

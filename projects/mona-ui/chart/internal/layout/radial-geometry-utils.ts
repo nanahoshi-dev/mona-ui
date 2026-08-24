@@ -1,8 +1,4 @@
-import {
-    normalizeNonNegativeNumber
-    ,normalizePositiveNumber,
-    normalizeRatio
-} from "../utils/number-utils";
+import { normalizeNonNegativeNumber, normalizePositiveNumber, normalizeRatio } from "../utils/number-utils";
 import { degreesToRadians } from "../utils/angle-utils";
 
 export interface RadialRingBand {
@@ -47,9 +43,10 @@ export function computeRadialRingBands(
     const maxThickness = remainingBand / count;
 
     let thickness: number;
-    const normReqThickness = requestedThickness !== undefined && Number.isFinite(requestedThickness) && requestedThickness > 0
-        ? requestedThickness
-        : undefined;
+    const normReqThickness =
+        requestedThickness !== undefined && Number.isFinite(requestedThickness) && requestedThickness > 0
+            ? requestedThickness
+            : undefined;
 
     if (normReqThickness !== undefined) {
         thickness = Math.min(normReqThickness, maxThickness);
@@ -80,11 +77,7 @@ export function computeRadialRingBands(
     };
 }
 
-export function normalizeRosePadding(
-    requestedPadDeg: number,
-    slotSpanRad: number,
-    categoryCount: number
-): number {
+export function normalizeRosePadding(requestedPadDeg: number, slotSpanRad: number, categoryCount: number): number {
     if (categoryCount <= 1 || !Number.isFinite(slotSpanRad) || slotSpanRad <= 0) {
         return 0;
     }
@@ -96,11 +89,7 @@ export function normalizeRosePadding(
     return Math.min(requestedPadRad, maxPadRad);
 }
 
-export function normalizeArcCornerRadius(
-    value: unknown,
-    maxCorner: number,
-    fallback: number = 0
-): number {
+export function normalizeArcCornerRadius(value: unknown, maxCorner: number, fallback: number = 0): number {
     if (value === undefined || value === null) {
         return fallback;
     }

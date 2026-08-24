@@ -8,10 +8,7 @@ import type { CartesianOverlayScene } from "../scene/cartesian-overlay-scene";
 import type { CartesianSelectionScene } from "../scene/cartesian-selection-scene";
 import type { ChartExportTransformKind } from "./chart-export-transform";
 
-export type ChartExportDomPlane =
-    | "plot-labels"
-    | "plot-overlays"
-    | "host-chrome";
+export type ChartExportDomPlane = "plot-labels" | "plot-overlays" | "host-chrome";
 
 export interface ChartExportPrimitiveBase {
     readonly documentOrder: number;

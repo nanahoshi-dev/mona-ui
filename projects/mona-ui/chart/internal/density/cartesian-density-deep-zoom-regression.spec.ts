@@ -1,13 +1,20 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
-import type { ChartLineSeriesRegistration, ChartXAxisRegistration, ChartYAxisRegistration } from "../context/chart-registration-context";
+import type {
+    ChartLineSeriesRegistration,
+    ChartXAxisRegistration,
+    ChartYAxisRegistration
+} from "../context/chart-registration-context";
 import { CartesianAxisDomainResolver } from "../layout/cartesian-axis-domain-resolver";
 import { CartesianAxisRegistryResolver } from "../layout/cartesian-axis-registry-resolver";
 import { CartesianMultiAxisCoordinator } from "../layout/cartesian-multi-axis-coordinator";
 import { CartesianSeriesAxisBindingResolver } from "../layout/cartesian-series-axis-binding-resolver";
 import { CartesianScaleFactory, LinearScale } from "../scale/cartesian-scale-factory";
 import type { SceneHitTarget } from "../scene/scene-geometry";
-import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
+import {
+    CartesianAxisCoordinateSpace,
+    type CartesianAxisCoordinateSnapshot
+} from "../viewport/cartesian-axis-coordinate-space";
 import { createCartesianNormalizedBaseMapper } from "../viewport/cartesian-normalized-base-mapper";
 import { normalizeCartesianTemporalDomain } from "../data/cartesian-temporal-value-resolver";
 import { CartesianMarkerSpatialInteractionProvider } from "./cartesian-marker-dense-provider";
@@ -35,10 +42,12 @@ function createNearCoordinateProvider(): CartesianMarkerSpatialInteractionProvid
     const semanticX = [0, 4e-13, 6e-13, 9e-13];
     const xScale = new LinearScale([0, 1e-12], [0, 600]);
     const yScale = new LinearScale([0, 1], [100, 0]);
-    const targets = semanticX.map((value, index) => markerTarget(index, {
-        x: xScale.map(value)!,
-        y: yScale.map(0.5)!
-    }));
+    const targets = semanticX.map((value, index) =>
+        markerTarget(index, {
+            x: xScale.map(value)!,
+            y: yScale.map(0.5)!
+        })
+    );
     const hierarchy = new CartesianSpatialDensityIndex(
         Float64Array.from(semanticX),
         new Float64Array(semanticX.length).fill(0.5)
@@ -266,7 +275,10 @@ describe("Cartesian Density Deep Zoom and Temporal Bounds Regressions", () => {
         expect(scale.domain()[0].getTime()).toBeLessThan(scale.domain()[1].getTime());
 
         const committedDomain = resolveTemporalCommittedDomain(
-            [{ x: "2026-01-01", y: 1 }, { x: "2026-01-02", y: 2 }],
+            [
+                { x: "2026-01-01", y: 1 },
+                { x: "2026-01-02", y: 2 }
+            ],
             new Date("2026-01-03"),
             new Date("2026-01-01")
         );
@@ -275,7 +287,10 @@ describe("Cartesian Density Deep Zoom and Temporal Bounds Regressions", () => {
 
     it("keeps a valid explicit minimum above observed temporal data", () => {
         const domain = resolveTemporalStageADomain(
-            [{ x: "2026-01-01", y: 1 }, { x: "2026-01-02", y: 2 }],
+            [
+                { x: "2026-01-01", y: 1 },
+                { x: "2026-01-02", y: 2 }
+            ],
             new Date("2026-02-01")
         );
 
@@ -285,7 +300,10 @@ describe("Cartesian Density Deep Zoom and Temporal Bounds Regressions", () => {
 
     it("keeps a valid explicit maximum below observed temporal data", () => {
         const domain = resolveTemporalStageADomain(
-            [{ x: "2026-02-01", y: 1 }, { x: "2026-02-02", y: 2 }],
+            [
+                { x: "2026-02-01", y: 1 },
+                { x: "2026-02-02", y: 2 }
+            ],
             undefined,
             new Date("2026-01-01")
         );
@@ -308,7 +326,10 @@ describe("Cartesian Density Deep Zoom and Temporal Bounds Regressions", () => {
     it("keeps time and UTC explicit bounds ascending through the committed domain", () => {
         for (const type of ["time", "utc"] as const) {
             const domain = resolveTemporalCommittedDomain(
-                [{ x: "2026-01-01T00:00:00Z", y: 1 }, { x: "2026-01-02T00:00:00Z", y: 2 }],
+                [
+                    { x: "2026-01-01T00:00:00Z", y: 1 },
+                    { x: "2026-01-02T00:00:00Z", y: 2 }
+                ],
                 new Date("2026-01-03T00:00:00Z"),
                 new Date("2026-01-01T00:00:00Z"),
                 type
@@ -320,7 +341,10 @@ describe("Cartesian Density Deep Zoom and Temporal Bounds Regressions", () => {
 
     it("uses the temporal fallback policy for invalid explicit bounds", () => {
         const domain = resolveTemporalStageADomain(
-            [{ x: "2026-01-01", y: 1 }, { x: "2026-01-02", y: 2 }],
+            [
+                { x: "2026-01-01", y: 1 },
+                { x: "2026-01-02", y: 2 }
+            ],
             new Date(Number.NaN),
             new Date(Number.NaN)
         );

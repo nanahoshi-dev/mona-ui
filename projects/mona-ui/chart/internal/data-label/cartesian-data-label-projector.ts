@@ -14,9 +14,7 @@ import type { SceneHitTarget } from "../scene/scene-geometry";
 import { ChartMarkIdentityResolver } from "../interaction/chart-mark-identity-resolver";
 import { ChartDataLabelCollisionIndex } from "./chart-data-label-collision-index";
 import { ChartDataLabelContextBuilder } from "./chart-data-label-context-builder";
-import {
-    normalizeChartDataLabelOptions
-} from "./chart-data-label-options";
+import { normalizeChartDataLabelOptions } from "./chart-data-label-options";
 import { ChartDataLabelPlacement } from "./chart-data-label-placement";
 import { ChartDataLabelTextMeasurer } from "./chart-data-label-text-measurer";
 
@@ -81,7 +79,8 @@ export class CartesianDataLabelProjector {
                 continue;
             }
 
-            const cartesianReg = registration as ChartCartesianSeriesRegistrationBase | ChartFinancialSeriesRegistrationBase;
+            const cartesianReg = registration as
+                ChartCartesianSeriesRegistrationBase | ChartFinancialSeriesRegistrationBase;
             const dataLabelsInput = cartesianReg.dataLabels?.();
             const normalizedOptions = normalizeChartDataLabelOptions(dataLabelsInput);
 
@@ -89,12 +88,13 @@ export class CartesianDataLabelProjector {
                 continue;
             }
 
-            const rawColor = "color" in cartesianReg && typeof (cartesianReg as ChartCartesianSeriesRegistrationBase).color === "function"
-                ? (cartesianReg as ChartCartesianSeriesRegistrationBase).color()
-                : undefined;
-            const seriesColor = (rawColor && rawColor.trim() !== "")
-                ? rawColor
-                : (resolvedSeriesColors?.get(seriesId) ?? undefined);
+            const rawColor =
+                "color" in cartesianReg &&
+                typeof (cartesianReg as ChartCartesianSeriesRegistrationBase).color === "function"
+                    ? (cartesianReg as ChartCartesianSeriesRegistrationBase).color()
+                    : undefined;
+            const seriesColor =
+                rawColor && rawColor.trim() !== "" ? rawColor : (resolvedSeriesColors?.get(seriesId) ?? undefined);
 
             const template = cartesianReg.dataLabelTemplate?.();
             const sampledHits = CartesianDataLabelProjector.#sampleHits(seriesHits, normalizedOptions.maxLabels);
@@ -106,10 +106,8 @@ export class CartesianDataLabelProjector {
 
                 if (template) {
                     const measureKey1 = `${hit.seriesId}:${markId}`;
-                    const measured =
-                        templateMeasurements?.get(measureKey1) ??
-                        templateMeasurements?.get(markId) ??
-                        { height: 20, width: 44 };
+                    const measured = templateMeasurements?.get(measureKey1) ??
+                        templateMeasurements?.get(markId) ?? { height: 20, width: 44 };
 
                     const placements = ChartDataLabelPlacement.resolvePlacements(
                         hit,

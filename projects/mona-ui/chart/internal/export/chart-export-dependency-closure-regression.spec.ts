@@ -93,9 +93,9 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
             svg.appendChild(text);
             container.appendChild(svg);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(/outside|#outside-path|not contained/i);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                /outside|#outside-path|not contained/i
+            );
         });
 
         // Baseline gap 2: gradient/paint-server inheritance href escapes the scan
@@ -114,9 +114,9 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
             svg.appendChild(rect);
             container.appendChild(svg);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
 
         it("rejects <pattern> with an external inheritance href", async () => {
@@ -134,9 +134,9 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
             svg.appendChild(rect);
             container.appendChild(svg);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
 
         // Baseline gap 3: input[type=image] src remains a live URL
@@ -164,9 +164,9 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
             svg.appendChild(rect);
             container.appendChild(svg);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(/missing-target|not contained/i);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                /missing-target|not contained/i
+            );
         });
 
         // Baseline gap 4b: uppercase URL(...) bypasses the lower-case precheck in inline styles
@@ -191,9 +191,9 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
             unknown.setAttribute("src", "https://cdn.example/mystery.png");
             container.appendChild(unknown);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
     });
 
@@ -275,11 +275,8 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
         // Baseline gap 7b: WebP RIFF/WEBP container without a valid bitstream chunk must not be accepted
         it("rejects malformed WebP payloads that carry only the RIFF/WEBP prefix", async () => {
             const webpPrefixOnly = Uint8Array.from([
-                0x52, 0x49, 0x46, 0x46, 0x24, 0x00, 0x00, 0x00,
-                0x57, 0x45, 0x42, 0x50,
-                0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f,
-                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                0x08, 0x09, 0x0a, 0x0b
+                0x52, 0x49, 0x46, 0x46, 0x24, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50, 0x58, 0x59, 0x5a, 0x5b, 0x5c,
+                0x5d, 0x5e, 0x5f, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b
             ]);
 
             await expect(
@@ -319,9 +316,7 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
             svg.appendChild(circle);
             el.appendChild(svg);
 
-            expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(
-                ChartExportError
-            );
+            expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(ChartExportError);
         });
     });
 
@@ -347,11 +342,7 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
                 });
             }
 
-            const rejection = await ChartExportRasterIslandRenderer.renderIslands(
-                islands,
-                new Map(),
-                2
-            ).then(
+            const rejection = await ChartExportRasterIslandRenderer.renderIslands(islands, new Map(), 2).then(
                 () => null,
                 (err: unknown) => err
             );
@@ -411,10 +402,7 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
         it("rejects non-base64 (percent-encoded) binary raster payloads per the base64-only policy", () => {
             const svg = createSvg();
             const image = document.createElementNS(SVG_NS, "image");
-            image.setAttribute(
-                "href",
-                "data:image/png,%89%50%4E%47%0D%0A%1A%0A%00%00%00%0D%49%48%44%52"
-            );
+            image.setAttribute("href", "data:image/png,%89%50%4E%47%0D%0A%1A%0A%00%00%00%0D%49%48%44%52");
             svg.appendChild(image);
 
             expect(() => ChartExportSvgValidator.validate(svg)).toThrowError(ChartExportError);
@@ -465,9 +453,9 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
         it("rejects backing stores one pixel over the budget or over the edge cap", () => {
             const overPixels = document.createElement("div");
             overPixels.appendChild(canvasOf(16384, 4097));
-            expect(() => ChartExportDomFreezer.freeze(overPixels, overPixels.cloneNode(true) as HTMLElement)).toThrowError(
-                ChartExportError
-            );
+            expect(() =>
+                ChartExportDomFreezer.freeze(overPixels, overPixels.cloneNode(true) as HTMLElement)
+            ).toThrowError(ChartExportError);
 
             const overEdge = document.createElement("div");
             overEdge.appendChild(canvasOf(16385, 1));
@@ -515,9 +503,9 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
                 });
             }
 
-            await expect(
-                ChartExportRasterIslandRenderer.renderIslands(islands, new Map(), 1)
-            ).rejects.toMatchObject({ code: "too-large" });
+            await expect(ChartExportRasterIslandRenderer.renderIslands(islands, new Map(), 1)).rejects.toMatchObject({
+                code: "too-large"
+            });
         });
     });
 
@@ -553,7 +541,17 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
         });
 
         function rect(w: number, h: number): DOMRect {
-            return { bottom: h, height: h, left: 0, right: w, top: 0, width: w, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
+            return {
+                bottom: h,
+                height: h,
+                left: 0,
+                right: w,
+                top: 0,
+                width: w,
+                x: 0,
+                y: 0,
+                toJSON: () => ({})
+            } as DOMRect;
         }
 
         function withRect(el: HTMLElement, w: number, h: number): HTMLElement {
@@ -685,7 +683,11 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
                 // Both same-ID live originals keep their untouched IDs
                 expect(gradientInside.getAttribute("id")).toBe("shared-id");
                 expect(outsideGradient.getAttribute("id")).toBe("shared-id");
-                expect(mockHtml2canvas.mock.calls.every(([, opts]) => (opts as Record<string, unknown>)["normalizeDom"] === false)).toBe(true);
+                expect(
+                    mockHtml2canvas.mock.calls.every(
+                        ([, opts]) => (opts as Record<string, unknown>)["normalizeDom"] === false
+                    )
+                ).toBe(true);
 
                 const request = buildRequest();
                 const snapshot = {

@@ -42,7 +42,10 @@ export class SvgDefinitionRegistry {
         this.#usedIds = usedIds ?? new Set<string>();
     }
 
-    #syncStops(gradient: SVGGradientElement, stops: readonly { readonly color: string; readonly offset: number }[]): void {
+    #syncStops(
+        gradient: SVGGradientElement,
+        stops: readonly { readonly color: string; readonly offset: number }[]
+    ): void {
         const existingStops = Array.from(gradient.children) as SVGStopElement[];
         while (existingStops.length > stops.length) {
             existingStops.pop()?.remove();

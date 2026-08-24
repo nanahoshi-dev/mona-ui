@@ -29,7 +29,8 @@ export class SvgCartesianInteractionRenderer {
     ): void {
         if (
             !interactionState ||
-            (!interactionState.activeHitTarget && (!interactionState.activeHits || interactionState.activeHits.length === 0))
+            (!interactionState.activeHitTarget &&
+                (!interactionState.activeHits || interactionState.activeHits.length === 0))
         ) {
             this.#keyedGroup.clear();
             return;
@@ -58,8 +59,7 @@ export class SvgCartesianInteractionRenderer {
             styleResolver.resolveCssVariable("--color-surface") ||
             "#ffffff";
         const barHighlightColor =
-            styleResolver.resolveCssVariable("--mona-chart-bar-highlight-color") ||
-            "rgba(255, 255, 255, 0.25)";
+            styleResolver.resolveCssVariable("--mona-chart-bar-highlight-color") || "rgba(255, 255, 255, 0.25)";
         const focusIndicatorColor =
             styleResolver.resolveCssVariable("--color-focus-indicator") ||
             styleResolver.resolveCssVariable("--color-ring") ||
@@ -80,9 +80,7 @@ export class SvgCartesianInteractionRenderer {
 
                 if (hit.seriesType === "rangeArea" && (hit.rangeBand || (hit.highPoint && hit.lowPoint))) {
                     const matchingSeries = series.find(s => s.id === hit.seriesId);
-                    const color = isKeyboardSource
-                        ? focusIndicatorColor
-                        : (matchingSeries?.style.color ?? "#3b82f6");
+                    const color = isKeyboardSource ? focusIndicatorColor : (matchingSeries?.style.color ?? "#3b82f6");
                     const fromP = hit.rangeBand?.fromPoint ?? hit.highPoint!;
                     const toP = hit.rangeBand?.toPoint ?? hit.lowPoint!;
 
@@ -147,7 +145,8 @@ export class SvgCartesianInteractionRenderer {
                 } else if (hit.bounds || hit.visualBounds) {
                     const barRect = hit.visualBounds ?? hit.bounds;
                     if (barRect) {
-                        const isHorizontalBar = hit.barOrientation === "horizontal" || scene.orientation === "horizontal";
+                        const isHorizontalBar =
+                            hit.barOrientation === "horizontal" || scene.orientation === "horizontal";
                         const isZeroExtent = isHorizontalBar ? barRect.width <= 0.001 : barRect.height <= 0.001;
 
                         if (isZeroExtent) {
@@ -165,31 +164,39 @@ export class SvgCartesianInteractionRenderer {
                                 setSvgAttribute(lineEl, "x2", barRect.x + barRect.width);
                                 setSvgAttribute(lineEl, "y2", y);
                             }
-                            setSvgAttribute(lineEl, "stroke", isKeyboardSource ? focusIndicatorColor : barHighlightColor);
+                            setSvgAttribute(
+                                lineEl,
+                                "stroke",
+                                isKeyboardSource ? focusIndicatorColor : barHighlightColor
+                            );
                             setSvgAttribute(lineEl, "stroke-width", isKeyboardSource ? 2.5 : 2);
                             setSvgAttribute(lineEl, "shape-rendering", "crispEdges");
                             group.appendChild(lineEl);
                         } else {
                             const radius = hit.borderRadius ?? 4;
-                            const cornerRadii = hit.cornerRadii ?? (hit.seriesType === "rangeBar" && radius > 0 ? {
-                                bottomLeft: radius,
-                                bottomRight: radius,
-                                topLeft: radius,
-                                topRight: radius
-                            } : undefined);
+                            const cornerRadii =
+                                hit.cornerRadii ??
+                                (hit.seriesType === "rangeBar" && radius > 0
+                                    ? {
+                                          bottomLeft: radius,
+                                          bottomRight: radius,
+                                          topLeft: radius,
+                                          topRight: radius
+                                      }
+                                    : undefined);
                             const isPos = hit.isPositive ?? true;
 
                             const d = cornerRadii
                                 ? buildRoundedRectPath(barRect.x, barRect.y, barRect.width, barRect.height, cornerRadii)
                                 : buildBarPath({
-                                    height: barRect.height,
-                                    isPositive: isPos,
-                                    orientation: isHorizontalBar ? "horizontal" : "vertical",
-                                    radius,
-                                    width: barRect.width,
-                                    x: barRect.x,
-                                    y: barRect.y
-                                });
+                                      height: barRect.height,
+                                      isPositive: isPos,
+                                      orientation: isHorizontalBar ? "horizontal" : "vertical",
+                                      radius,
+                                      width: barRect.width,
+                                      x: barRect.x,
+                                      y: barRect.y
+                                  });
 
                             const pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
                             setSvgAttribute(pathEl, "d", d);

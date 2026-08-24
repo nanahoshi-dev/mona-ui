@@ -26,13 +26,7 @@ export class TreemapIdentity {
         readonly labelField?: ChartField;
         readonly labelFormatter?: ChartValueFormatter;
     }): Map<string, RootBranchIdentityInfo> {
-        const {
-            childrenField = "children",
-            data,
-            keyField,
-            labelField = "name",
-            labelFormatter
-        } = options;
+        const { childrenField = "children", data, keyField, labelField = "name", labelFormatter } = options;
 
         const result = new Map<string, RootBranchIdentityInfo>();
         if (data === undefined || data === null) {
@@ -198,4 +192,3 @@ export class TreemapIdentity {
         };
     }
 }
-

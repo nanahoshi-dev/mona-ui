@@ -1,5 +1,9 @@
 import type { ChartViewportConstraint } from "../../models/chart-viewport.models";
-import type { ChartContinuousPositionScale, ChartPositionScale, ResolvedChartCartesianAxisType } from "../scale/chart-scale";
+import type {
+    ChartContinuousPositionScale,
+    ChartPositionScale,
+    ResolvedChartCartesianAxisType
+} from "../scale/chart-scale";
 import { clamp } from "../utils/number-utils";
 
 export class CartesianViewportConstraints {
@@ -16,14 +20,8 @@ export class CartesianViewportConstraints {
         let start = Math.floor(startIndex);
         let end = Math.ceil(endIndexExclusive);
 
-        const minVisible = Math.max(
-            1,
-            constraint?.minVisibleCategories ?? defaultMinCategories
-        );
-        const maxVisible = Math.min(
-            baseCount,
-            constraint?.maxVisibleCategories ?? baseCount
-        );
+        const minVisible = Math.max(1, constraint?.minVisibleCategories ?? defaultMinCategories);
+        const maxVisible = Math.min(baseCount, constraint?.maxVisibleCategories ?? baseCount);
 
         // Category indices are array slice indices and must always remain legal [0, baseCount]
         start = clamp(start, 0, baseCount - 1);
@@ -106,14 +104,7 @@ export class CartesianViewportConstraints {
         }
 
         if (clampToData) {
-            return this.clampContinuousDomainPreservingSpan(
-                curMin,
-                curMax,
-                baseMin,
-                baseMax,
-                baseScale,
-                resolvedType
-            );
+            return this.clampContinuousDomainPreservingSpan(curMin, curMax, baseMin, baseMax, baseScale, resolvedType);
         }
 
         return [curMin, curMax];
@@ -137,10 +128,7 @@ export class CartesianViewportConstraints {
         // For nonlinear scales, clamp in base pixel space
         if (
             baseScale &&
-            (resolvedType === "log" ||
-                resolvedType === "symlog" ||
-                resolvedType === "pow" ||
-                resolvedType === "sqrt")
+            (resolvedType === "log" || resolvedType === "symlog" || resolvedType === "pow" || resolvedType === "sqrt")
         ) {
             const continuousBase = baseScale as ChartContinuousPositionScale<number>;
             const pMin = continuousBase.map(min);

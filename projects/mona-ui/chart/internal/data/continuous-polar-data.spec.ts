@@ -51,7 +51,7 @@ describe("ContinuousPolarData", () => {
             { angle: 180, value: 50 },
             { angle: 0, value: 10 },
             { angle: -90, value: 30 }, // normalized to 270
-            { angle: 450, value: 20 }  // normalized to 90
+            { angle: 450, value: 20 } // normalized to 90
         ];
         const series = createPolarSeries({ data: rawData });
         const result = prepareContinuousPolarData([series], []);

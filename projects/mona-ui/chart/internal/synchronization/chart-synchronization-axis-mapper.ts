@@ -12,7 +12,10 @@ import {
     type InternalAxisViewport,
     type InternalCartesianViewportState
 } from "../viewport/cartesian-viewport-normalizer";
-import type { CartesianAxisCoordinateSnapshot, CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
+import type {
+    CartesianAxisCoordinateSnapshot,
+    CartesianAxisCoordinateSpace
+} from "../viewport/cartesian-axis-coordinate-space";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type {
     ChartSynchronizationAxisWindow,
@@ -28,7 +31,10 @@ export interface ResolvedIncomingAxis {
 const temporalTypes = new Set(["time", "utc"]);
 const numericTypes = new Set(["linear", "log", "symlog", "pow", "sqrt"]);
 
-export function axisTargetsDimension(axes: NormalizedChartSynchronizationOptions["viewport"]["axes"], dimension: "x" | "y"): boolean {
+export function axisTargetsDimension(
+    axes: NormalizedChartSynchronizationOptions["viewport"]["axes"],
+    dimension: "x" | "y"
+): boolean {
     if (axes === "auto" || axes === "xy") return true;
     if (axes === "x") return dimension === "x";
     if (axes === "y") return dimension === "y";
@@ -182,7 +188,9 @@ export class ChartSynchronizationAxisMapper {
             if (!axisTargetsDimension(options.viewport.axes, incoming.sourceRef.axis)) {
                 continue;
             }
-            const isPrimary = incoming.sourceIsPrimary ?? (primaryAxisIds ? primaryAxisIds[incoming.sourceRef.axis] === incoming.sourceRef.axisId : false);
+            const isPrimary =
+                incoming.sourceIsPrimary ??
+                (primaryAxisIds ? primaryAxisIds[incoming.sourceRef.axis] === incoming.sourceRef.axisId : false);
             const targetRef = this.resolveMappedAxisIdentity(
                 incoming.sourceRef,
                 isPrimary,
@@ -283,9 +291,10 @@ export class ChartSynchronizationAxisMapper {
 
         if (sourceIsPrimary) {
             const configuredPrimaryId = sourceRef.axis === "x" ? primaryAxisIds?.x : primaryAxisIds?.y;
-            const primaryId = configuredPrimaryId && coordinateSpace.get({ axis: sourceRef.axis, axisId: configuredPrimaryId })?.valid
-                ? configuredPrimaryId
-                : firstValidAxisId(coordinateSpace, sourceRef.axis);
+            const primaryId =
+                configuredPrimaryId && coordinateSpace.get({ axis: sourceRef.axis, axisId: configuredPrimaryId })?.valid
+                    ? configuredPrimaryId
+                    : firstValidAxisId(coordinateSpace, sourceRef.axis);
             if (primaryId !== null && primaryId !== undefined) {
                 return { axis: sourceRef.axis, axisId: primaryId };
             }

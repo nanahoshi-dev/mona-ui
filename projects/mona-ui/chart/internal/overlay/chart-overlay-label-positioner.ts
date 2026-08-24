@@ -22,13 +22,7 @@ export interface PositionedOverlayLabel {
 
 export class ChartOverlayLabelPositioner {
     public static position(options: PositionOverlayLabelOptions): PositionedOverlayLabel {
-        const {
-            anchorFraction,
-            containerRect,
-            desiredAnchor,
-            measurement,
-            padding = 0
-        } = options;
+        const { anchorFraction, containerRect, desiredAnchor, measurement, padding = 0 } = options;
 
         const w = measurement?.width ?? 40;
         const h = measurement?.height ?? 20;

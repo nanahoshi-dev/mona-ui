@@ -90,14 +90,11 @@ describe("SVG Foundation Infrastructure", () => {
         expect(parent.children[1].getAttribute("r")).toBe("20");
 
         // Reconcile with reorder and deletion
-        keyedGroup.reconcile(
-            [{ id: "b", val: 30 }],
-            {
-                key: d => d.id,
-                tag: "circle",
-                update: (el, d) => el.setAttribute("r", String(d.val))
-            }
-        );
+        keyedGroup.reconcile([{ id: "b", val: 30 }], {
+            key: d => d.id,
+            tag: "circle",
+            update: (el, d) => el.setAttribute("r", String(d.val))
+        });
 
         expect(parent.children.length).toBe(1);
         expect(parent.children[0].getAttribute("r")).toBe("30");

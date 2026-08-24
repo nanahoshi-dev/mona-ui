@@ -131,7 +131,9 @@ describe("WaterfallDataProcessor", () => {
         // Legend items for all 5 used visual kinds, semantic presentation
         expect(res.legendItems.length).toBe(5);
         expect(res.legendItems.map(i => i.name)).toEqual(["Increase", "Decrease", "No Change", "Subtotal", "Total"]);
-        expect(res.legendItems.every(i => i.kind === "semantic" && i.interactive === false && i.visible === true)).toBe(true);
+        expect(res.legendItems.every(i => i.kind === "semantic" && i.interactive === false && i.visible === true)).toBe(
+            true
+        );
     });
 
     it("supports startValue baseline offset and does NOT force zero if no subtotal/total is present", () => {
@@ -338,10 +340,7 @@ describe("WaterfallDataProcessor", () => {
     });
 
     it("falls back to Step N when no xField or rootXField is provided", () => {
-        const data = [
-            { value: 10 },
-            { value: 20 }
-        ];
+        const data = [{ value: 10 }, { value: 20 }];
 
         const res = WaterfallDataProcessor.process({
             data,
@@ -359,11 +358,7 @@ describe("WaterfallDataProcessor", () => {
     });
 
     it("applies valueFormatter with source dataIndex", () => {
-        const data = [
-            { value: 100 },
-            { value: "invalid" },
-            { value: 50 }
-        ];
+        const data = [{ value: 100 }, { value: "invalid" }, { value: 50 }];
 
         const seenIndices: number[] = [];
         const res = WaterfallDataProcessor.process({

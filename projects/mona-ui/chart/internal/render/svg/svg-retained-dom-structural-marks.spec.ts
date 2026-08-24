@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
-import type { CartesianFunnelChartScene, CartesianHeatmapChartScene, PolarAxisChartScene, PolarSectorChartScene } from "../../scene/chart-scene";
+import type {
+    CartesianFunnelChartScene,
+    CartesianHeatmapChartScene,
+    PolarAxisChartScene,
+    PolarSectorChartScene
+} from "../../scene/chart-scene";
 import type { PolarArcChartScene } from "../../scene/polar-arc-scene";
 import type { SceneHitTarget } from "../../scene/scene-geometry";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
@@ -106,8 +111,24 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                         mode: "category",
                         rotation: 0,
                         ticks: [
-                            { angle: 0, formattedValue: "A", index: 0, labelPoint: { x: 150, y: 50 }, tickKey: "t1", value: "A", visible: true },
-                            { angle: Math.PI, formattedValue: "B", index: 1, labelPoint: { x: 150, y: 250 }, tickKey: "t2", value: "B", visible: true }
+                            {
+                                angle: 0,
+                                formattedValue: "A",
+                                index: 0,
+                                labelPoint: { x: 150, y: 50 },
+                                tickKey: "t1",
+                                value: "A",
+                                visible: true
+                            },
+                            {
+                                angle: Math.PI,
+                                formattedValue: "B",
+                                index: 1,
+                                labelPoint: { x: 150, y: 250 },
+                                tickKey: "t2",
+                                value: "B",
+                                visible: true
+                            }
                         ],
                         visible: true
                     },
@@ -131,8 +152,26 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                         labelOffset: 5,
                         labels: true,
                         ticks: [
-                            { formattedValue: "50", index: 0, isZero: false, labelPoint: { x: 150, y: 100 }, radius: 50, tickKey: "r1", value: 50, visible: true },
-                            { formattedValue: "100", index: 1, isZero: false, labelPoint: { x: 150, y: 50 }, radius: 100, tickKey: "r2", value: 100, visible: true }
+                            {
+                                formattedValue: "50",
+                                index: 0,
+                                isZero: false,
+                                labelPoint: { x: 150, y: 100 },
+                                radius: 50,
+                                tickKey: "r1",
+                                value: 50,
+                                visible: true
+                            },
+                            {
+                                formattedValue: "100",
+                                index: 1,
+                                isZero: false,
+                                labelPoint: { x: 150, y: 50 },
+                                radius: 100,
+                                tickKey: "r2",
+                                value: 100,
+                                visible: true
+                            }
                         ],
                         visible: true
                     },
@@ -148,8 +187,30 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                             name: "Radar Series",
                             pointRadius: 4,
                             points: [
-                                { angle: 0, animationKey: "p1", categoryKey: "A", dataIndex: 0, datum: {}, defined: true, formattedValue: String(val1), point: { x: 150, y: 150 - val1 }, radius: val1, value: val1 },
-                                { angle: Math.PI, animationKey: "p2", categoryKey: "B", dataIndex: 1, datum: {}, defined: true, formattedValue: String(val2), point: { x: 150, y: 150 + val2 }, radius: val2, value: val2 }
+                                {
+                                    angle: 0,
+                                    animationKey: "p1",
+                                    categoryKey: "A",
+                                    dataIndex: 0,
+                                    datum: {},
+                                    defined: true,
+                                    formattedValue: String(val1),
+                                    point: { x: 150, y: 150 - val1 },
+                                    radius: val1,
+                                    value: val1
+                                },
+                                {
+                                    angle: Math.PI,
+                                    animationKey: "p2",
+                                    categoryKey: "B",
+                                    dataIndex: 1,
+                                    datum: {},
+                                    defined: true,
+                                    formattedValue: String(val2),
+                                    point: { x: 150, y: 150 + val2 },
+                                    radius: val2,
+                                    value: val2
+                                }
                             ],
                             showPoints: true,
                             strokeWidth: 2,
@@ -220,7 +281,13 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                                 }
                             ],
                             name: "Radial Bar",
-                            style: { color: "#3b82f6", fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
+                            style: {
+                                color: "#3b82f6",
+                                fillOpacity: 1,
+                                strokeColor: "none",
+                                strokeSource: "default",
+                                strokeWidth: 0
+                            },
                             tracks: [
                                 {
                                     animationKey: "rb-t1",
@@ -334,7 +401,20 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                     series: [
                         {
                             cells: [
-                                { backgroundColor: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: val, valueText: String(val), width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }
+                                {
+                                    backgroundColor: "#ff0000",
+                                    dataIndex: 0,
+                                    datum: {},
+                                    height: 50,
+                                    opacity: 1,
+                                    rawValue: val,
+                                    valueText: String(val),
+                                    width: 50,
+                                    x: 20,
+                                    xIndex: 0,
+                                    y: 20,
+                                    yIndex: 0
+                                }
                             ],
                             id: "heat-series-A",
                             labels: [],
@@ -377,7 +457,20 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                 series: [
                     {
                         cells: [
-                            { backgroundColor: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: 10, valueText: "10", width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }
+                            {
+                                backgroundColor: "#ff0000",
+                                dataIndex: 0,
+                                datum: {},
+                                height: 50,
+                                opacity: 1,
+                                rawValue: 10,
+                                valueText: "10",
+                                width: 50,
+                                x: 20,
+                                xIndex: 0,
+                                y: 20,
+                                yIndex: 0
+                            }
                         ],
                         id: "heat-series-A",
                         labels: [],
@@ -386,7 +479,20 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                     },
                     {
                         cells: [
-                            { backgroundColor: "#00ff00", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: 20, valueText: "20", width: 50, x: 70, xIndex: 0, y: 20, yIndex: 0 }
+                            {
+                                backgroundColor: "#00ff00",
+                                dataIndex: 0,
+                                datum: {},
+                                height: 50,
+                                opacity: 1,
+                                rawValue: 20,
+                                valueText: "20",
+                                width: 50,
+                                x: 70,
+                                xIndex: 0,
+                                y: 20,
+                                yIndex: 0
+                            }
                         ],
                         id: "heat-series-B",
                         labels: [],

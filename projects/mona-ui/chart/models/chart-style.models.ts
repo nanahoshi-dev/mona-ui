@@ -7,4 +7,3 @@ export interface ChartSeriesStyle {
     opacity: number;
     pointRadius: number;
 }
-

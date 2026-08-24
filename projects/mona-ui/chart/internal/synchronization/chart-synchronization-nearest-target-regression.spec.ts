@@ -3,7 +3,10 @@ import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import { CartesianInteractionGeometryIndex } from "../interaction/cartesian-interaction-geometry-index";
 import { resolveSynchronizationLocalTarget } from "./chart-synchronization-local-target-resolver";
-import type { CartesianDenseInteractionProvider, CartesianDenseSemanticBucketQuery } from "../density/cartesian-dense-interaction-provider";
+import type {
+    CartesianDenseInteractionProvider,
+    CartesianDenseSemanticBucketQuery
+} from "../density/cartesian-dense-interaction-provider";
 
 describe("Chart Synchronization Nearest Target Resolution and Axis Namespace Regressions", () => {
     describe("Exact XY Nearest Target Resolution across Wide X Buckets", () => {

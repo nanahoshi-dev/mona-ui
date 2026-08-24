@@ -201,34 +201,15 @@ export class ChartDataLabelPlacement {
         const isHorizontal = hit.barOrientation === "horizontal" || orientation === "horizontal";
 
         if (type === "bar" || type === "rangeBar") {
-            return ChartDataLabelPlacement.#computeBarPlacement(
-                hit,
-                position,
-                offset,
-                width,
-                height,
-                isHorizontal
-            );
+            return ChartDataLabelPlacement.#computeBarPlacement(hit, position, offset, width, height, isHorizontal);
         }
 
         if (type === "rangeArea") {
-            return ChartDataLabelPlacement.#computeRangeAreaPlacement(
-                hit,
-                position,
-                offset,
-                width,
-                height
-            );
+            return ChartDataLabelPlacement.#computeRangeAreaPlacement(hit, position, offset, width, height);
         }
 
         // Point-like / financial / fallback
-        return ChartDataLabelPlacement.#computePointPlacement(
-            hit,
-            position,
-            offset,
-            width,
-            height
-        );
+        return ChartDataLabelPlacement.#computePointPlacement(hit, position, offset, width, height);
     }
 
     static #computePointPlacement(
@@ -404,7 +385,7 @@ export class ChartDataLabelPlacement {
             const key = `${seriesType}:${requested}`;
             if (!ChartDataLabelPlacement.#warnedPositions.has(key)) {
                 ChartDataLabelPlacement.#warnedPositions.add(key);
-                 
+
                 console.warn(
                     `[Mona Chart] Data label position "${requested}" is not supported for "${seriesType}" series. Falling back to "${fallback}".`
                 );

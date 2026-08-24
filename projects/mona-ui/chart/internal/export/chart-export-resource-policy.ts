@@ -79,7 +79,9 @@ export function parseDataUrlMediaType(url: string): string | null {
 /**
  * Checks whether a parsed media type belongs to the certified raster media allowlist.
  */
-export function isSupportedRasterMediaType(mediaType: string | null | undefined): mediaType is ChartExportRasterMediaType {
+export function isSupportedRasterMediaType(
+    mediaType: string | null | undefined
+): mediaType is ChartExportRasterMediaType {
     if (!mediaType) {
         return false;
     }

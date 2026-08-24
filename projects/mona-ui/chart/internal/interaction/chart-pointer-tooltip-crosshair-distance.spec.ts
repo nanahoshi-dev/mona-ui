@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { ChartPointerInteractionResolver, type ChartPointerInteractionDemand } from "./chart-pointer-interaction-resolver";
+import {
+    ChartPointerInteractionResolver,
+    type ChartPointerInteractionDemand
+} from "./chart-pointer-interaction-resolver";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget, ChartInteractionBucket } from "../scene/scene-geometry";
 

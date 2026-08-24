@@ -10,11 +10,7 @@ import { resolveDensityCapability } from "./cartesian-density-capability";
 const chartPolicy = normalizeChartDownsamplingOptions(true);
 
 type ExpectedDensityFamilyPolicy =
-    | "connected-range"
-    | "connected-scalar"
-    | "intentional-exclusion"
-    | "marker"
-    | "stacked-area";
+    "connected-range" | "connected-scalar" | "intentional-exclusion" | "marker" | "stacked-area";
 
 /** Test-only contract table: every public series type must have an explicit density policy. */
 const expectedDensityFamilyPolicy: Record<ChartSeriesType, ExpectedDensityFamilyPolicy> = {

@@ -19,13 +19,13 @@ export class OhlcSeriesRenderer {
                 continue;
             }
 
-            const markColor = style.color || (
-                mark.direction === "rising"
+            const markColor =
+                style.color ||
+                (mark.direction === "rising"
                     ? style.risingColor
                     : mark.direction === "falling"
-                        ? style.fallingColor
-                        : style.neutralColor
-            );
+                      ? style.fallingColor
+                      : style.neutralColor);
 
             const wickColor = style.wickColor || markColor;
             const wickWidth = mark.wickWidth;

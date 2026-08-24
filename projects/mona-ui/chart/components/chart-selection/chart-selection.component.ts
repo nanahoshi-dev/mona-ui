@@ -1,10 +1,7 @@
 import { Component, computed, DestroyRef, effect, inject, input, OnInit, output } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
-import type {
-    ChartSelectionChangeEvent,
-    ChartSelectionMode
-} from "../../models/chart-selection.models";
+import type { ChartSelectionChangeEvent, ChartSelectionMode } from "../../models/chart-selection.models";
 
 @Component({
     selector: "mona-chart-selection",

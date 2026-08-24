@@ -11,13 +11,7 @@ const FORBIDDEN_COLOR_PATTERNS = [
     /calc\s*\(/i
 ];
 
-const CSS_WIDE_KEYWORDS = new Set([
-    "inherit",
-    "initial",
-    "unset",
-    "revert",
-    "revert-layer"
-]);
+const CSS_WIDE_KEYWORDS = new Set(["inherit", "initial", "unset", "revert", "revert-layer"]);
 
 /**
  * Guards against environments whose 2D context exists but cannot render or read back
@@ -99,10 +93,7 @@ export class ChartExportColorNormalizer {
     public static normalizeColor(colorStr: string): string {
         const trimmed = colorStr.trim();
         if (!trimmed) {
-            throw new ChartExportError(
-                "invalid-size",
-                "Color string cannot be empty."
-            );
+            throw new ChartExportError("invalid-size", "Color string cannot be empty.");
         }
 
         const lower = trimmed.toLowerCase();
@@ -130,10 +121,7 @@ export class ChartExportColorNormalizer {
             testEl.style.color = trimmed;
 
             if (!testEl.style.color) {
-                throw new ChartExportError(
-                    "invalid-size",
-                    `Invalid CSS color syntax: '${trimmed}'.`
-                );
+                throw new ChartExportError("invalid-size", `Invalid CSS color syntax: '${trimmed}'.`);
             }
 
             if (document.body) {

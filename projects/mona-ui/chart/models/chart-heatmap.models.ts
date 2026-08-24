@@ -51,10 +51,7 @@ export interface HeatmapThresholdInterval {
     readonly min?: number;
 }
 
-export type HeatmapScale =
-    | readonly string[]
-    | readonly HeatmapColorStop[]
-    | readonly HeatmapThresholdInterval[];
+export type HeatmapScale = readonly string[] | readonly HeatmapColorStop[] | readonly HeatmapThresholdInterval[];
 
 export interface ChartHeatmapCategory {
     readonly formattedValue: string;

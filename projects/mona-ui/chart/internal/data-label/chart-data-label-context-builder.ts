@@ -109,7 +109,10 @@ export class ChartDataLabelContextBuilder {
             case "area":
             case "bar":
                 if (context.stackMode === "percent") {
-                    return context.formattedStackPercentage ?? (context.stackPercentage !== undefined ? `${context.stackPercentage}%` : "");
+                    return (
+                        context.formattedStackPercentage ??
+                        (context.stackPercentage !== undefined ? `${context.stackPercentage}%` : "")
+                    );
                 }
                 return context.formattedValue || (context.yValue !== undefined ? String(context.yValue) : "");
 

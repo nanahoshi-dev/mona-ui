@@ -41,10 +41,7 @@ export function createBubbleRadiusScale(
         return () => midRadius;
     }
 
-    const d3Scale = scaleSqrt()
-        .domain([minVal, maxVal])
-        .range([minRadius, maxRadius])
-        .clamp(true);
+    const d3Scale = scaleSqrt().domain([minVal, maxVal]).range([minRadius, maxRadius]).clamp(true);
 
     return (val: number) => {
         if (!isFiniteNumber(val) || val <= 0) {

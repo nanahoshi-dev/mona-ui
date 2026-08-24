@@ -46,8 +46,24 @@ describe("RoseGridRenderer", () => {
             mode: "category",
             rotation: 0,
             ticks: [
-                { angle: 0, formattedValue: "A", index: 0, labelPoint: { x: 0, y: 0 }, tickKey: "a", value: "A", visible: true },
-                { angle: Math.PI, formattedValue: "B", index: 1, labelPoint: { x: 0, y: 0 }, tickKey: "b", value: "B", visible: true }
+                {
+                    angle: 0,
+                    formattedValue: "A",
+                    index: 0,
+                    labelPoint: { x: 0, y: 0 },
+                    tickKey: "a",
+                    value: "A",
+                    visible: true
+                },
+                {
+                    angle: Math.PI,
+                    formattedValue: "B",
+                    index: 1,
+                    labelPoint: { x: 0, y: 0 },
+                    tickKey: "b",
+                    value: "B",
+                    visible: true
+                }
             ],
             visible: true
         };
@@ -60,7 +76,16 @@ describe("RoseGridRenderer", () => {
             labelOffset: 6,
             labels: true,
             ticks: [
-                { formattedValue: "50", index: 0, isZero: false, labelPoint: { x: 0, y: 0 }, radius: 65, tickKey: "50", value: 50, visible: true }
+                {
+                    formattedValue: "50",
+                    index: 0,
+                    isZero: false,
+                    labelPoint: { x: 0, y: 0 },
+                    radius: 65,
+                    tickKey: "50",
+                    value: 50,
+                    visible: true
+                }
             ],
             visible: true
         };
@@ -95,7 +120,16 @@ describe("RoseGridRenderer", () => {
             labelOffset: 6,
             labels: true,
             ticks: [
-                { formattedValue: "50", index: 0, isZero: false, labelPoint: { x: 0, y: 0 }, radius: 65, tickKey: "50", value: 50, visible: true }
+                {
+                    formattedValue: "50",
+                    index: 0,
+                    isZero: false,
+                    labelPoint: { x: 0, y: 0 },
+                    radius: 65,
+                    tickKey: "50",
+                    value: 50,
+                    visible: true
+                }
             ],
             visible: true
         };

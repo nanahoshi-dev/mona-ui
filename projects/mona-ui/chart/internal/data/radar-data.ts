@@ -79,9 +79,7 @@ export function prepareRadarData(
             const categoryKey = String(rawCat);
 
             if (!categoryMap.has(categoryKey)) {
-                const formatted = angularFormatter
-                    ? angularFormatter(rawCat, categoryMap.size)
-                    : String(rawCat);
+                const formatted = angularFormatter ? angularFormatter(rawCat, categoryMap.size) : String(rawCat);
                 categoryMap.set(categoryKey, {
                     formatted,
                     index: categoryMap.size,
@@ -128,7 +126,11 @@ export function prepareRadarData(
             const numVal = defined ? (val as number) : 0;
 
             const catInfo = categoryMap.get(categoryKey);
-            const formattedCat = catInfo ? catInfo.formatted : (angularFormatter ? angularFormatter(rawCat, 0) : String(rawCat));
+            const formattedCat = catInfo
+                ? catInfo.formatted
+                : angularFormatter
+                  ? angularFormatter(rawCat, 0)
+                  : String(rawCat);
 
             const formattedVal = defined
                 ? valueFormatter

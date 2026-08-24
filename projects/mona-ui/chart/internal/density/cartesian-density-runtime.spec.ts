@@ -44,11 +44,36 @@ describe("binary search bounds", () => {
 
 describe("density segments and monotonicity", () => {
     it("detects all five monotonicity classes", () => {
-        expect(detectMonotonicity(Float64Array.from([1, 2, 3]), buildDefinedSegments(Float64Array.from([1, 2, 3]), Float64Array.from([1, 1, 1])))).toBe("ascending");
-        expect(detectMonotonicity(Float64Array.from([1, 1, 2]), buildDefinedSegments(Float64Array.from([1, 1, 2]), Float64Array.from([1, 1, 1])))).toBe("non-decreasing");
-        expect(detectMonotonicity(Float64Array.from([3, 2, 1]), buildDefinedSegments(Float64Array.from([3, 2, 1]), Float64Array.from([1, 1, 1])))).toBe("descending");
-        expect(detectMonotonicity(Float64Array.from([3, 3, 2]), buildDefinedSegments(Float64Array.from([3, 3, 2]), Float64Array.from([1, 1, 1])))).toBe("non-increasing");
-        expect(detectMonotonicity(Float64Array.from([1, 3, 2]), buildDefinedSegments(Float64Array.from([1, 3, 2]), Float64Array.from([1, 1, 1])))).toBe("unsorted");
+        expect(
+            detectMonotonicity(
+                Float64Array.from([1, 2, 3]),
+                buildDefinedSegments(Float64Array.from([1, 2, 3]), Float64Array.from([1, 1, 1]))
+            )
+        ).toBe("ascending");
+        expect(
+            detectMonotonicity(
+                Float64Array.from([1, 1, 2]),
+                buildDefinedSegments(Float64Array.from([1, 1, 2]), Float64Array.from([1, 1, 1]))
+            )
+        ).toBe("non-decreasing");
+        expect(
+            detectMonotonicity(
+                Float64Array.from([3, 2, 1]),
+                buildDefinedSegments(Float64Array.from([3, 2, 1]), Float64Array.from([1, 1, 1]))
+            )
+        ).toBe("descending");
+        expect(
+            detectMonotonicity(
+                Float64Array.from([3, 3, 2]),
+                buildDefinedSegments(Float64Array.from([3, 3, 2]), Float64Array.from([1, 1, 1]))
+            )
+        ).toBe("non-increasing");
+        expect(
+            detectMonotonicity(
+                Float64Array.from([1, 3, 2]),
+                buildDefinedSegments(Float64Array.from([1, 3, 2]), Float64Array.from([1, 1, 1]))
+            )
+        ).toBe("unsorted");
     });
 
     it("splits segments at invalid entries", () => {

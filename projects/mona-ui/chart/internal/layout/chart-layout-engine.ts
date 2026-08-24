@@ -11,11 +11,11 @@ import type {
     ChartAngularAxisRegistration,
     ChartCartesianSeriesRegistration,
     ChartFunnelSeriesRegistration,
-    ChartHeatmapSeriesRegistration
-    ,ChartRadialArcSeriesRegistration,
+    ChartHeatmapSeriesRegistration,
+    ChartRadialArcSeriesRegistration,
     ChartRadialAxisRegistration,
-    ChartRadialSeriesRegistration
-    ,ChartSeriesRegistration,
+    ChartRadialSeriesRegistration,
+    ChartSeriesRegistration,
     ChartTreemapSeriesRegistration,
     ChartWaterfallSeriesRegistration,
     ChartXAxisRegistration,
@@ -174,9 +174,7 @@ export class ChartLayoutEngine {
             }
         }
 
-        const treemapSeries = series.filter(
-            (s): s is ChartTreemapSeriesRegistration => s.type === "treemap"
-        );
+        const treemapSeries = series.filter((s): s is ChartTreemapSeriesRegistration => s.type === "treemap");
 
         if (treemapSeries.length > 0 || coordinateSystem === "hierarchical") {
             if (treemapSeries.length !== 1 || series.length !== 1) {
@@ -187,7 +185,10 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Hierarchical charts (treemap) cannot be mixed with other chart families.",
                     warnedSet
                 );
-                return { kind: "scene", scene: HierarchicalLayoutEngine.createEmptyScene(options.containerWidth, options.containerHeight) };
+                return {
+                    kind: "scene",
+                    scene: HierarchicalLayoutEngine.createEmptyScene(options.containerWidth, options.containerHeight)
+                };
             }
 
             if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
@@ -220,9 +221,7 @@ export class ChartLayoutEngine {
             };
         }
 
-        const funnelSeries = series.filter(
-            (s): s is ChartFunnelSeriesRegistration => s.type === "funnel"
-        );
+        const funnelSeries = series.filter((s): s is ChartFunnelSeriesRegistration => s.type === "funnel");
 
         if (funnelSeries.length > 0) {
             if (funnelSeries.length > 1 || series.length > 1) {
@@ -233,7 +232,10 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Funnel series cannot be mixed with other chart series.",
                     warnedSet
                 );
-                return { kind: "scene", scene: FunnelLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
+                return {
+                    kind: "scene",
+                    scene: FunnelLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight)
+                };
             }
 
             if (options.xAxis || options.yAxis || options.angularAxis || options.radialAxis) {
@@ -266,9 +268,7 @@ export class ChartLayoutEngine {
             };
         }
 
-        const waterfallSeries = series.filter(
-            (s): s is ChartWaterfallSeriesRegistration => s.type === "waterfall"
-        );
+        const waterfallSeries = series.filter((s): s is ChartWaterfallSeriesRegistration => s.type === "waterfall");
 
         if (waterfallSeries.length > 0) {
             if (waterfallSeries.length > 1 || series.length > 1) {
@@ -279,7 +279,10 @@ export class ChartLayoutEngine {
                         : "[MonaChart] Waterfall series cannot be mixed with other chart series.",
                     warnedSet
                 );
-                return { kind: "scene", scene: WaterfallLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
+                return {
+                    kind: "scene",
+                    scene: WaterfallLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight)
+                };
             }
 
             return {
@@ -298,9 +301,7 @@ export class ChartLayoutEngine {
             };
         }
 
-        const heatmapSeries = series.filter(
-            (s): s is ChartHeatmapSeriesRegistration => s.type === "heatmap"
-        );
+        const heatmapSeries = series.filter((s): s is ChartHeatmapSeriesRegistration => s.type === "heatmap");
 
         if (heatmapSeries.length > 0) {
             if (heatmapSeries.length > 1) {
@@ -309,7 +310,10 @@ export class ChartLayoutEngine {
                     "[MonaChart] Multiple heatmap series in the same chart are unsupported.",
                     warnedSet
                 );
-                return { kind: "scene", scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
+                return {
+                    kind: "scene",
+                    scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight)
+                };
             }
             if (series.length > heatmapSeries.length) {
                 const hasPolar = series.some(s => isPolarCoordinateFamily(getChartSeriesFamily(s.type)));
@@ -326,7 +330,10 @@ export class ChartLayoutEngine {
                         warnedSet
                     );
                 }
-                return { kind: "scene", scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight) };
+                return {
+                    kind: "scene",
+                    scene: HeatmapLayoutEngine.computeEmptyScene(options.containerWidth, options.containerHeight)
+                };
             }
 
             return {
@@ -425,7 +432,10 @@ export class ChartLayoutEngine {
                     }
                 };
             }
-            if (famArray.includes("cartesian") && (famArray.includes("sector") || famArray.includes("radar") || famArray.includes("polar"))) {
+            if (
+                famArray.includes("cartesian") &&
+                (famArray.includes("sector") || famArray.includes("radar") || famArray.includes("polar"))
+            ) {
                 return {
                     kind: "scene",
                     scene: {

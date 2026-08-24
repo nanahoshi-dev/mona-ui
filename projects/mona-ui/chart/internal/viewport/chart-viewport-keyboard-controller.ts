@@ -1,22 +1,16 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type {
     ChartNavigationAxisTarget,
-    ChartViewportAxisRef
-    ,ChartViewportConstraint,
+    ChartViewportAxisRef,
+    ChartViewportConstraint,
     ChartViewportLinkGroup,
     ChartViewportState
 } from "../../models/chart-viewport.models";
 import type { ChartAxisScene } from "../scene/cartesian-scene";
 import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportOperationCoordinator } from "./cartesian-viewport-operation-coordinator";
-import {
-    areInternalViewportStatesEqual,
-    type InternalCartesianViewportState
-} from "./cartesian-viewport-normalizer";
-import {
-    CartesianViewportTargetResolver,
-    type CartesianNavigationProfile
-} from "./cartesian-viewport-target-resolver";
+import { areInternalViewportStatesEqual, type InternalCartesianViewportState } from "./cartesian-viewport-normalizer";
+import { CartesianViewportTargetResolver, type CartesianNavigationProfile } from "./cartesian-viewport-target-resolver";
 import type { NormalizedChartNavigationOptions } from "./chart-navigation-options";
 
 export interface ChartViewportKeyboardResult {
@@ -50,19 +44,15 @@ export class ChartViewportKeyboardController {
             y: plotRect.y + plotRect.height / 2
         };
 
-        const isPanKey = event.shiftKey && (
-            event.key === "ArrowLeft" ||
-            event.key === "ArrowRight" ||
-            event.key === "ArrowUp" ||
-            event.key === "ArrowDown"
-        );
+        const isPanKey =
+            event.shiftKey &&
+            (event.key === "ArrowLeft" ||
+                event.key === "ArrowRight" ||
+                event.key === "ArrowUp" ||
+                event.key === "ArrowDown");
 
-        const isZoomKey = !event.shiftKey && (
-            event.key === "+" ||
-            event.key === "=" ||
-            event.key === "-" ||
-            event.key === "_"
-        );
+        const isZoomKey =
+            !event.shiftKey && (event.key === "+" || event.key === "=" || event.key === "-" || event.key === "_");
 
         const isResetKey = !event.shiftKey && event.key === "0";
 
@@ -81,7 +71,9 @@ export class ChartViewportKeyboardController {
         const keyTarget: ChartNavigationAxisTarget | undefined = activeNamespace
             ? [activeNamespace]
             : isPanKey
-              ? (event.key === "ArrowLeft" || event.key === "ArrowRight" ? "x" : "y")
+              ? event.key === "ArrowLeft" || event.key === "ArrowRight"
+                  ? "x"
+                  : "y"
               : isZoomKey
                 ? options.zoomAxes
                 : undefined;
@@ -212,9 +204,10 @@ export class ChartViewportKeyboardController {
             if (res.accepted) {
                 nextState = res.viewport;
                 changedAxes = res.changedAxes;
-                announcement = defaultViewport && defaultViewport.axes && defaultViewport.axes.length > 0
-                    ? "Viewport reset to default range"
-                    : "Viewport reset to full range";
+                announcement =
+                    defaultViewport && defaultViewport.axes && defaultViewport.axes.length > 0
+                        ? "Viewport reset to default range"
+                        : "Viewport reset to full range";
                 handled = true;
             }
         }

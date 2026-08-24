@@ -1,7 +1,7 @@
 import type {
     ChartNavigationAxisTarget,
-    ChartNavigationInput
-    ,ChartViewportConstraint,
+    ChartNavigationInput,
+    ChartViewportConstraint,
     ChartViewportLinkGroup
 } from "../../models/chart-viewport.models";
 
@@ -89,11 +89,15 @@ export function normalizeChartNavigationOptions(
         enabled,
         keyboard,
         keyboardPanRatio:
-            typeof input.keyboardPanRatio === "number" && Number.isFinite(input.keyboardPanRatio) && input.keyboardPanRatio > 0
+            typeof input.keyboardPanRatio === "number" &&
+            Number.isFinite(input.keyboardPanRatio) &&
+            input.keyboardPanRatio > 0
                 ? input.keyboardPanRatio
                 : 0.1,
         keyboardZoomFactor:
-            typeof input.keyboardZoomFactor === "number" && Number.isFinite(input.keyboardZoomFactor) && input.keyboardZoomFactor > 1
+            typeof input.keyboardZoomFactor === "number" &&
+            Number.isFinite(input.keyboardZoomFactor) &&
+            input.keyboardZoomFactor > 1
                 ? input.keyboardZoomFactor
                 : 1.2,
         linkGroups: input.linkGroups ?? [],
@@ -105,7 +109,9 @@ export function normalizeChartNavigationOptions(
         panAxes: input.panAxes ?? "auto",
         pinchZoom,
         wheelSensitivity:
-            typeof input.wheelSensitivity === "number" && Number.isFinite(input.wheelSensitivity) && input.wheelSensitivity > 0
+            typeof input.wheelSensitivity === "number" &&
+            Number.isFinite(input.wheelSensitivity) &&
+            input.wheelSensitivity > 0
                 ? input.wheelSensitivity
                 : 0.002,
         wheelZoom,

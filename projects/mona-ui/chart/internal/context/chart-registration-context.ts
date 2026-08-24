@@ -22,8 +22,8 @@ import type {
 } from "../../models/chart-annotation.models";
 import type {
     ChartAxisFormatter,
-    ChartAxisLabelRotation
-    ,ChartXAxisPosition,
+    ChartAxisLabelRotation,
+    ChartXAxisPosition,
     ChartXAxisType,
     ChartYAxisPosition,
     ChartYAxisType
@@ -42,10 +42,7 @@ import type {
     ChartCrosshairSnapMode
 } from "../../models/chart-crosshair.models";
 import type { ChartDataLabelsInput } from "../../models/chart-data-label.models";
-import type {
-    ChartSelectionChangeEvent,
-    ChartSelectionMode
-} from "../../models/chart-selection.models";
+import type { ChartSelectionChangeEvent, ChartSelectionMode } from "../../models/chart-selection.models";
 import type {
     ChartPolarFillMode,
     ChartPolarLabelContent,
@@ -63,12 +60,7 @@ import type {
     ChartRadialArcFillMode,
     ChartRoseScaleMode
 } from "../../models/chart-radial-arc.models";
-import type {
-    ChartAreaFillMode,
-    ChartCurve,
-    ChartLegendItem,
-    ChartSeriesType
-} from "../../models/chart-series.models";
+import type { ChartAreaFillMode, ChartCurve, ChartLegendItem, ChartSeriesType } from "../../models/chart-series.models";
 import type { ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
 import type { ChartStackMode } from "../../models/chart-stack.models";
 import type { ChartScene } from "../scene/chart-scene";
@@ -202,8 +194,7 @@ export interface ChartCartesianSeriesRegistrationBase extends ChartSeriesRegistr
 }
 
 export interface ChartCartesianScalarSeriesRegistrationBase
-    extends ChartCartesianSeriesRegistrationBase,
-        ChartScalarSeriesRegistrationBase {}
+    extends ChartCartesianSeriesRegistrationBase, ChartScalarSeriesRegistrationBase {}
 
 export interface ChartCartesianRangeSeriesRegistrationBase extends ChartCartesianSeriesRegistrationBase {
     fromField: Signal<ChartField>;
@@ -428,8 +419,7 @@ export interface ChartRadialArcSeriesRegistrationBase extends ChartSeriesRegistr
 }
 
 export interface ChartRadialBarSeriesRegistration
-    extends ChartRadialArcSeriesRegistrationBase,
-        ChartDatumVisibilityRegistration {
+    extends ChartRadialArcSeriesRegistrationBase, ChartDatumVisibilityRegistration {
     readonly barGap: Signal<number>;
     readonly barThickness?: Signal<number | undefined>;
     readonly categoryField: Signal<ChartField>;
@@ -454,8 +444,7 @@ export interface ChartRadialBarSeriesRegistration
 }
 
 export interface ChartRoseSeriesRegistration
-    extends ChartRadialArcSeriesRegistrationBase,
-        ChartDatumVisibilityRegistration {
+    extends ChartRadialArcSeriesRegistrationBase, ChartDatumVisibilityRegistration {
     readonly categoryField: Signal<ChartField>;
     readonly categoryFormatter?: Signal<ChartValueFormatter | undefined>;
     readonly colorField?: Signal<ChartField | undefined>;
@@ -499,8 +488,7 @@ export interface ChartGaugeSeriesRegistration extends ChartRadialArcSeriesRegist
 }
 
 export interface ChartTreemapSeriesRegistration
-    extends Omit<ChartSeriesRegistrationBase, "data">,
-        ChartDatumVisibilityRegistration {
+    extends Omit<ChartSeriesRegistrationBase, "data">, ChartDatumVisibilityRegistration {
     readonly borderRadius?: Signal<number | undefined>;
     readonly childrenField: Signal<ChartField>;
     readonly color?: Signal<string | undefined>;
@@ -532,9 +520,7 @@ export interface ChartTreemapSeriesRegistration
     readonly valueFormatter?: Signal<ChartValueFormatter | undefined>;
 }
 
-export interface ChartFunnelSeriesRegistration
-    extends ChartSeriesRegistrationBase,
-        ChartDatumVisibilityRegistration {
+export interface ChartFunnelSeriesRegistration extends ChartSeriesRegistrationBase, ChartDatumVisibilityRegistration {
     readonly categoryField: Signal<ChartField>;
     readonly categoryFormatter?: Signal<ChartValueFormatter | undefined>;
     readonly color?: Signal<string>;
@@ -544,7 +530,9 @@ export interface ChartFunnelSeriesRegistration
     readonly fillOpacity?: Signal<number | undefined>;
     readonly gap: Signal<number>;
     readonly labelContent: Signal<import("../../models/chart-funnel.models").ChartFunnelLabelContent>;
-    readonly labelTemplate?: Signal<import("../../directives/chart-funnel-label-template.directive").ChartFunnelLabelTemplateDirective | undefined>;
+    readonly labelTemplate?: Signal<
+        import("../../directives/chart-funnel-label-template.directive").ChartFunnelLabelTemplateDirective | undefined
+    >;
     readonly maxLabels?: Signal<number>;
     readonly minLabelHeight?: Signal<number | undefined>;
     readonly minLabelWidth?: Signal<number | undefined>;
@@ -557,8 +545,7 @@ export interface ChartFunnelSeriesRegistration
     readonly widthRatio: Signal<number>;
 }
 
-export interface ChartWaterfallSeriesRegistration
-    extends ChartSeriesRegistrationBase {
+export interface ChartWaterfallSeriesRegistration extends ChartSeriesRegistrationBase {
     readonly borderRadius?: Signal<number | undefined>;
     readonly connectorColor?: Signal<string>;
     readonly connectorWidth?: Signal<number | undefined>;
@@ -568,7 +555,10 @@ export interface ChartWaterfallSeriesRegistration
     readonly increaseColor?: Signal<string>;
     readonly keyField?: Signal<ChartField | undefined>;
     readonly kindField?: Signal<ChartField | undefined>;
-    readonly labelTemplate?: Signal<import("../../directives/chart-waterfall-label-template.directive").ChartWaterfallLabelTemplateDirective | undefined>;
+    readonly labelTemplate?: Signal<
+        | import("../../directives/chart-waterfall-label-template.directive").ChartWaterfallLabelTemplateDirective
+        | undefined
+    >;
     readonly maxBarWidth?: Signal<number | undefined>;
     readonly maxLabels?: Signal<number>;
     readonly minLabelWidth?: Signal<number | undefined>;
@@ -588,9 +578,7 @@ export interface ChartWaterfallSeriesRegistration
 export type ChartHierarchicalSeriesRegistration = ChartTreemapSeriesRegistration;
 
 export type ChartRadialArcSeriesRegistration =
-    | ChartGaugeSeriesRegistration
-    | ChartRadialBarSeriesRegistration
-    | ChartRoseSeriesRegistration;
+    ChartGaugeSeriesRegistration | ChartRadialBarSeriesRegistration | ChartRoseSeriesRegistration;
 
 export type ChartFinancialSeriesRegistration = ChartCandlestickSeriesRegistration | ChartOhlcSeriesRegistration;
 

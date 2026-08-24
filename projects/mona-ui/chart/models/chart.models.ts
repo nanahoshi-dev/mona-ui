@@ -10,7 +10,6 @@ export type ChartField<T = any, TResult = any> = string | ChartValueAccessor<T, 
 
 export type ChartValueFormatter<T = unknown> = (value: T, index: number) => string;
 
-
 export interface ChartPadding {
     bottom: number;
     left: number;
@@ -34,4 +33,3 @@ export interface ChartSize {
     height: number;
     width: number;
 }
-

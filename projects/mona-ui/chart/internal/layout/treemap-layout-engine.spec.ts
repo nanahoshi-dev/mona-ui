@@ -10,8 +10,8 @@ function createMockTreemapRegistration(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         [K in keyof ChartTreemapSeriesRegistration]: ChartTreemapSeriesRegistration[K] extends (...args: any[]) => any
             ? ChartTreemapSeriesRegistration[K]
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            : any;
+            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              any;
     }> = {}
 ): ChartTreemapSeriesRegistration {
     const hiddenSet = new Set<string>();
@@ -78,9 +78,7 @@ describe("TreemapLayoutEngine", () => {
                 name: "Compute"
             },
             {
-                children: [
-                    { name: "Database", value: 100 }
-                ],
+                children: [{ name: "Database", value: 100 }],
                 name: "Storage"
             }
         ];
@@ -135,9 +133,7 @@ describe("TreemapLayoutEngine", () => {
             {
                 children: [
                     {
-                        children: [
-                            { name: "Level 3", value: 100 }
-                        ],
+                        children: [{ name: "Level 3", value: 100 }],
                         name: "Level 2"
                     }
                 ],
@@ -166,9 +162,7 @@ describe("TreemapLayoutEngine", () => {
             value: (i + 1) * 10
         }));
 
-        const data = [
-            { children, name: "Parent Group" }
-        ];
+        const data = [{ children, name: "Parent Group" }];
 
         const reg = createMockTreemapRegistration(data, { maxLabels: signal(5) });
         const scene = TreemapLayoutEngine.layout(reg, plotRect, 600, 400, styleResolver);

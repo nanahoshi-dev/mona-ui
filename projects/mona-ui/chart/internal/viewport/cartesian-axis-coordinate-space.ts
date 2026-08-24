@@ -65,14 +65,7 @@ export interface ResolvedContinuousCoordinate {
     readonly axis: "x" | "y";
     readonly axisId: string;
     readonly pixel: number;
-    readonly resolvedType:
-        | "linear"
-        | "log"
-        | "symlog"
-        | "pow"
-        | "sqrt"
-        | "time"
-        | "utc";
+    readonly resolvedType: "linear" | "log" | "symlog" | "pow" | "sqrt" | "time" | "utc";
     readonly value: number | Date;
 }
 
@@ -244,9 +237,10 @@ export class CartesianAxisCoordinateSpace {
         for (const yAxis of axisResolution.yAxes) {
             const resolvedType = resolvedTypes.y.get(yAxis.axisId)!;
             const baseDomain = baseDomains.y.get(yAxis.axisId)!;
-            const range: readonly [number, number] = resolvedType === "category"
-                ? [plotRect.y, plotRect.y + plotRect.height]
-                : [plotRect.y + plotRect.height, plotRect.y];
+            const range: readonly [number, number] =
+                resolvedType === "category"
+                    ? [plotRect.y, plotRect.y + plotRect.height]
+                    : [plotRect.y + plotRect.height, plotRect.y];
             const baseScale = baseScales.getYScale(yAxis.axisId)!;
             const isValid = yAxisValidityById.get(yAxis.axisId)?.valid ?? true;
             const normalizedBaseMapper = createCartesianNormalizedBaseMapper({
@@ -386,10 +380,7 @@ export class CartesianAxisCoordinateSpace {
      *    (min abs(pixel - bandCenter)) is returned. Ties break deterministically to the lower viewport index.
      * 4. Category domain keys within a single axis domain are contracted to be unique.
      */
-    public resolveCategoryAtPixel(
-        ref: ChartViewportAxisRef,
-        pixel: number
-    ): ResolvedCategoryAtPixel | undefined {
+    public resolveCategoryAtPixel(ref: ChartViewportAxisRef, pixel: number): ResolvedCategoryAtPixel | undefined {
         const snap = this.get(ref);
         if (!snap || snap.resolvedType !== "category" || snap.valid === false) {
             return undefined;
@@ -706,7 +697,9 @@ export class CartesianAxisCoordinateSpace {
             return undefined;
         }
 
-        const scale = (space === "base" ? snap.baseScale : snap.viewportScale) as ChartContinuousPositionScale<number | Date>;
+        const scale = (space === "base" ? snap.baseScale : snap.viewportScale) as ChartContinuousPositionScale<
+            number | Date
+        >;
         if (typeof scale.invert !== "function") {
             return undefined;
         }
@@ -746,11 +739,23 @@ export class CartesianAxisCoordinateSpace {
     }
 
     public toResolvedAxisInfoMap(): {
-        readonly x: ReadonlyMap<string, { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }>;
-        readonly y: ReadonlyMap<string, { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }>;
+        readonly x: ReadonlyMap<
+            string,
+            { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }
+        >;
+        readonly y: ReadonlyMap<
+            string,
+            { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }
+        >;
     } {
-        const xMap = new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>();
-        const yMap = new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>();
+        const xMap = new Map<
+            string,
+            { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }
+        >();
+        const yMap = new Map<
+            string,
+            { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }
+        >();
 
         for (const [id, snap] of this.x) {
             xMap.set(id, { baseDomain: snap.baseDomain, resolvedType: snap.resolvedType });

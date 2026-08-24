@@ -56,16 +56,7 @@ export function buildRoundedRectPath(
 }
 
 export function buildBarPath(options: RoundedRectOptions): string {
-    const {
-        cornerRadii,
-        height,
-        isPositive = true,
-        orientation = "vertical",
-        radius = 0,
-        width,
-        x,
-        y
-    } = options;
+    const { cornerRadii, height, isPositive = true, orientation = "vertical", radius = 0, width, x, y } = options;
 
     if (width <= 0 || height <= 0) {
         return "";

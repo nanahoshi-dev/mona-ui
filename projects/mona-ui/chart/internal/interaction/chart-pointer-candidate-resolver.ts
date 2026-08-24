@@ -8,7 +8,10 @@ export interface ChartPointerCandidates {
     readonly hitTargets: readonly SceneHitTarget[];
     readonly interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
     readonly interactionBuckets?: readonly ChartInteractionBucket[];
-    readonly interactionBucketsByAxisId?: ReadonlyMap<string, ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>>;
+    readonly interactionBucketsByAxisId?: ReadonlyMap<
+        string,
+        ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>
+    >;
     readonly maxCandidateDistance: number;
     readonly plotRectBoundsValid: boolean;
     readonly pointCandidates: readonly SceneHitTarget[];
@@ -83,9 +86,7 @@ export class ChartPointerCandidateResolver {
                 }
             }
             if (rawCandidates.length > 0) {
-                const seenIdentities = new Set(
-                    pointCandidates.map(t => `${t.seriesId}:${t.index ?? t.dataIndex}`)
-                );
+                const seenIdentities = new Set(pointCandidates.map(t => `${t.seriesId}:${t.index ?? t.dataIndex}`));
                 const merged: SceneHitTarget[] = [...pointCandidates];
                 for (const raw of rawCandidates) {
                     const identity = `${raw.seriesId}:${raw.index ?? raw.dataIndex}`;

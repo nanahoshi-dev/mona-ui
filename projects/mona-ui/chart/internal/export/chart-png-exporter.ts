@@ -1,14 +1,8 @@
 import type { ChartExportSnapshot } from "./chart-export-snapshot";
 import type { NormalizedChartExportRequest } from "./chart-export-options";
 import type { FinalizedSvgOutput } from "./chart-export-svg-finalizer";
-import {
-    MAX_RASTER_DIMENSION,
-    MAX_RASTER_TOTAL_PIXELS
-} from "./chart-export-options";
-import {
-    ChartExportError,
-    type ChartExportResult
-} from "../../models/chart-export.models";
+import { MAX_RASTER_DIMENSION, MAX_RASTER_TOTAL_PIXELS } from "./chart-export-options";
+import { ChartExportError, type ChartExportResult } from "../../models/chart-export.models";
 
 export class ChartPngExporter {
     public static async exportPng(
@@ -21,10 +15,7 @@ export class ChartPngExporter {
         }
 
         if (typeof document === "undefined" || typeof URL === "undefined") {
-            throw new ChartExportError(
-                "unsupported-environment",
-                "Cannot export PNG in a non-browser environment."
-            );
+            throw new ChartExportError("unsupported-environment", "Cannot export PNG in a non-browser environment.");
         }
 
         const physicalWidth = Math.round(request.width * request.pixelRatio);

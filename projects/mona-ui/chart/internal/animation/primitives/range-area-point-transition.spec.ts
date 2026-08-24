@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-    sampleRangeAreaPointTransition,
-    type RangeAreaPointMarkTransitionPlan
-} from "./range-area-point-transition";
+import { sampleRangeAreaPointTransition, type RangeAreaPointMarkTransitionPlan } from "./range-area-point-transition";
 
 describe("sampleRangeAreaPointTransition", () => {
     it("should sample progress <= 0 using from state", () => {

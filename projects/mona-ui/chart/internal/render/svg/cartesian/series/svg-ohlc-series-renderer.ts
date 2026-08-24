@@ -38,13 +38,13 @@ export class SvgOhlcSeriesRenderer {
                     return;
                 }
 
-                const markColor = style.color || (
-                    mark.direction === "rising"
+                const markColor =
+                    style.color ||
+                    (mark.direction === "rising"
                         ? style.risingColor
                         : mark.direction === "falling"
-                            ? style.fallingColor
-                            : style.neutralColor
-                );
+                          ? style.fallingColor
+                          : style.neutralColor);
 
                 const cx = Math.round(mark.centerX);
                 const highY = Math.round(mark.highY);

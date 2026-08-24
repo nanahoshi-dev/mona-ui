@@ -29,16 +29,10 @@ describe("ChartOverlayLabelMeasureDirective (CAA-R3-005)", () => {
         fixture.detectChanges();
 
         expect(mockContext.observeOverlayLabelElement).toHaveBeenCalledTimes(1);
-        expect(mockContext.observeOverlayLabelElement).toHaveBeenCalledWith(
-            expect.any(HTMLElement),
-            "crosshair:x"
-        );
+        expect(mockContext.observeOverlayLabelElement).toHaveBeenCalledWith(expect.any(HTMLElement), "crosshair:x");
 
         fixture.destroy();
         expect(mockContext.unobserveOverlayLabelElement).toHaveBeenCalledTimes(1);
-        expect(mockContext.unobserveOverlayLabelElement).toHaveBeenCalledWith(
-            expect.any(HTMLElement),
-            "crosshair:x"
-        );
+        expect(mockContext.unobserveOverlayLabelElement).toHaveBeenCalledWith(expect.any(HTMLElement), "crosshair:x");
     });
 });

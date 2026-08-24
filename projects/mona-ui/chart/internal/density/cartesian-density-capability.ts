@@ -2,17 +2,11 @@ import type { ChartDownsamplingInput } from "../../models/chart-downsampling.mod
 import type { ChartSeriesType } from "../../models/chart-series.models";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import {
-    
     resolveEffectiveDownsamplingPolicy,
     type NormalizedChartDownsamplingOptions
 } from "./chart-downsampling-options";
 
-export type CartesianDensityMode =
-    | "connected-range"
-    | "connected-scalar"
-    | "marker"
-    | "none"
-    | "stacked-area";
+export type CartesianDensityMode = "connected-range" | "connected-scalar" | "marker" | "none" | "stacked-area";
 
 /**
  * The family-safe reducer selected for a series.

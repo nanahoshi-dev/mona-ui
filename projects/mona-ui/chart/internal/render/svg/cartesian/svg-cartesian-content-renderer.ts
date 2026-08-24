@@ -169,11 +169,7 @@ export class SvgCartesianContentRenderer {
         this.#axesGroup.remove();
     }
 
-    public render(
-        scene: CartesianXYChartScene,
-        defs: SvgDefinitionRegistry,
-        styleResolver: ChartStyleResolver
-    ): void {
+    public render(scene: CartesianXYChartScene, defs: SvgDefinitionRegistry, styleResolver: ChartStyleResolver): void {
         const { plotRect, series } = scene;
         if (plotRect.width <= 0 || plotRect.height <= 0) {
             this.clear();

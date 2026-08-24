@@ -5,10 +5,7 @@ import type {
     CartesianAxisRegistryResolution,
     ResolvedCartesianAxisDescriptor
 } from "./cartesian-axis-registry-resolver";
-import type {
-    ResolvedSeriesAxisBinding,
-    SeriesAxisBindingResolution
-} from "./cartesian-series-axis-binding-resolver";
+import type { ResolvedSeriesAxisBinding, SeriesAxisBindingResolution } from "./cartesian-series-axis-binding-resolver";
 
 export type CartesianAxisDimension = "x" | "y";
 
@@ -24,22 +21,14 @@ export interface CartesianAxisMaps<T> {
 
 export interface ChartAxisValidity {
     readonly reason?:
-        | "all-zero-log"
-        | "incompatible-series"
-        | "invalid-explicit-domain"
-        | "invalid-unit-mode"
-        | "mixed-log-sign";
+        "all-zero-log" | "incompatible-series" | "invalid-explicit-domain" | "invalid-unit-mode" | "mixed-log-sign";
     readonly valid: boolean;
 }
 
 export interface ResolvedCartesianSeriesContext {
     readonly binding: ResolvedSeriesAxisBinding;
     readonly effectiveXField?: ChartField;
-    readonly invalidReason?:
-        | "incompatible-scale"
-        | "invalid-axis-domain"
-        | "invalid-stack"
-        | "unknown-axis";
+    readonly invalidReason?: "incompatible-scale" | "invalid-axis-domain" | "invalid-stack" | "unknown-axis";
     readonly registration: ChartSeriesRegistration;
     readonly valid: boolean;
     readonly xAxis?: ResolvedCartesianAxisDescriptor<"x">;
@@ -189,7 +178,10 @@ export class CartesianAxisResolvedContextBuilder {
         // Fill defaults for any missing axes
         for (const ax of axisResolution.xAxes) {
             if (!resolvedXTypeByAxisId.has(ax.axisId)) {
-                resolvedXTypeByAxisId.set(ax.axisId, ax.type === "auto" ? (orientation === "horizontal" ? "linear" : "category") : ax.type);
+                resolvedXTypeByAxisId.set(
+                    ax.axisId,
+                    ax.type === "auto" ? (orientation === "horizontal" ? "linear" : "category") : ax.type
+                );
             }
             if (!xAxisValidityById.has(ax.axisId)) {
                 xAxisValidityById.set(ax.axisId, { valid: true });
@@ -200,7 +192,10 @@ export class CartesianAxisResolvedContextBuilder {
         }
         for (const ay of axisResolution.yAxes) {
             if (!resolvedYTypeByAxisId.has(ay.axisId)) {
-                resolvedYTypeByAxisId.set(ay.axisId, ay.type === "auto" ? (orientation === "horizontal" ? "category" : "linear") : ay.type);
+                resolvedYTypeByAxisId.set(
+                    ay.axisId,
+                    ay.type === "auto" ? (orientation === "horizontal" ? "category" : "linear") : ay.type
+                );
             }
             if (!yAxisValidityById.has(ay.axisId)) {
                 yAxisValidityById.set(ay.axisId, { valid: true });

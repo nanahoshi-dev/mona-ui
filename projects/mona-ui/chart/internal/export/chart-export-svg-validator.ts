@@ -99,28 +99,20 @@ export class ChartExportSvgValidator {
      */
     public static validate(svgElement: SVGSVGElement): void {
         if (!svgElement || svgElement.tagName.toLowerCase() !== "svg") {
-            throw new ChartExportError(
-                "svg-composition-failed",
-                "Export root must be a valid SVGSVGElement."
-            );
+            throw new ChartExportError("svg-composition-failed", "Export root must be a valid SVGSVGElement.");
         }
 
         // 1. Validate root dimensions and viewBox strictly (R3-04)
         const viewBox = svgElement.getAttribute("viewBox");
         if (!viewBox) {
-            throw new ChartExportError(
-                "svg-composition-failed",
-                "SVG export root is missing a viewBox attribute."
-            );
+            throw new ChartExportError("svg-composition-failed", "SVG export root is missing a viewBox attribute.");
         }
 
-        const vbParts = viewBox.trim().split(/[\s,]+/).map(Number);
-        if (
-            vbParts.length !== 4 ||
-            !vbParts.every(Number.isFinite) ||
-            vbParts[2] <= 0 ||
-            vbParts[3] <= 0
-        ) {
+        const vbParts = viewBox
+            .trim()
+            .split(/[\s,]+/)
+            .map(Number);
+        if (vbParts.length !== 4 || !vbParts.every(Number.isFinite) || vbParts[2] <= 0 || vbParts[3] <= 0) {
             throw new ChartExportError(
                 "svg-composition-failed",
                 `SVG export root has invalid viewBox dimensions: '${viewBox}'.`
@@ -149,10 +141,7 @@ export class ChartExportSvgValidator {
 
         // 3. Reject script tags
         if (svgElement.querySelector("script")) {
-            throw new ChartExportError(
-                "svg-composition-failed",
-                "SVG export cannot contain executable <script> tags."
-            );
+            throw new ChartExportError("svg-composition-failed", "SVG export cannot contain executable <script> tags.");
         }
 
         // 3.1 Reject stylesheet elements: the compositor never intentionally generates <style>,
@@ -232,11 +221,7 @@ export class ChartExportSvgValidator {
                 }
 
                 // Check case-insensitive unresolved CSS variables, currentColor, or calc expressions
-                if (
-                    valLower.includes("var(") ||
-                    valLower.includes("currentcolor") ||
-                    valLower.includes("calc(")
-                ) {
+                if (valLower.includes("var(") || valLower.includes("currentcolor") || valLower.includes("calc(")) {
                     throw new ChartExportError(
                         "svg-composition-failed",
                         `SVG attribute '${name}' contains unresolved CSS variable, currentColor, or calc expression: '${rawVal}'.`
@@ -288,10 +273,7 @@ export class ChartExportSvgValidator {
             doc.documentElement.namespaceURI !== "http://www.w3.org/2000/svg" ||
             doc.documentElement.localName.toLowerCase() !== "svg"
         ) {
-            throw new ChartExportError(
-                "svg-serialization-failed",
-                "Serialized XML root is not a valid SVG document."
-            );
+            throw new ChartExportError("svg-serialization-failed", "Serialized XML root is not a valid SVG document.");
         }
     }
 }

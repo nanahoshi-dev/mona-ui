@@ -1,9 +1,6 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
-import type {
-    ChartDonutSeriesRegistration,
-    ChartPieSeriesRegistration
-} from "../context/chart-registration-context";
+import type { ChartDonutSeriesRegistration, ChartPieSeriesRegistration } from "../context/chart-registration-context";
 import type { PolarSectorChartScene } from "../scene/chart-scene";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { PolarLayoutEngine } from "./polar-layout-engine";

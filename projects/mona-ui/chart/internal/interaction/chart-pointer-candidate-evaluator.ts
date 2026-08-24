@@ -6,20 +6,11 @@ import type {
     PolarAxisChartScene,
     PolarSectorChartScene
 } from "../scene/chart-scene";
-import type {
-    ChartInteractionBucket,
-    SceneHitTarget
-} from "../scene/scene-geometry";
+import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { distance, isPointInRect } from "../utils/geometry-utils";
 import type { ChartInteractionState } from "./chart-interaction-state";
-import type {
-    ChartPointerCandidates,
-    ChartPointerEvaluationInstrumentation
-} from "./chart-pointer-candidate-resolver";
-import {
-    findNearestInteractionBucketByX,
-    findNearestInteractionBucketByY
-} from "./chart-interaction-bucket-search";
+import type { ChartPointerCandidates, ChartPointerEvaluationInstrumentation } from "./chart-pointer-candidate-resolver";
+import { findNearestInteractionBucketByX, findNearestInteractionBucketByY } from "./chart-interaction-bucket-search";
 import { HeatmapHitTester } from "./heatmap-hit-tester";
 import { PolarAxisHitTester } from "./polar-axis-hit-tester";
 import { PolarSectorHitTester } from "./polar-sector-hit-tester";
@@ -135,10 +126,7 @@ export class ChartPointerCandidateEvaluator {
         return new ChartPointerCandidateEvaluator(candidates, scene, instrumentation);
     }
 
-    public resolveCrosshairCandidates(
-        scene: ChartScene,
-        crosshairDistance: number
-    ): readonly SceneHitTarget[] {
+    public resolveCrosshairCandidates(scene: ChartScene, crosshairDistance: number): readonly SceneHitTarget[] {
         const candidateSet = new Set<SceneHitTarget>();
 
         // 1. Contained bars
@@ -162,10 +150,7 @@ export class ChartPointerCandidateEvaluator {
         return Array.from(candidateSet);
     }
 
-    public resolveHitState(
-        shared: boolean = false,
-        maxHoverDistance: number = 32
-    ): ChartInteractionState {
+    public resolveHitState(shared: boolean = false, maxHoverDistance: number = 32): ChartInteractionState {
         const pointer = this.pointer;
         const scene = this.scene;
         const candidateSet = this.candidates;
@@ -240,8 +225,8 @@ export class ChartPointerCandidateEvaluator {
         const getBucketForHit = (target: SceneHitTarget): ChartInteractionBucket | undefined => {
             const axisId =
                 cartesianScene.interactionAxis === "y"
-                    ? target.yAxisId ?? cartesianScene.primaryYAxisId
-                    : target.xAxisId ?? cartesianScene.primaryXAxisId;
+                    ? (target.yAxisId ?? cartesianScene.primaryYAxisId)
+                    : (target.xAxisId ?? cartesianScene.primaryXAxisId);
             if (axisId && cartesianScene.interactionBucketsByAxisId) {
                 const axisLookup = cartesianScene.interactionBucketsByAxisId.get(axisId);
                 if (axisLookup?.has(target.xKey)) {
@@ -249,9 +234,7 @@ export class ChartPointerCandidateEvaluator {
                 }
             }
             const primaryId =
-                cartesianScene.interactionAxis === "y"
-                    ? cartesianScene.primaryYAxisId
-                    : cartesianScene.primaryXAxisId;
+                cartesianScene.interactionAxis === "y" ? cartesianScene.primaryYAxisId : cartesianScene.primaryXAxisId;
             if (!axisId || axisId === primaryId || !cartesianScene.interactionBucketsByAxisId) {
                 return (
                     cartesianScene.interactionBucketLookup?.get(target.xKey) ??

@@ -157,7 +157,7 @@ export function buildStackGroupDensityRuntime(
             const xNum =
                 typeof entry.xKey === "number" && Number.isFinite(entry.xKey)
                     ? entry.xKey
-                    : resolveCartesianTemporalValue(entry.xValue)?.epochMs ?? Number(entry.xKey);
+                    : (resolveCartesianTemporalValue(entry.xValue)?.epochMs ?? Number(entry.xKey));
 
             if (!Number.isFinite(xNum)) {
                 continue;

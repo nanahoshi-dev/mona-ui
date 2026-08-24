@@ -2,16 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { ChartAxisScene } from "../scene/cartesian-scene";
 import type { ChartRect } from "../../models/chart.models";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import {
-    CartesianAxisCoordinateSpace,
-    type CartesianAxisCoordinateSnapshot
-} from "./cartesian-axis-coordinate-space";
+import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
 import { ChartViewportKeyboardController } from "./chart-viewport-keyboard-controller";
 import { normalizeChartNavigationOptions } from "./chart-navigation-options";
-import {
-    createEmptyInternalViewportState,
-    type InternalCartesianViewportState
-} from "./cartesian-viewport-normalizer";
+import { createEmptyInternalViewportState, type InternalCartesianViewportState } from "./cartesian-viewport-normalizer";
 
 describe("ChartViewportKeyboardController", () => {
     const plotRect: ChartRect = { height: 300, width: 400, x: 50, y: 30 };
@@ -77,10 +71,7 @@ describe("ChartViewportKeyboardController", () => {
         viewportScale: yScale
     };
 
-    const coordSpace = new CartesianAxisCoordinateSpace(
-        new Map([["x-1", xSnap]]),
-        new Map([["y-1", ySnap]])
-    );
+    const coordSpace = new CartesianAxisCoordinateSpace(new Map([["x-1", xSnap]]), new Map([["y-1", ySnap]]));
 
     const options = normalizeChartNavigationOptions(true);
     const initialViewport = createEmptyInternalViewportState();

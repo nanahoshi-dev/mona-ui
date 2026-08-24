@@ -19,11 +19,7 @@ describe("CartesianBrushMarkIndex", () => {
         index.build([hit1 as SceneHitTarget, hit2 as SceneHitTarget]);
 
         // Brush covering only hit1
-        const results = index.query(
-            { x: 50, y: 50, width: 100, height: 100 },
-            "center",
-            "xy"
-        );
+        const results = index.query({ x: 50, y: 50, width: 100, height: 100 }, "center", "xy");
 
         expect(results).toHaveLength(1);
         expect(results[0].animationKey).toBe("m1");
@@ -48,13 +44,7 @@ describe("CartesianBrushMarkIndex", () => {
 
         index.build([hit1 as SceneHitTarget, hit2 as SceneHitTarget]);
 
-        const results = index.query(
-            { x: 50, y: 50, width: 100, height: 100 },
-            "center",
-            "xy",
-            "x1",
-            "y1"
-        );
+        const results = index.query({ x: 50, y: 50, width: 100, height: 100 }, "center", "xy", "x1", "y1");
 
         expect(results).toHaveLength(1);
         expect(results[0].animationKey).toBe("m1");

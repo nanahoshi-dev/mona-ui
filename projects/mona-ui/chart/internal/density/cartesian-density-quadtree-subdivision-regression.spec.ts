@@ -87,7 +87,7 @@ describe("Cartesian Density Quadtree Subdivision and Mark Identity Regressions",
                 { key: "beta", val: 20 },
                 { key: "alpha", val: 30 }, // duplicate key "alpha", rank 1
                 { key: "gamma", val: 40 },
-                { key: "alpha", val: 50 }  // duplicate key "alpha", rank 2
+                { key: "alpha", val: 50 } // duplicate key "alpha", rank 2
             ];
 
             const authority = new ChartSeriesMarkIdentityAuthority("series-1", data, {
@@ -105,10 +105,18 @@ describe("Cartesian Density Quadtree Subdivision and Mark Identity Regressions",
             expect(authority.resolveKeyAt(4)).toBe(JSON.stringify(["series-1", "s", "alpha", 2]));
 
             // Reverse lookup by key part and occurrence rank
-            expect(authority.locate({ occurrenceRank: 0, partType: "s", seriesPrefix: "series-1", value: "alpha" })).toBe(0);
-            expect(authority.locate({ occurrenceRank: 1, partType: "s", seriesPrefix: "series-1", value: "alpha" })).toBe(2);
-            expect(authority.locate({ occurrenceRank: 2, partType: "s", seriesPrefix: "series-1", value: "alpha" })).toBe(4);
-            expect(authority.locate({ occurrenceRank: 0, partType: "s", seriesPrefix: "series-1", value: "non-existent" })).toBeNull();
+            expect(
+                authority.locate({ occurrenceRank: 0, partType: "s", seriesPrefix: "series-1", value: "alpha" })
+            ).toBe(0);
+            expect(
+                authority.locate({ occurrenceRank: 1, partType: "s", seriesPrefix: "series-1", value: "alpha" })
+            ).toBe(2);
+            expect(
+                authority.locate({ occurrenceRank: 2, partType: "s", seriesPrefix: "series-1", value: "alpha" })
+            ).toBe(4);
+            expect(
+                authority.locate({ occurrenceRank: 0, partType: "s", seriesPrefix: "series-1", value: "non-existent" })
+            ).toBeNull();
         });
     });
 

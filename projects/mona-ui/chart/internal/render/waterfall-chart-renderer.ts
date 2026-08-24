@@ -20,9 +20,7 @@ export class WaterfallChartRenderer {
         context.save();
 
         // 1. Draw Grid Lines
-        const gridColor =
-            styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
-            "rgba(148, 163, 184, 0.2)";
+        const gridColor = styleResolver.resolveCssVariable("--mona-chart-grid-color") || "rgba(148, 163, 184, 0.2)";
 
         context.strokeStyle = gridColor;
         context.lineWidth = 1;

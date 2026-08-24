@@ -78,9 +78,10 @@ export class CanvasChartRenderer {
         this.clear(context, toScene.width, toScene.height);
 
         if (toScene.coordinateSystem === "cartesian" && toScene.cartesianKind === "xy") {
-            const fromXY = fromScene && fromScene.coordinateSystem === "cartesian" && fromScene.cartesianKind === "xy"
-                ? (fromScene as CartesianXYChartScene)
-                : null;
+            const fromXY =
+                fromScene && fromScene.coordinateSystem === "cartesian" && fromScene.cartesianKind === "xy"
+                    ? (fromScene as CartesianXYChartScene)
+                    : null;
             CartesianChartRenderer.renderCrossfade(
                 context,
                 fromXY,

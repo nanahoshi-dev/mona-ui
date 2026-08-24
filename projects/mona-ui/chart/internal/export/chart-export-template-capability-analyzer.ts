@@ -96,7 +96,8 @@ export function hasVisibleTextShadow(textShadow: string | null | undefined): boo
         return false;
     }
     // Zero-length shadow check e.g. "0px 0px 0px" or "0 0 0 transparent"
-    const zeroPattern = /^(?:(?:rgba?\([^)]+\)|#[0-9a-fA-F]+|[a-zA-Z]+)\s+)?0(?:px)?\s+0(?:px)?(?:\s+0(?:px)?)?(?:\s+(?:rgba?\([^)]+\)|#[0-9a-fA-F]+|[a-zA-Z]+))?$/i;
+    const zeroPattern =
+        /^(?:(?:rgba?\([^)]+\)|#[0-9a-fA-F]+|[a-zA-Z]+)\s+)?0(?:px)?\s+0(?:px)?(?:\s+0(?:px)?)?(?:\s+(?:rgba?\([^)]+\)|#[0-9a-fA-F]+|[a-zA-Z]+))?$/i;
     if (zeroPattern.test(trimmed)) {
         return false;
     }
@@ -129,7 +130,10 @@ function pseudoMayPaint(style: CSSStyleDeclaration | null): boolean {
         return false;
     }
 
-    const content = (style.content || "").trim().replace(/^"(.*)"$/, "$1").trim();
+    const content = (style.content || "")
+        .trim()
+        .replace(/^"(.*)"$/, "$1")
+        .trim();
     if (!INVISIBLE_PSEUDO_CONTENT.has(content)) {
         return true;
     }
@@ -156,8 +160,14 @@ function pseudoMayPaint(style: CSSStyleDeclaration | null): boolean {
     const bLeft = parseFloat(style.borderLeftWidth || "0");
     const hasBorder =
         (bTop > 0 && style.borderTopStyle && style.borderTopStyle !== "none" && style.borderTopStyle !== "hidden") ||
-        (bRight > 0 && style.borderRightStyle && style.borderRightStyle !== "none" && style.borderRightStyle !== "hidden") ||
-        (bBottom > 0 && style.borderBottomStyle && style.borderBottomStyle !== "none" && style.borderBottomStyle !== "hidden") ||
+        (bRight > 0 &&
+            style.borderRightStyle &&
+            style.borderRightStyle !== "none" &&
+            style.borderRightStyle !== "hidden") ||
+        (bBottom > 0 &&
+            style.borderBottomStyle &&
+            style.borderBottomStyle !== "none" &&
+            style.borderBottomStyle !== "hidden") ||
         (bLeft > 0 && style.borderLeftStyle && style.borderLeftStyle !== "none" && style.borderLeftStyle !== "hidden");
     if (hasBorder) {
         return true;
@@ -257,7 +267,8 @@ export class ChartExportTemplateCapabilityAnalyzer {
                 const computed = window.getComputedStyle(el);
 
                 // 3. CSS Mask checks (R5-09 Part A / WP4 Part C)
-                const maskImg = computed.maskImage || (computed as unknown as Record<string, string>)["webkitMaskImage"];
+                const maskImg =
+                    computed.maskImage || (computed as unknown as Record<string, string>)["webkitMaskImage"];
                 const mask = computed.mask || (computed as unknown as Record<string, string>)["webkitMask"];
                 if ((maskImg && maskImg !== "none" && maskImg !== "") || (mask && mask !== "none" && mask !== "")) {
                     return {
@@ -296,7 +307,12 @@ export class ChartExportTemplateCapabilityAnalyzer {
 
                 // 7. Painted outlines extend outside the border box (R5-07)
                 const outlineWidth = parseFloat(computed.outlineWidth || "0");
-                if (outlineWidth > 0 && computed.outlineStyle && computed.outlineStyle !== "none" && computed.outlineStyle !== "hidden") {
+                if (
+                    outlineWidth > 0 &&
+                    computed.outlineStyle &&
+                    computed.outlineStyle !== "none" &&
+                    computed.outlineStyle !== "hidden"
+                ) {
                     return {
                         reason: "Template element uses CSS outline which paints outside the element border box.",
                         reasonCode: "unsupported-outline",

@@ -139,7 +139,8 @@ export class GaugeSeriesRenderer {
                     context.fill();
                 } else {
                     const hoverOverlayColor =
-                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
+                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") ||
+                        "rgba(255, 255, 255, 0.22)";
                     context.fillStyle = hoverOverlayColor;
                     context.fill();
                 }

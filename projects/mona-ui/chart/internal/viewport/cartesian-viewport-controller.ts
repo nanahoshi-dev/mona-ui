@@ -4,10 +4,7 @@ import type {
     ChartViewportConstraint,
     ChartViewportWindow
 } from "../../models/chart-viewport.models";
-import type {
-    CartesianAxisCoordinateSnapshot,
-    CartesianAxisCoordinateSpace
-} from "./cartesian-axis-coordinate-space";
+import type { CartesianAxisCoordinateSnapshot, CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportConstraints } from "./cartesian-viewport-constraints";
 import { resolveCartesianNormalizedBaseMapper } from "./cartesian-normalized-base-mapper";
 import {
@@ -77,7 +74,9 @@ export class CartesianViewportController {
         const roundedStart = Math.round(nextStart);
         const roundedEnd = Math.round(nextEnd);
 
-        const constraint = options?.constraints?.find(c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId);
+        const constraint = options?.constraints?.find(
+            c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId
+        );
         const [cStart, cEnd] = CartesianViewportConstraints.applyCategoryConstraints(
             roundedStart,
             roundedEnd,
@@ -115,8 +114,10 @@ export class CartesianViewportController {
         const rangeSpan = r1 - r0;
         if (rangeSpan === 0) return undefined;
 
-        const b0 = snapshot.baseDomain[0] instanceof Date ? snapshot.baseDomain[0].getTime() : Number(snapshot.baseDomain[0]);
-        const b1 = snapshot.baseDomain[1] instanceof Date ? snapshot.baseDomain[1].getTime() : Number(snapshot.baseDomain[1]);
+        const b0 =
+            snapshot.baseDomain[0] instanceof Date ? snapshot.baseDomain[0].getTime() : Number(snapshot.baseDomain[0]);
+        const b1 =
+            snapshot.baseDomain[1] instanceof Date ? snapshot.baseDomain[1].getTime() : Number(snapshot.baseDomain[1]);
         const baseMin = Math.min(b0, b1);
         const baseMax = Math.max(b0, b1);
 
@@ -149,7 +150,9 @@ export class CartesianViewportController {
 
         let transformedU0 = u0 + t0 * (u1 - u0);
         let transformedU1 = u0 + t1 * (u1 - u0);
-        const constraint = options?.constraints?.find(c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId);
+        const constraint = options?.constraints?.find(
+            c => c.axis === snapshot.ref.axis && c.axisId === snapshot.ref.axisId
+        );
 
         // A pure pan is translated in the authority mapper's normalized space.
         // Clamp that operation in the same space before inversion so repeated
@@ -250,21 +253,15 @@ export class CartesianViewportController {
             const snapshot = coordinateSpace.get(axisRef);
             if (!snapshot || !snapshot.valid) continue;
 
-            const existingWindow = axisRef.axis === "x" ? currentViewport.x.get(axisRef.axisId) : currentViewport.y.get(axisRef.axisId);
+            const existingWindow =
+                axisRef.axis === "x" ? currentViewport.x.get(axisRef.axisId) : currentViewport.y.get(axisRef.axisId);
             const anchorPixel = axisRef.axis === "x" ? anchor.x : anchor.y;
             const delta = axisRef.axis === "x" ? deltaPx.x : deltaPx.y;
 
             let nextWindow: InternalAxisViewport | undefined;
 
             if (snapshot.resolvedType === "category") {
-                nextWindow = this.#transformCategoryAxis(
-                    existingWindow,
-                    snapshot,
-                    factor,
-                    delta,
-                    anchorPixel,
-                    options
-                );
+                nextWindow = this.#transformCategoryAxis(existingWindow, snapshot, factor, delta, anchorPixel, options);
             } else {
                 nextWindow = this.#transformContinuousAxis(
                     existingWindow,
@@ -414,7 +411,8 @@ export class CartesianViewportController {
             const snapshot = coordinateSpace.get(axisRef);
             if (!snapshot || !snapshot.valid) continue;
 
-            const existingWindow = win.axis === "x" ? currentViewport.x.get(win.axisId) : currentViewport.y.get(win.axisId);
+            const existingWindow =
+                win.axis === "x" ? currentViewport.x.get(win.axisId) : currentViewport.y.get(win.axisId);
             let nextWin: InternalAxisViewport | undefined;
 
             switch (win.kind) {
@@ -433,8 +431,10 @@ export class CartesianViewportController {
                     endIndex = Math.max(startIndex + 1, Math.min(endIndex, baseCount));
 
                     const catDomain = snapshot.baseDomain as readonly string[];
-                    const firstVisibleKey = catDomain[startIndex] !== undefined ? String(catDomain[startIndex]) : undefined;
-                    const lastVisibleKey = catDomain[endIndex - 1] !== undefined ? String(catDomain[endIndex - 1]) : undefined;
+                    const firstVisibleKey =
+                        catDomain[startIndex] !== undefined ? String(catDomain[startIndex]) : undefined;
+                    const lastVisibleKey =
+                        catDomain[endIndex - 1] !== undefined ? String(catDomain[endIndex - 1]) : undefined;
 
                     if (startIndex === 0 && endIndex === baseCount) {
                         nextWin = undefined;
@@ -471,9 +471,19 @@ export class CartesianViewportController {
                     let finalMin = minVal;
                     let finalMax = maxVal;
 
-                    if (options?.clampToData !== false && Array.isArray(snapshot.baseDomain) && snapshot.baseDomain.length >= 2) {
-                        const bMin = snapshot.baseDomain[0] instanceof Date ? snapshot.baseDomain[0].getTime() : Number(snapshot.baseDomain[0]);
-                        const bMax = snapshot.baseDomain[1] instanceof Date ? snapshot.baseDomain[1].getTime() : Number(snapshot.baseDomain[1]);
+                    if (
+                        options?.clampToData !== false &&
+                        Array.isArray(snapshot.baseDomain) &&
+                        snapshot.baseDomain.length >= 2
+                    ) {
+                        const bMin =
+                            snapshot.baseDomain[0] instanceof Date
+                                ? snapshot.baseDomain[0].getTime()
+                                : Number(snapshot.baseDomain[0]);
+                        const bMax =
+                            snapshot.baseDomain[1] instanceof Date
+                                ? snapshot.baseDomain[1].getTime()
+                                : Number(snapshot.baseDomain[1]);
                         if (Number.isFinite(bMin) && Number.isFinite(bMax)) {
                             const span = finalMax - finalMin;
                             const baseSpan = bMax - bMin;

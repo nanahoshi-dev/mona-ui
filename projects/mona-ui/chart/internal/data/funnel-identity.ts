@@ -17,13 +17,7 @@ export class FunnelIdentity {
         readonly rootData?: readonly unknown[];
         readonly seriesId?: string;
     }): Set<string> {
-        const {
-            data,
-            field = "value",
-            keyField,
-            rootData,
-            seriesId = "funnel"
-        } = options;
+        const { data, field = "value", keyField, rootData, seriesId = "funnel" } = options;
 
         let rawData: readonly unknown[];
         if (data !== undefined && data !== null) {
@@ -46,13 +40,7 @@ export class FunnelIdentity {
                 continue;
             }
 
-            const identity = this.resolveStageIdentity(
-                datum,
-                i,
-                seriesId,
-                keyField,
-                seenExplicitKeys
-            );
+            const identity = this.resolveStageIdentity(datum, i, seriesId, keyField, seenExplicitKeys);
 
             result.add(identity.stageId);
         }

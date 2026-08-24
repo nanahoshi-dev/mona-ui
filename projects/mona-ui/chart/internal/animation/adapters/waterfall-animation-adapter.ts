@@ -175,9 +175,7 @@ export class WaterfallAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
             fromSeries: previous,
             id,
             sample: (progress: number) => {
-                const bars = barPlans
-                    .filter(p => (p.type !== "exit" || progress < 1))
-                    .map(p => sampleBar(p, progress));
+                const bars = barPlans.filter(p => p.type !== "exit" || progress < 1).map(p => sampleBar(p, progress));
 
                 const barsByKey = new Map(bars.map(b => [b.animationKey, b]));
                 const connectors: SceneWaterfallConnector[] = [];

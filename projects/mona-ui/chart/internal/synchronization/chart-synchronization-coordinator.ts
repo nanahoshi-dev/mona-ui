@@ -120,7 +120,12 @@ export class ChartSynchronizationCoordinator {
     #joinGroup(entry: CoordinatorEntry, groupName: string): void {
         let group = this.#groups.get(groupName);
         if (!group) {
-            group = { activeCrosshairOrigin: null, groupSessionId: ++synchronizationGroupSessionCounter, members: new Map(), sequence: 0 };
+            group = {
+                activeCrosshairOrigin: null,
+                groupSessionId: ++synchronizationGroupSessionCounter,
+                members: new Map(),
+                sequence: 0
+            };
             this.#groups.set(groupName, group);
         }
         group.members.set(entry.member.memberId, entry.member);
@@ -179,7 +184,9 @@ export class ChartSynchronizationCoordinator {
             sequence: ++group.sequence,
             transactionId: `clear-${originMemberId}-${group.sequence}`
         };
-        this.#deliverToGroupPeers(group, entry.groupId, originMemberId, message, member => member.clearCrosshair(message));
+        this.#deliverToGroupPeers(group, entry.groupId, originMemberId, message, member =>
+            member.clearCrosshair(message)
+        );
     }
 
     #publishCrosshair(originMemberId: string, payload: ChartSynchronizationPublishCrosshairPayload): void {
@@ -204,13 +211,8 @@ export class ChartSynchronizationCoordinator {
             transactionId: payload.transactionId ?? `crosshair-${originMemberId}-${group.sequence}`
         };
         ChartSynchronizationTracker.current?.onSyncMessagePublished?.("crosshair");
-        this.#scheduleGroupDelivery(
-            group,
-            entry.groupId,
-            originMemberId,
-            "crosshair",
-            message.sequence,
-            member => member.receiveCrosshair(message)
+        this.#scheduleGroupDelivery(group, entry.groupId, originMemberId, "crosshair", message.sequence, member =>
+            member.receiveCrosshair(message)
         );
     }
 
@@ -246,13 +248,8 @@ export class ChartSynchronizationCoordinator {
             return;
         }
 
-        this.#scheduleGroupDelivery(
-            group,
-            entry.groupId,
-            originMemberId,
-            "viewport",
-            message.sequence,
-            member => member.receiveViewport(message)
+        this.#scheduleGroupDelivery(group, entry.groupId, originMemberId, "viewport", message.sequence, member =>
+            member.receiveViewport(message)
         );
     }
 
@@ -260,7 +257,10 @@ export class ChartSynchronizationCoordinator {
         group: SynchronizationGroupState,
         groupName: string,
         originMemberId: string,
-        message: ChartSynchronizationViewportMessage | ChartSynchronizationCrosshairMessage | ChartSynchronizationCrosshairClearMessage,
+        message:
+            | ChartSynchronizationViewportMessage
+            | ChartSynchronizationCrosshairMessage
+            | ChartSynchronizationCrosshairClearMessage,
         invoke: (member: ChartSynchronizationMember) => void
     ): void {
         const channel = message.kind === "viewport" ? "viewport" : "crosshair";

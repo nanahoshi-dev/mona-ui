@@ -4,14 +4,8 @@ import { ChartPdfCapabilityAnalyzer } from "./chart-pdf-capability-analyzer";
 import { ChartExportDomCollector } from "./chart-export-dom-collector";
 import { ChartExportDomFreezer } from "./chart-export-dom-freezer";
 import { ChartExportColorNormalizer } from "./chart-export-color-normalizer";
-import {
-    
-    ChartExportSvgValidator
-} from "./chart-export-svg-validator";
-import {
-    
-    resolveEffectiveIslandScale
-} from "./chart-export-geometry";
+import { ChartExportSvgValidator } from "./chart-export-svg-validator";
+import { resolveEffectiveIslandScale } from "./chart-export-geometry";
 import { ChartExportError } from "../../models/chart-export.models";
 import { normalizeChartExportOptions } from "./chart-export-options";
 import { ChartExportResourceManager } from "./chart-export-resource-manager";
@@ -54,8 +48,9 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
             img.src = "blob:http://localhost/test-uuid-1234";
             container.appendChild(img);
 
-            const mockPngDataUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
-            
+            const mockPngDataUrl =
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
             const originalFetch = window.fetch;
             window.fetch = vi.fn().mockImplementation(async (url: string) => {
                 if (url.startsWith("blob:")) {
@@ -76,7 +71,11 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
             (window as unknown as { FileReader: unknown }).FileReader = MockFileReader;
 
             try {
-                await ChartExportResourceManager.captureAndInlineIslandResources([container], undefined, fakeBitmapDecodeEnvironment());
+                await ChartExportResourceManager.captureAndInlineIslandResources(
+                    [container],
+                    undefined,
+                    fakeBitmapDecodeEnvironment()
+                );
                 expect(img.src.startsWith("data:image/png")).toBe(true);
             } finally {
                 window.fetch = originalFetch;
@@ -90,7 +89,8 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
             child.style.backgroundImage = "url('blob:http://localhost/bg-test')";
             container.appendChild(child);
 
-            const mockPngDataUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+            const mockPngDataUrl =
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
             const originalFetch = window.fetch;
             window.fetch = vi.fn().mockImplementation(async () => {
                 return new Response(R4_PNG_BYTES);
@@ -108,7 +108,11 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
             (window as unknown as { FileReader: unknown }).FileReader = MockFileReader;
 
             try {
-                await ChartExportResourceManager.captureAndInlineIslandResources([container], undefined, fakeBitmapDecodeEnvironment());
+                await ChartExportResourceManager.captureAndInlineIslandResources(
+                    [container],
+                    undefined,
+                    fakeBitmapDecodeEnvironment()
+                );
                 expect(child.style.backgroundImage).toContain("data:image/png");
             } finally {
                 window.fetch = originalFetch;
@@ -132,7 +136,10 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
             vi.spyOn(sourceCanvas, "getContext").mockImplementation(() => {
                 return {
                     getImageData: () => {
-                        const err = new DOMException("The canvas has been tainted by cross-origin data.", "SecurityError");
+                        const err = new DOMException(
+                            "The canvas has been tainted by cross-origin data.",
+                            "SecurityError"
+                        );
                         throw err;
                     }
                 } as unknown as CanvasRenderingContext2D;
@@ -372,7 +379,7 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
                             layoutHeight: 50,
                             layoutWidth: 50,
                             plane: "host-chrome",
-                            role: "legend-template",
+                            role: "legend-template"
                         }
                     ],
                     rasterIslands: [],

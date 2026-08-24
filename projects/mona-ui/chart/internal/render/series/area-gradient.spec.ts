@@ -74,11 +74,7 @@ describe("area-gradient", () => {
 
         it("should generate positive-only gradient fading to 0 at baseline", () => {
             // In Canvas pixels, y=80 is above baseline y=200 (positive values)
-            const points = [
-                createPoint(50, 120),
-                createPoint(100, 80),
-                createPoint(150, 150)
-            ];
+            const points = [createPoint(50, 120), createPoint(100, 80), createPoint(150, 150)];
             const baselineY = 200;
             const fillOpacity = 0.2;
             const spec = createAreaGradientSpec(baselineY, points, "#3b82f6", fillOpacity);
@@ -99,11 +95,7 @@ describe("area-gradient", () => {
 
         it("should generate negative-only gradient starting at 0 at baseline and reaching full opacity at bottom", () => {
             // In Canvas pixels, y=250 and y=300 are below baseline y=200 (negative values)
-            const points = [
-                createPoint(50, 250),
-                createPoint(100, 320),
-                createPoint(150, 280)
-            ];
+            const points = [createPoint(50, 250), createPoint(100, 320), createPoint(150, 280)];
             const baselineY = 200;
             const fillOpacity = 0.3;
             const spec = createAreaGradientSpec(baselineY, points, "#ef4444", fillOpacity);
@@ -124,11 +116,7 @@ describe("area-gradient", () => {
 
         it("should generate mixed-sign continuous gradient with residual non-zero opacity at zero baseline", () => {
             // Points span both sides: minY=50 (above baseline), maxY=250 (below baseline), baseline=150
-            const points = [
-                createPoint(50, 50),
-                createPoint(100, 150),
-                createPoint(150, 250)
-            ];
+            const points = [createPoint(50, 50), createPoint(100, 150), createPoint(150, 250)];
             const baselineY = 150;
             const fillOpacity = 0.2;
             const spec = createAreaGradientSpec(baselineY, points, "#10b981", fillOpacity);

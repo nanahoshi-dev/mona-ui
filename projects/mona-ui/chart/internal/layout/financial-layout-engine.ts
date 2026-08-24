@@ -19,7 +19,8 @@ export interface FinancialLayoutContext {
     readonly plotRect: ChartRect;
     readonly rootXField?: ChartField;
     readonly styleResolver: ChartStyleResolver;
-    readonly valueFormatter?: ((val: number, idx: number) => string) | ChartAxisFormatter<unknown> | ChartValueFormatter;
+    readonly valueFormatter?:
+        ((val: number, idx: number) => string) | ChartAxisFormatter<unknown> | ChartValueFormatter;
     readonly xAxisType: ChartXAxisType;
     readonly xScale: ChartBandScale | ChartContinuousScale;
     readonly yScale: ChartContinuousScale;
@@ -83,9 +84,8 @@ export class FinancialLayoutEngine {
         const { plotRect, styleResolver, valueFormatter, xAxisType, xScale, yScale } = context;
 
         const resolvedStyle: ChartFinancialSeriesStyle = styleResolver.resolveFinancialSeriesStyle(series);
-        const fillMode = (series.type === "candlestick" && "fillMode" in series && series.fillMode)
-            ? series.fillMode()
-            : "filled";
+        const fillMode =
+            series.type === "candlestick" && "fillMode" in series && series.fillMode ? series.fillMode() : "filled";
         const explicitBodyWidth = series.bodyWidth?.();
         const explicitBodyWidthRatio = series.bodyWidthRatio?.();
         const explicitMaxBodyWidth = series.maxBodyWidth?.();
@@ -104,10 +104,14 @@ export class FinancialLayoutEngine {
             const closeY = yScale.map(mark.close);
 
             if (
-                openY === undefined || !Number.isFinite(openY) ||
-                highY === undefined || !Number.isFinite(highY) ||
-                lowY === undefined || !Number.isFinite(lowY) ||
-                closeY === undefined || !Number.isFinite(closeY)
+                openY === undefined ||
+                !Number.isFinite(openY) ||
+                highY === undefined ||
+                !Number.isFinite(highY) ||
+                lowY === undefined ||
+                !Number.isFinite(lowY) ||
+                closeY === undefined ||
+                !Number.isFinite(closeY)
             ) {
                 continue;
             }
@@ -133,9 +137,10 @@ export class FinancialLayoutEngine {
         });
 
         const nominalBodyWidth = markWidths.length > 0 ? markWidths[0] : 16;
-        const maxBodyWidth = isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
-            ? Math.max(2, explicitMaxBodyWidth as number)
-            : 32;
+        const maxBodyWidth =
+            isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
+                ? Math.max(2, explicitMaxBodyWidth as number)
+                : 32;
         const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(series.wickWidth?.(), 1));
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
@@ -197,12 +202,19 @@ export class FinancialLayoutEngine {
             marks: sceneMarks,
             maxBodyWidth,
             name: seriesName,
-            renderOpacity: ("renderOpacity" in series && typeof series.renderOpacity === "function" ? (series as unknown as { renderOpacity(): number }).renderOpacity() : undefined),
+            renderOpacity:
+                "renderOpacity" in series && typeof series.renderOpacity === "function"
+                    ? (series as unknown as { renderOpacity(): number }).renderOpacity()
+                    : undefined,
             style: resolvedStyle,
             type: "candlestick",
             wickWidth,
-            xAxisId: ("xAxisId" in series && typeof series.xAxisId === "function" ? series.xAxisId() : undefined) ?? "default-x",
-            yAxisId: ("yAxisId" in series && typeof series.yAxisId === "function" ? series.yAxisId() : undefined) ?? "default-y"
+            xAxisId:
+                ("xAxisId" in series && typeof series.xAxisId === "function" ? series.xAxisId() : undefined) ??
+                "default-x",
+            yAxisId:
+                ("yAxisId" in series && typeof series.yAxisId === "function" ? series.yAxisId() : undefined) ??
+                "default-y"
         };
     }
 
@@ -217,11 +229,12 @@ export class FinancialLayoutEngine {
         const explicitBodyWidth = series.bodyWidth?.();
         const explicitBodyWidthRatio = series.bodyWidthRatio?.();
         const explicitMaxBodyWidth = series.maxBodyWidth?.();
-        const explicitTickLength = (series.type === "ohlc" && "tickLength" in series && series.tickLength)
-            ? series.tickLength()
-            : (series.type === "ohlc" && "tickWidth" in series && series.tickWidth)
-                ? (series as unknown as { tickWidth(): number }).tickWidth()
-                : undefined;
+        const explicitTickLength =
+            series.type === "ohlc" && "tickLength" in series && series.tickLength
+                ? series.tickLength()
+                : series.type === "ohlc" && "tickWidth" in series && series.tickWidth
+                  ? (series as unknown as { tickWidth(): number }).tickWidth()
+                  : undefined;
         const bandwidth = "bandwidth" in xScale ? (xScale as ChartBandScale).bandwidth() : undefined;
 
         // Filter to marks that are valid and completely mappable
@@ -237,10 +250,14 @@ export class FinancialLayoutEngine {
             const closeY = yScale.map(mark.close);
 
             if (
-                openY === undefined || !Number.isFinite(openY) ||
-                highY === undefined || !Number.isFinite(highY) ||
-                lowY === undefined || !Number.isFinite(lowY) ||
-                closeY === undefined || !Number.isFinite(closeY)
+                openY === undefined ||
+                !Number.isFinite(openY) ||
+                highY === undefined ||
+                !Number.isFinite(highY) ||
+                lowY === undefined ||
+                !Number.isFinite(lowY) ||
+                closeY === undefined ||
+                !Number.isFinite(closeY)
             ) {
                 continue;
             }
@@ -266,9 +283,10 @@ export class FinancialLayoutEngine {
         });
 
         const nominalBodyWidth = markWidths.length > 0 ? markWidths[0] : 16;
-        const maxBodyWidth = isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
-            ? Math.max(2, explicitMaxBodyWidth as number)
-            : 32;
+        const maxBodyWidth =
+            isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
+                ? Math.max(2, explicitMaxBodyWidth as number)
+                : 32;
         const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(series.wickWidth?.(), 1));
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
@@ -277,9 +295,12 @@ export class FinancialLayoutEngine {
             const { centerX, closeY, highY, lowY, mark, openY } = v;
             const bodyWidth = markWidths[i] ?? nominalBodyWidth;
             const maxTick = bodyWidth / 2;
-            const tickWidth = (explicitTickLength !== undefined && isFiniteNumber(explicitTickLength) && (explicitTickLength as number) > 0)
-                ? Math.min(explicitTickLength as number, maxTick)
-                : maxTick;
+            const tickWidth =
+                explicitTickLength !== undefined &&
+                isFiniteNumber(explicitTickLength) &&
+                (explicitTickLength as number) > 0
+                    ? Math.min(explicitTickLength as number, maxTick)
+                    : maxTick;
             const totalWidth = tickWidth * 2;
 
             const formattedOpen = formatValue(mark.open, seriesFormatter, mark.dataIndex);
@@ -321,13 +342,20 @@ export class FinancialLayoutEngine {
             marks: sceneMarks,
             maxBodyWidth,
             name: seriesName,
-            renderOpacity: ("renderOpacity" in series && typeof series.renderOpacity === "function" ? (series as unknown as { renderOpacity(): number }).renderOpacity() : undefined),
+            renderOpacity:
+                "renderOpacity" in series && typeof series.renderOpacity === "function"
+                    ? (series as unknown as { renderOpacity(): number }).renderOpacity()
+                    : undefined,
             style: resolvedStyle,
             tickWidth: nominalBodyWidth / 2,
             type: "ohlc",
             wickWidth,
-            xAxisId: ("xAxisId" in series && typeof series.xAxisId === "function" ? series.xAxisId() : undefined) ?? "default-x",
-            yAxisId: ("yAxisId" in series && typeof series.yAxisId === "function" ? series.yAxisId() : undefined) ?? "default-y"
+            xAxisId:
+                ("xAxisId" in series && typeof series.xAxisId === "function" ? series.xAxisId() : undefined) ??
+                "default-x",
+            yAxisId:
+                ("yAxisId" in series && typeof series.yAxisId === "function" ? series.yAxisId() : undefined) ??
+                "default-y"
         };
     }
 }

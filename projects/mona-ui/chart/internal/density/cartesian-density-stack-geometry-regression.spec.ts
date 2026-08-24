@@ -6,30 +6,25 @@ import {
     projectSegmentedLttb,
     resolveViewportContinuityNeighbors
 } from "./cartesian-density-projector";
-import {
-    buildScalarDensityData,
-    buildRangeDensityData
-} from "./cartesian-density-preparer";
+import { buildScalarDensityData, buildRangeDensityData } from "./cartesian-density-preparer";
 import {
     CartesianStackCanonicalIdentityIndex,
     materializeStackedAreaHitTarget,
     resolveStackEntryXCoordinate
 } from "./cartesian-stack-geometry-resolver";
-import {
-    computeSharedStackProjection,
-    buildStackTimelineData
-} from "./cartesian-stack-downsampler";
-import {
-    buildStackGroupDensityRuntime,
-    resolveStackGroupPolicy
-} from "./cartesian-stack-density-runtime";
+import { computeSharedStackProjection, buildStackTimelineData } from "./cartesian-stack-downsampler";
+import { buildStackGroupDensityRuntime, resolveStackGroupPolicy } from "./cartesian-stack-density-runtime";
 import { buildDensityRuntime } from "./cartesian-density-runtime";
 import { resolveCartesianMarkerGeometry } from "../layout/cartesian-marker-geometry-resolver";
 import type { CartesianDomainPreparation } from "../layout/cartesian-multi-axis-coordinator";
 import type { CartesianAxisResolvedContext } from "../layout/cartesian-axis-resolved-context";
 import { LinearScale, TimeScale } from "../scale/cartesian-scale-factory";
 import type { CartesianStackEntry, CartesianStackGroup } from "../data/cartesian-stack-engine";
-import type { ChartAreaSeriesRegistration, ChartCartesianSeriesRegistration, ChartScatterSeriesRegistration } from "../context/chart-registration-context";
+import type {
+    ChartAreaSeriesRegistration,
+    ChartCartesianSeriesRegistration,
+    ChartScatterSeriesRegistration
+} from "../context/chart-registration-context";
 import { resolveInteractionGeometryDistance } from "../interaction/cartesian-interaction-geometry-index";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 
@@ -157,7 +152,13 @@ describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
         it("triggers range area reduction when visibleCount <= threshold but visibleCount > maxPoints", () => {
             const n = 500;
             const data = Array.from({ length: n }, (_, i) => ({ from: 0, to: Math.sin(i / 10) + 2, x: i }));
-            const range = buildRangeDensityData({ data, fromField: "from", temporal: false, toField: "to", xField: "x" });
+            const range = buildRangeDensityData({
+                data,
+                fromField: "from",
+                temporal: false,
+                toField: "to",
+                xField: "x"
+            });
             const scale = new LinearScale([0, n], [0, 800]);
 
             const res = projectRangeEnvelopeIndexView({
@@ -229,8 +230,21 @@ describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
                 resolvedTypes: { x: new Map([["x1", "number"]]), y: new Map([["y1", "number"]]) }
             };
             const resolvedContext = {
-                resolvedContextById: new Map([["s1", { binding: { xAxisId: "x1", yAxisId: "y1" }, id: "s1", valid: true }]]),
-                resolvedSeriesContextById: new Map([["s1", { binding: { xAxisId: "x1", yAxisId: "y1" }, effectiveXField: "x", id: "s1", valid: true, xType: "number" }]])
+                resolvedContextById: new Map([
+                    ["s1", { binding: { xAxisId: "x1", yAxisId: "y1" }, id: "s1", valid: true }]
+                ]),
+                resolvedSeriesContextById: new Map([
+                    [
+                        "s1",
+                        {
+                            binding: { xAxisId: "x1", yAxisId: "y1" },
+                            effectiveXField: "x",
+                            id: "s1",
+                            valid: true,
+                            xType: "number"
+                        }
+                    ]
+                ])
             };
 
             const runtime = buildDensityRuntime(
@@ -404,7 +418,10 @@ describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
 
             const stackRuntime = buildStackGroupDensityRuntime(
                 group,
-                new Map([["sA", entriesA], ["sB", entriesB]]),
+                new Map([
+                    ["sA", entriesA],
+                    ["sB", entriesB]
+                ]),
                 [],
                 { algorithm: "minmax", enabled: true, maxPoints: null, samplesPerPixel: 2, threshold: null }
             );

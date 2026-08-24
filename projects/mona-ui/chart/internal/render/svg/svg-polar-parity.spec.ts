@@ -122,7 +122,11 @@ describe("SVG Polar Parity", () => {
                 source: "keyboard"
             });
 
-            backend.render({ presentation: { cartesianOverlay: null, interaction: interactionKeyboard }, scene, styleResolver });
+            backend.render({
+                presentation: { cartesianOverlay: null, interaction: interactionKeyboard },
+                scene,
+                styleResolver
+            });
 
             const highlightGroup = svg.querySelector("g[data-polar-layer='highlight']");
             expect(highlightGroup).not.toBeNull();
@@ -221,7 +225,11 @@ describe("SVG Polar Parity", () => {
                 source: "pointer"
             });
 
-            backend.render({ presentation: { cartesianOverlay: null, interaction: interactionPointer }, scene, styleResolver });
+            backend.render({
+                presentation: { cartesianOverlay: null, interaction: interactionPointer },
+                scene,
+                styleResolver
+            });
 
             const highlightGroup = svg.querySelector("g[data-polar-layer='highlight']");
             expect(highlightGroup?.children.length).toBe(0);
@@ -255,7 +263,23 @@ describe("SVG Polar Parity", () => {
                 id: "s1",
                 name: "Series 1",
                 renderOpacity: 1,
-                slices: [{ color: "#ff0000", cornerRadius: 0, dataIndex: 0, datum: {}, endAngle: Math.PI, formattedValue: "10", innerRadius: 0, outerRadius: 50, padAngle: 0, sliceId: "s1-m1", startAngle: 0, value: 10, visible: true }],
+                slices: [
+                    {
+                        color: "#ff0000",
+                        cornerRadius: 0,
+                        dataIndex: 0,
+                        datum: {},
+                        endAngle: Math.PI,
+                        formattedValue: "10",
+                        innerRadius: 0,
+                        outerRadius: 50,
+                        padAngle: 0,
+                        sliceId: "s1-m1",
+                        startAngle: 0,
+                        value: 10,
+                        visible: true
+                    }
+                ],
                 style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
                 type: "pie"
             };
@@ -264,7 +288,23 @@ describe("SVG Polar Parity", () => {
                 id: "s2",
                 name: "Series 2",
                 renderOpacity: 1,
-                slices: [{ color: "#00ff00", cornerRadius: 0, dataIndex: 0, datum: {}, endAngle: Math.PI, formattedValue: "20", innerRadius: 60, outerRadius: 100, padAngle: 0, sliceId: "s2-m1", startAngle: 0, value: 20, visible: true }],
+                slices: [
+                    {
+                        color: "#00ff00",
+                        cornerRadius: 0,
+                        dataIndex: 0,
+                        datum: {},
+                        endAngle: Math.PI,
+                        formattedValue: "20",
+                        innerRadius: 60,
+                        outerRadius: 100,
+                        padAngle: 0,
+                        sliceId: "s2-m1",
+                        startAngle: 0,
+                        value: 20,
+                        visible: true
+                    }
+                ],
                 style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
                 type: "donut"
             };
@@ -292,7 +332,16 @@ describe("SVG Polar Parity", () => {
 
             const createScene = (seriesList: unknown[]): PolarAxisChartScene =>
                 ({
-                    angularAxis: { axisLine: true, gridLines: true, labelOffset: 10, labels: true, mode: "category", rotation: 0, ticks: [], visible: true },
+                    angularAxis: {
+                        axisLine: true,
+                        gridLines: true,
+                        labelOffset: 10,
+                        labels: true,
+                        mode: "category",
+                        rotation: 0,
+                        ticks: [],
+                        visible: true
+                    },
                     axisMode: "radar",
                     center: { x: 150, y: 150 },
                     coordinateSystem: "polar",
@@ -304,13 +353,51 @@ describe("SVG Polar Parity", () => {
                     outerRadius: 100,
                     plotRect: { height: 300, width: 300, x: 0, y: 0 },
                     polarKind: "axis",
-                    radialAxis: { axisLine: true, domain: [0, 100], gridLines: true, gridShape: "circle", labelAngle: 0, labelOffset: 5, labels: true, ticks: [], visible: true },
+                    radialAxis: {
+                        axisLine: true,
+                        domain: [0, 100],
+                        gridLines: true,
+                        gridShape: "circle",
+                        labelAngle: 0,
+                        labelOffset: 5,
+                        labels: true,
+                        ticks: [],
+                        visible: true
+                    },
                     series: seriesList,
                     width: 300
                 }) as unknown as PolarAxisChartScene;
 
-            const r1 = { color: "#ff0000", connectNulls: true, curve: "linear", fillMode: "solid", fillOpacity: 0.2, id: "r1", maxRenderedRadius: 100, name: "R1", pointRadius: 4, points: [], showPoints: false, strokeWidth: 2, type: "radar" };
-            const r2 = { color: "#00ff00", connectNulls: true, curve: "linear", fillMode: "solid", fillOpacity: 0.2, id: "r2", maxRenderedRadius: 100, name: "R2", pointRadius: 4, points: [], showPoints: false, strokeWidth: 2, type: "radar" };
+            const r1 = {
+                color: "#ff0000",
+                connectNulls: true,
+                curve: "linear",
+                fillMode: "solid",
+                fillOpacity: 0.2,
+                id: "r1",
+                maxRenderedRadius: 100,
+                name: "R1",
+                pointRadius: 4,
+                points: [],
+                showPoints: false,
+                strokeWidth: 2,
+                type: "radar"
+            };
+            const r2 = {
+                color: "#00ff00",
+                connectNulls: true,
+                curve: "linear",
+                fillMode: "solid",
+                fillOpacity: 0.2,
+                id: "r2",
+                maxRenderedRadius: 100,
+                name: "R2",
+                pointRadius: 4,
+                points: [],
+                showPoints: false,
+                strokeWidth: 2,
+                type: "radar"
+            };
 
             backend.render({ presentation: null, scene: createScene([r1, r2]), styleResolver });
             const r1Group = svg.querySelector("g[data-series-id='r1']");
@@ -348,9 +435,31 @@ describe("SVG Polar Parity", () => {
             const radialBarSeries = {
                 fillMode: "solid",
                 id: "series-X",
-                marks: [{ animationKey: "m1", color: "#3b82f6", cornerRadius: 0, dataIndex: 0, datum: {}, endAngle: Math.PI, innerRadius: 60, itemId: "m1", outerRadius: 80, padAngle: 0, startAngle: 0, value: 50, visible: true }],
+                marks: [
+                    {
+                        animationKey: "m1",
+                        color: "#3b82f6",
+                        cornerRadius: 0,
+                        dataIndex: 0,
+                        datum: {},
+                        endAngle: Math.PI,
+                        innerRadius: 60,
+                        itemId: "m1",
+                        outerRadius: 80,
+                        padAngle: 0,
+                        startAngle: 0,
+                        value: 50,
+                        visible: true
+                    }
+                ],
                 name: "Radial Bar",
-                style: { color: "#3b82f6", fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
+                style: {
+                    color: "#3b82f6",
+                    fillOpacity: 1,
+                    strokeColor: "none",
+                    strokeSource: "default",
+                    strokeWidth: 0
+                },
                 tracks: [],
                 type: "radialBar"
             };
@@ -359,9 +468,31 @@ describe("SVG Polar Parity", () => {
                 angularCategories: [],
                 fillMode: "solid",
                 id: "series-X",
-                marks: [{ animationKey: "p1", color: "#ec4899", cornerRadius: 0, dataIndex: 0, datum: {}, endAngle: Math.PI, innerRadius: 0, itemId: "p1", outerRadius: 80, padAngle: 0, startAngle: 0, value: 50, visible: true }],
+                marks: [
+                    {
+                        animationKey: "p1",
+                        color: "#ec4899",
+                        cornerRadius: 0,
+                        dataIndex: 0,
+                        datum: {},
+                        endAngle: Math.PI,
+                        innerRadius: 0,
+                        itemId: "p1",
+                        outerRadius: 80,
+                        padAngle: 0,
+                        startAngle: 0,
+                        value: 50,
+                        visible: true
+                    }
+                ],
                 name: "Rose",
-                style: { color: "#ec4899", fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
+                style: {
+                    color: "#ec4899",
+                    fillOpacity: 1,
+                    strokeColor: "none",
+                    strokeSource: "default",
+                    strokeWidth: 0
+                },
                 type: "rose"
             };
 
@@ -468,9 +599,31 @@ describe("SVG Polar Parity", () => {
                         {
                             fillMode,
                             id: "rb-1",
-                            marks: [{ animationKey: "m1", color: "#3b82f6", cornerRadius: 0, dataIndex: 0, datum: {}, endAngle: Math.PI, innerRadius: 60, itemId: "m1", outerRadius: 80, padAngle: 0, startAngle: 0, value: 50, visible: true }],
+                            marks: [
+                                {
+                                    animationKey: "m1",
+                                    color: "#3b82f6",
+                                    cornerRadius: 0,
+                                    dataIndex: 0,
+                                    datum: {},
+                                    endAngle: Math.PI,
+                                    innerRadius: 60,
+                                    itemId: "m1",
+                                    outerRadius: 80,
+                                    padAngle: 0,
+                                    startAngle: 0,
+                                    value: 50,
+                                    visible: true
+                                }
+                            ],
                             name: "Radial Bar",
-                            style: { color: "#3b82f6", fillOpacity: 0.75, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
+                            style: {
+                                color: "#3b82f6",
+                                fillOpacity: 0.75,
+                                strokeColor: "none",
+                                strokeSource: "default",
+                                strokeWidth: 0
+                            },
                             tracks: [],
                             type: "radialBar"
                         }

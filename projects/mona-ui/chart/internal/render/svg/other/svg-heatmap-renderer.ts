@@ -88,9 +88,7 @@ export class SvgHeatmapRenderer {
         }
 
         // 1. Grid
-        const gridColor =
-            styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
-            "rgba(148, 163, 184, 0.2)";
+        const gridColor = styleResolver.resolveCssVariable("--mona-chart-grid-color") || "rgba(148, 163, 184, 0.2)";
 
         const gridSegments: string[] = [];
         const xAxisScene = axes.find(a => a.axis === "x");
@@ -135,7 +133,12 @@ export class SvgHeatmapRenderer {
                 const key = `${s.id}:${cell.animationKey || `${cell.xIndex}:${cell.yIndex}`}`;
                 const item: HeatmapRenderCellItem = { cell, key, seriesId: s.id };
                 allCells.push(item);
-                if ((s.showLabels || cell.showLabel) && cell.width >= 20 && cell.height >= 12 && Boolean(cell.formattedValue)) {
+                if (
+                    (s.showLabels || cell.showLabel) &&
+                    cell.width >= 20 &&
+                    cell.height >= 12 &&
+                    Boolean(cell.formattedValue)
+                ) {
                     labelCells.push({ cell, key: `lbl:${key}`, seriesId: s.id });
                 }
             }
@@ -202,15 +205,11 @@ export class SvgHeatmapRenderer {
             if (!axisScene.visible || !axisScene.axisLine) continue;
             if (axisScene.axis === "y") {
                 const x =
-                    axisScene.position === "right"
-                        ? Math.round(plotRect.x + plotRect.width)
-                        : Math.round(plotRect.x);
+                    axisScene.position === "right" ? Math.round(plotRect.x + plotRect.width) : Math.round(plotRect.x);
                 axisSegments.push(`M ${x} ${plotRect.y} V ${plotRect.y + plotRect.height}`);
             } else if (axisScene.axis === "x") {
                 const y =
-                    axisScene.position === "top"
-                        ? Math.round(plotRect.y)
-                        : Math.round(plotRect.y + plotRect.height);
+                    axisScene.position === "top" ? Math.round(plotRect.y) : Math.round(plotRect.y + plotRect.height);
                 axisSegments.push(`M ${plotRect.x} ${y} H ${plotRect.x + plotRect.width}`);
             }
         }
@@ -234,7 +233,11 @@ export class SvgHeatmapRenderer {
         if (interactionState) {
             const isKeyboard = interactionState.source === "keyboard";
             const hit = interactionState.activeHitTarget ?? interactionState.activeHits[0];
-            const b = hit?.visualBounds ?? hit?.bounds ?? (hit as unknown as { rect?: { height: number; width: number; x: number; y: number } } | undefined)?.rect;
+            const b =
+                hit?.visualBounds ??
+                hit?.bounds ??
+                (hit as unknown as { rect?: { height: number; width: number; x: number; y: number } } | undefined)
+                    ?.rect;
             if (hit && b) {
                 const radius = hit.borderRadius ?? 0;
                 const highlightEl = radius > 0 ? createSvgElement("path") : createSvgElement("rect");

@@ -1,15 +1,29 @@
 import { describe, expect, it, vi } from "vitest";
 import { normalizeCartesianTemporalDomain } from "../data/cartesian-temporal-value-resolver";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
+import {
+    CartesianAxisCoordinateSpace,
+    type CartesianAxisCoordinateSnapshot
+} from "../viewport/cartesian-axis-coordinate-space";
 import { ChartSynchronizationAxisMapper } from "./chart-synchronization-axis-mapper";
-import { normalizeChartSynchronizationOptions, type NormalizedChartSynchronizationOptions } from "./chart-synchronization-options";
+import {
+    normalizeChartSynchronizationOptions,
+    type NormalizedChartSynchronizationOptions
+} from "./chart-synchronization-options";
 import { mapIncomingCrosshair } from "./chart-synchronization-crosshair";
 import type { ChartSynchronizationViewportMessage } from "./chart-synchronization-types";
 
-function linearSnap(axisId: string, domain: readonly [number, number], dimension: "x" | "y" = "x"): CartesianAxisCoordinateSnapshot {
+function linearSnap(
+    axisId: string,
+    domain: readonly [number, number],
+    dimension: "x" | "y" = "x"
+): CartesianAxisCoordinateSnapshot {
     const range: readonly [number, number] = [0, 400];
-    const scale = CartesianScaleFactory.createExactPositionScale({ domain: [...domain], range: [...range], type: "linear" });
+    const scale = CartesianScaleFactory.createExactPositionScale({
+        domain: [...domain],
+        range: [...range],
+        type: "linear"
+    });
     return {
         baseDomain: domain,
         baseScale: scale,
@@ -71,7 +85,14 @@ function spaceFrom(...snaps: readonly CartesianAxisCoordinateSnapshot[]): Cartes
 
 const baseOptions: NormalizedChartSynchronizationOptions = {
     axisMappings: [],
-    crosshair: { axes: "auto", clearOnLeave: true, enabled: true, match: "axis-value", mode: "domain", showTooltip: false },
+    crosshair: {
+        axes: "auto",
+        clearOnLeave: true,
+        enabled: true,
+        match: "axis-value",
+        mode: "domain",
+        showTooltip: false
+    },
     group: "g",
     viewport: { axes: "auto", enabled: true, mode: "domain", phase: "continuous" }
 };
@@ -120,7 +141,9 @@ describe("ChartSynchronizationAxisMapper", () => {
     it("canonicalizes full-domain windows to no entry", () => {
         const coordinateSpace = spaceFrom(linearSnap("x-main", [0, 98]));
 
-        const recipientState = new Map([["x-main", { axis: "x" as const, axisId: "x-main", kind: "continuous" as const, max: 50, min: 10 }]]);
+        const recipientState = new Map([
+            ["x-main", { axis: "x" as const, axisId: "x-main", kind: "continuous" as const, max: 50, min: 10 }]
+        ]);
 
         const result = ChartSynchronizationAxisMapper.mapIncomingAxes(
             viewportMessage([
@@ -190,18 +213,20 @@ describe("ChartSynchronizationAxisMapper", () => {
 
             const result = ChartSynchronizationAxisMapper.mapIncomingAxes(
                 viewportMessage(
-                    [{
-                        normalizedWindow: [0.25, 0.75],
-                        sourceRef: { axis: "x", axisId: "x-source" },
-                        sourceType: type,
-                        window: {
-                            axis: "x",
-                            axisId: "x-source",
-                            kind: "continuous",
-                            max: end,
-                            min: start
+                    [
+                        {
+                            normalizedWindow: [0.25, 0.75],
+                            sourceRef: { axis: "x", axisId: "x-source" },
+                            sourceType: type,
+                            window: {
+                                axis: "x",
+                                axisId: "x-source",
+                                kind: "continuous",
+                                max: end,
+                                min: start
+                            }
                         }
-                    }],
+                    ],
                     "relative"
                 ),
                 coordinateSpace,
@@ -239,13 +264,15 @@ describe("ChartSynchronizationAxisMapper", () => {
             };
 
             const mapped = mapIncomingCrosshair(
-                [{
-                    normalizedBasePosition: 0.25,
-                    sourceIsPrimary: true,
-                    sourceRef: { axis: "x", axisId: "x-main" },
-                    sourceType: type,
-                    value: start
-                }],
+                [
+                    {
+                        normalizedBasePosition: 0.25,
+                        sourceIsPrimary: true,
+                        sourceRef: { axis: "x", axisId: "x-main" },
+                        sourceType: type,
+                        value: start
+                    }
+                ],
                 options,
                 {
                     axisScenes: [],
@@ -258,7 +285,10 @@ describe("ChartSynchronizationAxisMapper", () => {
 
             const mappedValue = mapped?.x?.value;
             expect(mappedValue).toBeInstanceOf(Date);
-            expect((mappedValue as Date).getTime()).toBeCloseTo(start.getTime() + (end.getTime() - start.getTime()) * 0.25, -2);
+            expect((mappedValue as Date).getTime()).toBeCloseTo(
+                start.getTime() + (end.getTime() - start.getTime()) * 0.25,
+                -2
+            );
             expect(mapped?.anchor.x).toBeCloseTo(100, 6);
         }
     });
@@ -469,7 +499,9 @@ describe("synchronization axis mapping normalization", () => {
             ...baseOptions,
             viewport: { ...baseOptions.viewport, mode: "relative" }
         };
-        const recipientState = new Map([["x-main", { axis: "x" as const, axisId: "x-main", kind: "continuous" as const, max: 500, min: 100 }]]);
+        const recipientState = new Map([
+            ["x-main", { axis: "x" as const, axisId: "x-main", kind: "continuous" as const, max: 500, min: 100 }]
+        ]);
 
         const result = ChartSynchronizationAxisMapper.mapIncomingAxes(
             viewportMessage(

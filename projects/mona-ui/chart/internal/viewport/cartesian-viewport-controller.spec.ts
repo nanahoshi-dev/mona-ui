@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import {
-    CartesianAxisCoordinateSpace,
-    type CartesianAxisCoordinateSnapshot
-} from "./cartesian-axis-coordinate-space";
+import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportController } from "./cartesian-viewport-controller";
 import { createEmptyInternalViewportState } from "./cartesian-viewport-normalizer";
 
@@ -34,10 +31,7 @@ describe("CartesianViewportController — Pure Math Matrix (PZV-004)", () => {
             viewportScale: baseScale
         };
 
-        return new CartesianAxisCoordinateSpace(
-            new Map([["test-axis", snap]]),
-            new Map()
-        );
+        return new CartesianAxisCoordinateSpace(new Map([["test-axis", snap]]), new Map());
     }
 
     describe("Continuous Zoom and Pan Across Scale Families", () => {
@@ -125,10 +119,7 @@ describe("CartesianViewportController — Pure Math Matrix (PZV-004)", () => {
                 viewportDomain: baseDomain,
                 viewportScale: baseScale
             };
-            return new CartesianAxisCoordinateSpace(
-                new Map([["cat-axis", snap]]),
-                new Map()
-            );
+            return new CartesianAxisCoordinateSpace(new Map([["cat-axis", snap]]), new Map());
         }
 
         it("should zoom category window around anchor", () => {
@@ -136,13 +127,10 @@ describe("CartesianViewportController — Pure Math Matrix (PZV-004)", () => {
             const space = createCategorySpace(categories);
             const initial = createEmptyInternalViewportState();
 
-            const res = CartesianViewportController.zoom(
-                initial,
-                space,
-                [{ axis: "x", axisId: "cat-axis" }],
-                2.0,
-                { x: 250, y: 0 }
-            );
+            const res = CartesianViewportController.zoom(initial, space, [{ axis: "x", axisId: "cat-axis" }], 2.0, {
+                x: 250,
+                y: 0
+            });
 
             expect(res.changed).toBe(true);
             const win = res.viewport.x.get("cat-axis");
@@ -160,13 +148,10 @@ describe("CartesianViewportController — Pure Math Matrix (PZV-004)", () => {
             const initial = createEmptyInternalViewportState();
 
             // Zoom first
-            const resZoom = CartesianViewportController.zoom(
-                initial,
-                space,
-                [{ axis: "x", axisId: "cat-axis" }],
-                2.0,
-                { x: 250, y: 0 }
-            );
+            const resZoom = CartesianViewportController.zoom(initial, space, [{ axis: "x", axisId: "cat-axis" }], 2.0, {
+                x: 250,
+                y: 0
+            });
 
             const resPan = CartesianViewportController.pan(
                 resZoom.viewport,
@@ -181,7 +166,9 @@ describe("CartesianViewportController — Pure Math Matrix (PZV-004)", () => {
     describe("Fit and Reset Operations", () => {
         it("should fit viewport by clearing specified or all axes", () => {
             const initial = {
-                x: new Map([["x1", { axis: "x" as const, axisId: "x1", kind: "continuous" as const, min: 10, max: 20 }]]),
+                x: new Map([
+                    ["x1", { axis: "x" as const, axisId: "x1", kind: "continuous" as const, min: 10, max: 20 }]
+                ]),
                 y: new Map([["y1", { axis: "y" as const, axisId: "y1", kind: "continuous" as const, min: 0, max: 50 }]])
             };
             const fitAll = CartesianViewportController.fit(initial);

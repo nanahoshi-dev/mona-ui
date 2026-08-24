@@ -2,11 +2,7 @@ import type { ChartRect } from "./chart.models";
 
 export type ChartFunnelOrientation = "horizontal" | "vertical";
 
-export type ChartFunnelLabelContent =
-    | "category"
-    | "category-value"
-    | "category-value-conversion"
-    | "value";
+export type ChartFunnelLabelContent = "category" | "category-value" | "category-value-conversion" | "value";
 
 export interface ChartFunnelPointMetadata {
     readonly category: unknown;

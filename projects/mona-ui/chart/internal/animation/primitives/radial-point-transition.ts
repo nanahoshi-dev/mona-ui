@@ -73,4 +73,3 @@ export function sampleRadialPointTransition(
         value: to.value ?? from.value
     };
 }
-

@@ -51,8 +51,7 @@ export function mapCategoryDomainWindow(
 
     const sourceDomain = sourceSnap.baseDomain as readonly string[];
     const targetDomain = targetSnap.baseDomain as readonly string[];
-    const areEqual =
-        sourceDomain.length === targetDomain.length && sourceDomain.every((k, i) => k === targetDomain[i]);
+    const areEqual = sourceDomain.length === targetDomain.length && sourceDomain.every((k, i) => k === targetDomain[i]);
     if (!areEqual) {
         ChartDiagnostics.warnOnce(
             context.warned,
@@ -155,8 +154,14 @@ export function computeSourceNormalizedWindow(
         }
     } else {
         const contWin = sourceWin as InternalContinuousViewport;
-        const pMinVal = sourceSnap.resolvedType === "time" || sourceSnap.resolvedType === "utc" ? new Date(contWin.min) : contWin.min;
-        const pMaxVal = sourceSnap.resolvedType === "time" || sourceSnap.resolvedType === "utc" ? new Date(contWin.max) : contWin.max;
+        const pMinVal =
+            sourceSnap.resolvedType === "time" || sourceSnap.resolvedType === "utc"
+                ? new Date(contWin.min)
+                : contWin.min;
+        const pMaxVal =
+            sourceSnap.resolvedType === "time" || sourceSnap.resolvedType === "utc"
+                ? new Date(contWin.max)
+                : contWin.max;
         const mapper = resolveCartesianNormalizedBaseMapper(sourceSnap);
         if (mapper) {
             const mapped0 = mapper.map(pMinVal);

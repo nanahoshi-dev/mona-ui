@@ -9,12 +9,7 @@ export type ChartBrushLineStyle = "solid" | "dashed" | "dotted";
 
 export type ChartBrushHitPolicy = "center" | "intersect";
 
-export type ChartBrushSelectionBehavior =
-    | "none"
-    | "replace"
-    | "add"
-    | "remove"
-    | "toggle";
+export type ChartBrushSelectionBehavior = "none" | "replace" | "add" | "remove" | "toggle";
 
 export type ChartBrushPhase = "start" | "update" | "end" | "cancel";
 
@@ -45,20 +40,11 @@ export interface ChartBrushContinuousRange {
     readonly axisId: string;
     readonly from: number | Date;
     readonly kind: "continuous";
-    readonly scaleType:
-        | "linear"
-        | "log"
-        | "pow"
-        | "sqrt"
-        | "symlog"
-        | "time"
-        | "utc";
+    readonly scaleType: "linear" | "log" | "pow" | "sqrt" | "symlog" | "time" | "utc";
     readonly to: number | Date;
 }
 
-export type ChartBrushAxisRange =
-    | ChartBrushCategoryRange
-    | ChartBrushContinuousRange;
+export type ChartBrushAxisRange = ChartBrushCategoryRange | ChartBrushContinuousRange;
 
 export interface ChartBrushChangeEvent<T = unknown> {
     readonly cancelReason?: ChartBrushCancelReason;

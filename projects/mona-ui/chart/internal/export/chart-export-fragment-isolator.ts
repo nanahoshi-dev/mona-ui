@@ -33,10 +33,7 @@ function buildRewriteMap(ids: readonly { readonly id: string }[], namespacePrefi
     const map = new Map<string, string>();
     for (const { id } of ids) {
         if (map.has(id)) {
-            throw new ChartExportError(
-                "resource-load-failed",
-                `Template SVG document contains duplicate ID '#${id}'.`
-            );
+            throw new ChartExportError("resource-load-failed", `Template SVG document contains duplicate ID '#${id}'.`);
         }
         map.set(id, `${namespacePrefix}--${id}`);
     }

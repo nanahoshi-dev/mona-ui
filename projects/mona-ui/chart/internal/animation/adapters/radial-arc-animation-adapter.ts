@@ -36,10 +36,7 @@ function createCollapsedRoseMark(mark: SceneRadialArcMark, opacity = 0): SceneRa
     };
 }
 
-function sampleRadialArcMark(
-    plan: RadialArcMarkPlan,
-    progress: number
-): SceneRadialArcMark {
+function sampleRadialArcMark(plan: RadialArcMarkPlan, progress: number): SceneRadialArcMark {
     const { from, to } = plan;
     const startAngle = lerp(from.startAngle, to.startAngle, progress);
     const endAngle = lerp(from.endAngle, to.endAngle, progress);
@@ -61,9 +58,10 @@ function sampleRadialArcMark(
         formattedValue: to.formattedValue,
         innerRadius,
         itemId: to.itemId,
-        normalizedValue: to.normalizedValue !== undefined && from.normalizedValue !== undefined
-            ? lerp(from.normalizedValue, to.normalizedValue, progress)
-            : to.normalizedValue,
+        normalizedValue:
+            to.normalizedValue !== undefined && from.normalizedValue !== undefined
+                ? lerp(from.normalizedValue, to.normalizedValue, progress)
+                : to.normalizedValue,
         outerRadius,
         padAngle,
         rawValue: lerp(from.rawValue, to.rawValue, progress),
@@ -93,7 +91,11 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
         }
 
         if (type === "radialBar") {
-            return this.#planRadialBar(previous as ChartRadialBarSeriesScene | null, target as ChartRadialBarSeriesScene | null, id);
+            return this.#planRadialBar(
+                previous as ChartRadialBarSeriesScene | null,
+                target as ChartRadialBarSeriesScene | null,
+                id
+            );
         }
 
         if (type === "rose") {
@@ -336,21 +338,29 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
         const seriesEntering = !previous && !!target;
         const seriesExiting = !!previous && !target;
 
-        const effectiveFromVal: SceneGaugeValue | undefined = previous?.value ?? (target?.value ? {
-            ...target.value,
-            cornerRadius: target.value.cornerRadius,
-            endAngle: target.value.startAngle,
-            ratio: 0,
-            renderOpacity: 1
-        } : undefined);
+        const effectiveFromVal: SceneGaugeValue | undefined =
+            previous?.value ??
+            (target?.value
+                ? {
+                      ...target.value,
+                      cornerRadius: target.value.cornerRadius,
+                      endAngle: target.value.startAngle,
+                      ratio: 0,
+                      renderOpacity: 1
+                  }
+                : undefined);
 
-        const effectiveToVal: SceneGaugeValue | undefined = target?.value ?? (previous?.value ? {
-            ...previous.value,
-            cornerRadius: previous.value.cornerRadius,
-            endAngle: previous.value.startAngle,
-            ratio: 0,
-            renderOpacity: 1
-        } : undefined);
+        const effectiveToVal: SceneGaugeValue | undefined =
+            target?.value ??
+            (previous?.value
+                ? {
+                      ...previous.value,
+                      cornerRadius: previous.value.cornerRadius,
+                      endAngle: previous.value.startAngle,
+                      ratio: 0,
+                      renderOpacity: 1
+                  }
+                : undefined);
 
         const fromNeedle = previous?.needle;
         const toNeedle = target?.needle;
@@ -402,8 +412,10 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     const fromAngle = fromNeedle?.angle ?? effectiveFromVal.startAngle;
                     const toAngle = toNeedle?.angle ?? effectiveToVal.startAngle;
                     const angle = lerp(fromAngle, toAngle, progress);
-                    const length = fromNeedle && toNeedle ? lerp(fromNeedle.length, toNeedle.length, progress) : baseNeedle.length;
-                    const width = fromNeedle && toNeedle ? lerp(fromNeedle.width, toNeedle.width, progress) : baseNeedle.width;
+                    const length =
+                        fromNeedle && toNeedle ? lerp(fromNeedle.length, toNeedle.length, progress) : baseNeedle.length;
+                    const width =
+                        fromNeedle && toNeedle ? lerp(fromNeedle.width, toNeedle.width, progress) : baseNeedle.width;
 
                     sampledNeedle = {
                         angle,
@@ -415,7 +427,11 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
                     };
                 }
 
-                const renderOpacity = seriesEntering ? lerpOpacity(0, 1, progress) : seriesExiting ? lerpOpacity(1, 0, progress) : 1;
+                const renderOpacity = seriesEntering
+                    ? lerpOpacity(0, 1, progress)
+                    : seriesExiting
+                      ? lerpOpacity(1, 0, progress)
+                      : 1;
 
                 return {
                     fillMode: baseScene.fillMode,

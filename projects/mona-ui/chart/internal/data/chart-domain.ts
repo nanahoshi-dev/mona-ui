@@ -11,10 +11,7 @@ import { resolveFiniteRangeValues } from "./chart-range-resolver";
 import { FinancialDataResolver } from "./financial-data-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
 import type { CartesianStackAnalysis, CartesianStackLayout } from "./cartesian-stack-engine";
-import {
-    normalizeCartesianTemporalDomain,
-    resolveCartesianTemporalValue
-} from "./cartesian-temporal-value-resolver";
+import { normalizeCartesianTemporalDomain, resolveCartesianTemporalValue } from "./cartesian-temporal-value-resolver";
 
 export interface ContinuousDomain {
     max: number;

@@ -296,7 +296,10 @@ describe("chart-domain", () => {
         it("should include zero baseline when mixed line and area series exist", () => {
             const lineSeries = createMockSeries("line", "val1");
             const areaSeries = createMockSeries("area", "val2");
-            const data = [{ val1: 20, val2: 40 }, { val1: 60, val2: 80 }];
+            const data = [
+                { val1: 20, val2: 40 },
+                { val1: 60, val2: 80 }
+            ];
             const domain = calculateContinuousYDomain([lineSeries, areaSeries], data);
             expect(domain).toEqual([0, 80]);
         });
@@ -304,7 +307,10 @@ describe("chart-domain", () => {
         it("should recalculate domain without zero baseline when area series is hidden", () => {
             const lineSeries = createMockSeries("line", "val1", undefined, true);
             const areaSeries = createMockSeries("area", "val2", undefined, false);
-            const data = [{ val1: 20, val2: 40 }, { val1: 60, val2: 80 }];
+            const data = [
+                { val1: 20, val2: 40 },
+                { val1: 60, val2: 80 }
+            ];
             const domain = calculateContinuousYDomain([lineSeries, areaSeries], data);
             expect(domain).toEqual([20, 60]);
         });
@@ -415,21 +421,30 @@ describe("chart-domain", () => {
     describe("calculateLinearXDomain", () => {
         it("should compute min and max for numeric X values", () => {
             const series = [createMockSeries("line", "val", undefined, true, "x")];
-            const data = [{ x: 5, val: 1 }, { x: 25, val: 2 }];
+            const data = [
+                { x: 5, val: 1 },
+                { x: 25, val: 2 }
+            ];
             const domain = calculateLinearXDomain(series, data, "x");
             expect(domain).toEqual([5, 25]);
         });
 
         it("should swap reversed explicit X bounds", () => {
             const series = [createMockSeries("line", "val", undefined, true, "x")];
-            const data = [{ x: 5, val: 1 }, { x: 25, val: 2 }];
+            const data = [
+                { x: 5, val: 1 },
+                { x: 25, val: 2 }
+            ];
             const domain = calculateLinearXDomain(series, data, "x", 50, 0);
             expect(domain).toEqual([0, 50]);
         });
 
         it("should expand domain safely when one-sided explicit min exceeds observed max", () => {
             const series = [createMockSeries("line", "val", undefined, true, "x")];
-            const data = [{ x: 5, val: 1 }, { x: 25, val: 2 }];
+            const data = [
+                { x: 5, val: 1 },
+                { x: 25, val: 2 }
+            ];
             const domain = calculateLinearXDomain(series, data, "x", 100, undefined);
             expect(domain[0]).toBe(100);
             expect(domain[1]).toBeGreaterThan(100);
@@ -448,7 +463,10 @@ describe("chart-domain", () => {
             const d1 = new Date("2026-01-01T00:00:00Z");
             const d2 = new Date("2026-01-10T00:00:00Z");
             const series = [createMockSeries("line", "val", undefined, true, "date")];
-            const data = [{ date: d1, val: 1 }, { date: d2, val: 2 }];
+            const data = [
+                { date: d1, val: 1 },
+                { date: d2, val: 2 }
+            ];
             const domain = calculateTimeDomain(series, data, "date");
             expect(domain[0].getTime()).toBe(d1.getTime());
             expect(domain[1].getTime()).toBe(d2.getTime());
@@ -456,7 +474,10 @@ describe("chart-domain", () => {
 
         it("should parse ISO date strings", () => {
             const series = [createMockSeries("line", "val", undefined, true, "date")];
-            const data = [{ date: "2026-05-01", val: 1 }, { date: "2026-05-15", val: 2 }];
+            const data = [
+                { date: "2026-05-01", val: 1 },
+                { date: "2026-05-15", val: 2 }
+            ];
             const domain = calculateTimeDomain(series, data, "date");
             expect(domain[0].toISOString().startsWith("2026-05-01")).toBe(true);
             expect(domain[1].toISOString().startsWith("2026-05-15")).toBe(true);
@@ -477,7 +498,10 @@ describe("chart-domain", () => {
             const d2 = new Date("2026-01-10T00:00:00Z");
             const explicitMin = new Date("2026-02-01T00:00:00Z");
             const series = [createMockSeries("line", "val", undefined, true, "date")];
-            const data = [{ date: d1, val: 1 }, { date: d2, val: 2 }];
+            const data = [
+                { date: d1, val: 1 },
+                { date: d2, val: 2 }
+            ];
             const domain = calculateTimeDomain(series, data, "date", explicitMin, undefined);
             expect(domain[0].getTime()).toBe(explicitMin.getTime());
             expect(domain[1].getTime()).toBeGreaterThan(explicitMin.getTime());
@@ -487,13 +511,21 @@ describe("chart-domain", () => {
     describe("calculateCategoryDomain", () => {
         it("should return distinct ordered category keys", () => {
             const series = [createMockSeries("bar", "val", undefined, true, "category")];
-            const data = [{ category: "Q1", val: 10 }, { category: "Q2", val: 20 }, { category: "Q1", val: 30 }];
+            const data = [
+                { category: "Q1", val: 10 },
+                { category: "Q2", val: 20 },
+                { category: "Q1", val: 30 }
+            ];
             const domain = calculateCategoryDomain(series, data, "category");
             expect(domain).toEqual(["Q1", "Q2"]);
         });
 
         it("should fall back to root data when no series are registered", () => {
-            const data = [{ category: "Jan", val: 10 }, { category: "Feb", val: 20 }, { category: "Mar", val: 30 }];
+            const data = [
+                { category: "Jan", val: 10 },
+                { category: "Feb", val: 20 },
+                { category: "Mar", val: 30 }
+            ];
             const domain = calculateCategoryDomain([], data, "category");
             expect(domain).toEqual(["Jan", "Feb", "Mar"]);
         });
@@ -573,10 +605,7 @@ describe("chart-domain", () => {
         });
 
         it("should filter out incompatible Bar series when calculating Y domain on linear axis (SB-002)", () => {
-            const series = [
-                createMockSeries("bar", "barY"),
-                createMockScatterSeries("scatterY")
-            ];
+            const series = [createMockSeries("bar", "barY"), createMockScatterSeries("scatterY")];
             const data = [
                 { barY: 1000, scatterY: 50, x: 10 },
                 { barY: 2000, scatterY: 80, x: 20 }
@@ -679,9 +708,7 @@ describe("chart-domain", () => {
         });
 
         it("should aggregate all registered percent groups to determine sign fallback (PRE-004)", () => {
-            const data = [
-                { month: "Jan", neg: -30, pos: 50 }
-            ];
+            const data = [{ month: "Jan", neg: -30, pos: 50 }];
             const series: readonly ChartCartesianSeriesRegistration[] = [
                 {
                     ...createMockSeries("bar", "pos", undefined, false, "month"),
@@ -735,10 +762,7 @@ describe("chart-domain", () => {
         });
 
         it("should ignore Bar series on linear X axis", () => {
-            const series = [
-                createMockSeries("bar", "barY"),
-                createMockScatterSeries("scatterY")
-            ];
+            const series = [createMockSeries("bar", "barY"), createMockScatterSeries("scatterY")];
             const data = [
                 { barY: 10, scatterY: 20, x: 5 },
                 { barY: 20, scatterY: 30, x: 15 }
@@ -761,10 +785,7 @@ describe("chart-domain", () => {
         });
 
         it("should ignore Range Bar series on linear X axis", () => {
-            const series = [
-                createMockRangeBarSeries("low", "high"),
-                createMockSeries("line", "val")
-            ];
+            const series = [createMockRangeBarSeries("low", "high"), createMockSeries("line", "val")];
             const data = [
                 { high: 50, low: 10, val: 30, x: 10 },
                 { high: 60, low: 20, val: 40, x: 50 }
@@ -777,10 +798,7 @@ describe("chart-domain", () => {
 
     describe("Range Series Y Domain Resolution", () => {
         it("should calculate Y domain encompassing both from and to values across Range Bar and Range Area", () => {
-            const series = [
-                createMockRangeBarSeries("minTemp", "maxTemp"),
-                createMockRangeAreaSeries("q1", "q3")
-            ];
+            const series = [createMockRangeBarSeries("minTemp", "maxTemp"), createMockRangeAreaSeries("q1", "q3")];
             const data = [
                 { maxTemp: 35, minTemp: 15, q1: 18, q3: 30 },
                 { maxTemp: 42, minTemp: 22, q1: 25, q3: 38 }
@@ -970,12 +988,9 @@ describe("chart-domain", () => {
 
         it("should infer category from valid Financial category without being poisoned by malformed root data (FIN-R3)", () => {
             const series = [createMockCandlestickSeries("o", "h", "l", "c", undefined, true, "x")];
-            const seriesData = [
-                { c: 110, h: 120, l: 95, o: 100, x: "Category-1" }
-            ];
+            const seriesData = [{ c: 110, h: 120, l: 95, o: 100, x: "Category-1" }];
 
             expect(inferXAxisType(series, seriesData, "x")).toBe("category");
         });
     });
 });
-

@@ -6,9 +6,7 @@ describe("MarkerSeriesAnimationAdapter", () => {
     it("should plan and sample a scatter series transition", () => {
         const from: ChartScatterSeriesScene = {
             id: "s1",
-            markers: [
-                { animationKey: "k1", datum: {}, index: 0, radius: 4, x: 50, xValue: 1, y: 50, yValue: 10 }
-            ],
+            markers: [{ animationKey: "k1", datum: {}, index: 0, radius: 4, x: 50, xValue: 1, y: 50, yValue: 10 }],
             name: "Scatter",
             pointRadius: 4,
             style: { color: "#ff0000", fillOpacity: 0.8, strokeColor: "#ffffff", strokeWidth: 1 },
@@ -19,9 +17,7 @@ describe("MarkerSeriesAnimationAdapter", () => {
 
         const to: ChartScatterSeriesScene = {
             id: "s1",
-            markers: [
-                { animationKey: "k1", datum: {}, index: 0, radius: 8, x: 150, xValue: 1, y: 150, yValue: 20 }
-            ],
+            markers: [{ animationKey: "k1", datum: {}, index: 0, radius: 8, x: 150, xValue: 1, y: 150, yValue: 20 }],
             name: "Scatter",
             pointRadius: 8,
             style: { color: "#0000ff", fillOpacity: 0.4, strokeColor: "#000000", strokeWidth: 2 },

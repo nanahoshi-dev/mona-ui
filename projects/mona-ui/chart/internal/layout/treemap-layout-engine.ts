@@ -13,10 +13,7 @@ import type { ChartRect } from "../../models/chart.models";
 import type { ChartTreemapSeriesRegistration } from "../context/chart-registration-context";
 import { TreemapDataProcessor, type PreparedTreemapNode } from "../data/treemap-data";
 import { TreemapHitIndex } from "../interaction/treemap-hit-index";
-import {
-    type TreemapNavigationEntry,
-    type TreemapNavigationIndex
-} from "../interaction/treemap-keyboard-navigation";
+import { type TreemapNavigationEntry, type TreemapNavigationIndex } from "../interaction/treemap-keyboard-navigation";
 import type {
     ChartTreemapSeriesScene,
     SceneTreemapLabel,
@@ -77,19 +74,11 @@ export class TreemapLayoutEngine {
         const tileMode = registration.tile ? registration.tile() : "squarify";
         const sortMode = registration.sort ? registration.sort() : "descending";
 
-        const paddingInner = Math.max(
-            0,
-            registration.paddingInner ? (registration.paddingInner() ?? 2) : 2
-        );
-        const paddingOuter = Math.max(
-            0,
-            registration.paddingOuter ? (registration.paddingOuter() ?? 4) : 4
-        );
+        const paddingInner = Math.max(0, registration.paddingInner ? (registration.paddingInner() ?? 2) : 2);
+        const paddingOuter = Math.max(0, registration.paddingOuter ? (registration.paddingOuter() ?? 4) : 4);
         const parentHeaderHeight = Math.max(
             0,
-            registration.parentHeaderHeight
-                ? (registration.parentHeaderHeight() ?? 20)
-                : 20
+            registration.parentHeaderHeight ? (registration.parentHeaderHeight() ?? 20) : 20
         );
         const showParentLabels = registration.showParentLabels ? registration.showParentLabels() : true;
         const showLabels = registration.showLabels ? registration.showLabels() : true;
@@ -109,7 +98,9 @@ export class TreemapLayoutEngine {
         const defaultMinTerminalLabelHeight = showValues ? 24 : 16;
         const minTerminalLabelHeight = Math.max(
             0,
-            registration.minLabelHeight ? (registration.minLabelHeight() ?? defaultMinTerminalLabelHeight) : defaultMinTerminalLabelHeight
+            registration.minLabelHeight
+                ? (registration.minLabelHeight() ?? defaultMinTerminalLabelHeight)
+                : defaultMinTerminalLabelHeight
         );
         const minParentHeaderLabelHeight = 12;
 
@@ -236,16 +227,18 @@ export class TreemapLayoutEngine {
         });
 
         if (sortMode === "descending") {
-            rootHierarchy.sort((a, b) =>
-                b.height - a.height ||
-                (b.value ?? 0) - (a.value ?? 0) ||
-                (a.data.node?.nodeId ?? "").localeCompare(b.data.node?.nodeId ?? "")
+            rootHierarchy.sort(
+                (a, b) =>
+                    b.height - a.height ||
+                    (b.value ?? 0) - (a.value ?? 0) ||
+                    (a.data.node?.nodeId ?? "").localeCompare(b.data.node?.nodeId ?? "")
             );
         } else if (sortMode === "ascending") {
-            rootHierarchy.sort((a, b) =>
-                a.height - b.height ||
-                (a.value ?? 0) - (b.value ?? 0) ||
-                (a.data.node?.nodeId ?? "").localeCompare(b.data.node?.nodeId ?? "")
+            rootHierarchy.sort(
+                (a, b) =>
+                    a.height - b.height ||
+                    (a.value ?? 0) - (b.value ?? 0) ||
+                    (a.data.node?.nodeId ?? "").localeCompare(b.data.node?.nodeId ?? "")
             );
         }
 
@@ -265,9 +258,9 @@ export class TreemapLayoutEngine {
         layoutGenerator(rectangularRoot);
 
         // Collect all valid descendant nodes
-        const d3Nodes = rectangularRoot.descendants().filter(
-            (d): d is HierarchyRectangularNode<TreemapHierarchyDatum> => d.depth > 0 && d.data.node !== null
-        );
+        const d3Nodes = rectangularRoot
+            .descendants()
+            .filter((d): d is HierarchyRectangularNode<TreemapHierarchyDatum> => d.depth > 0 && d.data.node !== null);
 
         const rootTotal = rootHierarchy.value ?? 0;
         const sceneNodes: SceneTreemapNode[] = [];
@@ -333,16 +326,10 @@ export class TreemapLayoutEngine {
 
             const aggregateValue = isCollapsed ? pNode.aggregateValue : (dNode.value ?? pNode.aggregateValue);
             const percentageOfParent =
-                dNode.parent && dNode.parent.value && dNode.parent.value > 0
-                    ? aggregateValue / dNode.parent.value
-                    : 1;
+                dNode.parent && dNode.parent.value && dNode.parent.value > 0 ? aggregateValue / dNode.parent.value : 1;
             const percentageOfRoot = rootTotal > 0 ? aggregateValue / rootTotal : 0;
 
-            const formattedValue = formatYValue(
-                aggregateValue,
-                pNode.dataIndex,
-                registration.valueFormatter?.()
-            );
+            const formattedValue = formatYValue(aggregateValue, pNode.dataIndex, registration.valueFormatter?.());
 
             const sceneNode: SceneTreemapNode = {
                 aggregateValue,
@@ -538,20 +525,22 @@ export class TreemapLayoutEngine {
             const parentDNode = dNode.parent?.data.node;
 
             const siblings = (dNode.parent?.children ?? []).filter(
-                c => c.data.node !== null && (c.x1 - c.x0) > 0 && (c.y1 - c.y0) > 0
+                c => c.data.node !== null && c.x1 - c.x0 > 0 && c.y1 - c.y0 > 0
             );
             const sIdx = siblings.indexOf(dNode);
             const prevSibling = sIdx > 0 ? siblings[sIdx - 1].data.node?.nodeId : undefined;
-            const nextSibling = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1].data.node?.nodeId : undefined;
+            const nextSibling =
+                sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1].data.node?.nodeId : undefined;
 
             const children = (dNode.children ?? []).filter(
-                c => c.data.node !== null && (c.x1 - c.x0) > 0 && (c.y1 - c.y0) > 0
+                c => c.data.node !== null && c.x1 - c.x0 > 0 && c.y1 - c.y0 > 0
             );
             const firstChildId = children.length > 0 ? children[0].data.node?.nodeId : undefined;
             const lastChildId = children.length > 0 ? children[children.length - 1].data.node?.nodeId : undefined;
 
             const previousDepthFirstId = i > 0 ? dfsOrderedNodes[i - 1].data.node?.nodeId : undefined;
-            const nextDepthFirstId = i < dfsOrderedNodes.length - 1 ? dfsOrderedNodes[i + 1].data.node?.nodeId : undefined;
+            const nextDepthFirstId =
+                i < dfsOrderedNodes.length - 1 ? dfsOrderedNodes[i + 1].data.node?.nodeId : undefined;
 
             navEntries.set(pNode.nodeId, {
                 firstChildId,
@@ -568,13 +557,16 @@ export class TreemapLayoutEngine {
         const navigationIndex: TreemapNavigationIndex = {
             entries: navEntries,
             firstNodeId: dfsOrderedNodes.length > 0 ? dfsOrderedNodes[0].data.node?.nodeId : undefined,
-            lastNodeId: dfsOrderedNodes.length > 0 ? dfsOrderedNodes[dfsOrderedNodes.length - 1].data.node?.nodeId : undefined
+            lastNodeId:
+                dfsOrderedNodes.length > 0 ? dfsOrderedNodes[dfsOrderedNodes.length - 1].data.node?.nodeId : undefined
         };
 
         const hitIndex = new TreemapHitIndex(plotRect, hitTargets);
 
         // Select candidate DOM labels with global hard cap
-        candidateParentLabels.sort((a, b) => a.depth - b.depth || b.headerArea - a.headerArea || a.renderOrder - b.renderOrder);
+        candidateParentLabels.sort(
+            (a, b) => a.depth - b.depth || b.headerArea - a.headerArea || a.renderOrder - b.renderOrder
+        );
         candidateTerminalLabels.sort((a, b) => b.area - a.area || a.renderOrder - b.renderOrder);
 
         const selectedLabels: SceneTreemapLabel[] = [];

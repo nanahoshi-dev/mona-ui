@@ -1,11 +1,4 @@
-import {
-    curveLinear,
-    curveMonotoneX,
-    curveNatural,
-    curveStep,
-    curveStepAfter,
-    type CurveFactory
-} from "d3-shape";
+import { curveLinear, curveMonotoneX, curveNatural, curveStep, curveStepAfter, type CurveFactory } from "d3-shape";
 import type { ChartCurve } from "../../../models/chart-series.models";
 
 export function resolveCurveFactory(curve: ChartCurve): CurveFactory {

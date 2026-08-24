@@ -11,8 +11,18 @@ export class RadarSeriesRenderer {
         center: { x: number; y: number },
         styleResolver: ChartStyleResolver
     ): void {
-        const { color, connectNulls, curve, fillMode, fillOpacity, maxRenderedRadius, pointRadius, points, showPoints, strokeWidth } =
-            series;
+        const {
+            color,
+            connectNulls,
+            curve,
+            fillMode,
+            fillOpacity,
+            maxRenderedRadius,
+            pointRadius,
+            points,
+            showPoints,
+            strokeWidth
+        } = series;
 
         const definedPoints = points.filter(p => p.defined);
         if (definedPoints.length === 0) {
@@ -66,8 +76,12 @@ export class RadarSeriesRenderer {
         if (strokeWidth > 0 && definedPoints.length >= 2) {
             const isSmooth = curve === "smooth" && (connectNulls ? definedPoints.length >= 3 : points.length >= 3);
             const lineCurve = isClosed
-                ? (isSmooth ? curveCatmullRomClosed : curveLinearClosed)
-                : (isSmooth ? curveCatmullRom : curveLinear);
+                ? isSmooth
+                    ? curveCatmullRomClosed
+                    : curveLinearClosed
+                : isSmooth
+                  ? curveCatmullRom
+                  : curveLinear;
 
             const lineGenerator = lineRadial<SceneRadialPoint>()
                 .angle(d => d.angle)

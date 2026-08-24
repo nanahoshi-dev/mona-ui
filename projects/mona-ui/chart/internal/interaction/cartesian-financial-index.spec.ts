@@ -84,9 +84,27 @@ describe("CartesianFinancialIndex", () => {
         });
 
         const entries: FinancialHitEntry[] = [
-            { bounds: { height: 90, width: 20, x: 90, y: 10 }, centerX: 100, highY: 10, lowY: 100, target: createTarget(0, 100) },
-            { bounds: { height: 90, width: 40, x: 180, y: 10 }, centerX: 200, highY: 10, lowY: 100, target: createTarget(1, 200) },
-            { bounds: { height: 90, width: 10, x: 295, y: 10 }, centerX: 300, highY: 10, lowY: 100, target: createTarget(2, 300) }
+            {
+                bounds: { height: 90, width: 20, x: 90, y: 10 },
+                centerX: 100,
+                highY: 10,
+                lowY: 100,
+                target: createTarget(0, 100)
+            },
+            {
+                bounds: { height: 90, width: 40, x: 180, y: 10 },
+                centerX: 200,
+                highY: 10,
+                lowY: 100,
+                target: createTarget(1, 200)
+            },
+            {
+                bounds: { height: 90, width: 10, x: 295, y: 10 },
+                centerX: 300,
+                highY: 10,
+                lowY: 100,
+                target: createTarget(2, 300)
+            }
         ];
 
         const index = new CartesianFinancialIndex(entries);

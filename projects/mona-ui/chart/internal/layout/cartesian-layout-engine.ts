@@ -72,8 +72,8 @@ import { CartesianLegendBuilder } from "./cartesian-legend-builder";
 import { CartesianMarkerLayout } from "./cartesian-marker-layout";
 import { CartesianOrientationPolicy } from "./cartesian-orientation-policy";
 import {
-    CartesianAxisRegistryResolver
-    ,type CartesianAxisRegistryResolution
+    CartesianAxisRegistryResolver,
+    type CartesianAxisRegistryResolution
 } from "./cartesian-axis-registry-resolver";
 import {
     CartesianSeriesAxisBindingResolver,
@@ -383,7 +383,8 @@ export class CartesianLayoutEngine {
                                     : undefined,
                             valueField: s.field(),
                             valueFormatter:
-                                "valueFormatter" in s && typeof (s as SeriesWithOptionalValueFormatter).valueFormatter === "function"
+                                "valueFormatter" in s &&
+                                typeof (s as SeriesWithOptionalValueFormatter).valueFormatter === "function"
                                     ? (s as SeriesWithOptionalValueFormatter).valueFormatter!()
                                     : undefined,
                             xAxis: seriesXAxis?.registration,
@@ -417,17 +418,13 @@ export class CartesianLayoutEngine {
                                 sourceData: sData,
                                 seriesType: s.type as "bubble" | "scatter",
                                 sizes: spatialEntry.sizes,
-                                xBaseDenormalize: xBaseMapper
-                                    ? val => xBaseMapper.invert(val) ?? val
-                                    : undefined,
+                                xBaseDenormalize: xBaseMapper ? val => xBaseMapper.invert(val) ?? val : undefined,
                                 xBaseNormalize: xBaseMapper
                                     ? semantic => xBaseMapper.map(semantic) ?? Number.NaN
                                     : v => Number(v),
                                 xViewportScale: seriesXScale as ChartContinuousPositionScale<number | Date>,
                                 yAxisId: binding.yAxisId,
-                                yBaseDenormalize: yBaseMapper
-                                    ? val => yBaseMapper.invert(val) ?? val
-                                    : undefined,
+                                yBaseDenormalize: yBaseMapper ? val => yBaseMapper.invert(val) ?? val : undefined,
                                 yBaseNormalize: yBaseMapper
                                     ? semantic => yBaseMapper.map(semantic) ?? Number.NaN
                                     : v => Number(v),
@@ -1386,7 +1383,7 @@ export class CartesianLayoutEngine {
                             if (bPos !== undefined) {
                                 xPos = bPos + (seriesXScale as BandScale<string>).bandwidth() / 2;
                                 isXValid = true;
-                        }
+                            }
                         } else if (seriesXScale.type === "time" || seriesXScale.type === "utc") {
                             const resolved = resolveCartesianTemporalValue(xVal);
                             if (resolved) {

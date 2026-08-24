@@ -109,8 +109,7 @@ export class ChartExportDomFreezer {
 
                 // Animation suppression check (EXP-03 / R2-09):
                 // ONLY honor explicit Mona suppression marker, never generic consumer opacity-0
-                const isMonaSuppressed =
-                    src.getAttribute("data-mona-chart-export-animation-suppression") === "opacity";
+                const isMonaSuppressed = src.getAttribute("data-mona-chart-export-animation-suppression") === "opacity";
 
                 if (isMonaSuppressed) {
                     dst.style.opacity = "1";
@@ -191,8 +190,7 @@ export class ChartExportDomFreezer {
     public static neutralizeResponsiveImageSelection(cloneRoot: HTMLElement): void {
         const rootTag = cloneRoot.tagName.toLowerCase();
 
-        const pictures =
-            rootTag === "picture" ? [cloneRoot] : Array.from(cloneRoot.querySelectorAll("picture"));
+        const pictures = rootTag === "picture" ? [cloneRoot] : Array.from(cloneRoot.querySelectorAll("picture"));
         for (const picture of pictures) {
             for (const source of Array.from(picture.querySelectorAll("source"))) {
                 source.remove();

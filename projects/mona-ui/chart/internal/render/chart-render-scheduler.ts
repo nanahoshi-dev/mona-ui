@@ -79,7 +79,7 @@ export class ChartRenderScheduler {
             this.#cancelFrame(this.#frameId);
             this.#frameId = null;
         }
-        const accumulatedReason = this.#pendingReason !== 0 ? (this.#pendingReason | defaultReason) : defaultReason;
+        const accumulatedReason = this.#pendingReason !== 0 ? this.#pendingReason | defaultReason : defaultReason;
         this.#pendingReason = 0;
         this.#callback(accumulatedReason as ChartInvalidationReason);
     }

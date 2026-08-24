@@ -1,4 +1,10 @@
-import type { CartesianFunnelChartScene, CartesianHeatmapChartScene, CartesianWaterfallChartScene, CartesianXYChartScene, ChartScene } from "../scene/chart-scene";
+import type {
+    CartesianFunnelChartScene,
+    CartesianHeatmapChartScene,
+    CartesianWaterfallChartScene,
+    CartesianXYChartScene,
+    ChartScene
+} from "../scene/chart-scene";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { clamp } from "../utils/number-utils";
 import { FunnelKeyboardNavigation } from "./funnel-keyboard-navigation";
@@ -84,10 +90,7 @@ export function resolveInteractionBuckets(
     }
     const cartesianScene = scene as CartesianXYChartScene;
     const dimension: "x" | "y" = cartesianScene.interactionAxis === "y" ? "y" : "x";
-    const primaryId =
-        dimension === "y"
-            ? (cartesianScene.primaryYAxisId ?? "")
-            : (cartesianScene.primaryXAxisId ?? "");
+    const primaryId = dimension === "y" ? (cartesianScene.primaryYAxisId ?? "") : (cartesianScene.primaryXAxisId ?? "");
 
     const targetNamespace = namespace ?? {
         axis: dimension,
@@ -143,7 +146,9 @@ export class ChartKeyboardNavigation {
         activeNamespace?: ChartKeyboardAxisNamespace | null
     ): KeyboardNavigationResult | null {
         if (scene.coordinateSystem === "hierarchical" && scene.hierarchicalKind === "treemap") {
-            const currentHit = activeHitKey ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null : null;
+            const currentHit = activeHitKey
+                ? (scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null)
+                : null;
             const currentId = currentHit?.hierarchy?.nodeId;
             const nextNodeId = TreemapKeyboardNavigation.navigate(currentId, event.key, scene.navigationIndex);
             if (!nextNodeId) {
@@ -164,8 +169,14 @@ export class ChartKeyboardNavigation {
 
         if (scene.coordinateSystem === "cartesian") {
             if (scene.cartesianKind === "heatmap") {
-                const currentHit = activeHitKey ? scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null : null;
-                const nextHit = HeatmapKeyboardNavigation.handleKey(event, scene as CartesianHeatmapChartScene, currentHit);
+                const currentHit = activeHitKey
+                    ? (scene.hitTargets.find(h => getHitTargetKey(h) === activeHitKey) ?? null)
+                    : null;
+                const nextHit = HeatmapKeyboardNavigation.handleKey(
+                    event,
+                    scene as CartesianHeatmapChartScene,
+                    currentHit
+                );
                 if (!nextHit) {
                     return null;
                 }
@@ -180,7 +191,11 @@ export class ChartKeyboardNavigation {
             }
 
             if (scene.cartesianKind === "funnel") {
-                const navRes = FunnelKeyboardNavigation.handleKeyDown(event, scene as CartesianFunnelChartScene, activeBucketIndex);
+                const navRes = FunnelKeyboardNavigation.handleKeyDown(
+                    event,
+                    scene as CartesianFunnelChartScene,
+                    activeBucketIndex
+                );
                 if (!navRes) {
                     return null;
                 }
@@ -194,7 +209,11 @@ export class ChartKeyboardNavigation {
             }
 
             if (scene.cartesianKind === "waterfall") {
-                const navRes = WaterfallKeyboardNavigation.handleKeyDown(event, scene as CartesianWaterfallChartScene, activeBucketIndex);
+                const navRes = WaterfallKeyboardNavigation.handleKeyDown(
+                    event,
+                    scene as CartesianWaterfallChartScene,
+                    activeBucketIndex
+                );
                 if (!navRes) {
                     return null;
                 }
@@ -211,7 +230,8 @@ export class ChartKeyboardNavigation {
         const isCartesianXY = scene.coordinateSystem === "cartesian" && scene.cartesianKind === "xy";
         const availableNamespaces = getAvailableAxisNamespaces(scene);
         const resolvedNamespace: ChartKeyboardAxisNamespace =
-            activeNamespace && availableNamespaces.some(ns => ns.axis === activeNamespace.axis && ns.axisId === activeNamespace.axisId)
+            activeNamespace &&
+            availableNamespaces.some(ns => ns.axis === activeNamespace.axis && ns.axisId === activeNamespace.axisId)
                 ? activeNamespace
                 : availableNamespaces[0];
 
@@ -238,7 +258,11 @@ export class ChartKeyboardNavigation {
                         targetBucketIndex = nextBuckets.findIndex(b => b.xKey === currentHit.xKey);
                     }
                     if (targetBucketIndex < 0) {
-                        targetBucketIndex = clamp(activeBucketIndex < 0 ? 0 : activeBucketIndex, 0, nextBuckets.length - 1);
+                        targetBucketIndex = clamp(
+                            activeBucketIndex < 0 ? 0 : activeBucketIndex,
+                            0,
+                            nextBuckets.length - 1
+                        );
                     }
                     return this.#resolveSelection(
                         nextBuckets,
@@ -417,7 +441,13 @@ export class ChartKeyboardNavigation {
 
             case "End": {
                 event.preventDefault();
-                return this.#resolveSelection(buckets, buckets.length - 1, activeSeriesId, activeHitKey, resolvedNamespace);
+                return this.#resolveSelection(
+                    buckets,
+                    buckets.length - 1,
+                    activeSeriesId,
+                    activeHitKey,
+                    resolvedNamespace
+                );
             }
 
             default:
@@ -425,4 +455,3 @@ export class ChartKeyboardNavigation {
         }
     }
 }
-

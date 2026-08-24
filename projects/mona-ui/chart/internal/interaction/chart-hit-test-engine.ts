@@ -1,16 +1,10 @@
 import type { ChartPoint } from "../../models/chart.models";
-import type {   ChartScene  } from "../scene/chart-scene";
+import type { ChartScene } from "../scene/chart-scene";
 import type {} from "../scene/scene-geometry";
 import type { ChartInteractionState } from "./chart-interaction-state";
-import {
-    ChartPointerCandidateResolver,
-    type ChartPointerCandidates
-} from "./chart-pointer-candidate-resolver";
+import { ChartPointerCandidateResolver, type ChartPointerCandidates } from "./chart-pointer-candidate-resolver";
 
-export {
-    findNearestInteractionBucketByX,
-    findNearestInteractionBucketByY
-} from "./chart-interaction-bucket-search";
+export { findNearestInteractionBucketByX, findNearestInteractionBucketByY } from "./chart-interaction-bucket-search";
 
 import { ChartPointerCandidateEvaluator } from "./chart-pointer-candidate-evaluator";
 
@@ -35,4 +29,3 @@ export class ChartHitTestEngine {
         return ChartHitTestEngine.evaluateCandidateHit(candidates, scene, shared, maxHoverDistance);
     }
 }
-

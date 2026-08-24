@@ -171,7 +171,12 @@ export class ChartExportDomCollector {
             }
             const hasComplexTransform = !transformAnalysis.vectorEligible;
 
-            if (mode === "raster" || role.endsWith("-template") || role === "legend-color-scale" || hasComplexTransform) {
+            if (
+                mode === "raster" ||
+                role.endsWith("-template") ||
+                role === "legend-color-scale" ||
+                hasComplexTransform
+            ) {
                 // Bounded template capability contract: unsupported visual features fail
                 // explicitly at the snapshot boundary instead of exporting incomplete artifacts (R4-06 / R5-06 / R5-07)
                 ChartExportTemplateCapabilityAnalyzer.assertSupported(node);
@@ -231,7 +236,7 @@ export class ChartExportDomCollector {
                     role,
                     transform,
                     transformKind: transformAnalysis.kind,
-                    transformOrigin,
+                    transformOrigin
                 };
                 rasterIslands.push(rasterSnapshot);
                 primitives.push({ kind: "raster", ...rasterSnapshot });
@@ -284,7 +289,7 @@ export class ChartExportDomCollector {
                     plane,
                     role,
                     text,
-                    textColor: color,
+                    textColor: color
                 };
                 badges.push(badgeSnapshot);
                 primitives.push({ kind: "badge", ...badgeSnapshot });
@@ -310,7 +315,7 @@ export class ChartExportDomCollector {
                     plane,
                     role,
                     text,
-                    textAlign,
+                    textAlign
                 };
                 vectorTexts.push(vectorSnapshot);
                 primitives.push({ kind: "text", ...vectorSnapshot });

@@ -15,20 +15,13 @@ export interface ChartCategoryViewportWindow extends ChartViewportAxisRef {
     readonly startIndex: number;
 }
 
-export type ChartViewportWindow =
-    | ChartCategoryViewportWindow
-    | ChartContinuousViewportWindow;
+export type ChartViewportWindow = ChartCategoryViewportWindow | ChartContinuousViewportWindow;
 
 export interface ChartViewportState {
     readonly axes: readonly ChartViewportWindow[];
 }
 
-export type ChartNavigationAxisTarget =
-    | "auto"
-    | "x"
-    | "xy"
-    | "y"
-    | readonly ChartViewportAxisRef[];
+export type ChartNavigationAxisTarget = "auto" | "x" | "xy" | "y" | readonly ChartViewportAxisRef[];
 
 export interface ChartViewportConstraint extends ChartViewportAxisRef {
     readonly maxSpan?: number;
@@ -38,9 +31,7 @@ export interface ChartViewportConstraint extends ChartViewportAxisRef {
     readonly minVisibleCategories?: number;
 }
 
-export type ChartViewportLinkMode =
-    | "domain"
-    | "relative";
+export type ChartViewportLinkMode = "domain" | "relative";
 
 export interface ChartViewportLinkGroup {
     readonly axes: readonly ChartViewportAxisRef[];
@@ -66,25 +57,12 @@ export interface ChartNavigationOptions {
     readonly zoomAxes?: ChartNavigationAxisTarget;
 }
 
-export type ChartNavigationInput =
-    | boolean
-    | ChartNavigationOptions;
+export type ChartNavigationInput = boolean | ChartNavigationOptions;
 
 export type ChartViewportChangeSource =
-    | "data-reconcile"
-    | "drag"
-    | "fit"
-    | "keyboard"
-    | "pinch"
-    | "programmatic"
-    | "reset"
-    | "sync"
-    | "wheel";
+    "data-reconcile" | "drag" | "fit" | "keyboard" | "pinch" | "programmatic" | "reset" | "sync" | "wheel";
 
-export type ChartViewportChangePhase =
-    | "end"
-    | "start"
-    | "update";
+export type ChartViewportChangePhase = "end" | "start" | "update";
 
 export interface ChartViewportChangeEvent {
     readonly changedAxes: readonly ChartViewportAxisRef[];

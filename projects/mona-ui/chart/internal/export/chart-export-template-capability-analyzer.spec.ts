@@ -38,9 +38,7 @@ describe("ChartExportTemplateCapabilityAnalyzer active content policy", () => {
             el.appendChild(svg);
 
             try {
-                expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(
-                    ChartExportError
-                );
+                expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(ChartExportError);
                 try {
                     ChartExportTemplateCapabilityAnalyzer.assertSupported(el);
                 } catch (err) {

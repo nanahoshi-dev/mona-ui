@@ -80,9 +80,7 @@ describe("PolarAxisLayoutEngine", () => {
         };
     }
 
-    function createMockRadialAxis(
-        overrides: Partial<ChartRadialAxisRegistration> = {}
-    ): ChartRadialAxisRegistration {
+    function createMockRadialAxis(overrides: Partial<ChartRadialAxisRegistration> = {}): ChartRadialAxisRegistration {
         return {
             axisLine: signal(true),
             formatter: signal(undefined),
@@ -279,7 +277,12 @@ describe("PolarAxisLayoutEngine", () => {
             angularAxis: createMockAngularAxis({ labelOffset: signal(10), rotation: signal(0) }),
             containerHeight: 400,
             containerWidth: 400,
-            radialAxis: createMockRadialAxis({ labelAngle: signal(0), labelOffset: signal(6), max: signal(100), min: signal(0) }),
+            radialAxis: createMockRadialAxis({
+                labelAngle: signal(0),
+                labelOffset: signal(6),
+                max: signal(100),
+                min: signal(0)
+            }),
             rootData,
             series: [series],
             styleResolver

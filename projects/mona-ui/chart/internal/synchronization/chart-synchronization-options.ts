@@ -104,7 +104,12 @@ function normalizeAxisMappings(
         }
         const source = mapping.source;
         const target = mapping.target;
-        if (!source || !target || (source.axis !== "x" && source.axis !== "y") || (target.axis !== "x" && target.axis !== "y")) {
+        if (
+            !source ||
+            !target ||
+            (source.axis !== "x" && source.axis !== "y") ||
+            (target.axis !== "x" && target.axis !== "y")
+        ) {
             ChartDiagnostics.warnOnce(
                 warned,
                 `Invalid synchronization axis mapping in group "${group}". Mapping ignored.`,

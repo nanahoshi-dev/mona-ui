@@ -168,9 +168,7 @@ describe("CartesianStackEngine", () => {
 
     describe("Normal Stacking — Mixed Signs (Diverging)", () => {
         it("should accumulate positive and negative values on their respective sides without canceling", () => {
-            const rootData = [
-                { month: "Jan", gain1: 10, gain2: 15, loss1: -5, loss2: -10 }
-            ];
+            const rootData = [{ month: "Jan", gain1: 10, gain2: 15, loss1: -5, loss2: -10 }];
 
             const series = [
                 createMockBarSeries({ field: "gain1", id: "g1", stack: "pnl" }),
@@ -271,9 +269,7 @@ describe("CartesianStackEngine", () => {
         });
 
         it("should independently normalize mixed signs to +100% and -100%", () => {
-            const rootData = [
-                { month: "Jan", gain: 40, loss1: -20, loss2: -60 }
-            ];
+            const rootData = [{ month: "Jan", gain: 40, loss1: -20, loss2: -60 }];
 
             const series = [
                 createMockBarSeries({ field: "gain", id: "g", stack: "p", stackMode: "percent" }),
@@ -340,7 +336,7 @@ describe("CartesianStackEngine", () => {
             expect(a2At2?.defined).toBe(true);
             expect(a2At2?.rawValue).toBe(0);
             expect(a2At2?.stackStart).toBe(20); // starts after a1's 20
-            expect(a2At2?.stackEnd).toBe(20);   // ends at 20 (zero height)
+            expect(a2At2?.stackEnd).toBe(20); // ends at 20 (zero height)
         });
     });
 
@@ -352,9 +348,7 @@ describe("CartesianStackEngine", () => {
                 { month: "Feb", val: 30 }
             ];
 
-            const series = [
-                createMockBarSeries({ data, field: "val", id: "s1", stack: "g1", xField: "month" })
-            ];
+            const series = [createMockBarSeries({ data, field: "val", id: "s1", stack: "g1", xField: "month" })];
 
             const analysis = CartesianStackEngine.computeAnalysis({
                 rootData: [],
@@ -419,9 +413,7 @@ describe("CartesianStackEngine", () => {
 
     describe("Visibility Filtering & Stable Configuration Signature", () => {
         it("should exclude hidden series from cumulative calculation and maintain stable configuration signature", () => {
-            const rootData = [
-                { month: "Jan", s1: 20, s2: 30, s3: 50 }
-            ];
+            const rootData = [{ month: "Jan", s1: 20, s2: 30, s3: 50 }];
 
             const seriesAll = [
                 createMockBarSeries({ field: "s1", id: "s1", stack: "pct", stackMode: "percent", visible: true }),

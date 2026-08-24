@@ -52,24 +52,19 @@ export class RangeBarSeriesRenderer {
             }
 
             const radius = bar.radius ?? borderRadius;
-            const cornerRadii = bar.cornerRadii ?? (radius > 0 ? {
-                bottomLeft: radius,
-                bottomRight: radius,
-                topLeft: radius,
-                topRight: radius
-            } : undefined);
+            const cornerRadii =
+                bar.cornerRadii ??
+                (radius > 0
+                    ? {
+                          bottomLeft: radius,
+                          bottomRight: radius,
+                          topLeft: radius,
+                          topRight: radius
+                      }
+                    : undefined);
 
             context.globalAlpha = barAlpha;
-            drawBarRect(
-                context,
-                bar.x,
-                bar.y,
-                bar.width,
-                bar.height,
-                radius,
-                true,
-                cornerRadii
-            );
+            drawBarRect(context, bar.x, bar.y, bar.width, bar.height, radius, true, cornerRadii);
         }
 
         context.restore();

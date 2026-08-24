@@ -65,9 +65,7 @@ describe("HierarchicalLayoutEngine & ChartLayoutEngine (Hierarchical)", () => {
     });
 
     it("routes through ChartLayoutEngine to HierarchicalLayoutEngine and produces TreemapChartScene", () => {
-        const reg = createMockTreemapRegistration([
-            { name: "Group 1", children: [{ name: "Leaf 1", value: 50 }] }
-        ]);
+        const reg = createMockTreemapRegistration([{ name: "Group 1", children: [{ name: "Leaf 1", value: 50 }] }]);
 
         const scene = ChartLayoutEngine.computeScene({
             containerHeight: 300,
@@ -85,9 +83,7 @@ describe("HierarchicalLayoutEngine & ChartLayoutEngine (Hierarchical)", () => {
 
     it("uses options.rootData when series registration has undefined data", () => {
         const reg = createMockTreemapRegistration(undefined);
-        const rootData = [
-            { name: "Group Root", children: [{ name: "Leaf Root", value: 100 }] }
-        ];
+        const rootData = [{ name: "Group Root", children: [{ name: "Leaf Root", value: 100 }] }];
 
         const scene = ChartLayoutEngine.computeScene({
             containerHeight: 300,

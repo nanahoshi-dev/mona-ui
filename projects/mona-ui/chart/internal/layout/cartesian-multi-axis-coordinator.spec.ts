@@ -1,7 +1,6 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type {
-    
     ChartLineSeriesRegistration,
     ChartXAxisRegistration,
     ChartYAxisRegistration
@@ -68,7 +67,9 @@ describe("CartesianMultiAxisCoordinator", () => {
         ...overrides
     });
 
-    const createMockLineSeries = (overrides: Partial<ChartLineSeriesRegistration> = {}): ChartLineSeriesRegistration => ({
+    const createMockLineSeries = (
+        overrides: Partial<ChartLineSeriesRegistration> = {}
+    ): ChartLineSeriesRegistration => ({
         color: signal("#10b981"),
         curve: signal("linear"),
         data: signal(undefined),
@@ -88,8 +89,16 @@ describe("CartesianMultiAxisCoordinator", () => {
 
     it("should coordinate dual Y-axes on left and right sides", () => {
         const x1 = createMockXAxis({ axisId: signal("x-main"), field: signal("month") });
-        const y1 = createMockYAxis({ axisId: signal("y-temp"), position: signal("left"), title: signal("Temperature (°C)") });
-        const y2 = createMockYAxis({ axisId: signal("y-precip"), position: signal("right"), title: signal("Precipitation (mm)") });
+        const y1 = createMockYAxis({
+            axisId: signal("y-temp"),
+            position: signal("left"),
+            title: signal("Temperature (°C)")
+        });
+        const y2 = createMockYAxis({
+            axisId: signal("y-precip"),
+            position: signal("right"),
+            title: signal("Precipitation (mm)")
+        });
 
         const s1 = createMockLineSeries({ field: signal("temp"), id: "s-temp", yAxisId: signal("y-temp") });
         const s2 = createMockLineSeries({ field: signal("precip"), id: "s-precip", yAxisId: signal("y-precip") });
@@ -402,7 +411,12 @@ describe("CartesianMultiAxisCoordinator", () => {
 
     it("should coordinate identically-named X and Y axes without cross-dimension collision (MAX3-001, MAX3-017)", () => {
         const xShared = createMockXAxis({ axisId: signal("shared"), field: signal("cat"), type: signal("category") });
-        const yShared = createMockYAxis({ axisId: signal("shared"), position: signal("left"), title: signal("Value"), type: signal("linear") });
+        const yShared = createMockYAxis({
+            axisId: signal("shared"),
+            position: signal("left"),
+            title: signal("Value"),
+            type: signal("linear")
+        });
 
         const s1 = createMockLineSeries({
             field: signal("val"),

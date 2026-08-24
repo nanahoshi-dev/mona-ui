@@ -27,7 +27,7 @@ import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geom
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { canonicalPolarAngle, degreesToRadians, normalizeDegrees } from "../utils/angle-utils";
-import { clamp ,normalizeNonNegativeNumber, normalizeTickCount } from "../utils/number-utils";
+import { clamp, normalizeNonNegativeNumber, normalizeTickCount } from "../utils/number-utils";
 
 export interface PolarAxisLayoutOptions {
     angularAxis?: ChartAngularAxisRegistration;
@@ -50,7 +50,16 @@ function computeMaxRadius(radii: readonly number[], fallback: number): number {
 
 export class PolarAxisLayoutEngine {
     public static computeScene(options: PolarAxisLayoutOptions): PolarAxisChartScene {
-        const { angularAxis, containerHeight, containerWidth, measurements, radialAxis, rootData, series, styleResolver } = options;
+        const {
+            angularAxis,
+            containerHeight,
+            containerWidth,
+            measurements,
+            radialAxis,
+            rootData,
+            series,
+            styleResolver
+        } = options;
 
         const isRadar = series.some(s => s.type === "radar");
         const axisMode: "polar" | "radar" = isRadar ? "radar" : "polar";
@@ -96,7 +105,9 @@ export class PolarAxisLayoutEngine {
             radarDataResult = prepareRadarData(radarSeriesList, rootData, angularFormatter);
             allValues = radarDataResult.allValues;
         } else {
-            const polarSeriesList = series.filter((s): s is ChartContinuousPolarSeriesRegistration => s.type === "polar");
+            const polarSeriesList = series.filter(
+                (s): s is ChartContinuousPolarSeriesRegistration => s.type === "polar"
+            );
             polarDataResult = prepareContinuousPolarData(polarSeriesList, rootData, angularFormatter);
             allValues = polarDataResult.allValues;
         }
@@ -210,9 +221,7 @@ export class PolarAxisLayoutEngine {
                     x: center.x + Math.sin(angle) * (outerRadius + angularLabelOffset),
                     y: center.y - Math.cos(angle) * (outerRadius + angularLabelOffset)
                 };
-                const isTickVisible =
-                    angularTickCount <= 12 ||
-                    (angularTickCount <= 24 ? i % 2 === 0 : i % 4 === 0);
+                const isTickVisible = angularTickCount <= 12 || (angularTickCount <= 24 ? i % 2 === 0 : i % 4 === 0);
 
                 angularTicks.push({
                     angle,
@@ -247,9 +256,7 @@ export class PolarAxisLayoutEngine {
                 x: center.x + sinLabelAngle * r + cosLabelAngle * radialLabelOffset,
                 y: center.y - cosLabelAngle * r + sinLabelAngle * radialLabelOffset
             };
-            const formattedValue = radialFormatter
-                ? radialFormatter(val, idx)
-                : formatRadialValue(val);
+            const formattedValue = radialFormatter ? radialFormatter(val, idx) : formatRadialValue(val);
 
             return {
                 formattedValue,
@@ -278,7 +285,10 @@ export class PolarAxisLayoutEngine {
         // 7. Series Scenes, Hit Targets, and Interaction Buckets
         const seriesScenes: ChartRadialSeriesScene[] = [];
         const hitTargets: SceneHitTarget[] = [];
-        const bucketMap = new Map<string, { anchor: ChartPoint; hits: SceneHitTarget[]; order: number; value: unknown }>();
+        const bucketMap = new Map<
+            string,
+            { anchor: ChartPoint; hits: SceneHitTarget[]; order: number; value: unknown }
+        >();
         let hasVisualRenderableSeries = false;
 
         let seriesIndex = 0;
@@ -361,11 +371,11 @@ export class PolarAxisLayoutEngine {
                 }
 
                 const definedCount = points.filter(p => p.defined).length;
-                const isSeriesRenderable = isVisible && (
-                    (showPoints && (pointRadius ?? 4) > 0 && definedCount >= 1) ||
-                    (strokeWidth > 0 && definedCount >= 2) ||
-                    (fillMode !== "none" && definedCount >= 3)
-                );
+                const isSeriesRenderable =
+                    isVisible &&
+                    ((showPoints && (pointRadius ?? 4) > 0 && definedCount >= 1) ||
+                        (strokeWidth > 0 && definedCount >= 2) ||
+                        (fillMode !== "none" && definedCount >= 3));
                 if (isSeriesRenderable) {
                     hasVisualRenderableSeries = true;
                 }
@@ -460,11 +470,11 @@ export class PolarAxisLayoutEngine {
                 }
 
                 const definedCount = points.filter(p => p.defined).length;
-                const isSeriesRenderable = isVisible && (
-                    (showPoints && (pointRadius ?? 4) > 0 && definedCount >= 1) ||
-                    (strokeWidth > 0 && definedCount >= 2) ||
-                    (fillMode !== "none" && definedCount >= 2)
-                );
+                const isSeriesRenderable =
+                    isVisible &&
+                    ((showPoints && (pointRadius ?? 4) > 0 && definedCount >= 1) ||
+                        (strokeWidth > 0 && definedCount >= 2) ||
+                        (fillMode !== "none" && definedCount >= 2));
                 if (isSeriesRenderable) {
                     hasVisualRenderableSeries = true;
                 }

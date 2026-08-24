@@ -10,7 +10,8 @@ const ONE_PX_PNG_BYTES = Uint8Array.from(
     c => c.charCodeAt(0)
 );
 
-const VALID_DATA_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+const VALID_DATA_PNG =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
 function imageContainer(url: string): HTMLElement {
     const container = document.createElement("div");
@@ -57,9 +58,7 @@ describe("ChartExportResourceManager", () => {
         const video = document.createElement("video");
         root.appendChild(video);
 
-        await expect(ChartExportResourceManager.preflightIslandResources([root])).rejects.toThrow(
-            ChartExportError
-        );
+        await expect(ChartExportResourceManager.preflightIslandResources([root])).rejects.toThrow(ChartExportError);
     });
 
     it("throws AbortError when signal is already aborted", async () => {
@@ -67,18 +66,14 @@ describe("ChartExportResourceManager", () => {
         const controller = new AbortController();
         controller.abort();
 
-        await expect(
-            ChartExportResourceManager.preflightIslandResources([root], controller.signal)
-        ).rejects.toThrow();
+        await expect(ChartExportResourceManager.preflightIslandResources([root], controller.signal)).rejects.toThrow();
     });
 
     it("succeeds when template elements are static text and standard markup", async () => {
         const root = document.createElement("div");
         root.innerHTML = '<span class="badge">Value: 100</span>';
 
-        await expect(
-            ChartExportResourceManager.preflightIslandResources([root])
-        ).resolves.toBeUndefined();
+        await expect(ChartExportResourceManager.preflightIslandResources([root])).resolves.toBeUndefined();
     });
 
     it("accepts valid supported data URI raster images and inlines them", async () => {
@@ -87,7 +82,11 @@ describe("ChartExportResourceManager", () => {
         img.src = VALID_DATA_PNG;
         root.appendChild(img);
 
-        await ChartExportResourceManager.captureAndInlineIslandResources([root], undefined, fakeBitmapDecodeEnvironment());
+        await ChartExportResourceManager.captureAndInlineIslandResources(
+            [root],
+            undefined,
+            fakeBitmapDecodeEnvironment()
+        );
         expect(img.src.startsWith("data:image/png")).toBe(true);
     });
 
@@ -97,9 +96,9 @@ describe("ChartExportResourceManager", () => {
         img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
         root.appendChild(img);
 
-        await expect(
-            ChartExportResourceManager.captureAndInlineIslandResources([root])
-        ).rejects.toThrowError(ChartExportError);
+        await expect(ChartExportResourceManager.captureAndInlineIslandResources([root])).rejects.toThrowError(
+            ChartExportError
+        );
     });
 
     it("rejects corrupt supported data image URIs", async () => {
@@ -109,9 +108,9 @@ describe("ChartExportResourceManager", () => {
         img.src = "data:image/png;base64,iVBORw0KGgoAAAA=";
         root.appendChild(img);
 
-        await expect(
-            ChartExportResourceManager.captureAndInlineIslandResources([root])
-        ).rejects.toThrowError(ChartExportError);
+        await expect(ChartExportResourceManager.captureAndInlineIslandResources([root])).rejects.toThrowError(
+            ChartExportError
+        );
     });
 
     it("deduplicates identical external resource URLs within one transaction", async () => {
@@ -125,7 +124,11 @@ describe("ChartExportResourceManager", () => {
         img2.src = "https://cdn.example/shared-logo.png";
         root2.appendChild(img2);
 
-        await ChartExportResourceManager.captureAndInlineIslandResources([root1, root2], undefined, fakeBitmapDecodeEnvironment());
+        await ChartExportResourceManager.captureAndInlineIslandResources(
+            [root1, root2],
+            undefined,
+            fakeBitmapDecodeEnvironment()
+        );
 
         // fetch should only be called once for both elements
         expect(window.fetch).toHaveBeenCalledTimes(1);
@@ -137,8 +140,16 @@ describe("ChartExportResourceManager", () => {
         const first = imageContainer("https://cdn.example/per-tx.png");
         const second = imageContainer("https://cdn.example/per-tx.png");
 
-        await ChartExportResourceManager.captureAndInlineIslandResources([first], undefined, fakeBitmapDecodeEnvironment());
-        await ChartExportResourceManager.captureAndInlineIslandResources([second], undefined, fakeBitmapDecodeEnvironment());
+        await ChartExportResourceManager.captureAndInlineIslandResources(
+            [first],
+            undefined,
+            fakeBitmapDecodeEnvironment()
+        );
+        await ChartExportResourceManager.captureAndInlineIslandResources(
+            [second],
+            undefined,
+            fakeBitmapDecodeEnvironment()
+        );
 
         // A fresh transaction must not reuse the previous transaction's capture cache
         expect(window.fetch).toHaveBeenCalledTimes(2);
@@ -276,7 +287,9 @@ describe("ChartExportResourceManager transaction concurrency (plan §39)", () =>
         window.fetch = vi.fn().mockImplementation(async () => {
             return new Response(
                 Uint8Array.from(
-                    atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="),
+                    atob(
+                        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                    ),
                     c => c.charCodeAt(0)
                 ),
                 { status: 200 }
@@ -336,7 +349,9 @@ describe("ChartExportResourceManager transaction concurrency (plan §39)", () =>
             }
             return new Response(
                 Uint8Array.from(
-                    atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="),
+                    atob(
+                        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                    ),
                     c => c.charCodeAt(0)
                 ),
                 { status: 200 }

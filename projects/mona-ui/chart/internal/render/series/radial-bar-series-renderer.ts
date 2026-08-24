@@ -76,12 +76,7 @@ export class RadialBarSeriesRenderer {
             markArcGenerator(mark);
 
             if (fillMode === "gradient") {
-                const spec = createPolarGradientSpec(
-                    mark.innerRadius,
-                    mark.outerRadius,
-                    mark.color,
-                    style.fillOpacity
-                );
+                const spec = createPolarGradientSpec(mark.innerRadius, mark.outerRadius, mark.color, style.fillOpacity);
                 const gradient = context.createRadialGradient(0, 0, spec.innerRadius, 0, 0, spec.outerRadius);
                 for (const stop of spec.stops) {
                     gradient.addColorStop(stop.offset, stop.color);

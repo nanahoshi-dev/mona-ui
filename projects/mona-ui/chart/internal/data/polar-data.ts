@@ -80,13 +80,9 @@ export function preparePolarData(
             cat = `Item ${dataIndex + 1}`;
         }
 
-        const formattedCategory = categoryFormatter
-            ? categoryFormatter(cat, dataIndex)
-            : String(cat);
+        const formattedCategory = categoryFormatter ? categoryFormatter(cat, dataIndex) : String(cat);
 
-        const formattedValue = valueFormatter
-            ? valueFormatter(numVal, dataIndex)
-            : formatPolarValue(numVal);
+        const formattedValue = valueFormatter ? valueFormatter(numVal, dataIndex) : formatPolarValue(numVal);
 
         const paletteIndex = validPaletteIndex++;
         const sliceId = `${series.id}:slice:${dataIndex}`;

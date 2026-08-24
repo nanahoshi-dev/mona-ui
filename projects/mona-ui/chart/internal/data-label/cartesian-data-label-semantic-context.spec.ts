@@ -41,12 +41,7 @@ describe("Chart Data Label Semantic Context & Color Fallback", () => {
             orientation: "horizontal"
         };
 
-        const ctx = ChartDataLabelContextBuilder.buildContext(
-            hit,
-            true,
-            "#3b82f6",
-            horizontalScene
-        );
+        const ctx = ChartDataLabelContextBuilder.buildContext(hit, true, "#3b82f6", horizontalScene);
 
         // For horizontal range bar:
         // xValue is undefined (range spans horizontally via fromValue/toValue)
@@ -76,20 +71,10 @@ describe("Chart Data Label Semantic Context & Color Fallback", () => {
             xValue: "A"
         };
 
-        const ctxEmpty = ChartDataLabelContextBuilder.buildContext(
-            hit,
-            false,
-            "",
-            mockScene
-        );
+        const ctxEmpty = ChartDataLabelContextBuilder.buildContext(hit, false, "", mockScene);
         expect(ctxEmpty.color).toBe("#000000");
 
-        const ctxUndefined = ChartDataLabelContextBuilder.buildContext(
-            hit,
-            false,
-            undefined,
-            mockScene
-        );
+        const ctxUndefined = ChartDataLabelContextBuilder.buildContext(hit, false, undefined, mockScene);
         expect(ctxUndefined.color).toBe("#000000");
     });
 
@@ -140,12 +125,7 @@ describe("Chart Data Label Semantic Context & Color Fallback", () => {
             yAxisId: "customY"
         };
 
-        const ctx = ChartDataLabelContextBuilder.buildContext(
-            hit,
-            false,
-            "#10b981",
-            sceneWithAxes
-        );
+        const ctx = ChartDataLabelContextBuilder.buildContext(hit, false, "#10b981", sceneWithAxes);
 
         expect(ctx.xValue).toBe("2026-08-20");
         expect(ctx.yValue).toBe(45.5);

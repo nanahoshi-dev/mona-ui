@@ -1,17 +1,11 @@
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartCrosshairRegistration } from "../context/chart-registration-context";
 import type { ChartPointerResolution } from "./chart-pointer-interaction-resolver";
-import type {
-    ChartCrosshairState,
-    ResolvedCrosshairAxisState
-} from "./chart-crosshair-state";
+import type { ChartCrosshairState, ResolvedCrosshairAxisState } from "./chart-crosshair-state";
 import type { ChartPoint } from "../../models/chart.models";
 import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
 import { formatCartesianAxisSemanticValue } from "../utils/chart-formatter";
-import {
-    findNearestInteractionBucketByX,
-    findNearestInteractionBucketByY
-} from "./chart-interaction-bucket-search";
+import { findNearestInteractionBucketByX, findNearestInteractionBucketByY } from "./chart-interaction-bucket-search";
 import { CartesianMarkSemanticResolver } from "./cartesian-mark-semantic-resolver";
 
 export interface CartesianCrosshairResolution {
@@ -123,12 +117,14 @@ function findNearestCompatibleHitAcrossNamespaces(
         let right = low;
 
         while (left >= 0 || right < buckets.length) {
-            const distLeft = left >= 0
-                ? Math.abs(targetCoord - (isHoriz ? buckets[left].anchor.y : buckets[left].anchor.x))
-                : Number.POSITIVE_INFINITY;
-            const distRight = right < buckets.length
-                ? Math.abs(targetCoord - (isHoriz ? buckets[right].anchor.y : buckets[right].anchor.x))
-                : Number.POSITIVE_INFINITY;
+            const distLeft =
+                left >= 0
+                    ? Math.abs(targetCoord - (isHoriz ? buckets[left].anchor.y : buckets[left].anchor.x))
+                    : Number.POSITIVE_INFINITY;
+            const distRight =
+                right < buckets.length
+                    ? Math.abs(targetCoord - (isHoriz ? buckets[right].anchor.y : buckets[right].anchor.x))
+                    : Number.POSITIVE_INFINITY;
 
             if (distLeft > maxSnapDistance && distRight > maxSnapDistance) {
                 break;
@@ -152,19 +148,22 @@ function findNearestCompatibleHitAcrossNamespaces(
 
             const bucketHit = findNearestCompatibleHitInBucket(inspectBucket, pointer, scene, targetAxes);
             if (bucketHit) {
-                const hitPos = bucketHit.point ?? (bucketHit.visualBounds ? {
-                    x: bucketHit.visualBounds.x + bucketHit.visualBounds.width / 2,
-                    y: bucketHit.visualBounds.y + bucketHit.visualBounds.height / 2
-                } : (bucketHit.bounds ? {
-                    x: bucketHit.bounds.x + bucketHit.bounds.width / 2,
-                    y: bucketHit.bounds.y + bucketHit.bounds.height / 2
-                } : inspectBucket.anchor));
+                const hitPos =
+                    bucketHit.point ??
+                    (bucketHit.visualBounds
+                        ? {
+                              x: bucketHit.visualBounds.x + bucketHit.visualBounds.width / 2,
+                              y: bucketHit.visualBounds.y + bucketHit.visualBounds.height / 2
+                          }
+                        : bucketHit.bounds
+                          ? {
+                                x: bucketHit.bounds.x + bucketHit.bounds.width / 2,
+                                y: bucketHit.bounds.y + bucketHit.bounds.height / 2
+                            }
+                          : inspectBucket.anchor);
                 const geomDist = Math.hypot(pointer.x - hitPos.x, pointer.y - hitPos.y);
 
-                if (
-                    axisDist < minAxisDist ||
-                    (axisDist === minAxisDist && geomDist < minGeomDist)
-                ) {
+                if (axisDist < minAxisDist || (axisDist === minAxisDist && geomDist < minGeomDist)) {
                     minAxisDist = axisDist;
                     minGeomDist = geomDist;
                     bestHit = bucketHit;
@@ -230,7 +229,7 @@ export class CartesianCrosshairResolver {
         const isXValid = Boolean(xSnap && xSnap.valid !== false);
         const isYValid = Boolean(ySnap && ySnap.valid !== false);
 
-        if ((needX && !isXValid) && (needY && !isYValid)) {
+        if (needX && !isXValid && needY && !isYValid) {
             return emptyResult;
         }
 
@@ -278,18 +277,22 @@ export class CartesianCrosshairResolver {
                         continue;
                     }
                     if (source === "pointer" && pointer) {
-                        const hitPos = h.point ?? (h.visualBounds ? {
-                            x: h.visualBounds.x + h.visualBounds.width / 2,
-                            y: h.visualBounds.y + h.visualBounds.height / 2
-                        } : (h.bounds ? {
-                            x: h.bounds.x + h.bounds.width / 2,
-                            y: h.bounds.y + h.bounds.height / 2
-                        } : pointer));
+                        const hitPos =
+                            h.point ??
+                            (h.visualBounds
+                                ? {
+                                      x: h.visualBounds.x + h.visualBounds.width / 2,
+                                      y: h.visualBounds.y + h.visualBounds.height / 2
+                                  }
+                                : h.bounds
+                                  ? {
+                                        x: h.bounds.x + h.bounds.width / 2,
+                                        y: h.bounds.y + h.bounds.height / 2
+                                    }
+                                  : pointer);
 
                         const dist = Math.hypot(pointer.x - hitPos.x, pointer.y - hitPos.y);
-                        const distAlongAxis = isHoriz
-                            ? Math.abs(pointer.y - hitPos.y)
-                            : Math.abs(pointer.x - hitPos.x);
+                        const distAlongAxis = isHoriz ? Math.abs(pointer.y - hitPos.y) : Math.abs(pointer.x - hitPos.x);
 
                         if (dist <= maxSnapDistance || distAlongAxis <= maxSnapDistance) {
                             if (dist < minCandDist) {
@@ -314,7 +317,13 @@ export class CartesianCrosshairResolver {
 
                 if (!independentRequested) {
                     // Value-only mode: independent axis is irrelevant, search all available independent bucket namespaces
-                    const match = findNearestCompatibleHitAcrossNamespaces(scene, pointer, isHoriz, maxSnapDistance, targetAxes);
+                    const match = findNearestCompatibleHitAcrossNamespaces(
+                        scene,
+                        pointer,
+                        isHoriz,
+                        maxSnapDistance,
+                        targetAxes
+                    );
                     if (match) {
                         selectedHit = match.hit;
                         snapKind = "mark";
@@ -326,12 +335,17 @@ export class CartesianCrosshairResolver {
                 } else {
                     // Independent axis is requested: constrain to target independent axis ID
                     const interactionAxisId = isHoriz ? yAxisId : xAxisId;
-                    const isTargetPrimary = interactionAxisId === (isHoriz ? scene.primaryYAxisId : scene.primaryXAxisId);
+                    const isTargetPrimary =
+                        interactionAxisId === (isHoriz ? scene.primaryYAxisId : scene.primaryXAxisId);
 
-                    const map = interactionAxisId ? scene.interactionBucketsByAxisId?.get(interactionAxisId) : undefined;
+                    const map = interactionAxisId
+                        ? scene.interactionBucketsByAxisId?.get(interactionAxisId)
+                        : undefined;
                     const axisBuckets: readonly ChartInteractionBucket[] | undefined = map
                         ? Array.from(map.values())
-                        : (isTargetPrimary ? scene.interactionBuckets : undefined);
+                        : isTargetPrimary
+                          ? scene.interactionBuckets
+                          : undefined;
 
                     let nearestBucket: ChartInteractionBucket | null = null;
                     if (axisBuckets && axisBuckets.length > 0) {
@@ -363,7 +377,11 @@ export class CartesianCrosshairResolver {
                                         valX = coordinateSpace.resolveContinuousAtPixel(xRef, coordX)?.value;
                                     }
 
-                                    if (valX !== undefined && coordX >= plotRect.x && coordX <= plotRect.x + plotRect.width) {
+                                    if (
+                                        valX !== undefined &&
+                                        coordX >= plotRect.x &&
+                                        coordX <= plotRect.x + plotRect.width
+                                    ) {
                                         resolvedX = {
                                             axis: "x",
                                             axisId: xAxisId!,
@@ -379,13 +397,20 @@ export class CartesianCrosshairResolver {
                                     }
                                 } else {
                                     // Mode="y" or "xy": value-axis requires a compatible mark in bucket
-                                    const bucketHit = findNearestCompatibleHitInBucket(nearestBucket, pointer, scene, targetAxes);
+                                    const bucketHit = findNearestCompatibleHitInBucket(
+                                        nearestBucket,
+                                        pointer,
+                                        scene,
+                                        targetAxes
+                                    );
                                     if (bucketHit) {
                                         selectedHit = bucketHit;
                                         snapKind = "mark";
                                         activeHitTarget = bucketHit;
                                         activeHits = nearestBucket.hits
-                                            ? nearestBucket.hits.filter(h => isHitCompatibleWithTargetAxes(h, scene, targetAxes))
+                                            ? nearestBucket.hits.filter(h =>
+                                                  isHitCompatibleWithTargetAxes(h, scene, targetAxes)
+                                              )
                                             : [bucketHit];
                                     }
                                 }
@@ -406,7 +431,11 @@ export class CartesianCrosshairResolver {
                                         valY = coordinateSpace.resolveContinuousAtPixel(yRef, coordY)?.value;
                                     }
 
-                                    if (valY !== undefined && coordY >= plotRect.y && coordY <= plotRect.y + plotRect.height) {
+                                    if (
+                                        valY !== undefined &&
+                                        coordY >= plotRect.y &&
+                                        coordY <= plotRect.y + plotRect.height
+                                    ) {
                                         resolvedY = {
                                             axis: "y",
                                             axisId: yAxisId!,
@@ -422,13 +451,20 @@ export class CartesianCrosshairResolver {
                                     }
                                 } else {
                                     // Mode="x" or "xy": value-axis requires a compatible mark in bucket
-                                    const bucketHit = findNearestCompatibleHitInBucket(nearestBucket, pointer, scene, targetAxes);
+                                    const bucketHit = findNearestCompatibleHitInBucket(
+                                        nearestBucket,
+                                        pointer,
+                                        scene,
+                                        targetAxes
+                                    );
                                     if (bucketHit) {
                                         selectedHit = bucketHit;
                                         snapKind = "mark";
                                         activeHitTarget = bucketHit;
                                         activeHits = nearestBucket.hits
-                                            ? nearestBucket.hits.filter(h => isHitCompatibleWithTargetAxes(h, scene, targetAxes))
+                                            ? nearestBucket.hits.filter(h =>
+                                                  isHitCompatibleWithTargetAxes(h, scene, targetAxes)
+                                              )
                                             : [bucketHit];
                                     }
                                 }
@@ -462,7 +498,12 @@ export class CartesianCrosshairResolver {
                         coordX = coordinateSpace.mapContinuousValue(xRef, valX, "viewport");
                     }
 
-                    if (coordX !== undefined && Number.isFinite(coordX) && coordX >= plotRect.x && coordX <= plotRect.x + plotRect.width) {
+                    if (
+                        coordX !== undefined &&
+                        Number.isFinite(coordX) &&
+                        coordX >= plotRect.x &&
+                        coordX <= plotRect.x + plotRect.width
+                    ) {
                         const formattedValue = formatCartesianAxisSemanticValue({
                             axisScene: targetXAxis,
                             index: semantics.semanticIndexX,
@@ -493,7 +534,12 @@ export class CartesianCrosshairResolver {
                         coordY = coordinateSpace.mapContinuousValue(yRef, valY, "viewport");
                     }
 
-                    if (coordY !== undefined && Number.isFinite(coordY) && coordY >= plotRect.y && coordY <= plotRect.y + plotRect.height) {
+                    if (
+                        coordY !== undefined &&
+                        Number.isFinite(coordY) &&
+                        coordY >= plotRect.y &&
+                        coordY <= plotRect.y + plotRect.height
+                    ) {
                         const formattedValue = formatCartesianAxisSemanticValue({
                             axisScene: targetYAxis,
                             index: semantics.semanticIndexY,
@@ -615,4 +661,3 @@ export class CartesianCrosshairResolver {
         };
     }
 }
-

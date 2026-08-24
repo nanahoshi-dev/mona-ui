@@ -5,12 +5,7 @@ import type { InternalCartesianViewportState } from "./cartesian-viewport-normal
 export type ViewportGestureKind = "idle" | "drag-pan" | "pinch" | "wheel";
 
 export type ViewportGestureCancelReason =
-    | "escape"
-    | "navigation-disabled"
-    | "pointer-cancel"
-    | "lost-pointer-capture"
-    | "authority-change"
-    | "destroy";
+    "escape" | "navigation-disabled" | "pointer-cancel" | "lost-pointer-capture" | "authority-change" | "destroy";
 
 export interface ChartViewportDragSession {
     captureOwned: boolean;

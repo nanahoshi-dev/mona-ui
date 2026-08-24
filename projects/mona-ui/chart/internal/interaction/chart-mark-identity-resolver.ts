@@ -12,10 +12,6 @@ export class ChartMarkIdentityResolver {
             return hit.sliceId;
         }
 
-        return JSON.stringify([
-            hit.seriesId,
-            "index",
-            hit.dataIndex ?? hit.index
-        ]);
+        return JSON.stringify([hit.seriesId, "index", hit.dataIndex ?? hit.index]);
     }
 }

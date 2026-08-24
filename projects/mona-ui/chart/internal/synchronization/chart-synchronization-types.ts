@@ -1,4 +1,9 @@
-import type { ChartViewportAxisRef, ChartViewportChangePhase, ChartViewportChangeSource, ChartViewportWindow } from "../../models/chart-viewport.models";
+import type {
+    ChartViewportAxisRef,
+    ChartViewportChangePhase,
+    ChartViewportChangeSource,
+    ChartViewportWindow
+} from "../../models/chart-viewport.models";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
 import type { InternalCartesianViewportState } from "../viewport/cartesian-viewport-normalizer";

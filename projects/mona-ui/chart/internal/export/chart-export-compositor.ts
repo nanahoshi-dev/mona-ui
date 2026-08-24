@@ -16,10 +16,7 @@ export class ChartExportCompositor {
         renderedIslands: readonly RenderedRasterIsland[] = []
     ): SVGSVGElement {
         if (typeof document === "undefined") {
-            throw new ChartExportError(
-                "unsupported-environment",
-                "Cannot compose SVG in a non-browser environment."
-            );
+            throw new ChartExportError("unsupported-environment", "Cannot compose SVG in a non-browser environment.");
         }
 
         // Local clip ID counter to guarantee deterministic output across export transactions (R5-14)

@@ -1,15 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ChartViewportAxisRef, ChartViewportLinkGroup } from "../../models/chart-viewport.models";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import {
-    CartesianAxisCoordinateSpace,
-    type CartesianAxisCoordinateSnapshot
-} from "./cartesian-axis-coordinate-space";
+import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportLinker } from "./cartesian-viewport-linker";
-import {
-    
-    type InternalCartesianViewportState
-} from "./cartesian-viewport-normalizer";
+import { type InternalCartesianViewportState } from "./cartesian-viewport-normalizer";
 
 describe("CartesianViewportLinker", () => {
     const xScale1 = CartesianScaleFactory.createExactPositionScale({
@@ -104,9 +98,7 @@ describe("CartesianViewportLinker", () => {
         ];
 
         const state: InternalCartesianViewportState = {
-            x: new Map([
-                ["x-1", { axis: "x", axisId: "x-1", kind: "continuous", min: 20, max: 80 }]
-            ]),
+            x: new Map([["x-1", { axis: "x", axisId: "x-1", kind: "continuous", min: 20, max: 80 }]]),
             y: new Map()
         };
 
@@ -140,9 +132,7 @@ describe("CartesianViewportLinker", () => {
         ];
 
         const state: InternalCartesianViewportState = {
-            x: new Map([
-                ["x-1", { axis: "x", axisId: "x-1", kind: "continuous", min: 0, max: 50 }]
-            ]),
+            x: new Map([["x-1", { axis: "x", axisId: "x-1", kind: "continuous", min: 0, max: 50 }]]),
             y: new Map()
         };
 

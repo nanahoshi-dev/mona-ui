@@ -76,7 +76,20 @@ describe("SVG Chart Family Smoke Coverage", () => {
                 series: [
                     // Bar
                     {
-                        bars: [{ datum: {}, height: 50, index: 0, isPositive: true, radius: 0, width: 20, x: 50, xValue: "A", y: 100, yValue: 10 }],
+                        bars: [
+                            {
+                                datum: {},
+                                height: 50,
+                                index: 0,
+                                isPositive: true,
+                                radius: 0,
+                                width: 20,
+                                x: 50,
+                                xValue: "A",
+                                y: 100,
+                                yValue: 10
+                            }
+                        ],
                         borderRadius: 0,
                         fillOpacity: 1,
                         id: "bar-1",
@@ -94,7 +107,17 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         fillOpacity: 1,
                         id: "line-1",
                         name: "Line",
-                        points: [{ datum: {}, defined: true, index: 0, point: { x: 50, y: 100 }, renderOpacity: 1, xValue: "A", yValue: 10 }],
+                        points: [
+                            {
+                                datum: {},
+                                defined: true,
+                                index: 0,
+                                point: { x: 50, y: 100 },
+                                renderOpacity: 1,
+                                xValue: "A",
+                                yValue: 10
+                            }
+                        ],
                         style: createMockSeriesStyle("#10b981"),
                         type: "line",
                         visible: true,
@@ -108,7 +131,17 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         fillOpacity: 0.3,
                         id: "area-1",
                         name: "Area",
-                        points: [{ datum: {}, defined: true, index: 0, point: { x: 50, y: 100 }, renderOpacity: 1, xValue: "A", yValue: 10 }],
+                        points: [
+                            {
+                                datum: {},
+                                defined: true,
+                                index: 0,
+                                point: { x: 50, y: 100 },
+                                renderOpacity: 1,
+                                xValue: "A",
+                                yValue: 10
+                            }
+                        ],
                         style: createMockSeriesStyle("#8b5cf6"),
                         type: "area",
                         visible: true,
@@ -144,7 +177,23 @@ describe("SVG Chart Family Smoke Coverage", () => {
                     // OHLC
                     {
                         id: "ohlc-1",
-                        marks: [{ centerX: 60, close: 115, closeY: 85, datum: {}, direction: "rising", high: 130, highY: 70, low: 80, lowY: 130, open: 85, openY: 115, tickWidth: 8, wickWidth: 1 }],
+                        marks: [
+                            {
+                                centerX: 60,
+                                close: 115,
+                                closeY: 85,
+                                datum: {},
+                                direction: "rising",
+                                high: 130,
+                                highY: 70,
+                                low: 80,
+                                lowY: 130,
+                                open: 85,
+                                openY: 115,
+                                tickWidth: 8,
+                                wickWidth: 1
+                            }
+                        ],
                         name: "OHLC",
                         style: createMockSeriesStyle("#6366f1"),
                         type: "ohlc",
@@ -155,7 +204,22 @@ describe("SVG Chart Family Smoke Coverage", () => {
                     // Candlestick
                     {
                         id: "candle-1",
-                        marks: [{ bodyBounds: { height: 30, width: 16, x: 52, y: 85 }, centerX: 60, close: 115, datum: {}, direction: "rising", fillMode: "solid", high: 130, highY: 70, low: 80, lowY: 130, open: 85, wickWidth: 1 }],
+                        marks: [
+                            {
+                                bodyBounds: { height: 30, width: 16, x: 52, y: 85 },
+                                centerX: 60,
+                                close: 115,
+                                datum: {},
+                                direction: "rising",
+                                fillMode: "solid",
+                                high: 130,
+                                highY: 70,
+                                low: 80,
+                                lowY: 130,
+                                open: 85,
+                                wickWidth: 1
+                            }
+                        ],
                         name: "Candlestick",
                         style: createMockSeriesStyle("#10b981"),
                         type: "candlestick",
@@ -165,7 +229,22 @@ describe("SVG Chart Family Smoke Coverage", () => {
                     } as unknown as ChartSeriesScene,
                     // RangeBar
                     {
-                        bars: [{ bounds: { height: 40, width: 20, x: 50, y: 80 }, datum: {}, from: 20, height: 40, index: 0, isPositive: true, radius: 0, to: 60, width: 20, x: 50, xValue: "A", y: 80 }],
+                        bars: [
+                            {
+                                bounds: { height: 40, width: 20, x: 50, y: 80 },
+                                datum: {},
+                                from: 20,
+                                height: 40,
+                                index: 0,
+                                isPositive: true,
+                                radius: 0,
+                                to: 60,
+                                width: 20,
+                                x: 50,
+                                xValue: "A",
+                                y: 80
+                            }
+                        ],
                         borderRadius: 0,
                         fillOpacity: 1,
                         id: "rangebar-1",
@@ -183,7 +262,19 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         fillOpacity: 0.3,
                         id: "rangearea-1",
                         name: "RangeArea",
-                        points: [{ datum: {}, defined: true, fromPoint: { x: 50, y: 80 }, high: 60, index: 0, low: 20, renderOpacity: 1, toPoint: { x: 50, y: 120 }, xValue: "A" }],
+                        points: [
+                            {
+                                datum: {},
+                                defined: true,
+                                fromPoint: { x: 50, y: 80 },
+                                high: 60,
+                                index: 0,
+                                low: 20,
+                                renderOpacity: 1,
+                                toPoint: { x: 50, y: 120 },
+                                xValue: "A"
+                            }
+                        ],
                         style: createMockSeriesStyle("#14b8a6"),
                         type: "rangeArea",
                         visible: true,
@@ -229,7 +320,22 @@ describe("SVG Chart Family Smoke Coverage", () => {
                 plotRect: { height: 200, width: 200, x: 20, y: 20 },
                 series: [
                     {
-                        cells: [{ color: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: 10, valueText: "10", width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }],
+                        cells: [
+                            {
+                                color: "#ff0000",
+                                dataIndex: 0,
+                                datum: {},
+                                height: 50,
+                                opacity: 1,
+                                rawValue: 10,
+                                valueText: "10",
+                                width: 50,
+                                x: 20,
+                                xIndex: 0,
+                                y: 20,
+                                yIndex: 0
+                            }
+                        ],
                         id: "h1",
                         labels: [],
                         name: "Heatmap",
@@ -254,7 +360,23 @@ describe("SVG Chart Family Smoke Coverage", () => {
                 plotRect: { height: 200, width: 200, x: 20, y: 20 },
                 series: [
                     {
-                        bars: [{ bounds: { height: 50, width: 30, x: 30, y: 50 }, color: "#10b981", dataIndex: 0, datum: {}, fillColor: "#10b981", height: 50, isTotal: false, labelText: "10", radius: 0, summary: "none", width: 30, x: 30, y: 50 }],
+                        bars: [
+                            {
+                                bounds: { height: 50, width: 30, x: 30, y: 50 },
+                                color: "#10b981",
+                                dataIndex: 0,
+                                datum: {},
+                                fillColor: "#10b981",
+                                height: 50,
+                                isTotal: false,
+                                labelText: "10",
+                                radius: 0,
+                                summary: "none",
+                                width: 30,
+                                x: 30,
+                                y: 50
+                            }
+                        ],
                         connectors: [],
                         id: "w1",
                         labels: [],
@@ -325,7 +447,22 @@ describe("SVG Chart Family Smoke Coverage", () => {
                 series: [
                     {
                         id: "pie-1",
-                        marks: [{ color: "#ff0000", dataIndex: 0, datum: {}, endAngle: Math.PI, formattedValue: "10", innerRadius: 0, itemId: "m1", outerRadius: 100, padAngle: 0, rawValue: 10, startAngle: 0, visible: true }],
+                        marks: [
+                            {
+                                color: "#ff0000",
+                                dataIndex: 0,
+                                datum: {},
+                                endAngle: Math.PI,
+                                formattedValue: "10",
+                                innerRadius: 0,
+                                itemId: "m1",
+                                outerRadius: 100,
+                                padAngle: 0,
+                                rawValue: 10,
+                                startAngle: 0,
+                                visible: true
+                            }
+                        ],
                         name: "Pie",
                         renderOpacity: 1,
                         style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
@@ -357,10 +494,43 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         barGap: 5,
                         fillMode: "solid",
                         id: "rb-1",
-                        marks: [{ animationKey: "rb1", color: "#3b82f6", cornerRadius: 0, dataIndex: 0, datum: {}, endAngle: Math.PI, formattedValue: "50", innerRadius: 40, itemId: "rb-m1", outerRadius: 60, padAngle: 0, rawValue: 50, startAngle: 0, visible: true }],
+                        marks: [
+                            {
+                                animationKey: "rb1",
+                                color: "#3b82f6",
+                                cornerRadius: 0,
+                                dataIndex: 0,
+                                datum: {},
+                                endAngle: Math.PI,
+                                formattedValue: "50",
+                                innerRadius: 40,
+                                itemId: "rb-m1",
+                                outerRadius: 60,
+                                padAngle: 0,
+                                rawValue: 50,
+                                startAngle: 0,
+                                visible: true
+                            }
+                        ],
                         name: "RadialBar",
-                        style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0, trackColor: "#eee", trackOpacity: 1 },
-                        tracks: [{ color: "#eee", endAngle: Math.PI * 2, innerRadius: 40, opacity: 1, outerRadius: 60, startAngle: 0 }],
+                        style: {
+                            fillOpacity: 1,
+                            strokeColor: "none",
+                            strokeSource: "default",
+                            strokeWidth: 0,
+                            trackColor: "#eee",
+                            trackOpacity: 1
+                        },
+                        tracks: [
+                            {
+                                color: "#eee",
+                                endAngle: Math.PI * 2,
+                                innerRadius: 40,
+                                opacity: 1,
+                                outerRadius: 60,
+                                startAngle: 0
+                            }
+                        ],
                         type: "radialBar"
                     }
                 ],
@@ -371,4 +541,3 @@ describe("SVG Chart Family Smoke Coverage", () => {
         });
     });
 });
-

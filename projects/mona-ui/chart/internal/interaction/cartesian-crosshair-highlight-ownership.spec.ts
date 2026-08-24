@@ -3,7 +3,10 @@ import { signal } from "@angular/core";
 import { CartesianCrosshairResolver } from "./cartesian-crosshair-resolver";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartCrosshairRegistration } from "../context/chart-registration-context";
-import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
+import {
+    CartesianAxisCoordinateSpace,
+    type CartesianAxisCoordinateSnapshot
+} from "../viewport/cartesian-axis-coordinate-space";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import type { ChartPointerResolution } from "./chart-pointer-interaction-resolver";
 import type { SceneHitTarget, ChartInteractionBucket } from "../scene/scene-geometry";
@@ -113,7 +116,9 @@ function createMockScene(): CartesianXYChartScene {
 }
 
 describe("CartesianCrosshairHighlightOwnership (CAA-R3-002)", () => {
-    function createRegistration(overrides: Partial<Record<keyof ChartCrosshairRegistration, unknown>> = {}): ChartCrosshairRegistration {
+    function createRegistration(
+        overrides: Partial<Record<keyof ChartCrosshairRegistration, unknown>> = {}
+    ): ChartCrosshairRegistration {
         return {
             color: signal(undefined),
             element: { nativeElement: document.createElement("div") },

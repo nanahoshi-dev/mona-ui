@@ -131,18 +131,32 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R6-004 / Gate U)"
     it("guarantees exact layer draw order [grid -> underlays -> series -> overlays -> axes -> transient] across progress steps (Gate U)", () => {
         const orderLog: string[] = [];
 
-        const gridSpy = vi.spyOn(CartesianChartRenderer as unknown as { renderGridLayer: () => void }, "renderGridLayer")
-            .mockImplementation(() => { orderLog.push("grid"); });
-        const underlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderUnderlays")
-            .mockImplementation(() => { orderLog.push("underlay"); });
-        const seriesSpy = vi.spyOn(CartesianChartRenderer as unknown as { renderSeriesLayer: () => void }, "renderSeriesLayer")
-            .mockImplementation(() => { orderLog.push("series"); });
-        const overlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderOverlays")
-            .mockImplementation(() => { orderLog.push("overlay"); });
-        const axisSpy = vi.spyOn(CartesianChartRenderer as unknown as { renderAxisLayer: () => void }, "renderAxisLayer")
-            .mockImplementation(() => { orderLog.push("axis"); });
-        const transientSpy = vi.spyOn(CartesianChartRenderer as unknown as { renderTransientLayer: () => void }, "renderTransientLayer")
-            .mockImplementation(() => { orderLog.push("transient"); });
+        const gridSpy = vi
+            .spyOn(CartesianChartRenderer as unknown as { renderGridLayer: () => void }, "renderGridLayer")
+            .mockImplementation(() => {
+                orderLog.push("grid");
+            });
+        const underlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderUnderlays").mockImplementation(() => {
+            orderLog.push("underlay");
+        });
+        const seriesSpy = vi
+            .spyOn(CartesianChartRenderer as unknown as { renderSeriesLayer: () => void }, "renderSeriesLayer")
+            .mockImplementation(() => {
+                orderLog.push("series");
+            });
+        const overlaySpy = vi.spyOn(CartesianOverlayRenderer, "renderOverlays").mockImplementation(() => {
+            orderLog.push("overlay");
+        });
+        const axisSpy = vi
+            .spyOn(CartesianChartRenderer as unknown as { renderAxisLayer: () => void }, "renderAxisLayer")
+            .mockImplementation(() => {
+                orderLog.push("axis");
+            });
+        const transientSpy = vi
+            .spyOn(CartesianChartRenderer as unknown as { renderTransientLayer: () => void }, "renderTransientLayer")
+            .mockImplementation(() => {
+                orderLog.push("transient");
+            });
 
         const hostEl = document.createElement("div");
         const styleResolver = new ChartStyleResolver(hostEl);
@@ -165,14 +179,7 @@ describe("CartesianChartRenderer Crossfade Layer Ordering (CAA-R6-004 / Gate U)"
             // Filter out consecutive duplicate calls to same layer caused by from/to dual passes (e.g. series from + series to)
             const uniqueSequence = orderLog.filter((item, idx) => idx === 0 || item !== orderLog[idx - 1]);
 
-            expect(uniqueSequence).toEqual([
-                "grid",
-                "underlay",
-                "series",
-                "overlay",
-                "axis",
-                "transient"
-            ]);
+            expect(uniqueSequence).toEqual(["grid", "underlay", "series", "overlay", "axis", "transient"]);
         }
 
         gridSpy.mockRestore();

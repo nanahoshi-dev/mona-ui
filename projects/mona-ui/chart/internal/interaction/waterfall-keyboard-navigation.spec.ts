@@ -1,14 +1,51 @@
 import { describe, expect, it } from "vitest";
 import { WaterfallKeyboardNavigation } from "./waterfall-keyboard-navigation";
-import type { CartesianWaterfallChartScene, ChartWaterfallSeriesStyle, SceneWaterfallBar } from "../scene/waterfall-scene";
+import type {
+    CartesianWaterfallChartScene,
+    ChartWaterfallSeriesStyle,
+    SceneWaterfallBar
+} from "../scene/waterfall-scene";
 import { WaterfallHitIndex } from "./waterfall-hit-index";
 
 describe("WaterfallKeyboardNavigation", () => {
     function createMockScene(): CartesianWaterfallChartScene {
         const hitTargets = [
-            { animationKey: "w:0", dataIndex: 0, datum: {}, index: 0, itemId: "w:0", seriesId: "w-1", seriesName: "Waterfall", seriesType: "waterfall" as const, xKey: "w:0", xValue: "A" },
-            { animationKey: "w:1", dataIndex: 1, datum: {}, index: 1, itemId: "w:1", seriesId: "w-1", seriesName: "Waterfall", seriesType: "waterfall" as const, xKey: "w:1", xValue: "B" },
-            { animationKey: "w:2", dataIndex: 2, datum: {}, index: 2, itemId: "w:2", seriesId: "w-1", seriesName: "Waterfall", seriesType: "waterfall" as const, xKey: "w:2", xValue: "C" }
+            {
+                animationKey: "w:0",
+                dataIndex: 0,
+                datum: {},
+                index: 0,
+                itemId: "w:0",
+                seriesId: "w-1",
+                seriesName: "Waterfall",
+                seriesType: "waterfall" as const,
+                xKey: "w:0",
+                xValue: "A"
+            },
+            {
+                animationKey: "w:1",
+                dataIndex: 1,
+                datum: {},
+                index: 1,
+                itemId: "w:1",
+                seriesId: "w-1",
+                seriesName: "Waterfall",
+                seriesType: "waterfall" as const,
+                xKey: "w:1",
+                xValue: "B"
+            },
+            {
+                animationKey: "w:2",
+                dataIndex: 2,
+                datum: {},
+                index: 2,
+                itemId: "w:2",
+                seriesId: "w-1",
+                seriesName: "Waterfall",
+                seriesType: "waterfall" as const,
+                xKey: "w:2",
+                xValue: "C"
+            }
         ];
 
         return {
@@ -24,21 +61,23 @@ describe("WaterfallKeyboardNavigation", () => {
             legendItems: [],
             plotRect: { height: 300, width: 300, x: 0, y: 0 },
             sequenceSignature: "sig",
-            series: [{
-                bars: [
-                    { animationKey: "w:0" } as unknown as SceneWaterfallBar,
-                    { animationKey: "w:1" } as unknown as SceneWaterfallBar,
-                    { animationKey: "w:2" } as unknown as SceneWaterfallBar
-                ],
-                connectors: [],
-                id: "w-1",
-                kindSignature: "",
-                labels: [],
-                name: "Waterfall",
-                sequenceSignature: "sig",
-                style: {} as unknown as ChartWaterfallSeriesStyle,
-                type: "waterfall"
-            }],
+            series: [
+                {
+                    bars: [
+                        { animationKey: "w:0" } as unknown as SceneWaterfallBar,
+                        { animationKey: "w:1" } as unknown as SceneWaterfallBar,
+                        { animationKey: "w:2" } as unknown as SceneWaterfallBar
+                    ],
+                    connectors: [],
+                    id: "w-1",
+                    kindSignature: "",
+                    labels: [],
+                    name: "Waterfall",
+                    sequenceSignature: "sig",
+                    style: {} as unknown as ChartWaterfallSeriesStyle,
+                    type: "waterfall"
+                }
+            ],
             width: 300,
             xAxisType: "category"
         };
@@ -47,7 +86,7 @@ describe("WaterfallKeyboardNavigation", () => {
     it("navigates horizontally with ArrowRight / ArrowLeft / Home / End", () => {
         const scene = createMockScene();
 
-        const createKeyEvent = (key: string) => ({ key, preventDefault: () => {} } as KeyboardEvent);
+        const createKeyEvent = (key: string) => ({ key, preventDefault: () => {} }) as KeyboardEvent;
 
         // ArrowRight from none (-1) -> 0
         const r1 = WaterfallKeyboardNavigation.handleKeyDown(createKeyEvent("ArrowRight"), scene, -1);

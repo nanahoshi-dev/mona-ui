@@ -25,11 +25,7 @@ import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geom
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { degreesToRadians, normalizeAngleSpan, normalizeDegrees } from "../utils/angle-utils";
 import { RoseHitIndex } from "../interaction/rose-hit-index";
-import {
-    computeOuterRadiusWithStroke,
-    normalizeArcCornerRadius,
-    normalizeRosePadding
-} from "./radial-geometry-utils";
+import { computeOuterRadiusWithStroke, normalizeArcCornerRadius, normalizeRosePadding } from "./radial-geometry-utils";
 import { clamp, normalizeNonNegativeNumber, normalizeRatio, normalizeTickCount } from "../utils/number-utils";
 
 export interface RoseLayoutOptions {
@@ -149,7 +145,9 @@ export class RoseLayout {
             let maxLabelHeight = 14;
             for (let k = 0; k < K; k++) {
                 const cat = preparedData.allCategories[k];
-                const meas = measurements?.get(`angular:${cat.categoryKey}`) ?? measurements?.get(`angular:${String(cat.category)}`);
+                const meas =
+                    measurements?.get(`angular:${cat.categoryKey}`) ??
+                    measurements?.get(`angular:${String(cat.category)}`);
                 if (meas) {
                     maxLabelWidth = Math.max(maxLabelWidth, meas.width);
                     maxLabelHeight = Math.max(maxLabelHeight, meas.height);
@@ -378,9 +376,7 @@ export class RoseLayout {
                     y: center.y - Math.cos(midAngle) * (outerRadius + angularLabelOffset)
                 };
 
-                const formattedValue = angularFormatter
-                    ? angularFormatter(cat.category, k)
-                    : cat.formattedCategory;
+                const formattedValue = angularFormatter ? angularFormatter(cat.category, k) : cat.formattedCategory;
 
                 angularTicks.push({
                     angle: midAngle,
@@ -435,9 +431,7 @@ export class RoseLayout {
                     y: center.y - cosLabel * r + sinLabel * radialLabelOffset
                 };
 
-                const formattedValue = radialFormatter
-                    ? radialFormatter(val, idx)
-                    : formatRadialValue(val);
+                const formattedValue = radialFormatter ? radialFormatter(val, idx) : formatRadialValue(val);
 
                 return {
                     formattedValue,
@@ -479,13 +473,7 @@ export class RoseLayout {
 
         const hasRenderableData = isVisible && preparedData.allItems.length > 0;
 
-        const hitIndex = new RoseHitIndex(
-            center,
-            hitTargets,
-            effectiveStartAngleRad,
-            totalSpanRad,
-            K
-        );
+        const hitIndex = new RoseHitIndex(center, hitTargets, effectiveStartAngleRad, totalSpanRad, K);
 
         return {
             angularAxis: angularAxisScene,

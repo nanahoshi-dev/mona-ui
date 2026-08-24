@@ -1,8 +1,8 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type {
-    ChartBarSeriesRegistration
-    ,ChartXAxisRegistration,
+    ChartBarSeriesRegistration,
+    ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
@@ -39,15 +39,17 @@ function createMockBar(
     };
 }
 
-function createMockXAxis(options?: Partial<{
-    max: number;
-    min: number;
-    nice: boolean;
-    position: "bottom" | "top";
-    tickCount: number;
-    title: string;
-    type: "auto" | "category" | "linear" | "time" | "utc";
-}>): ChartXAxisRegistration {
+function createMockXAxis(
+    options?: Partial<{
+        max: number;
+        min: number;
+        nice: boolean;
+        position: "bottom" | "top";
+        tickCount: number;
+        title: string;
+        type: "auto" | "category" | "linear" | "time" | "utc";
+    }>
+): ChartXAxisRegistration {
     return {
         axisId: signal(undefined),
         axisLine: signal(true),
@@ -71,15 +73,17 @@ function createMockXAxis(options?: Partial<{
     };
 }
 
-function createMockYAxis(options?: Partial<{
-    max: number;
-    min: number;
-    nice: boolean;
-    position: "left" | "right";
-    tickCount: number;
-    title: string;
-    type: "auto" | "category" | "linear";
-}>): ChartYAxisRegistration {
+function createMockYAxis(
+    options?: Partial<{
+        max: number;
+        min: number;
+        nice: boolean;
+        position: "left" | "right";
+        tickCount: number;
+        title: string;
+        type: "auto" | "category" | "linear";
+    }>
+): ChartYAxisRegistration {
     return {
         axisId: signal(undefined),
         axisLine: signal(true),
@@ -203,7 +207,9 @@ describe("Cartesian Plot Convergence Synchronization (HAX-F01, HAX-F02, HAX-F13)
             const yAxisScene = measuredScene.axes.find(a => a.axis === "y")!;
             for (const t of yAxisScene.ticks) {
                 expect(t.coordinate).toBeGreaterThanOrEqual(measuredScene.plotRect.y - 0.5);
-                expect(t.coordinate).toBeLessThanOrEqual(measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5);
+                expect(t.coordinate).toBeLessThanOrEqual(
+                    measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5
+                );
             }
             for (const t of xAxisScene.ticks) {
                 expect(t.coordinate).toBeGreaterThanOrEqual(measuredScene.plotRect.x - 0.5);
@@ -330,7 +336,9 @@ describe("Cartesian Plot Convergence Synchronization (HAX-F01, HAX-F02, HAX-F13)
             const yAxisScene = measuredScene.axes.find(a => a.axis === "y")!;
             for (const t of yAxisScene.ticks) {
                 expect(t.coordinate).toBeGreaterThanOrEqual(measuredScene.plotRect.y - 0.5);
-                expect(t.coordinate).toBeLessThanOrEqual(measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5);
+                expect(t.coordinate).toBeLessThanOrEqual(
+                    measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5
+                );
             }
             for (const t of xAxisScene.ticks) {
                 expect(t.coordinate).toBeGreaterThanOrEqual(measuredScene.plotRect.x - 0.5);
@@ -410,9 +418,13 @@ describe("Cartesian Plot Convergence Synchronization (HAX-F01, HAX-F02, HAX-F13)
             const barScene = measuredScene.series[0] as import("../scene/cartesian-scene").ChartBarSeriesScene;
             for (const b of barScene.bars) {
                 expect(b.x).toBe(measuredScene.plotRect.x);
-                expect(b.x + b.width).toBeLessThanOrEqual(measuredScene.plotRect.x + measuredScene.plotRect.width + 0.5);
+                expect(b.x + b.width).toBeLessThanOrEqual(
+                    measuredScene.plotRect.x + measuredScene.plotRect.width + 0.5
+                );
                 expect(b.y).toBeGreaterThanOrEqual(measuredScene.plotRect.y);
-                expect(b.y + b.height).toBeLessThanOrEqual(measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5);
+                expect(b.y + b.height).toBeLessThanOrEqual(
+                    measuredScene.plotRect.y + measuredScene.plotRect.height + 0.5
+                );
             }
         });
     });

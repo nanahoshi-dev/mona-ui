@@ -53,4 +53,3 @@ export interface ChartAnimationRenderFrame {
     readonly scene: ChartScene;
     readonly toScene?: ChartScene;
 }
-

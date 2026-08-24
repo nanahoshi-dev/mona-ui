@@ -13,8 +13,7 @@ export interface ChartExportResourceDependency {
     readonly isLocalFragment: boolean;
     readonly rawValue: string;
     readonly source:
-        | { readonly kind: "attribute"; readonly name: string }
-        | { readonly kind: "style"; readonly property: string };
+        { readonly kind: "attribute"; readonly name: string } | { readonly kind: "style"; readonly property: string };
     readonly url: string;
 }
 

@@ -27,10 +27,7 @@ function toRangeAreaPointState(pt: SceneRangeAreaPoint, opacity = 1): RangeAreaP
     };
 }
 
-function createCollapsedRangeAreaPointState(
-    pt: SceneRangeAreaPoint,
-    opacity = 0
-): RangeAreaPointMarkTransitionState {
+function createCollapsedRangeAreaPointState(pt: SceneRangeAreaPoint, opacity = 0): RangeAreaPointMarkTransitionState {
     const midY =
         pt.fromPoint && pt.toPoint
             ? (pt.fromPoint.y + pt.toPoint.y) / 2

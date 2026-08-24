@@ -25,10 +25,7 @@ import type {
 } from "./cartesian-axis-registry-resolver";
 import type { SeriesAxisBindingResolution } from "./cartesian-series-axis-binding-resolver";
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
-import type {
-    CartesianAxisMaps,
-    ChartAxisValidity
-} from "./cartesian-axis-resolved-context";
+import type { CartesianAxisMaps, ChartAxisValidity } from "./cartesian-axis-resolved-context";
 import { isFiniteNumber } from "../utils/number-utils";
 import { formatPercentagePoint } from "../utils/chart-formatter";
 import type { CartesianAxisTopologyItem, CartesianStackSceneConfig } from "../scene/chart-scene";
@@ -149,7 +146,10 @@ export interface MultiAxisCoordinatorResult {
 export class CartesianMultiAxisCoordinator {
     static #buildScales(
         axisResolution: CartesianAxisRegistryResolution,
-        resolvedTypes: { x: ReadonlyMap<string, ResolvedChartCartesianAxisType>; y: ReadonlyMap<string, ResolvedChartCartesianAxisType> },
+        resolvedTypes: {
+            x: ReadonlyMap<string, ResolvedChartCartesianAxisType>;
+            y: ReadonlyMap<string, ResolvedChartCartesianAxisType>;
+        },
         domains: { x: ReadonlyMap<string, readonly unknown[]>; y: ReadonlyMap<string, readonly unknown[]> },
         plotRect: ChartRect
     ): { xScales: Map<string, ChartPositionScale>; yScales: Map<string, ChartPositionScale> } {
@@ -175,9 +175,10 @@ export class CartesianMultiAxisCoordinator {
         for (const yAxis of axisResolution.yAxes) {
             const type = resolvedTypes.y.get(yAxis.axisId)!;
             const domain = domains.y.get(yAxis.axisId)!;
-            const range: readonly [number, number] = type === "category"
-                ? [plotRect.y, plotRect.y + plotRect.height]
-                : [plotRect.y + plotRect.height, plotRect.y];
+            const range: readonly [number, number] =
+                type === "category"
+                    ? [plotRect.y, plotRect.y + plotRect.height]
+                    : [plotRect.y + plotRect.height, plotRect.y];
 
             const scale = CartesianScaleFactory.createExactPositionScale({
                 domain,
@@ -217,15 +218,17 @@ export class CartesianMultiAxisCoordinator {
             };
         }
 
-        const rawTicks = "ticks" in scale
-            ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
-            : (scale as ChartBandPositionScale).domain();
+        const rawTicks =
+            "ticks" in scale
+                ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
+                : (scale as ChartBandPositionScale).domain();
 
-        const step = typeof (scale as ChartBandPositionScale).step === "function"
-            ? (scale as ChartBandPositionScale).step()
-            : rawTicks.length > 1
-                ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
-                : 60;
+        const step =
+            typeof (scale as ChartBandPositionScale).step === "function"
+                ? (scale as ChartBandPositionScale).step()
+                : rawTicks.length > 1
+                  ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
+                  : 60;
 
         let maxUnrotatedWidth = 0;
         let maxUnrotatedHeight = 0;
@@ -239,7 +242,10 @@ export class CartesianMultiAxisCoordinator {
             let height: number;
 
             if (measurement) {
-                width = axis.labelMaxWidth !== undefined ? Math.min(axis.labelMaxWidth, measurement.width) : measurement.width;
+                width =
+                    axis.labelMaxWidth !== undefined
+                        ? Math.min(axis.labelMaxWidth, measurement.width)
+                        : measurement.width;
                 height = measurement.height;
             } else {
                 let formattedText: string;
@@ -247,8 +253,14 @@ export class CartesianMultiAxisCoordinator {
                     formattedText = axis.formatter(val, i);
                 } else if (unitMode === "percent" && typeof val === "number") {
                     formattedText = formatPercentagePoint(val);
-                } else if ("formatTick" in scale && typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function") {
-                    formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(val as number, axis.tickCount ?? 5);
+                } else if (
+                    "formatTick" in scale &&
+                    typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function"
+                ) {
+                    formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(
+                        val as number,
+                        axis.tickCount ?? 5
+                    );
                 } else {
                     formattedText = String(val);
                 }
@@ -270,7 +282,11 @@ export class CartesianMultiAxisCoordinator {
                 if (maxUnrotatedWidth + 4 <= step) {
                     resolvedRotation = 0;
                 } else {
-                    const rot45Proj = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, maxUnrotatedHeight, 45);
+                    const rot45Proj = CartesianAxisLabelGeometry.projectRotatedDimensions(
+                        maxUnrotatedWidth,
+                        maxUnrotatedHeight,
+                        45
+                    );
                     if (rot45Proj.projectedWidth + 4 <= step) {
                         resolvedRotation = axis.position === "top" ? -45 : 45;
                     } else {
@@ -284,9 +300,13 @@ export class CartesianMultiAxisCoordinator {
             resolvedRotation = axis.labelRotation;
         }
 
-        const proj = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, maxUnrotatedHeight, resolvedRotation);
+        const proj = CartesianAxisLabelGeometry.projectRotatedDimensions(
+            maxUnrotatedWidth,
+            maxUnrotatedHeight,
+            resolvedRotation
+        );
         const perpExtent = axis.dimension === "x" ? proj.projectedHeight : proj.projectedWidth;
-        const basePerp = perpExtent > 0 ? perpExtent : (axis.dimension === "x" ? 16 : 36);
+        const basePerp = perpExtent > 0 ? perpExtent : axis.dimension === "x" ? 16 : 36;
 
         const gutter = tickMarksOffset + labelPadding + basePerp + (axis.title ? titlePadding + titleExtent : 0);
         return { gutter, resolvedRotation };
@@ -301,15 +321,20 @@ export class CartesianMultiAxisCoordinator {
         plotRect: ChartRect,
         labelRotation: number = 0
     ): readonly ChartAxisSceneTick[] {
-        const rawTicks = "ticks" in scale
-            ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
-            : (scale as ChartBandPositionScale).domain();
-        const bandwidth = typeof (scale as ChartBandPositionScale).bandwidth === "function" ? (scale as ChartBandPositionScale).bandwidth() : 0;
-        const step = typeof (scale as ChartBandPositionScale).step === "function"
-            ? (scale as ChartBandPositionScale).step()
-            : rawTicks.length > 1
-                ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
-                : 60;
+        const rawTicks =
+            "ticks" in scale
+                ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
+                : (scale as ChartBandPositionScale).domain();
+        const bandwidth =
+            typeof (scale as ChartBandPositionScale).bandwidth === "function"
+                ? (scale as ChartBandPositionScale).bandwidth()
+                : 0;
+        const step =
+            typeof (scale as ChartBandPositionScale).step === "function"
+                ? (scale as ChartBandPositionScale).step()
+                : rawTicks.length > 1
+                  ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
+                  : 60;
 
         interface IntermediateTick {
             readonly coord: number;
@@ -339,23 +364,34 @@ export class CartesianMultiAxisCoordinator {
                 formattedText = axis.formatter(val, i);
             } else if (unitMode === "percent" && typeof val === "number") {
                 formattedText = formatPercentagePoint(val);
-            } else if ("formatTick" in scale && typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function") {
-                formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(val as number, axis.tickCount ?? 5);
+            } else if (
+                "formatTick" in scale &&
+                typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function"
+            ) {
+                formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(
+                    val as number,
+                    axis.tickCount ?? 5
+                );
             } else {
                 formattedText = String(val);
             }
 
             const tickKey = createCartesianAxisMeasurementKey(axis.dimension, axis.axisId, resolvedType, val);
             const measurement = labelMeasurements.get(tickKey);
-            const estimated = !measurement ? CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText) : undefined;
+            const estimated = !measurement
+                ? CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText)
+                : undefined;
             if (!measurement && estimated && labelMeasurements instanceof Map && !labelMeasurements.has(tickKey)) {
                 (labelMeasurements as Map<string, ChartLabelMeasurement>).set(tickKey, {
                     height: estimated.height,
-                    width: axis.labelMaxWidth !== undefined ? Math.min(axis.labelMaxWidth, estimated.width) : estimated.width
+                    width:
+                        axis.labelMaxWidth !== undefined
+                            ? Math.min(axis.labelMaxWidth, estimated.width)
+                            : estimated.width
                 });
             }
 
-            const rawWidth = measurement?.width ?? estimated?.width ?? (formattedText.length * 7.5);
+            const rawWidth = measurement?.width ?? estimated?.width ?? formattedText.length * 7.5;
             const rawHeight = measurement?.height ?? estimated?.height ?? 16;
             const projected = CartesianAxisLabelGeometry.projectRotatedDimensions(rawWidth, rawHeight, labelRotation);
             const extentAlongAxis = axis.dimension === "x" ? projected.projectedWidth : projected.projectedHeight;
@@ -437,10 +473,7 @@ export class CartesianMultiAxisCoordinator {
             yScales: new Map()
         };
 
-        const allDescriptors: ResolvedCartesianAxisDescriptor[] = [
-            ...axisResolution.xAxes,
-            ...axisResolution.yAxes
-        ];
+        const allDescriptors: ResolvedCartesianAxisDescriptor[] = [...axisResolution.xAxes, ...axisResolution.yAxes];
 
         for (let iter = 0; iter < maxIterations; iter++) {
             const currentScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
@@ -488,9 +521,15 @@ export class CartesianMultiAxisCoordinator {
             };
 
             const axesBySide: Record<ChartAxisPosition, ResolvedCartesianAxisDescriptor[]> = {
-                bottom: axisResolution.xAxes.filter(a => a.position === "bottom").sort((a, b) => a.stackIndex - b.stackIndex),
-                left: axisResolution.yAxes.filter(a => a.position === "left").sort((a, b) => a.stackIndex - b.stackIndex),
-                right: axisResolution.yAxes.filter(a => a.position === "right").sort((a, b) => a.stackIndex - b.stackIndex),
+                bottom: axisResolution.xAxes
+                    .filter(a => a.position === "bottom")
+                    .sort((a, b) => a.stackIndex - b.stackIndex),
+                left: axisResolution.yAxes
+                    .filter(a => a.position === "left")
+                    .sort((a, b) => a.stackIndex - b.stackIndex),
+                right: axisResolution.yAxes
+                    .filter(a => a.position === "right")
+                    .sort((a, b) => a.stackIndex - b.stackIndex),
                 top: axisResolution.xAxes.filter(a => a.position === "top").sort((a, b) => a.stackIndex - b.stackIndex)
             };
 
@@ -524,7 +563,8 @@ export class CartesianMultiAxisCoordinator {
             const newWidth = Math.max(0, chartWidth - newX - insetRight - effectiveRight);
             const newHeight = Math.max(0, chartHeight - newY - insetBottom - effectiveBottom);
 
-            const converged = Math.abs(plotRect.x - newX) < 0.5 &&
+            const converged =
+                Math.abs(plotRect.x - newX) < 0.5 &&
                 Math.abs(plotRect.y - newY) < 0.5 &&
                 Math.abs(plotRect.width - newWidth) < 0.5 &&
                 Math.abs(plotRect.height - newHeight) < 0.5;
@@ -553,25 +593,25 @@ export class CartesianMultiAxisCoordinator {
             const sideOffset = sideOffsets.x.get(xAxis.axisId) ?? 0;
             const labelRotation = effectiveRotations.x.get(xAxis.axisId) ?? 0;
 
-            const ticks = xAxis.labels !== false
-                ? this.#generateAxisSceneTicks(
-                    xAxis,
-                    scale,
-                    resolvedType,
-                    labelMeasurements,
-                    unitMode,
-                    plotRect,
-                    labelRotation
-                )
-                : [];
+            const ticks =
+                xAxis.labels !== false
+                    ? this.#generateAxisSceneTicks(
+                          xAxis,
+                          scale,
+                          resolvedType,
+                          labelMeasurements,
+                          unitMode,
+                          plotRect,
+                          labelRotation
+                      )
+                    : [];
 
             for (const t of ticks) {
                 if (t.tickKey) measurementKeys.add(t.tickKey);
             }
 
-            const defaultGrid = preparation.orientation === "horizontal"
-                ? (xAxis.dimension === "x" && xAxis.isPrimary)
-                : false;
+            const defaultGrid =
+                preparation.orientation === "horizontal" ? xAxis.dimension === "x" && xAxis.isPrimary : false;
 
             baseAxisScenes.push({
                 axis: "x",
@@ -608,25 +648,25 @@ export class CartesianMultiAxisCoordinator {
             const sideOffset = sideOffsets.y.get(yAxis.axisId) ?? 0;
             const labelRotation = effectiveRotations.y.get(yAxis.axisId) ?? 0;
 
-            const ticks = yAxis.labels !== false
-                ? this.#generateAxisSceneTicks(
-                    yAxis,
-                    scale,
-                    resolvedType,
-                    labelMeasurements,
-                    unitMode,
-                    plotRect,
-                    labelRotation
-                )
-                : [];
+            const ticks =
+                yAxis.labels !== false
+                    ? this.#generateAxisSceneTicks(
+                          yAxis,
+                          scale,
+                          resolvedType,
+                          labelMeasurements,
+                          unitMode,
+                          plotRect,
+                          labelRotation
+                      )
+                    : [];
 
             for (const t of ticks) {
                 if (t.tickKey) measurementKeys.add(t.tickKey);
             }
 
-            const defaultGrid = preparation.orientation !== "horizontal"
-                ? (yAxis.dimension === "y" && yAxis.isPrimary)
-                : false;
+            const defaultGrid =
+                preparation.orientation !== "horizontal" ? yAxis.dimension === "y" && yAxis.isPrimary : false;
 
             baseAxisScenes.push({
                 axis: "y",
@@ -672,7 +712,13 @@ export class CartesianMultiAxisCoordinator {
         const prep = this.prepareDomains(options);
         const chrome = this.computeChrome(prep, options);
         const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(prep, chrome);
-        const proj = this.projectViewport(prep, chrome, options.viewport, options.labelMeasurements, baseCoordinateSpace);
+        const proj = this.projectViewport(
+            prep,
+            chrome,
+            options.viewport,
+            options.labelMeasurements,
+            baseCoordinateSpace
+        );
 
         return {
             axisScenes: proj.axisScenes,
@@ -698,13 +744,7 @@ export class CartesianMultiAxisCoordinator {
 
     public static prepareDomains(options: MultiAxisPreparationOptions): CartesianDomainPreparation {
         CartesianStageTracker.current?.onStageA?.();
-        const {
-            axisResolution,
-            bindingResolution,
-            orientation = "vertical",
-            rootData,
-            rootXField
-        } = options;
+        const { axisResolution, bindingResolution, orientation = "vertical", rootData, rootXField } = options;
 
         const effectiveRootXField = rootXField || (axisResolution.xAxes[0]?.field as ChartField | undefined);
         const warnings: string[] = [...axisResolution.warnings, ...bindingResolution.warnings];
@@ -716,10 +756,7 @@ export class CartesianMultiAxisCoordinator {
         const xUnitModes = new Map<string, "percent" | "raw">();
         const yUnitModes = new Map<string, "percent" | "raw">();
 
-        const allDescriptors: ResolvedCartesianAxisDescriptor[] = [
-            ...axisResolution.xAxes,
-            ...axisResolution.yAxes
-        ];
+        const allDescriptors: ResolvedCartesianAxisDescriptor[] = [...axisResolution.xAxes, ...axisResolution.yAxes];
 
         for (const axis of allDescriptors) {
             if (axis.type === "log" && axis.logBase !== undefined) {
@@ -769,8 +806,11 @@ export class CartesianMultiAxisCoordinator {
             resolvedYTypes.set(yAxis.axisId, compat.resolvedType);
         }
 
-        const allCartesianSeries = bindingResolution.activeSeries.filter(s => "color" in s) as import("../context/chart-registration-context").ChartCartesianSeriesRegistration[];
-        const primaryXType = resolvedXTypes.get(axisResolution.primaryXAxisId) ?? (orientation === "horizontal" ? "linear" : "category");
+        const allCartesianSeries = bindingResolution.activeSeries.filter(
+            s => "color" in s
+        ) as import("../context/chart-registration-context").ChartCartesianSeriesRegistration[];
+        const primaryXType =
+            resolvedXTypes.get(axisResolution.primaryXAxisId) ?? (orientation === "horizontal" ? "linear" : "category");
         CartesianStageTracker.current?.onStackAnalysis?.();
         const stackCoordination = CartesianStackEngine.computeCoordination({
             orientation,
@@ -781,7 +821,14 @@ export class CartesianMultiAxisCoordinator {
             rootData: rootData ?? [],
             rootXField: effectiveRootXField,
             series: allCartesianSeries,
-            xAxisType: orientation === "horizontal" ? "category" : (primaryXType === "time" || primaryXType === "utc" ? primaryXType : primaryXType === "linear" ? "linear" : "category")
+            xAxisType:
+                orientation === "horizontal"
+                    ? "category"
+                    : primaryXType === "time" || primaryXType === "utc"
+                      ? primaryXType
+                      : primaryXType === "linear"
+                        ? "linear"
+                        : "category"
         });
 
         for (const diag of stackCoordination.diagnostics) {
@@ -790,15 +837,22 @@ export class CartesianMultiAxisCoordinator {
 
         for (const xAxis of axisResolution.xAxes) {
             const xState = stackCoordination.valueAxisState.x.get(xAxis.axisId);
-            xUnitModes.set(xAxis.axisId, orientation === "horizontal" && xState?.unitMode === "percent" ? "percent" : "raw");
+            xUnitModes.set(
+                xAxis.axisId,
+                orientation === "horizontal" && xState?.unitMode === "percent" ? "percent" : "raw"
+            );
         }
 
         const stackAnalysesByYAxis = new Map<string, CartesianStackAnalysis>();
         for (const yAxis of axisResolution.yAxes) {
             const yState = stackCoordination.valueAxisState.y.get(yAxis.axisId);
-            yUnitModes.set(yAxis.axisId, orientation !== "horizontal" && yState?.unitMode === "percent" ? "percent" : "raw");
+            yUnitModes.set(
+                yAxis.axisId,
+                orientation !== "horizontal" && yState?.unitMode === "percent" ? "percent" : "raw"
+            );
 
-            const singleAnalysis = stackCoordination.analysisByGroupId.get(`bar:${axisResolution.primaryXAxisId}:${yAxis.axisId}:`) ??
+            const singleAnalysis =
+                stackCoordination.analysisByGroupId.get(`bar:${axisResolution.primaryXAxisId}:${yAxis.axisId}:`) ??
                 stackCoordination.analysisByGroupId.get(`area:${axisResolution.primaryXAxisId}:${yAxis.axisId}:`) ??
                 stackCoordination.analysisByGroupId.values().next().value;
             if (singleAnalysis) {
@@ -812,25 +866,29 @@ export class CartesianMultiAxisCoordinator {
         for (const xAxis of axisResolution.xAxes) {
             const resolvedType = resolvedXTypes.get(xAxis.axisId)!;
             const boundSeries = bindingResolution.seriesByXAxis.get(xAxis.axisId) ?? [];
-            const stackState = orientation === "horizontal"
-                ? stackCoordination.valueAxisState.x.get(xAxis.axisId)
-                : undefined;
-            const stackedExtents = stackState && (stackState.hasPositive || stackState.hasNegative)
-                ? { min: stackState.extent[0], max: stackState.extent[1] }
-                : undefined;
-            const stackAnalysis = orientation === "horizontal" && stackState
-                ? {
-                    axisUnitMode: stackState.unitMode === "percent" ? ("percent" as const) : ("raw" as const),
-                    configuration: stackCoordination.configuration,
-                    diagnostics: stackCoordination.diagnostics,
-                    invalidGroupIds: stackCoordination.invalidGroupIds,
-                    invalidSeriesIds: stackCoordination.invalidSeriesIds,
-                    layout: stackCoordination.layout,
-                    visibleLayout: stackCoordination.visibleLayout,
-                    visibleYUnitMode: stackState.unitMode === "percent" ? ("percent-stack" as const) : ("normal-stack" as const),
-                    yUnitMode: stackState.unitMode === "percent" ? ("percent" as const) : ("normal" as const)
-                }
-                : undefined;
+            const stackState =
+                orientation === "horizontal" ? stackCoordination.valueAxisState.x.get(xAxis.axisId) : undefined;
+            const stackedExtents =
+                stackState && (stackState.hasPositive || stackState.hasNegative)
+                    ? { min: stackState.extent[0], max: stackState.extent[1] }
+                    : undefined;
+            const stackAnalysis =
+                orientation === "horizontal" && stackState
+                    ? {
+                          axisUnitMode: stackState.unitMode === "percent" ? ("percent" as const) : ("raw" as const),
+                          configuration: stackCoordination.configuration,
+                          diagnostics: stackCoordination.diagnostics,
+                          invalidGroupIds: stackCoordination.invalidGroupIds,
+                          invalidSeriesIds: stackCoordination.invalidSeriesIds,
+                          layout: stackCoordination.layout,
+                          visibleLayout: stackCoordination.visibleLayout,
+                          visibleYUnitMode:
+                              stackState.unitMode === "percent"
+                                  ? ("percent-stack" as const)
+                                  : ("normal-stack" as const),
+                          yUnitMode: stackState.unitMode === "percent" ? ("percent" as const) : ("normal" as const)
+                      }
+                    : undefined;
 
             const domainRes = CartesianAxisDomainResolver.resolveDomain(
                 xAxis,
@@ -845,10 +903,21 @@ export class CartesianMultiAxisCoordinator {
             warnings.push(...domainRes.warnings);
 
             let canonicalBaseDomain: readonly unknown[] = domainRes.domain;
-            if (domainRes.isValid && resolvedType !== "category" && Array.isArray(canonicalBaseDomain) && canonicalBaseDomain.length >= 2) {
+            if (
+                domainRes.isValid &&
+                resolvedType !== "category" &&
+                Array.isArray(canonicalBaseDomain) &&
+                canonicalBaseDomain.length >= 2
+            ) {
                 if (resolvedType === "time" || resolvedType === "utc") {
-                    const minD = canonicalBaseDomain[0] instanceof Date ? canonicalBaseDomain[0] : new Date(Number(canonicalBaseDomain[0]));
-                    const maxD = canonicalBaseDomain[1] instanceof Date ? canonicalBaseDomain[1] : new Date(Number(canonicalBaseDomain[1]));
+                    const minD =
+                        canonicalBaseDomain[0] instanceof Date
+                            ? canonicalBaseDomain[0]
+                            : new Date(Number(canonicalBaseDomain[0]));
+                    const maxD =
+                        canonicalBaseDomain[1] instanceof Date
+                            ? canonicalBaseDomain[1]
+                            : new Date(Number(canonicalBaseDomain[1]));
                     const tempScale = CartesianScaleFactory.createTemporalScale({
                         domain: [minD, maxD],
                         explicitMax: xAxis.explicitMax,
@@ -885,25 +954,29 @@ export class CartesianMultiAxisCoordinator {
         for (const yAxis of axisResolution.yAxes) {
             const resolvedType = resolvedYTypes.get(yAxis.axisId)!;
             const boundSeries = bindingResolution.seriesByYAxis.get(yAxis.axisId) ?? [];
-            const stackState = orientation !== "horizontal"
-                ? stackCoordination.valueAxisState.y.get(yAxis.axisId)
-                : undefined;
-            const stackedExtents = stackState && (stackState.hasPositive || stackState.hasNegative)
-                ? { min: stackState.extent[0], max: stackState.extent[1] }
-                : undefined;
-            const stackAnalysis = orientation !== "horizontal" && stackState
-                ? {
-                    axisUnitMode: stackState.unitMode === "percent" ? ("percent" as const) : ("raw" as const),
-                    configuration: stackCoordination.configuration,
-                    diagnostics: stackCoordination.diagnostics,
-                    invalidGroupIds: stackCoordination.invalidGroupIds,
-                    invalidSeriesIds: stackCoordination.invalidSeriesIds,
-                    layout: stackCoordination.layout,
-                    visibleLayout: stackCoordination.visibleLayout,
-                    visibleYUnitMode: stackState.unitMode === "percent" ? ("percent-stack" as const) : ("normal-stack" as const),
-                    yUnitMode: stackState.unitMode === "percent" ? ("percent" as const) : ("normal" as const)
-                }
-                : undefined;
+            const stackState =
+                orientation !== "horizontal" ? stackCoordination.valueAxisState.y.get(yAxis.axisId) : undefined;
+            const stackedExtents =
+                stackState && (stackState.hasPositive || stackState.hasNegative)
+                    ? { min: stackState.extent[0], max: stackState.extent[1] }
+                    : undefined;
+            const stackAnalysis =
+                orientation !== "horizontal" && stackState
+                    ? {
+                          axisUnitMode: stackState.unitMode === "percent" ? ("percent" as const) : ("raw" as const),
+                          configuration: stackCoordination.configuration,
+                          diagnostics: stackCoordination.diagnostics,
+                          invalidGroupIds: stackCoordination.invalidGroupIds,
+                          invalidSeriesIds: stackCoordination.invalidSeriesIds,
+                          layout: stackCoordination.layout,
+                          visibleLayout: stackCoordination.visibleLayout,
+                          visibleYUnitMode:
+                              stackState.unitMode === "percent"
+                                  ? ("percent-stack" as const)
+                                  : ("normal-stack" as const),
+                          yUnitMode: stackState.unitMode === "percent" ? ("percent" as const) : ("normal" as const)
+                      }
+                    : undefined;
 
             const domainRes = CartesianAxisDomainResolver.resolveDomain(
                 yAxis,
@@ -918,10 +991,21 @@ export class CartesianMultiAxisCoordinator {
             warnings.push(...domainRes.warnings);
 
             let canonicalBaseDomain: readonly unknown[] = domainRes.domain;
-            if (domainRes.isValid && resolvedType !== "category" && Array.isArray(canonicalBaseDomain) && canonicalBaseDomain.length >= 2) {
+            if (
+                domainRes.isValid &&
+                resolvedType !== "category" &&
+                Array.isArray(canonicalBaseDomain) &&
+                canonicalBaseDomain.length >= 2
+            ) {
                 if (resolvedType === "time" || resolvedType === "utc") {
-                    const minD = canonicalBaseDomain[0] instanceof Date ? canonicalBaseDomain[0] : new Date(Number(canonicalBaseDomain[0]));
-                    const maxD = canonicalBaseDomain[1] instanceof Date ? canonicalBaseDomain[1] : new Date(Number(canonicalBaseDomain[1]));
+                    const minD =
+                        canonicalBaseDomain[0] instanceof Date
+                            ? canonicalBaseDomain[0]
+                            : new Date(Number(canonicalBaseDomain[0]));
+                    const maxD =
+                        canonicalBaseDomain[1] instanceof Date
+                            ? canonicalBaseDomain[1]
+                            : new Date(Number(canonicalBaseDomain[1]));
                     const tempScale = CartesianScaleFactory.createTemporalScale({
                         domain: [minD, maxD],
                         explicitMax: yAxis.explicitMax,
@@ -968,9 +1052,13 @@ export class CartesianMultiAxisCoordinator {
             dimension: a.dimension,
             isPrimary: a.isPrimary,
             position: a.position,
-            resolvedType: (a.dimension === "x" ? resolvedXTypes.get(a.axisId) : resolvedYTypes.get(a.axisId)) ?? "linear",
+            resolvedType:
+                (a.dimension === "x" ? resolvedXTypes.get(a.axisId) : resolvedYTypes.get(a.axisId)) ?? "linear",
             stackIndex: a.stackIndex,
-            valid: (a.dimension === "x" ? xAxisValidityById.get(a.axisId)?.valid : yAxisValidityById.get(a.axisId)?.valid) ?? true,
+            valid:
+                (a.dimension === "x"
+                    ? xAxisValidityById.get(a.axisId)?.valid
+                    : yAxisValidityById.get(a.axisId)?.valid) ?? true,
             visible: a.visible
         }));
         const axisTopologySignature = JSON.stringify(axisTopology);
@@ -996,7 +1084,9 @@ export class CartesianMultiAxisCoordinator {
             bindingResolution,
             effectiveRootXField,
             effectiveSeries: allCartesianSeries,
-            hasBaseRenderableData: allCartesianSeries.length > 0 && ((rootData?.length ?? 0) > 0 || allCartesianSeries.some(s => (s.data?.()?.length ?? 0) > 0)),
+            hasBaseRenderableData:
+                allCartesianSeries.length > 0 &&
+                ((rootData?.length ?? 0) > 0 || allCartesianSeries.some(s => (s.data?.()?.length ?? 0) > 0)),
             orientation,
             resolvedTypes: { x: resolvedXTypes, y: resolvedYTypes },
             resolvedTypesByAxisId,
@@ -1020,7 +1110,8 @@ export class CartesianMultiAxisCoordinator {
         baseCoordinateSpace?: CartesianAxisCoordinateSpace
     ): MultiAxisViewportProjectionResult {
         CartesianStageTracker.current?.onStageC?.();
-        const { axisResolution, baseDomains, resolvedTypes, axisUnitModes, xAxisValidityById, yAxisValidityById } = preparation;
+        const { axisResolution, baseDomains, resolvedTypes, axisUnitModes, xAxisValidityById, yAxisValidityById } =
+            preparation;
         const { plotRect, gutters, sideOffsets, effectiveRotations, baseScales } = chrome;
         const measurements = labelMeasurements ?? new Map();
 
@@ -1034,8 +1125,9 @@ export class CartesianMultiAxisCoordinator {
             const baseDomain = baseDomains.x.get(xAxis.axisId)!;
             const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
             const baseScale = baseScales.getXScale(xAxis.axisId)!;
-            const normalizedBaseMapper = baseCoordinateSpace?.get({ axis: "x", axisId: xAxis.axisId })?.normalizedBaseMapper
-                ?? createCartesianNormalizedBaseMapper({
+            const normalizedBaseMapper =
+                baseCoordinateSpace?.get({ axis: "x", axisId: xAxis.axisId })?.normalizedBaseMapper ??
+                createCartesianNormalizedBaseMapper({
                     domain: baseDomain,
                     exponent: xAxis.exponent,
                     logBase: xAxis.logBase,
@@ -1083,12 +1175,14 @@ export class CartesianMultiAxisCoordinator {
         for (const yAxis of axisResolution.yAxes) {
             const resolvedType = resolvedTypes.y.get(yAxis.axisId)!;
             const baseDomain = baseDomains.y.get(yAxis.axisId)!;
-            const range: readonly [number, number] = resolvedType === "category"
-                ? [plotRect.y, plotRect.y + plotRect.height]
-                : [plotRect.y + plotRect.height, plotRect.y];
+            const range: readonly [number, number] =
+                resolvedType === "category"
+                    ? [plotRect.y, plotRect.y + plotRect.height]
+                    : [plotRect.y + plotRect.height, plotRect.y];
             const baseScale = baseScales.getYScale(yAxis.axisId)!;
-            const normalizedBaseMapper = baseCoordinateSpace?.get({ axis: "y", axisId: yAxis.axisId })?.normalizedBaseMapper
-                ?? createCartesianNormalizedBaseMapper({
+            const normalizedBaseMapper =
+                baseCoordinateSpace?.get({ axis: "y", axisId: yAxis.axisId })?.normalizedBaseMapper ??
+                createCartesianNormalizedBaseMapper({
                     domain: baseDomain,
                     exponent: yAxis.exponent,
                     logBase: yAxis.logBase,
@@ -1151,21 +1245,21 @@ export class CartesianMultiAxisCoordinator {
             const sideOffset = sideOffsets.x.get(xAxis.axisId) ?? 0;
             const labelRotation = effectiveRotations.x.get(xAxis.axisId) ?? 0;
 
-            const ticks = xAxis.labels !== false
-                ? this.#generateAxisSceneTicks(
-                    xAxis,
-                    scale,
-                    resolvedType,
-                    measurements,
-                    unitMode,
-                    plotRect,
-                    labelRotation
-                )
-                : [];
+            const ticks =
+                xAxis.labels !== false
+                    ? this.#generateAxisSceneTicks(
+                          xAxis,
+                          scale,
+                          resolvedType,
+                          measurements,
+                          unitMode,
+                          plotRect,
+                          labelRotation
+                      )
+                    : [];
 
-            const defaultGrid = preparation.orientation === "horizontal"
-                ? (xAxis.dimension === "x" && xAxis.isPrimary)
-                : false;
+            const defaultGrid =
+                preparation.orientation === "horizontal" ? xAxis.dimension === "x" && xAxis.isPrimary : false;
 
             axisScenes.push({
                 axis: "x",
@@ -1202,21 +1296,21 @@ export class CartesianMultiAxisCoordinator {
             const sideOffset = sideOffsets.y.get(yAxis.axisId) ?? 0;
             const labelRotation = effectiveRotations.y.get(yAxis.axisId) ?? 0;
 
-            const ticks = yAxis.labels !== false
-                ? this.#generateAxisSceneTicks(
-                    yAxis,
-                    scale,
-                    resolvedType,
-                    measurements,
-                    unitMode,
-                    plotRect,
-                    labelRotation
-                )
-                : [];
+            const ticks =
+                yAxis.labels !== false
+                    ? this.#generateAxisSceneTicks(
+                          yAxis,
+                          scale,
+                          resolvedType,
+                          measurements,
+                          unitMode,
+                          plotRect,
+                          labelRotation
+                      )
+                    : [];
 
-            const defaultGrid = preparation.orientation !== "horizontal"
-                ? (yAxis.dimension === "y" && yAxis.isPrimary)
-                : false;
+            const defaultGrid =
+                preparation.orientation !== "horizontal" ? yAxis.dimension === "y" && yAxis.isPrimary : false;
 
             axisScenes.push({
                 axis: "y",

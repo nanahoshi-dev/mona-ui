@@ -94,7 +94,7 @@ describe("ChartKeyboardNavigation", () => {
     };
 
     const createKeyEvent = (key: string): KeyboardEvent =>
-        ({ key, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+        ({ key, preventDefault: vi.fn() }) as unknown as KeyboardEvent;
 
     it("should navigate clockwise with ArrowRight and wrap around in polar axis charts", () => {
         const eventRight = createKeyEvent("ArrowRight");

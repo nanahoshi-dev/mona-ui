@@ -1,12 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ChartAxisScene } from "../scene/cartesian-scene";
-import type {  ChartRect } from "../../models/chart.models";
+import type { ChartRect } from "../../models/chart.models";
 import type { ChartViewportChangeEvent } from "../../models/chart-viewport.models";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import {
-    CartesianAxisCoordinateSpace,
-    type CartesianAxisCoordinateSnapshot
-} from "./cartesian-axis-coordinate-space";
+import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
 import { ChartViewportGestureController, type ChartViewportGestureContext } from "./chart-viewport-gesture-controller";
 import { normalizeChartNavigationOptions } from "./chart-navigation-options";
 import { createEmptyInternalViewportState, type InternalCartesianViewportState } from "./cartesian-viewport-normalizer";
@@ -75,10 +72,7 @@ describe("ChartViewportGestureController", () => {
         viewportScale: yScale
     };
 
-    const coordSpace = new CartesianAxisCoordinateSpace(
-        new Map([["x-1", xSnap]]),
-        new Map([["y-1", ySnap]])
-    );
+    const coordSpace = new CartesianAxisCoordinateSpace(new Map([["x-1", xSnap]]), new Map([["y-1", ySnap]]));
 
     function createMockContext(overrides?: Partial<ChartViewportGestureContext>): {
         context: ChartViewportGestureContext;
@@ -114,10 +108,10 @@ describe("ChartViewportGestureController", () => {
         });
         const controller = new ChartViewportGestureController(context);
 
-        const handledDown = controller.handlePointerDown(
-            { button: 0, pointerId: 1 } as PointerEvent,
-            { x: 100, y: 100 }
-        );
+        const handledDown = controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, {
+            x: 100,
+            y: 100
+        });
         expect(handledDown).toBe(false);
         expect(controller.isDragging).toBe(false);
     });
@@ -126,27 +120,21 @@ describe("ChartViewportGestureController", () => {
         const { context, cursorHistory, events } = createMockContext();
         const controller = new ChartViewportGestureController(context);
 
-        const downResult = controller.handlePointerDown(
-            { button: 0, pointerId: 1 } as PointerEvent,
-            { x: 100, y: 100 }
-        );
+        const downResult = controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, {
+            x: 100,
+            y: 100
+        });
         expect(downResult).toBe(true);
         expect(controller.isDragging).toBe(false);
         expect(controller.isClickSuppressed).toBe(false);
 
         // Move 2px (sub-threshold)
-        const move1 = controller.handlePointerMove(
-            { pointerId: 1 } as PointerEvent,
-            { x: 102, y: 100 }
-        );
+        const move1 = controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 102, y: 100 });
         expect(move1).toBe(false);
         expect(controller.isDragging).toBe(false);
 
         // Move beyond 4px (threshold met)
-        const move2 = controller.handlePointerMove(
-            { pointerId: 1 } as PointerEvent,
-            { x: 110, y: 100 }
-        );
+        const move2 = controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 110, y: 100 });
         expect(move2).toBe(true);
         expect(controller.isDragging).toBe(true);
         expect(controller.isClickSuppressed).toBe(true);
@@ -168,10 +156,7 @@ describe("ChartViewportGestureController", () => {
         const { context, events } = createMockContext();
         const controller = new ChartViewportGestureController(context);
 
-        const handled = controller.handleWheel(
-            { deltaY: -100 } as WheelEvent,
-            { x: 250, y: 180 }
-        );
+        const handled = controller.handleWheel({ deltaY: -100 } as WheelEvent, { x: 250, y: 180 });
         expect(handled).toBe(true);
         expect(events.length).toBeGreaterThanOrEqual(1);
         expect(events[0].source).toBe("wheel");
@@ -191,16 +176,10 @@ describe("ChartViewportGestureController", () => {
         const controller = new ChartViewportGestureController(context);
 
         // Pointer 1 down
-        controller.handlePointerDown(
-            { button: 0, pointerId: 1 } as PointerEvent,
-            { x: 100, y: 150 }
-        );
+        controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 150 });
 
         // Pointer 2 down -> initiates pinch
-        const pinchDown = controller.handlePointerDown(
-            { button: 0, pointerId: 2 } as PointerEvent,
-            { x: 200, y: 150 }
-        );
+        const pinchDown = controller.handlePointerDown({ button: 0, pointerId: 2 } as PointerEvent, { x: 200, y: 150 });
         expect(pinchDown).toBe(true);
         expect(controller.isPinching).toBe(true);
 
@@ -209,10 +188,7 @@ describe("ChartViewportGestureController", () => {
         expect(startEvent.phase).toBe("start");
 
         // Move pointer 2 outwards (spread / zoom in)
-        const move = controller.handlePointerMove(
-            { pointerId: 2 } as PointerEvent,
-            { x: 260, y: 150 }
-        );
+        const move = controller.handlePointerMove({ pointerId: 2 } as PointerEvent, { x: 260, y: 150 });
         expect(move).toBe(true);
         controller.flushPendingFrame();
 
@@ -242,10 +218,7 @@ describe("ChartViewportGestureController", () => {
         const controller = new ChartViewportGestureController(context);
 
         // Zoom out (positive deltaY) when already at full boundary
-        const handled = controller.handleWheel(
-            { ctrlKey: false, deltaY: 100 } as WheelEvent,
-            { x: 250, y: 180 }
-        );
+        const handled = controller.handleWheel({ ctrlKey: false, deltaY: 100 } as WheelEvent, { x: 250, y: 180 });
 
         expect(handled).toBe(false);
     });
@@ -260,10 +233,7 @@ describe("ChartViewportGestureController", () => {
         });
         const controller = new ChartViewportGestureController(context);
 
-        const handled = controller.handleWheel(
-            { ctrlKey: true, deltaY: 100 } as WheelEvent,
-            { x: 250, y: 180 }
-        );
+        const handled = controller.handleWheel({ ctrlKey: true, deltaY: 100 } as WheelEvent, { x: 250, y: 180 });
 
         expect(handled).toBe(true);
     });
@@ -272,14 +242,8 @@ describe("ChartViewportGestureController", () => {
         const { context, events } = createMockContext();
         const controller = new ChartViewportGestureController(context);
 
-        controller.handlePointerDown(
-            { button: 0, pointerId: 1 } as PointerEvent,
-            { x: 100, y: 100 }
-        );
-        controller.handlePointerMove(
-            { pointerId: 1 } as PointerEvent,
-            { x: 150, y: 100 }
-        );
+        controller.handlePointerDown({ button: 0, pointerId: 1 } as PointerEvent, { x: 100, y: 100 });
+        controller.handlePointerMove({ pointerId: 1 } as PointerEvent, { x: 150, y: 100 });
         expect(controller.isDragging).toBe(true);
 
         const eventCountBeforeDestroy = events.length;
@@ -296,14 +260,8 @@ describe("ChartViewportGestureController", () => {
         const { context, events } = createMockContext();
         const controller = new ChartViewportGestureController(context);
 
-        controller.handlePointerDown(
-            { button: 0, pointerId: 5 } as PointerEvent,
-            { x: 100, y: 100 }
-        );
-        controller.handlePointerMove(
-            { pointerId: 5 } as PointerEvent,
-            { x: 120, y: 100 }
-        );
+        controller.handlePointerDown({ button: 0, pointerId: 5 } as PointerEvent, { x: 100, y: 100 });
+        controller.handlePointerMove({ pointerId: 5 } as PointerEvent, { x: 120, y: 100 });
         expect(controller.isDragging).toBe(true);
 
         controller.handleLostPointerCapture({ pointerId: 5 } as PointerEvent);
@@ -563,8 +521,14 @@ describe("ChartViewportGestureController", () => {
             });
             const controller = new ChartViewportGestureController(context);
 
-            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
-            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, { x: 200, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, {
+                x: 100,
+                y: 150
+            });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, {
+                x: 200,
+                y: 150
+            });
             expect(captured.has(1)).toBe(true);
             expect(captured.has(2)).toBe(true);
 
@@ -702,8 +666,14 @@ describe("ChartViewportGestureController", () => {
             const { context } = createMockContext();
             const controller = new ChartViewportGestureController(context);
 
-            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
-            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, { x: 200, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, {
+                x: 100,
+                y: 150
+            });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, {
+                x: 200,
+                y: 150
+            });
             expect(controller.activePointersCount).toBe(2);
 
             // Third pointer arriving
@@ -720,7 +690,10 @@ describe("ChartViewportGestureController", () => {
             const controller = new ChartViewportGestureController(context);
 
             // Pointer 1 inside plot
-            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, {
+                x: 100,
+                y: 150
+            });
             expect(controller.activePointersCount).toBe(1);
 
             // Pointer 2 far outside plot causing centroid to have no valid target
@@ -770,10 +743,10 @@ describe("ChartViewportGestureController", () => {
             const controller = new ChartViewportGestureController(context);
 
             // Start drag
-            controller.handlePointerDown(
-                { button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent,
-                { x: 100, y: 100 }
-            );
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, {
+                x: 100,
+                y: 100
+            });
             expect(controller.activePointersCount).toBe(1);
 
             // Cross threshold (>= 4px)
@@ -821,10 +794,10 @@ describe("ChartViewportGestureController", () => {
             });
             const controller = new ChartViewportGestureController(context);
 
-            controller.handlePointerDown(
-                { button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent,
-                { x: 100, y: 100 }
-            );
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, {
+                x: 100,
+                y: 100
+            });
             controller.handlePointerMove(
                 { button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent,
                 { x: 150, y: 100 }
@@ -873,14 +846,14 @@ describe("ChartViewportGestureController", () => {
             });
             const controller = new ChartViewportGestureController(context);
 
-            controller.handlePointerDown(
-                { button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent,
-                { x: 100, y: 150 }
-            );
-            controller.handlePointerDown(
-                { button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent,
-                { x: 200, y: 150 }
-            );
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, {
+                x: 100,
+                y: 150
+            });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, {
+                x: 200,
+                y: 150
+            });
             expect(controller.isPinching).toBe(true);
             expect(controller.activePointersCount).toBe(2);
 
@@ -908,8 +881,14 @@ describe("ChartViewportGestureController", () => {
             const controller = new ChartViewportGestureController(context);
 
             // 1. Start drag and cross threshold
-            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
-            controller.handlePointerMove({ button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 150, y: 100 });
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, {
+                x: 100,
+                y: 100
+            });
+            controller.handlePointerMove(
+                { button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 150, y: 100 }
+            );
             expect(controller.isDragging).toBe(true);
             expect(controller.isClickSuppressed).toBe(true);
 
@@ -930,7 +909,10 @@ describe("ChartViewportGestureController", () => {
 
             // 4. Fresh pointer sequence begins (e.g. mouse click on data point)
             // Even though dragPan is false and handlePointerDown returns false, suppression is retired!
-            const admitted = controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
+            const admitted = controller.handlePointerDown(
+                { button: 0, pointerId: 2, pointerType: "mouse" } as PointerEvent,
+                { x: 100, y: 100 }
+            );
             expect(admitted).toBe(false);
             expect(controller.isClickSuppressed).toBe(false); // Stale suppression retired!
             expect(controller.consumeClickSuppression()).toBe(false);
@@ -946,8 +928,14 @@ describe("ChartViewportGestureController", () => {
             const controller = new ChartViewportGestureController(context);
 
             // 1. Perform 2-finger pinch
-            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
-            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, { x: 200, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, {
+                x: 100,
+                y: 150
+            });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, {
+                x: 200,
+                y: 150
+            });
             expect(controller.isPinching).toBe(true);
             expect(controller.isClickSuppressed).toBe(true);
 
@@ -957,7 +945,10 @@ describe("ChartViewportGestureController", () => {
             expect(controller.isClickSuppressed).toBe(true); // Armed for old sequence
 
             // 3. Fresh single-finger tap arrives (touch pointer retained only as future pinch candidate)
-            controller.handlePointerDown({ button: 0, pointerId: 3, pointerType: "touch" } as PointerEvent, { x: 120, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 3, pointerType: "touch" } as PointerEvent, {
+                x: 120,
+                y: 150
+            });
             expect(controller.isClickSuppressed).toBe(false); // Retired on fresh pointer sequence!
             expect(controller.consumeClickSuppression()).toBe(false);
         });
@@ -966,8 +957,14 @@ describe("ChartViewportGestureController", () => {
             const { context } = createMockContext();
             const controller = new ChartViewportGestureController(context);
 
-            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
-            controller.handlePointerMove({ button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 150, y: 100 });
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, {
+                x: 100,
+                y: 100
+            });
+            controller.handlePointerMove(
+                { button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 150, y: 100 }
+            );
             controller.handlePointerUp({ pointerId: 1, pointerType: "mouse" } as PointerEvent);
 
             expect(controller.consumeClickSuppression()).toBe(true); // First consume swallows synthetic click
@@ -978,8 +975,14 @@ describe("ChartViewportGestureController", () => {
             const { context } = createMockContext();
             const controller = new ChartViewportGestureController(context);
 
-            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
-            controller.handlePointerMove({ button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent, { x: 150, y: 100 });
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "mouse" } as PointerEvent, {
+                x: 100,
+                y: 100
+            });
+            controller.handlePointerMove(
+                { button: 0, buttons: 1, pointerId: 1, pointerType: "mouse" } as PointerEvent,
+                { x: 150, y: 100 }
+            );
             expect(controller.isClickSuppressed).toBe(true);
 
             // Authority change aborts gesture
@@ -987,7 +990,10 @@ describe("ChartViewportGestureController", () => {
             expect(controller.isClickSuppressed).toBe(true);
 
             // Fresh pointer down arrives
-            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "mouse" } as PointerEvent, { x: 100, y: 100 });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "mouse" } as PointerEvent, {
+                x: 100,
+                y: 100
+            });
             // Since it's a fresh drag candidate, suppression was retired at start of handlePointerDown
             expect(controller.isClickSuppressed).toBe(false);
         });
@@ -1002,9 +1008,15 @@ describe("ChartViewportGestureController", () => {
             const controller = new ChartViewportGestureController(context);
 
             // 1st pointer touches
-            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, { x: 100, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 1, pointerType: "touch" } as PointerEvent, {
+                x: 100,
+                y: 150
+            });
             // 2nd pointer touches -> same physical sequence, starts pinch and arms click suppression
-            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, { x: 200, y: 150 });
+            controller.handlePointerDown({ button: 0, pointerId: 2, pointerType: "touch" } as PointerEvent, {
+                x: 200,
+                y: 150
+            });
             expect(controller.isPinching).toBe(true);
             expect(controller.isClickSuppressed).toBe(true);
         });

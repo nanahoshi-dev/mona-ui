@@ -66,13 +66,9 @@ export const chartHeaderBaseThemeVariants = cva("flex flex-col gap-1 mb-3 select
     }
 });
 
-export const chartTitleBaseThemeVariants = cva(
-    "text-sm font-semibold text-foreground tracking-tight select-none"
-);
+export const chartTitleBaseThemeVariants = cva("text-sm font-semibold text-foreground tracking-tight select-none");
 
-export const chartSubtitleBaseThemeVariants = cva(
-    "text-xs text-muted-foreground select-none"
-);
+export const chartSubtitleBaseThemeVariants = cva("text-xs text-muted-foreground select-none");
 
 export const chartCrosshairLabelBaseThemeVariants = cva(
     "absolute pointer-events-none z-40 rounded border border-border bg-popover px-1.5 py-0.5 text-[11px] font-medium text-popover-foreground shadow-sm select-none whitespace-nowrap"
@@ -90,4 +86,3 @@ export type ChartBaseVariantProps = VariantProps<typeof chartBaseThemeVariants>;
 export type ChartHeaderBaseVariantProps = VariantProps<typeof chartHeaderBaseThemeVariants>;
 export type ChartLegendBaseVariantProps = VariantProps<typeof chartLegendBaseThemeVariants>;
 export type ChartLegendItemBaseVariantProps = VariantProps<typeof chartLegendItemBaseThemeVariants>;
-

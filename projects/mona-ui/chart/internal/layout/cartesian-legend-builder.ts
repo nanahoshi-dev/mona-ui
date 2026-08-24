@@ -15,9 +15,7 @@ export class CartesianLegendBuilder {
         for (let seriesIdx = 0; seriesIdx < effectiveSeries.length; seriesIdx++) {
             const series = effectiveSeries[seriesIdx];
             if (series.type === "candlestick" || series.type === "ohlc") {
-                const finStyle = styleResolver.resolveFinancialSeriesStyle(
-                    series as ChartFinancialSeriesRegistration
-                );
+                const finStyle = styleResolver.resolveFinancialSeriesStyle(series as ChartFinancialSeriesRegistration);
                 const color = finStyle.color || finStyle.risingColor;
                 const secondaryColor = finStyle.color ? undefined : finStyle.fallingColor;
                 legendItems.push({

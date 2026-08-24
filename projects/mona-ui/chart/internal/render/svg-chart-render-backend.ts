@@ -131,12 +131,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
         switch (scene.coordinateSystem) {
             case "cartesian":
                 if (scene.cartesianKind === "xy") {
-                    this.#cartesianRenderer.render(
-                        scene as CartesianXYChartScene,
-                        presentation,
-                        styleResolver,
-                        defs
-                    );
+                    this.#cartesianRenderer.render(scene as CartesianXYChartScene, presentation, styleResolver, defs);
                     break;
                 }
                 if (scene.cartesianKind === "heatmap") {
@@ -197,28 +192,32 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
                     let r = isFrom ? this.#fromCartesianRenderer : this.#toCartesianRenderer;
                     if (!r) {
                         r = new SvgCartesianContentRenderer(container);
-                        if (isFrom) this.#fromCartesianRenderer = r; else this.#toCartesianRenderer = r;
+                        if (isFrom) this.#fromCartesianRenderer = r;
+                        else this.#toCartesianRenderer = r;
                     }
                     r.render(scene as CartesianXYChartScene, defs, styleResolver);
                 } else if (scene.cartesianKind === "heatmap") {
                     let r = isFrom ? this.#fromHeatmapRenderer : this.#toHeatmapRenderer;
                     if (!r) {
                         r = new SvgHeatmapRenderer(container);
-                        if (isFrom) this.#fromHeatmapRenderer = r; else this.#toHeatmapRenderer = r;
+                        if (isFrom) this.#fromHeatmapRenderer = r;
+                        else this.#toHeatmapRenderer = r;
                     }
                     r.render(scene as CartesianHeatmapChartScene, null, styleResolver);
                 } else if (scene.cartesianKind === "funnel") {
                     let r = isFrom ? this.#fromFunnelRenderer : this.#toFunnelRenderer;
                     if (!r) {
                         r = new SvgFunnelRenderer(container);
-                        if (isFrom) this.#fromFunnelRenderer = r; else this.#toFunnelRenderer = r;
+                        if (isFrom) this.#fromFunnelRenderer = r;
+                        else this.#toFunnelRenderer = r;
                     }
                     r.render(scene as CartesianFunnelChartScene, null, styleResolver);
                 } else if (scene.cartesianKind === "waterfall") {
                     let r = isFrom ? this.#fromWaterfallRenderer : this.#toWaterfallRenderer;
                     if (!r) {
                         r = new SvgWaterfallRenderer(container);
-                        if (isFrom) this.#fromWaterfallRenderer = r; else this.#toWaterfallRenderer = r;
+                        if (isFrom) this.#fromWaterfallRenderer = r;
+                        else this.#toWaterfallRenderer = r;
                     }
                     r.render(scene as CartesianWaterfallChartScene, null, styleResolver);
                 }
@@ -228,7 +227,8 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
                     let r = isFrom ? this.#fromTreemapRenderer : this.#toTreemapRenderer;
                     if (!r) {
                         r = new SvgTreemapRenderer(container);
-                        if (isFrom) this.#fromTreemapRenderer = r; else this.#toTreemapRenderer = r;
+                        if (isFrom) this.#fromTreemapRenderer = r;
+                        else this.#toTreemapRenderer = r;
                     }
                     r.render(scene as TreemapChartScene, null, styleResolver);
                 }
@@ -237,7 +237,8 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
                 let r = isFrom ? this.#fromPolarRenderer : this.#toPolarRenderer;
                 if (!r) {
                     r = new SvgPolarChartRenderer(container);
-                    if (isFrom) this.#fromPolarRenderer = r; else this.#toPolarRenderer = r;
+                    if (isFrom) this.#fromPolarRenderer = r;
+                    else this.#toPolarRenderer = r;
                 }
                 r.render(scene as PolarChartScene, null, styleResolver, defs);
                 break;
@@ -309,13 +310,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
         const canUseCartesianStructuralCrossfade =
             toScene.coordinateSystem === "cartesian" &&
             toScene.cartesianKind === "xy" &&
-            (
-                fromScene === null ||
-                (
-                    fromScene.coordinateSystem === "cartesian" &&
-                    fromScene.cartesianKind === "xy"
-                )
-            );
+            (fromScene === null || (fromScene.coordinateSystem === "cartesian" && fromScene.cartesianKind === "xy"));
 
         if (canUseCartesianStructuralCrossfade) {
             this.#clearGenericCrossfade();
@@ -385,4 +380,3 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
         this.#root.style.height = `${height}px`;
     }
 }
-

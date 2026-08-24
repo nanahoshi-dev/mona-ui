@@ -126,7 +126,13 @@ export class DensePointGeometryIndex {
 
         // X-only fast monotonic narrowing if applicable
         for (const superBlock of this.#superBlocks) {
-            const sbLowerBound = this.#rectDistance(superBlock.minX, superBlock.maxX, superBlock.minY, superBlock.maxY, query);
+            const sbLowerBound = this.#rectDistance(
+                superBlock.minX,
+                superBlock.maxX,
+                superBlock.minY,
+                superBlock.maxY,
+                query
+            );
             if (sbLowerBound > bestDist) {
                 continue;
             }
@@ -284,7 +290,13 @@ export class DenseSegmentGeometryIndex {
         let bestSecDist = Number.POSITIVE_INFINITY;
 
         for (const superBlock of this.#superBlocks) {
-            const sbLowerBound = this.#rectDistance(superBlock.minX, superBlock.maxX, superBlock.minY, superBlock.maxY, query);
+            const sbLowerBound = this.#rectDistance(
+                superBlock.minX,
+                superBlock.maxX,
+                superBlock.minY,
+                superBlock.maxY,
+                query
+            );
             if (sbLowerBound > bestDist) {
                 continue;
             }
@@ -302,8 +314,12 @@ export class DenseSegmentGeometryIndex {
                     const pyLow = mapY(this.#source.getLowY(i));
                     const pyHigh = mapY(this.#source.getHighY(i));
                     if (
-                        px === undefined || pyLow === undefined || pyHigh === undefined ||
-                        !Number.isFinite(px) || !Number.isFinite(pyLow) || !Number.isFinite(pyHigh)
+                        px === undefined ||
+                        pyLow === undefined ||
+                        pyHigh === undefined ||
+                        !Number.isFinite(px) ||
+                        !Number.isFinite(pyLow) ||
+                        !Number.isFinite(pyHigh)
                     ) {
                         continue;
                     }
@@ -311,7 +327,7 @@ export class DenseSegmentGeometryIndex {
                     const minY = Math.min(pyLow, pyHigh);
                     const maxY = Math.max(pyLow, pyHigh);
                     const dx = px - pixel.x;
-                    const dy = pixel.y < minY ? minY - pixel.y : (pixel.y > maxY ? pixel.y - maxY : 0);
+                    const dy = pixel.y < minY ? minY - pixel.y : pixel.y > maxY ? pixel.y - maxY : 0;
 
                     let dist = 0;
                     let secDist = 0;

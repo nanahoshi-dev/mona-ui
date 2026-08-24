@@ -12,7 +12,10 @@ function createMockBarSeries(overrides: Partial<ChartBarSeriesRegistration> = {}
     return {
         borderRadius: signal(4),
         color: signal("#3b82f6"),
-        data: signal([{ cat: "Q1", val: 100 }, { cat: "Q2", val: 200 }]),
+        data: signal([
+            { cat: "Q1", val: 100 },
+            { cat: "Q2", val: 200 }
+        ]),
         element: { nativeElement: {} as HTMLElement } as import("@angular/core").ElementRef<HTMLElement>,
         field: signal("val"),
         fillOpacity: signal(1),
@@ -33,11 +36,16 @@ function createMockBarSeries(overrides: Partial<ChartBarSeriesRegistration> = {}
     };
 }
 
-function createMockRangeBarSeries(overrides: Partial<ChartRangeBarSeriesRegistration> = {}): ChartRangeBarSeriesRegistration {
+function createMockRangeBarSeries(
+    overrides: Partial<ChartRangeBarSeriesRegistration> = {}
+): ChartRangeBarSeriesRegistration {
     return {
         borderRadius: signal(4),
         color: signal("#10b981"),
-        data: signal([{ cat: "Q1", from: 50, to: 120 }, { cat: "Q2", from: 80, to: 180 }]),
+        data: signal([
+            { cat: "Q1", from: 50, to: 120 },
+            { cat: "Q2", from: 80, to: 180 }
+        ]),
         element: { nativeElement: {} as HTMLElement } as import("@angular/core").ElementRef<HTMLElement>,
         fillOpacity: signal(1),
         fromField: signal("from"),
@@ -287,7 +295,11 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
 
     it("omits non-finite values in unstacked horizontal bars", () => {
         const barSeries = createMockBarSeries({
-            data: signal([{ cat: "Q1", val: 100 }, { cat: "Q2", val: Number.NaN }, { cat: "Q3", val: null }])
+            data: signal([
+                { cat: "Q1", val: 100 },
+                { cat: "Q2", val: Number.NaN },
+                { cat: "Q3", val: null }
+            ])
         });
         const xAxis = createMockXAxis();
         const yAxis = createMockYAxis();
@@ -537,7 +549,10 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
 
     it("evaluates hasRenderableData correctly for all-invalid vs single-valid horizontal datasets", () => {
         const invalidBar = createMockBarSeries({
-            data: signal([{ cat: "Q1", val: Number.NaN }, { cat: "Q2", val: null }])
+            data: signal([
+                { cat: "Q1", val: Number.NaN },
+                { cat: "Q2", val: null }
+            ])
         });
         const invalidScene = CartesianHorizontalBarLayoutEngine.computeLayout({
             containerHeight: 300,
@@ -658,4 +673,3 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
         expect(hit2?.xAxisTitle).toBe("Units");
     });
 });
-

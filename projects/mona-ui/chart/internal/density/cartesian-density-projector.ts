@@ -75,12 +75,7 @@ export interface ConnectedCandidate extends PrioritizedSourceCandidate {
 }
 
 export type ConnectedProtectedCandidateReason =
-    | "bucket-edge"
-    | "clip-anchor"
-    | "continuity-anchor"
-    | "step-extremum"
-    | "step-transition"
-    | "visible-boundary";
+    "bucket-edge" | "clip-anchor" | "continuity-anchor" | "step-extremum" | "step-transition" | "visible-boundary";
 
 export interface ConnectedProtectedCandidateGroup {
     readonly anchorIndex: number;
@@ -130,10 +125,7 @@ function protectedGroupReason(candidate: ConnectedCandidate): ConnectedProtected
     return "step-transition";
 }
 
-function compareProtectedGroups(
-    a: ConnectedProtectedCandidateGroup,
-    b: ConnectedProtectedCandidateGroup
-): number {
+function compareProtectedGroups(a: ConnectedProtectedCandidateGroup, b: ConnectedProtectedCandidateGroup): number {
     if (b.priority !== a.priority) {
         return b.priority - a.priority;
     }
@@ -238,11 +230,7 @@ export function selectConnectedProtectedCandidatesUnderBudget(
         .map(group => ({
             ...group,
             indices: Array.from(
-                new Set(
-                    group.indices.filter(
-                        index => Number.isInteger(index) && index >= 0 && index < sourceCount
-                    )
-                )
+                new Set(group.indices.filter(index => Number.isInteger(index) && index >= 0 && index < sourceCount))
             ).sort((a, b) => a - b)
         }))
         .filter(group => group.indices.length > 0)
@@ -268,9 +256,7 @@ export function selectConnectedProtectedCandidatesUnderBudget(
     // Complete groups around anchors that were already reserved. A group that
     // does not fit is intentionally skipped; its mandatory anchor remains
     // selected without allowing a neighbor to evict another anchor.
-    const requiredGroups = new Set(
-        normalized.filter(group => group.indices.some(index => reservedAnchors.has(index)))
-    );
+    const requiredGroups = new Set(normalized.filter(group => group.indices.some(index => reservedAnchors.has(index))));
     for (const group of requiredGroups) {
         addGroup(group);
     }
@@ -317,12 +303,7 @@ export function reserveRequiredIndices(
     }
 
     for (const index of requiredAnchorIndices) {
-        if (
-            selected.size >= target ||
-            !Number.isInteger(index) ||
-            index < 0 ||
-            index >= sourceCount
-        ) {
+        if (selected.size >= target || !Number.isInteger(index) || index < 0 || index >= sourceCount) {
             continue;
         }
         selected.add(index);

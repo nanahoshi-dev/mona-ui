@@ -1,5 +1,5 @@
 import type { ChartPoint, ChartRect } from "../../../models/chart.models";
-import type { ChartFunnelSeriesScene ,SceneFunnelStage } from "../../scene/funnel-scene";
+import type { ChartFunnelSeriesScene, SceneFunnelStage } from "../../scene/funnel-scene";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";
@@ -187,7 +187,7 @@ export class FunnelAnimationAdapter implements ChartSeriesAnimationAdapter<Chart
             id,
             sample: (progress: number) => {
                 const stages = stagePlans
-                    .filter(p => (p.type !== "exit" || progress < 1))
+                    .filter(p => p.type !== "exit" || progress < 1)
                     .map(p => sampleStage(p, progress));
 
                 return {

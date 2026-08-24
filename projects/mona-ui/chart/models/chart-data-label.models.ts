@@ -141,5 +141,4 @@ export interface ChartDataLabelContext<T = unknown> {
     readonly yValue?: unknown;
 }
 
-export type ChartDataLabelFormatter<T = unknown> =
-    (context: ChartDataLabelContext<T>) => string | null | undefined;
+export type ChartDataLabelFormatter<T = unknown> = (context: ChartDataLabelContext<T>) => string | null | undefined;

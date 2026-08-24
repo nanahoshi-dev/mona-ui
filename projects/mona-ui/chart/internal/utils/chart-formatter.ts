@@ -67,11 +67,7 @@ export function formatXValue(
     return value !== undefined && value !== null ? String(value) : "";
 }
 
-export function formatYValue(
-    value: unknown,
-    index: number = 0,
-    formatter?: ChartAxisFormatter<unknown>
-): string {
+export function formatYValue(value: unknown, index: number = 0, formatter?: ChartAxisFormatter<unknown>): string {
     if (formatter) {
         return formatter(value, index);
     }
@@ -105,13 +101,7 @@ export function formatCartesianAxisSemanticValue(options: CartesianAxisSemanticF
         return formatPercentagePoint(value);
     }
     if (axisScene?.axis === "x") {
-        return formatXValue(
-            value,
-            index,
-            undefined,
-            axisScene.scaleType as ChartXAxisType,
-            xTimeSpanMs
-        );
+        return formatXValue(value, index, undefined, axisScene.scaleType as ChartXAxisType, xTimeSpanMs);
     }
     return formatYValue(value, index, undefined);
 }

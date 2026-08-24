@@ -1,5 +1,9 @@
 import type { ChartInteractionState } from "../../../interaction/chart-interaction-state";
-import type { CartesianWaterfallChartScene, SceneWaterfallBar, SceneWaterfallConnector } from "../../../scene/waterfall-scene";
+import type {
+    CartesianWaterfallChartScene,
+    SceneWaterfallBar,
+    SceneWaterfallConnector
+} from "../../../scene/waterfall-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import { buildRoundedRectPath } from "../../geometry/rounded-rect-path-builder";
 import { setSvgAttribute } from "../svg-attribute-utils";
@@ -54,7 +58,9 @@ export class SvgWaterfallRenderer {
         this.#highlightGroup.setAttribute("data-waterfall-layer", "highlight");
         this.#container.appendChild(this.#highlightGroup);
 
-        this.#connectorKeyedGroup = new SvgKeyedGroup<WaterfallRenderConnectorItem, SVGLineElement>(this.#connectorsGroup);
+        this.#connectorKeyedGroup = new SvgKeyedGroup<WaterfallRenderConnectorItem, SVGLineElement>(
+            this.#connectorsGroup
+        );
         this.#barKeyedGroup = new SvgKeyedGroup<WaterfallRenderBarItem, SVGElement>(this.#barsGroup);
     }
 
@@ -95,9 +101,7 @@ export class SvgWaterfallRenderer {
         }
 
         // 1. Grid
-        const gridColor =
-            styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
-            "rgba(148, 163, 184, 0.2)";
+        const gridColor = styleResolver.resolveCssVariable("--mona-chart-grid-color") || "rgba(148, 163, 184, 0.2)";
 
         const gridSegments: string[] = [];
         for (const axisScene of axes) {
@@ -227,15 +231,11 @@ export class SvgWaterfallRenderer {
             if (!axisScene.visible || !axisScene.axisLine) continue;
             if (axisScene.axis === "y") {
                 const x =
-                    axisScene.position === "right"
-                        ? Math.round(plotRect.x + plotRect.width)
-                        : Math.round(plotRect.x);
+                    axisScene.position === "right" ? Math.round(plotRect.x + plotRect.width) : Math.round(plotRect.x);
                 axisSegments.push(`M ${x} ${plotRect.y} V ${plotRect.y + plotRect.height}`);
             } else if (axisScene.axis === "x") {
                 const y =
-                    axisScene.position === "top"
-                        ? Math.round(plotRect.y)
-                        : Math.round(plotRect.y + plotRect.height);
+                    axisScene.position === "top" ? Math.round(plotRect.y) : Math.round(plotRect.y + plotRect.height);
                 axisSegments.push(`M ${plotRect.x} ${y} H ${plotRect.x + plotRect.width}`);
             }
         }

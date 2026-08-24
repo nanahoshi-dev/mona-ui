@@ -9,11 +9,7 @@ export function formatSvgNumber(num: number): string {
     return String(rounded);
 }
 
-export function setSvgAttribute(
-    element: SVGElement,
-    name: string,
-    value: string | number | null | undefined
-): void {
+export function setSvgAttribute(element: SVGElement, name: string, value: string | number | null | undefined): void {
     if (value === null || value === undefined) {
         element.removeAttribute(name);
     } else if (typeof value === "number") {
@@ -32,9 +28,7 @@ export function setSvgAttribute(
     }
 }
 
-export function resolveBrushDashArray(
-    lineStyle?: "solid" | "dashed" | "dotted" | null
-): string | undefined {
+export function resolveBrushDashArray(lineStyle?: "solid" | "dashed" | "dotted" | null): string | undefined {
     switch (lineStyle) {
         case "dashed":
             return "4 4";
@@ -46,9 +40,7 @@ export function resolveBrushDashArray(
     }
 }
 
-export function resolveStrokeDashArray(
-    lineStyle?: "solid" | "dashed" | "dotted" | null
-): string | undefined {
+export function resolveStrokeDashArray(lineStyle?: "solid" | "dashed" | "dotted" | null): string | undefined {
     switch (lineStyle) {
         case "dashed":
             return "4 4";

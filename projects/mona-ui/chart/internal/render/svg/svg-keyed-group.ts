@@ -60,7 +60,10 @@ export class SvgKeyedGroup<T = unknown, E extends SVGElement = SVGElement> {
             seenKeys.add(key);
 
             let element = this.#elementsByKey.get(key);
-            const requestedTag = typeof options.tag === "function" ? options.tag(item, i) : (options.tag ?? (options.create ? undefined : "g"));
+            const requestedTag =
+                typeof options.tag === "function"
+                    ? options.tag(item, i)
+                    : (options.tag ?? (options.create ? undefined : "g"));
 
             if (element && requestedTag && element.localName.toLowerCase() !== requestedTag.toLowerCase()) {
                 const replacement = createSvgElement<E>(requestedTag as keyof SVGElementTagNameMap);

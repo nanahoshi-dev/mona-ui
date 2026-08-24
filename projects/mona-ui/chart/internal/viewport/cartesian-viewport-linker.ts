@@ -1,7 +1,4 @@
-import type {
-    ChartViewportAxisRef,
-    ChartViewportLinkGroup
-} from "../../models/chart-viewport.models";
+import type { ChartViewportAxisRef, ChartViewportLinkGroup } from "../../models/chart-viewport.models";
 import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
 import {
     mapDomainWindow,
@@ -137,7 +134,8 @@ export class CartesianViewportLinker {
                     const targetSnap = coordinateSpace.get(targetRef);
                     if (!targetSnap || !targetSnap.valid) continue;
 
-                    const existingTargetWin = targetRef.axis === "x" ? nextX.get(targetRef.axisId) : nextY.get(targetRef.axisId);
+                    const existingTargetWin =
+                        targetRef.axis === "x" ? nextX.get(targetRef.axisId) : nextY.get(targetRef.axisId);
                     let newTargetWin: InternalAxisViewport | undefined;
 
                     if (group.mode === "domain") {

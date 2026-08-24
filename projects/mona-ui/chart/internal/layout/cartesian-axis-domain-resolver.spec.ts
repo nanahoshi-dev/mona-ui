@@ -3,12 +3,15 @@ import { describe, expect, it } from "vitest";
 import type {
     ChartBubbleSeriesRegistration,
     ChartFinancialSeriesRegistration,
-    ChartLineSeriesRegistration
-    ,ChartXAxisRegistration,
+    ChartLineSeriesRegistration,
+    ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import { CartesianAxisDomainResolver } from "./cartesian-axis-domain-resolver";
-import { CartesianAxisRegistryResolver, type ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
+import {
+    CartesianAxisRegistryResolver,
+    type ResolvedCartesianAxisDescriptor
+} from "./cartesian-axis-registry-resolver";
 
 describe("CartesianAxisDomainResolver", () => {
     const createMockXAxis = (overrides: Partial<ChartXAxisRegistration> = {}): ResolvedCartesianAxisDescriptor<"x"> => {
@@ -80,11 +83,7 @@ describe("CartesianAxisDomainResolver", () => {
             const series: ChartLineSeriesRegistration = {
                 color: signal("#000"),
                 curve: signal("linear"),
-                data: signal([
-                    { info: { label: "Alpha" } },
-                    { info: { label: "Beta" } },
-                    { info: { label: "Alpha" } }
-                ]),
+                data: signal([{ info: { label: "Alpha" } }, { info: { label: "Beta" } }, { info: { label: "Alpha" } }]),
                 element: { nativeElement: {} as HTMLElement },
                 field: signal("val"),
                 id: "s1",

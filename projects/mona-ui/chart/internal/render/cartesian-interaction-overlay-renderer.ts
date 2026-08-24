@@ -10,7 +10,11 @@ export class CartesianInteractionOverlayRenderer {
         interactionState: ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        if (!interactionState || (!interactionState.activeHitTarget && (!interactionState.activeHits || interactionState.activeHits.length === 0))) {
+        if (
+            !interactionState ||
+            (!interactionState.activeHitTarget &&
+                (!interactionState.activeHits || interactionState.activeHits.length === 0))
+        ) {
             return;
         }
 
@@ -40,8 +44,7 @@ export class CartesianInteractionOverlayRenderer {
             styleResolver.resolveCssVariable("--color-surface") ||
             "#ffffff";
         const barHighlightColor =
-            styleResolver.resolveCssVariable("--mona-chart-bar-highlight-color") ||
-            "rgba(255, 255, 255, 0.25)";
+            styleResolver.resolveCssVariable("--mona-chart-bar-highlight-color") || "rgba(255, 255, 255, 0.25)";
         const focusIndicatorColor =
             styleResolver.resolveCssVariable("--color-focus-indicator") ||
             styleResolver.resolveCssVariable("--color-ring") ||
@@ -51,9 +54,7 @@ export class CartesianInteractionOverlayRenderer {
         for (const hit of hits) {
             if (hit.seriesType === "rangeArea" && (hit.rangeBand || (hit.highPoint && hit.lowPoint))) {
                 const matchingSeries = series.find(s => s.id === hit.seriesId);
-                const color = isKeyboardSource
-                    ? focusIndicatorColor
-                    : (matchingSeries?.style.color ?? "#3b82f6");
+                const color = isKeyboardSource ? focusIndicatorColor : (matchingSeries?.style.color ?? "#3b82f6");
                 const fromP = hit.rangeBand?.fromPoint ?? hit.highPoint!;
                 const toP = hit.rangeBand?.toPoint ?? hit.lowPoint!;
 
@@ -86,9 +87,7 @@ export class CartesianInteractionOverlayRenderer {
                     context.stroke();
                 } else {
                     const matchingSeries = series.find(s => s.id === hit.seriesId);
-                    const color = isKeyboardSource
-                        ? focusIndicatorColor
-                        : (matchingSeries?.style.color ?? "#3b82f6");
+                    const color = isKeyboardSource ? focusIndicatorColor : (matchingSeries?.style.color ?? "#3b82f6");
                     drawPointMarker(context, hit.point.x, hit.point.y, 5, color, markerStrokeColor, 2);
                 }
             } else if (hit.bounds || hit.visualBounds) {
@@ -114,22 +113,44 @@ export class CartesianInteractionOverlayRenderer {
                         context.restore();
                     } else {
                         const radius = hit.borderRadius ?? 4;
-                        const cornerRadii = hit.cornerRadii ?? (hit.seriesType === "rangeBar" && radius > 0 ? {
-                            bottomLeft: radius,
-                            bottomRight: radius,
-                            topLeft: radius,
-                            topRight: radius
-                        } : undefined);
+                        const cornerRadii =
+                            hit.cornerRadii ??
+                            (hit.seriesType === "rangeBar" && radius > 0
+                                ? {
+                                      bottomLeft: radius,
+                                      bottomRight: radius,
+                                      topLeft: radius,
+                                      topRight: radius
+                                  }
+                                : undefined);
                         const isPos = hit.isPositive ?? true;
 
                         context.save();
                         if (isKeyboardSource) {
                             context.strokeStyle = focusIndicatorColor;
                             context.lineWidth = 2;
-                            drawBarRectOutline(context, barRect.x, barRect.y, barRect.width, barRect.height, radius, isPos, cornerRadii);
+                            drawBarRectOutline(
+                                context,
+                                barRect.x,
+                                barRect.y,
+                                barRect.width,
+                                barRect.height,
+                                radius,
+                                isPos,
+                                cornerRadii
+                            );
                         } else {
                             context.fillStyle = barHighlightColor;
-                            drawBarRect(context, barRect.x, barRect.y, barRect.width, barRect.height, radius, isPos, cornerRadii);
+                            drawBarRect(
+                                context,
+                                barRect.x,
+                                barRect.y,
+                                barRect.width,
+                                barRect.height,
+                                radius,
+                                isPos,
+                                cornerRadii
+                            );
                         }
                         context.restore();
                     }

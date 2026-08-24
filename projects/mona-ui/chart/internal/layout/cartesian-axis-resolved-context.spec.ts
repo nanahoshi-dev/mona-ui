@@ -3,18 +3,24 @@ import { signal } from "@angular/core";
 import { CartesianAxisResolvedContextBuilder } from "./cartesian-axis-resolved-context";
 import { CartesianAxisRegistryResolver } from "./cartesian-axis-registry-resolver";
 import { CartesianSeriesAxisBindingResolver } from "./cartesian-series-axis-binding-resolver";
-import type { ChartXAxisRegistration, ChartYAxisRegistration, ChartBarSeriesRegistration } from "../context/chart-registration-context";
+import type {
+    ChartXAxisRegistration,
+    ChartYAxisRegistration,
+    ChartBarSeriesRegistration
+} from "../context/chart-registration-context";
 
-function createMockXAxis(options?: Partial<{
-    axisId: string;
-    max: number | Date;
-    min: number | Date;
-    nice: boolean;
-    position: "bottom" | "top";
-    tickCount: number;
-    title: string;
-    type: "auto" | "category" | "linear" | "time" | "utc";
-}>): ChartXAxisRegistration {
+function createMockXAxis(
+    options?: Partial<{
+        axisId: string;
+        max: number | Date;
+        min: number | Date;
+        nice: boolean;
+        position: "bottom" | "top";
+        tickCount: number;
+        title: string;
+        type: "auto" | "category" | "linear" | "time" | "utc";
+    }>
+): ChartXAxisRegistration {
     return {
         axisId: signal(options?.axisId),
         axisLine: signal(true),
@@ -33,16 +39,18 @@ function createMockXAxis(options?: Partial<{
     };
 }
 
-function createMockYAxis(options?: Partial<{
-    axisId: string;
-    max: number;
-    min: number;
-    nice: boolean;
-    position: "left" | "right";
-    tickCount: number;
-    title: string;
-    type: "auto" | "category" | "linear" | "log" | "symlog" | "pow" | "sqrt";
-}>): ChartYAxisRegistration {
+function createMockYAxis(
+    options?: Partial<{
+        axisId: string;
+        max: number;
+        min: number;
+        nice: boolean;
+        position: "left" | "right";
+        tickCount: number;
+        title: string;
+        type: "auto" | "category" | "linear" | "log" | "symlog" | "pow" | "sqrt";
+    }>
+): ChartYAxisRegistration {
     return {
         axisId: signal(options?.axisId),
         axisLine: signal(true),
@@ -61,11 +69,13 @@ function createMockYAxis(options?: Partial<{
     };
 }
 
-function createMockBarSeries(options?: Partial<{
-    id: string;
-    xAxisId: string;
-    yAxisId: string;
-}>): ChartBarSeriesRegistration {
+function createMockBarSeries(
+    options?: Partial<{
+        id: string;
+        xAxisId: string;
+        yAxisId: string;
+    }>
+): ChartBarSeriesRegistration {
     return {
         borderRadius: signal(undefined),
         color: signal("#3f6be2"),

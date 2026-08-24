@@ -2,14 +2,18 @@
     <div [class]="headerClasses()" [style.text-align]="titleAlign()">
         @if (titleTemplate(); as tpl) {
             <div data-mona-chart-export-role="title-template">
-                <ng-container [ngTemplateOutlet]="tpl.templateRef" [ngTemplateOutletContext]="{ $implicit: title(), title: title() }" />
+                <ng-container
+                    [ngTemplateOutlet]="tpl.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: title(), title: title() }" />
             </div>
         } @else if (title()) {
             <div [class]="titleClasses()" data-mona-chart-export-role="title">{{ title() }}</div>
         }
         @if (subtitleTemplate(); as subTpl) {
             <div data-mona-chart-export-role="subtitle-template">
-                <ng-container [ngTemplateOutlet]="subTpl.templateRef" [ngTemplateOutletContext]="{ $implicit: subtitle(), subtitle: subtitle() }" />
+                <ng-container
+                    [ngTemplateOutlet]="subTpl.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: subtitle(), subtitle: subtitle() }" />
             </div>
         } @else if (subtitle()) {
             <div [class]="subtitleClasses()" data-mona-chart-export-role="subtitle">{{ subtitle() }}</div>
@@ -32,9 +36,7 @@
         (wheel)="onWheel($event)"
         (click)="onCanvasClick($event)">
         @if (renderer() === "canvas") {
-            <canvas
-                #canvas
-                class="absolute inset-0 block h-full w-full pointer-events-none"></canvas>
+            <canvas #canvas class="absolute inset-0 block h-full w-full pointer-events-none"></canvas>
         } @else {
             <svg
                 #svgSurface
@@ -46,16 +48,21 @@
 
         <!-- DOM Cartesian Axis Labels & Titles -->
         @if (cartesianScene(); as cart) {
-            @for (axisScene of cart.axes; track (axisScene.axis + ':' + (axisScene.axisId ?? ''))) {
+            @for (axisScene of cart.axes; track axisScene.axis + ":" + (axisScene.axisId ?? "")) {
                 @if (axisScene.visible) {
                     @if (axisScene.labels !== false) {
-                        @for (tick of axisScene.ticks; track (tick.tickKey ? (tick.tickKey + ':' + tick.index) : tick.index)) {
+                        @for (
+                            tick of axisScene.ticks;
+                            track tick.tickKey ? tick.tickKey + ":" + tick.index : tick.index
+                        ) {
                             @if (tick.labelVisible !== false) {
                                 <div
                                     [class]="axisLabelClasses()"
                                     [monaChartLabelMeasure]="tick.tickKey ?? ''"
                                     data-mona-chart-export-role="axis-label"
-                                    [attr.data-mona-chart-export-mode]="resolveAxisLabelTemplate(axisScene) ? 'raster' : 'vector'"
+                                    [attr.data-mona-chart-export-mode]="
+                                        resolveAxisLabelTemplate(axisScene) ? 'raster' : 'vector'
+                                    "
                                     [style.left.px]="axisLabelLeft(cart, axisScene, tick)"
                                     [style.top.px]="axisLabelTop(cart, axisScene, tick)"
                                     [style.max-width.px]="axisScene.labelMaxWidth ?? null"
@@ -89,7 +96,15 @@
                             data-mona-chart-export-mode="vector"
                             [style.left.px]="axisTitleLeft(cart, axisScene)"
                             [style.top.px]="axisTitleTop(cart, axisScene)"
-                            [style.transform]="axisScene.axis === 'x' ? (axisScene.position === 'top' ? 'translate(-50%, 0)' : 'translate(-50%, -100%)') : (axisScene.position === 'right' ? 'translate(-50%, -50%) rotate(90deg)' : 'translate(-50%, -50%) rotate(-90deg)')">
+                            [style.transform]="
+                                axisScene.axis === 'x'
+                                    ? axisScene.position === 'top'
+                                        ? 'translate(-50%, 0)'
+                                        : 'translate(-50%, -100%)'
+                                    : axisScene.position === 'right'
+                                      ? 'translate(-50%, -50%) rotate(90deg)'
+                                      : 'translate(-50%, -50%) rotate(-90deg)'
+                            ">
                             {{ axisScene.title }}
                         </div>
                     }
@@ -107,13 +122,19 @@
                                 aria-hidden="true"
                                 class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
                                 [class.opacity-0]="isAnimating() && isStructuralAnimation()"
-                                [attr.data-mona-chart-export-animation-suppression]="(isAnimating() && isStructuralAnimation()) ? 'opacity' : null"
+                                [attr.data-mona-chart-export-animation-suppression]="
+                                    isAnimating() && isStructuralAnimation() ? 'opacity' : null
+                                "
                                 [monaChartLabelMeasure]="'sector:' + slice.sliceId"
                                 data-mona-chart-export-role="sector-label"
-                                [attr.data-mona-chart-export-mode]="polarSeriesRegistration()?.sliceLabelTemplate?.() ? 'raster' : 'vector'"
+                                [attr.data-mona-chart-export-mode]="
+                                    polarSeriesRegistration()?.sliceLabelTemplate?.() ? 'raster' : 'vector'
+                                "
                                 [style.left.px]="slice.label.position.x"
                                 [style.top.px]="slice.label.position.y"
-                                [style.transform]="slice.label.side === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'">
+                                [style.transform]="
+                                    slice.label.side === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'
+                                ">
                                 @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
                                     <ng-container
                                         [ngTemplateOutlet]="labelTemplate.templateRef"
@@ -127,9 +148,13 @@
                                 aria-hidden="true"
                                 class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
                                 [class.opacity-0]="isAnimating() && isStructuralAnimation()"
-                                [attr.data-mona-chart-export-animation-suppression]="(isAnimating() && isStructuralAnimation()) ? 'opacity' : null"
+                                [attr.data-mona-chart-export-animation-suppression]="
+                                    isAnimating() && isStructuralAnimation() ? 'opacity' : null
+                                "
                                 data-mona-chart-export-role="sector-label"
-                                [attr.data-mona-chart-export-mode]="polarSeriesRegistration()?.sliceLabelTemplate?.() ? 'raster' : 'vector'"
+                                [attr.data-mona-chart-export-mode]="
+                                    polarSeriesRegistration()?.sliceLabelTemplate?.() ? 'raster' : 'vector'
+                                "
                                 [style.left.px]="slice.insideLabelPoint.x"
                                 [style.top.px]="slice.insideLabelPoint.y"
                                 [style.transform]="'translate(-50%, -50%)'"
@@ -149,7 +174,13 @@
 
             @for (seriesScene of pol.series; track seriesScene.id) {
                 <!-- Donut Center Template -->
-                @if (seriesScene.type === 'donut' && pol.hasRenderableData && seriesScene.slices.length > 0 && donutSeriesRegistration()?.centerTemplate?.(); as centerTemplate) {
+                @if (
+                    seriesScene.type === "donut" &&
+                        pol.hasRenderableData &&
+                        seriesScene.slices.length > 0 &&
+                        donutSeriesRegistration()?.centerTemplate?.();
+                    as centerTemplate
+                ) {
                     <div
                         class="absolute pointer-events-none flex flex-col items-center justify-center text-center overflow-hidden"
                         data-mona-chart-export-role="donut-center"
@@ -217,7 +248,9 @@
                             class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
                             [monaChartLabelMeasure]="'angular:' + tick.tickKey"
                             data-mona-chart-export-role="polar-angular-label"
-                            [attr.data-mona-chart-export-mode]="angularAxisRegistration()?.labelTemplate?.() ? 'raster' : 'vector'"
+                            [attr.data-mona-chart-export-mode]="
+                                angularAxisRegistration()?.labelTemplate?.() ? 'raster' : 'vector'
+                            "
                             [style.left.px]="tick.labelPoint.x"
                             [style.top.px]="tick.labelPoint.y"
                             [style.transform]="angularLabelTransform(tick)">
@@ -247,7 +280,9 @@
                             class="absolute pointer-events-none text-xs text-muted-foreground select-none whitespace-nowrap"
                             [monaChartLabelMeasure]="'radial:' + tick.tickKey"
                             data-mona-chart-export-role="polar-radial-label"
-                            [attr.data-mona-chart-export-mode]="radialAxisRegistration()?.labelTemplate?.() ? 'raster' : 'vector'"
+                            [attr.data-mona-chart-export-mode]="
+                                radialAxisRegistration()?.labelTemplate?.() ? 'raster' : 'vector'
+                            "
                             [style.left.px]="tick.labelPoint.x"
                             [style.top.px]="tick.labelPoint.y"
                             [style.transform]="radialLabelTransform(tick, radScene.radialAxis.labelAngle)">
@@ -467,7 +502,7 @@
 
         <!-- DOM Cartesian Data Labels (Template Layer) -->
         @if (cartesianDataLabelScene(); as labelScene) {
-            @for (label of labelScene.templateLabels; track (label.seriesId + ':' + label.markId)) {
+            @for (label of labelScene.templateLabels; track label.seriesId + ":" + label.markId) {
                 <div
                     aria-hidden="true"
                     class="absolute pointer-events-none select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
@@ -557,7 +592,10 @@
 
         <!-- No Data Placeholder -->
         @if (hasNoData()) {
-            <div [class]="noDataClasses()" data-mona-chart-export-role="no-data" [attr.data-mona-chart-export-mode]="noDataTemplate() ? 'raster' : 'vector'">
+            <div
+                [class]="noDataClasses()"
+                data-mona-chart-export-role="no-data"
+                [attr.data-mona-chart-export-mode]="noDataTemplate() ? 'raster' : 'vector'">
                 @if (noDataTemplate(); as template) {
                     <ng-container [ngTemplateOutlet]="template.templateRef" />
                 } @else {

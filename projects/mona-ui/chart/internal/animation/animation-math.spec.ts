@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-    lerp,
-    lerpCircularAngle,
-    lerpCircularDegrees,
-    lerpOpacity,
-    lerpPoint,
-    lerpRect
-} from "./animation-math";
+import { lerp, lerpCircularAngle, lerpCircularDegrees, lerpOpacity, lerpPoint, lerpRect } from "./animation-math";
 
 describe("animation-math", () => {
     it("should lerp numbers correctly", () => {

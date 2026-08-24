@@ -10,14 +10,14 @@ import type {
     ChartFunnelSeriesRegistration,
     ChartGaugeSeriesRegistration,
     ChartHeatmapSeriesRegistration,
-    ChartPolarSeriesRegistration
-    ,ChartRadialBarSeriesRegistration,
+    ChartPolarSeriesRegistration,
+    ChartRadialBarSeriesRegistration,
     ChartRadialSeriesRegistration,
     ChartReferenceBandRegistration,
     ChartReferenceLineRegistration,
     ChartRoseSeriesRegistration,
-    ChartSelectionRegistration
-    ,ChartTreemapSeriesRegistration,
+    ChartSelectionRegistration,
+    ChartTreemapSeriesRegistration,
     ChartWaterfallSeriesRegistration
 } from "../context/chart-registration-context";
 import type { ChartField } from "../../models/chart.models";
@@ -36,7 +36,7 @@ const DEFAULT_CHART_COLORS = [
     "#10b981", // Emerald (shadcn Chart 2)
     "#f59e0b", // Amber (shadcn Chart 3)
     "#8b5cf6", // Purple (shadcn Chart 4)
-    "#ec4899"  // Pink (shadcn Chart 5)
+    "#ec4899" // Pink (shadcn Chart 5)
 ];
 
 const DEFAULT_CHART_PALETTE_VARIABLES = [
@@ -237,14 +237,25 @@ export class ChartStyleResolver {
                 "#3b82f6";
         }
 
-        let markerRadius = explicitRadius !== undefined && isFiniteNumber(explicitRadius) && explicitRadius >= 0 ? explicitRadius : undefined;
+        let markerRadius =
+            explicitRadius !== undefined && isFiniteNumber(explicitRadius) && explicitRadius >= 0
+                ? explicitRadius
+                : undefined;
         if (markerRadius === undefined) {
             const cssRadius = this.resolveNumericCssVariable("--mona-chart-annotation-marker-radius", el);
             markerRadius = cssRadius !== undefined && cssRadius >= 0 ? cssRadius : 4;
         }
 
-        const markerStrokeWidth = explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0 ? explicitStrokeWidth : 1.5;
-        const connectorWidth = explicitConnectorWidth !== undefined && isFiniteNumber(explicitConnectorWidth) && explicitConnectorWidth >= 0 ? explicitConnectorWidth : 1;
+        const markerStrokeWidth =
+            explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
+                ? explicitStrokeWidth
+                : 1.5;
+        const connectorWidth =
+            explicitConnectorWidth !== undefined &&
+            isFiniteNumber(explicitConnectorWidth) &&
+            explicitConnectorWidth >= 0
+                ? explicitConnectorWidth
+                : 1;
 
         return { color, connectorWidth, markerRadius, markerStrokeWidth };
     }
@@ -270,10 +281,14 @@ export class ChartStyleResolver {
                 "#3b82f6";
         }
 
-        let fillOpacity = explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity) ? Math.max(0, Math.min(1, explicitFillOpacity)) : undefined;
+        let fillOpacity =
+            explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
+                ? Math.max(0, Math.min(1, explicitFillOpacity))
+                : undefined;
         if (fillOpacity === undefined) {
             const cssOpacity = this.resolveNumericCssVariable("--mona-chart-brush-fill-opacity");
-            fillOpacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.15;
+            fillOpacity =
+                cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.15;
         }
 
         let borderColor = explicitBorderColor ? this.resolveCssVariable(explicitBorderColor) : "";
@@ -284,7 +299,10 @@ export class ChartStyleResolver {
                 "#3b82f6";
         }
 
-        let borderWidth = explicitBorderWidth !== undefined && isFiniteNumber(explicitBorderWidth) && explicitBorderWidth >= 0 ? explicitBorderWidth : undefined;
+        let borderWidth =
+            explicitBorderWidth !== undefined && isFiniteNumber(explicitBorderWidth) && explicitBorderWidth >= 0
+                ? explicitBorderWidth
+                : undefined;
         if (borderWidth === undefined) {
             const cssBorderWidth = this.resolveNumericCssVariable("--mona-chart-brush-border-width");
             borderWidth = cssBorderWidth !== undefined && cssBorderWidth >= 0 ? cssBorderWidth : 1;
@@ -314,13 +332,19 @@ export class ChartStyleResolver {
                 "rgba(148, 163, 184, 0.4)";
         }
 
-        let width = explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0 ? explicitWidth : undefined;
+        let width =
+            explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0
+                ? explicitWidth
+                : undefined;
         if (width === undefined) {
             const cssWidth = this.resolveNumericCssVariable("--mona-chart-crosshair-width", el);
             width = cssWidth !== undefined && cssWidth >= 0 ? cssWidth : 1;
         }
 
-        let opacity = explicitOpacity !== undefined && isFiniteNumber(explicitOpacity) ? Math.max(0, Math.min(1, explicitOpacity)) : undefined;
+        let opacity =
+            explicitOpacity !== undefined && isFiniteNumber(explicitOpacity)
+                ? Math.max(0, Math.min(1, explicitOpacity))
+                : undefined;
         if (opacity === undefined) {
             const cssOpacity = this.resolveNumericCssVariable("--mona-chart-crosshair-opacity", el);
             opacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 1;
@@ -383,7 +407,8 @@ export class ChartStyleResolver {
         }
         try {
             let current = trimmed;
-            const primaryEl = targetElement ?? this.#rootElement ?? (typeof document !== "undefined" ? document.body : null);
+            const primaryEl =
+                targetElement ?? this.#rootElement ?? (typeof document !== "undefined" ? document.body : null);
             if (!primaryEl) {
                 if (current.startsWith("var(")) {
                     const inner = current.slice(4, -1).trim();
@@ -489,9 +514,7 @@ export class ChartStyleResolver {
         return this.resolvePaletteColor(paletteIndex);
     }
 
-    public resolveFinancialSeriesStyle(
-        series: ChartFinancialSeriesRegistration
-    ): ChartFinancialSeriesStyle {
+    public resolveFinancialSeriesStyle(series: ChartFinancialSeriesRegistration): ChartFinancialSeriesStyle {
         const rawExplicitRising = series.risingColor?.();
         const rawExplicitFalling = series.fallingColor?.();
         const rawExplicitNeutral = series.neutralColor?.();
@@ -515,13 +538,19 @@ export class ChartStyleResolver {
                 if (seriesEl) {
                     const computed = window.getComputedStyle(seriesEl);
 
-                    const risingVal = computed.getPropertyValue("--mona-chart-financial-rising-color") || computed.getPropertyValue("--mona-chart-color-rising");
+                    const risingVal =
+                        computed.getPropertyValue("--mona-chart-financial-rising-color") ||
+                        computed.getPropertyValue("--mona-chart-color-rising");
                     if (risingVal) cssRisingColor = risingVal.trim();
 
-                    const fallingVal = computed.getPropertyValue("--mona-chart-financial-falling-color") || computed.getPropertyValue("--mona-chart-color-falling");
+                    const fallingVal =
+                        computed.getPropertyValue("--mona-chart-financial-falling-color") ||
+                        computed.getPropertyValue("--mona-chart-color-falling");
                     if (fallingVal) cssFallingColor = fallingVal.trim();
 
-                    const neutralVal = computed.getPropertyValue("--mona-chart-financial-neutral-color") || computed.getPropertyValue("--mona-chart-color-neutral");
+                    const neutralVal =
+                        computed.getPropertyValue("--mona-chart-financial-neutral-color") ||
+                        computed.getPropertyValue("--mona-chart-color-neutral");
                     if (neutralVal) cssNeutralColor = neutralVal.trim();
 
                     const wickColVal = computed.getPropertyValue("--mona-chart-financial-wick-color");
@@ -546,15 +575,21 @@ export class ChartStyleResolver {
                 if (this.#rootElement) {
                     const rootComputed = window.getComputedStyle(this.#rootElement);
                     if (!cssRisingColor) {
-                        const rootRising = rootComputed.getPropertyValue("--mona-chart-financial-rising-color") || rootComputed.getPropertyValue("--mona-chart-color-rising");
+                        const rootRising =
+                            rootComputed.getPropertyValue("--mona-chart-financial-rising-color") ||
+                            rootComputed.getPropertyValue("--mona-chart-color-rising");
                         if (rootRising) cssRisingColor = rootRising.trim();
                     }
                     if (!cssFallingColor) {
-                        const rootFalling = rootComputed.getPropertyValue("--mona-chart-financial-falling-color") || rootComputed.getPropertyValue("--mona-chart-color-falling");
+                        const rootFalling =
+                            rootComputed.getPropertyValue("--mona-chart-financial-falling-color") ||
+                            rootComputed.getPropertyValue("--mona-chart-color-falling");
                         if (rootFalling) cssFallingColor = rootFalling.trim();
                     }
                     if (!cssNeutralColor) {
-                        const rootNeutral = rootComputed.getPropertyValue("--mona-chart-financial-neutral-color") || rootComputed.getPropertyValue("--mona-chart-color-neutral");
+                        const rootNeutral =
+                            rootComputed.getPropertyValue("--mona-chart-financial-neutral-color") ||
+                            rootComputed.getPropertyValue("--mona-chart-color-neutral");
                         if (rootNeutral) cssNeutralColor = rootNeutral.trim();
                     }
                     if (!cssHollowFillColor) {
@@ -570,27 +605,33 @@ export class ChartStyleResolver {
         const risingColor = this.resolveCssVariable(rawExplicitRising || cssRisingColor || "#22c55e", seriesEl);
         const fallingColor = this.resolveCssVariable(rawExplicitFalling || cssFallingColor || "#ef4444", seriesEl);
         const neutralColor = this.resolveCssVariable(rawExplicitNeutral || cssNeutralColor || "#6b7280", seriesEl);
-        const wickColor = (rawExplicitWickColor || cssWickColor)
-            ? this.resolveCssVariable((rawExplicitWickColor || cssWickColor)!, seriesEl)
-            : undefined;
+        const wickColor =
+            rawExplicitWickColor || cssWickColor
+                ? this.resolveCssVariable((rawExplicitWickColor || cssWickColor)!, seriesEl)
+                : undefined;
         const color = rawExplicitColor ? this.resolveCssVariable(rawExplicitColor, seriesEl) : undefined;
-        const wickWidth = explicitWickWidth !== undefined && isFiniteNumber(explicitWickWidth) && explicitWickWidth >= 0
-            ? explicitWickWidth
-            : (cssWickWidth ?? 1);
-        const opacity = explicitOpacity !== undefined && isFiniteNumber(explicitOpacity)
-            ? Math.max(0, Math.min(1, explicitOpacity))
-            : (cssOpacity !== undefined ? cssOpacity : undefined);
+        const wickWidth =
+            explicitWickWidth !== undefined && isFiniteNumber(explicitWickWidth) && explicitWickWidth >= 0
+                ? explicitWickWidth
+                : (cssWickWidth ?? 1);
+        const opacity =
+            explicitOpacity !== undefined && isFiniteNumber(explicitOpacity)
+                ? Math.max(0, Math.min(1, explicitOpacity))
+                : cssOpacity !== undefined
+                  ? cssOpacity
+                  : undefined;
 
-        const hollowFillColor = this.resolveCssVariable(
-            cssHollowFillColor ||
-            this.resolveCssVariable("--mona-chart-financial-hollow-fill", seriesEl) ||
-            this.resolveCssVariable("--color-surface", seriesEl) ||
-            this.resolveCssVariable("--mona-chart-surface", seriesEl) ||
-            this.resolveCssVariable("--color-card", seriesEl) ||
-            this.resolveCssVariable("--color-background", seriesEl) ||
-            "#ffffff",
-            seriesEl
-        ) || "#ffffff";
+        const hollowFillColor =
+            this.resolveCssVariable(
+                cssHollowFillColor ||
+                    this.resolveCssVariable("--mona-chart-financial-hollow-fill", seriesEl) ||
+                    this.resolveCssVariable("--color-surface", seriesEl) ||
+                    this.resolveCssVariable("--mona-chart-surface", seriesEl) ||
+                    this.resolveCssVariable("--color-card", seriesEl) ||
+                    this.resolveCssVariable("--color-background", seriesEl) ||
+                    "#ffffff",
+                seriesEl
+            ) || "#ffffff";
 
         return {
             color,
@@ -604,23 +645,20 @@ export class ChartStyleResolver {
         };
     }
 
-    public resolveFunnelSeriesStyle(
-        series: ChartFunnelSeriesRegistration
-    ): ChartFunnelSeriesStyle {
+    public resolveFunnelSeriesStyle(series: ChartFunnelSeriesRegistration): ChartFunnelSeriesStyle {
         const rawStrokeColor = series.strokeColor ? series.strokeColor() : "";
         const strokeWidthInput = series.strokeWidth?.();
         const fillOpacityInput = series.fillOpacity?.();
-        const rawBaseColor = series.colors ? (series.colors()?.[0] ?? "") : (series.color ? (series.color() ?? "") : "");
+        const rawBaseColor = series.colors ? (series.colors()?.[0] ?? "") : series.color ? (series.color() ?? "") : "";
 
         let cssStrokeWidth: number | undefined;
         let cssStrokeColor: string | undefined;
         let cssFillOpacity: number | undefined;
         let cssLabelColor: string | undefined;
 
-        const targetElements = [
-            series.element?.nativeElement,
-            this.#rootElement
-        ].filter((el): el is HTMLElement => Boolean(el));
+        const targetElements = [series.element?.nativeElement, this.#rootElement].filter((el): el is HTMLElement =>
+            Boolean(el)
+        );
 
         if (typeof window !== "undefined") {
             for (const el of targetElements) {
@@ -663,25 +701,27 @@ export class ChartStyleResolver {
 
         const strokeColor = rawStrokeColor
             ? this.resolveCssVariable(rawStrokeColor, seriesEl)
-            : (cssStrokeColor ? this.resolveCssVariable(cssStrokeColor, seriesEl) : defaultStrokeColor);
+            : cssStrokeColor
+              ? this.resolveCssVariable(cssStrokeColor, seriesEl)
+              : defaultStrokeColor;
 
         const strokeWidth =
             strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
                 ? strokeWidthInput
-                : (cssStrokeWidth !== undefined ? cssStrokeWidth : 1);
+                : cssStrokeWidth !== undefined
+                  ? cssStrokeWidth
+                  : 1;
 
         const fillOpacity =
             fillOpacityInput !== undefined && isFiniteNumber(fillOpacityInput)
                 ? Math.max(0, Math.min(1, fillOpacityInput))
-                : (cssFillOpacity !== undefined ? cssFillOpacity : 1);
+                : cssFillOpacity !== undefined
+                  ? cssFillOpacity
+                  : 1;
 
-        const baseColor = rawBaseColor
-            ? this.resolveCssVariable(rawBaseColor, seriesEl)
-            : this.resolvePaletteColor(0);
+        const baseColor = rawBaseColor ? this.resolveCssVariable(rawBaseColor, seriesEl) : this.resolvePaletteColor(0);
 
-        const labelColor = cssLabelColor
-            ? this.resolveCssVariable(cssLabelColor, seriesEl)
-            : undefined;
+        const labelColor = cssLabelColor ? this.resolveCssVariable(cssLabelColor, seriesEl) : undefined;
 
         return {
             baseColor,
@@ -692,9 +732,7 @@ export class ChartStyleResolver {
         };
     }
 
-    public resolveGaugeSeriesStyle(
-        series: ChartGaugeSeriesRegistration
-    ): ChartGaugeSeriesStyle {
+    public resolveGaugeSeriesStyle(series: ChartGaugeSeriesRegistration): ChartGaugeSeriesStyle {
         const rawColor = series.color();
         const rawNeedleColor = series.needleColor();
         const rawTrackColor = series.trackColor();
@@ -743,9 +781,9 @@ export class ChartStyleResolver {
 
         const primaryColor = rawColor
             ? this.resolveCssVariable(rawColor, seriesEl)
-            : (cssGaugeColor
-                  ? this.resolveCssVariable(cssGaugeColor, seriesEl)
-                  : this.resolvePaletteColor(0));
+            : cssGaugeColor
+              ? this.resolveCssVariable(cssGaugeColor, seriesEl)
+              : this.resolvePaletteColor(0);
 
         const defaultTrackColor =
             this.resolveCssVariable("--mona-chart-radial-track-color", seriesEl) ||
@@ -754,7 +792,9 @@ export class ChartStyleResolver {
 
         const trackColor = rawTrackColor
             ? this.resolveCssVariable(rawTrackColor, seriesEl)
-            : (cssTrackColor ? this.resolveCssVariable(cssTrackColor, seriesEl) : defaultTrackColor);
+            : cssTrackColor
+              ? this.resolveCssVariable(cssTrackColor, seriesEl)
+              : defaultTrackColor;
 
         const defaultTrackOpacity = 0.15;
         const trackOpacity =
@@ -764,13 +804,11 @@ export class ChartStyleResolver {
 
         const needleColor = rawNeedleColor
             ? this.resolveCssVariable(rawNeedleColor, seriesEl)
-            : (cssNeedleColor
-                  ? this.resolveCssVariable(cssNeedleColor, seriesEl)
-                  : (primaryColor || "#1e293b"));
+            : cssNeedleColor
+              ? this.resolveCssVariable(cssNeedleColor, seriesEl)
+              : primaryColor || "#1e293b";
 
-        const hubColor = cssHubColor
-            ? this.resolveCssVariable(cssHubColor, seriesEl)
-            : needleColor;
+        const hubColor = cssHubColor ? this.resolveCssVariable(cssHubColor, seriesEl) : needleColor;
 
         const fillOpacity =
             rawFillOpacity !== undefined && isFiniteNumber(rawFillOpacity)
@@ -810,10 +848,9 @@ export class ChartStyleResolver {
         let cssBorderRadius: number | undefined;
         let cssFillOpacity: number | undefined;
 
-        const targetElements = [
-            series.element?.nativeElement,
-            this.#rootElement
-        ].filter((el): el is HTMLElement => Boolean(el));
+        const targetElements = [series.element?.nativeElement, this.#rootElement].filter((el): el is HTMLElement =>
+            Boolean(el)
+        );
 
         if (typeof window !== "undefined") {
             for (const el of targetElements) {
@@ -823,11 +860,15 @@ export class ChartStyleResolver {
                         const rootComputed = this.#rootElement ? window.getComputedStyle(this.#rootElement) : null;
                         const rootColor = rootComputed?.color ?? "";
                         const userClass = series.userClass?.() ?? "";
-                        const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+                        const hasTextClass =
+                            typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
 
                         if (el.style?.color) {
                             elementColor = this.resolveCssVariable(el.style.color);
-                        } else if (computed.color && (hasTextClass || (rootColor !== "" && computed.color !== rootColor))) {
+                        } else if (
+                            computed.color &&
+                            (hasTextClass || (rootColor !== "" && computed.color !== rootColor))
+                        ) {
                             elementColor = toCanvasColor(computed.color, this.#rootElement?.ownerDocument);
                         }
                     }
@@ -882,30 +923,28 @@ export class ChartStyleResolver {
             this.resolvePaletteColor(seriesIndex);
 
         const resolvedStrokeColor =
-            (explicitStrokeColor ? this.resolveCssVariable(explicitStrokeColor) : "") ||
-            cssBorderColor ||
-            "";
+            (explicitStrokeColor ? this.resolveCssVariable(explicitStrokeColor) : "") || cssBorderColor || "";
 
         const resolvedStrokeWidth =
             explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
                 ? explicitStrokeWidth
                 : cssStrokeWidth !== undefined
-                    ? cssStrokeWidth
-                    : 0;
+                  ? cssStrokeWidth
+                  : 0;
 
         const resolvedBorderRadius =
             explicitBorderRadius !== undefined && isFiniteNumber(explicitBorderRadius) && explicitBorderRadius >= 0
                 ? explicitBorderRadius
                 : cssBorderRadius !== undefined
-                    ? cssBorderRadius
-                    : 2;
+                  ? cssBorderRadius
+                  : 2;
 
         const resolvedFillOpacity =
             explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
                 ? Math.max(0, Math.min(1, explicitFillOpacity))
                 : cssFillOpacity !== undefined
-                    ? Math.max(0, Math.min(1, cssFillOpacity))
-                    : 1;
+                  ? Math.max(0, Math.min(1, cssFillOpacity))
+                  : 1;
 
         return {
             baseColor: resolvedBaseColor,
@@ -919,9 +958,7 @@ export class ChartStyleResolver {
         };
     }
 
-    public resolveMarkerSeriesGeometry(
-        series: ChartCartesianSeriesRegistration
-    ): {
+    public resolveMarkerSeriesGeometry(series: ChartCartesianSeriesRegistration): {
         bubbleMaxRadius?: number;
         bubbleMinRadius?: number;
         pointRadius?: number;
@@ -988,7 +1025,8 @@ export class ChartStyleResolver {
                 const rootComputed = this.#rootElement ? window.getComputedStyle(this.#rootElement) : null;
                 const rootColor = rootComputed?.color ?? "";
                 const userClass = (series as { userClass?: () => string }).userClass?.() ?? "";
-                const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+                const hasTextClass =
+                    typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
 
                 if (nativeEl.style?.color) {
                     elementColor = this.resolveCssVariable(nativeEl.style.color);
@@ -1037,14 +1075,14 @@ export class ChartStyleResolver {
         let defaultStrokeColor = resolvedColor;
         if (series.type === "scatter") {
             defaultStrokeColor =
-                this.resolveCssVariable("--color-surface") ||
-                this.resolveCssVariable("--color-card") ||
-                "#ffffff";
+                this.resolveCssVariable("--color-surface") || this.resolveCssVariable("--color-card") || "#ffffff";
         }
 
         const resolvedStrokeColor = explicitStrokeColor
             ? this.resolveCssVariable(explicitStrokeColor)
-            : (cssStrokeColor ? this.resolveCssVariable(cssStrokeColor) : defaultStrokeColor);
+            : cssStrokeColor
+              ? this.resolveCssVariable(cssStrokeColor)
+              : defaultStrokeColor;
 
         return {
             color: resolvedColor,
@@ -1059,7 +1097,8 @@ export class ChartStyleResolver {
             return undefined;
         }
         try {
-            const primaryEl = targetElement ?? this.#rootElement ?? (typeof document !== "undefined" ? document.body : null);
+            const primaryEl =
+                targetElement ?? this.#rootElement ?? (typeof document !== "undefined" ? document.body : null);
             if (!primaryEl) {
                 return undefined;
             }
@@ -1123,9 +1162,9 @@ export class ChartStyleResolver {
 
         const strokeColor = rawStrokeColor
             ? this.resolveCssVariable(rawStrokeColor)
-            : (cssStrokeColor
-                  ? this.resolveCssVariable(cssStrokeColor)
-                  : (this.resolveCssVariable("--color-surface") || "#ffffff"));
+            : cssStrokeColor
+              ? this.resolveCssVariable(cssStrokeColor)
+              : this.resolveCssVariable("--color-surface") || "#ffffff";
 
         const strokeWidth =
             strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
@@ -1198,9 +1237,9 @@ export class ChartStyleResolver {
 
         const strokeColor = rawStrokeColor
             ? this.resolveCssVariable(rawStrokeColor, seriesEl)
-            : (cssStrokeColor
-                  ? this.resolveCssVariable(cssStrokeColor, seriesEl)
-                  : "");
+            : cssStrokeColor
+              ? this.resolveCssVariable(cssStrokeColor, seriesEl)
+              : "";
 
         const strokeWidth =
             strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
@@ -1219,7 +1258,9 @@ export class ChartStyleResolver {
 
         const trackColor = trackColorInput
             ? this.resolveCssVariable(trackColorInput, seriesEl)
-            : (cssTrackColor ? this.resolveCssVariable(cssTrackColor, seriesEl) : defaultTrackColor);
+            : cssTrackColor
+              ? this.resolveCssVariable(cssTrackColor, seriesEl)
+              : defaultTrackColor;
 
         const defaultTrackOpacity = 0.15;
         const trackOpacity =
@@ -1265,7 +1306,8 @@ export class ChartStyleResolver {
                 const rootComputed = this.#rootElement ? window.getComputedStyle(this.#rootElement) : null;
                 const rootColor = rootComputed?.color ?? "";
                 const userClass = (series as { userClass?: () => string }).userClass?.() ?? "";
-                const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+                const hasTextClass =
+                    typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
 
                 if (nativeEl.style?.color) {
                     elementColor = this.resolveCssVariable(nativeEl.style.color);
@@ -1339,10 +1381,14 @@ export class ChartStyleResolver {
                 "rgb(148, 163, 184)";
         }
 
-        let fillOpacity = explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity) ? Math.max(0, Math.min(1, explicitFillOpacity)) : undefined;
+        let fillOpacity =
+            explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
+                ? Math.max(0, Math.min(1, explicitFillOpacity))
+                : undefined;
         if (fillOpacity === undefined) {
             const cssOpacity = this.resolveNumericCssVariable("--mona-chart-reference-band-opacity", el);
-            fillOpacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.15;
+            fillOpacity =
+                cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.15;
         }
 
         let borderColor = explicitBorderColor ? this.resolveCssVariable(explicitBorderColor, el) : undefined;
@@ -1353,10 +1399,13 @@ export class ChartStyleResolver {
             }
         }
 
-        let borderWidth = explicitBorderWidth !== undefined && isFiniteNumber(explicitBorderWidth) && explicitBorderWidth >= 0 ? explicitBorderWidth : undefined;
+        let borderWidth =
+            explicitBorderWidth !== undefined && isFiniteNumber(explicitBorderWidth) && explicitBorderWidth >= 0
+                ? explicitBorderWidth
+                : undefined;
         if (borderWidth === undefined) {
             const cssBorderWidth = this.resolveNumericCssVariable("--mona-chart-reference-band-border-width", el);
-            borderWidth = cssBorderWidth !== undefined && cssBorderWidth >= 0 ? cssBorderWidth : (borderColor ? 1 : 0);
+            borderWidth = cssBorderWidth !== undefined && cssBorderWidth >= 0 ? cssBorderWidth : borderColor ? 1 : 0;
         }
 
         return { borderColor, borderWidth, fillColor, fillOpacity };
@@ -1380,13 +1429,19 @@ export class ChartStyleResolver {
                 "rgba(148, 163, 184, 0.8)";
         }
 
-        let width = explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0 ? explicitWidth : undefined;
+        let width =
+            explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0
+                ? explicitWidth
+                : undefined;
         if (width === undefined) {
             const cssWidth = this.resolveNumericCssVariable("--mona-chart-reference-line-width", el);
             width = cssWidth !== undefined && cssWidth >= 0 ? cssWidth : 1;
         }
 
-        let opacity = explicitOpacity !== undefined && isFiniteNumber(explicitOpacity) ? Math.max(0, Math.min(1, explicitOpacity)) : undefined;
+        let opacity =
+            explicitOpacity !== undefined && isFiniteNumber(explicitOpacity)
+                ? Math.max(0, Math.min(1, explicitOpacity))
+                : undefined;
         if (opacity === undefined) {
             const cssOpacity = this.resolveNumericCssVariable("--mona-chart-reference-line-opacity", el);
             opacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 1;
@@ -1412,16 +1467,23 @@ export class ChartStyleResolver {
                 "#3b82f6";
         }
 
-        let strokeWidth = explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0 ? explicitWidth : undefined;
+        let strokeWidth =
+            explicitWidth !== undefined && isFiniteNumber(explicitWidth) && explicitWidth >= 0
+                ? explicitWidth
+                : undefined;
         if (strokeWidth === undefined) {
             const cssWidth = this.resolveNumericCssVariable("--mona-chart-selection-stroke-width");
             strokeWidth = cssWidth !== undefined && cssWidth >= 0 ? cssWidth : 2;
         }
 
-        let fillOpacity = explicitOpacity !== undefined && isFiniteNumber(explicitOpacity) ? Math.max(0, Math.min(1, explicitOpacity)) : undefined;
+        let fillOpacity =
+            explicitOpacity !== undefined && isFiniteNumber(explicitOpacity)
+                ? Math.max(0, Math.min(1, explicitOpacity))
+                : undefined;
         if (fillOpacity === undefined) {
             const cssOpacity = this.resolveNumericCssVariable("--mona-chart-selection-fill-opacity");
-            fillOpacity = cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.12;
+            fillOpacity =
+                cssOpacity !== undefined && isFiniteNumber(cssOpacity) ? Math.max(0, Math.min(1, cssOpacity)) : 0.12;
         }
 
         return { color, fillOpacity, strokeWidth };
@@ -1451,7 +1513,8 @@ export class ChartStyleResolver {
                 const rootComputed = this.#rootElement ? window.getComputedStyle(this.#rootElement) : null;
                 const rootColor = rootComputed?.color ?? "";
                 const userClass = (series as { userClass?: () => string }).userClass?.() ?? "";
-                const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+                const hasTextClass =
+                    typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
 
                 if (nativeEl.style?.color) {
                     elementColor = this.resolveCssVariable(nativeEl.style.color);
@@ -1491,19 +1554,22 @@ export class ChartStyleResolver {
         const isLineLike = series.type === "line" || series.type === "area" || series.type === "rangeArea";
 
         const defaultLineWidth = isLineLike ? 2 : 1;
-        const resolvedLineWidth = explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
-            ? explicitStrokeWidth
-            : (cssLineWidth ?? defaultLineWidth);
+        const resolvedLineWidth =
+            explicitStrokeWidth !== undefined && isFiniteNumber(explicitStrokeWidth) && explicitStrokeWidth >= 0
+                ? explicitStrokeWidth
+                : (cssLineWidth ?? defaultLineWidth);
 
         const defaultPointRadius = isAreaLike ? 4 : 3;
-        const resolvedPointRadius = explicitPointRadius !== undefined && isFiniteNumber(explicitPointRadius) && explicitPointRadius >= 0
-            ? explicitPointRadius
-            : (cssPointRadius ?? defaultPointRadius);
+        const resolvedPointRadius =
+            explicitPointRadius !== undefined && isFiniteNumber(explicitPointRadius) && explicitPointRadius >= 0
+                ? explicitPointRadius
+                : (cssPointRadius ?? defaultPointRadius);
 
         const defaultFillOpacity = isAreaLike ? 0.18 : 1;
-        const resolvedFillOpacity = explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
-            ? Math.max(0, Math.min(1, explicitFillOpacity))
-            : (cssAreaFillOpacity ?? defaultFillOpacity);
+        const resolvedFillOpacity =
+            explicitFillOpacity !== undefined && isFiniteNumber(explicitFillOpacity)
+                ? Math.max(0, Math.min(1, explicitFillOpacity))
+                : (cssAreaFillOpacity ?? defaultFillOpacity);
         const resolvedAreaFillColor = cssAreaFillColor ? this.resolveCssVariable(cssAreaFillColor) : resolvedColor;
 
         return {
@@ -1533,15 +1599,13 @@ export class ChartStyleResolver {
         );
     }
 
-    public resolveTreemapSeriesStyle(
-        series: ChartTreemapSeriesRegistration
-    ): ChartTreemapSeriesStyle {
+    public resolveTreemapSeriesStyle(series: ChartTreemapSeriesRegistration): ChartTreemapSeriesStyle {
         const rawStrokeColor = series.strokeColor ? series.strokeColor() : "";
         const strokeWidthInput = series.strokeWidth?.();
         const fillOpacityInput = series.fillOpacity?.();
         const parentFillOpacityInput = series.parentFillOpacity?.();
         const borderRadiusInput = series.borderRadius?.();
-        const rawBaseColor = series.colors ? (series.colors()?.[0] ?? "") : (series.color ? (series.color() ?? "") : "");
+        const rawBaseColor = series.colors ? (series.colors()?.[0] ?? "") : series.color ? (series.color() ?? "") : "";
 
         let cssStrokeWidth: number | undefined;
         let cssStrokeColor: string | undefined;
@@ -1550,10 +1614,9 @@ export class ChartStyleResolver {
         let cssBorderRadius: number | undefined;
         let cssLabelColor: string | undefined;
 
-        const targetElements = [
-            series.element?.nativeElement,
-            this.#rootElement
-        ].filter((el): el is HTMLElement => Boolean(el));
+        const targetElements = [series.element?.nativeElement, this.#rootElement].filter((el): el is HTMLElement =>
+            Boolean(el)
+        );
 
         if (typeof window !== "undefined") {
             for (const el of targetElements) {
@@ -1610,31 +1673,39 @@ export class ChartStyleResolver {
 
         const strokeColor = rawStrokeColor
             ? this.resolveCssVariable(rawStrokeColor, seriesEl)
-            : (cssStrokeColor ? this.resolveCssVariable(cssStrokeColor, seriesEl) : defaultStrokeColor);
+            : cssStrokeColor
+              ? this.resolveCssVariable(cssStrokeColor, seriesEl)
+              : defaultStrokeColor;
 
         const strokeWidth =
             strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
                 ? strokeWidthInput
-                : (cssStrokeWidth !== undefined ? cssStrokeWidth : 1);
+                : cssStrokeWidth !== undefined
+                  ? cssStrokeWidth
+                  : 1;
 
         const fillOpacity =
             fillOpacityInput !== undefined && isFiniteNumber(fillOpacityInput)
                 ? Math.max(0, Math.min(1, fillOpacityInput))
-                : (cssFillOpacity !== undefined ? cssFillOpacity : 1);
+                : cssFillOpacity !== undefined
+                  ? cssFillOpacity
+                  : 1;
 
         const parentFillOpacity =
             parentFillOpacityInput !== undefined && isFiniteNumber(parentFillOpacityInput)
                 ? Math.max(0, Math.min(1, parentFillOpacityInput))
-                : (cssParentFillOpacity !== undefined ? cssParentFillOpacity : 0.15);
+                : cssParentFillOpacity !== undefined
+                  ? cssParentFillOpacity
+                  : 0.15;
 
         const borderRadius =
             borderRadiusInput !== undefined && isFiniteNumber(borderRadiusInput) && borderRadiusInput >= 0
                 ? borderRadiusInput
-                : (cssBorderRadius !== undefined ? cssBorderRadius : 0);
+                : cssBorderRadius !== undefined
+                  ? cssBorderRadius
+                  : 0;
 
-        const baseColor = rawBaseColor
-            ? this.resolveCssVariable(rawBaseColor, seriesEl)
-            : this.resolvePaletteColor(0);
+        const baseColor = rawBaseColor ? this.resolveCssVariable(rawBaseColor, seriesEl) : this.resolvePaletteColor(0);
 
         const labelColor = cssLabelColor ? this.resolveCssVariable(cssLabelColor, seriesEl) : undefined;
 
@@ -1649,9 +1720,7 @@ export class ChartStyleResolver {
         };
     }
 
-    public resolveWaterfallSeriesStyle(
-        series: ChartWaterfallSeriesRegistration
-    ): ChartWaterfallSeriesStyle {
+    public resolveWaterfallSeriesStyle(series: ChartWaterfallSeriesRegistration): ChartWaterfallSeriesStyle {
         const rawIncreaseColor = series.increaseColor ? series.increaseColor() : "";
         const rawDecreaseColor = series.decreaseColor ? series.decreaseColor() : "";
         const rawNeutralColor = series.neutralColor ? series.neutralColor() : "";
@@ -1678,10 +1747,9 @@ export class ChartStyleResolver {
         let cssBorderRadius: number | undefined;
         let cssLabelColor: string | undefined;
 
-        const targetElements = [
-            series.element?.nativeElement,
-            this.#rootElement
-        ].filter((el): el is HTMLElement => Boolean(el));
+        const targetElements = [series.element?.nativeElement, this.#rootElement].filter((el): el is HTMLElement =>
+            Boolean(el)
+        );
 
         if (typeof window !== "undefined") {
             for (const el of targetElements) {
@@ -1771,14 +1839,10 @@ export class ChartStyleResolver {
             "#6b7280";
 
         const defaultSubtotal =
-            this.resolveCssVariable("--color-chart-2", seriesEl) ||
-            this.resolvePaletteColor(1) ||
-            "#3b82f6";
+            this.resolveCssVariable("--color-chart-2", seriesEl) || this.resolvePaletteColor(1) || "#3b82f6";
 
         const defaultTotal =
-            this.resolveCssVariable("--color-chart-1", seriesEl) ||
-            this.resolvePaletteColor(0) ||
-            "#1d4ed8";
+            this.resolveCssVariable("--color-chart-1", seriesEl) || this.resolvePaletteColor(0) || "#1d4ed8";
 
         const defaultConnector =
             this.resolveCssVariable("--color-muted-foreground", seriesEl) ||
@@ -1787,51 +1851,73 @@ export class ChartStyleResolver {
 
         const increaseColor = rawIncreaseColor
             ? this.resolveCssVariable(rawIncreaseColor, seriesEl)
-            : (cssIncreaseColor ? this.resolveCssVariable(cssIncreaseColor, seriesEl) : defaultIncrease);
+            : cssIncreaseColor
+              ? this.resolveCssVariable(cssIncreaseColor, seriesEl)
+              : defaultIncrease;
 
         const decreaseColor = rawDecreaseColor
             ? this.resolveCssVariable(rawDecreaseColor, seriesEl)
-            : (cssDecreaseColor ? this.resolveCssVariable(cssDecreaseColor, seriesEl) : defaultDecrease);
+            : cssDecreaseColor
+              ? this.resolveCssVariable(cssDecreaseColor, seriesEl)
+              : defaultDecrease;
 
         const neutralColor = rawNeutralColor
             ? this.resolveCssVariable(rawNeutralColor, seriesEl)
-            : (cssNeutralColor ? this.resolveCssVariable(cssNeutralColor, seriesEl) : defaultNeutral);
+            : cssNeutralColor
+              ? this.resolveCssVariable(cssNeutralColor, seriesEl)
+              : defaultNeutral;
 
         const subtotalColor = rawSubtotalColor
             ? this.resolveCssVariable(rawSubtotalColor, seriesEl)
-            : (cssSubtotalColor ? this.resolveCssVariable(cssSubtotalColor, seriesEl) : defaultSubtotal);
+            : cssSubtotalColor
+              ? this.resolveCssVariable(cssSubtotalColor, seriesEl)
+              : defaultSubtotal;
 
         const totalColor = rawTotalColor
             ? this.resolveCssVariable(rawTotalColor, seriesEl)
-            : (cssTotalColor ? this.resolveCssVariable(cssTotalColor, seriesEl) : defaultTotal);
+            : cssTotalColor
+              ? this.resolveCssVariable(cssTotalColor, seriesEl)
+              : defaultTotal;
 
         const connectorColor = rawConnectorColor
             ? this.resolveCssVariable(rawConnectorColor, seriesEl)
-            : (cssConnectorColor ? this.resolveCssVariable(cssConnectorColor, seriesEl) : defaultConnector);
+            : cssConnectorColor
+              ? this.resolveCssVariable(cssConnectorColor, seriesEl)
+              : defaultConnector;
 
         const strokeColor = rawStrokeColor
             ? this.resolveCssVariable(rawStrokeColor, seriesEl)
-            : (cssStrokeColor ? this.resolveCssVariable(cssStrokeColor, seriesEl) : "");
+            : cssStrokeColor
+              ? this.resolveCssVariable(cssStrokeColor, seriesEl)
+              : "";
 
         const strokeWidth =
             strokeWidthInput !== undefined && isFiniteNumber(strokeWidthInput) && strokeWidthInput >= 0
                 ? strokeWidthInput
-                : (cssStrokeWidth !== undefined ? cssStrokeWidth : 0);
+                : cssStrokeWidth !== undefined
+                  ? cssStrokeWidth
+                  : 0;
 
         const connectorWidth =
             connectorWidthInput !== undefined && isFiniteNumber(connectorWidthInput) && connectorWidthInput >= 0
                 ? connectorWidthInput
-                : (cssConnectorWidth !== undefined ? cssConnectorWidth : 1);
+                : cssConnectorWidth !== undefined
+                  ? cssConnectorWidth
+                  : 1;
 
         const fillOpacity =
             fillOpacityInput !== undefined && isFiniteNumber(fillOpacityInput)
                 ? Math.max(0, Math.min(1, fillOpacityInput))
-                : (cssFillOpacity !== undefined ? cssFillOpacity : 1);
+                : cssFillOpacity !== undefined
+                  ? cssFillOpacity
+                  : 1;
 
         const borderRadius =
             borderRadiusInput !== undefined && isFiniteNumber(borderRadiusInput) && borderRadiusInput >= 0
                 ? borderRadiusInput
-                : (cssBorderRadius !== undefined ? cssBorderRadius : 4);
+                : cssBorderRadius !== undefined
+                  ? cssBorderRadius
+                  : 4;
 
         const labelColor = cssLabelColor ? this.resolveCssVariable(cssLabelColor, seriesEl) : undefined;
 

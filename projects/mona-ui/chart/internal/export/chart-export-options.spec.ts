@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-    normalizeChartDownloadOptions,
-    normalizeChartExportOptions,
-    sanitizeFileName
-} from "./chart-export-options";
+import { normalizeChartDownloadOptions, normalizeChartExportOptions, sanitizeFileName } from "./chart-export-options";
 import { ChartExportError } from "../../models/chart-export.models";
 
 describe("ChartExportOptions", () => {
@@ -84,9 +80,7 @@ describe("ChartExportOptions", () => {
         });
 
         it("throws invalid-options for non-positive or invalid dimensions", () => {
-            expect(() => normalizeChartExportOptions({ format: "svg", width: 0 }, 500, 300)).toThrow(
-                ChartExportError
-            );
+            expect(() => normalizeChartExportOptions({ format: "svg", width: 0 }, 500, 300)).toThrow(ChartExportError);
             expect(() => normalizeChartExportOptions({ format: "svg", width: -100 }, 500, 300)).toThrow(
                 ChartExportError
             );
@@ -111,11 +105,7 @@ describe("ChartExportOptions", () => {
         });
 
         it("appends correct extension according to export format", () => {
-            const pngDownload = normalizeChartDownloadOptions(
-                { fileName: "report_q3", format: "png" },
-                500,
-                300
-            );
+            const pngDownload = normalizeChartDownloadOptions({ fileName: "report_q3", format: "png" }, 500, 300);
             expect(pngDownload.fileName).toBe("report_q3.png");
 
             const svgDownload = normalizeChartDownloadOptions(
@@ -125,21 +115,12 @@ describe("ChartExportOptions", () => {
             );
             expect(svgDownload.fileName).toBe("vector_chart.svg");
 
-            const pdfDownload = normalizeChartDownloadOptions(
-                { fileName: "summary", format: "pdf" },
-                500,
-                300
-            );
+            const pdfDownload = normalizeChartDownloadOptions({ fileName: "summary", format: "pdf" }, 500, 300);
             expect(pdfDownload.fileName).toBe("summary.pdf");
         });
 
         it("falls back to chart title when filename is omitted", () => {
-            const download = normalizeChartDownloadOptions(
-                { format: "png" },
-                500,
-                300,
-                "Revenue Analysis 2026"
-            );
+            const download = normalizeChartDownloadOptions({ format: "png" }, 500, 300, "Revenue Analysis 2026");
             expect(download.fileName).toBe("Revenue Analysis 2026.png");
         });
     });

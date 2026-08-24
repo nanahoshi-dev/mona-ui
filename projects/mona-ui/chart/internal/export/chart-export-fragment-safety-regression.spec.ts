@@ -2,7 +2,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartExportDomCollector } from "./chart-export-dom-collector";
 import { ChartExportResourceManager } from "./chart-export-resource-manager";
-import { ChartExportTemplateCapabilityAnalyzer, hasNonInsetBoxShadow } from "./chart-export-template-capability-analyzer";
+import {
+    ChartExportTemplateCapabilityAnalyzer,
+    hasNonInsetBoxShadow
+} from "./chart-export-template-capability-analyzer";
 import { ChartExportSvgValidator } from "./chart-export-svg-validator";
 import { ChartExportCompositor } from "./chart-export-compositor";
 import { analyzeTransform, classifyTransform } from "./chart-export-transform";
@@ -83,9 +86,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
             img.src = "https://cdn.example/corrupted.png";
             container.appendChild(img);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
 
         it("rejects unsupported data URI formats such as GIF and AVIF", async () => {
@@ -94,9 +97,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
             img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
             container.appendChild(img);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(/unsupported or forbidden media type/);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                /unsupported or forbidden media type/
+            );
         });
 
         it("rejects malformed data URIs with broken base64 encoding", async () => {
@@ -105,9 +108,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
             img.src = "data:image/png;base64,!!!NotBase64!!!";
             container.appendChild(img);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
 
         it("exact media parser parses valid and rejects invalid types", () => {
@@ -130,27 +133,27 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
             const container = document.createElement("div");
             container.style.clipPath = "url(#someClip)";
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(/clip-path/);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                /clip-path/
+            );
         });
 
         it("rejects templates with mask-image in inline styles", async () => {
             const container = document.createElement("div");
             container.style.setProperty("mask-image", "url(https://cdn.example/mask.png)");
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(/mask/);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                /mask/
+            );
         });
 
         it("rejects templates with unclassified style properties containing url(...)", async () => {
             const container = document.createElement("div");
             container.style.setProperty("cursor", "url(https://cdn.example/cursor.png), auto");
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(/unclassified URL expression/);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                /unclassified URL expression/
+            );
         });
     });
 
@@ -185,9 +188,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
             svg.appendChild(use);
             container.appendChild(svg);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(/not contained inside the isolated frozen export template/);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                /not contained inside the isolated frozen export template/
+            );
         });
 
         it("rejects SVG <feImage> anywhere in a custom template", async () => {
@@ -198,9 +201,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
             svg.appendChild(feImage);
             container.appendChild(svg);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(/feImage/);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                /feImage/
+            );
         });
     });
 
@@ -217,8 +220,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
 
         it("rejects pseudo-element with empty content but visible border", () => {
             const el = createTemplate();
-            const spy = vi.spyOn(window, "getComputedStyle").mockImplementation(
-                (elt: Element, pseudo?: string | null) => {
+            const spy = vi
+                .spyOn(window, "getComputedStyle")
+                .mockImplementation((elt: Element, pseudo?: string | null) => {
                     if (elt === el && (pseudo === "::before" || pseudo === ":before")) {
                         return {
                             borderBottomStyle: "none",
@@ -246,10 +250,11 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
                         transform: "none",
                         visibility: "visible"
                     } as unknown as CSSStyleDeclaration;
-                }
-            );
+                });
             try {
-                expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(/::before|pseudo-element/);
+                expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(
+                    /::before|pseudo-element/
+                );
             } finally {
                 spy.mockRestore();
             }
@@ -257,8 +262,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
 
         it("rejects pseudo-element with empty content but visible outline", () => {
             const el = createTemplate();
-            const spy = vi.spyOn(window, "getComputedStyle").mockImplementation(
-                (elt: Element, pseudo?: string | null) => {
+            const spy = vi
+                .spyOn(window, "getComputedStyle")
+                .mockImplementation((elt: Element, pseudo?: string | null) => {
                     if (elt === el && (pseudo === "::after" || pseudo === ":after")) {
                         return {
                             content: '""',
@@ -283,10 +289,11 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
                         transform: "none",
                         visibility: "visible"
                     } as unknown as CSSStyleDeclaration;
-                }
-            );
+                });
             try {
-                expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(/::after|pseudo-element/);
+                expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(
+                    /::after|pseudo-element/
+                );
             } finally {
                 spy.mockRestore();
             }
@@ -294,8 +301,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
 
         it("allows pseudo-element with display: none or opacity: 0", () => {
             const el = createTemplate();
-            const spy = vi.spyOn(window, "getComputedStyle").mockImplementation(
-                (elt: Element, pseudo?: string | null) => {
+            const spy = vi
+                .spyOn(window, "getComputedStyle")
+                .mockImplementation((elt: Element, pseudo?: string | null) => {
                     if (elt === el && (pseudo === "::before" || pseudo === ":before")) {
                         return {
                             content: '"Hidden"',
@@ -316,8 +324,7 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
                         transform: "none",
                         visibility: "visible"
                     } as unknown as CSSStyleDeclaration;
-                }
-            );
+                });
             try {
                 expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).not.toThrow();
             } finally {
@@ -359,7 +366,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
                 } as unknown as CSSStyleDeclaration;
             });
             try {
-                expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(/non-inset box-shadow/);
+                expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(
+                    /non-inset box-shadow/
+                );
             } finally {
                 spy.mockRestore();
             }
@@ -546,7 +555,10 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
         it("accepts exact supported image/png data URI in <image href>", () => {
             const svg = createSvg();
             const image = document.createElementNS(svgNs, "image");
-            image.setAttribute("href", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
+            image.setAttribute(
+                "href",
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+            );
             svg.appendChild(image);
 
             expect(() => ChartExportSvgValidator.validate(svg)).not.toThrow();
@@ -558,7 +570,9 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
             image.setAttribute("href", "data:image/png-evil;base64,AAA");
             svg.appendChild(image);
 
-            expect(() => ChartExportSvgValidator.validate(svg)).toThrowError(/forbidden non-standalone or external resource/);
+            expect(() => ChartExportSvgValidator.validate(svg)).toThrowError(
+                /forbidden non-standalone or external resource/
+            );
         });
     });
 

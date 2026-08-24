@@ -19,12 +19,7 @@ export class CartesianSelectionOverlayRenderer {
             return;
         }
 
-        const {
-            color = "#3b82f6",
-            fillOpacity = 0.12,
-            plotRect,
-            strokeWidth = 2
-        } = options;
+        const { color = "#3b82f6", fillOpacity = 0.12, plotRect, strokeWidth = 2 } = options;
 
         ctx.save();
         ctx.beginPath();

@@ -1,24 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { CartesianBrushRangeResolver } from "./cartesian-brush-range-resolver";
-import type { CartesianAxisCoordinateSnapshot, CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
+import type {
+    CartesianAxisCoordinateSnapshot,
+    CartesianAxisCoordinateSpace
+} from "../viewport/cartesian-axis-coordinate-space";
 
 describe("CartesianBrushRangeResolver", () => {
     it("should return empty object if brush is invalid", () => {
         const mockCoordSpace = {} as CartesianAxisCoordinateSpace;
-        const res = CartesianBrushRangeResolver.resolve(
-            { x: 10, y: 10, width: 0, height: 0 },
-            mockCoordSpace,
-            "xy"
-        );
+        const res = CartesianBrushRangeResolver.resolve({ x: 10, y: 10, width: 0, height: 0 }, mockCoordSpace, "xy");
         expect(res).toEqual({});
     });
 
     it("should resolve continuous x and y ranges", () => {
         const xMap = new Map([
-            ["x-main", { axisId: "x-main", resolvedType: "linear", valid: true } as unknown as CartesianAxisCoordinateSnapshot]
+            [
+                "x-main",
+                { axisId: "x-main", resolvedType: "linear", valid: true } as unknown as CartesianAxisCoordinateSnapshot
+            ]
         ]);
         const yMap = new Map([
-            ["y-main", { axisId: "y-main", resolvedType: "linear", valid: true } as unknown as CartesianAxisCoordinateSnapshot]
+            [
+                "y-main",
+                { axisId: "y-main", resolvedType: "linear", valid: true } as unknown as CartesianAxisCoordinateSnapshot
+            ]
         ]);
 
         const mockCoordSpace: Partial<CartesianAxisCoordinateSpace> = {

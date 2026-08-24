@@ -172,10 +172,7 @@ export type {
     ChartRoseScaleMode
 } from "./models/chart-radial-arc.models";
 
-export type {
-    ChartHierarchyNodeContext,
-    ChartHierarchyPointMetadata
-} from "./models/chart-hierarchy.models";
+export type { ChartHierarchyNodeContext, ChartHierarchyPointMetadata } from "./models/chart-hierarchy.models";
 
 export type {
     ChartTreemapLabelTemplateContext,

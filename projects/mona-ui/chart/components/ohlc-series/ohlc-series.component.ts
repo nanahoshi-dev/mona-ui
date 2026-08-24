@@ -1,4 +1,15 @@
-import { Component, computed, contentChild, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
+import {
+    Component,
+    computed,
+    contentChild,
+    DestroyRef,
+    effect,
+    ElementRef,
+    inject,
+    input,
+    model,
+    OnInit
+} from "@angular/core";
 import { ChartDataLabelTemplateDirective } from "../../directives/chart-data-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {

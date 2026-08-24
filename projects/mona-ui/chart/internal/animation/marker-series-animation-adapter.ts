@@ -1,8 +1,4 @@
-import type {
-    ChartBubbleSeriesScene,
-    ChartMarkerSeriesStyle,
-    ChartScatterSeriesScene
-} from "../scene/cartesian-scene";
+import type { ChartBubbleSeriesScene, ChartMarkerSeriesStyle, ChartScatterSeriesScene } from "../scene/cartesian-scene";
 import { lerp, lerpOpacity } from "./animation-math";
 import { MarkerTransition, type MarkerTransitionState } from "./marker-transition";
 
@@ -56,8 +52,10 @@ export class MarkerSeriesAnimationAdapter {
             fromStyle,
             id,
             markers: markerState,
-            maxRadius: (toSeries as ChartBubbleSeriesScene)?.maxRadius ?? (fromSeries as ChartBubbleSeriesScene)?.maxRadius,
-            minRadius: (toSeries as ChartBubbleSeriesScene)?.minRadius ?? (fromSeries as ChartBubbleSeriesScene)?.minRadius,
+            maxRadius:
+                (toSeries as ChartBubbleSeriesScene)?.maxRadius ?? (fromSeries as ChartBubbleSeriesScene)?.maxRadius,
+            minRadius:
+                (toSeries as ChartBubbleSeriesScene)?.minRadius ?? (fromSeries as ChartBubbleSeriesScene)?.minRadius,
             name,
             pointRadius:
                 (toSeries as ChartScatterSeriesScene)?.pointRadius ??
@@ -76,11 +74,7 @@ export class MarkerSeriesAnimationAdapter {
     ): ChartBubbleSeriesScene | ChartScatterSeriesScene {
         const p = Math.max(0, Math.min(1, progress));
         const isWholeSeriesFade = state.fromOpacity === 0 || state.toOpacity === 0;
-        const sampledMarkers = MarkerTransition.sample(
-            state.markers,
-            p,
-            isWholeSeriesFade ? "radius" : "both"
-        );
+        const sampledMarkers = MarkerTransition.sample(state.markers, p, isWholeSeriesFade ? "radius" : "both");
 
         const renderOpacity = lerpOpacity(state.fromOpacity, state.toOpacity, p);
         const fillOpacity = lerp(state.fromStyle.fillOpacity, state.toStyle.fillOpacity, p);

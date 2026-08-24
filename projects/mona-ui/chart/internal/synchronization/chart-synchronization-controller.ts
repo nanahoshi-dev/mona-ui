@@ -15,13 +15,8 @@ import { ChartSynchronizationTracker } from "../layout/chart-density-instrumenta
 import { ChartSynchronizationCoordinator } from "./chart-synchronization-coordinator";
 import type { NormalizedChartSynchronizationOptions } from "./chart-synchronization-options";
 import { ChartSynchronizationAxisMapper } from "./chart-synchronization-axis-mapper";
-import {
-    buildPublishedCrosshairValues,
-    mapIncomingCrosshair
-} from "./chart-synchronization-crosshair";
-import type {
-    ChartSynchronizationAxisWindow
-} from "./chart-synchronization-types";
+import { buildPublishedCrosshairValues, mapIncomingCrosshair } from "./chart-synchronization-crosshair";
+import type { ChartSynchronizationAxisWindow } from "./chart-synchronization-types";
 
 export interface ViewportCommitNotification {
     /** True when the commit is the accepted echo of an inbound synchronized proposal. */
@@ -45,8 +40,16 @@ export interface ChartSynchronizationHost {
     getViewport(): InternalCartesianViewportState | null;
     isControlled(): boolean;
     onRemoteCrosshairState(state: import("../interaction/chart-crosshair-state").ChartCrosshairState | null): void;
-    onSyncViewportCommit(state: InternalCartesianViewportState, changedAxes: readonly ChartViewportAxisRef[], phase: ChartViewportChangePhase): void;
-    onSyncViewportProposal(state: InternalCartesianViewportState, changedAxes: readonly ChartViewportAxisRef[], phase: ChartViewportChangePhase): void;
+    onSyncViewportCommit(
+        state: InternalCartesianViewportState,
+        changedAxes: readonly ChartViewportAxisRef[],
+        phase: ChartViewportChangePhase
+    ): void;
+    onSyncViewportProposal(
+        state: InternalCartesianViewportState,
+        changedAxes: readonly ChartViewportAxisRef[],
+        phase: ChartViewportChangePhase
+    ): void;
 }
 
 interface PendingSyncViewportAck {
@@ -290,10 +293,7 @@ export class ChartSynchronizationController {
             return;
         }
 
-        if (
-            notification.acknowledgedInbound &&
-            notification.phase === "end"
-        ) {
+        if (notification.acknowledgedInbound && notification.phase === "end") {
             return;
         }
 
@@ -304,7 +304,9 @@ export class ChartSynchronizationController {
         );
     }
 
-    public publishLocalCrosshair(state: import("../interaction/chart-crosshair-state").ChartCrosshairState | null): void {
+    public publishLocalCrosshair(
+        state: import("../interaction/chart-crosshair-state").ChartCrosshairState | null
+    ): void {
         if (!this.#options?.crosshair.enabled || !this.#registration) {
             return;
         }
@@ -426,7 +428,9 @@ export function buildAxisWindows(
         }
         const isPrimary = ref.axis === "x" ? ref.axisId === primaryX : ref.axisId === primaryY;
         const internalWindow = ref.axis === "x" ? viewport.x.get(ref.axisId) : viewport.y.get(ref.axisId);
-        windows.push(buildAxisWindow(ref, snap.resolvedType, internalWindow ?? null, snap, baseDomainSignature, isPrimary));
+        windows.push(
+            buildAxisWindow(ref, snap.resolvedType, internalWindow ?? null, snap, baseDomainSignature, isPrimary)
+        );
     }
     return windows;
 }

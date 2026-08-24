@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
-import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
+import {
+    CartesianAxisCoordinateSpace,
+    type CartesianAxisCoordinateSnapshot
+} from "../viewport/cartesian-axis-coordinate-space";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import { ChartPointerInteractionResolver } from "./chart-pointer-interaction-resolver";
 import type { ChartPointerEvaluationInstrumentation } from "./chart-pointer-candidate-resolver";
@@ -117,8 +120,26 @@ function createPerformanceScene(hitTargetCount: number = 1): CartesianXYChartSce
 
     return {
         axes: [
-            { axis: "x", axisId: "x-main", axisLine: true, gridLines: false, position: "bottom", ticks: [], title: "X", visible: true },
-            { axis: "y", axisId: "y-main", axisLine: true, gridLines: false, position: "left", ticks: [], title: "Y", visible: true }
+            {
+                axis: "x",
+                axisId: "x-main",
+                axisLine: true,
+                gridLines: false,
+                position: "bottom",
+                ticks: [],
+                title: "X",
+                visible: true
+            },
+            {
+                axis: "y",
+                axisId: "y-main",
+                axisLine: true,
+                gridLines: false,
+                position: "left",
+                ticks: [],
+                title: "Y",
+                visible: true
+            }
         ],
         cartesianKind: "xy",
         coordinateSpace: space,

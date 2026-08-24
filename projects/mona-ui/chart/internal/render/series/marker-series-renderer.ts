@@ -1,7 +1,4 @@
-import type {
-    ChartBubbleSeriesScene,
-    ChartScatterSeriesScene
-} from "../../scene/cartesian-scene";
+import type { ChartBubbleSeriesScene, ChartScatterSeriesScene } from "../../scene/cartesian-scene";
 
 export class MarkerSeriesRenderer {
     public static render(
@@ -13,11 +10,8 @@ export class MarkerSeriesRenderer {
             return;
         }
 
-        const hasPerMarkerOpacity = markers.some(
-            m => m.renderOpacity !== undefined && m.renderOpacity < 1
-        );
-        const requiresIndependentFill =
-            hasPerMarkerOpacity || (scene.type === "bubble" && style.fillOpacity < 0.99);
+        const hasPerMarkerOpacity = markers.some(m => m.renderOpacity !== undefined && m.renderOpacity < 1);
+        const requiresIndependentFill = hasPerMarkerOpacity || (scene.type === "bubble" && style.fillOpacity < 0.99);
 
         if (!requiresIndependentFill) {
             // Opaque Fast Path: Batch all circle arcs into one path for fill and stroke

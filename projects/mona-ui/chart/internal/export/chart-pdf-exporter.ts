@@ -3,10 +3,7 @@ import type { NormalizedChartExportRequest } from "./chart-export-options";
 import type { FinalizedSvgOutput } from "./chart-export-svg-finalizer";
 import { ChartPdfCapabilityAnalyzer } from "./chart-pdf-capability-analyzer";
 import { ChartPngExporter } from "./chart-png-exporter";
-import {
-    ChartExportError,
-    type ChartExportResult
-} from "../../models/chart-export.models";
+import { ChartExportError, type ChartExportResult } from "../../models/chart-export.models";
 
 import { resolvePdfLayout, resolvePdfRasterPixelRatio } from "./chart-export-geometry";
 
@@ -32,28 +29,27 @@ export class ChartPdfExporter {
         }
 
         if (typeof document === "undefined") {
-            throw new ChartExportError(
-                "unsupported-environment",
-                "Cannot export PDF in a non-browser environment."
-            );
+            throw new ChartExportError("unsupported-environment", "Cannot export PDF in a non-browser environment.");
         }
 
         let jsPdfModule: Record<string, unknown>;
         try {
             jsPdfModule = await import("jspdf");
         } catch (err) {
-            throw new ChartExportError(
-                "pdf-generation-failed",
-                "Failed to dynamically load jsPDF library.",
-                { cause: err }
-            );
+            throw new ChartExportError("pdf-generation-failed", "Failed to dynamically load jsPDF library.", {
+                cause: err
+            });
         }
 
         if (request.signal?.aborted) {
             throw new DOMException("Export was aborted", "AbortError");
         }
 
-        const jsPDF = (jsPdfModule["jsPDF"] ?? jsPdfModule["default"] ?? jsPdfModule) as new (options: { format: readonly [number, number]; orientation: string; unit: string }) => import("jspdf").jsPDF;
+        const jsPDF = (jsPdfModule["jsPDF"] ?? jsPdfModule["default"] ?? jsPdfModule) as new (options: {
+            format: readonly [number, number];
+            orientation: string;
+            unit: string;
+        }) => import("jspdf").jsPDF;
         const layout = resolvePdfLayout(request);
 
         const capability = ChartPdfCapabilityAnalyzer.analyze(finalizedSvg.svgElement);
@@ -86,7 +82,8 @@ export class ChartPdfExporter {
                 throw new DOMException("Export was aborted", "AbortError");
             }
 
-            const svg2pdfFn = (svg2pdfModule?.["svg2pdf"] ?? svg2pdfModule?.["default"] ?? svg2pdfModule) as ((element: SVGElement, doc: unknown, options: Record<string, number>) => Promise<void>) | undefined;
+            const svg2pdfFn = (svg2pdfModule?.["svg2pdf"] ?? svg2pdfModule?.["default"] ?? svg2pdfModule) as
+                ((element: SVGElement, doc: unknown, options: Record<string, number>) => Promise<void>) | undefined;
 
             if (svg2pdfFn) {
                 if (request.signal?.aborted) {

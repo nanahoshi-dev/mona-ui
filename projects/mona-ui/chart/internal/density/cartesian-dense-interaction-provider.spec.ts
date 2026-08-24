@@ -80,8 +80,16 @@ describe("CartesianConnectedPathInteractionProvider", () => {
             { x: 20, y: 12 }
         ];
         const dupScalar = buildScalarDensityData({ data: dupData, temporal: false, xField: "x", yField: "y" });
-        const dupXScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 20], range: [0, 100], type: "linear" });
-        const dupYScale = CartesianScaleFactory.createExactPositionScale({ domain: [-40, 60], range: [100, 0], type: "linear" });
+        const dupXScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 20],
+            range: [0, 100],
+            type: "linear"
+        });
+        const dupYScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [-40, 60],
+            range: [100, 0],
+            type: "linear"
+        });
         const dupKeyResolver = new ChartMarkKeyResolver("dup", undefined, undefined);
         const dupProvider = new CartesianConnectedPathInteractionProvider({
             materialize: createDenseHitMaterializer({

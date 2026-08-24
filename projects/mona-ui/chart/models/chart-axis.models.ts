@@ -38,4 +38,3 @@ export interface ChartSubtitleTemplateContext {
     readonly $implicit: string;
     readonly subtitle: string;
 }
-

@@ -6,9 +6,7 @@
         [style.top.px]="placement().top"
         [attr.data-placement]="placement().placement">
         @if (customTemplate(); as template) {
-            <ng-container
-                [ngTemplateOutlet]="template.templateRef"
-                [ngTemplateOutletContext]="context" />
+            <ng-container [ngTemplateOutlet]="template.templateRef" [ngTemplateOutletContext]="context" />
         } @else if (context.point.seriesType === "heatmap") {
             <div class="flex items-center gap-1.5 mb-1">
                 <span
@@ -18,8 +16,11 @@
             </div>
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 <div>
-                    <span class="font-medium text-foreground">{{ context.point.formattedX }}</span>,
-                    <span class="font-medium text-foreground">{{ context.point.formattedYCategory || context.point.categoryY }}</span>
+                    <span class="font-medium text-foreground">{{ context.point.formattedX }}</span
+                    >,
+                    <span class="font-medium text-foreground">{{
+                        context.point.formattedYCategory || context.point.categoryY
+                    }}</span>
                 </div>
                 <div>
                     Value: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
@@ -30,7 +31,9 @@
                 <span
                     class="inline-block h-2 w-2 rounded-full flex-shrink-0"
                     [style.background-color]="context.point.color"></span>
-                <span class="font-semibold text-foreground">{{ context.point.formattedCategory || context.point.seriesName }}</span>
+                <span class="font-semibold text-foreground">{{
+                    context.point.formattedCategory || context.point.seriesName
+                }}</span>
             </div>
             <div class="flex items-center gap-2 text-xs text-muted-foreground">
                 <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
@@ -52,13 +55,14 @@
                 </div>
                 @if (context.point.formattedRadialMin && context.point.formattedRadialMax) {
                     <div>
-                        Range: <span class="font-medium text-foreground">{{ context.point.formattedRadialMin }} – {{ context.point.formattedRadialMax }}</span>
+                        Range:
+                        <span class="font-medium text-foreground"
+                            >{{ context.point.formattedRadialMin }} – {{ context.point.formattedRadialMax }}</span
+                        >
                     </div>
                 }
                 @if (context.point.isClamped) {
-                    <div class="text-[11px] text-amber-500 font-medium">
-                        Visual indicator clamped
-                    </div>
+                    <div class="text-[11px] text-amber-500 font-medium">Visual indicator clamped</div>
                 }
             </div>
         } @else if (context.point.seriesType === "treemap") {
@@ -66,7 +70,9 @@
                 <span
                     class="inline-block h-2 w-2 rounded-full flex-shrink-0"
                     [style.background-color]="context.point.color"></span>
-                <span class="font-semibold text-foreground">{{ context.point.hierarchy?.formattedLabel || context.point.formattedX || context.point.seriesName }}</span>
+                <span class="font-semibold text-foreground">{{
+                    context.point.hierarchy?.formattedLabel || context.point.formattedX || context.point.seriesName
+                }}</span>
             </div>
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 @if (context.point.hierarchy?.formattedPath && context.point.hierarchy!.formattedPath.length > 1) {
@@ -75,8 +81,13 @@
                     </div>
                 }
                 <div class="flex items-center gap-2">
-                    <span>Value: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span></span>
-                    @if (context.point.hierarchy?.percentageOfRoot !== undefined && context.point.hierarchy!.percentageOfRoot > 0) {
+                    <span
+                        >Value: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span></span
+                    >
+                    @if (
+                        context.point.hierarchy?.percentageOfRoot !== undefined &&
+                        context.point.hierarchy!.percentageOfRoot > 0
+                    ) {
                         <span>·</span>
                         <span>{{ (context.point.hierarchy!.percentageOfRoot * 100).toFixed(1) }}%</span>
                     }
@@ -87,20 +98,31 @@
                 <span
                     class="inline-block h-2 w-2 rounded-full flex-shrink-0"
                     [style.background-color]="context.point.color"></span>
-                <span class="font-semibold text-foreground">{{ context.point.formattedCategory || context.point.formattedX || context.point.seriesName }}</span>
+                <span class="font-semibold text-foreground">{{
+                    context.point.formattedCategory || context.point.formattedX || context.point.seriesName
+                }}</span>
             </div>
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 <div>
-                    Value: <span class="font-medium text-foreground">{{ context.point.funnel?.formattedValue || context.point.formattedY }}</span>
+                    Value:
+                    <span class="font-medium text-foreground">{{
+                        context.point.funnel?.formattedValue || context.point.formattedY
+                    }}</span>
                 </div>
                 @if (context.point.funnel?.formattedConversionRate) {
                     <div>
-                        Conversion: <span class="font-medium text-foreground">{{ context.point.funnel!.formattedConversionRate }}</span>
+                        Conversion:
+                        <span class="font-medium text-foreground">{{
+                            context.point.funnel!.formattedConversionRate
+                        }}</span>
                     </div>
                 }
                 @if (context.point.funnel?.formattedOverallConversionRate) {
                     <div>
-                        Overall: <span class="font-medium text-foreground">{{ context.point.funnel!.formattedOverallConversionRate }}</span>
+                        Overall:
+                        <span class="font-medium text-foreground">{{
+                            context.point.funnel!.formattedOverallConversionRate
+                        }}</span>
                     </div>
                 }
                 @if (context.point.funnel?.dropOff !== undefined && context.point.funnel!.dropOff > 0) {
@@ -114,20 +136,35 @@
                 <span
                     class="inline-block h-2 w-2 rounded-full flex-shrink-0"
                     [style.background-color]="context.point.color"></span>
-                <span class="font-semibold text-foreground">{{ context.point.formattedCategory || context.point.formattedX || context.point.seriesName }}</span>
+                <span class="font-semibold text-foreground">{{
+                    context.point.formattedCategory || context.point.formattedX || context.point.seriesName
+                }}</span>
             </div>
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 @if (context.point.waterfall?.kind === "change") {
                     <div>
-                        Change: <span class="font-medium text-foreground">{{ context.point.waterfall?.formattedDelta || context.point.formattedY }}</span>
+                        Change:
+                        <span class="font-medium text-foreground">{{
+                            context.point.waterfall?.formattedDelta || context.point.formattedY
+                        }}</span>
                     </div>
-                    @if (context.point.waterfall?.formattedCumulativeBefore && context.point.waterfall?.formattedCumulativeAfter) {
+                    @if (
+                        context.point.waterfall?.formattedCumulativeBefore &&
+                        context.point.waterfall?.formattedCumulativeAfter
+                    ) {
                         <div>
-                            Running Total: <span class="font-medium text-foreground">{{ context.point.waterfall!.formattedCumulativeBefore }} → {{ context.point.waterfall!.formattedCumulativeAfter }}</span>
+                            Running Total:
+                            <span class="font-medium text-foreground"
+                                >{{ context.point.waterfall!.formattedCumulativeBefore }} →
+                                {{ context.point.waterfall!.formattedCumulativeAfter }}</span
+                            >
                         </div>
                     } @else if (context.point.waterfall?.formattedCumulativeAfter) {
                         <div>
-                            Running Total: <span class="font-medium text-foreground">{{ context.point.waterfall!.formattedCumulativeAfter }}</span>
+                            Running Total:
+                            <span class="font-medium text-foreground">{{
+                                context.point.waterfall!.formattedCumulativeAfter
+                            }}</span>
                         </div>
                     }
                 } @else {
@@ -152,17 +189,43 @@
                                 @if (pt.financialDirection; as dir) {
                                     <span
                                         class="text-[10px] font-medium px-1 py-0.2 rounded capitalize"
-                                        [style.background-color]="dir === 'rising' ? 'rgba(34, 197, 94, 0.15)' : dir === 'falling' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(107, 114, 128, 0.15)'"
+                                        [style.background-color]="
+                                            dir === 'rising'
+                                                ? 'rgba(34, 197, 94, 0.15)'
+                                                : dir === 'falling'
+                                                  ? 'rgba(239, 68, 68, 0.15)'
+                                                  : 'rgba(107, 114, 128, 0.15)'
+                                        "
                                         [style.color]="pt.color">
                                         {{ dir }}
                                     </span>
                                 }
                             </div>
                             <div class="text-[11px] text-muted-foreground pl-3.5 flex items-center gap-1 flex-wrap">
-                                <span>O: <span class="font-medium text-foreground">{{ pt.formattedOpen || pt.open }}</span></span>
-                                <span>H: <span class="font-medium text-foreground">{{ pt.formattedHigh || pt.high }}</span></span>
-                                <span>L: <span class="font-medium text-foreground">{{ pt.formattedLow || pt.low }}</span></span>
-                                <span>C: <span class="font-medium text-foreground">{{ pt.formattedClose || pt.close }}</span></span>
+                                <span
+                                    >O:
+                                    <span class="font-medium text-foreground">{{
+                                        pt.formattedOpen || pt.open
+                                    }}</span></span
+                                >
+                                <span
+                                    >H:
+                                    <span class="font-medium text-foreground">{{
+                                        pt.formattedHigh || pt.high
+                                    }}</span></span
+                                >
+                                <span
+                                    >L:
+                                    <span class="font-medium text-foreground">{{
+                                        pt.formattedLow || pt.low
+                                    }}</span></span
+                                >
+                                <span
+                                    >C:
+                                    <span class="font-medium text-foreground">{{
+                                        pt.formattedClose || pt.close
+                                    }}</span></span
+                                >
                                 @if (pt.formattedChange) {
                                     <span class="font-medium text-foreground">({{ pt.formattedChange }})</span>
                                 }
@@ -177,7 +240,9 @@
                                 <span class="text-muted-foreground">{{ pt.seriesName }}</span>
                             </div>
                             <div class="flex items-center gap-1">
-                                <span class="font-medium text-foreground">{{ pt.formattedFrom }} – {{ pt.formattedTo }}</span>
+                                <span class="font-medium text-foreground"
+                                    >{{ pt.formattedFrom }} – {{ pt.formattedTo }}</span
+                                >
                             </div>
                         </div>
                     } @else {
@@ -191,7 +256,9 @@
                             <div class="flex items-center gap-1">
                                 <span class="font-medium text-foreground">{{ pt.formattedY }}</span>
                                 @if (pt.formattedStackPercentage) {
-                                    <span class="text-xs text-muted-foreground">({{ pt.formattedStackPercentage }})</span>
+                                    <span class="text-xs text-muted-foreground"
+                                        >({{ pt.formattedStackPercentage }})</span
+                                    >
                                 }
                                 @if (pt.formattedSize) {
                                     <span class="text-xs text-muted-foreground">({{ pt.formattedSize }})</span>
@@ -201,7 +268,11 @@
                     }
                 }
             </div>
-        } @else if (context.point.seriesType === "candlestick" || context.point.seriesType === "ohlc" || context.point.valueKind === "ohlc") {
+        } @else if (
+            context.point.seriesType === "candlestick" ||
+            context.point.seriesType === "ohlc" ||
+            context.point.valueKind === "ohlc"
+        ) {
             <div class="flex items-center justify-between gap-2 mb-1">
                 <div class="flex items-center gap-1.5">
                     <span
@@ -212,7 +283,13 @@
                 @if (context.point.financialDirection; as dir) {
                     <span
                         class="text-[10px] font-medium px-1 py-0.5 rounded capitalize"
-                        [style.background-color]="dir === 'rising' ? 'rgba(34, 197, 94, 0.15)' : dir === 'falling' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(107, 114, 128, 0.15)'"
+                        [style.background-color]="
+                            dir === 'rising'
+                                ? 'rgba(34, 197, 94, 0.15)'
+                                : dir === 'falling'
+                                  ? 'rgba(239, 68, 68, 0.15)'
+                                  : 'rgba(107, 114, 128, 0.15)'
+                        "
                         [style.color]="context.point.color">
                         {{ dir }}
                     </span>
@@ -224,19 +301,27 @@
             <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs">
                 <div class="flex items-center justify-between gap-1.5">
                     <span class="text-muted-foreground">Open:</span>
-                    <span class="font-medium text-foreground">{{ context.point.formattedOpen || context.point.open }}</span>
+                    <span class="font-medium text-foreground">{{
+                        context.point.formattedOpen || context.point.open
+                    }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-1.5">
                     <span class="text-muted-foreground">High:</span>
-                    <span class="font-medium text-foreground">{{ context.point.formattedHigh || context.point.high }}</span>
+                    <span class="font-medium text-foreground">{{
+                        context.point.formattedHigh || context.point.high
+                    }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-1.5">
                     <span class="text-muted-foreground">Low:</span>
-                    <span class="font-medium text-foreground">{{ context.point.formattedLow || context.point.low }}</span>
+                    <span class="font-medium text-foreground">{{
+                        context.point.formattedLow || context.point.low
+                    }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-1.5">
                     <span class="text-muted-foreground">Close:</span>
-                    <span class="font-medium text-foreground">{{ context.point.formattedClose || context.point.close }}</span>
+                    <span class="font-medium text-foreground">{{
+                        context.point.formattedClose || context.point.close
+                    }}</span>
                 </div>
             </div>
             @if (context.point.formattedChange || context.point.change !== undefined) {
@@ -252,9 +337,7 @@
             }
         } @else {
             <div class="flex items-center gap-1.5 mb-0.5">
-                <span
-                    class="inline-block h-2 w-2 rounded-full"
-                    [style.background-color]="context.point.color"></span>
+                <span class="inline-block h-2 w-2 rounded-full" [style.background-color]="context.point.color"></span>
                 <span class="font-semibold text-foreground">{{ context.point.seriesName }}</span>
             </div>
             <div class="text-muted-foreground">
@@ -265,7 +348,10 @@
                     <span class="font-medium text-foreground">{{ context.point.formattedStackPercentage }}</span>
                 }
                 @if (context.point.formattedSize) {
-                    <span class="ml-1.5">(size: <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span>)</span>
+                    <span class="ml-1.5"
+                        >(size: <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span
+                        >)</span
+                    >
                 }
             </div>
         }

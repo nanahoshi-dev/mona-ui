@@ -8,12 +8,7 @@
  * are classified as unsupported for template export.
  */
 
-export type ChartExportTransformKind =
-    | "none"
-    | "translation-2d"
-    | "affine-2d"
-    | "three-dimensional"
-    | "unknown";
+export type ChartExportTransformKind = "none" | "translation-2d" | "affine-2d" | "three-dimensional" | "unknown";
 
 export type ChartExportTransformClassification = "simple" | "complex";
 

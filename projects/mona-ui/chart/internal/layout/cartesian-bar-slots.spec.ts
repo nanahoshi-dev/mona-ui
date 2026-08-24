@@ -32,10 +32,7 @@ function createMockBarSeries(config: {
 
 describe("CartesianBarSlots", () => {
     it("should assign each unstacked bar series its own series slot", () => {
-        const series = [
-            createMockBarSeries({ field: "a", id: "s1" }),
-            createMockBarSeries({ field: "b", id: "s2" })
-        ];
+        const series = [createMockBarSeries({ field: "a", id: "s1" }), createMockBarSeries({ field: "b", id: "s2" })];
 
         const slots = CartesianBarSlots.computeSlots(series);
         expect(slots.length).toBe(2);
@@ -163,4 +160,3 @@ describe("CartesianBarSlots", () => {
         expect(layout.bySeriesId.get("s3")?.id).toBe("series:s3");
     });
 });
-

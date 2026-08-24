@@ -128,10 +128,21 @@ describe("lazy reverse lookup by mark id", () => {
     });
 
     it("returns no candidates for values absent from the source domain", () => {
-        const data = [{ x: 0, y: 1 }, { x: 5, y: 2 }];
+        const data = [
+            { x: 0, y: 1 },
+            { x: 5, y: 2 }
+        ];
         const scalar = buildScalarDensityData({ data, temporal: false, xField: "x", yField: "y" });
-        const xScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 5], range: [0, 100], type: "linear" });
-        const yScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 2], range: [10, 0], type: "linear" });
+        const xScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 5],
+            range: [0, 100],
+            type: "linear"
+        });
+        const yScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 2],
+            range: [10, 0],
+            type: "linear"
+        });
         const provider = new CartesianConnectedPathInteractionProvider({
             materialize: () => null,
             scalar,

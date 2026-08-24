@@ -14,10 +14,7 @@ export class TreemapHitIndex {
     readonly #grid: readonly (readonly SceneHitTarget[])[];
     readonly #allTargets: readonly SceneHitTarget[];
 
-    public constructor(
-        plotRect: ChartRect,
-        hitTargets: readonly SceneHitTarget[]
-    ) {
+    public constructor(plotRect: ChartRect, hitTargets: readonly SceneHitTarget[]) {
         this.#plotRect = plotRect;
         this.#allTargets = hitTargets;
 
@@ -53,9 +50,15 @@ export class TreemapHitIndex {
             }
 
             const minCol = Math.max(0, Math.min(cols - 1, Math.floor((bounds.x - plotRect.x) / this.#cellWidth)));
-            const maxCol = Math.max(0, Math.min(cols - 1, Math.floor((bounds.x + bounds.width - plotRect.x) / this.#cellWidth)));
+            const maxCol = Math.max(
+                0,
+                Math.min(cols - 1, Math.floor((bounds.x + bounds.width - plotRect.x) / this.#cellWidth))
+            );
             const minRow = Math.max(0, Math.min(rows - 1, Math.floor((bounds.y - plotRect.y) / this.#cellHeight)));
-            const maxRow = Math.max(0, Math.min(rows - 1, Math.floor((bounds.y + bounds.height - plotRect.y) / this.#cellHeight)));
+            const maxRow = Math.max(
+                0,
+                Math.min(rows - 1, Math.floor((bounds.y + bounds.height - plotRect.y) / this.#cellHeight))
+            );
 
             for (let r = minRow; r <= maxRow; r++) {
                 for (let c = minCol; c <= maxCol; c++) {

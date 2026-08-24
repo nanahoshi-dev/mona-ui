@@ -1,9 +1,6 @@
 import type { ChartAxisScene } from "../scene/cartesian-scene";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
-import type {
-    ChartNavigationAxisTarget,
-    ChartViewportAxisRef
-} from "../../models/chart-viewport.models";
+import type { ChartNavigationAxisTarget, ChartViewportAxisRef } from "../../models/chart-viewport.models";
 import type { NormalizedChartNavigationOptions } from "./chart-navigation-options";
 
 export interface ResolvedTargetAxes {
@@ -68,8 +65,10 @@ export class CartesianViewportTargetResolver {
         axisScenes: readonly ChartAxisScene[]
     ): readonly ChartViewportAxisRef[] {
         const visibleScenes = axisScenes.filter(s => s.visible);
-        const primaryX = visibleScenes.find(s => s.axis === "x" && s.isPrimary) ?? visibleScenes.find(s => s.axis === "x");
-        const primaryY = visibleScenes.find(s => s.axis === "y" && s.isPrimary) ?? visibleScenes.find(s => s.axis === "y");
+        const primaryX =
+            visibleScenes.find(s => s.axis === "x" && s.isPrimary) ?? visibleScenes.find(s => s.axis === "x");
+        const primaryY =
+            visibleScenes.find(s => s.axis === "y" && s.isPrimary) ?? visibleScenes.find(s => s.axis === "y");
 
         if (target === "xy") {
             const targets: ChartViewportAxisRef[] = [];
@@ -82,19 +81,13 @@ export class CartesianViewportTargetResolver {
             return targets;
         }
         if (target === "x") {
-            return primaryX
-                ? [{ axis: "x", axisId: primaryX.axisId ?? "default-x" }]
-                : [];
+            return primaryX ? [{ axis: "x", axisId: primaryX.axisId ?? "default-x" }] : [];
         }
         if (target === "y") {
-            return primaryY
-                ? [{ axis: "y", axisId: primaryY.axisId ?? "default-y" }]
-                : [];
+            return primaryY ? [{ axis: "y", axisId: primaryY.axisId ?? "default-y" }] : [];
         }
         if (target === "auto") {
-            return primaryX
-                ? [{ axis: "x", axisId: primaryX.axisId ?? "default-x" }]
-                : [];
+            return primaryX ? [{ axis: "x", axisId: primaryX.axisId ?? "default-x" }] : [];
         }
         if (Array.isArray(target)) {
             const seen = new Set<string>();
@@ -113,7 +106,9 @@ export class CartesianViewportTargetResolver {
         }
         if (typeof target === "object" && target !== null && "axis" in target && "axisId" in target) {
             const exists = visibleScenes.some(
-                s => s.axis === target.axis && (s.axisId ?? (s.axis === "x" ? "default-x" : "default-y")) === target.axisId
+                s =>
+                    s.axis === target.axis &&
+                    (s.axisId ?? (s.axis === "x" ? "default-x" : "default-y")) === target.axisId
             );
             return exists ? [target as ChartViewportAxisRef] : [];
         }

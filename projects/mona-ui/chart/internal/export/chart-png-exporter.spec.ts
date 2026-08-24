@@ -66,9 +66,7 @@ describe("ChartPngExporter", () => {
         const request = createTestRequest({ height: 20000, width: 20000 }); // Exceeds MAX_RASTER_DIMENSION
         const finalizedSvg = createFinalizedSvg();
 
-        await expect(ChartPngExporter.exportPng(finalizedSvg, snapshot, request)).rejects.toThrow(
-            ChartExportError
-        );
+        await expect(ChartPngExporter.exportPng(finalizedSvg, snapshot, request)).rejects.toThrow(ChartExportError);
     });
 
     it("throws AbortError when request signal is aborted", async () => {

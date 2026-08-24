@@ -69,7 +69,8 @@ export class SvgFunnelRenderer {
 
             for (const stage of stages) {
                 const stageOpacity = stage.renderOpacity ?? 1;
-                if (stageOpacity <= 0 || (stage.bounds && (stage.bounds.width <= 0 || stage.bounds.height <= 0))) continue;
+                if (stageOpacity <= 0 || (stage.bounds && (stage.bounds.width <= 0 || stage.bounds.height <= 0)))
+                    continue;
 
                 renderItems.push({
                     alpha: renderOpacity * stageOpacity,
@@ -112,7 +113,10 @@ export class SvgFunnelRenderer {
             if (hit && hit.seriesType === "funnel") {
                 const targetSeries = series.find(s => s.id === hit.seriesId) ?? series[0];
                 const stage = targetSeries?.stages.find(
-                    st => st.animationKey === hit.animationKey || st.stageId === hit.itemId || st.dataIndex === hit.dataIndex
+                    st =>
+                        st.animationKey === hit.animationKey ||
+                        st.stageId === hit.itemId ||
+                        st.dataIndex === hit.dataIndex
                 );
 
                 if (stage && stage.polygon) {

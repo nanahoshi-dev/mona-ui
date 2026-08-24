@@ -6,7 +6,6 @@ import {
     isFullContinuousViewport,
     type InternalAxisViewport,
     type InternalCartesianViewportState
-    
 } from "./cartesian-viewport-normalizer";
 
 export interface ViewportReconciliationResult {
@@ -118,7 +117,9 @@ export class CartesianViewportReconciler {
                 }
             }
 
-            const constraint = options?.constraints?.find(c => c.axis === snap.ref.axis && c.axisId === snap.ref.axisId);
+            const constraint = options?.constraints?.find(
+                c => c.axis === snap.ref.axis && c.axisId === snap.ref.axisId
+            );
             const [cStart, cEnd] = CartesianViewportConstraints.applyCategoryConstraints(
                 startIndex,
                 endIndex,

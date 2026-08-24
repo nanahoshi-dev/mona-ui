@@ -378,7 +378,11 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             yAxisId: "default-y"
         };
 
-        const plan = adapter.createPlan(prevVerticalReversed, nextHorizontalReversed, {} as unknown as ChartAnimationPlanningContext);
+        const plan = adapter.createPlan(
+            prevVerticalReversed,
+            nextHorizontalReversed,
+            {} as unknown as ChartAnimationPlanningContext
+        );
 
         for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
             const sampled = plan.sample(progress);
@@ -475,7 +479,11 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             yAxisId: "default-y"
         };
 
-        const plan = adapter.createPlan(prevHorizontalReversed, nextVerticalReversed, {} as unknown as ChartAnimationPlanningContext);
+        const plan = adapter.createPlan(
+            prevHorizontalReversed,
+            nextVerticalReversed,
+            {} as unknown as ChartAnimationPlanningContext
+        );
 
         for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
             const sampled = plan.sample(progress);
@@ -568,7 +576,11 @@ describe("RangeBarSeriesAnimationAdapter", () => {
             yAxisId: "default-y"
         };
 
-        const plan = adapter.createPlan(prevVerticalZero, nextHorizontalZero, {} as unknown as ChartAnimationPlanningContext);
+        const plan = adapter.createPlan(
+            prevVerticalZero,
+            nextHorizontalZero,
+            {} as unknown as ChartAnimationPlanningContext
+        );
         const finalSample = plan.sample(1);
 
         expect(finalSample).toBeDefined();

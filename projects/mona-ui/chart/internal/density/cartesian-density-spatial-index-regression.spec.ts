@@ -5,10 +5,7 @@ import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { LinearScale } from "../scale/cartesian-scale-factory";
 import { buildScalarDensityData, buildRangeDensityData } from "./cartesian-density-preparer";
 import { CartesianRangeAreaDenseInteractionProvider } from "./cartesian-range-dense-interaction-provider";
-import {
-    buildStackGroupDensityRuntime,
-    resolveStackGroupPolicy
-} from "./cartesian-stack-density-runtime";
+import { buildStackGroupDensityRuntime, resolveStackGroupPolicy } from "./cartesian-stack-density-runtime";
 import { CartesianStackedAreaDenseInteractionProvider } from "./cartesian-stack-dense-interaction-provider";
 import type { CartesianStackEntry, CartesianStackGroup } from "../data/cartesian-stack-engine";
 import { CartesianSpatialDensityIndex } from "./cartesian-spatial-density-index";
@@ -17,10 +14,7 @@ import { resolveDenseMarkById } from "./cartesian-dense-selection";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import { defaultDownsamplingOptions } from "./chart-downsampling-options";
-import {
-    resolveCartesianMarkerDatum,
-    type ResolveMarkerDatumContext
-} from "./cartesian-marker-hit-materializer";
+import { resolveCartesianMarkerDatum, type ResolveMarkerDatumContext } from "./cartesian-marker-hit-materializer";
 import { createBubbleRadiusScale } from "../scale/bubble-size-scale";
 import { computeSharedStackSampleIndices } from "./cartesian-stack-downsampler";
 
@@ -115,8 +109,8 @@ describe("Cartesian Density Spatial Index and Stack Group Regressions", () => {
     describe("Range raw nearest and brush indexed performance", () => {
         it("range nearest selects closer candidate with dx=2 rather than earlier candidate with dx=50", () => {
             const sourceData = [
-                { from: 10, to: 20, x: 50 },  // Index 0: dx = 50 from x=100
-                { from: 10, to: 20, x: 98 }   // Index 1: dx = 2 from x=100
+                { from: 10, to: 20, x: 50 }, // Index 0: dx = 50 from x=100
+                { from: 10, to: 20, x: 98 } // Index 1: dx = 2 from x=100
             ];
 
             const range = buildRangeDensityData({
@@ -286,9 +280,7 @@ describe("Cartesian Density Spatial Index and Stack Group Regressions", () => {
                 xValue: 100
             };
 
-            const entriesBySeriesId = new Map<string, CartesianStackEntry[]>([
-                ["s1", [entry]]
-            ]);
+            const entriesBySeriesId = new Map<string, CartesianStackEntry[]>([["s1", [entry]]]);
 
             const runtime = buildStackGroupDensityRuntime(
                 group1,
@@ -327,8 +319,8 @@ describe("Cartesian Density Spatial Index and Stack Group Regressions", () => {
             // Normalized metric: A = 0.0025, B = 0.0100 -> A would wrongly win under normalized metric
             // Pixel metric: A = 40px, B = 20px -> B MUST win in screen space!
 
-            const u = new Float64Array([0.05, 0.00]);
-            const v = new Float64Array([0.00, 0.10]);
+            const u = new Float64Array([0.05, 0.0]);
+            const v = new Float64Array([0.0, 0.1]);
             const index = new CartesianSpatialDensityIndex(u, v);
 
             const xScale = new LinearScale([0, 1], [0, 800]);
@@ -475,10 +467,7 @@ describe("Cartesian Density Spatial Index and Stack Group Regressions", () => {
                 yAxisType: "linear"
             };
 
-            const mark = resolveDenseMarkById(
-                mockScene,
-                markId
-            );
+            const mark = resolveDenseMarkById(mockScene, markId);
 
             expect(mark).not.toBeNull();
             expect(mark?.seriesId).toBe("scatter-1");

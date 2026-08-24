@@ -27,7 +27,14 @@ describe("ChartAnimationController", () => {
         const targetScene = createMockCartesianScene();
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 0,
             easing: "linear",
             fromScene: null,
@@ -54,7 +61,14 @@ describe("ChartAnimationController", () => {
         const toScene = createMockCartesianScene();
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene,
@@ -95,7 +109,14 @@ describe("ChartAnimationController", () => {
         const toScene = createMockCartesianScene();
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene: null,
@@ -120,7 +141,14 @@ describe("ChartAnimationController", () => {
         const toScene = createMockCartesianScene();
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene: null,

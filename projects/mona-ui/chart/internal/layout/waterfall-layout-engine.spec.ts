@@ -37,12 +37,7 @@ describe("WaterfallLayoutEngine", () => {
             visible: signal(true)
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver);
 
         expect(scene.hasRenderableData).toBe(true);
         const bars = scene.series[0].bars;
@@ -171,7 +166,7 @@ describe("WaterfallLayoutEngine", () => {
         const count = 500;
         const data = Array.from({ length: count }, (_, i) => ({
             category: `Step ${i + 1}`,
-            value: (i % 2 === 0 ? 10 : -5)
+            value: i % 2 === 0 ? 10 : -5
         }));
 
         const registration: ChartWaterfallSeriesRegistration = {
@@ -184,12 +179,7 @@ describe("WaterfallLayoutEngine", () => {
             visible: signal(true)
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver);
 
         const xAxes = scene.axes.filter(a => a.axis === "x");
         expect(xAxes.length).toBe(1);
@@ -221,12 +211,7 @@ describe("WaterfallLayoutEngine", () => {
             visible: signal(true)
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver);
 
         expect(scene.series[0].connectors.length).toBe(0);
     });
@@ -245,12 +230,7 @@ describe("WaterfallLayoutEngine", () => {
             visible: signal(true)
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver);
 
         expect(scene.series[0].bars[0].borderRadius).toBe(8);
         expect(scene.hitTargets[0].borderRadius).toBe(8);
@@ -276,12 +256,7 @@ describe("WaterfallLayoutEngine", () => {
             visible: signal(true)
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver);
 
         expect(scene.hasRenderableData).toBe(true);
         expect(scene.series[0].labels.length).toBe(2);
@@ -323,13 +298,7 @@ describe("WaterfallLayoutEngine", () => {
             visible: signal(true)
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver,
-            xAxis
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver, xAxis);
 
         expect(scene.series[0].bars[0].formattedCategory).toBe("Quarter: 2026-Q1");
         expect(scene.hitTargets[0].formattedCategory).toBe("Quarter: 2026-Q1");
@@ -354,12 +323,7 @@ describe("WaterfallLayoutEngine", () => {
             visible: signal(true)
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver);
 
         expect(scene.series[0].bars[0].renderOpacity).toBe(1);
         expect(scene.series[0].bars[1].renderOpacity).toBe(1);
@@ -369,8 +333,8 @@ describe("WaterfallLayoutEngine", () => {
     it("uses canonical source-index formattedCategory for X axis ticks when earlier source rows are omitted (FWF-C3)", () => {
         const data = [
             { category: "InvalidRow", kind: "change", value: "NaN" }, // omitted
-            { category: "FirstValid", kind: "change", value: 100 },   // dataIndex = 1
-            { category: "SecondValid", kind: "change", value: -20 }   // dataIndex = 2
+            { category: "FirstValid", kind: "change", value: 100 }, // dataIndex = 1
+            { category: "SecondValid", kind: "change", value: -20 } // dataIndex = 2
         ];
 
         const registration: ChartWaterfallSeriesRegistration = {
@@ -403,13 +367,7 @@ describe("WaterfallLayoutEngine", () => {
             visible: signal(true)
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver,
-            xAxis
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver, xAxis);
 
         expect(scene.series[0].bars.length).toBe(2);
         expect(scene.series[0].bars[0].formattedCategory).toBe("src-1:FirstValid");
@@ -440,12 +398,7 @@ describe("WaterfallLayoutEngine", () => {
             xField: signal("category")
         };
 
-        const scene = WaterfallLayoutEngine.layout(
-            registration,
-            600,
-            400,
-            styleResolver
-        );
+        const scene = WaterfallLayoutEngine.layout(registration, 600, 400, styleResolver);
 
         expect(scene.series[0].labels.length).toBe(2);
         // Both labels expose matching bar color in fillColor

@@ -1,6 +1,5 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type {
-    
     ChartViewportChangeEvent,
     ChartViewportConstraint,
     ChartViewportLinkGroup
@@ -10,15 +9,11 @@ import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportOperationCoordinator } from "./cartesian-viewport-operation-coordinator";
 import {
-    
     diffInternalViewportStates,
     toPublicViewportState,
     type InternalCartesianViewportState
 } from "./cartesian-viewport-normalizer";
-import {
-    CartesianViewportTargetResolver,
-    type CartesianNavigationProfile
-} from "./cartesian-viewport-target-resolver";
+import { CartesianViewportTargetResolver, type CartesianNavigationProfile } from "./cartesian-viewport-target-resolver";
 import type { NormalizedChartNavigationOptions } from "./chart-navigation-options";
 import type {
     ChartViewportDragSession,
@@ -121,10 +116,20 @@ export class ChartViewportGestureController {
     ): void {
         const resolvedAxisMap = this.#context.coordinateSpace?.toResolvedAxisInfoMap() ?? {
             x: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                this.#context.axisScenes.filter(s => s.axis === "x").map(s => [s.axisId ?? "default-x", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+                this.#context.axisScenes
+                    .filter(s => s.axis === "x")
+                    .map(s => [
+                        s.axisId ?? "default-x",
+                        { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }
+                    ])
             ),
             y: new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>(
-                this.#context.axisScenes.filter(s => s.axis === "y").map(s => [s.axisId ?? "default-y", { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }])
+                this.#context.axisScenes
+                    .filter(s => s.axis === "y")
+                    .map(s => [
+                        s.axisId ?? "default-y",
+                        { baseDomain: [], resolvedType: s.scaleType as ResolvedChartCartesianAxisType }
+                    ])
             )
         };
 
@@ -159,13 +164,7 @@ export class ChartViewportGestureController {
         }
 
         if (shouldEmitEnd) {
-            this.#dispatchChangeEvent(
-                "drag",
-                "end",
-                finalViewport,
-                finalViewport,
-                []
-            );
+            this.#dispatchChangeEvent("drag", "end", finalViewport, finalViewport, []);
         }
 
         this.#context.onCursorChange(null);
@@ -190,13 +189,7 @@ export class ChartViewportGestureController {
         }
 
         if (shouldEmitEnd) {
-            this.#dispatchChangeEvent(
-                "pinch",
-                "end",
-                finalViewport,
-                finalViewport,
-                []
-            );
+            this.#dispatchChangeEvent("pinch", "end", finalViewport, finalViewport, []);
         }
     }
 
@@ -221,13 +214,7 @@ export class ChartViewportGestureController {
         const finalViewport = session.latestViewport;
 
         if (!options.silent) {
-            this.#dispatchChangeEvent(
-                "wheel",
-                "end",
-                finalViewport,
-                finalViewport,
-                []
-            );
+            this.#dispatchChangeEvent("wheel", "end", finalViewport, finalViewport, []);
         }
     }
 
@@ -265,9 +252,10 @@ export class ChartViewportGestureController {
 
         // 2. Flush Pinch
         if (this.#pinchSession) {
-            const totalScaleFactor = this.#pinchSession.initialDistance > 0
-                ? this.#pinchSession.latestDistance / this.#pinchSession.initialDistance
-                : 1;
+            const totalScaleFactor =
+                this.#pinchSession.initialDistance > 0
+                    ? this.#pinchSession.latestDistance / this.#pinchSession.initialDistance
+                    : 1;
             const totalDeltaX = this.#pinchSession.latestCentroid.x - this.#pinchSession.startCentroid.x;
             const totalDeltaY = this.#pinchSession.latestCentroid.y - this.#pinchSession.startCentroid.y;
             const res = CartesianViewportOperationCoordinator.transform(
@@ -321,16 +309,13 @@ export class ChartViewportGestureController {
         session.changedAxes = diff.changedAxes;
         session.hasChanged = true;
 
-        this.#dispatchChangeEvent(
-            source,
-            "update",
-            proposal,
-            previous,
-            diff.changedAxes
-        );
+        this.#dispatchChangeEvent(source, "update", proposal, previous, diff.changedAxes);
     }
 
-    #rebaseWheelSession(newAnchor: ChartPoint, sourceAxes: readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[]): void {
+    #rebaseWheelSession(
+        newAnchor: ChartPoint,
+        sourceAxes: readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[]
+    ): void {
         if (!this.#wheelSession) return;
         if (this.#wheelSession.endTimerId !== null) {
             clearTimeout(this.#wheelSession.endTimerId);
@@ -428,7 +413,10 @@ export class ChartViewportGestureController {
         this.#activePointers.delete(event.pointerId);
 
         if (this.#pinchSession) {
-            if (event.pointerId === this.#pinchSession.pointer1Id || event.pointerId === this.#pinchSession.pointer2Id) {
+            if (
+                event.pointerId === this.#pinchSession.pointer1Id ||
+                event.pointerId === this.#pinchSession.pointer2Id
+            ) {
                 this.#flushPendingGestureFrame();
                 this.#finalizePinch({ releaseCapture: false });
             }
@@ -444,7 +432,10 @@ export class ChartViewportGestureController {
         this.#activePointers.delete(event.pointerId);
 
         if (this.#pinchSession) {
-            if (event.pointerId === this.#pinchSession.pointer1Id || event.pointerId === this.#pinchSession.pointer2Id) {
+            if (
+                event.pointerId === this.#pinchSession.pointer1Id ||
+                event.pointerId === this.#pinchSession.pointer2Id
+            ) {
                 this.#flushPendingGestureFrame();
                 this.#finalizePinch({ releaseCapture: true });
                 return true;
@@ -462,9 +453,7 @@ export class ChartViewportGestureController {
 
     public handlePointerDown(event: PointerEvent, elementPoint: ChartPoint, targetElement?: Element | null): boolean {
         const isFreshPointerSequence =
-            this.#activePointers.size === 0 &&
-            this.#dragSession === null &&
-            this.#pinchSession === null;
+            this.#activePointers.size === 0 && this.#dragSession === null && this.#pinchSession === null;
 
         if (isFreshPointerSequence) {
             this.#isClickSuppressed = false;
@@ -618,7 +607,10 @@ export class ChartViewportGestureController {
 
         // If active pinch is ongoing, pinch pointers are captured - do not cancel
         if (this.#pinchSession) {
-            if (event.pointerId === this.#pinchSession.pointer1Id || event.pointerId === this.#pinchSession.pointer2Id) {
+            if (
+                event.pointerId === this.#pinchSession.pointer1Id ||
+                event.pointerId === this.#pinchSession.pointer2Id
+            ) {
                 return;
             }
         }
@@ -706,7 +698,10 @@ export class ChartViewportGestureController {
         this.#activePointers.delete(event.pointerId);
 
         if (this.#pinchSession) {
-            if (event.pointerId === this.#pinchSession.pointer1Id || event.pointerId === this.#pinchSession.pointer2Id) {
+            if (
+                event.pointerId === this.#pinchSession.pointer1Id ||
+                event.pointerId === this.#pinchSession.pointer2Id
+            ) {
                 this.#flushPendingGestureFrame();
                 const endedSessionLatestViewport = this.#pinchSession.latestViewport;
                 this.#finalizePinch({ releaseCapture: false });
@@ -884,9 +879,7 @@ export class ChartViewportGestureController {
             context.constraints,
             context.linkGroups
         );
-        const policyChanged =
-            this.#currentPolicySignature !== undefined &&
-            this.#currentPolicySignature !== newPolicy;
+        const policyChanged = this.#currentPolicySignature !== undefined && this.#currentPolicySignature !== newPolicy;
 
         if (tokenChanged || policyChanged) {
             if (this.#dragSession || this.#pinchSession || this.#wheelSession) {

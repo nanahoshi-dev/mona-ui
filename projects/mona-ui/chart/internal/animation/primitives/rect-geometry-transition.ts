@@ -1,11 +1,7 @@
 import type { ChartRect } from "../../../models/chart.models";
 
 export class RectGeometryTransition {
-    public static interpolate(
-        fromRect: ChartRect,
-        toRect: ChartRect,
-        progress: number
-    ): ChartRect {
+    public static interpolate(fromRect: ChartRect, toRect: ChartRect, progress: number): ChartRect {
         const p = Math.max(0, Math.min(1, progress));
         return {
             height: fromRect.height + (toRect.height - fromRect.height) * p,
@@ -15,11 +11,7 @@ export class RectGeometryTransition {
         };
     }
 
-    public static interpolateRadius(
-        fromRadius: number,
-        toRadius: number,
-        progress: number
-    ): number {
+    public static interpolateRadius(fromRadius: number, toRadius: number, progress: number): number {
         const p = Math.max(0, Math.min(1, progress));
         return fromRadius + (toRadius - fromRadius) * p;
     }

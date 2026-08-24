@@ -6,11 +6,7 @@ import { ChartExportSvgFinalizer } from "./chart-export-svg-finalizer";
 import { ChartPngExporter } from "./chart-png-exporter";
 import { ChartPdfExporter } from "./chart-pdf-exporter";
 import { resolveEffectiveIslandScale } from "./chart-export-geometry";
-import {
-    ChartExportError,
-    type ChartExportErrorCode,
-    type ChartExportResult
-} from "../../models/chart-export.models";
+import { ChartExportError, type ChartExportErrorCode, type ChartExportResult } from "../../models/chart-export.models";
 
 export class ChartExportCoordinator {
     public static async export(
@@ -76,7 +72,10 @@ export class ChartExportCoordinator {
                 case "pdf":
                     return await ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request);
                 default:
-                    throw new ChartExportError("not-ready", `Unsupported format: ${(request as unknown as { format: unknown }).format}`);
+                    throw new ChartExportError(
+                        "not-ready",
+                        `Unsupported format: ${(request as unknown as { format: unknown }).format}`
+                    );
             }
         } catch (err: unknown) {
             if (err instanceof ChartExportError || (err as { name?: string } | undefined)?.name === "AbortError") {
@@ -89,7 +88,12 @@ export class ChartExportCoordinator {
             } else if (stage === "finalization") {
                 fallbackCode = "svg-serialization-failed";
             } else if (stage === "output-generation") {
-                fallbackCode = request.format === "png" ? "png-rasterization-failed" : request.format === "pdf" ? "pdf-generation-failed" : "svg-composition-failed";
+                fallbackCode =
+                    request.format === "png"
+                        ? "png-rasterization-failed"
+                        : request.format === "pdf"
+                          ? "pdf-generation-failed"
+                          : "svg-composition-failed";
             }
 
             throw new ChartExportError(

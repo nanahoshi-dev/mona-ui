@@ -5,15 +5,23 @@ import {
     computeSourceNormalizedWindow,
     mapCategoryDomainWindow,
     mapCategoryRelativeWindow,
-    mapContinuousDomainWindow
-    ,mapDomainWindow,
+    mapContinuousDomainWindow,
+    mapDomainWindow,
     mapRelativeWindow
 } from "./cartesian-viewport-semantic-mapper";
 import type { InternalCategoryViewport, InternalContinuousViewport } from "./cartesian-viewport-normalizer";
 
-const linearSnap = (axisId: string, domain: readonly [number, number], range: readonly [number, number]): CartesianAxisCoordinateSnapshot => ({
+const linearSnap = (
+    axisId: string,
+    domain: readonly [number, number],
+    range: readonly [number, number]
+): CartesianAxisCoordinateSnapshot => ({
     baseDomain: domain,
-    baseScale: CartesianScaleFactory.createExactPositionScale({ domain: [...domain], range: [...range], type: "linear" }),
+    baseScale: CartesianScaleFactory.createExactPositionScale({
+        domain: [...domain],
+        range: [...range],
+        type: "linear"
+    }),
     range,
     ref: { axis: "x", axisId },
     resolvedType: "linear",
@@ -22,9 +30,17 @@ const linearSnap = (axisId: string, domain: readonly [number, number], range: re
     viewportScale: undefined as never
 });
 
-const timeSnap = (axisId: string, domain: readonly [number, number], range: readonly [number, number]): CartesianAxisCoordinateSnapshot => ({
+const timeSnap = (
+    axisId: string,
+    domain: readonly [number, number],
+    range: readonly [number, number]
+): CartesianAxisCoordinateSnapshot => ({
     baseDomain: [new Date(domain[0]), new Date(domain[1])],
-    baseScale: CartesianScaleFactory.createExactPositionScale({ domain: [new Date(domain[0]), new Date(domain[1])], range: [...range], type: "time" }),
+    baseScale: CartesianScaleFactory.createExactPositionScale({
+        domain: [new Date(domain[0]), new Date(domain[1])],
+        range: [...range],
+        type: "time"
+    }),
     range,
     ref: { axis: "x", axisId },
     resolvedType: "time",
@@ -33,7 +49,11 @@ const timeSnap = (axisId: string, domain: readonly [number, number], range: read
     viewportScale: undefined as never
 });
 
-const categorySnap = (axisId: string, domain: readonly string[], range: readonly [number, number]): CartesianAxisCoordinateSnapshot => ({
+const categorySnap = (
+    axisId: string,
+    domain: readonly string[],
+    range: readonly [number, number]
+): CartesianAxisCoordinateSnapshot => ({
     baseDomain: domain,
     baseScale: CartesianScaleFactory.createBandScale({ domain: [...domain], range: [...range] }),
     range,
@@ -44,11 +64,21 @@ const categorySnap = (axisId: string, domain: readonly string[], range: readonly
     viewportScale: undefined as never
 });
 
-const contWin = (min: number, max: number): InternalContinuousViewport =>
-    ({ axis: "x", axisId: "src", kind: "continuous", max, min });
+const contWin = (min: number, max: number): InternalContinuousViewport => ({
+    axis: "x",
+    axisId: "src",
+    kind: "continuous",
+    max,
+    min
+});
 
-const catWin = (start: number, endExclusive: number): InternalCategoryViewport =>
-    ({ axis: "x", axisId: "src", endIndexExclusive: endExclusive, kind: "category", startIndex: start });
+const catWin = (start: number, endExclusive: number): InternalCategoryViewport => ({
+    axis: "x",
+    axisId: "src",
+    endIndexExclusive: endExclusive,
+    kind: "category",
+    startIndex: start
+});
 
 describe("cartesian viewport semantic mapper", () => {
     const warned = new Set<string>();
@@ -56,7 +86,13 @@ describe("cartesian viewport semantic mapper", () => {
     it("maps continuous domain windows preserving semantic values within target base", () => {
         const source = linearSnap("src", [0, 100], [0, 400]);
         const target = linearSnap("tgt", [0, 200], [0, 400]);
-        const mapped = mapContinuousDomainWindow(contWin(20, 60), source, target, {}, { diagnosticScope: "test", warned });
+        const mapped = mapContinuousDomainWindow(
+            contWin(20, 60),
+            source,
+            target,
+            {},
+            { diagnosticScope: "test", warned }
+        );
         expect(mapped?.kind).toBe("continuous");
         expect(mapped && mapped.kind === "continuous" ? mapped.min : undefined).toBe(20);
         expect(mapped && mapped.kind === "continuous" ? mapped.max : undefined).toBe(60);
@@ -78,7 +114,13 @@ describe("cartesian viewport semantic mapper", () => {
     it("maps time to utc domain windows preserving instants", () => {
         const source = timeSnap("src", [0, 1000], [0, 400]);
         const target = timeSnap("tgt", [0, 2000], [0, 400]);
-        const mapped = mapContinuousDomainWindow(contWin(100, 500), source, target, {}, { diagnosticScope: "test", warned });
+        const mapped = mapContinuousDomainWindow(
+            contWin(100, 500),
+            source,
+            target,
+            {},
+            { diagnosticScope: "test", warned }
+        );
         expect(mapped && mapped.kind === "continuous" ? mapped.min : undefined).toBe(100);
         expect(mapped && mapped.kind === "continuous" ? mapped.max : undefined).toBe(500);
     });
@@ -88,7 +130,9 @@ describe("cartesian viewport semantic mapper", () => {
         try {
             const source = categorySnap("src", ["a", "b", "c"], [0, 300]);
             const target = categorySnap("tgt", ["a", "b", "d"], [0, 300]);
-            expect(mapCategoryDomainWindow(catWin(0, 2), source, target, {}, { diagnosticScope: "t", warned })).toBeUndefined();
+            expect(
+                mapCategoryDomainWindow(catWin(0, 2), source, target, {}, { diagnosticScope: "t", warned })
+            ).toBeUndefined();
             expect(spy).toHaveBeenCalled();
 
             const same = categorySnap("tgt2", ["a", "b", "c"], [0, 300]);
@@ -104,7 +148,11 @@ describe("cartesian viewport semantic mapper", () => {
         const logDomain: [number, number] = [1, 100];
         const snap: CartesianAxisCoordinateSnapshot = {
             ...linearSnap("src", logDomain, [0, 400]),
-            baseScale: CartesianScaleFactory.createExactPositionScale({ domain: [...logDomain], range: [0, 400], type: "log" }),
+            baseScale: CartesianScaleFactory.createExactPositionScale({
+                domain: [...logDomain],
+                range: [0, 400],
+                type: "log"
+            }),
             resolvedType: "log"
         };
         const normalized = computeSourceNormalizedWindow(contWin(1, 10), snap);

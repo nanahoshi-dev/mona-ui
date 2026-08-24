@@ -9,7 +9,7 @@ import {
 
 describe("ChartKeyboardNavigation — Axis Namespace Awareness (PZV-000B)", () => {
     const createKeyEvent = (key: string): KeyboardEvent =>
-        ({ key, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+        ({ key, preventDefault: vi.fn() }) as unknown as KeyboardEvent;
 
     function createDualXScene(): CartesianXYChartScene {
         const hitX1: SceneHitTarget = {
@@ -83,7 +83,13 @@ describe("ChartKeyboardNavigation — Axis Namespace Awareness (PZV-000B)", () =
 
         const bucketsByAxis = new Map<string, Map<string, ChartInteractionBucket>>();
         bucketsByAxis.set("x-primary", new Map([["A", bucketPrimary]]));
-        bucketsByAxis.set("x-secondary", new Map([["A", bucketSecondaryA], ["B", bucketSecondaryB]]));
+        bucketsByAxis.set(
+            "x-secondary",
+            new Map([
+                ["A", bucketSecondaryA],
+                ["B", bucketSecondaryB]
+            ])
+        );
 
         return {
             axes: [
@@ -166,40 +172,28 @@ describe("ChartKeyboardNavigation — Axis Namespace Awareness (PZV-000B)", () =
         const eventPageDown = createKeyEvent("PageDown");
 
         // From primary -> PageDown moves to secondary X
-        const res1 = ChartKeyboardNavigation.handleKeyDown(
-            eventPageDown,
-            scene,
-            0,
-            "s-x1",
-            "s-x1:0",
-            { axis: "x", axisId: "x-primary" }
-        );
+        const res1 = ChartKeyboardNavigation.handleKeyDown(eventPageDown, scene, 0, "s-x1", "s-x1:0", {
+            axis: "x",
+            axisId: "x-primary"
+        });
         expect(res1).not.toBeNull();
         expect(res1?.namespace).toEqual({ axis: "x", axisId: "x-secondary" });
         expect(res1?.hitTarget?.seriesId).toBe("s-x2");
 
         // From secondary -> PageDown cycles back to primary X
-        const res2 = ChartKeyboardNavigation.handleKeyDown(
-            eventPageDown,
-            scene,
-            0,
-            "s-x2",
-            "s-x2:0",
-            { axis: "x", axisId: "x-secondary" }
-        );
+        const res2 = ChartKeyboardNavigation.handleKeyDown(eventPageDown, scene, 0, "s-x2", "s-x2:0", {
+            axis: "x",
+            axisId: "x-secondary"
+        });
         expect(res2?.namespace).toEqual({ axis: "x", axisId: "x-primary" });
         expect(res2?.hitTarget?.seriesId).toBe("s-x1");
 
         // PageUp cycles backwards
         const eventPageUp = createKeyEvent("PageUp");
-        const res3 = ChartKeyboardNavigation.handleKeyDown(
-            eventPageUp,
-            scene,
-            0,
-            "s-x1",
-            "s-x1:0",
-            { axis: "x", axisId: "x-primary" }
-        );
+        const res3 = ChartKeyboardNavigation.handleKeyDown(eventPageUp, scene, 0, "s-x1", "s-x1:0", {
+            axis: "x",
+            axisId: "x-primary"
+        });
         expect(res3?.namespace).toEqual({ axis: "x", axisId: "x-secondary" });
     });
 
@@ -208,14 +202,7 @@ describe("ChartKeyboardNavigation — Axis Namespace Awareness (PZV-000B)", () =
         const activeNamespace = { axis: "x" as const, axisId: "x-secondary" };
 
         const eventRight = createKeyEvent("ArrowRight");
-        const res = ChartKeyboardNavigation.handleKeyDown(
-            eventRight,
-            scene,
-            0,
-            "s-x2",
-            "s-x2:0",
-            activeNamespace
-        );
+        const res = ChartKeyboardNavigation.handleKeyDown(eventRight, scene, 0, "s-x2", "s-x2:0", activeNamespace);
         expect(res).not.toBeNull();
         expect(res?.bucketIndex).toBe(1);
         expect(res?.hitTarget?.xValue).toBe("B");

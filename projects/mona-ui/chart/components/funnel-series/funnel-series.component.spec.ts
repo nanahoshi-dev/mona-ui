@@ -6,10 +6,7 @@ import type {
     ChartRegistrationContext,
     ChartSeriesRegistration
 } from "../../internal/context/chart-registration-context";
-import type {
-    ChartFunnelOrientation,
-    ChartFunnelStageVisibilityEvent
-} from "../../models/chart-funnel.models";
+import type { ChartFunnelOrientation, ChartFunnelStageVisibilityEvent } from "../../models/chart-funnel.models";
 import { FunnelSeriesComponent } from "./funnel-series.component";
 
 @Component({

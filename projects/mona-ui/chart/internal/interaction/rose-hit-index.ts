@@ -26,11 +26,12 @@ export class RoseHitIndex implements PolarArcHitIndex {
 
         for (let i = 0; i < this.#targets.length; i++) {
             const target = this.#targets[i];
-            const slotIndex = target.categoryIndex !== undefined
-                ? target.categoryIndex
-                : target.index !== undefined
-                  ? target.index
-                  : i;
+            const slotIndex =
+                target.categoryIndex !== undefined
+                    ? target.categoryIndex
+                    : target.index !== undefined
+                      ? target.index
+                      : i;
             this.#targetBySlot.set(slotIndex, target);
         }
     }

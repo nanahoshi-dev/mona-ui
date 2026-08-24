@@ -209,9 +209,10 @@ export class HeatmapDataResolver {
             }
 
             const customKey = keyField ? resolveValue<string>(datum, keyField, i) : undefined;
-            const animationKey = customKey !== undefined && customKey !== null && String(customKey).length > 0
-                ? `${seriesId}:heat:${String(customKey)}:${xKey}:${yKey}`
-                : `${seriesId}:heat:${xKey}:${yKey}`;
+            const animationKey =
+                customKey !== undefined && customKey !== null && String(customKey).length > 0
+                    ? `${seriesId}:heat:${String(customKey)}:${xKey}:${yKey}`
+                    : `${seriesId}:heat:${xKey}:${yKey}`;
 
             validCells.push({
                 animationKey,

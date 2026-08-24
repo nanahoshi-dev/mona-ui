@@ -56,11 +56,7 @@ export class HeatmapSeriesRenderer {
                     if (cell.width >= textMetrics.width + 4 && cell.height >= 12) {
                         context.globalAlpha = alpha;
                         context.fillStyle = cell.labelColor || "#ffffff";
-                        context.fillText(
-                            cell.formattedValue,
-                            cell.x + cell.width / 2,
-                            cell.y + cell.height / 2
-                        );
+                        context.fillText(cell.formattedValue, cell.x + cell.width / 2, cell.y + cell.height / 2);
                     }
                 }
             }

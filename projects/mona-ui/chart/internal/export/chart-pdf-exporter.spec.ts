@@ -72,9 +72,7 @@ describe("ChartPdfExporter", () => {
         });
         const finalizedSvg = createFinalizedSvg();
 
-        await expect(ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request)).rejects.toThrow(
-            ChartExportError
-        );
+        await expect(ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request)).rejects.toThrow(ChartExportError);
     });
 
     it("throws AbortError when request signal is aborted", async () => {
@@ -105,8 +103,6 @@ describe("ChartPdfExporter", () => {
             xml: '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
         };
 
-        await expect(ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request)).rejects.toThrow(
-            ChartExportError
-        );
+        await expect(ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request)).rejects.toThrow(ChartExportError);
     });
 });

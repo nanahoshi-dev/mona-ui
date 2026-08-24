@@ -50,7 +50,20 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
             plotRect: { height: 200, width: 200, x: 20, y: 20 },
             series: [
                 {
-                    bars: [{ datum: {}, height: 50, index: 0, isPositive: true, radius: 0, width: 20, x: 50, xValue: "A", y: 100, yValue: 10 }],
+                    bars: [
+                        {
+                            datum: {},
+                            height: 50,
+                            index: 0,
+                            isPositive: true,
+                            radius: 0,
+                            width: 20,
+                            x: 50,
+                            xValue: "A",
+                            y: 100,
+                            yValue: 10
+                        }
+                    ],
                     borderRadius: 0,
                     fillOpacity: 1,
                     id: "s1",
@@ -106,7 +119,20 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                     plotRect: { height: 200, width: 200, x: 20, y: 20 },
                     series: [
                         {
-                            bars: [{ datum: {}, height: 50, index: 0, isPositive: true, radius: 0, width: 20, x: 50, xValue: "A", y: 100, yValue: 10 }],
+                            bars: [
+                                {
+                                    datum: {},
+                                    height: 50,
+                                    index: 0,
+                                    isPositive: true,
+                                    radius: 0,
+                                    width: 20,
+                                    x: 50,
+                                    xValue: "A",
+                                    y: 100,
+                                    yValue: 10
+                                }
+                            ],
                             borderRadius: 0,
                             fillOpacity: 1,
                             id: "s-xy",
@@ -137,7 +163,22 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                     plotRect: { height: 200, width: 200, x: 20, y: 20 },
                     series: [
                         {
-                            cells: [{ backgroundColor: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: 10, valueText: "10", width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }],
+                            cells: [
+                                {
+                                    backgroundColor: "#ff0000",
+                                    dataIndex: 0,
+                                    datum: {},
+                                    height: 50,
+                                    opacity: 1,
+                                    rawValue: 10,
+                                    valueText: "10",
+                                    width: 50,
+                                    x: 20,
+                                    xIndex: 0,
+                                    y: 20,
+                                    yIndex: 0
+                                }
+                            ],
                             id: "heat-1",
                             labels: [],
                             name: "Heatmap",
@@ -166,7 +207,21 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                             id: "funnel-1",
                             labels: [],
                             name: "Funnel",
-                            stages: [{ bounds: { height: 50, width: 100, x: 50, y: 20 }, dataIndex: 0, datum: {}, fillColor: "#ff0000", polygon: [{ x: 50, y: 20 }, { x: 150, y: 20 }, { x: 140, y: 70 }, { x: 60, y: 70 }], stageId: "stage-0" }],
+                            stages: [
+                                {
+                                    bounds: { height: 50, width: 100, x: 50, y: 20 },
+                                    dataIndex: 0,
+                                    datum: {},
+                                    fillColor: "#ff0000",
+                                    polygon: [
+                                        { x: 50, y: 20 },
+                                        { x: 150, y: 20 },
+                                        { x: 140, y: 70 },
+                                        { x: 60, y: 70 }
+                                    ],
+                                    stageId: "stage-0"
+                                }
+                            ],
                             type: "funnel"
                         }
                     ],
@@ -188,7 +243,26 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                     plotRect: { height: 200, width: 200, x: 20, y: 20 },
                     series: [
                         {
-                            bars: [{ barType: "initial", bounds: { height: 50, width: 20, x: 50, y: 100 }, color: "#3b82f6", connectorY: 100, dataIndex: 0, datum: {}, height: 50, index: 0, isNegative: false, isTotal: false, radius: 0, width: 20, x: 50, xValue: "A", y: 100, yValue: 50 }],
+                            bars: [
+                                {
+                                    barType: "initial",
+                                    bounds: { height: 50, width: 20, x: 50, y: 100 },
+                                    color: "#3b82f6",
+                                    connectorY: 100,
+                                    dataIndex: 0,
+                                    datum: {},
+                                    height: 50,
+                                    index: 0,
+                                    isNegative: false,
+                                    isTotal: false,
+                                    radius: 0,
+                                    width: 20,
+                                    x: 50,
+                                    xValue: "A",
+                                    y: 100,
+                                    yValue: 50
+                                }
+                            ],
                             connectors: [],
                             id: "waterfall-1",
                             name: "Waterfall",
@@ -216,7 +290,28 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                             id: "tree-1",
                             labels: [],
                             name: "Treemap",
-                            nodes: [{ bounds: { height: 100, width: 100, x: 20, y: 20 }, color: "#3b82f6", dataIndex: 0, datum: {}, depth: 1, fillColor: "#3b82f6", hasChildren: false, height: 100, id: "n1", isLeaf: true, label: "Node 1", nodeId: "node-1", opacity: 1, value: 50, valueText: "50", width: 100, x: 20, y: 20 }],
+                            nodes: [
+                                {
+                                    bounds: { height: 100, width: 100, x: 20, y: 20 },
+                                    color: "#3b82f6",
+                                    dataIndex: 0,
+                                    datum: {},
+                                    depth: 1,
+                                    fillColor: "#3b82f6",
+                                    hasChildren: false,
+                                    height: 100,
+                                    id: "n1",
+                                    isLeaf: true,
+                                    label: "Node 1",
+                                    nodeId: "node-1",
+                                    opacity: 1,
+                                    value: 50,
+                                    valueText: "50",
+                                    width: 100,
+                                    x: 20,
+                                    y: 20
+                                }
+                            ],
                             type: "treemap"
                         }
                     ],
@@ -242,7 +337,23 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                             fillMode: "solid",
                             id: "sector-1",
                             name: "Pie",
-                            slices: [{ color: "#ff0000", cornerRadius: 0, dataIndex: 0, datum: {}, endAngle: Math.PI, formattedValue: "10", innerRadius: 0, outerRadius: 100, padAngle: 0, sliceId: "s1", startAngle: 0, value: 10, visible: true }],
+                            slices: [
+                                {
+                                    color: "#ff0000",
+                                    cornerRadius: 0,
+                                    dataIndex: 0,
+                                    datum: {},
+                                    endAngle: Math.PI,
+                                    formattedValue: "10",
+                                    innerRadius: 0,
+                                    outerRadius: 100,
+                                    padAngle: 0,
+                                    sliceId: "s1",
+                                    startAngle: 0,
+                                    value: 10,
+                                    visible: true
+                                }
+                            ],
                             style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
                             type: "pie"
                         }
@@ -254,7 +365,16 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                 markSelector: "g[data-series-id='radar-1'] circle",
                 name: "Polar Axis (Radar)",
                 scene: {
-                    angularAxis: { axisLine: true, gridLines: true, labelOffset: 10, labels: true, mode: "category", rotation: 0, ticks: [], visible: true },
+                    angularAxis: {
+                        axisLine: true,
+                        gridLines: true,
+                        labelOffset: 10,
+                        labels: true,
+                        mode: "category",
+                        rotation: 0,
+                        ticks: [],
+                        visible: true
+                    },
                     axisMode: "radar",
                     center: { x: 150, y: 150 },
                     coordinateSystem: "polar",
@@ -266,9 +386,46 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                     outerRadius: 100,
                     plotRect: { height: 300, width: 300, x: 0, y: 0 },
                     polarKind: "axis",
-                    radialAxis: { axisLine: true, domain: [0, 100], gridLines: true, gridShape: "circle", labelAngle: 0, labelOffset: 5, labels: true, ticks: [], visible: true },
+                    radialAxis: {
+                        axisLine: true,
+                        domain: [0, 100],
+                        gridLines: true,
+                        gridShape: "circle",
+                        labelAngle: 0,
+                        labelOffset: 5,
+                        labels: true,
+                        ticks: [],
+                        visible: true
+                    },
                     series: [
-                        { color: "#3b82f6", connectNulls: true, curve: "linear", fillMode: "solid", fillOpacity: 0.2, id: "radar-1", maxRenderedRadius: 100, name: "Radar", pointRadius: 4, points: [{ angle: 0, animationKey: "p1", categoryKey: "A", dataIndex: 0, datum: {}, defined: true, formattedValue: "40", point: { x: 150, y: 110 }, radius: 40, value: 40 }], showPoints: true, strokeWidth: 2, type: "radar" }
+                        {
+                            color: "#3b82f6",
+                            connectNulls: true,
+                            curve: "linear",
+                            fillMode: "solid",
+                            fillOpacity: 0.2,
+                            id: "radar-1",
+                            maxRenderedRadius: 100,
+                            name: "Radar",
+                            pointRadius: 4,
+                            points: [
+                                {
+                                    angle: 0,
+                                    animationKey: "p1",
+                                    categoryKey: "A",
+                                    dataIndex: 0,
+                                    datum: {},
+                                    defined: true,
+                                    formattedValue: "40",
+                                    point: { x: 150, y: 110 },
+                                    radius: 40,
+                                    value: 40
+                                }
+                            ],
+                            showPoints: true,
+                            strokeWidth: 2,
+                            type: "radar"
+                        }
                     ],
                     width: 300
                 } as unknown as PolarAxisChartScene
@@ -290,7 +447,47 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                     plotRect: { height: 300, width: 300, x: 0, y: 0 },
                     polarKind: "arc",
                     series: [
-                        { fillMode: "solid", id: "gauge-1", indicator: "arc", name: "Gauge", showValue: true, style: { color: "#3b82f6", fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0, trackColor: "#e5e7eb", trackOpacity: 1 }, track: { color: "#e5e7eb", endAngle: Math.PI, innerRadius: 80, opacity: 1, outerRadius: 100, startAngle: 0 }, type: "gauge", value: { animationKey: "v1", cornerRadius: 0, dataIndex: 0, datum: {}, endAngle: Math.PI / 2, formattedValue: "50", innerRadius: 80, isClamped: false, max: 100, min: 0, outerRadius: 100, ratio: 0.5, rawValue: 50, startAngle: 0 } }
+                        {
+                            fillMode: "solid",
+                            id: "gauge-1",
+                            indicator: "arc",
+                            name: "Gauge",
+                            showValue: true,
+                            style: {
+                                color: "#3b82f6",
+                                fillOpacity: 1,
+                                strokeColor: "none",
+                                strokeSource: "default",
+                                strokeWidth: 0,
+                                trackColor: "#e5e7eb",
+                                trackOpacity: 1
+                            },
+                            track: {
+                                color: "#e5e7eb",
+                                endAngle: Math.PI,
+                                innerRadius: 80,
+                                opacity: 1,
+                                outerRadius: 100,
+                                startAngle: 0
+                            },
+                            type: "gauge",
+                            value: {
+                                animationKey: "v1",
+                                cornerRadius: 0,
+                                dataIndex: 0,
+                                datum: {},
+                                endAngle: Math.PI / 2,
+                                formattedValue: "50",
+                                innerRadius: 80,
+                                isClamped: false,
+                                max: 100,
+                                min: 0,
+                                outerRadius: 100,
+                                ratio: 0.5,
+                                rawValue: 50,
+                                startAngle: 0
+                            }
+                        }
                     ],
                     width: 300
                 } as unknown as PolarArcChartScene

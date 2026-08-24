@@ -53,10 +53,7 @@ describe("Cartesian Brush Category Extent O(log C) Performance & Boundary Semant
             viewportScale: { domain: () => [0, 100], range: () => [300, 0] } as unknown as ChartPositionScale<unknown>
         };
 
-        const coordSpace = new CartesianAxisCoordinateSpace(
-            new Map([["xAxis", xSnap]]),
-            new Map([["yAxis", ySnap]])
-        );
+        const coordSpace = new CartesianAxisCoordinateSpace(new Map([["xAxis", xSnap]]), new Map([["yAxis", ySnap]]));
 
         const target: ResolvedCartesianBrushTarget = {
             isValidX: true,
@@ -121,10 +118,7 @@ describe("Cartesian Brush Category Extent O(log C) Performance & Boundary Semant
             viewportScale: { domain: () => [0, 100], range: () => [300, 0] } as unknown as ChartPositionScale<unknown>
         };
 
-        const coordSpace = new CartesianAxisCoordinateSpace(
-            new Map([["xAxis", xSnap]]),
-            new Map([["yAxis", ySnap]])
-        );
+        const coordSpace = new CartesianAxisCoordinateSpace(new Map([["xAxis", xSnap]]), new Map([["yAxis", ySnap]]));
 
         // Query in pure gap between 31 and 49
         const extent = coordSpace.resolveCategoryExtentAtPixels({ axis: "x", axisId: "xAxis" }, 32, 48);

@@ -76,9 +76,7 @@ export class CartesianMarkSemanticResolver {
                     }
                 } else if (hit.point && hit.highPoint) {
                     chosenX =
-                        Math.abs(pointer.x - hit.point.x) <= Math.abs(pointer.x - hit.highPoint.x)
-                            ? fromVal
-                            : toVal;
+                        Math.abs(pointer.x - hit.point.x) <= Math.abs(pointer.x - hit.highPoint.x) ? fromVal : toVal;
                 }
 
                 const catY = hit.yCategory ?? hit.categoryY ?? hit.category ?? hit.xValue;

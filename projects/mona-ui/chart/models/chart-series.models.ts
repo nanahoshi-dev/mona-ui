@@ -25,15 +25,7 @@ export type ChartSeriesType =
     | "waterfall";
 
 export type ChartSeriesFamily =
-    | "cartesian"
-    | "funnel"
-    | "heatmap"
-    | "hierarchy"
-    | "polar"
-    | "radar"
-    | "radialArc"
-    | "sector"
-    | "waterfall";
+    "cartesian" | "funnel" | "heatmap" | "hierarchy" | "polar" | "radar" | "radialArc" | "sector" | "waterfall";
 
 export function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily {
     switch (type) {
@@ -80,7 +72,6 @@ export function isPolarCoordinateFamily(family: ChartSeriesFamily): boolean {
 export function isHierarchicalCoordinateFamily(family: ChartSeriesFamily): boolean {
     return family === "hierarchy";
 }
-
 
 export type ChartLegendItemKind = "datum" | "semantic" | "series";
 

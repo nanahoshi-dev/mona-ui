@@ -6,10 +6,7 @@ import type {
     ChartViewportWindow
 } from "../../models/chart-viewport.models";
 import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
-import {
-    CartesianViewportController,
-    type CartesianViewportTransformIntent
-} from "./cartesian-viewport-controller";
+import { CartesianViewportController, type CartesianViewportTransformIntent } from "./cartesian-viewport-controller";
 import { CartesianViewportLinker } from "./cartesian-viewport-linker";
 import {
     areAxisViewportsEqual,
@@ -152,16 +149,12 @@ export class CartesianViewportOperationCoordinator {
             return this.fit(currentViewport, coordinateSpace, targetAxes, options);
         }
 
-        const normalizedDefault = normalizeViewportState(
-            defaultViewport,
-            coordinateSpace,
-            {
-                clampToData: options?.clampToData,
-                constraints: options?.constraints,
-                minVisibleCategories: options?.minVisibleCategories,
-                warnedSignatures: options?.warnedSignatures
-            }
-        );
+        const normalizedDefault = normalizeViewportState(defaultViewport, coordinateSpace, {
+            clampToData: options?.clampToData,
+            constraints: options?.constraints,
+            minVisibleCategories: options?.minVisibleCategories,
+            warnedSignatures: options?.warnedSignatures
+        });
 
         const isFullReset = !targetAxes || targetAxes.length === 0;
         if (isFullReset) {
@@ -203,12 +196,10 @@ export class CartesianViewportOperationCoordinator {
         const changedAxes: ChartViewportAxisRef[] = [];
 
         for (const target of targetAxes) {
-            const defaultWin = target.axis === "x"
-                ? normalizedDefault.x.get(target.axisId)
-                : normalizedDefault.y.get(target.axisId);
-            const currentWin = target.axis === "x"
-                ? currentViewport.x.get(target.axisId)
-                : currentViewport.y.get(target.axisId);
+            const defaultWin =
+                target.axis === "x" ? normalizedDefault.x.get(target.axisId) : normalizedDefault.y.get(target.axisId);
+            const currentWin =
+                target.axis === "x" ? currentViewport.x.get(target.axisId) : currentViewport.y.get(target.axisId);
 
             if (!areAxisViewportsEqual(currentWin, defaultWin)) {
                 if (defaultWin) {
@@ -263,16 +254,12 @@ export class CartesianViewportOperationCoordinator {
         viewport: ChartViewportState,
         options?: CartesianViewportOperationOptions
     ): CartesianViewportOperationResult {
-        const normalized = normalizeViewportState(
-            viewport,
-            coordinateSpace,
-            {
-                clampToData: options?.clampToData,
-                constraints: options?.constraints,
-                minVisibleCategories: options?.minVisibleCategories,
-                warnedSignatures: options?.warnedSignatures
-            }
-        );
+        const normalized = normalizeViewportState(viewport, coordinateSpace, {
+            clampToData: options?.clampToData,
+            constraints: options?.constraints,
+            minVisibleCategories: options?.minVisibleCategories,
+            warnedSignatures: options?.warnedSignatures
+        });
 
         const changedSourceAxes: ChartViewportAxisRef[] = [];
         const nextX = new Map<string, InternalAxisViewport>();
@@ -353,16 +340,11 @@ export class CartesianViewportOperationCoordinator {
             explicitAxisSet.add(`${axis}:${axisId}`);
             anyAccepted = true;
             const constraint = options?.constraints?.find(c => c.axis === axis && c.axisId === axisId);
-            const normalized = normalizeAxisWindow(
-                win,
-                snapshot,
-                constraint,
-                {
-                    clampToData: options?.clampToData,
-                    minVisibleCategories: options?.minVisibleCategories,
-                    warnedSignatures: options?.warnedSignatures
-                }
-            );
+            const normalized = normalizeAxisWindow(win, snapshot, constraint, {
+                clampToData: options?.clampToData,
+                minVisibleCategories: options?.minVisibleCategories,
+                warnedSignatures: options?.warnedSignatures
+            });
 
             const existing = axis === "x" ? currentViewport.x.get(axisId) : currentViewport.y.get(axisId);
             if (!areAxisViewportsEqual(existing, normalized)) {

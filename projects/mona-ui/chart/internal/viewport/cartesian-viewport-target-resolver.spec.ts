@@ -86,9 +86,7 @@ describe("CartesianViewportTargetResolver", () => {
             "vertical"
         );
         expect(result.isAxisGutterHit).toBe(true);
-        expect(result.targetAxes).toEqual([
-            { axis: "y", axisId: "y-right" }
-        ]);
+        expect(result.targetAxes).toEqual([{ axis: "y", axisId: "y-right" }]);
     });
 
     it("should target primary X axis by default in vertical Cartesian when panAxes is auto", () => {
@@ -100,9 +98,7 @@ describe("CartesianViewportTargetResolver", () => {
             "vertical"
         );
         expect(result.isAxisGutterHit).toBe(false);
-        expect(result.targetAxes).toEqual([
-            { axis: "x", axisId: "x-bottom" }
-        ]);
+        expect(result.targetAxes).toEqual([{ axis: "x", axisId: "x-bottom" }]);
     });
 
     it("should target primary Y axis by default in horizontal Cartesian when panAxes is auto", () => {
@@ -114,9 +110,7 @@ describe("CartesianViewportTargetResolver", () => {
             "horizontal"
         );
         expect(result.isAxisGutterHit).toBe(false);
-        expect(result.targetAxes).toEqual([
-            { axis: "y", axisId: "y-left" }
-        ]);
+        expect(result.targetAxes).toEqual([{ axis: "y", axisId: "y-left" }]);
     });
 
     it("should target primary X and primary Y when profile is xy", () => {
@@ -159,9 +153,7 @@ describe("CartesianViewportTargetResolver", () => {
             "vertical"
         );
         expect(result.isAxisGutterHit).toBe(false);
-        expect(result.targetAxes).toEqual([
-            { axis: "y", axisId: "y-left" }
-        ]);
+        expect(result.targetAxes).toEqual([{ axis: "y", axisId: "y-left" }]);
     });
 
     it("should resolve explicit targets correctly", () => {
@@ -176,10 +168,7 @@ describe("CartesianViewportTargetResolver", () => {
             { axis: "y", axisId: "y-left" }
         ]);
         expect(
-            CartesianViewportTargetResolver.resolveExplicitTarget(
-                [{ axis: "y", axisId: "y-right" }],
-                axisScenes
-            )
+            CartesianViewportTargetResolver.resolveExplicitTarget([{ axis: "y", axisId: "y-right" }], axisScenes)
         ).toEqual([{ axis: "y", axisId: "y-right" }]);
     });
 });

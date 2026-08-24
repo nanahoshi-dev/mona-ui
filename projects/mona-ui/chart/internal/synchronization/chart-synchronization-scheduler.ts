@@ -88,7 +88,11 @@ export class ChartSynchronizationScheduler {
         let count = 0;
         for (const [key, item] of this.#pending.entries()) {
             const itemChannel = item.channel ?? item.kind;
-            if (item.originMemberId === originMemberId && item.group === group && (!channel || itemChannel === channel)) {
+            if (
+                item.originMemberId === originMemberId &&
+                item.group === group &&
+                (!channel || itemChannel === channel)
+            ) {
                 this.#pending.delete(key);
                 count++;
             }
@@ -96,11 +100,19 @@ export class ChartSynchronizationScheduler {
         return count;
     }
 
-    public cancelRecipientGroup(recipientMemberId: string, group: string, channel?: SynchronizationDeliveryChannel): number {
+    public cancelRecipientGroup(
+        recipientMemberId: string,
+        group: string,
+        channel?: SynchronizationDeliveryChannel
+    ): number {
         let count = 0;
         for (const [key, item] of this.#pending.entries()) {
             const itemChannel = item.channel ?? item.kind;
-            if (item.recipientMemberId === recipientMemberId && item.group === group && (!channel || itemChannel === channel)) {
+            if (
+                item.recipientMemberId === recipientMemberId &&
+                item.group === group &&
+                (!channel || itemChannel === channel)
+            ) {
                 this.#pending.delete(key);
                 count++;
             }

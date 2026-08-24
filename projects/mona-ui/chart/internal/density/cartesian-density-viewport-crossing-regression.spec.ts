@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-    allocateSegmentBudgets
-    
-    ,projectRangeEnvelopeIndexView,
+    allocateSegmentBudgets,
+    projectRangeEnvelopeIndexView,
     projectScalarIndexView
 } from "./cartesian-density-projector";
 import { buildScalarDensityData, buildRangeDensityData } from "./cartesian-density-preparer";
@@ -12,7 +11,11 @@ import { buildStackGroupDensityRuntime } from "./cartesian-stack-density-runtime
 import { LinearScale } from "../scale/cartesian-scale-factory";
 import type { CartesianStackEntry, CartesianStackGroup } from "../data/cartesian-stack-engine";
 import { ChartDensityTracker } from "../layout/chart-density-instrumentation";
-import type { ChartAreaSeriesRegistration, ChartXAxisRegistration, ChartYAxisRegistration } from "../context/chart-registration-context";
+import type {
+    ChartAreaSeriesRegistration,
+    ChartXAxisRegistration,
+    ChartYAxisRegistration
+} from "../context/chart-registration-context";
 
 describe("Cartesian Density Viewport Crossing and Segment Budget Regressions", () => {
     describe("Exact Line Crossing Viewport with Zero In-Window Points", () => {

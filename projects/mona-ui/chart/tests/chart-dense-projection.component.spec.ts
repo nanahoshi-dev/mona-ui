@@ -1,31 +1,22 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ChartCurve } from "../models/chart-series.models";
-import type { ChartDownsamplingInput } from "../models/chart-downsampling.models";
-import type { ChartViewportState } from "../models/chart-viewport.models";
-import { CartesianStageTracker } from "../internal/layout/cartesian-stage-instrumentation";
-import { ChartDensityTracker } from "../internal/layout/chart-density-instrumentation";
+import { AreaSeriesComponent } from "../components/area-series/area-series.component";
+import { BubbleSeriesComponent } from "../components/bubble-series/bubble-series.component";
 import { ChartXAxisComponent } from "../components/chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../components/chart-y-axis/chart-y-axis.component";
+import { ChartComponent } from "../components/chart/chart.component";
 import { LineSeriesComponent } from "../components/line-series/line-series.component";
-import { AreaSeriesComponent } from "../components/area-series/area-series.component";
 import { RangeAreaSeriesComponent } from "../components/range-area-series/range-area-series.component";
 import { ScatterSeriesComponent } from "../components/scatter-series/scatter-series.component";
-import { BubbleSeriesComponent } from "../components/bubble-series/bubble-series.component";
-import { ChartComponent } from "../components/chart/chart.component";
+import { CartesianStageTracker } from "../internal/layout/cartesian-stage-instrumentation";
+import { ChartDensityTracker } from "../internal/layout/chart-density-instrumentation";
+import type { ChartDownsamplingInput } from "../models/chart-downsampling.models";
+import type { ChartCurve } from "../models/chart-series.models";
+import type { ChartViewportState } from "../models/chart-viewport.models";
 
 @Component({
-    imports: [
-        ChartComponent,
-        ChartXAxisComponent,
-        ChartYAxisComponent,
-        LineSeriesComponent,
-        AreaSeriesComponent,
-        RangeAreaSeriesComponent,
-        ScatterSeriesComponent,
-        BubbleSeriesComponent
-    ],
+    imports: [ChartComponent, ChartXAxisComponent, ChartYAxisComponent, AreaSeriesComponent],
     template: `
         <mona-chart
             #stackChart

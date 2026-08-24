@@ -145,12 +145,7 @@ describe("Cartesian Stage Isolation and Fast-Path Layout", () => {
             ["axis:y:y-1:linear:50", { height: 16, width: 80 }]
         ]);
 
-        const updatedRuntime = CartesianLayoutEngine.recomputeChrome(
-            runtime,
-            500,
-            300,
-            updatedMeasurements
-        );
+        const updatedRuntime = CartesianLayoutEngine.recomputeChrome(runtime, 500, 300, updatedMeasurements);
 
         // Preparation is preserved (Stage A was not re-run)
         expect(updatedRuntime.preparation).toBe(runtime.preparation);
@@ -206,11 +201,7 @@ describe("Cartesian Stage Isolation and Fast-Path Layout", () => {
         const runtime = computation.runtime!;
         expect(runtime.orientation).toBe("horizontal");
 
-        const recomputedRuntime = CartesianHorizontalBarLayoutEngine.recomputeChrome(
-            runtime,
-            500,
-            300
-        );
+        const recomputedRuntime = CartesianHorizontalBarLayoutEngine.recomputeChrome(runtime, 500, 300);
         expect(recomputedRuntime.preparation).toBe(runtime.preparation);
 
         const viewport: InternalCartesianViewportState = {
@@ -218,11 +209,7 @@ describe("Cartesian Stage Isolation and Fast-Path Layout", () => {
             y: new Map([["y-1", { axis: "y", axisId: "y-1", kind: "continuous", min: 10, max: 40 }]])
         };
 
-        const fastProj = CartesianHorizontalBarLayoutEngine.projectViewportFastPath(
-            recomputedRuntime,
-            viewport
-        );
+        const fastProj = CartesianHorizontalBarLayoutEngine.projectViewportFastPath(recomputedRuntime, viewport);
         expect(fastProj.scene.viewport).toBeDefined();
     });
 });
-

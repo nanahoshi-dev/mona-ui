@@ -36,10 +36,7 @@ export class ChartDataLabelTextMeasurer {
         ChartDataLabelTextMeasurer.#cache.clear();
     }
 
-    public static measure(
-        text: string,
-        font: string = "500 11px system-ui, sans-serif"
-    ): ChartMeasuredText {
+    public static measure(text: string, font: string = "500 11px system-ui, sans-serif"): ChartMeasuredText {
         if (!text) {
             return { ascent: 0, descent: 0, height: 0, width: 0 };
         }

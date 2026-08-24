@@ -83,4 +83,3 @@ export function sampleRectTransition(plan: RectMarkTransitionPlan, progress: num
         yValue: to.yValue ?? from.yValue
     };
 }
-

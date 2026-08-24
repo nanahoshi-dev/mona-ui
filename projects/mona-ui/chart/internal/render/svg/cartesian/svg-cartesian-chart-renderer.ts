@@ -288,7 +288,10 @@ export class SvgCartesianChartRenderer {
         }
 
         // 5. Generic Data Labels (default <text> labels)
-        if (presentation?.cartesianDataLabels?.defaultLabels && presentation.cartesianDataLabels.defaultLabels.length > 0) {
+        if (
+            presentation?.cartesianDataLabels?.defaultLabels &&
+            presentation.cartesianDataLabels.defaultLabels.length > 0
+        ) {
             this.#dataLabelRenderer.render(presentation.cartesianDataLabels.defaultLabels, plotClipUrl);
         } else {
             this.#dataLabelRenderer.clear();
@@ -320,7 +323,9 @@ export class SvgCartesianChartRenderer {
         if (presentation?.activeBrushBounds && (presentation.brushRegistration || presentation.brushSnapshot)) {
             const resolved =
                 presentation.brushSnapshot ??
-                (presentation.brushRegistration ? styleResolver.resolveBrushStyle(presentation.brushRegistration) : undefined);
+                (presentation.brushRegistration
+                    ? styleResolver.resolveBrushStyle(presentation.brushRegistration)
+                    : undefined);
             this.#brushRenderer.render(
                 presentation.activeBrushBounds,
                 presentation.brushRegistration ?? null,

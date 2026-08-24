@@ -64,15 +64,11 @@ describe("chart-export-resource-policy", () => {
         });
 
         it("rejects percent-encoded binary payloads explicitly", () => {
-            expect(() =>
-                decodeDataUrlPayload("data:image/png,%89%50%4E%47%0D%0A%1A%0A")
-            ).toThrowError(/base64/);
+            expect(() => decodeDataUrlPayload("data:image/png,%89%50%4E%47%0D%0A%1A%0A")).toThrowError(/base64/);
         });
 
         it("rejects malformed base64 payloads", () => {
-            expect(() => decodeDataUrlPayload("data:image/png;base64,!!!NotBase64!!!")).toThrowError(
-                ChartExportError
-            );
+            expect(() => decodeDataUrlPayload("data:image/png;base64,!!!NotBase64!!!")).toThrowError(ChartExportError);
         });
 
         it("rejects oversized payloads before materializing decoded bytes", () => {
@@ -118,7 +114,9 @@ describe("chart-export-resource-policy", () => {
         it("identifies PNG, JPEG, and WebP magic bytes exactly", () => {
             expect(sniffRasterImageType(ONE_PX_PNG_BYTES)).toBe("image/png");
             expect(sniffRasterImageType(Uint8Array.from([0xff, 0xd8, 0xff, 0xe0]))).toBe("image/jpeg");
-            expect(sniffRasterImageType(Uint8Array.from([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]))).toBe("image/webp");
+            expect(
+                sniffRasterImageType(Uint8Array.from([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]))
+            ).toBe("image/webp");
             expect(sniffRasterImageType(new Uint8Array([1, 2, 3]))).toBeNull();
         });
 

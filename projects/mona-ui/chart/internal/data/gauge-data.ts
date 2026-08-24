@@ -126,16 +126,17 @@ export class GaugeDataProcessor {
             ? valueFormatter(effectiveValue, matchedDataIndex >= 0 ? matchedDataIndex : 0)
             : formatYValue(effectiveValue, matchedDataIndex >= 0 ? matchedDataIndex : 0);
 
-        const formattedMin = valueFormatter
-            ? valueFormatter(domainMin, 0)
-            : formatYValue(domainMin, 0);
+        const formattedMin = valueFormatter ? valueFormatter(domainMin, 0) : formatYValue(domainMin, 0);
 
-        const formattedMax = valueFormatter
-            ? valueFormatter(domainMax, 0)
-            : formatYValue(domainMax, 0);
+        const formattedMax = valueFormatter ? valueFormatter(domainMax, 0) : formatYValue(domainMax, 0);
 
         const rawKey = matchedDatum && keyField ? resolveValue(matchedDatum, keyField, matchedDataIndex) : undefined;
-        const itemId = deriveRadialDatumId(matchedDatum, undefined, rawKey, matchedDataIndex >= 0 ? matchedDataIndex : 0);
+        const itemId = deriveRadialDatumId(
+            matchedDatum,
+            undefined,
+            rawKey,
+            matchedDataIndex >= 0 ? matchedDataIndex : 0
+        );
         const animationKey = `${seriesId}:gauge:${itemId}`;
 
         return {

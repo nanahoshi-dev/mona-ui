@@ -63,7 +63,20 @@ describe("SVG and Canvas Renderer Switching", () => {
             plotRect: { height: 200, width: 400, x: 20, y: 20 },
             series: [
                 {
-                    bars: [{ datum: {}, height: 50, index: 0, isPositive: true, radius: 0, width: 20, x: 50, xValue: "A", y: 100, yValue: 10 }],
+                    bars: [
+                        {
+                            datum: {},
+                            height: 50,
+                            index: 0,
+                            isPositive: true,
+                            radius: 0,
+                            width: 20,
+                            x: 50,
+                            xValue: "A",
+                            y: 100,
+                            yValue: 10
+                        }
+                    ],
                     borderRadius: 0,
                     fillOpacity: 1,
                     id: "s1",

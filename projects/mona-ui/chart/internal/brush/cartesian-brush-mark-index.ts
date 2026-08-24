@@ -109,7 +109,16 @@ export class CartesianBrushMarkIndex {
             instrumentation?.onCandidateExamined?.();
             const hit = item.hit;
 
-            if (!CartesianHitAxisCompatibility.isCompatible(hit, targetOrMode, targetXAxisId, targetYAxisId, primaryXAxisId, primaryYAxisId)) {
+            if (
+                !CartesianHitAxisCompatibility.isCompatible(
+                    hit,
+                    targetOrMode,
+                    targetXAxisId,
+                    targetYAxisId,
+                    primaryXAxisId,
+                    primaryYAxisId
+                )
+            ) {
                 continue;
             }
 
@@ -130,11 +139,7 @@ export class CartesianBrushMarkIndex {
         return CartesianMarkVisualGeometry.getVisualCenter(hit);
     }
 
-    static #matches(
-        item: IndexedBrushMark,
-        brush: ChartRect,
-        policy: ChartBrushHitPolicy
-    ): boolean {
+    static #matches(item: IndexedBrushMark, brush: ChartRect, policy: ChartBrushHitPolicy): boolean {
         const hit = item.hit;
         const hitBounds = item.bounds;
 

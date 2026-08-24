@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ChartViewportState } from "../../models/chart-viewport.models";
 import {
-    
-    
     areViewportStatesEqual,
     normalizeViewportState,
     toPublicViewportState,
@@ -25,9 +23,7 @@ describe("cartesian-viewport-normalizer", () => {
 
     it("should normalize valid continuous numeric viewport", () => {
         const publicState: ChartViewportState = {
-            axes: [
-                { axis: "x", axisId: "x-num", kind: "continuous", min: 20, max: 80 }
-            ]
+            axes: [{ axis: "x", axisId: "x-num", kind: "continuous", min: 20, max: 80 }]
         };
         const normalized = normalizeViewportState(publicState, mockAxes);
         expect(normalized.x.get("x-num")).toEqual({
@@ -69,9 +65,7 @@ describe("cartesian-viewport-normalizer", () => {
 
     it("should normalize category viewport indices", () => {
         const publicState: ChartViewportState = {
-            axes: [
-                { axis: "x", axisId: "x-cat", kind: "category", startIndex: 1, endIndexExclusive: 4 }
-            ]
+            axes: [{ axis: "x", axisId: "x-cat", kind: "category", startIndex: 1, endIndexExclusive: 4 }]
         };
         const normalized = normalizeViewportState(publicState, mockAxes);
         expect(normalized.x.get("x-cat")).toEqual({
@@ -87,9 +81,7 @@ describe("cartesian-viewport-normalizer", () => {
 
     it("should clamp category viewport and reject invalid indices", () => {
         const publicState: ChartViewportState = {
-            axes: [
-                { axis: "x", axisId: "x-cat", kind: "category", startIndex: -5, endIndexExclusive: 3 }
-            ]
+            axes: [{ axis: "x", axisId: "x-cat", kind: "category", startIndex: -5, endIndexExclusive: 3 }]
         };
         const normalized = normalizeViewportState(publicState, mockAxes, { clampToData: true });
         expect(normalized.x.get("x-cat")).toEqual({
@@ -104,9 +96,7 @@ describe("cartesian-viewport-normalizer", () => {
 
         // Full domain clamping collapses to undefined (omitted)
         const fullSpanState: ChartViewportState = {
-            axes: [
-                { axis: "x", axisId: "x-cat", kind: "category", startIndex: -5, endIndexExclusive: 10 }
-            ]
+            axes: [{ axis: "x", axisId: "x-cat", kind: "category", startIndex: -5, endIndexExclusive: 10 }]
         };
         const fullNormalized = normalizeViewportState(fullSpanState, mockAxes, { clampToData: true });
         expect(fullNormalized.x.get("x-cat")).toBeUndefined();
@@ -114,9 +104,7 @@ describe("cartesian-viewport-normalizer", () => {
 
     it("should reject log sign mismatch / zero crossing", () => {
         const publicState: ChartViewportState = {
-            axes: [
-                { axis: "x", axisId: "x-log", kind: "continuous", min: -10, max: 50 }
-            ]
+            axes: [{ axis: "x", axisId: "x-log", kind: "continuous", min: -10, max: 50 }]
         };
         const warned = new Set<string>();
         const normalized = normalizeViewportState(publicState, mockAxes, { warnedSignatures: warned });
@@ -140,9 +128,7 @@ describe("cartesian-viewport-normalizer", () => {
         expect(areViewportStatesEqual(stateA, stateB)).toBe(true);
 
         const stateC: ChartViewportState = {
-            axes: [
-                { axis: "x", axisId: "x-num", kind: "continuous", min: 10, max: 20.5 }
-            ]
+            axes: [{ axis: "x", axisId: "x-num", kind: "continuous", min: 10, max: 20.5 }]
         };
         expect(areViewportStatesEqual(stateA, stateC)).toBe(false);
     });

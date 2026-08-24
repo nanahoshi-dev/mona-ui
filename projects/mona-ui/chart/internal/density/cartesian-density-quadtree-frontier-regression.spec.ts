@@ -2,7 +2,10 @@ import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type { ChartLineSeriesRegistration, ChartXAxisRegistration } from "../context/chart-registration-context";
 import { CartesianAxisDomainResolver } from "../layout/cartesian-axis-domain-resolver";
-import { CartesianAxisRegistryResolver, type ResolvedCartesianAxisDescriptor } from "../layout/cartesian-axis-registry-resolver";
+import {
+    CartesianAxisRegistryResolver,
+    type ResolvedCartesianAxisDescriptor
+} from "../layout/cartesian-axis-registry-resolver";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import { CartesianScaleFactory, LinearScale } from "../scale/cartesian-scale-factory";
 import { createBubbleRadiusScale } from "../scale/bubble-size-scale";
@@ -145,10 +148,7 @@ describe("Cartesian Density Quadtree Frontier and Temporal Bounds Regressions", 
         }
 
         const hierarchy = new CartesianSpatialDensityIndex(u, v);
-        const result = hierarchy.resolveTopmostPointerCandidate(
-            [0, 0, 1, 1],
-            index => index === 1 || index === 99
-        );
+        const result = hierarchy.resolveTopmostPointerCandidate([0, 0, 1, 1], index => index === 1 || index === 99);
 
         expect(result).toBe(99);
     });

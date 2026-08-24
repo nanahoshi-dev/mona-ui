@@ -22,13 +22,7 @@ function findNearestPolarBucket(
     }
 
     const n = buckets.length;
-    const candidates = [
-        (low - 1 + n) % n,
-        low % n,
-        (low + 1) % n,
-        0,
-        n - 1
-    ];
+    const candidates = [(low - 1 + n) % n, low % n, (low + 1) % n, 0, n - 1];
 
     let bestIndex = 0;
     let bestDelta = Number.POSITIVE_INFINITY;

@@ -49,7 +49,15 @@ function createMockCartesianSceneWithBars(): CartesianXYChartScene {
                 fillOpacity: 1,
                 id: "b1",
                 name: "Bar 1",
-                style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                style: {
+                    areaFillColor: "#3b82f6",
+                    areaFillOpacity: 0.2,
+                    color: "#3b82f6",
+                    fillOpacity: 1,
+                    lineWidth: 2,
+                    opacity: 1,
+                    pointRadius: 4
+                },
                 type: "bar",
                 xAxisId: "default-x",
                 yAxisId: "default-y"
@@ -159,7 +167,15 @@ describe("ChartTransitionPlanner", () => {
                 { animationKey: "line1:p1", datum: {}, defined: true, index: 1, x: 20, xValue: 1, y: 60, yValue: 60 }
             ],
             showPoints: true,
-            style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+            style: {
+                areaFillColor: "",
+                areaFillOpacity: 0,
+                color: "#3b82f6",
+                fillOpacity: 1,
+                lineWidth: 2,
+                opacity: 1,
+                pointRadius: 4
+            },
             type: "line",
             xAxisId: "default-x",
             yAxisId: "default-y"
@@ -251,50 +267,59 @@ describe("ChartTransitionPlanner", () => {
     });
 
     it("should crossfade when Rose angular topology changes (PRE-TM-009)", () => {
-        const createRoseScene = (cats: string[], rotation = 0) => ({
-            angularAxis: {
-                axisLine: true,
-                gridLines: true,
-                labelOffset: 8,
-                labels: true,
-                mode: "category",
-                rotation,
-                ticks: [],
-                visible: true
-            },
-            arcMode: "rose",
-            center: { x: 200, y: 200 },
-            coordinateSystem: "polar",
-            hasRenderableData: true,
-            height: 400,
-            hitTargets: [],
-            interactionBuckets: [],
-            legendItems: [],
-            outerRadius: 150,
-            plotRect: { height: 400, width: 400, x: 0, y: 0 },
-            polarKind: "arc",
-            series: [
-                {
-                    angularCategories: cats.map((c, i) => ({
-                        category: c,
-                        categoryKey: `k:${c}`,
-                        endAngle: (i + 1) * 0.5,
-                        formattedCategory: c,
-                        index: i,
-                        midAngle: (i + 0.5) * 0.5,
-                        startAngle: i * 0.5
-                    })),
-                    fillMode: "solid",
-                    id: "rose-1",
-                    marks: [],
-                    name: "Rose",
-                    scaleMode: "radius",
-                    style: { color: "#3b82f6", fillOpacity: 0.8, strokeColor: "", strokeSource: "default", strokeWidth: 0, trackColor: "", trackOpacity: 1 },
-                    type: "rose"
-                }
-            ],
-            width: 400
-        }) as unknown as PolarArcChartScene;
+        const createRoseScene = (cats: string[], rotation = 0) =>
+            ({
+                angularAxis: {
+                    axisLine: true,
+                    gridLines: true,
+                    labelOffset: 8,
+                    labels: true,
+                    mode: "category",
+                    rotation,
+                    ticks: [],
+                    visible: true
+                },
+                arcMode: "rose",
+                center: { x: 200, y: 200 },
+                coordinateSystem: "polar",
+                hasRenderableData: true,
+                height: 400,
+                hitTargets: [],
+                interactionBuckets: [],
+                legendItems: [],
+                outerRadius: 150,
+                plotRect: { height: 400, width: 400, x: 0, y: 0 },
+                polarKind: "arc",
+                series: [
+                    {
+                        angularCategories: cats.map((c, i) => ({
+                            category: c,
+                            categoryKey: `k:${c}`,
+                            endAngle: (i + 1) * 0.5,
+                            formattedCategory: c,
+                            index: i,
+                            midAngle: (i + 0.5) * 0.5,
+                            startAngle: i * 0.5
+                        })),
+                        fillMode: "solid",
+                        id: "rose-1",
+                        marks: [],
+                        name: "Rose",
+                        scaleMode: "radius",
+                        style: {
+                            color: "#3b82f6",
+                            fillOpacity: 0.8,
+                            strokeColor: "",
+                            strokeSource: "default",
+                            strokeWidth: 0,
+                            trackColor: "",
+                            trackOpacity: 1
+                        },
+                        type: "rose"
+                    }
+                ],
+                width: 400
+            }) as unknown as PolarArcChartScene;
 
         const prev = createRoseScene(["N", "E", "S", "W"], 0);
         const nextDiffCats = createRoseScene(["N", "E", "S", "W", "NW"], 0);
@@ -362,7 +387,15 @@ describe("ChartTransitionPlanner", () => {
                         id: "b1",
                         name: "Bar 1",
                         orientation: "horizontal",
-                        style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                        style: {
+                            areaFillColor: "#3b82f6",
+                            areaFillOpacity: 0.2,
+                            color: "#3b82f6",
+                            fillOpacity: 1,
+                            lineWidth: 2,
+                            opacity: 1,
+                            pointRadius: 4
+                        },
                         type: "bar",
                         xAxisId: "default-x",
                         yAxisId: "default-y"
@@ -437,7 +470,15 @@ describe("ChartTransitionPlanner", () => {
                         id: "b1",
                         name: "Bar 1",
                         orientation: "horizontal",
-                        style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                        style: {
+                            areaFillColor: "#3b82f6",
+                            areaFillOpacity: 0.2,
+                            color: "#3b82f6",
+                            fillOpacity: 1,
+                            lineWidth: 2,
+                            opacity: 1,
+                            pointRadius: 4
+                        },
                         type: "bar",
                         xAxisId: "default-x",
                         yAxisId: "default-y"
@@ -475,9 +516,28 @@ describe("ChartTransitionPlanner", () => {
                         curve: "linear",
                         id: "l1",
                         name: "Line 1",
-                        points: [{ animationKey: "p0", datum: {}, defined: true, index: 0, x: 10, xValue: 0, y: 50, yValue: 50 }],
+                        points: [
+                            {
+                                animationKey: "p0",
+                                datum: {},
+                                defined: true,
+                                index: 0,
+                                x: 10,
+                                xValue: 0,
+                                y: 50,
+                                yValue: 50
+                            }
+                        ],
                         showPoints: true,
-                        style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                        style: {
+                            areaFillColor: "",
+                            areaFillOpacity: 0,
+                            color: "#3b82f6",
+                            fillOpacity: 1,
+                            lineWidth: 2,
+                            opacity: 1,
+                            pointRadius: 4
+                        },
                         type: "line",
                         xAxisId: "default-x",
                         yAxisId: "default-y"
@@ -505,9 +565,28 @@ describe("ChartTransitionPlanner", () => {
                         curve: "linear",
                         id: "l1",
                         name: "Line 1",
-                        points: [{ animationKey: "p0", datum: {}, defined: true, index: 0, x: 50, xValue: 50, y: 10, yValue: 0 }],
+                        points: [
+                            {
+                                animationKey: "p0",
+                                datum: {},
+                                defined: true,
+                                index: 0,
+                                x: 50,
+                                xValue: 50,
+                                y: 10,
+                                yValue: 0
+                            }
+                        ],
                         showPoints: true,
-                        style: { areaFillColor: "", areaFillOpacity: 0, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                        style: {
+                            areaFillColor: "",
+                            areaFillOpacity: 0,
+                            color: "#3b82f6",
+                            fillOpacity: 1,
+                            lineWidth: 2,
+                            opacity: 1,
+                            pointRadius: 4
+                        },
                         type: "line",
                         xAxisId: "default-x",
                         yAxisId: "default-y"

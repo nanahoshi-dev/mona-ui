@@ -94,9 +94,7 @@ describe("Chart Synchronization Target Resolution Regressions", () => {
                 xValue: 50
             };
 
-            const bucketsByAxis = new Map([
-                ["default-x", new Map([[50, bucket50]])]
-            ]);
+            const bucketsByAxis = new Map([["default-x", new Map([[50, bucket50]])]]);
 
             const scene: Partial<CartesianXYChartScene> = {
                 interactionAxis: "x",

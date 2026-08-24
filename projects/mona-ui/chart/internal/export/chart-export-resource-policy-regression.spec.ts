@@ -198,9 +198,9 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
             img.src = svgDataUrl;
             container.appendChild(img);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
 
         it("rejects SVG <image> elements that reference SVG data URLs", async () => {
@@ -212,9 +212,9 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
             svg.appendChild(image);
             container.appendChild(svg);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
     });
 
@@ -228,9 +228,9 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
             style.textContent = ".x { background-image: url(https://cdn.example/bg.png); }";
             container.appendChild(style);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
 
         it("rejects frozen templates containing external stylesheet links", async () => {
@@ -240,9 +240,9 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
             link.href = "https://cdn.example/theme.css";
             container.appendChild(link);
 
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([container])
-            ).rejects.toThrowError(ChartExportError);
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([container])).rejects.toThrowError(
+                ChartExportError
+            );
         });
     });
 
@@ -371,15 +371,13 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
     // -------------------------------------------------------------------------
     describe("Full-raster PDF page-fit density", () => {
         it("raster PDF upscales the internal bitmap when an A4 page enlarges a small chart", async () => {
-            const exportPngSpy = vi
-                .spyOn(ChartPngExporter, "exportPng")
-                .mockResolvedValue({
-                    blob: new Blob(["fake"], { type: "image/png" }),
-                    format: "png",
-                    height: 200,
-                    mimeType: "image/png",
-                    width: 300
-                });
+            const exportPngSpy = vi.spyOn(ChartPngExporter, "exportPng").mockResolvedValue({
+                blob: new Blob(["fake"], { type: "image/png" }),
+                format: "png",
+                height: 200,
+                mimeType: "image/png",
+                width: 300
+            });
 
             try {
                 const request = normalizeChartExportOptions(
@@ -440,28 +438,23 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
             return el;
         }
 
-        function overrideComputedStyle(
-            target: Element,
-            overrides: Record<string, string>
-        ) {
+        function overrideComputedStyle(target: Element, overrides: Record<string, string>) {
             const original = window.getComputedStyle.bind(window);
-            return vi.spyOn(window, "getComputedStyle").mockImplementation(
-                (elt: Element, pseudo?: string | null) => {
-                    const declaration = original(elt, pseudo ?? undefined);
-                    if (!pseudo && elt === target) {
-                        return new Proxy(declaration, {
-                            get(t, prop) {
-                                if (prop in overrides) {
-                                    return overrides[prop as string];
-                                }
-                                const value = Reflect.get(t as object, prop, t);
-                                return typeof value === "function" ? value.bind(t) : value;
+            return vi.spyOn(window, "getComputedStyle").mockImplementation((elt: Element, pseudo?: string | null) => {
+                const declaration = original(elt, pseudo ?? undefined);
+                if (!pseudo && elt === target) {
+                    return new Proxy(declaration, {
+                        get(t, prop) {
+                            if (prop in overrides) {
+                                return overrides[prop as string];
                             }
-                        });
-                    }
-                    return declaration;
+                            const value = Reflect.get(t as object, prop, t);
+                            return typeof value === "function" ? value.bind(t) : value;
+                        }
+                    });
                 }
-            );
+                return declaration;
+            });
         }
 
         it("accepts plain text templates without unsupported visual features", () => {
@@ -472,14 +465,14 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
         it("rejects visible ::before content", () => {
             const el = createTemplateElement();
             const original = window.getComputedStyle.bind(window);
-            const spy = vi.spyOn(window, "getComputedStyle").mockImplementation(
-                (elt: Element, pseudo?: string | null) => {
+            const spy = vi
+                .spyOn(window, "getComputedStyle")
+                .mockImplementation((elt: Element, pseudo?: string | null) => {
                     if (elt === el && (pseudo === "::before" || pseudo === ":before")) {
                         return { content: '"★"', backgroundImage: "none" } as unknown as CSSStyleDeclaration;
                     }
                     return original(elt, pseudo ?? undefined);
-                }
-            );
+                });
             try {
                 expect(() => ChartExportTemplateCapabilityAnalyzer.assertSupported(el)).toThrowError(/::before/);
             } finally {
@@ -541,7 +534,9 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
         it("emits canonical sRGB output for accepted color forms", () => {
             expect(ChartExportColorNormalizer.normalizeColor("#ff0000")).toMatch(/^rgb\((\d+), (\d+), (\d+)\)$/);
             expect(ChartExportColorNormalizer.normalizeColor("red")).toMatch(/^rgb\((\d+), (\d+), (\d+)\)$/);
-            expect(ChartExportColorNormalizer.normalizeColor("hsl(120, 100%, 50%)")).toMatch(/^rgb\((\d+), (\d+), (\d+)\)$/);
+            expect(ChartExportColorNormalizer.normalizeColor("hsl(120, 100%, 50%)")).toMatch(
+                /^rgb\((\d+), (\d+), (\d+)\)$/
+            );
         });
 
         it("rejects contextual or non-standalone color expressions", () => {

@@ -57,7 +57,20 @@ describe("SVG Style Parity", () => {
             series: [
                 {
                     cells: [
-                        { color: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: 10, valueText: "10", width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }
+                        {
+                            color: "#ff0000",
+                            dataIndex: 0,
+                            datum: {},
+                            height: 50,
+                            opacity: 1,
+                            rawValue: 10,
+                            valueText: "10",
+                            width: 50,
+                            x: 20,
+                            xIndex: 0,
+                            y: 20,
+                            yIndex: 0
+                        }
                     ],
                     id: "heat-1",
                     labels: [],
@@ -89,7 +102,11 @@ describe("SVG Style Parity", () => {
                 "--color-ring": "#ff0000"
             });
 
-            backend.render({ presentation: { cartesianOverlay: null, interaction: keyboardInteraction }, scene: heatmapScene, styleResolver });
+            backend.render({
+                presentation: { cartesianOverlay: null, interaction: keyboardInteraction },
+                scene: heatmapScene,
+                styleResolver
+            });
             const rect = svg.querySelector("g[data-heatmap-layer='highlight'] rect");
             expect(rect?.getAttribute("stroke")).toBe("#ff0000");
         });
@@ -102,7 +119,11 @@ describe("SVG Style Parity", () => {
                 "--color-primary": "#0000ff"
             });
 
-            backend.render({ presentation: { cartesianOverlay: null, interaction: keyboardInteraction }, scene: heatmapScene, styleResolver });
+            backend.render({
+                presentation: { cartesianOverlay: null, interaction: keyboardInteraction },
+                scene: heatmapScene,
+                styleResolver
+            });
             const rect = svg.querySelector("g[data-heatmap-layer='highlight'] rect");
             expect(rect?.getAttribute("stroke")).toBe("#00ff00");
         });
@@ -114,7 +135,11 @@ describe("SVG Style Parity", () => {
                 "--color-primary": "#0000ff"
             });
 
-            backend.render({ presentation: { cartesianOverlay: null, interaction: keyboardInteraction }, scene: heatmapScene, styleResolver });
+            backend.render({
+                presentation: { cartesianOverlay: null, interaction: keyboardInteraction },
+                scene: heatmapScene,
+                styleResolver
+            });
             const rect = svg.querySelector("g[data-heatmap-layer='highlight'] rect");
             expect(rect?.getAttribute("stroke")).toBe("#0000ff");
         });
@@ -124,7 +149,11 @@ describe("SVG Style Parity", () => {
             const backend = new SvgChartRenderBackend(svg, 1);
             const styleResolver = createMockStyleResolver();
 
-            backend.render({ presentation: { cartesianOverlay: null, interaction: keyboardInteraction }, scene: heatmapScene, styleResolver });
+            backend.render({
+                presentation: { cartesianOverlay: null, interaction: keyboardInteraction },
+                scene: heatmapScene,
+                styleResolver
+            });
             const rect = svg.querySelector("g[data-heatmap-layer='highlight'] rect");
             expect(rect?.getAttribute("stroke")).toBe("#3b82f6");
         });
@@ -150,7 +179,20 @@ describe("SVG Style Parity", () => {
                 series: [
                     {
                         cells: [
-                            { color: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: 10, valueText: "10", width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }
+                            {
+                                color: "#ff0000",
+                                dataIndex: 0,
+                                datum: {},
+                                height: 50,
+                                opacity: 1,
+                                rawValue: 10,
+                                valueText: "10",
+                                width: 50,
+                                x: 20,
+                                xIndex: 0,
+                                y: 20,
+                                yIndex: 0
+                            }
                         ],
                         id: "heat-1",
                         labels: [],

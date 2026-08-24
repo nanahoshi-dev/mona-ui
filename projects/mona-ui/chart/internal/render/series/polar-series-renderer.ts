@@ -11,8 +11,18 @@ export class PolarSeriesRenderer {
         center: { x: number; y: number },
         styleResolver: ChartStyleResolver
     ): void {
-        const { color, connectNulls, curve, fillMode, fillOpacity, maxRenderedRadius, pointRadius, points, showPoints, strokeWidth } =
-            series;
+        const {
+            color,
+            connectNulls,
+            curve,
+            fillMode,
+            fillOpacity,
+            maxRenderedRadius,
+            pointRadius,
+            points,
+            showPoints,
+            strokeWidth
+        } = series;
 
         const definedPoints = points.filter(p => p.defined);
         if (definedPoints.length === 0) {

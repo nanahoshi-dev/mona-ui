@@ -214,7 +214,12 @@ export class RadialBarSeriesComponent implements OnInit {
 
             // Prune hidden item IDs and maintain canonical identity map
             const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
-            const identities = extractRetainedRadialBarIdentities(raw, this.categoryField(), this.field(), this.keyField());
+            const identities = extractRetainedRadialBarIdentities(
+                raw,
+                this.categoryField(),
+                this.field(),
+                this.keyField()
+            );
             const retainedIdSet = new Set(identities.map(id => id.itemId));
 
             this.#identityMap.clear();

@@ -1,7 +1,4 @@
-import {
-    ChartExportSvgMetadataStripper,
-    ChartExportSvgValidator
-} from "./chart-export-svg-validator";
+import { ChartExportSvgMetadataStripper, ChartExportSvgValidator } from "./chart-export-svg-validator";
 
 export class ChartExportSvgSanitizer {
     public static sanitize(svgElement: SVGSVGElement): void {

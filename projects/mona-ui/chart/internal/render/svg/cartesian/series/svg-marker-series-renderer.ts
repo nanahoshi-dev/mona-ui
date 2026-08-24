@@ -1,7 +1,4 @@
-import type {
-    ChartBubbleSeriesScene,
-    ChartScatterSeriesScene
-} from "../../../../scene/cartesian-scene";
+import type { ChartBubbleSeriesScene, ChartScatterSeriesScene } from "../../../../scene/cartesian-scene";
 import type { SceneMarker } from "../../../../scene/scene-geometry";
 import { setSvgAttribute } from "../../svg-attribute-utils";
 import { SvgKeyedGroup } from "../../svg-keyed-group";

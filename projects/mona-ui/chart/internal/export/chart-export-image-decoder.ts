@@ -38,15 +38,17 @@ function resolveEnvironment(overrides?: RasterDecodeEnvironment): ResolvedDecode
         overrides && "createImageBitmap" in overrides
             ? overrides.createImageBitmap
             : typeof createImageBitmap === "function"
-                ? createImageBitmap
-                : undefined;
+              ? createImageBitmap
+              : undefined;
 
-    const globalCreateObjectURL = typeof URL !== "undefined" && typeof URL.createObjectURL === "function"
-        ? URL.createObjectURL.bind(URL)
-        : undefined;
-    const globalRevokeObjectURL = typeof URL !== "undefined" && typeof URL.revokeObjectURL === "function"
-        ? URL.revokeObjectURL.bind(URL)
-        : undefined;
+    const globalCreateObjectURL =
+        typeof URL !== "undefined" && typeof URL.createObjectURL === "function"
+            ? URL.createObjectURL.bind(URL)
+            : undefined;
+    const globalRevokeObjectURL =
+        typeof URL !== "undefined" && typeof URL.revokeObjectURL === "function"
+            ? URL.revokeObjectURL.bind(URL)
+            : undefined;
 
     // The object-URL image strategy decodes through load/error events, so it only
     // requires an Image constructor plus object URL support (R7-03). Environments
@@ -59,7 +61,11 @@ function resolveEnvironment(overrides?: RasterDecodeEnvironment): ResolvedDecode
     // semantics as the createImageBitmap override) so tests can pin environments
     // without relying on platform globals.
     const createHtmlImage =
-        overrides && "createHtmlImage" in overrides ? overrides.createHtmlImage : hasImageConstructor ? () => new Image() : undefined;
+        overrides && "createHtmlImage" in overrides
+            ? overrides.createHtmlImage
+            : hasImageConstructor
+              ? () => new Image()
+              : undefined;
     const createObjectURL = overrides?.createObjectURL ?? globalCreateObjectURL;
     const revokeObjectURL = overrides?.revokeObjectURL ?? globalRevokeObjectURL;
 
@@ -216,8 +222,8 @@ function parseWebpDimensions(bytes: Uint8Array): DecodedImageDimensions | null {
         const b1 = bytes[22];
         const b2 = bytes[23];
         const b3 = bytes[24];
-        const width = 1 + (((b1 & 0x3f) << 8 | b0) & 0x3fff);
-        const height = 1 + (((b3 << 10 | b2 << 2 | b1 >> 6)) & 0x3fff);
+        const width = 1 + ((((b1 & 0x3f) << 8) | b0) & 0x3fff);
+        const height = 1 + (((b3 << 10) | (b2 << 2) | (b1 >> 6)) & 0x3fff);
         return width > 0 && height > 0 ? { height, width } : null;
     }
 
@@ -226,8 +232,8 @@ function parseWebpDimensions(bytes: Uint8Array): DecodedImageDimensions | null {
         if (bytes.length < 30) {
             return null;
         }
-        const width = 1 + (bytes[24] | bytes[25] << 8 | bytes[26] << 16);
-        const height = 1 + (bytes[27] | bytes[28] << 8 | bytes[29] << 16);
+        const width = 1 + (bytes[24] | (bytes[25] << 8) | (bytes[26] << 16));
+        const height = 1 + (bytes[27] | (bytes[28] << 8) | (bytes[29] << 16));
         return width > 0 && height > 0 ? { height, width } : null;
     }
 
@@ -389,9 +395,13 @@ function decodeWithHtmlImage(
             };
             img.onerror = e => {
                 finishErr(
-                    new ChartExportError("resource-load-failed", "Template image resource failed image element decoding.", {
-                        cause: e
-                    })
+                    new ChartExportError(
+                        "resource-load-failed",
+                        "Template image resource failed image element decoding.",
+                        {
+                            cause: e
+                        }
+                    )
                 );
             };
             img.src = objectUrl;
@@ -471,9 +481,13 @@ export async function validateRasterImageDecode(
             if (err instanceof ChartExportError) {
                 throw err;
             }
-            throw new ChartExportError("resource-load-failed", "Template image resource failed image bitmap decoding.", {
-                cause: err
-            });
+            throw new ChartExportError(
+                "resource-load-failed",
+                "Template image resource failed image bitmap decoding.",
+                {
+                    cause: err
+                }
+            );
         }
     } else if (env.htmlImageDecode) {
         try {
@@ -485,9 +499,13 @@ export async function validateRasterImageDecode(
             if (err instanceof ChartExportError) {
                 throw err;
             }
-            throw new ChartExportError("resource-load-failed", "Template image resource failed image element decoding.", {
-                cause: err
-            });
+            throw new ChartExportError(
+                "resource-load-failed",
+                "Template image resource failed image element decoding.",
+                {
+                    cause: err
+                }
+            );
         }
     } else {
         throw new ChartExportError(

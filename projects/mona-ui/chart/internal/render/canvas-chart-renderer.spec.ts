@@ -363,7 +363,20 @@ describe("CanvasChartRenderer", () => {
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             series: [
                 {
-                    bars: [{ datum: {}, height: 100, index: 0, isPositive: true, radius: 4, width: 30, x: 100, xValue: "Jan", y: 150, yValue: 50 }],
+                    bars: [
+                        {
+                            datum: {},
+                            height: 100,
+                            index: 0,
+                            isPositive: true,
+                            radius: 4,
+                            width: 30,
+                            x: 100,
+                            xValue: "Jan",
+                            y: 150,
+                            yValue: 50
+                        }
+                    ],
                     borderRadius: 4,
                     fillOpacity: 1,
                     id: "bar-1",

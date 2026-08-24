@@ -247,10 +247,7 @@ export class ChartSelectionController {
         return result;
     }
 
-    public static normalizeForMode(
-        ids: readonly string[] | undefined,
-        mode: ChartSelectionMode
-    ): readonly string[] {
+    public static normalizeForMode(ids: readonly string[] | undefined, mode: ChartSelectionMode): readonly string[] {
         const normalized = ChartSelectionController.normalize(ids);
         if (mode === "single" && normalized.length > 1) {
             return [normalized[0]];

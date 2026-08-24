@@ -114,7 +114,10 @@ export class FunnelDataProcessor {
                 const hasTextClass =
                     typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
                 if (seriesElement.style?.color) {
-                    seriesExplicitHostColor = styleResolver.resolveCssVariable(seriesElement.style.color, seriesElement);
+                    seriesExplicitHostColor = styleResolver.resolveCssVariable(
+                        seriesElement.style.color,
+                        seriesElement
+                    );
                 } else if (hasTextClass) {
                     const computed = window.getComputedStyle(seriesElement);
                     if (computed.color && computed.color !== "rgba(0, 0, 0, 0)" && computed.color !== "transparent") {
@@ -242,8 +245,7 @@ export class FunnelDataProcessor {
             const previousValue = vIdx > 0 ? visibleStagesRaw[vIdx - 1].value : undefined;
             const conversionRate =
                 previousValue !== undefined && previousValue > 0 ? rawStage.value / previousValue : undefined;
-            const overallConversionRate =
-                firstVisibleValue > 0 ? rawStage.value / firstVisibleValue : undefined;
+            const overallConversionRate = firstVisibleValue > 0 ? rawStage.value / firstVisibleValue : undefined;
             const dropOff = previousValue !== undefined ? previousValue - rawStage.value : undefined;
 
             const formattedConversionRate =

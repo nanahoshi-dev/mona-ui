@@ -72,12 +72,16 @@ describe("SVG Render Backend Regressions", () => {
     describe("Backend Factory Mode Explicitness", () => {
         it("throws when mode is 'svg' and svg element is null, even if canvas is provided", () => {
             const canvas = document.createElement("canvas");
-            expect(() => createChartRenderBackend("svg", canvas, null)).toThrow(/required DOM element not found|svg element not found/);
+            expect(() => createChartRenderBackend("svg", canvas, null)).toThrow(
+                /required DOM element not found|svg element not found/
+            );
         });
 
         it("throws when mode is 'canvas' and canvas element is null", () => {
             const svg = createSvgElement("svg");
-            expect(() => createChartRenderBackend("canvas", null, svg)).toThrow(/required DOM element not found|canvas element not found/);
+            expect(() => createChartRenderBackend("canvas", null, svg)).toThrow(
+                /required DOM element not found|canvas element not found/
+            );
         });
     });
 
@@ -248,7 +252,22 @@ describe("SVG Render Backend Regressions", () => {
                         innerRadius: 0,
                         name: "Sector 1",
                         outerRadius: 100,
-                        slices: [{ color: "red", cornerRadius: 0, dataIndex: 0, endAngle: Math.PI, innerRadius: 0, outerRadius: 100, padAngle: 0, percentage: 50, sliceId: "sl1", startAngle: 0, value: 50, visible: true }],
+                        slices: [
+                            {
+                                color: "red",
+                                cornerRadius: 0,
+                                dataIndex: 0,
+                                endAngle: Math.PI,
+                                innerRadius: 0,
+                                outerRadius: 100,
+                                padAngle: 0,
+                                percentage: 50,
+                                sliceId: "sl1",
+                                startAngle: 0,
+                                value: 50,
+                                visible: true
+                            }
+                        ],
                         style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
                         type: "pie",
                         visible: true
@@ -275,7 +294,22 @@ describe("SVG Render Backend Regressions", () => {
                         innerRadius: 0,
                         name: "Sector 2",
                         outerRadius: 100,
-                        slices: [{ color: "blue", cornerRadius: 0, dataIndex: 0, endAngle: Math.PI * 2, innerRadius: 0, outerRadius: 100, padAngle: 0, percentage: 100, sliceId: "sl2", startAngle: 0, value: 100, visible: true }],
+                        slices: [
+                            {
+                                color: "blue",
+                                cornerRadius: 0,
+                                dataIndex: 0,
+                                endAngle: Math.PI * 2,
+                                innerRadius: 0,
+                                outerRadius: 100,
+                                padAngle: 0,
+                                percentage: 100,
+                                sliceId: "sl2",
+                                startAngle: 0,
+                                value: 100,
+                                visible: true
+                            }
+                        ],
                         style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
                         type: "pie",
                         visible: true
@@ -326,7 +360,14 @@ describe("SVG Render Backend Regressions", () => {
                 outerRadius: 150,
                 plotRect: { height: 400, width: 600, x: 0, y: 0 },
                 polarKind: "axis" as const,
-                radialAxis: { axisLine: true, gridLines: true, gridShape: "circle", labelAngle: 0, ticks: [], visible: true },
+                radialAxis: {
+                    axisLine: true,
+                    gridLines: true,
+                    gridShape: "circle",
+                    labelAngle: 0,
+                    ticks: [],
+                    visible: true
+                },
                 series: [
                     {
                         color: "#3b82f6",
@@ -389,7 +430,14 @@ describe("SVG Render Backend Regressions", () => {
                 outerRadius: 150,
                 plotRect: { height: 400, width: 600, x: 0, y: 0 },
                 polarKind: "axis" as const,
-                radialAxis: { axisLine: true, gridLines: true, gridShape: "circle", labelAngle: 0, ticks: [], visible: true },
+                radialAxis: {
+                    axisLine: true,
+                    gridLines: true,
+                    gridShape: "circle",
+                    labelAngle: 0,
+                    ticks: [],
+                    visible: true
+                },
                 series: [
                     {
                         color: "#3b82f6",
@@ -401,8 +449,20 @@ describe("SVG Render Backend Regressions", () => {
                         pointRadius: 4,
                         points: [
                             { angle: 0, defined: true, point: { x: 300, y: 100 }, radius: 100, value: 100 },
-                            { angle: (Math.PI * 2) / 3, defined: true, point: { x: 386, y: 250 }, radius: 100, value: 100 },
-                            { angle: (Math.PI * 4) / 3, defined: true, point: { x: 214, y: 250 }, radius: 100, value: 100 }
+                            {
+                                angle: (Math.PI * 2) / 3,
+                                defined: true,
+                                point: { x: 386, y: 250 },
+                                radius: 100,
+                                value: 100
+                            },
+                            {
+                                angle: (Math.PI * 4) / 3,
+                                defined: true,
+                                point: { x: 214, y: 250 },
+                                radius: 100,
+                                value: 100
+                            }
                         ],
                         seriesType: "radar",
                         showPoints: false,
@@ -635,8 +695,54 @@ describe("SVG Render Backend Regressions", () => {
                         cellBorderRadius: 0,
                         cellBorderWidth: 0,
                         cells: [
-                            { animationKey: "c0", backgroundColor: "red", borderRadius: 0, borderWidth: 0, categoryX: "A", categoryY: "1", datum: {}, formattedValue: "10", formattedX: "A", formattedY: "1", hasValue: true, height: 50, numericValue: 10, opacity: 1, rawValue: 10, showLabel: false, value: 10, width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 },
-                            { animationKey: "c1", backgroundColor: "blue", borderRadius: 0, borderWidth: 0, categoryX: "B", categoryY: "1", datum: {}, formattedValue: "20", formattedX: "B", formattedY: "1", hasValue: true, height: 50, numericValue: 20, opacity: 1, rawValue: 20, showLabel: false, value: 20, width: 50, x: 70, xIndex: 1, y: 20, yIndex: 0 }
+                            {
+                                animationKey: "c0",
+                                backgroundColor: "red",
+                                borderRadius: 0,
+                                borderWidth: 0,
+                                categoryX: "A",
+                                categoryY: "1",
+                                datum: {},
+                                formattedValue: "10",
+                                formattedX: "A",
+                                formattedY: "1",
+                                hasValue: true,
+                                height: 50,
+                                numericValue: 10,
+                                opacity: 1,
+                                rawValue: 10,
+                                showLabel: false,
+                                value: 10,
+                                width: 50,
+                                x: 20,
+                                xIndex: 0,
+                                y: 20,
+                                yIndex: 0
+                            },
+                            {
+                                animationKey: "c1",
+                                backgroundColor: "blue",
+                                borderRadius: 0,
+                                borderWidth: 0,
+                                categoryX: "B",
+                                categoryY: "1",
+                                datum: {},
+                                formattedValue: "20",
+                                formattedX: "B",
+                                formattedY: "1",
+                                hasValue: true,
+                                height: 50,
+                                numericValue: 20,
+                                opacity: 1,
+                                rawValue: 20,
+                                showLabel: false,
+                                value: 20,
+                                width: 50,
+                                x: 70,
+                                xIndex: 1,
+                                y: 20,
+                                yIndex: 0
+                            }
                         ],
                         colorScale: {
                             domain: [0, 100] as const,
@@ -796,7 +902,18 @@ describe("SVG Render Backend Regressions", () => {
             const scene = createMockCartesianXYScene({
                 series: [
                     {
-                        bars: [createMockBar({ animationKey: "hb1", height: 20, isPositive: true, orientation: "horizontal", radius: 4, width: 100, x: 20, y: 50 })],
+                        bars: [
+                            createMockBar({
+                                animationKey: "hb1",
+                                height: 20,
+                                isPositive: true,
+                                orientation: "horizontal",
+                                radius: 4,
+                                width: 100,
+                                x: 20,
+                                y: 50
+                            })
+                        ],
                         borderRadius: 4,
                         fillOpacity: 1,
                         id: "hbar",

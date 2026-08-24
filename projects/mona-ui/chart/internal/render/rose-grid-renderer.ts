@@ -14,11 +14,9 @@ export interface RoseGridRendererOptions {
 }
 
 export class RoseGridRenderer {
-    public static renderBackground(
-        context: CanvasRenderingContext2D,
-        options: RoseGridRendererOptions
-    ): void {
-        const { angularAxis, center, endAngleRad, innerRadius, outerRadius, radialAxis, startAngleRad, styleResolver } = options;
+    public static renderBackground(context: CanvasRenderingContext2D, options: RoseGridRendererOptions): void {
+        const { angularAxis, center, endAngleRad, innerRadius, outerRadius, radialAxis, startAngleRad, styleResolver } =
+            options;
         if (outerRadius <= 0) {
             return;
         }
@@ -91,11 +89,9 @@ export class RoseGridRenderer {
         context.restore();
     }
 
-    public static renderForeground(
-        context: CanvasRenderingContext2D,
-        options: RoseGridRendererOptions
-    ): void {
-        const { angularAxis, center, endAngleRad, innerRadius, outerRadius, radialAxis, startAngleRad, styleResolver } = options;
+    public static renderForeground(context: CanvasRenderingContext2D, options: RoseGridRendererOptions): void {
+        const { angularAxis, center, endAngleRad, innerRadius, outerRadius, radialAxis, startAngleRad, styleResolver } =
+            options;
         if (outerRadius <= 0) {
             return;
         }

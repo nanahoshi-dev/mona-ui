@@ -1,14 +1,7 @@
-import type {
-    ChartCandlestickSeriesScene,
-    ChartOhlcSeriesScene,
-    ChartSeriesScene
-} from "../../scene/cartesian-scene";
+import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene, ChartSeriesScene } from "../../scene/cartesian-scene";
 import type { SceneCandlestickMark, SceneOhlcMark } from "../../scene/scene-geometry";
 import { lerp, lerpOpacity } from "../animation-math";
-import type {
-    ChartAnimationPlanningContext,
-    ChartSeriesTransitionPlan
-} from "../chart-transition-types";
+import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";
 
 interface FinancialMarkState {
@@ -134,8 +127,7 @@ function sampleCandlestickMark(plan: FinancialMarkPlan, progress: number, wickWi
     const high = lerp(from.high, to.high, progress);
     const low = lerp(from.low, to.low, progress);
     const close = lerp(from.close, to.close, progress);
-    const direction: "falling" | "neutral" | "rising" =
-        close > open ? "rising" : close < open ? "falling" : "neutral";
+    const direction: "falling" | "neutral" | "rising" = close > open ? "rising" : close < open ? "falling" : "neutral";
 
     const bodyTopY = Math.min(openY, closeY);
     const bodyHeight = Math.max(1, Math.abs(closeY - openY));
@@ -191,8 +183,7 @@ function sampleOhlcMark(plan: FinancialMarkPlan, progress: number, wickWidth: nu
     const high = lerp(from.high, to.high, progress);
     const low = lerp(from.low, to.low, progress);
     const close = lerp(from.close, to.close, progress);
-    const direction: "falling" | "neutral" | "rising" =
-        close > open ? "rising" : close < open ? "falling" : "neutral";
+    const direction: "falling" | "neutral" | "rising" = close > open ? "rising" : close < open ? "falling" : "neutral";
 
     const state = progress >= 0.5 ? to : from;
 
@@ -222,20 +213,22 @@ function sampleOhlcMark(plan: FinancialMarkPlan, progress: number, wickWidth: nu
     };
 }
 
-export class FinancialSeriesAnimationAdapter
-    implements ChartSeriesAnimationAdapter<ChartCandlestickSeriesScene | ChartOhlcSeriesScene>
-{
+export class FinancialSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<
+    ChartCandlestickSeriesScene | ChartOhlcSeriesScene
+> {
     public createPlan(
         from: ChartSeriesScene | null,
         to: ChartSeriesScene | null,
         _context: ChartAnimationPlanningContext
     ): ChartSeriesTransitionPlan<ChartCandlestickSeriesScene | ChartOhlcSeriesScene> {
-        const fromFinancial = (from?.type === "candlestick" || from?.type === "ohlc")
-            ? (from as ChartCandlestickSeriesScene | ChartOhlcSeriesScene)
-            : null;
-        const toFinancial = (to?.type === "candlestick" || to?.type === "ohlc")
-            ? (to as ChartCandlestickSeriesScene | ChartOhlcSeriesScene)
-            : null;
+        const fromFinancial =
+            from?.type === "candlestick" || from?.type === "ohlc"
+                ? (from as ChartCandlestickSeriesScene | ChartOhlcSeriesScene)
+                : null;
+        const toFinancial =
+            to?.type === "candlestick" || to?.type === "ohlc"
+                ? (to as ChartCandlestickSeriesScene | ChartOhlcSeriesScene)
+                : null;
 
         const seriesId = toFinancial?.id ?? fromFinancial?.id ?? "unknown";
         const seriesType = toFinancial?.type ?? fromFinancial?.type ?? "candlestick";

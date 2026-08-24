@@ -57,12 +57,16 @@ export class SvgRangeBarSeriesRenderer {
                 }
 
                 const radius = bar.radius ?? borderRadius;
-                const cornerRadii = bar.cornerRadii ?? (radius > 0 ? {
-                    bottomLeft: radius,
-                    bottomRight: radius,
-                    topLeft: radius,
-                    topRight: radius
-                } : { bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 });
+                const cornerRadii =
+                    bar.cornerRadii ??
+                    (radius > 0
+                        ? {
+                              bottomLeft: radius,
+                              bottomRight: radius,
+                              topLeft: radius,
+                              topRight: radius
+                          }
+                        : { bottomLeft: 0, bottomRight: 0, topLeft: 0, topRight: 0 });
 
                 const d = buildRoundedRectPath(bar.x, bar.y, bar.width, bar.height, cornerRadii);
                 setSvgAttribute(element, "d", d);

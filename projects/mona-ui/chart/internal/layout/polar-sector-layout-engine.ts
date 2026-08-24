@@ -1,5 +1,9 @@
 import { pie } from "d3-shape";
-import type { ChartLabelMeasurement, ChartPolarLabelContent, ChartPolarLabelPosition } from "../../models/chart-polar.models";
+import type {
+    ChartLabelMeasurement,
+    ChartPolarLabelContent,
+    ChartPolarLabelPosition
+} from "../../models/chart-polar.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartPadding, ChartPoint, ChartRect } from "../../models/chart.models";
 import type {
@@ -75,8 +79,12 @@ export class PolarSectorLayoutEngine {
 
         const targetSeries = series[0];
         const showLabels = Boolean(targetSeries.showLabels());
-        const labelPosition: ChartPolarLabelPosition = targetSeries.labelPosition ? targetSeries.labelPosition() : "outside";
-        const labelContent: ChartPolarLabelContent = targetSeries.labelContent ? targetSeries.labelContent() : "percentage";
+        const labelPosition: ChartPolarLabelPosition = targetSeries.labelPosition
+            ? targetSeries.labelPosition()
+            : "outside";
+        const labelContent: ChartPolarLabelContent = targetSeries.labelContent
+            ? targetSeries.labelContent()
+            : "percentage";
         const fillMode = targetSeries.fillMode ? targetSeries.fillMode() : "solid";
 
         const dataResult = preparePolarData(targetSeries, rootData, styleResolver);
@@ -197,7 +205,11 @@ export class PolarSectorLayoutEngine {
 
             const pieArcs = pieGen(dataResult.visibleData as PolarDatum[]);
             const labelRadius = innerRadius + (outerRadius - innerRadius) * 0.55;
-            const keyResolver = new ChartMarkKeyResolver(targetSeries.id, targetSeries.keyField?.(), targetSeries.seriesKey?.());
+            const keyResolver = new ChartMarkKeyResolver(
+                targetSeries.id,
+                targetSeries.keyField?.(),
+                targetSeries.seriesKey?.()
+            );
 
             for (const arc of pieArcs) {
                 const d = arc.data;

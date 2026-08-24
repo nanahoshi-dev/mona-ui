@@ -2,11 +2,7 @@ import type { ChartField } from "../../models/chart.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
 import type { ChartRoseScaleMode } from "../../models/chart-radial-arc.models";
 import { resolveData, resolveValue } from "./chart-value-resolver";
-import {
-    deriveRadialDatumId,
-    serializeRadialCategoryKey,
-    serializeRadialExplicitKey
-} from "./radial-datum-identity";
+import { deriveRadialDatumId, serializeRadialCategoryKey, serializeRadialExplicitKey } from "./radial-datum-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatYValue } from "../utils/chart-formatter";
@@ -215,7 +211,10 @@ export class RoseDataProcessor {
             };
         }
 
-        const validEntries = categorySlots.filter((slot): slot is CategorySlot & { validDatum: NonNullable<CategorySlot["validDatum"]> } => slot.validDatum !== undefined);
+        const validEntries = categorySlots.filter(
+            (slot): slot is CategorySlot & { validDatum: NonNullable<CategorySlot["validDatum"]> } =>
+                slot.validDatum !== undefined
+        );
 
         let rawMax = 0;
         for (const entry of validEntries) {

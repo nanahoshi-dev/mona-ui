@@ -1,11 +1,11 @@
 import type { ChartAxisFormatter, ChartXAxisType } from "../../models/chart-axis.models";
 import type { ChartField, ChartRect } from "../../models/chart.models";
-import type {
-    ChartAxisRegistration,
-    ChartFinancialSeriesRegistration
-} from "../context/chart-registration-context";
+import type { ChartAxisRegistration, ChartFinancialSeriesRegistration } from "../context/chart-registration-context";
 import { FinancialDataResolver } from "../data/financial-data-resolver";
-import { createCandlestickFinancialHitGeometry, createOhlcFinancialHitGeometry } from "../interaction/financial-hit-geometry";
+import {
+    createCandlestickFinancialHitGeometry,
+    createOhlcFinancialHitGeometry
+} from "../interaction/financial-hit-geometry";
 import { CartesianFinancialIndex, type FinancialHitEntry } from "../interaction/cartesian-financial-index";
 import type { ChartBandScale, ChartContinuousScale, ChartPositionScale } from "../scale/chart-scale";
 import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene } from "../scene/cartesian-scene";
@@ -45,9 +45,7 @@ export interface CartesianFinancialLayoutContext {
     readonly yScale: ChartContinuousScale;
 }
 
-export function computeFinancialLayout(
-    ctx: CartesianFinancialLayoutContext
-): CartesianFinancialLayoutResult | null {
+export function computeFinancialLayout(ctx: CartesianFinancialLayoutContext): CartesianFinancialLayoutResult | null {
     const {
         bandScale,
         linearXScale,
@@ -75,11 +73,9 @@ export function computeFinancialLayout(
     } = ctx;
 
     let xScale: ChartPositionScale | undefined = customXScale;
-    const effectiveXAxisType: ChartXAxisType = (
-        customXScale?.type ??
+    const effectiveXAxisType: ChartXAxisType = (customXScale?.type ??
         (bandScale ? "category" : linearXScale ? "linear" : timeScale ? "time" : xAxisType) ??
-        "category"
-    ) as ChartXAxisType;
+        "category") as ChartXAxisType;
 
     if (!xScale) {
         if (effectiveXAxisType === "category") {
@@ -125,9 +121,10 @@ export function computeFinancialLayout(
         yScale
     };
 
-    const scene = s.type === "candlestick"
-        ? FinancialLayoutEngine.createCandlestickScene(s, resolvedDataset, layoutContext)
-        : FinancialLayoutEngine.createOhlcScene(s, resolvedDataset, layoutContext);
+    const scene =
+        s.type === "candlestick"
+            ? FinancialLayoutEngine.createCandlestickScene(s, resolvedDataset, layoutContext)
+            : FinancialLayoutEngine.createOhlcScene(s, resolvedDataset, layoutContext);
 
     const xAxisFormatter = xAxis?.formatter?.() as ChartAxisFormatter<unknown> | undefined;
     const financialHitEntries: FinancialHitEntry[] = [];
@@ -135,25 +132,19 @@ export function computeFinancialLayout(
     for (let i = 0; i < scene.marks.length; i++) {
         const mark = scene.marks[i];
         const currentRenderOrder = ++renderOrderCounter.value;
-        const xKey: ChartInteractionXKey = mark.xKey ?? (typeof mark.xValue === "number" || typeof mark.xValue === "string"
-            ? mark.xValue
-            : String(mark.index));
+        const xKey: ChartInteractionXKey =
+            mark.xKey ??
+            (typeof mark.xValue === "number" || typeof mark.xValue === "string" ? mark.xValue : String(mark.index));
 
-        const formattedCategory = formatXValue(
-            mark.xValue,
-            mark.index,
-            xAxisFormatter,
-            xAxisType,
-            timeSpanMs
-        );
+        const formattedCategory = formatXValue(mark.xValue, mark.index, xAxisFormatter, xAxisType, timeSpanMs);
 
-        const markColor = scene.style.color || (
-            mark.direction === "rising"
+        const markColor =
+            scene.style.color ||
+            (mark.direction === "rising"
                 ? scene.style.risingColor
                 : mark.direction === "falling"
-                    ? scene.style.fallingColor
-                    : scene.style.neutralColor
-        );
+                  ? scene.style.fallingColor
+                  : scene.style.neutralColor);
 
         const isCandle = "bodyBounds" in mark;
         const hitGeom = isCandle
@@ -163,21 +154,26 @@ export function computeFinancialLayout(
         const bounds: ChartRect = hitGeom.bounds;
         const visualBounds: ChartRect = hitGeom.visualBounds;
 
-        const change = mark.change ?? (mark.close - mark.open);
-        const changePercentage = mark.changePercentage ?? (mark.open !== 0 ? (mark.close - mark.open) / mark.open : undefined);
+        const change = mark.change ?? mark.close - mark.open;
+        const changePercentage =
+            mark.changePercentage ?? (mark.open !== 0 ? (mark.close - mark.open) / mark.open : undefined);
         let formattedChange: string | undefined;
         if (Number.isFinite(change)) {
             const customFormatter = s.valueFormatter?.() ?? yFormatter;
             if (customFormatter) {
-                const absFmt = (customFormatter as (val: unknown, idx?: number) => string)(Math.abs(change), mark.index);
+                const absFmt = (customFormatter as (val: unknown, idx?: number) => string)(
+                    Math.abs(change),
+                    mark.index
+                );
                 formattedChange = `${change >= 0 ? "+" : "-"}${absFmt}`;
             } else {
                 formattedChange = `${change >= 0 ? "+" : ""}${change.toFixed(2)}`;
             }
         }
-        const formattedChangePercentage = changePercentage !== undefined
-            ? `${changePercentage >= 0 ? "+" : ""}${(changePercentage * 100).toFixed(2)}%`
-            : undefined;
+        const formattedChangePercentage =
+            changePercentage !== undefined
+                ? `${changePercentage >= 0 ? "+" : ""}${(changePercentage * 100).toFixed(2)}%`
+                : undefined;
 
         const target: SceneHitTarget = {
             animationKey: mark.animationKey,
@@ -225,12 +221,12 @@ export function computeFinancialLayout(
             seriesType: s.type,
             valueKind: "ohlc",
             visualBounds,
-            xAxisId: xAxisId ?? (xAxis?.axisId?.() ?? "default-x"),
-            xAxisTitle: xAxisTitle ?? (xAxis?.title?.() ?? ""),
+            xAxisId: xAxisId ?? xAxis?.axisId?.() ?? "default-x",
+            xAxisTitle: xAxisTitle ?? xAxis?.title?.() ?? "",
             xKey,
             xValue: mark.xValue,
-            yAxisId: yAxisId ?? (yAxis?.axisId?.() ?? "default-y"),
-            yAxisTitle: yAxisTitle ?? (yAxis?.title?.() ?? ""),
+            yAxisId: yAxisId ?? yAxis?.axisId?.() ?? "default-y",
+            yAxisTitle: yAxisTitle ?? yAxis?.title?.() ?? "",
             yValue: mark.close
         };
 

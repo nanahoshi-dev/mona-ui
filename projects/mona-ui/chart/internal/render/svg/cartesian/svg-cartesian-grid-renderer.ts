@@ -30,9 +30,7 @@ export class SvgCartesianGridRenderer {
             return;
         }
 
-        const gridColor =
-            styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
-            "rgba(148, 163, 184, 0.2)";
+        const gridColor = styleResolver.resolveCssVariable("--mona-chart-grid-color") || "rgba(148, 163, 184, 0.2)";
 
         const items: GridPathItem[] = [];
 

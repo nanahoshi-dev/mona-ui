@@ -84,13 +84,14 @@ export function resolveCartesianNormalizedBaseMapper(
         readonly exponent?: number;
         readonly logBase?: number;
     };
-    const mapper = createCartesianNormalizedBaseMapper({
-        domain: source.baseDomain,
-        exponent: baseScale.exponent,
-        logBase: baseScale.logBase,
-        symlogConstant: baseScale.constant,
-        type: source.resolvedType
-    }) ?? null;
+    const mapper =
+        createCartesianNormalizedBaseMapper({
+            domain: source.baseDomain,
+            exponent: baseScale.exponent,
+            logBase: baseScale.logBase,
+            symlogConstant: baseScale.constant,
+            type: source.resolvedType
+        }) ?? null;
     fallbackMapperCache.set(source, mapper);
     return mapper ?? undefined;
 }

@@ -149,7 +149,13 @@ export class WaterfallLayoutEngine {
         const yTickSize = yTickMarks ? (yAxis?.tickSize ? (yAxis.tickSize() ?? 6) : 6) : 0;
         const yLabelOutward = yLabelsEnabled ? Math.max(24, maxLabelLength * 8) + yLabelPadding : 0;
         const yGutter = isYAxisVisible
-            ? Math.max(48, Math.min(180, Math.round(yTickSize + yLabelOutward + (yHasTitle ? yTitleExtent + yActualTitlePadding : 0) + 8)))
+            ? Math.max(
+                  48,
+                  Math.min(
+                      180,
+                      Math.round(yTickSize + yLabelOutward + (yHasTitle ? yTitleExtent + yActualTitlePadding : 0) + 8)
+                  )
+              )
             : 8;
 
         const xHasTitle = Boolean(xTitle.trim());
@@ -160,7 +166,13 @@ export class WaterfallLayoutEngine {
         const xTickSize = xTickMarks ? (xAxis?.tickSize ? (xAxis.tickSize() ?? 6) : 6) : 0;
         const xLabelOutward = xLabelsEnabled ? 16 + xLabelPadding : 0;
         const xGutter = isXAxisVisible
-            ? Math.max(32, Math.min(160, Math.round(xTickSize + xLabelOutward + (xHasTitle ? xTitleExtent + xActualTitlePadding : 0) + 8)))
+            ? Math.max(
+                  32,
+                  Math.min(
+                      160,
+                      Math.round(xTickSize + xLabelOutward + (xHasTitle ? xTitleExtent + xActualTitlePadding : 0) + 8)
+                  )
+              )
             : 8;
 
         const padding: ChartPadding = {
@@ -271,12 +283,7 @@ export class WaterfallLayoutEngine {
             };
 
             const displayValue = pt.category ?? pt.formattedCategory;
-            const formattedCategory = formatXValue(
-                displayValue,
-                pt.dataIndex,
-                xAxis?.formatter(),
-                "category"
-            );
+            const formattedCategory = formatXValue(displayValue, pt.dataIndex, xAxis?.formatter(), "category");
 
             const sceneBar: SceneWaterfallBar = {
                 animationKey: pt.animationKey,
@@ -397,9 +404,7 @@ export class WaterfallLayoutEngine {
 
             // Label Candidate
             if (showLabels && barBounds.width >= minLabelWidth) {
-                const labelText = pt.kind === "change"
-                    ? (pt.formattedDelta ?? pt.formattedValue)
-                    : pt.formattedValue;
+                const labelText = pt.kind === "change" ? (pt.formattedDelta ?? pt.formattedValue) : pt.formattedValue;
 
                 let labelY: number;
                 let isInside = false;
@@ -435,7 +440,7 @@ export class WaterfallLayoutEngine {
                     style.labelColor ??
                     (isInside
                         ? styleResolver.getReadableForeground(pt.color)
-                        : (styleResolver.resolveCssVariable("--color-foreground") || "#1e293b"));
+                        : styleResolver.resolveCssVariable("--color-foreground") || "#1e293b");
 
                 // Clamp label bounds to plotRect
                 labelY = Math.max(plotRect.y, Math.min(plotRect.y + plotRect.height - 16, labelY));

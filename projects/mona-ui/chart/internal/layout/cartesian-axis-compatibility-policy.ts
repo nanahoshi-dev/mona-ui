@@ -161,13 +161,21 @@ export class CartesianAxisCompatibilityPolicy {
         const isCategoryDim = orientation === "horizontal" ? axis.dimension === "y" : axis.dimension === "x";
 
         for (const s of boundSeries) {
-            const data = resolveData("data" in s && typeof (s as SeriesWithOptionalFieldAccessors).data === "function" ? (s as SeriesWithOptionalFieldAccessors).data!() : undefined, rootData);
+            const data = resolveData(
+                "data" in s && typeof (s as SeriesWithOptionalFieldAccessors).data === "function"
+                    ? (s as SeriesWithOptionalFieldAccessors).data!()
+                    : undefined,
+                rootData
+            );
             for (let i = 0; i < data.length && samples.length < maxSamples; i++) {
                 const item = data[i];
                 if (isCategoryDim) {
-                    const field = ("xField" in s && typeof s.xField === "function" && s.xField() !== undefined)
-                        ? s.xField()
-                        : (orientation === "vertical" && axis.field !== undefined ? axis.field : rootXField);
+                    const field =
+                        "xField" in s && typeof s.xField === "function" && s.xField() !== undefined
+                            ? s.xField()
+                            : orientation === "vertical" && axis.field !== undefined
+                              ? axis.field
+                              : rootXField;
                     const val = resolveValue(item, field, i);
                     if (val !== null && val !== undefined) {
                         samples.push(val);
@@ -176,10 +184,16 @@ export class CartesianAxisCompatibilityPolicy {
                     if ("field" in s && typeof (s as SeriesWithOptionalFieldAccessors).field === "function") {
                         const val = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).field!(), i);
                         if (val !== null && val !== undefined) samples.push(val);
-                    } else if ("fromField" in s && typeof (s as SeriesWithOptionalFieldAccessors).fromField === "function") {
+                    } else if (
+                        "fromField" in s &&
+                        typeof (s as SeriesWithOptionalFieldAccessors).fromField === "function"
+                    ) {
                         const fv = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).fromField!(), i);
                         if (fv !== null && fv !== undefined) samples.push(fv);
-                    } else if ("closeField" in s && typeof (s as SeriesWithOptionalFieldAccessors).closeField === "function") {
+                    } else if (
+                        "closeField" in s &&
+                        typeof (s as SeriesWithOptionalFieldAccessors).closeField === "function"
+                    ) {
                         const cv = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).closeField!(), i);
                         if (cv !== null && cv !== undefined) samples.push(cv);
                     }
@@ -198,9 +212,14 @@ export class CartesianAxisCompatibilityPolicy {
         values: unknown[],
         orientation: "horizontal" | "vertical" = "vertical"
     ): ResolvedChartCartesianAxisType {
-        const defaultType = orientation === "horizontal"
-            ? (dimension === "x" ? "linear" : "category")
-            : (dimension === "x" ? "category" : "linear");
+        const defaultType =
+            orientation === "horizontal"
+                ? dimension === "x"
+                    ? "linear"
+                    : "category"
+                : dimension === "x"
+                  ? "category"
+                  : "linear";
 
         if (values.length === 0) {
             return defaultType;

@@ -1,6 +1,4 @@
 import type {
-    
-    
     ChartViewportAxisRef,
     ChartViewportConstraint,
     ChartViewportState,
@@ -29,9 +27,7 @@ export interface InternalCategoryViewport {
     readonly startIndex: number;
 }
 
-export type InternalAxisViewport =
-    | InternalCategoryViewport
-    | InternalContinuousViewport;
+export type InternalAxisViewport = InternalCategoryViewport | InternalContinuousViewport;
 
 export interface InternalCartesianViewportState {
     readonly x: ReadonlyMap<string, InternalAxisViewport>;
@@ -99,7 +95,12 @@ export function isFullContinuousViewport(
     max: number,
     axisInfo: ResolvedAxisInfo | CartesianAxisCoordinateSnapshot
 ): boolean {
-    if (!Number.isFinite(min) || !Number.isFinite(max) || !Array.isArray(axisInfo.baseDomain) || axisInfo.baseDomain.length < 2) {
+    if (
+        !Number.isFinite(min) ||
+        !Number.isFinite(max) ||
+        !Array.isArray(axisInfo.baseDomain) ||
+        axisInfo.baseDomain.length < 2
+    ) {
         return false;
     }
 
@@ -207,10 +208,7 @@ export function diffInternalViewportStates(
     };
 }
 
-export function areViewportStatesEqual(
-    a: ChartViewportState | undefined,
-    b: ChartViewportState | undefined
-): boolean {
+export function areViewportStatesEqual(a: ChartViewportState | undefined, b: ChartViewportState | undefined): boolean {
     if (a === b) return true;
     if (!a || !b) return false;
     if (a.axes.length !== b.axes.length) return false;
@@ -228,7 +226,8 @@ export function areViewportStatesEqual(
             const maxA = wA.max instanceof Date ? wA.max.getTime() : Number(wA.max);
             const minB = wB.min instanceof Date ? wB.min.getTime() : Number(wB.min);
             const maxB = wB.max instanceof Date ? wB.max.getTime() : Number(wB.max);
-            if (!continuousViewportNumbersEqual(minA, minB) || !continuousViewportNumbersEqual(maxA, maxB)) return false;
+            if (!continuousViewportNumbersEqual(minA, minB) || !continuousViewportNumbersEqual(maxA, maxB))
+                return false;
         } else if (wA.kind === "category" && wB.kind === "category") {
             if (wA.startIndex !== wB.startIndex || wA.endIndexExclusive !== wB.endIndexExclusive) return false;
         }
@@ -297,7 +296,11 @@ export function normalizeAxisWindow(
     // Validate constraint applicability and bounds
     if (constraint) {
         if (isCategory) {
-            if (constraint.minSpan !== undefined || constraint.maxSpan !== undefined || constraint.maxZoom !== undefined) {
+            if (
+                constraint.minSpan !== undefined ||
+                constraint.maxSpan !== undefined ||
+                constraint.maxZoom !== undefined
+            ) {
                 ChartDiagnostics.warnOnce(
                     warned,
                     `Continuous constraint options (minSpan, maxSpan, maxZoom) ignored for category axis "${axisId}".`,
@@ -434,12 +437,18 @@ export function normalizeAxisWindow(
             }
         }
 
-        const baseMin = Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2
-            ? (axisInfo.baseDomain[0] instanceof Date ? axisInfo.baseDomain[0].getTime() : Number(axisInfo.baseDomain[0]))
-            : minVal;
-        const baseMax = Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2
-            ? (axisInfo.baseDomain[1] instanceof Date ? axisInfo.baseDomain[1].getTime() : Number(axisInfo.baseDomain[1]))
-            : maxVal;
+        const baseMin =
+            Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2
+                ? axisInfo.baseDomain[0] instanceof Date
+                    ? axisInfo.baseDomain[0].getTime()
+                    : Number(axisInfo.baseDomain[0])
+                : minVal;
+        const baseMax =
+            Array.isArray(axisInfo.baseDomain) && axisInfo.baseDomain.length >= 2
+                ? axisInfo.baseDomain[1] instanceof Date
+                    ? axisInfo.baseDomain[1].getTime()
+                    : Number(axisInfo.baseDomain[1])
+                : maxVal;
 
         const baseScale = "baseScale" in axisInfo ? axisInfo.baseScale : undefined;
 

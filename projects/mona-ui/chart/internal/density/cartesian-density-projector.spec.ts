@@ -54,7 +54,11 @@ describe("projectScalarIndexView", () => {
         values[12_345] = 500;
         values[40_000] = -400;
         const scalar = buildScalar(values);
-        const view = projectScalarIndexView({ ...baseInput, scalar, viewportScale: linearScale([0, values.length - 1], [0, 500]) });
+        const view = projectScalarIndexView({
+            ...baseInput,
+            scalar,
+            viewportScale: linearScale([0, values.length - 1], [0, 500])
+        });
 
         expect(view.sampled).toBe(true);
         expect(view.indices).not.toBeNull();
@@ -100,7 +104,7 @@ describe("projectScalarIndexView", () => {
         const values = Array.from({ length: count }, (_, i) => Math.sin(i / 20) * 5);
         values[10_000] = 300;
         const scalar = buildScalar(values, { descending: true });
-        const scale = linearScale([0, (count - 1)], [0, 500]);
+        const scale = linearScale([0, count - 1], [0, 500]);
         const view = projectScalarIndexView({ ...baseInput, scalar, viewportScale: scale });
         expect(view.sampled).toBe(true);
         expect(view.indices!).toContain(10_000);
@@ -112,7 +116,15 @@ describe("projectScalarIndexView", () => {
         const scalar = buildScalar(values);
         // Viewport covers only [5000, 6000] of domain [0, count-1].
         const scale = linearScale([0, count - 1], [5000, 6000]);
-        const view = projectScalarIndexView({ ...baseInput, algorithm: "minmax" as const, maxPoints: null, plotSpanPx: 1000, samplesPerPixel: 1, scalar, viewportScale: scale });
+        const view = projectScalarIndexView({
+            ...baseInput,
+            algorithm: "minmax" as const,
+            maxPoints: null,
+            plotSpanPx: 1000,
+            samplesPerPixel: 1,
+            scalar,
+            viewportScale: scale
+        });
         const indices = view.indices!;
         expect(indices[0]).toBeLessThan(5000);
         expect(indices[indices.length - 1]).toBeGreaterThan(6000);
@@ -125,7 +137,11 @@ describe("projectScalarIndexView", () => {
             values[i] = null;
         }
         const scalar = buildScalar(values);
-        const view = projectScalarIndexView({ ...baseInput, scalar, viewportScale: linearScale([0, values.length - 1], [0, 500]) });
+        const view = projectScalarIndexView({
+            ...baseInput,
+            scalar,
+            viewportScale: linearScale([0, values.length - 1], [0, 500])
+        });
         expect(view.sampled).toBe(true);
         // No sampled index inside the null run.
         expect(view.indices!.every(i => i < 10_000 || i >= 20_000)).toBe(true);
@@ -145,7 +161,12 @@ describe("projectScalarIndexView", () => {
             ];
             // Pad with more data to pass retention floor? Unsorted returns full regardless.
             const bigData = Array.from({ length: 25_000 }, (_, i) => ({ x: i % 7, y: i }));
-            const scalar = buildScalarDensityData({ data: [...data, ...bigData], temporal: false, xField: "x", yField: "y" });
+            const scalar = buildScalarDensityData({
+                data: [...data, ...bigData],
+                temporal: false,
+                xField: "x",
+                yField: "y"
+            });
             const view = projectScalarIndexView({ ...baseInput, scalar });
             expect(view.sampled).toBe(false);
             expect(warnSpy).toHaveBeenCalled();

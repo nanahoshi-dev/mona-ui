@@ -19,7 +19,9 @@ export interface PolarLayoutOptions {
     measurements?: ReadonlyMap<string, ChartLabelMeasurement>;
     radialAxis?: ChartRadialAxisRegistration;
     rootData: readonly unknown[];
-    series: readonly (ChartRadialArcSeriesRegistration | ChartRadialSeriesRegistration | ChartSectorSeriesRegistration)[];
+    series: readonly (
+        ChartRadialArcSeriesRegistration | ChartRadialSeriesRegistration | ChartSectorSeriesRegistration
+    )[];
     styleResolver: ChartStyleResolver;
     warnedDiagnosticSignatures?: Set<string>;
 }

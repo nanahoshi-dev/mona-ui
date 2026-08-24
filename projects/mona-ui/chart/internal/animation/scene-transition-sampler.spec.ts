@@ -64,7 +64,15 @@ describe("SceneTransitionSampler", () => {
                     fillOpacity: 1,
                     id: "b1",
                     name: "Bar",
-                    style: { areaFillColor: "#3b82f6", areaFillOpacity: 0.2, color: "#3b82f6", fillOpacity: 1, lineWidth: 2, opacity: 1, pointRadius: 4 },
+                    style: {
+                        areaFillColor: "#3b82f6",
+                        areaFillOpacity: 0.2,
+                        color: "#3b82f6",
+                        fillOpacity: 1,
+                        lineWidth: 2,
+                        opacity: 1,
+                        pointRadius: 4
+                    },
                     type: "bar",
                     xAxisId: "default-x",
                     yAxisId: "default-y"
@@ -91,7 +99,14 @@ describe("SceneTransitionSampler", () => {
         });
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene: null,
@@ -109,7 +124,7 @@ describe("SceneTransitionSampler", () => {
 
         const frameMid = SceneTransitionSampler.sampleFrame(plan, 0.5);
         const sampledCartesianMid = frameMid.scene as CartesianXYChartScene;
-        expect(((sampledCartesianMid.series[0] as ChartBarSeriesScene).bars[0]).height).toBeCloseTo(50, 1);
+        expect((sampledCartesianMid.series[0] as ChartBarSeriesScene).bars[0].height).toBeCloseTo(50, 1);
         expect(sampledCartesianMid.stackConfiguration).toEqual(toScene.stackConfiguration);
         expect(sampledCartesianMid.stackSignature).toBe(toScene.stackSignature);
 
@@ -185,7 +200,14 @@ describe("SceneTransitionSampler", () => {
         });
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene: null,
@@ -278,7 +300,14 @@ describe("SceneTransitionSampler", () => {
         });
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene: null,
@@ -342,7 +371,15 @@ describe("SceneTransitionSampler", () => {
                     ],
                     name: "RadialBar",
                     renderOpacity: 1,
-                    style: { color: "#3b82f6", fillOpacity: 0.9, strokeColor: "", strokeSource: "default", strokeWidth: 0, trackColor: "", trackOpacity: 1 },
+                    style: {
+                        color: "#3b82f6",
+                        fillOpacity: 0.9,
+                        strokeColor: "",
+                        strokeSource: "default",
+                        strokeWidth: 0,
+                        trackColor: "",
+                        trackOpacity: 1
+                    },
                     tracks: [],
                     type: "radialBar"
                 }
@@ -358,7 +395,14 @@ describe("SceneTransitionSampler", () => {
         });
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene: null,
@@ -497,7 +541,14 @@ describe("SceneTransitionSampler", () => {
         });
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene,
@@ -515,7 +566,10 @@ describe("SceneTransitionSampler", () => {
         expect(sampledBarC.bounds.x).toBeCloseTo(220, 1);
 
         // 2. Query sampled C center returns C
-        const sampledCenter = { x: sampledBarC.bounds.x + sampledBarC.bounds.width / 2, y: sampledBarC.bounds.y + sampledBarC.bounds.height / 2 };
+        const sampledCenter = {
+            x: sampledBarC.bounds.x + sampledBarC.bounds.width / 2,
+            y: sampledBarC.bounds.y + sampledBarC.bounds.height / 2
+        };
         const nearestAtSampledCenter = sampled.hitIndex.query(sampledCenter);
         expect(nearestAtSampledCenter).not.toBeNull();
         expect(nearestAtSampledCenter?.itemId).toBe("C");
@@ -637,7 +691,14 @@ describe("SceneTransitionSampler", () => {
         });
 
         const plan: ChartTransitionPlan = {
-            complexity: { independentMarks: 1, markCount: 1, pathCount: 0, pathPoints: 0, pointCount: 0, totalWeightedCost: 1 },
+            complexity: {
+                independentMarks: 1,
+                markCount: 1,
+                pathCount: 0,
+                pathPoints: 0,
+                pointCount: 0,
+                totalWeightedCost: 1
+            },
             duration: 400,
             easing: "linear",
             fromScene,

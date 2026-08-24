@@ -37,9 +37,7 @@ export interface ChartReferenceBandLabelContext<
     readonly to: TTo;
 }
 
-export type ChartReferenceLabelTemplateContext =
-    | ChartReferenceLineLabelContext
-    | ChartReferenceBandLabelContext;
+export type ChartReferenceLabelTemplateContext = ChartReferenceLineLabelContext | ChartReferenceBandLabelContext;
 
 export interface ChartAnnotationLabelTemplateContext<TData = unknown> {
     readonly $implicit: TData;

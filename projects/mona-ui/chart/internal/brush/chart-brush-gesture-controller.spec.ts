@@ -127,8 +127,15 @@ describe("ChartBrushGestureController", () => {
             mode: signal("xy")
         };
 
-        controller.onPointerDown(new PointerEvent("pointerdown", { clientX: 100, clientY: 100, pointerId: 1 }), plotRect, reg as ChartBrushRegistration);
-        controller.onPointerMove(new PointerEvent("pointermove", { clientX: 150, clientY: 150, pointerId: 1 }), plotRect);
+        controller.onPointerDown(
+            new PointerEvent("pointerdown", { clientX: 100, clientY: 100, pointerId: 1 }),
+            plotRect,
+            reg as ChartBrushRegistration
+        );
+        controller.onPointerMove(
+            new PointerEvent("pointermove", { clientX: 150, clientY: 150, pointerId: 1 }),
+            plotRect
+        );
 
         const upEvt = new PointerEvent("pointerup", { clientX: 150, clientY: 150, pointerId: 1 });
         const upRes = controller.onPointerUp(upEvt, plotRect);
@@ -145,8 +152,15 @@ describe("ChartBrushGestureController", () => {
             mode: signal("xy")
         };
 
-        controller.onPointerDown(new PointerEvent("pointerdown", { clientX: 100, clientY: 100, pointerId: 1 }), plotRect, reg as ChartBrushRegistration);
-        controller.onPointerMove(new PointerEvent("pointermove", { clientX: 150, clientY: 150, pointerId: 1 }), plotRect);
+        controller.onPointerDown(
+            new PointerEvent("pointerdown", { clientX: 100, clientY: 100, pointerId: 1 }),
+            plotRect,
+            reg as ChartBrushRegistration
+        );
+        controller.onPointerMove(
+            new PointerEvent("pointermove", { clientX: 150, clientY: 150, pointerId: 1 }),
+            plotRect
+        );
 
         const cancelled = controller.cancel();
         expect(cancelled).toBe(true);

@@ -132,10 +132,7 @@ export interface ChartGaugeSeriesScene {
     readonly value: SceneGaugeValue;
 }
 
-export type ChartRadialArcSeriesScene =
-    | ChartGaugeSeriesScene
-    | ChartRadialBarSeriesScene
-    | ChartRoseSeriesScene;
+export type ChartRadialArcSeriesScene = ChartGaugeSeriesScene | ChartRadialBarSeriesScene | ChartRoseSeriesScene;
 
 export interface PolarArcHitIndex {
     query(pointer: ChartPoint): readonly SceneHitTarget[];

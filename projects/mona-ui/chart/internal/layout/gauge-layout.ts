@@ -25,14 +25,8 @@ export interface GaugeLayoutOptions {
 
 export class GaugeLayout {
     public static computeScene(options: GaugeLayoutOptions): PolarArcChartScene {
-        const {
-            containerHeight,
-            containerWidth,
-            rootData,
-            series,
-            styleResolver,
-            warnedDiagnosticSignatures
-        } = options;
+        const { containerHeight, containerWidth, rootData, series, styleResolver, warnedDiagnosticSignatures } =
+            options;
 
         const center: ChartPoint = {
             x: containerWidth / 2,
@@ -213,22 +207,23 @@ export class GaugeLayout {
         ];
 
         const hasRenderableData = isVisible && preparedData.hasValidData;
-        const hitGeometry = hasRenderableData && hitTarget
-            ? {
-                  center,
-                  indicator,
-                  needle: needle
-                      ? {
-                            angle: needle.angle,
-                            hubRadius: needle.hubRadius,
-                            length: needle.length,
-                            width: needle.width
-                        }
-                      : undefined,
-                  target: hitTarget,
-                  valueArc: hitTarget.arc
-              }
-            : null;
+        const hitGeometry =
+            hasRenderableData && hitTarget
+                ? {
+                      center,
+                      indicator,
+                      needle: needle
+                          ? {
+                                angle: needle.angle,
+                                hubRadius: needle.hubRadius,
+                                length: needle.length,
+                                width: needle.width
+                            }
+                          : undefined,
+                      target: hitTarget,
+                      valueArc: hitTarget.arc
+                  }
+                : null;
 
         const hitIndex = new GaugeHitIndex(hitGeometry);
 

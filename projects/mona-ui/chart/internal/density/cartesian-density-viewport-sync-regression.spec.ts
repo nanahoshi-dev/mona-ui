@@ -67,7 +67,14 @@ function viewportMessage(
 
 const synchronizationOptions = {
     axisMappings: [],
-    crosshair: { axes: "auto" as const, clearOnLeave: true, enabled: true, match: "axis-value" as const, mode: "domain" as const, showTooltip: false },
+    crosshair: {
+        axes: "auto" as const,
+        clearOnLeave: true,
+        enabled: true,
+        match: "axis-value" as const,
+        mode: "domain" as const,
+        showTooltip: false
+    },
     group: "r15",
     viewport: { axes: "auto" as const, enabled: true, mode: "relative" as const, phase: "continuous" as const }
 };
@@ -208,14 +215,17 @@ describe("Cartesian Density Viewport Synchronization Regressions", () => {
         );
         const existing = new Map([["target", continuousWindow("target", 0, 1e-12)]]);
         const result = ChartSynchronizationAxisMapper.mapIncomingAxes(
-            viewportMessage([
-                {
-                    normalizedWindow: [5e-13, 1.5e-12],
-                    sourceRef: { axis: "x", axisId: "source" },
-                    sourceType: "linear",
-                    window: { axis: "x", axisId: "source", kind: "continuous", max: 1.5e-12, min: 5e-13 }
-                }
-            ], "relative"),
+            viewportMessage(
+                [
+                    {
+                        normalizedWindow: [5e-13, 1.5e-12],
+                        sourceRef: { axis: "x", axisId: "source" },
+                        sourceType: "linear",
+                        window: { axis: "x", axisId: "source", kind: "continuous", max: 1.5e-12, min: 5e-13 }
+                    }
+                ],
+                "relative"
+            ),
             coordinateSpace,
             synchronizationOptions,
             { x: existing, y: new Map() },
@@ -237,8 +247,16 @@ describe("Cartesian Density Viewport Synchronization Regressions", () => {
             xField: "x",
             yField: "y"
         });
-        const xScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 1e-12], range: [0, 1_000], type: "linear" });
-        const yScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 1], range: [100, 0], type: "linear" });
+        const xScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 1e-12],
+            range: [0, 1_000],
+            type: "linear"
+        });
+        const yScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 1],
+            range: [100, 0],
+            type: "linear"
+        });
         const provider = new CartesianConnectedPathInteractionProvider({
             materialize: index => ({
                 animationKey: `r15-${index}`,
@@ -277,8 +295,16 @@ describe("Cartesian Density Viewport Synchronization Regressions", () => {
             { x: 6.1, y: 0.5 }
         ];
         const scalar = buildScalarDensityData({ data, temporal: false, xField: "x", yField: "y" });
-        const xScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 10], range: [0, 100], type: "linear" });
-        const yScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 1], range: [100, 0], type: "linear" });
+        const xScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 10],
+            range: [0, 100],
+            type: "linear"
+        });
+        const yScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 1],
+            range: [100, 0],
+            type: "linear"
+        });
         const provider = new CartesianConnectedPathInteractionProvider({
             materialize: index => ({
                 animationKey: `r15-edge-${index}`,
@@ -300,7 +326,12 @@ describe("Cartesian Density Viewport Synchronization Regressions", () => {
         expect(edgeHits.map(hit => hit.index)).toEqual([1, 2, 3, 4, 5]);
 
         const descendingData = Array.from({ length: 11 }, (_, index) => ({ x: 10 - index, y: 0.5 }));
-        const descendingScalar = buildScalarDensityData({ data: descendingData, temporal: false, xField: "x", yField: "y" });
+        const descendingScalar = buildScalarDensityData({
+            data: descendingData,
+            temporal: false,
+            xField: "x",
+            yField: "y"
+        });
         const descendingProvider = new CartesianConnectedPathInteractionProvider({
             materialize: index => ({
                 animationKey: `r15-desc-${index}`,
@@ -340,7 +371,11 @@ describe("Cartesian Density Viewport Synchronization Regressions", () => {
             }),
             scalar: temporalScalar,
             xScale: new TimeScale([new Date(epoch), new Date(epoch + 1_000)], [0, 1_000]),
-            yScale: CartesianScaleFactory.createExactPositionScale({ domain: [0, 1], range: [100, 0], type: "linear" }) as never
+            yScale: CartesianScaleFactory.createExactPositionScale({
+                domain: [0, 1],
+                range: [100, 0],
+                type: "linear"
+            }) as never
         });
 
         const tracker = ChartDensityTracker.install();
@@ -367,8 +402,16 @@ describe("Cartesian Density Viewport Synchronization Regressions", () => {
                 yValue: tinyYScalar.y[index]
             }),
             scalar: tinyYScalar,
-            xScale: CartesianScaleFactory.createExactPositionScale({ domain: [0, 10], range: [0, 100], type: "linear" }) as never,
-            yScale: CartesianScaleFactory.createExactPositionScale({ domain: [0, 1e-15], range: [100, 0], type: "linear" }) as never
+            xScale: CartesianScaleFactory.createExactPositionScale({
+                domain: [0, 10],
+                range: [0, 100],
+                type: "linear"
+            }) as never,
+            yScale: CartesianScaleFactory.createExactPositionScale({
+                domain: [0, 1e-15],
+                range: [100, 0],
+                type: "linear"
+            }) as never
         });
 
         const tinyYHits = tinyYProvider.queryRange({ pixelA: { x: 20, y: 45 }, pixelB: { x: 80, y: 55 } });

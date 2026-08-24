@@ -30,7 +30,10 @@ export function createSeededRandom(seed: number): SeededRandom {
 
 const defaultStartMs = Date.UTC(2025, 0, 1);
 
-export function generateSineWave(count: number, options?: { readonly startMs?: number; readonly stepMs?: number }): BenchmarkScalarPoint[] {
+export function generateSineWave(
+    count: number,
+    options?: { readonly startMs?: number; readonly stepMs?: number }
+): BenchmarkScalarPoint[] {
     const startMs = options?.startMs ?? defaultStartMs;
     const stepMs = options?.stepMs ?? 1000;
     const points: BenchmarkScalarPoint[] = new Array(count);
@@ -70,7 +73,11 @@ export function generateSpikedSeries(
     return points;
 }
 
-export function generateRandomWalk(count: number, seed: number, options?: { readonly stepMs?: number; readonly startMs?: number }): BenchmarkScalarPoint[] {
+export function generateRandomWalk(
+    count: number,
+    seed: number,
+    options?: { readonly stepMs?: number; readonly startMs?: number }
+): BenchmarkScalarPoint[] {
     const random = createSeededRandom(seed);
     const startMs = options?.startMs ?? defaultStartMs;
     const stepMs = options?.stepMs ?? 1000;
@@ -83,7 +90,10 @@ export function generateRandomWalk(count: number, seed: number, options?: { read
     return points;
 }
 
-export function generateStepSignal(count: number, options?: { readonly runLength?: number; readonly stepMs?: number; readonly startMs?: number }): BenchmarkScalarPoint[] {
+export function generateStepSignal(
+    count: number,
+    options?: { readonly runLength?: number; readonly stepMs?: number; readonly startMs?: number }
+): BenchmarkScalarPoint[] {
     const startMs = options?.startMs ?? defaultStartMs;
     const stepMs = options?.stepMs ?? 1000;
     const runLength = options?.runLength ?? 50;
@@ -98,7 +108,15 @@ export function generateStepSignal(count: number, options?: { readonly runLength
     return points;
 }
 
-export function generateNullGapSeries(count: number, options?: { readonly gapStart?: number; readonly gapLength?: number; readonly stepMs?: number; readonly startMs?: number }): BenchmarkScalarPoint[] {
+export function generateNullGapSeries(
+    count: number,
+    options?: {
+        readonly gapStart?: number;
+        readonly gapLength?: number;
+        readonly stepMs?: number;
+        readonly startMs?: number;
+    }
+): BenchmarkScalarPoint[] {
     const startMs = options?.startMs ?? defaultStartMs;
     const stepMs = options?.stepMs ?? 1000;
     const gapStart = options?.gapStart ?? Math.floor(count / 3);
@@ -114,7 +132,11 @@ export function generateNullGapSeries(count: number, options?: { readonly gapSta
     return points;
 }
 
-export function generateIrregularTimestamps(count: number, seed: number, options?: { readonly startMs?: number }): BenchmarkScalarPoint[] {
+export function generateIrregularTimestamps(
+    count: number,
+    seed: number,
+    options?: { readonly startMs?: number }
+): BenchmarkScalarPoint[] {
     const random = createSeededRandom(seed);
     const startMs = options?.startMs ?? defaultStartMs;
     const points: BenchmarkScalarPoint[] = new Array(count);
@@ -127,7 +149,10 @@ export function generateIrregularTimestamps(count: number, seed: number, options
     return points;
 }
 
-export function generateDuplicateXSeries(count: number, options?: { readonly startMs?: number; readonly stepMs?: number }): BenchmarkScalarPoint[] {
+export function generateDuplicateXSeries(
+    count: number,
+    options?: { readonly startMs?: number; readonly stepMs?: number }
+): BenchmarkScalarPoint[] {
     const startMs = options?.startMs ?? defaultStartMs;
     const stepMs = options?.stepMs ?? 2000;
     const points: BenchmarkScalarPoint[] = new Array(count);
@@ -141,7 +166,10 @@ export function generateDuplicateXSeries(count: number, options?: { readonly sta
     return points;
 }
 
-export function generateDescendingSeries(count: number, options?: { readonly stepMs?: number; readonly startMs?: number }): BenchmarkScalarPoint[] {
+export function generateDescendingSeries(
+    count: number,
+    options?: { readonly stepMs?: number; readonly startMs?: number }
+): BenchmarkScalarPoint[] {
     const startMs = options?.startMs ?? defaultStartMs;
     const stepMs = options?.stepMs ?? 1000;
     const points: BenchmarkScalarPoint[] = new Array(count);
@@ -154,7 +182,11 @@ export function generateDescendingSeries(count: number, options?: { readonly ste
     return points;
 }
 
-export function generateUnsortedSeries(count: number, seed: number, options?: { readonly startMs?: number; readonly stepMs?: number }): BenchmarkScalarPoint[] {
+export function generateUnsortedSeries(
+    count: number,
+    seed: number,
+    options?: { readonly startMs?: number; readonly stepMs?: number }
+): BenchmarkScalarPoint[] {
     const random = createSeededRandom(seed);
     const startMs = options?.startMs ?? defaultStartMs;
     const stepMs = options?.stepMs ?? 1000;
@@ -178,7 +210,11 @@ export function generateScatterClusters(
     }
 ): BenchmarkMarkerPoint[] {
     const random = createSeededRandom(seed);
-    const centers = options?.clusterCenters ?? [[25, 25], [75, 75], [50, 10]];
+    const centers = options?.clusterCenters ?? [
+        [25, 25],
+        [75, 75],
+        [50, 10]
+    ];
     const outlierCount = options?.outlierCount ?? Math.max(1, Math.floor(count / 10_000));
     const points: BenchmarkMarkerPoint[] = new Array(count);
     const bodyCount = count - outlierCount;
@@ -211,7 +247,11 @@ export function generateBubbleSizeOutliers(count: number, seed: number): Benchma
 }
 
 export interface BenchmarkStackedSeries {
-    readonly data: readonly { readonly x: number | Date; readonly positive: number | null; readonly negative: number | null }[];
+    readonly data: readonly {
+        readonly x: number | Date;
+        readonly positive: number | null;
+        readonly negative: number | null;
+    }[];
 }
 
 export function generateStackedAreaSeries(

@@ -36,9 +36,7 @@ describe("ChartMarkIdentityResolver", () => {
             dataIndex: 4,
             index: 4
         };
-        expect(ChartMarkIdentityResolver.resolve(hit as SceneHitTarget)).toBe(
-            JSON.stringify(["series-d", "index", 4])
-        );
+        expect(ChartMarkIdentityResolver.resolve(hit as SceneHitTarget)).toBe(JSON.stringify(["series-d", "index", 4]));
     });
 
     it("should resolve consistent markIds for identical hit targets", () => {

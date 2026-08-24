@@ -162,7 +162,11 @@ describe("FinancialSeriesAnimationAdapter", () => {
             xValue: "2026-01-01"
         };
 
-        const plan = adapter.createPlan(createCandlestickScene([markA], 20), createCandlestickScene([markB], 30), {} as unknown as ChartAnimationPlanningContext);
+        const plan = adapter.createPlan(
+            createCandlestickScene([markA], 20),
+            createCandlestickScene([markB], 30),
+            {} as unknown as ChartAnimationPlanningContext
+        );
 
         const mid = plan.sample(0.5) as ChartCandlestickSeriesScene;
         expect(mid.marks[0].centerX).toBe(125);

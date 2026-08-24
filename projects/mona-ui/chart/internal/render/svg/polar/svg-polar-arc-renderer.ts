@@ -64,14 +64,15 @@ class SvgRadialBarSeriesRenderer {
             key: (track, i) => track.animationKey ?? track.itemId ?? String(i),
             tag: "path",
             update: (element, track) => {
-                const d = buildArcPath({
-                    cornerRadius: 0,
-                    endAngle: track.endAngle,
-                    innerRadius: track.innerRadius,
-                    outerRadius: track.outerRadius,
-                    padAngle: 0,
-                    startAngle: track.startAngle
-                }) ?? "";
+                const d =
+                    buildArcPath({
+                        cornerRadius: 0,
+                        endAngle: track.endAngle,
+                        innerRadius: track.innerRadius,
+                        outerRadius: track.outerRadius,
+                        padAngle: 0,
+                        startAngle: track.startAngle
+                    }) ?? "";
                 setSvgAttribute(element, "d", d);
                 setSvgAttribute(element, "fill", track.color);
                 setSvgAttribute(element, "fill-opacity", track.opacity);
@@ -84,14 +85,15 @@ class SvgRadialBarSeriesRenderer {
             key: (mark, _i) => mark.itemId || String(mark.dataIndex),
             tag: "path",
             update: (element, arcData) => {
-                const d = buildArcPath({
-                    cornerRadius: arcData.cornerRadius,
-                    endAngle: arcData.endAngle,
-                    innerRadius: arcData.innerRadius,
-                    outerRadius: arcData.outerRadius,
-                    padAngle: arcData.padAngle,
-                    startAngle: arcData.startAngle
-                }) ?? "";
+                const d =
+                    buildArcPath({
+                        cornerRadius: arcData.cornerRadius,
+                        endAngle: arcData.endAngle,
+                        innerRadius: arcData.innerRadius,
+                        outerRadius: arcData.outerRadius,
+                        padAngle: arcData.padAngle,
+                        startAngle: arcData.startAngle
+                    }) ?? "";
                 setSvgAttribute(element, "d", d);
 
                 if (series.fillMode === "gradient") {
@@ -149,11 +151,7 @@ class SvgRoseSeriesRenderer {
         this.#container.remove();
     }
 
-    public render(
-        series: ChartRoseSeriesScene,
-        center: { x: number; y: number },
-        defs: SvgDefinitionRegistry
-    ): void {
+    public render(series: ChartRoseSeriesScene, center: { x: number; y: number }, defs: SvgDefinitionRegistry): void {
         setSvgAttribute(this.#container, "transform", `translate(${center.x}, ${center.y})`);
         setSvgAttribute(this.#container, "opacity", series.renderOpacity ?? 1);
 
@@ -162,14 +160,15 @@ class SvgRoseSeriesRenderer {
             key: (mark, _i) => mark.itemId || String(mark.dataIndex),
             tag: "path",
             update: (element, petal) => {
-                const d = buildArcPath({
-                    cornerRadius: petal.cornerRadius,
-                    endAngle: petal.endAngle,
-                    innerRadius: petal.innerRadius,
-                    outerRadius: petal.outerRadius,
-                    padAngle: petal.padAngle,
-                    startAngle: petal.startAngle
-                }) ?? "";
+                const d =
+                    buildArcPath({
+                        cornerRadius: petal.cornerRadius,
+                        endAngle: petal.endAngle,
+                        innerRadius: petal.innerRadius,
+                        outerRadius: petal.outerRadius,
+                        padAngle: petal.padAngle,
+                        startAngle: petal.startAngle
+                    }) ?? "";
                 setSvgAttribute(element, "d", d);
 
                 if (series.fillMode === "gradient") {
@@ -241,11 +240,7 @@ class SvgGaugeSeriesRenderer {
         this.#container.remove();
     }
 
-    public render(
-        series: ChartGaugeSeriesScene,
-        center: { x: number; y: number },
-        defs: SvgDefinitionRegistry
-    ): void {
+    public render(series: ChartGaugeSeriesScene, center: { x: number; y: number }, defs: SvgDefinitionRegistry): void {
         const { fillMode, indicator, needle, style, track, value } = series;
         const seriesOpacity = series.renderOpacity ?? 1;
 
@@ -254,14 +249,15 @@ class SvgGaugeSeriesRenderer {
 
         // 1. Background Track
         if (track) {
-            const d = buildArcPath({
-                cornerRadius: 0,
-                endAngle: track.endAngle,
-                innerRadius: track.innerRadius,
-                outerRadius: track.outerRadius,
-                padAngle: 0,
-                startAngle: track.startAngle
-            }) ?? "";
+            const d =
+                buildArcPath({
+                    cornerRadius: 0,
+                    endAngle: track.endAngle,
+                    innerRadius: track.innerRadius,
+                    outerRadius: track.outerRadius,
+                    padAngle: 0,
+                    startAngle: track.startAngle
+                }) ?? "";
             if (d) {
                 if (!this.#trackPath) {
                     this.#trackPath = createSvgElement("path");
@@ -282,14 +278,15 @@ class SvgGaugeSeriesRenderer {
         // 2. Value Arc
         if ((indicator === "arc" || indicator === "both") && value && value.endAngle > value.startAngle) {
             const valOpacity = value.renderOpacity ?? 1;
-            const d = buildArcPath({
-                cornerRadius: value.cornerRadius,
-                endAngle: value.endAngle,
-                innerRadius: value.innerRadius,
-                outerRadius: value.outerRadius,
-                padAngle: 0,
-                startAngle: value.startAngle
-            }) ?? "";
+            const d =
+                buildArcPath({
+                    cornerRadius: value.cornerRadius,
+                    endAngle: value.endAngle,
+                    innerRadius: value.innerRadius,
+                    outerRadius: value.outerRadius,
+                    padAngle: 0,
+                    startAngle: value.startAngle
+                }) ?? "";
             if (d) {
                 if (!this.#valuePath) {
                     this.#valuePath = createSvgElement("path");
@@ -368,8 +365,14 @@ export class SvgPolarArcRenderer {
     readonly #container: SVGGElement;
     readonly #foregroundGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
-    readonly #roseGridRingsKeyedGroup: SvgKeyedGroup<{ d: string; radius: number; tick: ChartRadialAxisTick }, SVGPathElement>;
-    readonly #roseGridSpokesKeyedGroup: SvgKeyedGroup<{ tick: ChartAngularAxisTick; x1: number; y1: number; x2: number; y2: number }, SVGLineElement>;
+    readonly #roseGridRingsKeyedGroup: SvgKeyedGroup<
+        { d: string; radius: number; tick: ChartRadialAxisTick },
+        SVGPathElement
+    >;
+    readonly #roseGridSpokesKeyedGroup: SvgKeyedGroup<
+        { tick: ChartAngularAxisTick; x1: number; y1: number; x2: number; y2: number },
+        SVGLineElement
+    >;
     readonly #seriesEntries = new Map<string, PolarArcSeriesEntry>();
     readonly #seriesGroup: SVGGElement;
     #roseForegroundArcPath: SVGPathElement | null = null;
@@ -392,8 +395,14 @@ export class SvgPolarArcRenderer {
         this.#highlightGroup.setAttribute("data-polar-layer", "highlight");
         this.#container.appendChild(this.#highlightGroup);
 
-        this.#roseGridRingsKeyedGroup = new SvgKeyedGroup<{ d: string; radius: number; tick: ChartRadialAxisTick }, SVGPathElement>(this.#backgroundGroup);
-        this.#roseGridSpokesKeyedGroup = new SvgKeyedGroup<{ tick: ChartAngularAxisTick; x1: number; y1: number; x2: number; y2: number }, SVGLineElement>(this.#backgroundGroup);
+        this.#roseGridRingsKeyedGroup = new SvgKeyedGroup<
+            { d: string; radius: number; tick: ChartRadialAxisTick },
+            SVGPathElement
+        >(this.#backgroundGroup);
+        this.#roseGridSpokesKeyedGroup = new SvgKeyedGroup<
+            { tick: ChartAngularAxisTick; x1: number; y1: number; x2: number; y2: number },
+            SVGLineElement
+        >(this.#backgroundGroup);
     }
 
     #renderHighlight(
@@ -457,7 +466,14 @@ export class SvgPolarArcRenderer {
             }
         }
 
-        let arcGeometry: { cornerRadius?: number; endAngle: number; innerRadius: number; outerRadius: number; padAngle?: number; startAngle: number } | null = null;
+        let arcGeometry: {
+            cornerRadius?: number;
+            endAngle: number;
+            innerRadius: number;
+            outerRadius: number;
+            padAngle?: number;
+            startAngle: number;
+        } | null = null;
 
         if (activeHit.arc) {
             arcGeometry = activeHit.arc;
@@ -531,20 +547,25 @@ export class SvgPolarArcRenderer {
             const validTicks = radialAxis.ticks
                 .filter(t => t.radius > 0)
                 .map(tick => {
-                    const d = buildArcPath({
-                        cornerRadius: 0,
-                        endAngle: endAngleRad,
-                        innerRadius: tick.radius,
-                        outerRadius: tick.radius,
-                        padAngle: 0,
-                        startAngle: startAngleRad
-                    }) ?? "";
+                    const d =
+                        buildArcPath({
+                            cornerRadius: 0,
+                            endAngle: endAngleRad,
+                            innerRadius: tick.radius,
+                            outerRadius: tick.radius,
+                            padAngle: 0,
+                            startAngle: startAngleRad
+                        }) ?? "";
                     return { d, radius: tick.radius, tick };
                 })
                 .filter(item => Boolean(item.d));
 
             this.#roseGridRingsKeyedGroup.reconcile(validTicks, {
-                key: (item, _i) => item.tick.tickKey ?? (item.tick.index !== undefined ? String(item.tick.index) : (item.tick.formattedValue ?? String(item.tick.value))),
+                key: (item, _i) =>
+                    item.tick.tickKey ??
+                    (item.tick.index !== undefined
+                        ? String(item.tick.index)
+                        : (item.tick.formattedValue ?? String(item.tick.value))),
                 tag: "path",
                 update: (ringPath, item) => {
                     setSvgAttribute(ringPath, "d", item.d);
@@ -569,7 +590,9 @@ export class SvgPolarArcRenderer {
             }));
 
             this.#roseGridSpokesKeyedGroup.reconcile(spokeItems, {
-                key: (item, _i) => item.tick.tickKey ?? (item.tick.index !== undefined ? String(item.tick.index) : String(item.tick.angle)),
+                key: (item, _i) =>
+                    item.tick.tickKey ??
+                    (item.tick.index !== undefined ? String(item.tick.index) : String(item.tick.angle)),
                 tag: "line",
                 update: (spoke, item) => {
                     setSvgAttribute(spoke, "x1", item.x1);
@@ -607,14 +630,15 @@ export class SvgPolarArcRenderer {
 
         // Outer Boundary Arc
         if (angularAxis && angularAxis.visible && angularAxis.axisLine) {
-            const d = buildArcPath({
-                cornerRadius: 0,
-                endAngle: endAngleRad,
-                innerRadius: outerRadius,
-                outerRadius,
-                padAngle: 0,
-                startAngle: startAngleRad
-            }) ?? "";
+            const d =
+                buildArcPath({
+                    cornerRadius: 0,
+                    endAngle: endAngleRad,
+                    innerRadius: outerRadius,
+                    outerRadius,
+                    padAngle: 0,
+                    startAngle: startAngleRad
+                }) ?? "";
             if (d) {
                 if (!this.#roseForegroundArcPath) {
                     this.#roseForegroundArcPath = createSvgElement("path");

@@ -93,7 +93,12 @@ export class SvgTreemapRenderer {
                     strokeWidth
                 });
 
-                if (!isRenderTerminal && node.headerBounds && node.headerBounds.width > 0 && node.headerBounds.height > 0) {
+                if (
+                    !isRenderTerminal &&
+                    node.headerBounds &&
+                    node.headerBounds.width > 0 &&
+                    node.headerBounds.height > 0
+                ) {
                     const headerAlpha = renderOpacity * nodeOpacity * (parentFillOpacity * 2);
                     renderItems.push({
                         alpha: headerAlpha,

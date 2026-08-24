@@ -3,8 +3,8 @@ import {
     type ChartDownloadOptions,
     type ChartExportBackground,
     type ChartExportFormat,
-    type ChartExportOptions
-    ,type ChartPdfMargins,
+    type ChartExportOptions,
+    type ChartPdfMargins,
     type ChartPdfPageOptions,
     type ChartPdfPageSize,
     type ChartPdfRenderMode
@@ -79,7 +79,10 @@ function normalizeBackground(bg: unknown): ChartExportBackground {
         return "transparent";
     }
     if (typeof bg !== "string") {
-        throw new ChartExportError("invalid-size", "Background option must be 'auto', 'transparent', or a valid CSS color string.");
+        throw new ChartExportError(
+            "invalid-size",
+            "Background option must be 'auto', 'transparent', or a valid CSS color string."
+        );
     }
     const trimmed = bg.trim();
     if (!trimmed) {

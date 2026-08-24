@@ -1,8 +1,8 @@
 import type {
     ChartAxisFormatter,
-    ChartAxisPosition
-    ,ChartXAxisType
-    ,ChartYAxisType
+    ChartAxisPosition,
+    ChartXAxisType,
+    ChartYAxisType
 } from "../../models/chart-axis.models";
 import type { ChartAxisRegistrationBase } from "../context/chart-registration-context";
 import type { ChartAxisScene, ChartAxisSceneTick } from "../scene/cartesian-scene";
@@ -53,7 +53,18 @@ interface IntermediateTick {
 
 export class CartesianAxisLayoutEngine {
     public static computeAxisLayout(options: CartesianAxisLayoutOptions): CartesianAxisLayoutResult {
-        const { axis, axisType, containerSize, defaultGridLines, effectiveFormatter, measurements, plotGutterConstraint, position, registration, scale } = options;
+        const {
+            axis,
+            axisType,
+            containerSize,
+            defaultGridLines,
+            effectiveFormatter,
+            measurements,
+            plotGutterConstraint,
+            position,
+            registration,
+            scale
+        } = options;
 
         const isVisible = registration ? registration.visible() : true;
         const labelsEnabled = registration?.labels ? (registration.labels() ?? true) : true;
@@ -64,7 +75,8 @@ export class CartesianAxisLayoutEngine {
         const labelMaxWidth = normalizePositiveNumber(registration?.labelMaxWidth?.());
         const title = registration?.title ? registration.title() : "";
         const titlePadding = normalizeNonNegativeNumber(registration?.titlePadding?.(), 6);
-        const gridLines = registration?.gridLines?.() !== undefined ? (registration.gridLines() as boolean) : defaultGridLines;
+        const gridLines =
+            registration?.gridLines?.() !== undefined ? (registration.gridLines() as boolean) : defaultGridLines;
         const userRotation = registration?.labelRotation ? registration.labelRotation() : 0;
 
         if (!isVisible) {
@@ -105,7 +117,13 @@ export class CartesianAxisLayoutEngine {
         const bandwidth = typeof scale.bandwidth === "function" ? scale.bandwidth() : 0;
 
         // 1. Generate ticks
-        const rawTicks: { coordinate: number; formattedValue: string; index: number; tickKey: string; value: unknown }[] = [];
+        const rawTicks: {
+            coordinate: number;
+            formattedValue: string;
+            index: number;
+            tickKey: string;
+            value: unknown;
+        }[] = [];
         if (axisType === "category") {
             const domain = (scale.domain() ?? []) as readonly unknown[];
             for (let i = 0; i < domain.length; i++) {
@@ -113,9 +131,11 @@ export class CartesianAxisLayoutEngine {
                 const coord = mapValue(val) + (bandwidth > 0 ? bandwidth / 2 : 0);
                 const formattedValue = effectiveFormatter
                     ? effectiveFormatter(val, i)
-                    : (registration?.formatter?.()
-                        ? registration.formatter()!(val, i)
-                        : (val !== undefined && val !== null ? String(val) : ""));
+                    : registration?.formatter?.()
+                      ? registration.formatter()!(val, i)
+                      : val !== undefined && val !== null
+                        ? String(val)
+                        : "";
                 const tickKey = CartesianAxisLabelGeometry.createTickKey(axis, "category", val, i);
                 rawTicks.push({
                     coordinate: coord,
@@ -130,12 +150,15 @@ export class CartesianAxisLayoutEngine {
             const generated = typeof scale.ticks === "function" ? scale.ticks(tickCount) : [];
             for (let i = 0; i < generated.length; i++) {
                 const item = generated[i];
-                const val = item !== null && typeof item === "object" && "value" in item ? (item as { value: unknown }).value : item;
+                const val =
+                    item !== null && typeof item === "object" && "value" in item
+                        ? (item as { value: unknown }).value
+                        : item;
                 const formattedValue = effectiveFormatter
                     ? effectiveFormatter(val, i)
-                    : (registration?.formatter?.()
-                        ? registration.formatter()!(val, i)
-                        : formatXValue(val, i, undefined, axis === "x" ? (axisType as ChartXAxisType) : undefined));
+                    : registration?.formatter?.()
+                      ? registration.formatter()!(val, i)
+                      : formatXValue(val, i, undefined, axis === "x" ? (axisType as ChartXAxisType) : undefined);
                 const tickKey = CartesianAxisLabelGeometry.createTickKey(axis, axisType, val, i);
                 rawTicks.push({
                     coordinate: mapValue(val),
@@ -181,13 +204,18 @@ export class CartesianAxisLayoutEngine {
             if (axis === "x" && axisType === "category" && intermediateTicks.length > 1) {
                 const maxUnrotatedWidth = intermediateTicks.reduce((max, t) => Math.max(max, t.unrotatedWidth), 12);
                 const maxUnrotatedHeight = intermediateTicks.reduce((max, t) => Math.max(max, t.unrotatedHeight), 16);
-                const categoryStep = typeof scale.step === "function"
-                    ? scale.step()
-                    : (bandwidth > 0
-                        ? bandwidth
-                        : Math.abs(intermediateTicks[1].coordinate - intermediateTicks[0].coordinate));
+                const categoryStep =
+                    typeof scale.step === "function"
+                        ? scale.step()
+                        : bandwidth > 0
+                          ? bandwidth
+                          : Math.abs(intermediateTicks[1].coordinate - intermediateTicks[0].coordinate);
                 if (maxUnrotatedWidth > categoryStep - 8) {
-                    const proj45 = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, maxUnrotatedHeight, 45);
+                    const proj45 = CartesianAxisLabelGeometry.projectRotatedDimensions(
+                        maxUnrotatedWidth,
+                        maxUnrotatedHeight,
+                        45
+                    );
                     const isTop = position === "top";
                     if (proj45.projectedWidth <= categoryStep + 4) {
                         resolvedRotation = isTop ? 45 : -45;
@@ -223,13 +251,14 @@ export class CartesianAxisLayoutEngine {
         // 5. Category label thinning
         if (labelsEnabled && axisType === "category" && intermediateTicks.length > 0) {
             const maxExtentAlong = intermediateTicks.reduce((max, t) => Math.max(max, t.extentAlongAxis), 12);
-            const categoryStep = typeof scale.step === "function"
-                ? scale.step()
-                : (bandwidth > 0
-                    ? bandwidth
-                    : (intermediateTicks.length > 1
+            const categoryStep =
+                typeof scale.step === "function"
+                    ? scale.step()
+                    : bandwidth > 0
+                      ? bandwidth
+                      : intermediateTicks.length > 1
                         ? Math.abs(intermediateTicks[1].coordinate - intermediateTicks[0].coordinate)
-                        : containerSize));
+                        : containerSize;
             const thinningFlags = CartesianAxisLabelGeometry.resolveCategoryLabelThinning({
                 categoryCount: intermediateTicks.length,
                 categoryStep,
@@ -252,9 +281,8 @@ export class CartesianAxisLayoutEngine {
         const actualTickMarks = hasTickMarks ? tickSize : 0;
 
         const visibleTicks = intermediateTicks.filter(t => t.labelVisible);
-        const maxOutwardLabel = visibleTicks.length > 0
-            ? visibleTicks.reduce((max, t) => Math.max(max, t.outwardExtent), 0)
-            : 0;
+        const maxOutwardLabel =
+            visibleTicks.length > 0 ? visibleTicks.reduce((max, t) => Math.max(max, t.outwardExtent), 0) : 0;
 
         const labelContribution = labelsEnabled && maxOutwardLabel > 0 ? maxOutwardLabel + labelPadding : 0;
         let rawGutter = actualTickMarks + labelContribution + (hasTitle ? titleExtent + actualTitlePadding : 0);

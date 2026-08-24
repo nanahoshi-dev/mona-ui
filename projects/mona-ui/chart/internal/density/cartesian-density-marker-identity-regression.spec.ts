@@ -21,7 +21,11 @@ import type { SceneHitTarget } from "../scene/scene-geometry";
 describe("Cartesian Density Marker Identity and Downsampling Regressions", () => {
     describe("Unified Mark Identity Authority", () => {
         it("resolves and locates keys without materializing source data arrays", () => {
-            const data = [{ x: 10, y: 100 }, { x: 20, y: 200 }, { x: 30, y: 300 }];
+            const data = [
+                { x: 10, y: 100 },
+                { x: 20, y: 200 },
+                { x: 30, y: 300 }
+            ];
             const authority = new ChartSeriesMarkIdentityAuthority("s1", data, {
                 extractNaturalKey: (d: unknown) => (d as { x: number }).x
             });
@@ -162,14 +166,18 @@ describe("Cartesian Density Marker Identity and Downsampling Regressions", () =>
 
             const provider = new CartesianMarkerSpatialInteractionProvider({
                 hierarchy: index,
-                materialize: idx => ({
-                    datum: { x: 50, y: idx === 0 ? 20 : 80 },
-                    point: { x: 50, y: idx === 0 ? 20 : 80 },
-                    seriesId: "marker-s1"
-                } as unknown as SceneHitTarget),
+                materialize: idx =>
+                    ({
+                        datum: { x: 50, y: idx === 0 ? 20 : 80 },
+                        point: { x: 50, y: idx === 0 ? 20 : 80 },
+                        seriesId: "marker-s1"
+                    }) as unknown as SceneHitTarget,
                 maxVisualRadius: 4,
                 seriesId: "marker-s1",
-                sourceData: [{ x: 50, y: 20 }, { x: 50, y: 80 }],
+                sourceData: [
+                    { x: 50, y: 20 },
+                    { x: 50, y: 80 }
+                ],
                 xViewportScale: new LinearScale([0, 100], [0, 100]),
                 yViewportScale: new LinearScale([0, 100], [100, 0])
             });

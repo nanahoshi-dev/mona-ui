@@ -29,14 +29,8 @@ export interface RadialBarLayoutOptions {
 
 export class RadialBarLayout {
     public static computeScene(options: RadialBarLayoutOptions): PolarArcChartScene {
-        const {
-            containerHeight,
-            containerWidth,
-            rootData,
-            series,
-            styleResolver,
-            warnedDiagnosticSignatures
-        } = options;
+        const { containerHeight, containerWidth, rootData, series, styleResolver, warnedDiagnosticSignatures } =
+            options;
 
         const center: ChartPoint = {
             x: containerWidth / 2,
@@ -175,9 +169,8 @@ export class RadialBarLayout {
 
                 hitTargets.push(target);
 
-                const midAngle = datum.normalizedValue > 0
-                    ? (spanInfo.startAngleRad + markEndAngle) / 2
-                    : spanInfo.startAngleRad;
+                const midAngle =
+                    datum.normalizedValue > 0 ? (spanInfo.startAngleRad + markEndAngle) / 2 : spanInfo.startAngleRad;
                 const midRadius = (ringInner + ringOuter) / 2;
                 interactionBuckets.push({
                     anchor: {
@@ -216,9 +209,10 @@ export class RadialBarLayout {
             visible: isVisible && item.visible
         }));
 
-        const hasRenderableData = isVisible && (
-            marks.some(m => m.normalizedValue !== undefined && m.normalizedValue > 0) || (showTrack && marks.length > 0)
-        );
+        const hasRenderableData =
+            isVisible &&
+            (marks.some(m => m.normalizedValue !== undefined && m.normalizedValue > 0) ||
+                (showTrack && marks.length > 0));
 
         const hitIndex = new RadialBarHitIndex(center, hitTargets);
 

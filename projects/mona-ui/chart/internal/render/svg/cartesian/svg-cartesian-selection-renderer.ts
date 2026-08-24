@@ -28,21 +28,13 @@ export class SvgCartesianSelectionRenderer {
         this.#keyedGroup.destroy();
     }
 
-    public render(
-        scene: CartesianSelectionScene | null,
-        options: SvgCartesianSelectionOptions
-    ): void {
+    public render(scene: CartesianSelectionScene | null, options: SvgCartesianSelectionOptions): void {
         if (!scene || scene.hits.length === 0) {
             this.#keyedGroup.clear();
             return;
         }
 
-        const {
-            color = "#3b82f6",
-            fillOpacity = 0.12,
-            plotClipUrl,
-            strokeWidth = 2
-        } = options;
+        const { color = "#3b82f6", fillOpacity = 0.12, plotClipUrl, strokeWidth = 2 } = options;
 
         this.#keyedGroup.reconcile(scene.hits, {
             key: (hit, index) => `${hit.seriesId}:${hit.animationKey ?? hit.index ?? index}`,

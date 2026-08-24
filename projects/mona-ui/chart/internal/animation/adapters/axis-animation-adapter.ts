@@ -34,7 +34,10 @@ export class AxisAnimationAdapter {
                             return a.axisId === targetAxis.axisId && a.axis === targetAxis.axis;
                         }
                         if (targetAxis.axisId || a.axisId) {
-                            return (targetAxis.axisId ?? a.axisId) === (a.axisId ?? targetAxis.axisId) && a.axis === targetAxis.axis;
+                            return (
+                                (targetAxis.axisId ?? a.axisId) === (a.axisId ?? targetAxis.axisId) &&
+                                a.axis === targetAxis.axis
+                            );
                         }
                         return a.axis === targetAxis.axis && a.position === targetAxis.position;
                     });
@@ -43,13 +46,20 @@ export class AxisAnimationAdapter {
                         return targetAxis;
                     }
 
-                    const prevTicksByKey = new Map(prevAxis.ticks.map(t => [
-                        t.tickKey ?? (t.value instanceof Date ? String(t.value.getTime()) : `${typeof t.value}:${t.value}`),
-                        t.coordinate
-                    ]));
+                    const prevTicksByKey = new Map(
+                        prevAxis.ticks.map(t => [
+                            t.tickKey ??
+                                (t.value instanceof Date ? String(t.value.getTime()) : `${typeof t.value}:${t.value}`),
+                            t.coordinate
+                        ])
+                    );
 
                     const interpolatedTicks = targetAxis.ticks.map(tick => {
-                        const key = tick.tickKey ?? (tick.value instanceof Date ? String(tick.value.getTime()) : `${typeof tick.value}:${tick.value}`);
+                        const key =
+                            tick.tickKey ??
+                            (tick.value instanceof Date
+                                ? String(tick.value.getTime())
+                                : `${typeof tick.value}:${tick.value}`);
                         const prevCoord = prevTicksByKey.get(key);
                         if (prevCoord === undefined) {
                             return tick;
@@ -60,13 +70,15 @@ export class AxisAnimationAdapter {
                         };
                     });
 
-                    const interpolatedGutter = prevAxis.gutter !== undefined && targetAxis.gutter !== undefined
-                        ? lerp(prevAxis.gutter, targetAxis.gutter, progress)
-                        : targetAxis.gutter;
+                    const interpolatedGutter =
+                        prevAxis.gutter !== undefined && targetAxis.gutter !== undefined
+                            ? lerp(prevAxis.gutter, targetAxis.gutter, progress)
+                            : targetAxis.gutter;
 
-                    const interpolatedSideOffset = prevAxis.sideOffset !== undefined && targetAxis.sideOffset !== undefined
-                        ? lerp(prevAxis.sideOffset, targetAxis.sideOffset, progress)
-                        : targetAxis.sideOffset;
+                    const interpolatedSideOffset =
+                        prevAxis.sideOffset !== undefined && targetAxis.sideOffset !== undefined
+                            ? lerp(prevAxis.sideOffset, targetAxis.sideOffset, progress)
+                            : targetAxis.sideOffset;
 
                     return {
                         ...targetAxis,

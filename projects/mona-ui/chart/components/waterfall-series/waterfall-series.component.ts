@@ -1,14 +1,4 @@
-import {
-    Component,
-    contentChild,
-    DestroyRef,
-    effect,
-    ElementRef,
-    inject,
-    input,
-    model,
-    OnInit
-} from "@angular/core";
+import { Component, contentChild, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { ChartWaterfallLabelTemplateDirective } from "../../directives/chart-waterfall-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {

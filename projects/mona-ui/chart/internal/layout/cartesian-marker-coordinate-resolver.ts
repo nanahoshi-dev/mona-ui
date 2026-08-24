@@ -25,7 +25,9 @@ export function resolveCartesianContinuousXCoordinate(
         if (activeScale.type === "time" || activeScale.type === "utc") {
             const resolved = resolveCartesianTemporalValue(val);
             if (resolved) {
-                const coord = (activeScale as unknown as { map(value: unknown): number | undefined }).map(resolved.date);
+                const coord = (activeScale as unknown as { map(value: unknown): number | undefined }).map(
+                    resolved.date
+                );
                 if (coord !== undefined && Number.isFinite(coord)) {
                     return {
                         coordinate: coord,

@@ -66,8 +66,14 @@ describe("Cartesian Stacked Area Density", () => {
             yAxisId: "y-main"
         };
 
-        const mockSeriesA: ChartAreaSeriesRegistration = { id: "series-a", type: "area" } as unknown as ChartAreaSeriesRegistration;
-        const mockSeriesB: ChartAreaSeriesRegistration = { id: "series-b", type: "area" } as unknown as ChartAreaSeriesRegistration;
+        const mockSeriesA: ChartAreaSeriesRegistration = {
+            id: "series-a",
+            type: "area"
+        } as unknown as ChartAreaSeriesRegistration;
+        const mockSeriesB: ChartAreaSeriesRegistration = {
+            id: "series-b",
+            type: "area"
+        } as unknown as ChartAreaSeriesRegistration;
 
         const runtime = buildStackGroupDensityRuntime(
             group,
@@ -108,7 +114,11 @@ describe("Cartesian Stacked Area Density", () => {
             xAxisId: "x-main",
             xScale: xScale as ChartContinuousPositionScale<number | Date>,
             yAxisId: "y-main",
-            yScale: CartesianScaleFactory.createExactPositionScale({ domain: [0, 30], range: [100, 0], type: "linear" }) as ChartContinuousPositionScale<number>
+            yScale: CartesianScaleFactory.createExactPositionScale({
+                domain: [0, 30],
+                range: [100, 0],
+                type: "linear"
+            }) as ChartContinuousPositionScale<number>
         });
 
         const hit = provider.materializeAt(5);

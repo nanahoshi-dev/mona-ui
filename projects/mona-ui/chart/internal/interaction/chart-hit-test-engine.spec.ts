@@ -256,14 +256,15 @@ describe("ChartHitTestEngine", () => {
             yValue: 25
         };
 
-        const bucketLookup = new Map<ChartInteractionXKey, { anchor: { x: number; y: number }; hits: SceneHitTarget[]; order: number; xKey: string; xValue: number }>([
-            ["10", { anchor: { x: 100, y: 100 }, hits: [bottomMarker, topMarker], order: 0, xKey: "10", xValue: 10 }]
-        ]);
+        const bucketLookup = new Map<
+            ChartInteractionXKey,
+            { anchor: { x: number; y: number }; hits: SceneHitTarget[]; order: number; xKey: string; xValue: number }
+        >([["10", { anchor: { x: 100, y: 100 }, hits: [bottomMarker, topMarker], order: 0, xKey: "10", xValue: 10 }]]);
 
         const markerScene: ChartScene = {
             axes: [],
             cartesianKind: "xy",
-        coordinateSystem: "cartesian",
+            coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
             hitTargets: [bottomMarker, topMarker],
@@ -381,7 +382,7 @@ describe("ChartHitTestEngine", () => {
         const rangeScene: ChartScene = {
             axes: [],
             cartesianKind: "xy",
-        coordinateSystem: "cartesian",
+            coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
             hitTargets: [rangeBandHit, topRangeBandHit, zeroHeightBarHit],

@@ -1,7 +1,11 @@
 import type { ResolvedChartCartesianAxisType } from "./chart-scale";
 
 export class CartesianScalePolicy {
-    public static isScaleCompatibleWithSeries(seriesType: string, scaleType: ResolvedChartCartesianAxisType, dimension: "x" | "y"): boolean {
+    public static isScaleCompatibleWithSeries(
+        seriesType: string,
+        scaleType: ResolvedChartCartesianAxisType,
+        dimension: "x" | "y"
+    ): boolean {
         // Value axis log restriction: Bar and Area do not support log due to zero baseline
         if (scaleType === "log") {
             if (dimension === "y" && (seriesType === "bar" || seriesType === "area")) {

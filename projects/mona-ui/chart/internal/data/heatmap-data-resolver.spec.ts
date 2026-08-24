@@ -127,9 +127,7 @@ describe("HeatmapDataResolver", () => {
     });
 
     it("should use fallback coordinate animation key when keyField is absent", () => {
-        const data = [
-            { day: "Mon", hour: 10, val: 20 }
-        ];
+        const data = [{ day: "Mon", hour: 10, val: 20 }];
 
         const res = HeatmapDataResolver.resolve({
             data,
@@ -144,9 +142,7 @@ describe("HeatmapDataResolver", () => {
     });
 
     it("should swap inverted explicit min and max bounds", () => {
-        const data = [
-            { day: "Mon", hour: 10, val: 25 }
-        ];
+        const data = [{ day: "Mon", hour: 10, val: 25 }];
 
         const res = HeatmapDataResolver.resolve({
             data,

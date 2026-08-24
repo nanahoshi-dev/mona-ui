@@ -3,7 +3,10 @@ import { signal } from "@angular/core";
 import { CartesianCrosshairResolver } from "./cartesian-crosshair-resolver";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartCrosshairRegistration } from "../context/chart-registration-context";
-import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
+import {
+    CartesianAxisCoordinateSpace,
+    type CartesianAxisCoordinateSnapshot
+} from "../viewport/cartesian-axis-coordinate-space";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import type { ChartPointerResolution } from "./chart-pointer-interaction-resolver";
 import type { SceneHitTarget, ChartInteractionBucket } from "../scene/scene-geometry";
@@ -140,7 +143,9 @@ function createMultiAxisScene(): CartesianXYChartScene {
 }
 
 describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
-    function createRegistration(overrides: Partial<Record<keyof ChartCrosshairRegistration, unknown>> = {}): ChartCrosshairRegistration {
+    function createRegistration(
+        overrides: Partial<Record<keyof ChartCrosshairRegistration, unknown>> = {}
+    ): ChartCrosshairRegistration {
         return {
             color: signal(undefined),
             element: { nativeElement: document.createElement("div") },
@@ -169,7 +174,12 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
         const resolution: ChartPointerResolution = {
             bucketHits: scene.hitTargets,
             crosshairCandidates: scene.hitTargets,
-            hitState: { activeHitTarget: scene.hitTargets[0], activeHits: scene.hitTargets, pointerPosition: { x: 252, y: 148 }, source: "pointer" },
+            hitState: {
+                activeHitTarget: scene.hitTargets[0],
+                activeHits: scene.hitTargets,
+                pointerPosition: { x: 252, y: 148 },
+                source: "pointer"
+            },
             nearestAnchor: { x: 250, y: 150 },
             pointer: { x: 252, y: 148 },
             primaryHit: scene.hitTargets[0],
@@ -353,9 +363,36 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
 
         const horizScene: CartesianXYChartScene = {
             axes: [
-                { axis: "x", axisId: "x-main", axisLine: true, gridLines: false, position: "bottom", ticks: [], title: "X Main", visible: true },
-                { axis: "x", axisId: "x-sec", axisLine: true, gridLines: false, position: "top", ticks: [], title: "X Sec", visible: true },
-                { axis: "y", axisId: "y-main", axisLine: true, gridLines: false, position: "left", ticks: [], title: "Y Main", visible: true }
+                {
+                    axis: "x",
+                    axisId: "x-main",
+                    axisLine: true,
+                    gridLines: false,
+                    position: "bottom",
+                    ticks: [],
+                    title: "X Main",
+                    visible: true
+                },
+                {
+                    axis: "x",
+                    axisId: "x-sec",
+                    axisLine: true,
+                    gridLines: false,
+                    position: "top",
+                    ticks: [],
+                    title: "X Sec",
+                    visible: true
+                },
+                {
+                    axis: "y",
+                    axisId: "y-main",
+                    axisLine: true,
+                    gridLines: false,
+                    position: "left",
+                    ticks: [],
+                    title: "Y Main",
+                    visible: true
+                }
             ],
             cartesianKind: "xy",
             coordinateSpace: coordSpace,
@@ -451,8 +488,26 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
 
         const scene: CartesianXYChartScene = {
             axes: [
-                { axis: "x", axisId: "shared-id", axisLine: true, gridLines: false, position: "bottom", ticks: [], title: "X", visible: true },
-                { axis: "y", axisId: "shared-id", axisLine: true, gridLines: false, position: "left", ticks: [], title: "Y", visible: true }
+                {
+                    axis: "x",
+                    axisId: "shared-id",
+                    axisLine: true,
+                    gridLines: false,
+                    position: "bottom",
+                    ticks: [],
+                    title: "X",
+                    visible: true
+                },
+                {
+                    axis: "y",
+                    axisId: "shared-id",
+                    axisLine: true,
+                    gridLines: false,
+                    position: "left",
+                    ticks: [],
+                    title: "Y",
+                    visible: true
+                }
             ],
             cartesianKind: "xy",
             coordinateSpace: coordSpace,
@@ -478,7 +533,12 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
         const resolution: ChartPointerResolution = {
             bucketHits: [hit],
             crosshairCandidates: [hit],
-            hitState: { activeHitTarget: hit, activeHits: [hit], pointerPosition: { x: 250, y: 150 }, source: "pointer" },
+            hitState: {
+                activeHitTarget: hit,
+                activeHits: [hit],
+                pointerPosition: { x: 250, y: 150 },
+                source: "pointer"
+            },
             nearestAnchor: { x: 250, y: 150 },
             pointer: { x: 250, y: 150 },
             primaryHit: hit,
@@ -535,9 +595,27 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
             yValue: 37.5
         };
 
-        const bucket0: ChartInteractionBucket = { anchor: { x: 200, y: 150 }, hits: [mainHit1], order: 0, xKey: "x-0", xValue: 37.5 };
-        const bucket1: ChartInteractionBucket = { anchor: { x: 210, y: 150 }, hits: [mainHit2], order: 1, xKey: "x-1", xValue: 40 };
-        const bucket2: ChartInteractionBucket = { anchor: { x: 220, y: 100 }, hits: [secHit], order: 2, xKey: "x-2", xValue: 42.5 };
+        const bucket0: ChartInteractionBucket = {
+            anchor: { x: 200, y: 150 },
+            hits: [mainHit1],
+            order: 0,
+            xKey: "x-0",
+            xValue: 37.5
+        };
+        const bucket1: ChartInteractionBucket = {
+            anchor: { x: 210, y: 150 },
+            hits: [mainHit2],
+            order: 1,
+            xKey: "x-1",
+            xValue: 40
+        };
+        const bucket2: ChartInteractionBucket = {
+            anchor: { x: 220, y: 100 },
+            hits: [secHit],
+            order: 2,
+            xKey: "x-2",
+            xValue: 42.5
+        };
 
         const bucketMap = new Map<string, ChartInteractionBucket>([
             ["x-0", bucket0],
@@ -584,29 +662,149 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
         const xMap = new Map<string, CartesianAxisCoordinateSnapshot>();
         const yMap = new Map<string, CartesianAxisCoordinateSnapshot>();
 
-        const xScaleMain = CartesianScaleFactory.createExactPositionScale({ domain: [0, 1000], range: [50, 450], type: "linear" });
-        const xScaleSec = CartesianScaleFactory.createExactPositionScale({ domain: [0, 50], range: [50, 450], type: "linear" });
-        const yScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 100], range: [250, 50], type: "linear" });
+        const xScaleMain = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 1000],
+            range: [50, 450],
+            type: "linear"
+        });
+        const xScaleSec = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 50],
+            range: [50, 450],
+            type: "linear"
+        });
+        const yScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [0, 100],
+            range: [250, 50],
+            type: "linear"
+        });
 
-        xMap.set("x-main", { baseDomain: [0, 1000], baseScale: xScaleMain, range: [50, 450], ref: { axis: "x", axisId: "x-main" }, resolvedType: "linear", valid: true, viewportDomain: [0, 1000], viewportScale: xScaleMain });
-        xMap.set("x-sec", { baseDomain: [0, 50], baseScale: xScaleSec, range: [50, 450], ref: { axis: "x", axisId: "x-sec" }, resolvedType: "linear", valid: true, viewportDomain: [0, 50], viewportScale: xScaleSec });
-        yMap.set("y-main", { baseDomain: [0, 100], baseScale: yScale, range: [250, 50], ref: { axis: "y", axisId: "y-main" }, resolvedType: "linear", valid: true, viewportDomain: [0, 100], viewportScale: yScale });
+        xMap.set("x-main", {
+            baseDomain: [0, 1000],
+            baseScale: xScaleMain,
+            range: [50, 450],
+            ref: { axis: "x", axisId: "x-main" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 1000],
+            viewportScale: xScaleMain
+        });
+        xMap.set("x-sec", {
+            baseDomain: [0, 50],
+            baseScale: xScaleSec,
+            range: [50, 450],
+            ref: { axis: "x", axisId: "x-sec" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 50],
+            viewportScale: xScaleSec
+        });
+        yMap.set("y-main", {
+            baseDomain: [0, 100],
+            baseScale: yScale,
+            range: [250, 50],
+            ref: { axis: "y", axisId: "y-main" },
+            resolvedType: "linear",
+            valid: true,
+            viewportDomain: [0, 100],
+            viewportScale: yScale
+        });
 
         const coordSpace = new CartesianAxisCoordinateSpace(xMap, yMap);
 
-        const mainHit1: SceneHitTarget = { datum: {}, index: 0, point: { x: 250, y: 100 }, seriesId: "s1", seriesName: "S1", seriesType: "bar", xAxisId: "x-main", xKey: "y-0", xValue: 500, yAxisId: "y-main", yValue: 75 };
-        const mainHit2: SceneHitTarget = { datum: {}, index: 1, point: { x: 250, y: 110 }, seriesId: "s2", seriesName: "S2", seriesType: "bar", xAxisId: "x-main", xKey: "y-1", xValue: 500, yAxisId: "y-main", yValue: 70 };
-        const secHit: SceneHitTarget = { datum: {}, index: 2, point: { x: 350, y: 120 }, seriesId: "s3", seriesName: "S3", seriesType: "bar", xAxisId: "x-sec", xKey: "y-2", xValue: 37.5, yAxisId: "y-main", yValue: 65 };
+        const mainHit1: SceneHitTarget = {
+            datum: {},
+            index: 0,
+            point: { x: 250, y: 100 },
+            seriesId: "s1",
+            seriesName: "S1",
+            seriesType: "bar",
+            xAxisId: "x-main",
+            xKey: "y-0",
+            xValue: 500,
+            yAxisId: "y-main",
+            yValue: 75
+        };
+        const mainHit2: SceneHitTarget = {
+            datum: {},
+            index: 1,
+            point: { x: 250, y: 110 },
+            seriesId: "s2",
+            seriesName: "S2",
+            seriesType: "bar",
+            xAxisId: "x-main",
+            xKey: "y-1",
+            xValue: 500,
+            yAxisId: "y-main",
+            yValue: 70
+        };
+        const secHit: SceneHitTarget = {
+            datum: {},
+            index: 2,
+            point: { x: 350, y: 120 },
+            seriesId: "s3",
+            seriesName: "S3",
+            seriesType: "bar",
+            xAxisId: "x-sec",
+            xKey: "y-2",
+            xValue: 37.5,
+            yAxisId: "y-main",
+            yValue: 65
+        };
 
-        const bucket0: ChartInteractionBucket = { anchor: { x: 250, y: 100 }, hits: [mainHit1], order: 0, xKey: "y-0", xValue: 75 };
-        const bucket1: ChartInteractionBucket = { anchor: { x: 250, y: 110 }, hits: [mainHit2], order: 1, xKey: "y-1", xValue: 70 };
-        const bucket2: ChartInteractionBucket = { anchor: { x: 350, y: 120 }, hits: [secHit], order: 2, xKey: "y-2", xValue: 65 };
+        const bucket0: ChartInteractionBucket = {
+            anchor: { x: 250, y: 100 },
+            hits: [mainHit1],
+            order: 0,
+            xKey: "y-0",
+            xValue: 75
+        };
+        const bucket1: ChartInteractionBucket = {
+            anchor: { x: 250, y: 110 },
+            hits: [mainHit2],
+            order: 1,
+            xKey: "y-1",
+            xValue: 70
+        };
+        const bucket2: ChartInteractionBucket = {
+            anchor: { x: 350, y: 120 },
+            hits: [secHit],
+            order: 2,
+            xKey: "y-2",
+            xValue: 65
+        };
 
         const horizScene: CartesianXYChartScene = {
             axes: [
-                { axis: "x", axisId: "x-main", axisLine: true, gridLines: false, position: "bottom", ticks: [], title: "X Main", visible: true },
-                { axis: "x", axisId: "x-sec", axisLine: true, gridLines: false, position: "top", ticks: [], title: "X Sec", visible: true },
-                { axis: "y", axisId: "y-main", axisLine: true, gridLines: false, position: "left", ticks: [], title: "Y Main", visible: true }
+                {
+                    axis: "x",
+                    axisId: "x-main",
+                    axisLine: true,
+                    gridLines: false,
+                    position: "bottom",
+                    ticks: [],
+                    title: "X Main",
+                    visible: true
+                },
+                {
+                    axis: "x",
+                    axisId: "x-sec",
+                    axisLine: true,
+                    gridLines: false,
+                    position: "top",
+                    ticks: [],
+                    title: "X Sec",
+                    visible: true
+                },
+                {
+                    axis: "y",
+                    axisId: "y-main",
+                    axisLine: true,
+                    gridLines: false,
+                    position: "left",
+                    ticks: [],
+                    title: "Y Main",
+                    visible: true
+                }
             ],
             cartesianKind: "xy",
             coordinateSpace: coordSpace,
@@ -616,7 +814,16 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
             hitTargets: [mainHit1, mainHit2, secHit],
             interactionAxis: "y",
             interactionBuckets: [bucket0, bucket1, bucket2],
-            interactionBucketsByAxisId: new Map([["y-main", new Map([["y-0", bucket0], ["y-1", bucket1], ["y-2", bucket2]])]]),
+            interactionBucketsByAxisId: new Map([
+                [
+                    "y-main",
+                    new Map([
+                        ["y-0", bucket0],
+                        ["y-1", bucket1],
+                        ["y-2", bucket2]
+                    ])
+                ]
+            ]),
             legendItems: [],
             plotRect: { height: 200, width: 400, x: 50, y: 50 },
             primaryXAxisId: "x-main",
@@ -679,15 +886,35 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
             yValue: 37.5
         };
 
-        const bucket0: ChartInteractionBucket = { anchor: { x: 100, y: 100 }, hits: [secHit], order: 0, xKey: "x-1", xValue: 12.5 };
-        const bucket1: ChartInteractionBucket = { anchor: { x: 200, y: 150 }, hits: [mainHit], order: 1, xKey: "x-0", xValue: 37.5 };
+        const bucket0: ChartInteractionBucket = {
+            anchor: { x: 100, y: 100 },
+            hits: [secHit],
+            order: 0,
+            xKey: "x-1",
+            xValue: 12.5
+        };
+        const bucket1: ChartInteractionBucket = {
+            anchor: { x: 200, y: 150 },
+            hits: [mainHit],
+            order: 1,
+            xKey: "x-0",
+            xValue: 37.5
+        };
 
         const scene: CartesianXYChartScene = {
             ...createMultiAxisScene(),
             coordinateSpace: space,
             hitTargets: [mainHit, secHit],
             interactionBuckets: [bucket0, bucket1],
-            interactionBucketsByAxisId: new Map([["x-main", new Map([["x-1", bucket0], ["x-0", bucket1]])]])
+            interactionBucketsByAxisId: new Map([
+                [
+                    "x-main",
+                    new Map([
+                        ["x-1", bucket0],
+                        ["x-0", bucket1]
+                    ])
+                ]
+            ])
         };
 
         const reg = createRegistration({

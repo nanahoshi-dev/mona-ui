@@ -8,7 +8,10 @@ import type {
     ChartSynchronizationViewportMessage
 } from "./chart-synchronization-types";
 
-function createMember(memberId: string, group: string): ChartSynchronizationMember & {
+function createMember(
+    memberId: string,
+    group: string
+): ChartSynchronizationMember & {
     cleared: ChartSynchronizationCrosshairClearMessage[];
     crosshairs: ChartSynchronizationCrosshairMessage[];
     viewports: ChartSynchronizationViewportMessage[];
@@ -22,7 +25,14 @@ function createMember(memberId: string, group: string): ChartSynchronizationMemb
         getCoordinateSpace: () => null,
         getOptions: () => ({
             axisMappings: [],
-            crosshair: { axes: "auto", clearOnLeave: true, enabled: true, match: "axis-value", mode: "domain", showTooltip: false },
+            crosshair: {
+                axes: "auto",
+                clearOnLeave: true,
+                enabled: true,
+                match: "axis-value",
+                mode: "domain",
+                showTooltip: false
+            },
             group,
             viewport: { axes: "auto", enabled: true, mode: "domain", phase: "continuous" }
         }),

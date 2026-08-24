@@ -5,8 +5,8 @@ describe("FinancialDataResolver", () => {
     it("should extract valid rising, falling, and neutral OHLC data with change and changePercentage", () => {
         const data = [
             { c: 110, date: "2026-01-01", h: 120, l: 95, o: 100 }, // rising (close > open)
-            { c: 90, date: "2026-01-02", h: 115, l: 85, o: 105 },  // falling (close < open)
-            { c: 100, date: "2026-01-03", h: 110, l: 90, o: 100 }  // neutral (close === open)
+            { c: 90, date: "2026-01-02", h: 115, l: 85, o: 105 }, // falling (close < open)
+            { c: 100, date: "2026-01-03", h: 110, l: 90, o: 100 } // neutral (close === open)
         ];
 
         const result = FinancialDataResolver.resolve({
@@ -279,7 +279,9 @@ describe("FinancialDataResolver", () => {
         expect(result.marks[0].animationKey).toBe("fin-1:fin:key:s:candle-1");
         expect(signatures.has("fin-1:duplicate-financial-key")).toBe(true);
         expect(warnSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Financial series "Price" encountered duplicate explicit animation key "s:candle-1" at data index 1. First valid datum wins.')
+            expect.stringContaining(
+                'Financial series "Price" encountered duplicate explicit animation key "s:candle-1" at data index 1. First valid datum wins.'
+            )
         );
         warnSpy.mockRestore();
     });

@@ -38,12 +38,7 @@ export function normalizeOpacity(value: unknown, fallback: number = 1): number {
     return isFiniteNumber(value) ? clamp(value, 0, 1) : clamp(fallback, 0, 1);
 }
 
-export function normalizeTickCount(
-    value: unknown,
-    fallback: number = 5,
-    min: number = 1,
-    max: number = 100
-): number {
+export function normalizeTickCount(value: unknown, fallback: number = 5, min: number = 1, max: number = 100): number {
     if (isFiniteNumber(value)) {
         const intVal = Math.floor(value);
         if (intVal >= min) {

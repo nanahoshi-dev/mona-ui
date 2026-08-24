@@ -3,7 +3,10 @@ import { signal } from "@angular/core";
 import { CartesianCrosshairResolver } from "./cartesian-crosshair-resolver";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartCrosshairRegistration } from "../context/chart-registration-context";
-import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
+import {
+    CartesianAxisCoordinateSpace,
+    type CartesianAxisCoordinateSnapshot
+} from "../viewport/cartesian-axis-coordinate-space";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import type { ChartPointerResolution } from "./chart-pointer-interaction-resolver";
 
@@ -89,7 +92,9 @@ function createMockScene(space: CartesianAxisCoordinateSpace, interactionAxis: "
 }
 
 describe("CartesianCrosshairResolver", () => {
-    function createRegistration(overrides: Partial<Record<keyof ChartCrosshairRegistration, unknown>> = {}): ChartCrosshairRegistration {
+    function createRegistration(
+        overrides: Partial<Record<keyof ChartCrosshairRegistration, unknown>> = {}
+    ): ChartCrosshairRegistration {
         return {
             color: signal(undefined),
             element: { nativeElement: document.createElement("div") },
@@ -204,7 +209,12 @@ describe("CartesianCrosshairResolver", () => {
         };
         const resolution: ChartPointerResolution = {
             bucketHits: [primaryHit],
-            hitState: { activeHitTarget: primaryHit, activeHits: [primaryHit], pointerPosition: { x: 260, y: 110 }, source: "pointer" },
+            hitState: {
+                activeHitTarget: primaryHit,
+                activeHits: [primaryHit],
+                pointerPosition: { x: 260, y: 110 },
+                source: "pointer"
+            },
             nearestAnchor: markAnchor,
             pointer: { x: 260, y: 110 },
             primaryHit,

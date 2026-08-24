@@ -7,10 +7,5 @@ export function distance(x1: number, y1: number, x2: number, y2: number): number
 }
 
 export function isPointInRect(point: ChartPoint, rect: ChartRect): boolean {
-    return (
-        point.x >= rect.x &&
-        point.x <= rect.x + rect.width &&
-        point.y >= rect.y &&
-        point.y <= rect.y + rect.height
-    );
+    return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
 }

@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ChartViewportLinkGroup, ChartViewportState } from "../../models/chart-viewport.models";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import {
-    CartesianAxisCoordinateSpace,
-    type CartesianAxisCoordinateSnapshot
-} from "./cartesian-axis-coordinate-space";
+import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportOperationCoordinator } from "./cartesian-viewport-operation-coordinator";
 import type { InternalCartesianViewportState } from "./cartesian-viewport-normalizer";
 
@@ -64,9 +61,7 @@ describe("CartesianViewportOperationCoordinator", () => {
             ["x-1", xSnap],
             ["x-cat", xCatSnap]
         ]),
-        new Map([
-            ["y-1", ySnap]
-        ])
+        new Map([["y-1", ySnap]])
     );
 
     const emptyViewport: InternalCartesianViewportState = {
@@ -125,16 +120,10 @@ describe("CartesianViewportOperationCoordinator", () => {
 
         // Replace with only x-1 specified -> y-1 should revert to full domain (cleared from map)
         const newState: ChartViewportState = {
-            axes: [
-                { axis: "x", axisId: "x-1", kind: "continuous", min: 30, max: 70 }
-            ]
+            axes: [{ axis: "x", axisId: "x-1", kind: "continuous", min: 30, max: 70 }]
         };
 
-        const res = CartesianViewportOperationCoordinator.setViewport(
-            initial,
-            coordSpace,
-            newState
-        );
+        const res = CartesianViewportOperationCoordinator.setViewport(initial, coordSpace, newState);
 
         expect(res.accepted).toBe(true);
         expect(res.changed).toBe(true);
@@ -154,11 +143,13 @@ describe("CartesianViewportOperationCoordinator", () => {
             y: new Map([["y-1", { axis: "y", axisId: "y-1", kind: "continuous", min: 10, max: 40 }]])
         };
 
-        const res = CartesianViewportOperationCoordinator.setWindow(
-            initial,
-            coordSpace,
-            { axis: "x", axisId: "x-1", kind: "continuous", min: 10, max: 90 }
-        );
+        const res = CartesianViewportOperationCoordinator.setWindow(initial, coordSpace, {
+            axis: "x",
+            axisId: "x-1",
+            kind: "continuous",
+            min: 10,
+            max: 90
+        });
 
         expect(res.accepted).toBe(true);
         expect(res.changed).toBe(true);
@@ -179,11 +170,7 @@ describe("CartesianViewportOperationCoordinator", () => {
             y: new Map([["y-1", { axis: "y", axisId: "y-1", kind: "continuous", min: 10, max: 40 }]])
         };
 
-        const res = CartesianViewportOperationCoordinator.fit(
-            initial,
-            coordSpace,
-            [{ axis: "x", axisId: "x-1" }]
-        );
+        const res = CartesianViewportOperationCoordinator.fit(initial, coordSpace, [{ axis: "x", axisId: "x-1" }]);
 
         expect(res.accepted).toBe(true);
         expect(res.changed).toBe(true);
@@ -198,16 +185,10 @@ describe("CartesianViewportOperationCoordinator", () => {
         };
 
         const defaultViewport: ChartViewportState = {
-            axes: [
-                { axis: "x", axisId: "x-1", kind: "continuous", min: 10, max: 90 }
-            ]
+            axes: [{ axis: "x", axisId: "x-1", kind: "continuous", min: 10, max: 90 }]
         };
 
-        const res = CartesianViewportOperationCoordinator.reset(
-            initial,
-            coordSpace,
-            defaultViewport
-        );
+        const res = CartesianViewportOperationCoordinator.reset(initial, coordSpace, defaultViewport);
 
         expect(res.accepted).toBe(true);
         expect(res.changed).toBe(true);
@@ -337,12 +318,9 @@ describe("CartesianViewportOperationCoordinator", () => {
             ]
         };
 
-        const res = CartesianViewportOperationCoordinator.setViewport(
-            emptyViewport,
-            multiCoordSpace,
-            state,
-            { linkGroups }
-        );
+        const res = CartesianViewportOperationCoordinator.setViewport(emptyViewport, multiCoordSpace, state, {
+            linkGroups
+        });
 
         expect(res.accepted).toBe(true);
         expect(res.changed).toBe(true);

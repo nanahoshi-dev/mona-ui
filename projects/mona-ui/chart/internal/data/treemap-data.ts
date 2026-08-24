@@ -134,9 +134,13 @@ export class TreemapDataProcessor {
         if (typeof window !== "undefined" && seriesElement) {
             try {
                 const userClass = seriesElement.className || "";
-                const hasTextClass = typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
+                const hasTextClass =
+                    typeof userClass === "string" && (/\btext-/.test(userClass) || /\btext\[/.test(userClass));
                 if (seriesElement.style?.color) {
-                    seriesExplicitHostColor = styleResolver.resolveCssVariable(seriesElement.style.color, seriesElement);
+                    seriesExplicitHostColor = styleResolver.resolveCssVariable(
+                        seriesElement.style.color,
+                        seriesElement
+                    );
                 } else if (hasTextClass) {
                     const computed = window.getComputedStyle(seriesElement);
                     if (computed.color && computed.color !== "rgba(0, 0, 0, 0)" && computed.color !== "transparent") {
@@ -233,7 +237,11 @@ export class TreemapDataProcessor {
                             const childSiblingTracker = new Map<string, number>();
                             for (let cIdx = 0; cIdx < rawChildren.length; cIdx++) {
                                 const childDatum = rawChildren[cIdx];
-                                if (typeof childDatum === "object" && childDatum !== null && activeAncestors.has(childDatum)) {
+                                if (
+                                    typeof childDatum === "object" &&
+                                    childDatum !== null &&
+                                    activeAncestors.has(childDatum)
+                                ) {
                                     if (warnedDiagnosticSignatures) {
                                         ChartDiagnostics.warnOnce(
                                             warnedDiagnosticSignatures,
@@ -394,9 +402,7 @@ export class TreemapDataProcessor {
         }
 
         // Total value of visible root branches
-        const totalValue = rootNodes
-            .filter(r => r.visible)
-            .reduce((sum, r) => sum + r.aggregateValue, 0);
+        const totalValue = rootNodes.filter(r => r.visible).reduce((sum, r) => sum + r.aggregateValue, 0);
 
         return {
             allNodes: allNodes as readonly PreparedTreemapNode[],

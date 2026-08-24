@@ -21,9 +21,7 @@ export class CartesianOrientationPolicy {
                 if (raw === "horizontal" || raw === "vertical") {
                     return raw;
                 }
-                diagnostics.push(
-                    `[MonaChart] Invalid orientation '${String(raw)}'. Falling back to 'vertical'.`
-                );
+                diagnostics.push(`[MonaChart] Invalid orientation '${String(raw)}'. Falling back to 'vertical'.`);
                 return "vertical";
             }
             return "vertical";

@@ -45,7 +45,12 @@ export class AreaSeriesRenderer {
         } else {
             const spec = createAreaGradientSpec(baselineY, definedPoints, style.areaFillColor, fillOpacity);
             if (spec) {
-                const gradient = context.createLinearGradient(0, spec.startY ?? spec.startPos, 0, spec.endY ?? spec.endPos);
+                const gradient = context.createLinearGradient(
+                    0,
+                    spec.startY ?? spec.startPos,
+                    0,
+                    spec.endY ?? spec.endPos
+                );
                 for (const stop of spec.stops) {
                     gradient.addColorStop(stop.offset, stop.color);
                 }

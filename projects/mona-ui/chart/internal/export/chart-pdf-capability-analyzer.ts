@@ -12,12 +12,7 @@ export interface PdfCapabilityResult {
     readonly reasonCode?: ChartPdfUnsafeReason;
 }
 
-const CERTIFIED_PRIMARY_PDF_FONTS = new Set([
-    "helvetica",
-    "times",
-    "times roman",
-    "courier"
-]);
+const CERTIFIED_PRIMARY_PDF_FONTS = new Set(["helvetica", "times", "times roman", "courier"]);
 
 /**
  * Regex matching any characters outside the standard ASCII printable range
@@ -40,7 +35,10 @@ const DEFAULT_EFFECTIVE_FONT_FAMILY = "helvetica";
 
 function parsePrimaryFontFamily(fontFamilyStr: string): string {
     const firstFamily = fontFamilyStr.split(",")[0] ?? "";
-    const clean = firstFamily.trim().replace(/^['"]|['"]$/g, "").toLowerCase();
+    const clean = firstFamily
+        .trim()
+        .replace(/^['"]|['"]$/g, "")
+        .toLowerCase();
     if (clean === "depends on user agent" || !clean) {
         return DEFAULT_EFFECTIVE_FONT_FAMILY;
     }
@@ -204,7 +202,9 @@ export class ChartPdfCapabilityAnalyzer {
         const elementsWithUrls = svgElement.querySelectorAll("[href], [xlink\\:href], [src]");
         for (let i = 0; i < elementsWithUrls.length; i++) {
             const el = elementsWithUrls[i];
-            const href = (el.getAttribute("href") || el.getAttribute("xlink:href") || el.getAttribute("src") || "").trim().toLowerCase();
+            const href = (el.getAttribute("href") || el.getAttribute("xlink:href") || el.getAttribute("src") || "")
+                .trim()
+                .toLowerCase();
             if (href.startsWith("http://") || href.startsWith("https://") || href.startsWith("blob:")) {
                 return {
                     isVectorSafe: false,

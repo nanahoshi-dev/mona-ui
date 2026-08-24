@@ -5,7 +5,12 @@ import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import type { InternalCategoryViewport, InternalContinuousViewport } from "./cartesian-viewport-normalizer";
 
 describe("CartesianViewportReconciler", () => {
-    function makeNumericSnap(axis: "x" | "y", axisId: string, min: number, max: number): CartesianAxisCoordinateSnapshot {
+    function makeNumericSnap(
+        axis: "x" | "y",
+        axisId: string,
+        min: number,
+        max: number
+    ): CartesianAxisCoordinateSnapshot {
         const scale = CartesianScaleFactory.createNumericScale({
             domain: [min, max],
             range: axis === "x" ? [0, 500] : [300, 0],
@@ -23,7 +28,11 @@ describe("CartesianViewportReconciler", () => {
         };
     }
 
-    function makeCategorySnap(axis: "x" | "y", axisId: string, categories: readonly string[]): CartesianAxisCoordinateSnapshot {
+    function makeCategorySnap(
+        axis: "x" | "y",
+        axisId: string,
+        categories: readonly string[]
+    ): CartesianAxisCoordinateSnapshot {
         const scale = CartesianScaleFactory.createBandScale({
             domain: categories,
             range: axis === "x" ? [0, 500] : [300, 0]
@@ -60,10 +69,7 @@ describe("CartesianViewportReconciler", () => {
     });
 
     it("clamps continuous window to expanded or contracted base domain", () => {
-        const space = new CartesianAxisCoordinateSpace(
-            new Map([["x1", makeNumericSnap("x", "x1", 0, 80)]]),
-            new Map()
-        );
+        const space = new CartesianAxisCoordinateSpace(new Map([["x1", makeNumericSnap("x", "x1", 0, 80)]]), new Map());
         const currentViewport = {
             x: new Map<string, InternalContinuousViewport>([
                 ["x1", { axis: "x", axisId: "x1", kind: "continuous", min: 50, max: 100 }]
@@ -103,15 +109,18 @@ describe("CartesianViewportReconciler", () => {
         );
         const currentViewport = {
             x: new Map<string, InternalCategoryViewport>([
-                ["catX", {
-                    axis: "x",
-                    axisId: "catX",
-                    endIndexExclusive: 3,
-                    firstVisibleKey: "B",
-                    kind: "category",
-                    lastVisibleKey: "C",
-                    startIndex: 1
-                }]
+                [
+                    "catX",
+                    {
+                        axis: "x",
+                        axisId: "catX",
+                        endIndexExclusive: 3,
+                        firstVisibleKey: "B",
+                        kind: "category",
+                        lastVisibleKey: "C",
+                        startIndex: 1
+                    }
+                ]
             ]),
             y: new Map()
         };

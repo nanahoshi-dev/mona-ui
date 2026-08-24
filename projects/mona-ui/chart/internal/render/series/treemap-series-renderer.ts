@@ -31,7 +31,14 @@ export class TreemapSeriesRenderer {
                 context.fillStyle = node.fillColor;
 
                 if (borderRadius > 0) {
-                    drawCellRect(context, node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, borderRadius);
+                    drawCellRect(
+                        context,
+                        node.bounds.x,
+                        node.bounds.y,
+                        node.bounds.width,
+                        node.bounds.height,
+                        borderRadius
+                    );
                 } else {
                     context.fillRect(node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height);
                 }
@@ -64,7 +71,14 @@ export class TreemapSeriesRenderer {
                 context.fillStyle = node.fillColor;
 
                 if (borderRadius > 0) {
-                    drawCellRect(context, node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, borderRadius);
+                    drawCellRect(
+                        context,
+                        node.bounds.x,
+                        node.bounds.y,
+                        node.bounds.width,
+                        node.bounds.height,
+                        borderRadius
+                    );
                 } else {
                     context.fillRect(node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height);
                 }

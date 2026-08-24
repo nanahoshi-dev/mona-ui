@@ -32,9 +32,7 @@ describe("TreemapDataProcessor", () => {
             },
             {
                 name: "Storage",
-                children: [
-                    { name: "Database", value: 100 }
-                ]
+                children: [{ name: "Database", value: 100 }]
             }
         ];
 
@@ -134,9 +132,7 @@ describe("TreemapDataProcessor", () => {
     });
 
     it("uses explicit keyField for node identity when provided", () => {
-        const data = [
-            { id: "node-comp", name: "Compute", children: [{ id: "node-api", name: "API", value: 50 }] }
-        ];
+        const data = [{ id: "node-comp", name: "Compute", children: [{ id: "node-api", name: "API", value: 50 }] }];
 
         const res = TreemapDataProcessor.process({
             data,
@@ -305,9 +301,7 @@ describe("TreemapDataProcessor", () => {
     it("ensures extractRetainedRootBranchIdentities and process produce identical root nodeIds even with nested key collisions", () => {
         const data = [
             {
-                children: [
-                    { id: "shared-key", name: "A child", value: 10 }
-                ],
+                children: [{ id: "shared-key", name: "A child", value: 10 }],
                 id: "root-a",
                 name: "A"
             },
@@ -347,9 +341,7 @@ describe("TreemapDataProcessor", () => {
     it("distinguishes string vs numeric keys with same stringified value", () => {
         const data = [
             {
-                children: [
-                    { id: 1, name: "Num child", value: 10 }
-                ],
+                children: [{ id: 1, name: "Num child", value: 10 }],
                 id: "root-a",
                 name: "A"
             },

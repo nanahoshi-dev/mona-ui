@@ -107,15 +107,17 @@ function createMockBubble(
     };
 }
 
-function createMockXAxis(options?: Partial<{
-    max: number | Date;
-    min: number | Date;
-    nice: boolean;
-    position: "bottom" | "top";
-    tickCount: number;
-    title: string;
-    type: "auto" | "category" | "linear" | "time" | "utc";
-}>): ChartXAxisRegistration {
+function createMockXAxis(
+    options?: Partial<{
+        max: number | Date;
+        min: number | Date;
+        nice: boolean;
+        position: "bottom" | "top";
+        tickCount: number;
+        title: string;
+        type: "auto" | "category" | "linear" | "time" | "utc";
+    }>
+): ChartXAxisRegistration {
     return {
         axisId: signal(undefined),
         axisLine: signal(true),
@@ -134,15 +136,17 @@ function createMockXAxis(options?: Partial<{
     };
 }
 
-function createMockYAxis(options?: Partial<{
-    max: number;
-    min: number;
-    nice: boolean;
-    position: "left" | "right";
-    tickCount: number;
-    title: string;
-    type: "auto" | "category" | "linear";
-}>): ChartYAxisRegistration {
+function createMockYAxis(
+    options?: Partial<{
+        max: number;
+        min: number;
+        nice: boolean;
+        position: "left" | "right";
+        tickCount: number;
+        title: string;
+        type: "auto" | "category" | "linear";
+    }>
+): ChartYAxisRegistration {
     return {
         axisId: signal(undefined),
         axisLine: signal(true),
@@ -166,7 +170,10 @@ describe("CartesianLayoutEngine", () => {
 
     it("should compute valid plotRect and series scene", () => {
         const series = [createMockSeries("line", "val")];
-        const data = [{ val: 10, x: "A" }, { val: 20, x: "B" }];
+        const data = [
+            { val: 10, x: "A" },
+            { val: 20, x: "B" }
+        ];
 
         const scene = CartesianLayoutEngine.computeScene({
             containerHeight: 300,
@@ -208,7 +215,10 @@ describe("CartesianLayoutEngine", () => {
 
     it("should render zero-valued bar with zero height", () => {
         const s1 = createMockSeries("bar", "val");
-        const data = [{ val: 0, x: "A" }, { val: 50, x: "B" }];
+        const data = [
+            { val: 0, x: "A" },
+            { val: 50, x: "B" }
+        ];
 
         const scene = CartesianLayoutEngine.computeScene({
             containerHeight: 300,
@@ -286,7 +296,10 @@ describe("CartesianLayoutEngine", () => {
     it("should skip bar series on incompatible time X axis without breaking scene generation", () => {
         const barSeries = createMockSeries("bar", "val", "bar-1");
         const lineSeries = createMockSeries("line", "val", "line-1");
-        const data = [{ date: "2026-01-01", val: 10 }, { date: "2026-01-02", val: 20 }];
+        const data = [
+            { date: "2026-01-01", val: 10 },
+            { date: "2026-01-02", val: 20 }
+        ];
 
         const scene = CartesianLayoutEngine.computeScene({
             containerHeight: 300,
@@ -479,10 +492,22 @@ describe("CartesianLayoutEngine", () => {
         const runtime = prepared.runtime;
         const makeViewport = (targetRuntime: NonNullable<typeof runtime>, min: number, max: number) => ({
             x: new Map([
-                [targetRuntime.primaryXAxisId, { axis: "x" as const, axisId: targetRuntime.primaryXAxisId, kind: "continuous" as const, min, max }]
+                [
+                    targetRuntime.primaryXAxisId,
+                    { axis: "x" as const, axisId: targetRuntime.primaryXAxisId, kind: "continuous" as const, min, max }
+                ]
             ]),
             y: new Map([
-                [targetRuntime.primaryYAxisId, { axis: "y" as const, axisId: targetRuntime.primaryYAxisId, kind: "continuous" as const, min: 0, max: 1 }]
+                [
+                    targetRuntime.primaryYAxisId,
+                    {
+                        axis: "y" as const,
+                        axisId: targetRuntime.primaryYAxisId,
+                        kind: "continuous" as const,
+                        min: 0,
+                        max: 1
+                    }
+                ]
             ])
         });
 
@@ -572,7 +597,9 @@ describe("CartesianLayoutEngine", () => {
             const s2JanHit = scene.hitTargets.find((h: SceneHitTarget) => h.seriesId === "s2" && h.xKey === "Jan");
             expect(s2JanHit).toBeDefined();
             expect(s2JanHit?.bounds).toBeUndefined(); // Omitted bounds for zero-height bar
-            expect(scene.barHitTargets?.some((h: SceneHitTarget) => h.seriesId === "s2" && h.xKey === "Jan")).toBe(false);
+            expect(scene.barHitTargets?.some((h: SceneHitTarget) => h.seriesId === "s2" && h.xKey === "Jan")).toBe(
+                false
+            );
 
             // But it is present in the category interaction bucket for keyboard / shared tooltips
             const janBucket = scene.interactionBucketLookup?.get("Jan");
@@ -704,5 +731,3 @@ describe("CartesianLayoutEngine", () => {
         });
     });
 });
-
-

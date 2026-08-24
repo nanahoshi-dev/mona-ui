@@ -203,7 +203,11 @@ export class FunnelSeriesComponent implements OnInit {
             const catF = this.categoryField();
             const catFmt = this.categoryFormatter();
 
-            const arr: readonly unknown[] = Array.isArray(rawData) ? rawData : (rawData !== undefined && rawData !== null ? [rawData] : []);
+            const arr: readonly unknown[] = Array.isArray(rawData)
+                ? rawData
+                : rawData !== undefined && rawData !== null
+                  ? [rawData]
+                  : [];
 
             this.#stageIdentityMap.clear();
             const seenKeys = new Set<string>();
@@ -215,13 +219,7 @@ export class FunnelSeriesComponent implements OnInit {
                     continue;
                 }
 
-                const identity = FunnelIdentity.resolveStageIdentity(
-                    datum,
-                    i,
-                    this.#seriesId,
-                    keyF,
-                    seenKeys
-                );
+                const identity = FunnelIdentity.resolveStageIdentity(datum, i, this.#seriesId, keyF, seenKeys);
 
                 const rawCat = resolveValue(datum, catF, i);
                 const formattedCategory = catFmt

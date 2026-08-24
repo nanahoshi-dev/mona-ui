@@ -81,7 +81,7 @@ export class SvgCartesianCrosshairRenderer {
         }
 
         const dash = snapshot
-            ? snapshot.dashArray ?? getCrosshairDash(snapshot.lineStyle)
+            ? (snapshot.dashArray ?? getCrosshairDash(snapshot.lineStyle))
             : getCrosshairDash(registration!.lineStyle());
 
         const items: CrosshairLineItem[] = [];

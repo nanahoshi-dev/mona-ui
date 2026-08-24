@@ -10,8 +10,8 @@ function createMockFunnelRegistration(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         [K in keyof ChartFunnelSeriesRegistration]: ChartFunnelSeriesRegistration[K] extends (...args: any[]) => any
             ? ChartFunnelSeriesRegistration[K]
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            : any;
+            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              any;
     }> = {}
 ): ChartFunnelSeriesRegistration {
     const hiddenSet = new Set<string>();
@@ -172,22 +172,17 @@ describe("FunnelLayoutEngine", () => {
         });
 
         const plotRect = { height: 200, width: 200, x: 0, y: 0 };
-        const scene = FunnelLayoutEngine.layout(
-            registration,
-            plotRect,
-            200,
-            200,
-            styleResolver,
-            undefined,
-            warned
-        );
+        const scene = FunnelLayoutEngine.layout(registration, plotRect, 200, 200, styleResolver, undefined, warned);
 
         expect(scene.orientation).toBe("vertical");
         expect(warned.has("f-1:invalid-orientation")).toBe(true);
     });
 
     it("normalizes non-finite numeric inputs (gap, widthRatio, maxLabels, minLabelWidth, minLabelHeight)", () => {
-        const data = [{ stage: "S1", value: 100 }, { stage: "S2", value: 50 }];
+        const data = [
+            { stage: "S1", value: 100 },
+            { stage: "S2", value: 50 }
+        ];
 
         const registration = createMockFunnelRegistration(data, {
             gap: signal(NaN),
@@ -207,9 +202,7 @@ describe("FunnelLayoutEngine", () => {
     });
 
     it("calculates readable label foreground color for contrast against stage background", () => {
-        const data = [
-            { stage: "Dark", value: 100 }
-        ];
+        const data = [{ stage: "Dark", value: 100 }];
 
         const registration = createMockFunnelRegistration(data, {
             color: signal("#000000"), // Very dark background

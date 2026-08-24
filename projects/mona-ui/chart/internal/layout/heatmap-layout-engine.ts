@@ -2,34 +2,19 @@ import type { ChartAxisTick } from "../../models/chart-axis.models";
 import type { ChartField, ChartRect } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
-    
     ChartHeatmapSeriesRegistration,
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import { HeatmapColorScale } from "../color/heatmap-color-scale";
-import {
-    HeatmapDataResolver,
-    toFormattedCategoryValue,
-    type ChartCategoryKey
-} from "../data/heatmap-data-resolver";
+import { HeatmapDataResolver, toFormattedCategoryValue, type ChartCategoryKey } from "../data/heatmap-data-resolver";
 import { resolveData } from "../data/chart-value-resolver";
 import { HeatmapCellIndex } from "../interaction/heatmap-cell-index";
 import { BandScale } from "../scale/cartesian-scale-factory";
 import type { ChartAxisScene } from "../scene/cartesian-scene";
-import type {
-    CartesianHeatmapChartScene
-} from "../scene/chart-scene";
-import type {
-    
-    ChartHeatmapSeriesScene,
-    SceneHeatmapCell
-} from "../../models/chart-heatmap.models";
-import type {
-    ChartInteractionBucket,
-    ChartInteractionXKey,
-    SceneHitTarget
-} from "../scene/scene-geometry";
+import type { CartesianHeatmapChartScene } from "../scene/chart-scene";
+import type { ChartHeatmapSeriesScene, SceneHeatmapCell } from "../../models/chart-heatmap.models";
+import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { clamp, formatCompactNumber, normalizeNonNegativeNumber } from "../utils/number-utils";
@@ -187,7 +172,13 @@ export class HeatmapLayoutEngine {
         const yTickSize = yTickMarks ? (yAxis?.tickSize ? (yAxis.tickSize() ?? 6) : 6) : 0;
         const yLabelOutward = yLabelsEnabled ? Math.max(24, maxCategoryLen * 8) + yLabelPadding : 0;
         const yGutter = isYAxisVisible
-            ? Math.max(48, Math.min(180, Math.round(yTickSize + yLabelOutward + (yHasTitle ? yTitleExtent + yActualTitlePadding : 0) + 8)))
+            ? Math.max(
+                  48,
+                  Math.min(
+                      180,
+                      Math.round(yTickSize + yLabelOutward + (yHasTitle ? yTitleExtent + yActualTitlePadding : 0) + 8)
+                  )
+              )
             : 16;
 
         const xHasTitle = Boolean(xTitle.trim());
@@ -198,7 +189,13 @@ export class HeatmapLayoutEngine {
         const xTickSize = xTickMarks ? (xAxis?.tickSize ? (xAxis.tickSize() ?? 6) : 6) : 0;
         const xLabelOutward = xLabelsEnabled ? 16 + xLabelPadding : 0;
         const xGutter = isXAxisVisible
-            ? Math.max(32, Math.min(160, Math.round(xTickSize + xLabelOutward + (xHasTitle ? xTitleExtent + xActualTitlePadding : 0) + 8)))
+            ? Math.max(
+                  32,
+                  Math.min(
+                      160,
+                      Math.round(xTickSize + xLabelOutward + (xHasTitle ? xTitleExtent + xActualTitlePadding : 0) + 8)
+                  )
+              )
             : 16;
 
         const leftMargin = yAxisPosition === "left" ? yGutter : 16;
@@ -321,13 +318,9 @@ export class HeatmapLayoutEngine {
                 ? valueFormatter(cell.value, cell.dataIndex)
                 : formatCompactNumber(cell.value);
 
-            const formattedX = xFormatter
-                ? xFormatter(cell.xValue, xCatIndex)
-                : toFormattedCategoryValue(cell.xValue);
+            const formattedX = xFormatter ? xFormatter(cell.xValue, xCatIndex) : toFormattedCategoryValue(cell.xValue);
 
-            const formattedY = yFormatter
-                ? yFormatter(cell.yValue, yCatIndex)
-                : toFormattedCategoryValue(cell.yValue);
+            const formattedY = yFormatter ? yFormatter(cell.yValue, yCatIndex) : toFormattedCategoryValue(cell.yValue);
 
             const sceneCell: SceneHeatmapCell = {
                 animationKey: cell.animationKey,
@@ -413,7 +406,8 @@ export class HeatmapLayoutEngine {
                 }
             }
             const estXLabelWidth = Math.max(36, maxXCategoryLen * 7.5 + 12);
-            const xStepFromGeometry = bandWidth < estXLabelWidth ? Math.ceil(estXLabelWidth / Math.max(1, bandWidth)) : 1;
+            const xStepFromGeometry =
+                bandWidth < estXLabelWidth ? Math.ceil(estXLabelWidth / Math.max(1, bandWidth)) : 1;
             const xStepFromCount = Math.ceil(matrix.xCategories.length / 100);
             const xTickStep = Math.max(1, xStepFromGeometry, xStepFromCount);
 
@@ -461,7 +455,8 @@ export class HeatmapLayoutEngine {
         // Y Axis
         if (isYAxisVisible) {
             const estYLabelHeight = 20;
-            const yStepFromGeometry = bandHeight < estYLabelHeight ? Math.ceil(estYLabelHeight / Math.max(1, bandHeight)) : 1;
+            const yStepFromGeometry =
+                bandHeight < estYLabelHeight ? Math.ceil(estYLabelHeight / Math.max(1, bandHeight)) : 1;
             const yStepFromCount = Math.ceil(matrix.yCategories.length / 100);
             const yTickStep = Math.max(1, yStepFromGeometry, yStepFromCount);
 
@@ -562,4 +557,3 @@ export class HeatmapLayoutEngine {
         };
     }
 }
-

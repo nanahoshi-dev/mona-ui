@@ -1,7 +1,6 @@
 import { isDevMode } from "@angular/core";
 import { formatRgb, interpolate, parse, wcagContrast, type Color } from "culori";
 import type {
-    
     ChartColorLegendStop,
     ChartColorLegendTick,
     ChartHeatmapColorMode,
@@ -104,9 +103,9 @@ export class HeatmapColorScale {
                         warnedDiagnosticSignatures
                     );
                 }
-                const low = (style.lowColor && isStopValid(style.lowColor)) ? style.lowColor : "#3b82f6";
-                const mid = (style.midColor && isStopValid(style.midColor)) ? style.midColor : "#f8fafc";
-                const high = (style.highColor && isStopValid(style.highColor)) ? style.highColor : "#ef4444";
+                const low = style.lowColor && isStopValid(style.lowColor) ? style.lowColor : "#3b82f6";
+                const mid = style.midColor && isStopValid(style.midColor) ? style.midColor : "#f8fafc";
+                const high = style.highColor && isStopValid(style.highColor) ? style.highColor : "#ef4444";
                 resolvedStops = [low, mid, high];
             }
         } else {
@@ -127,12 +126,13 @@ export class HeatmapColorScale {
                         warnedDiagnosticSignatures
                     );
                 }
-                const low = (style.lowColor && isStopValid(style.lowColor)) ? style.lowColor : "#eff6ff";
-                const high = (style.highColor && isStopValid(style.highColor))
-                    ? style.highColor
-                    : (style.baseColor && isStopValid(style.baseColor))
-                        ? style.baseColor
-                        : "#3b82f6";
+                const low = style.lowColor && isStopValid(style.lowColor) ? style.lowColor : "#eff6ff";
+                const high =
+                    style.highColor && isStopValid(style.highColor)
+                        ? style.highColor
+                        : style.baseColor && isStopValid(style.baseColor)
+                          ? style.baseColor
+                          : "#3b82f6";
                 resolvedStops = [low, high];
             }
         }

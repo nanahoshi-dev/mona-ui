@@ -57,7 +57,10 @@ describe("CartesianOrientationPolicy", () => {
         };
     };
 
-    const createLineSeries = (id: string, visible = true): ChartLineSeriesRegistration & { visible: import("@angular/core").WritableSignal<boolean> } => {
+    const createLineSeries = (
+        id: string,
+        visible = true
+    ): ChartLineSeriesRegistration & { visible: import("@angular/core").WritableSignal<boolean> } => {
         const visibleSig = signal(visible);
         return {
             color: signal("#3b82f6"),
@@ -75,10 +78,7 @@ describe("CartesianOrientationPolicy", () => {
     };
 
     it("defaults to vertical when series are vertical or orientation is absent", () => {
-        const series: ChartCartesianSeriesRegistration[] = [
-            createBarSeries("b1", "vertical"),
-            createLineSeries("l1")
-        ];
+        const series: ChartCartesianSeriesRegistration[] = [createBarSeries("b1", "vertical"), createLineSeries("l1")];
 
         const resolution = CartesianOrientationPolicy.resolve(series);
 
@@ -100,85 +100,91 @@ describe("CartesianOrientationPolicy", () => {
         expect(resolution.diagnostics).toEqual([]);
     });
 
-    const createCandlestickSeries = (id: string, visible = true): ChartCartesianSeriesRegistration => ({
-        closeField: signal("close"),
-        color: signal("#3b82f6"),
-        data: signal(undefined),
-        element: { nativeElement: document.createElement("div") },
-        highField: signal("high"),
-        id,
-        lowField: signal("low"),
-        name: signal(id),
-        openField: signal("open"),
-        type: "candlestick",
-        visible: signal(visible),
-        xField: signal(undefined)
-    } as unknown as ChartCartesianSeriesRegistration);
+    const createCandlestickSeries = (id: string, visible = true): ChartCartesianSeriesRegistration =>
+        ({
+            closeField: signal("close"),
+            color: signal("#3b82f6"),
+            data: signal(undefined),
+            element: { nativeElement: document.createElement("div") },
+            highField: signal("high"),
+            id,
+            lowField: signal("low"),
+            name: signal(id),
+            openField: signal("open"),
+            type: "candlestick",
+            visible: signal(visible),
+            xField: signal(undefined)
+        }) as unknown as ChartCartesianSeriesRegistration;
 
-    const createAreaSeries = (id: string, visible = true): ChartCartesianSeriesRegistration => ({
-        color: signal("#3b82f6"),
-        data: signal(undefined),
-        element: { nativeElement: document.createElement("div") },
-        field: signal("val"),
-        id,
-        name: signal(id),
-        type: "area",
-        visible: signal(visible),
-        xField: signal(undefined)
-    } as unknown as ChartCartesianSeriesRegistration);
+    const createAreaSeries = (id: string, visible = true): ChartCartesianSeriesRegistration =>
+        ({
+            color: signal("#3b82f6"),
+            data: signal(undefined),
+            element: { nativeElement: document.createElement("div") },
+            field: signal("val"),
+            id,
+            name: signal(id),
+            type: "area",
+            visible: signal(visible),
+            xField: signal(undefined)
+        }) as unknown as ChartCartesianSeriesRegistration;
 
-    const createRangeAreaSeries = (id: string, visible = true): ChartCartesianSeriesRegistration => ({
-        color: signal("#3b82f6"),
-        data: signal(undefined),
-        element: { nativeElement: document.createElement("div") },
-        fromField: signal("from"),
-        id,
-        name: signal(id),
-        toField: signal("to"),
-        type: "rangeArea",
-        visible: signal(visible),
-        xField: signal(undefined)
-    } as unknown as ChartCartesianSeriesRegistration);
+    const createRangeAreaSeries = (id: string, visible = true): ChartCartesianSeriesRegistration =>
+        ({
+            color: signal("#3b82f6"),
+            data: signal(undefined),
+            element: { nativeElement: document.createElement("div") },
+            fromField: signal("from"),
+            id,
+            name: signal(id),
+            toField: signal("to"),
+            type: "rangeArea",
+            visible: signal(visible),
+            xField: signal(undefined)
+        }) as unknown as ChartCartesianSeriesRegistration;
 
-    const createScatterSeries = (id: string, visible = true): ChartCartesianSeriesRegistration => ({
-        color: signal("#3b82f6"),
-        data: signal(undefined),
-        element: { nativeElement: document.createElement("div") },
-        field: signal("val"),
-        id,
-        name: signal(id),
-        type: "scatter",
-        visible: signal(visible),
-        xField: signal(undefined)
-    } as unknown as ChartCartesianSeriesRegistration);
+    const createScatterSeries = (id: string, visible = true): ChartCartesianSeriesRegistration =>
+        ({
+            color: signal("#3b82f6"),
+            data: signal(undefined),
+            element: { nativeElement: document.createElement("div") },
+            field: signal("val"),
+            id,
+            name: signal(id),
+            type: "scatter",
+            visible: signal(visible),
+            xField: signal(undefined)
+        }) as unknown as ChartCartesianSeriesRegistration;
 
-    const createBubbleSeries = (id: string, visible = true): ChartCartesianSeriesRegistration => ({
-        color: signal("#3b82f6"),
-        data: signal(undefined),
-        element: { nativeElement: document.createElement("div") },
-        field: signal("val"),
-        id,
-        name: signal(id),
-        sizeField: signal("size"),
-        type: "bubble",
-        visible: signal(visible),
-        xField: signal(undefined)
-    } as unknown as ChartCartesianSeriesRegistration);
+    const createBubbleSeries = (id: string, visible = true): ChartCartesianSeriesRegistration =>
+        ({
+            color: signal("#3b82f6"),
+            data: signal(undefined),
+            element: { nativeElement: document.createElement("div") },
+            field: signal("val"),
+            id,
+            name: signal(id),
+            sizeField: signal("size"),
+            type: "bubble",
+            visible: signal(visible),
+            xField: signal(undefined)
+        }) as unknown as ChartCartesianSeriesRegistration;
 
-    const createOhlcSeries = (id: string, visible = true): ChartCartesianSeriesRegistration => ({
-        closeField: signal("close"),
-        color: signal("#3b82f6"),
-        data: signal(undefined),
-        element: { nativeElement: document.createElement("div") },
-        highField: signal("high"),
-        id,
-        lowField: signal("low"),
-        name: signal(id),
-        openField: signal("open"),
-        type: "ohlc",
-        visible: signal(visible),
-        xField: signal(undefined)
-    } as unknown as ChartCartesianSeriesRegistration);
+    const createOhlcSeries = (id: string, visible = true): ChartCartesianSeriesRegistration =>
+        ({
+            closeField: signal("close"),
+            color: signal("#3b82f6"),
+            data: signal(undefined),
+            element: { nativeElement: document.createElement("div") },
+            highField: signal("high"),
+            id,
+            lowField: signal("low"),
+            name: signal(id),
+            openField: signal("open"),
+            type: "ohlc",
+            visible: signal(visible),
+            xField: signal(undefined)
+        }) as unknown as ChartCartesianSeriesRegistration;
 
     it("fails safe when horizontal bar is combined with visible Line series", () => {
         const series: ChartCartesianSeriesRegistration[] = [

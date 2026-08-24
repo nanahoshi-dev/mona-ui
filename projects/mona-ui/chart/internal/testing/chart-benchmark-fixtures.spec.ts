@@ -95,7 +95,11 @@ describe("chart benchmark fixtures", () => {
         expect(points).toHaveLength(1000);
         const farPoints = points.filter(
             p =>
-                ![[25, 25], [75, 75], [50, 10]].some(([cx, cy]) => Math.abs(p.x - cx) <= 5 && Math.abs(p.y - cy) <= 5)
+                ![
+                    [25, 25],
+                    [75, 75],
+                    [50, 10]
+                ].some(([cx, cy]) => Math.abs(p.x - cx) <= 5 && Math.abs(p.y - cy) <= 5)
         );
         expect(farPoints.length).toBeGreaterThanOrEqual(10);
     });

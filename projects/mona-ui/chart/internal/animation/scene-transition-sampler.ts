@@ -1,10 +1,9 @@
 import type {
-    
     CartesianFunnelChartScene,
     CartesianHeatmapChartScene,
     CartesianWaterfallChartScene,
-    CartesianXYChartScene
-    ,PolarArcChartScene,
+    CartesianXYChartScene,
+    PolarArcChartScene,
     PolarAxisChartScene,
     PolarSectorChartScene,
     TreemapChartScene
@@ -27,7 +26,7 @@ import type {
 } from "../scene/cartesian-scene";
 import type { ChartSectorSeriesScene } from "../scene/polar-scene";
 import type { ChartContinuousPolarSeriesScene, ChartRadarSeriesScene } from "../scene/polar-axis-scene";
-import type { ChartGaugeSeriesScene ,ChartRoseSeriesScene, SceneRadialArcMark } from "../scene/polar-arc-scene";
+import type { ChartGaugeSeriesScene, ChartRoseSeriesScene, SceneRadialArcMark } from "../scene/polar-arc-scene";
 import type {
     ChartInteractionBucket,
     ChartInteractionXKey,
@@ -44,7 +43,10 @@ import type { CartesianAxisTransitionPlan, PolarAxisTransitionPlan } from "./ada
 import type { ChartAnimationRenderFrame, ChartTransitionPlan } from "./chart-transition-types";
 import { CartesianPointSpatialIndex } from "../interaction/cartesian-point-spatial-index";
 import { CartesianFinancialIndex, type FinancialHitEntry } from "../interaction/cartesian-financial-index";
-import { createCandlestickFinancialHitGeometry, createOhlcFinancialHitGeometry } from "../interaction/financial-hit-geometry";
+import {
+    createCandlestickFinancialHitGeometry,
+    createOhlcFinancialHitGeometry
+} from "../interaction/financial-hit-geometry";
 import { RadialBarHitIndex } from "../interaction/radial-bar-hit-index";
 import { RoseHitIndex } from "../interaction/rose-hit-index";
 import { GaugeHitIndex } from "../interaction/gauge-hit-index";
@@ -139,11 +141,7 @@ export class SceneTransitionSampler {
         }
 
         if (toScene.coordinateSystem === "polar" && toScene.polarKind === "sector") {
-            const sampledSector = this.#sampleSectorScene(
-                toScene as PolarSectorChartScene,
-                seriesPlans,
-                progress
-            );
+            const sampledSector = this.#sampleSectorScene(toScene as PolarSectorChartScene, seriesPlans, progress);
             return {
                 fromScene,
                 mode: "morph",
@@ -186,11 +184,7 @@ export class SceneTransitionSampler {
         }
 
         if (toScene.coordinateSystem === "hierarchical" && toScene.hierarchicalKind === "treemap") {
-            const sampledTreemap = this.#sampleTreemapScene(
-                toScene as TreemapChartScene,
-                seriesPlans,
-                progress
-            );
+            const sampledTreemap = this.#sampleTreemapScene(toScene as TreemapChartScene, seriesPlans, progress);
             return {
                 fromScene,
                 mode: "morph",
@@ -236,9 +230,9 @@ export class SceneTransitionSampler {
                 const targetHit = targetHitsByKey.get(node.animationKey);
                 if (targetHit) {
                     const pointerBounds = targetHit.bounds
-                        ? (node.headerBounds && targetHit.bounds !== targetHit.visualBounds
-                              ? node.headerBounds
-                              : node.bounds)
+                        ? node.headerBounds && targetHit.bounds !== targetHit.visualBounds
+                            ? node.headerBounds
+                            : node.bounds
                         : undefined;
 
                     sampledHitTargets.push({
@@ -458,7 +452,12 @@ export class SceneTransitionSampler {
                 }
             } else if (targetHit.seriesType === "rangeArea") {
                 const sampledRangeAreaPt = sampledRangeAreaPointsByKey.get(key);
-                if (sampledRangeAreaPt && sampledRangeAreaPt.defined && sampledRangeAreaPt.fromPoint && sampledRangeAreaPt.toPoint) {
+                if (
+                    sampledRangeAreaPt &&
+                    sampledRangeAreaPt.defined &&
+                    sampledRangeAreaPt.fromPoint &&
+                    sampledRangeAreaPt.toPoint
+                ) {
                     highPoint = sampledRangeAreaPt.highPoint;
                     lowPoint = sampledRangeAreaPt.lowPoint;
                     rangeBand = {
@@ -477,8 +476,12 @@ export class SceneTransitionSampler {
                             formattedFrom: sampledRangeAreaPt.formattedFrom ?? targetHit.formattedFrom ?? "",
                             formattedTo: sampledRangeAreaPt.formattedTo ?? targetHit.formattedTo ?? "",
                             fromValue: sampledRangeAreaPt.fromValue,
-                            highValue: sampledRangeAreaPt.highValue ?? Math.max(sampledRangeAreaPt.fromValue, sampledRangeAreaPt.toValue),
-                            lowValue: sampledRangeAreaPt.lowValue ?? Math.min(sampledRangeAreaPt.fromValue, sampledRangeAreaPt.toValue),
+                            highValue:
+                                sampledRangeAreaPt.highValue ??
+                                Math.max(sampledRangeAreaPt.fromValue, sampledRangeAreaPt.toValue),
+                            lowValue:
+                                sampledRangeAreaPt.lowValue ??
+                                Math.min(sampledRangeAreaPt.fromValue, sampledRangeAreaPt.toValue),
                             toValue: sampledRangeAreaPt.toValue
                         };
                     }
@@ -595,9 +598,9 @@ export class SceneTransitionSampler {
             if (isFinancial && hit.bounds) {
                 sampledFinancialHitEntries.push({
                     bounds: hit.bounds,
-                    centerX: hit.point?.x ?? (hit.bounds.x + hit.bounds.width / 2),
+                    centerX: hit.point?.x ?? hit.bounds.x + hit.bounds.width / 2,
                     highY: hit.highPoint?.y ?? hit.bounds.y,
-                    lowY: hit.lowPoint?.y ?? (hit.bounds.y + hit.bounds.height),
+                    lowY: hit.lowPoint?.y ?? hit.bounds.y + hit.bounds.height,
                     target: hit
                 });
             }
@@ -659,8 +662,12 @@ export class SceneTransitionSampler {
                             ? {
                                   x:
                                       primaryHit.point?.x ??
-                                      (primaryHit.bounds ? primaryHit.bounds.x + primaryHit.bounds.width / 2 : targetBucket.anchor.x),
-                                  y: primaryHit.point?.y ?? (primaryHit.bounds ? primaryHit.bounds.y : targetBucket.anchor.y)
+                                      (primaryHit.bounds
+                                          ? primaryHit.bounds.x + primaryHit.bounds.width / 2
+                                          : targetBucket.anchor.x),
+                                  y:
+                                      primaryHit.point?.y ??
+                                      (primaryHit.bounds ? primaryHit.bounds.y : targetBucket.anchor.y)
                               }
                             : targetBucket.anchor;
                     }
@@ -695,9 +702,8 @@ export class SceneTransitionSampler {
             pointSpatialIndex.insertAll(sampledPointHitTargets);
         }
 
-        const financialIndex = sampledFinancialHitEntries.length > 0
-            ? new CartesianFinancialIndex(sampledFinancialHitEntries)
-            : undefined;
+        const financialIndex =
+            sampledFinancialHitEntries.length > 0 ? new CartesianFinancialIndex(sampledFinancialHitEntries) : undefined;
 
         const axes = axisPlan ? axisPlan.sample(progress) : toScene.axes;
 
@@ -873,7 +879,7 @@ export class SceneTransitionSampler {
                             formattedValue: pt.formattedValue,
                             index: pt.dataIndex,
                             point: pt.point,
-                            radius: targetHit.radius ?? (pt.radius + 4),
+                            radius: targetHit.radius ?? pt.radius + 4,
                             seriesId: s.id,
                             seriesName: s.name,
                             seriesType: s.type,
@@ -914,7 +920,9 @@ export class SceneTransitionSampler {
             })
             .filter((b): b is ChartInteractionBucket => b !== null);
 
-        const sampledAxes = axisPlan ? axisPlan.sample(progress) : { angularAxis: toScene.angularAxis, radialAxis: toScene.radialAxis };
+        const sampledAxes = axisPlan
+            ? axisPlan.sample(progress)
+            : { angularAxis: toScene.angularAxis, radialAxis: toScene.radialAxis };
 
         return {
             angularAxis: sampledAxes.angularAxis ?? toScene.angularAxis,
@@ -1026,25 +1034,21 @@ export class SceneTransitionSampler {
                 if (series0.type === "radialBar") {
                     sampledHitIndex = new RadialBarHitIndex(toScene.center, sampledHitTargets);
                 } else {
-                    const targetRose = toScene.series[0]?.type === "rose" ? (toScene.series[0] as ChartRoseSeriesScene) : undefined;
+                    const targetRose =
+                        toScene.series[0]?.type === "rose" ? (toScene.series[0] as ChartRoseSeriesScene) : undefined;
                     const startAngleRad = targetRose?.angularCategories[0]?.startAngle ?? 0;
                     const spanRad = targetRose?.angularCategories.length
                         ? targetRose.angularCategories[targetRose.angularCategories.length - 1].endAngle - startAngleRad
                         : Math.PI * 2;
                     const K = targetRose?.angularCategories.length ?? sampledHitTargets.length;
 
-                    sampledHitIndex = new RoseHitIndex(
-                        toScene.center,
-                        sampledHitTargets,
-                        startAngleRad,
-                        spanRad,
-                        K
-                    );
+                    sampledHitIndex = new RoseHitIndex(toScene.center, sampledHitTargets, startAngleRad, spanRad, K);
                 }
             } else if (series0.type === "gauge") {
                 const gVal = series0.value;
                 const gNeedle = series0.needle;
-                const targetGauge = toScene.series[0]?.type === "gauge" ? (toScene.series[0] as ChartGaugeSeriesScene) : undefined;
+                const targetGauge =
+                    toScene.series[0]?.type === "gauge" ? (toScene.series[0] as ChartGaugeSeriesScene) : undefined;
                 const indicator = targetGauge?.indicator ?? "both";
 
                 sampledHitTargets = toScene.hitTargets.map((target: SceneHitTarget) => {
@@ -1074,22 +1078,23 @@ export class SceneTransitionSampler {
                     };
                 });
 
-                const hitGeometry = sampledHitTargets.length > 0 && gVal
-                    ? {
-                          center: toScene.center,
-                          indicator,
-                          needle: gNeedle
-                              ? {
-                                    angle: gNeedle.angle,
-                                    hubRadius: gNeedle.hubRadius,
-                                    length: gNeedle.length,
-                                    width: gNeedle.width
-                                }
-                              : undefined,
-                          target: sampledHitTargets[0],
-                          valueArc: sampledHitTargets[0].arc
-                      }
-                    : null;
+                const hitGeometry =
+                    sampledHitTargets.length > 0 && gVal
+                        ? {
+                              center: toScene.center,
+                              indicator,
+                              needle: gNeedle
+                                  ? {
+                                        angle: gNeedle.angle,
+                                        hubRadius: gNeedle.hubRadius,
+                                        length: gNeedle.length,
+                                        width: gNeedle.width
+                                    }
+                                  : undefined,
+                              target: sampledHitTargets[0],
+                              valueArc: sampledHitTargets[0].arc
+                          }
+                        : null;
 
                 sampledHitIndex = new GaugeHitIndex(hitGeometry);
             }
@@ -1100,36 +1105,35 @@ export class SceneTransitionSampler {
             hitsByKey.set(h.xKey, h);
         }
 
-        const sampledBuckets: ChartInteractionBucket[] = toScene.interactionBuckets
-            .map(targetBucket => {
-                const primaryHit = hitsByKey.get(targetBucket.xKey);
-                if (!primaryHit?.arc) {
-                    return targetBucket;
-                }
-                const arcGeom = primaryHit.arc;
-                let anchor: ChartPoint;
-                if (series0?.type === "gauge" && series0.indicator === "needle" && series0.needle) {
-                    const needleMidRadius = series0.needle.length * 0.7;
-                    anchor = {
-                        x: toScene.center.x + Math.sin(series0.needle.angle) * needleMidRadius,
-                        y: toScene.center.y - Math.cos(series0.needle.angle) * needleMidRadius
-                    };
-                } else {
-                    const midAngle = (arcGeom.startAngle + arcGeom.endAngle) / 2;
-                    const midRadius = (arcGeom.innerRadius + arcGeom.outerRadius) / 2;
-                    anchor = {
-                        x: toScene.center.x + Math.sin(midAngle) * midRadius,
-                        y: toScene.center.y - Math.cos(midAngle) * midRadius
-                    };
-                }
-                return {
-                    anchor,
-                    hits: [primaryHit],
-                    order: targetBucket.order,
-                    xKey: targetBucket.xKey,
-                    xValue: targetBucket.xValue
+        const sampledBuckets: ChartInteractionBucket[] = toScene.interactionBuckets.map(targetBucket => {
+            const primaryHit = hitsByKey.get(targetBucket.xKey);
+            if (!primaryHit?.arc) {
+                return targetBucket;
+            }
+            const arcGeom = primaryHit.arc;
+            let anchor: ChartPoint;
+            if (series0?.type === "gauge" && series0.indicator === "needle" && series0.needle) {
+                const needleMidRadius = series0.needle.length * 0.7;
+                anchor = {
+                    x: toScene.center.x + Math.sin(series0.needle.angle) * needleMidRadius,
+                    y: toScene.center.y - Math.cos(series0.needle.angle) * needleMidRadius
                 };
-            });
+            } else {
+                const midAngle = (arcGeom.startAngle + arcGeom.endAngle) / 2;
+                const midRadius = (arcGeom.innerRadius + arcGeom.outerRadius) / 2;
+                anchor = {
+                    x: toScene.center.x + Math.sin(midAngle) * midRadius,
+                    y: toScene.center.y - Math.cos(midAngle) * midRadius
+                };
+            }
+            return {
+                anchor,
+                hits: [primaryHit],
+                order: targetBucket.order,
+                xKey: targetBucket.xKey,
+                xValue: targetBucket.xValue
+            };
+        });
 
         let sampledAngularAxis = toScene.angularAxis;
         let sampledRadialAxis = toScene.radialAxis;

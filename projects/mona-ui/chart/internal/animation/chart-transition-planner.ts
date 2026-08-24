@@ -57,8 +57,16 @@ type SceneSeriesWithOptionalAxisId = { xAxisId?: string; yAxisId?: string };
 
 export class ChartTransitionPlanner {
     public static isPathTopologyCompatible(
-        prevPoints: readonly { readonly animationKey?: string; readonly defined?: boolean; readonly synthetic?: boolean }[],
-        targetPoints: readonly { readonly animationKey?: string; readonly defined?: boolean; readonly synthetic?: boolean }[]
+        prevPoints: readonly {
+            readonly animationKey?: string;
+            readonly defined?: boolean;
+            readonly synthetic?: boolean;
+        }[],
+        targetPoints: readonly {
+            readonly animationKey?: string;
+            readonly defined?: boolean;
+            readonly synthetic?: boolean;
+        }[]
     ): boolean {
         if (prevPoints.length !== targetPoints.length) {
             return false;
@@ -263,10 +271,7 @@ export class ChartTransitionPlanner {
                     };
                 }
 
-                if (
-                    prevPolar.polarKind === "arc" &&
-                    targetPolar.polarKind === "arc"
-                ) {
+                if (prevPolar.polarKind === "arc" && targetPolar.polarKind === "arc") {
                     if (prevPolar.arcMode !== targetPolar.arcMode) {
                         return {
                             complexity,
@@ -525,7 +530,8 @@ export class ChartTransitionPlanner {
                     !isBarOrientationChange &&
                     (prevCartesian as CartesianXYChartScene).axisTopologySignature !== undefined &&
                     (targetCartesian as CartesianXYChartScene).axisTopologySignature !== undefined &&
-                    (prevCartesian as CartesianXYChartScene).axisTopologySignature !== (targetCartesian as CartesianXYChartScene).axisTopologySignature
+                    (prevCartesian as CartesianXYChartScene).axisTopologySignature !==
+                        (targetCartesian as CartesianXYChartScene).axisTopologySignature
                 ) {
                     return {
                         complexity,
@@ -557,14 +563,28 @@ export class ChartTransitionPlanner {
                             };
                         }
 
-                        const prevHasX = "xAxisId" in prevSeries && (prevSeries as SceneSeriesWithOptionalAxisId).xAxisId !== undefined;
-                        const targetHasX = "xAxisId" in targetSeries && (targetSeries as SceneSeriesWithOptionalAxisId).xAxisId !== undefined;
-                        const prevHasY = "yAxisId" in prevSeries && (prevSeries as SceneSeriesWithOptionalAxisId).yAxisId !== undefined;
-                        const targetHasY = "yAxisId" in targetSeries && (targetSeries as SceneSeriesWithOptionalAxisId).yAxisId !== undefined;
+                        const prevHasX =
+                            "xAxisId" in prevSeries &&
+                            (prevSeries as SceneSeriesWithOptionalAxisId).xAxisId !== undefined;
+                        const targetHasX =
+                            "xAxisId" in targetSeries &&
+                            (targetSeries as SceneSeriesWithOptionalAxisId).xAxisId !== undefined;
+                        const prevHasY =
+                            "yAxisId" in prevSeries &&
+                            (prevSeries as SceneSeriesWithOptionalAxisId).yAxisId !== undefined;
+                        const targetHasY =
+                            "yAxisId" in targetSeries &&
+                            (targetSeries as SceneSeriesWithOptionalAxisId).yAxisId !== undefined;
 
                         if (
-                            (prevHasX && targetHasX && (targetSeries as SceneSeriesWithOptionalAxisId).xAxisId !== (prevSeries as SceneSeriesWithOptionalAxisId).xAxisId) ||
-                            (prevHasY && targetHasY && (targetSeries as SceneSeriesWithOptionalAxisId).yAxisId !== (prevSeries as SceneSeriesWithOptionalAxisId).yAxisId)
+                            (prevHasX &&
+                                targetHasX &&
+                                (targetSeries as SceneSeriesWithOptionalAxisId).xAxisId !==
+                                    (prevSeries as SceneSeriesWithOptionalAxisId).xAxisId) ||
+                            (prevHasY &&
+                                targetHasY &&
+                                (targetSeries as SceneSeriesWithOptionalAxisId).yAxisId !==
+                                    (prevSeries as SceneSeriesWithOptionalAxisId).yAxisId)
                         ) {
                             return {
                                 complexity,
@@ -579,7 +599,11 @@ export class ChartTransitionPlanner {
                         }
                     }
 
-                    if (targetSeries.type === "line" || targetSeries.type === "area" || targetSeries.type === "rangeArea") {
+                    if (
+                        targetSeries.type === "line" ||
+                        targetSeries.type === "area" ||
+                        targetSeries.type === "rangeArea"
+                    ) {
                         if (prevSeries && prevSeries.type === targetSeries.type) {
                             if (!this.isPathTopologyCompatible(prevSeries.points, targetSeries.points)) {
                                 return {
@@ -653,8 +677,7 @@ export class ChartTransitionPlanner {
 
         let axisPlan: ChartTransitionPlan["axisPlan"] = null;
         if (target.coordinateSystem === "cartesian") {
-            const prevCartesian =
-                previous?.coordinateSystem === "cartesian" ? (previous as CartesianChartScene) : null;
+            const prevCartesian = previous?.coordinateSystem === "cartesian" ? (previous as CartesianChartScene) : null;
             const targetCartesian = target as CartesianChartScene;
             axisPlan = AxisAnimationAdapter.createCartesianAxisPlan(prevCartesian?.axes, targetCartesian.axes);
         } else if (target.coordinateSystem === "polar") {
@@ -672,15 +695,15 @@ export class ChartTransitionPlanner {
                 );
             } else if (target.polarKind === "arc" && target.arcMode === "rose") {
                 const prevRose =
-                    previous?.coordinateSystem === "polar" && previous.polarKind === "arc" && previous.arcMode === "rose"
+                    previous?.coordinateSystem === "polar" &&
+                    previous.polarKind === "arc" &&
+                    previous.arcMode === "rose"
                         ? (previous as PolarArcChartScene)
                         : null;
                 const targetRose = target as PolarArcChartScene;
                 if (targetRose.angularAxis || targetRose.radialAxis || prevRose?.angularAxis || prevRose?.radialAxis) {
                     axisPlan = AxisAnimationAdapter.createPolarAxisPlan(
-                        prevRose
-                            ? { angularAxis: prevRose.angularAxis, radialAxis: prevRose.radialAxis }
-                            : undefined,
+                        prevRose ? { angularAxis: prevRose.angularAxis, radialAxis: prevRose.radialAxis } : undefined,
                         { angularAxis: targetRose.angularAxis, radialAxis: targetRose.radialAxis }
                     );
                 }
@@ -782,8 +805,7 @@ export class ChartTransitionPlanner {
 
         if (target.coordinateSystem === "cartesian") {
             const targetCartesian = target as CartesianChartScene;
-            const prevCartesian =
-                previous?.coordinateSystem === "cartesian" ? (previous as CartesianChartScene) : null;
+            const prevCartesian = previous?.coordinateSystem === "cartesian" ? (previous as CartesianChartScene) : null;
 
             const prevSeriesById = new Map(prevCartesian?.series.map(s => [s.id, s]));
             const targetIds = new Set<string>();
@@ -813,27 +835,15 @@ export class ChartTransitionPlanner {
                     );
                 } else if (targetSeries.type === "bar") {
                     plans.push(
-                        barAdapter.createPlan(
-                            prevSeries?.type === "bar" ? prevSeries : null,
-                            targetSeries,
-                            context
-                        )
+                        barAdapter.createPlan(prevSeries?.type === "bar" ? prevSeries : null, targetSeries, context)
                     );
                 } else if (targetSeries.type === "line") {
                     plans.push(
-                        lineAdapter.createPlan(
-                            prevSeries?.type === "line" ? prevSeries : null,
-                            targetSeries,
-                            context
-                        )
+                        lineAdapter.createPlan(prevSeries?.type === "line" ? prevSeries : null, targetSeries, context)
                     );
                 } else if (targetSeries.type === "area") {
                     plans.push(
-                        areaAdapter.createPlan(
-                            prevSeries?.type === "area" ? prevSeries : null,
-                            targetSeries,
-                            context
-                        )
+                        areaAdapter.createPlan(prevSeries?.type === "area" ? prevSeries : null, targetSeries, context)
                     );
                 } else if (targetSeries.type === "rangeBar") {
                     plans.push(
@@ -963,19 +973,11 @@ export class ChartTransitionPlanner {
 
                 if (targetSeries.type === "radar") {
                     plans.push(
-                        radarAdapter.createPlan(
-                            prevSeries?.type === "radar" ? prevSeries : null,
-                            targetSeries,
-                            context
-                        )
+                        radarAdapter.createPlan(prevSeries?.type === "radar" ? prevSeries : null, targetSeries, context)
                     );
                 } else if (targetSeries.type === "polar") {
                     plans.push(
-                        polarAdapter.createPlan(
-                            prevSeries?.type === "polar" ? prevSeries : null,
-                            targetSeries,
-                            context
-                        )
+                        polarAdapter.createPlan(prevSeries?.type === "polar" ? prevSeries : null, targetSeries, context)
                     );
                 }
             }
@@ -1021,4 +1023,3 @@ export class ChartTransitionPlanner {
         return plans;
     }
 }
-

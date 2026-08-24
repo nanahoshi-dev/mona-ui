@@ -1,13 +1,4 @@
-import {
-    scaleBand,
-    scaleLinear,
-    scaleLog,
-    scalePow,
-    scaleSqrt,
-    scaleSymlog,
-    scaleTime,
-    scaleUtc
-} from "d3-scale";
+import { scaleBand, scaleLinear, scaleLog, scalePow, scaleSqrt, scaleSymlog, scaleTime, scaleUtc } from "d3-scale";
 import type {
     ChartBandPositionScale,
     ChartContinuousPositionScale,
@@ -76,11 +67,7 @@ export class LogScale implements ChartContinuousPositionScale<number> {
     readonly #scale = scaleLog();
     readonly #sign: "negative" | "positive";
     public readonly type = "log" as const;
-    public constructor(
-        domain: readonly [number, number],
-        range: readonly [number, number],
-        logBase: number = 10
-    ) {
+    public constructor(domain: readonly [number, number], range: readonly [number, number], logBase: number = 10) {
         const validBase = Number.isFinite(logBase) && logBase > 0 && logBase !== 1 ? logBase : 10;
         this.#logBase = validBase;
         this.#scale.base(validBase);
@@ -174,11 +161,7 @@ export class SymlogScale implements ChartContinuousPositionScale<number> {
     readonly #constant: number;
     readonly #scale = scaleSymlog();
     public readonly type = "symlog" as const;
-    public constructor(
-        domain: readonly [number, number],
-        range: readonly [number, number],
-        constant: number = 1
-    ) {
+    public constructor(domain: readonly [number, number], range: readonly [number, number], constant: number = 1) {
         const validConstant = Number.isFinite(constant) && constant > 0 ? constant : 1;
         this.#constant = validConstant;
         this.#scale.constant(validConstant);
@@ -238,11 +221,7 @@ export class PowScale implements ChartContinuousPositionScale<number> {
     readonly #exponent: number;
     readonly #scale = scalePow();
     public readonly type = "pow" as const;
-    public constructor(
-        domain: readonly [number, number],
-        range: readonly [number, number],
-        exponent: number = 1
-    ) {
+    public constructor(domain: readonly [number, number], range: readonly [number, number], exponent: number = 1) {
         const validExp = Number.isFinite(exponent) && exponent > 0 ? exponent : 1;
         this.#exponent = validExp;
         this.#scale.exponent(validExp);
@@ -525,12 +504,7 @@ export class CartesianScaleFactory {
             return new BandScale(options, range ?? [0, 1], paddingInner, paddingOuter);
         }
         const opt = options as BandScaleOptions<T>;
-        return new BandScale(
-            opt.domain,
-            opt.range,
-            opt.paddingInner ?? 0.2,
-            opt.paddingOuter ?? 0.1
-        );
+        return new BandScale(opt.domain, opt.range, opt.paddingInner ?? 0.2, opt.paddingOuter ?? 0.1);
     }
 
     public static createExactPositionScale(options: {

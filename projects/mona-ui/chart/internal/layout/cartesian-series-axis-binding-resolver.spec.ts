@@ -88,7 +88,9 @@ describe("CartesianSeriesAxisBindingResolver", () => {
         ...overrides
     });
 
-    const createMockLineSeries = (overrides: Partial<ChartLineSeriesRegistration> = {}): ChartLineSeriesRegistration => ({
+    const createMockLineSeries = (
+        overrides: Partial<ChartLineSeriesRegistration> = {}
+    ): ChartLineSeriesRegistration => ({
         color: signal("#10b981"),
         curve: signal("linear"),
         data: signal(undefined),
@@ -157,7 +159,11 @@ describe("CartesianSeriesAxisBindingResolver", () => {
         const y1 = createMockYAxis({ axisId: signal("y1") });
         const axisResolution = CartesianAxisRegistryResolver.resolve([x1], [y1]);
 
-        const s1 = createMockBarSeries({ id: "s1", xAxisId: signal("non-existent-x"), yAxisId: signal("non-existent-y") });
+        const s1 = createMockBarSeries({
+            id: "s1",
+            xAxisId: signal("non-existent-x"),
+            yAxisId: signal("non-existent-y")
+        });
         const bindingResolution = CartesianSeriesAxisBindingResolver.resolve([s1], axisResolution);
 
         expect(bindingResolution.warnings.length).toBe(2);

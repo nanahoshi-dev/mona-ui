@@ -62,7 +62,9 @@ function keysMatch(a: unknown, b: unknown): boolean {
  * Resolves the globally nearest local datum across all dense providers and ordinary
  * scene targets for synchronized nearest-point and tooltip presentation (WP2 / SD4-R03, SD4-R04, SD4-R05, SD6-R13, SD6-R14, SD6-R15).
  */
-export function resolveSynchronizationLocalTarget(options: ResolveSyncLocalTargetOptions): SyncLocalTargetResolution | null {
+export function resolveSynchronizationLocalTarget(
+    options: ResolveSyncLocalTargetOptions
+): SyncLocalTargetResolution | null {
     const { anchor, dimension, mappedXAxisId, mappedYAxisId, scene, sharedTooltip = false } = options;
     if (!scene) {
         return null;
@@ -200,9 +202,14 @@ export function resolveSynchronizationLocalTarget(options: ResolveSyncLocalTarge
     } else {
         const interactionAxis = scene.interactionAxis ?? "x";
         const primaryAxisId = interactionAxis === "y" ? bestHit.yAxisId : bestHit.xAxisId;
-        const primaryKey = interactionAxis === "y"
-            ? (bestHit.yValue !== undefined ? bestHit.yValue : bestHit.value)
-            : (bestHit.xKey !== undefined ? bestHit.xKey : bestHit.xValue);
+        const primaryKey =
+            interactionAxis === "y"
+                ? bestHit.yValue !== undefined
+                    ? bestHit.yValue
+                    : bestHit.value
+                : bestHit.xKey !== undefined
+                  ? bestHit.xKey
+                  : bestHit.xValue;
 
         const bucketMap = new Map<string, SceneHitTarget>();
         const addHit = (h: SceneHitTarget) => {
@@ -210,9 +217,14 @@ export function resolveSynchronizationLocalTarget(options: ResolveSyncLocalTarge
             if (primaryAxisId && hAxisId && hAxisId !== primaryAxisId) {
                 return;
             }
-            const hKey = interactionAxis === "y"
-                ? (h.yValue !== undefined ? h.yValue : h.value)
-                : (h.xKey !== undefined ? h.xKey : h.xValue);
+            const hKey =
+                interactionAxis === "y"
+                    ? h.yValue !== undefined
+                        ? h.yValue
+                        : h.value
+                    : h.xKey !== undefined
+                      ? h.xKey
+                      : h.xValue;
 
             if (keysMatch(primaryKey, hKey)) {
                 const markId = ChartMarkIdentityResolver.resolve(h);

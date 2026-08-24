@@ -1,9 +1,6 @@
 import type { ChartExportSnapshot } from "./chart-export-snapshot";
 import type { NormalizedChartExportRequest } from "./chart-export-options";
-import {
-    ChartExportSvgMetadataStripper,
-    ChartExportSvgValidator
-} from "./chart-export-svg-validator";
+import { ChartExportSvgMetadataStripper, ChartExportSvgValidator } from "./chart-export-svg-validator";
 import { setSvgAttribute } from "../render/svg/svg-attribute-utils";
 import { ChartExportError } from "../../models/chart-export.models";
 
@@ -20,10 +17,7 @@ export class ChartExportSvgFinalizer {
         request: NormalizedChartExportRequest
     ): FinalizedSvgOutput {
         if (typeof XMLSerializer === "undefined") {
-            throw new ChartExportError(
-                "unsupported-environment",
-                "Cannot serialize SVG in a non-browser environment."
-            );
+            throw new ChartExportError("unsupported-environment", "Cannot serialize SVG in a non-browser environment.");
         }
 
         if (svgElement.hasAttribute("xmlns")) {
@@ -92,11 +86,9 @@ export class ChartExportSvgFinalizer {
             const serializer = new XMLSerializer();
             rawXml = serializer.serializeToString(svgElement);
         } catch (err) {
-            throw new ChartExportError(
-                "svg-serialization-failed",
-                "Failed to serialize composed SVG document.",
-                { cause: err }
-            );
+            throw new ChartExportError("svg-serialization-failed", "Failed to serialize composed SVG document.", {
+                cause: err
+            });
         }
 
         const xml = `<?xml version="1.0" encoding="UTF-8"?>\n${rawXml}`;

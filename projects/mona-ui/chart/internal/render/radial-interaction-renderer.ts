@@ -26,8 +26,7 @@ export class RadialInteractionRenderer {
             "#3b82f6";
 
         const crosshairColor =
-            styleResolver.resolveCssVariable("--mona-chart-crosshair-color") ||
-            "rgba(59, 130, 246, 0.4)";
+            styleResolver.resolveCssVariable("--mona-chart-crosshair-color") || "rgba(59, 130, 246, 0.4)";
 
         const isKeyboard = interactionState.source === "keyboard";
 
@@ -51,9 +50,7 @@ export class RadialInteractionRenderer {
         }
 
         // 2. Highlight active series points
-        const hitsToHighlight = interactionState.activeHits.length > 0
-            ? interactionState.activeHits
-            : [activeHit];
+        const hitsToHighlight = interactionState.activeHits.length > 0 ? interactionState.activeHits : [activeHit];
 
         const surfaceColor =
             styleResolver.resolveCssVariable("--color-surface") ||

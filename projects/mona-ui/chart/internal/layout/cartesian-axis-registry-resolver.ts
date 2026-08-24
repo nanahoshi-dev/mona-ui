@@ -1,9 +1,5 @@
 import type { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
-import type {
-    
-    ChartXAxisRegistration,
-    ChartYAxisRegistration
-} from "../context/chart-registration-context";
+import type { ChartXAxisRegistration, ChartYAxisRegistration } from "../context/chart-registration-context";
 import type {
     ChartAxisFormatter,
     ChartAxisLabelRotation,
@@ -119,7 +115,9 @@ export class CartesianAxisRegistryResolver {
                 }
 
                 if (rawExplicitId && seenXIds.has(rawExplicitId)) {
-                    warnings.push(`[MonaChart] Duplicate X axis ID "${rawExplicitId}" detected. Later duplicate axis remains inactive.`);
+                    warnings.push(
+                        `[MonaChart] Duplicate X axis ID "${rawExplicitId}" detected. Later duplicate axis remains inactive.`
+                    );
                     continue;
                 }
                 seenXIds.add(id);
@@ -197,7 +195,9 @@ export class CartesianAxisRegistryResolver {
                 }
 
                 if (rawExplicitId && seenYIds.has(rawExplicitId)) {
-                    warnings.push(`[MonaChart] Duplicate Y axis ID "${rawExplicitId}" detected. Later duplicate axis remains inactive.`);
+                    warnings.push(
+                        `[MonaChart] Duplicate Y axis ID "${rawExplicitId}" detected. Later duplicate axis remains inactive.`
+                    );
                     continue;
                 }
                 seenYIds.add(id);

@@ -25,10 +25,7 @@ describe("CartesianAxisCoordinateSpace", () => {
             viewportScale: xScale
         };
 
-        const coordSpace = new CartesianAxisCoordinateSpace(
-            new Map([["x-1", xSnap]]),
-            new Map()
-        );
+        const coordSpace = new CartesianAxisCoordinateSpace(new Map([["x-1", xSnap]]), new Map());
 
         it("should retrieve snapshots by axis ref", () => {
             expect(coordSpace.get({ axis: "x", axisId: "x-1" })).toBe(xSnap);
@@ -72,10 +69,7 @@ describe("CartesianAxisCoordinateSpace", () => {
             viewportScale: bandScale
         };
 
-        const coordSpace = new CartesianAxisCoordinateSpace(
-            new Map([["x-cat", catSnap]]),
-            new Map()
-        );
+        const coordSpace = new CartesianAxisCoordinateSpace(new Map([["x-cat", catSnap]]), new Map());
 
         it("resolves band start, center, and end interior to the band itself", () => {
             const atStart = coordSpace.resolveCategoryAtPixel({ axis: "x", axisId: "x-cat" }, startA);
@@ -146,10 +140,7 @@ describe("CartesianAxisCoordinateSpace", () => {
                 viewportScale: zoomedScale
             };
 
-            const zoomedSpace = new CartesianAxisCoordinateSpace(
-                new Map([["x-zoomed", zoomedSnap]]),
-                new Map()
-            );
+            const zoomedSpace = new CartesianAxisCoordinateSpace(new Map([["x-zoomed", zoomedSnap]]), new Map());
 
             const startD = zoomedScale.map("D")!;
             const resD = zoomedSpace.resolveCategoryAtPixel({ axis: "x", axisId: "x-zoomed" }, startD + 1);
@@ -180,10 +171,7 @@ describe("CartesianAxisCoordinateSpace", () => {
                 viewportScale: yBandScale
             };
 
-            const horizontalSpace = new CartesianAxisCoordinateSpace(
-                new Map(),
-                new Map([["y-cat", ySnap]])
-            );
+            const horizontalSpace = new CartesianAxisCoordinateSpace(new Map(), new Map([["y-cat", ySnap]]));
 
             const betaStart = yBandScale.map("Beta")!;
             const resBeta = horizontalSpace.resolveCategoryAtPixel({ axis: "y", axisId: "y-cat" }, betaStart + 2);
@@ -394,10 +382,7 @@ describe("CartesianAxisCoordinateSpace", () => {
             viewportScale: yScale
         };
 
-        const space = new CartesianAxisCoordinateSpace(
-            new Map([["shared", xSnap]]),
-            new Map([["shared", ySnap]])
-        );
+        const space = new CartesianAxisCoordinateSpace(new Map([["shared", xSnap]]), new Map([["shared", ySnap]]));
 
         it("never collides between X and Y axes sharing raw axisId 'shared'", () => {
             const getX = space.get({ axis: "x", axisId: "shared" });
@@ -460,11 +445,26 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
 
         it("clampPointToPlot clamps coordinates to plot bounds", () => {
-            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 100, y: 100 }, plotRect)).toEqual({ x: 100, y: 100 });
-            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 10, y: 100 }, plotRect)).toEqual({ x: 50, y: 100 });
-            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 600, y: 100 }, plotRect)).toEqual({ x: 450, y: 100 });
-            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 100, y: 0 }, plotRect)).toEqual({ x: 100, y: 30 });
-            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 100, y: 300 }, plotRect)).toEqual({ x: 100, y: 230 });
+            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 100, y: 100 }, plotRect)).toEqual({
+                x: 100,
+                y: 100
+            });
+            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 10, y: 100 }, plotRect)).toEqual({
+                x: 50,
+                y: 100
+            });
+            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 600, y: 100 }, plotRect)).toEqual({
+                x: 450,
+                y: 100
+            });
+            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 100, y: 0 }, plotRect)).toEqual({
+                x: 100,
+                y: 30
+            });
+            expect(CartesianAxisCoordinateSpace.clampPointToPlot({ x: 100, y: 300 }, plotRect)).toEqual({
+                x: 100,
+                y: 230
+            });
         });
     });
 
@@ -521,7 +521,9 @@ describe("CartesianAxisCoordinateSpace", () => {
             expect(visibleGeom?.visibleInViewport).toBe(true);
 
             // Viewport lookup of non-visible category returns undefined
-            expect(space.resolveCategoryByKey({ axis: "x", axisId: "x-cat-large" }, "cat_10", "viewport")).toBeUndefined();
+            expect(
+                space.resolveCategoryByKey({ axis: "x", axisId: "x-cat-large" }, "cat_10", "viewport")
+            ).toBeUndefined();
         });
 
         it("constructs 10,000 category full viewport without quadratic scan", () => {
@@ -705,7 +707,7 @@ describe("CartesianAxisCoordinateSpace", () => {
                 expect(resolved?.axis).toBe("x");
                 expect(resolved?.axisId).toBe(snap.ref.axisId);
                 expect(resolved?.resolvedType).toBe(type);
-                expect((resolved?.value as number)).toBeCloseTo(val, 2);
+                expect(resolved?.value as number).toBeCloseTo(val, 2);
             });
         }
 
@@ -780,7 +782,10 @@ describe("CartesianAxisCoordinateSpace", () => {
             };
 
             const space = new CartesianAxisCoordinateSpace(
-                new Map([["x-invalid", invalidSnap], ["x-cat", catSnap]]),
+                new Map([
+                    ["x-invalid", invalidSnap],
+                    ["x-cat", catSnap]
+                ]),
                 new Map()
             );
 

@@ -213,7 +213,9 @@ describe("ChartStyleResolver", () => {
             xField: signal("x")
         };
 
-        const style = resolver.resolveFinancialSeriesStyle(mockFinancial as unknown as ChartFinancialSeriesRegistration);
+        const style = resolver.resolveFinancialSeriesStyle(
+            mockFinancial as unknown as ChartFinancialSeriesRegistration
+        );
 
         expect(style.risingColor).toBe("#00ffaa");
         expect(style.fallingColor).toBe("#ff00aa");

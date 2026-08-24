@@ -37,7 +37,10 @@
                     <div class="flex justify-between w-full text-[11px] font-medium text-muted-foreground">
                         @if (scale.ticks && scale.ticks.length > 0) {
                             @for (tick of scale.ticks; track tick.value) {
-                                <span [style.text-align]="tick.offset === 0 ? 'left' : tick.offset === 1 ? 'right' : 'center'">
+                                <span
+                                    [style.text-align]="
+                                        tick.offset === 0 ? 'left' : tick.offset === 1 ? 'right' : 'center'
+                                    ">
                                     {{ tick.formattedValue }}
                                 </span>
                             }
@@ -96,19 +99,31 @@
                         [attr.aria-pressed]="item.visible">
                         <span
                             class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                            [style.background]="item.secondaryColor ? ('linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)') : item.color"
+                            [style.background]="
+                                item.secondaryColor
+                                    ? 'linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)'
+                                    : item.color
+                            "
                             [style.backgroundColor]="item.color"
                             data-mona-chart-export-role="legend-bullet"></span>
-                        <span class="text-xs font-medium" data-mona-chart-export-role="legend-text">{{ item.name }}</span>
+                        <span class="text-xs font-medium" data-mona-chart-export-role="legend-text">{{
+                            item.name
+                        }}</span>
                     </button>
                 } @else {
                     <div [class]="itemClasses(item)">
                         <span
                             class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                            [style.background]="item.secondaryColor ? ('linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)') : item.color"
+                            [style.background]="
+                                item.secondaryColor
+                                    ? 'linear-gradient(135deg, ' + item.color + ' 50%, ' + item.secondaryColor + ' 50%)'
+                                    : item.color
+                            "
                             [style.backgroundColor]="item.color"
                             data-mona-chart-export-role="legend-bullet"></span>
-                        <span class="text-xs font-medium" data-mona-chart-export-role="legend-text">{{ item.name }}</span>
+                        <span class="text-xs font-medium" data-mona-chart-export-role="legend-text">{{
+                            item.name
+                        }}</span>
                     </div>
                 }
             }

@@ -1,10 +1,7 @@
 import type { ChartPoint } from "../../models/chart.models";
 import type { CartesianXYChartScene, ChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
-import {
-    findNearestInteractionBucketByX,
-    findNearestInteractionBucketByY
-} from "./chart-interaction-bucket-search";
+import { findNearestInteractionBucketByX, findNearestInteractionBucketByY } from "./chart-interaction-bucket-search";
 import { ChartPointerCandidateEvaluator } from "./chart-pointer-candidate-evaluator";
 import {
     ChartPointerCandidateResolver,
@@ -37,13 +34,13 @@ export class ChartPointerInteractionResolver {
         maxDistanceOrDemand: number | ChartPointerInteractionDemand = 32,
         instrumentation?: ChartPointerEvaluationInstrumentation
     ): ChartPointerResolution {
-        const demand: ChartPointerInteractionDemand = typeof maxDistanceOrDemand === "number"
-            ? { maxDistance: maxDistanceOrDemand, needHitTest: true }
-            : { maxDistance: 32, needHitTest: true, ...maxDistanceOrDemand };
+        const demand: ChartPointerInteractionDemand =
+            typeof maxDistanceOrDemand === "number"
+                ? { maxDistance: maxDistanceOrDemand, needHitTest: true }
+                : { maxDistance: 32, needHitTest: true, ...maxDistanceOrDemand };
 
-        const tooltipMaxDistance = Number.isFinite(demand.maxDistance) && demand.maxDistance! >= 0
-            ? demand.maxDistance!
-            : 32;
+        const tooltipMaxDistance =
+            Number.isFinite(demand.maxDistance) && demand.maxDistance! >= 0 ? demand.maxDistance! : 32;
 
         if (demand.needHitTest === false && !demand.needCrosshairCandidates) {
             const emptyHitState: ChartInteractionState = {
@@ -62,24 +59,31 @@ export class ChartPointerInteractionResolver {
             };
         }
 
-        const chDistance = Number.isFinite(demand.crosshairMaxDistance) && demand.crosshairMaxDistance! >= 0
-            ? demand.crosshairMaxDistance!
-            : 32;
+        const chDistance =
+            Number.isFinite(demand.crosshairMaxDistance) && demand.crosshairMaxDistance! >= 0
+                ? demand.crosshairMaxDistance!
+                : 32;
 
         const maxCandidateDistance = Math.max(
             demand.needHitTest !== false ? tooltipMaxDistance : 0,
             demand.needCrosshairCandidates ? chDistance : 0
         );
-        const candidates = ChartPointerCandidateResolver.discover(pointer, scene, maxCandidateDistance, instrumentation);
+        const candidates = ChartPointerCandidateResolver.discover(
+            pointer,
+            scene,
+            maxCandidateDistance,
+            instrumentation
+        );
         const evaluator = ChartPointerCandidateEvaluator.evaluate(candidates, scene, instrumentation);
 
-        const hitState = demand.needHitTest !== false
-            ? evaluator.resolveHitState(sharedTooltip, tooltipMaxDistance)
-            : {
-                  activeHitTarget: null,
-                  activeHits: [],
-                  pointerPosition: pointer
-              };
+        const hitState =
+            demand.needHitTest !== false
+                ? evaluator.resolveHitState(sharedTooltip, tooltipMaxDistance)
+                : {
+                      activeHitTarget: null,
+                      activeHits: [],
+                      pointerPosition: pointer
+                  };
 
         const primaryHit = hitState.activeHitTarget ?? hitState.activeHits[0] ?? null;
         const bucketHits = hitState.activeHits;

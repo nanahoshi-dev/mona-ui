@@ -257,16 +257,23 @@ export class WaterfallDataProcessor {
 
             const formattedValue = valueFormatter
                 ? valueFormatter(primaryValue, i)
-                : (kind === "change" && deltaValue !== undefined)
+                : kind === "change" && deltaValue !== undefined
                   ? `${deltaValue >= 0 ? "+" : ""}${deltaValue}`
                   : String(primaryValue);
 
-            const formattedDelta = kind === "change" && deltaValue !== undefined
-                ? (valueFormatter ? valueFormatter(deltaValue, i) : `${deltaValue >= 0 ? "+" : ""}${deltaValue}`)
-                : undefined;
+            const formattedDelta =
+                kind === "change" && deltaValue !== undefined
+                    ? valueFormatter
+                        ? valueFormatter(deltaValue, i)
+                        : `${deltaValue >= 0 ? "+" : ""}${deltaValue}`
+                    : undefined;
 
-            const formattedCumulativeBefore = valueFormatter ? valueFormatter(cumulativeBefore, i) : String(cumulativeBefore);
-            const formattedCumulativeAfter = valueFormatter ? valueFormatter(cumulativeAfter, i) : String(cumulativeAfter);
+            const formattedCumulativeBefore = valueFormatter
+                ? valueFormatter(cumulativeBefore, i)
+                : String(cumulativeBefore);
+            const formattedCumulativeAfter = valueFormatter
+                ? valueFormatter(cumulativeAfter, i)
+                : String(cumulativeAfter);
 
             points.push({
                 animationKey,

@@ -1,7 +1,4 @@
-import type {
-    ChartAnimationEasing,
-    ChartAnimationInput
-} from "../../models/chart-animation.models";
+import type { ChartAnimationEasing, ChartAnimationInput } from "../../models/chart-animation.models";
 
 export interface NormalizedChartAnimationOptions {
     readonly data: boolean;

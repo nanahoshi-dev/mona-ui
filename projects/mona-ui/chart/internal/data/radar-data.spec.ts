@@ -142,10 +142,13 @@ describe("RadarData", () => {
         expect(result.categories.map(c => c.key)).toEqual(["Active"]);
 
         // When all hidden, fallback to all
-        const allHiddenResult = prepareRadarData([
-            createRadarSeries({ data: [{ category: "H1", value: 1 }], visible: false }),
-            createRadarSeries({ data: [{ category: "H2", value: 2 }], visible: false })
-        ], []);
+        const allHiddenResult = prepareRadarData(
+            [
+                createRadarSeries({ data: [{ category: "H1", value: 1 }], visible: false }),
+                createRadarSeries({ data: [{ category: "H2", value: 2 }], visible: false })
+            ],
+            []
+        );
         expect(allHiddenResult.categories.map(c => c.key)).toEqual(["H1", "H2"]);
     });
 });

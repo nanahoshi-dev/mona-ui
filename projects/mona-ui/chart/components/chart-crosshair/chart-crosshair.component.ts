@@ -1,12 +1,4 @@
-import {
-    Component,
-    contentChild,
-    DestroyRef,
-    effect,
-    ElementRef,
-    inject,
-    input
-} from "@angular/core";
+import { Component, contentChild, DestroyRef, effect, ElementRef, inject, input } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
     ChartInvalidationReason,

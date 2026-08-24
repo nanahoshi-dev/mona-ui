@@ -7,9 +7,39 @@ import { signal } from "@angular/core";
 describe("CartesianBrushTargetResolver Unit Tests", () => {
     const mockScene: CartesianXYChartScene = {
         axes: [
-            { axis: "x", axisId: "x1", axisLine: true, gridLines: false, isPrimary: true, position: "bottom", ticks: [], title: "X1", visible: true },
-            { axis: "y", axisId: "y1", axisLine: true, gridLines: false, isPrimary: true, position: "left", ticks: [], title: "Y1", visible: true },
-            { axis: "y", axisId: "y2", axisLine: true, gridLines: false, isPrimary: false, position: "right", ticks: [], title: "Y2", visible: true }
+            {
+                axis: "x",
+                axisId: "x1",
+                axisLine: true,
+                gridLines: false,
+                isPrimary: true,
+                position: "bottom",
+                ticks: [],
+                title: "X1",
+                visible: true
+            },
+            {
+                axis: "y",
+                axisId: "y1",
+                axisLine: true,
+                gridLines: false,
+                isPrimary: true,
+                position: "left",
+                ticks: [],
+                title: "Y1",
+                visible: true
+            },
+            {
+                axis: "y",
+                axisId: "y2",
+                axisLine: true,
+                gridLines: false,
+                isPrimary: false,
+                position: "right",
+                ticks: [],
+                title: "Y2",
+                visible: true
+            }
         ],
         cartesianKind: "xy",
         coordinateSystem: "cartesian",

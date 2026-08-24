@@ -76,14 +76,15 @@ export class SvgPolarSectorSeriesRenderer {
             key: s => s.sliceId,
             tag: "path",
             update: (element, slice) => {
-                const d = buildArcPath({
-                    cornerRadius: slice.cornerRadius,
-                    endAngle: slice.endAngle,
-                    innerRadius: slice.innerRadius,
-                    outerRadius: slice.outerRadius,
-                    padAngle: slice.padAngle,
-                    startAngle: slice.startAngle
-                }) ?? "";
+                const d =
+                    buildArcPath({
+                        cornerRadius: slice.cornerRadius,
+                        endAngle: slice.endAngle,
+                        innerRadius: slice.innerRadius,
+                        outerRadius: slice.outerRadius,
+                        padAngle: slice.padAngle,
+                        startAngle: slice.startAngle
+                    }) ?? "";
 
                 const opacity = (series.renderOpacity ?? 1) * (slice.renderOpacity ?? 1);
                 setSvgAttribute(element, "d", d);
@@ -136,7 +137,9 @@ export class SvgPolarSectorSeriesRenderer {
                     continue;
                 }
                 const { arcAnchor, elbow, lineEnd } = slice.label;
-                pathSegments.push(`M ${arcAnchor.x} ${arcAnchor.y} L ${elbow.x} ${elbow.y} L ${lineEnd.x} ${lineEnd.y}`);
+                pathSegments.push(
+                    `M ${arcAnchor.x} ${arcAnchor.y} L ${elbow.x} ${elbow.y} L ${lineEnd.x} ${lineEnd.y}`
+                );
             }
 
             if (pathSegments.length > 0) {
@@ -162,14 +165,15 @@ export class SvgPolarSectorSeriesRenderer {
         if (activeHit && activeHit.seriesId === series.id) {
             const activeSlice = slices.find(s => s.sliceId === activeHit.sliceId || s.dataIndex === activeHit.index);
             if (activeSlice && activeSlice.visible) {
-                const d = buildArcPath({
-                    cornerRadius: activeSlice.cornerRadius,
-                    endAngle: activeSlice.endAngle,
-                    innerRadius: activeSlice.innerRadius,
-                    outerRadius: activeSlice.outerRadius,
-                    padAngle: activeSlice.padAngle,
-                    startAngle: activeSlice.startAngle
-                }) ?? "";
+                const d =
+                    buildArcPath({
+                        cornerRadius: activeSlice.cornerRadius,
+                        endAngle: activeSlice.endAngle,
+                        innerRadius: activeSlice.innerRadius,
+                        outerRadius: activeSlice.outerRadius,
+                        padAngle: activeSlice.padAngle,
+                        startAngle: activeSlice.startAngle
+                    }) ?? "";
 
                 if (!this.#highlightPath) {
                     this.#highlightPath = createSvgElement("path");
@@ -188,7 +192,8 @@ export class SvgPolarSectorSeriesRenderer {
                     setSvgAttribute(this.#highlightPath, "stroke-width", 3);
                 } else {
                     const hoverOverlayColor =
-                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
+                        styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") ||
+                        "rgba(255, 255, 255, 0.22)";
                     setSvgAttribute(this.#highlightPath, "fill", hoverOverlayColor);
                     setSvgAttribute(this.#highlightPath, "stroke", "none");
                     setSvgAttribute(this.#highlightPath, "stroke-width", 0);

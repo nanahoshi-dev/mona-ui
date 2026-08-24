@@ -17,10 +17,7 @@ export class CartesianFinancialIndex {
         this.#entries = [...entries].sort((a, b) => a.centerX - b.centerX);
         let maxHalf = 0;
         for (const e of this.#entries) {
-            const halfW = Math.max(
-                Math.abs(e.centerX - e.bounds.x),
-                Math.abs(e.bounds.x + e.bounds.width - e.centerX)
-            );
+            const halfW = Math.max(Math.abs(e.centerX - e.bounds.x), Math.abs(e.bounds.x + e.bounds.width - e.centerX));
             if (halfW > maxHalf) {
                 maxHalf = halfW;
             }

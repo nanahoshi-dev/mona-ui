@@ -1,6 +1,9 @@
 import { ChartExportError, type ChartExportErrorCode } from "../../models/chart-export.models";
 import { abortable } from "./chart-export-abort-utils";
-import { discoverResourceDependencies, type ChartExportResourceDependency } from "./chart-export-resource-dependency-scanner";
+import {
+    discoverResourceDependencies,
+    type ChartExportResourceDependency
+} from "./chart-export-resource-dependency-scanner";
 import {
     ChartExportRasterMediaType,
     MAX_EXPORT_RESOURCE_BYTES,
@@ -119,10 +122,7 @@ function assertOwnedFragment(root: Element, rawFragment: string): Element {
     }
 
     if (matches.length > 1) {
-        throw new ChartExportError(
-            "resource-load-failed",
-            `Template SVG document contains duplicate ID '#${id}'.`
-        );
+        throw new ChartExportError("resource-load-failed", `Template SVG document contains duplicate ID '#${id}'.`);
     }
 
     return matches[0];
@@ -138,7 +138,11 @@ function classifyDependency(dependency: ChartExportResourceDependency): Dependen
 
     if (dependency.source.kind === "attribute") {
         const attributeName = dependency.source.name.toLowerCase();
-        const isDirectUriAttribute = attributeName === "href" || attributeName === "xlink:href" || attributeName === "src" || attributeName === "poster";
+        const isDirectUriAttribute =
+            attributeName === "href" ||
+            attributeName === "xlink:href" ||
+            attributeName === "src" ||
+            attributeName === "poster";
 
         if (!isDirectUriAttribute) {
             return classifyCssUrlSurface(tagName, attributeName, dependency);
@@ -251,7 +255,11 @@ function classifyDependency(dependency: ChartExportResourceDependency): Dependen
     return classifyCssUrlSurface(tagName, propertyKey, dependency);
 }
 
-function classifyCssUrlSurface(_tagName: string, propertyOrAttributeKey: string, dependency: ChartExportResourceDependency): DependencyAction {
+function classifyCssUrlSurface(
+    _tagName: string,
+    propertyOrAttributeKey: string,
+    dependency: ChartExportResourceDependency
+): DependencyAction {
     if (FORBIDDEN_CSS_URL_PROPERTIES.has(propertyOrAttributeKey)) {
         return {
             kind: "reject",
@@ -271,11 +279,13 @@ function classifyCssUrlSurface(_tagName: string, propertyOrAttributeKey: string,
     }
 
     if (isPresentationAttribute) {
-        return dependency.isLocalFragment ? { kind: "owned-fragment" } : {
-            kind: "reject",
-            code: "unsupported-template",
-            message: `Template SVG attribute '${dependency.source.name}' contains unsupported external URL reference: '${dependency.url}'.`
-        };
+        return dependency.isLocalFragment
+            ? { kind: "owned-fragment" }
+            : {
+                  kind: "reject",
+                  code: "unsupported-template",
+                  message: `Template SVG attribute '${dependency.source.name}' contains unsupported external URL reference: '${dependency.url}'.`
+              };
     }
 
     return {
@@ -506,7 +516,10 @@ class ChartExportResourceTransaction {
                     canvas.height = height;
                     const ctx = canvas.getContext("2d");
                     if (!ctx) {
-                        throw new ChartExportError("resource-load-failed", "Could not create 2D canvas for resource capture.");
+                        throw new ChartExportError(
+                            "resource-load-failed",
+                            "Could not create 2D canvas for resource capture."
+                        );
                     }
                     ctx.drawImage(testImg, 0, 0);
                     const dataUrl = canvas.toDataURL("image/png");
@@ -541,11 +554,9 @@ class ChartExportResourceTransaction {
                     this.signal.removeEventListener("abort", onAbort);
                 }
                 reject(
-                    new ChartExportError(
-                        "resource-load-failed",
-                        `Failed to load template image resource: '${url}'.`,
-                        { cause: e }
-                    )
+                    new ChartExportError("resource-load-failed", `Failed to load template image resource: '${url}'.`, {
+                        cause: e
+                    })
                 );
             };
 
@@ -591,10 +602,7 @@ function rejectStylesheetDescendants(root: Element): void {
  * display the already-captured image bytes (R4-02).
  */
 function neutralizeResponsiveImageSelection(root: Element): void {
-    const pictures =
-        root.tagName.toLowerCase() === "picture"
-            ? [root]
-            : Array.from(root.querySelectorAll("picture"));
+    const pictures = root.tagName.toLowerCase() === "picture" ? [root] : Array.from(root.querySelectorAll("picture"));
     for (const picture of pictures) {
         for (const source of Array.from(picture.querySelectorAll("source"))) {
             source.remove();
@@ -602,9 +610,7 @@ function neutralizeResponsiveImageSelection(root: Element): void {
     }
 
     const images =
-        root.tagName.toLowerCase() === "img"
-            ? [root as HTMLImageElement]
-            : Array.from(root.querySelectorAll("img"));
+        root.tagName.toLowerCase() === "img" ? [root as HTMLImageElement] : Array.from(root.querySelectorAll("img"));
     for (const img of images) {
         img.removeAttribute("srcset");
         img.removeAttribute("sizes");
@@ -637,7 +643,12 @@ function collectTemplateFontChecks(
         const font = `${fontPrefix} ${fontFamily}`.trim();
         if (!usages.has(font)) {
             usages.set(font, {
-                families: fontFamily.split(",").map(f => f.trim().replace(/^['"]|['"]$/g, "").toLowerCase()),
+                families: fontFamily.split(",").map(f =>
+                    f
+                        .trim()
+                        .replace(/^['"]|['"]$/g, "")
+                        .toLowerCase()
+                ),
                 fontPrefix,
                 sampleText
             });

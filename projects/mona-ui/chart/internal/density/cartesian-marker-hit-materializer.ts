@@ -132,13 +132,7 @@ export function resolveCartesianMarkerDatum(
     const rawXVal = resolveValue(datum, context.xField, sourceIndex);
     const rawYVal = resolveValue(datum, context.valueField, sourceIndex);
 
-    const resolvedX = resolveCartesianContinuousXCoordinate(
-        rawXVal,
-        undefined,
-        undefined,
-        sourceIndex,
-        context.xScale
-    );
+    const resolvedX = resolveCartesianContinuousXCoordinate(rawXVal, undefined, undefined, sourceIndex, context.xScale);
     if (!resolvedX.valid || !isFiniteNumber(rawYVal)) {
         return null;
     }
@@ -162,16 +156,19 @@ export function resolveCartesianMarkerDatum(
         }
         sizeVal = Number(rawSize);
         markerRadius = context.bubbleRadiusScale ? context.bubbleRadiusScale(sizeVal) : context.defaultMinRadius;
-        formattedSizeStr = context.sizeFormatter ? context.sizeFormatter(sizeVal, sourceIndex) : formatCompactNumber(sizeVal);
+        formattedSizeStr = context.sizeFormatter
+            ? context.sizeFormatter(sizeVal, sourceIndex)
+            : formatCompactNumber(sizeVal);
     } else {
         markerRadius = context.defaultScatterRadius;
     }
 
     const animationKey = context.identity
         ? context.identity.resolveKeyAt(sourceIndex, resolvedX.interactionKey, datum)
-        : (occurrenceRank !== undefined
-            ? context.keyResolver?.resolveKeyWithRank(datum, resolvedX.interactionKey, sourceIndex, occurrenceRank) ?? ""
-            : context.keyResolver?.resolveKey(datum, resolvedX.interactionKey, sourceIndex) ?? "");
+        : occurrenceRank !== undefined
+          ? (context.keyResolver?.resolveKeyWithRank(datum, resolvedX.interactionKey, sourceIndex, occurrenceRank) ??
+            "")
+          : (context.keyResolver?.resolveKey(datum, resolvedX.interactionKey, sourceIndex) ?? "");
 
     const marker: SceneMarker = {
         animationKey,
@@ -193,9 +190,19 @@ export function resolveCartesianMarkerDatum(
         animationKey,
         color: context.color,
         datum,
-        formattedCategory: formatXValue(rawXVal, sourceIndex, context.xAxisFormatter, context.xAxisType, context.xTimeSpanMs),
+        formattedCategory: formatXValue(
+            rawXVal,
+            sourceIndex,
+            context.xAxisFormatter,
+            context.xAxisType,
+            context.xTimeSpanMs
+        ),
         formattedSize: formattedSizeStr,
-        formattedValue: formatYValue(yVal, sourceIndex, context.yAxisFormatter ?? (context.valueFormatter as ChartAxisFormatter<unknown> | undefined)),
+        formattedValue: formatYValue(
+            yVal,
+            sourceIndex,
+            context.yAxisFormatter ?? (context.valueFormatter as ChartAxisFormatter<unknown> | undefined)
+        ),
         index: sourceIndex,
         markerInteractionOrder: {
             seriesOrdinal: context.seriesOrdinal ?? 0,
@@ -211,11 +218,11 @@ export function resolveCartesianMarkerDatum(
         value: yVal,
         visualRadius: markerRadius,
         xAxisId: context.xAxisId,
-        xAxisTitle: context.xAxisTitle ?? (context.xAxis?.title?.() ?? ""),
+        xAxisTitle: context.xAxisTitle ?? context.xAxis?.title?.() ?? "",
         xKey: resolvedX.interactionKey,
         xValue: rawXVal,
         yAxisId: context.yAxisId,
-        yAxisTitle: context.yAxisTitle ?? (context.yAxis?.title?.() ?? ""),
+        yAxisTitle: context.yAxisTitle ?? context.yAxis?.title?.() ?? "",
         yValue: yVal
     };
 

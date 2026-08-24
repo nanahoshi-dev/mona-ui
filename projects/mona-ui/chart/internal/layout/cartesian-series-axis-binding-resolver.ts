@@ -48,12 +48,14 @@ export class CartesianSeriesAxisBindingResolver {
         }
 
         for (const series of seriesList) {
-            const rawXId = "xAxisId" in series && typeof series.xAxisId === "function"
-                ? (series.xAxisId as () => string | undefined)()?.trim()
-                : undefined;
-            const rawYId = "yAxisId" in series && typeof series.yAxisId === "function"
-                ? (series.yAxisId as () => string | undefined)()?.trim()
-                : undefined;
+            const rawXId =
+                "xAxisId" in series && typeof series.xAxisId === "function"
+                    ? (series.xAxisId as () => string | undefined)()?.trim()
+                    : undefined;
+            const rawYId =
+                "yAxisId" in series && typeof series.yAxisId === "function"
+                    ? (series.yAxisId as () => string | undefined)()?.trim()
+                    : undefined;
 
             const isDefaultX = !rawXId;
             const isDefaultY = !rawYId;

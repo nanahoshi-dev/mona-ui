@@ -73,12 +73,7 @@ export class ChartBrushGestureController {
         return wasBrushing;
     }
 
-    public computeBounds(
-        p1: ChartPoint,
-        p2: ChartPoint,
-        mode: ChartBrushMode,
-        plotRect: ChartRect
-    ): ChartRect {
+    public computeBounds(p1: ChartPoint, p2: ChartPoint, mode: ChartBrushMode, plotRect: ChartRect): ChartRect {
         const minX = Math.max(plotRect.x, Math.min(p1.x, p2.x));
         const maxX = Math.min(plotRect.x + plotRect.width, Math.max(p1.x, p2.x));
         const minY = Math.max(plotRect.y, Math.min(p1.y, p2.y));
@@ -199,11 +194,7 @@ export class ChartBrushGestureController {
         return true;
     }
 
-    public onPointerMove(
-        event: PointerEvent,
-        plotRect: ChartRect,
-        element?: HTMLElement
-    ): BrushGestureResult | null {
+    public onPointerMove(event: PointerEvent, plotRect: ChartRect, element?: HTMLElement): BrushGestureResult | null {
         if (!this.#session || this.#session.pointerId !== event.pointerId) {
             return null;
         }
@@ -252,11 +243,7 @@ export class ChartBrushGestureController {
         return { bounds, phase: "update", session: this.#session };
     }
 
-    public onPointerUp(
-        event: PointerEvent,
-        plotRect: ChartRect,
-        element?: HTMLElement
-    ): BrushGestureResult | null {
+    public onPointerUp(event: PointerEvent, plotRect: ChartRect, element?: HTMLElement): BrushGestureResult | null {
         if (!this.#session || this.#session.pointerId !== event.pointerId) {
             return null;
         }

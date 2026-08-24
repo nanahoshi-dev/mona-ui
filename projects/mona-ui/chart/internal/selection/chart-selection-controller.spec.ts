@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-    ChartSelectionController
-} from "./chart-selection-controller";
+import { ChartSelectionController } from "./chart-selection-controller";
 import { ChartVisibleMarkIndex } from "../interaction/chart-visible-mark-index";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 
@@ -134,12 +132,7 @@ describe("ChartSelectionController", () => {
                 removed: []
             };
 
-            const evt = ChartSelectionController.buildChangeEvent(
-                "click",
-                mutation,
-                ["m1"],
-                visibleIndex
-            );
+            const evt = ChartSelectionController.buildChangeEvent("click", mutation, ["m1"], visibleIndex);
 
             expect(evt.source).toBe("click");
             expect(evt.previousSelectedMarkIds).toEqual(["m1"]);

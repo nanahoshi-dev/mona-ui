@@ -33,7 +33,10 @@ export class FunnelChartRenderer {
             if (hit && hit.seriesType === "funnel") {
                 const s = series[0];
                 const stage = s?.stages.find(
-                    st => st.animationKey === hit.animationKey || st.stageId === hit.itemId || st.dataIndex === hit.dataIndex
+                    st =>
+                        st.animationKey === hit.animationKey ||
+                        st.stageId === hit.itemId ||
+                        st.dataIndex === hit.dataIndex
                 );
 
                 if (stage && stage.polygon) {

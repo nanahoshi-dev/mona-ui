@@ -1,9 +1,6 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ChartBrushRegistration, ChartCrosshairRegistration } from "../context/chart-registration-context";
-import type {
-    ChartBrushRenderSnapshot,
-    ChartCrosshairRenderSnapshot
-} from "../export/chart-export-snapshot";
+import type { ChartBrushRenderSnapshot, ChartCrosshairRenderSnapshot } from "../export/chart-export-snapshot";
 import type { ChartCrosshairState } from "../interaction/chart-crosshair-state";
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { CartesianDataLabelScene } from "../scene/cartesian-data-label-scene";

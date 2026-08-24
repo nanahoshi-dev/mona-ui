@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { ChartWaterfallSeriesScene, ChartWaterfallSeriesStyle, SceneWaterfallBar } from "../../scene/waterfall-scene";
+import type {
+    ChartWaterfallSeriesScene,
+    ChartWaterfallSeriesStyle,
+    SceneWaterfallBar
+} from "../../scene/waterfall-scene";
 import { WaterfallAnimationAdapter } from "./waterfall-animation-adapter";
 
 describe("WaterfallAnimationAdapter", () => {

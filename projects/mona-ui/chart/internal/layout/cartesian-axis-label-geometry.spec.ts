@@ -59,7 +59,9 @@ describe("CartesianAxisLabelGeometry", () => {
 
         it("creates time tick key", () => {
             const date = new Date(2026, 0, 1);
-            expect(CartesianAxisLabelGeometry.createTickKey("x", "time", date, 0)).toBe(`axis:x:time:${date.getTime()}`);
+            expect(CartesianAxisLabelGeometry.createTickKey("x", "time", date, 0)).toBe(
+                `axis:x:time:${date.getTime()}`
+            );
         });
     });
 

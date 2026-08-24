@@ -152,7 +152,20 @@ function createMockHeatmapScene(): CartesianHeatmapChartScene {
         series: [
             {
                 cells: [
-                    { backgroundColor: "#ff0000", dataIndex: 0, datum: {}, height: 50, opacity: 1, rawValue: 10, valueText: "10", width: 50, x: 20, xIndex: 0, y: 20, yIndex: 0 }
+                    {
+                        backgroundColor: "#ff0000",
+                        dataIndex: 0,
+                        datum: {},
+                        height: 50,
+                        opacity: 1,
+                        rawValue: 10,
+                        valueText: "10",
+                        width: 50,
+                        x: 20,
+                        xIndex: 0,
+                        y: 20,
+                        yIndex: 0
+                    }
                 ],
                 id: "heat-1",
                 labels: [],
@@ -174,8 +187,24 @@ function createMockRadarScene(): PolarAxisChartScene {
             mode: "category",
             rotation: 0,
             ticks: [
-                { angle: 0, formattedValue: "A", index: 0, labelPoint: { x: 150, y: 50 }, tickKey: "t1", value: "A", visible: true },
-                { angle: Math.PI, formattedValue: "B", index: 1, labelPoint: { x: 150, y: 250 }, tickKey: "t2", value: "B", visible: true }
+                {
+                    angle: 0,
+                    formattedValue: "A",
+                    index: 0,
+                    labelPoint: { x: 150, y: 50 },
+                    tickKey: "t1",
+                    value: "A",
+                    visible: true
+                },
+                {
+                    angle: Math.PI,
+                    formattedValue: "B",
+                    index: 1,
+                    labelPoint: { x: 150, y: 250 },
+                    tickKey: "t2",
+                    value: "B",
+                    visible: true
+                }
             ],
             visible: true
         },
@@ -199,7 +228,16 @@ function createMockRadarScene(): PolarAxisChartScene {
             labelOffset: 5,
             labels: true,
             ticks: [
-                { formattedValue: "50", index: 0, isZero: false, labelPoint: { x: 150, y: 100 }, radius: 50, tickKey: "r1", value: 50, visible: true }
+                {
+                    formattedValue: "50",
+                    index: 0,
+                    isZero: false,
+                    labelPoint: { x: 150, y: 100 },
+                    radius: 50,
+                    tickKey: "r1",
+                    value: 50,
+                    visible: true
+                }
             ],
             visible: true
         },
@@ -215,7 +253,18 @@ function createMockRadarScene(): PolarAxisChartScene {
                 name: "Radar Series",
                 pointRadius: 4,
                 points: [
-                    { angle: 0, animationKey: "pt-1", categoryKey: "c1", dataIndex: 0, datum: {}, defined: true, formattedValue: "40", point: { x: 150, y: 110 }, radius: 40, value: 40 }
+                    {
+                        angle: 0,
+                        animationKey: "pt-1",
+                        categoryKey: "c1",
+                        dataIndex: 0,
+                        datum: {},
+                        defined: true,
+                        formattedValue: "40",
+                        point: { x: 150, y: 110 },
+                        radius: 40,
+                        value: 40
+                    }
                 ],
                 showPoints: true,
                 strokeWidth: 2,
@@ -404,7 +453,20 @@ describe("SVG Crossfade Transitions", () => {
                 plotRect: { height: 200, width: 400, x: 20, y: 20 },
                 series: [
                     {
-                        bars: [{ datum: {}, height: 50, index: 0, isPositive: true, radius: 0, width: 20, x: 50, xValue: "A", y: 100, yValue: 10 }],
+                        bars: [
+                            {
+                                datum: {},
+                                height: 50,
+                                index: 0,
+                                isPositive: true,
+                                radius: 0,
+                                width: 20,
+                                x: 50,
+                                xValue: "A",
+                                y: 100,
+                                yValue: 10
+                            }
+                        ],
                         borderRadius: 0,
                         fillOpacity: 1,
                         id: "s-from",
@@ -427,7 +489,17 @@ describe("SVG Crossfade Transitions", () => {
                         fillOpacity: 1,
                         id: "s-to",
                         name: "Line To",
-                        points: [{ datum: {}, defined: true, index: 0, point: { x: 50, y: 80 }, renderOpacity: 1, xValue: "A", yValue: 15 }],
+                        points: [
+                            {
+                                datum: {},
+                                defined: true,
+                                index: 0,
+                                point: { x: 50, y: 80 },
+                                renderOpacity: 1,
+                                xValue: "A",
+                                yValue: 15
+                            }
+                        ],
                         style: createMockSeriesStyle("#00ff00"),
                         type: "line",
                         visible: true,
@@ -487,7 +559,20 @@ describe("SVG Crossfade Transitions", () => {
             const toScene = createMockCartesianXYScene({
                 series: [
                     {
-                        bars: [{ datum: {}, height: 50, index: 0, isPositive: true, radius: 0, width: 20, x: 50, xValue: "A", y: 100, yValue: 10 }],
+                        bars: [
+                            {
+                                datum: {},
+                                height: 50,
+                                index: 0,
+                                isPositive: true,
+                                radius: 0,
+                                width: 20,
+                                x: 50,
+                                xValue: "A",
+                                y: 100,
+                                yValue: 10
+                            }
+                        ],
                         borderRadius: 0,
                         fillOpacity: 1,
                         id: "s-to",
@@ -532,15 +617,30 @@ describe("SVG Crossfade Transitions", () => {
                 const styleResolver = createMockStyleResolver();
 
                 // Test at p = 0.5
-                backend.renderCrossfade({ fromScene: null, presentation: null, progress: 0.5, styleResolver, toScene: scene });
+                backend.renderCrossfade({
+                    fromScene: null,
+                    presentation: null,
+                    progress: 0.5,
+                    styleResolver,
+                    toScene: scene
+                });
                 const toScope = svg.querySelector("g[data-crossfade-scope='to']");
                 expect(toScope, `${name} should have to-scope at p=0.5`).not.toBeNull();
                 expect(Number(toScope?.getAttribute("opacity"))).toBeCloseTo(0.5, 2);
                 expect(svg.querySelector("g[data-crossfade-scope='from']")).toBeNull();
 
                 // Test at p = 1.0
-                backend.renderCrossfade({ fromScene: null, presentation: null, progress: 1.0, styleResolver, toScene: scene });
-                expect(svg.querySelector("g[data-crossfade-scope='to']"), `${name} should have no to-scope at p=1.0`).toBeNull();
+                backend.renderCrossfade({
+                    fromScene: null,
+                    presentation: null,
+                    progress: 1.0,
+                    styleResolver,
+                    toScene: scene
+                });
+                expect(
+                    svg.querySelector("g[data-crossfade-scope='to']"),
+                    `${name} should have no to-scope at p=1.0`
+                ).toBeNull();
             }
         });
     });
@@ -559,8 +659,26 @@ describe("SVG Crossfade Transitions", () => {
                         fillMode: "gradient",
                         id: "area-series-1",
                         points: [
-                            { datum: {}, defined: true, index: 0, renderOpacity: 1, x: 50, xValue: "A", y: 100, yValue: 10 },
-                            { datum: {}, defined: true, index: 1, renderOpacity: 1, x: 150, xValue: "B", y: 50, yValue: 20 }
+                            {
+                                datum: {},
+                                defined: true,
+                                index: 0,
+                                renderOpacity: 1,
+                                x: 50,
+                                xValue: "A",
+                                y: 100,
+                                yValue: 10
+                            },
+                            {
+                                datum: {},
+                                defined: true,
+                                index: 1,
+                                renderOpacity: 1,
+                                x: 150,
+                                xValue: "B",
+                                y: 50,
+                                yValue: 20
+                            }
                         ],
                         style: createMockSeriesStyle("#ff0000"),
                         type: "area",
@@ -578,8 +696,26 @@ describe("SVG Crossfade Transitions", () => {
                         fillMode: "gradient",
                         id: "area-series-1",
                         points: [
-                            { datum: {}, defined: true, index: 0, renderOpacity: 1, x: 50, xValue: "A", y: 80, yValue: 15 },
-                            { datum: {}, defined: true, index: 1, renderOpacity: 1, x: 150, xValue: "B", y: 30, yValue: 25 }
+                            {
+                                datum: {},
+                                defined: true,
+                                index: 0,
+                                renderOpacity: 1,
+                                x: 50,
+                                xValue: "A",
+                                y: 80,
+                                yValue: 15
+                            },
+                            {
+                                datum: {},
+                                defined: true,
+                                index: 1,
+                                renderOpacity: 1,
+                                x: 150,
+                                xValue: "B",
+                                y: 30,
+                                yValue: 25
+                            }
                         ],
                         style: createMockSeriesStyle("#00ff00"),
                         type: "area",
@@ -710,7 +846,9 @@ describe("SVG Crossfade Transitions", () => {
             });
 
             // Highlight layer inside generic scopes should not render active highlights
-            const highlightPaths = svg.querySelectorAll("g[data-crossfade-scope] g[data-polar-layer='highlight'] > *, g[data-crossfade-scope] g[data-heatmap-layer='highlight'] > *");
+            const highlightPaths = svg.querySelectorAll(
+                "g[data-crossfade-scope] g[data-polar-layer='highlight'] > *, g[data-crossfade-scope] g[data-heatmap-layer='highlight'] > *"
+            );
             expect(highlightPaths.length).toBe(0);
         });
     });
@@ -747,10 +885,22 @@ describe("SVG Crossfade Transitions", () => {
             const sceneC = createMockHeatmapScene();
 
             // Start A -> B at 0.4
-            backend.renderCrossfade({ fromScene: sceneA, presentation: null, progress: 0.4, styleResolver, toScene: sceneB });
+            backend.renderCrossfade({
+                fromScene: sceneA,
+                presentation: null,
+                progress: 0.4,
+                styleResolver,
+                toScene: sceneB
+            });
 
             // Interrupted! Now B -> C at 0.3
-            backend.renderCrossfade({ fromScene: sceneB, presentation: null, progress: 0.3, styleResolver, toScene: sceneC });
+            backend.renderCrossfade({
+                fromScene: sceneB,
+                presentation: null,
+                progress: 0.3,
+                styleResolver,
+                toScene: sceneC
+            });
 
             const fromContainer = svg.querySelector("g[data-crossfade-scope='from']");
             const toContainer = svg.querySelector("g[data-crossfade-scope='to']");

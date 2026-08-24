@@ -9,8 +9,8 @@ import {
     effect,
     ElementRef,
     inject,
-    input
-    ,output,
+    input,
+    output,
     Signal,
     signal,
     untracked,
@@ -41,8 +41,8 @@ import {
     type ChartFunnelSeriesRegistration,
     type ChartGaugeSeriesRegistration,
     type ChartHeatmapSeriesRegistration,
-    type ChartLegendRegistration
-    ,type ChartRadialAxisRegistration,
+    type ChartLegendRegistration,
+    type ChartRadialAxisRegistration,
     type ChartRadialBarSeriesRegistration,
     type ChartReferenceBandRegistration,
     type ChartReferenceLineRegistration,
@@ -69,10 +69,7 @@ import { CartesianDataLabelProjector } from "../../internal/data-label/cartesian
 import type { CartesianDataLabelScene } from "../../internal/scene/cartesian-data-label-scene";
 import { CartesianSelectionProjector } from "../../internal/selection/cartesian-selection-projector";
 import type { CartesianSelectionScene } from "../../internal/scene/cartesian-selection-scene";
-import {
-    ChartSelectionController,
-    toSelectedPoint
-} from "../../internal/selection/chart-selection-controller";
+import { ChartSelectionController, toSelectedPoint } from "../../internal/selection/chart-selection-controller";
 import { CartesianBrushRangeResolver } from "../../internal/brush/cartesian-brush-range-resolver";
 import { CartesianBrushMarkIndex } from "../../internal/brush/cartesian-brush-mark-index";
 import {
@@ -84,9 +81,7 @@ import {
     type ResolvedCartesianBrushTarget
 } from "../../internal/brush/cartesian-brush-target-resolver";
 import { normalizeSeriesKey } from "../../internal/animation/animation-identity";
-import {
-    CartesianCrosshairResolver
-} from "../../internal/interaction/cartesian-crosshair-resolver";
+import { CartesianCrosshairResolver } from "../../internal/interaction/cartesian-crosshair-resolver";
 import {
     ChartPointerInteractionResolver,
     type ChartPointerInteractionDemand,
@@ -105,8 +100,8 @@ import type {
 } from "../../internal/scene/cartesian-overlay-scene";
 import {
     ChartKeyboardNavigation,
-    type ChartKeyboardAxisNamespace
-    ,resolveInteractionBuckets
+    type ChartKeyboardAxisNamespace,
+    resolveInteractionBuckets
 } from "../../internal/interaction/chart-keyboard-navigation";
 import { ChartLabelMeasurementPruner } from "../../internal/layout/chart-label-measurement-pruner";
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
@@ -123,10 +118,7 @@ import {
     type ChartExportOptions,
     type ChartExportResult
 } from "../../models/chart-export.models";
-import {
-    normalizeChartDownloadOptions,
-    normalizeChartExportOptions
-} from "../../internal/export/chart-export-options";
+import { normalizeChartDownloadOptions, normalizeChartExportOptions } from "../../internal/export/chart-export-options";
 import { ChartExportSnapshotBuilder } from "../../internal/export/chart-export-snapshot-builder";
 import { ChartExportCoordinator } from "../../internal/export/chart-export-coordinator";
 import { ChartDownloadHelper } from "../../internal/export/chart-download-helper";
@@ -148,7 +140,10 @@ import type { ChartWaterfallSeriesScene, SceneWaterfallLabel } from "../../inter
 import type { ChartHierarchyNodeContext } from "../../models/chart-hierarchy.models";
 import type { ChartTreemapLabelTemplateContext } from "../../models/chart-treemap.models";
 import type { ChartFunnelLabelTemplateContext, ChartFunnelStageContext } from "../../models/chart-funnel.models";
-import type { ChartWaterfallLabelTemplateContext, ChartWaterfallPointContext } from "../../models/chart-waterfall.models";
+import type {
+    ChartWaterfallLabelTemplateContext,
+    ChartWaterfallPointContext
+} from "../../models/chart-waterfall.models";
 import type { ChartGaugeSeriesScene, PolarArcChartScene } from "../../internal/scene/polar-arc-scene";
 import type { ChartGaugeCenterTemplateContext } from "../../models/chart-radial-arc.models";
 import type { ChartColorLegendScale } from "../../models/chart-heatmap.models";
@@ -165,10 +160,7 @@ import { degreesToRadians } from "../../internal/utils/angle-utils";
 import { formatXValue, formatYValue } from "../../internal/utils/chart-formatter";
 import { clamp } from "../../internal/utils/number-utils";
 import type { ChartAnimationInput } from "../../models/chart-animation.models";
-import type {
-    ChartBrushCancelReason,
-    ChartBrushPhase
-} from "../../models/chart-brush.models";
+import type { ChartBrushCancelReason, ChartBrushPhase } from "../../models/chart-brush.models";
 import type { ChartSelectionMode } from "../../models/chart-selection.models";
 import type {
     ChartPointEvent,
@@ -202,8 +194,8 @@ import {
 } from "../../internal/density/cartesian-dense-selection";
 import { normalizeChartNavigationOptions } from "../../internal/viewport/chart-navigation-options";
 import {
-    areInternalViewportStatesEqual
-    ,diffInternalViewportStates,
+    areInternalViewportStatesEqual,
+    diffInternalViewportStates,
     normalizeViewportState,
     toPublicViewportState,
     type InternalCartesianViewportState
@@ -351,7 +343,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const seriesColors = new Map<string, string>();
         if (scene.series) {
             for (const s of scene.series) {
-                const c = ("style" in s && s.style?.color) || ("color" in s && typeof (s as { color?: unknown }).color === "string" ? (s as { color?: string }).color : undefined);
+                const c =
+                    ("style" in s && s.style?.color) ||
+                    ("color" in s && typeof (s as { color?: unknown }).color === "string"
+                        ? (s as { color?: string }).color
+                        : undefined);
                 if (c) {
                     seriesColors.set(s.id, c);
                 }
@@ -552,14 +548,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return new Set(this.effectiveSelectedMarkIds());
     });
     protected readonly styleRevision = signal(0);
-    protected readonly subtitleClasses = computed(() =>
-        twMerge(chartSubtitleBaseThemeVariants())
-    );
+    protected readonly subtitleClasses = computed(() => twMerge(chartSubtitleBaseThemeVariants()));
     protected readonly subtitleTemplate = contentChild(ChartSubtitleTemplateDirective);
     protected readonly svgElement = viewChild<ElementRef<SVGSVGElement>>("svgSurface");
-    protected readonly titleClasses = computed(() =>
-        twMerge(chartTitleBaseThemeVariants())
-    );
+    protected readonly titleClasses = computed(() => twMerge(chartTitleBaseThemeVariants()));
     protected readonly titleTemplate = contentChild(ChartTitleTemplateDirective);
     protected readonly touchActionStyle = computed(() => {
         const nav = this.normalizedNavigation();
@@ -848,7 +840,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             {
                 getBaseDomainSignature: () => null,
                 getCoordinateSpace: () =>
-                    this.#cartesianLayoutRuntime?.baseCoordinateSpace ?? this.cartesianXYScene()?.coordinateSpace ?? null,
+                    this.#cartesianLayoutRuntime?.baseCoordinateSpace ??
+                    this.cartesianXYScene()?.coordinateSpace ??
+                    null,
                 getNavigationOptions: () => ({
                     clampToData: this.normalizedNavigation().clampToData,
                     constraints: this.normalizedNavigation().constraints,
@@ -866,7 +860,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         plotRect: scene.plotRect,
                         primaryXAxisId: scene.primaryXAxisId ?? "default-x",
                         primaryYAxisId: scene.primaryYAxisId ?? "default-y",
-                        resolveNearestPoint: (pixel: ChartPoint, dimension: "x" | "y" | "xy" = "xy", mappedXAxisId?: string, mappedYAxisId?: string) => {
+                        resolveNearestPoint: (
+                            pixel: ChartPoint,
+                            dimension: "x" | "y" | "xy" = "xy",
+                            mappedXAxisId?: string,
+                            mappedYAxisId?: string
+                        ) => {
                             const sc = this.cartesianXYScene();
                             if (!sc) return null;
                             const res = resolveSynchronizationLocalTarget({
@@ -1001,7 +1000,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const seriesList = this.#registeredSeries();
             const seenKeys = new Map<string, string>();
             for (const s of seriesList) {
-                if ("seriesKey" in s && typeof (s as { seriesKey?: () => string | undefined }).seriesKey === "function") {
+                if (
+                    "seriesKey" in s &&
+                    typeof (s as { seriesKey?: () => string | undefined }).seriesKey === "function"
+                ) {
                     const raw = (s as { seriesKey?: () => string | undefined }).seriesKey!();
                     const norm = normalizeSeriesKey(raw);
                     if (norm) {
@@ -1137,7 +1139,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         // Sync external viewport model changes to internal state
         effect(() => {
             const extViewport = this.viewport();
-            const baseCoord = this.#cartesianLayoutRuntime?.baseCoordinateSpace ?? this.cartesianXYScene()?.coordinateSpace;
+            const baseCoord =
+                this.#cartesianLayoutRuntime?.baseCoordinateSpace ?? this.cartesianXYScene()?.coordinateSpace;
             if (extViewport !== undefined) {
                 if (baseCoord) {
                     const normalized = normalizeViewportState(extViewport, baseCoord, {
@@ -1286,10 +1289,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         });
     }
 
-    #applyGestureViewportEvent(
-        nextState: InternalCartesianViewportState,
-        event: ChartViewportChangeEvent
-    ): void {
+    #applyGestureViewportEvent(nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent): void {
         if (this.#isDestroyed) return;
         this.#retireTransientInteractionForViewportChange();
         this.viewportChange.emit(event);
@@ -1332,7 +1332,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (syncOptions?.crosshair.showTooltip && state) {
             const sc = this.cartesianXYScene();
             if (sc) {
-                const dimension: "x" | "y" | "xy" = state.x && state.y ? "xy" : (state.x ? "x" : "y");
+                const dimension: "x" | "y" | "xy" = state.x && state.y ? "xy" : state.x ? "x" : "y";
                 const res = resolveSynchronizationLocalTarget({
                     anchor: state.anchor,
                     dimension,
@@ -1343,7 +1343,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 });
                 if (res && res.primaryHit) {
                     this.tooltipPosition.set(res.nearestAnchor);
-                    this.tooltipContext.set(this.#buildTooltipContext(res.sharedHits, this.#resolveSharedTooltip(sc), res.primaryHit));
+                    this.tooltipContext.set(
+                        this.#buildTooltipContext(res.sharedHits, this.#resolveSharedTooltip(sc), res.primaryHit)
+                    );
                 } else {
                     this.tooltipContext.set(null);
                     this.tooltipPosition.set(null);
@@ -1524,8 +1526,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     hit.value ??
                     (isRange && fromValue !== undefined && toValue !== undefined
                         ? [fromValue, toValue]
-                        : hit.hierarchy?.aggregateValue ?? hit.yValue),
-                valueKind: hit.valueKind ?? (isRange ? "range" : hit.financial ? "ohlc" : hit.waterfall ? "waterfall" : "scalar"),
+                        : (hit.hierarchy?.aggregateValue ?? hit.yValue)),
+                valueKind:
+                    hit.valueKind ??
+                    (isRange ? "range" : hit.financial ? "ohlc" : hit.waterfall ? "waterfall" : "scalar"),
                 waterfall: hit.waterfall,
                 xAxisId: hit.xAxisId,
                 xAxisTitle: hit.xAxisTitle,
@@ -1563,7 +1567,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const session = this.#brushGestureController.activeSession;
         const brushReg = this.#brush();
         const hadBounds = this.#activeBrushBounds() !== null;
-        const wasBrushing = this.#brushGestureController.cancel(options?.element ?? this.#getSurfaceElement() ?? undefined);
+        const wasBrushing = this.#brushGestureController.cancel(
+            options?.element ?? this.#getSurfaceElement() ?? undefined
+        );
         this.#activeBrushBounds.set(null);
 
         if (!options?.silent && (wasBrushing || hadBounds) && brushReg) {
@@ -1611,9 +1617,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.tooltipPosition.set(null);
     }
 
-    #clearTransientInteractionOwnedBy(
-        owner: Exclude<ChartTransientInteractionOwner, null>
-    ): boolean {
+    #clearTransientInteractionOwnedBy(owner: Exclude<ChartTransientInteractionOwner, null>): boolean {
         if (this.#interactionOwner === owner) {
             this.#interactionState = null;
             this.#interactionOwner = null;
@@ -1628,7 +1632,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             if (this.#lastNormalizedControlledViewport !== null) {
                 return this.#lastNormalizedControlledViewport;
             }
-            const baseCoord = this.#cartesianLayoutRuntime?.baseCoordinateSpace ?? this.cartesianXYScene()?.coordinateSpace;
+            const baseCoord =
+                this.#cartesianLayoutRuntime?.baseCoordinateSpace ?? this.cartesianXYScene()?.coordinateSpace;
             if (baseCoord) {
                 const norm = normalizeViewportState(controlled, baseCoord, {
                     clampToData: this.normalizedNavigation().clampToData,
@@ -1680,11 +1685,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#activeBrushBounds.set(frame.result.bounds);
 
         const ranges = frame.scene.coordinateSpace
-            ? CartesianBrushRangeResolver.resolve(
-                  frame.result.bounds,
-                  frame.scene.coordinateSpace,
-                  frame.target
-              )
+            ? CartesianBrushRangeResolver.resolve(frame.result.bounds, frame.scene.coordinateSpace, frame.target)
             : {};
 
         if (frame.phase === "start") {
@@ -1713,10 +1714,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #formatHitAnnouncement(matchingHit: SceneHitTarget): string {
-        const xStr = matchingHit.formattedXValue ?? (matchingHit.xValue !== undefined ? String(matchingHit.xValue) : "");
+        const xStr =
+            matchingHit.formattedXValue ?? (matchingHit.xValue !== undefined ? String(matchingHit.xValue) : "");
         const yStr = matchingHit.formattedValue ?? (matchingHit.yValue !== undefined ? String(matchingHit.yValue) : "");
         const isRange = matchingHit.range || matchingHit.fromValue !== undefined || matchingHit.toValue !== undefined;
-        const fromStr = matchingHit.formattedFrom ?? (matchingHit.fromValue !== undefined ? String(matchingHit.fromValue) : "");
+        const fromStr =
+            matchingHit.formattedFrom ?? (matchingHit.fromValue !== undefined ? String(matchingHit.fromValue) : "");
         const toStr = matchingHit.formattedTo ?? (matchingHit.toValue !== undefined ? String(matchingHit.toValue) : "");
         if (isRange && fromStr && toStr) {
             return `${matchingHit.seriesName}: ${xStr}, ${fromStr} to ${toStr}`;
@@ -1770,7 +1773,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#canvasContext = canvasRef.nativeElement.getContext("2d");
         }
 
-        const plotEl = plotSurfaceRef?.nativeElement || canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
+        const plotEl =
+            plotSurfaceRef?.nativeElement || canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
 
         if (typeof ResizeObserver !== "undefined") {
             this.#resizeObserver = new ResizeObserver(entries => {
@@ -1991,8 +1995,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#labelMeasurements
             );
             const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
-            const { viewport: canonicalViewport, reconciliationEvent } =
-                this.#resolveCanonicalViewportForAuthority(baseCoordSpace, "chrome");
+            const { viewport: canonicalViewport, reconciliationEvent } = this.#resolveCanonicalViewportForAuthority(
+                baseCoordSpace,
+                "chrome"
+            );
 
             if (reconciliationEvent) {
                 this.viewportChange.emit(reconciliationEvent);
@@ -2030,8 +2036,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#beginInteractionAuthorityChange();
                 this.#cartesianLayoutRuntime = preparation.runtime;
                 const baseCoordSpace = this.#cartesianLayoutRuntime.baseCoordinateSpace;
-                const { viewport: canonicalViewport, reconciliationEvent } =
-                    this.#resolveCanonicalViewportForAuthority(baseCoordSpace, "structural");
+                const { viewport: canonicalViewport, reconciliationEvent } = this.#resolveCanonicalViewportForAuthority(
+                    baseCoordSpace,
+                    "structural"
+                );
 
                 if (reconciliationEvent) {
                     this.viewportChange.emit(reconciliationEvent);
@@ -2062,7 +2070,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         );
 
         if (newScene?.hitTargets && this.#dataLabelMeasurements.size > 0) {
-            const activeKeys = new Set(newScene.hitTargets.map(h => `${h.seriesId}:${ChartMarkIdentityResolver.resolve(h)}`));
+            const activeKeys = new Set(
+                newScene.hitTargets.map(h => `${h.seriesId}:${ChartMarkIdentityResolver.resolve(h)}`)
+            );
             for (const key of this.#dataLabelMeasurements.keys()) {
                 if (!activeKeys.has(key)) {
                     this.#dataLabelMeasurements.delete(key);
@@ -2136,10 +2146,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             typeof window !== "undefined" && window.matchMedia
                 ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
                 : false;
-        const isAnimationDisabled =
-            animOptions.enabled === false ||
-            animOptions.duration === 0 ||
-            prefersReducedMotion;
+        const isAnimationDisabled = animOptions.enabled === false || animOptions.duration === 0 || prefersReducedMotion;
 
         const effectiveOptions: NormalizedChartAnimationOptions = isAnimationDisabled
             ? { ...animOptions, duration: 0, easing: "linear", enabled: false }
@@ -2164,9 +2171,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#animationMode.set(null);
             this.#isExitingData.set(false);
             if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
-                const reasonToInvalidate = this.#pendingLabelMeasurementReason !== 0
-                    ? this.#pendingLabelMeasurementReason
-                    : ChartInvalidationReason.Layout;
+                const reasonToInvalidate =
+                    this.#pendingLabelMeasurementReason !== 0
+                        ? this.#pendingLabelMeasurementReason
+                        : ChartInvalidationReason.Layout;
                 this.#pendingLabelMeasurementReason = 0;
                 this.#hasPendingSizeReflow = false;
                 this.invalidate(reasonToInvalidate as ChartInvalidationReason);
@@ -2187,9 +2195,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#animationMode.set(null);
             this.#isExitingData.set(false);
             if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
-                const reasonToInvalidate = this.#pendingLabelMeasurementReason !== 0
-                    ? this.#pendingLabelMeasurementReason
-                    : ChartInvalidationReason.Layout;
+                const reasonToInvalidate =
+                    this.#pendingLabelMeasurementReason !== 0
+                        ? this.#pendingLabelMeasurementReason
+                        : ChartInvalidationReason.Layout;
                 this.#pendingLabelMeasurementReason = 0;
                 this.#hasPendingSizeReflow = false;
                 this.invalidate(reasonToInvalidate as ChartInvalidationReason);
@@ -2218,9 +2227,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     this.#animationMode.set(null);
                     this.#isExitingData.set(false);
                     if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
-                        const reasonToInvalidate = this.#pendingLabelMeasurementReason !== 0
-                            ? this.#pendingLabelMeasurementReason
-                            : ChartInvalidationReason.Layout;
+                        const reasonToInvalidate =
+                            this.#pendingLabelMeasurementReason !== 0
+                                ? this.#pendingLabelMeasurementReason
+                                : ChartInvalidationReason.Layout;
                         this.#pendingLabelMeasurementReason = 0;
                         this.#hasPendingSizeReflow = false;
                         this.invalidate(reasonToInvalidate as ChartInvalidationReason);
@@ -2438,11 +2448,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         if (rawControlled !== undefined) {
             // Controlled: normalize raw public input against the newly computed base authority
-            const canonicalViewport = normalizeViewportState(
-                rawControlled,
-                baseCoordSpace,
-                normalizeOpts
-            );
+            const canonicalViewport = normalizeViewportState(rawControlled, baseCoordSpace, normalizeOpts);
             const previousCanonical = this.#lastNormalizedControlledViewport;
             const canonicalChanged =
                 previousCanonical !== null && !areInternalViewportStatesEqual(previousCanonical, canonicalViewport);
@@ -2474,24 +2480,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const rawDefault = this.defaultViewport();
         if (rawDefault !== undefined && !this.#hasInitializedDefaultViewport()) {
             this.#hasInitializedDefaultViewport.set(true);
-            const canonicalDefault = normalizeViewportState(
-                rawDefault,
-                baseCoordSpace,
-                normalizeOpts
-            );
+            const canonicalDefault = normalizeViewportState(rawDefault, baseCoordSpace, normalizeOpts);
             this.#uncontrolledViewportState.set(canonicalDefault);
             return { viewport: canonicalDefault };
         }
 
-        const reconcilerRes = CartesianViewportReconciler.reconcile(
-            this.#uncontrolledViewportState(),
-            baseCoordSpace,
-            {
-                clampToData: nav.clampToData,
-                constraints: nav.constraints,
-                minVisibleCategories: nav.minVisibleCategories
-            }
-        );
+        const reconcilerRes = CartesianViewportReconciler.reconcile(this.#uncontrolledViewportState(), baseCoordSpace, {
+            clampToData: nav.clampToData,
+            constraints: nav.constraints,
+            minVisibleCategories: nav.minVisibleCategories
+        });
 
         let reconciliationEvent: ChartViewportChangeEvent | undefined;
         if (reconcilerRes.changed) {
@@ -2584,9 +2582,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             };
         } else {
             const effectivePhase: ChartBrushPhase =
-                this.#pendingBrushFrame.phase === "start" || result.phase === "start"
-                    ? "start"
-                    : "update";
+                this.#pendingBrushFrame.phase === "start" || result.phase === "start" ? "start" : "update";
             this.#pendingBrushFrame = {
                 event,
                 phase: effectivePhase,
@@ -2631,8 +2627,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 const dimension: "x" | "y" = xyScene.interactionAxis === "y" ? "y" : "x";
                 const primaryId =
                     dimension === "y" ? (xyScene.primaryYAxisId ?? "default") : (xyScene.primaryXAxisId ?? "default");
-                this.#activeKeyboardNamespace =
-                    namespace ?? this.#activeKeyboardNamespace ?? { axis: dimension, axisId: primaryId };
+                this.#activeKeyboardNamespace = namespace ??
+                    this.#activeKeyboardNamespace ?? { axis: dimension, axisId: primaryId };
             }
 
             const buckets = resolveInteractionBuckets(currentScene, this.#activeKeyboardNamespace);
@@ -2674,12 +2670,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 ? resolvedBuckets[this.#activeKeyboardBucketIndex].hits
                 : [matchingHit];
 
-        this.#setTransientInteraction({
-            activeHitTarget: matchingHit,
-            activeHits,
-            pointerPosition: pointPos,
-            source: "keyboard"
-        }, "keyboard");
+        this.#setTransientInteraction(
+            {
+                activeHitTarget: matchingHit,
+                activeHits,
+                pointerPosition: pointPos,
+                source: "keyboard"
+            },
+            "keyboard"
+        );
 
         this.tooltipPosition.set(pointPos);
         this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, matchingHit));
@@ -2702,19 +2701,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             if (matchingHit.seriesType === "gauge") {
                 const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
                 const clampedStr = matchingHit.isClamped ? " (visual indicator clamped)" : "";
-                const minStr = matchingHit.formattedRadialMin ?? (matchingHit.radialMin !== undefined ? String(matchingHit.radialMin) : "");
-                const maxStr = matchingHit.formattedRadialMax ?? (matchingHit.radialMax !== undefined ? String(matchingHit.radialMax) : "");
+                const minStr =
+                    matchingHit.formattedRadialMin ??
+                    (matchingHit.radialMin !== undefined ? String(matchingHit.radialMin) : "");
+                const maxStr =
+                    matchingHit.formattedRadialMax ??
+                    (matchingHit.radialMax !== undefined ? String(matchingHit.radialMax) : "");
                 const rangeStr = minStr && maxStr ? `, range ${minStr} to ${maxStr}` : "";
-                this.activeAccessibilityText.set(
-                    `${matchingHit.seriesName}: ${valStr}${rangeStr}${clampedStr}`
-                );
+                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${valStr}${rangeStr}${clampedStr}`);
             } else {
                 const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
                 const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
                 const catStr = matchingHit.formattedCategory ?? matchingHit.category ?? matchingHit.seriesName;
-                this.activeAccessibilityText.set(
-                    `${matchingHit.seriesName}, ${catStr}: ${valStr}${pctStr}`
-                );
+                this.activeAccessibilityText.set(`${matchingHit.seriesName}, ${catStr}: ${valStr}${pctStr}`);
             }
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap") {
             const primaryX = this.#xAxes()[0];
@@ -2759,7 +2758,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     const deltaFormatted = wf?.formattedDelta ? wf.formattedDelta.replace(/^\+/, "") : String(delta);
                     detail = `increase ${deltaFormatted}, running total ${wf?.formattedCumulativeBefore ?? ""} to ${wf?.formattedCumulativeAfter ?? ""}`;
                 } else if (delta < 0) {
-                    const deltaFormatted = wf?.formattedDelta ? wf.formattedDelta.replace(/^-/, "") : String(Math.abs(delta));
+                    const deltaFormatted = wf?.formattedDelta
+                        ? wf.formattedDelta.replace(/^-/, "")
+                        : String(Math.abs(delta));
                     detail = `decrease ${deltaFormatted}, running total ${wf?.formattedCumulativeBefore ?? ""} to ${wf?.formattedCumulativeAfter ?? ""}`;
                 } else {
                     detail = `no change, running total ${wf?.formattedCumulativeAfter ?? matchingHit.formattedValue}`;
@@ -2769,8 +2770,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 `${matchingHit.seriesName}, ${matchingHit.formattedCategory}${stepPrefix}: ${detail}.`
             );
         } else {
-            const xAxis = (matchingHit.xAxisId ? this.#xAxes().find(a => a.axisId?.() === matchingHit.xAxisId) : undefined) ?? this.#xAxes()[0];
-            const yAxis = (matchingHit.yAxisId ? this.#yAxes().find(a => a.axisId?.() === matchingHit.yAxisId) : undefined) ?? this.#yAxes()[0];
+            const xAxis =
+                (matchingHit.xAxisId ? this.#xAxes().find(a => a.axisId?.() === matchingHit.xAxisId) : undefined) ??
+                this.#xAxes()[0];
+            const yAxis =
+                (matchingHit.yAxisId ? this.#yAxes().find(a => a.axisId?.() === matchingHit.yAxisId) : undefined) ??
+                this.#yAxes()[0];
             const xStr =
                 matchingHit.formattedCategory ??
                 formatXValue(matchingHit.xValue, matchingHit.index, xAxis?.formatter(), xAxis?.type());
@@ -2854,10 +2859,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#paint();
     }
 
-    #setTransientInteraction(
-        state: ChartInteractionState | null,
-        owner: ChartTransientInteractionOwner
-    ): void {
+    #setTransientInteraction(state: ChartInteractionState | null, owner: ChartTransientInteractionOwner): void {
         this.#interactionState = state;
         this.#interactionOwner = state !== null ? owner : null;
     }
@@ -2871,7 +2873,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#renderBackend = createChartRenderBackend(mode, canvas, svg);
             if (this.#currentWidth > 0 && this.#currentHeight > 0) {
                 const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-                this.#renderBackend.resize({ devicePixelRatio: dpr, height: this.#currentHeight, width: this.#currentWidth });
+                this.#renderBackend.resize({
+                    devicePixelRatio: dpr,
+                    height: this.#currentHeight,
+                    width: this.#currentWidth
+                });
             }
             this.#paint();
         } catch {
@@ -2938,13 +2944,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             value,
             valueKind:
                 target.valueKind ??
-                (target.range
-                    ? "range"
-                    : target.financial
-                      ? "ohlc"
-                      : target.waterfall
-                        ? "waterfall"
-                        : "scalar"),
+                (target.range ? "range" : target.financial ? "ohlc" : target.waterfall ? "waterfall" : "scalar"),
             waterfall: target.waterfall,
             funnel: target.funnel,
             xAxisId: target.xAxisId,
@@ -3158,9 +3158,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public fitViewport(target?: ChartNavigationAxisTarget): void {
         const sc = this.cartesianXYScene();
         if (!sc || !sc.coordinateSpace) return;
-        const targetAxes = target !== undefined
-            ? CartesianViewportTargetResolver.resolveExplicitTarget(target, sc.axes)
-            : undefined;
+        const targetAxes =
+            target !== undefined ? CartesianViewportTargetResolver.resolveExplicitTarget(target, sc.axes) : undefined;
         const nav = this.normalizedNavigation();
         const res = CartesianViewportOperationCoordinator.fit(
             this.#effectiveViewportState(),
@@ -3639,18 +3638,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             currentScene.cartesianKind === "xy"
         ) {
             const xyScene = currentScene as CartesianXYChartScene;
-            const target = CartesianBrushTargetResolver.resolve(
-                xyScene,
-                brushReg,
-                msg => {
-                    if (typeof ngDevMode !== "undefined" && ngDevMode) {
-                        if (!this.#warnedDiagnosticSignatures.has(msg)) {
-                            this.#warnedDiagnosticSignatures.add(msg);
-                            console.warn(msg);
-                        }
+            const target = CartesianBrushTargetResolver.resolve(xyScene, brushReg, msg => {
+                if (typeof ngDevMode !== "undefined" && ngDevMode) {
+                    if (!this.#warnedDiagnosticSignatures.has(msg)) {
+                        this.#warnedDiagnosticSignatures.add(msg);
+                        console.warn(msg);
                     }
                 }
-            );
+            });
             const started = this.#brushGestureController.onPointerDown(
                 event,
                 plotRect,
@@ -3775,11 +3770,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 const target = result.session.target;
 
                 const ranges = xyScene.coordinateSpace
-                    ? CartesianBrushRangeResolver.resolve(
-                          result.bounds,
-                          xyScene.coordinateSpace,
-                          target
-                      )
+                    ? CartesianBrushRangeResolver.resolve(result.bounds, xyScene.coordinateSpace, target)
                     : {};
 
                 if (hadPendingStart && !this.#hasEmittedBrushStart) {
@@ -3948,7 +3939,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (this.#brush() !== null) {
             if (!this.#hasWarnedMultiBrush && typeof ngDevMode !== "undefined" && ngDevMode) {
                 this.#hasWarnedMultiBrush = true;
-                console.warn("[Mona Chart] Multiple <mona-chart-brush> components detected. Only the first registered component is active.");
+                console.warn(
+                    "[Mona Chart] Multiple <mona-chart-brush> components detected. Only the first registered component is active."
+                );
             }
             return () => {};
         }
@@ -4016,7 +4009,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (this.#selection() !== null) {
             if (!this.#hasWarnedMultiSelection && typeof ngDevMode !== "undefined" && ngDevMode) {
                 this.#hasWarnedMultiSelection = true;
-                console.warn("[Mona Chart] Multiple <mona-chart-selection> components detected. Only the first registered component is active.");
+                console.warn(
+                    "[Mona Chart] Multiple <mona-chart-selection> components detected. Only the first registered component is active."
+                );
             }
             return () => {};
         }
@@ -4085,9 +4080,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public resetViewport(target?: ChartNavigationAxisTarget): void {
         const sc = this.cartesianXYScene();
         if (!sc || !sc.coordinateSpace) return;
-        const targetAxes = target !== undefined
-            ? CartesianViewportTargetResolver.resolveExplicitTarget(target, sc.axes)
-            : undefined;
+        const targetAxes =
+            target !== undefined ? CartesianViewportTargetResolver.resolveExplicitTarget(target, sc.axes) : undefined;
         const nav = this.normalizedNavigation();
         const res = CartesianViewportOperationCoordinator.reset(
             this.#effectiveViewportState(),
@@ -4215,12 +4209,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         activeHits.find(
                             (h: SceneHitTarget) => h.seriesId === this.#interactionState?.activeHitTarget?.seriesId
                         ) ?? activeHits[0];
-                    this.#setTransientInteraction({
-                        activeHitTarget: primary,
-                        activeHits,
-                        pointerPosition: this.#interactionState.pointerPosition,
-                        source: this.#interactionState.source
-                    }, this.#interactionOwner);
+                    this.#setTransientInteraction(
+                        {
+                            activeHitTarget: primary,
+                            activeHits,
+                            pointerPosition: this.#interactionState.pointerPosition,
+                            source: this.#interactionState.source
+                        },
+                        this.#interactionOwner
+                    );
                     if (this.#interactionOwner === "tooltip" || this.#interactionOwner === "keyboard") {
                         const currentScene = this.#renderScene ?? this.scene();
                         const shared = currentScene ? this.#resolveSharedTooltip(currentScene) : false;
@@ -4259,7 +4256,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public zoom(factor: number, anchor?: ChartPoint, target?: ChartNavigationAxisTarget): void {
         const sc = this.cartesianXYScene();
         if (!sc || !sc.coordinateSpace) return;
-        const center = anchor ?? { x: sc.plotRect.x + sc.plotRect.width / 2, y: sc.plotRect.y + sc.plotRect.height / 2 };
+        const center = anchor ?? {
+            x: sc.plotRect.x + sc.plotRect.width / 2,
+            y: sc.plotRect.y + sc.plotRect.height / 2
+        };
         const nav = this.normalizedNavigation();
         const resolved = CartesianViewportTargetResolver.resolveTargets(
             center,
@@ -4324,7 +4324,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
-    protected axisLabelLeft(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): number {
+    protected axisLabelLeft(
+        cart: CartesianChartScene,
+        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene,
+        tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick
+    ): number {
         if (axisScene.axis === "x") {
             return tick.coordinate;
         }
@@ -4336,7 +4340,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             : cart.plotRect.x - sideOffset - tickMarksOffset - labelPadding;
     }
 
-    protected axisLabelTop(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): number {
+    protected axisLabelTop(
+        cart: CartesianChartScene,
+        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene,
+        tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick
+    ): number {
         if (axisScene.axis === "y") {
             return tick.coordinate;
         }
@@ -4348,7 +4356,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             : cart.plotRect.y + cart.plotRect.height + sideOffset + tickMarksOffset + labelPadding;
     }
 
-    protected axisLabelTransform(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, _tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): string {
+    protected axisLabelTransform(
+        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene,
+        _tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick
+    ): string {
         const rot = axisScene.labelRotation ?? 0;
         if (axisScene.axis === "x") {
             if (axisScene.position === "top") {
@@ -4374,7 +4385,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return `translate(-100%, -50%) rotate(${rot}deg)`;
     }
 
-    protected axisLabelTransformOrigin(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): string {
+    protected axisLabelTransformOrigin(
+        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene
+    ): string {
         const rot = axisScene.labelRotation ?? 0;
         if (axisScene.axis === "x") {
             if (axisScene.position === "top") {
@@ -4388,7 +4401,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return rot === 0 ? "center center" : "right center";
     }
 
-    protected axisTitleLeft(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): number {
+    protected axisTitleLeft(
+        cart: CartesianChartScene,
+        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene
+    ): number {
         if (axisScene.axis === "x") {
             return cart.plotRect.x + cart.plotRect.width / 2;
         }
@@ -4399,7 +4415,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             : cart.plotRect.x - sideOffset - gutter + 12;
     }
 
-    protected axisTitleTop(cart: CartesianChartScene, axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): number {
+    protected axisTitleTop(
+        cart: CartesianChartScene,
+        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene
+    ): number {
         if (axisScene.axis === "y") {
             return cart.plotRect.y + cart.plotRect.height / 2;
         }
@@ -4416,12 +4435,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const targetAxis = cart.axes.find(a => a.axis === "x" && a.axisId === state.x?.axisId);
         const sideOffset = targetAxis?.sideOffset ?? 0;
         const offset = this.#crosshair()?.labelOffset() ?? 4;
-        const desiredY = targetAxis?.position === "top"
-            ? cart.plotRect.y - sideOffset - offset
-            : cart.plotRect.y + cart.plotRect.height + sideOffset + offset;
-        const fraction: LabelAnchorFraction = targetAxis?.position === "top"
-            ? { x: 0.5, y: 1 }
-            : { x: 0.5, y: 0 };
+        const desiredY =
+            targetAxis?.position === "top"
+                ? cart.plotRect.y - sideOffset - offset
+                : cart.plotRect.y + cart.plotRect.height + sideOffset + offset;
+        const fraction: LabelAnchorFraction = targetAxis?.position === "top" ? { x: 0.5, y: 1 } : { x: 0.5, y: 0 };
         const measurement = this.#overlayLabelMeasurements.get("crosshair:x");
         const containerRect: ChartRect = { height: this.#currentHeight, width: this.#currentWidth, x: 0, y: 0 };
         const pos = ChartOverlayLabelPositioner.position({
@@ -4439,12 +4457,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const targetAxis = cart.axes.find(a => a.axis === "x" && a.axisId === state.x?.axisId);
         const sideOffset = targetAxis?.sideOffset ?? 0;
         const offset = this.#crosshair()?.labelOffset() ?? 4;
-        const desiredY = targetAxis?.position === "top"
-            ? cart.plotRect.y - sideOffset - offset
-            : cart.plotRect.y + cart.plotRect.height + sideOffset + offset;
-        const fraction: LabelAnchorFraction = targetAxis?.position === "top"
-            ? { x: 0.5, y: 1 }
-            : { x: 0.5, y: 0 };
+        const desiredY =
+            targetAxis?.position === "top"
+                ? cart.plotRect.y - sideOffset - offset
+                : cart.plotRect.y + cart.plotRect.height + sideOffset + offset;
+        const fraction: LabelAnchorFraction = targetAxis?.position === "top" ? { x: 0.5, y: 1 } : { x: 0.5, y: 0 };
         const measurement = this.#overlayLabelMeasurements.get("crosshair:x");
         const containerRect: ChartRect = { height: this.#currentHeight, width: this.#currentWidth, x: 0, y: 0 };
         const pos = ChartOverlayLabelPositioner.position({
@@ -4468,12 +4485,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const targetAxis = cart.axes.find(a => a.axis === "y" && a.axisId === state.y?.axisId);
         const sideOffset = targetAxis?.sideOffset ?? 0;
         const offset = this.#crosshair()?.labelOffset() ?? 4;
-        const desiredX = targetAxis?.position === "right"
-            ? cart.plotRect.x + cart.plotRect.width + sideOffset + offset
-            : cart.plotRect.x - sideOffset - offset;
-        const fraction: LabelAnchorFraction = targetAxis?.position === "right"
-            ? { x: 0, y: 0.5 }
-            : { x: 1, y: 0.5 };
+        const desiredX =
+            targetAxis?.position === "right"
+                ? cart.plotRect.x + cart.plotRect.width + sideOffset + offset
+                : cart.plotRect.x - sideOffset - offset;
+        const fraction: LabelAnchorFraction = targetAxis?.position === "right" ? { x: 0, y: 0.5 } : { x: 1, y: 0.5 };
         const measurement = this.#overlayLabelMeasurements.get("crosshair:y");
         const containerRect: ChartRect = { height: this.#currentHeight, width: this.#currentWidth, x: 0, y: 0 };
         const pos = ChartOverlayLabelPositioner.position({
@@ -4491,12 +4507,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const targetAxis = cart.axes.find(a => a.axis === "y" && a.axisId === state.y?.axisId);
         const sideOffset = targetAxis?.sideOffset ?? 0;
         const offset = this.#crosshair()?.labelOffset() ?? 4;
-        const desiredX = targetAxis?.position === "right"
-            ? cart.plotRect.x + cart.plotRect.width + sideOffset + offset
-            : cart.plotRect.x - sideOffset - offset;
-        const fraction: LabelAnchorFraction = targetAxis?.position === "right"
-            ? { x: 0, y: 0.5 }
-            : { x: 1, y: 0.5 };
+        const desiredX =
+            targetAxis?.position === "right"
+                ? cart.plotRect.x + cart.plotRect.width + sideOffset + offset
+                : cart.plotRect.x - sideOffset - offset;
+        const fraction: LabelAnchorFraction = targetAxis?.position === "right" ? { x: 0, y: 0.5 } : { x: 1, y: 0.5 };
         const measurement = this.#overlayLabelMeasurements.get("crosshair:y");
         const containerRect: ChartRect = { height: this.#currentHeight, width: this.#currentWidth, x: 0, y: 0 };
         const pos = ChartOverlayLabelPositioner.position({
@@ -4677,12 +4692,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return this.#annotationById().get(annId)?.template?.();
     }
 
-    protected resolveAxisLabelTemplate(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene): ChartAxisLabelTemplateDirective | undefined {
+    protected resolveAxisLabelTemplate(
+        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene
+    ): ChartAxisLabelTemplateDirective | undefined {
         if (axisScene.axis === "x") {
-            const reg = this.#xAxes().find(a => a.registrationId === axisScene.registrationId || (a.axisId?.() ?? "default-x") === axisScene.axisId);
+            const reg = this.#xAxes().find(
+                a => a.registrationId === axisScene.registrationId || (a.axisId?.() ?? "default-x") === axisScene.axisId
+            );
             return reg?.labelTemplate?.();
         }
-        const reg = this.#yAxes().find(a => a.registrationId === axisScene.registrationId || (a.axisId?.() ?? "default-y") === axisScene.axisId);
+        const reg = this.#yAxes().find(
+            a => a.registrationId === axisScene.registrationId || (a.axisId?.() ?? "default-y") === axisScene.axisId
+        );
         return reg?.labelTemplate?.();
     }
 

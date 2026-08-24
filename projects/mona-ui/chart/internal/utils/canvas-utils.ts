@@ -127,10 +127,18 @@ export function drawBarRectOutline(
         return;
     }
     const maxRadius = Math.min(width / 2, height / 2);
-    const tl = cornerRadii ? clamp(cornerRadii.topLeft, 0, maxRadius) : (isPositive ? clamp(radius, 0, maxRadius) : 0);
-    const tr = cornerRadii ? clamp(cornerRadii.topRight, 0, maxRadius) : (isPositive ? clamp(radius, 0, maxRadius) : 0);
-    const br = cornerRadii ? clamp(cornerRadii.bottomRight, 0, maxRadius) : (!isPositive ? clamp(radius, 0, maxRadius) : 0);
-    const bl = cornerRadii ? clamp(cornerRadii.bottomLeft, 0, maxRadius) : (!isPositive ? clamp(radius, 0, maxRadius) : 0);
+    const tl = cornerRadii ? clamp(cornerRadii.topLeft, 0, maxRadius) : isPositive ? clamp(radius, 0, maxRadius) : 0;
+    const tr = cornerRadii ? clamp(cornerRadii.topRight, 0, maxRadius) : isPositive ? clamp(radius, 0, maxRadius) : 0;
+    const br = cornerRadii
+        ? clamp(cornerRadii.bottomRight, 0, maxRadius)
+        : !isPositive
+          ? clamp(radius, 0, maxRadius)
+          : 0;
+    const bl = cornerRadii
+        ? clamp(cornerRadii.bottomLeft, 0, maxRadius)
+        : !isPositive
+          ? clamp(radius, 0, maxRadius)
+          : 0;
 
     context.beginPath();
     if (tl <= 0 && tr <= 0 && br <= 0 && bl <= 0) {
@@ -209,7 +217,6 @@ export function drawCellRectOutline(
     };
     drawBarRectOutline(context, x, y, width, height, r, true, radii);
 }
-
 
 export function drawPointMarker(
     context: CanvasRenderingContext2D,

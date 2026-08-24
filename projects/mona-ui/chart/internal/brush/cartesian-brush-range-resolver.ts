@@ -21,11 +21,7 @@ export class CartesianBrushRangeResolver {
         targetXAxisId?: string,
         targetYAxisId?: string
     ): ResolvedBrushRanges {
-        if (
-            !coordinateSpace?.x ||
-            !coordinateSpace?.y ||
-            (bounds.width <= 0 && bounds.height <= 0)
-        ) {
+        if (!coordinateSpace?.x || !coordinateSpace?.y || (bounds.width <= 0 && bounds.height <= 0)) {
             return {};
         }
 
@@ -124,11 +120,7 @@ export class CartesianBrushRangeResolver {
             const temp = from;
             from = to;
             to = temp;
-        } else if (
-            from instanceof Date &&
-            to instanceof Date &&
-            from.getTime() > to.getTime()
-        ) {
+        } else if (from instanceof Date && to instanceof Date && from.getTime() > to.getTime()) {
             const temp = from;
             from = to;
             to = temp;

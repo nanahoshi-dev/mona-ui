@@ -297,7 +297,8 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
                         : visualRadius;
                     const radiusToUse = visual ? visualRadius : hitRadius;
                     return (
-                        Math.hypot(target.point.x - query.pixel.x, target.point.y - query.pixel.y) <= radiusToUse + cartesianMarkerHitEpsilon
+                        Math.hypot(target.point.x - query.pixel.x, target.point.y - query.pixel.y) <=
+                        radiusToUse + cartesianMarkerHitEpsilon
                     );
                 },
                 () => this.#onNodeVisited?.(),
@@ -399,7 +400,8 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
                 const radius = visual
                     ? Math.max(0, target.visualRadius ?? target.radius ?? 0)
                     : resolveCartesianBubbleHitRadius(target.visualRadius ?? target.radius ?? 0);
-                return Math.hypot(target.point.x - query.pixel.x, target.point.y - query.pixel.y) <= radius + cartesianMarkerHitEpsilon
+                return Math.hypot(target.point.x - query.pixel.x, target.point.y - query.pixel.y) <=
+                    radius + cartesianMarkerHitEpsilon
                     ? candidate
                     : undefined;
             }
@@ -413,7 +415,8 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
             }
             const visualRadius = Math.max(0, target.visualRadius ?? target.radius ?? 0);
             const radius = visual ? visualRadius : Math.max(visualRadius, target.radius ?? visualRadius);
-            return Math.hypot(target.point.x - query.pixel.x, target.point.y - query.pixel.y) <= radius + cartesianMarkerHitEpsilon
+            return Math.hypot(target.point.x - query.pixel.x, target.point.y - query.pixel.y) <=
+                radius + cartesianMarkerHitEpsilon
                 ? node.topmostIndex
                 : null;
         }

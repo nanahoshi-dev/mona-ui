@@ -80,4 +80,3 @@ export function createAngularLabelMeasurementKey(tickKey: string): string {
 export function createRadialLabelMeasurementKey(tickKey: string): string {
     return `radial:${tickKey}`;
 }
-

@@ -206,7 +206,10 @@ function installCanvasAllocationProbe(): CanvasAllocationProbe {
     const toDataURL = vi.fn(() => ONE_PX_PNG_DATA_URL);
     const originalCreateElement = document.createElement.bind(document);
 
-    const spy = vi.spyOn(document, "createElement").mockImplementation(((tagName: string, options?: ElementCreationOptions) => {
+    const spy = vi.spyOn(document, "createElement").mockImplementation(((
+        tagName: string,
+        options?: ElementCreationOptions
+    ) => {
         const element = originalCreateElement(tagName, options);
         if (String(tagName).toLowerCase() === "canvas") {
             const canvas = element as HTMLCanvasElement;
@@ -595,8 +598,16 @@ describe("Chart Export Transaction Isolation and Fallback Budget Regressions", (
         const rootB = imageContainer(sharedUrl);
 
         await Promise.all([
-            ChartExportResourceManager.captureAndInlineIslandResources([rootA], undefined, fakeBitmapDecodeEnvironment()),
-            ChartExportResourceManager.captureAndInlineIslandResources([rootB], undefined, fakeBitmapDecodeEnvironment())
+            ChartExportResourceManager.captureAndInlineIslandResources(
+                [rootA],
+                undefined,
+                fakeBitmapDecodeEnvironment()
+            ),
+            ChartExportResourceManager.captureAndInlineIslandResources(
+                [rootB],
+                undefined,
+                fakeBitmapDecodeEnvironment()
+            )
         ]);
 
         expect(fetchCount).toBe(2);
@@ -606,9 +617,7 @@ describe("Chart Export Transaction Isolation and Fallback Budget Regressions", (
 
     it("rejects an oversized CORS-fallback image before any canvas allocation", async () => {
         window.fetch = vi.fn().mockRejectedValue(new TypeError("network path unavailable"));
-        installFakeFallbackImage([
-            { height: 20000, outcome: "load", urlSuffix: "hostile-fallback.png", width: 20000 }
-        ]);
+        installFakeFallbackImage([{ height: 20000, outcome: "load", urlSuffix: "hostile-fallback.png", width: 20000 }]);
         const probe = installCanvasAllocationProbe();
 
         try {
@@ -633,9 +642,7 @@ describe("Chart Export Transaction Isolation and Fallback Budget Regressions", (
 
         try {
             const root = imageContainer("https://cdn.example/small-fallback.png");
-            await expect(
-                ChartExportResourceManager.captureAndInlineIslandResources([root])
-            ).resolves.toBeUndefined();
+            await expect(ChartExportResourceManager.captureAndInlineIslandResources([root])).resolves.toBeUndefined();
 
             expect(root.querySelector("img")!.src.startsWith("data:image/png")).toBe(true);
             expect(probe.sizedWrites).toEqual([{ width: 10 }, { height: 10 }]);
@@ -702,9 +709,9 @@ describe("Chart Export Transaction Isolation and Fallback Budget Regressions", (
         });
 
         it("rejects a decoded width above the maximum dimension before allocation", async () => {
-            await expect(
-                captureWithDimensions(MAX_EXPORT_RESOURCE_DIMENSION + 1, 1)
-            ).rejects.toMatchObject({ code: "too-large" });
+            await expect(captureWithDimensions(MAX_EXPORT_RESOURCE_DIMENSION + 1, 1)).rejects.toMatchObject({
+                code: "too-large"
+            });
         });
 
         it("allows a decoded pixel count exactly at the maximum pixel budget", async () => {

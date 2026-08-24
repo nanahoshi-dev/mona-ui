@@ -46,7 +46,7 @@ export function buildStackTimelineData(
             const xNum =
                 typeof entry.xKey === "number" && Number.isFinite(entry.xKey)
                     ? entry.xKey
-                    : resolveCartesianTemporalValue(entry.xValue)?.epochMs ?? Number(entry.xKey);
+                    : (resolveCartesianTemporalValue(entry.xValue)?.epochMs ?? Number(entry.xKey));
             if (!Number.isFinite(xNum)) {
                 continue;
             }
@@ -283,9 +283,7 @@ function selectCoverageAwareStackProtectedGroups(
     }
 
     const records = groups.map(group => ({
-        coveredMemberIds: new Set(
-            (group.coveredSeriesIds ?? []).filter(seriesId => visibleMemberIds.has(seriesId))
-        ),
+        coveredMemberIds: new Set((group.coveredSeriesIds ?? []).filter(seriesId => visibleMemberIds.has(seriesId))),
         group
     }));
     const uncoveredMemberIds = new Set(visibleMemberIds);
@@ -328,10 +326,7 @@ function selectCoverageAwareStackProtectedGroups(
                 uncoveredMemberIds.has(memberId)
             ).length;
             const missingCount = record.group.indices.filter(index => !selected.has(index)).length;
-            if (
-                missingCount > target - selectedIndices.length ||
-                (uncoveredCoverage === 0 && bestCoverage > 0)
-            ) {
+            if (missingCount > target - selectedIndices.length || (uncoveredCoverage === 0 && bestCoverage > 0)) {
                 continue;
             }
             if (
@@ -380,10 +375,7 @@ function selectCoverageAwareStackProtectedGroups(
     return Array.from(new Set(selectedIndices)).sort((a, b) => a - b);
 }
 
-function compareProtectedStackGroups(
-    a: ConnectedProtectedCandidateGroup,
-    b: ConnectedProtectedCandidateGroup
-): number {
+function compareProtectedStackGroups(a: ConnectedProtectedCandidateGroup, b: ConnectedProtectedCandidateGroup): number {
     if (b.priority !== a.priority) {
         return b.priority - a.priority;
     }

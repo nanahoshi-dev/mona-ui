@@ -136,14 +136,8 @@ export function sampleRangeAreaPointTransition(
     const lowValue = fromValue !== undefined && toValue !== undefined ? Math.min(fromValue, toValue) : undefined;
     const highValue = fromValue !== undefined && toValue !== undefined ? Math.max(fromValue, toValue) : undefined;
 
-    const lowPoint =
-        fromPoint && toPoint
-            ? { x, y: Math.max(fromPoint.y, toPoint.y) }
-            : (fromPoint ?? toPoint);
-    const highPoint =
-        fromPoint && toPoint
-            ? { x, y: Math.min(fromPoint.y, toPoint.y) }
-            : (toPoint ?? fromPoint);
+    const lowPoint = fromPoint && toPoint ? { x, y: Math.max(fromPoint.y, toPoint.y) } : (fromPoint ?? toPoint);
+    const highPoint = fromPoint && toPoint ? { x, y: Math.min(fromPoint.y, toPoint.y) } : (toPoint ?? fromPoint);
 
     return {
         animationKey: plan.to.animationKey ?? plan.from.animationKey,

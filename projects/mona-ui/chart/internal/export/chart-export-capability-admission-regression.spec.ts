@@ -3,14 +3,8 @@ import { ChartPdfCapabilityAnalyzer } from "./chart-pdf-capability-analyzer";
 import { ChartExportDomCollector } from "./chart-export-dom-collector";
 import { ChartExportDomFreezer } from "./chart-export-dom-freezer";
 import { ChartExportColorNormalizer } from "./chart-export-color-normalizer";
-import {
-    ChartExportSvgMetadataStripper,
-    ChartExportSvgValidator
-} from "./chart-export-svg-validator";
-import {
-    resolveChartExportContainTransform,
-    resolveEffectiveIslandScale
-} from "./chart-export-geometry";
+import { ChartExportSvgMetadataStripper, ChartExportSvgValidator } from "./chart-export-svg-validator";
+import { resolveChartExportContainTransform, resolveEffectiveIslandScale } from "./chart-export-geometry";
 import { ChartExportError } from "../../models/chart-export.models";
 import { normalizeChartExportOptions } from "./chart-export-options";
 
@@ -232,18 +226,10 @@ describe("Chart Export Capability Admission and Style Freezing Regressions", () 
         });
 
         it("computes effective density scaling for SVG and PDF", () => {
-            const svgReq = normalizeChartExportOptions(
-                { format: "svg", height: 800, width: 1200 },
-                600,
-                400
-            );
+            const svgReq = normalizeChartExportOptions({ format: "svg", height: 800, width: 1200 }, 600, 400);
             expect(resolveEffectiveIslandScale(svgReq)).toBe(4.0); // 2.0 contain * 2 default dpr
 
-            const pdfReq = normalizeChartExportOptions(
-                { format: "pdf", height: 800, width: 1200 },
-                600,
-                400
-            );
+            const pdfReq = normalizeChartExportOptions({ format: "pdf", height: 800, width: 1200 }, 600, 400);
             expect(resolveEffectiveIslandScale(pdfReq)).toBe(4.0); // 2.0 contain * 2
         });
     });
@@ -254,7 +240,9 @@ describe("Chart Export Capability Admission and Style Freezing Regressions", () 
     describe("Concrete Color Normalization", () => {
         it("rejects CSS variables and gradients in background options", () => {
             expect(() => ChartExportColorNormalizer.normalizeColor("var(--bg)")).toThrow(ChartExportError);
-            expect(() => ChartExportColorNormalizer.normalizeColor("linear-gradient(red, blue)")).toThrow(ChartExportError);
+            expect(() => ChartExportColorNormalizer.normalizeColor("linear-gradient(red, blue)")).toThrow(
+                ChartExportError
+            );
             expect(() => ChartExportColorNormalizer.normalizeColor("url(image.png)")).toThrow(ChartExportError);
         });
 

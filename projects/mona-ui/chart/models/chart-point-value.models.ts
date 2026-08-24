@@ -47,8 +47,4 @@ export interface ChartWaterfallPointValue {
 }
 
 export type ChartPointValue =
-    | ChartOhlcPointValue
-    | ChartRangePointValue
-    | ChartScalarPointValue
-    | ChartWaterfallPointValue;
-
+    ChartOhlcPointValue | ChartRangePointValue | ChartScalarPointValue | ChartWaterfallPointValue;

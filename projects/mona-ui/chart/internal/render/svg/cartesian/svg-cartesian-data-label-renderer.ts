@@ -21,7 +21,7 @@ function parseFontShorthand(fontStr?: string): {
     const fontSize = sizeMatch ? parseFloat(sizeMatch[1]) : 11;
     const isItalic = fontStr.includes("italic");
     const isBold = /\b(bold|[6-9]00)\b/.test(fontStr);
-    const fontWeight = isBold ? "bold" : (/\b500\b/.test(fontStr) ? "500" : "normal");
+    const fontWeight = isBold ? "bold" : /\b500\b/.test(fontStr) ? "500" : "normal";
     const fontStyle = isItalic ? "italic" : "normal";
 
     let rawFamily = "Helvetica, Arial, sans-serif";

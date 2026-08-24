@@ -124,4 +124,3 @@ export class HeatmapCellIndex {
         return undefined;
     }
 }
-

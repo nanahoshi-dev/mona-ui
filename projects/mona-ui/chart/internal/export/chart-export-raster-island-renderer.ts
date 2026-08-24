@@ -5,11 +5,7 @@ import { isolateFragmentIds } from "./chart-export-fragment-isolator";
 import type { RasterDecodeEnvironment } from "./chart-export-image-decoder";
 import { ChartExportError } from "../../models/chart-export.models";
 
-import {
-    MAX_RASTER_DIMENSION,
-    MAX_RASTER_TOTAL_PIXELS,
-    MAX_RASTER_TRANSACTION_PIXELS
-} from "./chart-export-options";
+import { MAX_RASTER_DIMENSION, MAX_RASTER_TOTAL_PIXELS, MAX_RASTER_TRANSACTION_PIXELS } from "./chart-export-options";
 
 export interface RenderedRasterIsland {
     readonly clipRect?: ChartRect;
@@ -143,7 +139,9 @@ export class ChartExportRasterIslandRenderer {
         let html2canvas: (element: HTMLElement, options?: Record<string, unknown>) => Promise<HTMLCanvasElement>;
         try {
             const mod = await import("html2canvas-pro");
-            html2canvas = (mod as unknown as { default?: unknown }).default as typeof html2canvas ?? mod as unknown as typeof html2canvas;
+            html2canvas =
+                ((mod as unknown as { default?: unknown }).default as typeof html2canvas) ??
+                (mod as unknown as typeof html2canvas);
         } catch (err: unknown) {
             throw new ChartExportError(
                 "template-rasterization-failed",
@@ -244,10 +242,21 @@ export class ChartExportRasterIslandRenderer {
                 }
 
                 // Restore scroll positions after attaching to staging DOM (R3-09)
-                const allStagedElements = [targetElement, ...Array.from(targetElement.querySelectorAll<HTMLElement>("*"))];
+                const allStagedElements = [
+                    targetElement,
+                    ...Array.from(targetElement.querySelectorAll<HTMLElement>("*"))
+                ];
                 for (const el of allStagedElements) {
-                    const top = (el as unknown as Record<string, number>)["__monaScrollTop"] ?? (el.hasAttribute("data-mona-scroll-top") ? parseFloat(el.getAttribute("data-mona-scroll-top")!) : 0);
-                    const left = (el as unknown as Record<string, number>)["__monaScrollLeft"] ?? (el.hasAttribute("data-mona-scroll-left") ? parseFloat(el.getAttribute("data-mona-scroll-left")!) : 0);
+                    const top =
+                        (el as unknown as Record<string, number>)["__monaScrollTop"] ??
+                        (el.hasAttribute("data-mona-scroll-top")
+                            ? parseFloat(el.getAttribute("data-mona-scroll-top")!)
+                            : 0);
+                    const left =
+                        (el as unknown as Record<string, number>)["__monaScrollLeft"] ??
+                        (el.hasAttribute("data-mona-scroll-left")
+                            ? parseFloat(el.getAttribute("data-mona-scroll-left")!)
+                            : 0);
                     if (top > 0) el.scrollTop = top;
                     if (left > 0) el.scrollLeft = left;
                 }

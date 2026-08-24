@@ -42,7 +42,9 @@ export class CartesianChartRenderer {
         const cartesianOverlay: CartesianOverlayScene | null =
             overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
         const annotationBadgeAnchors: ReadonlyMap<string, ChartPoint> | null =
-            overlayState && "annotationBadgeAnchors" in overlayState ? (overlayState.annotationBadgeAnchors ?? null) : null;
+            overlayState && "annotationBadgeAnchors" in overlayState
+                ? (overlayState.annotationBadgeAnchors ?? null)
+                : null;
         const cartesianDataLabels: CartesianDataLabelScene | null =
             overlayState && "cartesianDataLabels" in overlayState ? (overlayState.cartesianDataLabels ?? null) : null;
         const selectionScene: CartesianSelectionScene | null =
@@ -179,7 +181,9 @@ export class CartesianChartRenderer {
         const cartesianOverlay: CartesianOverlayScene | null =
             overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
         const annotationBadgeAnchors: ReadonlyMap<string, ChartPoint> | null =
-            overlayState && "annotationBadgeAnchors" in overlayState ? (overlayState.annotationBadgeAnchors ?? null) : null;
+            overlayState && "annotationBadgeAnchors" in overlayState
+                ? (overlayState.annotationBadgeAnchors ?? null)
+                : null;
         const activeBrushBounds: ChartRect | null =
             overlayState && "activeBrushBounds" in overlayState ? (overlayState.activeBrushBounds ?? null) : null;
         const brushRegistration: ChartBrushRegistration | null =
@@ -260,9 +264,7 @@ export class CartesianChartRenderer {
         styleResolver: ChartStyleResolver
     ): void {
         const { axes, plotRect } = scene;
-        const gridColor =
-            styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
-            "rgba(148, 163, 184, 0.2)";
+        const gridColor = styleResolver.resolveCssVariable("--mona-chart-grid-color") || "rgba(148, 163, 184, 0.2)";
 
         context.save();
         context.strokeStyle = gridColor;
@@ -311,10 +313,7 @@ export class CartesianChartRenderer {
         }
     }
 
-    public static renderSeriesLayer(
-        context: CanvasRenderingContext2D,
-        scene: CartesianXYChartScene
-    ): void {
+    public static renderSeriesLayer(context: CanvasRenderingContext2D, scene: CartesianXYChartScene): void {
         const { plotRect, series } = scene;
         context.save();
         context.beginPath();
@@ -359,7 +358,12 @@ export class CartesianChartRenderer {
         plotRect: ChartRect,
         annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null
     ): void {
-        CartesianOverlayRenderer.renderOverlays(context, cartesianOverlay, plotRect, annotationBadgeAnchors ?? undefined);
+        CartesianOverlayRenderer.renderOverlays(
+            context,
+            cartesianOverlay,
+            plotRect,
+            annotationBadgeAnchors ?? undefined
+        );
     }
 
     public static renderStaticUnderlayLayer(
@@ -393,13 +397,7 @@ export class CartesianChartRenderer {
         context.save();
         // Crosshair Lines
         if (crosshairState && crosshairRegistration) {
-            CartesianCrosshairRenderer.render(
-                context,
-                crosshairState,
-                crosshairRegistration,
-                plotRect,
-                styleResolver
-            );
+            CartesianCrosshairRenderer.render(context, crosshairState, crosshairRegistration, plotRect, styleResolver);
         }
 
         // Active Highlights

@@ -98,11 +98,7 @@ export class CartesianOverlayRenderer {
         context.restore();
     }
 
-    private static renderLine(
-        context: CanvasRenderingContext2D,
-        line: SceneReferenceLine,
-        plotRect: ChartRect
-    ): void {
+    private static renderLine(context: CanvasRenderingContext2D, line: SceneReferenceLine, plotRect: ChartRect): void {
         if (line.width <= 0 || line.opacity <= 0) {
             return;
         }

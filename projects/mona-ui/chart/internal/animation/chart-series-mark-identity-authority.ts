@@ -27,11 +27,7 @@ export class ChartSeriesMarkIdentityAuthority {
     readonly #sourceData: readonly unknown[];
     #reverseMap: Map<string, number[]> | null = null;
 
-    public constructor(
-        seriesId: string,
-        sourceData: readonly unknown[],
-        options?: ChartSeriesMarkIdentityOptions
-    ) {
+    public constructor(seriesId: string, sourceData: readonly unknown[], options?: ChartSeriesMarkIdentityOptions) {
         this.#seriesId = seriesId;
         this.#sourceData = sourceData;
         this.#keyField = options?.keyField;
@@ -108,7 +104,12 @@ export class ChartSeriesMarkIdentityAuthority {
             return JSON.stringify([this.#seriesPrefix, "i", sourceIndex, 0]);
         }
         const rowDatum = datum !== undefined ? datum : this.#sourceData[sourceIndex];
-        const rowNaturalKey = naturalKey !== undefined ? naturalKey : (this.#extractNaturalKey ? this.#extractNaturalKey(rowDatum, sourceIndex) : sourceIndex);
+        const rowNaturalKey =
+            naturalKey !== undefined
+                ? naturalKey
+                : this.#extractNaturalKey
+                  ? this.#extractNaturalKey(rowDatum, sourceIndex)
+                  : sourceIndex;
         const { part } = resolveMarkKeyPart(rowDatum, this.#keyField, rowNaturalKey, sourceIndex);
         const rank = this.#occurrenceRanks[sourceIndex];
         return composeMarkKey(this.#seriesPrefix, part, rank);

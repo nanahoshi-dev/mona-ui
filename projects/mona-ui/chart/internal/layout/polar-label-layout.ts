@@ -1,5 +1,9 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
-import type { ChartLabelMeasurement, ChartPolarLabelContent, ChartPolarLabelSide } from "../../models/chart-polar.models";
+import type {
+    ChartLabelMeasurement,
+    ChartPolarLabelContent,
+    ChartPolarLabelSide
+} from "../../models/chart-polar.models";
 import type { ScenePolarLabel, ScenePolarSlice } from "../scene/polar-scene";
 import { createSectorLabelMeasurementKey } from "./cartesian-axis-measurement-key";
 
@@ -49,10 +53,16 @@ interface RawLabelCandidate {
     width: number;
 }
 
-export function layoutOutsidePolarLabels(
-    options: PolarLabelLayoutOptions
-): Map<string, ScenePolarLabel> {
-    const { center, labelContent = "percentage", measurements, outerRadius, plotRect, slices, strokeWidth = 1 } = options;
+export function layoutOutsidePolarLabels(options: PolarLabelLayoutOptions): Map<string, ScenePolarLabel> {
+    const {
+        center,
+        labelContent = "percentage",
+        measurements,
+        outerRadius,
+        plotRect,
+        slices,
+        strokeWidth = 1
+    } = options;
     const result = new Map<string, ScenePolarLabel>();
 
     if (!slices || slices.length === 0 || outerRadius <= 0) {
@@ -84,10 +94,7 @@ export function layoutOutsidePolarLabels(
         };
 
         const lineEndX =
-            elbow.x +
-            (side === "right"
-                ? OUTSIDE_LABEL_HORIZONTAL_LENGTH
-                : -OUTSIDE_LABEL_HORIZONTAL_LENGTH);
+            elbow.x + (side === "right" ? OUTSIDE_LABEL_HORIZONTAL_LENGTH : -OUTSIDE_LABEL_HORIZONTAL_LENGTH);
 
         const lineEnd: ChartPoint = {
             x: lineEndX,
@@ -99,8 +106,7 @@ export function layoutOutsidePolarLabels(
         const height = measured?.height ?? DEFAULT_LABEL_HEIGHT;
         const defaultText = formatPolarLabelText(slice, labelContent);
         const width =
-            measured?.width ??
-            (defaultText ? Math.max(24, defaultText.length * 7.5 + 8) : DEFAULT_LABEL_WIDTH);
+            measured?.width ?? (defaultText ? Math.max(24, defaultText.length * 7.5 + 8) : DEFAULT_LABEL_WIDTH);
 
         if (measurements instanceof Map && !measurements.has(sectorKey)) {
             (measurements as Map<string, ChartLabelMeasurement>).set(sectorKey, { height, width });

@@ -67,8 +67,8 @@ function createMockOhlcRegistration(): ChartFinancialSeriesRegistration {
 describe("FinancialLayoutEngine", () => {
     const rawData = [
         { category: "Day 1", close: 110, high: 120, low: 90, open: 100 }, // rising
-        { category: "Day 2", close: 95, high: 115, low: 85, open: 110 },  // falling
-        { category: "Day 3", close: 105, high: 125, low: 95, open: 105 }  // neutral (doji)
+        { category: "Day 2", close: 95, high: 115, low: 85, open: 110 }, // falling
+        { category: "Day 3", close: 105, high: 125, low: 95, open: 105 } // neutral (doji)
     ];
 
     const plotRect = { height: 300, width: 600, x: 50, y: 50 };
@@ -164,7 +164,7 @@ describe("FinancialLayoutEngine", () => {
         const scene = FinancialLayoutEngine.createCandlestickScene(series, resolved, {
             plotRect,
             styleResolver,
-            valueFormatter: (val: unknown) => typeof val === "number" ? `$${val.toFixed(2)}` : String(val),
+            valueFormatter: (val: unknown) => (typeof val === "number" ? `$${val.toFixed(2)}` : String(val)),
             xAxisType: "category",
             xScale,
             yScale

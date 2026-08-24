@@ -116,12 +116,21 @@ export class CartesianAxisDomainResolver {
         const isTemporalAxis = orientation === "horizontal" ? axis.dimension === "y" : axis.dimension === "x";
 
         for (const s of boundSeries) {
-            const data = resolveData("data" in s && typeof (s as SeriesWithOptionalRangeAccessors).data === "function" ? (s as SeriesWithOptionalRangeAccessors).data!() : undefined, rootData);
+            const data = resolveData(
+                "data" in s && typeof (s as SeriesWithOptionalRangeAccessors).data === "function"
+                    ? (s as SeriesWithOptionalRangeAccessors).data!()
+                    : undefined,
+                rootData
+            );
             const field = isTemporalAxis
-                ? (("xField" in s && typeof s.xField === "function" && s.xField() !== undefined)
+                ? "xField" in s && typeof s.xField === "function" && s.xField() !== undefined
                     ? s.xField()
-                    : (orientation === "vertical" && axis.field !== undefined ? axis.field : rootXField))
-                : ("field" in s && typeof s.field === "function" ? s.field() : undefined);
+                    : orientation === "vertical" && axis.field !== undefined
+                      ? axis.field
+                      : rootXField
+                : "field" in s && typeof s.field === "function"
+                  ? s.field()
+                  : undefined;
 
             for (let i = 0; i < data.length; i++) {
                 const item = data[i];
@@ -135,21 +144,33 @@ export class CartesianAxisDomainResolver {
                     } else if (s.type === "rangeBar" || s.type === "rangeArea") {
                         const fv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).fromField?.(), i);
                         const tv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).toField?.(), i);
-                        if (typeof fv !== "number" || !Number.isFinite(fv) || typeof tv !== "number" || !Number.isFinite(tv)) continue;
+                        if (
+                            typeof fv !== "number" ||
+                            !Number.isFinite(fv) ||
+                            typeof tv !== "number" ||
+                            !Number.isFinite(tv)
+                        )
+                            continue;
                     } else if (s.type === "candlestick" || s.type === "ohlc") {
-                        const fReg = s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
+                        const fReg =
+                            s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
                         const ov = resolveValue(item, fReg.openField(), i);
                         const cv = resolveValue(item, fReg.closeField(), i);
                         const lv = resolveValue(item, fReg.lowField(), i);
                         const hv = resolveValue(item, fReg.highField(), i);
                         if (
-                            typeof ov !== "number" || !Number.isFinite(ov) ||
-                            typeof cv !== "number" || !Number.isFinite(cv) ||
-                            typeof lv !== "number" || !Number.isFinite(lv) ||
-                            typeof hv !== "number" || !Number.isFinite(hv) ||
+                            typeof ov !== "number" ||
+                            !Number.isFinite(ov) ||
+                            typeof cv !== "number" ||
+                            !Number.isFinite(cv) ||
+                            typeof lv !== "number" ||
+                            !Number.isFinite(lv) ||
+                            typeof hv !== "number" ||
+                            !Number.isFinite(hv) ||
                             lv > Math.min(ov, cv) ||
                             hv < Math.max(ov, cv)
-                        ) continue;
+                        )
+                            continue;
                     } else if ("field" in s && typeof s.field === "function") {
                         const yv = resolveValue(item, s.field(), i);
                         if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
@@ -251,11 +272,19 @@ export class CartesianAxisDomainResolver {
             if (isValueAxis && stackedSeriesIds && stackedSeriesIds.has(s.id)) {
                 continue;
             }
-            const data = resolveData("data" in s && typeof (s as SeriesWithOptionalRangeAccessors).data === "function" ? (s as SeriesWithOptionalRangeAccessors).data!() : undefined, rootData);
+            const data = resolveData(
+                "data" in s && typeof (s as SeriesWithOptionalRangeAccessors).data === "function"
+                    ? (s as SeriesWithOptionalRangeAccessors).data!()
+                    : undefined,
+                rootData
+            );
             if (!isValueAxis) {
-                const field = ("xField" in s && typeof s.xField === "function" && s.xField() !== undefined)
-                    ? s.xField()
-                    : (orientation === "vertical" && axis.field !== undefined ? axis.field : rootXField);
+                const field =
+                    "xField" in s && typeof s.xField === "function" && s.xField() !== undefined
+                        ? s.xField()
+                        : orientation === "vertical" && axis.field !== undefined
+                          ? axis.field
+                          : rootXField;
                 for (let i = 0; i < data.length; i++) {
                     const item = data[i];
                     // Verify paired value validity before expanding independent domain
@@ -268,21 +297,33 @@ export class CartesianAxisDomainResolver {
                     } else if (s.type === "rangeBar" || s.type === "rangeArea") {
                         const fv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).fromField?.(), i);
                         const tv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).toField?.(), i);
-                        if (typeof fv !== "number" || !Number.isFinite(fv) || typeof tv !== "number" || !Number.isFinite(tv)) continue;
+                        if (
+                            typeof fv !== "number" ||
+                            !Number.isFinite(fv) ||
+                            typeof tv !== "number" ||
+                            !Number.isFinite(tv)
+                        )
+                            continue;
                     } else if (s.type === "candlestick" || s.type === "ohlc") {
-                        const fReg = s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
+                        const fReg =
+                            s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
                         const ov = resolveValue(item, fReg.openField(), i);
                         const cv = resolveValue(item, fReg.closeField(), i);
                         const lv = resolveValue(item, fReg.lowField(), i);
                         const hv = resolveValue(item, fReg.highField(), i);
                         if (
-                            typeof ov !== "number" || !Number.isFinite(ov) ||
-                            typeof cv !== "number" || !Number.isFinite(cv) ||
-                            typeof lv !== "number" || !Number.isFinite(lv) ||
-                            typeof hv !== "number" || !Number.isFinite(hv) ||
+                            typeof ov !== "number" ||
+                            !Number.isFinite(ov) ||
+                            typeof cv !== "number" ||
+                            !Number.isFinite(cv) ||
+                            typeof lv !== "number" ||
+                            !Number.isFinite(lv) ||
+                            typeof hv !== "number" ||
+                            !Number.isFinite(hv) ||
                             lv > Math.min(ov, cv) ||
                             hv < Math.max(ov, cv)
-                        ) continue;
+                        )
+                            continue;
                     } else if ("field" in s && typeof s.field === "function") {
                         const yv = resolveValue(item, s.field(), i);
                         if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
@@ -296,7 +337,8 @@ export class CartesianAxisDomainResolver {
             } else {
                 // Value dimension
                 if (s.type === "bubble") {
-                    const bubbleReg = s as import("../context/chart-registration-context").ChartBubbleSeriesRegistration;
+                    const bubbleReg =
+                        s as import("../context/chart-registration-context").ChartBubbleSeriesRegistration;
                     const sizeField = bubbleReg.sizeField?.();
                     const f = bubbleReg.field?.();
                     for (let i = 0; i < data.length; i++) {
@@ -311,19 +353,30 @@ export class CartesianAxisDomainResolver {
                             rawValues.push(val);
                         }
                     }
-                } else if ("fromField" in s && "toField" in s && typeof (s as SeriesWithOptionalRangeAccessors).fromField === "function" && typeof (s as SeriesWithOptionalRangeAccessors).toField === "function") {
+                } else if (
+                    "fromField" in s &&
+                    "toField" in s &&
+                    typeof (s as SeriesWithOptionalRangeAccessors).fromField === "function" &&
+                    typeof (s as SeriesWithOptionalRangeAccessors).toField === "function"
+                ) {
                     const ff = (s as SeriesWithOptionalRangeAccessors).fromField!();
                     const tf = (s as SeriesWithOptionalRangeAccessors).toField!();
                     for (let i = 0; i < data.length; i++) {
                         const item = data[i];
                         const fv = resolveValue(item, ff, i);
                         const tv = resolveValue(item, tf, i);
-                        if (typeof fv === "number" && Number.isFinite(fv) && typeof tv === "number" && Number.isFinite(tv)) {
+                        if (
+                            typeof fv === "number" &&
+                            Number.isFinite(fv) &&
+                            typeof tv === "number" &&
+                            Number.isFinite(tv)
+                        ) {
                             rawValues.push(fv, tv);
                         }
                     }
                 } else if ("openField" in s && "closeField" in s && "lowField" in s && "highField" in s) {
-                    const finReg = s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
+                    const finReg =
+                        s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
                     const of = finReg.openField();
                     const cf = finReg.closeField();
                     const lf = finReg.lowField();
@@ -335,10 +388,14 @@ export class CartesianAxisDomainResolver {
                         const lv = resolveValue(item, lf, i);
                         const hv = resolveValue(item, hf, i);
                         if (
-                            typeof ov === "number" && Number.isFinite(ov) &&
-                            typeof cv === "number" && Number.isFinite(cv) &&
-                            typeof lv === "number" && Number.isFinite(lv) &&
-                            typeof hv === "number" && Number.isFinite(hv) &&
+                            typeof ov === "number" &&
+                            Number.isFinite(ov) &&
+                            typeof cv === "number" &&
+                            Number.isFinite(cv) &&
+                            typeof lv === "number" &&
+                            Number.isFinite(lv) &&
+                            typeof hv === "number" &&
+                            Number.isFinite(hv) &&
                             lv <= Math.min(ov, cv) &&
                             hv >= Math.max(ov, cv)
                         ) {
@@ -407,8 +464,12 @@ export class CartesianAxisDomainResolver {
                     if ((isPositive && em > 0) || (!isPositive && em < 0)) {
                         min = em;
                     } else {
-                        const req = isPositive ? "positive log scale requires min > 0" : "negative log scale requires min < 0";
-                        warnings.push(`[MonaChart] Log axis "${axis.axisId}" has invalid explicit min ${axis.explicitMin}; ${req}.`);
+                        const req = isPositive
+                            ? "positive log scale requires min > 0"
+                            : "negative log scale requires min < 0";
+                        warnings.push(
+                            `[MonaChart] Log axis "${axis.axisId}" has invalid explicit min ${axis.explicitMin}; ${req}.`
+                        );
                     }
                 }
             }
@@ -418,8 +479,12 @@ export class CartesianAxisDomainResolver {
                     if ((isPositive && em > 0) || (!isPositive && em < 0)) {
                         max = em;
                     } else {
-                        const req = isPositive ? "positive log scale requires max > 0" : "negative log scale requires max < 0";
-                        warnings.push(`[MonaChart] Log axis "${axis.axisId}" has invalid explicit max ${axis.explicitMax}; ${req}.`);
+                        const req = isPositive
+                            ? "positive log scale requires max > 0"
+                            : "negative log scale requires max < 0";
+                        warnings.push(
+                            `[MonaChart] Log axis "${axis.axisId}" has invalid explicit max ${axis.explicitMax}; ${req}.`
+                        );
                     }
                 }
             }

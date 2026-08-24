@@ -35,12 +35,12 @@ export function resolveCartesianMarkerGeometry(
         const bSeries = series as ChartBubbleSeriesRegistration;
         const explicitMin = bSeries.minRadius?.();
         const explicitMax = bSeries.maxRadius?.();
-        const rawMin = explicitMin !== undefined && isFiniteNumber(explicitMin)
-            ? explicitMin
-            : (cssGeometry.bubbleMinRadius ?? 4);
-        const rawMax = explicitMax !== undefined && isFiniteNumber(explicitMax)
-            ? explicitMax
-            : (cssGeometry.bubbleMaxRadius ?? 24);
+        const rawMin =
+            explicitMin !== undefined && isFiniteNumber(explicitMin) ? explicitMin : (cssGeometry.bubbleMinRadius ?? 4);
+        const rawMax =
+            explicitMax !== undefined && isFiniteNumber(explicitMax)
+                ? explicitMax
+                : (cssGeometry.bubbleMaxRadius ?? 24);
         const range = normalizeBubbleRadiusRange(rawMin, rawMax);
         normalizedMinRadius = range.minRadius;
         normalizedMaxRadius = range.maxRadius;

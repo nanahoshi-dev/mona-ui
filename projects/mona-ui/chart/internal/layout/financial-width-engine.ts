@@ -13,9 +13,10 @@ export class FinancialWidthEngine {
     public static resolveBodyWidth(options: FinancialWidthOptions): number {
         const widths = this.resolveBodyWidths(options);
         if (widths.length === 0) {
-            const maxBodyWidth = isFiniteNumber(options.explicitMaxBodyWidth) && (options.explicitMaxBodyWidth as number) > 0
-                ? (options.explicitMaxBodyWidth as number)
-                : 32;
+            const maxBodyWidth =
+                isFiniteNumber(options.explicitMaxBodyWidth) && (options.explicitMaxBodyWidth as number) > 0
+                    ? (options.explicitMaxBodyWidth as number)
+                    : 32;
             return clamp(16, 2, maxBodyWidth);
         }
         return widths[0];
@@ -31,9 +32,10 @@ export class FinancialWidthEngine {
             plotWidth
         } = options;
 
-        const maxBodyWidth = isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
-            ? Math.max(2, explicitMaxBodyWidth as number)
-            : 32;
+        const maxBodyWidth =
+            isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
+                ? Math.max(2, explicitMaxBodyWidth as number)
+                : 32;
 
         if (isFiniteNumber(explicitBodyWidth) && (explicitBodyWidth as number) > 0) {
             const width = clamp(explicitBodyWidth as number, 2, maxBodyWidth);

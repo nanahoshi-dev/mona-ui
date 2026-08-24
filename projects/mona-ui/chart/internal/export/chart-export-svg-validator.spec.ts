@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-    ChartExportSvgMetadataStripper,
-    ChartExportSvgValidator
-} from "./chart-export-svg-validator";
+import { ChartExportSvgMetadataStripper, ChartExportSvgValidator } from "./chart-export-svg-validator";
 import { ChartExportError } from "../../models/chart-export.models";
 
 describe("ChartExportSvgValidator & MetadataStripper", () => {
@@ -122,7 +119,9 @@ describe("ChartExportSvgValidator & MetadataStripper", () => {
 
     it("validates XML syntax and catches parsererror", () => {
         expect(() => ChartExportSvgValidator.validateXml("<svg><rect></svg>")).toThrow(ChartExportError);
-        expect(() => ChartExportSvgValidator.validateXml('<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>')).not.toThrow();
+        expect(() =>
+            ChartExportSvgValidator.validateXml('<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>')
+        ).not.toThrow();
     });
 });
 
@@ -142,9 +141,9 @@ describe("ChartExportSvgValidator embedded raster payload validation (R6-07 / R6
 
     function jpegBytes(): Uint8Array {
         return Uint8Array.from([
-            0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
-            0x00, 0x01, 0x00, 0x00, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x01, 0x00, 0x01, 0x03, 0x01, 0x11,
-            0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xff, 0xd9
+            0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01,
+            0x00, 0x00, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x01, 0x00, 0x01, 0x03, 0x01, 0x11, 0x00, 0x02, 0x11, 0x01,
+            0x03, 0x11, 0x01, 0xff, 0xd9
         ]);
     }
 
@@ -177,26 +176,25 @@ describe("ChartExportSvgValidator embedded raster payload validation (R6-07 / R6
     });
 
     it("rejects unsupported media types such as GIF and AVIF", () => {
-        const gif =
-            "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+        const gif = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
         expect(() => ChartExportSvgValidator.validate(imageWithHref(gif))).toThrow(ChartExportError);
         expect(() =>
-            ChartExportSvgValidator.validate(
-                imageWithHref(bytesToDataUrl(new Uint8Array([1, 2, 3, 4]), "image/avif"))
-            )
+            ChartExportSvgValidator.validate(imageWithHref(bytesToDataUrl(new Uint8Array([1, 2, 3, 4]), "image/avif")))
         ).toThrow(ChartExportError);
     });
 
     it("rejects approved MIME with syntactically invalid base64 payloads", () => {
-        expect(() =>
-            ChartExportSvgValidator.validate(imageWithHref("data:image/png;base64,!!!NotBase64!!!"))
-        ).toThrow(ChartExportError);
+        expect(() => ChartExportSvgValidator.validate(imageWithHref("data:image/png;base64,!!!NotBase64!!!"))).toThrow(
+            ChartExportError
+        );
     });
 
     it("rejects MIME/bytes mismatches such as PNG bytes declared as JPEG", () => {
         const pngBytesAsJpeg = bytesToDataUrl(
             Uint8Array.from(
-                atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="),
+                atob(
+                    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                ),
                 c => c.charCodeAt(0)
             ),
             "image/jpeg"
@@ -213,9 +211,9 @@ describe("ChartExportSvgValidator embedded raster payload validation (R6-07 / R6
     });
 
     it("rejects lookalike MIME values like image/png-evil", () => {
-        expect(() =>
-            ChartExportSvgValidator.validate(imageWithHref("data:image/png-evil;base64,AAA"))
-        ).toThrow(/forbidden non-standalone or external resource/);
+        expect(() => ChartExportSvgValidator.validate(imageWithHref("data:image/png-evil;base64,AAA"))).toThrow(
+            /forbidden non-standalone or external resource/
+        );
     });
 
     it("discovers url(...) expressions case-insensitively", () => {

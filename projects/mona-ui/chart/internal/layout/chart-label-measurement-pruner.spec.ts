@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ChartLabelMeasurement } from "../../models/chart-polar.models";
-import type {
-    CartesianXYChartScene,
-    ChartScene,
-    PolarSectorChartScene,
-    TreemapChartScene
-} from "../scene/chart-scene";
+import type { CartesianXYChartScene, ChartScene, PolarSectorChartScene, TreemapChartScene } from "../scene/chart-scene";
 import { ChartLabelMeasurementPruner } from "./chart-label-measurement-pruner";
 import { createCartesianAxisMeasurementKey } from "./cartesian-axis-measurement-key";
 
@@ -36,8 +31,22 @@ describe("ChartLabelMeasurementPruner (HAX-F07 / PZVF-011)", () => {
                     gridLines: false,
                     position: "bottom",
                     ticks: [
-                        { coordinate: 50, formattedValue: "Q1", index: 0, labelVisible: true, tickKey: keyQ1, value: "Q1" },
-                        { coordinate: 150, formattedValue: "Q2", index: 1, labelVisible: true, tickKey: keyQ2, value: "Q2" }
+                        {
+                            coordinate: 50,
+                            formattedValue: "Q1",
+                            index: 0,
+                            labelVisible: true,
+                            tickKey: keyQ1,
+                            value: "Q1"
+                        },
+                        {
+                            coordinate: 150,
+                            formattedValue: "Q2",
+                            index: 1,
+                            labelVisible: true,
+                            tickKey: keyQ2,
+                            value: "Q2"
+                        }
                     ],
                     title: "",
                     visible: true
@@ -49,7 +58,14 @@ describe("ChartLabelMeasurementPruner (HAX-F07 / PZVF-011)", () => {
                     gridLines: true,
                     position: "left",
                     ticks: [
-                        { coordinate: 100, formattedValue: "100", index: 0, labelVisible: true, tickKey: keyY100, value: 100 }
+                        {
+                            coordinate: 100,
+                            formattedValue: "100",
+                            index: 0,
+                            labelVisible: true,
+                            tickKey: keyY100,
+                            value: 100
+                        }
                     ],
                     title: "",
                     visible: true
@@ -72,10 +88,13 @@ describe("ChartLabelMeasurementPruner (HAX-F07 / PZVF-011)", () => {
     });
 
     it("handles complex axis IDs and ISO timestamp tick values containing colons", () => {
-        const timeKey = createCartesianAxisMeasurementKey("x", "telemetry/time:sensor-1", "time", "2026-08-19T00:00:00.000Z");
-        const measurements = new Map<string, ChartLabelMeasurement>([
-            [timeKey, { height: 16, width: 120 }]
-        ]);
+        const timeKey = createCartesianAxisMeasurementKey(
+            "x",
+            "telemetry/time:sensor-1",
+            "time",
+            "2026-08-19T00:00:00.000Z"
+        );
+        const measurements = new Map<string, ChartLabelMeasurement>([[timeKey, { height: 16, width: 120 }]]);
 
         const cartesianScene: Partial<CartesianXYChartScene> = {
             axes: [

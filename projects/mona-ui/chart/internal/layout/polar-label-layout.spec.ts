@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ScenePolarSlice } from "../scene/polar-scene";
-import {
-    formatPolarLabelText,
-    layoutOutsidePolarLabels
-    
-} from "./polar-label-layout";
+import { formatPolarLabelText, layoutOutsidePolarLabels } from "./polar-label-layout";
 
 function createSlice(id: string, startAngle: number, endAngle: number, value: number): ScenePolarSlice {
     return {
@@ -119,8 +115,8 @@ describe("polar-label-layout", () => {
         expect(l2.position.y).toBeLessThan(l3.position.y);
 
         // Required separation check: min gap between adjacent labels
-        const gapBetween1And2 = (l2.position.y - l2.heightEstimate / 2) - (l1.position.y + l1.heightEstimate / 2);
-        const gapBetween2And3 = (l3.position.y - l3.heightEstimate / 2) - (l2.position.y + l2.heightEstimate / 2);
+        const gapBetween1And2 = l2.position.y - l2.heightEstimate / 2 - (l1.position.y + l1.heightEstimate / 2);
+        const gapBetween2And3 = l3.position.y - l3.heightEstimate / 2 - (l2.position.y + l2.heightEstimate / 2);
 
         expect(gapBetween1And2).toBeGreaterThanOrEqual(3.9);
         expect(gapBetween2And3).toBeGreaterThanOrEqual(3.9);
@@ -181,7 +177,7 @@ describe("polar-label-layout", () => {
         for (let i = 1; i < visibleLabels.length; i++) {
             const prev = visibleLabels[i - 1];
             const curr = visibleLabels[i];
-            const gap = (curr.position.y - curr.heightEstimate / 2) - (prev.position.y + prev.heightEstimate / 2);
+            const gap = curr.position.y - curr.heightEstimate / 2 - (prev.position.y + prev.heightEstimate / 2);
             expect(gap).toBeGreaterThanOrEqual(3.9);
         }
     });
@@ -210,7 +206,7 @@ describe("polar-label-layout", () => {
         expect(l1.widthEstimate).toBe(80);
         expect(l2.heightEstimate).toBe(30);
 
-        const gap = (l2.position.y - 15) - (l1.position.y + 20);
+        const gap = l2.position.y - 15 - (l1.position.y + 20);
         expect(gap).toBeGreaterThanOrEqual(3.9);
     });
 });

@@ -73,7 +73,7 @@ function toRangeBarState(bar: SceneRangeBar, opacity = 1): RangeBarMarkState {
 function createCollapsedRangeBarState(bar: SceneRangeBar, opacity = 0): RangeBarMarkState {
     if (bar.orientation === "horizontal") {
         const fromX = bar.fromValuePixel ?? bar.x;
-        const toX = bar.toValuePixel ?? (bar.x + bar.width);
+        const toX = bar.toValuePixel ?? bar.x + bar.width;
         const midX = (fromX + toX) / 2;
         return {
             animationKey: bar.animationKey,
@@ -102,7 +102,7 @@ function createCollapsedRangeBarState(bar: SceneRangeBar, opacity = 0): RangeBar
     }
 
     const fromY = bar.fromY ?? bar.y;
-    const toY = bar.toY ?? (bar.y + bar.height);
+    const toY = bar.toY ?? bar.y + bar.height;
     const midY = (fromY + toY) / 2;
     return {
         animationKey: bar.animationKey,
@@ -193,10 +193,16 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
 
     if (isOrientationSwitch) {
         if (plan.to.orientation === "horizontal") {
-            const fromSourceX = plan.from.fromValuePixel ?? (plan.from.fromValue > plan.from.toValue ? plan.from.x + plan.from.width : plan.from.x);
-            const toSourceX = plan.from.toValuePixel ?? (plan.from.fromValue > plan.from.toValue ? plan.from.x : plan.from.x + plan.from.width);
-            const fromTargetX = plan.to.fromValuePixel ?? (plan.to.fromValue > plan.to.toValue ? plan.to.x + plan.to.width : plan.to.x);
-            const toTargetX = plan.to.toValuePixel ?? (plan.to.fromValue > plan.to.toValue ? plan.to.x : plan.to.x + plan.to.width);
+            const fromSourceX =
+                plan.from.fromValuePixel ??
+                (plan.from.fromValue > plan.from.toValue ? plan.from.x + plan.from.width : plan.from.x);
+            const toSourceX =
+                plan.from.toValuePixel ??
+                (plan.from.fromValue > plan.from.toValue ? plan.from.x : plan.from.x + plan.from.width);
+            const fromTargetX =
+                plan.to.fromValuePixel ?? (plan.to.fromValue > plan.to.toValue ? plan.to.x + plan.to.width : plan.to.x);
+            const toTargetX =
+                plan.to.toValuePixel ?? (plan.to.fromValue > plan.to.toValue ? plan.to.x : plan.to.x + plan.to.width);
 
             const fromValuePixel = lerp(fromSourceX, fromTargetX, progress);
             const toValuePixel = lerp(toSourceX, toTargetX, progress);
@@ -231,9 +237,12 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
             };
         }
 
-        const fromSourceY = plan.from.fromY ?? (plan.from.fromValue > plan.from.toValue ? plan.from.y : plan.from.y + plan.from.height);
-        const toSourceY = plan.from.toY ?? (plan.from.fromValue > plan.from.toValue ? plan.from.y + plan.from.height : plan.from.y);
-        const fromTargetY = plan.to.fromY ?? (plan.to.fromValue > plan.to.toValue ? plan.to.y : plan.to.y + plan.to.height);
+        const fromSourceY =
+            plan.from.fromY ?? (plan.from.fromValue > plan.from.toValue ? plan.from.y : plan.from.y + plan.from.height);
+        const toSourceY =
+            plan.from.toY ?? (plan.from.fromValue > plan.from.toValue ? plan.from.y + plan.from.height : plan.from.y);
+        const fromTargetY =
+            plan.to.fromY ?? (plan.to.fromValue > plan.to.toValue ? plan.to.y : plan.to.y + plan.to.height);
         const toTargetY = plan.to.toY ?? (plan.to.fromValue > plan.to.toValue ? plan.to.y + plan.to.height : plan.to.y);
 
         const fromY = lerp(fromSourceY, fromTargetY, progress);
@@ -274,8 +283,16 @@ function sampleRangeBarTransition(plan: RangeBarMarkPlan, progress: number): Sce
     const isHorizontal = plan.to.orientation === "horizontal";
 
     if (isHorizontal) {
-        const fromValuePixel = lerp(plan.from.fromValuePixel ?? plan.from.x, plan.to.fromValuePixel ?? plan.to.x, progress);
-        const toValuePixel = lerp(plan.from.toValuePixel ?? (plan.from.x + plan.from.width), plan.to.toValuePixel ?? (plan.to.x + plan.to.width), progress);
+        const fromValuePixel = lerp(
+            plan.from.fromValuePixel ?? plan.from.x,
+            plan.to.fromValuePixel ?? plan.to.x,
+            progress
+        );
+        const toValuePixel = lerp(
+            plan.from.toValuePixel ?? plan.from.x + plan.from.width,
+            plan.to.toValuePixel ?? plan.to.x + plan.to.width,
+            progress
+        );
         const x = Math.min(fromValuePixel, toValuePixel);
         const width = Math.abs(fromValuePixel - toValuePixel);
         const y = lerp(plan.from.y, plan.to.y, progress);

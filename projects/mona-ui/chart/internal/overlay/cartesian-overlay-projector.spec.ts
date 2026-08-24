@@ -8,7 +8,10 @@ import type {
     ChartReferenceBandRegistration,
     ChartReferenceLineRegistration
 } from "../context/chart-registration-context";
-import { CartesianAxisCoordinateSpace, type CartesianAxisCoordinateSnapshot } from "../viewport/cartesian-axis-coordinate-space";
+import {
+    CartesianAxisCoordinateSpace,
+    type CartesianAxisCoordinateSnapshot
+} from "../viewport/cartesian-axis-coordinate-space";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 
 function createMockCoordinateSpace(): CartesianAxisCoordinateSpace {
@@ -143,13 +146,7 @@ describe("CartesianOverlayProjector", () => {
                 width: signal(1)
             };
 
-            const result = CartesianOverlayProjector.project(
-                scene,
-                [refLineX, refLineY],
-                [],
-                [],
-                styleResolver
-            );
+            const result = CartesianOverlayProjector.project(scene, [refLineX, refLineY], [], [], styleResolver);
 
             expect(result.referenceLines.length).toBe(2);
 
@@ -196,13 +193,7 @@ describe("CartesianOverlayProjector", () => {
                 width: signal(undefined)
             };
 
-            const result = CartesianOverlayProjector.project(
-                scene,
-                [refLineCat],
-                [],
-                [],
-                styleResolver
-            );
+            const result = CartesianOverlayProjector.project(scene, [refLineCat], [], [], styleResolver);
 
             expect(result.referenceLines.length).toBe(1);
             expect(result.referenceLines[0].coordinate).toBe(250);
@@ -278,13 +269,7 @@ describe("CartesianOverlayProjector", () => {
                 visible: signal(true)
             };
 
-            const result = CartesianOverlayProjector.project(
-                scene,
-                [],
-                [band],
-                [],
-                styleResolver
-            );
+            const result = CartesianOverlayProjector.project(scene, [], [band], [], styleResolver);
 
             expect(result.referenceBands.length).toBe(1);
             const projBand = result.referenceBands[0];
@@ -320,13 +305,7 @@ describe("CartesianOverlayProjector", () => {
                 visible: signal(true)
             };
 
-            const result = CartesianOverlayProjector.project(
-                scene,
-                [],
-                [catBand],
-                [],
-                styleResolver
-            );
+            const result = CartesianOverlayProjector.project(scene, [], [catBand], [], styleResolver);
 
             expect(result.referenceBands.length).toBe(1);
             const projBand = result.referenceBands[0];
@@ -359,13 +338,7 @@ describe("CartesianOverlayProjector", () => {
                 visible: signal(true)
             };
 
-            const result = CartesianOverlayProjector.project(
-                scene,
-                [],
-                [wideBand],
-                [],
-                styleResolver
-            );
+            const result = CartesianOverlayProjector.project(scene, [], [wideBand], [], styleResolver);
 
             expect(result.referenceBands.length).toBe(1);
             expect(result.referenceBands[0].bounds.x).toBe(50);
@@ -402,13 +375,7 @@ describe("CartesianOverlayProjector", () => {
                 yAxisId: signal(undefined)
             };
 
-            const result = CartesianOverlayProjector.project(
-                scene,
-                [],
-                [],
-                [annotation],
-                styleResolver
-            );
+            const result = CartesianOverlayProjector.project(scene, [], [], [annotation], styleResolver);
 
             expect(result.annotations.length).toBe(1);
             const projAnn = result.annotations[0];
@@ -451,13 +418,7 @@ describe("CartesianOverlayProjector", () => {
                 yAxisId: signal(undefined)
             };
 
-            const result = CartesianOverlayProjector.project(
-                scene,
-                [],
-                [],
-                [outAnn],
-                styleResolver
-            );
+            const result = CartesianOverlayProjector.project(scene, [], [], [outAnn], styleResolver);
 
             expect(result.annotations.length).toBe(0);
         });

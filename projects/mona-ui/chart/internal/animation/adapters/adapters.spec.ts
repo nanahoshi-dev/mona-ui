@@ -27,8 +27,32 @@ describe("Series Animation Adapters", () => {
             const adapter = new BarSeriesAnimationAdapter();
             const toSeries: ChartBarSeriesScene = {
                 bars: [
-                    { animationKey: "b:0", datum: {}, height: 100, index: 0, isPositive: true, radius: 4, width: 20, x: 50, xValue: 0, y: 100, yValue: 10 },
-                    { animationKey: "b:1", datum: {}, height: 60, index: 1, isPositive: false, radius: 4, width: 20, x: 80, xValue: 1, y: 200, yValue: -6 }
+                    {
+                        animationKey: "b:0",
+                        datum: {},
+                        height: 100,
+                        index: 0,
+                        isPositive: true,
+                        radius: 4,
+                        width: 20,
+                        x: 50,
+                        xValue: 0,
+                        y: 100,
+                        yValue: 10
+                    },
+                    {
+                        animationKey: "b:1",
+                        datum: {},
+                        height: 60,
+                        index: 1,
+                        isPositive: false,
+                        radius: 4,
+                        width: 20,
+                        x: 80,
+                        xValue: 1,
+                        y: 200,
+                        yValue: -6
+                    }
                 ],
                 borderRadius: 4,
                 fillOpacity: 1,
@@ -41,7 +65,14 @@ describe("Series Animation Adapters", () => {
             };
 
             const plan = adapter.createPlan(null, toSeries, {
-                options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+                options: {
+                    data: true,
+                    duration: 400,
+                    easing: "linear",
+                    enabled: true,
+                    initial: true,
+                    visibility: true
+                },
                 plotRect: { height: 260, width: 460, x: 20, y: 20 },
                 trigger: "initial"
             });
@@ -120,7 +151,14 @@ describe("Series Animation Adapters", () => {
             };
 
             const plan = adapter.createPlan(fromVertical, toHorizontal, {
-                options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+                options: {
+                    data: true,
+                    duration: 400,
+                    easing: "linear",
+                    enabled: true,
+                    initial: true,
+                    visibility: true
+                },
                 plotRect: { height: 260, width: 460, x: 20, y: 20 },
                 trigger: "data"
             });
@@ -158,7 +196,14 @@ describe("Series Animation Adapters", () => {
             };
 
             const plan = adapter.createPlan(null, toSeries, {
-                options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+                options: {
+                    data: true,
+                    duration: 400,
+                    easing: "linear",
+                    enabled: true,
+                    initial: true,
+                    visibility: true
+                },
                 plotRect: { height: 260, width: 460, x: 20, y: 20 },
                 trigger: "initial"
             });
@@ -183,7 +228,17 @@ describe("Series Animation Adapters", () => {
                 id: "a",
                 name: "Area",
                 points: [
-                    { animationKey: "a:0", baseY: 280, datum: {}, defined: true, index: 0, x: 50, xValue: 0, y: 100, yValue: 10 }
+                    {
+                        animationKey: "a:0",
+                        baseY: 280,
+                        datum: {},
+                        defined: true,
+                        index: 0,
+                        x: 50,
+                        xValue: 0,
+                        y: 100,
+                        yValue: 10
+                    }
                 ],
                 showPoints: false,
                 style: mockStyle,
@@ -193,7 +248,14 @@ describe("Series Animation Adapters", () => {
             };
 
             const plan = adapter.createPlan(null, toSeries, {
-                options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+                options: {
+                    data: true,
+                    duration: 400,
+                    easing: "linear",
+                    enabled: true,
+                    initial: true,
+                    visibility: true
+                },
                 plotRect: { height: 260, width: 460, x: 20, y: 20 },
                 trigger: "initial"
             });
@@ -250,7 +312,14 @@ describe("Series Animation Adapters", () => {
             };
 
             const plan = adapter.createPlan(null, toSeries, {
-                options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+                options: {
+                    data: true,
+                    duration: 400,
+                    easing: "linear",
+                    enabled: true,
+                    initial: true,
+                    visibility: true
+                },
                 trigger: "initial"
             });
 
@@ -282,7 +351,18 @@ describe("Series Animation Adapters", () => {
                 name: "Radar",
                 pointRadius: 4,
                 points: [
-                    { angle: 0, animationKey: "r:0", category: "A", dataIndex: 0, datum: {}, defined: true, formattedValue: "50", point: { x: 250, y: 50 }, radius: 100, value: 50 }
+                    {
+                        angle: 0,
+                        animationKey: "r:0",
+                        category: "A",
+                        dataIndex: 0,
+                        datum: {},
+                        defined: true,
+                        formattedValue: "50",
+                        point: { x: 250, y: 50 },
+                        radius: 100,
+                        value: 50
+                    }
                 ],
                 showPoints: true,
                 strokeWidth: 2,
@@ -290,7 +370,14 @@ describe("Series Animation Adapters", () => {
             };
 
             const plan = adapter.createPlan(null, toSeries, {
-                options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+                options: {
+                    data: true,
+                    duration: 400,
+                    easing: "linear",
+                    enabled: true,
+                    initial: true,
+                    visibility: true
+                },
                 trigger: "initial"
             });
 
@@ -319,7 +406,17 @@ describe("Series Animation Adapters", () => {
                 name: "Polar",
                 pointRadius: 4,
                 points: [
-                    { angle: 0, animationKey: "pol:0", dataIndex: 0, datum: {}, defined: true, formattedValue: "80", point: { x: 250, y: 70 }, radius: 80, value: 80 }
+                    {
+                        angle: 0,
+                        animationKey: "pol:0",
+                        dataIndex: 0,
+                        datum: {},
+                        defined: true,
+                        formattedValue: "80",
+                        point: { x: 250, y: 70 },
+                        radius: 80,
+                        value: 80
+                    }
                 ],
                 showPoints: true,
                 strokeWidth: 2,
@@ -327,7 +424,14 @@ describe("Series Animation Adapters", () => {
             };
 
             const plan = adapter.createPlan(null, toSeries, {
-                options: { data: true, duration: 400, easing: "linear", enabled: true, initial: true, visibility: true },
+                options: {
+                    data: true,
+                    duration: 400,
+                    easing: "linear",
+                    enabled: true,
+                    initial: true,
+                    visibility: true
+                },
                 trigger: "initial"
             });
 

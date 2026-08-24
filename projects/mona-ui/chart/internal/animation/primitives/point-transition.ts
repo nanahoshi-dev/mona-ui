@@ -40,4 +40,3 @@ export function samplePointTransition(plan: PointMarkTransitionPlan, progress: n
         yValue: to.yValue ?? from.yValue
     };
 }
-

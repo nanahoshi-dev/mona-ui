@@ -2,11 +2,7 @@ import type { ChartSeriesType } from "./chart-series.models";
 
 export type ChartSelectionMode = "single" | "multiple";
 
-export type ChartSelectionChangeSource =
-    | "brush"
-    | "click"
-    | "keyboard"
-    | "programmatic";
+export type ChartSelectionChangeSource = "brush" | "click" | "keyboard" | "programmatic";
 
 export interface ChartSelectedPoint<T = unknown> {
     readonly close?: number;

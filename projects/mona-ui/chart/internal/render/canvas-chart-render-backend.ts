@@ -37,12 +37,7 @@ export class CanvasChartRenderBackend implements ChartRenderBackend {
         if (!this.#context) {
             return;
         }
-        CanvasChartRenderer.render(
-            this.#context,
-            frame.scene,
-            frame.presentation,
-            frame.styleResolver
-        );
+        CanvasChartRenderer.render(this.#context, frame.scene, frame.presentation, frame.styleResolver);
     }
 
     public renderCrossfade(frame: ChartCrossfadeRenderFrame): void {

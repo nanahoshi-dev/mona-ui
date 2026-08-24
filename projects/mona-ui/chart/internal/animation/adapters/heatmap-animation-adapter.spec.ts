@@ -33,10 +33,7 @@ describe("HeatmapAnimationAdapter", () => {
     const mockFromSeries: ChartHeatmapSeriesScene = {
         cellBorderRadius: 0,
         cellBorderWidth: 0,
-        cells: [
-            createMockCell("cell-1", "rgb(239, 246, 255)", 1),
-            createMockCell("cell-2", "rgb(59, 130, 246)", 1)
-        ],
+        cells: [createMockCell("cell-1", "rgb(239, 246, 255)", 1), createMockCell("cell-2", "rgb(59, 130, 246)", 1)],
         colorScale: {
             domain: [0, 100],
             emptyCellColor: "rgba(0, 0, 0, 0)",
@@ -59,10 +56,7 @@ describe("HeatmapAnimationAdapter", () => {
 
     const mockToSeries: ChartHeatmapSeriesScene = {
         ...mockFromSeries,
-        cells: [
-            createMockCell("cell-1", "rgb(29, 78, 216)", 1),
-            createMockCell("cell-2", "rgb(30, 64, 175)", 1)
-        ]
+        cells: [createMockCell("cell-1", "rgb(29, 78, 216)", 1), createMockCell("cell-2", "rgb(30, 64, 175)", 1)]
     };
 
     it("should interpolate color values smoothly across progress [0, 1]", () => {

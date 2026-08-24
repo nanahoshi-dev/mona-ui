@@ -1,7 +1,12 @@
 import { curveCatmullRom, curveCatmullRomClosed, curveLinear, curveLinearClosed, lineRadial } from "d3-shape";
 import type { ChartInteractionState } from "../../../interaction/chart-interaction-state";
 import type { PolarAxisChartScene } from "../../../scene/chart-scene";
-import type { ChartRadarSeriesScene, ChartContinuousPolarSeriesScene, ChartRadialAxisTick, SceneRadialPoint } from "../../../scene/polar-axis-scene";
+import type {
+    ChartRadarSeriesScene,
+    ChartContinuousPolarSeriesScene,
+    ChartRadialAxisTick,
+    SceneRadialPoint
+} from "../../../scene/polar-axis-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import { withAlpha } from "../../series/area-gradient";
 import { createRadialSeriesGradientSpec } from "../../series/radial-series-gradient";
@@ -67,9 +72,11 @@ class SvgPolarAxisSeriesRenderer {
 
         const allDefined = series.points.length > 0 && series.points.every(p => p.defined);
         const isClosed = series.connectNulls || allDefined;
-        const canFill = isClosed && (series.connectNulls ? definedPoints.length >= 3 : allDefined && series.points.length >= 3);
+        const canFill =
+            isClosed && (series.connectNulls ? definedPoints.length >= 3 : allDefined && series.points.length >= 3);
         const renderPoints = series.connectNulls ? definedPoints : series.points;
-        const isSmooth = series.curve === "smooth" && (series.connectNulls ? definedPoints.length >= 3 : series.points.length >= 3);
+        const isSmooth =
+            series.curve === "smooth" && (series.connectNulls ? definedPoints.length >= 3 : series.points.length >= 3);
 
         // 1. Fill
         if (series.fillMode !== "none" && canFill) {
@@ -89,7 +96,11 @@ class SvgPolarAxisSeriesRenderer {
                 setSvgAttribute(this.#fillPath, "d", fillD);
 
                 if (series.fillMode === "gradient") {
-                    const spec = createRadialSeriesGradientSpec(series.maxRenderedRadius, series.color, series.fillOpacity);
+                    const spec = createRadialSeriesGradientSpec(
+                        series.maxRenderedRadius,
+                        series.color,
+                        series.fillOpacity
+                    );
                     const gradUrl = defs.useRadialGradient(`polar-axis-grad-${series.id}`, {
                         cx: 0,
                         cy: 0,
@@ -115,8 +126,12 @@ class SvgPolarAxisSeriesRenderer {
         // 2. Stroke
         if (series.strokeWidth > 0 && definedPoints.length >= 2) {
             const lineCurve = isClosed
-                ? (isSmooth ? curveCatmullRomClosed : curveLinearClosed)
-                : (isSmooth ? curveCatmullRom : curveLinear);
+                ? isSmooth
+                    ? curveCatmullRomClosed
+                    : curveLinearClosed
+                : isSmooth
+                  ? curveCatmullRom
+                  : curveLinear;
 
             const lineGen = lineRadial<SceneRadialPoint>()
                 .angle(d => d.angle)
@@ -224,7 +239,9 @@ export class SvgPolarAxisRenderer {
             const isPolygon = radialAxis.gridShape === "polygon" && angularAxis.ticks.length >= 3;
 
             this.#radialGridKeyedGroup.reconcile(validTicks, {
-                key: (tick, _i) => tick.tickKey ?? (tick.index !== undefined ? String(tick.index) : (tick.formattedValue ?? String(tick.value))),
+                key: (tick, _i) =>
+                    tick.tickKey ??
+                    (tick.index !== undefined ? String(tick.index) : (tick.formattedValue ?? String(tick.value))),
                 tag: isPolygon ? "path" : "circle",
                 update: (element, tick) => {
                     if (isPolygon) {

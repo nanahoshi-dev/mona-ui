@@ -98,11 +98,21 @@ export class ChartMarkKeyResolver {
      * materialization of the same source datum stays identical to the ID the
      * full sequential layout produced (stable mark identity).
      */
-    public resolveKeyWithRank(datum: unknown, naturalKey: unknown, dataIndex: number, occurrenceRank: number): ChartAnimationMarkKey {
+    public resolveKeyWithRank(
+        datum: unknown,
+        naturalKey: unknown,
+        dataIndex: number,
+        occurrenceRank: number
+    ): ChartAnimationMarkKey {
         return this.#composeKey(datum, naturalKey, dataIndex, occurrenceRank);
     }
 
-    #composeKey(datum: unknown, naturalKey: unknown, dataIndex: number, forcedRank: number | null): ChartAnimationMarkKey {
+    #composeKey(
+        datum: unknown,
+        naturalKey: unknown,
+        dataIndex: number,
+        forcedRank: number | null
+    ): ChartAnimationMarkKey {
         const { isExplicit, part } = resolveMarkKeyPart(datum, this.#keyField, naturalKey, dataIndex);
 
         const baseKey = `${part.type}:${part.value}`;
@@ -114,7 +124,7 @@ export class ChartMarkKeyResolver {
         if (count > 0 && isExplicit && typeof ngDevMode !== "undefined" && ngDevMode) {
             if (!this.#warnedDuplicateKeys.has(baseKey)) {
                 this.#warnedDuplicateKeys.add(baseKey);
-                 
+
                 console.warn(
                     `[Mona Chart] Duplicate explicit keyField value "${part.value}" encountered in series "${this.#seriesId}". Suffixing occurrence to maintain unique identity.`
                 );

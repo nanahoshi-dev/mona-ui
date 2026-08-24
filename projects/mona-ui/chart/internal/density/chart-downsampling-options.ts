@@ -27,7 +27,9 @@ export function normalizeChartDownsamplingOptions(
     }
 
     const samplesPerPixel =
-        typeof input.samplesPerPixel === "number" && Number.isFinite(input.samplesPerPixel) && input.samplesPerPixel >= 1
+        typeof input.samplesPerPixel === "number" &&
+        Number.isFinite(input.samplesPerPixel) &&
+        input.samplesPerPixel >= 1
             ? Math.floor(input.samplesPerPixel)
             : 1;
     const maxPoints =
@@ -63,19 +65,30 @@ export function resolveEffectiveDownsamplingPolicy(
     }
 
     const enabled = seriesInput.enabled !== undefined ? Boolean(seriesInput.enabled) : chartPolicy.enabled;
-    const algorithm = seriesInput.algorithm !== undefined ? normalizeAlgorithm(seriesInput.algorithm) : chartPolicy.algorithm;
+    const algorithm =
+        seriesInput.algorithm !== undefined ? normalizeAlgorithm(seriesInput.algorithm) : chartPolicy.algorithm;
     const samplesPerPixel =
-        typeof seriesInput.samplesPerPixel === "number" && Number.isFinite(seriesInput.samplesPerPixel) && seriesInput.samplesPerPixel >= 1
+        typeof seriesInput.samplesPerPixel === "number" &&
+        Number.isFinite(seriesInput.samplesPerPixel) &&
+        seriesInput.samplesPerPixel >= 1
             ? Math.floor(seriesInput.samplesPerPixel)
             : chartPolicy.samplesPerPixel;
     const maxPoints =
-        typeof seriesInput.maxPoints === "number" && Number.isFinite(seriesInput.maxPoints) && seriesInput.maxPoints >= 1
+        typeof seriesInput.maxPoints === "number" &&
+        Number.isFinite(seriesInput.maxPoints) &&
+        seriesInput.maxPoints >= 1
             ? Math.floor(seriesInput.maxPoints)
-            : (seriesInput.maxPoints === null ? null : chartPolicy.maxPoints);
+            : seriesInput.maxPoints === null
+              ? null
+              : chartPolicy.maxPoints;
     const threshold =
-        typeof seriesInput.threshold === "number" && Number.isFinite(seriesInput.threshold) && seriesInput.threshold >= 0
+        typeof seriesInput.threshold === "number" &&
+        Number.isFinite(seriesInput.threshold) &&
+        seriesInput.threshold >= 0
             ? Math.floor(seriesInput.threshold)
-            : (seriesInput.threshold === null ? null : chartPolicy.threshold);
+            : seriesInput.threshold === null
+              ? null
+              : chartPolicy.threshold;
 
     return {
         algorithm,
@@ -94,7 +107,10 @@ export function normalizeAlgorithm(algorithm: ChartDownsamplingAlgorithm | undef
  * Default activation threshold: max(2000, relevantPixelSpan * 4).
  * Sources below this size always use the ordinary full layout.
  */
-export function computeEffectiveDensityThreshold(options: NormalizedChartDownsamplingOptions, pixelSpan: number): number {
+export function computeEffectiveDensityThreshold(
+    options: NormalizedChartDownsamplingOptions,
+    pixelSpan: number
+): number {
     if (options.threshold !== null) {
         return options.threshold;
     }
