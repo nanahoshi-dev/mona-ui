@@ -139,6 +139,31 @@ Renders continuous polar series mapping magnitude over continuous degree angles 
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter for numeric values in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 
+### `<mona-line-series>`
+
+Renders a continuous Cartesian line series with configurable interpolation, optional null-gap joining, point markers, data labels, and multi-axis binding.
+
+| Input / Output | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `color` | `string` | `""` | Explicit stroke color override for the series line. |
+| `connectNulls` | `boolean` | `false` | Whether to connect points across null or invalid values without gaps. |
+| `curve` | `ChartCurve` | `"linear"` | Curve interpolation: `"linear"`, `"monotone-x"`, `"natural"`, `"step"`, or `"step-after"`. Step variants preserve source adjacency under density reduction. |
+| `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root chart data. |
+| `dataLabels` | `ChartDataLabelsInput` | `false` | Data-label display options or a boolean flag enabling default labels. |
+| `downsampling` | `ChartDownsamplingInput` | `undefined` | Per-series high-density policy; inherits the chart policy when omitted. Eligible continuous-X line series use a family-safe scalar strategy, while `step` and `step-after` protect source adjacency. |
+| `field` | `ChartField` | `""` | Property key or accessor extracting the Y value for each data item. |
+| `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity across updates. |
+| `name` | `string` | `""` | Series name displayed in legends and tooltips. |
+| `pointRadius` | `number` | `undefined` | Radius in pixels for optional point markers. |
+| `seriesKey` | `string` | `undefined` | Optional stable series identity for mark identity and selection across updates. |
+| `showPoints` | `boolean` | `false` | Whether to draw point markers at each data coordinate along the line. |
+| `strokeWidth` | `number` | `undefined` | Stroke width in pixels for the series line. |
+| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
+| `visible` | `model(boolean)` | `true` | Two-way bindable visibility for the series. |
+| `xAxisId` | `string` | `undefined` | Optional Cartesian X-axis ID; omitted uses the primary X axis. |
+| `xField` | `ChartField` | `undefined` | Property key or accessor extracting X, overriding the root chart X field. |
+| `yAxisId` | `string` | `undefined` | Optional Cartesian Y-axis ID; omitted uses the primary Y axis. |
+
 ### `<mona-bar-series>`
 
 Renders a Cartesian bar series supporting standalone bars, grouped slots, stacked segments, and 100% normalized stacks.
