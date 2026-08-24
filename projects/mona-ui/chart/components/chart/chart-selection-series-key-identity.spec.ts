@@ -49,7 +49,6 @@ class FinancialSeriesKeyHostComponent {
 
 describe("Financial Series Identity and seriesKey Normalization", () => {
     let fixture: ComponentFixture<FinancialSeriesKeyHostComponent>;
-    let host: FinancialSeriesKeyHostComponent;
 
     beforeEach(async () => {
         vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
@@ -69,7 +68,6 @@ describe("Financial Series Identity and seriesKey Normalization", () => {
         }).compileComponents();
 
         fixture = TestBed.createComponent(FinancialSeriesKeyHostComponent);
-        host = fixture.componentInstance;
         fixture.detectChanges();
         await fixture.whenStable();
     });

@@ -973,9 +973,6 @@ describe("chart-domain", () => {
             const seriesData = [
                 { c: 110, h: 120, l: 95, o: 100, x: "Category-1" }
             ];
-            const rootData = [
-                { x: 9999 } // rootData numeric fallback row
-            ];
 
             expect(inferXAxisType(series, seriesData, "x")).toBe("category");
         });

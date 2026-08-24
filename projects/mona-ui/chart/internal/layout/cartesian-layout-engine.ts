@@ -590,13 +590,11 @@ export class CartesianLayoutEngine {
             axisTopologySignature,
             containerHeight,
             containerWidth,
-            effectiveRootXField,
             effectiveSeries,
             plotRect,
             preparation,
             primaryXAxisId,
             primaryXType,
-            primaryYAxisId,
             primaryYType,
             resolvedContext,
             rootData,
@@ -1553,7 +1551,6 @@ export class CartesianLayoutEngine {
                     });
                 }
             } else if (s.type === "area") {
-                const areaDensityEntry = runtime.density?.seriesById.get(s.id) ?? null;
                 const points: SceneAreaPoint[] = [];
                 const isStacked = seriesStackLayout?.bySeriesId.has(s.id);
                 const stackGroup = seriesStackLayout?.groupBySeriesId.get(s.id);

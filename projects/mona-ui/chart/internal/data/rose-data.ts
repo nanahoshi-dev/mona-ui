@@ -80,7 +80,6 @@ export class RoseDataProcessor {
             isDatumVisible,
             keyField,
             rootData,
-            scaleMode,
             seriesElement,
             seriesField,
             seriesId,

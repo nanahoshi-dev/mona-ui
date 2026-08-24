@@ -9,8 +9,8 @@ export class ChartWaterfallLabelTemplateDirective {
 
     public static ngTemplateContextGuard(
         _dir: ChartWaterfallLabelTemplateDirective,
-        ctx: unknown
-    ): ctx is ChartWaterfallLabelTemplateContext {
+        _ctx: unknown
+    ): _ctx is ChartWaterfallLabelTemplateContext {
         return true;
     }
 }

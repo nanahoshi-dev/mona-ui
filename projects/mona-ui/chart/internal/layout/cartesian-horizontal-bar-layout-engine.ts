@@ -341,10 +341,9 @@ export class CartesianHorizontalBarLayoutEngine {
         runtime: CartesianXYLayoutRuntime,
         projection: MultiAxisViewportProjectionResult,
         viewport?: InternalCartesianViewportState,
-        warnedDiagnosticSignatures?: Set<string>
+        _warnedDiagnosticSignatures?: Set<string>
     ): CartesianXYChartScene {
         const {
-            axisResolution,
             axisTopology,
             axisTopologySignature,
             containerHeight,
@@ -407,7 +406,6 @@ export class CartesianHorizontalBarLayoutEngine {
             }
 
             const seriesStyle = styleResolver.resolveSeriesStyle(series, seriesIdx);
-            const seriesColor = seriesStyle.color;
             const binding = sCtx.binding;
 
             const seriesXAxis = binding.xAxis;

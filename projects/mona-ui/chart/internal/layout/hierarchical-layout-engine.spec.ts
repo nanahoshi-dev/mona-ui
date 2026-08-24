@@ -47,7 +47,6 @@ function createMockTreemapRegistration(data?: readonly unknown[] | unknown): Cha
 
 describe("HierarchicalLayoutEngine & ChartLayoutEngine (Hierarchical)", () => {
     const styleResolver = new ChartStyleResolver();
-    const plotRect = { height: 300, width: 400, x: 0, y: 0 };
 
     it("resolves coordinate system to hierarchical for treemap series", () => {
         const reg = createMockTreemapRegistration([{ name: "A", value: 10 }]);

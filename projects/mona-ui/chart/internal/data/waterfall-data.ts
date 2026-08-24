@@ -70,12 +70,10 @@ export class WaterfallDataProcessor {
             kindField = "kind",
             rootData,
             rootXField,
-            seriesElement,
             seriesId,
             seriesName,
             startValue = 0,
             style,
-            styleResolver,
             valueFormatter,
             warnedDiagnosticSignatures,
             xField

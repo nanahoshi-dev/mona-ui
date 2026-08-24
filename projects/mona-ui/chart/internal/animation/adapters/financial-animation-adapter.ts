@@ -184,7 +184,6 @@ function sampleOhlcMark(plan: FinancialMarkPlan, progress: number, wickWidth: nu
     const highY = lerp(from.highY, to.highY, progress);
     const lowY = lerp(from.lowY, to.lowY, progress);
     const closeY = lerp(from.closeY, to.closeY, progress);
-    const bodyWidth = lerp(from.width, to.width, progress);
     const tickWidth = lerp(from.tickWidth ?? from.width / 2, to.tickWidth ?? to.width / 2, progress);
     const renderOpacity = lerpOpacity(from.opacity, to.opacity, progress);
 

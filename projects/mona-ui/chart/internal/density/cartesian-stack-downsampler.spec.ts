@@ -52,7 +52,7 @@ describe("computeSharedStackSampleIndices", () => {
         const count = 40_000;
         const entries = new Map<string, readonly CartesianStackEntry[]>([
             ["a", makeEntries("a", count, i => Math.sin(i / 100) * 10 + 20)],
-            ["b", makeEntries("b", count, i => -5)]
+            ["b", makeEntries("b", count, _i => -5)]
         ]);
         const first = computeSharedStackSampleIndices({
             entriesBySeriesId: entries,
@@ -102,7 +102,7 @@ describe("computeSharedStackSampleIndices", () => {
         const count = 20_000;
         const entries = new Map<string, readonly CartesianStackEntry[]>([
             ["a", makeEntries("a", count, i => Math.floor(i / 250) % 4)],
-            ["b", makeEntries("b", count, i => 1)]
+            ["b", makeEntries("b", count, _i => 1)]
         ]);
         const projection = computeSharedStackProjection({
             entriesBySeriesId: entries,
@@ -125,7 +125,7 @@ describe("computeSharedStackSampleIndices", () => {
         const count = 20_000;
         const entries = new Map<string, readonly CartesianStackEntry[]>([
             ["a", makeEntries("a", count, i => Math.floor(i / 250) % 4)],
-            ["b", makeEntries("b", count, i => 1)]
+            ["b", makeEntries("b", count, _i => 1)]
         ]);
         const projection = computeSharedStackProjection({
             entriesBySeriesId: entries,
@@ -151,7 +151,7 @@ describe("computeSharedStackSampleIndices", () => {
         const count = 20_000;
         const entries = new Map<string, readonly CartesianStackEntry[]>([
             ["a", makeEntries("a", count, i => Math.floor(i / 250) % 4)],
-            ["b", makeEntries("b", count, i => 1)]
+            ["b", makeEntries("b", count, _i => 1)]
         ]);
         const zoomedScale = CartesianScaleFactory.createExactPositionScale({
             domain: [5_000, 15_000],

@@ -168,8 +168,6 @@ export class RadialArcAnimationAdapter implements ChartSeriesAnimationAdapter<Ch
         }
 
         const baseScene = target ?? previous;
-        const seriesEntering = !previous && !!target;
-        const seriesExiting = !!previous && !target;
 
         return {
             adapterType: "radialBar",

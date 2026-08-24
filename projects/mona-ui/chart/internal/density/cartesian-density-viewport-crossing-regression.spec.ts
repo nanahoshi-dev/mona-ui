@@ -116,7 +116,7 @@ describe("Cartesian Density Viewport Crossing and Segment Budget Regressions", (
             const scalar = buildScalarDensityData({ data, temporal: false, xField: "x", yField: "y" });
             const scale = new LinearScale([0, n], [0, 800]);
 
-            const tracker = ChartDensityTracker.install();
+            ChartDensityTracker.install();
             try {
                 const res = projectScalarIndexView({
                     algorithm: "lttb",

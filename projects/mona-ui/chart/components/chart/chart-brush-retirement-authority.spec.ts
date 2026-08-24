@@ -68,7 +68,6 @@ describe("Chart Brush Centralized Retirement Authority", () => {
 
     it("emits cancel with reason 'escape' on Escape key press during drag", async () => {
         const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
-        const container = fixture.nativeElement.querySelector("div[tabindex]") || fixture.nativeElement;
 
         // Start drag
         chartEl.dispatchEvent(

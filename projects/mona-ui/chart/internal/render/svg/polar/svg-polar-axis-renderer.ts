@@ -215,7 +215,7 @@ export class SvgPolarAxisRenderer {
         styleResolver: ChartStyleResolver,
         defs: SvgDefinitionRegistry
     ): void {
-        const { angularAxis, center, outerRadius, radialAxis, series } = scene;
+        const { center, outerRadius, series } = scene;
         if (outerRadius <= 0) {
             this.clear();
             return;
@@ -290,7 +290,7 @@ export class SvgPolarAxisRenderer {
             const isPolygon = radialAxis.gridShape === "polygon" && angularAxis.ticks.length >= 3;
 
             this.#radialGridKeyedGroup.reconcile(validTicks, {
-                key: (tick, i) => tick.tickKey ?? (tick.index !== undefined ? String(tick.index) : (tick.formattedValue ?? String(tick.value))),
+                key: (tick, _i) => tick.tickKey ?? (tick.index !== undefined ? String(tick.index) : (tick.formattedValue ?? String(tick.value))),
                 tag: isPolygon ? "path" : "circle",
                 update: (element, tick) => {
                     if (isPolygon) {

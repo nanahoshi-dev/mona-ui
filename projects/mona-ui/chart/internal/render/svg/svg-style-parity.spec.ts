@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
 import type { CartesianHeatmapChartScene, CartesianXYChartScene } from "../../scene/chart-scene";
 import type { SceneHitTarget } from "../../scene/scene-geometry";
-import type { ChartSeriesStyle } from "../../../models/chart-style.models";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
 import { SvgChartRenderBackend } from "../svg-chart-render-backend";
 import { resolveBrushDashArray, resolveStrokeDashArray } from "./svg-attribute-utils";
@@ -15,18 +14,6 @@ function createMockStyleResolver(vars: Record<string, string> = {}): ChartStyleR
         resolver.resolveCssVariable = (name: string) => vars[name] ?? "";
     }
     return resolver;
-}
-
-function createMockSeriesStyle(color: string): ChartSeriesStyle {
-    return {
-        areaFillColor: color,
-        areaFillOpacity: 0.2,
-        color,
-        fillOpacity: 1,
-        lineWidth: 2,
-        opacity: 1,
-        pointRadius: 4
-    };
 }
 
 function createMockHitTarget(partial: Partial<SceneHitTarget> = {}): SceneHitTarget {

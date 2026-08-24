@@ -48,6 +48,10 @@ describe("ChartExportResourceManager", () => {
         });
     });
 
+    afterEach(() => {
+        window.fetch = originalFetch;
+    });
+
     it("throws resource-load-failed when template contains video or iframe elements", async () => {
         const root = document.createElement("div");
         const video = document.createElement("video");

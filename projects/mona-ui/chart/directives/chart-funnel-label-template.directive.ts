@@ -9,8 +9,8 @@ export class ChartFunnelLabelTemplateDirective {
 
     public static ngTemplateContextGuard(
         _dir: ChartFunnelLabelTemplateDirective,
-        ctx: unknown
-    ): ctx is ChartFunnelLabelTemplateContext {
+        _ctx: unknown
+    ): _ctx is ChartFunnelLabelTemplateContext {
         return true;
     }
 }

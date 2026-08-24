@@ -47,7 +47,7 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
             keyedGroup.reconcile([{ id: "bar-1", rounded: false }], {
                 key: d => d.id,
                 tag: d => (d.rounded ? "path" : "rect"),
-                update: (el, d) => {
+                update: (el, _d) => {
                     el.setAttribute("data-test", "sharp");
                 }
             });
@@ -61,7 +61,7 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
             keyedGroup.reconcile([{ id: "bar-1", rounded: true }], {
                 key: d => d.id,
                 tag: d => (d.rounded ? "path" : "rect"),
-                update: (el, d) => {
+                update: (el, _d) => {
                     el.setAttribute("data-test", "rounded");
                 }
             });
@@ -76,7 +76,7 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
             keyedGroup.reconcile([{ id: "bar-1", rounded: false }], {
                 key: d => d.id,
                 tag: d => (d.rounded ? "path" : "rect"),
-                update: (el, d) => {
+                update: (el, _d) => {
                     el.setAttribute("data-test", "sharp-again");
                 }
             });

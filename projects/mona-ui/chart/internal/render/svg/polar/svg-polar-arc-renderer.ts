@@ -68,7 +68,7 @@ class SvgRadialBarSeriesRenderer {
         // 2. Marks
         const activeMarks = series.marks.filter(m => m.visible && m.endAngle > m.startAngle);
         this.#markKeyedGroup.reconcile(activeMarks, {
-            key: (mark, i) => mark.itemId || String(mark.dataIndex),
+            key: (mark, _i) => mark.itemId || String(mark.dataIndex),
             tag: "path",
             update: (element, arcData) => {
                 const d = buildArcPath({
@@ -150,7 +150,7 @@ class SvgRoseSeriesRenderer {
 
         const activeMarks = series.marks.filter(m => m.visible && m.endAngle > m.startAngle);
         this.#marksKeyedGroup.reconcile(activeMarks, {
-            key: (mark, i) => mark.itemId || String(mark.dataIndex),
+            key: (mark, _i) => mark.itemId || String(mark.dataIndex),
             tag: "path",
             update: (element, petal) => {
                 const d = buildArcPath({
@@ -554,7 +554,7 @@ export class SvgPolarArcRenderer {
                 .filter(item => Boolean(item.d));
 
             this.#roseGridRingsKeyedGroup.reconcile(validTicks, {
-                key: (item, i) => item.tick.tickKey ?? (item.tick.index !== undefined ? String(item.tick.index) : (item.tick.formattedValue ?? String(item.tick.value))),
+                key: (item, _i) => item.tick.tickKey ?? (item.tick.index !== undefined ? String(item.tick.index) : (item.tick.formattedValue ?? String(item.tick.value))),
                 tag: "path",
                 update: (ringPath, item) => {
                     setSvgAttribute(ringPath, "d", item.d);
@@ -579,7 +579,7 @@ export class SvgPolarArcRenderer {
             }));
 
             this.#roseGridSpokesKeyedGroup.reconcile(spokeItems, {
-                key: (item, i) => item.tick.tickKey ?? (item.tick.index !== undefined ? String(item.tick.index) : String(item.tick.angle)),
+                key: (item, _i) => item.tick.tickKey ?? (item.tick.index !== undefined ? String(item.tick.index) : String(item.tick.angle)),
                 tag: "line",
                 update: (spoke, item) => {
                     setSvgAttribute(spoke, "x1", item.x1);

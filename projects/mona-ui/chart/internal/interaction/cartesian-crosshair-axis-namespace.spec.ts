@@ -227,7 +227,6 @@ describe("CartesianCrosshairAxisNamespace (CAA-R3-001)", () => {
     });
 
     it("resolves value-only nearest mode='y' even with irrelevant xAxisId (Gate C / CAA-R4-003)", () => {
-        const space = createMultiAxisCoordSpace();
         const secHit: SceneHitTarget = {
             datum: {},
             index: 0,

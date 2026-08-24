@@ -132,7 +132,6 @@ describe("lazy reverse lookup by mark id", () => {
         const scalar = buildScalarDensityData({ data, temporal: false, xField: "x", yField: "y" });
         const xScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 5], range: [0, 100], type: "linear" });
         const yScale = CartesianScaleFactory.createExactPositionScale({ domain: [0, 2], range: [10, 0], type: "linear" });
-        const keyResolver = new ChartMarkKeyResolver("abs", undefined, undefined);
         const provider = new CartesianConnectedPathInteractionProvider({
             materialize: () => null,
             scalar,

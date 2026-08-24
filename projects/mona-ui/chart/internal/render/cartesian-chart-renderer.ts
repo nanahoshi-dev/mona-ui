@@ -345,12 +345,6 @@ export class CartesianChartRenderer {
             overlayState && "cartesianOverlay" in overlayState ? (overlayState.cartesianOverlay ?? null) : null;
         const annotationBadgeAnchors: ReadonlyMap<string, ChartPoint> | null =
             overlayState && "annotationBadgeAnchors" in overlayState ? (overlayState.annotationBadgeAnchors ?? null) : null;
-        const cartesianDataLabels: CartesianDataLabelScene | null =
-            overlayState && "cartesianDataLabels" in overlayState ? (overlayState.cartesianDataLabels ?? null) : null;
-        const selectionScene: CartesianSelectionScene | null =
-            overlayState && "selectionScene" in overlayState ? (overlayState.selectionScene ?? null) : null;
-        const selectionOptions =
-            overlayState && "selectionOptions" in overlayState ? (overlayState.selectionOptions ?? null) : null;
         const activeBrushBounds: ChartRect | null =
             overlayState && "activeBrushBounds" in overlayState ? (overlayState.activeBrushBounds ?? null) : null;
         const brushRegistration: ChartBrushRegistration | null =

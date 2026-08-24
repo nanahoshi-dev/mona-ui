@@ -120,6 +120,7 @@ describe("CartesianMultiAxisCoordinator", () => {
 
         expect(yLeft).toBeDefined();
         expect(yRight).toBeDefined();
+        expect(xBottom).toBeDefined();
         expect(yLeft?.position).toBe("left");
         expect(yRight?.position).toBe("right");
 

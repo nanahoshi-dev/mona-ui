@@ -51,7 +51,7 @@ export const synchronizationDisabled: NormalizedChartSynchronizationOptions | nu
 
 function normalizeViewportOptions(
     raw: boolean | ChartViewportSynchronizationOptions | undefined,
-    warned: Set<string>
+    _warned: Set<string>
 ): NormalizedChartViewportSynchronizationOptions {
     if (raw === undefined || raw === true) {
         return defaultViewportOptions;
@@ -70,7 +70,7 @@ function normalizeViewportOptions(
 
 function normalizeCrosshairOptions(
     raw: boolean | ChartCrosshairSynchronizationOptions | undefined,
-    warned: Set<string>
+    _warned: Set<string>
 ): NormalizedChartCrosshairSynchronizationOptions {
     if (raw === undefined || raw === true) {
         return defaultCrosshairOptions;

@@ -95,7 +95,7 @@ export class ChartDataLabelPlacement {
     static #normalizePosition(
         hit: SceneHitTarget,
         requested: ChartDataLabelPosition,
-        orientation?: "horizontal" | "vertical"
+        _orientation?: "horizontal" | "vertical"
     ): ChartDataLabelPosition {
         const type = hit.seriesType;
         if (type === "line" || type === "area" || type === "scatter" || type === "bubble") {

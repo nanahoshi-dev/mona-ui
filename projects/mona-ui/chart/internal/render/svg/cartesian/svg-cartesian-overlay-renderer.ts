@@ -8,23 +8,6 @@ import type {
 import { setSvgAttribute } from "../svg-attribute-utils";
 import { SvgKeyedGroup } from "../svg-keyed-group";
 
-interface OverlayItem {
-    readonly clipPath?: string;
-    readonly d?: string;
-    readonly fill?: string;
-    readonly fillOpacity?: number;
-    readonly height?: number;
-    readonly id: string;
-    readonly kind: "rect" | "line" | "path" | "group";
-    readonly opacity?: number;
-    readonly stroke?: string;
-    readonly strokeDasharray?: string;
-    readonly strokeWidth?: number;
-    readonly width?: number;
-    readonly x?: number;
-    readonly y?: number;
-}
-
 export class SvgCartesianOverlayRenderer {
     readonly #underlayGroup: SvgKeyedGroup<SceneReferenceBand | SceneReferenceLine, SVGElement>;
     readonly #overlayGroup: SvgKeyedGroup<SceneReferenceBand | SceneReferenceLine | ScenePointAnnotation, SVGElement>;

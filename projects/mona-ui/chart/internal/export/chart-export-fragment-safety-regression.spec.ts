@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartExportDomCollector } from "./chart-export-dom-collector";
 import { ChartExportResourceManager } from "./chart-export-resource-manager";
 import { ChartExportTemplateCapabilityAnalyzer, hasNonInsetBoxShadow } from "./chart-export-template-capability-analyzer";
@@ -33,6 +33,10 @@ describe("Chart Export Fragment Safety and Paint Bounds Regressions", () => {
         window.fetch = vi.fn().mockImplementation(async () => {
             return new Response(ONE_PX_PNG_BYTES, { status: 200 });
         });
+    });
+
+    afterEach(() => {
+        window.fetch = originalFetch;
     });
 
     // -------------------------------------------------------------------------

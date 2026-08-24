@@ -1218,7 +1218,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return reg?.labelTemplate?.();
     }
 
-    protected axisLabelTransform(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): string {
+    protected axisLabelTransform(axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene, _tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick): string {
         const rot = axisScene.labelRotation ?? 0;
         if (axisScene.axis === "x") {
             if (axisScene.position === "top") {
@@ -3627,7 +3627,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const isInitial = !this.#hasCommittedVisualScene;
         const isVisibility = hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
         const isData = hasInvalidationReason(reason, ChartInvalidationReason.Data);
-        const isViewport = hasInvalidationReason(reason, ChartInvalidationReason.Viewport);
         if (isData || isVisibility) {
             this.#cancelBrushAuthority("data-change");
         }
