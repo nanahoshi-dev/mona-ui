@@ -64,6 +64,7 @@ import {
     type ChartCrosshairMode,
     type ChartCrosshairSnapMode,
     type ChartCurve,
+    type ChartDownsamplingInput,
     type ChartDataLabelPosition,
     type ChartFinancialFillMode,
     type ChartFunnelLabelContent,
@@ -164,6 +165,15 @@ interface PanZoomTelemetryMetric {
     readonly date: Date;
     readonly memory: number;
     readonly requests: number;
+}
+
+interface StepDensityMetric {
+    readonly date: Date;
+    readonly high: number;
+    readonly layerA: number;
+    readonly layerB: number;
+    readonly low: number;
+    readonly status: number;
 }
 
 interface MultiAxisMetric {
@@ -1665,6 +1675,19 @@ export class ChartDemoComponent {
     protected readonly panZoomData = signal<readonly PanZoomTelemetryMetric[]>(this.#generateTelemetryData());
     protected readonly activeViewportSummary = signal<string>("Full Range (100% visible)");
 
+    // Deferred-parts cleanup fixture: deterministic step, range, and stack data.
+    protected readonly stepDensityEnabled = signal<boolean>(true);
+    protected readonly stepDensityCurve = signal<ChartCurve>("step-after");
+    protected readonly stepDensityMaxPoints = signal<number>(160);
+    protected readonly stepDensityCurveOptions: readonly { label: string; value: ChartCurve }[] = [
+        { label: "Step", value: "step" },
+        { label: "Step After", value: "step-after" }
+    ];
+    protected readonly stepDensityPolicy = computed<ChartDownsamplingInput>(() =>
+        this.stepDensityEnabled() ? { enabled: true, maxPoints: this.stepDensityMaxPoints(), threshold: 0 } : false
+    );
+    protected readonly stepDensityData = signal<readonly StepDensityMetric[]>(this.#generateStepDensityData());
+
     // Multi-Axis Controls & State
     protected readonly multiAxisData = signal<readonly MultiAxisMetric[]>([
         { load: 42, margin: 28.5, month: "Jan", quarter: "Q1", revenue: 125 },
@@ -1804,6 +1827,25 @@ export class ChartDemoComponent {
             }))
         );
         this.#addLog("dataUpdate", "Randomized multi-axis metrics");
+    }
+
+    #generateStepDensityData(): StepDensityMetric[] {
+        const result: StepDensityMetric[] = [];
+        let timestamp = Date.UTC(2026, 0, 1);
+        for (let i = 0; i < 50_000; i++) {
+            timestamp += 1_000 + (i % 11) * 137;
+            const status = Math.floor(i / 250) % 4;
+            const pulse = i % 97 === 0 ? 0.75 : 0;
+            result.push({
+                date: new Date(timestamp),
+                high: status + 0.45 + pulse,
+                layerA: status + 1,
+                layerB: (i % 13) / 13 + 0.5,
+                low: status - 0.45 - pulse,
+                status
+            });
+        }
+        return result;
     }
 
     #generateTelemetryData(): PanZoomTelemetryMetric[] {

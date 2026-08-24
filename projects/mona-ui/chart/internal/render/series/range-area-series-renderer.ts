@@ -1,34 +1,9 @@
-import {
-    area,
-    curveLinear,
-    curveMonotoneX,
-    curveNatural,
-    curveStep,
-    curveStepAfter,
-    line,
-    type CurveFactory
-} from "d3-shape";
-import type { ChartCurve } from "../../../models/chart-series.models";
+import { area, line } from "d3-shape";
 import type { ChartRangeAreaSeriesScene } from "../../scene/cartesian-scene";
 import type { SceneRangeAreaPoint } from "../../scene/scene-geometry";
 import { drawPointMarker } from "../../utils/canvas-utils";
 import { withAlpha } from "./area-gradient";
-
-function getCurveFactory(curve: ChartCurve): CurveFactory {
-    switch (curve) {
-        case "monotone-x":
-            return curveMonotoneX;
-        case "natural":
-            return curveNatural;
-        case "step":
-            return curveStep;
-        case "step-after":
-            return curveStepAfter;
-        case "linear":
-        default:
-            return curveLinear;
-    }
-}
+import { resolveCurveFactory } from "../geometry/chart-curve-factory";
 
 export class RangeAreaSeriesRenderer {
     public static render(context: CanvasRenderingContext2D, scene: ChartRangeAreaSeriesScene): void {
@@ -55,7 +30,7 @@ export class RangeAreaSeriesRenderer {
             .x(p => p.x)
             .y0(p => (p.defined && p.fromPoint ? p.fromPoint.y : 0))
             .y1(p => (p.defined && p.toPoint ? p.toPoint.y : 0))
-            .curve(getCurveFactory(curve))
+            .curve(resolveCurveFactory(curve))
             .context(context);
 
         if (!connectNulls) {
@@ -78,7 +53,7 @@ export class RangeAreaSeriesRenderer {
             const fromLineGenerator = line<SceneRangeAreaPoint>()
                 .x(p => p.x)
                 .y(p => (p.defined && p.fromPoint ? p.fromPoint.y : 0))
-                .curve(getCurveFactory(curve))
+                .curve(resolveCurveFactory(curve))
                 .context(context);
 
             if (!connectNulls) {
@@ -93,7 +68,7 @@ export class RangeAreaSeriesRenderer {
             const toLineGenerator = line<SceneRangeAreaPoint>()
                 .x(p => p.x)
                 .y(p => (p.defined && p.toPoint ? p.toPoint.y : 0))
-                .curve(getCurveFactory(curve))
+                .curve(resolveCurveFactory(curve))
                 .context(context);
 
             if (!connectNulls) {

@@ -93,12 +93,12 @@ interface ChartDownsamplingOptions {
 
 | Series                | Strategy                                                                                                                                             |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line / unstacked area | indexed min/max envelope (auto), segment-aware LTTB (explicit)                                                                                       |
+| line / unstacked area | indexed min/max envelope (auto), segment-aware LTTB (explicit); `step` and `step-after` use protected adjacency groups                                                                                                               |
 | rangeArea             | range envelope (first/last/lowest/highest per bucket, preserving same-segment clipping neighbors and null island endpoints when `connectNulls=true`) |
-| stacked area          | coordinated shared-X selection across the whole group, strictly bounded by `maxPoints` and preserving sparse member data                             |
+| stacked area          | coordinated shared-X selection across the whole group, strictly bounded by `maxPoints` and preserving sparse member data; any step member enables protected shared selection                                                                          |
 | scatter / bubble      | normalized spatial hierarchy with adaptive quadtree subdivision and bounded representatives                                                          |
 
-Bar, financial, heatmap, waterfall, funnel, pie/donut, polar/radar, treemap, and category-X connected paths are **not** downsampled in this phase; they keep viewport culling semantics. Step curves require a dedicated reducer and are disabled until certified.
+Bar, financial, heatmap, waterfall, funnel, pie/donut, polar/radar, treemap, and category-X connected paths intentionally remain outside automatic point reduction; they keep their discrete or family-specific viewport semantics. Financial marks require semantic OHLC aggregation rather than implicit point dropping. Step and step-after curves on eligible continuous-X line, area, range-area, and stacked-area series use protected adjacency selection.
 
 ### Semantics preserved
 

@@ -1,34 +1,9 @@
-import {
-    area,
-    curveLinear,
-    curveMonotoneX,
-    curveNatural,
-    curveStep,
-    curveStepAfter,
-    line,
-    type CurveFactory
-} from "d3-shape";
-import type { ChartCurve } from "../../../models/chart-series.models";
+import { area, line } from "d3-shape";
 import type { ChartAreaSeriesScene } from "../../scene/cartesian-scene";
 import type { SceneAreaPoint, ScenePoint } from "../../scene/scene-geometry";
 import { drawPointMarker } from "../../utils/canvas-utils";
 import { createAreaGradientSpec, withAlpha } from "./area-gradient";
-
-function getCurveFactory(curve: ChartCurve): CurveFactory {
-    switch (curve) {
-        case "monotone-x":
-            return curveMonotoneX;
-        case "natural":
-            return curveNatural;
-        case "step":
-            return curveStep;
-        case "step-after":
-            return curveStepAfter;
-        case "linear":
-        default:
-            return curveLinear;
-    }
-}
+import { resolveCurveFactory } from "../geometry/chart-curve-factory";
 
 export class AreaSeriesRenderer {
     public static render(context: CanvasRenderingContext2D, scene: ChartAreaSeriesScene): void {
@@ -47,7 +22,7 @@ export class AreaSeriesRenderer {
             .x(p => p.x)
             .y0(p => p.baseY ?? baselineY)
             .y1(p => p.y)
-            .curve(getCurveFactory(curve))
+            .curve(resolveCurveFactory(curve))
             .context(context);
 
         if (!connectNulls) {
@@ -90,7 +65,7 @@ export class AreaSeriesRenderer {
         const lineGenerator = line<SceneAreaPoint>()
             .x(p => p.x)
             .y(p => p.y)
-            .curve(getCurveFactory(curve))
+            .curve(resolveCurveFactory(curve))
             .context(context);
 
         if (!connectNulls) {
@@ -122,4 +97,3 @@ export class AreaSeriesRenderer {
         context.restore();
     }
 }
-

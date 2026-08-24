@@ -982,7 +982,9 @@ export class CartesianLayoutEngine {
                         samplesPerPixel: rangeEntry.capability.effectivePolicy?.samplesPerPixel ?? 1,
                         threshold: rangeEntry.capability.effectivePolicy?.threshold ?? null,
                         viewportScale: seriesXScale as ChartContinuousPositionScale<number | Date>,
-                        warnedSignatures: warnedDiagnosticSignatures
+                        warnedSignatures: warnedDiagnosticSignatures,
+                        curve: (s as ChartRangeAreaSeriesRegistration).curve?.(),
+                        stepProtected: rangeEntry.capability.strategy === "step-range-envelope"
                     });
                     rangeIndexView = envelope.indices;
                     rangeProjectionSampled = envelope.sampled;
@@ -1587,6 +1589,7 @@ export class CartesianLayoutEngine {
                                     samplesPerPixel: groupDensity.effectivePolicy.samplesPerPixel,
                                     threshold: groupDensity.effectivePolicy.threshold,
                                     timeline: groupDensity.timeline,
+                                    stepProtected: groupDensity.strategy === "step-stack-envelope",
                                     viewportScale: seriesXScale as ChartContinuousPositionScale<number | Date>
                                 });
                             }
@@ -1642,7 +1645,7 @@ export class CartesianLayoutEngine {
                                 s.id,
                                 before,
                                 {
-                                    algorithm: "stack-envelope",
+                                    algorithm: groupDensity.strategy,
                                     indices: null,
                                     renderedCount: stackEntries.length,
                                     sampled: projResult.sampled,
@@ -2146,7 +2149,8 @@ function resolveConnectedScalarIndexView(
         scalar: entry.scalar,
         threshold: entry.capability.effectivePolicy?.threshold ?? null,
         viewportScale: seriesXScale as ChartContinuousPositionScale<number | Date>,
-        warnedSignatures: warnedDiagnosticSignatures
+        warnedSignatures: warnedDiagnosticSignatures,
+        stepProtected: entry.capability.strategy === "step-scalar"
     });
 }
 

@@ -28,6 +28,29 @@ The Mona UI Chart library combines declarative Angular template composition with
 - **Interactive Legend:** Clickable legend items that toggle series or individual slice/stage/ring visibility with stable palette coloring (and semantic presentation legend markers for Waterfall steps).
 - **Customizable Templates:** Custom Angular templates for tooltips (`monaChartTooltipTemplate`), axis tick labels (`monaChartAxisLabelTemplate`), legend items (`monaChartLegendItemTemplate`), slice data labels (`monaChartSliceLabelTemplate`), donut center content (`monaChartCenterTemplate`), gauge center content (`monaChartGaugeCenterTemplate`), treemap node labels (`monaChartTreemapLabelTemplate`), funnel stage labels (`monaChartFunnelLabelTemplate`), waterfall step labels (`monaChartWaterfallLabelTemplate`), and empty states (`monaChartNoDataTemplate`).
 
+## High-Density Cartesian Data
+
+Downsampling is a render-sample optimization for searchable continuous X axes. The public `algorithm` option is a preference constrained by each series family's semantics; it does not force every family to use a literal reducer with the same name.
+
+| Series | Continuous-X reduction | Category-X reduction | Notes |
+| :--- | :--- | :--- | :--- |
+| Line | Yes | No | Linear, smooth, `step`, and `step-after` curves use real source points. |
+| Area | Yes | No | Stacked areas use one shared X selection; step members use topology protection. |
+| Range Area | Yes | No | Uses a low/high envelope reducer, including step-safe adjacency. |
+| Scatter / Bubble | Yes | No | Uses spatial/pixel representatives; bubble size keeps its full source domain. |
+| Bar / Range Bar | No | No | Discrete marks are not automatically point-sampled. |
+| Candlestick / OHLC | No | No | Financial marks require semantic OHLC aggregation, which is not implicit. |
+| Heatmap / non-Cartesian | No | — | Outside the Cartesian point-density subsystem. |
+
+| Requested algorithm | Scalar line/area | Step line/area | Range area | Stack area | Scatter/Bubble |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `auto` | Indexed scalar | Step-safe | Envelope | Shared stack envelope | Pixel |
+| `minmax` | Min/max | Step-safe | Envelope | Shared stack envelope | Pixel fallback |
+| `lttb` | LTTB | Step-safe fallback | Envelope fallback | Shared stack envelope fallback | Pixel fallback |
+| `pixel` | Connected auto fallback | Step-safe | Envelope fallback | Shared stack envelope fallback | Pixel |
+
+`maxPoints` is a hard cap on the committed render sample. Raw pointer, brush, selection, and tooltip interaction may still resolve an unsampled source datum through the retained interaction provider. For stacked areas, the cap applies to shared timeline X positions rather than the sum of every layer's materialized geometry. Unsorted or unsearchable X data safely keeps source-order full layout because sorting it would change connected-path semantics.
+
 ---
 
 ## Basic Usage
@@ -615,5 +638,4 @@ Clipping applied by ancestors *outside* the captured template node is intentiona
 ### PDF Raster Fidelity
 
 Raster PDF output (both explicit `mode: "raster"` and automatic fallback) chooses its internal pixel density from the final PDF page occupancy, including paper-page fitting and upscaling, so enlarged pages do not blur a low-density bitmap. Outputs whose required pixel dimensions exceed browser allocation safety limits throw `ChartExportError("too-large")` instead of silently reducing fidelity.
-
 

@@ -7,7 +7,12 @@ import type {
     CartesianStackMemberDensityRuntime
 } from "./cartesian-stack-density-runtime";
 import { CartesianMinMaxBlockIndex, lowerBoundAscending, upperBoundAscending } from "./cartesian-minmax-block-index";
-import type { PrioritizedSourceCandidate } from "./cartesian-density-projector";
+import {
+    createConnectedProtectedCandidateGroups,
+    type ConnectedCandidate,
+    type ConnectedProtectedCandidateGroup,
+    type PrioritizedSourceCandidate
+} from "./cartesian-density-projector";
 import { ChartDensityTracker } from "../layout/chart-density-instrumentation";
 import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
 
@@ -121,6 +126,7 @@ export interface ComputeSharedStackProjectionInput {
     readonly threshold?: number | null;
     readonly timeline?: CartesianStackGroupTimeline | CartesianStackTimelineData | null;
     readonly viewportScale: ChartContinuousPositionScale<number | Date>;
+    readonly stepProtected?: boolean;
 }
 
 /**
@@ -240,6 +246,123 @@ export function selectCoverageAwareStackIndices(
     return selectedIndices.sort((a, b) => a - b);
 }
 
+function selectCoverageAwareStackProtectedGroups(
+    groups: readonly ConnectedProtectedCandidateGroup[],
+    budget: number,
+    members: readonly CartesianStackMemberDensityRuntime[],
+    visibleStart: number,
+    visibleEnd: number
+): number[] {
+    const target = Math.max(0, Math.floor(budget));
+    if (target === 0 || groups.length === 0) {
+        return [];
+    }
+
+    const visibleMemberIds = new Set<string>();
+    for (const member of members) {
+        ChartDensityTracker.current?.onStackCoverageMemberSearch?.();
+        const start = lowerBoundAscending(
+            member.realTimelineIndices,
+            0,
+            member.realTimelineIndices.length,
+            visibleStart
+        );
+        ChartDensityTracker.current?.onStackCoverageMemberSearch?.();
+        const end = upperBoundAscending(
+            member.realTimelineIndices,
+            start,
+            member.realTimelineIndices.length,
+            visibleEnd - 1
+        );
+        if (end > start) {
+            visibleMemberIds.add(member.seriesId);
+        }
+    }
+
+    const records = groups.map(group => ({
+        coveredMemberIds: new Set(
+            (group.coveredSeriesIds ?? []).filter(seriesId => visibleMemberIds.has(seriesId))
+        ),
+        group
+    }));
+    const uncoveredMemberIds = new Set(visibleMemberIds);
+    const selected = new Set<number>();
+    const selectedIndices: number[] = [];
+
+    const addGroup = (group: ConnectedProtectedCandidateGroup): boolean => {
+        const missing = group.indices.filter(index => !selected.has(index));
+        if (missing.length > target - selectedIndices.length) {
+            return false;
+        }
+        for (const index of missing) {
+            selected.add(index);
+            selectedIndices.push(index);
+        }
+        return true;
+    };
+
+    while (selectedIndices.length < target && uncoveredMemberIds.size > 0) {
+        let best: (typeof records)[number] | undefined;
+        let bestCoverage = -1;
+        for (const record of records) {
+            const uncoveredCoverage = Array.from(record.coveredMemberIds).filter(memberId =>
+                uncoveredMemberIds.has(memberId)
+            ).length;
+            const missingCount = record.group.indices.filter(index => !selected.has(index)).length;
+            if (
+                missingCount > target - selectedIndices.length ||
+                (uncoveredCoverage === 0 && bestCoverage > 0)
+            ) {
+                continue;
+            }
+            if (
+                uncoveredCoverage > bestCoverage ||
+                (uncoveredCoverage === bestCoverage &&
+                    (!best ||
+                        record.group.priority > best.group.priority ||
+                        (record.group.priority === best.group.priority &&
+                            record.group.anchorIndex < best.group.anchorIndex)))
+            ) {
+                best = record;
+                bestCoverage = uncoveredCoverage;
+            }
+        }
+        if (!best || bestCoverage <= 0 || !addGroup(best.group)) {
+            break;
+        }
+        for (const memberId of best.coveredMemberIds) {
+            uncoveredMemberIds.delete(memberId);
+        }
+    }
+
+    const remaining = records.slice().sort((a, b) => compareProtectedStackGroups(a.group, b.group));
+    for (const record of remaining) {
+        if (selectedIndices.length >= target) {
+            break;
+        }
+        addGroup(record.group);
+    }
+
+    // A cap smaller than every protected step group still gets one
+    // deterministic source point rather than an empty render sample.
+    if (selectedIndices.length === 0 && remaining[0]) {
+        selected.add(remaining[0].group.anchorIndex);
+        selectedIndices.push(remaining[0].group.anchorIndex);
+    }
+
+    return Array.from(new Set(selectedIndices)).sort((a, b) => a - b).slice(0, target);
+}
+
+function compareProtectedStackGroups(
+    a: ConnectedProtectedCandidateGroup,
+    b: ConnectedProtectedCandidateGroup
+): number {
+    if (b.priority !== a.priority) {
+        return b.priority - a.priority;
+    }
+    return a.anchorIndex - b.anchorIndex;
+}
+
 /**
  * Coordinates shared sample-X selection across an entire stack group (WP10 / SD4-R21, SD4-R22, SD6-R04, SD6-R11).
  * Returns an explicit projected view:
@@ -247,6 +370,7 @@ export function selectCoverageAwareStackIndices(
  * - "keys" when visible timeline count > threshold OR visible timeline count > maxPoints (enforcing maxPoints deterministically)
  */
 export function computeSharedStackProjection(input: ComputeSharedStackProjectionInput): StackProjectionResult {
+    const stepProtected = input.stepProtected ?? input.groupRuntime?.strategy === "step-stack-envelope";
     let timeline = input.timeline;
     if (!timeline && input.groupRuntime) {
         timeline = input.groupRuntime.timeline;
@@ -459,7 +583,22 @@ export function computeSharedStackProjection(input: ComputeSharedStackProjection
     }
 
     const memberList = members ? Array.from(members.values()) : [];
-    const sortedIndices = selectCoverageAwareStackIndices(candidates, maxBudget, memberList, visStart, visEnd);
+    let sortedIndices: number[];
+    if (stepProtected) {
+        const connectedCandidates: ConnectedCandidate[] = candidates.map(candidate => ({
+            ...candidate,
+            defined: true,
+            insideViewport: candidate.index >= visStart && candidate.index < visEnd,
+            reason: candidate.priority >= 1000 ? "visible-defined" : "visible-extremum"
+        }));
+        const groups = createConnectedProtectedCandidateGroups(connectedCandidates, {
+            connectNulls: true,
+            sourceCount: totalPoints
+        });
+        sortedIndices = selectCoverageAwareStackProtectedGroups(groups, maxBudget, memberList, visStart, visEnd);
+    } else {
+        sortedIndices = selectCoverageAwareStackIndices(candidates, maxBudget, memberList, visStart, visEnd);
+    }
 
     const orderedKeys = sortedIndices.map(getKey);
     const keysSet = new Set<ChartInteractionXKey>(orderedKeys);

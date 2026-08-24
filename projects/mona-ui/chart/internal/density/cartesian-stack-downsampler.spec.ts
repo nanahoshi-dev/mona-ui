@@ -4,6 +4,7 @@ import type { CartesianStackEntry } from "../data/cartesian-stack-engine";
 import type { CartesianStackMemberDensityRuntime } from "./cartesian-stack-density-runtime";
 import {
     buildStackTimelineData,
+    computeSharedStackProjection,
     computeSharedStackSampleIndices,
     selectCoverageAwareStackIndices
 } from "./cartesian-stack-downsampler";
@@ -95,6 +96,29 @@ describe("computeSharedStackSampleIndices", () => {
         })!;
         expect(selected.has(spikeIndex)).toBe(true);
         expect(selected.has(21_000)).toBe(true);
+    });
+
+    it("keeps shared stack step selection bounded and source-adjacent", () => {
+        const count = 20_000;
+        const entries = new Map<string, readonly CartesianStackEntry[]>([
+            ["a", makeEntries("a", count, i => Math.floor(i / 250) % 4)],
+            ["b", makeEntries("b", count, i => 1)]
+        ]);
+        const projection = computeSharedStackProjection({
+            entriesBySeriesId: entries,
+            maxPoints: 120,
+            plotSpanPx: 500,
+            samplesPerPixel: 1,
+            stepProtected: true,
+            threshold: 0,
+            viewportScale: scale
+        });
+
+        expect(projection.sampled).toBe(true);
+        expect(projection.view.kind).toBe("keys");
+        expect(projection.renderedCount).toBeLessThanOrEqual(120);
+        expect(projection.view.kind === "keys" ? projection.view.keys.has(0) : false).toBe(true);
+        expect(projection.view.kind === "keys" ? projection.view.keys.has(count - 1) : false).toBe(true);
     });
 
     it("accumulates totals from full layers before selection (never sampled-only)", () => {

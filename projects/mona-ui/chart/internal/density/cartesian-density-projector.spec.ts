@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
-import { buildScalarDensityData } from "./cartesian-density-preparer";
+import { buildRangeDensityData, buildScalarDensityData } from "./cartesian-density-preparer";
 import {
+    selectConnectedProtectedCandidatesUnderBudget,
     projectRangeEnvelopeIndexView,
-    projectScalarIndexView
+    projectScalarIndexView,
+    type ConnectedProtectedCandidateGroup
 } from "./cartesian-density-projector";
 
 function buildScalar(
@@ -194,6 +196,40 @@ describe("projectScalarIndexView", () => {
             }
         }
     });
+
+    it("protects adjacent source points for sampled step transitions", () => {
+        const scalar = buildScalar([0, 0, 10, 10, 0, 0, 0]);
+        const view = projectScalarIndexView({
+            ...baseInput,
+            algorithm: "lttb",
+            curve: "step",
+            maxPoints: 7,
+            scalar,
+            threshold: 0,
+            viewportScale: linearScale([0, 6], [0, 500])
+        });
+
+        expect(view.algorithm).toBe("step");
+        expect(view.sampled).toBe(true);
+        expect(view.indices).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    });
+
+    it("keeps step groups inside defined segments and within a hard cap", () => {
+        const scalar = buildScalar([0, 0, null, 10, 10, 0, 0]);
+        const view = projectScalarIndexView({
+            ...baseInput,
+            algorithm: "minmax",
+            curve: "step-after",
+            maxPoints: 5,
+            scalar,
+            threshold: 0,
+            viewportScale: linearScale([0, 6], [0, 500])
+        });
+
+        expect(view.algorithm).toBe("step");
+        expect(view.indices!.length).toBeLessThanOrEqual(5);
+        expect(view.indices).not.toContain(2);
+    });
 });
 
 describe("projectRangeEnvelopeIndexView", () => {
@@ -223,5 +259,80 @@ describe("projectRangeEnvelopeIndexView", () => {
         for (let i = 1; i < indices.length; i++) {
             expect(indices[i]).toBeGreaterThan(indices[i - 1]);
         }
+    });
+
+    it("uses protected adjacency for step range envelopes", () => {
+        const data = [
+            { from: 0, high: 2, x: 0 },
+            { from: 0, high: 2, x: 1 },
+            { from: 5, high: 7, x: 2 },
+            { from: 5, high: 7, x: 3 },
+            { from: 0, high: 2, x: 4 },
+            { from: 0, high: 2, x: 5 },
+            { from: 0, high: 2, x: 6 }
+        ];
+        const range = buildRangeDensityData({ data, fromField: "from", temporal: false, toField: "high", xField: "x" });
+        const view = projectRangeEnvelopeIndexView({
+            ...baseInput,
+            curve: "step-after",
+            maxPoints: 7,
+            range,
+            threshold: 0,
+            viewportScale: linearScale([0, 6], [0, 500])
+        });
+
+        expect(view.algorithm).toBe("step-range-envelope");
+        expect(view.sampled).toBe(true);
+        expect(view.indices!.length).toBeLessThanOrEqual(7);
+        expect(view.indices).toEqual(expect.arrayContaining([1, 2, 3, 4]));
+    });
+});
+
+describe("selectConnectedProtectedCandidatesUnderBudget", () => {
+    const groups: readonly ConnectedProtectedCandidateGroup[] = [
+        {
+            anchorIndex: 2,
+            indices: [1, 2, 3],
+            order: 0,
+            priority: 1000,
+            reason: "clip-anchor"
+        },
+        {
+            anchorIndex: 6,
+            indices: [5, 6, 7],
+            order: 1,
+            priority: 500,
+            reason: "step-extremum"
+        }
+    ];
+
+    it("keeps a protected group atomic whenever the budget allows it", () => {
+        expect(selectConnectedProtectedCandidatesUnderBudget(groups, 3, [2])).toEqual([1, 2, 3]);
+        expect(selectConnectedProtectedCandidatesUnderBudget(groups, 2, [2])).toEqual([2]);
+    });
+
+    it("deduplicates overlapping groups and keeps deterministic source order", () => {
+        const overlapping: readonly ConnectedProtectedCandidateGroup[] = [
+            {
+                anchorIndex: 10,
+                indices: [10, 11],
+                order: 0,
+                priority: 100,
+                reason: "step-transition"
+            },
+            {
+                anchorIndex: 11,
+                indices: [11, 12],
+                order: 1,
+                priority: 100,
+                reason: "step-transition"
+            }
+        ];
+
+        expect(selectConnectedProtectedCandidatesUnderBudget(overlapping, 3)).toEqual([10, 11, 12]);
+    });
+
+    it("degrades to one deterministic anchor when no protected group fits", () => {
+        expect(selectConnectedProtectedCandidatesUnderBudget(groups, 1)).toEqual([2]);
     });
 });

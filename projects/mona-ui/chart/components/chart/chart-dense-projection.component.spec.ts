@@ -2,6 +2,7 @@ import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ChartCurve } from "../../models/chart-series.models";
 import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
 import type { ChartViewportState } from "../../models/chart-viewport.models";
 import { CartesianStageTracker } from "../../internal/layout/cartesian-stage-instrumentation";
@@ -76,16 +77,17 @@ class StackedHostComponent {
             <mona-chart-y-axis axisId="y-main" type="linear" [max]="axisMax()" [min]="axisMin()" [nice]="axisNice()" />
             @switch (seriesKind()) {
                 @case ("line") {
-                    <mona-line-series field="y" name="L" />
+                    <mona-line-series field="y" name="L" [curve]="curve()" />
                 }
                 @case ("area") {
-                    <mona-area-series field="y" name="A" />
+                    <mona-area-series field="y" name="A" [curve]="curve()" />
                 }
                 @case ("range") {
                     <mona-range-area-series
                         fromField="low"
                         toField="high"
                         name="R"
+                        [curve]="curve()"
                         [pointRadius]="rangePointRadius()"
                         [showPoints]="rangeShowPoints()" />
                 }
@@ -109,6 +111,7 @@ class DenseHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
     public readonly data = signal<readonly unknown[]>([]);
     public readonly downsampling = signal<ChartDownsamplingInput>(true);
+    public readonly curve = signal<ChartCurve>("linear");
     public readonly seriesKind = signal<"line" | "area" | "range" | "scatter" | "bubble">("line");
     public readonly viewport = signal<ChartViewportState | undefined>(undefined);
     public readonly markerRadius = signal(60);
@@ -257,6 +260,25 @@ describe("indexed dense projection (WP8)", () => {
         const areaScene = host.chart()["cartesianXYScene"]();
         const areaMetadata = Array.from(areaScene!.seriesDensityMetadataById!.values())[0];
         expect(areaMetadata.sampled).toBe(true);
+    });
+
+    it("samples a step-after line through the protected path", () => {
+        host.curve.set("step-after");
+        host.downsampling.set({ algorithm: "lttb", enabled: true, maxPoints: 100, threshold: 0 });
+        host.data.set(
+            Array.from({ length: 20_000 }, (_, i) => ({
+                x: i,
+                y: Math.floor(i / 125) % 5
+            }))
+        );
+        render();
+
+        const scene = host.chart()["cartesianXYScene"]();
+        const lineScene = scene?.series.find(s => s.type === "line") as { points: readonly unknown[] } | undefined;
+        const metadata = Array.from(scene!.seriesDensityMetadataById!.values())[0];
+        expect(metadata.algorithm).toBe("step");
+        expect(metadata.sampled).toBe(true);
+        expect(lineScene?.points.length).toBeLessThanOrEqual(100);
     });
 
     it("retains clipped LTTB detail and the interior spike through the chart scene", () => {

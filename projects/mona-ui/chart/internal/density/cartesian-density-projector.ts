@@ -1,4 +1,5 @@
 import type { ChartContinuousPositionScale } from "../scale/chart-scale";
+import type { ChartCurve } from "../../models/chart-series.models";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type { CartesianScalarDensityData } from "./cartesian-density-preparer";
 import { detectSearchableXMonotonicity } from "./cartesian-density-segments";
@@ -16,7 +17,16 @@ export type ProjectedSourceView =
     | { readonly indices: readonly number[]; readonly kind: "indices" };
 
 export interface CartesianProjectedIndexView {
-    readonly algorithm: "full" | "lttb" | "minmax" | "pixel" | "range-envelope" | "stack-envelope";
+    readonly algorithm:
+        | "full"
+        | "lttb"
+        | "minmax"
+        | "pixel"
+        | "range-envelope"
+        | "stack-envelope"
+        | "step"
+        | "step-range-envelope"
+        | "step-stack-envelope";
     /** null means "all source indices in order" (ordinary full layout). */
     readonly indices: readonly number[] | null;
     readonly renderedCount: number;
@@ -62,6 +72,213 @@ export type ConnectedCandidateRole =
 export interface ConnectedCandidate extends PrioritizedSourceCandidate {
     readonly roles?: readonly ConnectedCandidateRole[];
     readonly segmentId?: number;
+}
+
+export type ConnectedProtectedCandidateReason =
+    | "bucket-edge"
+    | "clip-anchor"
+    | "continuity-anchor"
+    | "step-extremum"
+    | "step-transition"
+    | "visible-boundary";
+
+export interface ConnectedProtectedCandidateGroup {
+    readonly anchorIndex: number;
+    readonly coveredSeriesIds?: readonly string[];
+    readonly indices: readonly number[];
+    readonly order?: number;
+    readonly priority: number;
+    readonly reason: ConnectedProtectedCandidateReason;
+    readonly segmentId?: number;
+}
+
+function protectedReasonRank(reason: ConnectedProtectedCandidateReason): number {
+    switch (reason) {
+        case "clip-anchor":
+            return 0;
+        case "continuity-anchor":
+            return 1;
+        case "visible-boundary":
+            return 2;
+        case "step-extremum":
+            return 3;
+        case "bucket-edge":
+            return 4;
+        case "step-transition":
+        default:
+            return 5;
+    }
+}
+
+function protectedGroupReason(candidate: ConnectedCandidate): ConnectedProtectedCandidateReason {
+    const roles = inferConnectedCandidateRoles(candidate);
+    if (roles.includes("clip-left") || roles.includes("clip-right")) {
+        return "clip-anchor";
+    }
+    if (roles.includes("connect-left") || roles.includes("connect-right")) {
+        return "continuity-anchor";
+    }
+    if (roles.includes("visible-first") || roles.includes("visible-last")) {
+        return "visible-boundary";
+    }
+    if (roles.includes("min-extremum") || roles.includes("max-extremum")) {
+        return "step-extremum";
+    }
+    if (roles.includes("bucket-first") || roles.includes("bucket-last")) {
+        return "bucket-edge";
+    }
+    return "step-transition";
+}
+
+function compareProtectedGroups(
+    a: ConnectedProtectedCandidateGroup,
+    b: ConnectedProtectedCandidateGroup
+): number {
+    if (b.priority !== a.priority) {
+        return b.priority - a.priority;
+    }
+    const reasonRank = protectedReasonRank(a.reason) - protectedReasonRank(b.reason);
+    if (reasonRank !== 0) {
+        return reasonRank;
+    }
+    if (a.order !== undefined && b.order !== undefined && a.order !== b.order) {
+        return a.order - b.order;
+    }
+    return a.anchorIndex - b.anchorIndex;
+}
+
+/**
+ * Converts indexed connected candidates into small source-adjacency groups.
+ * The resolver uses retained segment metadata, so it never scans visible rows.
+ */
+export function createConnectedProtectedCandidateGroups(
+    candidates: readonly ConnectedCandidate[],
+    options: {
+        readonly connectNulls: boolean;
+        readonly segmentIds?: Int32Array;
+        readonly segments?: readonly { endIndexExclusive: number; startIndex: number }[];
+        readonly sourceCount?: number;
+    }
+): ConnectedProtectedCandidateGroup[] {
+    const groups: ConnectedProtectedCandidateGroup[] = [];
+    const sourceCount = options.sourceCount ?? options.segmentIds?.length ?? Number.POSITIVE_INFINITY;
+
+    const resolveNeighbor = (index: number, direction: -1 | 1): number | null => {
+        const segmentId = options.segmentIds?.[index] ?? -1;
+        if (!options.connectNulls) {
+            if (segmentId < 0 || !options.segments) {
+                // Raw range callers without retained segment metadata are
+                // already responsible for supplying a connected source view.
+                // Production density runtimes always pass segment metadata;
+                // this bounded fallback keeps the lower-level projector useful
+                // for direct finite-array callers without a source scan.
+                const neighbor = index + direction;
+                return neighbor >= 0 && neighbor < sourceCount ? neighbor : null;
+            }
+            const segment = options.segments[segmentId];
+            const neighbor = index + direction;
+            return neighbor >= segment.startIndex && neighbor < segment.endIndexExclusive ? neighbor : null;
+        }
+
+        if (options.segments) {
+            return direction < 0
+                ? findPreviousDefinedIndex(options.segments, index)
+                : findNextDefinedIndex(options.segments, index + 1);
+        }
+
+        const neighbor = index + direction;
+        return neighbor >= 0 && neighbor < sourceCount ? neighbor : null;
+    };
+
+    for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        if (!Number.isInteger(candidate.index) || candidate.index < 0 || candidate.index >= sourceCount) {
+            continue;
+        }
+        const indices = new Set<number>([candidate.index]);
+        const previous = resolveNeighbor(candidate.index, -1);
+        const next = resolveNeighbor(candidate.index, 1);
+        if (previous !== null) {
+            indices.add(previous);
+        }
+        if (next !== null) {
+            indices.add(next);
+        }
+        groups.push({
+            anchorIndex: candidate.index,
+            coveredSeriesIds: candidate.coveredSeriesIds,
+            indices: Array.from(indices).sort((a, b) => a - b),
+            order: candidate.order ?? i,
+            priority: candidate.priority,
+            reason: protectedGroupReason(candidate),
+            segmentId: candidate.segmentId
+        });
+    }
+    return groups;
+}
+
+/**
+ * Selects protected connected groups without ever exceeding the hard cap.
+ * A group is added atomically when its not-yet-selected indices fit. If a
+ * required pair cannot fit, its required anchor is retained as a deterministic
+ * fallback so pathological caps such as one remain useful and bounded.
+ */
+export function selectConnectedProtectedCandidatesUnderBudget(
+    groups: readonly ConnectedProtectedCandidateGroup[],
+    budget: number,
+    requiredAnchorIndices: readonly number[] = []
+): number[] {
+    const target = Math.max(0, Math.floor(budget));
+    if (target === 0 || groups.length === 0) {
+        return [];
+    }
+
+    const normalized = groups
+        .map(group => ({
+            ...group,
+            indices: Array.from(new Set(group.indices.filter(index => Number.isInteger(index) && index >= 0))).sort(
+                (a, b) => a - b
+            )
+        }))
+        .filter(group => group.indices.length > 0)
+        .sort(compareProtectedGroups);
+    const selected = new Set<number>();
+    const required = new Set(requiredAnchorIndices.filter(index => Number.isInteger(index) && index >= 0));
+
+    const addGroup = (group: ConnectedProtectedCandidateGroup): boolean => {
+        const missing = group.indices.filter(index => !selected.has(index));
+        if (missing.length > target - selected.size) {
+            return false;
+        }
+        for (const index of missing) {
+            selected.add(index);
+        }
+        return true;
+    };
+
+    for (const group of normalized.filter(group => group.indices.some(index => required.has(index)))) {
+        if (!addGroup(group) && selected.size < target) {
+            const fallback = group.indices.find(index => required.has(index) && !selected.has(index));
+            if (fallback !== undefined) {
+                selected.add(fallback);
+            }
+        }
+    }
+
+    for (const group of normalized) {
+        if (selected.size >= target) {
+            break;
+        }
+        addGroup(group);
+    }
+
+    // If no group can fit at all (for example maxPoints = 1), keep one
+    // deterministic anchor rather than returning an empty render sample.
+    if (selected.size === 0 && normalized[0]) {
+        selected.add(normalized[0].anchorIndex);
+    }
+
+    return Array.from(selected).sort((a, b) => a - b).slice(0, target);
 }
 
 function inferConnectedCandidateRoles(candidate: ConnectedCandidate): readonly ConnectedCandidateRole[] {
@@ -692,9 +909,12 @@ export function projectScalarIndexView(input: {
     readonly threshold?: number | null;
     readonly viewportScale: ChartContinuousPositionScale<number | Date>;
     readonly warnedSignatures?: Set<string>;
+    readonly curve?: ChartCurve;
+    readonly stepProtected?: boolean;
 }): CartesianProjectedIndexView {
     const { scalar, viewportScale } = input;
     const sourceCount = scalar.sourceData.length;
+    const stepProtected = input.stepProtected ?? (input.curve === "step" || input.curve === "step-after");
 
     if (scalar.monotonicity === "unsorted" || scalar.monotonicity === "unsearchable") {
         ChartDiagnostics.warnOnce(
@@ -799,7 +1019,7 @@ export function projectScalarIndexView(input: {
 
     const useLttb = input.algorithm === "lttb";
 
-    if (useLttb) {
+    if (useLttb && !stepProtected) {
         const reduced = projectSegmentedLttb({
             budget,
             connectNulls: input.connectNulls ?? false,
@@ -837,11 +1057,12 @@ export function projectScalarIndexView(input: {
         viewportScale,
         input.maxPoints,
         input.connectNulls ?? false,
-        exactPlan
+        exactPlan,
+        stepProtected
     );
 
     return {
-        algorithm: "minmax",
+        algorithm: stepProtected ? "step" : "minmax",
         indices,
         renderedCount: indices.length,
         sampled: true,
@@ -869,11 +1090,14 @@ export function projectRangeEnvelopeIndexView(input: {
     readonly viewportScale: ChartContinuousPositionScale<number | Date>;
     readonly warnedSignatures?: Set<string>;
     readonly x?: Float64Array;
+    readonly curve?: ChartCurve;
+    readonly stepProtected?: boolean;
 }): CartesianProjectedIndexView {
     const x = input.range ? input.range.x : (input.x ?? new Float64Array(0));
     const fromY = input.range ? input.range.from : (input.fromY ?? new Float64Array(0));
     const toY = input.range ? input.range.to : (input.toY ?? new Float64Array(0));
     const sourceCount = x.length;
+    const stepProtected = input.stepProtected ?? (input.curve === "step" || input.curve === "step-after");
 
     const monotonicity = input.range?.monotonicity ?? detectSearchableXMonotonicity(x);
     if (monotonicity === "unsorted" || monotonicity === "unsearchable") {
@@ -1179,21 +1403,38 @@ export function projectRangeEnvelopeIndexView(input: {
 
     const autoBudget = Math.max(512, Math.floor(input.plotSpanPx * Math.max(1, input.samplesPerPixel) * 4));
     const effectiveCap = input.maxPoints ?? autoBudget;
-    const requiredAnchorIndices = exactPlan
-        ? [exactPlan.clipLeft, exactPlan.clipRight, exactPlan.connectBracketLeft, exactPlan.connectBracketRight].filter(
-              (index): index is number => index !== null && index !== undefined
+    const requiredAnchorIndices = [
+        ...(exactPlan
+            ? [exactPlan.clipLeft, exactPlan.clipRight, exactPlan.connectBracketLeft, exactPlan.connectBracketRight]
+            : []),
+        ...candidates
+            .filter(candidate => {
+                const roles = inferConnectedCandidateRoles(candidate);
+                return roles.includes("visible-first") || roles.includes("visible-last");
+            })
+            .map(candidate => candidate.index)
+    ].filter((index): index is number => index !== null && index !== undefined);
+    const indices = stepProtected
+        ? selectConnectedProtectedCandidatesUnderBudget(
+              createConnectedProtectedCandidateGroups(candidates, {
+                  connectNulls: input.connectNulls ?? false,
+                  segmentIds: input.range?.segmentIds,
+                  segments: input.range?.segments,
+                  sourceCount
+              }),
+              Math.max(1, effectiveCap),
+              requiredAnchorIndices
           )
-        : [];
-    const indices = input.range
-        ? selectConnectedCandidatesUnderBudget(candidates, Math.max(1, effectiveCap), {
-              connectNulls: input.connectNulls ?? false,
-              requiredAnchorIndices,
-              segmentIds: input.range.segmentIds
-          })
-        : enforceSourcePointCap(candidates, Math.max(1, effectiveCap));
+        : input.range
+          ? selectConnectedCandidatesUnderBudget(candidates, Math.max(1, effectiveCap), {
+                connectNulls: input.connectNulls ?? false,
+                requiredAnchorIndices,
+                segmentIds: input.range.segmentIds
+            })
+          : enforceSourcePointCap(candidates, Math.max(1, effectiveCap));
 
     return {
-        algorithm: "range-envelope",
+        algorithm: stepProtected ? "step-range-envelope" : "range-envelope",
         indices,
         renderedCount: indices.length,
         sampled: true,
@@ -1221,7 +1462,8 @@ function buildMinMaxIndices(
     viewportScale: ChartContinuousPositionScale<number | Date>,
     maxPoints?: number | null,
     connectNulls = false,
-    exactPlan?: ExactConnectedProjectionPlan
+    exactPlan?: ExactConnectedProjectionPlan,
+    stepProtected = false
 ): number[] {
     const candidates: ConnectedCandidate[] = [];
     const [px0, px1] = scalePixelRange(viewportScale);
@@ -1342,11 +1584,27 @@ function buildMinMaxIndices(
 
     const autoBudget = Math.max(512, Math.floor(plotSpanPx * Math.max(1, samplesPerPixel) * 4));
     const effectiveCap = maxPoints !== null && maxPoints !== undefined ? maxPoints : autoBudget;
-    const requiredAnchorIndices = exactPlan
-        ? [exactPlan.clipLeft, exactPlan.clipRight, exactPlan.connectBracketLeft, exactPlan.connectBracketRight].filter(
-              (index): index is number => index !== null && index !== undefined
-          )
-        : [];
+    const requiredAnchorIndices = [
+        ...(exactPlan
+            ? [exactPlan.clipLeft, exactPlan.clipRight, exactPlan.connectBracketLeft, exactPlan.connectBracketRight]
+            : []),
+        ...candidates
+            .filter(candidate => {
+                const roles = inferConnectedCandidateRoles(candidate);
+                return roles.includes("visible-first") || roles.includes("visible-last");
+            })
+            .map(candidate => candidate.index)
+    ].filter((index): index is number => index !== null && index !== undefined);
+    if (stepProtected) {
+        const groups = createConnectedProtectedCandidateGroups(candidates, {
+            connectNulls,
+            segmentIds: scalar.segmentIds,
+            segments: scalar.segments,
+            sourceCount: scalar.sourceData.length
+        });
+        return selectConnectedProtectedCandidatesUnderBudget(groups, Math.max(1, effectiveCap), requiredAnchorIndices);
+    }
+
     return selectConnectedCandidatesUnderBudget(candidates, Math.max(1, effectiveCap), {
         connectNulls,
         requiredAnchorIndices,

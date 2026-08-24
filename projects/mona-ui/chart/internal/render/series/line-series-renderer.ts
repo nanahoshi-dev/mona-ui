@@ -1,32 +1,8 @@
-import {
-    curveLinear,
-    curveMonotoneX,
-    curveNatural,
-    curveStep,
-    curveStepAfter,
-    line,
-    type CurveFactory
-} from "d3-shape";
-import type { ChartCurve } from "../../../models/chart-series.models";
+import { line } from "d3-shape";
 import type { ChartLineSeriesScene } from "../../scene/cartesian-scene";
 import type { ScenePoint } from "../../scene/scene-geometry";
 import { drawPointMarker } from "../../utils/canvas-utils";
-
-function getCurveFactory(curve: ChartCurve): CurveFactory {
-    switch (curve) {
-        case "monotone-x":
-            return curveMonotoneX;
-        case "natural":
-            return curveNatural;
-        case "step":
-            return curveStep;
-        case "step-after":
-            return curveStepAfter;
-        case "linear":
-        default:
-            return curveLinear;
-    }
-}
+import { resolveCurveFactory } from "../geometry/chart-curve-factory";
 
 export class LineSeriesRenderer {
     public static render(context: CanvasRenderingContext2D, scene: ChartLineSeriesScene): void {
@@ -44,7 +20,7 @@ export class LineSeriesRenderer {
         const lineGenerator = line<ScenePoint>()
             .x(p => p.x)
             .y(p => p.y)
-            .curve(getCurveFactory(curve))
+            .curve(resolveCurveFactory(curve))
             .context(context);
 
         if (!connectNulls) {

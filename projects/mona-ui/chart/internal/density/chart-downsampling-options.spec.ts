@@ -62,6 +62,7 @@ describe("resolveDensityCapability", () => {
         });
         expect(capability.eligible).toBe(true);
         expect(capability.mode).toBe("connected-scalar");
+        expect(capability.strategy).toBe("scalar-auto");
     });
 
     it("unstacked area is eligible connected-scalar", () => {
@@ -83,6 +84,7 @@ describe("resolveDensityCapability", () => {
             xResolvedType: "linear"
         });
         expect(capability.mode).toBe("stacked-area");
+        expect(capability.strategy).toBe("stack-envelope");
     });
 
     it("rangeArea is eligible connected-range", () => {
@@ -93,6 +95,7 @@ describe("resolveDensityCapability", () => {
             xResolvedType: "utc"
         });
         expect(capability.mode).toBe("connected-range");
+        expect(capability.strategy).toBe("range-envelope");
     });
 
     it("scatter and bubble are marker mode", () => {
@@ -104,6 +107,7 @@ describe("resolveDensityCapability", () => {
                 xResolvedType: "linear"
             });
             expect(capability.mode).toBe("marker");
+            expect(capability.strategy).toBe("marker-pixel");
         }
     });
 
@@ -118,7 +122,7 @@ describe("resolveDensityCapability", () => {
         expect(capability.reason).toContain("category");
     });
 
-    it("step curves require a dedicated reducer and are disabled", () => {
+    it("step curves are eligible through the protected scalar strategy", () => {
         for (const curve of ["step", "step-after"]) {
             const capability = resolveDensityCapability({
                 chartPolicy,
@@ -127,9 +131,40 @@ describe("resolveDensityCapability", () => {
                 seriesType: "line",
                 xResolvedType: "linear"
             });
-            expect(capability.eligible).toBe(false);
-            expect(capability.reason).toContain(curve);
+            expect(capability.eligible).toBe(true);
+            expect(capability.strategy).toBe("step-scalar");
         }
+    });
+
+    it("keeps public preferences separate from family-safe internal strategies", () => {
+        const stepLttb = resolveDensityCapability({
+            chartPolicy,
+            curve: "step",
+            seriesDownsampling: { algorithm: "lttb" },
+            seriesType: "line",
+            xResolvedType: "linear"
+        });
+        expect(stepLttb.algorithmOverride).toBe("lttb");
+        expect(stepLttb.strategy).toBe("step-scalar");
+
+        const rangeLttb = resolveDensityCapability({
+            chartPolicy,
+            curve: "step-after",
+            seriesDownsampling: { algorithm: "lttb" },
+            seriesType: "rangeArea",
+            xResolvedType: "linear"
+        });
+        expect(rangeLttb.algorithmOverride).toBe("lttb");
+        expect(rangeLttb.strategy).toBe("step-range-envelope");
+
+        const markerMinmax = resolveDensityCapability({
+            chartPolicy,
+            seriesDownsampling: { algorithm: "minmax" },
+            seriesType: "bubble",
+            xResolvedType: "linear"
+        });
+        expect(markerMinmax.algorithmOverride).toBe("minmax");
+        expect(markerMinmax.strategy).toBe("marker-pixel");
     });
 
     it("unsupported families are rejected", () => {

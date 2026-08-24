@@ -51,6 +51,7 @@ export interface CartesianStackGroupDensityRuntime {
     readonly groupId: string;
     readonly membersBySeriesId: ReadonlyMap<string, CartesianStackMemberDensityRuntime>;
     readonly seriesIds: readonly string[];
+    readonly strategy: "stack-envelope" | "step-stack-envelope";
     readonly timeline: CartesianStackGroupTimeline;
     readonly valid: boolean;
 }
@@ -122,6 +123,12 @@ export function buildStackGroupDensityRuntime(
     if (!effectivePolicy.enabled) {
         return null;
     }
+
+    const stepProtected = seriesInGroup.some(series => {
+        const curve = (series as unknown as { curve?: (() => unknown) | undefined }).curve;
+        const value = typeof curve === "function" ? curve() : undefined;
+        return value === "step" || value === "step-after";
+    });
 
     const timelineMap = new Map<ChartInteractionXKey, StackTimelineItem>();
     const entriesBySeriesAndKey = new Map<string, Map<ChartInteractionXKey, CartesianStackEntry>>();
@@ -259,6 +266,7 @@ export function buildStackGroupDensityRuntime(
         groupId: group.id,
         membersBySeriesId,
         seriesIds: group.seriesIds,
+        strategy: stepProtected ? "step-stack-envelope" : "stack-envelope",
         timeline: {
             negativeExtrema: new CartesianMinMaxBlockIndex(negative),
             positiveExtrema: new CartesianMinMaxBlockIndex(positive),
