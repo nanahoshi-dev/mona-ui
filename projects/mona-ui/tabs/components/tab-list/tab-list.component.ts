@@ -112,6 +112,7 @@ export class TabListComponent implements TabListVariantInput {
                 });
             }
         });
+        this.setupScrolling();
         afterNextRender({
             write: () => {
                 const selectedTab = firstOrDefault(this.tabList(), t => t.id === this.selectedTabId());
@@ -122,7 +123,6 @@ export class TabListComponent implements TabListVariantInput {
             read: () => {
                 this.setupKeyboardNavigation();
                 this.setupResizeObserver();
-                this.setupScrolling();
             }
         });
         inject(DestroyRef).onDestroy(() => this.#resizeObserver?.disconnect());
