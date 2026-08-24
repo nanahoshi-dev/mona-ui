@@ -103,6 +103,25 @@ describe("ChartDemoComponent", () => {
         expect(component.eventLogs()[0].details).toContain("Telemetry dataset");
     });
 
+    it("should expose the certified step-density caps and renderer choices", () => {
+        const stepDensity = component as unknown as {
+            stepDensityCurveOptions: readonly { value: string }[];
+            stepDensityMaxPointsOptions: readonly { value: number }[];
+            stepDensityRenderer: () => string;
+            stepDensityRendererOptions: readonly { value: string }[];
+        };
+
+        expect(stepDensity.stepDensityCurveOptions.map(option => option.value)).toEqual(["step", "step-after"]);
+        expect(stepDensity.stepDensityMaxPointsOptions.map(option => option.value)).toEqual([1, 2, 3, 4, 16, 160]);
+        expect(stepDensity.stepDensityRendererOptions.map(option => option.value)).toEqual(["canvas", "svg"]);
+        expect(stepDensity.stepDensityRenderer()).toBe("svg");
+
+        component.setTab("pan-zoom");
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain("Step Density Fixture");
+        expect(fixture.nativeElement.textContent).toContain("Renderer:");
+    });
+
     it("should handle Multi-Axis actions and metric randomization", () => {
         component.setTab("multi-axis");
         fixture.detectChanges();

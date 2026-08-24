@@ -86,6 +86,7 @@ import {
     type ChartRadialGridShape,
     type ChartReferenceLabelPosition,
     type ChartReferenceLineStyle,
+    type ChartRendererMode,
     type ChartRoseScaleMode,
     type ChartSelectionChangeEvent,
     type ChartSelectionMode,
@@ -1682,6 +1683,19 @@ export class ChartDemoComponent {
     protected readonly stepDensityCurveOptions: readonly { label: string; value: ChartCurve }[] = [
         { label: "Step", value: "step" },
         { label: "Step After", value: "step-after" }
+    ];
+    protected readonly stepDensityMaxPointsOptions: readonly { label: string; value: number }[] = [
+        { label: "1 mark", value: 1 },
+        { label: "2 marks", value: 2 },
+        { label: "3 marks", value: 3 },
+        { label: "4 marks", value: 4 },
+        { label: "16 marks", value: 16 },
+        { label: "160 marks", value: 160 }
+    ];
+    protected readonly stepDensityRenderer = signal<ChartRendererMode>("svg");
+    protected readonly stepDensityRendererOptions: readonly { label: string; value: ChartRendererMode }[] = [
+        { label: "Canvas", value: "canvas" },
+        { label: "SVG", value: "svg" }
     ];
     protected readonly stepDensityPolicy = computed<ChartDownsamplingInput>(() =>
         this.stepDensityEnabled() ? { enabled: true, maxPoints: this.stepDensityMaxPoints(), threshold: 0 } : false

@@ -167,6 +167,53 @@ describe("resolveDensityCapability", () => {
         expect(markerMinmax.strategy).toBe("marker-pixel");
     });
 
+    it.each(["auto", "minmax", "lttb", "pixel"] as const)(
+        "keeps the %s preference family-safe across connected series",
+        algorithm => {
+            const scalar = resolveDensityCapability({
+                chartPolicy,
+                seriesDownsampling: { algorithm },
+                seriesType: "line",
+                xResolvedType: "linear"
+            });
+            const step = resolveDensityCapability({
+                chartPolicy,
+                curve: "step-after",
+                seriesDownsampling: { algorithm },
+                seriesType: "line",
+                xResolvedType: "linear"
+            });
+            const range = resolveDensityCapability({
+                chartPolicy,
+                seriesDownsampling: { algorithm },
+                seriesType: "rangeArea",
+                xResolvedType: "linear"
+            });
+            const stack = resolveDensityCapability({
+                chartPolicy,
+                seriesDownsampling: { algorithm },
+                seriesType: "area",
+                stacked: true,
+                xResolvedType: "linear"
+            });
+            const marker = resolveDensityCapability({
+                chartPolicy,
+                seriesDownsampling: { algorithm },
+                seriesType: "scatter",
+                xResolvedType: "linear"
+            });
+
+            expect(scalar.algorithmOverride).toBe(algorithm);
+            expect(scalar.strategy).toBe(
+                algorithm === "lttb" ? "scalar-lttb" : algorithm === "minmax" ? "scalar-minmax" : "scalar-auto"
+            );
+            expect(step.strategy).toBe("step-scalar");
+            expect(range.strategy).toBe("range-envelope");
+            expect(stack.strategy).toBe("stack-envelope");
+            expect(marker.strategy).toBe("marker-pixel");
+        }
+    );
+
     it("unsupported families are rejected", () => {
         for (const type of ["bar", "candlestick", "pie", "treemap"] as const) {
             const capability = resolveDensityCapability({

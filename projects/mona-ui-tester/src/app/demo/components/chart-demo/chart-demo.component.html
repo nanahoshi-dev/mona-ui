@@ -1011,9 +1011,17 @@
                                     valueField="value" [valuePrimitive]="true" size="small" class="w-32" />
                                 <div class="flex items-center gap-1.5">
                                     <span class="text-xs text-muted-foreground">maxPoints:</span>
-                                    <mona-numeric-text-box [value]="stepDensityMaxPoints()"
-                                        (valueChange)="stepDensityMaxPoints.set($event ?? 160)" [minValue]="1"
-                                        [maxValue]="1000" [step]="10" size="small" class="w-24" />
+                                    <mona-dropdown-list [data]="stepDensityMaxPointsOptions"
+                                        [value]="stepDensityMaxPoints()"
+                                        (valueChange)="$event && stepDensityMaxPoints.set($event)" textField="label"
+                                        valueField="value" [valuePrimitive]="true" size="small" class="w-28" />
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs text-muted-foreground">Renderer:</span>
+                                    <mona-dropdown-list [data]="stepDensityRendererOptions"
+                                        [value]="stepDensityRenderer()"
+                                        (valueChange)="$event && stepDensityRenderer.set($event)" textField="label"
+                                        valueField="value" [valuePrimitive]="true" size="small" class="w-28" />
                                 </div>
                             </div>
                         </div>
@@ -2182,7 +2190,7 @@
                     </p>
                 </div>
                 <mona-chart [data]="stepDensityData()" xField="date" [downsampling]="stepDensityPolicy()"
-                    [renderer]="'svg'" class="h-96 w-full" aria-label="Step density topology proof chart">
+                    [renderer]="stepDensityRenderer()" class="h-96 w-full" aria-label="Step density topology proof chart">
                     <mona-chart-x-axis type="time" [nice]="false" />
                     <mona-chart-y-axis type="linear" [nice]="true" />
                     <mona-range-area-series fromField="low" toField="high" [curve]="stepDensityCurve()"

@@ -49,7 +49,9 @@ Downsampling is a render-sample optimization for searchable continuous X axes. T
 | `lttb` | LTTB | Step-safe fallback | Envelope fallback | Shared stack envelope fallback | Pixel fallback |
 | `pixel` | Connected auto fallback | Step-safe | Envelope fallback | Shared stack envelope fallback | Pixel |
 
-`maxPoints` is a hard cap on the committed render sample. Raw pointer, brush, selection, and tooltip interaction may still resolve an unsampled source datum through the retained interaction provider. For stacked areas, the cap applies to shared timeline X positions rather than the sum of every layer's materialized geometry. Unsorted or unsearchable X data safely keeps source-order full layout because sorting it would change connected-path semantics.
+Step and step-after series protect source adjacency around selected semantic anchors. Mandatory visible or crossing anchors are reserved before adjacency detail, while `maxPoints` remains a hard cap; when the cap cannot preserve every transition, detail degrades deterministically within that budget.
+
+`maxPoints` has family-specific meaning: line, area, and range area count selected defined source marks; scatter and bubble count selected marker candidates; stacked area counts shared timeline X keys for the group. Minimal invalid gap sentinels may appear internally to preserve disconnected-path topology, but they are not selected data marks. Raw pointer, brush, selection, and tooltip interaction may still resolve an unsampled source datum through the retained interaction provider. Unsorted or unsearchable X data safely keeps source-order full layout because sorting it would change connected-path semantics. Keyboard navigation intentionally remains bounded to the rendered sample.
 
 ---
 
@@ -595,7 +597,7 @@ await chart.downloadChart({
 ### Technical Considerations & Limitations
 
 - **Browser-only:** Export operations run entirely in the browser and require `document`, `fetch`, canvas, and image decoding support. Server-side invocation throws `ChartExportError("unsupported-environment")`.
-- **Snapshot Semantics:** Export captures a frozen semantic and visual snapshot synchronously at the `exportChart()` call boundary. After that boundary, live chart data, theme, and signal changes do not affect an in-flight export. Supported external resources referenced by the snapshot are then captured into export-owned embedded representations before rasterization begins.
+- **Snapshot Semantics:** Export captures a frozen semantic and visual snapshot synchronously at the `exportChart()` call boundary. After that boundary, live chart data, theme, and signal changes do not affect an in-flight export. Supported external resources referenced by the snapshot are then captured into export-owned embedded representations before rasterization begins. Export uses the committed scene; output dimensions and pixel ratio do not trigger a different semantic sample or a new density projection.
 - **Custom Templates & Transformed DOM:** Custom Angular template content (e.g. `monaChartLegendItemTemplate`, `monaChartCenterTemplate`) and complex CSS transformed DOM labels (e.g. rotated axis labels) are captured as isolated raster islands and embedded as data URIs within SVG and hybrid PDF artifacts.
 - **Resource Capture & CORS:** External template images (`<img>`, `input[type="image"]`, SVG `<image>`, CSS `background`/`background-image`/`border-image(-source)`/`list-style(-image)`) are fetched with bounded streaming reads, validated as decodable PNG/JPEG/WebP bytes, and rewritten to embedded data URLs before rasterization. Cross-origin images must be CORS-accessible. A response that is empty, non-image, oversized, or undecodable fails the export explicitly instead of silently producing missing content.
 - **True Decode Guarantee:** Every accepted raster payload passes a real browser image decode (`createImageBitmap`, or an event-driven object-URL `HTMLImageElement` decode when unavailable). Header/magic-byte checks are only a fast pre-gate; malformed JPEG/WebP/PNG bodies that carry plausible headers are still rejected. Environments without any image decoding capability fail explicitly.
@@ -638,4 +640,3 @@ Clipping applied by ancestors *outside* the captured template node is intentiona
 ### PDF Raster Fidelity
 
 Raster PDF output (both explicit `mode: "raster"` and automatic fallback) chooses its internal pixel density from the final PDF page occupancy, including paper-page fitting and upscaling, so enlarged pages do not blur a low-density bitmap. Outputs whose required pixel dimensions exceed browser allocation safety limits throw `ChartExportError("too-large")` instead of silently reducing fidelity.
-

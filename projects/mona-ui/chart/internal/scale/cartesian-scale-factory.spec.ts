@@ -83,11 +83,14 @@ describe("CartesianScaleFactory and Scale Adapters", () => {
     });
 
     describe("TimeScale and UtcScale", () => {
-        it("should map Date objects and timestamps linearly across time", () => {
-            const d1 = new Date(2025, 0, 1);
-            const d2 = new Date(2025, 0, 3);
-            const mid = new Date(2025, 0, 2);
-            const scale = new TimeScale([d1, d2], [0, 200]);
+        it.each([
+            ["local time", TimeScale],
+            ["UTC", UtcScale]
+        ] as const)("should map Date objects and timestamps linearly across %s", (_name, Scale) => {
+            const d1 = new Date("2025-01-01T00:00:00Z");
+            const d2 = new Date("2025-01-03T00:00:00Z");
+            const mid = new Date("2025-01-02T00:00:00Z");
+            const scale = new Scale([d1, d2], [0, 200]);
 
             expect(scale.map(d1)).toBeCloseTo(0, 2);
             expect(scale.map(mid)).toBeCloseTo(100, 2);
