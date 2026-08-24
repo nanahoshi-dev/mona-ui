@@ -9,6 +9,7 @@ import type {
 import { CartesianMinMaxBlockIndex, lowerBoundAscending, upperBoundAscending } from "./cartesian-minmax-block-index";
 import {
     createConnectedProtectedCandidateGroups,
+    reserveRequiredIndices,
     type ConnectedCandidate,
     type ConnectedProtectedCandidateGroup,
     type PrioritizedSourceCandidate
@@ -251,10 +252,12 @@ function selectCoverageAwareStackProtectedGroups(
     budget: number,
     members: readonly CartesianStackMemberDensityRuntime[],
     visibleStart: number,
-    visibleEnd: number
+    visibleEnd: number,
+    requiredAnchorIndices: readonly number[] = [],
+    sourceCount = Number.POSITIVE_INFINITY
 ): number[] {
     const target = Math.max(0, Math.floor(budget));
-    if (target === 0 || groups.length === 0) {
+    if (target === 0) {
         return [];
     }
 
@@ -287,7 +290,8 @@ function selectCoverageAwareStackProtectedGroups(
     }));
     const uncoveredMemberIds = new Set(visibleMemberIds);
     const selected = new Set<number>();
-    const selectedIndices: number[] = [];
+    reserveRequiredIndices(selected, requiredAnchorIndices, target, sourceCount);
+    const selectedIndices: number[] = Array.from(selected);
 
     const addGroup = (group: ConnectedProtectedCandidateGroup): boolean => {
         const missing = group.indices.filter(index => !selected.has(index));
@@ -300,6 +304,21 @@ function selectCoverageAwareStackProtectedGroups(
         }
         return true;
     };
+
+    // Reserve the actual visible endpoints before coverage/detail groups can
+    // consume the cap. Complete an endpoint's protected group only when its
+    // remaining members still fit; otherwise retain the endpoint itself.
+    const reservedAnchors = new Set(selected);
+    const requiredGroups = new Set(
+        records.filter(record => record.group.indices.some(index => reservedAnchors.has(index)))
+    );
+    for (const record of requiredGroups) {
+        if (addGroup(record.group)) {
+            for (const memberId of record.coveredMemberIds) {
+                uncoveredMemberIds.delete(memberId);
+            }
+        }
+    }
 
     while (selectedIndices.length < target && uncoveredMemberIds.size > 0) {
         let best: (typeof records)[number] | undefined;
@@ -335,7 +354,9 @@ function selectCoverageAwareStackProtectedGroups(
         }
     }
 
-    const remaining = records.slice().sort((a, b) => compareProtectedStackGroups(a.group, b.group));
+    const remaining = records
+        .filter(record => !requiredGroups.has(record))
+        .sort((a, b) => compareProtectedStackGroups(a.group, b.group));
     for (const record of remaining) {
         if (selectedIndices.length >= target) {
             break;
@@ -346,11 +367,17 @@ function selectCoverageAwareStackProtectedGroups(
     // A cap smaller than every protected step group still gets one
     // deterministic source point rather than an empty render sample.
     if (selectedIndices.length === 0 && remaining[0]) {
-        selected.add(remaining[0].group.anchorIndex);
-        selectedIndices.push(remaining[0].group.anchorIndex);
+        const anchorIndex =
+            Number.isInteger(remaining[0].group.anchorIndex) &&
+            remaining[0].group.anchorIndex >= 0 &&
+            remaining[0].group.anchorIndex < sourceCount
+                ? remaining[0].group.anchorIndex
+                : remaining[0].group.indices[0];
+        selected.add(anchorIndex);
+        selectedIndices.push(anchorIndex);
     }
 
-    return Array.from(new Set(selectedIndices)).sort((a, b) => a - b).slice(0, target);
+    return Array.from(new Set(selectedIndices)).sort((a, b) => a - b);
 }
 
 function compareProtectedStackGroups(
@@ -419,11 +446,13 @@ export function computeSharedStackProjection(input: ComputeSharedStackProjection
     const windowMin = inv0 !== null && inv1 !== null ? Math.min(inv0, inv1) : xCoords[0];
     const windowMax = inv0 !== null && inv1 !== null ? Math.max(inv0, inv1) : xCoords[totalPoints - 1];
 
-    let visStart = lowerBoundAscending(xCoords, 0, totalPoints, windowMin);
-    let visEnd = upperBoundAscending(xCoords, 0, totalPoints, windowMax);
+    const rawVisibleStart = lowerBoundAscending(xCoords, 0, totalPoints, windowMin);
+    const rawVisibleEnd = upperBoundAscending(xCoords, 0, totalPoints, windowMax);
     // Boundary continuity neighbors
-    visStart = Math.max(0, visStart - 1);
-    visEnd = Math.min(totalPoints, visEnd + 1);
+    const projectionStart = Math.max(0, rawVisibleStart - 1);
+    const projectionEnd = Math.min(totalPoints, rawVisibleEnd + 1);
+    const visStart = projectionStart;
+    const visEnd = projectionEnd;
     const visibleCount = Math.max(0, visEnd - visStart);
 
     const effectiveThreshold =
@@ -581,21 +610,39 @@ export function computeSharedStackProjection(input: ComputeSharedStackProjection
     if (visEnd === totalPoints) {
         addCandidate(totalPoints - 1, 1000);
     }
+    if (stepProtected && rawVisibleStart < rawVisibleEnd) {
+        addCandidate(rawVisibleStart, 1000);
+        addCandidate(rawVisibleEnd - 1, 1000);
+    }
 
     const memberList = members ? Array.from(members.values()) : [];
     let sortedIndices: number[];
     if (stepProtected) {
+        const requiredStackAnchorIndices =
+            rawVisibleStart < rawVisibleEnd
+                ? [rawVisibleStart, rawVisibleEnd - 1]
+                : projectionStart < projectionEnd
+                  ? [projectionStart, projectionEnd - 1]
+                  : [];
         const connectedCandidates: ConnectedCandidate[] = candidates.map(candidate => ({
             ...candidate,
             defined: true,
-            insideViewport: candidate.index >= visStart && candidate.index < visEnd,
+            insideViewport: candidate.index >= rawVisibleStart && candidate.index < rawVisibleEnd,
             reason: candidate.priority >= 1000 ? "visible-defined" : "visible-extremum"
         }));
         const groups = createConnectedProtectedCandidateGroups(connectedCandidates, {
             connectNulls: true,
             sourceCount: totalPoints
         });
-        sortedIndices = selectCoverageAwareStackProtectedGroups(groups, maxBudget, memberList, visStart, visEnd);
+        sortedIndices = selectCoverageAwareStackProtectedGroups(
+            groups,
+            maxBudget,
+            memberList,
+            rawVisibleStart,
+            rawVisibleEnd,
+            requiredStackAnchorIndices,
+            totalPoints
+        );
     } else {
         sortedIndices = selectCoverageAwareStackIndices(candidates, maxBudget, memberList, visStart, visEnd);
     }

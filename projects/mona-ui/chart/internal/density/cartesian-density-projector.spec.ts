@@ -214,6 +214,88 @@ describe("projectScalarIndexView", () => {
         expect(view.indices).toEqual([0, 1, 2, 3, 4, 5, 6]);
     });
 
+    it.each(["step", "step-after"] as const)("keeps scalar step endpoints across hard caps for %s", curve => {
+        const count = 10_000;
+        const scalar = buildScalar(Array.from({ length: count }, (_, i) => Math.floor(i / 250) % 4));
+        for (const maxPoints of [1, 2, 3, 4, 8]) {
+            const input = {
+                ...baseInput,
+                algorithm: "minmax" as const,
+                curve,
+                maxPoints,
+                scalar,
+                threshold: 0,
+                viewportScale: linearScale([0, count - 1], [0, 500])
+            };
+            const view = projectScalarIndexView(input);
+            const indices = view.indices!;
+
+            expect(view.algorithm).toBe("step");
+            expect(indices.length).toBeLessThanOrEqual(maxPoints);
+            if (maxPoints === 1) {
+                expect(indices).toEqual([0]);
+            } else {
+                expect(indices).toEqual(expect.arrayContaining([0, count - 1]));
+            }
+        }
+    });
+
+    it("uses actual visible endpoints for a zoomed scalar step viewport", () => {
+        const count = 10_000;
+        const scalar = buildScalar(Array.from({ length: count }, (_, i) => Math.floor(i / 250) % 4));
+        const view = projectScalarIndexView({
+            ...baseInput,
+            algorithm: "minmax",
+            curve: "step-after",
+            maxPoints: 2,
+            scalar,
+            threshold: 0,
+            viewportScale: linearScale([4_000, 6_000], [0, 500])
+        });
+
+        expect(view.indices).toEqual([4_000, 6_000]);
+    });
+
+    it("preserves a crossing-only step pair at a two-point cap", () => {
+        const scalar = buildScalar([0, 10]);
+        const view = projectScalarIndexView({
+            ...baseInput,
+            curve: "step-after",
+            maxPoints: 2,
+            scalar,
+            threshold: 0,
+            viewportScale: linearScale([0.25, 0.75], [0, 500])
+        });
+
+        expect(view.indices).toEqual([0, 1]);
+    });
+
+    it("preserves connectNulls brackets without inventing a false gap bridge", () => {
+        const scalar = buildScalar([1, null, null, 2]);
+        const connected = projectScalarIndexView({
+            ...baseInput,
+            connectNulls: true,
+            curve: "step",
+            maxPoints: 2,
+            scalar,
+            threshold: 0,
+            viewportScale: linearScale([1.25, 1.75], [0, 500])
+        });
+        const segmented = projectScalarIndexView({
+            ...baseInput,
+            connectNulls: false,
+            curve: "step-after",
+            maxPoints: 2,
+            scalar,
+            threshold: 0,
+            viewportScale: linearScale([1.25, 1.75], [0, 500])
+        });
+
+        expect(connected.indices).toEqual([0, 3]);
+        expect(segmented.indices).toBeNull();
+        expect(segmented.view).toEqual({ endIndexExclusive: 2, kind: "range", startIndex: 2 });
+    });
+
     it("keeps step groups inside defined segments and within a hard cap", () => {
         const scalar = buildScalar([0, 0, null, 10, 10, 0, 0]);
         const view = projectScalarIndexView({
@@ -286,6 +368,54 @@ describe("projectRangeEnvelopeIndexView", () => {
         expect(view.indices!.length).toBeLessThanOrEqual(7);
         expect(view.indices).toEqual(expect.arrayContaining([1, 2, 3, 4]));
     });
+
+    it.each(["step", "step-after"] as const)("keeps range step endpoints across hard caps for %s", curve => {
+        const count = 10_000;
+        const x = Float64Array.from({ length: count }, (_, i) => i);
+        const from = Float64Array.from({ length: count }, (_, i) => Math.floor(i / 250) % 4);
+        const to = Float64Array.from({ length: count }, (_, i) => from[i] + 2);
+
+        for (const maxPoints of [1, 2, 3, 4, 8]) {
+            const view = projectRangeEnvelopeIndexView({
+                ...baseInput,
+                curve,
+                fromY: from,
+                maxPoints,
+                threshold: 0,
+                toY: to,
+                viewportScale: linearScale([0, count - 1], [0, 500]),
+                x
+            });
+            const indices = view.indices!;
+
+            expect(view.algorithm).toBe("step-range-envelope");
+            expect(indices.length).toBeLessThanOrEqual(maxPoints);
+            if (maxPoints === 1) {
+                expect(indices).toEqual([0]);
+            } else {
+                expect(indices).toEqual(expect.arrayContaining([0, count - 1]));
+            }
+        }
+    });
+
+    it("uses actual visible endpoints for a zoomed range step viewport", () => {
+        const count = 10_000;
+        const x = Float64Array.from({ length: count }, (_, i) => i);
+        const from = Float64Array.from({ length: count }, (_, i) => Math.floor(i / 250) % 4);
+        const to = Float64Array.from({ length: count }, (_, i) => from[i] + 2);
+        const view = projectRangeEnvelopeIndexView({
+            ...baseInput,
+            curve: "step",
+            fromY: from,
+            maxPoints: 2,
+            threshold: 0,
+            toY: to,
+            viewportScale: linearScale([4_000, 6_000], [0, 500]),
+            x
+        });
+
+        expect(view.indices).toEqual([4_000, 6_000]);
+    });
 });
 
 describe("selectConnectedProtectedCandidatesUnderBudget", () => {
@@ -334,5 +464,64 @@ describe("selectConnectedProtectedCandidatesUnderBudget", () => {
 
     it("degrades to one deterministic anchor when no protected group fits", () => {
         expect(selectConnectedProtectedCandidatesUnderBudget(groups, 1)).toEqual([2]);
+    });
+
+    it("reserves distinct mandatory endpoints before completing protected groups", () => {
+        const endpointGroups: readonly ConnectedProtectedCandidateGroup[] = [
+            {
+                anchorIndex: 0,
+                indices: [0, 1],
+                order: 0,
+                priority: 1000,
+                reason: "visible-boundary"
+            },
+            {
+                anchorIndex: 99,
+                indices: [98, 99],
+                order: 1,
+                priority: 1000,
+                reason: "visible-boundary"
+            }
+        ];
+
+        expect(selectConnectedProtectedCandidatesUnderBudget(endpointGroups, 1, [0, 99])).toEqual([0]);
+        expect(selectConnectedProtectedCandidatesUnderBudget(endpointGroups, 2, [0, 99])).toEqual([0, 99]);
+        expect(selectConnectedProtectedCandidatesUnderBudget(endpointGroups, 3, [0, 99])).toEqual([0, 1, 99]);
+        expect(selectConnectedProtectedCandidatesUnderBudget(endpointGroups, 4, [0, 99])).toEqual([0, 1, 98, 99]);
+    });
+
+    it("reserves overlapping mandatory endpoints without counting shared indices twice", () => {
+        const overlapping: readonly ConnectedProtectedCandidateGroup[] = [
+            {
+                anchorIndex: 10,
+                indices: [10, 11],
+                order: 0,
+                priority: 1000,
+                reason: "visible-boundary"
+            },
+            {
+                anchorIndex: 12,
+                indices: [11, 12],
+                order: 1,
+                priority: 1000,
+                reason: "visible-boundary"
+            }
+        ];
+
+        expect(selectConnectedProtectedCandidatesUnderBudget(overlapping, 2, [10, 12])).toEqual([10, 12]);
+    });
+
+    it("ignores invalid group and required-anchor indices", () => {
+        const invalid: readonly ConnectedProtectedCandidateGroup[] = [
+            {
+                anchorIndex: 20,
+                indices: [-1, 20],
+                order: 0,
+                priority: 1000,
+                reason: "visible-boundary"
+            }
+        ];
+
+        expect(selectConnectedProtectedCandidatesUnderBudget(invalid, 2, [1, 20], 10)).toEqual([1]);
     });
 });

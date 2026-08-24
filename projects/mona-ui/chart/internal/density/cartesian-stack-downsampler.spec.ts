@@ -121,6 +121,57 @@ describe("computeSharedStackSampleIndices", () => {
         expect(projection.view.kind === "keys" ? projection.view.keys.has(count - 1) : false).toBe(true);
     });
 
+    it.each([1, 2, 3, 4, 8])("reserves shared visible endpoints at maxPoints=%i", maxPoints => {
+        const count = 20_000;
+        const entries = new Map<string, readonly CartesianStackEntry[]>([
+            ["a", makeEntries("a", count, i => Math.floor(i / 250) % 4)],
+            ["b", makeEntries("b", count, i => 1)]
+        ]);
+        const projection = computeSharedStackProjection({
+            entriesBySeriesId: entries,
+            maxPoints,
+            plotSpanPx: 500,
+            samplesPerPixel: 1,
+            stepProtected: true,
+            threshold: 0,
+            viewportScale: scale
+        });
+
+        expect(projection.view.kind).toBe("keys");
+        expect(projection.renderedCount).toBeLessThanOrEqual(maxPoints);
+        if (maxPoints === 1 && projection.view.kind === "keys") {
+            expect(projection.view.orderedKeys).toEqual([0]);
+        } else if (projection.view.kind === "keys") {
+            expect(projection.view.keys.has(0)).toBe(true);
+            expect(projection.view.keys.has(count - 1)).toBe(true);
+        }
+    });
+
+    it("reserves endpoints from the raw visible stack interval after continuity expansion", () => {
+        const count = 20_000;
+        const entries = new Map<string, readonly CartesianStackEntry[]>([
+            ["a", makeEntries("a", count, i => Math.floor(i / 250) % 4)],
+            ["b", makeEntries("b", count, i => 1)]
+        ]);
+        const zoomedScale = CartesianScaleFactory.createExactPositionScale({
+            domain: [5_000, 15_000],
+            range: [0, 500],
+            type: "linear"
+        }) as never;
+        const projection = computeSharedStackProjection({
+            entriesBySeriesId: entries,
+            maxPoints: 2,
+            plotSpanPx: 500,
+            samplesPerPixel: 1,
+            stepProtected: true,
+            threshold: 0,
+            viewportScale: zoomedScale
+        });
+
+        expect(projection.view.kind).toBe("keys");
+        expect(projection.view.kind === "keys" ? projection.view.orderedKeys : []).toEqual([5_000, 15_000]);
+    });
+
     it("accumulates totals from full layers before selection (never sampled-only)", () => {
         const count = 25_000;
         // Two layers each with modest values; combined positive peak at index k

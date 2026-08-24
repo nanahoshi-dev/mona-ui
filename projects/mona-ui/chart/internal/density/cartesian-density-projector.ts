@@ -226,24 +226,33 @@ export function createConnectedProtectedCandidateGroups(
 export function selectConnectedProtectedCandidatesUnderBudget(
     groups: readonly ConnectedProtectedCandidateGroup[],
     budget: number,
-    requiredAnchorIndices: readonly number[] = []
+    requiredAnchorIndices: readonly number[] = [],
+    sourceCount = Number.POSITIVE_INFINITY
 ): number[] {
     const target = Math.max(0, Math.floor(budget));
-    if (target === 0 || groups.length === 0) {
+    if (target === 0) {
         return [];
     }
 
     const normalized = groups
         .map(group => ({
             ...group,
-            indices: Array.from(new Set(group.indices.filter(index => Number.isInteger(index) && index >= 0))).sort(
-                (a, b) => a - b
-            )
+            indices: Array.from(
+                new Set(
+                    group.indices.filter(
+                        index => Number.isInteger(index) && index >= 0 && index < sourceCount
+                    )
+                )
+            ).sort((a, b) => a - b)
         }))
         .filter(group => group.indices.length > 0)
         .sort(compareProtectedGroups);
     const selected = new Set<number>();
-    const required = new Set(requiredAnchorIndices.filter(index => Number.isInteger(index) && index >= 0));
+    reserveRequiredIndices(selected, requiredAnchorIndices, target, sourceCount);
+    const reservedAnchors = new Set(selected);
+    if (normalized.length === 0) {
+        return Array.from(selected).sort((a, b) => a - b);
+    }
 
     const addGroup = (group: ConnectedProtectedCandidateGroup): boolean => {
         const missing = group.indices.filter(index => !selected.has(index));
@@ -256,16 +265,20 @@ export function selectConnectedProtectedCandidatesUnderBudget(
         return true;
     };
 
-    for (const group of normalized.filter(group => group.indices.some(index => required.has(index)))) {
-        if (!addGroup(group) && selected.size < target) {
-            const fallback = group.indices.find(index => required.has(index) && !selected.has(index));
-            if (fallback !== undefined) {
-                selected.add(fallback);
-            }
-        }
+    // Complete groups around anchors that were already reserved. A group that
+    // does not fit is intentionally skipped; its mandatory anchor remains
+    // selected without allowing a neighbor to evict another anchor.
+    const requiredGroups = new Set(
+        normalized.filter(group => group.indices.some(index => reservedAnchors.has(index)))
+    );
+    for (const group of requiredGroups) {
+        addGroup(group);
     }
 
     for (const group of normalized) {
+        if (requiredGroups.has(group)) {
+            continue;
+        }
         if (selected.size >= target) {
             break;
         }
@@ -275,10 +288,45 @@ export function selectConnectedProtectedCandidatesUnderBudget(
     // If no group can fit at all (for example maxPoints = 1), keep one
     // deterministic anchor rather than returning an empty render sample.
     if (selected.size === 0 && normalized[0]) {
-        selected.add(normalized[0].anchorIndex);
+        const anchorIndex =
+            Number.isInteger(normalized[0].anchorIndex) &&
+            normalized[0].anchorIndex >= 0 &&
+            normalized[0].anchorIndex < sourceCount
+                ? normalized[0].anchorIndex
+                : normalized[0].indices[0];
+        selected.add(anchorIndex);
     }
 
-    return Array.from(selected).sort((a, b) => a - b).slice(0, target);
+    return Array.from(selected).sort((a, b) => a - b);
+}
+
+/**
+ * Reserves mandatory semantic anchors in the caller-provided policy order.
+ * This helper is intentionally independent of candidate grouping so required
+ * endpoints cannot be displaced by protected neighbor detail.
+ */
+export function reserveRequiredIndices(
+    selected: Set<number>,
+    requiredAnchorIndices: readonly number[],
+    budget: number,
+    sourceCount = Number.POSITIVE_INFINITY
+): void {
+    const target = Math.max(0, Math.floor(budget));
+    if (target === 0) {
+        return;
+    }
+
+    for (const index of requiredAnchorIndices) {
+        if (
+            selected.size >= target ||
+            !Number.isInteger(index) ||
+            index < 0 ||
+            index >= sourceCount
+        ) {
+            continue;
+        }
+        selected.add(index);
+    }
 }
 
 function inferConnectedCandidateRoles(candidate: ConnectedCandidate): readonly ConnectedCandidateRole[] {
@@ -458,6 +506,45 @@ export interface ExactConnectedProjectionPlan {
     readonly needsIndicesView: boolean;
     readonly visEnd: number;
     readonly visStart: number;
+}
+
+function resolveProtectedRequiredAnchorIndices(
+    candidates: readonly ConnectedCandidate[],
+    exactPlan: ExactConnectedProjectionPlan | undefined,
+    sourceCount: number
+): number[] {
+    const visibleAnchors = Array.from(
+        new Set(
+            [
+                candidates.find(
+                    candidate =>
+                        candidate.defined === true &&
+                        candidate.insideViewport !== false &&
+                        inferConnectedCandidateRoles(candidate).includes("visible-first")
+                )?.index,
+                candidates.find(
+                    candidate =>
+                        candidate.defined === true &&
+                        candidate.insideViewport !== false &&
+                        inferConnectedCandidateRoles(candidate).includes("visible-last")
+                )?.index
+            ].filter((index): index is number => index !== undefined)
+        )
+    ).filter(index => index >= 0 && index < sourceCount);
+    if (visibleAnchors.length > 0) {
+        return visibleAnchors;
+    }
+
+    return Array.from(
+        new Set(
+            [
+                exactPlan?.clipLeft,
+                exactPlan?.clipRight,
+                exactPlan?.connectBracketLeft,
+                exactPlan?.connectBracketRight
+            ].filter((index): index is number => index !== null && index !== undefined)
+        )
+    ).filter(index => index >= 0 && index < sourceCount);
 }
 
 export function planExactConnectedProjection(options: {
@@ -1351,6 +1438,31 @@ export function projectRangeEnvelopeIndexView(input: {
             roles: isEndDefined ? ["visible-last"] : undefined,
             segmentId: input.range ? input.range.segmentIds[visEnd - 1] : undefined
         });
+        if (input.range) {
+            const visible = input.range.extremaIndex.queryRange(visStart, visEnd);
+            if (visible.firstValidIndex >= 0) {
+                addCandidate({
+                    defined: true,
+                    index: visible.firstValidIndex,
+                    insideViewport: true,
+                    priority: 1000,
+                    reason: "visible-defined",
+                    roles: ["visible-first"],
+                    segmentId: input.range.segmentIds[visible.firstValidIndex]
+                });
+                if (visible.lastValidIndex !== visible.firstValidIndex) {
+                    addCandidate({
+                        defined: true,
+                        index: visible.lastValidIndex,
+                        insideViewport: true,
+                        priority: 1000,
+                        reason: "visible-defined",
+                        roles: ["visible-last"],
+                        segmentId: input.range.segmentIds[visible.lastValidIndex]
+                    });
+                }
+            }
+        }
     }
 
     const exactPlan = decisionPlan;
@@ -1403,7 +1515,7 @@ export function projectRangeEnvelopeIndexView(input: {
 
     const autoBudget = Math.max(512, Math.floor(input.plotSpanPx * Math.max(1, input.samplesPerPixel) * 4));
     const effectiveCap = input.maxPoints ?? autoBudget;
-    const requiredAnchorIndices = [
+    const ordinaryRequiredAnchorIndices = [
         ...(exactPlan
             ? [exactPlan.clipLeft, exactPlan.clipRight, exactPlan.connectBracketLeft, exactPlan.connectBracketRight]
             : []),
@@ -1414,6 +1526,9 @@ export function projectRangeEnvelopeIndexView(input: {
             })
             .map(candidate => candidate.index)
     ].filter((index): index is number => index !== null && index !== undefined);
+    const requiredAnchorIndices = stepProtected
+        ? resolveProtectedRequiredAnchorIndices(candidates, exactPlan, sourceCount)
+        : ordinaryRequiredAnchorIndices;
     const indices = stepProtected
         ? selectConnectedProtectedCandidatesUnderBudget(
               createConnectedProtectedCandidateGroups(candidates, {
@@ -1423,7 +1538,8 @@ export function projectRangeEnvelopeIndexView(input: {
                   sourceCount
               }),
               Math.max(1, effectiveCap),
-              requiredAnchorIndices
+              requiredAnchorIndices,
+              sourceCount
           )
         : input.range
           ? selectConnectedCandidatesUnderBudget(candidates, Math.max(1, effectiveCap), {
@@ -1584,7 +1700,7 @@ function buildMinMaxIndices(
 
     const autoBudget = Math.max(512, Math.floor(plotSpanPx * Math.max(1, samplesPerPixel) * 4));
     const effectiveCap = maxPoints !== null && maxPoints !== undefined ? maxPoints : autoBudget;
-    const requiredAnchorIndices = [
+    const ordinaryRequiredAnchorIndices = [
         ...(exactPlan
             ? [exactPlan.clipLeft, exactPlan.clipRight, exactPlan.connectBracketLeft, exactPlan.connectBracketRight]
             : []),
@@ -1595,6 +1711,9 @@ function buildMinMaxIndices(
             })
             .map(candidate => candidate.index)
     ].filter((index): index is number => index !== null && index !== undefined);
+    const requiredAnchorIndices = stepProtected
+        ? resolveProtectedRequiredAnchorIndices(candidates, exactPlan, scalar.sourceData.length)
+        : ordinaryRequiredAnchorIndices;
     if (stepProtected) {
         const groups = createConnectedProtectedCandidateGroups(candidates, {
             connectNulls,
@@ -1602,7 +1721,12 @@ function buildMinMaxIndices(
             segments: scalar.segments,
             sourceCount: scalar.sourceData.length
         });
-        return selectConnectedProtectedCandidatesUnderBudget(groups, Math.max(1, effectiveCap), requiredAnchorIndices);
+        return selectConnectedProtectedCandidatesUnderBudget(
+            groups,
+            Math.max(1, effectiveCap),
+            requiredAnchorIndices,
+            scalar.sourceData.length
+        );
     }
 
     return selectConnectedCandidatesUnderBudget(candidates, Math.max(1, effectiveCap), {
