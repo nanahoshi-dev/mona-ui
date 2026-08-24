@@ -25,10 +25,13 @@ import {
 } from "./cartesian-stack-density-runtime";
 import { buildDensityRuntime } from "./cartesian-density-runtime";
 import { resolveCartesianMarkerGeometry } from "../layout/cartesian-marker-geometry-resolver";
+import type { CartesianDomainPreparation } from "../layout/cartesian-multi-axis-coordinator";
+import type { CartesianAxisResolvedContext } from "../layout/cartesian-axis-resolved-context";
 import { LinearScale, TimeScale } from "../scale/cartesian-scale-factory";
 import type { CartesianStackEntry, CartesianStackGroup } from "../data/cartesian-stack-engine";
-import type { ChartScatterSeriesRegistration } from "../context/chart-registration-context";
+import type { ChartAreaSeriesRegistration, ChartCartesianSeriesRegistration, ChartScatterSeriesRegistration } from "../context/chart-registration-context";
 import { resolveInteractionGeometryDistance } from "../interaction/cartesian-interaction-geometry-index";
+import { ChartStyleResolver } from "../style/chart-style-resolver";
 
 describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
     describe("Canonical Stack X Coordinate Resolution", () => {
@@ -113,10 +116,10 @@ describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
         it("combines member thresholds using Math.max so reduction triggers only when all member threshold conditions are met", () => {
             const seriesA = {
                 downsampling: () => ({ enabled: true, threshold: 2000 })
-            } as any;
+            } as unknown as ChartCartesianSeriesRegistration;
             const seriesB = {
                 downsampling: () => ({ enabled: true, threshold: 5000 })
-            } as any;
+            } as unknown as ChartCartesianSeriesRegistration;
 
             const merged = resolveStackGroupPolicy(
                 { algorithm: "minmax", enabled: true, maxPoints: null, samplesPerPixel: 2, threshold: null },
@@ -231,9 +234,9 @@ describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
             };
 
             const runtime = buildDensityRuntime(
-                series as any,
-                preparation as any,
-                resolvedContext as any,
+                series as unknown as ChartCartesianSeriesRegistration[],
+                preparation as unknown as CartesianDomainPreparation,
+                resolvedContext as unknown as CartesianAxisResolvedContext,
                 data,
                 "x",
                 { algorithm: "minmax", enabled: true, maxPoints: null, samplesPerPixel: 2, threshold: null },
@@ -253,13 +256,13 @@ describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
                     bubbleMinRadius: 6,
                     pointRadius: 8
                 })
-            } as any;
+            } as unknown as ChartStyleResolver;
 
             const scatterSeries: ChartScatterSeriesRegistration = {
                 id: "sc1",
                 pointRadius: () => undefined,
                 type: "scatter"
-            } as any;
+            } as unknown as ChartScatterSeriesRegistration;
 
             const geom = resolveCartesianMarkerGeometry({
                 series: scatterSeries,
@@ -447,7 +450,7 @@ describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
                 showPoints: () => false,
                 type: "area",
                 valueFormatter: () => undefined
-            } as any;
+            } as unknown as ChartAreaSeriesRegistration;
 
             const hit = materializeStackedAreaHitTarget({
                 baseY: 200,
@@ -495,7 +498,7 @@ describe("Cartesian Density Stack Geometry and Marker Halo Regressions", () => {
                 pointRadius: () => 4,
                 showPoints: () => true,
                 type: "area"
-            } as any;
+            } as unknown as ChartAreaSeriesRegistration;
 
             const target = materializeStackedAreaHitTarget({
                 baseY: 250,

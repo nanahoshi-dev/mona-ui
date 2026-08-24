@@ -210,8 +210,8 @@ describe("Chart Export Integration Coverage", () => {
             toJSON: () => ({})
         } as DOMRect);
 
-        if (!(SVGElement.prototype as any).getBBox) {
-            (SVGElement.prototype as any).getBBox = function () {
+        if (!(SVGElement.prototype as unknown as { getBBox?: () => DOMRect }).getBBox) {
+            (SVGElement.prototype as unknown as { getBBox?: () => DOMRect }).getBBox = function () {
                 return {
                     bottom: 16,
                     height: 16,
@@ -225,8 +225,8 @@ describe("Chart Export Integration Coverage", () => {
                 } as DOMRect;
             };
         }
-        if (typeof SVGGraphicsElement !== "undefined" && !(SVGGraphicsElement.prototype as any).getBBox) {
-            (SVGGraphicsElement.prototype as any).getBBox = (SVGElement.prototype as any).getBBox;
+        if (typeof SVGGraphicsElement !== "undefined" && !(SVGGraphicsElement.prototype as unknown as { getBBox?: () => DOMRect }).getBBox) {
+            (SVGGraphicsElement.prototype as unknown as { getBBox?: () => DOMRect }).getBBox = (SVGElement.prototype as unknown as { getBBox?: () => DOMRect }).getBBox;
         }
 
         HTMLCanvasElement.prototype.getContext = function (type: string) {
@@ -263,10 +263,10 @@ describe("Chart Export Integration Coverage", () => {
                     strokeText: () => {},
                     transform: () => {},
                     translate: () => {}
-                } as any;
+                } as unknown as CanvasRenderingContext2D;
             }
             return null;
-        } as any;
+        } as typeof HTMLCanvasElement.prototype.getContext;
 
         HTMLCanvasElement.prototype.toBlob = function (callback: (blob: Blob | null) => void) {
             callback(new Blob([VALID_1X1_PNG_BYTES], { type: "image/png" }));
@@ -282,18 +282,18 @@ describe("Chart Export Integration Coverage", () => {
                 setTimeout(() => this.onload?.(new Event("load")), 0);
             }
 
-            public onerror: ((ev: any) => void) | null = null;
+            public onerror: ((ev: Event) => void) | null = null;
             public onload: ((ev: Event) => void) | null = null;
         }
 
-        (window as any).Image = MockImage;
+        (window as unknown as { Image: unknown }).Image = MockImage;
     });
 
     afterEach(() => {
         HTMLCanvasElement.prototype.getContext = originalGetContext;
         HTMLCanvasElement.prototype.toBlob = originalToBlob;
         HTMLCanvasElement.prototype.toDataURL = originalToDataURL;
-        (window as any).Image = originalImage;
+        (window as unknown as { Image: unknown }).Image = originalImage;
         setPdfExportInstrumentation(null);
     });
 

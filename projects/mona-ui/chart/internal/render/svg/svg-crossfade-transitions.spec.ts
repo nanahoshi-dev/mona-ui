@@ -6,9 +6,12 @@ import type {
     PolarSectorChartScene,
     TreemapChartScene
 } from "../../scene/chart-scene";
+import type { ChartAxisScene, ChartSeriesScene } from "../../scene/cartesian-scene";
+import type { ChartSectorSeriesScene } from "../../scene/polar-scene";
 import type { PolarArcChartScene } from "../../scene/polar-arc-scene";
 import type { ChartSeriesStyle } from "../../../models/chart-style.models";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
+import type { SceneHitTarget } from "../../scene/scene-geometry";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
 import { SvgChartRenderBackend } from "../svg-chart-render-backend";
 import { SvgDefinitionRegistry } from "./svg-definition-registry";
@@ -45,7 +48,7 @@ function createMockCartesianXYScene(partial: Partial<CartesianXYChartScene> = {}
                 title: "",
                 type: "category",
                 visible: true
-            } as any,
+            } as unknown as ChartAxisScene,
             {
                 axisLine: true,
                 gridLines: true,
@@ -56,7 +59,7 @@ function createMockCartesianXYScene(partial: Partial<CartesianXYChartScene> = {}
                 title: "",
                 type: "value",
                 visible: true
-            } as any
+            } as unknown as ChartAxisScene
         ],
         cartesianKind: "xy",
         coordinateSystem: "cartesian",
@@ -128,7 +131,7 @@ function createMockSectorScene(partial: Partial<PolarSectorChartScene> = {}): Po
                 style: { fillOpacity: 1, strokeColor: "none", strokeSource: "default", strokeWidth: 0 },
                 total: 10,
                 type: "pie"
-            } as any
+            } as unknown as ChartSectorSeriesScene
         ],
         width: 300,
         ...partial
@@ -412,7 +415,7 @@ describe("SVG Crossfade Transitions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 
@@ -430,7 +433,7 @@ describe("SVG Crossfade Transitions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 
@@ -495,7 +498,7 @@ describe("SVG Crossfade Transitions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 
@@ -564,7 +567,7 @@ describe("SVG Crossfade Transitions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 
@@ -583,7 +586,7 @@ describe("SVG Crossfade Transitions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 
@@ -692,7 +695,7 @@ describe("SVG Crossfade Transitions", () => {
                     seriesType: "pie",
                     xKey: 0,
                     xValue: 0
-                } as any,
+                } as unknown as SceneHitTarget,
                 activeHits: [],
                 pointerPosition: { x: 100, y: 100 },
                 source: "pointer"
@@ -739,7 +742,7 @@ describe("SVG Crossfade Transitions", () => {
             const backend = new SvgChartRenderBackend(svg, 1);
             const styleResolver = createMockStyleResolver();
 
-            const sceneA = createMockCartesianXYScene({ id: "sceneA" } as any);
+            const sceneA = createMockCartesianXYScene();
             const sceneB = createMockSectorScene();
             const sceneC = createMockHeatmapScene();
 
