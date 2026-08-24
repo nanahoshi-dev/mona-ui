@@ -7,16 +7,16 @@ import type {
 import type { ChartAxisRegistrationBase } from "../context/chart-registration-context";
 import type { ChartAxisScene, ChartAxisSceneTick } from "../scene/cartesian-scene";
 import { formatXValue } from "../utils/chart-formatter";
-import { clamp ,normalizeNonNegativeNumber, normalizePositiveNumber, normalizeTickCount } from "../utils/number-utils";
+import { clamp, normalizeNonNegativeNumber, normalizePositiveNumber, normalizeTickCount } from "../utils/number-utils";
 import { CartesianAxisLabelGeometry } from "./cartesian-axis-label-geometry";
 
 export interface CartesianScaleLike {
     readonly bandwidth?: () => number;
     readonly domain: () => readonly unknown[];
-    readonly map?: (value: any) => number | undefined;
-    readonly scale?: (value: any) => number;
+    map?(value: unknown): number | undefined;
+    scale?(value: unknown): number;
     readonly step?: () => number;
-    readonly ticks?: (count?: number) => readonly any[];
+    ticks?(count?: number): readonly unknown[];
 }
 
 export interface CartesianAxisLayoutOptions {
@@ -24,7 +24,7 @@ export interface CartesianAxisLayoutOptions {
     readonly axisType: ChartXAxisType | ChartYAxisType;
     readonly containerSize: number;
     readonly defaultGridLines: boolean;
-    readonly effectiveFormatter?: ChartAxisFormatter<any>;
+    readonly effectiveFormatter?: ChartAxisFormatter<unknown>;
     readonly measurements?: ReadonlyMap<string, { height: number; width: number }>;
     readonly plotGutterConstraint: number;
     readonly position: ChartAxisPosition;

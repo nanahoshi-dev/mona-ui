@@ -38,7 +38,7 @@ export class ChartPdfExporter {
             );
         }
 
-        let jsPdfModule: any;
+        let jsPdfModule: Record<string, unknown>;
         try {
             jsPdfModule = await import("jspdf");
         } catch (err) {
@@ -53,7 +53,7 @@ export class ChartPdfExporter {
             throw new DOMException("Export was aborted", "AbortError");
         }
 
-        const jsPDF = jsPdfModule.jsPDF ?? jsPdfModule.default ?? jsPdfModule;
+        const jsPDF = (jsPdfModule["jsPDF"] ?? jsPdfModule["default"] ?? jsPdfModule) as new (options: { format: readonly [number, number]; orientation: string; unit: string }) => import("jspdf").jsPDF;
         const layout = resolvePdfLayout(request);
 
         const capability = ChartPdfCapabilityAnalyzer.analyze(finalizedSvg.svgElement);
@@ -68,7 +68,7 @@ export class ChartPdfExporter {
         const useVector = (request.pdfMode === "auto" && capability.isVectorSafe) || request.pdfMode === "vector";
 
         if (useVector) {
-            let svg2pdfModule: any;
+            let svg2pdfModule: Record<string, unknown> | undefined;
             try {
                 svg2pdfModule = await import("svg2pdf.js");
             } catch (err) {
@@ -86,7 +86,7 @@ export class ChartPdfExporter {
                 throw new DOMException("Export was aborted", "AbortError");
             }
 
-            const svg2pdfFn = svg2pdfModule?.svg2pdf ?? svg2pdfModule?.default ?? svg2pdfModule;
+            const svg2pdfFn = (svg2pdfModule?.["svg2pdf"] ?? svg2pdfModule?.["default"] ?? svg2pdfModule) as ((element: SVGElement, doc: unknown, options: Record<string, number>) => Promise<void>) | undefined;
 
             if (svg2pdfFn) {
                 if (request.signal?.aborted) {
@@ -123,14 +123,14 @@ export class ChartPdfExporter {
                         mimeType: "application/pdf",
                         width: request.width
                     };
-                } catch (err: any) {
-                    if (err?.name === "AbortError") {
+                } catch (err: unknown) {
+                    if (err instanceof Error && err.name === "AbortError") {
                         throw err;
                     }
                     if (request.pdfMode === "vector") {
                         throw new ChartExportError(
                             "pdf-vector-unsupported",
-                            `Vector PDF conversion failed: ${err?.message ?? err}`,
+                            `Vector PDF conversion failed: ${err instanceof Error ? err.message : err}`,
                             { cause: err }
                         );
                     }
@@ -241,13 +241,13 @@ export class ChartPdfExporter {
                 mimeType: "application/pdf",
                 width: request.width
             };
-        } catch (err: any) {
-            if (err?.name === "AbortError" || err instanceof ChartExportError) {
+        } catch (err: unknown) {
+            if ((err instanceof Error && err.name === "AbortError") || err instanceof ChartExportError) {
                 throw err;
             }
             throw new ChartExportError(
                 "pdf-generation-failed",
-                `Failed to generate raster PDF: ${err?.message ?? err}`,
+                `Failed to generate raster PDF: ${err instanceof Error ? err.message : err}`,
                 { cause: err }
             );
         }

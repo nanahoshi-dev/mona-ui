@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
 import type { CartesianHeatmapChartScene, CartesianXYChartScene } from "../../scene/chart-scene";
 import type { SceneHitTarget } from "../../scene/scene-geometry";
+import type { ChartBrushRegistration } from "../../context/chart-registration-context";
+import type { CartesianDataLabelScene } from "../../scene/cartesian-data-label-scene";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
 import { SvgChartRenderBackend } from "../svg-chart-render-backend";
 import { resolveBrushDashArray, resolveStrokeDashArray } from "./svg-attribute-utils";
@@ -74,7 +76,7 @@ describe("SVG Style Parity", () => {
                 seriesId: "heat-1",
                 xIndex: 0,
                 yIndex: 0
-            } as any),
+            } as unknown as Partial<SceneHitTarget>),
             source: "keyboard"
         });
 
@@ -167,7 +169,7 @@ describe("SVG Style Parity", () => {
                     seriesId: "heat-1",
                     xIndex: 0,
                     yIndex: 0
-                } as any),
+                } as unknown as Partial<SceneHitTarget>),
                 pointerPosition: { x: 45, y: 45 },
                 source: "pointer"
             });
@@ -226,7 +228,7 @@ describe("SVG Style Parity", () => {
                         fillColor: () => "rgba(59, 130, 246, 0.1)",
                         fillOpacity: () => 0.1,
                         lineStyle: () => "dashed"
-                    } as any,
+                    } as unknown as ChartBrushRegistration,
                     cartesianOverlay: null,
                     interaction: null
                 },
@@ -278,7 +280,7 @@ describe("SVG Style Parity", () => {
                             visible: true
                         }
                     ]
-                } as any,
+                } as unknown as CartesianDataLabelScene,
                 cartesianOverlay: null,
                 interaction: null
             });

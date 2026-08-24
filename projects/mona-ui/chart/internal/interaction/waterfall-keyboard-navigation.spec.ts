@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { WaterfallKeyboardNavigation } from "./waterfall-keyboard-navigation";
-import type { CartesianWaterfallChartScene } from "../scene/waterfall-scene";
+import type { CartesianWaterfallChartScene, ChartWaterfallSeriesStyle, SceneWaterfallBar } from "../scene/waterfall-scene";
 import { WaterfallHitIndex } from "./waterfall-hit-index";
 
 describe("WaterfallKeyboardNavigation", () => {
@@ -26,9 +26,9 @@ describe("WaterfallKeyboardNavigation", () => {
             sequenceSignature: "sig",
             series: [{
                 bars: [
-                    { animationKey: "w:0" } as any,
-                    { animationKey: "w:1" } as any,
-                    { animationKey: "w:2" } as any
+                    { animationKey: "w:0" } as unknown as SceneWaterfallBar,
+                    { animationKey: "w:1" } as unknown as SceneWaterfallBar,
+                    { animationKey: "w:2" } as unknown as SceneWaterfallBar
                 ],
                 connectors: [],
                 id: "w-1",
@@ -36,7 +36,7 @@ describe("WaterfallKeyboardNavigation", () => {
                 labels: [],
                 name: "Waterfall",
                 sequenceSignature: "sig",
-                style: {} as any,
+                style: {} as unknown as ChartWaterfallSeriesStyle,
                 type: "waterfall"
             }],
             width: 300,

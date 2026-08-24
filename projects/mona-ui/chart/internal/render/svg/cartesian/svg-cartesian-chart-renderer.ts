@@ -22,13 +22,18 @@ import { SvgOhlcSeriesRenderer } from "./series/svg-ohlc-series-renderer";
 import { SvgRangeAreaSeriesRenderer } from "./series/svg-range-area-series-renderer";
 import { SvgRangeBarSeriesRenderer } from "./series/svg-range-bar-series-renderer";
 
+interface SvgSeriesRendererLike {
+    clear(): void;
+    render(scene: import("../../../scene/cartesian-scene").ChartSeriesScene, defs?: SvgDefinitionRegistry): void;
+}
+
 export class SvgCartesianChartRenderer {
     readonly #axisRenderer: SvgCartesianAxisRenderer;
     readonly #brushRenderer: SvgCartesianBrushRenderer;
     readonly #crossfadeFromContainers = new Map<string, SVGGElement>();
-    readonly #crossfadeFromRenderers = new Map<string, { renderer: any; type: string }>();
+    readonly #crossfadeFromRenderers = new Map<string, { renderer: SvgSeriesRendererLike; type: string }>();
     readonly #crossfadeToContainers = new Map<string, SVGGElement>();
-    readonly #crossfadeToRenderers = new Map<string, { renderer: any; type: string }>();
+    readonly #crossfadeToRenderers = new Map<string, { renderer: SvgSeriesRendererLike; type: string }>();
     readonly #crosshairRenderer: SvgCartesianCrosshairRenderer;
     readonly #dataLabelRenderer: SvgCartesianDataLabelRenderer;
     readonly #gridRenderer: SvgCartesianGridRenderer;
@@ -124,7 +129,7 @@ export class SvgCartesianChartRenderer {
         seriesList: readonly import("../../../scene/cartesian-scene").ChartSeriesScene[],
         defs: SvgDefinitionRegistry,
         containersMap: Map<string, SVGGElement>,
-        renderersMap: Map<string, { renderer: any; type: string }>
+        renderersMap: Map<string, { renderer: SvgSeriesRendererLike; type: string }>
     ): void {
         const activeIds = new Set<string>();
 
@@ -154,7 +159,7 @@ export class SvgCartesianChartRenderer {
             }
 
             if (!entry) {
-                let renderer: any = null;
+                let renderer: SvgSeriesRendererLike | null = null;
                 switch (s.type) {
                     case "area":
                         renderer = new SvgAreaSeriesRenderer(group);
