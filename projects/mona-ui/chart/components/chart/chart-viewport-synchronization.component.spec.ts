@@ -107,7 +107,7 @@ const nextFrame = (): Promise<void> =>
         }
     });
 
-describe("chart viewport synchronization (WP4)", () => {
+describe("chart viewport synchronization", () => {
     let fixture: ComponentFixture<SynchronizationHostComponent>;
     let host: SynchronizationHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;

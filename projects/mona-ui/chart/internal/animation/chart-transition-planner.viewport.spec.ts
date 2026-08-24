@@ -27,7 +27,7 @@ const emptyScene = {
     width: 500
 } as unknown as CartesianXYChartScene;
 
-describe("viewport animation trigger (WP13)", () => {
+describe("viewport animation trigger", () => {
     it("viewport-only projections plan as immediate regardless of complexity", () => {
         const plan = ChartTransitionPlanner.plan(emptyScene, emptyScene, "viewport", options);
         expect(plan.mode).toBe("immediate");

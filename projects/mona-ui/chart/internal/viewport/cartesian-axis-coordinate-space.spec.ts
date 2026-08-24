@@ -44,7 +44,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Category Pixel Resolution (PZV8-001)", () => {
+    describe("Category Pixel Resolution", () => {
         const domain = ["A", "B", "C", "D", "E"];
         const bandScale = CartesianScaleFactory.createBandScale({
             domain,
@@ -209,7 +209,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Continuous Scale Qualification Matrix (PZV8-005 / Section 8.1)", () => {
+    describe("Continuous Scale Qualification Matrix", () => {
         const scaleTypes = [
             { type: "linear", domain: [0, 100], testVals: [0, 25, 50, 75, 100] },
             { type: "log", domain: [1, 1000], testVals: [1, 10, 100, 500, 1000] },
@@ -294,7 +294,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Reversed Y Axis Continuous Scale (PZV8-005 / Section 8.2)", () => {
+    describe("Reversed Y Axis Continuous Scale", () => {
         const yLinear = CartesianScaleFactory.createExactPositionScale({
             type: "linear",
             domain: [0, 100],
@@ -323,7 +323,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Base vs Viewport Scale Distinction (PZV8-005 / Section 8.3)", () => {
+    describe("Base vs Viewport Scale Distinction", () => {
         const baseScale = CartesianScaleFactory.createExactPositionScale({
             type: "linear",
             domain: [0, 100],
@@ -360,7 +360,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Namespaced Identical Raw Axis IDs (PZV8-005 / Section 8.5)", () => {
+    describe("Namespaced Identical Raw Axis IDs", () => {
         const xScale = CartesianScaleFactory.createExactPositionScale({
             type: "linear",
             domain: [0, 100],
@@ -413,7 +413,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Invalid Axis Snapshot Handling (PZV8-005 / Section 8.6)", () => {
+    describe("Invalid Axis Snapshot Handling", () => {
         const dummyScale = CartesianScaleFactory.createExactPositionScale({
             type: "linear",
             domain: [0, 1],
@@ -439,7 +439,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Plot Geometry Helpers (PZV8-005 / Section 8.7)", () => {
+    describe("Plot Geometry Helpers", () => {
         const plotRect = { x: 50, y: 30, width: 400, height: 200 };
 
         it("containsPlotPoint correctly evaluates points and edges", () => {
@@ -468,7 +468,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Category Performance & Linear Index Construction (PZV10-001 / Section 6)", () => {
+    describe("Category Performance & Linear Index Construction", () => {
         it("scales with viewport size and retains base index for large base + small viewport", () => {
             const baseCount = 100_000;
             const baseDomain: string[] = [];
@@ -665,7 +665,7 @@ describe("CartesianAxisCoordinateSpace", () => {
         });
     });
 
-    describe("Continuous Semantic Coordinate API (PZV10-010 / Section 28 & 29)", () => {
+    describe("Continuous Semantic Coordinate API", () => {
         const types = [
             { type: "linear", domain: [0, 100], val: 42 },
             { type: "log", domain: [1, 1000], val: 100 },

@@ -92,7 +92,7 @@ const nextFrame = (): Promise<void> =>
         }
     });
 
-describe("synchronized crosshair (WP5)", () => {
+describe("synchronized crosshair", () => {
     let fixture: ComponentFixture<CrosshairSyncHostComponent>;
     let host: CrosshairSyncHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;

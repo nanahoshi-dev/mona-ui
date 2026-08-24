@@ -142,7 +142,7 @@ describe("ChartPercentStackCrosshairIntegration (CAA-R6-004 / Gates G & Sections
         }
     });
 
-    it("formats vertical percent stack crosshair and reference line in percentage points (Section 46)", async () => {
+    it("formats vertical percent stack crosshair and reference line in percentage points", async () => {
         const fixture = TestBed.createComponent(VerticalPercentStackHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -184,7 +184,7 @@ describe("ChartPercentStackCrosshairIntegration (CAA-R6-004 / Gates G & Sections
         expect(refLine?.formattedValue).toBe("50%");
     });
 
-    it("formats horizontal percent stack crosshair and reference line in percentage points (Section 47)", async () => {
+    it("formats horizontal percent stack crosshair and reference line in percentage points", async () => {
         const fixture = TestBed.createComponent(HorizontalPercentStackHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -226,7 +226,7 @@ describe("ChartPercentStackCrosshairIntegration (CAA-R6-004 / Gates G & Sections
         expect(refLine?.formattedValue).toBe("75%");
     });
 
-    it("formats negative percent stack crosshair preserving signed percentage points (Section 48)", async () => {
+    it("formats negative percent stack crosshair preserving signed percentage points", async () => {
         const fixture = TestBed.createComponent(NegativePercentStackHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();

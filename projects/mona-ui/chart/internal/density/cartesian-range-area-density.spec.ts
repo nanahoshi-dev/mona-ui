@@ -5,7 +5,7 @@ import { CartesianRangeAreaDenseInteractionProvider } from "./cartesian-range-de
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import type { ChartRangeAreaSeriesRegistration } from "../context/chart-registration-context";
 
-describe("Cartesian Range Area Density (SD2-R17, SD2-R18, SD2-R37)", () => {
+describe("Cartesian Range Area Density", () => {
     it("builds range density data with lowExtrema and highExtrema indexes", () => {
         const data = [
             { from: 10, to: 20, x: 0 },

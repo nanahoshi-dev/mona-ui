@@ -314,7 +314,7 @@ describe("ChartViewportGestureController", () => {
         expect(lastEvent.phase).toBe("end");
     });
 
-    describe("Wheel Anchor Rebasing & Timer Ownership (PZV8-002)", () => {
+    describe("Wheel Anchor Rebasing & Timer Ownership", () => {
         it("should clear old debounce timer on anchor rebase so session is not terminated prematurely", () => {
             vi.useFakeTimers();
             const { context, events } = createMockContext();
@@ -366,7 +366,7 @@ describe("ChartViewportGestureController", () => {
         });
     });
 
-    describe("Authority-Change Lifecycle & Click Suppression (PZV8-003)", () => {
+    describe("Authority-Change Lifecycle & Click Suppression", () => {
         it("should emit exactly one end event and retain click suppression for active drag", () => {
             const { context, events } = createMockContext();
             const controller = new ChartViewportGestureController(context);
@@ -451,7 +451,7 @@ describe("ChartViewportGestureController", () => {
         });
     });
 
-    describe("Gesture Reversibility & Event Partition Invariance (PZV8-012)", () => {
+    describe("Gesture Reversibility & Event Partition Invariance", () => {
         it("restores initial viewport when wheel delta is inverted within active session", () => {
             const { context, events } = createMockContext();
             const controller = new ChartViewportGestureController(context);
@@ -518,7 +518,7 @@ describe("ChartViewportGestureController", () => {
         });
     });
 
-    describe("Tenth Remediation Gesture Capture Ownership (PZV10-WP3 / Section 15)", () => {
+    describe("Gesture Capture Ownership", () => {
         it("tracks inherited pointer capture across pinch->drag and releases upon authority change before drag threshold", () => {
             const captured = new Set<number>();
             const { context, events } = createMockContext({
@@ -589,7 +589,7 @@ describe("ChartViewportGestureController", () => {
         });
     });
 
-    describe("Tenth Remediation Dynamic Navigation Policy Authority (PZV10-WP4 / Section 18)", () => {
+    describe("Dynamic Navigation Policy Authority", () => {
         it("terminates active drag when dragPan is dynamically disabled while navigation remains enabled", () => {
             const { context, events } = createMockContext();
             const controller = new ChartViewportGestureController(context);
@@ -683,7 +683,7 @@ describe("ChartViewportGestureController", () => {
         });
     });
 
-    describe("Tenth Remediation Pointer Admission (PZV10-WP5 / Section 21)", () => {
+    describe("Pointer Admission", () => {
         it("rejects non-primary mouse button and does not retain in activePointers", () => {
             const { context } = createMockContext();
             const controller = new ChartViewportGestureController(context);
@@ -760,7 +760,7 @@ describe("ChartViewportGestureController", () => {
         });
     });
 
-    describe("Eleventh Remediation Terminal Pointer State Cleanup (PZV11-002 / PZV11-003)", () => {
+    describe("Terminal Pointer State Cleanup", () => {
         it("deletes active pointer in buttons === 0 started drag recovery and admits subsequent fresh drag", () => {
             const captured = new Set<number>();
             const { context, events } = createMockContext({
@@ -902,7 +902,7 @@ describe("ChartViewportGestureController", () => {
         });
     });
 
-    describe("Twelfth Remediation Click Suppression Sequence Lifetime (PZV12-001)", () => {
+    describe("Click Suppression Sequence Lifetime", () => {
         it("retires stale click suppression on fresh pointerdown when dragPan is dynamically disabled", () => {
             const { context } = createMockContext();
             const controller = new ChartViewportGestureController(context);

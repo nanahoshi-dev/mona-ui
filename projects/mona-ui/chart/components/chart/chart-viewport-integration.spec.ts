@@ -141,7 +141,7 @@ describe("ChartComponent Viewport Integration", () => {
         }
     });
 
-    it("should normalize controlled viewport against new data authority after structural data change (PZV5-005)", () => {
+    it("should normalize controlled viewport against new data authority after structural data change", () => {
         // Controlled viewport set to [20, 80]
         host.viewport.set({
             axes: [
@@ -168,7 +168,7 @@ describe("ChartComponent Viewport Integration", () => {
         }
     });
 
-    it("should seed uncontrolled state from last normalized controlled viewport when transitioning to uncontrolled (PZV5-006)", () => {
+    it("should seed uncontrolled state from last normalized controlled viewport when transitioning to uncontrolled", () => {
         // Set controlled viewport
         host.viewport.set({
             axes: [
@@ -192,7 +192,7 @@ describe("ChartComponent Viewport Integration", () => {
         }
     });
 
-    it("should perform full replacement with setViewport and partial mutation with setViewportWindow (PZV5-015)", () => {
+    it("should perform full replacement with setViewport and partial mutation with setViewportWindow", () => {
         const chart = host.chart();
 
         // Set partial window on x
@@ -216,7 +216,7 @@ describe("ChartComponent Viewport Integration", () => {
         expect(vp?.axes.length).toBe(0);
     });
 
-    it("should emit correct sources for fitViewport ('fit') and resetViewport ('reset') (PZV5-016)", () => {
+    it("should emit correct sources for fitViewport ('fit') and resetViewport ('reset')", () => {
         const chart = host.chart();
 
         chart.setViewportWindow({

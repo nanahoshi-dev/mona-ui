@@ -106,7 +106,7 @@ class PercentStackedSelectionHostComponent {
     }
 }
 
-describe("Chart Selected Point Semantic Context (GDSB-R4-004)", () => {
+describe("Chart Selected Point Semantic Context", () => {
     const mockScene: CartesianXYChartScene = {
         axes: [],
         cartesianKind: "xy",

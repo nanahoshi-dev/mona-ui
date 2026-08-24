@@ -69,7 +69,7 @@ class LifecycleHostComponent {
     public readonly crosshairYAxisId = signal<string | undefined>(undefined);
 }
 
-describe("ChartCrosshairOwnerLifecycle (WP0 / Gates A & B)", () => {
+describe("ChartCrosshairOwnerLifecycle", () => {
     let origGetContext: typeof HTMLCanvasElement.prototype.getContext | undefined;
     let globalRenderSpy: ReturnType<typeof vi.spyOn> | undefined;
 
@@ -268,7 +268,7 @@ describe("ChartCrosshairOwnerLifecycle (WP0 / Gates A & B)", () => {
         expect(postRemoveOverlay?.interaction?.activeHitTarget).toBeTruthy();
     });
 
-    it("coalesces tooltip-unregister to crosshair takeover into a single repaint (CAA-R6-005 / WP4)", async () => {
+    it("coalesces tooltip-unregister to crosshair takeover into a single repaint", async () => {
         const fixture = TestBed.createComponent(LifecycleHostComponent);
         fixture.componentInstance.showTooltip.set(true);
         fixture.componentInstance.showCrosshair.set(true);
@@ -527,7 +527,7 @@ describe("ChartCrosshairOwnerLifecycle (WP0 / Gates A & B)", () => {
         expect(postChangeOverlay?.interaction ?? null).toBeNull();
     });
 
-    it("guarantees no test diagnostic getters are exposed on the ChartComponent public API (CAA-R6-001)", () => {
+    it("guarantees no test diagnostic getters are exposed on the ChartComponent public API", () => {
         type Forbidden =
             | "interactionOwner"
             | "interactionState"

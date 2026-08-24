@@ -47,7 +47,7 @@ class FinancialSeriesKeyHostComponent {
     ]);
 }
 
-describe("Financial Series Identity & seriesKey Normalization Release Gate (GDSB-R2-014)", () => {
+describe("Financial Series Identity and seriesKey Normalization", () => {
     let fixture: ComponentFixture<FinancialSeriesKeyHostComponent>;
     let host: FinancialSeriesKeyHostComponent;
 

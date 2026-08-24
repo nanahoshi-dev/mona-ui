@@ -45,7 +45,7 @@ class NineLayerRenderOrderHostComponent {
     ]);
 }
 
-describe("Chart 9-Layer Authoritative Render Ordering (GDSB-R3-007)", () => {
+describe("Chart 9-Layer Authoritative Render Ordering", () => {
     let fixture: ComponentFixture<NineLayerRenderOrderHostComponent>;
     let host: NineLayerRenderOrderHostComponent;
 

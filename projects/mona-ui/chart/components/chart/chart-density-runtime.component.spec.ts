@@ -53,7 +53,7 @@ class FakeResizeObserver {
     public disconnect(): void {}
 }
 
-describe("density runtime structural attachment (WP7)", () => {
+describe("density runtime structural attachment", () => {
     let fixture: ComponentFixture<DensityRuntimeHostComponent>;
     let host: DensityRuntimeHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;

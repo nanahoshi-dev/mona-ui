@@ -77,7 +77,7 @@ const nextFrame = (): Promise<void> =>
         }
     });
 
-describe("combined synchronization + density stress matrix (WP14)", () => {
+describe("combined synchronization + density stress matrix", () => {
     let fixture: ComponentFixture<SyncDensityHostComponent>;
     let host: SyncDensityHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;

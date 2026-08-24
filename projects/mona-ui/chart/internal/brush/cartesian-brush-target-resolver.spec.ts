@@ -4,7 +4,7 @@ import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartBrushRegistration } from "../context/chart-registration-context";
 import { signal } from "@angular/core";
 
-describe("CartesianBrushTargetResolver Unit Tests (GDSB-R2-005, GDSB-R2-006)", () => {
+describe("CartesianBrushTargetResolver Unit Tests", () => {
     const mockScene: CartesianXYChartScene = {
         axes: [
             { axis: "x", axisId: "x1", axisLine: true, gridLines: false, isPrimary: true, position: "bottom", ticks: [], title: "X1", visible: true },

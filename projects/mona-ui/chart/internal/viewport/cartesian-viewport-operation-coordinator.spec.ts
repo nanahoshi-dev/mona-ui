@@ -220,7 +220,7 @@ describe("CartesianViewportOperationCoordinator", () => {
         });
     });
 
-    it("should enforce multi-source link group precedence (PZV5-019)", () => {
+    it("should enforce multi-source link group precedence", () => {
         const x2Scale = CartesianScaleFactory.createExactPositionScale({
             type: "linear",
             domain: [0, 100],

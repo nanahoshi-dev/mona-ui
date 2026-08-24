@@ -234,7 +234,7 @@ describe("ChartOverlayMeasurementPaint (CAA-R6-003 / Gates N & O)", () => {
         chart.unobserveOverlayLabelElement(bandEl, "overlay:band:band-1");
     });
 
-    it("cleans up overlay measurements and unobserves elements with per-instance tracking (Gate O / Section 34)", async () => {
+    it("cleans up overlay measurements and unobserves elements with per-instance tracking", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -259,7 +259,7 @@ describe("ChartOverlayMeasurementPaint (CAA-R6-003 / Gates N & O)", () => {
         }
     });
 
-    it("proves stale callback cannot affect removed unobserved element (Section 35)", async () => {
+    it("proves stale callback cannot affect removed unobserved element", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -283,7 +283,7 @@ describe("ChartOverlayMeasurementPaint (CAA-R6-003 / Gates N & O)", () => {
         expect(stageEvents.stageC).toBe(0);
     });
 
-    it("cleans up measurement registry on unobserve so subsequent observation is treated as fresh (Section 36)", async () => {
+    it("cleans up measurement registry on unobserve so subsequent observation is treated as fresh", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -316,7 +316,7 @@ describe("ChartOverlayMeasurementPaint (CAA-R6-003 / Gates N & O)", () => {
         chart.unobserveOverlayLabelElement(el2, labelId);
     });
 
-    it("disconnects ResizeObserver and releases tracked elements on fixture destroy (Section 37)", async () => {
+    it("disconnects ResizeObserver and releases tracked elements on fixture destroy", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -334,7 +334,7 @@ describe("ChartOverlayMeasurementPaint (CAA-R6-003 / Gates N & O)", () => {
         expect(observer.observed.size).toBe(0);
     });
 
-    it("annotation resize with unchanged effective anchor does not paint canvas (Section 38.1)", async () => {
+    it("annotation resize with unchanged effective anchor does not paint canvas", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.componentInstance.annotationX.set(50);
         fixture.componentInstance.annotationY.set(50);
@@ -367,7 +367,7 @@ describe("ChartOverlayMeasurementPaint (CAA-R6-003 / Gates N & O)", () => {
         expect(stageEvents.stageC).toBe(0);
     });
 
-    it("annotation resize causing clamp-anchor change executes exactly one Canvas paint (Section 38.2)", async () => {
+    it("annotation resize causing clamp-anchor change executes exactly one Canvas paint", async () => {
         const fixture = TestBed.createComponent(OverlayMeasurementPaintHostComponent);
         fixture.componentInstance.annotationX.set(100);
         fixture.componentInstance.annotationY.set(90);

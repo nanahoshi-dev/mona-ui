@@ -7,7 +7,7 @@ import type { CartesianStackEntry, CartesianStackGroup } from "../data/cartesian
 import type { ChartAreaSeriesRegistration } from "../context/chart-registration-context";
 import { defaultDownsamplingOptions } from "./chart-downsampling-options";
 
-describe("Cartesian Stacked Area Density (SD2-R22 - SD2-R26, SD2-R37)", () => {
+describe("Cartesian Stacked Area Density", () => {
     it("builds retained stack timeline keyed by semantic-X rather than raw index", () => {
         const count = 3_000;
         const entriesA: CartesianStackEntry[] = [];

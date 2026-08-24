@@ -68,7 +68,7 @@ const nextFrame = (): Promise<void> =>
         }
     });
 
-describe("synchronized crosshair races and priorities (WP5)", () => {
+describe("synchronized crosshair races and priorities", () => {
     let fixture: ComponentFixture<CrosshairSyncHostComponent>;
     let host: CrosshairSyncHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;

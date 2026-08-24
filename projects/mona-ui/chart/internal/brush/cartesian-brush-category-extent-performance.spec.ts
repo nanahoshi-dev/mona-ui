@@ -7,7 +7,7 @@ import { CartesianBrushRangeResolver } from "./cartesian-brush-range-resolver";
 import type { ResolvedCartesianBrushTarget } from "./cartesian-brush-target-resolver";
 import type { ChartBrushCategoryRange } from "../../models/chart-brush.models";
 
-describe("Cartesian Brush Category Extent O(log C) Performance & Boundary Semantics (GDSB-R2-011)", () => {
+describe("Cartesian Brush Category Extent O(log C) Performance & Boundary Semantics", () => {
     it("resolves category extent in O(log C) time over a large category domain (50,000 categories)", () => {
         const count = 50000;
         const categories = Array.from({ length: count }, (_, i) => `Cat_${i}`);

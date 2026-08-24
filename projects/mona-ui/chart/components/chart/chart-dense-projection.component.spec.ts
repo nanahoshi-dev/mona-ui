@@ -132,7 +132,7 @@ class FakeResizeObserver {
     public disconnect(): void {}
 }
 
-describe("indexed dense projection (WP8)", () => {
+describe("indexed dense projection", () => {
     let fixture: ComponentFixture<DenseHostComponent>;
     let host: DenseHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;
@@ -676,7 +676,7 @@ describe("indexed dense projection (WP8)", () => {
     });
 });
 
-describe("coordinated stacked-area sampling (WP12)", () => {
+describe("coordinated stacked-area sampling", () => {
     let fixture: ComponentFixture<StackedHostComponent>;
     let host: StackedHostComponent;
     let originalResizeObserver: typeof ResizeObserver | undefined;

@@ -3,7 +3,7 @@ import { ChartDataLabelContextBuilder } from "./chart-data-label-context-builder
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 
-describe("Chart Data Label Semantic Context & Color Fallback (GDSB-R2-012, GDSB-R2-013)", () => {
+describe("Chart Data Label Semantic Context & Color Fallback", () => {
     const mockScene: CartesianXYChartScene = {
         axes: [],
         cartesianKind: "xy",
@@ -93,7 +93,7 @@ describe("Chart Data Label Semantic Context & Color Fallback (GDSB-R2-012, GDSB-
         expect(ctxUndefined.color).toBe("#000000");
     });
 
-    it("formats xValue and yValue consistently using matching axis scene formatters (GDSB-R3-003)", () => {
+    it("formats xValue and yValue consistently using matching axis scene formatters", () => {
         const axisXScene = {
             axis: "x" as const,
             axisId: "customX",
@@ -153,7 +153,7 @@ describe("Chart Data Label Semantic Context & Color Fallback (GDSB-R2-012, GDSB-
         expect(ctx.formattedY).toBe("$45.50");
     });
 
-    it("populates physical accumulated yValue and formattedY for vertical normal stacked data label context (GDSB-R4-004)", () => {
+    it("populates physical accumulated yValue and formattedY for vertical normal stacked data label context", () => {
         const axisYScene = {
             axis: "y" as const,
             axisId: "customY",
@@ -201,7 +201,7 @@ describe("Chart Data Label Semantic Context & Color Fallback (GDSB-R2-012, GDSB-
         expect(ctx.formattedValue).toBe("30");
     });
 
-    it("populates physical accumulated xValue and formattedX for horizontal normal stacked data label context (GDSB-R4-004)", () => {
+    it("populates physical accumulated xValue and formattedX for horizontal normal stacked data label context", () => {
         const axisXScene = {
             axis: "x" as const,
             axisId: "customX",
@@ -250,7 +250,7 @@ describe("Chart Data Label Semantic Context & Color Fallback (GDSB-R2-012, GDSB-
         expect(ctx.formattedValue).toBe("30");
     });
 
-    it("populates physical percentage yValue and formattedY for vertical percent stacked data label context (GDSB-R4-004)", () => {
+    it("populates physical percentage yValue and formattedY for vertical percent stacked data label context", () => {
         const axisYScene = {
             axis: "y" as const,
             axisId: "percentY",
@@ -299,7 +299,7 @@ describe("Chart Data Label Semantic Context & Color Fallback (GDSB-R2-012, GDSB-
         expect(ctx.stackPercentage).toBe(0.75);
     });
 
-    it("populates physical percentage xValue and formattedX for horizontal percent stacked data label context (GDSB-R4-004)", () => {
+    it("populates physical percentage xValue and formattedX for horizontal percent stacked data label context", () => {
         const axisXScene = {
             axis: "x" as const,
             axisId: "percentX",
