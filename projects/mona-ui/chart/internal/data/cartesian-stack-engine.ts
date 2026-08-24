@@ -17,6 +17,10 @@ import { resolveCartesianTemporalValue } from "./cartesian-temporal-value-resolv
 
 export type StackableCartesianSeriesRegistration = ChartAreaSeriesRegistration | ChartBarSeriesRegistration;
 
+type MutableStackPosition = { stackPosition?: "inner" | "outer" | "single" };
+
+type SeriesWithOptionalAxisId = { xAxisId?: () => string; yAxisId?: () => string };
+
 export interface CartesianStackEntry {
     readonly animationKey: string;
     readonly dataIndex: number;
@@ -167,8 +171,8 @@ export class CartesianStackEngine {
 
         const visibleSeriesOnTargetAxis = options.series.filter(s => {
             const sAxisId = options.orientation === "horizontal"
-                ? (("xAxisId" in s && typeof (s as any).xAxisId === "function" ? (s as any).xAxisId() : undefined) ?? options.primaryXAxisId ?? "default-x")
-                : (("yAxisId" in s && typeof (s as any).yAxisId === "function" ? (s as any).yAxisId() : undefined) ?? options.primaryYAxisId ?? "default-y");
+                ? (("xAxisId" in s && typeof (s as SeriesWithOptionalAxisId).xAxisId === "function" ? (s as SeriesWithOptionalAxisId).xAxisId!() : undefined) ?? options.primaryXAxisId ?? "default-x")
+                : (("yAxisId" in s && typeof (s as SeriesWithOptionalAxisId).yAxisId === "function" ? (s as SeriesWithOptionalAxisId).yAxisId!() : undefined) ?? options.primaryYAxisId ?? "default-y");
             return sAxisId === targetValueAxisId && s.visible();
         });
 
@@ -263,7 +267,7 @@ export class CartesianStackEngine {
                 ? (options.resolvedYAxisTypeByAxisId?.get(yAxisId) ?? "category")
                 : (options.resolvedXAxisTypeByAxisId?.get(xAxisId) ?? xAxisType ?? "category");
 
-            if (!isCartesianSeriesCompatibleWithXAxisType(s.type, indepType as any)) {
+            if (!isCartesianSeriesCompatibleWithXAxisType(s.type, indepType as ChartXAxisType | ResolvedChartCartesianAxisType)) {
                 continue;
             }
 
@@ -454,7 +458,7 @@ export class CartesianStackEngine {
                     const xVal = resolveValue(datum, sXField, dIdx);
                     const yVal = resolveValue(datum, sField, dIdx);
 
-                    const xKey = this.resolveNormalizedXKey(xVal, dIdx, groupIndepAxisType as any);
+                    const xKey = this.resolveNormalizedXKey(xVal, dIdx, groupIndepAxisType as ChartXAxisType | ResolvedChartCartesianAxisType);
                     if (xKey === undefined) {
                         continue;
                     }
@@ -652,13 +656,13 @@ export class CartesianStackEngine {
 
                 for (const segList of [posSegments, negSegments]) {
                     if (segList.length === 1) {
-                        (segList[0].entry as any).stackPosition = "single";
+                        (segList[0].entry as MutableStackPosition).stackPosition = "single";
                     } else if (segList.length > 1) {
-                        (segList[0].entry as any).stackPosition = "inner";
+                        (segList[0].entry as MutableStackPosition).stackPosition = "inner";
                         for (let i = 1; i < segList.length - 1; i++) {
-                            (segList[i].entry as any).stackPosition = "inner";
+                            (segList[i].entry as MutableStackPosition).stackPosition = "inner";
                         }
-                        (segList[segList.length - 1].entry as any).stackPosition = "outer";
+                        (segList[segList.length - 1].entry as MutableStackPosition).stackPosition = "outer";
                     }
                 }
 
@@ -703,14 +707,14 @@ export class CartesianStackEngine {
         const yValueAxisState = new Map<string, CartesianValueAxisStackState>();
 
         const valueAxes = orientation === "horizontal"
-            ? Array.from(new Set(series.map(s => ("xAxisId" in s && typeof (s as any).xAxisId === "function" ? (s as any).xAxisId() : undefined) ?? options.primaryXAxisId ?? "default-x")))
-            : Array.from(new Set(series.map(s => ("yAxisId" in s && typeof (s as any).yAxisId === "function" ? (s as any).yAxisId() : undefined) ?? options.primaryYAxisId ?? "default-y")));
+            ? Array.from(new Set(series.map(s => ("xAxisId" in s && typeof (s as SeriesWithOptionalAxisId).xAxisId === "function" ? (s as SeriesWithOptionalAxisId).xAxisId!() : undefined) ?? options.primaryXAxisId ?? "default-x")))
+            : Array.from(new Set(series.map(s => ("yAxisId" in s && typeof (s as SeriesWithOptionalAxisId).yAxisId === "function" ? (s as SeriesWithOptionalAxisId).yAxisId!() : undefined) ?? options.primaryYAxisId ?? "default-y")));
 
         for (const vAxisId of valueAxes) {
             const seriesOnAxis = series.filter(s => {
                 const sAxisId = orientation === "horizontal"
-                    ? (("xAxisId" in s && typeof (s as any).xAxisId === "function" ? (s as any).xAxisId() : undefined) ?? options.primaryXAxisId ?? "default-x")
-                    : (("yAxisId" in s && typeof (s as any).yAxisId === "function" ? (s as any).yAxisId() : undefined) ?? options.primaryYAxisId ?? "default-y");
+                    ? (("xAxisId" in s && typeof (s as SeriesWithOptionalAxisId).xAxisId === "function" ? (s as SeriesWithOptionalAxisId).xAxisId!() : undefined) ?? options.primaryXAxisId ?? "default-x")
+                    : (("yAxisId" in s && typeof (s as SeriesWithOptionalAxisId).yAxisId === "function" ? (s as SeriesWithOptionalAxisId).yAxisId!() : undefined) ?? options.primaryYAxisId ?? "default-y");
                 return sAxisId === vAxisId;
             });
             const visibleSeriesOnAxis = seriesOnAxis.filter(s => s.visible());
@@ -803,8 +807,8 @@ export class CartesianStackEngine {
             };
             const seriesOnAxis = series.filter(s => {
                 const sAxisId = orientation === "horizontal"
-                    ? (("xAxisId" in s && typeof (s as any).xAxisId === "function" ? (s as any).xAxisId() : undefined) ?? options.primaryXAxisId ?? "default-x")
-                    : (("yAxisId" in s && typeof (s as any).yAxisId === "function" ? (s as any).yAxisId() : undefined) ?? options.primaryYAxisId ?? "default-y");
+                    ? (("xAxisId" in s && typeof (s as SeriesWithOptionalAxisId).xAxisId === "function" ? (s as SeriesWithOptionalAxisId).xAxisId!() : undefined) ?? options.primaryXAxisId ?? "default-x")
+                    : (("yAxisId" in s && typeof (s as SeriesWithOptionalAxisId).yAxisId === "function" ? (s as SeriesWithOptionalAxisId).yAxisId!() : undefined) ?? options.primaryYAxisId ?? "default-y");
                 return sAxisId === vAxisId;
             });
             const visibleSeriesOnAxis = seriesOnAxis.filter(s => s.visible());

@@ -34,6 +34,12 @@ function scanMax(values: readonly number[]): number {
     return max;
 }
 
+type SeriesWithOptionalRangeAccessors = {
+    data?: () => readonly unknown[] | undefined;
+    fromField?: () => ChartField | undefined;
+    toField?: () => ChartField | undefined;
+};
+
 export class CartesianAxisDomainResolver {
     public static resolveDomain(
         axis: ResolvedCartesianAxisDescriptor,
@@ -110,7 +116,7 @@ export class CartesianAxisDomainResolver {
         const isTemporalAxis = orientation === "horizontal" ? axis.dimension === "y" : axis.dimension === "x";
 
         for (const s of boundSeries) {
-            const data = resolveData("data" in s && typeof (s as any).data === "function" ? ((s as any).data() as readonly unknown[] | undefined) : undefined, rootData);
+            const data = resolveData("data" in s && typeof (s as SeriesWithOptionalRangeAccessors).data === "function" ? (s as SeriesWithOptionalRangeAccessors).data!() : undefined, rootData);
             const field = isTemporalAxis
                 ? (("xField" in s && typeof s.xField === "function" && s.xField() !== undefined)
                     ? s.xField()
@@ -127,8 +133,8 @@ export class CartesianAxisDomainResolver {
                         const yv = resolveValue(item, bReg.field?.(), i);
                         if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
                     } else if (s.type === "rangeBar" || s.type === "rangeArea") {
-                        const fv = resolveValue(item, (s as any).fromField?.(), i);
-                        const tv = resolveValue(item, (s as any).toField?.(), i);
+                        const fv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).fromField?.(), i);
+                        const tv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).toField?.(), i);
                         if (typeof fv !== "number" || !Number.isFinite(fv) || typeof tv !== "number" || !Number.isFinite(tv)) continue;
                     } else if (s.type === "candlestick" || s.type === "ohlc") {
                         const fReg = s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
@@ -245,7 +251,7 @@ export class CartesianAxisDomainResolver {
             if (isValueAxis && stackedSeriesIds && stackedSeriesIds.has(s.id)) {
                 continue;
             }
-            const data = resolveData("data" in s && typeof (s as any).data === "function" ? ((s as any).data() as readonly unknown[] | undefined) : undefined, rootData);
+            const data = resolveData("data" in s && typeof (s as SeriesWithOptionalRangeAccessors).data === "function" ? (s as SeriesWithOptionalRangeAccessors).data!() : undefined, rootData);
             if (!isValueAxis) {
                 const field = ("xField" in s && typeof s.xField === "function" && s.xField() !== undefined)
                     ? s.xField()
@@ -260,8 +266,8 @@ export class CartesianAxisDomainResolver {
                         const yv = resolveValue(item, bReg.field?.(), i);
                         if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
                     } else if (s.type === "rangeBar" || s.type === "rangeArea") {
-                        const fv = resolveValue(item, (s as any).fromField?.(), i);
-                        const tv = resolveValue(item, (s as any).toField?.(), i);
+                        const fv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).fromField?.(), i);
+                        const tv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).toField?.(), i);
                         if (typeof fv !== "number" || !Number.isFinite(fv) || typeof tv !== "number" || !Number.isFinite(tv)) continue;
                     } else if (s.type === "candlestick" || s.type === "ohlc") {
                         const fReg = s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
@@ -305,9 +311,9 @@ export class CartesianAxisDomainResolver {
                             rawValues.push(val);
                         }
                     }
-                } else if ("fromField" in s && "toField" in s && typeof (s as any).fromField === "function" && typeof (s as any).toField === "function") {
-                    const ff = (s as any).fromField();
-                    const tf = (s as any).toField();
+                } else if ("fromField" in s && "toField" in s && typeof (s as SeriesWithOptionalRangeAccessors).fromField === "function" && typeof (s as SeriesWithOptionalRangeAccessors).toField === "function") {
+                    const ff = (s as SeriesWithOptionalRangeAccessors).fromField!();
+                    const tf = (s as SeriesWithOptionalRangeAccessors).toField!();
                     for (let i = 0; i < data.length; i++) {
                         const item = data[i];
                         const fv = resolveValue(item, ff, i);

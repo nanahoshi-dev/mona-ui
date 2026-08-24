@@ -9,7 +9,7 @@ import { createCandlestickFinancialHitGeometry, createOhlcFinancialHitGeometry }
 import { CartesianFinancialIndex, type FinancialHitEntry } from "../interaction/cartesian-financial-index";
 import type { ChartBandScale, ChartContinuousScale, ChartPositionScale } from "../scale/chart-scale";
 import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene } from "../scene/cartesian-scene";
-import type { ChartInteractionXKey, SceneHitTarget } from "../scene/scene-geometry";
+import type { ChartInteractionXKey, SceneHitTarget, SceneOhlcMark } from "../scene/scene-geometry";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatXValue } from "../utils/chart-formatter";
 import { FinancialLayoutEngine, type FinancialLayoutContext } from "./financial-layout-engine";
@@ -72,7 +72,7 @@ export function computeFinancialLayout(
         yAxisTitle,
         yFormatter,
         yScale
-    } = ctx as any;
+    } = ctx;
 
     let xScale: ChartPositionScale | undefined = customXScale;
     const effectiveXAxisType: ChartXAxisType = (
@@ -121,7 +121,7 @@ export function computeFinancialLayout(
         styleResolver,
         valueFormatter: yFormatter,
         xAxisType: effectiveXAxisType,
-        xScale: xScale as any,
+        xScale: xScale as ChartBandScale | ChartContinuousScale,
         yScale
     };
 
@@ -158,7 +158,7 @@ export function computeFinancialLayout(
         const isCandle = "bodyBounds" in mark;
         const hitGeom = isCandle
             ? createCandlestickFinancialHitGeometry(mark)
-            : createOhlcFinancialHitGeometry(mark as any);
+            : createOhlcFinancialHitGeometry(mark as SceneOhlcMark);
 
         const bounds: ChartRect = hitGeom.bounds;
         const visualBounds: ChartRect = hitGeom.visualBounds;

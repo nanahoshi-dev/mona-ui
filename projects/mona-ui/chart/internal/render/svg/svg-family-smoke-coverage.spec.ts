@@ -3,8 +3,10 @@ import type {
     CartesianHeatmapChartScene,
     CartesianWaterfallChartScene,
     CartesianXYChartScene,
+    ChartScene,
     PolarSectorChartScene
 } from "../../scene/chart-scene";
+import type { ChartAxisScene, ChartSeriesScene } from "../../scene/cartesian-scene";
 import type { PolarArcChartScene } from "../../scene/polar-arc-scene";
 import type { ChartSeriesStyle } from "../../../models/chart-style.models";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
@@ -49,7 +51,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         title: "",
                         type: "category",
                         visible: true
-                    } as any,
+                    } as unknown as ChartAxisScene,
                     {
                         axis: "y",
                         axisLine: true,
@@ -61,7 +63,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         title: "",
                         type: "value",
                         visible: true
-                    } as any
+                    } as unknown as ChartAxisScene
                 ],
                 cartesianKind: "xy",
                 coordinateSystem: "cartesian",
@@ -85,7 +87,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any,
+                    } as unknown as ChartSeriesScene,
                     // Line
                     {
                         borderRadius: 0,
@@ -98,7 +100,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any,
+                    } as unknown as ChartSeriesScene,
                     // Area
                     {
                         baselineY: 200,
@@ -112,7 +114,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any,
+                    } as unknown as ChartSeriesScene,
                     // Scatter
                     {
                         borderRadius: 0,
@@ -125,7 +127,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any,
+                    } as unknown as ChartSeriesScene,
                     // Bubble
                     {
                         borderRadius: 0,
@@ -138,7 +140,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any,
+                    } as unknown as ChartSeriesScene,
                     // OHLC
                     {
                         id: "ohlc-1",
@@ -149,7 +151,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any,
+                    } as unknown as ChartSeriesScene,
                     // Candlestick
                     {
                         id: "candle-1",
@@ -160,7 +162,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any,
+                    } as unknown as ChartSeriesScene,
                     // RangeBar
                     {
                         bars: [{ bounds: { height: 40, width: 20, x: 50, y: 80 }, datum: {}, from: 20, height: 40, index: 0, isPositive: true, radius: 0, to: 60, width: 20, x: 50, xValue: "A", y: 80 }],
@@ -174,7 +176,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any,
+                    } as unknown as ChartSeriesScene,
                     // RangeArea
                     {
                         borderRadius: 0,
@@ -187,7 +189,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ],
                 width: 600
             };
@@ -295,7 +297,7 @@ describe("SVG Chart Family Smoke Coverage", () => {
                     }
                 ],
                 width: 300
-            } as any;
+            } as unknown as ChartScene;
             expect(() => backend.render({ presentation: null, scene: treemapScene, styleResolver })).not.toThrow();
             expect(svg.querySelector("[data-key='tm1:node-1']")).not.toBeNull();
         });

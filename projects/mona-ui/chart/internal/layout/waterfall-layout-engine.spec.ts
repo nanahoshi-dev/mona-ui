@@ -1,5 +1,6 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
+import type { ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
 import type {
     ChartWaterfallSeriesRegistration,
     ChartXAxisRegistration,
@@ -28,7 +29,7 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
             name: signal("Waterfall"),
@@ -77,7 +78,7 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
             name: signal("Waterfall"),
@@ -107,7 +108,7 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
             name: signal("Waterfall"),
@@ -128,7 +129,7 @@ describe("WaterfallLayoutEngine", () => {
             registrationId: "mock-x",
             tickCount: signal(undefined),
             title: signal(""),
-            type: signal("linear" as any),
+            type: signal<ChartXAxisType>("linear"),
             visible: signal(true)
         };
 
@@ -145,7 +146,7 @@ describe("WaterfallLayoutEngine", () => {
             registrationId: "mock-y",
             tickCount: signal(undefined),
             title: signal(""),
-            type: signal("category" as any),
+            type: signal<ChartYAxisType>("category"),
             visible: signal(true)
         };
 
@@ -175,7 +176,7 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
             name: signal("Waterfall"),
@@ -212,7 +213,7 @@ describe("WaterfallLayoutEngine", () => {
         const registration: ChartWaterfallSeriesRegistration = {
             connectorWidth: signal(0),
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
             name: signal("Waterfall"),
@@ -236,7 +237,7 @@ describe("WaterfallLayoutEngine", () => {
         const registration: ChartWaterfallSeriesRegistration = {
             borderRadius: signal(8),
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
             name: signal("Waterfall"),
@@ -263,11 +264,11 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
-            maxBarWidth: signal(NaN as any),
-            maxLabels: signal(Infinity as any),
+            maxBarWidth: signal(NaN),
+            maxLabels: signal(Infinity),
             minLabelWidth: signal(-5),
             name: signal("Waterfall"),
             showLabels: signal(true),
@@ -295,7 +296,7 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
             name: signal("Waterfall"),
@@ -344,7 +345,7 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             fillOpacity: signal(0.5),
             id: "w-1",
@@ -374,7 +375,7 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             id: "w-1",
             kindField: signal("kind"),
@@ -427,7 +428,7 @@ describe("WaterfallLayoutEngine", () => {
 
         const registration: ChartWaterfallSeriesRegistration = {
             data: signal(data),
-            element: { nativeElement: undefined as any },
+            element: { nativeElement: undefined as unknown as HTMLElement },
             field: signal("value"),
             increaseColor: signal("#000000"), // dark bar
             id: "w-1",

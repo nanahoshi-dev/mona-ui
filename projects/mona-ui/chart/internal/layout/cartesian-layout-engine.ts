@@ -1,5 +1,5 @@
-import type {  ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
-import type { ChartField ,ChartRect } from "../../models/chart.models";
+import type { ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
+import type { ChartField, ChartRect, ChartValueFormatter } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
     ChartAreaSeriesRegistration,
@@ -20,15 +20,15 @@ import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { BandScale, CartesianScaleFactory, LinearScale, TimeScale, UtcScale } from "../scale/cartesian-scale-factory";
 import type {
-    ChartPositionScale
-    ,ChartContinuousPositionScale,
+    ChartContinuousPositionScale,
+    ChartPositionScale,
     ResolvedChartCartesianAxisType
 } from "../scale/chart-scale";
 import type {
-    ChartAreaSeriesScene
-    ,ChartBarSeriesScene
-    ,ChartLineSeriesScene
-    ,ChartSeriesScene
+    ChartAreaSeriesScene,
+    ChartBarSeriesScene,
+    ChartLineSeriesScene,
+    ChartSeriesScene
 } from "../scene/cartesian-scene";
 import type { ChartSeriesDensityMetadata } from "../scene/chart-scene";
 import { projectRangeEnvelopeIndexView, projectScalarIndexView } from "../density/cartesian-density-projector";
@@ -39,7 +39,6 @@ import { CartesianStackedAreaDenseInteractionProvider } from "../density/cartesi
 import { createDenseHitMaterializer } from "../density/cartesian-dense-hit-materializer";
 import { CartesianMarkerSpatialInteractionProvider } from "../density/cartesian-marker-dense-provider";
 import {
-    
     resolveCartesianMarkerDatum,
     type ResolveMarkerDatumContext
 } from "../density/cartesian-marker-hit-materializer";
@@ -170,6 +169,8 @@ export interface CartesianPreparedLayout {
     readonly runtime?: CartesianXYLayoutRuntime;
 }
 
+type SeriesWithOptionalValueFormatter = { valueFormatter?: () => ChartValueFormatter | undefined };
+
 export class CartesianLayoutEngine {
     static #projectSeriesGeometry(
         runtime: CartesianXYLayoutRuntime,
@@ -283,13 +284,13 @@ export class CartesianLayoutEngine {
                     xAxisId: binding.xAxisId,
                     xAxisTitle: seriesXAxis?.title,
                     xAxisType: seriesXScale.type as ChartXAxisType,
-                    xScale: seriesXScale as any,
+                    xScale: seriesXScale,
                     yAxis: seriesYAxis?.registration,
                     yAxisId: binding.yAxisId,
                     yAxisTitle: seriesYAxis?.title,
                     yFormatter: seriesYAxis?.formatter,
-                    yScale: seriesYScale as any
-                } as any);
+                    yScale: seriesYScale as ChartContinuousPositionScale<number | Date>
+                });
                 if (financialLayoutResult) {
                     seriesScenes.push(financialLayoutResult.scene);
                     activeFinancialIndex = financialLayoutResult.financialIndex;
@@ -382,8 +383,8 @@ export class CartesianLayoutEngine {
                                     : undefined,
                             valueField: s.field(),
                             valueFormatter:
-                                "valueFormatter" in s && typeof (s as any).valueFormatter === "function"
-                                    ? ((s as any).valueFormatter() as any)
+                                "valueFormatter" in s && typeof (s as SeriesWithOptionalValueFormatter).valueFormatter === "function"
+                                    ? (s as SeriesWithOptionalValueFormatter).valueFormatter!()
                                     : undefined,
                             xAxis: seriesXAxis?.registration,
                             xAxisFormatter: seriesXAxis?.formatter,
@@ -535,7 +536,7 @@ export class CartesianLayoutEngine {
                     yAxisId: binding.yAxisId,
                     yAxisTitle: seriesYAxis?.title,
                     yFormatter: seriesYAxis?.formatter,
-                    yScale: seriesYScale as any
+                    yScale: seriesYScale as ChartContinuousPositionScale<number | Date>
                 });
                 if (rangeBarScene) {
                     seriesScenes.push(rangeBarScene);
@@ -596,7 +597,7 @@ export class CartesianLayoutEngine {
                                 yAxis: seriesYAxis?.registration,
                                 yAxisId: binding.yAxisId ?? "default-y",
                                 yFormatter: seriesYAxis?.formatter,
-                                yScale: seriesYScale as any
+                                yScale: seriesYScale as ChartContinuousPositionScale<number>
                             })
                         );
                     }
@@ -648,7 +649,7 @@ export class CartesianLayoutEngine {
                     yAxisId: binding.yAxisId,
                     yAxisTitle: seriesYAxis?.title,
                     yFormatter: seriesYAxis?.formatter,
-                    yScale: seriesYScale as any
+                    yScale: seriesYScale as ChartContinuousPositionScale<number | Date>
                 });
                 seriesScenes.push(rangeAreaScene);
                 const rangeDensityMetadata = seriesDensityMetadataById.get(s.id);
@@ -1026,7 +1027,7 @@ export class CartesianLayoutEngine {
                         const resolved = resolveCartesianTemporalValue(xVal);
                         if (resolved) {
                             normalizedXKey = resolved.epochMs;
-                            const coord = (seriesXScale as any).map(resolved.date);
+                            const coord = seriesXScale.map(resolved.date);
                             if (coord !== undefined && Number.isFinite(coord)) {
                                 xPos = coord;
                                 isXValid = true;
@@ -1035,7 +1036,7 @@ export class CartesianLayoutEngine {
                     } else {
                         if (isFiniteNumber(xVal)) {
                             normalizedXKey = Number(xVal);
-                            const coord = (seriesXScale as any).map(Number(xVal));
+                            const coord = seriesXScale.map(Number(xVal));
                             if (coord !== undefined && Number.isFinite(coord)) {
                                 xPos = coord;
                                 isXValid = true;
@@ -1046,7 +1047,7 @@ export class CartesianLayoutEngine {
                     let isYValid = isFiniteNumber(yVal);
                     let yPos = plotRect.y + plotRect.height;
                     if (isYValid) {
-                        const coord = (seriesYScale as any).map(Number(yVal));
+                        const coord = seriesYScale.map(Number(yVal));
                         if (coord !== undefined && Number.isFinite(coord)) {
                             yPos = coord;
                         } else {
@@ -1084,7 +1085,7 @@ export class CartesianLayoutEngine {
                                 normalizedXKey,
                                 dIdx,
                                 seriesXAxis?.formatter,
-                                (seriesXScale.type ?? "category") as any
+                                (seriesXScale.type ?? "category") as ChartXAxisType
                             ),
                             formattedValue: formatYValue(
                                 yVal,
@@ -1215,7 +1216,7 @@ export class CartesianLayoutEngine {
                                         yAxis: seriesYAxis?.registration,
                                         yAxisId: binding.yAxisId ?? "default-y",
                                         yFormatter: seriesYAxis?.formatter,
-                                        yScale: seriesYScale as any
+                                        yScale: seriesYScale as ChartContinuousPositionScale<number>
                                     })
                                 );
                             }
@@ -1440,7 +1441,7 @@ export class CartesianLayoutEngine {
                                     normalizedXKey,
                                     dIdx,
                                     seriesXAxis?.formatter,
-                                    (seriesXScale.type ?? "category") as any
+                                    (seriesXScale.type ?? "category") as ChartXAxisType
                                 ),
                                 formattedValue: formatYValue(yVal, dIdx, effectiveRawFormatter),
                                 index: dIdx,
