@@ -351,7 +351,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const seriesColors = new Map<string, string>();
         if (scene.series) {
             for (const s of scene.series) {
-                const c = ("style" in s && s.style?.color) || ("color" in s && typeof (s as any).color === "string" ? (s as any).color : undefined);
+                const c = ("style" in s && s.style?.color) || ("color" in s && typeof (s as { color?: unknown }).color === "string" ? (s as { color?: string }).color : undefined);
                 if (c) {
                     seriesColors.set(s.id, c);
                 }
@@ -1001,8 +1001,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const seriesList = this.#registeredSeries();
             const seenKeys = new Map<string, string>();
             for (const s of seriesList) {
-                if ("seriesKey" in s && typeof (s as any).seriesKey === "function") {
-                    const raw = (s as any).seriesKey();
+                if ("seriesKey" in s && typeof (s as { seriesKey?: () => string | undefined }).seriesKey === "function") {
+                    const raw = (s as { seriesKey?: () => string | undefined }).seriesKey!();
                     const norm = normalizeSeriesKey(raw);
                     if (norm) {
                         if (seenKeys.has(norm)) {

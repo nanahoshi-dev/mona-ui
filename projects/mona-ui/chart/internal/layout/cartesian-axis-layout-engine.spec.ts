@@ -176,10 +176,10 @@ describe("CartesianAxisLayoutEngine", () => {
 
     it("normalizes NaN, negative, or invalid presentation inputs cleanly", () => {
         const reg = createXAxisReg({
-            labelPadding: signal(Number.NaN as any),
+            labelPadding: signal(Number.NaN),
             tickCount: signal(-5),
-            tickSize: signal(-10 as any),
-            titlePadding: signal(Number.POSITIVE_INFINITY as any)
+            tickSize: signal(-10),
+            titlePadding: signal(Number.POSITIVE_INFINITY)
         });
         const scale = new LinearScale([0, 100], [0, 200]);
 

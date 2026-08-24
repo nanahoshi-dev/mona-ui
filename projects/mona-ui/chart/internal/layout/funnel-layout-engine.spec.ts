@@ -24,7 +24,7 @@ function createMockFunnelRegistration(
         colors: signal(undefined),
         data: signal(data),
         datumVisibilityRevision: signal(0),
-        element: { nativeElement: undefined as any },
+        element: { nativeElement: undefined as unknown as HTMLElement },
         field: signal("value"),
         fillOpacity: signal(1),
         gap: signal(2),
@@ -168,7 +168,7 @@ describe("FunnelLayoutEngine", () => {
         const data = [{ stage: "S1", value: 100 }];
 
         const registration = createMockFunnelRegistration(data, {
-            orientation: signal("slant" as any)
+            orientation: signal("slant" as unknown as import("../../models/chart-funnel.models").ChartFunnelOrientation)
         });
 
         const plotRect = { height: 200, width: 200, x: 0, y: 0 };
@@ -190,12 +190,12 @@ describe("FunnelLayoutEngine", () => {
         const data = [{ stage: "S1", value: 100 }, { stage: "S2", value: 50 }];
 
         const registration = createMockFunnelRegistration(data, {
-            gap: signal(NaN as any),
-            maxLabels: signal(Infinity as any),
-            minLabelHeight: signal(NaN as any),
+            gap: signal(NaN),
+            maxLabels: signal(Infinity),
+            minLabelHeight: signal(NaN),
             minLabelWidth: signal(-10),
             showLabels: signal(true),
-            widthRatio: signal(NaN as any)
+            widthRatio: signal(NaN)
         });
 
         const plotRect = { height: 200, width: 200, x: 0, y: 0 };

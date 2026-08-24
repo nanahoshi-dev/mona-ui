@@ -10,7 +10,7 @@ import { createEmptyInternalViewportState } from "./cartesian-viewport-normalize
 describe("CartesianViewportController — Pure Math Matrix (PZV-004)", () => {
     function createContinuousSpace(
         type: "linear" | "log" | "symlog" | "pow" | "sqrt" | "time" | "utc",
-        baseDomain: [any, any],
+        baseDomain: [number | Date, number | Date],
         range: [number, number] = [0, 400],
         options?: { logBase?: number; exponent?: number; symlogConstant?: number }
     ): CartesianAxisCoordinateSpace {
@@ -44,8 +44,8 @@ describe("CartesianViewportController — Pure Math Matrix (PZV-004)", () => {
         const scaleFamilies: Array<{
             name: string;
             type: "linear" | "log" | "symlog" | "pow" | "sqrt" | "time" | "utc";
-            domain: [any, any];
-            options?: any;
+            domain: [number | Date, number | Date];
+            options?: { exponent?: number; logBase?: number; symlogConstant?: number };
         }> = [
             { name: "linear", type: "linear", domain: [0, 100] },
             { name: "log positive", type: "log", domain: [1, 1000] },

@@ -326,7 +326,7 @@ describe("TreemapLayoutEngine", () => {
         ];
 
         const reg = createMockTreemapRegistration(data, {
-            maxLabels: signal(NaN as any)
+            maxLabels: signal(NaN)
         });
 
         const scene = TreemapLayoutEngine.layout(reg, plotRect, 600, 400, styleResolver);

@@ -90,7 +90,7 @@ describe("Chart Controlled Selection", () => {
         expect(warnSpy.mock.calls[0][0]).toContain("received 3 selectedMarkIds. Only the first ID will be selected");
 
         // Internal effective selection should have length 1
-        const effective = (host.chart() as any).effectiveSelectedMarkIds();
+        const effective = (host.chart() as unknown as { effectiveSelectedMarkIds: () => readonly string[] }).effectiveSelectedMarkIds();
         expect(effective).toEqual(["bar:0:0"]);
 
         warnSpy.mockRestore();
@@ -127,7 +127,7 @@ describe("Chart Controlled Selection", () => {
         fixture.detectChanges();
 
         // Effective selection before data change is only ["bar:0:0"]
-        const effectiveBefore = (host.chart() as any).effectiveSelectedMarkIds();
+        const effectiveBefore = (host.chart() as unknown as { effectiveSelectedMarkIds: () => readonly string[] }).effectiveSelectedMarkIds();
         expect(effectiveBefore).toEqual(["bar:0:0"]);
 
         // Mutate chart data
@@ -147,13 +147,13 @@ describe("Chart Controlled Selection", () => {
         expect(evt.addedMarkIds).toEqual([]);
 
         // If parent does not adopt (controlled input remains unchanged), effective selection remains ["bar:0:0"]
-        const effectiveAfterRejection = (host.chart() as any).effectiveSelectedMarkIds();
+        const effectiveAfterRejection = (host.chart() as unknown as { effectiveSelectedMarkIds: () => readonly string[] }).effectiveSelectedMarkIds();
         expect(effectiveAfterRejection).toEqual(["bar:0:0"]);
 
         // If parent adopts the proposal
         host.selectedMarkIds.set([]);
         fixture.detectChanges();
-        const effectiveAfterAdoption = (host.chart() as any).effectiveSelectedMarkIds();
+        const effectiveAfterAdoption = (host.chart() as unknown as { effectiveSelectedMarkIds: () => readonly string[] }).effectiveSelectedMarkIds();
         expect(effectiveAfterAdoption).toEqual([]);
 
         warnSpy.mockRestore();

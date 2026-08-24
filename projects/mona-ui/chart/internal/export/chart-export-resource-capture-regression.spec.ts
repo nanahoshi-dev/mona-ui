@@ -73,7 +73,7 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
                     setTimeout(() => this.onloadend?.(), 0);
                 }
             }
-            (window as any).FileReader = MockFileReader;
+            (window as unknown as { FileReader: unknown }).FileReader = MockFileReader;
 
             try {
                 await ChartExportResourceManager.captureAndInlineIslandResources([container], undefined, fakeBitmapDecodeEnvironment());
@@ -105,7 +105,7 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
                     setTimeout(() => this.onloadend?.(), 0);
                 }
             }
-            (window as any).FileReader = MockFileReader;
+            (window as unknown as { FileReader: unknown }).FileReader = MockFileReader;
 
             try {
                 await ChartExportResourceManager.captureAndInlineIslandResources([container], undefined, fakeBitmapDecodeEnvironment());
@@ -135,7 +135,7 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
                         const err = new DOMException("The canvas has been tainted by cross-origin data.", "SecurityError");
                         throw err;
                     }
-                } as any;
+                } as unknown as CanvasRenderingContext2D;
             });
 
             expect(() => {
@@ -346,8 +346,8 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
             const clone = source.cloneNode(true) as HTMLElement;
             ChartExportDomFreezer.freeze(source, clone);
 
-            expect((clone as any).__monaScrollTop).toBe(42);
-            expect((clone as any).__monaScrollLeft).toBe(17);
+            expect((clone as unknown as Record<string, number>)["__monaScrollTop"]).toBe(42);
+            expect((clone as unknown as Record<string, number>)["__monaScrollLeft"]).toBe(17);
         });
     });
 

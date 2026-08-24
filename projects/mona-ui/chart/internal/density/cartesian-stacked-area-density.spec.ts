@@ -3,6 +3,7 @@ import { buildStackGroupDensityRuntime } from "./cartesian-stack-density-runtime
 import { computeSharedStackSampleIndices } from "./cartesian-stack-downsampler";
 import { CartesianStackedAreaDenseInteractionProvider } from "./cartesian-stack-dense-interaction-provider";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
+import type { ChartContinuousPositionScale } from "../scale/chart-scale";
 import type { CartesianStackEntry, CartesianStackGroup } from "../data/cartesian-stack-engine";
 import type { ChartAreaSeriesRegistration } from "../context/chart-registration-context";
 import { defaultDownsamplingOptions } from "./chart-downsampling-options";
@@ -65,8 +66,8 @@ describe("Cartesian Stacked Area Density", () => {
             yAxisId: "y-main"
         };
 
-        const mockSeriesA: ChartAreaSeriesRegistration = { id: "series-a", type: "area" } as any;
-        const mockSeriesB: ChartAreaSeriesRegistration = { id: "series-b", type: "area" } as any;
+        const mockSeriesA: ChartAreaSeriesRegistration = { id: "series-a", type: "area" } as unknown as ChartAreaSeriesRegistration;
+        const mockSeriesB: ChartAreaSeriesRegistration = { id: "series-b", type: "area" } as unknown as ChartAreaSeriesRegistration;
 
         const runtime = buildStackGroupDensityRuntime(
             group,
@@ -92,7 +93,7 @@ describe("Cartesian Stacked Area Density", () => {
             samplesPerPixel: 1,
             threshold: 1000,
             timeline: runtime!.timeline,
-            viewportScale: xScale as any
+            viewportScale: xScale as ChartContinuousPositionScale<number | Date>
         });
 
         expect(selected).not.toBeNull();
@@ -105,9 +106,9 @@ describe("Cartesian Stacked Area Density", () => {
             series: mockSeriesA,
             seriesDisplayName: "Series A",
             xAxisId: "x-main",
-            xScale: xScale as any,
+            xScale: xScale as ChartContinuousPositionScale<number | Date>,
             yAxisId: "y-main",
-            yScale: CartesianScaleFactory.createExactPositionScale({ domain: [0, 30], range: [100, 0], type: "linear" }) as any
+            yScale: CartesianScaleFactory.createExactPositionScale({ domain: [0, 30], range: [100, 0], type: "linear" }) as ChartContinuousPositionScale<number>
         });
 
         const hit = provider.materializeAt(5);
