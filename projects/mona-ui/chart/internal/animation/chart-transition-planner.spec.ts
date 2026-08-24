@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CartesianXYChartScene, PolarSectorChartScene } from "../scene/chart-scene";
-import type { ChartLineSeriesScene } from "../scene/cartesian-scene";
+import type { ChartLineSeriesScene, ChartSeriesScene } from "../scene/cartesian-scene";
+import type { PolarArcChartScene } from "../scene/polar-arc-scene";
 import { normalizeChartAnimationOptions } from "./chart-animation-options";
 import { ChartTransitionPlanner } from "./chart-transition-planner";
 
@@ -234,13 +235,13 @@ describe("ChartTransitionPlanner", () => {
             interactionBuckets: [],
             legendItems: [],
             plotRect: { height: 260, width: 460, x: 20, y: 20 },
-            series: [candleSeries as any],
+            series: [candleSeries as unknown as ChartSeriesScene],
             width: 500
         };
 
         const next: CartesianXYChartScene = {
             ...prev,
-            series: [ohlcSeries as any]
+            series: [ohlcSeries as unknown as ChartSeriesScene]
         };
 
         const options = normalizeChartAnimationOptions(true);
@@ -250,7 +251,7 @@ describe("ChartTransitionPlanner", () => {
     });
 
     it("should crossfade when Rose angular topology changes (PRE-TM-009)", () => {
-        const createRoseScene = (cats: string[], rotation = 0): any => ({
+        const createRoseScene = (cats: string[], rotation = 0) => ({
             angularAxis: {
                 axisLine: true,
                 gridLines: true,
@@ -293,7 +294,7 @@ describe("ChartTransitionPlanner", () => {
                 }
             ],
             width: 400
-        });
+        }) as unknown as PolarArcChartScene;
 
         const prev = createRoseScene(["N", "E", "S", "W"], 0);
         const nextDiffCats = createRoseScene(["N", "E", "S", "W", "NW"], 0);

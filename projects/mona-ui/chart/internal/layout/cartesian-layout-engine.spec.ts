@@ -1,10 +1,13 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type {
+    ChartBarSeriesRegistration,
     ChartCartesianSeriesRegistration,
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
+import type { WritableSignal } from "@angular/core";
+import type { ChartBarOrientation } from "../../models/chart-bar.models";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CartesianLayoutEngine } from "./cartesian-layout-engine";
 import type { ChartField } from "../../models/chart.models";
@@ -373,7 +376,7 @@ describe("CartesianLayoutEngine", () => {
         });
 
         const withTitleAxis = createMockXAxis({ position: "bottom" });
-        (withTitleAxis.title as any).set("Monthly Trend");
+        (withTitleAxis.title as WritableSignal<string>).set("Monthly Trend");
 
         const withTitleScene = CartesianLayoutEngine.computeScene({
             containerHeight: 300,
@@ -656,7 +659,7 @@ describe("CartesianLayoutEngine", () => {
 
         it("emits warning diagnostics when orientation falls back from invalid runtime value", () => {
             const bar = createMockSeries("bar", "v1", "b1");
-            (bar as any).orientation = signal("diagonal");
+            (bar as ChartBarSeriesRegistration).orientation = signal("diagonal" as unknown as ChartBarOrientation);
             const data = [{ month: "Jan", v1: 100 }];
             const warned = new Set<string>();
 
@@ -677,7 +680,7 @@ describe("CartesianLayoutEngine", () => {
 
         it("preserves legend items in fail-safe scene when composition is invalid (HAX-F03)", () => {
             const hBar = createMockSeries("bar", "v1", "b1");
-            (hBar as any).orientation = signal("horizontal");
+            (hBar as ChartBarSeriesRegistration).orientation = signal<ChartBarOrientation | undefined>("horizontal");
             const line = createMockSeries("line", "v2", "l1");
             const data = [{ month: "Jan", v1: 100, v2: 200 }];
             const warned = new Set<string>();

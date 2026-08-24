@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FunnelKeyboardNavigation } from "./funnel-keyboard-navigation";
-import type { CartesianFunnelChartScene } from "../scene/funnel-scene";
+import type { CartesianFunnelChartScene, SceneFunnelStage } from "../scene/funnel-scene";
 import { FunnelHitIndex } from "./funnel-hit-index";
 
 describe("FunnelKeyboardNavigation", () => {
@@ -31,9 +31,9 @@ describe("FunnelKeyboardNavigation", () => {
                 orientation,
                 sequenceSignature: "sig",
                 stages: [
-                    { animationKey: "f:0" } as any,
-                    { animationKey: "f:1" } as any,
-                    { animationKey: "f:2" } as any
+                    { animationKey: "f:0" } as unknown as SceneFunnelStage,
+                    { animationKey: "f:1" } as unknown as SceneFunnelStage,
+                    { animationKey: "f:2" } as unknown as SceneFunnelStage
                 ],
                 style: { baseColor: "#3b82f6", fillOpacity: 1, strokeColor: "", strokeWidth: 0 },
                 type: "funnel"

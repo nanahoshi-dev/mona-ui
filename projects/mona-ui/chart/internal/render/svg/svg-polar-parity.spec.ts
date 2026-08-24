@@ -235,7 +235,7 @@ describe("SVG Polar Parity", () => {
             const backend = new SvgChartRenderBackend(svg, 1);
             const styleResolver = createMockStyleResolver();
 
-            const createScene = (seriesList: any[]): PolarSectorChartScene =>
+            const createScene = (seriesList: unknown[]): PolarSectorChartScene =>
                 ({
                     center: { x: 150, y: 150 },
                     coordinateSystem: "polar",
@@ -290,7 +290,7 @@ describe("SVG Polar Parity", () => {
             const backend = new SvgChartRenderBackend(svg, 1);
             const styleResolver = createMockStyleResolver();
 
-            const createScene = (seriesList: any[]): PolarAxisChartScene =>
+            const createScene = (seriesList: unknown[]): PolarAxisChartScene =>
                 ({
                     angularAxis: { axisLine: true, gridLines: true, labelOffset: 10, labels: true, mode: "category", rotation: 0, ticks: [], visible: true },
                     axisMode: "radar",
@@ -327,7 +327,7 @@ describe("SVG Polar Parity", () => {
             const backend = new SvgChartRenderBackend(svg, 1);
             const styleResolver = createMockStyleResolver();
 
-            const createScene = (seriesList: any[]): PolarArcChartScene =>
+            const createScene = (seriesList: unknown[]): PolarArcChartScene =>
                 ({
                     arcMode: "radialBar",
                     center: { x: 150, y: 150 },

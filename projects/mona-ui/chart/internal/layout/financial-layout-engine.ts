@@ -197,7 +197,7 @@ export class FinancialLayoutEngine {
             marks: sceneMarks,
             maxBodyWidth,
             name: seriesName,
-            renderOpacity: ("renderOpacity" in series && typeof series.renderOpacity === "function" ? (series as any).renderOpacity() : undefined),
+            renderOpacity: ("renderOpacity" in series && typeof series.renderOpacity === "function" ? (series as unknown as { renderOpacity(): number }).renderOpacity() : undefined),
             style: resolvedStyle,
             type: "candlestick",
             wickWidth,
@@ -220,7 +220,7 @@ export class FinancialLayoutEngine {
         const explicitTickLength = (series.type === "ohlc" && "tickLength" in series && series.tickLength)
             ? series.tickLength()
             : (series.type === "ohlc" && "tickWidth" in series && series.tickWidth)
-                ? (series as any).tickWidth()
+                ? (series as unknown as { tickWidth(): number }).tickWidth()
                 : undefined;
         const bandwidth = "bandwidth" in xScale ? (xScale as ChartBandScale).bandwidth() : undefined;
 
@@ -321,7 +321,7 @@ export class FinancialLayoutEngine {
             marks: sceneMarks,
             maxBodyWidth,
             name: seriesName,
-            renderOpacity: ("renderOpacity" in series && typeof series.renderOpacity === "function" ? (series as any).renderOpacity() : undefined),
+            renderOpacity: ("renderOpacity" in series && typeof series.renderOpacity === "function" ? (series as unknown as { renderOpacity(): number }).renderOpacity() : undefined),
             style: resolvedStyle,
             tickWidth: nominalBodyWidth / 2,
             type: "ohlc",

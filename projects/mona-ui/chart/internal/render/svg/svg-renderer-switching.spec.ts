@@ -28,7 +28,7 @@ describe("SVG and Canvas Renderer Switching", () => {
         const svg = createSvgElement("svg");
         const styleResolver = createMockStyleResolver();
 
-        const scene: CartesianXYChartScene = {
+        const scene = {
             axes: [
                 {
                     axisLine: true,
@@ -40,7 +40,7 @@ describe("SVG and Canvas Renderer Switching", () => {
                     title: "",
                     type: "category",
                     visible: true
-                } as any,
+                },
                 {
                     axisLine: true,
                     gridLines: true,
@@ -51,7 +51,7 @@ describe("SVG and Canvas Renderer Switching", () => {
                     title: "",
                     type: "value",
                     visible: true
-                } as any
+                }
             ],
             cartesianKind: "xy",
             coordinateSystem: "cartesian",
@@ -74,10 +74,10 @@ describe("SVG and Canvas Renderer Switching", () => {
                     visible: true,
                     xAxisId: "x",
                     yAxisId: "y"
-                } as any
+                }
             ],
             width: 500
-        };
+        } as unknown as CartesianXYChartScene;
 
         // 1. Render in Canvas backend
         let canvasBackend = createChartRenderBackend("canvas", canvas, null, 1);

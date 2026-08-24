@@ -1,5 +1,5 @@
 import type { ChartAxisFormatter, ChartXAxisType } from "../../models/chart-axis.models";
-import type { ChartField, ChartRect } from "../../models/chart.models";
+import type { ChartField, ChartRect, ChartValueFormatter } from "../../models/chart.models";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import type {
     ChartBubbleSeriesRegistration,
@@ -82,6 +82,8 @@ export interface CartesianMarkerLayoutOptions {
     readonly yAxisFormatter?: ChartAxisFormatter;
     readonly yScale: ChartPositionScale;
 }
+
+type SeriesWithOptionalValueFormatter = { valueFormatter?: () => ChartValueFormatter | undefined };
 
 export class CartesianMarkerLayout {
     public static calculateBubbleSizeDomain(
@@ -267,8 +269,8 @@ export class CartesianMarkerLayout {
             sizeFormatter: bSeries?.sizeFormatter?.(),
             valueField: sField,
             valueFormatter:
-                "valueFormatter" in s && typeof (s as any).valueFormatter === "function"
-                    ? ((s as any).valueFormatter() as any)
+                "valueFormatter" in s && typeof (s as SeriesWithOptionalValueFormatter).valueFormatter === "function"
+                    ? (s as SeriesWithOptionalValueFormatter).valueFormatter!()
                     : undefined,
             xAxis: options.xAxis,
             xAxisFormatter,

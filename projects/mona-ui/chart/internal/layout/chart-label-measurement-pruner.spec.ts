@@ -118,7 +118,7 @@ describe("ChartLabelMeasurementPruner (HAX-F07 / PZVF-011)", () => {
             ["sector:slice-stale", { height: 20, width: 50 }]
         ]);
 
-        const sectorScene: Partial<PolarSectorChartScene> = {
+        const sectorScene = {
             coordinateSystem: "polar",
             polarKind: "sector",
             series: [
@@ -131,12 +131,12 @@ describe("ChartLabelMeasurementPruner (HAX-F07 / PZVF-011)", () => {
                             startAngle: 0,
                             endAngle: Math.PI * 2,
                             value: 100
-                        } as any
+                        }
                     ],
                     type: "pie"
-                } as any
+                }
             ]
-        };
+        } as unknown as Partial<PolarSectorChartScene>;
 
         ChartLabelMeasurementPruner.prune(measurements, sectorScene as ChartScene);
 
@@ -162,7 +162,7 @@ describe("ChartLabelMeasurementPruner (HAX-F07 / PZVF-011)", () => {
         const treemapScene: Partial<TreemapChartScene> = {
             coordinateSystem: "hierarchical",
             hierarchicalKind: "treemap"
-        } as any;
+        };
 
         ChartLabelMeasurementPruner.prune(measurements, treemapScene as ChartScene);
 
