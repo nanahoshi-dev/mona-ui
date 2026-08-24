@@ -48,11 +48,10 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
     readonly #yBaseDenormalize?: (normalized: number) => unknown;
     readonly #yBaseNormalize: (semanticValue: unknown) => number;
     readonly #yViewportScale: ChartPositionScale<unknown>;
-    #identityIndex: DenseMarkIdentityIndex | null = null;
     public readonly seriesId?: string;
     public readonly xAxisId?: string;
     public readonly yAxisId?: string;
-
+    #identityIndex: DenseMarkIdentityIndex | null = null;
     public constructor(input: {
         readonly bubbleRadiusScale?: (size: number) => number;
         readonly hierarchy: CartesianSpatialDensityIndex;
@@ -169,97 +168,6 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
         return matches;
     }
 
-    public resolveSemanticBucket(query: CartesianDenseSemanticBucketQuery): readonly SceneHitTarget[] {
-        if (query.axis !== "x") {
-            return [];
-        }
-        if (query.axisId && this.xAxisId && query.axisId !== this.xAxisId) {
-            return [];
-        }
-        const key = query.key;
-        const semanticX = normalizeSemanticNumericKey(key);
-        if (semanticX === null) {
-            return [];
-        }
-        const u = this.#xBaseNormalize(key);
-        if (!Number.isFinite(u)) {
-            return [];
-        }
-        const rootBounds = this.#hierarchy.rootBounds;
-        const window: [number, number, number, number] = [u - 1e-6, rootBounds[1], 2e-6, rootBounds[3]];
-        const matches: SceneHitTarget[] = [];
-        this.#hierarchy.queryRangeNormalized(window, idx => {
-            const target = this.#materialize(idx);
-            if (!target) return;
-            const targetX = normalizeSemanticNumericKey(target.xKey ?? target.xValue);
-            if (targetX !== null && areSemanticNumbersEqual(targetX, semanticX)) {
-                matches.push(target);
-            }
-        });
-        return matches;
-    }
-
-    /**
-     * Discovers raw marker candidates in a pixel-radius neighborhood. Exact
-     * visual and forgiving containment is evaluated from the materialized
-     * current marker geometry. Source-order traversal stops at the first
-     * qualifying mark, while degenerate bubble leaves use their threshold
-     * index instead of scanning every identical source point.
-     */
-    public resolvePointerCandidates(query: CartesianDensePointerQuery): readonly SceneHitTarget[] {
-        const radius = this.#maxHitRadius;
-        const minPxX = query.pixel.x - radius;
-        const maxPxX = query.pixel.x + radius;
-        const minPxY = query.pixel.y - radius;
-        const maxPxY = query.pixel.y + radius;
-        const uA = this.toNormalizedU(minPxX);
-        const uB = this.toNormalizedU(maxPxX);
-        const vA = this.toNormalizedV(minPxY);
-        const vB = this.toNormalizedV(maxPxY);
-        if (uA === null || uB === null || vA === null || vB === null) {
-            return [];
-        }
-
-        const window: [number, number, number, number] = [
-            Math.min(uA, uB),
-            Math.min(vA, vB),
-            Math.abs(uB - uA),
-            Math.abs(vB - vA)
-        ];
-        const resolveClass = (visual: boolean): SceneHitTarget | null => {
-            const index = this.#hierarchy.resolveTopmostPointerCandidate(
-                window,
-                sourceIndex => {
-                    const target = this.materializePointerCandidate(sourceIndex);
-                    if (!target?.point) {
-                        return false;
-                    }
-                    const visualRadius = Number.isFinite(target.visualRadius)
-                        ? Math.max(0, target.visualRadius!)
-                        : Math.max(0, target.radius ?? 0);
-                    const hitRadius = Number.isFinite(target.radius)
-                        ? Math.max(visualRadius, target.radius!)
-                        : visualRadius;
-                    const radiusToUse = visual ? visualRadius : hitRadius;
-                    return (
-                        Math.hypot(target.point.x - query.pixel.x, target.point.y - query.pixel.y) <= radiusToUse + cartesianMarkerHitEpsilon
-                    );
-                },
-                () => this.#onNodeVisited?.(),
-                undefined,
-                (nodeIndex, node) => this.resolveDegeneratePointerCandidate(nodeIndex, node, query, visual)
-            );
-            return index === null ? null : this.#materialize(index);
-        };
-
-        const visual = resolveClass(true);
-        if (visual) {
-            return [visual];
-        }
-        const forgiving = resolveClass(false);
-        return forgiving ? [forgiving] : [];
-    }
-
     public resolveNearest(query: CartesianDensePointerQuery): readonly SceneHitTarget[] {
         const u = this.pointerToU(query.pixel);
         const v = this.pointerToV(query.pixel);
@@ -346,11 +254,117 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
         return target ? [target] : [];
     }
 
+    /**
+     * Discovers raw marker candidates in a pixel-radius neighborhood. Exact
+     * visual and forgiving containment is evaluated from the materialized
+     * current marker geometry. Source-order traversal stops at the first
+     * qualifying mark, while degenerate bubble leaves use their threshold
+     * index instead of scanning every identical source point.
+     */
+    public resolvePointerCandidates(query: CartesianDensePointerQuery): readonly SceneHitTarget[] {
+        const radius = this.#maxHitRadius;
+        const minPxX = query.pixel.x - radius;
+        const maxPxX = query.pixel.x + radius;
+        const minPxY = query.pixel.y - radius;
+        const maxPxY = query.pixel.y + radius;
+        const uA = this.toNormalizedU(minPxX);
+        const uB = this.toNormalizedU(maxPxX);
+        const vA = this.toNormalizedV(minPxY);
+        const vB = this.toNormalizedV(maxPxY);
+        if (uA === null || uB === null || vA === null || vB === null) {
+            return [];
+        }
+
+        const window: [number, number, number, number] = [
+            Math.min(uA, uB),
+            Math.min(vA, vB),
+            Math.abs(uB - uA),
+            Math.abs(vB - vA)
+        ];
+        const resolveClass = (visual: boolean): SceneHitTarget | null => {
+            const index = this.#hierarchy.resolveTopmostPointerCandidate(
+                window,
+                sourceIndex => {
+                    const target = this.materializePointerCandidate(sourceIndex);
+                    if (!target?.point) {
+                        return false;
+                    }
+                    const visualRadius = Number.isFinite(target.visualRadius)
+                        ? Math.max(0, target.visualRadius!)
+                        : Math.max(0, target.radius ?? 0);
+                    const hitRadius = Number.isFinite(target.radius)
+                        ? Math.max(visualRadius, target.radius!)
+                        : visualRadius;
+                    const radiusToUse = visual ? visualRadius : hitRadius;
+                    return (
+                        Math.hypot(target.point.x - query.pixel.x, target.point.y - query.pixel.y) <= radiusToUse + cartesianMarkerHitEpsilon
+                    );
+                },
+                () => this.#onNodeVisited?.(),
+                undefined,
+                (nodeIndex, node) => this.resolveDegeneratePointerCandidate(nodeIndex, node, query, visual)
+            );
+            return index === null ? null : this.#materialize(index);
+        };
+
+        const visual = resolveClass(true);
+        if (visual) {
+            return [visual];
+        }
+        const forgiving = resolveClass(false);
+        return forgiving ? [forgiving] : [];
+    }
+
+    public resolveSemanticBucket(query: CartesianDenseSemanticBucketQuery): readonly SceneHitTarget[] {
+        if (query.axis !== "x") {
+            return [];
+        }
+        if (query.axisId && this.xAxisId && query.axisId !== this.xAxisId) {
+            return [];
+        }
+        const key = query.key;
+        const semanticX = normalizeSemanticNumericKey(key);
+        if (semanticX === null) {
+            return [];
+        }
+        const u = this.#xBaseNormalize(key);
+        if (!Number.isFinite(u)) {
+            return [];
+        }
+        const rootBounds = this.#hierarchy.rootBounds;
+        const window: [number, number, number, number] = [u - 1e-6, rootBounds[1], 2e-6, rootBounds[3]];
+        const matches: SceneHitTarget[] = [];
+        this.#hierarchy.queryRangeNormalized(window, idx => {
+            const target = this.#materialize(idx);
+            if (!target) return;
+            const targetX = normalizeSemanticNumericKey(target.xKey ?? target.xValue);
+            if (targetX !== null && areSemanticNumbersEqual(targetX, semanticX)) {
+                matches.push(target);
+            }
+        });
+        return matches;
+    }
+
     private materializePointerCandidate(sourceIndex: number): SceneHitTarget | null {
         this.#onCandidateVisited?.();
         ChartDensityTracker.current?.onDenseRawHitCandidateVisited?.();
         ChartDensityTracker.current?.onDenseRawHitMaterialized?.();
         return this.#materialize(sourceIndex);
+    }
+
+    private pointerToU(pixel: ChartPoint): number | null {
+        const semantic = this.#xViewportScale.invert?.(pixel.x);
+        if (semantic === undefined) {
+            return null;
+        }
+        const normalized = this.#xBaseNormalize(semantic);
+        return Number.isFinite(normalized) ? normalized : null;
+    }
+
+    private pointerToV(pixel: ChartPoint): number | null {
+        const semantic = (this.#yViewportScale as ChartContinuousPositionScale<number>).invert?.(pixel.y);
+        const normalized = semantic !== undefined ? this.#yBaseNormalize(semantic) : Number.NaN;
+        return Number.isFinite(normalized) ? normalized : null;
     }
 
     private resolveDegeneratePointerCandidate(
@@ -405,21 +419,6 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
         }
 
         return undefined;
-    }
-
-    private pointerToU(pixel: ChartPoint): number | null {
-        const semantic = this.#xViewportScale.invert?.(pixel.x);
-        if (semantic === undefined) {
-            return null;
-        }
-        const normalized = this.#xBaseNormalize(semantic);
-        return Number.isFinite(normalized) ? normalized : null;
-    }
-
-    private pointerToV(pixel: ChartPoint): number | null {
-        const semantic = (this.#yViewportScale as ChartContinuousPositionScale<number>).invert?.(pixel.y);
-        const normalized = semantic !== undefined ? this.#yBaseNormalize(semantic) : Number.NaN;
-        return Number.isFinite(normalized) ? normalized : null;
     }
 
     private toNormalizedU(pixel: number): number | null {

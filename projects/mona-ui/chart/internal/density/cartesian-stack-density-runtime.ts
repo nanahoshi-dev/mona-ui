@@ -14,11 +14,11 @@ import { CartesianStackCanonicalIdentityIndex } from "./cartesian-stack-geometry
 import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
 
 export interface StackTimelineItem {
+    negativeAbsTotal: number;
+    positiveTotal: number;
     readonly xKey: ChartInteractionXKey;
     readonly xNumeric: number;
     readonly xValue: unknown;
-    negativeAbsTotal: number;
-    positiveTotal: number;
 }
 
 export interface CartesianStackGroupTimeline {

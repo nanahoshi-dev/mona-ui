@@ -20,8 +20,8 @@ const ONE_PX_PNG_DATA_URL = `data:image/png;base64,${ONE_PX_PNG_BASE64}`;
 
 interface Deferred<T> {
     promise: Promise<T>;
-    resolve: (value: T | PromiseLike<T>) => void;
     reject: (reason?: unknown) => void;
+    resolve: (value: T | PromiseLike<T>) => void;
 }
 
 function deferred<T = void>(): Deferred<T> {
@@ -243,14 +243,13 @@ function installCanvasAllocationProbe(): CanvasAllocationProbe {
 }
 
 class FakeEventImage {
+    #srcAssigned = false;
     public height = 0;
     public naturalHeight = 0;
     public naturalWidth = 0;
     public onerror: ((e: unknown) => void) | null = null;
     public onload: (() => void) | null = null;
     public width = 0;
-    #srcAssigned = false;
-
     public constructor(dimensions: { height: number; width: number }) {
         queueMicrotask(() => {
             if (this.#srcAssigned) {

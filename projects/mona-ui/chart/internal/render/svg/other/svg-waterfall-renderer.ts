@@ -21,19 +21,16 @@ interface WaterfallRenderConnectorItem {
 }
 
 export class SvgWaterfallRenderer {
+    readonly #axesGroup: SVGGElement;
+    readonly #barKeyedGroup: SvgKeyedGroup<WaterfallRenderBarItem, SVGElement>;
+    readonly #barsGroup: SVGGElement;
+    readonly #connectorKeyedGroup: SvgKeyedGroup<WaterfallRenderConnectorItem, SVGLineElement>;
+    readonly #connectorsGroup: SVGGElement;
     readonly #container: SVGGElement;
     readonly #gridGroup: SVGGElement;
-    readonly #connectorsGroup: SVGGElement;
-    readonly #barsGroup: SVGGElement;
-    readonly #axesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
-
-    #gridPath: SVGPathElement | null = null;
     #axisPath: SVGPathElement | null = null;
-
-    readonly #connectorKeyedGroup: SvgKeyedGroup<WaterfallRenderConnectorItem, SVGLineElement>;
-    readonly #barKeyedGroup: SvgKeyedGroup<WaterfallRenderBarItem, SVGElement>;
-
+    #gridPath: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -59,6 +56,31 @@ export class SvgWaterfallRenderer {
 
         this.#connectorKeyedGroup = new SvgKeyedGroup<WaterfallRenderConnectorItem, SVGLineElement>(this.#connectorsGroup);
         this.#barKeyedGroup = new SvgKeyedGroup<WaterfallRenderBarItem, SVGElement>(this.#barsGroup);
+    }
+
+    public clear(): void {
+        this.#connectorKeyedGroup.clear();
+        this.#barKeyedGroup.clear();
+        if (this.#gridPath) {
+            this.#gridPath.remove();
+            this.#gridPath = null;
+        }
+        if (this.#axisPath) {
+            this.#axisPath.remove();
+            this.#axisPath = null;
+        }
+        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#connectorKeyedGroup.destroy();
+        this.#barKeyedGroup.destroy();
+        this.#gridGroup.remove();
+        this.#connectorsGroup.remove();
+        this.#barsGroup.remove();
+        this.#axesGroup.remove();
+        this.#highlightGroup.remove();
     }
 
     public render(
@@ -279,30 +301,5 @@ export class SvgWaterfallRenderer {
                 this.#highlightGroup.appendChild(highlightEl);
             }
         }
-    }
-
-    public clear(): void {
-        this.#connectorKeyedGroup.clear();
-        this.#barKeyedGroup.clear();
-        if (this.#gridPath) {
-            this.#gridPath.remove();
-            this.#gridPath = null;
-        }
-        if (this.#axisPath) {
-            this.#axisPath.remove();
-            this.#axisPath = null;
-        }
-        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#connectorKeyedGroup.destroy();
-        this.#barKeyedGroup.destroy();
-        this.#gridGroup.remove();
-        this.#connectorsGroup.remove();
-        this.#barsGroup.remove();
-        this.#axesGroup.remove();
-        this.#highlightGroup.remove();
     }
 }

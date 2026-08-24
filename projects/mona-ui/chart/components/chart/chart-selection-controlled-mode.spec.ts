@@ -42,8 +42,8 @@ class SelectionControlledHostComponent {
         { name: "C", value: 30 }
     ]);
     public readonly mode = signal<ChartSelectionMode>("single");
-    public readonly selectedMarkIds = signal<readonly string[] | undefined>(undefined);
     public readonly retainOnDataChange = signal(true);
+    public readonly selectedMarkIds = signal<readonly string[] | undefined>(undefined);
     public selectionEvents: ChartSelectionChangeEvent[] = [];
 
     public onSelectionChange(evt: ChartSelectionChangeEvent): void {

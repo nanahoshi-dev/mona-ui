@@ -48,15 +48,12 @@ export class AreaSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly data = input<readonly unknown[] | undefined>(undefined);
-
+    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
     /**
      * @description Data label display options or boolean flag enabling default labels.
      * @default false
      */
     public readonly dataLabels = input<ChartDataLabelsInput>(false);
-
-    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
-
     /**
      * @description Per-series high-density downsampling override. Undefined inherits the chart policy.
      * @default undefined
@@ -98,19 +95,16 @@ export class AreaSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly pointRadius = input<number | undefined>(undefined);
-
-    /**
-     * @description Whether to draw point markers at each data coordinate along the top boundary line.
-     * @default false
-     */
-    public readonly showPoints = input(false);
-
     /**
      * @description Optional stable key identifying this series for mark identity and selection across updates.
      * @default undefined
      */
     public readonly seriesKey = input<string | undefined>(undefined);
-
+    /**
+     * @description Whether to draw point markers at each data coordinate along the top boundary line.
+     * @default false
+     */
+    public readonly showPoints = input(false);
     /**
      * @description Named stack group to participate in. Series with matching trimmed stack names stack together.
      * @default undefined

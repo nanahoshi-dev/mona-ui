@@ -159,10 +159,10 @@ export interface CartesianLayoutOptions {
     styleResolver?: ChartStyleResolver;
     viewport?: InternalCartesianViewportState;
     warnedDiagnosticSignatures?: Set<string>;
-    xAxis?: ChartXAxisRegistration;
     xAxes?: readonly ChartXAxisRegistration[];
-    yAxis?: ChartYAxisRegistration;
+    xAxis?: ChartXAxisRegistration;
     yAxes?: readonly ChartYAxisRegistration[];
+    yAxis?: ChartYAxisRegistration;
 }
 
 export interface CartesianPreparedLayout {
@@ -171,413 +171,6 @@ export interface CartesianPreparedLayout {
 }
 
 export class CartesianLayoutEngine {
-    public static prepareRuntime(options: CartesianLayoutOptions): CartesianPreparedLayout {
-        const { containerHeight, containerWidth, rootXField, warnedDiagnosticSignatures } = options;
-        const rootData = options.rootData ?? [];
-        const styleResolver = options.styleResolver ?? new ChartStyleResolver();
-
-        const inputSeries = options.series ?? options.effectiveSeries ?? [];
-        const seriesPolicy = CartesianSeriesPolicy.resolve(inputSeries);
-        const effectiveSeries = seriesPolicy.effectiveSeries;
-        if (warnedDiagnosticSignatures) {
-            for (const d of seriesPolicy.diagnostics) {
-                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, d.message, d.signature);
-            }
-        }
-
-        const orientationResolution = CartesianOrientationPolicy.resolve(effectiveSeries);
-        if (warnedDiagnosticSignatures) {
-            for (const d of orientationResolution.diagnostics) {
-                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, d);
-            }
-        }
-
-        if (!orientationResolution.valid) {
-            const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
-            const emptyScene: CartesianXYChartScene = {
-                axes: [],
-                axisTopology: [],
-                axisTopologySignature: "[]",
-                barHitTargets: [],
-                cartesianKind: "xy",
-                coordinateSystem: "cartesian",
-                hasRenderableData: false,
-                height: containerHeight,
-                hitTargets: [],
-                interactionAxis: orientationResolution.orientation === "horizontal" ? "y" : "x",
-                interactionBuckets: [],
-                legendItems,
-                orientation: orientationResolution.orientation,
-                plotRect: { height: 0, width: 0, x: 0, y: 0 },
-                primaryXAxisId: "default-x",
-                primaryYAxisId: "default-y",
-                series: [],
-                stackConfiguration: [],
-                stackSignature: "",
-                width: containerWidth,
-                xAxisType: "category",
-                yAxisType: "linear"
-            };
-            return { fallbackScene: emptyScene };
-        }
-
-        const isHorizontal = orientationResolution.orientation === "horizontal";
-
-        if (isHorizontal) {
-            return CartesianHorizontalBarLayoutEngine.prepareRuntime({
-                containerHeight,
-                containerWidth,
-                effectiveSeries,
-                measurements: options.measurements,
-                rootData,
-                rootXField,
-                series: effectiveSeries,
-                styleResolver,
-                viewport: options.viewport,
-                warnedDiagnosticSignatures,
-                xAxis: options.xAxis,
-                xAxes: options.xAxes,
-                yAxis: options.yAxis,
-                yAxes: options.yAxes
-            });
-        }
-
-        const xAxes = options.xAxes && options.xAxes.length > 0 ? options.xAxes : options.xAxis ? [options.xAxis] : [];
-        const yAxes = options.yAxes && options.yAxes.length > 0 ? options.yAxes : options.yAxis ? [options.yAxis] : [];
-
-        const axisResolution = CartesianAxisRegistryResolver.resolve(xAxes, yAxes);
-        if (warnedDiagnosticSignatures) {
-            for (const w of axisResolution.warnings) {
-                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
-            }
-        }
-
-        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve(effectiveSeries, axisResolution);
-        if (warnedDiagnosticSignatures) {
-            for (const w of bindingResolution.warnings) {
-                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
-            }
-        }
-
-        const effectiveRootXField = rootXField || (axisResolution.xAxes[0]?.field as ChartField | undefined);
-
-        // Stage A: Domain preparation
-        const prep = CartesianMultiAxisCoordinator.prepareDomains({
-            axisResolution,
-            bindingResolution,
-            orientation: "vertical",
-            rootData,
-            rootXField: effectiveRootXField
-        });
-
-        // Stage B: Chrome layout
-        const chrome = CartesianMultiAxisCoordinator.computeChrome(prep, {
-            chartHeight: containerHeight,
-            chartWidth: containerWidth,
-            labelMeasurements: options.measurements ?? new Map()
-        });
-
-        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(prep, chrome);
-
-        if (warnedDiagnosticSignatures) {
-            for (const w of prep.warnings) {
-                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
-            }
-        }
-
-        const resolvedContext = CartesianAxisResolvedContextBuilder.create({
-            axisResolution,
-            axisUnitModes: prep.axisUnitModes,
-            axisValidity: prep.axisValidity,
-            axisValidityById: prep.axisValidityById,
-            bindingResolution,
-            invalidStackSeriesIds: prep.stackCoordination?.invalidSeriesIds,
-            orientation: "vertical",
-            resolvedTypes: prep.resolvedTypes,
-            resolvedXTypeByAxisId: prep.resolvedXTypesByAxisId,
-            resolvedYTypeByAxisId: prep.resolvedYTypesByAxisId,
-            rootXField: effectiveRootXField,
-            seriesIncompatibilityById: new Set(
-                axisResolution.xAxes
-                    .flatMap(
-                        a =>
-                            CartesianAxisCompatibilityPolicy.resolveAxisType(
-                                a,
-                                bindingResolution.seriesByXAxis.get(a.axisId) ?? [],
-                                rootData,
-                                effectiveRootXField,
-                                "vertical"
-                            ).incompatibleSeriesIds
-                    )
-                    .concat(
-                        axisResolution.yAxes.flatMap(
-                            a =>
-                                CartesianAxisCompatibilityPolicy.resolveAxisType(
-                                    a,
-                                    bindingResolution.seriesByYAxis.get(a.axisId) ?? [],
-                                    rootData,
-                                    effectiveRootXField,
-                                    "vertical"
-                                ).incompatibleSeriesIds
-                        )
-                    )
-            ),
-            xAxisValidityById: prep.xAxisValidityById,
-            yAxisValidityById: prep.yAxisValidityById
-        });
-
-        const primaryXType =
-            (chrome.baseScales.getXScale(axisResolution.primaryXAxisId)?.type as ChartXAxisType) ?? "category";
-        const primaryYType =
-            (chrome.baseScales.getYScale(axisResolution.primaryYAxisId)?.type as ChartYAxisType) ?? "linear";
-
-        const stackConfigForScene = prep.stackCoordination
-            ? prep.stackCoordination.configuration.groups.map(g => ({
-                  geometryType: g.geometryType,
-                  groupId: g.id,
-                  mode: g.mode,
-                  name: g.name,
-                  registeredSeriesIds: g.registeredSeriesIds,
-                  valid: g.valid,
-                  xAxisId: g.xAxisId,
-                  yAxisId: g.yAxisId
-              }))
-            : [];
-        const stackSignature = prep.stackCoordination?.configuration.signature ?? "";
-
-        const axisTopology = [
-            ...axisResolution.xAxes.map(ax => ({
-                axis: "x" as const,
-                axisId: ax.axisId,
-                dimension: "x" as const,
-                isPrimary: ax.isPrimary,
-                position: ax.position,
-                resolvedType: resolvedContext.resolvedXTypeByAxisId.get(ax.axisId) ?? "category",
-                stackIndex: ax.stackIndex,
-                valid: resolvedContext.xAxisValidityById.get(ax.axisId)?.valid ?? true,
-                visible: ax.visible
-            })),
-            ...axisResolution.yAxes.map(ay => ({
-                axis: "y" as const,
-                axisId: ay.axisId,
-                dimension: "y" as const,
-                isPrimary: ay.isPrimary,
-                position: ay.position,
-                resolvedType: resolvedContext.resolvedYTypeByAxisId.get(ay.axisId) ?? "linear",
-                stackIndex: ay.stackIndex,
-                valid: resolvedContext.yAxisValidityById.get(ay.axisId)?.valid ?? true,
-                visible: ay.visible
-            }))
-        ];
-        const axisTopologySignature = JSON.stringify(axisTopology);
-
-        const navigationProfile: CartesianNavigationProfile = effectiveSeries.some(
-            s => s.type === "scatter" || s.type === "bubble"
-        )
-            ? "xy"
-            : "independent-x";
-
-        const visibleBubbleSeries = effectiveSeries.filter(
-            (s: ChartCartesianSeriesRegistration): s is ChartBubbleSeriesRegistration =>
-                s.visible() && s.type === "bubble"
-        );
-        const bubbleSizeDomain =
-            visibleBubbleSeries.length > 0
-                ? CartesianMarkerLayout.calculateBubbleSizeDomain(
-                      visibleBubbleSeries,
-                      rootData,
-                      effectiveRootXField,
-                      primaryXType as ChartXAxisType,
-                      id => resolvedContext.resolvedSeriesContextById.get(id)
-                  )
-                : undefined;
-
-        const runtime: CartesianXYLayoutRuntime = {
-            axisResolution,
-            axisTopology,
-            axisTopologySignature,
-            baseCoordinateSpace,
-            bindingResolution,
-            bubbleSizeDomain,
-            chrome,
-            containerHeight,
-            containerWidth,
-            effectiveRootXField,
-            effectiveSeries,
-            navigationProfile,
-            orientation: "vertical",
-            plotRect: chrome.plotRect,
-            preparation: prep,
-            primaryXAxisId: axisResolution.primaryXAxisId,
-            primaryXType: primaryXType as import("../scale/chart-scale").ResolvedChartCartesianAxisType,
-            primaryYAxisId: axisResolution.primaryYAxisId,
-            primaryYType: primaryYType as import("../scale/chart-scale").ResolvedChartCartesianAxisType,
-            resolvedContext,
-            rootData,
-            stackConfigForScene,
-            stackSignature,
-            styleResolver
-        };
-
-        // Retained structural density runtime (WP7): built once per authority revision.
-        if (options.downsamplingPolicy?.enabled !== false) {
-            try {
-                const density = buildDensityRuntime(
-                    effectiveSeries,
-                    prep,
-                    resolvedContext,
-                    rootData,
-                    effectiveRootXField ?? "",
-                    options.downsamplingPolicy ?? defaultDownsamplingOptions,
-                    chrome.plotRect.width,
-                    baseCoordinateSpace
-                );
-                return { runtime: attachDensityRuntime(runtime, density) };
-            } catch {
-                // Density preparation must never break ordinary layout; fall back to full layout.
-                return { runtime };
-            }
-        }
-
-        return { runtime };
-    }
-
-    public static projectRuntime(
-        runtime: CartesianXYLayoutRuntime,
-        viewport?: InternalCartesianViewportState,
-        measurements?: ReadonlyMap<string, { height: number; width: number }>,
-        warnedDiagnosticSignatures?: Set<string>
-    ): CartesianLayoutComputation {
-        if (runtime.orientation === "horizontal") {
-            return CartesianHorizontalBarLayoutEngine.projectRuntime(
-                runtime,
-                viewport,
-                measurements,
-                warnedDiagnosticSignatures
-            );
-        }
-
-        const {
-            axisResolution,
-            axisTopology,
-            axisTopologySignature,
-            chrome,
-            containerHeight,
-            containerWidth,
-            effectiveSeries,
-            preparation,
-            primaryXType,
-            primaryYType,
-            stackConfigForScene,
-            stackSignature,
-            styleResolver
-        } = runtime;
-
-        if (chrome.plotRect.width <= 0 || chrome.plotRect.height <= 0) {
-            const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
-            const emptyScene: CartesianXYChartScene = {
-                axes: chrome.baseAxisScenes,
-                axisTopology,
-                axisTopologySignature,
-                barHitTargets: [],
-                cartesianKind: "xy",
-                coordinateSystem: "cartesian",
-                hasRenderableData: false,
-                height: containerHeight,
-                hitTargets: [],
-                interactionAxis: "x",
-                interactionBuckets: [],
-                legendItems,
-                orientation: "vertical",
-                plotRect: chrome.plotRect,
-                primaryXAxisId: axisResolution.primaryXAxisId,
-                primaryYAxisId: axisResolution.primaryYAxisId,
-                series: [],
-                stackConfiguration: stackConfigForScene,
-                stackSignature,
-                width: containerWidth,
-                xAxisType: primaryXType as ChartXAxisType,
-                yAxisType: primaryYType as ChartYAxisType
-            };
-            return { runtime, scene: emptyScene };
-        }
-
-        const proj = CartesianMultiAxisCoordinator.projectViewport(
-            preparation,
-            chrome,
-            viewport,
-            measurements,
-            runtime.baseCoordinateSpace
-        );
-
-        const scene = this.#projectSeriesGeometry(runtime, proj, viewport, warnedDiagnosticSignatures);
-        return { runtime, scene };
-    }
-
-    public static compute(options: CartesianLayoutOptions): CartesianLayoutComputation {
-        const prep = this.prepareRuntime(options);
-        if (prep.fallbackScene) {
-            return { runtime: prep.runtime, scene: prep.fallbackScene };
-        }
-        if (!prep.runtime) {
-            throw new Error("Cartesian runtime could not be prepared");
-        }
-        const canonicalViewport = options.viewport
-            ? CartesianViewportReconciler.reconcile(options.viewport, prep.runtime.baseCoordinateSpace, {
-                  clampToData: true
-              }).viewport
-            : undefined;
-        return this.projectRuntime(
-            prep.runtime,
-            canonicalViewport,
-            options.measurements,
-            options.warnedDiagnosticSignatures
-        );
-    }
-
-    public static computeScene(options: CartesianLayoutOptions): CartesianXYChartScene {
-        return this.compute(options).scene;
-    }
-
-    public static recomputeChrome(
-        runtime: CartesianXYLayoutRuntime,
-        containerWidth: number,
-        containerHeight: number,
-        measurements?: ReadonlyMap<string, { height: number; width: number }>
-    ): CartesianXYLayoutRuntime {
-        if (runtime.orientation === "horizontal") {
-            return CartesianHorizontalBarLayoutEngine.recomputeChrome(
-                runtime,
-                containerWidth,
-                containerHeight,
-                measurements
-            );
-        }
-        const chrome = CartesianMultiAxisCoordinator.computeChrome(runtime.preparation, {
-            chartHeight: containerHeight,
-            chartWidth: containerWidth,
-            labelMeasurements: measurements ?? new Map()
-        });
-        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(runtime.preparation, chrome);
-        return {
-            ...runtime,
-            baseCoordinateSpace,
-            chrome,
-            containerHeight,
-            containerWidth,
-            plotRect: chrome.plotRect
-        };
-    }
-
-    public static projectViewportFastPath(
-        runtime: CartesianXYLayoutRuntime,
-        viewport?: InternalCartesianViewportState,
-        measurements?: ReadonlyMap<string, { height: number; width: number }>,
-        warnedDiagnosticSignatures?: Set<string>
-    ): CartesianLayoutComputation {
-        return this.projectRuntime(runtime, viewport, measurements, warnedDiagnosticSignatures);
-    }
-
     static #projectSeriesGeometry(
         runtime: CartesianXYLayoutRuntime,
         projection: MultiAxisViewportProjectionResult,
@@ -2044,6 +1637,413 @@ export class CartesianLayoutEngine {
             width: containerWidth,
             xAxisType: primaryXType as ChartXAxisType,
             yAxisType: primaryYType as ChartYAxisType
+        };
+    }
+
+    public static compute(options: CartesianLayoutOptions): CartesianLayoutComputation {
+        const prep = this.prepareRuntime(options);
+        if (prep.fallbackScene) {
+            return { runtime: prep.runtime, scene: prep.fallbackScene };
+        }
+        if (!prep.runtime) {
+            throw new Error("Cartesian runtime could not be prepared");
+        }
+        const canonicalViewport = options.viewport
+            ? CartesianViewportReconciler.reconcile(options.viewport, prep.runtime.baseCoordinateSpace, {
+                  clampToData: true
+              }).viewport
+            : undefined;
+        return this.projectRuntime(
+            prep.runtime,
+            canonicalViewport,
+            options.measurements,
+            options.warnedDiagnosticSignatures
+        );
+    }
+
+    public static computeScene(options: CartesianLayoutOptions): CartesianXYChartScene {
+        return this.compute(options).scene;
+    }
+
+    public static prepareRuntime(options: CartesianLayoutOptions): CartesianPreparedLayout {
+        const { containerHeight, containerWidth, rootXField, warnedDiagnosticSignatures } = options;
+        const rootData = options.rootData ?? [];
+        const styleResolver = options.styleResolver ?? new ChartStyleResolver();
+
+        const inputSeries = options.series ?? options.effectiveSeries ?? [];
+        const seriesPolicy = CartesianSeriesPolicy.resolve(inputSeries);
+        const effectiveSeries = seriesPolicy.effectiveSeries;
+        if (warnedDiagnosticSignatures) {
+            for (const d of seriesPolicy.diagnostics) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, d.message, d.signature);
+            }
+        }
+
+        const orientationResolution = CartesianOrientationPolicy.resolve(effectiveSeries);
+        if (warnedDiagnosticSignatures) {
+            for (const d of orientationResolution.diagnostics) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, d);
+            }
+        }
+
+        if (!orientationResolution.valid) {
+            const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
+            const emptyScene: CartesianXYChartScene = {
+                axes: [],
+                axisTopology: [],
+                axisTopologySignature: "[]",
+                barHitTargets: [],
+                cartesianKind: "xy",
+                coordinateSystem: "cartesian",
+                hasRenderableData: false,
+                height: containerHeight,
+                hitTargets: [],
+                interactionAxis: orientationResolution.orientation === "horizontal" ? "y" : "x",
+                interactionBuckets: [],
+                legendItems,
+                orientation: orientationResolution.orientation,
+                plotRect: { height: 0, width: 0, x: 0, y: 0 },
+                primaryXAxisId: "default-x",
+                primaryYAxisId: "default-y",
+                series: [],
+                stackConfiguration: [],
+                stackSignature: "",
+                width: containerWidth,
+                xAxisType: "category",
+                yAxisType: "linear"
+            };
+            return { fallbackScene: emptyScene };
+        }
+
+        const isHorizontal = orientationResolution.orientation === "horizontal";
+
+        if (isHorizontal) {
+            return CartesianHorizontalBarLayoutEngine.prepareRuntime({
+                containerHeight,
+                containerWidth,
+                effectiveSeries,
+                measurements: options.measurements,
+                rootData,
+                rootXField,
+                series: effectiveSeries,
+                styleResolver,
+                viewport: options.viewport,
+                warnedDiagnosticSignatures,
+                xAxis: options.xAxis,
+                xAxes: options.xAxes,
+                yAxis: options.yAxis,
+                yAxes: options.yAxes
+            });
+        }
+
+        const xAxes = options.xAxes && options.xAxes.length > 0 ? options.xAxes : options.xAxis ? [options.xAxis] : [];
+        const yAxes = options.yAxes && options.yAxes.length > 0 ? options.yAxes : options.yAxis ? [options.yAxis] : [];
+
+        const axisResolution = CartesianAxisRegistryResolver.resolve(xAxes, yAxes);
+        if (warnedDiagnosticSignatures) {
+            for (const w of axisResolution.warnings) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
+            }
+        }
+
+        const bindingResolution = CartesianSeriesAxisBindingResolver.resolve(effectiveSeries, axisResolution);
+        if (warnedDiagnosticSignatures) {
+            for (const w of bindingResolution.warnings) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
+            }
+        }
+
+        const effectiveRootXField = rootXField || (axisResolution.xAxes[0]?.field as ChartField | undefined);
+
+        // Stage A: Domain preparation
+        const prep = CartesianMultiAxisCoordinator.prepareDomains({
+            axisResolution,
+            bindingResolution,
+            orientation: "vertical",
+            rootData,
+            rootXField: effectiveRootXField
+        });
+
+        // Stage B: Chrome layout
+        const chrome = CartesianMultiAxisCoordinator.computeChrome(prep, {
+            chartHeight: containerHeight,
+            chartWidth: containerWidth,
+            labelMeasurements: options.measurements ?? new Map()
+        });
+
+        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(prep, chrome);
+
+        if (warnedDiagnosticSignatures) {
+            for (const w of prep.warnings) {
+                ChartDiagnostics.warnOnce(warnedDiagnosticSignatures, w);
+            }
+        }
+
+        const resolvedContext = CartesianAxisResolvedContextBuilder.create({
+            axisResolution,
+            axisUnitModes: prep.axisUnitModes,
+            axisValidity: prep.axisValidity,
+            axisValidityById: prep.axisValidityById,
+            bindingResolution,
+            invalidStackSeriesIds: prep.stackCoordination?.invalidSeriesIds,
+            orientation: "vertical",
+            resolvedTypes: prep.resolvedTypes,
+            resolvedXTypeByAxisId: prep.resolvedXTypesByAxisId,
+            resolvedYTypeByAxisId: prep.resolvedYTypesByAxisId,
+            rootXField: effectiveRootXField,
+            seriesIncompatibilityById: new Set(
+                axisResolution.xAxes
+                    .flatMap(
+                        a =>
+                            CartesianAxisCompatibilityPolicy.resolveAxisType(
+                                a,
+                                bindingResolution.seriesByXAxis.get(a.axisId) ?? [],
+                                rootData,
+                                effectiveRootXField,
+                                "vertical"
+                            ).incompatibleSeriesIds
+                    )
+                    .concat(
+                        axisResolution.yAxes.flatMap(
+                            a =>
+                                CartesianAxisCompatibilityPolicy.resolveAxisType(
+                                    a,
+                                    bindingResolution.seriesByYAxis.get(a.axisId) ?? [],
+                                    rootData,
+                                    effectiveRootXField,
+                                    "vertical"
+                                ).incompatibleSeriesIds
+                        )
+                    )
+            ),
+            xAxisValidityById: prep.xAxisValidityById,
+            yAxisValidityById: prep.yAxisValidityById
+        });
+
+        const primaryXType =
+            (chrome.baseScales.getXScale(axisResolution.primaryXAxisId)?.type as ChartXAxisType) ?? "category";
+        const primaryYType =
+            (chrome.baseScales.getYScale(axisResolution.primaryYAxisId)?.type as ChartYAxisType) ?? "linear";
+
+        const stackConfigForScene = prep.stackCoordination
+            ? prep.stackCoordination.configuration.groups.map(g => ({
+                  geometryType: g.geometryType,
+                  groupId: g.id,
+                  mode: g.mode,
+                  name: g.name,
+                  registeredSeriesIds: g.registeredSeriesIds,
+                  valid: g.valid,
+                  xAxisId: g.xAxisId,
+                  yAxisId: g.yAxisId
+              }))
+            : [];
+        const stackSignature = prep.stackCoordination?.configuration.signature ?? "";
+
+        const axisTopology = [
+            ...axisResolution.xAxes.map(ax => ({
+                axis: "x" as const,
+                axisId: ax.axisId,
+                dimension: "x" as const,
+                isPrimary: ax.isPrimary,
+                position: ax.position,
+                resolvedType: resolvedContext.resolvedXTypeByAxisId.get(ax.axisId) ?? "category",
+                stackIndex: ax.stackIndex,
+                valid: resolvedContext.xAxisValidityById.get(ax.axisId)?.valid ?? true,
+                visible: ax.visible
+            })),
+            ...axisResolution.yAxes.map(ay => ({
+                axis: "y" as const,
+                axisId: ay.axisId,
+                dimension: "y" as const,
+                isPrimary: ay.isPrimary,
+                position: ay.position,
+                resolvedType: resolvedContext.resolvedYTypeByAxisId.get(ay.axisId) ?? "linear",
+                stackIndex: ay.stackIndex,
+                valid: resolvedContext.yAxisValidityById.get(ay.axisId)?.valid ?? true,
+                visible: ay.visible
+            }))
+        ];
+        const axisTopologySignature = JSON.stringify(axisTopology);
+
+        const navigationProfile: CartesianNavigationProfile = effectiveSeries.some(
+            s => s.type === "scatter" || s.type === "bubble"
+        )
+            ? "xy"
+            : "independent-x";
+
+        const visibleBubbleSeries = effectiveSeries.filter(
+            (s: ChartCartesianSeriesRegistration): s is ChartBubbleSeriesRegistration =>
+                s.visible() && s.type === "bubble"
+        );
+        const bubbleSizeDomain =
+            visibleBubbleSeries.length > 0
+                ? CartesianMarkerLayout.calculateBubbleSizeDomain(
+                      visibleBubbleSeries,
+                      rootData,
+                      effectiveRootXField,
+                      primaryXType as ChartXAxisType,
+                      id => resolvedContext.resolvedSeriesContextById.get(id)
+                  )
+                : undefined;
+
+        const runtime: CartesianXYLayoutRuntime = {
+            axisResolution,
+            axisTopology,
+            axisTopologySignature,
+            baseCoordinateSpace,
+            bindingResolution,
+            bubbleSizeDomain,
+            chrome,
+            containerHeight,
+            containerWidth,
+            effectiveRootXField,
+            effectiveSeries,
+            navigationProfile,
+            orientation: "vertical",
+            plotRect: chrome.plotRect,
+            preparation: prep,
+            primaryXAxisId: axisResolution.primaryXAxisId,
+            primaryXType: primaryXType as import("../scale/chart-scale").ResolvedChartCartesianAxisType,
+            primaryYAxisId: axisResolution.primaryYAxisId,
+            primaryYType: primaryYType as import("../scale/chart-scale").ResolvedChartCartesianAxisType,
+            resolvedContext,
+            rootData,
+            stackConfigForScene,
+            stackSignature,
+            styleResolver
+        };
+
+        // Retained structural density runtime (WP7): built once per authority revision.
+        if (options.downsamplingPolicy?.enabled !== false) {
+            try {
+                const density = buildDensityRuntime(
+                    effectiveSeries,
+                    prep,
+                    resolvedContext,
+                    rootData,
+                    effectiveRootXField ?? "",
+                    options.downsamplingPolicy ?? defaultDownsamplingOptions,
+                    chrome.plotRect.width,
+                    baseCoordinateSpace
+                );
+                return { runtime: attachDensityRuntime(runtime, density) };
+            } catch {
+                // Density preparation must never break ordinary layout; fall back to full layout.
+                return { runtime };
+            }
+        }
+
+        return { runtime };
+    }
+
+    public static projectRuntime(
+        runtime: CartesianXYLayoutRuntime,
+        viewport?: InternalCartesianViewportState,
+        measurements?: ReadonlyMap<string, { height: number; width: number }>,
+        warnedDiagnosticSignatures?: Set<string>
+    ): CartesianLayoutComputation {
+        if (runtime.orientation === "horizontal") {
+            return CartesianHorizontalBarLayoutEngine.projectRuntime(
+                runtime,
+                viewport,
+                measurements,
+                warnedDiagnosticSignatures
+            );
+        }
+
+        const {
+            axisResolution,
+            axisTopology,
+            axisTopologySignature,
+            chrome,
+            containerHeight,
+            containerWidth,
+            effectiveSeries,
+            preparation,
+            primaryXType,
+            primaryYType,
+            stackConfigForScene,
+            stackSignature,
+            styleResolver
+        } = runtime;
+
+        if (chrome.plotRect.width <= 0 || chrome.plotRect.height <= 0) {
+            const legendItems = CartesianLegendBuilder.buildSeriesItems(effectiveSeries, styleResolver);
+            const emptyScene: CartesianXYChartScene = {
+                axes: chrome.baseAxisScenes,
+                axisTopology,
+                axisTopologySignature,
+                barHitTargets: [],
+                cartesianKind: "xy",
+                coordinateSystem: "cartesian",
+                hasRenderableData: false,
+                height: containerHeight,
+                hitTargets: [],
+                interactionAxis: "x",
+                interactionBuckets: [],
+                legendItems,
+                orientation: "vertical",
+                plotRect: chrome.plotRect,
+                primaryXAxisId: axisResolution.primaryXAxisId,
+                primaryYAxisId: axisResolution.primaryYAxisId,
+                series: [],
+                stackConfiguration: stackConfigForScene,
+                stackSignature,
+                width: containerWidth,
+                xAxisType: primaryXType as ChartXAxisType,
+                yAxisType: primaryYType as ChartYAxisType
+            };
+            return { runtime, scene: emptyScene };
+        }
+
+        const proj = CartesianMultiAxisCoordinator.projectViewport(
+            preparation,
+            chrome,
+            viewport,
+            measurements,
+            runtime.baseCoordinateSpace
+        );
+
+        const scene = this.#projectSeriesGeometry(runtime, proj, viewport, warnedDiagnosticSignatures);
+        return { runtime, scene };
+    }
+
+    public static projectViewportFastPath(
+        runtime: CartesianXYLayoutRuntime,
+        viewport?: InternalCartesianViewportState,
+        measurements?: ReadonlyMap<string, { height: number; width: number }>,
+        warnedDiagnosticSignatures?: Set<string>
+    ): CartesianLayoutComputation {
+        return this.projectRuntime(runtime, viewport, measurements, warnedDiagnosticSignatures);
+    }
+
+    public static recomputeChrome(
+        runtime: CartesianXYLayoutRuntime,
+        containerWidth: number,
+        containerHeight: number,
+        measurements?: ReadonlyMap<string, { height: number; width: number }>
+    ): CartesianXYLayoutRuntime {
+        if (runtime.orientation === "horizontal") {
+            return CartesianHorizontalBarLayoutEngine.recomputeChrome(
+                runtime,
+                containerWidth,
+                containerHeight,
+                measurements
+            );
+        }
+        const chrome = CartesianMultiAxisCoordinator.computeChrome(runtime.preparation, {
+            chartHeight: containerHeight,
+            chartWidth: containerWidth,
+            labelMeasurements: measurements ?? new Map()
+        });
+        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(runtime.preparation, chrome);
+        return {
+            ...runtime,
+            baseCoordinateSpace,
+            chrome,
+            containerHeight,
+            containerWidth,
+            plotRect: chrome.plotRect
         };
     }
 }

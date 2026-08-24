@@ -21,26 +21,16 @@ export class CanvasChartRenderBackend implements ChartRenderBackend {
         return this.#context;
     }
 
-    public setContext(context: CanvasRenderingContext2D | null): void {
-        this.#context = context;
-    }
-
-    public resize(viewport: ChartRenderViewport): void {
-        this.#viewport = viewport;
-        const canvas = this.#canvas;
-        if (!canvas) {
+    public clear(): void {
+        if (!this.#context) {
             return;
         }
+        CanvasChartRenderer.clear(this.#context, this.#viewport.width, this.#viewport.height);
+    }
 
-        const dpr = viewport.devicePixelRatio || (typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
-        canvas.width = Math.round(viewport.width * dpr);
-        canvas.height = Math.round(viewport.height * dpr);
-        canvas.style.width = `${viewport.width}px`;
-        canvas.style.height = `${viewport.height}px`;
-
-        if (this.#context) {
-            this.#context.setTransform(dpr, 0, 0, dpr, 0, 0);
-        }
+    public destroy(): void {
+        this.#canvas = null;
+        this.#context = null;
     }
 
     public render(frame: ChartRenderFrame): void {
@@ -69,15 +59,25 @@ export class CanvasChartRenderBackend implements ChartRenderBackend {
         );
     }
 
-    public clear(): void {
-        if (!this.#context) {
+    public resize(viewport: ChartRenderViewport): void {
+        this.#viewport = viewport;
+        const canvas = this.#canvas;
+        if (!canvas) {
             return;
         }
-        CanvasChartRenderer.clear(this.#context, this.#viewport.width, this.#viewport.height);
+
+        const dpr = viewport.devicePixelRatio || (typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
+        canvas.width = Math.round(viewport.width * dpr);
+        canvas.height = Math.round(viewport.height * dpr);
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+
+        if (this.#context) {
+            this.#context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
     }
 
-    public destroy(): void {
-        this.#canvas = null;
-        this.#context = null;
+    public setContext(context: CanvasRenderingContext2D | null): void {
+        this.#context = context;
     }
 }

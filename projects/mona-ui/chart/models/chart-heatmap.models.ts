@@ -19,8 +19,8 @@ export interface ChartColorLegendTick {
 
 export interface ChartColorLegendScale {
     readonly formattedMax: string;
-    readonly formattedMin: string;
     readonly formattedMidpoint?: string;
+    readonly formattedMin: string;
     readonly kind: "color";
     readonly midpoint?: number;
     readonly mode: ChartHeatmapColorMode;
@@ -80,8 +80,8 @@ export interface ChartHeatmapColorScaleScene {
     readonly domain: readonly [number, number];
     readonly emptyCellColor: string;
     readonly formattedMax: string;
-    readonly formattedMin: string;
     readonly formattedMidpoint?: string;
+    readonly formattedMin: string;
     readonly kind: "color";
     readonly midpoint?: number;
     readonly mode: ChartHeatmapColorMode;
@@ -136,11 +136,11 @@ export interface HeatmapCellIndex {
     readonly byCoordinate: ReadonlyMap<string, SceneHeatmapCell>;
     readonly byIndex: ReadonlyMap<string, SceneHeatmapCell>;
     readonly cellCount: number;
-    readonly xCount: number;
-    readonly yCount: number;
     get(columnIndex: number, rowIndex: number): SceneHitTarget | undefined;
     getCell(columnIndex: number, rowIndex: number): SceneHeatmapCell | undefined;
     hitTest(pointer: ChartPoint): SceneHitTarget | null;
+    readonly xCount: number;
+    readonly yCount: number;
 }
 
 export interface HeatmapCellClickEvent<T = unknown> {

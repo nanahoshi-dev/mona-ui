@@ -88,9 +88,6 @@ export class DenseMarkIdentityIndex {
  * Resolves real source datums independently of rendered samples.
  */
 export interface CartesianDenseInteractionProvider {
-    readonly seriesId?: string;
-    readonly xAxisId?: string;
-    readonly yAxisId?: string;
     /** Locates the raw source index behind a full-layout mark ID (lazy reverse lookup, §73 / SD3-R11). */
     locateMarkIdentity?(query: CartesianDenseMarkIdentityQuery): number | null;
     materializeAt(sourceIndex: number): SceneHitTarget | null;
@@ -99,6 +96,9 @@ export interface CartesianDenseInteractionProvider {
     /** Visual/hit-radius candidates for pointer containment, when supported. */
     resolvePointerCandidates?(query: CartesianDensePointerQuery): readonly SceneHitTarget[];
     resolveSemanticBucket?(query: CartesianDenseSemanticBucketQuery): readonly SceneHitTarget[];
+    readonly seriesId?: string;
+    readonly xAxisId?: string;
+    readonly yAxisId?: string;
 }
 
 import type { ChartSeriesMarkIdentityAuthority } from "../animation/chart-series-mark-identity-authority";
@@ -108,8 +108,6 @@ import type { ChartSeriesMarkIdentityAuthority } from "../animation/chart-series
  * uses exact branch-and-bound geometry index for X, Y, and XY queries.
  */
 export class CartesianConnectedPathInteractionProvider implements CartesianDenseInteractionProvider {
-    #geometryIndex: DensePointGeometryIndex | null = null;
-    #identityIndex: DenseMarkIdentityIndex | null = null;
     readonly #identity?: ChartSeriesMarkIdentityAuthority;
     readonly #materialize: (sourceIndex: number) => SceneHitTarget | null;
     readonly #scalar: CartesianScalarDensityData;
@@ -118,7 +116,8 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
     public readonly seriesId?: string;
     public readonly xAxisId?: string;
     public readonly yAxisId?: string;
-
+    #geometryIndex: DensePointGeometryIndex | null = null;
+    #identityIndex: DenseMarkIdentityIndex | null = null;
     public constructor(input: {
         readonly identity?: ChartSeriesMarkIdentityAuthority;
         readonly materialize: (sourceIndex: number) => SceneHitTarget | null;
@@ -139,6 +138,12 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
         this.yAxisId = input.yAxisId;
     }
 
+    #resolveSourcePoint(sourceIndex: number): ChartPoint | null {
+        const x = this.#xScale.map(this.#scalar.x[sourceIndex]);
+        const y = this.#yScale.map(this.#scalar.y[sourceIndex]);
+        return x !== undefined && y !== undefined && Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+    }
+
     public locateMarkIdentity(query: CartesianDenseMarkIdentityQuery): number | null {
         if (this.#identity) {
             return this.#identity.locate(query);
@@ -150,10 +155,6 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
             );
         }
         return this.#identityIndex.locate(query);
-    }
-
-    public materializeAt(sourceIndex: number): SceneHitTarget | null {
-        return this.#materialize(sourceIndex);
     }
 
     /**
@@ -185,6 +186,10 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
             }
         }
         return { candidateIndices: candidates };
+    }
+
+    public materializeAt(sourceIndex: number): SceneHitTarget | null {
+        return this.#materialize(sourceIndex);
     }
 
     /**
@@ -275,12 +280,6 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
         return matches;
     }
 
-    #resolveSourcePoint(sourceIndex: number): ChartPoint | null {
-        const x = this.#xScale.map(this.#scalar.x[sourceIndex]);
-        const y = this.#yScale.map(this.#scalar.y[sourceIndex]);
-        return x !== undefined && y !== undefined && Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
-    }
-
     public resolveNearest(query: CartesianDensePointerQuery): readonly SceneHitTarget[] {
         const scalar = this.#scalar;
         const n = scalar.sourceData.length;
@@ -369,6 +368,12 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
         return matches;
     }
 
+    private toPublicX(epochOrNumber: number): number | Date {
+        // Temporal axes map Date instances; numeric axes map raw numbers.
+        const probe = this.#xScale.invert?.(0);
+        return probe instanceof Date ? new Date(epochOrNumber) : epochOrNumber;
+    }
+
     private toSemanticX(pixel: number): number | null {
         const value = this.#xScale.invert?.(pixel);
         if (value === undefined) {
@@ -376,11 +381,5 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
         }
         const num = value instanceof Date ? value.getTime() : Number(value);
         return Number.isFinite(num) ? num : null;
-    }
-
-    private toPublicX(epochOrNumber: number): number | Date {
-        // Temporal axes map Date instances; numeric axes map raw numbers.
-        const probe = this.#xScale.invert?.(0);
-        return probe instanceof Date ? new Date(epochOrNumber) : epochOrNumber;
     }
 }

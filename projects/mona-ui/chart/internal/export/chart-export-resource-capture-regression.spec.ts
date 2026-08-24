@@ -66,8 +66,8 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
 
             const originalFileReader = window.FileReader;
             class MockFileReader {
-                public result: string | null = null;
                 public onloadend: (() => void) | null = null;
+                public result: string | null = null;
                 public readAsDataURL(_blob: Blob) {
                     this.result = mockPngDataUrl;
                     setTimeout(() => this.onloadend?.(), 0);
@@ -98,8 +98,8 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
 
             const originalFileReader = window.FileReader;
             class MockFileReader {
-                public result: string | null = null;
                 public onloadend: (() => void) | null = null;
+                public result: string | null = null;
                 public readAsDataURL(_blob: Blob) {
                     this.result = mockPngDataUrl;
                     setTimeout(() => this.onloadend?.(), 0);

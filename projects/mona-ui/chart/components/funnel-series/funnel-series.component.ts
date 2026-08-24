@@ -53,43 +53,36 @@ export class FunnelSeriesComponent implements OnInit {
     readonly #seriesId = `mona-funnel-series-${++nextFunnelSeriesId}`;
     readonly #stageIdentityMap = new Map<string, StageIdentityInfo>();
     readonly #visibilityRevision = signal<number>(0);
-
-    /**
-     * @description Array of stage data items overriding chart-level root data.
-     * @default undefined
-     */
-    public readonly data = input<readonly unknown[] | undefined>(undefined);
-
     /**
      * @description Property key or accessor extracting stage names.
      * @default "category"
      */
     public readonly categoryField = input<ChartField>("category");
-
     /**
      * @description Optional custom formatter for category names.
      * @default undefined
      */
     public readonly categoryFormatter = input<ChartValueFormatter | undefined>(undefined);
-
     /**
      * @description Uniform fill color for all funnel stages.
      * @default ""
      */
     public readonly color = input<string>("");
-
     /**
      * @description Property key extracting discrete colors per datum.
      * @default undefined
      */
     public readonly colorField = input<ChartField | undefined>(undefined);
-
     /**
      * @description Palette array of colors cycled across stages.
      * @default undefined
      */
     public readonly colors = input<readonly string[] | undefined>(undefined);
-
+    /**
+     * @description Array of stage data items overriding chart-level root data.
+     * @default undefined
+     */
+    public readonly data = input<readonly unknown[] | undefined>(undefined);
     /**
      * @description Property key or accessor function extracting numeric values.
      * @default "value"
@@ -161,7 +154,10 @@ export class FunnelSeriesComponent implements OnInit {
      * @default true
      */
     public readonly showLabels = input<boolean>(true);
-
+    /**
+     * @description Emits when a stage's visibility is toggled via legend or API.
+     */
+    public readonly stageVisibilityChange = output<ChartFunnelStageVisibilityEvent>();
     /**
      * @description Stroke outline color for stage trapezoids.
      * @default ""
@@ -197,11 +193,7 @@ export class FunnelSeriesComponent implements OnInit {
      * @default 0.9
      */
     public readonly widthRatio = input<number>(0.9);
-
-    /**
-     * @description Emits when a stage's visibility is toggled via legend or API.
-     */
-    public readonly stageVisibilityChange = output<ChartFunnelStageVisibilityEvent>();
+    #registered = false;
 
     public constructor() {
         effect(() => {
@@ -300,8 +292,6 @@ export class FunnelSeriesComponent implements OnInit {
             }
         });
     }
-
-    #registered = false;
 
     public isDatumVisible(stageId: string): boolean {
         this.#visibilityRevision();

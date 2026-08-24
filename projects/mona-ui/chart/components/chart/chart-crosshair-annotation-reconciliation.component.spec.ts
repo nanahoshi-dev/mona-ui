@@ -50,22 +50,20 @@ import type { ChartCrosshairMode, ChartCrosshairSnapMode } from "../../models/ch
     `
 })
 class FinalReleaseGateHostComponent {
-    public readonly chart = viewChild(ChartComponent);
-
     public readonly categoryData = signal([
         { category: "Jan", value: 100 },
         { category: "Feb", value: 200 },
         { category: "Mar", value: 300 }
     ]);
-
-    public readonly showCrosshair = signal(true);
+    public readonly chart = viewChild(ChartComponent);
     public readonly crosshairEnabled = signal(true);
+    public readonly crosshairMaxDist = signal(32);
     public readonly crosshairMode = signal<ChartCrosshairMode>("xy");
     public readonly crosshairSnap = signal<ChartCrosshairSnapMode>("nearest");
-    public readonly crosshairMaxDist = signal(32);
     public readonly crosshairXAxisId = signal<string | undefined>("x-main");
     public readonly crosshairYAxisId = signal<string | undefined>("y-main");
     public readonly showAnnotation = signal(true);
+    public readonly showCrosshair = signal(true);
 }
 
 describe("Chart Crosshair and Annotation Reconciliation", () => {

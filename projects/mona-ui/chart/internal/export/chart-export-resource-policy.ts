@@ -34,8 +34,8 @@ export const MAX_EXPORT_RESOURCE_PIXELS = 67108864;
  * never case-modified because base64 payloads are case-sensitive.
  */
 export interface ParsedDataUri {
-    readonly mediaType: string;
     readonly isBase64: boolean;
+    readonly mediaType: string;
     readonly payload: string;
 }
 

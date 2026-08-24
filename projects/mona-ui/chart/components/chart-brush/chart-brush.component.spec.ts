@@ -32,9 +32,9 @@ import type {
 })
 class TestHostComponent {
     public readonly activation = signal<ChartBrushActivation>("drag");
-    public readonly fillColor = signal("#3b82f6");
     public readonly borderColor = signal("#3b82f6");
     public readonly enabled = signal(true);
+    public readonly fillColor = signal("#3b82f6");
     public readonly hitPolicy = signal<ChartBrushHitPolicy>("center");
     public readonly mode = signal<ChartBrushMode>("xy");
     public readonly selectionBehavior = signal<ChartBrushSelectionBehavior>("replace");

@@ -36,13 +36,13 @@ import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
     `
 })
 class BrushMultiAxisHostComponent {
+    public readonly brushYAxisId = signal<string | undefined>("yLeft");
     public readonly chart = viewChild.required(ChartComponent);
     public readonly data = signal([
         { name: "A", v1: 10, v2: 100 },
         { name: "B", v1: 20, v2: 200 },
         { name: "C", v1: 30, v2: 300 }
     ]);
-    public readonly brushYAxisId = signal<string | undefined>("yLeft");
     public brushEvents: ChartBrushChangeEvent[] = [];
 
     public onBrushChange(evt: ChartBrushChangeEvent): void {

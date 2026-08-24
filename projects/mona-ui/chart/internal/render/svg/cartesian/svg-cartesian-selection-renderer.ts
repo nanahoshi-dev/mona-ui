@@ -20,6 +20,14 @@ export class SvgCartesianSelectionRenderer {
         this.#keyedGroup = new SvgKeyedGroup<SceneHitTarget, SVGGElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(
         scene: CartesianSelectionScene | null,
         options: SvgCartesianSelectionOptions
@@ -135,13 +143,5 @@ export class SvgCartesianSelectionRenderer {
                 }
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

@@ -60,85 +60,6 @@ export function toSelectedPoint<T = unknown>(
 }
 
 export class ChartSelectionController {
-    public static normalize(ids: readonly string[] | undefined): readonly string[] {
-        if (!ids || ids.length === 0) {
-            return [];
-        }
-
-        const seen = new Set<string>();
-        const result: string[] = [];
-
-        for (const id of ids) {
-            if (id && !seen.has(id)) {
-                seen.add(id);
-                result.push(id);
-            }
-        }
-
-        return result;
-    }
-
-    public static normalizeForMode(
-        ids: readonly string[] | undefined,
-        mode: ChartSelectionMode
-    ): readonly string[] {
-        const normalized = ChartSelectionController.normalize(ids);
-        if (mode === "single" && normalized.length > 1) {
-            return [normalized[0]];
-        }
-        return normalized;
-    }
-
-    public static applyClick(
-        current: readonly string[],
-        clickedId: string,
-        mode: ChartSelectionMode
-    ): SelectionMutationResult {
-        if (!clickedId) {
-            return { added: [], next: current, removed: [] };
-        }
-
-        if (mode === "single") {
-            if (current.length === 1 && current[0] === clickedId) {
-                return { added: [], next: current, removed: [] };
-            }
-            return {
-                added: [clickedId],
-                next: [clickedId],
-                removed: current.filter(id => id !== clickedId)
-            };
-        }
-
-        // multiple mode
-        const index = current.indexOf(clickedId);
-        if (index >= 0) {
-            const next = current.filter(id => id !== clickedId);
-            return {
-                added: [],
-                next,
-                removed: [clickedId]
-            };
-        } else {
-            const next = [...current, clickedId];
-            return {
-                added: [clickedId],
-                next,
-                removed: []
-            };
-        }
-    }
-
-    public static applyClear(current: readonly string[]): SelectionMutationResult {
-        if (current.length === 0) {
-            return { added: [], next: [], removed: [] };
-        }
-        return {
-            added: [],
-            next: [],
-            removed: [...current]
-        };
-    }
-
     public static applyBrush(
         current: readonly string[],
         matchedIds: readonly string[],
@@ -208,14 +129,54 @@ export class ChartSelectionController {
         return ChartSelectionController.diff(current, next);
     }
 
-    public static diff(previous: readonly string[], next: readonly string[]): SelectionMutationResult {
-        const prevSet = new Set(previous);
-        const nextSet = new Set(next);
+    public static applyClear(current: readonly string[]): SelectionMutationResult {
+        if (current.length === 0) {
+            return { added: [], next: [], removed: [] };
+        }
+        return {
+            added: [],
+            next: [],
+            removed: [...current]
+        };
+    }
 
-        const added = next.filter(id => !prevSet.has(id));
-        const removed = previous.filter(id => !nextSet.has(id));
+    public static applyClick(
+        current: readonly string[],
+        clickedId: string,
+        mode: ChartSelectionMode
+    ): SelectionMutationResult {
+        if (!clickedId) {
+            return { added: [], next: current, removed: [] };
+        }
 
-        return { added, next, removed };
+        if (mode === "single") {
+            if (current.length === 1 && current[0] === clickedId) {
+                return { added: [], next: current, removed: [] };
+            }
+            return {
+                added: [clickedId],
+                next: [clickedId],
+                removed: current.filter(id => id !== clickedId)
+            };
+        }
+
+        // multiple mode
+        const index = current.indexOf(clickedId);
+        if (index >= 0) {
+            const next = current.filter(id => id !== clickedId);
+            return {
+                added: [],
+                next,
+                removed: [clickedId]
+            };
+        } else {
+            const next = [...current, clickedId];
+            return {
+                added: [clickedId],
+                next,
+                removed: []
+            };
+        }
     }
 
     public static buildChangeEvent<T = unknown>(
@@ -256,5 +217,44 @@ export class ChartSelectionController {
             source,
             visibleSelectedPoints
         };
+    }
+
+    public static diff(previous: readonly string[], next: readonly string[]): SelectionMutationResult {
+        const prevSet = new Set(previous);
+        const nextSet = new Set(next);
+
+        const added = next.filter(id => !prevSet.has(id));
+        const removed = previous.filter(id => !nextSet.has(id));
+
+        return { added, next, removed };
+    }
+
+    public static normalize(ids: readonly string[] | undefined): readonly string[] {
+        if (!ids || ids.length === 0) {
+            return [];
+        }
+
+        const seen = new Set<string>();
+        const result: string[] = [];
+
+        for (const id of ids) {
+            if (id && !seen.has(id)) {
+                seen.add(id);
+                result.push(id);
+            }
+        }
+
+        return result;
+    }
+
+    public static normalizeForMode(
+        ids: readonly string[] | undefined,
+        mode: ChartSelectionMode
+    ): readonly string[] {
+        const normalized = ChartSelectionController.normalize(ids);
+        if (mode === "single" && normalized.length > 1) {
+            return [normalized[0]];
+        }
+        return normalized;
     }
 }

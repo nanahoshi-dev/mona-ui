@@ -13,6 +13,14 @@ export class SvgMarkerSeriesRenderer {
         this.#keyedGroup = new SvgKeyedGroup<SceneMarker, SVGCircleElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(scene: ChartBubbleSeriesScene | ChartScatterSeriesScene): void {
         const markers = scene.markers ?? [];
         const { renderOpacity = 1, style } = scene;
@@ -36,13 +44,5 @@ export class SvgMarkerSeriesRenderer {
                 setSvgAttribute(circle, "opacity", markerOpacity <= 0 ? 0 : markerOpacity);
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

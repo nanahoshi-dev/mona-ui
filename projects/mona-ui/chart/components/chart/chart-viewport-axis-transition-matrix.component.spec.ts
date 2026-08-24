@@ -17,9 +17,9 @@ import { PieSeriesComponent } from "../pie-series/pie-series.component";
 import { ChartComponent } from "./chart.component";
 
 interface FlexibleDataItem {
+    cat?: string;
     x: number | string | Date;
     y: number;
-    cat?: string;
 }
 
 @Component({
@@ -56,24 +56,23 @@ interface FlexibleDataItem {
 })
 class EighthRemediationHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
-    public readonly yField = "y";
     public readonly chartKind = signal<"xy" | "pie">("xy");
     public readonly data = signal<FlexibleDataItem[]>([
         { x: 0, y: 10, cat: "A" },
         { x: 50, y: 25, cat: "B" },
         { x: 100, y: 50, cat: "C" }
     ]);
-    public readonly xField = signal("x");
-    public readonly xAxisId = signal("x-main");
-    public readonly xAxisType = signal<ChartXAxisType>("linear");
-    public readonly yAxisId = signal("y-main");
-    public readonly yAxisType = signal<ChartYAxisType>("linear");
+    public readonly emittedEvents: ChartViewportChangeEvent[] = [];
+    public readonly navigation = signal<ChartNavigationInput>(true);
     public readonly showXAxis = signal(true);
     public readonly showYAxis = signal(true);
-    public readonly navigation = signal<ChartNavigationInput>(true);
     public readonly viewport = signal<ChartViewportState | undefined>(undefined);
-    public readonly emittedEvents: ChartViewportChangeEvent[] = [];
-
+    public readonly xAxisId = signal("x-main");
+    public readonly xAxisType = signal<ChartXAxisType>("linear");
+    public readonly xField = signal("x");
+    public readonly yAxisId = signal("y-main");
+    public readonly yAxisType = signal<ChartYAxisType>("linear");
+    public readonly yField = "y";
     public onViewportChange(event: ChartViewportChangeEvent): void {
         this.emittedEvents.push(event);
     }

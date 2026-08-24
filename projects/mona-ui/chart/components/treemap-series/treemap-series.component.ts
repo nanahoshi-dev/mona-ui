@@ -147,7 +147,10 @@ export class TreemapSeriesComponent implements OnInit {
      * @default "Treemap"
      */
     public readonly name = input<string>("Treemap");
-
+    /**
+     * @description Emits when an individual node or branch's visibility is toggled via the legend.
+     */
+    public readonly nodeVisibilityChange = output<ChartTreemapNodeVisibilityEvent>();
     /**
      * @description Inner padding in pixels between sibling treemap rectangles.
      * @default 2
@@ -231,12 +234,6 @@ export class TreemapSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model<boolean>(true);
-
-    /**
-     * @description Emits when an individual node or branch's visibility is toggled via the legend.
-     */
-    public readonly nodeVisibilityChange = output<ChartTreemapNodeVisibilityEvent>();
-
     #registered = false;
 
     public constructor() {

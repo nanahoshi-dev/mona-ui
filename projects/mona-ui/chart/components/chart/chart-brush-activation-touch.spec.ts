@@ -28,12 +28,12 @@ import type { ChartBrushActivation, ChartBrushChangeEvent } from "../../models/c
     `
 })
 class BrushActivationHostComponent {
+    public readonly activation = signal<ChartBrushActivation>("shift-drag");
     public readonly chart = viewChild.required(ChartComponent);
     public readonly data = signal([
         { name: "A", value: 10 },
         { name: "B", value: 20 }
     ]);
-    public readonly activation = signal<ChartBrushActivation>("shift-drag");
     public brushEvents: ChartBrushChangeEvent[] = [];
 
     public onBrushChange(evt: ChartBrushChangeEvent): void {

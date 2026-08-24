@@ -36,83 +36,133 @@ export function axisTargetsDimension(axes: NormalizedChartSynchronizationOptions
 }
 
 export class ChartSynchronizationAxisMapper {
-    /**
-     * Resolves axis identity mapping channel-neutrally (WP1 / SD2-R01).
-     * Channel filtering (viewport.axes vs crosshair.axes) is owned by callers.
-     */
-    public static resolveMappedAxisIdentity(
-        sourceRef: ChartViewportAxisRef,
-        sourceIsPrimary: boolean,
-        coordinateSpace: CartesianAxisCoordinateSpace,
-        axisMappings: readonly ChartSynchronizationAxisMapping[] | undefined,
-        warned: Set<string>,
-        primaryAxisIds?: { readonly x?: string; readonly y?: string }
-    ): ChartViewportAxisRef | null {
-        const explicit = axisMappings?.find(
-            m => m.source.axis === sourceRef.axis && m.source.axisId === sourceRef.axisId
+    static #mapCategoryKeysToTarget(
+        incoming: ChartSynchronizationAxisWindow,
+        targetSnap: CartesianAxisCoordinateSnapshot,
+        targetRef: ChartViewportAxisRef,
+        mapperOptions: ViewportSemanticMapperOptions,
+        warned: Set<string>
+    ): InternalAxisViewport | undefined {
+        if (!incoming.window || incoming.window.kind !== "category") {
+            return undefined;
+        }
+        const keys = incoming.visibleCategoryKeys;
+        if (!keys || keys.length === 0) {
+            return undefined;
+        }
+
+        const targetDomain = targetSnap.baseDomain as readonly string[];
+        const indexByKey = new Map<string, number>();
+        for (let i = 0; i < targetDomain.length; i++) {
+            indexByKey.set(String(targetDomain[i]), i);
+        }
+
+        const startIndex = indexByKey.get(keys[0]);
+        if (startIndex === undefined) {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Synchronized category window references keys missing from the target base domain. Axis "${targetRef.axis}:${targetRef.axisId}" ignored.`,
+                `sync-category-key-missing-${targetRef.axis}-${targetRef.axisId}`
+            );
+            return undefined;
+        }
+
+        for (let i = 0; i < keys.length; i++) {
+            const targetIdx = indexByKey.get(keys[i]);
+            if (targetIdx === undefined || targetIdx !== startIndex + i) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Synchronized category key sequence does not match the target domain sequence. Axis "${targetRef.axis}:${targetRef.axisId}" ignored.`,
+                    `sync-category-sequence-mismatch-${targetRef.axis}-${targetRef.axisId}`
+                );
+                return undefined;
+            }
+        }
+
+        const rawStart = startIndex;
+        const rawEndExclusive = startIndex + keys.length;
+
+        const constraint = findConstraint(mapperOptions, targetRef);
+        const [cStart, cEnd] = CartesianViewportConstraints.applyCategoryConstraints(
+            rawStart,
+            rawEndExclusive,
+            targetDomain.length,
+            constraint,
+            mapperOptions.minVisibleCategories ?? 1,
+            mapperOptions.clampToData !== false
         );
-        if (explicit) {
-            if (explicit.source.axis !== explicit.target.axis) {
-                ChartDiagnostics.warnOnce(
-                    warned,
-                    `Cross-dimension synchronization mapping from "${explicit.source.axis}:${explicit.source.axisId}" to "${explicit.target.axis}:${explicit.target.axisId}" is not supported. Ignoring mapped axis.`,
-                    `sync-mapping-cross-dim-${explicit.source.axis}-${explicit.target.axis}`
-                );
-                return null;
-            }
-            const snap = coordinateSpace.get(explicit.target);
-            if (!snap || !snap.valid) {
-                ChartDiagnostics.warnOnce(
-                    warned,
-                    `Synchronization mapping target "${explicit.target.axis}:${explicit.target.axisId}" is not a valid axis. Ignoring mapped axis.`,
-                    `sync-mapping-invalid-target-${explicit.target.axis}-${explicit.target.axisId}`
-                );
-                return null;
-            }
-            return explicit.target;
+
+        if (cStart === 0 && cEnd === targetDomain.length) {
+            return undefined;
         }
 
-        const sameIdSnap = coordinateSpace.get(sourceRef);
-        if (sameIdSnap && sameIdSnap.valid) {
-            return sourceRef;
-        }
-
-        if (sourceIsPrimary) {
-            const configuredPrimaryId = sourceRef.axis === "x" ? primaryAxisIds?.x : primaryAxisIds?.y;
-            const primaryId = configuredPrimaryId && coordinateSpace.get({ axis: sourceRef.axis, axisId: configuredPrimaryId })?.valid
-                ? configuredPrimaryId
-                : firstValidAxisId(coordinateSpace, sourceRef.axis);
-            if (primaryId !== null && primaryId !== undefined) {
-                return { axis: sourceRef.axis, axisId: primaryId };
-            }
-        }
-
-        return null;
+        return {
+            axis: targetRef.axis,
+            axisId: targetRef.axisId,
+            endIndexExclusive: cEnd,
+            firstVisibleKey: String(targetDomain[cStart]),
+            kind: "category",
+            lastVisibleKey: String(targetDomain[cEnd - 1]),
+            startIndex: cStart
+        };
     }
 
-    public static resolveTargetAxisRef(
-        sourceRef: ChartViewportAxisRef,
-        sourceIsPrimary: boolean,
-        coordinateSpace: CartesianAxisCoordinateSpace,
-        options: NormalizedChartSynchronizationOptions,
-        warned: Set<string>,
-        primaryAxisIds?: { readonly x?: string; readonly y?: string }
-    ): ChartViewportAxisRef | null {
-        if (!axisTargetsDimension(options.viewport.axes, sourceRef.axis)) {
-            return null;
+    static #mapDomainIncoming(
+        incoming: ChartSynchronizationAxisWindow,
+        targetSnap: CartesianAxisCoordinateSnapshot,
+        targetRef: ChartViewportAxisRef,
+        mapperOptions: ViewportSemanticMapperOptions,
+        warned: Set<string>
+    ): InternalAxisViewport | undefined {
+        if (incoming.window === null) {
+            return undefined;
         }
-        const targetRef = this.resolveMappedAxisIdentity(
-            sourceRef,
-            sourceIsPrimary,
-            coordinateSpace,
-            options.axisMappings,
-            warned,
-            primaryAxisIds
+
+        const isTemporal = temporalTypes.has(incoming.sourceType);
+        const isNumeric = numericTypes.has(incoming.sourceType);
+        const targetIsCategory = targetSnap.resolvedType === "category";
+
+        if (incoming.sourceType === "category" || targetIsCategory) {
+            if (incoming.sourceType !== "category" || !targetIsCategory) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Synchronization mode "domain" cannot map ${incoming.sourceType} to ${targetSnap.resolvedType} axes. Axis "${incoming.sourceRef.axis}:${incoming.sourceRef.axisId}" ignored.`,
+                    `sync-domain-incompatible-${incoming.sourceType}-${targetSnap.resolvedType}`
+                );
+                return undefined;
+            }
+            return this.#mapCategoryKeysToTarget(incoming, targetSnap, targetRef, mapperOptions, warned);
+        }
+
+        if (isTemporal !== temporalTypes.has(targetSnap.resolvedType)) {
+            ChartDiagnostics.warnOnce(
+                warned,
+                `Synchronization mode "domain" cannot map temporal and numeric axes. Axis "${incoming.sourceRef.axis}:${incoming.sourceRef.axisId}" ignored.`,
+                `sync-domain-type-mismatch-${incoming.sourceRef.axis}-${incoming.sourceRef.axisId}`
+            );
+            return undefined;
+        }
+
+        if (!isNumeric && !isTemporal) {
+            return undefined;
+        }
+
+        if (incoming.window.kind !== "continuous") {
+            return undefined;
+        }
+
+        return normalizeAxisWindow(
+            {
+                axis: targetRef.axis,
+                axisId: targetRef.axisId,
+                kind: "continuous",
+                max: incoming.window.max,
+                min: incoming.window.min
+            },
+            targetSnap,
+            findConstraint(mapperOptions, targetRef),
+            mapperOptions
         );
-        if (!targetRef || !axisTargetsDimension(options.viewport.axes, targetRef.axis)) {
-            return null;
-        }
-        return targetRef;
     }
 
     public static mapIncomingAxes(
@@ -190,133 +240,83 @@ export class ChartSynchronizationAxisMapper {
         return { changedAxes, viewport: { x: nextX, y: nextY } };
     }
 
-    static #mapDomainIncoming(
-        incoming: ChartSynchronizationAxisWindow,
-        targetSnap: CartesianAxisCoordinateSnapshot,
-        targetRef: ChartViewportAxisRef,
-        mapperOptions: ViewportSemanticMapperOptions,
-        warned: Set<string>
-    ): InternalAxisViewport | undefined {
-        if (incoming.window === null) {
-            return undefined;
-        }
-
-        const isTemporal = temporalTypes.has(incoming.sourceType);
-        const isNumeric = numericTypes.has(incoming.sourceType);
-        const targetIsCategory = targetSnap.resolvedType === "category";
-
-        if (incoming.sourceType === "category" || targetIsCategory) {
-            if (incoming.sourceType !== "category" || !targetIsCategory) {
+    /**
+     * Resolves axis identity mapping channel-neutrally (WP1 / SD2-R01).
+     * Channel filtering (viewport.axes vs crosshair.axes) is owned by callers.
+     */
+    public static resolveMappedAxisIdentity(
+        sourceRef: ChartViewportAxisRef,
+        sourceIsPrimary: boolean,
+        coordinateSpace: CartesianAxisCoordinateSpace,
+        axisMappings: readonly ChartSynchronizationAxisMapping[] | undefined,
+        warned: Set<string>,
+        primaryAxisIds?: { readonly x?: string; readonly y?: string }
+    ): ChartViewportAxisRef | null {
+        const explicit = axisMappings?.find(
+            m => m.source.axis === sourceRef.axis && m.source.axisId === sourceRef.axisId
+        );
+        if (explicit) {
+            if (explicit.source.axis !== explicit.target.axis) {
                 ChartDiagnostics.warnOnce(
                     warned,
-                    `Synchronization mode "domain" cannot map ${incoming.sourceType} to ${targetSnap.resolvedType} axes. Axis "${incoming.sourceRef.axis}:${incoming.sourceRef.axisId}" ignored.`,
-                    `sync-domain-incompatible-${incoming.sourceType}-${targetSnap.resolvedType}`
+                    `Cross-dimension synchronization mapping from "${explicit.source.axis}:${explicit.source.axisId}" to "${explicit.target.axis}:${explicit.target.axisId}" is not supported. Ignoring mapped axis.`,
+                    `sync-mapping-cross-dim-${explicit.source.axis}-${explicit.target.axis}`
                 );
-                return undefined;
+                return null;
             }
-            return this.#mapCategoryKeysToTarget(incoming, targetSnap, targetRef, mapperOptions, warned);
+            const snap = coordinateSpace.get(explicit.target);
+            if (!snap || !snap.valid) {
+                ChartDiagnostics.warnOnce(
+                    warned,
+                    `Synchronization mapping target "${explicit.target.axis}:${explicit.target.axisId}" is not a valid axis. Ignoring mapped axis.`,
+                    `sync-mapping-invalid-target-${explicit.target.axis}-${explicit.target.axisId}`
+                );
+                return null;
+            }
+            return explicit.target;
         }
 
-        if (isTemporal !== temporalTypes.has(targetSnap.resolvedType)) {
-            ChartDiagnostics.warnOnce(
-                warned,
-                `Synchronization mode "domain" cannot map temporal and numeric axes. Axis "${incoming.sourceRef.axis}:${incoming.sourceRef.axisId}" ignored.`,
-                `sync-domain-type-mismatch-${incoming.sourceRef.axis}-${incoming.sourceRef.axisId}`
-            );
-            return undefined;
+        const sameIdSnap = coordinateSpace.get(sourceRef);
+        if (sameIdSnap && sameIdSnap.valid) {
+            return sourceRef;
         }
 
-        if (!isNumeric && !isTemporal) {
-            return undefined;
+        if (sourceIsPrimary) {
+            const configuredPrimaryId = sourceRef.axis === "x" ? primaryAxisIds?.x : primaryAxisIds?.y;
+            const primaryId = configuredPrimaryId && coordinateSpace.get({ axis: sourceRef.axis, axisId: configuredPrimaryId })?.valid
+                ? configuredPrimaryId
+                : firstValidAxisId(coordinateSpace, sourceRef.axis);
+            if (primaryId !== null && primaryId !== undefined) {
+                return { axis: sourceRef.axis, axisId: primaryId };
+            }
         }
 
-        if (incoming.window.kind !== "continuous") {
-            return undefined;
-        }
-
-        return normalizeAxisWindow(
-            {
-                axis: targetRef.axis,
-                axisId: targetRef.axisId,
-                kind: "continuous",
-                max: incoming.window.max,
-                min: incoming.window.min
-            },
-            targetSnap,
-            findConstraint(mapperOptions, targetRef),
-            mapperOptions
-        );
+        return null;
     }
 
-    static #mapCategoryKeysToTarget(
-        incoming: ChartSynchronizationAxisWindow,
-        targetSnap: CartesianAxisCoordinateSnapshot,
-        targetRef: ChartViewportAxisRef,
-        mapperOptions: ViewportSemanticMapperOptions,
-        warned: Set<string>
-    ): InternalAxisViewport | undefined {
-        if (!incoming.window || incoming.window.kind !== "category") {
-            return undefined;
+    public static resolveTargetAxisRef(
+        sourceRef: ChartViewportAxisRef,
+        sourceIsPrimary: boolean,
+        coordinateSpace: CartesianAxisCoordinateSpace,
+        options: NormalizedChartSynchronizationOptions,
+        warned: Set<string>,
+        primaryAxisIds?: { readonly x?: string; readonly y?: string }
+    ): ChartViewportAxisRef | null {
+        if (!axisTargetsDimension(options.viewport.axes, sourceRef.axis)) {
+            return null;
         }
-        const keys = incoming.visibleCategoryKeys;
-        if (!keys || keys.length === 0) {
-            return undefined;
-        }
-
-        const targetDomain = targetSnap.baseDomain as readonly string[];
-        const indexByKey = new Map<string, number>();
-        for (let i = 0; i < targetDomain.length; i++) {
-            indexByKey.set(String(targetDomain[i]), i);
-        }
-
-        const startIndex = indexByKey.get(keys[0]);
-        if (startIndex === undefined) {
-            ChartDiagnostics.warnOnce(
-                warned,
-                `Synchronized category window references keys missing from the target base domain. Axis "${targetRef.axis}:${targetRef.axisId}" ignored.`,
-                `sync-category-key-missing-${targetRef.axis}-${targetRef.axisId}`
-            );
-            return undefined;
-        }
-
-        for (let i = 0; i < keys.length; i++) {
-            const targetIdx = indexByKey.get(keys[i]);
-            if (targetIdx === undefined || targetIdx !== startIndex + i) {
-                ChartDiagnostics.warnOnce(
-                    warned,
-                    `Synchronized category key sequence does not match the target domain sequence. Axis "${targetRef.axis}:${targetRef.axisId}" ignored.`,
-                    `sync-category-sequence-mismatch-${targetRef.axis}-${targetRef.axisId}`
-                );
-                return undefined;
-            }
-        }
-
-        const rawStart = startIndex;
-        const rawEndExclusive = startIndex + keys.length;
-
-        const constraint = findConstraint(mapperOptions, targetRef);
-        const [cStart, cEnd] = CartesianViewportConstraints.applyCategoryConstraints(
-            rawStart,
-            rawEndExclusive,
-            targetDomain.length,
-            constraint,
-            mapperOptions.minVisibleCategories ?? 1,
-            mapperOptions.clampToData !== false
+        const targetRef = this.resolveMappedAxisIdentity(
+            sourceRef,
+            sourceIsPrimary,
+            coordinateSpace,
+            options.axisMappings,
+            warned,
+            primaryAxisIds
         );
-
-        if (cStart === 0 && cEnd === targetDomain.length) {
-            return undefined;
+        if (!targetRef || !axisTargetsDimension(options.viewport.axes, targetRef.axis)) {
+            return null;
         }
-
-        return {
-            axis: targetRef.axis,
-            axisId: targetRef.axisId,
-            endIndexExclusive: cEnd,
-            firstVisibleKey: String(targetDomain[cStart]),
-            kind: "category",
-            lastVisibleKey: String(targetDomain[cEnd - 1]),
-            startIndex: cStart
-        };
+        return targetRef;
     }
 }
 

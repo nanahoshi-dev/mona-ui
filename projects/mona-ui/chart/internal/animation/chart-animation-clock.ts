@@ -29,16 +29,27 @@ export class BrowserAnimationClock implements ChartAnimationClock {
 }
 
 export class FakeAnimationClock implements ChartAnimationClock {
+    readonly #scheduledCallbacks = new Map<number, FrameRequestCallback>();
     #currentTime: number;
     #nextId = 1;
-    readonly #scheduledCallbacks = new Map<number, FrameRequestCallback>();
-
     public constructor(initialTime = 0) {
         this.#currentTime = initialTime;
     }
 
     public cancelFrame(id: number): void {
         this.#scheduledCallbacks.delete(id);
+    }
+
+    public flush(): void {
+        const currentCallbacks = Array.from(this.#scheduledCallbacks.entries());
+        this.#scheduledCallbacks.clear();
+        for (const [, callback] of currentCallbacks) {
+            callback(this.#currentTime);
+        }
+    }
+
+    public hasPendingFrames(): boolean {
+        return this.#scheduledCallbacks.size > 0;
     }
 
     public now(): number {
@@ -49,6 +60,10 @@ export class FakeAnimationClock implements ChartAnimationClock {
         const id = this.#nextId++;
         this.#scheduledCallbacks.set(id, callback);
         return id;
+    }
+
+    public setTime(newTime: number): void {
+        this.#currentTime = newTime;
     }
 
     public step(deltaTimeMs = 16.666): void {
@@ -62,21 +77,5 @@ export class FakeAnimationClock implements ChartAnimationClock {
 
     public tick(deltaTimeMs = 16.666): void {
         this.step(deltaTimeMs);
-    }
-
-    public setTime(newTime: number): void {
-        this.#currentTime = newTime;
-    }
-
-    public flush(): void {
-        const currentCallbacks = Array.from(this.#scheduledCallbacks.entries());
-        this.#scheduledCallbacks.clear();
-        for (const [, callback] of currentCallbacks) {
-            callback(this.#currentTime);
-        }
-    }
-
-    public hasPendingFrames(): boolean {
-        return this.#scheduledCallbacks.size > 0;
     }
 }

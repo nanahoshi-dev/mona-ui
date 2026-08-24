@@ -104,15 +104,15 @@ class DensityBrushHostComponent {
     `
 })
 class CrossSeriesDensityBrushHostComponent {
-    public readonly chart = viewChild.required(ChartComponent);
-    public readonly zData = signal<readonly { readonly x: number; readonly y: number }[]>([]);
     public readonly aData = signal<readonly { readonly x: number; readonly y: number }[]>([]);
+    public readonly chart = viewChild.required(ChartComponent);
     public readonly downsampling = signal<ChartDownsamplingInput>({
         enabled: true,
         maxPoints: 8,
         samplesPerPixel: 1,
         threshold: 0
     });
+    public readonly zData = signal<readonly { readonly x: number; readonly y: number }[]>([]);
     public brushEvents: ChartBrushChangeEvent[] = [];
 
     public onBrushChange(event: ChartBrushChangeEvent): void {

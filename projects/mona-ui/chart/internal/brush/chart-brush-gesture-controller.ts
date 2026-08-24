@@ -53,6 +53,63 @@ export class ChartBrushGestureController {
         return { x: event.clientX ?? 0, y: event.clientY ?? 0 };
     }
 
+    public cancel(element?: HTMLElement): boolean {
+        if (!this.#session) {
+            return false;
+        }
+
+        const wasBrushing = this.#session.thresholdMet;
+        const pointerId = this.#session.pointerId;
+        this.#session = null;
+
+        if (element && typeof element.releasePointerCapture === "function") {
+            try {
+                element.releasePointerCapture(pointerId);
+            } catch {
+                // Ignore
+            }
+        }
+
+        return wasBrushing;
+    }
+
+    public computeBounds(
+        p1: ChartPoint,
+        p2: ChartPoint,
+        mode: ChartBrushMode,
+        plotRect: ChartRect
+    ): ChartRect {
+        const minX = Math.max(plotRect.x, Math.min(p1.x, p2.x));
+        const maxX = Math.min(plotRect.x + plotRect.width, Math.max(p1.x, p2.x));
+        const minY = Math.max(plotRect.y, Math.min(p1.y, p2.y));
+        const maxY = Math.min(plotRect.y + plotRect.height, Math.max(p1.y, p2.y));
+
+        switch (mode) {
+            case "x":
+                return {
+                    height: plotRect.height,
+                    width: Math.max(1, maxX - minX),
+                    x: minX,
+                    y: plotRect.y
+                };
+            case "y":
+                return {
+                    height: Math.max(1, maxY - minY),
+                    width: plotRect.width,
+                    x: plotRect.x,
+                    y: minY
+                };
+            case "xy":
+            default:
+                return {
+                    height: Math.max(1, maxY - minY),
+                    width: Math.max(1, maxX - minX),
+                    x: minX,
+                    y: minY
+                };
+        }
+    }
+
     public onPointerDown(
         event: PointerEvent,
         plotRect: ChartRect,
@@ -125,6 +182,20 @@ export class ChartBrushGestureController {
             thresholdMet: false
         };
 
+        return true;
+    }
+
+    public onPointerLeave(event?: PointerEvent): boolean {
+        if (!this.#session) {
+            return false;
+        }
+        if (event && this.#session.pointerId !== event.pointerId) {
+            return false;
+        }
+        if (!this.#session.thresholdMet) {
+            this.#session = null;
+            return false;
+        }
         return true;
     }
 
@@ -212,76 +283,5 @@ export class ChartBrushGestureController {
         }
 
         return null;
-    }
-
-    public onPointerLeave(event?: PointerEvent): boolean {
-        if (!this.#session) {
-            return false;
-        }
-        if (event && this.#session.pointerId !== event.pointerId) {
-            return false;
-        }
-        if (!this.#session.thresholdMet) {
-            this.#session = null;
-            return false;
-        }
-        return true;
-    }
-
-    public cancel(element?: HTMLElement): boolean {
-        if (!this.#session) {
-            return false;
-        }
-
-        const wasBrushing = this.#session.thresholdMet;
-        const pointerId = this.#session.pointerId;
-        this.#session = null;
-
-        if (element && typeof element.releasePointerCapture === "function") {
-            try {
-                element.releasePointerCapture(pointerId);
-            } catch {
-                // Ignore
-            }
-        }
-
-        return wasBrushing;
-    }
-
-    public computeBounds(
-        p1: ChartPoint,
-        p2: ChartPoint,
-        mode: ChartBrushMode,
-        plotRect: ChartRect
-    ): ChartRect {
-        const minX = Math.max(plotRect.x, Math.min(p1.x, p2.x));
-        const maxX = Math.min(plotRect.x + plotRect.width, Math.max(p1.x, p2.x));
-        const minY = Math.max(plotRect.y, Math.min(p1.y, p2.y));
-        const maxY = Math.min(plotRect.y + plotRect.height, Math.max(p1.y, p2.y));
-
-        switch (mode) {
-            case "x":
-                return {
-                    height: plotRect.height,
-                    width: Math.max(1, maxX - minX),
-                    x: minX,
-                    y: plotRect.y
-                };
-            case "y":
-                return {
-                    height: Math.max(1, maxY - minY),
-                    width: plotRect.width,
-                    x: plotRect.x,
-                    y: minY
-                };
-            case "xy":
-            default:
-                return {
-                    height: Math.max(1, maxY - minY),
-                    width: Math.max(1, maxX - minX),
-                    x: minX,
-                    y: minY
-                };
-        }
     }
 }

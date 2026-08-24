@@ -29,10 +29,10 @@ import type { ChartCrosshairMode, ChartCrosshairSnapMode } from "../../models/ch
     `
 })
 class TestHostComponent {
+    public readonly color = signal<string | undefined>("#3b82f6");
     public readonly enabled = signal(true);
     public readonly mode = signal<ChartCrosshairMode>("xy");
     public readonly snap = signal<ChartCrosshairSnapMode>("pointer");
-    public readonly color = signal<string | undefined>("#3b82f6");
     public readonly useTemplate = signal(false);
 }
 

@@ -31,9 +31,9 @@ import type { ChartOverlayLayer } from "../../models/chart-annotation.models";
 })
 class TestHostComponent {
     public readonly from = signal<number | string>(20);
-    public readonly to = signal<number | string>(60);
     public readonly label = signal("Optimal Range");
     public readonly layer = signal<ChartOverlayLayer>("underlay");
+    public readonly to = signal<number | string>(60);
     public readonly useTemplate = signal(false);
 }
 

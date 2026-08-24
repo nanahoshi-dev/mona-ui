@@ -13,12 +13,36 @@ export class SvgRangeAreaSeriesRenderer {
     readonly #container: SVGGElement;
     #fillPath: SVGPathElement | null = null;
     #fromPath: SVGPathElement | null = null;
-    #toPath: SVGPathElement | null = null;
-    #markersGroup: SVGGElement | null = null;
     #markerKeyedGroup: SvgKeyedGroup<SceneRangeAreaPoint, SVGGElement> | null = null;
-
+    #markersGroup: SVGGElement | null = null;
+    #toPath: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
+    }
+
+    public clear(): void {
+        if (this.#fillPath) {
+            this.#fillPath.remove();
+            this.#fillPath = null;
+        }
+        if (this.#fromPath) {
+            this.#fromPath.remove();
+            this.#fromPath = null;
+        }
+        if (this.#toPath) {
+            this.#toPath.remove();
+            this.#toPath = null;
+        }
+        if (this.#markersGroup) {
+            this.#markerKeyedGroup?.clear();
+            this.#markersGroup.remove();
+            this.#markersGroup = null;
+            this.#markerKeyedGroup = null;
+        }
+    }
+
+    public destroy(): void {
+        this.clear();
     }
 
     public render(scene: ChartRangeAreaSeriesScene): void {
@@ -136,30 +160,5 @@ export class SvgRangeAreaSeriesRenderer {
             this.#markersGroup = null;
             this.#markerKeyedGroup = null;
         }
-    }
-
-    public clear(): void {
-        if (this.#fillPath) {
-            this.#fillPath.remove();
-            this.#fillPath = null;
-        }
-        if (this.#fromPath) {
-            this.#fromPath.remove();
-            this.#fromPath = null;
-        }
-        if (this.#toPath) {
-            this.#toPath.remove();
-            this.#toPath = null;
-        }
-        if (this.#markersGroup) {
-            this.#markerKeyedGroup?.clear();
-            this.#markersGroup.remove();
-            this.#markersGroup = null;
-            this.#markerKeyedGroup = null;
-        }
-    }
-
-    public destroy(): void {
-        this.clear();
     }
 }

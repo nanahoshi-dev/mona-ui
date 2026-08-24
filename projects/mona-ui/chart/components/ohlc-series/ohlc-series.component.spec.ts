@@ -28,8 +28,8 @@ class TestOhlcHostComponent {
     ]);
     public readonly seriesName = signal<string>("Bars");
     public readonly tickLength = signal<number | undefined>(8);
-    public readonly wickWidth = signal<number>(2);
     public readonly visible = signal<boolean>(true);
+    public readonly wickWidth = signal<number>(2);
 }
 
 describe("MonaOhlcSeriesComponent", () => {

@@ -25,11 +25,11 @@ import type { ChartSelectionChangeEvent, ChartSelectionMode } from "../../models
 })
 class TestHostComponent {
     public readonly color = signal("#3b82f6");
+    public readonly defaultSelectedMarkIds = signal<string[]>(["mark-1"]);
     public readonly enabled = signal(true);
     public readonly mode = signal<ChartSelectionMode>("single");
-    public readonly selectedMarkIds = signal<string[] | undefined>(undefined);
-    public readonly defaultSelectedMarkIds = signal<string[]>(["mark-1"]);
     public readonly retainOnDataChange = signal(true);
+    public readonly selectedMarkIds = signal<string[] | undefined>(undefined);
     public lastEvent: ChartSelectionChangeEvent | null = null;
 
     public onSelectionChange(event: ChartSelectionChangeEvent): void {

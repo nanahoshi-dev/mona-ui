@@ -21,6 +21,7 @@ let nextSeriesId = 0;
     }
 })
 export class OhlcSeriesComponent implements OnInit {
+    protected readonly effectiveTickLength = computed(() => this.tickLength() ?? this.tickWidth());
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -54,15 +55,12 @@ export class OhlcSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly data = input<readonly unknown[] | undefined>(undefined);
-
+    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
     /**
      * @description Data label display options or boolean flag enabling default labels.
      * @default false
      */
     public readonly dataLabels = input<ChartDataLabelsInput>(false);
-
-    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
-
     /**
      * @description Color for falling / bearish bars (close < open).
      * @default ""
@@ -137,9 +135,6 @@ export class OhlcSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly tickWidth = input<number | undefined>(undefined);
-
-    protected readonly effectiveTickLength = computed(() => this.tickLength() ?? this.tickWidth());
-
     /**
      * @description Additional CSS classes applied to the series host element.
      * @default ""

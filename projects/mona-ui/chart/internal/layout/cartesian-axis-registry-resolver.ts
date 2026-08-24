@@ -31,8 +31,8 @@ export interface ResolvedCartesianAxisDescriptor<D extends "x" | "y" = "x" | "y"
     readonly labelMaxWidth?: number;
     readonly labelPadding?: number;
     readonly labelRotation?: ChartAxisLabelRotation;
-    readonly labels?: boolean;
     readonly labelTemplate?: ChartAxisLabelTemplateDirective;
+    readonly labels?: boolean;
     readonly logBase?: number;
     readonly nice: boolean;
     readonly order: number;
@@ -52,6 +52,9 @@ export interface ResolvedCartesianAxisDescriptor<D extends "x" | "y" = "x" | "y"
 }
 
 export interface CartesianAxisRegistryResolution {
+    getAxis(dimension: "x", axisId: string): ResolvedCartesianAxisDescriptor<"x"> | undefined;
+    getAxis(dimension: "y", axisId: string): ResolvedCartesianAxisDescriptor<"y"> | undefined;
+    getAxis(dimension: "x" | "y", axisId: string): ResolvedCartesianAxisDescriptor | undefined;
     readonly primaryXAxisId: string;
     readonly primaryYAxisId: string;
     readonly warnings: readonly string[];
@@ -59,9 +62,6 @@ export interface CartesianAxisRegistryResolution {
     readonly xAxisById: ReadonlyMap<string, ResolvedCartesianAxisDescriptor<"x">>;
     readonly yAxes: readonly ResolvedCartesianAxisDescriptor<"y">[];
     readonly yAxisById: ReadonlyMap<string, ResolvedCartesianAxisDescriptor<"y">>;
-    getAxis(dimension: "x", axisId: string): ResolvedCartesianAxisDescriptor<"x"> | undefined;
-    getAxis(dimension: "y", axisId: string): ResolvedCartesianAxisDescriptor<"y"> | undefined;
-    getAxis(dimension: "x" | "y", axisId: string): ResolvedCartesianAxisDescriptor | undefined;
 }
 
 export class CartesianAxisRegistryResolver {

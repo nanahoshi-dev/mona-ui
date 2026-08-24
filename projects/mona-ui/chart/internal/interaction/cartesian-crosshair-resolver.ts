@@ -15,8 +15,8 @@ import {
 import { CartesianMarkSemanticResolver } from "./cartesian-mark-semantic-resolver";
 
 export interface CartesianCrosshairResolution {
-    readonly activeHits: readonly SceneHitTarget[];
     readonly activeHitTarget: SceneHitTarget | null;
+    readonly activeHits: readonly SceneHitTarget[];
     readonly snapKind: "bucket" | "mark" | "none" | "pointer";
     readonly state: ChartCrosshairState | null;
 }

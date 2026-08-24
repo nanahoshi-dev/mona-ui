@@ -40,10 +40,9 @@ const DATA: DataItem[] = Array.from({ length: 25 }, (_, i) => ({ x: i * 4, y: i 
     `
 })
 class CrosshairSyncHostComponent {
+    public readonly chartIds = ["a", "b", "c"] as const;
     public readonly chartRefs = viewChildren(ChartComponent);
     public readonly data = signal<readonly unknown[]>(DATA);
-    public readonly chartIds = ["a", "b", "c"] as const;
-
     public chartAt(index: number): ChartComponent {
         return this.chartRefs()[index];
     }
@@ -52,11 +51,11 @@ class CrosshairSyncHostComponent {
 class FakeResizeObserver {
     public constructor(public readonly callback: ResizeObserverCallback) {}
 
+    public disconnect(): void {}
+
     public observe(): void {}
 
     public unobserve(): void {}
-
-    public disconnect(): void {}
 }
 
 const nextFrame = (): Promise<void> =>

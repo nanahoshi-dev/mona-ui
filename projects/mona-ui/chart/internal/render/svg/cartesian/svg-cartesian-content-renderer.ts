@@ -17,20 +17,17 @@ import { SvgRangeAreaSeriesRenderer } from "./series/svg-range-area-series-rende
 import { SvgRangeBarSeriesRenderer } from "./series/svg-range-bar-series-renderer";
 
 export class SvgCartesianContentRenderer {
+    readonly #axesGroup: SVGGElement;
+    readonly #axisRenderer: SvgCartesianAxisRenderer;
     readonly #container: SVGGElement;
     readonly #gridGroup: SVGGElement;
-    readonly #underlayGroup: SVGGElement;
-    readonly #seriesGroup: SVGGElement;
-    readonly #overlayGroup: SVGGElement;
-    readonly #axesGroup: SVGGElement;
-
     readonly #gridRenderer: SvgCartesianGridRenderer;
+    readonly #overlayGroup: SVGGElement;
     readonly #overlayRenderer: SvgCartesianOverlayRenderer;
-    readonly #axisRenderer: SvgCartesianAxisRenderer;
-
     readonly #seriesContainers = new Map<string, SVGGElement>();
+    readonly #seriesGroup: SVGGElement;
     readonly #seriesRenderers = new Map<string, { renderer: any; type: string }>();
-
+    readonly #underlayGroup: SVGGElement;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -57,63 +54,6 @@ export class SvgCartesianContentRenderer {
         this.#gridRenderer = new SvgCartesianGridRenderer(this.#gridGroup);
         this.#overlayRenderer = new SvgCartesianOverlayRenderer(this.#underlayGroup, this.#overlayGroup);
         this.#axisRenderer = new SvgCartesianAxisRenderer(this.#axesGroup);
-    }
-
-    public render(
-        scene: CartesianXYChartScene,
-        defs: SvgDefinitionRegistry,
-        styleResolver: ChartStyleResolver
-    ): void {
-        const { plotRect, series } = scene;
-        if (plotRect.width <= 0 || plotRect.height <= 0) {
-            this.clear();
-            return;
-        }
-
-        const plotClipUrl = defs.useClipRect("plot-clip", plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-
-        // 1. Grid
-        this.#gridRenderer.render(scene, styleResolver);
-
-        // 2. Underlays
-        this.#overlayRenderer.renderUnderlays(null, plotRect, plotClipUrl);
-
-        // 3. Series
-        setSvgAttribute(this.#seriesGroup, "clip-path", plotClipUrl);
-        this.#renderSeries(series, defs);
-
-        // 4. Overlays
-        this.#overlayRenderer.renderOverlays(null, plotRect, undefined, plotClipUrl);
-
-        // 5. Axes
-        this.#axisRenderer.render(scene, styleResolver);
-    }
-
-    public clear(): void {
-        this.#gridRenderer.clear();
-        this.#overlayRenderer.clear();
-        this.#axisRenderer.clear();
-
-        for (const entry of this.#seriesRenderers.values()) {
-            entry.renderer.clear();
-        }
-        for (const container of this.#seriesContainers.values()) {
-            container.remove();
-        }
-        this.#seriesContainers.clear();
-        this.#seriesRenderers.clear();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#gridRenderer.destroy();
-        this.#overlayRenderer.destroy();
-        this.#axisRenderer.destroy();
-        this.#gridGroup.remove();
-        this.#underlayGroup.remove();
-        this.#seriesGroup.remove();
-        this.#overlayGroup.remove();
-        this.#axesGroup.remove();
     }
 
     #renderSeries(seriesList: readonly ChartSeriesScene[], defs: SvgDefinitionRegistry): void {
@@ -195,5 +135,62 @@ export class SvgCartesianContentRenderer {
                 this.#seriesContainers.delete(id);
             }
         }
+    }
+
+    public clear(): void {
+        this.#gridRenderer.clear();
+        this.#overlayRenderer.clear();
+        this.#axisRenderer.clear();
+
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.clear();
+        }
+        for (const container of this.#seriesContainers.values()) {
+            container.remove();
+        }
+        this.#seriesContainers.clear();
+        this.#seriesRenderers.clear();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#gridRenderer.destroy();
+        this.#overlayRenderer.destroy();
+        this.#axisRenderer.destroy();
+        this.#gridGroup.remove();
+        this.#underlayGroup.remove();
+        this.#seriesGroup.remove();
+        this.#overlayGroup.remove();
+        this.#axesGroup.remove();
+    }
+
+    public render(
+        scene: CartesianXYChartScene,
+        defs: SvgDefinitionRegistry,
+        styleResolver: ChartStyleResolver
+    ): void {
+        const { plotRect, series } = scene;
+        if (plotRect.width <= 0 || plotRect.height <= 0) {
+            this.clear();
+            return;
+        }
+
+        const plotClipUrl = defs.useClipRect("plot-clip", plotRect.x, plotRect.y, plotRect.width, plotRect.height);
+
+        // 1. Grid
+        this.#gridRenderer.render(scene, styleResolver);
+
+        // 2. Underlays
+        this.#overlayRenderer.renderUnderlays(null, plotRect, plotClipUrl);
+
+        // 3. Series
+        setSvgAttribute(this.#seriesGroup, "clip-path", plotClipUrl);
+        this.#renderSeries(series, defs);
+
+        // 4. Overlays
+        this.#overlayRenderer.renderOverlays(null, plotRect, undefined, plotClipUrl);
+
+        // 5. Axes
+        this.#axisRenderer.render(scene, styleResolver);
     }
 }

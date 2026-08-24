@@ -30,11 +30,11 @@ import type { ChartSelectionChangeEvent } from "../../models/chart-selection.mod
     `
 })
 class SelectionLifecycleDataChangeHostComponent {
+    public readonly clearOnBgClick = signal(true);
     public readonly data = signal([
         { name: "A", value: 10 },
         { name: "B", value: 20 }
     ]);
-    public readonly clearOnBgClick = signal(true);
     public readonly retainData = signal(false);
     public selectionEvents: ChartSelectionChangeEvent[] = [];
 

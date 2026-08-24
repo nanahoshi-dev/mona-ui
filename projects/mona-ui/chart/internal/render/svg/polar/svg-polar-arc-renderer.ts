@@ -18,11 +18,10 @@ import { SvgKeyedGroup } from "../svg-keyed-group";
 
 class SvgRadialBarSeriesRenderer {
     readonly #container: SVGGElement;
-    readonly #tracksGroup: SVGGElement;
+    readonly #markKeyedGroup: SvgKeyedGroup<SceneRadialArcMark, SVGPathElement>;
     readonly #marksGroup: SVGGElement;
     readonly #trackKeyedGroup: SvgKeyedGroup<SceneRadialTrack, SVGPathElement>;
-    readonly #markKeyedGroup: SvgKeyedGroup<SceneRadialArcMark, SVGPathElement>;
-
+    readonly #tracksGroup: SVGGElement;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -36,6 +35,20 @@ class SvgRadialBarSeriesRenderer {
 
         this.#trackKeyedGroup = new SvgKeyedGroup<SceneRadialTrack, SVGPathElement>(this.#tracksGroup);
         this.#markKeyedGroup = new SvgKeyedGroup<SceneRadialArcMark, SVGPathElement>(this.#marksGroup);
+    }
+
+    public clear(): void {
+        this.#trackKeyedGroup.clear();
+        this.#markKeyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#trackKeyedGroup.destroy();
+        this.#markKeyedGroup.destroy();
+        this.#tracksGroup.remove();
+        this.#marksGroup.remove();
+        this.#container.remove();
     }
 
     public render(
@@ -115,20 +128,6 @@ class SvgRadialBarSeriesRenderer {
             }
         });
     }
-
-    public clear(): void {
-        this.#trackKeyedGroup.clear();
-        this.#markKeyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#trackKeyedGroup.destroy();
-        this.#markKeyedGroup.destroy();
-        this.#tracksGroup.remove();
-        this.#marksGroup.remove();
-        this.#container.remove();
-    }
 }
 
 class SvgRoseSeriesRenderer {
@@ -138,6 +137,16 @@ class SvgRoseSeriesRenderer {
     public constructor(container: SVGGElement) {
         this.#container = container;
         this.#marksKeyedGroup = new SvgKeyedGroup<SceneRadialArcMark, SVGPathElement>(this.#container);
+    }
+
+    public clear(): void {
+        this.#marksKeyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#marksKeyedGroup.destroy();
+        this.#container.remove();
     }
 
     public render(
@@ -197,28 +206,39 @@ class SvgRoseSeriesRenderer {
             }
         });
     }
-
-    public clear(): void {
-        this.#marksKeyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#marksKeyedGroup.destroy();
-        this.#container.remove();
-    }
 }
 
 class SvgGaugeSeriesRenderer {
     readonly #container: SVGGElement;
-    #trackPath: SVGPathElement | null = null;
-    #valuePath: SVGPathElement | null = null;
+    #hubCircle: SVGCircleElement | null = null;
     #needleGroup: SVGGElement | null = null;
     #needlePath: SVGPathElement | null = null;
-    #hubCircle: SVGCircleElement | null = null;
-
+    #trackPath: SVGPathElement | null = null;
+    #valuePath: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
+    }
+
+    public clear(): void {
+        if (this.#trackPath) {
+            this.#trackPath.remove();
+            this.#trackPath = null;
+        }
+        if (this.#valuePath) {
+            this.#valuePath.remove();
+            this.#valuePath = null;
+        }
+        if (this.#needleGroup) {
+            this.#needleGroup.remove();
+            this.#needleGroup = null;
+            this.#needlePath = null;
+            this.#hubCircle = null;
+        }
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#container.remove();
     }
 
     public render(
@@ -335,28 +355,6 @@ class SvgGaugeSeriesRenderer {
             this.#hubCircle = null;
         }
     }
-
-    public clear(): void {
-        if (this.#trackPath) {
-            this.#trackPath.remove();
-            this.#trackPath = null;
-        }
-        if (this.#valuePath) {
-            this.#valuePath.remove();
-            this.#valuePath = null;
-        }
-        if (this.#needleGroup) {
-            this.#needleGroup.remove();
-            this.#needleGroup = null;
-            this.#needlePath = null;
-            this.#hubCircle = null;
-        }
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#container.remove();
-    }
 }
 
 interface PolarArcSeriesEntry {
@@ -366,18 +364,15 @@ interface PolarArcSeriesEntry {
 }
 
 export class SvgPolarArcRenderer {
-    readonly #container: SVGGElement;
     readonly #backgroundGroup: SVGGElement;
-    readonly #seriesGroup: SVGGElement;
+    readonly #container: SVGGElement;
     readonly #foregroundGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
-
     readonly #roseGridRingsKeyedGroup: SvgKeyedGroup<{ d: string; radius: number; tick: ChartRadialAxisTick }, SVGPathElement>;
     readonly #roseGridSpokesKeyedGroup: SvgKeyedGroup<{ tick: ChartAngularAxisTick; x1: number; y1: number; x2: number; y2: number }, SVGLineElement>;
-    #roseForegroundArcPath: SVGPathElement | null = null;
-
     readonly #seriesEntries = new Map<string, PolarArcSeriesEntry>();
-
+    readonly #seriesGroup: SVGGElement;
+    #roseForegroundArcPath: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -401,121 +396,116 @@ export class SvgPolarArcRenderer {
         this.#roseGridSpokesKeyedGroup = new SvgKeyedGroup<{ tick: ChartAngularAxisTick; x1: number; y1: number; x2: number; y2: number }, SVGLineElement>(this.#backgroundGroup);
     }
 
-    public render(
+    #renderHighlight(
         scene: PolarArcChartScene,
         interactionState: ChartInteractionState | null,
-        styleResolver: ChartStyleResolver,
-        defs: SvgDefinitionRegistry
+        styleResolver: ChartStyleResolver
     ): void {
-        const { arcMode, center, outerRadius, series } = scene;
-        if (outerRadius <= 0) {
-            this.clear();
+        while (this.#highlightGroup.firstChild) {
+            this.#highlightGroup.firstChild.remove();
+        }
+        if (!interactionState?.activeHitTarget) {
             return;
         }
 
-        const isRose = arcMode === "rose";
-        let roseStartAngleRad = 0;
-        let roseEndAngleRad = Math.PI * 2;
-
-        if (isRose && series.length > 0 && series[0].type === "rose") {
-            const roseScene = series[0] as ChartRoseSeriesScene;
-            if (roseScene.angularCategories.length > 0) {
-                roseStartAngleRad = roseScene.angularCategories[0].startAngle;
-                roseEndAngleRad = roseScene.angularCategories[roseScene.angularCategories.length - 1].endAngle;
-            }
+        const activeHit = interactionState.activeHitTarget;
+        const targetSeries = scene.series.find(s => s.id === activeHit.seriesId);
+        if (!targetSeries) {
+            return;
         }
 
-        // 1. Background Grid for Rose
-        this.#renderRoseBackground(scene, roseStartAngleRad, roseEndAngleRad, styleResolver);
+        const center = scene.center;
 
-        // 2. Series (RadialBar, Rose, Gauge)
-        const activeIds = new Set<string>();
+        // Gauge needle special parity:
+        if (targetSeries.type === "gauge") {
+            const gauge = targetSeries as ChartGaugeSeriesScene;
+            const indicator = gauge.indicator ?? "both";
+            if (indicator === "needle") {
+                if (interactionState.source === "keyboard" && gauge.needle) {
+                    const needle = gauge.needle;
+                    const focusIndicatorColor =
+                        styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                        styleResolver.resolveCssVariable("--color-primary") ||
+                        "#3b82f6";
 
-        for (let i = 0; i < series.length; i++) {
-            const s = series[i];
-            activeIds.add(s.id);
+                    const group = createSvgElement("g");
+                    const angleDeg = (needle.angle * 180) / Math.PI;
+                    setSvgAttribute(group, "transform", `translate(${center.x}, ${center.y}) rotate(${angleDeg})`);
 
-            let entry = this.#seriesEntries.get(s.id);
-            if (entry && entry.type !== s.type) {
-                entry.renderer.destroy();
-                entry.container.remove();
-                this.#seriesEntries.delete(s.id);
-                entry = undefined;
-            }
+                    // Needle outline
+                    const needlePath = createSvgElement("path");
+                    const d = `M ${-(needle.width / 2 + 3)} 0 L 0 ${-(needle.length + 3)} L ${needle.width / 2 + 3} 0 Z`;
+                    setSvgAttribute(needlePath, "d", d);
+                    setSvgAttribute(needlePath, "fill", "none");
+                    setSvgAttribute(needlePath, "stroke", focusIndicatorColor);
+                    setSvgAttribute(needlePath, "stroke-width", 2.5);
+                    group.appendChild(needlePath);
 
-            if (!entry) {
-                const container = createSvgElement("g");
-                container.setAttribute("data-series-id", s.id);
-                this.#seriesGroup.appendChild(container);
-                let renderer: SvgRadialBarSeriesRenderer | SvgRoseSeriesRenderer | SvgGaugeSeriesRenderer;
-                if (s.type === "radialBar") {
-                    renderer = new SvgRadialBarSeriesRenderer(container);
-                } else if (s.type === "rose") {
-                    renderer = new SvgRoseSeriesRenderer(container);
-                } else {
-                    renderer = new SvgGaugeSeriesRenderer(container);
+                    // Hub focus ring
+                    const hubRing = createSvgElement("circle");
+                    setSvgAttribute(hubRing, "cx", 0);
+                    setSvgAttribute(hubRing, "cy", 0);
+                    setSvgAttribute(hubRing, "r", needle.hubRadius + 3);
+                    setSvgAttribute(hubRing, "fill", "none");
+                    setSvgAttribute(hubRing, "stroke", focusIndicatorColor);
+                    setSvgAttribute(hubRing, "stroke-width", 2.5);
+                    group.appendChild(hubRing);
+
+                    this.#highlightGroup.appendChild(group);
                 }
-                entry = { container, renderer, type: s.type };
-                this.#seriesEntries.set(s.id, entry);
-            }
-
-            // Ensure DOM ordering
-            const currentNthChild = this.#seriesGroup.children[i];
-            if (currentNthChild !== entry.container) {
-                this.#seriesGroup.insertBefore(entry.container, currentNthChild ?? null);
-            }
-
-            if (s.type === "radialBar") {
-                (entry.renderer as SvgRadialBarSeriesRenderer).render(s, center, defs);
-            } else if (s.type === "rose") {
-                (entry.renderer as SvgRoseSeriesRenderer).render(s, center, defs);
-            } else if (s.type === "gauge") {
-                (entry.renderer as SvgGaugeSeriesRenderer).render(s, center, defs);
+                return;
             }
         }
 
-        // Cleanup stale series
-        for (const [id, entry] of this.#seriesEntries.entries()) {
-            if (!activeIds.has(id)) {
-                entry.renderer.destroy();
-                entry.container.remove();
-                this.#seriesEntries.delete(id);
+        let arcGeometry: { cornerRadius?: number; endAngle: number; innerRadius: number; outerRadius: number; padAngle?: number; startAngle: number } | null = null;
+
+        if (activeHit.arc) {
+            arcGeometry = activeHit.arc;
+        } else if (targetSeries.type === "radialBar" || targetSeries.type === "rose") {
+            const mark = (targetSeries as ChartRadialBarSeriesScene | ChartRoseSeriesScene).marks.find(
+                m => m.itemId === activeHit.itemId || m.dataIndex === activeHit.index
+            );
+            if (mark) {
+                arcGeometry = mark;
             }
         }
 
-        // 3. Foreground Axis for Rose
-        this.#renderRoseForeground(scene, roseStartAngleRad, roseEndAngleRad, styleResolver);
-
-        // 4. Interaction Highlight
-        this.#renderHighlight(scene, interactionState, styleResolver);
-    }
-
-    public clear(): void {
-        this.#roseGridRingsKeyedGroup.clear();
-        this.#roseGridSpokesKeyedGroup.clear();
-        for (const entry of this.#seriesEntries.values()) {
-            entry.renderer.clear();
+        if (!arcGeometry) {
+            return;
         }
-        if (this.#roseForegroundArcPath) {
-            this.#roseForegroundArcPath.remove();
-            this.#roseForegroundArcPath = null;
-        }
-        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
-    }
 
-    public destroy(): void {
-        this.clear();
-        this.#roseGridRingsKeyedGroup.destroy();
-        this.#roseGridSpokesKeyedGroup.destroy();
-        for (const entry of this.#seriesEntries.values()) {
-            entry.renderer.destroy();
-            entry.container.remove();
+        const d = buildArcPath({
+            cornerRadius: arcGeometry.cornerRadius ?? 0,
+            endAngle: arcGeometry.endAngle,
+            innerRadius: arcGeometry.innerRadius,
+            outerRadius: arcGeometry.outerRadius,
+            padAngle: arcGeometry.padAngle ?? 0,
+            startAngle: arcGeometry.startAngle
+        });
+
+        if (d) {
+            const highlightPath = createSvgElement("path");
+            setSvgAttribute(highlightPath, "d", d);
+            setSvgAttribute(highlightPath, "transform", `translate(${center.x}, ${center.y})`);
+
+            if (interactionState.source === "keyboard") {
+                const focusIndicatorColor =
+                    styleResolver.resolveCssVariable("--color-focus-indicator") ||
+                    styleResolver.resolveCssVariable("--color-primary") ||
+                    "#3b82f6";
+                setSvgAttribute(highlightPath, "fill", "rgba(255, 255, 255, 0.15)");
+                setSvgAttribute(highlightPath, "stroke", focusIndicatorColor);
+                setSvgAttribute(highlightPath, "stroke-width", 3);
+            } else {
+                const hoverOverlayColor =
+                    styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
+                setSvgAttribute(highlightPath, "fill", hoverOverlayColor);
+                setSvgAttribute(highlightPath, "stroke", "none");
+                setSvgAttribute(highlightPath, "stroke-width", 0);
+            }
+
+            this.#highlightGroup.appendChild(highlightPath);
         }
-        this.#seriesEntries.clear();
-        this.#backgroundGroup.remove();
-        this.#seriesGroup.remove();
-        this.#foregroundGroup.remove();
-        this.#highlightGroup.remove();
     }
 
     #renderRoseBackground(
@@ -645,115 +635,120 @@ export class SvgPolarArcRenderer {
         }
     }
 
-    #renderHighlight(
+    public clear(): void {
+        this.#roseGridRingsKeyedGroup.clear();
+        this.#roseGridSpokesKeyedGroup.clear();
+        for (const entry of this.#seriesEntries.values()) {
+            entry.renderer.clear();
+        }
+        if (this.#roseForegroundArcPath) {
+            this.#roseForegroundArcPath.remove();
+            this.#roseForegroundArcPath = null;
+        }
+        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#roseGridRingsKeyedGroup.destroy();
+        this.#roseGridSpokesKeyedGroup.destroy();
+        for (const entry of this.#seriesEntries.values()) {
+            entry.renderer.destroy();
+            entry.container.remove();
+        }
+        this.#seriesEntries.clear();
+        this.#backgroundGroup.remove();
+        this.#seriesGroup.remove();
+        this.#foregroundGroup.remove();
+        this.#highlightGroup.remove();
+    }
+
+    public render(
         scene: PolarArcChartScene,
         interactionState: ChartInteractionState | null,
-        styleResolver: ChartStyleResolver
+        styleResolver: ChartStyleResolver,
+        defs: SvgDefinitionRegistry
     ): void {
-        while (this.#highlightGroup.firstChild) {
-            this.#highlightGroup.firstChild.remove();
-        }
-        if (!interactionState?.activeHitTarget) {
+        const { arcMode, center, outerRadius, series } = scene;
+        if (outerRadius <= 0) {
+            this.clear();
             return;
         }
 
-        const activeHit = interactionState.activeHitTarget;
-        const targetSeries = scene.series.find(s => s.id === activeHit.seriesId);
-        if (!targetSeries) {
-            return;
+        const isRose = arcMode === "rose";
+        let roseStartAngleRad = 0;
+        let roseEndAngleRad = Math.PI * 2;
+
+        if (isRose && series.length > 0 && series[0].type === "rose") {
+            const roseScene = series[0] as ChartRoseSeriesScene;
+            if (roseScene.angularCategories.length > 0) {
+                roseStartAngleRad = roseScene.angularCategories[0].startAngle;
+                roseEndAngleRad = roseScene.angularCategories[roseScene.angularCategories.length - 1].endAngle;
+            }
         }
 
-        const center = scene.center;
+        // 1. Background Grid for Rose
+        this.#renderRoseBackground(scene, roseStartAngleRad, roseEndAngleRad, styleResolver);
 
-        // Gauge needle special parity:
-        if (targetSeries.type === "gauge") {
-            const gauge = targetSeries as ChartGaugeSeriesScene;
-            const indicator = gauge.indicator ?? "both";
-            if (indicator === "needle") {
-                if (interactionState.source === "keyboard" && gauge.needle) {
-                    const needle = gauge.needle;
-                    const focusIndicatorColor =
-                        styleResolver.resolveCssVariable("--color-focus-indicator") ||
-                        styleResolver.resolveCssVariable("--color-primary") ||
-                        "#3b82f6";
+        // 2. Series (RadialBar, Rose, Gauge)
+        const activeIds = new Set<string>();
 
-                    const group = createSvgElement("g");
-                    const angleDeg = (needle.angle * 180) / Math.PI;
-                    setSvgAttribute(group, "transform", `translate(${center.x}, ${center.y}) rotate(${angleDeg})`);
+        for (let i = 0; i < series.length; i++) {
+            const s = series[i];
+            activeIds.add(s.id);
 
-                    // Needle outline
-                    const needlePath = createSvgElement("path");
-                    const d = `M ${-(needle.width / 2 + 3)} 0 L 0 ${-(needle.length + 3)} L ${needle.width / 2 + 3} 0 Z`;
-                    setSvgAttribute(needlePath, "d", d);
-                    setSvgAttribute(needlePath, "fill", "none");
-                    setSvgAttribute(needlePath, "stroke", focusIndicatorColor);
-                    setSvgAttribute(needlePath, "stroke-width", 2.5);
-                    group.appendChild(needlePath);
+            let entry = this.#seriesEntries.get(s.id);
+            if (entry && entry.type !== s.type) {
+                entry.renderer.destroy();
+                entry.container.remove();
+                this.#seriesEntries.delete(s.id);
+                entry = undefined;
+            }
 
-                    // Hub focus ring
-                    const hubRing = createSvgElement("circle");
-                    setSvgAttribute(hubRing, "cx", 0);
-                    setSvgAttribute(hubRing, "cy", 0);
-                    setSvgAttribute(hubRing, "r", needle.hubRadius + 3);
-                    setSvgAttribute(hubRing, "fill", "none");
-                    setSvgAttribute(hubRing, "stroke", focusIndicatorColor);
-                    setSvgAttribute(hubRing, "stroke-width", 2.5);
-                    group.appendChild(hubRing);
-
-                    this.#highlightGroup.appendChild(group);
+            if (!entry) {
+                const container = createSvgElement("g");
+                container.setAttribute("data-series-id", s.id);
+                this.#seriesGroup.appendChild(container);
+                let renderer: SvgRadialBarSeriesRenderer | SvgRoseSeriesRenderer | SvgGaugeSeriesRenderer;
+                if (s.type === "radialBar") {
+                    renderer = new SvgRadialBarSeriesRenderer(container);
+                } else if (s.type === "rose") {
+                    renderer = new SvgRoseSeriesRenderer(container);
+                } else {
+                    renderer = new SvgGaugeSeriesRenderer(container);
                 }
-                return;
+                entry = { container, renderer, type: s.type };
+                this.#seriesEntries.set(s.id, entry);
+            }
+
+            // Ensure DOM ordering
+            const currentNthChild = this.#seriesGroup.children[i];
+            if (currentNthChild !== entry.container) {
+                this.#seriesGroup.insertBefore(entry.container, currentNthChild ?? null);
+            }
+
+            if (s.type === "radialBar") {
+                (entry.renderer as SvgRadialBarSeriesRenderer).render(s, center, defs);
+            } else if (s.type === "rose") {
+                (entry.renderer as SvgRoseSeriesRenderer).render(s, center, defs);
+            } else if (s.type === "gauge") {
+                (entry.renderer as SvgGaugeSeriesRenderer).render(s, center, defs);
             }
         }
 
-        let arcGeometry: { cornerRadius?: number; endAngle: number; innerRadius: number; outerRadius: number; padAngle?: number; startAngle: number } | null = null;
-
-        if (activeHit.arc) {
-            arcGeometry = activeHit.arc;
-        } else if (targetSeries.type === "radialBar" || targetSeries.type === "rose") {
-            const mark = (targetSeries as ChartRadialBarSeriesScene | ChartRoseSeriesScene).marks.find(
-                m => m.itemId === activeHit.itemId || m.dataIndex === activeHit.index
-            );
-            if (mark) {
-                arcGeometry = mark;
+        // Cleanup stale series
+        for (const [id, entry] of this.#seriesEntries.entries()) {
+            if (!activeIds.has(id)) {
+                entry.renderer.destroy();
+                entry.container.remove();
+                this.#seriesEntries.delete(id);
             }
         }
 
-        if (!arcGeometry) {
-            return;
-        }
+        // 3. Foreground Axis for Rose
+        this.#renderRoseForeground(scene, roseStartAngleRad, roseEndAngleRad, styleResolver);
 
-        const d = buildArcPath({
-            cornerRadius: arcGeometry.cornerRadius ?? 0,
-            endAngle: arcGeometry.endAngle,
-            innerRadius: arcGeometry.innerRadius,
-            outerRadius: arcGeometry.outerRadius,
-            padAngle: arcGeometry.padAngle ?? 0,
-            startAngle: arcGeometry.startAngle
-        });
-
-        if (d) {
-            const highlightPath = createSvgElement("path");
-            setSvgAttribute(highlightPath, "d", d);
-            setSvgAttribute(highlightPath, "transform", `translate(${center.x}, ${center.y})`);
-
-            if (interactionState.source === "keyboard") {
-                const focusIndicatorColor =
-                    styleResolver.resolveCssVariable("--color-focus-indicator") ||
-                    styleResolver.resolveCssVariable("--color-primary") ||
-                    "#3b82f6";
-                setSvgAttribute(highlightPath, "fill", "rgba(255, 255, 255, 0.15)");
-                setSvgAttribute(highlightPath, "stroke", focusIndicatorColor);
-                setSvgAttribute(highlightPath, "stroke-width", 3);
-            } else {
-                const hoverOverlayColor =
-                    styleResolver.resolveCssVariable("--mona-chart-slice-hover-overlay") || "rgba(255, 255, 255, 0.22)";
-                setSvgAttribute(highlightPath, "fill", hoverOverlayColor);
-                setSvgAttribute(highlightPath, "stroke", "none");
-                setSvgAttribute(highlightPath, "stroke-width", 0);
-            }
-
-            this.#highlightGroup.appendChild(highlightPath);
-        }
+        // 4. Interaction Highlight
+        this.#renderHighlight(scene, interactionState, styleResolver);
     }
 }

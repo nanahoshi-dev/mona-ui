@@ -122,11 +122,11 @@ class TestHostComponent {
     public readonly showXAxis = signal(true);
     public readonly showYAxis = signal(true);
     public readonly tooltipShared = signal(false);
-    public readonly userClass = signal("");
     public readonly useCustomAxisTemplate = signal(false);
     public readonly useCustomLegendTemplate = signal(false);
     public readonly useCustomNoData = signal(false);
     public readonly useCustomTooltipTemplate = signal(false);
+    public readonly userClass = signal("");
     public readonly xAxisFormatter = signal<ChartAxisFormatter | undefined>(undefined);
     public readonly xAxisType = signal<ChartXAxisType>("category");
     public readonly xField = signal("x");

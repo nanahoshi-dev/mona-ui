@@ -60,9 +60,8 @@ class TestTreemapChartComponent {
         }
     ]);
     public readonly maxDepth = signal<number | undefined>(undefined);
-    public readonly tile = signal<"squarify" | "binary" | "dice" | "slice" | "slice-dice">("squarify");
     public readonly sort = signal<"ascending" | "descending" | "none">("descending");
-
+    public readonly tile = signal<"squarify" | "binary" | "dice" | "slice" | "slice-dice">("squarify");
     public lastPointClick: ChartPointEvent | null = null;
 
     public onPointClick(event: ChartPointEvent): void {

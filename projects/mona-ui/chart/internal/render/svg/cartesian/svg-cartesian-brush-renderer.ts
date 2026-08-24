@@ -12,6 +12,17 @@ export class SvgCartesianBrushRenderer {
         this.#container = container;
     }
 
+    public clear(): void {
+        if (this.#rectElement) {
+            this.#rectElement.remove();
+            this.#rectElement = null;
+        }
+    }
+
+    public destroy(): void {
+        this.clear();
+    }
+
     public render(
         brushRect: ChartRect | null,
         registration: ChartBrushRegistration | null,
@@ -55,16 +66,5 @@ export class SvgCartesianBrushRenderer {
         } else {
             this.#rectElement.removeAttribute("clip-path");
         }
-    }
-
-    public clear(): void {
-        if (this.#rectElement) {
-            this.#rectElement.remove();
-            this.#rectElement = null;
-        }
-    }
-
-    public destroy(): void {
-        this.clear();
     }
 }

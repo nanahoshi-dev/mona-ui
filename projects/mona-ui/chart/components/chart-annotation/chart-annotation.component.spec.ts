@@ -30,12 +30,12 @@ import type { ChartAnnotationMarker } from "../../models/chart-annotation.models
     `
 })
 class TestHostComponent {
-    public readonly x = signal<number | string>(50);
-    public readonly y = signal<number | string>(200);
-    public readonly label = signal("Milestone");
     public readonly data = signal({ note: "Launch" });
+    public readonly label = signal("Milestone");
     public readonly marker = signal<ChartAnnotationMarker>("circle");
     public readonly useTemplate = signal(false);
+    public readonly x = signal<number | string>(50);
+    public readonly y = signal<number | string>(200);
 }
 
 describe("ChartAnnotationComponent", () => {

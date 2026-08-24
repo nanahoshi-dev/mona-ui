@@ -24,15 +24,15 @@ import type { ChartCandlestickSeriesScene } from "../../internal/scene/cartesian
     `
 })
 class TestCandlestickHostComponent {
+    public readonly bodyWidthRatio = signal<number>(0.8);
     public readonly data = signal<readonly Record<string, unknown>[]>([
         { c: 110, h: 115, l: 95, o: 100, time: "2026-01-01" },
         { c: 90, h: 112, l: 88, o: 108, time: "2026-01-02" }
     ]);
-    public readonly seriesName = signal<string>("Candles");
     public readonly fillMode = signal<ChartFinancialFillMode>("filled");
-    public readonly bodyWidthRatio = signal<number>(0.8);
-    public readonly wickWidth = signal<number>(2);
+    public readonly seriesName = signal<string>("Candles");
     public readonly visible = signal<boolean>(true);
+    public readonly wickWidth = signal<number>(2);
 }
 
 describe("MonaCandlestickSeriesComponent", () => {

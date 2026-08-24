@@ -20,11 +20,9 @@ interface TreemapRenderNodeItem {
 
 export class SvgTreemapRenderer {
     readonly #container: SVGGElement;
-    readonly #nodesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
-
     readonly #nodeKeyedGroup: SvgKeyedGroup<TreemapRenderNodeItem, SVGElement>;
-
+    readonly #nodesGroup: SVGGElement;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -37,6 +35,18 @@ export class SvgTreemapRenderer {
         this.#container.appendChild(this.#highlightGroup);
 
         this.#nodeKeyedGroup = new SvgKeyedGroup<TreemapRenderNodeItem, SVGElement>(this.#nodesGroup);
+    }
+
+    public clear(): void {
+        this.#nodeKeyedGroup.clear();
+        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#nodeKeyedGroup.destroy();
+        this.#nodesGroup.remove();
+        this.#highlightGroup.remove();
     }
 
     public render(
@@ -179,17 +189,5 @@ export class SvgTreemapRenderer {
                 this.#highlightGroup.appendChild(highlightEl);
             }
         }
-    }
-
-    public clear(): void {
-        this.#nodeKeyedGroup.clear();
-        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#nodeKeyedGroup.destroy();
-        this.#nodesGroup.remove();
-        this.#highlightGroup.remove();
     }
 }

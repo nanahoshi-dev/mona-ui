@@ -23,14 +23,14 @@ import { RoseSeriesComponent } from "./rose-series.component";
     `
 })
 class TestRoseHostComponent {
+    public readonly categoryField = signal("category");
     public readonly data = signal<readonly unknown[]>([
         { category: "North", value: 45 },
         { category: "South", value: 85 }
     ]);
     public readonly field = signal("value");
-    public readonly categoryField = signal("category");
-    public readonly scaleMode = signal<ChartRoseScaleMode>("area");
     public readonly padAngle = signal(2);
+    public readonly scaleMode = signal<ChartRoseScaleMode>("area");
     public readonly visible = signal(true);
 
     public lastVisibilityEvent: ChartRadialDatumVisibilityEvent | null = null;

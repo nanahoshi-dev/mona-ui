@@ -84,8 +84,8 @@ export interface ResolveMarkerDatumContext {
     readonly identity?: ChartSeriesMarkIdentityAuthority;
     readonly keyResolver?: ChartMarkKeyResolver;
     readonly series: ChartCartesianSeriesRegistration;
-    readonly seriesOrdinal?: number;
     readonly seriesDisplayName: string;
+    readonly seriesOrdinal?: number;
     readonly seriesType: "bubble" | "scatter";
     readonly sizeField?: ChartField;
     readonly sizeFormatter?: (size: number, index: number) => string;

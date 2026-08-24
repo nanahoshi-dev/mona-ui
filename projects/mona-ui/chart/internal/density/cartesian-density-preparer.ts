@@ -107,13 +107,13 @@ export interface CartesianRangeDensityData {
     readonly combinedMax: Float64Array;
     readonly combinedMin: Float64Array;
     readonly extremaIndex: CartesianMinMaxBlockIndex;
+    readonly from: Float64Array;
     readonly highExtremaIndex: CartesianMinMaxBlockIndex;
     readonly lowExtremaIndex: CartesianMinMaxBlockIndex;
-    readonly from: Float64Array;
     readonly monotonicity: CartesianXMonotonicity;
+    readonly segmentGeometryIndex: DenseSegmentGeometryIndex | null;
     /** Source index → containing segment ordinal; -1 marks invalid entries. */
     readonly segmentIds: Int32Array;
-    readonly segmentGeometryIndex: DenseSegmentGeometryIndex | null;
     readonly segmentIndex: CartesianDefinedSegmentIndex;
     readonly segments: readonly { readonly endIndexExclusive: number; readonly startIndex: number }[];
     readonly sourceData: readonly unknown[];

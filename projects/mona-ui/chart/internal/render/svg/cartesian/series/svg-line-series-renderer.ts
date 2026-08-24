@@ -7,12 +7,28 @@ import { SvgKeyedGroup } from "../../svg-keyed-group";
 
 export class SvgLineSeriesRenderer {
     readonly #container: SVGGElement;
-    #pathElement: SVGPathElement | null = null;
-    #markersGroup: SVGGElement | null = null;
     #markerKeyedGroup: SvgKeyedGroup<ScenePoint, SVGCircleElement> | null = null;
-
+    #markersGroup: SVGGElement | null = null;
+    #pathElement: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
+    }
+
+    public clear(): void {
+        if (this.#pathElement) {
+            this.#pathElement.remove();
+            this.#pathElement = null;
+        }
+        if (this.#markersGroup) {
+            this.#markerKeyedGroup?.clear();
+            this.#markersGroup.remove();
+            this.#markersGroup = null;
+            this.#markerKeyedGroup = null;
+        }
+    }
+
+    public destroy(): void {
+        this.clear();
     }
 
     public render(scene: ChartLineSeriesScene): void {
@@ -67,22 +83,5 @@ export class SvgLineSeriesRenderer {
             this.#markersGroup = null;
             this.#markerKeyedGroup = null;
         }
-    }
-
-    public clear(): void {
-        if (this.#pathElement) {
-            this.#pathElement.remove();
-            this.#pathElement = null;
-        }
-        if (this.#markersGroup) {
-            this.#markerKeyedGroup?.clear();
-            this.#markersGroup.remove();
-            this.#markersGroup = null;
-            this.#markerKeyedGroup = null;
-        }
-    }
-
-    public destroy(): void {
-        this.clear();
     }
 }

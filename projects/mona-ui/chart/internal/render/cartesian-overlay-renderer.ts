@@ -36,73 +36,46 @@ function drawDiamondMarker(
 }
 
 export class CartesianOverlayRenderer {
-    public static renderUnderlays(
+    private static renderAnnotation(
         context: CanvasRenderingContext2D,
-        overlayScene: CartesianOverlayScene | null,
-        plotRect: ChartRect
+        ann: ScenePointAnnotation,
+        effectiveAnchor?: ChartPoint
     ): void {
-        if (!overlayScene || (overlayScene.referenceBands.length === 0 && overlayScene.referenceLines.length === 0)) {
-            return;
+        // Connector line
+        const anchor = effectiveAnchor ?? ann.label?.anchor;
+        if (ann.connector && anchor && ann.connectorWidth > 0) {
+            context.save();
+            context.strokeStyle = ann.color;
+            context.lineWidth = ann.connectorWidth;
+            context.beginPath();
+            context.moveTo(ann.point.x, ann.point.y);
+            context.lineTo(anchor.x, anchor.y);
+            context.stroke();
+            context.restore();
         }
 
-        context.save();
-        context.beginPath();
-        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        context.clip();
-
-        // 1. Underlay Bands
-        for (const band of overlayScene.referenceBands) {
-            if (band.layer === "underlay") {
-                this.renderBand(context, band);
-            }
+        // Marker
+        if (ann.marker === "circle") {
+            drawPointMarker(
+                context,
+                ann.point.x,
+                ann.point.y,
+                ann.markerRadius,
+                ann.color,
+                "#ffffff",
+                ann.markerStrokeWidth
+            );
+        } else if (ann.marker === "diamond") {
+            drawDiamondMarker(
+                context,
+                ann.point.x,
+                ann.point.y,
+                ann.markerRadius,
+                ann.color,
+                "#ffffff",
+                ann.markerStrokeWidth
+            );
         }
-
-        // 2. Underlay Lines
-        for (const line of overlayScene.referenceLines) {
-            if (line.layer === "underlay") {
-                this.renderLine(context, line, plotRect);
-            }
-        }
-
-        context.restore();
-    }
-
-    public static renderOverlays(
-        context: CanvasRenderingContext2D,
-        overlayScene: CartesianOverlayScene | null,
-        plotRect: ChartRect,
-        annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null
-    ): void {
-        if (!overlayScene) {
-            return;
-        }
-
-        context.save();
-        context.beginPath();
-        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        context.clip();
-
-        // 1. Overlay Bands
-        for (const band of overlayScene.referenceBands) {
-            if (band.layer === "overlay") {
-                this.renderBand(context, band);
-            }
-        }
-
-        // 2. Overlay Lines
-        for (const line of overlayScene.referenceLines) {
-            if (line.layer === "overlay") {
-                this.renderLine(context, line, plotRect);
-            }
-        }
-
-        // 3. Annotations (connectors then markers)
-        for (const ann of overlayScene.annotations) {
-            const effectiveAnchor = annotationBadgeAnchors?.get(ann.id) ?? ann.label?.anchor;
-            this.renderAnnotation(context, ann, effectiveAnchor);
-        }
-
-        context.restore();
     }
 
     private static renderBand(context: CanvasRenderingContext2D, band: SceneReferenceBand): void {
@@ -154,45 +127,72 @@ export class CartesianOverlayRenderer {
         context.restore();
     }
 
-    private static renderAnnotation(
+    public static renderOverlays(
         context: CanvasRenderingContext2D,
-        ann: ScenePointAnnotation,
-        effectiveAnchor?: ChartPoint
+        overlayScene: CartesianOverlayScene | null,
+        plotRect: ChartRect,
+        annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null
     ): void {
-        // Connector line
-        const anchor = effectiveAnchor ?? ann.label?.anchor;
-        if (ann.connector && anchor && ann.connectorWidth > 0) {
-            context.save();
-            context.strokeStyle = ann.color;
-            context.lineWidth = ann.connectorWidth;
-            context.beginPath();
-            context.moveTo(ann.point.x, ann.point.y);
-            context.lineTo(anchor.x, anchor.y);
-            context.stroke();
-            context.restore();
+        if (!overlayScene) {
+            return;
         }
 
-        // Marker
-        if (ann.marker === "circle") {
-            drawPointMarker(
-                context,
-                ann.point.x,
-                ann.point.y,
-                ann.markerRadius,
-                ann.color,
-                "#ffffff",
-                ann.markerStrokeWidth
-            );
-        } else if (ann.marker === "diamond") {
-            drawDiamondMarker(
-                context,
-                ann.point.x,
-                ann.point.y,
-                ann.markerRadius,
-                ann.color,
-                "#ffffff",
-                ann.markerStrokeWidth
-            );
+        context.save();
+        context.beginPath();
+        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
+        context.clip();
+
+        // 1. Overlay Bands
+        for (const band of overlayScene.referenceBands) {
+            if (band.layer === "overlay") {
+                this.renderBand(context, band);
+            }
         }
+
+        // 2. Overlay Lines
+        for (const line of overlayScene.referenceLines) {
+            if (line.layer === "overlay") {
+                this.renderLine(context, line, plotRect);
+            }
+        }
+
+        // 3. Annotations (connectors then markers)
+        for (const ann of overlayScene.annotations) {
+            const effectiveAnchor = annotationBadgeAnchors?.get(ann.id) ?? ann.label?.anchor;
+            this.renderAnnotation(context, ann, effectiveAnchor);
+        }
+
+        context.restore();
+    }
+
+    public static renderUnderlays(
+        context: CanvasRenderingContext2D,
+        overlayScene: CartesianOverlayScene | null,
+        plotRect: ChartRect
+    ): void {
+        if (!overlayScene || (overlayScene.referenceBands.length === 0 && overlayScene.referenceLines.length === 0)) {
+            return;
+        }
+
+        context.save();
+        context.beginPath();
+        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
+        context.clip();
+
+        // 1. Underlay Bands
+        for (const band of overlayScene.referenceBands) {
+            if (band.layer === "underlay") {
+                this.renderBand(context, band);
+            }
+        }
+
+        // 2. Underlay Lines
+        for (const line of overlayScene.referenceLines) {
+            if (line.layer === "underlay") {
+                this.renderLine(context, line, plotRect);
+            }
+        }
+
+        context.restore();
     }
 }

@@ -36,6 +36,14 @@ export class ChartRenderScheduler {
         this.#pendingReason = 0;
     }
 
+    public consume(reason: ChartInvalidationReason): void {
+        this.#pendingReason &= ~reason;
+        if (this.#pendingReason === 0 && this.#frameId !== null) {
+            this.#cancelFrame(this.#frameId);
+            this.#frameId = null;
+        }
+    }
+
     public flush(): void {
         if (this.#frameId !== null) {
             this.#cancelFrame(this.#frameId);
@@ -45,31 +53,6 @@ export class ChartRenderScheduler {
             const accumulatedReason = this.#pendingReason;
             this.#pendingReason = 0;
             this.#callback(accumulatedReason as ChartInvalidationReason);
-        }
-    }
-
-    public hasPending(reasonMask?: number): boolean {
-        if (reasonMask === undefined) {
-            return this.#pendingReason !== 0;
-        }
-        return (this.#pendingReason & reasonMask) !== 0;
-    }
-
-    public flushWithDefault(defaultReason: ChartInvalidationReason): void {
-        if (this.#frameId !== null) {
-            this.#cancelFrame(this.#frameId);
-            this.#frameId = null;
-        }
-        const accumulatedReason = this.#pendingReason !== 0 ? (this.#pendingReason | defaultReason) : defaultReason;
-        this.#pendingReason = 0;
-        this.#callback(accumulatedReason as ChartInvalidationReason);
-    }
-
-    public consume(reason: ChartInvalidationReason): void {
-        this.#pendingReason &= ~reason;
-        if (this.#pendingReason === 0 && this.#frameId !== null) {
-            this.#cancelFrame(this.#frameId);
-            this.#frameId = null;
         }
     }
 
@@ -89,6 +72,23 @@ export class ChartRenderScheduler {
 
         this.#pendingReason &= ~structuralMask;
         this.#callback(structuralReason as ChartInvalidationReason);
+    }
+
+    public flushWithDefault(defaultReason: ChartInvalidationReason): void {
+        if (this.#frameId !== null) {
+            this.#cancelFrame(this.#frameId);
+            this.#frameId = null;
+        }
+        const accumulatedReason = this.#pendingReason !== 0 ? (this.#pendingReason | defaultReason) : defaultReason;
+        this.#pendingReason = 0;
+        this.#callback(accumulatedReason as ChartInvalidationReason);
+    }
+
+    public hasPending(reasonMask?: number): boolean {
+        if (reasonMask === undefined) {
+            return this.#pendingReason !== 0;
+        }
+        return (this.#pendingReason & reasonMask) !== 0;
     }
 
     public schedule(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {

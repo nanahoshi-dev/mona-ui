@@ -23,6 +23,18 @@ export class SvgKeyedGroup<T = unknown, E extends SVGElement = SVGElement> {
         return this.#elementsByKey.size;
     }
 
+    public clear(): void {
+        for (const element of this.#elementsByKey.values()) {
+            element.remove();
+        }
+        this.#elementsByKey.clear();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#container = null;
+    }
+
     public get(key: string): E | undefined {
         return this.#elementsByKey.get(key);
     }
@@ -87,17 +99,5 @@ export class SvgKeyedGroup<T = unknown, E extends SVGElement = SVGElement> {
         }
 
         this.#elementsByKey = nextElements;
-    }
-
-    public clear(): void {
-        for (const element of this.#elementsByKey.values()) {
-            element.remove();
-        }
-        this.#elementsByKey.clear();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#container = null;
     }
 }

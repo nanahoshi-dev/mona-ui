@@ -16,11 +16,9 @@ interface FunnelRenderStageItem {
 
 export class SvgFunnelRenderer {
     readonly #container: SVGGElement;
-    readonly #stagesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
-
     readonly #stageKeyedGroup: SvgKeyedGroup<FunnelRenderStageItem, SVGPathElement>;
-
+    readonly #stagesGroup: SVGGElement;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -33,6 +31,18 @@ export class SvgFunnelRenderer {
         this.#container.appendChild(this.#highlightGroup);
 
         this.#stageKeyedGroup = new SvgKeyedGroup<FunnelRenderStageItem, SVGPathElement>(this.#stagesGroup);
+    }
+
+    public clear(): void {
+        this.#stageKeyedGroup.clear();
+        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#stageKeyedGroup.destroy();
+        this.#stagesGroup.remove();
+        this.#highlightGroup.remove();
     }
 
     public render(
@@ -134,17 +144,5 @@ export class SvgFunnelRenderer {
                 }
             }
         }
-    }
-
-    public clear(): void {
-        this.#stageKeyedGroup.clear();
-        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#stageKeyedGroup.destroy();
-        this.#stagesGroup.remove();
-        this.#highlightGroup.remove();
     }
 }

@@ -63,33 +63,30 @@ import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
     `
 })
 class TestAxisPresentationHostComponent {
+    public readonly ariaDescription = signal<string>("");
+    public readonly ariaLabel = signal<string>("");
     public readonly data = signal<readonly unknown[]>([
         { category: "Alpha", revenue: 100 },
         { category: "Beta", revenue: 200 },
         { category: "Gamma", revenue: 300 }
     ]);
-    public readonly title = signal<string>("Chart Main Title");
     public readonly subtitle = signal<string>("Chart Subtitle Description");
+    public readonly title = signal<string>("Chart Main Title");
     public readonly titleAlign = signal<ChartHeaderAlignment>("left");
-    public readonly ariaLabel = signal<string>("");
-    public readonly ariaDescription = signal<string>("");
-
-    public readonly xLabels = signal<boolean>(true);
-    public readonly xLabelRotation = signal<ChartAxisLabelRotation>(0);
+    public readonly useCustomSubtitleTemplate = signal<boolean>(false);
+    public readonly useCustomTitleTemplate = signal<boolean>(false);
+    public readonly xAxisTitle = signal<string>("X Axis Category");
     public readonly xLabelMaxWidth = signal<number | undefined>(undefined);
+    public readonly xLabelRotation = signal<ChartAxisLabelRotation>(0);
+    public readonly xLabels = signal<boolean>(true);
     public readonly xTickMarks = signal<boolean>(false);
     public readonly xTickSize = signal<number>(6);
-    public readonly xAxisTitle = signal<string>("X Axis Category");
     public readonly xTitlePadding = signal<number>(8);
-
-    public readonly yLabels = signal<boolean>(true);
+    public readonly yAxisTitle = signal<string>("Y Axis Revenue");
     public readonly yLabelRotation = signal<ChartAxisLabelRotation>(0);
+    public readonly yLabels = signal<boolean>(true);
     public readonly yTickMarks = signal<boolean>(false);
     public readonly yTickSize = signal<number>(6);
-    public readonly yAxisTitle = signal<string>("Y Axis Revenue");
-
-    public readonly useCustomTitleTemplate = signal<boolean>(false);
-    public readonly useCustomSubtitleTemplate = signal<boolean>(false);
 }
 
 describe("Chart Axis Presentation & Header Layout", () => {

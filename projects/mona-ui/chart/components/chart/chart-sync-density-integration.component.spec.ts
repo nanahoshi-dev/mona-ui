@@ -54,18 +54,18 @@ class SyncDensityHostComponent {
 
     public readonly dataA = signal<readonly unknown[]>([]);
     public readonly dataB = signal<readonly unknown[]>([]);
-    public readonly viewportA = signal<ChartViewportState | undefined>(undefined);
     public readonly sync: ChartSynchronizationInput = { group: "dense-dashboard" };
+    public readonly viewportA = signal<ChartViewportState | undefined>(undefined);
 }
 
 class FakeResizeObserver {
     public constructor(public readonly callback: ResizeObserverCallback) {}
 
+    public disconnect(): void {}
+
     public observe(): void {}
 
     public unobserve(): void {}
-
-    public disconnect(): void {}
 }
 
 const nextFrame = (): Promise<void> =>

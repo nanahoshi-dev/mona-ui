@@ -57,9 +57,9 @@ function installResourceCaptureMocks(dataUrl: string): () => void {
 
     const originalFileReader = window.FileReader;
     class MockFileReader {
-        public result: string | null = null;
-        public onloadend: (() => void) | null = null;
         public onerror: ((e: unknown) => void) | null = null;
+        public onloadend: (() => void) | null = null;
+        public result: string | null = null;
         public readAsDataURL(_blob: Blob) {
             this.result = dataUrl;
             setTimeout(() => this.onloadend?.(), 0);

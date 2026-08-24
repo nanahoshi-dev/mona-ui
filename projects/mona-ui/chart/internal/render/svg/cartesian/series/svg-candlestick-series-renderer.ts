@@ -10,6 +10,14 @@ export class SvgCandlestickSeriesRenderer {
         this.#keyedGroup = new SvgKeyedGroup<SceneCandlestickMark, SVGGElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(scene: ChartCandlestickSeriesScene): void {
         const marks = scene.marks ?? [];
         const { style } = scene;
@@ -77,13 +85,5 @@ export class SvgCandlestickSeriesRenderer {
                 setSvgAttribute(group, "opacity", markAlpha);
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

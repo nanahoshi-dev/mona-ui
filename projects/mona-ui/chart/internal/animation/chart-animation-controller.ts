@@ -25,97 +25,6 @@ export class ChartAnimationController {
         this.#clock = clock;
     }
 
-    public currentScene(): ChartScene | null {
-        return this.#currentFrame?.scene ?? this.#activePlan?.toScene ?? null;
-    }
-
-    public isRunning(): boolean {
-        return this.#frameId !== null && this.#activePlan !== null;
-    }
-
-    public start(plan: ChartTransitionPlan, callbacks: ChartAnimationCallbacks): void {
-        this.cancel("keep-current");
-
-        this.#activePlan = plan;
-        this.#callbacks = callbacks;
-        this.#startTime = this.#clock.now();
-
-        if (plan.mode === "immediate" || plan.duration <= 0) {
-            const finalFrame: ChartAnimationRenderFrame = {
-                mode: plan.mode,
-                progress: 1,
-                scene: plan.toScene,
-                toScene: plan.toScene
-            };
-            this.#currentFrame = finalFrame;
-            callbacks.onFrame(finalFrame);
-            callbacks.onComplete(plan.toScene);
-            this.#activePlan = null;
-            this.#callbacks = null;
-            return;
-        }
-
-        // Produce initial frame
-        const easingFn = getEasingFunction(plan.easing);
-        const initialEasedProgress = easingFn(0);
-        const initialFrame = SceneTransitionSampler.sampleFrame(plan, initialEasedProgress);
-        this.#currentFrame = initialFrame;
-        callbacks.onFrame(initialFrame);
-
-        // Schedule RAF
-        this.#scheduleNextFrame();
-    }
-
-    public retarget(newPlan: ChartTransitionPlan, callbacks: ChartAnimationCallbacks): void {
-        this.start(newPlan, callbacks);
-    }
-
-    public cancel(mode: ChartAnimationCancelMode = "finish-target"): void {
-        if (this.#frameId !== null) {
-            this.#clock.cancelFrame(this.#frameId);
-            this.#frameId = null;
-        }
-
-        const activePlan = this.#activePlan;
-        const callbacks = this.#callbacks;
-
-        this.#activePlan = null;
-        this.#callbacks = null;
-
-        if (mode === "finish-target" && activePlan && callbacks) {
-            const finalFrame: ChartAnimationRenderFrame = {
-                mode: activePlan.mode,
-                progress: 1,
-                scene: activePlan.toScene,
-                toScene: activePlan.toScene
-            };
-            this.#currentFrame = finalFrame;
-            callbacks.onFrame(finalFrame);
-            callbacks.onComplete(activePlan.toScene);
-        }
-    }
-
-    public finish(): void {
-        this.cancel("finish-target");
-    }
-
-    public destroy(): void {
-        if (this.#frameId !== null) {
-            this.#clock.cancelFrame(this.#frameId);
-            this.#frameId = null;
-        }
-        this.#activePlan = null;
-        this.#callbacks = null;
-        this.#currentFrame = null;
-    }
-
-    #scheduleNextFrame(): void {
-        this.#frameId = this.#clock.requestFrame(timestamp => {
-            this.#frameId = null;
-            this.#onTick(timestamp);
-        });
-    }
-
     #onTick(timestamp: number): void {
         if (!this.#activePlan || !this.#callbacks) {
             return;
@@ -151,6 +60,97 @@ export class ChartAnimationController {
         this.#currentFrame = frame;
         this.#callbacks.onFrame(frame);
 
+        this.#scheduleNextFrame();
+    }
+
+    #scheduleNextFrame(): void {
+        this.#frameId = this.#clock.requestFrame(timestamp => {
+            this.#frameId = null;
+            this.#onTick(timestamp);
+        });
+    }
+
+    public cancel(mode: ChartAnimationCancelMode = "finish-target"): void {
+        if (this.#frameId !== null) {
+            this.#clock.cancelFrame(this.#frameId);
+            this.#frameId = null;
+        }
+
+        const activePlan = this.#activePlan;
+        const callbacks = this.#callbacks;
+
+        this.#activePlan = null;
+        this.#callbacks = null;
+
+        if (mode === "finish-target" && activePlan && callbacks) {
+            const finalFrame: ChartAnimationRenderFrame = {
+                mode: activePlan.mode,
+                progress: 1,
+                scene: activePlan.toScene,
+                toScene: activePlan.toScene
+            };
+            this.#currentFrame = finalFrame;
+            callbacks.onFrame(finalFrame);
+            callbacks.onComplete(activePlan.toScene);
+        }
+    }
+
+    public currentScene(): ChartScene | null {
+        return this.#currentFrame?.scene ?? this.#activePlan?.toScene ?? null;
+    }
+
+    public destroy(): void {
+        if (this.#frameId !== null) {
+            this.#clock.cancelFrame(this.#frameId);
+            this.#frameId = null;
+        }
+        this.#activePlan = null;
+        this.#callbacks = null;
+        this.#currentFrame = null;
+    }
+
+    public finish(): void {
+        this.cancel("finish-target");
+    }
+
+    public isRunning(): boolean {
+        return this.#frameId !== null && this.#activePlan !== null;
+    }
+
+    public retarget(newPlan: ChartTransitionPlan, callbacks: ChartAnimationCallbacks): void {
+        this.start(newPlan, callbacks);
+    }
+
+    public start(plan: ChartTransitionPlan, callbacks: ChartAnimationCallbacks): void {
+        this.cancel("keep-current");
+
+        this.#activePlan = plan;
+        this.#callbacks = callbacks;
+        this.#startTime = this.#clock.now();
+
+        if (plan.mode === "immediate" || plan.duration <= 0) {
+            const finalFrame: ChartAnimationRenderFrame = {
+                mode: plan.mode,
+                progress: 1,
+                scene: plan.toScene,
+                toScene: plan.toScene
+            };
+            this.#currentFrame = finalFrame;
+            callbacks.onFrame(finalFrame);
+            callbacks.onComplete(plan.toScene);
+            this.#activePlan = null;
+            this.#callbacks = null;
+            return;
+        }
+
+        // Produce initial frame
+        const easingFn = getEasingFunction(plan.easing);
+        const initialEasedProgress = easingFn(0);
+        const initialFrame = SceneTransitionSampler.sampleFrame(plan, initialEasedProgress);
+        this.#currentFrame = initialFrame;
+        callbacks.onFrame(initialFrame);
+
+        // Schedule RAF
         this.#scheduleNextFrame();
     }
 }

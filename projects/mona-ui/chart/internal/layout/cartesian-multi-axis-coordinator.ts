@@ -147,6 +147,555 @@ export interface MultiAxisCoordinatorResult {
 }
 
 export class CartesianMultiAxisCoordinator {
+    static #buildScales(
+        axisResolution: CartesianAxisRegistryResolution,
+        resolvedTypes: { x: ReadonlyMap<string, ResolvedChartCartesianAxisType>; y: ReadonlyMap<string, ResolvedChartCartesianAxisType> },
+        domains: { x: ReadonlyMap<string, readonly unknown[]>; y: ReadonlyMap<string, readonly unknown[]> },
+        plotRect: ChartRect
+    ): { xScales: Map<string, ChartPositionScale>; yScales: Map<string, ChartPositionScale> } {
+        const xScales = new Map<string, ChartPositionScale>();
+        const yScales = new Map<string, ChartPositionScale>();
+
+        for (const xAxis of axisResolution.xAxes) {
+            const type = resolvedTypes.x.get(xAxis.axisId)!;
+            const domain = domains.x.get(xAxis.axisId)!;
+            const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
+
+            const scale = CartesianScaleFactory.createExactPositionScale({
+                domain,
+                exponent: xAxis.exponent,
+                logBase: xAxis.logBase,
+                range,
+                symlogConstant: xAxis.symlogConstant,
+                type
+            });
+            xScales.set(xAxis.axisId, scale);
+        }
+
+        for (const yAxis of axisResolution.yAxes) {
+            const type = resolvedTypes.y.get(yAxis.axisId)!;
+            const domain = domains.y.get(yAxis.axisId)!;
+            const range: readonly [number, number] = type === "category"
+                ? [plotRect.y, plotRect.y + plotRect.height]
+                : [plotRect.y + plotRect.height, plotRect.y];
+
+            const scale = CartesianScaleFactory.createExactPositionScale({
+                domain,
+                exponent: yAxis.exponent,
+                logBase: yAxis.logBase,
+                range,
+                symlogConstant: yAxis.symlogConstant,
+                type
+            });
+            yScales.set(yAxis.axisId, scale);
+        }
+
+        return { xScales, yScales };
+    }
+
+    static #estimateAxisGutterAndRotation(
+        axis: ResolvedCartesianAxisDescriptor,
+        scale: ChartPositionScale,
+        resolvedType: ResolvedChartCartesianAxisType,
+        labelMeasurements: ReadonlyMap<string, ChartLabelMeasurement>,
+        unitMode: "percent" | "raw" = "raw",
+        plotRect: ChartRect
+    ): { gutter: number; resolvedRotation: number } {
+        if (!axis.visible) {
+            return { gutter: 0, resolvedRotation: 0 };
+        }
+
+        const tickMarksOffset = axis.tickMarks ? (axis.tickSize ?? 6) : 0;
+        const labelPadding = axis.labelPadding ?? 4;
+        const titlePadding = axis.titlePadding ?? 8;
+        const titleExtent = axis.title ? 24 : 0;
+
+        if (axis.labels === false) {
+            return {
+                gutter: tickMarksOffset + (axis.title ? titlePadding + titleExtent : 0),
+                resolvedRotation: 0
+            };
+        }
+
+        const rawTicks = "ticks" in scale
+            ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
+            : (scale as ChartBandPositionScale).domain();
+
+        const step = typeof (scale as any).step === "function"
+            ? (scale as any).step()
+            : rawTicks.length > 1
+                ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
+                : 60;
+
+        let maxUnrotatedWidth = 0;
+        let maxUnrotatedHeight = 0;
+
+        for (let i = 0; i < rawTicks.length; i++) {
+            const val = rawTicks[i];
+            const tickKey = createCartesianAxisMeasurementKey(axis.dimension, axis.axisId, resolvedType, val);
+            const measurement = labelMeasurements.get(tickKey);
+
+            let width: number;
+            let height: number;
+
+            if (measurement) {
+                width = axis.labelMaxWidth !== undefined ? Math.min(axis.labelMaxWidth, measurement.width) : measurement.width;
+                height = measurement.height;
+            } else {
+                let formattedText: string;
+                if (axis.formatter) {
+                    formattedText = axis.formatter(val, i);
+                } else if (unitMode === "percent" && typeof val === "number") {
+                    formattedText = formatPercentagePoint(val);
+                } else if ("formatTick" in scale && typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function") {
+                    formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(val as number, axis.tickCount ?? 5);
+                } else {
+                    formattedText = String(val);
+                }
+                const estimated = CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText);
+                width = Math.min(axis.labelMaxWidth ?? 120, estimated.width);
+                height = estimated.height;
+                if (labelMeasurements instanceof Map && !labelMeasurements.has(tickKey)) {
+                    (labelMeasurements as Map<string, ChartLabelMeasurement>).set(tickKey, { height, width });
+                }
+            }
+
+            maxUnrotatedWidth = Math.max(maxUnrotatedWidth, width);
+            maxUnrotatedHeight = Math.max(maxUnrotatedHeight, height);
+        }
+
+        let resolvedRotation = 0;
+        if (axis.labelRotation === "auto" || (axis.labelRotation === undefined && resolvedType === "category")) {
+            if (axis.dimension === "x") {
+                if (maxUnrotatedWidth + 4 <= step) {
+                    resolvedRotation = 0;
+                } else {
+                    const rot45Proj = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, maxUnrotatedHeight, 45);
+                    if (rot45Proj.projectedWidth + 4 <= step) {
+                        resolvedRotation = axis.position === "top" ? -45 : 45;
+                    } else {
+                        resolvedRotation = axis.position === "top" ? -90 : 90;
+                    }
+                }
+            } else {
+                resolvedRotation = 0;
+            }
+        } else if (typeof axis.labelRotation === "number") {
+            resolvedRotation = axis.labelRotation;
+        }
+
+        const proj = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, maxUnrotatedHeight, resolvedRotation);
+        const perpExtent = axis.dimension === "x" ? proj.projectedHeight : proj.projectedWidth;
+        const basePerp = perpExtent > 0 ? perpExtent : (axis.dimension === "x" ? 16 : 36);
+
+        const gutter = tickMarksOffset + labelPadding + basePerp + (axis.title ? titlePadding + titleExtent : 0);
+        return { gutter, resolvedRotation };
+    }
+
+    static #generateAxisSceneTicks(
+        axis: ResolvedCartesianAxisDescriptor,
+        scale: ChartPositionScale,
+        resolvedType: ResolvedChartCartesianAxisType,
+        labelMeasurements: ReadonlyMap<string, ChartLabelMeasurement>,
+        unitMode: "percent" | "raw" = "raw",
+        plotRect: ChartRect,
+        labelRotation: number = 0
+    ): readonly ChartAxisSceneTick[] {
+        const rawTicks = "ticks" in scale
+            ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
+            : (scale as ChartBandPositionScale).domain();
+        const bandwidth = typeof (scale as any).bandwidth === "function" ? (scale as any).bandwidth() : 0;
+        const step = typeof (scale as any).step === "function"
+            ? (scale as any).step()
+            : rawTicks.length > 1
+                ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
+                : 60;
+
+        interface IntermediateTick {
+            readonly coord: number;
+            readonly extentAlongAxis: number;
+            readonly formattedText: string;
+            readonly height: number;
+            readonly index: number;
+            readonly tickKey: string;
+            readonly val: unknown;
+            readonly width: number;
+        }
+
+        const intermediateTicks: IntermediateTick[] = [];
+
+        for (let i = 0; i < rawTicks.length; i++) {
+            const val = rawTicks[i];
+            let coord = (scale as ChartPositionScale<any>).map(val);
+            if (coord === undefined || !Number.isFinite(coord)) {
+                continue;
+            }
+            if (bandwidth > 0) {
+                coord += bandwidth / 2;
+            }
+
+            let formattedText: string;
+            if (axis.formatter) {
+                formattedText = axis.formatter(val, i);
+            } else if (unitMode === "percent" && typeof val === "number") {
+                formattedText = formatPercentagePoint(val);
+            } else if ("formatTick" in scale && typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function") {
+                formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(val as number, axis.tickCount ?? 5);
+            } else {
+                formattedText = String(val);
+            }
+
+            const tickKey = createCartesianAxisMeasurementKey(axis.dimension, axis.axisId, resolvedType, val);
+            const measurement = labelMeasurements.get(tickKey);
+            const estimated = !measurement ? CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText) : undefined;
+            if (!measurement && estimated && labelMeasurements instanceof Map && !labelMeasurements.has(tickKey)) {
+                (labelMeasurements as Map<string, ChartLabelMeasurement>).set(tickKey, {
+                    height: estimated.height,
+                    width: axis.labelMaxWidth !== undefined ? Math.min(axis.labelMaxWidth, estimated.width) : estimated.width
+                });
+            }
+
+            const rawWidth = measurement?.width ?? estimated?.width ?? (formattedText.length * 7.5);
+            const rawHeight = measurement?.height ?? estimated?.height ?? 16;
+            const projected = CartesianAxisLabelGeometry.projectRotatedDimensions(rawWidth, rawHeight, labelRotation);
+            const extentAlongAxis = axis.dimension === "x" ? projected.projectedWidth : projected.projectedHeight;
+
+            intermediateTicks.push({
+                coord,
+                extentAlongAxis,
+                formattedText,
+                height: rawHeight,
+                index: i,
+                tickKey,
+                val,
+                width: rawWidth
+            });
+        }
+
+        let thinningFlags: readonly boolean[] | undefined;
+        if (resolvedType === "category" && intermediateTicks.length > 0) {
+            const maxExtentAlong = intermediateTicks.reduce((max, t) => Math.max(max, t.extentAlongAxis), 12);
+            thinningFlags = CartesianAxisLabelGeometry.resolveCategoryLabelThinning({
+                categoryCount: intermediateTicks.length,
+                categoryStep: step,
+                maxLabelExtentAlongAxis: maxExtentAlong,
+                preferredTickCount: axis.tickCount
+            });
+        }
+
+        const ticks: ChartAxisSceneTick[] = [];
+        for (let i = 0; i < intermediateTicks.length; i++) {
+            const t = intermediateTicks[i];
+            const isThinned = thinningFlags ? !thinningFlags[i] : false;
+            const labelVisible = t.formattedText !== "" && !isThinned;
+
+            ticks.push({
+                coordinate: t.coord,
+                formattedValue: t.formattedText,
+                index: t.index,
+                labelVisible,
+                tickKey: t.tickKey,
+                unrotatedHeight: t.height,
+                unrotatedWidth: t.width,
+                value: t.val
+            });
+        }
+
+        return ticks;
+    }
+
+    public static computeChrome(
+        preparation: CartesianDomainPreparation,
+        options: MultiAxisChromeOptions
+    ): CartesianAxisChromeLayout {
+        CartesianStageTracker.current?.onStageB?.();
+        const { chartHeight, chartWidth, insets = {}, labelMeasurements } = options;
+        const { axisResolution, baseDomains, resolvedTypes, axisUnitModes } = preparation;
+
+        const insetTop = insets.top ?? 10;
+        const insetBottom = insets.bottom ?? 10;
+        const insetLeft = insets.left ?? 16;
+        const insetRight = insets.right ?? 16;
+
+        let plotRect: ChartRect = {
+            height: Math.max(0, chartHeight - insetTop - insetBottom - 60),
+            width: Math.max(0, chartWidth - insetLeft - insetRight - 80),
+            x: insetLeft + 48,
+            y: insetTop + 20
+        };
+
+        const gutters = { x: new Map<string, number>(), y: new Map<string, number>() };
+        const sideOffsets = { x: new Map<string, number>(), y: new Map<string, number>() };
+        const effectiveRotations = { x: new Map<string, number>(), y: new Map<string, number>() };
+        const measurementKeys = new Set<string>();
+
+        const axisSpacing = 8;
+        const maxIterations = 3;
+
+        let finalScales: { xScales: Map<string, ChartPositionScale>; yScales: Map<string, ChartPositionScale> } = {
+            xScales: new Map(),
+            yScales: new Map()
+        };
+
+        const allDescriptors: ResolvedCartesianAxisDescriptor[] = [
+            ...axisResolution.xAxes,
+            ...axisResolution.yAxes
+        ];
+
+        for (let iter = 0; iter < maxIterations; iter++) {
+            const currentScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
+            finalScales = currentScales;
+
+            for (const xAxis of axisResolution.xAxes) {
+                const scale = currentScales.xScales.get(xAxis.axisId)!;
+                const resolvedType = resolvedTypes.x.get(xAxis.axisId)!;
+                const unitMode = axisUnitModes.x.get(xAxis.axisId) ?? "raw";
+                const { gutter, resolvedRotation } = this.#estimateAxisGutterAndRotation(
+                    xAxis,
+                    scale,
+                    resolvedType,
+                    labelMeasurements,
+                    unitMode,
+                    plotRect
+                );
+                gutters.x.set(xAxis.axisId, gutter);
+                effectiveRotations.x.set(xAxis.axisId, resolvedRotation);
+            }
+
+            for (const yAxis of axisResolution.yAxes) {
+                const scale = currentScales.yScales.get(yAxis.axisId)!;
+                const resolvedType = resolvedTypes.y.get(yAxis.axisId)!;
+                const unitMode = axisUnitModes.y.get(yAxis.axisId) ?? "raw";
+                const { gutter, resolvedRotation } = this.#estimateAxisGutterAndRotation(
+                    yAxis,
+                    scale,
+                    resolvedType,
+                    labelMeasurements,
+                    unitMode,
+                    plotRect
+                );
+                gutters.y.set(yAxis.axisId, gutter);
+                effectiveRotations.y.set(yAxis.axisId, resolvedRotation);
+            }
+
+            const overhang = CartesianAxisOverhangResolver.computeOverhang(allDescriptors, labelMeasurements);
+
+            const sideThickness: Record<ChartAxisPosition, number> = {
+                bottom: 0,
+                left: 0,
+                right: 0,
+                top: 0
+            };
+
+            const axesBySide: Record<ChartAxisPosition, ResolvedCartesianAxisDescriptor[]> = {
+                bottom: axisResolution.xAxes.filter(a => a.position === "bottom").sort((a, b) => a.stackIndex - b.stackIndex),
+                left: axisResolution.yAxes.filter(a => a.position === "left").sort((a, b) => a.stackIndex - b.stackIndex),
+                right: axisResolution.yAxes.filter(a => a.position === "right").sort((a, b) => a.stackIndex - b.stackIndex),
+                top: axisResolution.xAxes.filter(a => a.position === "top").sort((a, b) => a.stackIndex - b.stackIndex)
+            };
+
+            for (const pos of ["bottom", "top", "left", "right"] as ChartAxisPosition[]) {
+                const axesOnSide = axesBySide[pos];
+                let accumOffset = 0;
+                const visibleAxesOnSide = axesOnSide.filter(a => a.visible);
+                for (let i = 0; i < visibleAxesOnSide.length; i++) {
+                    const ax = visibleAxesOnSide[i];
+                    if (ax.dimension === "x") {
+                        sideOffsets.x.set(ax.axisId, accumOffset);
+                    } else {
+                        sideOffsets.y.set(ax.axisId, accumOffset);
+                    }
+                    const axGutter = (ax.dimension === "x" ? gutters.x.get(ax.axisId) : gutters.y.get(ax.axisId)) ?? 0;
+                    accumOffset += axGutter;
+                    if (i < visibleAxesOnSide.length - 1) {
+                        accumOffset += axisSpacing;
+                    }
+                }
+                sideThickness[pos] = accumOffset;
+            }
+
+            const effectiveLeft = sideThickness.left + Math.max(0, overhang.left - insetLeft);
+            const effectiveRight = sideThickness.right + Math.max(0, overhang.right - insetRight);
+            const effectiveTop = sideThickness.top + Math.max(0, overhang.top - insetTop);
+            const effectiveBottom = sideThickness.bottom + Math.max(0, overhang.bottom - insetBottom);
+
+            const newX = insetLeft + effectiveLeft;
+            const newY = insetTop + effectiveTop;
+            const newWidth = Math.max(0, chartWidth - newX - insetRight - effectiveRight);
+            const newHeight = Math.max(0, chartHeight - newY - insetBottom - effectiveBottom);
+
+            const converged = Math.abs(plotRect.x - newX) < 0.5 &&
+                Math.abs(plotRect.y - newY) < 0.5 &&
+                Math.abs(plotRect.width - newWidth) < 0.5 &&
+                Math.abs(plotRect.height - newHeight) < 0.5;
+
+            plotRect = { height: newHeight, width: newWidth, x: newX, y: newY };
+            if (converged) {
+                break;
+            }
+        }
+
+        finalScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
+
+        const baseScaleRegistry = new CartesianScaleRegistry({
+            primaryXAxisId: axisResolution.primaryXAxisId,
+            primaryYAxisId: axisResolution.primaryYAxisId,
+            xScales: finalScales.xScales,
+            yScales: finalScales.yScales
+        });
+
+        const baseAxisScenes: ChartAxisScene[] = [];
+        for (const xAxis of axisResolution.xAxes) {
+            const scale = finalScales.xScales.get(xAxis.axisId)!;
+            const resolvedType = resolvedTypes.x.get(xAxis.axisId)!;
+            const unitMode = axisUnitModes.x.get(xAxis.axisId) ?? "raw";
+            const gutter = gutters.x.get(xAxis.axisId) ?? 0;
+            const sideOffset = sideOffsets.x.get(xAxis.axisId) ?? 0;
+            const labelRotation = effectiveRotations.x.get(xAxis.axisId) ?? 0;
+
+            const ticks = xAxis.labels !== false
+                ? this.#generateAxisSceneTicks(
+                    xAxis,
+                    scale,
+                    resolvedType,
+                    labelMeasurements,
+                    unitMode,
+                    plotRect,
+                    labelRotation
+                )
+                : [];
+
+            for (const t of ticks) {
+                if (t.tickKey) measurementKeys.add(t.tickKey);
+            }
+
+            const defaultGrid = preparation.orientation === "horizontal"
+                ? (xAxis.dimension === "x" && xAxis.isPrimary)
+                : false;
+
+            baseAxisScenes.push({
+                axis: "x",
+                axisId: xAxis.axisId,
+                axisLine: xAxis.axisLine,
+                formatter: xAxis.formatter,
+                gridLines: xAxis.gridLines ?? defaultGrid,
+                gutter,
+                isPrimary: xAxis.isPrimary,
+                labelMaxWidth: xAxis.labelMaxWidth,
+                labelPadding: xAxis.labelPadding ?? 4,
+                labelRotation,
+                labels: xAxis.labels ?? true,
+                position: xAxis.position,
+                registrationId: xAxis.registrationId,
+                scaleType: resolvedType,
+                sideOffset,
+                stackIndex: xAxis.stackIndex,
+                tickMarks: xAxis.tickMarks ?? false,
+                ticks,
+                tickSize: xAxis.tickSize ?? 6,
+                title: xAxis.title,
+                titlePadding: xAxis.titlePadding ?? 8,
+                unitMode: unitMode === "percent" ? "percent" : "raw",
+                visible: xAxis.visible
+            });
+        }
+
+        for (const yAxis of axisResolution.yAxes) {
+            const scale = finalScales.yScales.get(yAxis.axisId)!;
+            const resolvedType = resolvedTypes.y.get(yAxis.axisId)!;
+            const unitMode = axisUnitModes.y.get(yAxis.axisId) ?? "raw";
+            const gutter = gutters.y.get(yAxis.axisId) ?? 0;
+            const sideOffset = sideOffsets.y.get(yAxis.axisId) ?? 0;
+            const labelRotation = effectiveRotations.y.get(yAxis.axisId) ?? 0;
+
+            const ticks = yAxis.labels !== false
+                ? this.#generateAxisSceneTicks(
+                    yAxis,
+                    scale,
+                    resolvedType,
+                    labelMeasurements,
+                    unitMode,
+                    plotRect,
+                    labelRotation
+                )
+                : [];
+
+            for (const t of ticks) {
+                if (t.tickKey) measurementKeys.add(t.tickKey);
+            }
+
+            const defaultGrid = preparation.orientation !== "horizontal"
+                ? (yAxis.dimension === "y" && yAxis.isPrimary)
+                : false;
+
+            baseAxisScenes.push({
+                axis: "y",
+                axisId: yAxis.axisId,
+                axisLine: yAxis.axisLine,
+                formatter: yAxis.formatter,
+                gridLines: yAxis.gridLines ?? defaultGrid,
+                gutter,
+                isPrimary: yAxis.isPrimary,
+                labelMaxWidth: yAxis.labelMaxWidth,
+                labelPadding: yAxis.labelPadding ?? 4,
+                labelRotation,
+                labels: yAxis.labels ?? true,
+                position: yAxis.position,
+                registrationId: yAxis.registrationId,
+                scaleType: resolvedType,
+                sideOffset,
+                stackIndex: yAxis.stackIndex,
+                tickMarks: yAxis.tickMarks ?? false,
+                ticks,
+                tickSize: yAxis.tickSize ?? 6,
+                title: yAxis.title,
+                titlePadding: yAxis.titlePadding ?? 8,
+                unitMode: unitMode === "percent" ? "percent" : "raw",
+                visible: yAxis.visible
+            });
+        }
+
+        return {
+            baseAxisScenes,
+            baseScales: baseScaleRegistry,
+            effectiveRotations: { x: effectiveRotations.x, y: effectiveRotations.y },
+            gutters: { x: gutters.x, y: gutters.y },
+            height: chartHeight,
+            measurementKeys,
+            plotRect,
+            sideOffsets: { x: sideOffsets.x, y: sideOffsets.y },
+            width: chartWidth
+        };
+    }
+
+    public static coordinate(options: MultiAxisCoordinatorOptions): MultiAxisCoordinatorResult {
+        const prep = this.prepareDomains(options);
+        const chrome = this.computeChrome(prep, options);
+        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(prep, chrome);
+        const proj = this.projectViewport(prep, chrome, options.viewport, options.labelMeasurements, baseCoordinateSpace);
+
+        return {
+            axisScenes: proj.axisScenes,
+            axisUnitModes: prep.axisUnitModes,
+            axisValidity: prep.axisValidity,
+            axisValidityById: prep.axisValidityById,
+            chrome,
+            coordinateSpace: proj.coordinateSpace,
+            plotRect: chrome.plotRect,
+            preparation: prep,
+            resolvedTypes: prep.resolvedTypes,
+            resolvedTypesByAxisId: prep.resolvedTypesByAxisId,
+            resolvedXTypesByAxisId: prep.resolvedXTypesByAxisId,
+            resolvedYTypesByAxisId: prep.resolvedYTypesByAxisId,
+            scaleRegistry: proj.scaleRegistry,
+            stackAnalysesByYAxis: prep.stackAnalysesByYAxis,
+            stackCoordination: prep.stackCoordination,
+            warnings: prep.warnings,
+            xAxisValidityById: prep.xAxisValidityById,
+            yAxisValidityById: prep.yAxisValidityById
+        };
+    }
+
     public static prepareDomains(options: MultiAxisPreparationOptions): CartesianDomainPreparation {
         CartesianStageTracker.current?.onStageA?.();
         const {
@@ -463,270 +1012,6 @@ export class CartesianMultiAxisCoordinator {
         };
     }
 
-    public static computeChrome(
-        preparation: CartesianDomainPreparation,
-        options: MultiAxisChromeOptions
-    ): CartesianAxisChromeLayout {
-        CartesianStageTracker.current?.onStageB?.();
-        const { chartHeight, chartWidth, insets = {}, labelMeasurements } = options;
-        const { axisResolution, baseDomains, resolvedTypes, axisUnitModes } = preparation;
-
-        const insetTop = insets.top ?? 10;
-        const insetBottom = insets.bottom ?? 10;
-        const insetLeft = insets.left ?? 16;
-        const insetRight = insets.right ?? 16;
-
-        let plotRect: ChartRect = {
-            height: Math.max(0, chartHeight - insetTop - insetBottom - 60),
-            width: Math.max(0, chartWidth - insetLeft - insetRight - 80),
-            x: insetLeft + 48,
-            y: insetTop + 20
-        };
-
-        const gutters = { x: new Map<string, number>(), y: new Map<string, number>() };
-        const sideOffsets = { x: new Map<string, number>(), y: new Map<string, number>() };
-        const effectiveRotations = { x: new Map<string, number>(), y: new Map<string, number>() };
-        const measurementKeys = new Set<string>();
-
-        const axisSpacing = 8;
-        const maxIterations = 3;
-
-        let finalScales: { xScales: Map<string, ChartPositionScale>; yScales: Map<string, ChartPositionScale> } = {
-            xScales: new Map(),
-            yScales: new Map()
-        };
-
-        const allDescriptors: ResolvedCartesianAxisDescriptor[] = [
-            ...axisResolution.xAxes,
-            ...axisResolution.yAxes
-        ];
-
-        for (let iter = 0; iter < maxIterations; iter++) {
-            const currentScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
-            finalScales = currentScales;
-
-            for (const xAxis of axisResolution.xAxes) {
-                const scale = currentScales.xScales.get(xAxis.axisId)!;
-                const resolvedType = resolvedTypes.x.get(xAxis.axisId)!;
-                const unitMode = axisUnitModes.x.get(xAxis.axisId) ?? "raw";
-                const { gutter, resolvedRotation } = this.#estimateAxisGutterAndRotation(
-                    xAxis,
-                    scale,
-                    resolvedType,
-                    labelMeasurements,
-                    unitMode,
-                    plotRect
-                );
-                gutters.x.set(xAxis.axisId, gutter);
-                effectiveRotations.x.set(xAxis.axisId, resolvedRotation);
-            }
-
-            for (const yAxis of axisResolution.yAxes) {
-                const scale = currentScales.yScales.get(yAxis.axisId)!;
-                const resolvedType = resolvedTypes.y.get(yAxis.axisId)!;
-                const unitMode = axisUnitModes.y.get(yAxis.axisId) ?? "raw";
-                const { gutter, resolvedRotation } = this.#estimateAxisGutterAndRotation(
-                    yAxis,
-                    scale,
-                    resolvedType,
-                    labelMeasurements,
-                    unitMode,
-                    plotRect
-                );
-                gutters.y.set(yAxis.axisId, gutter);
-                effectiveRotations.y.set(yAxis.axisId, resolvedRotation);
-            }
-
-            const overhang = CartesianAxisOverhangResolver.computeOverhang(allDescriptors, labelMeasurements);
-
-            const sideThickness: Record<ChartAxisPosition, number> = {
-                bottom: 0,
-                left: 0,
-                right: 0,
-                top: 0
-            };
-
-            const axesBySide: Record<ChartAxisPosition, ResolvedCartesianAxisDescriptor[]> = {
-                bottom: axisResolution.xAxes.filter(a => a.position === "bottom").sort((a, b) => a.stackIndex - b.stackIndex),
-                left: axisResolution.yAxes.filter(a => a.position === "left").sort((a, b) => a.stackIndex - b.stackIndex),
-                right: axisResolution.yAxes.filter(a => a.position === "right").sort((a, b) => a.stackIndex - b.stackIndex),
-                top: axisResolution.xAxes.filter(a => a.position === "top").sort((a, b) => a.stackIndex - b.stackIndex)
-            };
-
-            for (const pos of ["bottom", "top", "left", "right"] as ChartAxisPosition[]) {
-                const axesOnSide = axesBySide[pos];
-                let accumOffset = 0;
-                const visibleAxesOnSide = axesOnSide.filter(a => a.visible);
-                for (let i = 0; i < visibleAxesOnSide.length; i++) {
-                    const ax = visibleAxesOnSide[i];
-                    if (ax.dimension === "x") {
-                        sideOffsets.x.set(ax.axisId, accumOffset);
-                    } else {
-                        sideOffsets.y.set(ax.axisId, accumOffset);
-                    }
-                    const axGutter = (ax.dimension === "x" ? gutters.x.get(ax.axisId) : gutters.y.get(ax.axisId)) ?? 0;
-                    accumOffset += axGutter;
-                    if (i < visibleAxesOnSide.length - 1) {
-                        accumOffset += axisSpacing;
-                    }
-                }
-                sideThickness[pos] = accumOffset;
-            }
-
-            const effectiveLeft = sideThickness.left + Math.max(0, overhang.left - insetLeft);
-            const effectiveRight = sideThickness.right + Math.max(0, overhang.right - insetRight);
-            const effectiveTop = sideThickness.top + Math.max(0, overhang.top - insetTop);
-            const effectiveBottom = sideThickness.bottom + Math.max(0, overhang.bottom - insetBottom);
-
-            const newX = insetLeft + effectiveLeft;
-            const newY = insetTop + effectiveTop;
-            const newWidth = Math.max(0, chartWidth - newX - insetRight - effectiveRight);
-            const newHeight = Math.max(0, chartHeight - newY - insetBottom - effectiveBottom);
-
-            const converged = Math.abs(plotRect.x - newX) < 0.5 &&
-                Math.abs(plotRect.y - newY) < 0.5 &&
-                Math.abs(plotRect.width - newWidth) < 0.5 &&
-                Math.abs(plotRect.height - newHeight) < 0.5;
-
-            plotRect = { height: newHeight, width: newWidth, x: newX, y: newY };
-            if (converged) {
-                break;
-            }
-        }
-
-        finalScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
-
-        const baseScaleRegistry = new CartesianScaleRegistry({
-            primaryXAxisId: axisResolution.primaryXAxisId,
-            primaryYAxisId: axisResolution.primaryYAxisId,
-            xScales: finalScales.xScales,
-            yScales: finalScales.yScales
-        });
-
-        const baseAxisScenes: ChartAxisScene[] = [];
-        for (const xAxis of axisResolution.xAxes) {
-            const scale = finalScales.xScales.get(xAxis.axisId)!;
-            const resolvedType = resolvedTypes.x.get(xAxis.axisId)!;
-            const unitMode = axisUnitModes.x.get(xAxis.axisId) ?? "raw";
-            const gutter = gutters.x.get(xAxis.axisId) ?? 0;
-            const sideOffset = sideOffsets.x.get(xAxis.axisId) ?? 0;
-            const labelRotation = effectiveRotations.x.get(xAxis.axisId) ?? 0;
-
-            const ticks = xAxis.labels !== false
-                ? this.#generateAxisSceneTicks(
-                    xAxis,
-                    scale,
-                    resolvedType,
-                    labelMeasurements,
-                    unitMode,
-                    plotRect,
-                    labelRotation
-                )
-                : [];
-
-            for (const t of ticks) {
-                if (t.tickKey) measurementKeys.add(t.tickKey);
-            }
-
-            const defaultGrid = preparation.orientation === "horizontal"
-                ? (xAxis.dimension === "x" && xAxis.isPrimary)
-                : false;
-
-            baseAxisScenes.push({
-                axis: "x",
-                axisId: xAxis.axisId,
-                axisLine: xAxis.axisLine,
-                formatter: xAxis.formatter,
-                gridLines: xAxis.gridLines ?? defaultGrid,
-                gutter,
-                isPrimary: xAxis.isPrimary,
-                labelMaxWidth: xAxis.labelMaxWidth,
-                labelPadding: xAxis.labelPadding ?? 4,
-                labelRotation,
-                labels: xAxis.labels ?? true,
-                position: xAxis.position,
-                registrationId: xAxis.registrationId,
-                scaleType: resolvedType,
-                sideOffset,
-                stackIndex: xAxis.stackIndex,
-                tickMarks: xAxis.tickMarks ?? false,
-                ticks,
-                tickSize: xAxis.tickSize ?? 6,
-                title: xAxis.title,
-                titlePadding: xAxis.titlePadding ?? 8,
-                unitMode: unitMode === "percent" ? "percent" : "raw",
-                visible: xAxis.visible
-            });
-        }
-
-        for (const yAxis of axisResolution.yAxes) {
-            const scale = finalScales.yScales.get(yAxis.axisId)!;
-            const resolvedType = resolvedTypes.y.get(yAxis.axisId)!;
-            const unitMode = axisUnitModes.y.get(yAxis.axisId) ?? "raw";
-            const gutter = gutters.y.get(yAxis.axisId) ?? 0;
-            const sideOffset = sideOffsets.y.get(yAxis.axisId) ?? 0;
-            const labelRotation = effectiveRotations.y.get(yAxis.axisId) ?? 0;
-
-            const ticks = yAxis.labels !== false
-                ? this.#generateAxisSceneTicks(
-                    yAxis,
-                    scale,
-                    resolvedType,
-                    labelMeasurements,
-                    unitMode,
-                    plotRect,
-                    labelRotation
-                )
-                : [];
-
-            for (const t of ticks) {
-                if (t.tickKey) measurementKeys.add(t.tickKey);
-            }
-
-            const defaultGrid = preparation.orientation !== "horizontal"
-                ? (yAxis.dimension === "y" && yAxis.isPrimary)
-                : false;
-
-            baseAxisScenes.push({
-                axis: "y",
-                axisId: yAxis.axisId,
-                axisLine: yAxis.axisLine,
-                formatter: yAxis.formatter,
-                gridLines: yAxis.gridLines ?? defaultGrid,
-                gutter,
-                isPrimary: yAxis.isPrimary,
-                labelMaxWidth: yAxis.labelMaxWidth,
-                labelPadding: yAxis.labelPadding ?? 4,
-                labelRotation,
-                labels: yAxis.labels ?? true,
-                position: yAxis.position,
-                registrationId: yAxis.registrationId,
-                scaleType: resolvedType,
-                sideOffset,
-                stackIndex: yAxis.stackIndex,
-                tickMarks: yAxis.tickMarks ?? false,
-                ticks,
-                tickSize: yAxis.tickSize ?? 6,
-                title: yAxis.title,
-                titlePadding: yAxis.titlePadding ?? 8,
-                unitMode: unitMode === "percent" ? "percent" : "raw",
-                visible: yAxis.visible
-            });
-        }
-
-        return {
-            baseAxisScenes,
-            baseScales: baseScaleRegistry,
-            effectiveRotations: { x: effectiveRotations.x, y: effectiveRotations.y },
-            gutters: { x: gutters.x, y: gutters.y },
-            height: chartHeight,
-            measurementKeys,
-            plotRect,
-            sideOffsets: { x: sideOffsets.x, y: sideOffsets.y },
-            width: chartWidth
-        };
-    }
-
     public static projectViewport(
         preparation: CartesianDomainPreparation,
         chrome: CartesianAxisChromeLayout,
@@ -961,290 +1246,5 @@ export class CartesianMultiAxisCoordinator {
         }
 
         return { axisScenes, coordinateSpace, scaleRegistry };
-    }
-
-    public static coordinate(options: MultiAxisCoordinatorOptions): MultiAxisCoordinatorResult {
-        const prep = this.prepareDomains(options);
-        const chrome = this.computeChrome(prep, options);
-        const baseCoordinateSpace = CartesianAxisCoordinateSpace.fromBaseAuthority(prep, chrome);
-        const proj = this.projectViewport(prep, chrome, options.viewport, options.labelMeasurements, baseCoordinateSpace);
-
-        return {
-            axisScenes: proj.axisScenes,
-            axisUnitModes: prep.axisUnitModes,
-            axisValidity: prep.axisValidity,
-            axisValidityById: prep.axisValidityById,
-            chrome,
-            coordinateSpace: proj.coordinateSpace,
-            plotRect: chrome.plotRect,
-            preparation: prep,
-            resolvedTypes: prep.resolvedTypes,
-            resolvedTypesByAxisId: prep.resolvedTypesByAxisId,
-            resolvedXTypesByAxisId: prep.resolvedXTypesByAxisId,
-            resolvedYTypesByAxisId: prep.resolvedYTypesByAxisId,
-            scaleRegistry: proj.scaleRegistry,
-            stackAnalysesByYAxis: prep.stackAnalysesByYAxis,
-            stackCoordination: prep.stackCoordination,
-            warnings: prep.warnings,
-            xAxisValidityById: prep.xAxisValidityById,
-            yAxisValidityById: prep.yAxisValidityById
-        };
-    }
-
-    static #buildScales(
-        axisResolution: CartesianAxisRegistryResolution,
-        resolvedTypes: { x: ReadonlyMap<string, ResolvedChartCartesianAxisType>; y: ReadonlyMap<string, ResolvedChartCartesianAxisType> },
-        domains: { x: ReadonlyMap<string, readonly unknown[]>; y: ReadonlyMap<string, readonly unknown[]> },
-        plotRect: ChartRect
-    ): { xScales: Map<string, ChartPositionScale>; yScales: Map<string, ChartPositionScale> } {
-        const xScales = new Map<string, ChartPositionScale>();
-        const yScales = new Map<string, ChartPositionScale>();
-
-        for (const xAxis of axisResolution.xAxes) {
-            const type = resolvedTypes.x.get(xAxis.axisId)!;
-            const domain = domains.x.get(xAxis.axisId)!;
-            const range: readonly [number, number] = [plotRect.x, plotRect.x + plotRect.width];
-
-            const scale = CartesianScaleFactory.createExactPositionScale({
-                domain,
-                exponent: xAxis.exponent,
-                logBase: xAxis.logBase,
-                range,
-                symlogConstant: xAxis.symlogConstant,
-                type
-            });
-            xScales.set(xAxis.axisId, scale);
-        }
-
-        for (const yAxis of axisResolution.yAxes) {
-            const type = resolvedTypes.y.get(yAxis.axisId)!;
-            const domain = domains.y.get(yAxis.axisId)!;
-            const range: readonly [number, number] = type === "category"
-                ? [plotRect.y, plotRect.y + plotRect.height]
-                : [plotRect.y + plotRect.height, plotRect.y];
-
-            const scale = CartesianScaleFactory.createExactPositionScale({
-                domain,
-                exponent: yAxis.exponent,
-                logBase: yAxis.logBase,
-                range,
-                symlogConstant: yAxis.symlogConstant,
-                type
-            });
-            yScales.set(yAxis.axisId, scale);
-        }
-
-        return { xScales, yScales };
-    }
-
-    static #estimateAxisGutterAndRotation(
-        axis: ResolvedCartesianAxisDescriptor,
-        scale: ChartPositionScale,
-        resolvedType: ResolvedChartCartesianAxisType,
-        labelMeasurements: ReadonlyMap<string, ChartLabelMeasurement>,
-        unitMode: "percent" | "raw" = "raw",
-        plotRect: ChartRect
-    ): { gutter: number; resolvedRotation: number } {
-        if (!axis.visible) {
-            return { gutter: 0, resolvedRotation: 0 };
-        }
-
-        const tickMarksOffset = axis.tickMarks ? (axis.tickSize ?? 6) : 0;
-        const labelPadding = axis.labelPadding ?? 4;
-        const titlePadding = axis.titlePadding ?? 8;
-        const titleExtent = axis.title ? 24 : 0;
-
-        if (axis.labels === false) {
-            return {
-                gutter: tickMarksOffset + (axis.title ? titlePadding + titleExtent : 0),
-                resolvedRotation: 0
-            };
-        }
-
-        const rawTicks = "ticks" in scale
-            ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
-            : (scale as ChartBandPositionScale).domain();
-
-        const step = typeof (scale as any).step === "function"
-            ? (scale as any).step()
-            : rawTicks.length > 1
-                ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
-                : 60;
-
-        let maxUnrotatedWidth = 0;
-        let maxUnrotatedHeight = 0;
-
-        for (let i = 0; i < rawTicks.length; i++) {
-            const val = rawTicks[i];
-            const tickKey = createCartesianAxisMeasurementKey(axis.dimension, axis.axisId, resolvedType, val);
-            const measurement = labelMeasurements.get(tickKey);
-
-            let width: number;
-            let height: number;
-
-            if (measurement) {
-                width = axis.labelMaxWidth !== undefined ? Math.min(axis.labelMaxWidth, measurement.width) : measurement.width;
-                height = measurement.height;
-            } else {
-                let formattedText: string;
-                if (axis.formatter) {
-                    formattedText = axis.formatter(val, i);
-                } else if (unitMode === "percent" && typeof val === "number") {
-                    formattedText = formatPercentagePoint(val);
-                } else if ("formatTick" in scale && typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function") {
-                    formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(val as number, axis.tickCount ?? 5);
-                } else {
-                    formattedText = String(val);
-                }
-                const estimated = CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText);
-                width = Math.min(axis.labelMaxWidth ?? 120, estimated.width);
-                height = estimated.height;
-                if (labelMeasurements instanceof Map && !labelMeasurements.has(tickKey)) {
-                    (labelMeasurements as Map<string, ChartLabelMeasurement>).set(tickKey, { height, width });
-                }
-            }
-
-            maxUnrotatedWidth = Math.max(maxUnrotatedWidth, width);
-            maxUnrotatedHeight = Math.max(maxUnrotatedHeight, height);
-        }
-
-        let resolvedRotation = 0;
-        if (axis.labelRotation === "auto" || (axis.labelRotation === undefined && resolvedType === "category")) {
-            if (axis.dimension === "x") {
-                if (maxUnrotatedWidth + 4 <= step) {
-                    resolvedRotation = 0;
-                } else {
-                    const rot45Proj = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, maxUnrotatedHeight, 45);
-                    if (rot45Proj.projectedWidth + 4 <= step) {
-                        resolvedRotation = axis.position === "top" ? -45 : 45;
-                    } else {
-                        resolvedRotation = axis.position === "top" ? -90 : 90;
-                    }
-                }
-            } else {
-                resolvedRotation = 0;
-            }
-        } else if (typeof axis.labelRotation === "number") {
-            resolvedRotation = axis.labelRotation;
-        }
-
-        const proj = CartesianAxisLabelGeometry.projectRotatedDimensions(maxUnrotatedWidth, maxUnrotatedHeight, resolvedRotation);
-        const perpExtent = axis.dimension === "x" ? proj.projectedHeight : proj.projectedWidth;
-        const basePerp = perpExtent > 0 ? perpExtent : (axis.dimension === "x" ? 16 : 36);
-
-        const gutter = tickMarksOffset + labelPadding + basePerp + (axis.title ? titlePadding + titleExtent : 0);
-        return { gutter, resolvedRotation };
-    }
-
-    static #generateAxisSceneTicks(
-        axis: ResolvedCartesianAxisDescriptor,
-        scale: ChartPositionScale,
-        resolvedType: ResolvedChartCartesianAxisType,
-        labelMeasurements: ReadonlyMap<string, ChartLabelMeasurement>,
-        unitMode: "percent" | "raw" = "raw",
-        plotRect: ChartRect,
-        labelRotation: number = 0
-    ): readonly ChartAxisSceneTick[] {
-        const rawTicks = "ticks" in scale
-            ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
-            : (scale as ChartBandPositionScale).domain();
-        const bandwidth = typeof (scale as any).bandwidth === "function" ? (scale as any).bandwidth() : 0;
-        const step = typeof (scale as any).step === "function"
-            ? (scale as any).step()
-            : rawTicks.length > 1
-                ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
-                : 60;
-
-        interface IntermediateTick {
-            readonly coord: number;
-            readonly extentAlongAxis: number;
-            readonly formattedText: string;
-            readonly height: number;
-            readonly index: number;
-            readonly tickKey: string;
-            readonly val: unknown;
-            readonly width: number;
-        }
-
-        const intermediateTicks: IntermediateTick[] = [];
-
-        for (let i = 0; i < rawTicks.length; i++) {
-            const val = rawTicks[i];
-            let coord = (scale as ChartPositionScale<any>).map(val);
-            if (coord === undefined || !Number.isFinite(coord)) {
-                continue;
-            }
-            if (bandwidth > 0) {
-                coord += bandwidth / 2;
-            }
-
-            let formattedText: string;
-            if (axis.formatter) {
-                formattedText = axis.formatter(val, i);
-            } else if (unitMode === "percent" && typeof val === "number") {
-                formattedText = formatPercentagePoint(val);
-            } else if ("formatTick" in scale && typeof (scale as ChartContinuousPositionScale<number>).formatTick === "function") {
-                formattedText = (scale as ChartContinuousPositionScale<number>).formatTick!(val as number, axis.tickCount ?? 5);
-            } else {
-                formattedText = String(val);
-            }
-
-            const tickKey = createCartesianAxisMeasurementKey(axis.dimension, axis.axisId, resolvedType, val);
-            const measurement = labelMeasurements.get(tickKey);
-            const estimated = !measurement ? CartesianAxisLabelGeometry.estimateLabelDimensions(formattedText) : undefined;
-            if (!measurement && estimated && labelMeasurements instanceof Map && !labelMeasurements.has(tickKey)) {
-                (labelMeasurements as Map<string, ChartLabelMeasurement>).set(tickKey, {
-                    height: estimated.height,
-                    width: axis.labelMaxWidth !== undefined ? Math.min(axis.labelMaxWidth, estimated.width) : estimated.width
-                });
-            }
-
-            const rawWidth = measurement?.width ?? estimated?.width ?? (formattedText.length * 7.5);
-            const rawHeight = measurement?.height ?? estimated?.height ?? 16;
-            const projected = CartesianAxisLabelGeometry.projectRotatedDimensions(rawWidth, rawHeight, labelRotation);
-            const extentAlongAxis = axis.dimension === "x" ? projected.projectedWidth : projected.projectedHeight;
-
-            intermediateTicks.push({
-                coord,
-                extentAlongAxis,
-                formattedText,
-                height: rawHeight,
-                index: i,
-                tickKey,
-                val,
-                width: rawWidth
-            });
-        }
-
-        let thinningFlags: readonly boolean[] | undefined;
-        if (resolvedType === "category" && intermediateTicks.length > 0) {
-            const maxExtentAlong = intermediateTicks.reduce((max, t) => Math.max(max, t.extentAlongAxis), 12);
-            thinningFlags = CartesianAxisLabelGeometry.resolveCategoryLabelThinning({
-                categoryCount: intermediateTicks.length,
-                categoryStep: step,
-                maxLabelExtentAlongAxis: maxExtentAlong,
-                preferredTickCount: axis.tickCount
-            });
-        }
-
-        const ticks: ChartAxisSceneTick[] = [];
-        for (let i = 0; i < intermediateTicks.length; i++) {
-            const t = intermediateTicks[i];
-            const isThinned = thinningFlags ? !thinningFlags[i] : false;
-            const labelVisible = t.formattedText !== "" && !isThinned;
-
-            ticks.push({
-                coordinate: t.coord,
-                formattedValue: t.formattedText,
-                index: t.index,
-                labelVisible,
-                tickKey: t.tickKey,
-                unrotatedHeight: t.height,
-                unrotatedWidth: t.width,
-                value: t.val
-            });
-        }
-
-        return ticks;
     }
 }

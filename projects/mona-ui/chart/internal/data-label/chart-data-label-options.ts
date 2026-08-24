@@ -6,8 +6,8 @@ import type {
 
 export interface NormalizedChartDataLabelOptions {
     readonly allowOverlap: boolean;
-    readonly color?: string;
     readonly collisionPadding: number;
+    readonly color?: string;
     readonly enabled: boolean;
     readonly formatter?: ChartDataLabelFormatter;
     readonly maxLabels: number;

@@ -16,9 +16,9 @@ export interface ChartKeyboardAxisNamespace {
 }
 
 export interface ChartKeyboardSelectionState {
-    readonly namespace: ChartKeyboardAxisNamespace;
     readonly bucketIndex: number;
     readonly hitKey: string | null;
+    readonly namespace: ChartKeyboardAxisNamespace;
     readonly seriesId: string | null;
 }
 
@@ -32,8 +32,8 @@ export interface KeyboardNavigationResult {
     bucketIndex: number;
     hitKey: string | null;
     hitTarget: SceneHitTarget | null;
-    seriesId: string | null;
     namespace?: ChartKeyboardAxisNamespace;
+    seriesId: string | null;
 }
 
 export function getAvailableAxisNamespaces(scene: ChartScene): readonly ChartKeyboardAxisNamespace[] {
@@ -109,6 +109,31 @@ export function resolveInteractionBuckets(
 }
 
 export class ChartKeyboardNavigation {
+    static #resolveSelection(
+        buckets: readonly ChartInteractionBucket[],
+        bucketIndex: number,
+        preferredSeriesId: string | null,
+        preferredHitKey?: string | null,
+        namespace?: ChartKeyboardAxisNamespace
+    ): KeyboardNavigationResult {
+        const clampedIndex = clamp(bucketIndex, 0, buckets.length - 1);
+        const bucket = buckets[clampedIndex];
+        const hit =
+            (preferredHitKey
+                ? bucket?.hits.find((h: SceneHitTarget) => getHitTargetKey(h) === preferredHitKey)
+                : undefined) ??
+            bucket?.hits.find((h: SceneHitTarget) => h.seriesId === preferredSeriesId) ??
+            bucket?.hits[0] ??
+            null;
+        return {
+            bucketIndex: clampedIndex,
+            hitKey: hit ? getHitTargetKey(hit) : null,
+            hitTarget: hit,
+            seriesId: hit ? hit.seriesId : preferredSeriesId,
+            namespace
+        };
+    }
+
     public static handleKeyDown(
         event: KeyboardEvent,
         scene: ChartScene,
@@ -398,31 +423,6 @@ export class ChartKeyboardNavigation {
             default:
                 return null;
         }
-    }
-
-    static #resolveSelection(
-        buckets: readonly ChartInteractionBucket[],
-        bucketIndex: number,
-        preferredSeriesId: string | null,
-        preferredHitKey?: string | null,
-        namespace?: ChartKeyboardAxisNamespace
-    ): KeyboardNavigationResult {
-        const clampedIndex = clamp(bucketIndex, 0, buckets.length - 1);
-        const bucket = buckets[clampedIndex];
-        const hit =
-            (preferredHitKey
-                ? bucket?.hits.find((h: SceneHitTarget) => getHitTargetKey(h) === preferredHitKey)
-                : undefined) ??
-            bucket?.hits.find((h: SceneHitTarget) => h.seriesId === preferredSeriesId) ??
-            bucket?.hits[0] ??
-            null;
-        return {
-            bucketIndex: clampedIndex,
-            hitKey: hit ? getHitTargetKey(hit) : null,
-            hitTarget: hit,
-            seriesId: hit ? hit.seriesId : preferredSeriesId,
-            namespace
-        };
     }
 }
 

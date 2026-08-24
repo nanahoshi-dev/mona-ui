@@ -19,6 +19,55 @@ export interface CategoryLabelThinningParams {
 }
 
 export class CartesianAxisLabelGeometry {
+    static #measureCanvas: HTMLCanvasElement | null = null;
+    static #measureCtx: CanvasRenderingContext2D | null = null;
+
+    public static createTickKey(axis: "x" | "y", axisType: string, value: unknown, index: number): string {
+        if (axisType === "category") {
+            const serialized = value !== undefined && value !== null ? String(value) : String(index);
+            return `axis:${axis}:category:${index}:${serialized}`;
+        }
+        if (axisType === "linear") {
+            return `axis:${axis}:linear:${value}`;
+        }
+        if (axisType === "time" || axisType === "utc") {
+            const epoch = value instanceof Date ? value.getTime() : String(value);
+            return `axis:${axis}:${axisType}:${epoch}`;
+        }
+        return `axis:${axis}:${axisType}:${index}:${String(value)}`;
+    }
+
+    public static estimateLabelDimensions(
+        formattedText: string,
+        font: string = "12px ui-sans-serif, system-ui, sans-serif"
+    ): LabelDimensions {
+        const textLen = Math.max(1, formattedText.length);
+        if (typeof document !== "undefined") {
+            try {
+                if (!CartesianAxisLabelGeometry.#measureCanvas) {
+                    CartesianAxisLabelGeometry.#measureCanvas = document.createElement("canvas");
+                    CartesianAxisLabelGeometry.#measureCtx = CartesianAxisLabelGeometry.#measureCanvas.getContext("2d");
+                }
+                if (CartesianAxisLabelGeometry.#measureCtx) {
+                    CartesianAxisLabelGeometry.#measureCtx.font = font;
+                    const measuredWidth = CartesianAxisLabelGeometry.#measureCtx.measureText(formattedText).width;
+                    if (typeof measuredWidth === "number" && !isNaN(measuredWidth) && measuredWidth > 0) {
+                        return {
+                            height: 16,
+                            width: Math.ceil(measuredWidth)
+                        };
+                    }
+                }
+            } catch {
+                // Fall back to character estimate
+            }
+        }
+        return {
+            height: 16,
+            width: Math.max(12, Math.round(textLen * 7.5 + 4))
+        };
+    }
+
     public static normalizeRotation(rotation: ChartAxisLabelRotation | undefined): number | "auto" {
         if (rotation === "auto") {
             return "auto";
@@ -49,55 +98,6 @@ export class CartesianAxisLabelGeometry {
         return {
             projectedHeight: Math.round(projectedHeight * 100) / 100,
             projectedWidth: Math.round(projectedWidth * 100) / 100
-        };
-    }
-
-    public static createTickKey(axis: "x" | "y", axisType: string, value: unknown, index: number): string {
-        if (axisType === "category") {
-            const serialized = value !== undefined && value !== null ? String(value) : String(index);
-            return `axis:${axis}:category:${index}:${serialized}`;
-        }
-        if (axisType === "linear") {
-            return `axis:${axis}:linear:${value}`;
-        }
-        if (axisType === "time" || axisType === "utc") {
-            const epoch = value instanceof Date ? value.getTime() : String(value);
-            return `axis:${axis}:${axisType}:${epoch}`;
-        }
-        return `axis:${axis}:${axisType}:${index}:${String(value)}`;
-    }
-
-    static #measureCanvas: HTMLCanvasElement | null = null;
-    static #measureCtx: CanvasRenderingContext2D | null = null;
-
-    public static estimateLabelDimensions(
-        formattedText: string,
-        font: string = "12px ui-sans-serif, system-ui, sans-serif"
-    ): LabelDimensions {
-        const textLen = Math.max(1, formattedText.length);
-        if (typeof document !== "undefined") {
-            try {
-                if (!CartesianAxisLabelGeometry.#measureCanvas) {
-                    CartesianAxisLabelGeometry.#measureCanvas = document.createElement("canvas");
-                    CartesianAxisLabelGeometry.#measureCtx = CartesianAxisLabelGeometry.#measureCanvas.getContext("2d");
-                }
-                if (CartesianAxisLabelGeometry.#measureCtx) {
-                    CartesianAxisLabelGeometry.#measureCtx.font = font;
-                    const measuredWidth = CartesianAxisLabelGeometry.#measureCtx.measureText(formattedText).width;
-                    if (typeof measuredWidth === "number" && !isNaN(measuredWidth) && measuredWidth > 0) {
-                        return {
-                            height: 16,
-                            width: Math.ceil(measuredWidth)
-                        };
-                    }
-                }
-            } catch {
-                // Fall back to character estimate
-            }
-        }
-        return {
-            height: 16,
-            width: Math.max(12, Math.round(textLen * 7.5 + 4))
         };
     }
 

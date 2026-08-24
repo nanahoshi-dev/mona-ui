@@ -3,6 +3,15 @@ import type { PolarAxisChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 
 export class PolarAxisGridRenderer {
+    public static render(
+        context: CanvasRenderingContext2D,
+        scene: PolarAxisChartScene,
+        styleResolver: ChartStyleResolver
+    ): void {
+        this.renderBackground(context, scene, styleResolver);
+        this.renderForeground(context, scene, styleResolver);
+    }
+
     public static renderBackground(
         context: CanvasRenderingContext2D,
         scene: PolarAxisChartScene,
@@ -143,14 +152,5 @@ export class PolarAxisGridRenderer {
         }
 
         context.restore();
-    }
-
-    public static render(
-        context: CanvasRenderingContext2D,
-        scene: PolarAxisChartScene,
-        styleResolver: ChartStyleResolver
-    ): void {
-        this.renderBackground(context, scene, styleResolver);
-        this.renderForeground(context, scene, styleResolver);
     }
 }

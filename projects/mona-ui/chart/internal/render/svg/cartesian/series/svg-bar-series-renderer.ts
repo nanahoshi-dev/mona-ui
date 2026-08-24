@@ -11,6 +11,14 @@ export class SvgBarSeriesRenderer {
         this.#keyedGroup = new SvgKeyedGroup<SceneBar, SVGPathElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(scene: ChartBarSeriesScene): void {
         const bars = scene.bars ?? [];
         const { borderRadius, fillOpacity, style } = scene;
@@ -42,13 +50,5 @@ export class SvgBarSeriesRenderer {
                 setSvgAttribute(element, "opacity", barAlpha <= 0 ? 0 : barAlpha);
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

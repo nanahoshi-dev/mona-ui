@@ -28,6 +28,7 @@ import { TreemapSeriesComponent } from "./treemap-series.component";
     `
 })
 class TestTreemapHostComponent {
+    public readonly childrenField = signal("children");
     public readonly data = signal<readonly unknown[]>([
         {
             children: [
@@ -39,9 +40,8 @@ class TestTreemapHostComponent {
     ]);
     public readonly field = signal("value");
     public readonly labelField = signal("name");
-    public readonly childrenField = signal("children");
-    public readonly tile = signal<ChartTreemapTile>("squarify");
     public readonly sort = signal<ChartTreemapSort>("descending");
+    public readonly tile = signal<ChartTreemapTile>("squarify");
     public readonly visible = signal(true);
 
     public lastVisibilityEvent: ChartTreemapNodeVisibilityEvent | null = null;

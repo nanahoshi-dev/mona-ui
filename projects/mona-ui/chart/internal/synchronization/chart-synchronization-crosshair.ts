@@ -14,13 +14,13 @@ import type { ChartSynchronizedAxisValue } from "./chart-synchronization-types";
 import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
 
 export interface CrosshairSceneContext {
+    readonly axisScenes: readonly ChartAxisScene[];
     readonly coordinateSpace: CartesianAxisCoordinateSpace;
+    readonly plotRect: ChartRect;
     readonly primaryXAxisId: string;
     readonly primaryYAxisId: string;
-    readonly plotRect: ChartRect;
-    readonly xTimeSpanMs?: number;
-    readonly axisScenes: readonly ChartAxisScene[];
     readonly resolveNearestPoint?: (pixel: ChartPoint, dimension?: "x" | "y" | "xy", mappedXAxisId?: string, mappedYAxisId?: string) => { readonly point: ChartPoint; readonly xValue?: unknown; readonly yValue?: unknown } | null;
+    readonly xTimeSpanMs?: number;
 }
 
 function toEpochMs(value: unknown): number | null {

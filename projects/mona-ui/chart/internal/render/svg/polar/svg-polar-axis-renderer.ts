@@ -12,11 +12,10 @@ import { SvgKeyedGroup } from "../svg-keyed-group";
 
 class SvgPolarAxisSeriesRenderer {
     readonly #container: SVGGElement;
-    #fillPath: SVGPathElement | null = null;
-    #strokePath: SVGPathElement | null = null;
     readonly #pointsGroup: SVGGElement;
     readonly #pointsKeyedGroup: SvgKeyedGroup<SceneRadialPoint, SVGCircleElement>;
-
+    #fillPath: SVGPathElement | null = null;
+    #strokePath: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -25,6 +24,25 @@ class SvgPolarAxisSeriesRenderer {
         this.#container.appendChild(this.#pointsGroup);
 
         this.#pointsKeyedGroup = new SvgKeyedGroup<SceneRadialPoint, SVGCircleElement>(this.#pointsGroup);
+    }
+
+    public clear(): void {
+        if (this.#fillPath) {
+            this.#fillPath.remove();
+            this.#fillPath = null;
+        }
+        if (this.#strokePath) {
+            this.#strokePath.remove();
+            this.#strokePath = null;
+        }
+        this.#pointsKeyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#pointsKeyedGroup.destroy();
+        this.#pointsGroup.remove();
+        this.#container.remove();
     }
 
     public render(
@@ -146,25 +164,6 @@ class SvgPolarAxisSeriesRenderer {
             this.#pointsKeyedGroup.clear();
         }
     }
-
-    public clear(): void {
-        if (this.#fillPath) {
-            this.#fillPath.remove();
-            this.#fillPath = null;
-        }
-        if (this.#strokePath) {
-            this.#strokePath.remove();
-            this.#strokePath = null;
-        }
-        this.#pointsKeyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#pointsKeyedGroup.destroy();
-        this.#pointsGroup.remove();
-        this.#container.remove();
-    }
 }
 
 interface SvgPolarAxisSeriesEntry {
@@ -173,20 +172,17 @@ interface SvgPolarAxisSeriesEntry {
 }
 
 export class SvgPolarAxisRenderer {
-    readonly #container: SVGGElement;
     readonly #backgroundGroup: SVGGElement;
-    readonly #seriesGroup: SVGGElement;
+    readonly #container: SVGGElement;
     readonly #foregroundGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
-
     readonly #radialGridKeyedGroup: SvgKeyedGroup<ChartRadialAxisTick, SVGElement>;
+    readonly #seriesGroup: SVGGElement;
+    readonly #seriesRenderers = new Map<string, SvgPolarAxisSeriesEntry>();
     #angularSpokesPath: SVGPathElement | null = null;
+    #highlightCircle: SVGCircleElement | null = null;
     #outerBoundaryElement: SVGElement | null = null;
     #radialRefSpokeLine: SVGLineElement | null = null;
-    #highlightCircle: SVGCircleElement | null = null;
-
-    readonly #seriesRenderers = new Map<string, SvgPolarAxisSeriesEntry>();
-
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -207,68 +203,6 @@ export class SvgPolarAxisRenderer {
         this.#container.appendChild(this.#highlightGroup);
 
         this.#radialGridKeyedGroup = new SvgKeyedGroup<ChartRadialAxisTick, SVGElement>(this.#backgroundGroup);
-    }
-
-    public render(
-        scene: PolarAxisChartScene,
-        interactionState: ChartInteractionState | null,
-        styleResolver: ChartStyleResolver,
-        defs: SvgDefinitionRegistry
-    ): void {
-        const { center, outerRadius, series } = scene;
-        if (outerRadius <= 0) {
-            this.clear();
-            return;
-        }
-
-        // 1. Background Grid & Spokes
-        this.#renderBackground(scene, styleResolver);
-
-        // 2. Series
-        this.#renderSeries(series, center, styleResolver, defs);
-
-        // 3. Foreground Axes
-        this.#renderForeground(scene, styleResolver);
-
-        // 4. Interaction Highlight
-        this.#renderHighlight(scene, interactionState, styleResolver);
-    }
-
-    public clear(): void {
-        this.#radialGridKeyedGroup.clear();
-        if (this.#angularSpokesPath) {
-            this.#angularSpokesPath.remove();
-            this.#angularSpokesPath = null;
-        }
-        for (const entry of this.#seriesRenderers.values()) {
-            entry.renderer.clear();
-        }
-        if (this.#outerBoundaryElement) {
-            this.#outerBoundaryElement.remove();
-            this.#outerBoundaryElement = null;
-        }
-        if (this.#radialRefSpokeLine) {
-            this.#radialRefSpokeLine.remove();
-            this.#radialRefSpokeLine = null;
-        }
-        if (this.#highlightCircle) {
-            this.#highlightCircle.remove();
-            this.#highlightCircle = null;
-        }
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#radialGridKeyedGroup.destroy();
-        for (const entry of this.#seriesRenderers.values()) {
-            entry.renderer.destroy();
-            entry.container.remove();
-        }
-        this.#seriesRenderers.clear();
-        this.#backgroundGroup.remove();
-        this.#seriesGroup.remove();
-        this.#foregroundGroup.remove();
-        this.#highlightGroup.remove();
     }
 
     #renderBackground(scene: PolarAxisChartScene, styleResolver: ChartStyleResolver): void {
@@ -344,47 +278,6 @@ export class SvgPolarAxisRenderer {
         } else if (this.#angularSpokesPath) {
             this.#angularSpokesPath.remove();
             this.#angularSpokesPath = null;
-        }
-    }
-
-    #renderSeries(
-        seriesList: readonly (ChartRadarSeriesScene | ChartContinuousPolarSeriesScene)[],
-        center: { x: number; y: number },
-        styleResolver: ChartStyleResolver,
-        defs: SvgDefinitionRegistry
-    ): void {
-        const activeIds = new Set<string>();
-
-        for (let i = 0; i < seriesList.length; i++) {
-            const s = seriesList[i];
-            activeIds.add(s.id);
-
-            let entry = this.#seriesRenderers.get(s.id);
-            if (!entry) {
-                const container = createSvgElement("g");
-                container.setAttribute("data-series-id", s.id);
-                this.#seriesGroup.appendChild(container);
-                const renderer = new SvgPolarAxisSeriesRenderer(container);
-                entry = { container, renderer };
-                this.#seriesRenderers.set(s.id, entry);
-            }
-
-            // Ensure DOM ordering
-            const currentNthChild = this.#seriesGroup.children[i];
-            if (currentNthChild !== entry.container) {
-                this.#seriesGroup.insertBefore(entry.container, currentNthChild ?? null);
-            }
-
-            entry.renderer.render(s, center, styleResolver, defs);
-        }
-
-        // Cleanup stale series
-        for (const [id, entry] of this.#seriesRenderers.entries()) {
-            if (!activeIds.has(id)) {
-                entry.renderer.destroy();
-                entry.container.remove();
-                this.#seriesRenderers.delete(id);
-            }
         }
     }
 
@@ -498,5 +391,108 @@ export class SvgPolarAxisRenderer {
         setSvgAttribute(this.#highlightCircle, "fill", isKeyboard ? focusIndicatorColor : seriesColor);
         setSvgAttribute(this.#highlightCircle, "stroke", surfaceColor);
         setSvgAttribute(this.#highlightCircle, "stroke-width", 2);
+    }
+
+    #renderSeries(
+        seriesList: readonly (ChartRadarSeriesScene | ChartContinuousPolarSeriesScene)[],
+        center: { x: number; y: number },
+        styleResolver: ChartStyleResolver,
+        defs: SvgDefinitionRegistry
+    ): void {
+        const activeIds = new Set<string>();
+
+        for (let i = 0; i < seriesList.length; i++) {
+            const s = seriesList[i];
+            activeIds.add(s.id);
+
+            let entry = this.#seriesRenderers.get(s.id);
+            if (!entry) {
+                const container = createSvgElement("g");
+                container.setAttribute("data-series-id", s.id);
+                this.#seriesGroup.appendChild(container);
+                const renderer = new SvgPolarAxisSeriesRenderer(container);
+                entry = { container, renderer };
+                this.#seriesRenderers.set(s.id, entry);
+            }
+
+            // Ensure DOM ordering
+            const currentNthChild = this.#seriesGroup.children[i];
+            if (currentNthChild !== entry.container) {
+                this.#seriesGroup.insertBefore(entry.container, currentNthChild ?? null);
+            }
+
+            entry.renderer.render(s, center, styleResolver, defs);
+        }
+
+        // Cleanup stale series
+        for (const [id, entry] of this.#seriesRenderers.entries()) {
+            if (!activeIds.has(id)) {
+                entry.renderer.destroy();
+                entry.container.remove();
+                this.#seriesRenderers.delete(id);
+            }
+        }
+    }
+
+    public clear(): void {
+        this.#radialGridKeyedGroup.clear();
+        if (this.#angularSpokesPath) {
+            this.#angularSpokesPath.remove();
+            this.#angularSpokesPath = null;
+        }
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.clear();
+        }
+        if (this.#outerBoundaryElement) {
+            this.#outerBoundaryElement.remove();
+            this.#outerBoundaryElement = null;
+        }
+        if (this.#radialRefSpokeLine) {
+            this.#radialRefSpokeLine.remove();
+            this.#radialRefSpokeLine = null;
+        }
+        if (this.#highlightCircle) {
+            this.#highlightCircle.remove();
+            this.#highlightCircle = null;
+        }
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#radialGridKeyedGroup.destroy();
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.destroy();
+            entry.container.remove();
+        }
+        this.#seriesRenderers.clear();
+        this.#backgroundGroup.remove();
+        this.#seriesGroup.remove();
+        this.#foregroundGroup.remove();
+        this.#highlightGroup.remove();
+    }
+
+    public render(
+        scene: PolarAxisChartScene,
+        interactionState: ChartInteractionState | null,
+        styleResolver: ChartStyleResolver,
+        defs: SvgDefinitionRegistry
+    ): void {
+        const { center, outerRadius, series } = scene;
+        if (outerRadius <= 0) {
+            this.clear();
+            return;
+        }
+
+        // 1. Background Grid & Spokes
+        this.#renderBackground(scene, styleResolver);
+
+        // 2. Series
+        this.#renderSeries(series, center, styleResolver, defs);
+
+        // 3. Foreground Axes
+        this.#renderForeground(scene, styleResolver);
+
+        // 4. Interaction Highlight
+        this.#renderHighlight(scene, interactionState, styleResolver);
     }
 }

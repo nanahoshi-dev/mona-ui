@@ -25,16 +25,6 @@ class TestResizeObserver {
         TestResizeObserver.instances.push(this);
     }
 
-    public observe(target: Element): void {
-        this.observed.add(target);
-        this.unobserved.delete(target);
-    }
-
-    public unobserve(target: Element): void {
-        this.observed.delete(target);
-        this.unobserved.add(target);
-    }
-
     public disconnect(): void {
         this.disconnected = true;
         this.observed.clear();
@@ -56,6 +46,16 @@ class TestResizeObserver {
             target: e.target
         })) as unknown as ResizeObserverEntry[];
         this.callback(mapped);
+    }
+
+    public observe(target: Element): void {
+        this.observed.add(target);
+        this.unobserved.delete(target);
+    }
+
+    public unobserve(target: Element): void {
+        this.observed.delete(target);
+        this.unobserved.add(target);
     }
 }
 
@@ -107,26 +107,23 @@ class TestResizeObserver {
     `
 })
 class PresentationStageContractHostComponent {
+    public readonly brushBorderColor = signal<string | undefined>(undefined);
+    public readonly brushBorderWidth = signal<number | undefined>(undefined);
+    public readonly brushEnabled = signal(true);
+    public readonly brushFillColor = signal<string | undefined>(undefined);
+    public readonly brushFillOpacity = signal<number | undefined>(undefined);
+    public readonly brushLineStyle = signal<"solid" | "dashed" | "dotted" | undefined>(undefined);
     public readonly chart = viewChild.required(ChartComponent);
+    public readonly controlledSelectedIds = signal<readonly string[] | undefined>(undefined);
     public readonly data = signal([
         { name: "A", value: 10 },
         { name: "B", value: 20 },
         { name: "C", value: 30 }
     ]);
-    public readonly controlledSelectedIds = signal<readonly string[] | undefined>(undefined);
+    public readonly dataLabelOptions = signal<boolean | ChartDataLabelOptions>(true);
     public readonly selectionColor = signal<string | undefined>(undefined);
     public readonly selectionFillOpacity = signal<number | undefined>(undefined);
     public readonly selectionStrokeWidth = signal<number | undefined>(undefined);
-
-    public readonly dataLabelOptions = signal<boolean | ChartDataLabelOptions>(true);
-
-    public readonly brushEnabled = signal(true);
-    public readonly brushFillColor = signal<string | undefined>(undefined);
-    public readonly brushFillOpacity = signal<number | undefined>(undefined);
-    public readonly brushBorderColor = signal<string | undefined>(undefined);
-    public readonly brushBorderWidth = signal<number | undefined>(undefined);
-    public readonly brushLineStyle = signal<"solid" | "dashed" | "dotted" | undefined>(undefined);
-
     public brushEvents: ChartBrushChangeEvent[] = [];
     public selectionEvents: ChartSelectionChangeEvent[] = [];
 

@@ -23,16 +23,19 @@ import { SvgRangeAreaSeriesRenderer } from "./series/svg-range-area-series-rende
 import { SvgRangeBarSeriesRenderer } from "./series/svg-range-bar-series-renderer";
 
 export class SvgCartesianChartRenderer {
-    readonly #layers: SvgRootLayers;
-    readonly #gridRenderer: SvgCartesianGridRenderer;
-    readonly #overlayRenderer: SvgCartesianOverlayRenderer;
     readonly #axisRenderer: SvgCartesianAxisRenderer;
-    readonly #selectionRenderer: SvgCartesianSelectionRenderer;
-    readonly #dataLabelRenderer: SvgCartesianDataLabelRenderer;
-    readonly #crosshairRenderer: SvgCartesianCrosshairRenderer;
-    readonly #interactionRenderer: SvgCartesianInteractionRenderer;
     readonly #brushRenderer: SvgCartesianBrushRenderer;
-
+    readonly #crossfadeFromContainers = new Map<string, SVGGElement>();
+    readonly #crossfadeFromRenderers = new Map<string, { renderer: any; type: string }>();
+    readonly #crossfadeToContainers = new Map<string, SVGGElement>();
+    readonly #crossfadeToRenderers = new Map<string, { renderer: any; type: string }>();
+    readonly #crosshairRenderer: SvgCartesianCrosshairRenderer;
+    readonly #dataLabelRenderer: SvgCartesianDataLabelRenderer;
+    readonly #gridRenderer: SvgCartesianGridRenderer;
+    readonly #interactionRenderer: SvgCartesianInteractionRenderer;
+    readonly #layers: SvgRootLayers;
+    readonly #overlayRenderer: SvgCartesianOverlayRenderer;
+    readonly #selectionRenderer: SvgCartesianSelectionRenderer;
     readonly #seriesContainers = new Map<string, SVGGElement>();
     readonly #seriesRenderers = new Map<
         string,
@@ -49,24 +52,16 @@ export class SvgCartesianChartRenderer {
             type: string;
         }
     >();
-
-    #crossfadeFromGridScope: SVGGElement | null = null;
-    #crossfadeToGridScope: SVGGElement | null = null;
-    #fromGridRenderer: SvgCartesianGridRenderer | null = null;
-    #toGridRenderer: SvgCartesianGridRenderer | null = null;
-
-    #crossfadeFromScope: SVGGElement | null = null;
-    #crossfadeToScope: SVGGElement | null = null;
-    readonly #crossfadeFromContainers = new Map<string, SVGGElement>();
-    readonly #crossfadeFromRenderers = new Map<string, { renderer: any; type: string }>();
-    readonly #crossfadeToContainers = new Map<string, SVGGElement>();
-    readonly #crossfadeToRenderers = new Map<string, { renderer: any; type: string }>();
-
     #crossfadeFromAxesScope: SVGGElement | null = null;
+    #crossfadeFromGridScope: SVGGElement | null = null;
+    #crossfadeFromScope: SVGGElement | null = null;
     #crossfadeToAxesScope: SVGGElement | null = null;
+    #crossfadeToGridScope: SVGGElement | null = null;
+    #crossfadeToScope: SVGGElement | null = null;
     #fromAxesRenderer: SvgCartesianAxisRenderer | null = null;
+    #fromGridRenderer: SvgCartesianGridRenderer | null = null;
     #toAxesRenderer: SvgCartesianAxisRenderer | null = null;
-
+    #toGridRenderer: SvgCartesianGridRenderer | null = null;
     public constructor(layers: SvgRootLayers) {
         this.#layers = layers;
         this.#gridRenderer = new SvgCartesianGridRenderer(layers.grid);
@@ -77,6 +72,174 @@ export class SvgCartesianChartRenderer {
         this.#crosshairRenderer = new SvgCartesianCrosshairRenderer(layers.transient);
         this.#interactionRenderer = new SvgCartesianInteractionRenderer(layers.transient);
         this.#brushRenderer = new SvgCartesianBrushRenderer(layers.brush);
+    }
+
+    #clearCrossfadeScopes(): void {
+        if (this.#crossfadeFromGridScope) {
+            this.#fromGridRenderer?.clear();
+            this.#crossfadeFromGridScope.remove();
+            this.#crossfadeFromGridScope = null;
+            this.#fromGridRenderer = null;
+        }
+        if (this.#crossfadeToGridScope) {
+            this.#toGridRenderer?.clear();
+            this.#crossfadeToGridScope.remove();
+            this.#crossfadeToGridScope = null;
+            this.#toGridRenderer = null;
+        }
+        if (this.#crossfadeFromAxesScope) {
+            this.#fromAxesRenderer?.clear();
+            this.#crossfadeFromAxesScope.remove();
+            this.#crossfadeFromAxesScope = null;
+            this.#fromAxesRenderer = null;
+        }
+        if (this.#crossfadeToAxesScope) {
+            this.#toAxesRenderer?.clear();
+            this.#crossfadeToAxesScope.remove();
+            this.#crossfadeToAxesScope = null;
+            this.#toAxesRenderer = null;
+        }
+        if (this.#crossfadeFromScope) {
+            for (const r of this.#crossfadeFromRenderers.values()) {
+                r.renderer.clear();
+            }
+            this.#crossfadeFromScope.remove();
+            this.#crossfadeFromScope = null;
+            this.#crossfadeFromContainers.clear();
+            this.#crossfadeFromRenderers.clear();
+        }
+        if (this.#crossfadeToScope) {
+            for (const r of this.#crossfadeToRenderers.values()) {
+                r.renderer.clear();
+            }
+            this.#crossfadeToScope.remove();
+            this.#crossfadeToScope = null;
+            this.#crossfadeToContainers.clear();
+            this.#crossfadeToRenderers.clear();
+        }
+    }
+
+    #renderSeriesInto(
+        targetContainer: SVGGElement,
+        seriesList: readonly import("../../../scene/cartesian-scene").ChartSeriesScene[],
+        defs: SvgDefinitionRegistry,
+        containersMap: Map<string, SVGGElement>,
+        renderersMap: Map<string, { renderer: any; type: string }>
+    ): void {
+        const activeIds = new Set<string>();
+
+        for (let i = 0; i < seriesList.length; i++) {
+            const s = seriesList[i];
+            activeIds.add(s.id);
+
+            let group = containersMap.get(s.id);
+            if (!group) {
+                group = createSvgElement("g");
+                group.setAttribute("data-series-id", s.id);
+                targetContainer.appendChild(group);
+                containersMap.set(s.id, group);
+            }
+
+            // Ensure correct DOM order in series layer (SVG-R1-012)
+            const currentNthChild = targetContainer.children[i];
+            if (currentNthChild !== group) {
+                targetContainer.insertBefore(group, currentNthChild ?? null);
+            }
+
+            let entry = renderersMap.get(s.id);
+            if (entry && entry.type !== s.type) {
+                entry.renderer.clear();
+                entry = undefined;
+                renderersMap.delete(s.id);
+            }
+
+            if (!entry) {
+                let renderer: any = null;
+                switch (s.type) {
+                    case "area":
+                        renderer = new SvgAreaSeriesRenderer(group);
+                        break;
+                    case "bar":
+                        renderer = new SvgBarSeriesRenderer(group);
+                        break;
+                    case "bubble":
+                    case "scatter":
+                        renderer = new SvgMarkerSeriesRenderer(group);
+                        break;
+                    case "candlestick":
+                        renderer = new SvgCandlestickSeriesRenderer(group);
+                        break;
+                    case "line":
+                        renderer = new SvgLineSeriesRenderer(group);
+                        break;
+                    case "ohlc":
+                        renderer = new SvgOhlcSeriesRenderer(group);
+                        break;
+                    case "rangeArea":
+                        renderer = new SvgRangeAreaSeriesRenderer(group);
+                        break;
+                    case "rangeBar":
+                        renderer = new SvgRangeBarSeriesRenderer(group);
+                        break;
+                }
+                if (renderer) {
+                    entry = { renderer, type: s.type };
+                    renderersMap.set(s.id, entry);
+                }
+            }
+
+            if (entry) {
+                if (s.type === "area") {
+                    (entry.renderer as SvgAreaSeriesRenderer).render(s, defs);
+                } else {
+                    entry.renderer.render(s);
+                }
+            }
+        }
+
+        // Cleanup stale series
+        for (const [id, group] of containersMap.entries()) {
+            if (!activeIds.has(id)) {
+                renderersMap.get(id)?.renderer.clear();
+                renderersMap.delete(id);
+                group.remove();
+                containersMap.delete(id);
+            }
+        }
+    }
+
+    public clear(): void {
+        this.#gridRenderer.clear();
+        this.#overlayRenderer.clear();
+        this.#axisRenderer.clear();
+        this.#selectionRenderer.clear();
+        this.#dataLabelRenderer.clear();
+        this.#crosshairRenderer.clear();
+        this.#interactionRenderer.clear();
+        this.#brushRenderer.clear();
+
+        this.#clearCrossfadeScopes();
+
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.clear();
+        }
+        for (const container of this.#seriesContainers.values()) {
+            container.remove();
+        }
+        this.#seriesContainers.clear();
+        this.#seriesRenderers.clear();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#gridRenderer.destroy();
+        this.#overlayRenderer.destroy();
+        this.#axisRenderer.destroy();
+        this.#selectionRenderer.destroy();
+        this.#dataLabelRenderer.destroy();
+        this.#crosshairRenderer.destroy();
+        this.#interactionRenderer.destroy();
+        this.#brushRenderer.destroy();
     }
 
     public render(
@@ -347,174 +510,6 @@ export class SvgCartesianChartRenderer {
             );
         } else {
             this.#brushRenderer.clear();
-        }
-    }
-
-    public clear(): void {
-        this.#gridRenderer.clear();
-        this.#overlayRenderer.clear();
-        this.#axisRenderer.clear();
-        this.#selectionRenderer.clear();
-        this.#dataLabelRenderer.clear();
-        this.#crosshairRenderer.clear();
-        this.#interactionRenderer.clear();
-        this.#brushRenderer.clear();
-
-        this.#clearCrossfadeScopes();
-
-        for (const entry of this.#seriesRenderers.values()) {
-            entry.renderer.clear();
-        }
-        for (const container of this.#seriesContainers.values()) {
-            container.remove();
-        }
-        this.#seriesContainers.clear();
-        this.#seriesRenderers.clear();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#gridRenderer.destroy();
-        this.#overlayRenderer.destroy();
-        this.#axisRenderer.destroy();
-        this.#selectionRenderer.destroy();
-        this.#dataLabelRenderer.destroy();
-        this.#crosshairRenderer.destroy();
-        this.#interactionRenderer.destroy();
-        this.#brushRenderer.destroy();
-    }
-
-    #clearCrossfadeScopes(): void {
-        if (this.#crossfadeFromGridScope) {
-            this.#fromGridRenderer?.clear();
-            this.#crossfadeFromGridScope.remove();
-            this.#crossfadeFromGridScope = null;
-            this.#fromGridRenderer = null;
-        }
-        if (this.#crossfadeToGridScope) {
-            this.#toGridRenderer?.clear();
-            this.#crossfadeToGridScope.remove();
-            this.#crossfadeToGridScope = null;
-            this.#toGridRenderer = null;
-        }
-        if (this.#crossfadeFromAxesScope) {
-            this.#fromAxesRenderer?.clear();
-            this.#crossfadeFromAxesScope.remove();
-            this.#crossfadeFromAxesScope = null;
-            this.#fromAxesRenderer = null;
-        }
-        if (this.#crossfadeToAxesScope) {
-            this.#toAxesRenderer?.clear();
-            this.#crossfadeToAxesScope.remove();
-            this.#crossfadeToAxesScope = null;
-            this.#toAxesRenderer = null;
-        }
-        if (this.#crossfadeFromScope) {
-            for (const r of this.#crossfadeFromRenderers.values()) {
-                r.renderer.clear();
-            }
-            this.#crossfadeFromScope.remove();
-            this.#crossfadeFromScope = null;
-            this.#crossfadeFromContainers.clear();
-            this.#crossfadeFromRenderers.clear();
-        }
-        if (this.#crossfadeToScope) {
-            for (const r of this.#crossfadeToRenderers.values()) {
-                r.renderer.clear();
-            }
-            this.#crossfadeToScope.remove();
-            this.#crossfadeToScope = null;
-            this.#crossfadeToContainers.clear();
-            this.#crossfadeToRenderers.clear();
-        }
-    }
-
-    #renderSeriesInto(
-        targetContainer: SVGGElement,
-        seriesList: readonly import("../../../scene/cartesian-scene").ChartSeriesScene[],
-        defs: SvgDefinitionRegistry,
-        containersMap: Map<string, SVGGElement>,
-        renderersMap: Map<string, { renderer: any; type: string }>
-    ): void {
-        const activeIds = new Set<string>();
-
-        for (let i = 0; i < seriesList.length; i++) {
-            const s = seriesList[i];
-            activeIds.add(s.id);
-
-            let group = containersMap.get(s.id);
-            if (!group) {
-                group = createSvgElement("g");
-                group.setAttribute("data-series-id", s.id);
-                targetContainer.appendChild(group);
-                containersMap.set(s.id, group);
-            }
-
-            // Ensure correct DOM order in series layer (SVG-R1-012)
-            const currentNthChild = targetContainer.children[i];
-            if (currentNthChild !== group) {
-                targetContainer.insertBefore(group, currentNthChild ?? null);
-            }
-
-            let entry = renderersMap.get(s.id);
-            if (entry && entry.type !== s.type) {
-                entry.renderer.clear();
-                entry = undefined;
-                renderersMap.delete(s.id);
-            }
-
-            if (!entry) {
-                let renderer: any = null;
-                switch (s.type) {
-                    case "area":
-                        renderer = new SvgAreaSeriesRenderer(group);
-                        break;
-                    case "bar":
-                        renderer = new SvgBarSeriesRenderer(group);
-                        break;
-                    case "bubble":
-                    case "scatter":
-                        renderer = new SvgMarkerSeriesRenderer(group);
-                        break;
-                    case "candlestick":
-                        renderer = new SvgCandlestickSeriesRenderer(group);
-                        break;
-                    case "line":
-                        renderer = new SvgLineSeriesRenderer(group);
-                        break;
-                    case "ohlc":
-                        renderer = new SvgOhlcSeriesRenderer(group);
-                        break;
-                    case "rangeArea":
-                        renderer = new SvgRangeAreaSeriesRenderer(group);
-                        break;
-                    case "rangeBar":
-                        renderer = new SvgRangeBarSeriesRenderer(group);
-                        break;
-                }
-                if (renderer) {
-                    entry = { renderer, type: s.type };
-                    renderersMap.set(s.id, entry);
-                }
-            }
-
-            if (entry) {
-                if (s.type === "area") {
-                    (entry.renderer as SvgAreaSeriesRenderer).render(s, defs);
-                } else {
-                    entry.renderer.render(s);
-                }
-            }
-        }
-
-        // Cleanup stale series
-        for (const [id, group] of containersMap.entries()) {
-            if (!activeIds.has(id)) {
-                renderersMap.get(id)?.renderer.clear();
-                renderersMap.delete(id);
-                group.remove();
-                containersMap.delete(id);
-            }
         }
     }
 }

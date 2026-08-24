@@ -40,15 +40,15 @@ class BrushRafHostComponent {
         { name: "B", value: 20 },
         { name: "C", value: 30 }
     ]);
-    public selectionEvents: ChartSelectionChangeEvent[] = [];
     public brushEvents: ChartBrushChangeEvent[] = [];
-
-    public onSelectionChange(evt: ChartSelectionChangeEvent): void {
-        this.selectionEvents.push(evt);
-    }
+    public selectionEvents: ChartSelectionChangeEvent[] = [];
 
     public onBrushChange(evt: ChartBrushChangeEvent): void {
         this.brushEvents.push(evt);
+    }
+
+    public onSelectionChange(evt: ChartSelectionChangeEvent): void {
+        this.selectionEvents.push(evt);
     }
 }
 

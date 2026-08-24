@@ -69,6 +69,39 @@ export class CartesianDefinedSegmentIndex {
         return this.#starts;
     }
 
+    /**
+     * Counts defined source marks in [sourceStart, sourceEnd) without walking
+     * the visible segment interval. Partial edge segments are handled directly;
+     * complete middle segments use the retained prefix sum.
+     */
+    public countDefinedInSourceRange(sourceStart: number, sourceEnd: number): number {
+        ChartDensityTracker.current?.onDefinedCountPrefixQuery?.();
+        if (this.count === 0 || sourceEnd <= sourceStart) {
+            return 0;
+        }
+
+        const start = Math.max(0, Math.floor(sourceStart));
+        const end = Math.min(Number.MAX_SAFE_INTEGER, Math.ceil(sourceEnd));
+        if (end <= start) {
+            return 0;
+        }
+
+        const first = this.findFirstIntersecting(start, end);
+        const last = this.findLastIntersecting(start, end);
+        if (first < 0 || last < 0 || last < first) {
+            return 0;
+        }
+
+        if (first === last) {
+            return Math.max(0, Math.min(this.#ends[first], end) - Math.max(this.#starts[first], start));
+        }
+
+        const firstCount = Math.max(0, this.#ends[first] - Math.max(this.#starts[first], start));
+        const middleCount = this.#prefixDefinedCounts[last] - this.#prefixDefinedCounts[first + 1];
+        const lastCount = Math.max(0, Math.min(this.#ends[last], end) - this.#starts[last]);
+        return firstCount + middleCount + lastCount;
+    }
+
     public findFirstIntersecting(sourceStart: number, sourceEnd: number): number {
         ChartDensityTracker.current?.onSegmentIndexQuery?.();
         if (this.count === 0 || sourceEnd <= sourceStart) {
@@ -175,39 +208,6 @@ export class CartesianDefinedSegmentIndex {
             return idx;
         }
         return null;
-    }
-
-    /**
-     * Counts defined source marks in [sourceStart, sourceEnd) without walking
-     * the visible segment interval. Partial edge segments are handled directly;
-     * complete middle segments use the retained prefix sum.
-     */
-    public countDefinedInSourceRange(sourceStart: number, sourceEnd: number): number {
-        ChartDensityTracker.current?.onDefinedCountPrefixQuery?.();
-        if (this.count === 0 || sourceEnd <= sourceStart) {
-            return 0;
-        }
-
-        const start = Math.max(0, Math.floor(sourceStart));
-        const end = Math.min(Number.MAX_SAFE_INTEGER, Math.ceil(sourceEnd));
-        if (end <= start) {
-            return 0;
-        }
-
-        const first = this.findFirstIntersecting(start, end);
-        const last = this.findLastIntersecting(start, end);
-        if (first < 0 || last < 0 || last < first) {
-            return 0;
-        }
-
-        if (first === last) {
-            return Math.max(0, Math.min(this.#ends[first], end) - Math.max(this.#starts[first], start));
-        }
-
-        const firstCount = Math.max(0, this.#ends[first] - Math.max(this.#starts[first], start));
-        const middleCount = this.#prefixDefinedCounts[last] - this.#prefixDefinedCounts[first + 1];
-        const lastCount = Math.max(0, Math.min(this.#ends[last], end) - this.#starts[last]);
-        return firstCount + middleCount + lastCount;
     }
 }
 

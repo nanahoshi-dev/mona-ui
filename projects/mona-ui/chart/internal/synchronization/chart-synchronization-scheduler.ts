@@ -37,9 +37,8 @@ function resolveFrameSchedulerHost(): FrameSchedulerHost | null {
 export class ChartSynchronizationScheduler {
     readonly #host: FrameSchedulerHost | null;
     readonly #onCoalesced?: () => void;
-    #frameHandle: number | null = null;
     readonly #pending = new Map<string, PendingSynchronizationDelivery>();
-
+    #frameHandle: number | null = null;
     public constructor(onCoalesced?: () => void) {
         this.#host = resolveFrameSchedulerHost();
         this.#onCoalesced = onCoalesced;
@@ -73,6 +72,18 @@ export class ChartSynchronizationScheduler {
         return count;
     }
 
+    public cancelGroupChannel(group: string, channel: SynchronizationDeliveryChannel): number {
+        let count = 0;
+        for (const [key, item] of this.#pending.entries()) {
+            const itemChannel = item.channel ?? item.kind;
+            if (item.group === group && itemChannel === channel) {
+                this.#pending.delete(key);
+                count++;
+            }
+        }
+        return count;
+    }
+
     public cancelOriginGroup(originMemberId: string, group: string, channel?: SynchronizationDeliveryChannel): number {
         let count = 0;
         for (const [key, item] of this.#pending.entries()) {
@@ -90,18 +101,6 @@ export class ChartSynchronizationScheduler {
         for (const [key, item] of this.#pending.entries()) {
             const itemChannel = item.channel ?? item.kind;
             if (item.recipientMemberId === recipientMemberId && item.group === group && (!channel || itemChannel === channel)) {
-                this.#pending.delete(key);
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public cancelGroupChannel(group: string, channel: SynchronizationDeliveryChannel): number {
-        let count = 0;
-        for (const [key, item] of this.#pending.entries()) {
-            const itemChannel = item.channel ?? item.kind;
-            if (item.group === group && itemChannel === channel) {
                 this.#pending.delete(key);
                 count++;
             }

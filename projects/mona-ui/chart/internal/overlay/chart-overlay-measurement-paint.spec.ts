@@ -24,16 +24,6 @@ class TestResizeObserver {
         TestResizeObserver.instances.push(this);
     }
 
-    public observe(target: Element): void {
-        this.observed.add(target);
-        this.unobserved.delete(target);
-    }
-
-    public unobserve(target: Element): void {
-        this.observed.delete(target);
-        this.unobserved.add(target);
-    }
-
     public disconnect(): void {
         this.disconnected = true;
         this.observed.clear();
@@ -55,6 +45,16 @@ class TestResizeObserver {
             target: e.target
         })) as unknown as ResizeObserverEntry[];
         this.callback(mapped);
+    }
+
+    public observe(target: Element): void {
+        this.observed.add(target);
+        this.unobserved.delete(target);
+    }
+
+    public unobserve(target: Element): void {
+        this.observed.delete(target);
+        this.unobserved.add(target);
     }
 }
 
@@ -95,16 +95,16 @@ function getObserverFor(el: Element): TestResizeObserver {
     `
 })
 class OverlayMeasurementPaintHostComponent {
+    public readonly annotationLabel = signal("Annotated Point");
+    public readonly annotationPlacement = signal<"bottom" | "left" | "right" | "top">("top");
+    public readonly annotationX = signal(50);
+    public readonly annotationY = signal(50);
     public readonly chart = viewChild.required(ChartComponent);
     public readonly data = signal([
         { x: 0, y: 10 },
         { x: 50, y: 50 },
         { x: 100, y: 90 }
     ]);
-    public readonly annotationX = signal(50);
-    public readonly annotationY = signal(50);
-    public readonly annotationLabel = signal("Annotated Point");
-    public readonly annotationPlacement = signal<"bottom" | "left" | "right" | "top">("top");
 }
 
 describe("ChartOverlayMeasurementPaint (CAA-R6-003 / Gates N & O)", () => {

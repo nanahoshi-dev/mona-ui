@@ -213,6 +213,10 @@ export class HeatmapColorScale {
         return this.#domain;
     }
 
+    public colorFor(value: number): string {
+        return this.#colorLut[this.indexFor(value)];
+    }
+
     public indexFor(value: number): number {
         const [min, max] = this.#domain;
         if (min === max) {
@@ -233,10 +237,6 @@ export class HeatmapColorScale {
         }
 
         return Math.min(255, Math.max(0, Math.round(t * 255)));
-    }
-
-    public colorFor(value: number): string {
-        return this.#colorLut[this.indexFor(value)];
     }
 
     public labelColorFor(value: number): string {

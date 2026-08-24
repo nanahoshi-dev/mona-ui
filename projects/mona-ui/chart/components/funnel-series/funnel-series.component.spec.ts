@@ -25,12 +25,12 @@ import { FunnelSeriesComponent } from "./funnel-series.component";
     `
 })
 class TestFunnelHostComponent {
+    public readonly categoryField = signal("stage");
     public readonly data = signal<readonly unknown[]>([
         { stage: "Stage 1", value: 100 },
         { stage: "Stage 2", value: 50 }
     ]);
     public readonly field = signal("value");
-    public readonly categoryField = signal("stage");
     public readonly orientation = signal<ChartFunnelOrientation>("vertical");
     public readonly visible = signal(true);
 

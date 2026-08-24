@@ -14,19 +14,16 @@ interface HeatmapRenderCellItem {
 }
 
 export class SvgHeatmapRenderer {
+    readonly #axesGroup: SVGGElement;
+    readonly #cellKeyedGroup: SvgKeyedGroup<HeatmapRenderCellItem, SVGElement>;
+    readonly #cellsGroup: SVGGElement;
     readonly #container: SVGGElement;
     readonly #gridGroup: SVGGElement;
-    readonly #cellsGroup: SVGGElement;
-    readonly #labelsGroup: SVGGElement;
-    readonly #axesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
-
-    #gridPath: SVGPathElement | null = null;
-    #axisPath: SVGPathElement | null = null;
-
-    readonly #cellKeyedGroup: SvgKeyedGroup<HeatmapRenderCellItem, SVGElement>;
     readonly #labelKeyedGroup: SvgKeyedGroup<HeatmapRenderCellItem, SVGTextElement>;
-
+    readonly #labelsGroup: SVGGElement;
+    #axisPath: SVGPathElement | null = null;
+    #gridPath: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -52,6 +49,31 @@ export class SvgHeatmapRenderer {
 
         this.#cellKeyedGroup = new SvgKeyedGroup<HeatmapRenderCellItem, SVGElement>(this.#cellsGroup);
         this.#labelKeyedGroup = new SvgKeyedGroup<HeatmapRenderCellItem, SVGTextElement>(this.#labelsGroup);
+    }
+
+    public clear(): void {
+        this.#cellKeyedGroup.clear();
+        this.#labelKeyedGroup.clear();
+        if (this.#gridPath) {
+            this.#gridPath.remove();
+            this.#gridPath = null;
+        }
+        if (this.#axisPath) {
+            this.#axisPath.remove();
+            this.#axisPath = null;
+        }
+        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#cellKeyedGroup.destroy();
+        this.#labelKeyedGroup.destroy();
+        this.#gridGroup.remove();
+        this.#cellsGroup.remove();
+        this.#labelsGroup.remove();
+        this.#axesGroup.remove();
+        this.#highlightGroup.remove();
     }
 
     public render(
@@ -254,30 +276,5 @@ export class SvgHeatmapRenderer {
                 this.#highlightGroup.appendChild(highlightEl);
             }
         }
-    }
-
-    public clear(): void {
-        this.#cellKeyedGroup.clear();
-        this.#labelKeyedGroup.clear();
-        if (this.#gridPath) {
-            this.#gridPath.remove();
-            this.#gridPath = null;
-        }
-        if (this.#axisPath) {
-            this.#axisPath.remove();
-            this.#axisPath = null;
-        }
-        while (this.#highlightGroup.firstChild) this.#highlightGroup.firstChild.remove();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#cellKeyedGroup.destroy();
-        this.#labelKeyedGroup.destroy();
-        this.#gridGroup.remove();
-        this.#cellsGroup.remove();
-        this.#labelsGroup.remove();
-        this.#axesGroup.remove();
-        this.#highlightGroup.remove();
     }
 }

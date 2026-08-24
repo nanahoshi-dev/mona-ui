@@ -71,10 +71,10 @@ export interface ChartLayoutOptions {
     styleResolver: ChartStyleResolver;
     viewport?: InternalCartesianViewportState;
     warnedDiagnosticSignatures?: Set<string>;
-    xAxis?: ChartXAxisRegistration;
     xAxes?: readonly ChartXAxisRegistration[];
-    yAxis?: ChartYAxisRegistration;
+    xAxis?: ChartXAxisRegistration;
     yAxes?: readonly ChartYAxisRegistration[];
+    yAxis?: ChartYAxisRegistration;
 }
 
 export function resolveChartCoordinateSystem(
@@ -117,6 +117,28 @@ export function resolveChartCoordinateSystem(
 }
 
 export class ChartLayoutEngine {
+    public static compute(options: ChartLayoutOptions): ChartLayoutComputation {
+        const structural = this.prepareStructural(options);
+        if (structural.kind === "scene") {
+            return { scene: structural.scene };
+        }
+        const canonicalViewport = options.viewport
+            ? CartesianViewportReconciler.reconcile(options.viewport, structural.runtime.baseCoordinateSpace, {
+                  clampToData: true
+              }).viewport
+            : undefined;
+        return CartesianLayoutEngine.projectRuntime(
+            structural.runtime,
+            canonicalViewport,
+            options.measurements,
+            options.warnedDiagnosticSignatures
+        );
+    }
+
+    public static computeScene(options: ChartLayoutOptions): ChartScene {
+        return this.compute(options).scene;
+    }
+
     public static prepareStructural(options: ChartLayoutOptions): ChartStructuralPreparation {
         const { series } = options;
         const warnedSet = options.warnedDiagnosticSignatures ?? globalWarnedSignatures;
@@ -610,27 +632,5 @@ export class ChartLayoutEngine {
             kind: "cartesian-xy",
             runtime: prep.runtime
         };
-    }
-
-    public static compute(options: ChartLayoutOptions): ChartLayoutComputation {
-        const structural = this.prepareStructural(options);
-        if (structural.kind === "scene") {
-            return { scene: structural.scene };
-        }
-        const canonicalViewport = options.viewport
-            ? CartesianViewportReconciler.reconcile(options.viewport, structural.runtime.baseCoordinateSpace, {
-                  clampToData: true
-              }).viewport
-            : undefined;
-        return CartesianLayoutEngine.projectRuntime(
-            structural.runtime,
-            canonicalViewport,
-            options.measurements,
-            options.warnedDiagnosticSignatures
-        );
-    }
-
-    public static computeScene(options: ChartLayoutOptions): ChartScene {
-        return this.compute(options).scene;
     }
 }

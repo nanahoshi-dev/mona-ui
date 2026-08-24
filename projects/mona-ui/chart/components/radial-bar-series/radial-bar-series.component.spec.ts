@@ -26,17 +26,17 @@ import { RadialBarSeriesComponent } from "./radial-bar-series.component";
     `
 })
 class TestRadialBarHostComponent {
+    public readonly barGap = signal(4);
+    public readonly categoryField = signal("category");
     public readonly data = signal<readonly unknown[]>([
         { category: "A", value: 30 },
         { category: "B", value: 70 }
     ]);
-    public readonly field = signal("value");
-    public readonly categoryField = signal("category");
-    public readonly min = signal<number | undefined>(0);
-    public readonly max = signal<number | undefined>(100);
-    public readonly barGap = signal(4);
-    public readonly startAngle = signal(0);
     public readonly endAngle = signal(360);
+    public readonly field = signal("value");
+    public readonly max = signal<number | undefined>(100);
+    public readonly min = signal<number | undefined>(0);
+    public readonly startAngle = signal(0);
     public readonly visible = signal(true);
 
     public lastVisibilityEvent: ChartRadialDatumVisibilityEvent | null = null;

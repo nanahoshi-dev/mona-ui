@@ -150,6 +150,53 @@ interface RawDatumRecord {
 }
 
 export class CartesianStackEngine {
+    public static computeAnalysis(options: CartesianStackEngineOptions): CartesianStackAnalysis {
+        const coord = this.computeCoordination(options);
+        const targetValueAxisId = options.orientation === "horizontal"
+            ? (options.primaryXAxisId ?? "default-x")
+            : (options.primaryYAxisId ?? "default-y");
+        const targetState = (options.orientation === "horizontal"
+            ? coord.valueAxisState.x.get(targetValueAxisId)
+            : coord.valueAxisState.y.get(targetValueAxisId)) ?? {
+            extent: [0, 0] as [number, number],
+            groupIds: [],
+            hasNegative: false,
+            hasPositive: false,
+            unitMode: "raw" as const
+        };
+
+        const visibleSeriesOnTargetAxis = options.series.filter(s => {
+            const sAxisId = options.orientation === "horizontal"
+                ? (("xAxisId" in s && typeof (s as any).xAxisId === "function" ? (s as any).xAxisId() : undefined) ?? options.primaryXAxisId ?? "default-x")
+                : (("yAxisId" in s && typeof (s as any).yAxisId === "function" ? (s as any).yAxisId() : undefined) ?? options.primaryYAxisId ?? "default-y");
+            return sAxisId === targetValueAxisId && s.visible();
+        });
+
+        const axisUnitMode: CartesianAxisUnitMode = targetState.unitMode === "percent" ? "percent" : "raw";
+        const visibleYUnitMode: CartesianVisibleYUnitMode =
+            visibleSeriesOnTargetAxis.length === 0
+                ? "none"
+                : targetState.unitMode === "percent"
+                    ? "percent-stack"
+                    : targetState.unitMode === "invalid"
+                      ? "invalid"
+                      : coord.layout.hasNormalStacks
+                        ? "normal-stack"
+                        : "raw";
+
+        return {
+            axisUnitMode,
+            configuration: coord.configuration,
+            diagnostics: coord.diagnostics,
+            invalidGroupIds: coord.invalidGroupIds,
+            invalidSeriesIds: coord.invalidSeriesIds,
+            layout: coord.layout,
+            visibleLayout: coord.visibleLayout,
+            visibleYUnitMode,
+            yUnitMode: targetState.unitMode === "percent" ? "percent" : targetState.unitMode === "invalid" ? "invalid" : "normal"
+        };
+    }
+
     public static computeCoordination(options: CartesianStackEngineOptions): CartesianStackCoordinationResult {
         const {
             orientation = "vertical",
@@ -804,53 +851,6 @@ export class CartesianStackEngine {
                 y: yValueAxisState
             },
             visibleLayout: layout
-        };
-    }
-
-    public static computeAnalysis(options: CartesianStackEngineOptions): CartesianStackAnalysis {
-        const coord = this.computeCoordination(options);
-        const targetValueAxisId = options.orientation === "horizontal"
-            ? (options.primaryXAxisId ?? "default-x")
-            : (options.primaryYAxisId ?? "default-y");
-        const targetState = (options.orientation === "horizontal"
-            ? coord.valueAxisState.x.get(targetValueAxisId)
-            : coord.valueAxisState.y.get(targetValueAxisId)) ?? {
-            extent: [0, 0] as [number, number],
-            groupIds: [],
-            hasNegative: false,
-            hasPositive: false,
-            unitMode: "raw" as const
-        };
-
-        const visibleSeriesOnTargetAxis = options.series.filter(s => {
-            const sAxisId = options.orientation === "horizontal"
-                ? (("xAxisId" in s && typeof (s as any).xAxisId === "function" ? (s as any).xAxisId() : undefined) ?? options.primaryXAxisId ?? "default-x")
-                : (("yAxisId" in s && typeof (s as any).yAxisId === "function" ? (s as any).yAxisId() : undefined) ?? options.primaryYAxisId ?? "default-y");
-            return sAxisId === targetValueAxisId && s.visible();
-        });
-
-        const axisUnitMode: CartesianAxisUnitMode = targetState.unitMode === "percent" ? "percent" : "raw";
-        const visibleYUnitMode: CartesianVisibleYUnitMode =
-            visibleSeriesOnTargetAxis.length === 0
-                ? "none"
-                : targetState.unitMode === "percent"
-                    ? "percent-stack"
-                    : targetState.unitMode === "invalid"
-                      ? "invalid"
-                      : coord.layout.hasNormalStacks
-                        ? "normal-stack"
-                        : "raw";
-
-        return {
-            axisUnitMode,
-            configuration: coord.configuration,
-            diagnostics: coord.diagnostics,
-            invalidGroupIds: coord.invalidGroupIds,
-            invalidSeriesIds: coord.invalidSeriesIds,
-            layout: coord.layout,
-            visibleLayout: coord.visibleLayout,
-            visibleYUnitMode,
-            yUnitMode: targetState.unitMode === "percent" ? "percent" : targetState.unitMode === "invalid" ? "invalid" : "normal"
         };
     }
 

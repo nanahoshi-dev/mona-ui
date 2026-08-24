@@ -124,10 +124,10 @@ export interface ComputeSharedStackProjectionInput {
     readonly maxPoints?: number | null;
     readonly plotSpanPx: number;
     readonly samplesPerPixel: number;
+    readonly stepProtected?: boolean;
     readonly threshold?: number | null;
     readonly timeline?: CartesianStackGroupTimeline | CartesianStackTimelineData | null;
     readonly viewportScale: ChartContinuousPositionScale<number | Date>;
-    readonly stepProtected?: boolean;
 }
 
 /**

@@ -46,7 +46,46 @@ export class ChartReferenceLineComponent {
      * @description Explicit identifier of the target axis. Defaults to primary axis for the dimension.
      */
     public readonly axisId = input<string | undefined>(undefined);
-
+    /**
+     * @description Stroke color of the reference line.
+     */
+    public readonly color = input<string | undefined>(undefined);
+    /**
+     * @description Text label displayed alongside the reference line.
+     */
+    public readonly label = input("");
+    /**
+     * @description Custom CSS class name applied to the label badge.
+     */
+    public readonly labelClass = input("");
+    /**
+     * @description Pixel offset between the reference line and the label.
+     */
+    public readonly labelOffset = input(6);
+    /**
+     * @description Alignment position for the label: 'start', 'center', or 'end'.
+     */
+    public readonly labelPosition = input<ChartReferenceLabelPosition>("end");
+    /**
+     * @description Render layer: 'underlay' (behind series) or 'overlay' (in front of series).
+     */
+    public readonly layer = input<ChartOverlayLayer>("overlay");
+    /**
+     * @description Line dash style: 'dashed', 'dotted', or 'solid'.
+     */
+    public readonly lineStyle = input<ChartReferenceLineStyle>("dashed");
+    /**
+     * @description Stroke opacity of the reference line (0 to 1).
+     */
+    public readonly opacity = input<number | undefined>(undefined);
+    /**
+     * @description Optional custom template for the reference line label.
+     */
+    public readonly template = contentChild(ChartReferenceLabelTemplateDirective);
+    /**
+     * @description Custom CSS class name applied to the reference line host.
+     */
+    public readonly userClass = input("", { alias: "class" });
     /**
      * @description Semantic coordinate value or category key for the reference line.
      */
@@ -56,62 +95,10 @@ export class ChartReferenceLineComponent {
      * @description Sets whether the reference line is visible.
      */
     public readonly visible = input(true);
-
-    /**
-     * @description Stroke color of the reference line.
-     */
-    public readonly color = input<string | undefined>(undefined);
-
-    /**
-     * @description Stroke opacity of the reference line (0 to 1).
-     */
-    public readonly opacity = input<number | undefined>(undefined);
-
     /**
      * @description Stroke width of the reference line in pixels.
      */
     public readonly width = input<number | undefined>(undefined);
-
-    /**
-     * @description Line dash style: 'dashed', 'dotted', or 'solid'.
-     */
-    public readonly lineStyle = input<ChartReferenceLineStyle>("dashed");
-
-    /**
-     * @description Render layer: 'underlay' (behind series) or 'overlay' (in front of series).
-     */
-    public readonly layer = input<ChartOverlayLayer>("overlay");
-
-    /**
-     * @description Text label displayed alongside the reference line.
-     */
-    public readonly label = input("");
-
-    /**
-     * @description Alignment position for the label: 'start', 'center', or 'end'.
-     */
-    public readonly labelPosition = input<ChartReferenceLabelPosition>("end");
-
-    /**
-     * @description Pixel offset between the reference line and the label.
-     */
-    public readonly labelOffset = input(6);
-
-    /**
-     * @description Custom CSS class name applied to the label badge.
-     */
-    public readonly labelClass = input("");
-
-    /**
-     * @description Custom CSS class name applied to the reference line host.
-     */
-    public readonly userClass = input("", { alias: "class" });
-
-    /**
-     * @description Optional custom template for the reference line label.
-     */
-    public readonly template = contentChild(ChartReferenceLabelTemplateDirective);
-
     public constructor() {
         if (!this.#context) {
             return;

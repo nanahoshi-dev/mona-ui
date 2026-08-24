@@ -15,6 +15,14 @@ export class SvgCartesianGridRenderer {
         this.#keyedGroup = new SvgKeyedGroup<GridPathItem, SVGPathElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(scene: CartesianXYChartScene, styleResolver: ChartStyleResolver): void {
         const { axes, plotRect } = scene;
         if (plotRect.width <= 0 || plotRect.height <= 0) {
@@ -64,13 +72,5 @@ export class SvgCartesianGridRenderer {
                 setSvgAttribute(element, "shape-rendering", "crispEdges");
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

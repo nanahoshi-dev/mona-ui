@@ -29,13 +29,13 @@ import type { ChartSelectionChangeEvent } from "../../models/chart-selection.mod
     `
 })
 class ControlledUncontrolledHostComponent {
+    public readonly controlledIds = signal<string[] | undefined>(undefined);
     public readonly data = signal([
         { name: "A", value: 10 },
         { name: "B", value: 20 },
         { name: "C", value: 30 }
     ]);
     public readonly mode = signal<"single" | "multiple">("multiple");
-    public readonly controlledIds = signal<string[] | undefined>(undefined);
     public selectionEvents: ChartSelectionChangeEvent[] = [];
 
     public onSelectionChange(evt: ChartSelectionChangeEvent): void {

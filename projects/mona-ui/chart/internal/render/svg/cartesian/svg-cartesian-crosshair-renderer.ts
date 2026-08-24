@@ -33,6 +33,14 @@ export class SvgCartesianCrosshairRenderer {
         this.#keyedGroup = new SvgKeyedGroup<CrosshairLineItem, SVGLineElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(
         crosshairState: ChartCrosshairState | null,
         registration: ChartCrosshairRegistration | null,
@@ -125,13 +133,5 @@ export class SvgCartesianCrosshairRenderer {
                 }
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

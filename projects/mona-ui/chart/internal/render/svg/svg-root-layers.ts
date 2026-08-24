@@ -93,6 +93,18 @@ export class SvgRootLayers {
         return this.#layers.get("brush")!;
     }
 
+    public clearLayers(): void {
+        for (const group of this.#layers.values()) {
+            while (group.firstChild) {
+                group.firstChild.remove();
+            }
+        }
+    }
+
+    public destroy(): void {
+        this.clearLayers();
+    }
+
     public getLayer(name: SvgLayerName): SVGGElement | SVGDefsElement {
         if (name === "defs") {
             return this.#defs;
@@ -108,17 +120,5 @@ export class SvgRootLayers {
             group.removeAttribute("filter");
             group.removeAttribute("mask");
         }
-    }
-
-    public clearLayers(): void {
-        for (const group of this.#layers.values()) {
-            while (group.firstChild) {
-                group.firstChild.remove();
-            }
-        }
-    }
-
-    public destroy(): void {
-        this.clearLayers();
     }
 }

@@ -59,19 +59,18 @@ import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene } from "../../in
     `
 })
 class TestFinancialHostComponent {
+    public readonly bodyWidthRatio = signal<number>(0.7);
     public readonly data = signal<readonly Record<string, unknown>[]>([
         { close: 104, date: "2026-03-01", high: 108, low: 98, open: 100 }, // rising
         { close: 102, date: "2026-03-02", high: 107, low: 100, open: 105 }, // falling
         { close: 110, date: "2026-03-03", high: 115, low: 108, open: 110 } // neutral doji
     ]);
-    public readonly xAxisType = signal<"category" | "linear" | "time">("category");
+    public readonly fillMode = signal<ChartFinancialFillMode>("filled");
     public readonly sharedTooltip = signal<boolean>(true);
     public readonly showCandlestick = signal<boolean>(true);
     public readonly showOhlc = signal<boolean>(false);
-    public readonly fillMode = signal<ChartFinancialFillMode>("filled");
     public readonly wickWidth = signal<number>(1.5);
-    public readonly bodyWidthRatio = signal<number>(0.7);
-
+    public readonly xAxisType = signal<"category" | "linear" | "time">("category");
     public lastPointClick: ChartPointEvent | null = null;
     public lastPointFocus: ChartPointFocusEvent | null = null;
 

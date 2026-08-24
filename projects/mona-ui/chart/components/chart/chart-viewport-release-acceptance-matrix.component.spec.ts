@@ -20,9 +20,9 @@ import { ChartComponent } from "./chart.component";
 import type { ChartBarOrientation } from "../../models/chart-bar.models";
 
 interface FlexibleDataItem {
+    cat?: string;
     x: number | string | Date;
     y: number;
-    cat?: string;
 }
 
 class FakeResizeObserver {
@@ -31,14 +31,6 @@ class FakeResizeObserver {
 
     public constructor(public readonly callback: ResizeObserverCallback) {
         FakeResizeObserver.instances.push(this);
-    }
-
-    public observe(target: Element): void {
-        this.observedElements.add(target);
-    }
-
-    public unobserve(target: Element): void {
-        this.observedElements.delete(target);
     }
 
     public disconnect(): void {
@@ -65,6 +57,14 @@ class FakeResizeObserver {
             ],
             this as unknown as ResizeObserver
         );
+    }
+
+    public observe(target: Element): void {
+        this.observedElements.add(target);
+    }
+
+    public unobserve(target: Element): void {
+        this.observedElements.delete(target);
     }
 }
 
@@ -112,35 +112,46 @@ class FakeResizeObserver {
     `
 })
 class EleventhRemediationHostComponent {
+    public readonly animation = signal<ChartAnimationInput>(false);
     public readonly chart = viewChild.required(ChartComponent);
-    public readonly yField = "y";
+    public readonly chartHeight = signal<number>(300);
     public readonly chartKind = signal<"xy" | "bar" | "pie">("xy");
     public readonly chartWidth = signal<number>(500);
-    public readonly chartHeight = signal<number>(300);
-    public readonly orientation = signal<ChartBarOrientation>("vertical");
+    public readonly clickedPoints: ChartPointEvent[] = [];
     public readonly data = signal<FlexibleDataItem[]>([
         { x: 0, y: 10, cat: "A" },
         { x: 50, y: 25, cat: "B" },
         { x: 100, y: 50, cat: "C" }
     ]);
-    public readonly xField = signal("x");
-    public readonly xAxisId = signal("x-main");
-    public readonly xAxisType = signal<ChartXAxisType>("linear");
-    public readonly yAxisId = signal("y-main");
-    public readonly yAxisType = signal<ChartYAxisType>("linear");
-    public readonly showXAxis = signal(true);
-    public readonly showYAxis = signal(true);
-    public readonly showSecondXAxis = signal(false);
-    public readonly secondXAxisId = signal("x-sec");
-    public readonly secondXAxisType = signal<ChartXAxisType>("linear");
-    public readonly navigation = signal<ChartNavigationInput>(true);
-    public readonly animation = signal<ChartAnimationInput>(false);
-    public readonly viewport = signal<ChartViewportState | undefined>(undefined);
     public readonly defaultViewport = signal<ChartViewportState | undefined>(undefined);
-    public readonly mode = signal<"immediate" | "delayed" | "end-only" | "reject" | "equal-clone">("reject");
     public readonly delayedQueue: ChartViewportState[] = [];
     public readonly emittedEvents: ChartViewportChangeEvent[] = [];
-    public readonly clickedPoints: ChartPointEvent[] = [];
+    public readonly mode = signal<"immediate" | "delayed" | "end-only" | "reject" | "equal-clone">("reject");
+    public readonly navigation = signal<ChartNavigationInput>(true);
+    public readonly orientation = signal<ChartBarOrientation>("vertical");
+    public readonly secondXAxisId = signal("x-sec");
+    public readonly secondXAxisType = signal<ChartXAxisType>("linear");
+    public readonly showSecondXAxis = signal(false);
+    public readonly showXAxis = signal(true);
+    public readonly showYAxis = signal(true);
+    public readonly viewport = signal<ChartViewportState | undefined>(undefined);
+    public readonly xAxisId = signal("x-main");
+    public readonly xAxisType = signal<ChartXAxisType>("linear");
+    public readonly xField = signal("x");
+    public readonly yAxisId = signal("y-main");
+    public readonly yAxisType = signal<ChartYAxisType>("linear");
+    public readonly yField = "y";
+
+    public flushDelayedParentFrame(): void {
+        const next = this.delayedQueue.shift();
+        if (next) {
+            this.viewport.set(next);
+        }
+    }
+
+    public onPointClick(event: ChartPointEvent): void {
+        this.clickedPoints.push(event);
+    }
 
     public onViewportChange(event: ChartViewportChangeEvent): void {
         this.emittedEvents.push(event);
@@ -157,17 +168,6 @@ class EleventhRemediationHostComponent {
             this.viewport.set({ axes: event.viewport.axes.map(a => ({ ...a })) });
         } else if (m === "reject") {
             // Do not update viewport
-        }
-    }
-
-    public onPointClick(event: ChartPointEvent): void {
-        this.clickedPoints.push(event);
-    }
-
-    public flushDelayedParentFrame(): void {
-        const next = this.delayedQueue.shift();
-        if (next) {
-            this.viewport.set(next);
         }
     }
 }

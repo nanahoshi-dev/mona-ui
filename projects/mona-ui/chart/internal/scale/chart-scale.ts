@@ -9,10 +9,10 @@ export type ResolvedChartCartesianAxisType =
     | "utc";
 
 export interface ChartPositionScaleBase<T = unknown> {
-    readonly type: ResolvedChartCartesianAxisType;
     domain(): readonly T[];
     map(value: T): number | undefined;
     range(): readonly [number, number];
+    readonly type: ResolvedChartCartesianAxisType;
 }
 
 export interface ChartContinuousPositionScale<T extends number | Date = number | Date>
@@ -26,9 +26,9 @@ export interface ChartContinuousPositionScale<T extends number | Date = number |
 
 export interface ChartBandPositionScale<T extends { toString(): string } = string>
     extends ChartPositionScaleBase<T> {
-    readonly type: "category";
     bandwidth(): number;
     step(): number;
+    readonly type: "category";
 }
 
 export type ChartPositionScale<T = unknown> =

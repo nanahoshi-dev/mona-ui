@@ -102,7 +102,13 @@ interface SampleDatum {
     `
 })
 class IntegrationHostComponent {
+    public readonly annX = signal(50);
+    public readonly annY = signal(90);
+    public readonly bandFrom = signal(30);
+    public readonly bandTo = signal(70);
     public readonly chart = viewChild(ChartComponent);
+    public readonly crosshairMode = signal<ChartCrosshairMode>("xy");
+    public readonly crosshairSnap = signal<ChartCrosshairSnapMode>("pointer");
     public readonly data = signal<SampleDatum[]>([
         { x: 0, y: 10 },
         { x: 25, y: 50 },
@@ -110,25 +116,15 @@ class IntegrationHostComponent {
         { x: 75, y: 40 },
         { x: 100, y: 20 }
     ]);
-
+    public readonly showAnnotation = signal(true);
     public readonly showCrosshair = signal(true);
-    public readonly crosshairMode = signal<ChartCrosshairMode>("xy");
-    public readonly crosshairSnap = signal<ChartCrosshairSnapMode>("pointer");
-    public readonly useCrosshairTemplate = signal(false);
-
+    public readonly showReferenceBand = signal(true);
     public readonly showReferenceLine = signal(true);
     public readonly targetY = signal(60);
-    public readonly useRefLineTemplate = signal(false);
-
-    public readonly showReferenceBand = signal(true);
-    public readonly bandFrom = signal(30);
-    public readonly bandTo = signal(70);
-    public readonly useRefBandTemplate = signal(false);
-
-    public readonly showAnnotation = signal(true);
-    public readonly annX = signal(50);
-    public readonly annY = signal(90);
     public readonly useAnnotationTemplate = signal(false);
+    public readonly useCrosshairTemplate = signal(false);
+    public readonly useRefBandTemplate = signal(false);
+    public readonly useRefLineTemplate = signal(false);
 }
 
 describe("Chart Crosshair & Annotations Integration", () => {

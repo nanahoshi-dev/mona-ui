@@ -6,9 +6,9 @@ export interface ChartPointerCandidates {
     readonly barTargets: readonly SceneHitTarget[];
     readonly financialHits: readonly SceneHitTarget[];
     readonly hitTargets: readonly SceneHitTarget[];
+    readonly interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
     readonly interactionBuckets?: readonly ChartInteractionBucket[];
     readonly interactionBucketsByAxisId?: ReadonlyMap<string, ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>>;
-    readonly interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;
     readonly maxCandidateDistance: number;
     readonly plotRectBoundsValid: boolean;
     readonly pointCandidates: readonly SceneHitTarget[];

@@ -4,15 +4,15 @@ export interface BenchmarkScalarPoint {
 }
 
 export interface BenchmarkRangePoint {
-    readonly x: number | Date;
     readonly from: number | null;
     readonly to: number | null;
+    readonly x: number | Date;
 }
 
 export interface BenchmarkMarkerPoint {
+    readonly size?: number;
     readonly x: number;
     readonly y: number;
-    readonly size?: number;
 }
 
 export type SeededRandom = () => number;

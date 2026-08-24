@@ -28,29 +28,75 @@ export interface CartesianStackedAreaDenseProviderOptions {
     readonly seriesDisplayName: string;
     readonly showPoints?: boolean;
     readonly timeSpanMs?: number;
-    readonly xFormatter?: ChartAxisFormatter;
     readonly xAxis?: ChartXAxisRegistration;
     readonly xAxisId: string;
+    readonly xFormatter?: ChartAxisFormatter;
     readonly xScale: ChartContinuousPositionScale<number | Date>;
-    readonly yFormatter?: ChartAxisFormatter;
     readonly yAxis?: ChartYAxisRegistration;
     readonly yAxisId: string;
+    readonly yFormatter?: ChartAxisFormatter;
     readonly yScale: ChartContinuousPositionScale<number>;
 }
 
 export class CartesianStackedAreaDenseInteractionProvider implements CartesianDenseInteractionProvider {
     readonly #options: CartesianStackedAreaDenseProviderOptions;
-    #geometryIndex: DenseSegmentGeometryIndex | null = null;
-    #indexedEntries: readonly CartesianStackEntry[] | null = null;
     public readonly seriesId: string;
     public readonly xAxisId: string;
     public readonly yAxisId: string;
-
+    #geometryIndex: DenseSegmentGeometryIndex | null = null;
+    #indexedEntries: readonly CartesianStackEntry[] | null = null;
     public constructor(options: CartesianStackedAreaDenseProviderOptions) {
         this.#options = options;
         this.seriesId = options.series.id;
         this.xAxisId = options.xAxisId;
         this.yAxisId = options.yAxisId;
+    }
+
+    #materializeEntry(entry: CartesianStackEntry): SceneHitTarget | null {
+        if (entry.synthetic || entry.dataIndex < 0) {
+            return null;
+        }
+        const {
+            pointRadius,
+            series,
+            seriesDisplayName,
+            showPoints,
+            timeSpanMs,
+            xAxis,
+            xAxisId,
+            xFormatter,
+            xScale,
+            yAxis,
+            yAxisId,
+            yFormatter,
+            yScale
+        } = this.#options;
+        const rawY = yScale.map(entry.stackEnd);
+        if (rawY === undefined) return null;
+
+        const xPos = resolveStackEntryXCoordinate(entry, xScale);
+        const baseY = yScale.map(entry.stackStart) ?? rawY;
+
+        return materializeStackedAreaHitTarget({
+            baseY,
+            entry,
+            isDense: true,
+            pointRadius,
+            series,
+            seriesDisplayName,
+            showPoints,
+            stackGroup: this.#options.groupRuntime.group.name,
+            timeSpanMs,
+            topY: rawY,
+            x: xPos,
+            xFormatter,
+            xAxis,
+            xAxisId,
+            xScaleType: xScale.type,
+            yFormatter,
+            yAxis,
+            yAxisId
+        });
     }
 
     public locateMarkIdentity(query: CartesianDenseMarkIdentityQuery): number | null {
@@ -64,6 +110,60 @@ export class CartesianStackedAreaDenseInteractionProvider implements CartesianDe
             return null;
         }
         return this.#materializeEntry(entry);
+    }
+
+    public queryRange(query: CartesianDenseRangeQuery): readonly SceneHitTarget[] {
+        const { hitPolicy = "intersect", pixelA, pixelB } = query;
+        const { groupRuntime, series, xScale, yScale } = this.#options;
+        const timeline = groupRuntime.timeline;
+        const n = timeline.xNumeric.length;
+        if (n === 0) return [];
+
+        const minPxX = Math.min(pixelA.x, pixelB.x);
+        const maxPxX = Math.max(pixelA.x, pixelB.x);
+        const minPxY = Math.min(pixelA.y, pixelB.y);
+        const maxPxY = Math.max(pixelA.y, pixelB.y);
+
+        const inv0 = xScale.invert?.(minPxX);
+        const inv1 = xScale.invert?.(maxPxX);
+        if (inv0 === undefined || inv1 === undefined) return [];
+
+        const num = (v: unknown): number => (v instanceof Date ? v.getTime() : Number(v));
+        const minX = Math.min(num(inv0), num(inv1));
+        const maxX = Math.max(num(inv0), num(inv1));
+
+        const startIdx = Math.max(0, lowerBoundAscending(timeline.xNumeric, 0, n, minX) - 1);
+        const endIdx = Math.min(n, upperBoundAscending(timeline.xNumeric, 0, n, maxX) + 1);
+
+        const hits: SceneHitTarget[] = [];
+        for (let i = startIdx; i < endIdx; i++) {
+            const xNum = timeline.xNumeric[i];
+            if (xNum < minX || xNum > maxX) continue;
+            const xKey = timeline.xKeys[i];
+            const entry = groupRuntime.entriesBySeriesAndKey.get(series.id)?.get(xKey);
+            if (!entry || !entry.defined || entry.synthetic || entry.dataIndex < 0) continue;
+            const t = this.#materializeEntry(entry);
+            if (!t || !t.point) continue;
+
+            const inX = t.point.x >= minPxX && t.point.x <= maxPxX;
+            if (!inX) continue;
+
+            const topY = t.point.y;
+            const baseY = yScale.map(entry.stackStart) ?? topY;
+            const top = Math.min(topY, baseY);
+            const bottom = Math.max(topY, baseY);
+
+            if (hitPolicy === "contains") {
+                if (top >= minPxY && bottom <= maxPxY) {
+                    hits.push(t);
+                }
+            } else {
+                if (bottom >= minPxY && top <= maxPxY) {
+                    hits.push(t);
+                }
+            }
+        }
+        return hits;
     }
 
     public resolveNearest(query: CartesianDensePointerQuery): readonly SceneHitTarget[] {
@@ -149,106 +249,5 @@ export class CartesianStackedAreaDenseInteractionProvider implements CartesianDe
         }
         const t = this.#materializeEntry(entry);
         return t ? [t] : [];
-    }
-
-    public queryRange(query: CartesianDenseRangeQuery): readonly SceneHitTarget[] {
-        const { hitPolicy = "intersect", pixelA, pixelB } = query;
-        const { groupRuntime, series, xScale, yScale } = this.#options;
-        const timeline = groupRuntime.timeline;
-        const n = timeline.xNumeric.length;
-        if (n === 0) return [];
-
-        const minPxX = Math.min(pixelA.x, pixelB.x);
-        const maxPxX = Math.max(pixelA.x, pixelB.x);
-        const minPxY = Math.min(pixelA.y, pixelB.y);
-        const maxPxY = Math.max(pixelA.y, pixelB.y);
-
-        const inv0 = xScale.invert?.(minPxX);
-        const inv1 = xScale.invert?.(maxPxX);
-        if (inv0 === undefined || inv1 === undefined) return [];
-
-        const num = (v: unknown): number => (v instanceof Date ? v.getTime() : Number(v));
-        const minX = Math.min(num(inv0), num(inv1));
-        const maxX = Math.max(num(inv0), num(inv1));
-
-        const startIdx = Math.max(0, lowerBoundAscending(timeline.xNumeric, 0, n, minX) - 1);
-        const endIdx = Math.min(n, upperBoundAscending(timeline.xNumeric, 0, n, maxX) + 1);
-
-        const hits: SceneHitTarget[] = [];
-        for (let i = startIdx; i < endIdx; i++) {
-            const xNum = timeline.xNumeric[i];
-            if (xNum < minX || xNum > maxX) continue;
-            const xKey = timeline.xKeys[i];
-            const entry = groupRuntime.entriesBySeriesAndKey.get(series.id)?.get(xKey);
-            if (!entry || !entry.defined || entry.synthetic || entry.dataIndex < 0) continue;
-            const t = this.#materializeEntry(entry);
-            if (!t || !t.point) continue;
-
-            const inX = t.point.x >= minPxX && t.point.x <= maxPxX;
-            if (!inX) continue;
-
-            const topY = t.point.y;
-            const baseY = yScale.map(entry.stackStart) ?? topY;
-            const top = Math.min(topY, baseY);
-            const bottom = Math.max(topY, baseY);
-
-            if (hitPolicy === "contains") {
-                if (top >= minPxY && bottom <= maxPxY) {
-                    hits.push(t);
-                }
-            } else {
-                if (bottom >= minPxY && top <= maxPxY) {
-                    hits.push(t);
-                }
-            }
-        }
-        return hits;
-    }
-
-    #materializeEntry(entry: CartesianStackEntry): SceneHitTarget | null {
-        if (entry.synthetic || entry.dataIndex < 0) {
-            return null;
-        }
-        const {
-            pointRadius,
-            series,
-            seriesDisplayName,
-            showPoints,
-            timeSpanMs,
-            xAxis,
-            xAxisId,
-            xFormatter,
-            xScale,
-            yAxis,
-            yAxisId,
-            yFormatter,
-            yScale
-        } = this.#options;
-        const rawY = yScale.map(entry.stackEnd);
-        if (rawY === undefined) return null;
-
-        const xPos = resolveStackEntryXCoordinate(entry, xScale);
-        const baseY = yScale.map(entry.stackStart) ?? rawY;
-
-        return materializeStackedAreaHitTarget({
-            baseY,
-            entry,
-            isDense: true,
-            pointRadius,
-            series,
-            seriesDisplayName,
-            showPoints,
-            stackGroup: this.#options.groupRuntime.group.name,
-            timeSpanMs,
-            topY: rawY,
-            x: xPos,
-            xFormatter,
-            xAxis,
-            xAxisId,
-            xScaleType: xScale.type,
-            yFormatter,
-            yAxis,
-            yAxisId
-        });
     }
 }

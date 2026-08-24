@@ -281,8 +281,9 @@ describe("Chart Export Integration Coverage", () => {
             public set src(_v: string) {
                 setTimeout(() => this.onload?.(new Event("load")), 0);
             }
-            public onload: ((ev: Event) => void) | null = null;
+
             public onerror: ((ev: any) => void) | null = null;
+            public onload: ((ev: Event) => void) | null = null;
         }
 
         (window as any).Image = MockImage;

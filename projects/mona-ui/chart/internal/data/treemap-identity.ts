@@ -19,73 +19,6 @@ export interface RootBranchIdentityInfo {
 }
 
 export class TreemapIdentity {
-    public static resolveNodeIdentity(
-        datum: unknown,
-        dataIndex: number,
-        siblingIndex: number,
-        parentId: string | undefined,
-        keyField: ChartField | undefined,
-        labelField: ChartField = "name",
-        labelFormatter?: ChartValueFormatter,
-        seenExplicitKeys?: Set<string>,
-        siblingOccurrenceTracker?: Map<string, number>,
-        warnedDiagnosticSignatures?: Set<string>,
-        seriesName?: string,
-        seriesId?: string
-    ): ResolvedTreemapNodeIdentity {
-        const rawLabel = resolveValue(datum, labelField, dataIndex);
-        const formattedLabel = labelFormatter
-            ? labelFormatter(rawLabel, dataIndex)
-            : rawLabel !== undefined && rawLabel !== null
-              ? String(rawLabel)
-              : `Node ${dataIndex + 1}`;
-
-        let explicitKey: string | undefined;
-        let nodeId: string;
-
-        if (keyField) {
-            const rawKey = resolveValue(datum, keyField, dataIndex);
-            const keyPart = serializeKeyPart(rawKey);
-            if (keyPart !== null) {
-                const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
-                if (seenExplicitKeys && seenExplicitKeys.has(keyStr)) {
-                    if (warnedDiagnosticSignatures && seriesId) {
-                        ChartDiagnostics.warnOnce(
-                            warnedDiagnosticSignatures,
-                            `Treemap series "${seriesName ?? seriesId}" encountered duplicate explicit key "${String(rawKey)}" at data index ${dataIndex}. Falling back to path identity.`,
-                            `${seriesId}:duplicate-keys`
-                        );
-                    }
-                } else {
-                    seenExplicitKeys?.add(keyStr);
-                    explicitKey = keyStr;
-                }
-            }
-        }
-
-        if (explicitKey !== undefined) {
-            nodeId = explicitKey;
-        } else {
-            const labelPart = serializeKeyPart(rawLabel);
-            const labelSegment =
-                labelPart !== null ? `l:${labelPart.type}:${String(labelPart.value)}` : `i:${siblingIndex}`;
-            const tracker = siblingOccurrenceTracker;
-            const count = tracker ? (tracker.get(labelSegment) ?? 0) : 0;
-            if (tracker) {
-                tracker.set(labelSegment, count + 1);
-            }
-            const uniqueSegment = count > 0 ? `${labelSegment}#${count}` : labelSegment;
-            nodeId = parentId ? `${parentId}/${uniqueSegment}` : `root/${uniqueSegment}`;
-        }
-
-        return {
-            explicitKey,
-            formattedLabel,
-            label: rawLabel,
-            nodeId
-        };
-    }
-
     public static extractRetainedRootBranchIdentities(options: {
         readonly childrenField?: ChartField;
         readonly data?: readonly unknown[] | unknown;
@@ -196,6 +129,73 @@ export class TreemapIdentity {
             labelField,
             labelFormatter
         });
+    }
+
+    public static resolveNodeIdentity(
+        datum: unknown,
+        dataIndex: number,
+        siblingIndex: number,
+        parentId: string | undefined,
+        keyField: ChartField | undefined,
+        labelField: ChartField = "name",
+        labelFormatter?: ChartValueFormatter,
+        seenExplicitKeys?: Set<string>,
+        siblingOccurrenceTracker?: Map<string, number>,
+        warnedDiagnosticSignatures?: Set<string>,
+        seriesName?: string,
+        seriesId?: string
+    ): ResolvedTreemapNodeIdentity {
+        const rawLabel = resolveValue(datum, labelField, dataIndex);
+        const formattedLabel = labelFormatter
+            ? labelFormatter(rawLabel, dataIndex)
+            : rawLabel !== undefined && rawLabel !== null
+              ? String(rawLabel)
+              : `Node ${dataIndex + 1}`;
+
+        let explicitKey: string | undefined;
+        let nodeId: string;
+
+        if (keyField) {
+            const rawKey = resolveValue(datum, keyField, dataIndex);
+            const keyPart = serializeKeyPart(rawKey);
+            if (keyPart !== null) {
+                const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
+                if (seenExplicitKeys && seenExplicitKeys.has(keyStr)) {
+                    if (warnedDiagnosticSignatures && seriesId) {
+                        ChartDiagnostics.warnOnce(
+                            warnedDiagnosticSignatures,
+                            `Treemap series "${seriesName ?? seriesId}" encountered duplicate explicit key "${String(rawKey)}" at data index ${dataIndex}. Falling back to path identity.`,
+                            `${seriesId}:duplicate-keys`
+                        );
+                    }
+                } else {
+                    seenExplicitKeys?.add(keyStr);
+                    explicitKey = keyStr;
+                }
+            }
+        }
+
+        if (explicitKey !== undefined) {
+            nodeId = explicitKey;
+        } else {
+            const labelPart = serializeKeyPart(rawLabel);
+            const labelSegment =
+                labelPart !== null ? `l:${labelPart.type}:${String(labelPart.value)}` : `i:${siblingIndex}`;
+            const tracker = siblingOccurrenceTracker;
+            const count = tracker ? (tracker.get(labelSegment) ?? 0) : 0;
+            if (tracker) {
+                tracker.set(labelSegment, count + 1);
+            }
+            const uniqueSegment = count > 0 ? `${labelSegment}#${count}` : labelSegment;
+            nodeId = parentId ? `${parentId}/${uniqueSegment}` : `root/${uniqueSegment}`;
+        }
+
+        return {
+            explicitKey,
+            formattedLabel,
+            label: rawLabel,
+            nodeId
+        };
     }
 }
 

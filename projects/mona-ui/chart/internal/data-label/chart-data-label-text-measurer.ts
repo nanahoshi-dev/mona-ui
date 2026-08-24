@@ -32,6 +32,10 @@ export class ChartDataLabelTextMeasurer {
         return null;
     }
 
+    public static clearCache(): void {
+        ChartDataLabelTextMeasurer.#cache.clear();
+    }
+
     public static measure(
         text: string,
         font: string = "500 11px system-ui, sans-serif"
@@ -91,9 +95,5 @@ export class ChartDataLabelTextMeasurer {
 
         ChartDataLabelTextMeasurer.#cache.set(cacheKey, result);
         return result;
-    }
-
-    public static clearCache(): void {
-        ChartDataLabelTextMeasurer.#cache.clear();
     }
 }

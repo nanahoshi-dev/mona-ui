@@ -4,12 +4,12 @@ import type { SceneHitTarget } from "../scene/scene-geometry";
 import { isAngleInsideArc, normalizeAngle } from "../utils/angle-utils";
 
 interface RadialRingTarget {
+    readonly endAngle: number;
     readonly hitTarget: SceneHitTarget;
     readonly innerRadius: number;
     readonly outerRadius: number;
     readonly padAngle: number;
     readonly startAngle: number;
-    readonly endAngle: number;
 }
 
 export class RadialBarHitIndex implements PolarArcHitIndex {

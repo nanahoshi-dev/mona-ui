@@ -55,15 +55,12 @@ export class CandlestickSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly data = input<readonly unknown[] | undefined>(undefined);
-
+    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
     /**
      * @description Data label display options or boolean flag enabling default labels.
      * @default false
      */
     public readonly dataLabels = input<ChartDataLabelsInput>(false);
-
-    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
-
     /**
      * @description Color for falling / bearish candles (close < open).
      * @default ""

@@ -2,15 +2,6 @@ import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type {  SceneHitTarget } from "../scene/scene-geometry";
 
 export class CartesianViewportHitPolicy {
-    public static isPointInPlot(point: ChartPoint, plotRect: ChartRect, tolerance = 4): boolean {
-        return (
-            point.x >= plotRect.x - tolerance &&
-            point.x <= plotRect.x + plotRect.width + tolerance &&
-            point.y >= plotRect.y - tolerance &&
-            point.y <= plotRect.y + plotRect.height + tolerance
-        );
-    }
-
     public static doesRectIntersectPlot(rect: ChartRect, plotRect: ChartRect, tolerance = 2): boolean {
         const rLeft = rect.x;
         const rRight = rect.x + rect.width;
@@ -25,6 +16,13 @@ export class CartesianViewportHitPolicy {
         return !(rRight < pLeft || rLeft > pRight || rBottom < pTop || rTop > pBottom);
     }
 
+    public static filterVisibleHitTargets(
+        targets: readonly SceneHitTarget[],
+        plotRect: ChartRect
+    ): readonly SceneHitTarget[] {
+        return targets.filter(t => this.isHitTargetVisible(t, plotRect));
+    }
+
     public static isHitTargetVisible(target: SceneHitTarget, plotRect: ChartRect): boolean {
         if (target.bounds) {
             return this.doesRectIntersectPlot(target.bounds, plotRect);
@@ -36,10 +34,12 @@ export class CartesianViewportHitPolicy {
         return true;
     }
 
-    public static filterVisibleHitTargets(
-        targets: readonly SceneHitTarget[],
-        plotRect: ChartRect
-    ): readonly SceneHitTarget[] {
-        return targets.filter(t => this.isHitTargetVisible(t, plotRect));
+    public static isPointInPlot(point: ChartPoint, plotRect: ChartRect, tolerance = 4): boolean {
+        return (
+            point.x >= plotRect.x - tolerance &&
+            point.x <= plotRect.x + plotRect.width + tolerance &&
+            point.y >= plotRect.y - tolerance &&
+            point.y <= plotRect.y + plotRect.height + tolerance
+        );
     }
 }

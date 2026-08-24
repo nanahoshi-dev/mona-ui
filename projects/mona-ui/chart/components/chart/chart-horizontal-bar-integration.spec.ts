@@ -96,6 +96,7 @@ class TestHorizontalBarHostComponent {
     public readonly ariaLabel = signal("");
     public readonly bar1Color = signal<string>("#3b82f6");
     public readonly bar1HostColor = signal<string | undefined>(undefined);
+    public readonly borderRadius = signal(4);
     public readonly data = signal<readonly unknown[]>([
         { category: "North", minVal: 40, maxVal: 120, profit: 40, revenue: 100 },
         { category: "South", minVal: 60, maxVal: 150, profit: 50, revenue: 140 },
@@ -103,17 +104,15 @@ class TestHorizontalBarHostComponent {
     ]);
     public readonly lineVisible = signal(true);
     public readonly orientation = signal<ChartBarOrientation>("horizontal");
+    public readonly showArea = signal(false);
     public readonly showBar1 = signal(true);
     public readonly showBar2 = signal(true);
-    public readonly showArea = signal(false);
     public readonly showLine = signal(false);
     public readonly showRangeBar = signal(false);
     public readonly stack1 = signal<string | undefined>(undefined);
     public readonly stack2 = signal<string | undefined>(undefined);
     public readonly stackMode = signal<"normal" | "percent">("normal");
     public readonly title = signal("");
-    public readonly borderRadius = signal(4);
-
     public lastPointClick: ChartPointEvent | null = null;
 
     public onPointClick(event: ChartPointEvent): void {

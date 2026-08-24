@@ -129,70 +129,62 @@ import type { ChartAnnotationLabelPlacement, ChartAnnotationAxisValue } from "..
     `
 })
 class ReleaseGateHostComponent {
-    public readonly chart = viewChild(ChartComponent);
-
-    public readonly seriesKind = signal<"line" | "range" | "candlestick">("line");
-    public readonly seriesYAxisId = signal<string | undefined>("y-main");
-
+    public readonly annOffsetX = signal(0);
+    public readonly annOffsetY = signal(0);
+    public readonly annPlacement = signal<ChartAnnotationLabelPlacement>("top");
+    public readonly annUserClass = signal("custom-ann-cls");
+    public readonly annX = signal<ChartAnnotationAxisValue>("Feb");
+    public readonly annXAxisId = signal<string | undefined>("x-main");
+    public readonly annY = signal<ChartAnnotationAxisValue>(200);
+    public readonly annYAxisId = signal<string | undefined>("y-main");
     public readonly categoryData = signal([
         { category: "Jan", value: 100 },
         { category: "Feb", value: 200 },
         { category: "Mar", value: 150 },
         { category: "Apr", value: 300 }
     ]);
-
-    public readonly rangeData = signal([
-        { category: "Jan", from: 50, to: 150 },
-        { category: "Feb", from: 120, to: 260 },
-        { category: "Mar", from: 80, to: 200 }
-    ]);
-
+    public readonly chart = viewChild(ChartComponent);
+    public readonly crosshairEnabled = signal(true);
+    public readonly crosshairMaxSnapDist = signal(32);
+    public readonly crosshairMode = signal<ChartCrosshairMode>("xy");
+    public readonly crosshairSnap = signal<ChartCrosshairSnapMode>("nearest");
+    public readonly crosshairXAxisId = signal<string | undefined>(undefined);
+    public readonly crosshairYAxisId = signal<string | undefined>(undefined);
     public readonly financialData = signal([
         { category: "Jan", open: 100, high: 140, low: 90, close: 120 },
         { category: "Feb", open: 120, high: 180, low: 110, close: 160 },
         { category: "Mar", open: 160, high: 170, low: 130, close: 140 }
     ]);
-
-    public readonly xFormatter = (v: unknown) => `M_${String(v)}`;
-    public readonly yFormatter = (v: unknown) => `$${Number(v).toFixed(0)}`;
-    public readonly ySecFormatter = (v: unknown) => `${Number(v)}%`;
-
-    // Crosshair state
-    public readonly showCrosshair = signal(true);
-    public readonly crosshairEnabled = signal(true);
-    public readonly crosshairMode = signal<ChartCrosshairMode>("xy");
-    public readonly crosshairSnap = signal<ChartCrosshairSnapMode>("nearest");
-    public readonly crosshairMaxSnapDist = signal(32);
-    public readonly crosshairXAxisId = signal<string | undefined>(undefined);
-    public readonly crosshairYAxisId = signal<string | undefined>(undefined);
-    public readonly useCrosshairTemplate = signal(false);
-
-    // Reference Line state
-    public readonly showReferenceLine = signal(true);
-    public readonly refLineAxisId = signal<string | undefined>("y-main");
-    public readonly refLineValue = signal<ChartAnnotationAxisValue>(150);
-    public readonly refLineUserClass = signal("custom-line-cls");
-    public readonly useRefLineTemplate = signal(false);
-
-    // Reference Band state
-    public readonly showReferenceBand = signal(true);
+    public readonly rangeData = signal([
+        { category: "Jan", from: 50, to: 150 },
+        { category: "Feb", from: 120, to: 260 },
+        { category: "Mar", from: 80, to: 200 }
+    ]);
     public readonly refBandAxisId = signal<string | undefined>("x-main");
     public readonly refBandFrom = signal<ChartAnnotationAxisValue>("Jan");
     public readonly refBandTo = signal<ChartAnnotationAxisValue>("Mar");
     public readonly refBandUserClass = signal("custom-band-cls");
-    public readonly useRefBandTemplate = signal(false);
+    public readonly refLineAxisId = signal<string | undefined>("y-main");
+    public readonly refLineUserClass = signal("custom-line-cls");
+    public readonly refLineValue = signal<ChartAnnotationAxisValue>(150);
+    public readonly seriesKind = signal<"line" | "range" | "candlestick">("line");
+    public readonly seriesYAxisId = signal<string | undefined>("y-main");
 
     // Annotation state
     public readonly showAnnotation = signal(true);
-    public readonly annX = signal<ChartAnnotationAxisValue>("Feb");
-    public readonly annY = signal<ChartAnnotationAxisValue>(200);
-    public readonly annXAxisId = signal<string | undefined>("x-main");
-    public readonly annYAxisId = signal<string | undefined>("y-main");
-    public readonly annPlacement = signal<ChartAnnotationLabelPlacement>("top");
-    public readonly annOffsetX = signal(0);
-    public readonly annOffsetY = signal(0);
-    public readonly annUserClass = signal("custom-ann-cls");
+    // Crosshair state
+    public readonly showCrosshair = signal(true);
+    // Reference Band state
+    public readonly showReferenceBand = signal(true);
+    // Reference Line state
+    public readonly showReferenceLine = signal(true);
     public readonly useAnnotationTemplate = signal(false);
+    public readonly useCrosshairTemplate = signal(false);
+    public readonly useRefBandTemplate = signal(false);
+    public readonly useRefLineTemplate = signal(false);
+    public readonly xFormatter = (v: unknown) => `M_${String(v)}`;
+    public readonly yFormatter = (v: unknown) => `$${Number(v).toFixed(0)}`;
+    public readonly ySecFormatter = (v: unknown) => `${Number(v)}%`;
 }
 
 describe("Chart Crosshairs and Annotations", () => {

@@ -2,19 +2,6 @@ import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 
 export class CartesianMarkVisualGeometry {
-    public static getVisualRadius(hit: SceneHitTarget, defaultPointRadius: number = 0): number {
-        if (hit.visualRadius !== undefined && Number.isFinite(hit.visualRadius)) {
-            return hit.visualRadius;
-        }
-        if (hit.seriesType === "bubble" || hit.seriesType === "scatter") {
-            return hit.visualRadius ?? 4;
-        }
-        if (hit.seriesType === "line" || hit.seriesType === "area") {
-            return hit.visualRadius ?? defaultPointRadius;
-        }
-        return 0;
-    }
-
     public static getVisualBounds(hit: SceneHitTarget): ChartRect | null {
         if (hit.visualBounds) {
             return hit.visualBounds;
@@ -69,5 +56,18 @@ export class CartesianMarkVisualGeometry {
             };
         }
         return { x: 0, y: 0 };
+    }
+
+    public static getVisualRadius(hit: SceneHitTarget, defaultPointRadius: number = 0): number {
+        if (hit.visualRadius !== undefined && Number.isFinite(hit.visualRadius)) {
+            return hit.visualRadius;
+        }
+        if (hit.seriesType === "bubble" || hit.seriesType === "scatter") {
+            return hit.visualRadius ?? 4;
+        }
+        if (hit.seriesType === "line" || hit.seriesType === "area") {
+            return hit.visualRadius ?? defaultPointRadius;
+        }
+        return 0;
     }
 }

@@ -17,8 +17,8 @@ export interface ViewportSemanticMapperOptions {
 }
 
 export interface ViewportSemanticMapperContext {
-    readonly warned: Set<string>;
     readonly diagnosticScope: string;
+    readonly warned: Set<string>;
 }
 
 function findConstraint(

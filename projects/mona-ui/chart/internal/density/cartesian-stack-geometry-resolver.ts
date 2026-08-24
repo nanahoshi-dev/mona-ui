@@ -58,15 +58,15 @@ export interface MaterializeStackedAreaHitTargetContext {
     readonly timeSpanMs?: number;
     readonly topY: number;
     readonly x: number;
-    readonly xFormatter?: ChartAxisFormatter;
     readonly xAxis?: ChartXAxisRegistration;
     readonly xAxisId?: string;
     readonly xAxisTitle?: string;
+    readonly xFormatter?: ChartAxisFormatter;
     readonly xScaleType?: ResolvedChartCartesianAxisType | string;
-    readonly yFormatter?: ChartAxisFormatter;
     readonly yAxis?: ChartYAxisRegistration;
     readonly yAxisId?: string;
     readonly yAxisTitle?: string;
+    readonly yFormatter?: ChartAxisFormatter;
 }
 
 export function materializeStackedAreaHitTarget(

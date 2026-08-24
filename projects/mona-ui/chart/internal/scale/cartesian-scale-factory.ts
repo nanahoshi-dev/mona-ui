@@ -22,9 +22,8 @@ import {
 } from "../data/cartesian-temporal-value-resolver";
 
 export class LinearScale implements ChartContinuousPositionScale<number> {
-    public readonly type = "linear" as const;
     readonly #scale = scaleLinear();
-
+    public readonly type = "linear" as const;
     public constructor(domain: readonly [number, number], range: readonly [number, number]) {
         let min = domain[0];
         let max = domain[1];
@@ -73,11 +72,10 @@ export class LinearScale implements ChartContinuousPositionScale<number> {
 }
 
 export class LogScale implements ChartContinuousPositionScale<number> {
-    public readonly type = "log" as const;
-    readonly #scale = scaleLog();
     readonly #logBase: number;
+    readonly #scale = scaleLog();
     readonly #sign: "negative" | "positive";
-
+    public readonly type = "log" as const;
     public constructor(
         domain: readonly [number, number],
         range: readonly [number, number],
@@ -173,10 +171,9 @@ export class LogScale implements ChartContinuousPositionScale<number> {
 }
 
 export class SymlogScale implements ChartContinuousPositionScale<number> {
-    public readonly type = "symlog" as const;
-    readonly #scale = scaleSymlog();
     readonly #constant: number;
-
+    readonly #scale = scaleSymlog();
+    public readonly type = "symlog" as const;
     public constructor(
         domain: readonly [number, number],
         range: readonly [number, number],
@@ -238,10 +235,9 @@ export class SymlogScale implements ChartContinuousPositionScale<number> {
 }
 
 export class PowScale implements ChartContinuousPositionScale<number> {
-    public readonly type = "pow" as const;
-    readonly #scale = scalePow();
     readonly #exponent: number;
-
+    readonly #scale = scalePow();
+    public readonly type = "pow" as const;
     public constructor(
         domain: readonly [number, number],
         range: readonly [number, number],
@@ -303,9 +299,8 @@ export class PowScale implements ChartContinuousPositionScale<number> {
 }
 
 export class SqrtScale implements ChartContinuousPositionScale<number> {
-    public readonly type = "sqrt" as const;
     readonly #scale = scaleSqrt();
-
+    public readonly type = "sqrt" as const;
     public constructor(domain: readonly [number, number], range: readonly [number, number]) {
         let min = domain[0];
         let max = domain[1];
@@ -355,9 +350,8 @@ export class SqrtScale implements ChartContinuousPositionScale<number> {
 }
 
 export class TimeScale implements ChartContinuousPositionScale<Date> {
-    public readonly type = "time" as const;
     readonly #scale = scaleTime();
-
+    public readonly type = "time" as const;
     public constructor(domain: readonly [Date, Date], range: readonly [number, number]) {
         let min = domain[0];
         let max = domain[1];
@@ -407,9 +401,8 @@ export class TimeScale implements ChartContinuousPositionScale<Date> {
 }
 
 export class UtcScale implements ChartContinuousPositionScale<Date> {
-    public readonly type = "utc" as const;
     readonly #scale = scaleUtc();
-
+    public readonly type = "utc" as const;
     public constructor(domain: readonly [Date, Date], range: readonly [number, number]) {
         let min = domain[0];
         let max = domain[1];
@@ -459,9 +452,8 @@ export class UtcScale implements ChartContinuousPositionScale<Date> {
 }
 
 export class BandScale<T extends { toString(): string } = string> implements ChartBandPositionScale<T> {
-    public readonly type = "category" as const;
     readonly #scale = scaleBand<T>();
-
+    public readonly type = "category" as const;
     public constructor(
         domain: readonly T[],
         range: readonly [number, number],
@@ -523,6 +515,91 @@ export interface BandScaleOptions<T extends { toString(): string } = string> {
 }
 
 export class CartesianScaleFactory {
+    public static createBandScale<T extends { toString(): string } = string>(
+        options: BandScaleOptions<T> | readonly T[],
+        range?: readonly [number, number],
+        paddingInner: number = 0.2,
+        paddingOuter: number = 0.1
+    ): BandScale<T> {
+        if (Array.isArray(options)) {
+            return new BandScale(options, range ?? [0, 1], paddingInner, paddingOuter);
+        }
+        const opt = options as BandScaleOptions<T>;
+        return new BandScale(
+            opt.domain,
+            opt.range,
+            opt.paddingInner ?? 0.2,
+            opt.paddingOuter ?? 0.1
+        );
+    }
+
+    public static createExactPositionScale(options: {
+        domain: readonly unknown[];
+        exponent?: number;
+        logBase?: number;
+        paddingInner?: number;
+        paddingOuter?: number;
+        range: readonly [number, number];
+        symlogConstant?: number;
+        type: ResolvedChartCartesianAxisType;
+    }): ChartPositionScale<unknown> {
+        const { type, domain, range } = options;
+        if (type === "category") {
+            return CartesianScaleFactory.createBandScale({
+                domain: domain as readonly string[],
+                paddingInner: options.paddingInner ?? 0.2,
+                paddingOuter: options.paddingOuter ?? 0.1,
+                range
+            }) as ChartPositionScale<unknown>;
+        }
+
+        if (type === "time") {
+            const minD = domain[0] instanceof Date ? domain[0] : new Date(Number(domain[0]));
+            const maxD = domain[1] instanceof Date ? domain[1] : new Date(Number(domain[1]));
+            return new TimeScale([minD, maxD], range) as ChartPositionScale<unknown>;
+        }
+
+        if (type === "utc") {
+            const minD = domain[0] instanceof Date ? domain[0] : new Date(Number(domain[0]));
+            const maxD = domain[1] instanceof Date ? domain[1] : new Date(Number(domain[1]));
+            return new UtcScale([minD, maxD], range) as ChartPositionScale<unknown>;
+        }
+
+        const numDomain: [number, number] = [Number(domain[0]), Number(domain[1])];
+        switch (type) {
+            case "log":
+                return new LogScale(numDomain, range, options.logBase ?? 10) as ChartPositionScale<unknown>;
+            case "symlog":
+                return new SymlogScale(numDomain, range, options.symlogConstant ?? 1) as ChartPositionScale<unknown>;
+            case "pow":
+                return new PowScale(numDomain, range, options.exponent ?? 1) as ChartPositionScale<unknown>;
+            case "sqrt":
+                return new SqrtScale(numDomain, range) as ChartPositionScale<unknown>;
+            case "linear":
+            default:
+                return new LinearScale(numDomain, range) as ChartPositionScale<unknown>;
+        }
+    }
+
+    public static createLinearScale(
+        domain: readonly [number, number],
+        range: readonly [number, number],
+        nice: boolean = true,
+        tickCount?: number,
+        explicitMin?: number,
+        explicitMax?: number
+    ): LinearScale {
+        return CartesianScaleFactory.createNumericScale({
+            domain,
+            explicitMax,
+            explicitMin,
+            nice,
+            range,
+            tickCount,
+            type: "linear"
+        }) as LinearScale;
+    }
+
     public static createNumericScale(options: NumericScaleOptions): ChartContinuousPositionScale<number> {
         const { type, domain, range, nice = true, tickCount, explicitMin, explicitMax } = options;
         let scale: ChartContinuousPositionScale<number>;
@@ -615,43 +692,6 @@ export class CartesianScaleFactory {
         return scale;
     }
 
-    public static createBandScale<T extends { toString(): string } = string>(
-        options: BandScaleOptions<T> | readonly T[],
-        range?: readonly [number, number],
-        paddingInner: number = 0.2,
-        paddingOuter: number = 0.1
-    ): BandScale<T> {
-        if (Array.isArray(options)) {
-            return new BandScale(options, range ?? [0, 1], paddingInner, paddingOuter);
-        }
-        const opt = options as BandScaleOptions<T>;
-        return new BandScale(
-            opt.domain,
-            opt.range,
-            opt.paddingInner ?? 0.2,
-            opt.paddingOuter ?? 0.1
-        );
-    }
-
-    public static createLinearScale(
-        domain: readonly [number, number],
-        range: readonly [number, number],
-        nice: boolean = true,
-        tickCount?: number,
-        explicitMin?: number,
-        explicitMax?: number
-    ): LinearScale {
-        return CartesianScaleFactory.createNumericScale({
-            domain,
-            explicitMax,
-            explicitMin,
-            nice,
-            range,
-            tickCount,
-            type: "linear"
-        }) as LinearScale;
-    }
-
     public static createTimeScale(
         domain: readonly [Date, Date],
         range: readonly [number, number],
@@ -688,53 +728,5 @@ export class CartesianScaleFactory {
             tickCount,
             type: "utc"
         }) as UtcScale;
-    }
-
-    public static createExactPositionScale(options: {
-        domain: readonly unknown[];
-        exponent?: number;
-        logBase?: number;
-        paddingInner?: number;
-        paddingOuter?: number;
-        range: readonly [number, number];
-        symlogConstant?: number;
-        type: ResolvedChartCartesianAxisType;
-    }): ChartPositionScale<unknown> {
-        const { type, domain, range } = options;
-        if (type === "category") {
-            return CartesianScaleFactory.createBandScale({
-                domain: domain as readonly string[],
-                paddingInner: options.paddingInner ?? 0.2,
-                paddingOuter: options.paddingOuter ?? 0.1,
-                range
-            }) as ChartPositionScale<unknown>;
-        }
-
-        if (type === "time") {
-            const minD = domain[0] instanceof Date ? domain[0] : new Date(Number(domain[0]));
-            const maxD = domain[1] instanceof Date ? domain[1] : new Date(Number(domain[1]));
-            return new TimeScale([minD, maxD], range) as ChartPositionScale<unknown>;
-        }
-
-        if (type === "utc") {
-            const minD = domain[0] instanceof Date ? domain[0] : new Date(Number(domain[0]));
-            const maxD = domain[1] instanceof Date ? domain[1] : new Date(Number(domain[1]));
-            return new UtcScale([minD, maxD], range) as ChartPositionScale<unknown>;
-        }
-
-        const numDomain: [number, number] = [Number(domain[0]), Number(domain[1])];
-        switch (type) {
-            case "log":
-                return new LogScale(numDomain, range, options.logBase ?? 10) as ChartPositionScale<unknown>;
-            case "symlog":
-                return new SymlogScale(numDomain, range, options.symlogConstant ?? 1) as ChartPositionScale<unknown>;
-            case "pow":
-                return new PowScale(numDomain, range, options.exponent ?? 1) as ChartPositionScale<unknown>;
-            case "sqrt":
-                return new SqrtScale(numDomain, range) as ChartPositionScale<unknown>;
-            case "linear":
-            default:
-                return new LinearScale(numDomain, range) as ChartPositionScale<unknown>;
-        }
     }
 }

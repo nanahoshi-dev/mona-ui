@@ -60,22 +60,21 @@ const DATA: DataItem[] = Array.from({ length: 25 }, (_, i) => ({ x: i * 4, y: i 
 class CrosshairSyncHostComponent {
     public readonly chartA = viewChild.required<ChartComponent>("chartA");
     public readonly chartB = viewChild.required<ChartComponent>("chartB");
-
+    public readonly crosshairA = signal(true);
+    public readonly crosshairB = signal(true);
     public readonly data = signal<readonly unknown[]>(DATA);
     public readonly syncA = signal<ChartSynchronizationInput>({ group: "g1" });
     public readonly syncB = signal<ChartSynchronizationInput>({ group: "g1" });
-    public readonly crosshairA = signal(true);
-    public readonly crosshairB = signal(true);
 }
 
 class FakeResizeObserver {
     public constructor(public readonly callback: ResizeObserverCallback) {}
 
+    public disconnect(): void {}
+
     public observe(): void {}
 
     public unobserve(): void {}
-
-    public disconnect(): void {}
 }
 
 const settleFrames = async (): Promise<void> => {

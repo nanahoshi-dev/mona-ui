@@ -49,8 +49,8 @@ function corruptPngWithValidHeader(): Uint8Array {
 
 interface DeferredImageBitmap {
     promise: Promise<ImageBitmap>;
-    resolve: (bitmap: ImageBitmap) => void;
     reject: (err: unknown) => void;
+    resolve: (bitmap: ImageBitmap) => void;
 }
 
 function deferredBitmap(): DeferredImageBitmap {
@@ -211,13 +211,13 @@ describe("chart-export-image-decoder", () => {
 
     describe("forced HTML image fallback strategy", () => {
         interface FakeImage {
-            onload: (() => void) | null;
-            onerror: ((e: unknown) => void) | null;
-            src: string;
-            naturalWidth: number;
-            naturalHeight: number;
-            width: number;
             height: number;
+            naturalHeight: number;
+            naturalWidth: number;
+            onerror: ((e: unknown) => void) | null;
+            onload: (() => void) | null;
+            src: string;
+            width: number;
         }
 
         function htmlImageEnv(): { env: RasterDecodeEnvironment; images: FakeImage[]; revokedUrls: string[] } {

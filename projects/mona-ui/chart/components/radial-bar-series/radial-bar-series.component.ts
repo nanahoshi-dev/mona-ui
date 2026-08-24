@@ -78,7 +78,10 @@ export class RadialBarSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly data = input<readonly unknown[] | undefined>(undefined);
-
+    /**
+     * @description Emits when an individual ring's visibility is toggled via the legend.
+     */
+    public readonly datumVisibilityChange = output<ChartRadialDatumVisibilityEvent>();
     /**
      * @description Ending angle in degrees (clockwise from 12 o'clock).
      * @default 360
@@ -192,12 +195,6 @@ export class RadialBarSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model<boolean>(true);
-
-    /**
-     * @description Emits when an individual ring's visibility is toggled via the legend.
-     */
-    public readonly datumVisibilityChange = output<ChartRadialDatumVisibilityEvent>();
-
     #registered = false;
 
     public constructor() {

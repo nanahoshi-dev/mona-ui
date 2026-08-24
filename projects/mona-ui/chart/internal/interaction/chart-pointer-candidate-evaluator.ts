@@ -47,15 +47,14 @@ function comparePointerPainterOrder(a: SceneHitTarget, b: SceneHitTarget): numbe
 }
 
 export class ChartPointerCandidateEvaluator {
-    public readonly pointer: ChartPoint;
-    public readonly scene: ChartScene;
-    public readonly candidates: ChartPointerCandidates;
     readonly #instrumentation?: ChartPointerEvaluationInstrumentation;
-
+    public readonly candidates: ChartPointerCandidates;
     // Evaluated facts cached for the pointer frame
     public readonly containedBarHits: readonly SceneHitTarget[];
-    public readonly pointMetrics: readonly PointCandidateMetric[];
     public readonly financialHits: readonly SceneHitTarget[];
+    public readonly pointMetrics: readonly PointCandidateMetric[];
+    public readonly pointer: ChartPoint;
+    public readonly scene: ChartScene;
     public readonly topFinancialHit: SceneHitTarget | null;
 
     public constructor(
@@ -134,6 +133,33 @@ export class ChartPointerCandidateEvaluator {
         instrumentation?: ChartPointerEvaluationInstrumentation
     ): ChartPointerCandidateEvaluator {
         return new ChartPointerCandidateEvaluator(candidates, scene, instrumentation);
+    }
+
+    public resolveCrosshairCandidates(
+        scene: ChartScene,
+        crosshairDistance: number
+    ): readonly SceneHitTarget[] {
+        const candidateSet = new Set<SceneHitTarget>();
+
+        // 1. Contained bars
+        for (const bar of this.containedBarHits) {
+            candidateSet.add(bar);
+        }
+
+        // 2. Financial hits
+        for (const fin of this.financialHits) {
+            candidateSet.add(fin);
+        }
+
+        // 3. Point candidates within crosshairDistance
+        for (const metric of this.pointMetrics) {
+            const maxAllowed = Math.min(metric.target.radius ?? crosshairDistance, crosshairDistance);
+            if (metric.distance <= maxAllowed || metric.distance <= metric.visualRadius) {
+                candidateSet.add(metric.target);
+            }
+        }
+
+        return Array.from(candidateSet);
     }
 
     public resolveHitState(
@@ -512,32 +538,5 @@ export class ChartPointerCandidateEvaluator {
             activeHits: [],
             pointerPosition: pointer
         };
-    }
-
-    public resolveCrosshairCandidates(
-        scene: ChartScene,
-        crosshairDistance: number
-    ): readonly SceneHitTarget[] {
-        const candidateSet = new Set<SceneHitTarget>();
-
-        // 1. Contained bars
-        for (const bar of this.containedBarHits) {
-            candidateSet.add(bar);
-        }
-
-        // 2. Financial hits
-        for (const fin of this.financialHits) {
-            candidateSet.add(fin);
-        }
-
-        // 3. Point candidates within crosshairDistance
-        for (const metric of this.pointMetrics) {
-            const maxAllowed = Math.min(metric.target.radius ?? crosshairDistance, crosshairDistance);
-            if (metric.distance <= maxAllowed || metric.distance <= metric.visualRadius) {
-                candidateSet.add(metric.target);
-            }
-        }
-
-        return Array.from(candidateSet);
     }
 }

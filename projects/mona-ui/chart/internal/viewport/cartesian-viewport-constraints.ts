@@ -3,73 +3,54 @@ import type { ChartContinuousPositionScale, ChartPositionScale, ResolvedChartCar
 import { clamp } from "../utils/number-utils";
 
 export class CartesianViewportConstraints {
-    public static clampContinuousDomainPreservingSpan(
-        min: number,
-        max: number,
-        baseMin: number,
-        baseMax: number,
-        baseScale?: ChartPositionScale<unknown>,
-        resolvedType?: ResolvedChartCartesianAxisType
+    public static applyCategoryConstraints(
+        startIndex: number,
+        endIndexExclusive: number,
+        baseCount: number,
+        constraint?: ChartViewportConstraint,
+        defaultMinCategories: number = 1,
+        _clampToData: boolean = true
     ): [number, number] {
-        const span = max - min;
-        const baseSpan = baseMax - baseMin;
+        if (baseCount <= 0) return [0, 0];
 
-        if (span >= baseSpan) {
-            return [baseMin, baseMax];
-        }
+        let start = Math.floor(startIndex);
+        let end = Math.ceil(endIndexExclusive);
 
-        // For nonlinear scales, clamp in base pixel space
-        if (
-            baseScale &&
-            (resolvedType === "log" ||
-                resolvedType === "symlog" ||
-                resolvedType === "pow" ||
-                resolvedType === "sqrt")
-        ) {
-            const continuousBase = baseScale as ChartContinuousPositionScale<number>;
-            const pMin = continuousBase.map(min);
-            const pMax = continuousBase.map(max);
-            const range = continuousBase.range();
+        const minVisible = Math.max(
+            1,
+            constraint?.minVisibleCategories ?? defaultMinCategories
+        );
+        const maxVisible = Math.min(
+            baseCount,
+            constraint?.maxVisibleCategories ?? baseCount
+        );
 
-            if (pMin !== undefined && pMax !== undefined) {
-                const r0 = Math.min(range[0], range[1]);
-                const r1 = Math.max(range[0], range[1]);
-                const pSpan = Math.abs(pMax - pMin);
-                const pStart = Math.min(pMin, pMax);
+        // Category indices are array slice indices and must always remain legal [0, baseCount]
+        start = clamp(start, 0, baseCount - 1);
+        end = clamp(end, start + 1, baseCount);
 
-                let nextP0 = pStart;
-                let nextP1 = pStart + pSpan;
-
-                if (nextP0 < r0) {
-                    nextP0 = r0;
-                    nextP1 = r0 + pSpan;
-                }
-                if (nextP1 > r1) {
-                    nextP1 = r1;
-                    nextP0 = r1 - pSpan;
-                }
-
-                const inv0 = continuousBase.invert(nextP0);
-                const inv1 = continuousBase.invert(nextP1);
-                if (Number.isFinite(inv0) && Number.isFinite(inv1)) {
-                    return [Math.min(inv0, inv1), Math.max(inv0, inv1)];
-                }
+        let span = end - start;
+        if (span < minVisible) {
+            span = Math.min(minVisible, baseCount);
+            if (start + span > baseCount) {
+                start = Math.max(0, baseCount - span);
             }
+            end = start + span;
+        } else if (span > maxVisible) {
+            span = maxVisible;
+            end = start + span;
         }
 
-        let clampedMin = min;
-        let clampedMax = max;
-
-        if (clampedMin < baseMin) {
-            clampedMin = baseMin;
-            clampedMax = baseMin + span;
+        if (start < 0) {
+            start = 0;
+            end = Math.min(baseCount, start + span);
         }
-        if (clampedMax > baseMax) {
-            clampedMax = baseMax;
-            clampedMin = baseMax - span;
+        if (end > baseCount) {
+            end = baseCount;
+            start = Math.max(0, end - span);
         }
 
-        return [clampedMin, clampedMax];
+        return [start, end];
     }
 
     public static applyContinuousConstraints(
@@ -138,53 +119,72 @@ export class CartesianViewportConstraints {
         return [curMin, curMax];
     }
 
-    public static applyCategoryConstraints(
-        startIndex: number,
-        endIndexExclusive: number,
-        baseCount: number,
-        constraint?: ChartViewportConstraint,
-        defaultMinCategories: number = 1,
-        _clampToData: boolean = true
+    public static clampContinuousDomainPreservingSpan(
+        min: number,
+        max: number,
+        baseMin: number,
+        baseMax: number,
+        baseScale?: ChartPositionScale<unknown>,
+        resolvedType?: ResolvedChartCartesianAxisType
     ): [number, number] {
-        if (baseCount <= 0) return [0, 0];
+        const span = max - min;
+        const baseSpan = baseMax - baseMin;
 
-        let start = Math.floor(startIndex);
-        let end = Math.ceil(endIndexExclusive);
+        if (span >= baseSpan) {
+            return [baseMin, baseMax];
+        }
 
-        const minVisible = Math.max(
-            1,
-            constraint?.minVisibleCategories ?? defaultMinCategories
-        );
-        const maxVisible = Math.min(
-            baseCount,
-            constraint?.maxVisibleCategories ?? baseCount
-        );
+        // For nonlinear scales, clamp in base pixel space
+        if (
+            baseScale &&
+            (resolvedType === "log" ||
+                resolvedType === "symlog" ||
+                resolvedType === "pow" ||
+                resolvedType === "sqrt")
+        ) {
+            const continuousBase = baseScale as ChartContinuousPositionScale<number>;
+            const pMin = continuousBase.map(min);
+            const pMax = continuousBase.map(max);
+            const range = continuousBase.range();
 
-        // Category indices are array slice indices and must always remain legal [0, baseCount]
-        start = clamp(start, 0, baseCount - 1);
-        end = clamp(end, start + 1, baseCount);
+            if (pMin !== undefined && pMax !== undefined) {
+                const r0 = Math.min(range[0], range[1]);
+                const r1 = Math.max(range[0], range[1]);
+                const pSpan = Math.abs(pMax - pMin);
+                const pStart = Math.min(pMin, pMax);
 
-        let span = end - start;
-        if (span < minVisible) {
-            span = Math.min(minVisible, baseCount);
-            if (start + span > baseCount) {
-                start = Math.max(0, baseCount - span);
+                let nextP0 = pStart;
+                let nextP1 = pStart + pSpan;
+
+                if (nextP0 < r0) {
+                    nextP0 = r0;
+                    nextP1 = r0 + pSpan;
+                }
+                if (nextP1 > r1) {
+                    nextP1 = r1;
+                    nextP0 = r1 - pSpan;
+                }
+
+                const inv0 = continuousBase.invert(nextP0);
+                const inv1 = continuousBase.invert(nextP1);
+                if (Number.isFinite(inv0) && Number.isFinite(inv1)) {
+                    return [Math.min(inv0, inv1), Math.max(inv0, inv1)];
+                }
             }
-            end = start + span;
-        } else if (span > maxVisible) {
-            span = maxVisible;
-            end = start + span;
         }
 
-        if (start < 0) {
-            start = 0;
-            end = Math.min(baseCount, start + span);
+        let clampedMin = min;
+        let clampedMax = max;
+
+        if (clampedMin < baseMin) {
+            clampedMin = baseMin;
+            clampedMax = baseMin + span;
         }
-        if (end > baseCount) {
-            end = baseCount;
-            start = Math.max(0, end - span);
+        if (clampedMax > baseMax) {
+            clampedMax = baseMax;
+            clampedMin = baseMax - span;
         }
 
-        return [start, end];
+        return [clampedMin, clampedMax];
     }
 }

@@ -62,19 +62,14 @@ class SynchronizationHostComponent {
 
     public readonly dataA = signal<readonly unknown[]>(DATA);
     public readonly dataB = signal<readonly unknown[]>(DATA);
-
-    public readonly navigationA = signal<ChartNavigationInput>(true);
-    public readonly navigationB = signal<ChartNavigationInput>(true);
-
-    public readonly viewportA = signal<ChartViewportState | undefined>(undefined);
-    public readonly viewportB = signal<ChartViewportState | undefined>(undefined);
-
-    public readonly syncA = signal<ChartSynchronizationInput>({ group: "g1" });
-    public readonly syncB = signal<ChartSynchronizationInput>({ group: "g1" });
-
     public readonly eventsA: ChartViewportChangeEvent[] = [];
     public readonly eventsB: ChartViewportChangeEvent[] = [];
-
+    public readonly navigationA = signal<ChartNavigationInput>(true);
+    public readonly navigationB = signal<ChartNavigationInput>(true);
+    public readonly syncA = signal<ChartSynchronizationInput>({ group: "g1" });
+    public readonly syncB = signal<ChartSynchronizationInput>({ group: "g1" });
+    public readonly viewportA = signal<ChartViewportState | undefined>(undefined);
+    public readonly viewportB = signal<ChartViewportState | undefined>(undefined);
     public onViewportChangeA(event: ChartViewportChangeEvent): void {
         this.eventsA.push(event);
     }
@@ -91,11 +86,11 @@ class FakeResizeObserver {
         FakeResizeObserver.instances.push(this);
     }
 
+    public disconnect(): void {}
+
     public observe(): void {}
 
     public unobserve(): void {}
-
-    public disconnect(): void {}
 }
 
 const nextFrame = (): Promise<void> =>

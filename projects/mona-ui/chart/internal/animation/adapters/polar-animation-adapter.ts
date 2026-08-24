@@ -53,12 +53,11 @@ function createPoleRadialState(pt: SceneRadialPoint, center: ChartPoint, opacity
 
 export class PolarSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<ChartContinuousPolarSeriesScene> {
     readonly #center: ChartPoint;
+    public readonly type = "polar";
 
     public constructor(center: ChartPoint = { x: 0, y: 0 }) {
         this.#center = center;
     }
-
-    public readonly type = "polar";
 
     public createPlan(
         previous: ChartContinuousPolarSeriesScene | null,

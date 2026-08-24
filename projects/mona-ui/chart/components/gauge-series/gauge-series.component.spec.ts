@@ -27,11 +27,11 @@ import { GaugeSeriesComponent } from "./gauge-series.component";
     `
 })
 class TestGaugeHostComponent {
-    public readonly value = signal<number | undefined>(72);
-    public readonly min = signal(0);
-    public readonly max = signal(100);
     public readonly indicator = signal<ChartGaugeIndicator>("both");
+    public readonly max = signal(100);
+    public readonly min = signal(0);
     public readonly showValue = signal(true);
+    public readonly value = signal<number | undefined>(72);
     public readonly visible = signal(true);
 }
 

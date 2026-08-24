@@ -53,12 +53,11 @@ function createCenterRadialState(pt: SceneRadialPoint, center: ChartPoint, opaci
 
 export class RadarSeriesAnimationAdapter implements ChartSeriesAnimationAdapter<ChartRadarSeriesScene> {
     readonly #center: ChartPoint;
+    public readonly type = "radar";
 
     public constructor(center: ChartPoint = { x: 0, y: 0 }) {
         this.#center = center;
     }
-
-    public readonly type = "radar";
 
     public createPlan(
         previous: ChartRadarSeriesScene | null,

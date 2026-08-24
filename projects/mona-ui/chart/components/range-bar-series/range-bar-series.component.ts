@@ -40,15 +40,12 @@ export class RangeBarSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly data = input<readonly unknown[] | undefined>(undefined);
-
+    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
     /**
      * @description Data label display options or boolean flag enabling default labels.
      * @default false
      */
     public readonly dataLabels = input<ChartDataLabelsInput>(false);
-
-    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
-
     /**
      * @description Fill opacity applied to the range bars.
      * @default undefined

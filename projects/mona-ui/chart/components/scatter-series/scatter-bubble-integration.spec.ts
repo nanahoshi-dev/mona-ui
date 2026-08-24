@@ -54,16 +54,15 @@ import { ScatterSeriesComponent } from "./scatter-series.component";
     `
 })
 class ScatterBubbleTestHostComponent {
+    public readonly bubbleVisible = signal(true);
     public readonly data = signal<readonly unknown[]>([
         { pop: 100, x: 10, y1: 20, y2: 30 },
         { pop: 400, x: 20, y1: 40, y2: 50 },
         { pop: 900, x: 30, y1: 60, y2: 70 },
         { pop: 1600, x: 30, y1: 80, y2: 90 } // Duplicate X = 30
     ]);
-    public readonly xField = signal("x");
     public readonly scatterVisible = signal(true);
-    public readonly bubbleVisible = signal(true);
-
+    public readonly xField = signal("x");
     public clickedPoint: ChartPointEvent | null = null;
     public lastVisibilityChange: ChartSeriesVisibilityEvent | null = null;
 

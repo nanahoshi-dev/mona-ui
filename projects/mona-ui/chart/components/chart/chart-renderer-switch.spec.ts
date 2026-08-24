@@ -38,13 +38,13 @@ import type { ChartRendererMode } from "../../models/chart-renderer.models";
 })
 class RendererSwitchCertificationHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
-    public readonly renderer = signal<ChartRendererMode>("canvas");
-    public readonly selectedMarkIds = signal<readonly string[]>(["Bar Series:B"]);
     public readonly data = signal([
         { name: "A", value: 10 },
         { name: "B", value: 25 },
         { name: "C", value: 40 }
     ]);
+    public readonly renderer = signal<ChartRendererMode>("canvas");
+    public readonly selectedMarkIds = signal<readonly string[]>(["Bar Series:B"]);
 }
 
 describe("Chart Renderer Switching", () => {

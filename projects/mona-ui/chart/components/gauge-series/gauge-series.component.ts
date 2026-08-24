@@ -21,169 +21,141 @@ let nextGaugeSeriesId = 0;
     }
 })
 export class GaugeSeriesComponent implements OnInit {
+    protected readonly centerTemplate = contentChild(ChartGaugeCenterTemplateDirective);
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #seriesId = `mona-gauge-series-${++nextGaugeSeriesId}`;
-
-    protected readonly centerTemplate = contentChild(ChartGaugeCenterTemplateDirective);
-
-    /**
-     * @description Direct scalar value for the gauge. When defined, takes precedence over data/field.
-     * @default undefined
-     */
-    public readonly value = input<number | undefined>(undefined);
-
-    /**
-     * @description Series-specific dataset overriding root chart data.
-     * @default undefined
-     */
-    public readonly data = input<readonly unknown[] | undefined>(undefined);
-
-    /**
-     * @description Property key or accessor extracting the numeric gauge value when direct value is not set.
-     * @default "value"
-     */
-    public readonly field = input<ChartField>("value");
-
-    /**
-     * @description Property key or accessor extracting a stable datum identity across updates.
-     * @default undefined
-     */
-    public readonly keyField = input<ChartField | undefined>(undefined);
-
-    /**
-     * @description Series name used in tooltips and accessibility announcements.
-     * @default "Gauge"
-     */
-    public readonly name = input<string>("Gauge");
-
-    /**
-     * @description Minimum domain value.
-     * @default 0
-     */
-    public readonly min = input<number>(0);
-
-    /**
-     * @description Maximum domain value.
-     * @default 100
-     */
-    public readonly max = input<number>(100);
-
-    /**
-     * @description Formatter callback for gauge numeric values.
-     * @default undefined
-     */
-    public readonly valueFormatter = input<ChartValueFormatter | undefined>(undefined);
-
-    /**
-     * @description Starting angle in degrees (0 is 12 o'clock, clockwise).
-     * @default -120
-     */
-    public readonly startAngle = input<number>(-120);
-
-    /**
-     * @description Ending angle in degrees (clockwise from 12 o'clock).
-     * @default 120
-     */
-    public readonly endAngle = input<number>(120);
-
-    /**
-     * @description Inner radius ratio relative to outer radius (0 to 1).
-     * @default 0.72
-     */
-    public readonly innerRadiusRatio = input<number>(0.72);
-
-    /**
-     * @description Outer radius ratio relative to available plot bounds (0.1 to 1).
-     * @default 0.9
-     */
-    public readonly outerRadiusRatio = input<number>(0.9);
-
-    /**
-     * @description Corner radius in pixels applied to gauge arc endpoints.
-     * @default undefined
-     */
-    public readonly cornerRadius = input<number | undefined>(undefined);
-
-    /**
-     * @description Indicator mode: "arc" (progress arc), "needle" (pointer needle), or "both".
-     * @default "arc"
-     */
-    public readonly indicator = input<ChartGaugeIndicator>("arc");
-
     /**
      * @description Primary color of the gauge value arc.
      * @default ""
      */
     public readonly color = input<string>("");
-
+    /**
+     * @description Corner radius in pixels applied to gauge arc endpoints.
+     * @default undefined
+     */
+    public readonly cornerRadius = input<number | undefined>(undefined);
+    /**
+     * @description Series-specific dataset overriding root chart data.
+     * @default undefined
+     */
+    public readonly data = input<readonly unknown[] | undefined>(undefined);
+    /**
+     * @description Ending angle in degrees (clockwise from 12 o'clock).
+     * @default 120
+     */
+    public readonly endAngle = input<number>(120);
+    /**
+     * @description Property key or accessor extracting the numeric gauge value when direct value is not set.
+     * @default "value"
+     */
+    public readonly field = input<ChartField>("value");
     /**
      * @description Fill style applied to gauge value arc ("solid" or radial "gradient").
      * @default "solid"
      */
     public readonly fillMode = input<ChartRadialArcFillMode>("solid");
-
     /**
      * @description Opacity of gauge value arc fill (between 0 and 1).
      * @default undefined
      */
     public readonly fillOpacity = input<number | undefined>(undefined);
-
-    /**
-     * @description Color of background track arc.
-     * @default ""
-     */
-    public readonly trackColor = input<string>("");
-
-    /**
-     * @description Opacity of background track arc.
-     * @default undefined
-     */
-    public readonly trackOpacity = input<number | undefined>(undefined);
-
-    /**
-     * @description Color of the needle and center hub.
-     * @default ""
-     */
-    public readonly needleColor = input<string>("");
-
-    /**
-     * @description Stroke width in pixels for the needle pointer.
-     * @default 2
-     */
-    public readonly needleWidth = input<number>(2);
-
-    /**
-     * @description Length of the needle pointer as a fraction of outer radius (0.1 to 1).
-     * @default 0.78
-     */
-    public readonly needleLengthRatio = input<number>(0.78);
-
     /**
      * @description Radius in pixels of the needle center hub circle.
      * @default 5
      */
     public readonly hubRadius = input<number>(5);
-
+    /**
+     * @description Indicator mode: "arc" (progress arc), "needle" (pointer needle), or "both".
+     * @default "arc"
+     */
+    public readonly indicator = input<ChartGaugeIndicator>("arc");
+    /**
+     * @description Inner radius ratio relative to outer radius (0 to 1).
+     * @default 0.72
+     */
+    public readonly innerRadiusRatio = input<number>(0.72);
+    /**
+     * @description Property key or accessor extracting a stable datum identity across updates.
+     * @default undefined
+     */
+    public readonly keyField = input<ChartField | undefined>(undefined);
+    /**
+     * @description Maximum domain value.
+     * @default 100
+     */
+    public readonly max = input<number>(100);
+    /**
+     * @description Minimum domain value.
+     * @default 0
+     */
+    public readonly min = input<number>(0);
+    /**
+     * @description Series name used in tooltips and accessibility announcements.
+     * @default "Gauge"
+     */
+    public readonly name = input<string>("Gauge");
+    /**
+     * @description Color of the needle and center hub.
+     * @default ""
+     */
+    public readonly needleColor = input<string>("");
+    /**
+     * @description Length of the needle pointer as a fraction of outer radius (0.1 to 1).
+     * @default 0.78
+     */
+    public readonly needleLengthRatio = input<number>(0.78);
+    /**
+     * @description Stroke width in pixels for the needle pointer.
+     * @default 2
+     */
+    public readonly needleWidth = input<number>(2);
+    /**
+     * @description Outer radius ratio relative to available plot bounds (0.1 to 1).
+     * @default 0.9
+     */
+    public readonly outerRadiusRatio = input<number>(0.9);
     /**
      * @description Whether to display the formatted value in the center of the gauge.
      * @default true
      */
     public readonly showValue = input<boolean>(true);
-
     /**
-     * @description Two-way bindable visibility of the series.
-     * @default true
+     * @description Starting angle in degrees (0 is 12 o'clock, clockwise).
+     * @default -120
      */
-    public readonly visible = model<boolean>(true);
-
+    public readonly startAngle = input<number>(-120);
+    /**
+     * @description Color of background track arc.
+     * @default ""
+     */
+    public readonly trackColor = input<string>("");
+    /**
+     * @description Opacity of background track arc.
+     * @default undefined
+     */
+    public readonly trackOpacity = input<number | undefined>(undefined);
     /**
      * @description Additional CSS classes applied to the series.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
-
+    /**
+     * @description Direct scalar value for the gauge. When defined, takes precedence over data/field.
+     * @default undefined
+     */
+    public readonly value = input<number | undefined>(undefined);
+    /**
+     * @description Formatter callback for gauge numeric values.
+     * @default undefined
+     */
+    public readonly valueFormatter = input<ChartValueFormatter | undefined>(undefined);
+    /**
+     * @description Two-way bindable visibility of the series.
+     * @default true
+     */
+    public readonly visible = model<boolean>(true);
     #registered = false;
 
     public constructor() {

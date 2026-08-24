@@ -3,21 +3,16 @@ import type { ChartCrossfadeRenderFrame, ChartRenderFrame } from "./chart-render
 export type ChartRenderBackendKind = "canvas" | "svg";
 
 export interface ChartRenderViewport {
-    readonly width: number;
-    readonly height: number;
     readonly devicePixelRatio: number;
+    readonly height: number;
+    readonly width: number;
 }
 
 export interface ChartRenderBackend {
-    readonly kind: ChartRenderBackendKind;
-
-    resize(viewport: ChartRenderViewport): void;
-
-    render(frame: ChartRenderFrame): void;
-
-    renderCrossfade(frame: ChartCrossfadeRenderFrame): void;
-
     clear(): void;
-
     destroy(): void;
+    readonly kind: ChartRenderBackendKind;
+    render(frame: ChartRenderFrame): void;
+    renderCrossfade(frame: ChartCrossfadeRenderFrame): void;
+    resize(viewport: ChartRenderViewport): void;
 }

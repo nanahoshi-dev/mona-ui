@@ -30,12 +30,12 @@ import type { ChartRendererMode } from "../../models/chart-renderer.models";
 })
 class SvgRendererHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
-    public readonly renderer = signal<ChartRendererMode>("svg");
     public readonly data = signal([
         { name: "A", value: 10 },
         { name: "B", value: 25 },
         { name: "C", value: 40 }
     ]);
+    public readonly renderer = signal<ChartRendererMode>("svg");
 }
 
 describe("SVG Rendering Abstraction & Parity", () => {

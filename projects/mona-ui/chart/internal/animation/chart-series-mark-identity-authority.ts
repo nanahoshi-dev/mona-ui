@@ -19,9 +19,9 @@ export interface ChartSeriesMarkIdentityOptions {
  * full layouts, sampled layouts, and dense raw hits all produce identical, stable mark IDs.
  */
 export class ChartSeriesMarkIdentityAuthority {
+    readonly #extractNaturalKey?: (datum: unknown, index: number) => unknown;
     readonly #keyField?: ChartField;
     readonly #occurrenceRanks: Int32Array;
-    readonly #extractNaturalKey?: (datum: unknown, index: number) => unknown;
     readonly #seriesId: string;
     readonly #seriesPrefix: string;
     readonly #sourceData: readonly unknown[];
@@ -64,24 +64,6 @@ export class ChartSeriesMarkIdentityAuthority {
         return this.#seriesPrefix;
     }
 
-    public occurrenceRankAt(sourceIndex: number): number {
-        if (sourceIndex >= 0 && sourceIndex < this.#occurrenceRanks.length) {
-            return this.#occurrenceRanks[sourceIndex];
-        }
-        return 0;
-    }
-
-    public resolveKeyAt(sourceIndex: number, naturalKey?: unknown, datum?: unknown): ChartAnimationMarkKey {
-        if (sourceIndex < 0 || sourceIndex >= this.#sourceData.length) {
-            return JSON.stringify([this.#seriesPrefix, "i", sourceIndex, 0]);
-        }
-        const rowDatum = datum !== undefined ? datum : this.#sourceData[sourceIndex];
-        const rowNaturalKey = naturalKey !== undefined ? naturalKey : (this.#extractNaturalKey ? this.#extractNaturalKey(rowDatum, sourceIndex) : sourceIndex);
-        const { part } = resolveMarkKeyPart(rowDatum, this.#keyField, rowNaturalKey, sourceIndex);
-        const rank = this.#occurrenceRanks[sourceIndex];
-        return composeMarkKey(this.#seriesPrefix, part, rank);
-    }
-
     public locate(query: CartesianDenseMarkIdentityQuery): number | null {
         if (query.partType === "i") {
             const idx = Number(query.value);
@@ -112,5 +94,23 @@ export class ChartSeriesMarkIdentityAuthority {
             return null;
         }
         return list[query.occurrenceRank];
+    }
+
+    public occurrenceRankAt(sourceIndex: number): number {
+        if (sourceIndex >= 0 && sourceIndex < this.#occurrenceRanks.length) {
+            return this.#occurrenceRanks[sourceIndex];
+        }
+        return 0;
+    }
+
+    public resolveKeyAt(sourceIndex: number, naturalKey?: unknown, datum?: unknown): ChartAnimationMarkKey {
+        if (sourceIndex < 0 || sourceIndex >= this.#sourceData.length) {
+            return JSON.stringify([this.#seriesPrefix, "i", sourceIndex, 0]);
+        }
+        const rowDatum = datum !== undefined ? datum : this.#sourceData[sourceIndex];
+        const rowNaturalKey = naturalKey !== undefined ? naturalKey : (this.#extractNaturalKey ? this.#extractNaturalKey(rowDatum, sourceIndex) : sourceIndex);
+        const { part } = resolveMarkKeyPart(rowDatum, this.#keyField, rowNaturalKey, sourceIndex);
+        const rank = this.#occurrenceRanks[sourceIndex];
+        return composeMarkKey(this.#seriesPrefix, part, rank);
     }
 }

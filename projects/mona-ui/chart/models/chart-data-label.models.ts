@@ -20,18 +20,15 @@ export interface ChartDataLabelOptions {
      * Default: false
      */
     allowOverlap?: boolean;
-
-    /**
-     * Optional text color override.
-     */
-    color?: string;
-
     /**
      * Collision padding around the label bounds.
      * Default: 2
      */
     collisionPadding?: number;
-
+    /**
+     * Optional text color override.
+     */
+    color?: string;
     /**
      * Optional semantic formatter.
      * Returning null/undefined/"" suppresses that label.

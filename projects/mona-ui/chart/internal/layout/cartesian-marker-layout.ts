@@ -127,6 +127,75 @@ export class CartesianMarkerLayout {
         return hasValidBubbleDomain ? [globalMinSize, globalMaxSize] : [1, 1];
     }
 
+    public static compute(options: CartesianMarkerLayoutOptions): CartesianMarkerLayoutResult {
+        const {
+            bubbleSizeDomain,
+            linearXScale,
+            plotRect,
+            renderOrderCounter,
+            rootData,
+            rootXField,
+            series,
+            styleResolver,
+            timeScale,
+            xAxisFormatter,
+            xAxisType,
+            xTimeSpanMs,
+            yAxisFormatter,
+            yScale
+        } = options;
+
+        const seriesScenes: (ChartBubbleSeriesScene | ChartScatterSeriesScene)[] = [];
+        const hitTargets: SceneHitTarget[] = [];
+        let totalValidDatumCount = 0;
+
+        const effectiveBubbleSizeDomain =
+            bubbleSizeDomain ??
+            CartesianMarkerLayout.calculateBubbleSizeDomain(
+                series.filter(s => s.type === "bubble" && s.visible()) as ChartBubbleSeriesRegistration[],
+                rootData,
+                rootXField,
+                xAxisType
+            );
+
+        for (let sIdx = 0; sIdx < series.length; sIdx++) {
+            const s = series[sIdx];
+            if (!s.visible() || (s.type !== "scatter" && s.type !== "bubble")) {
+                continue;
+            }
+
+            const res = this.computeSeries({
+                bubbleSizeDomain: effectiveBubbleSizeDomain,
+                linearXScale,
+                plotRect,
+                renderOrderCounter,
+                rootData,
+                rootXField,
+                series: s,
+                seriesIndex: sIdx,
+                styleResolver,
+                timeScale,
+                xAxisFormatter,
+                xAxisType,
+                xTimeSpanMs,
+                yAxisFormatter,
+                yScale
+            });
+
+            if (res) {
+                seriesScenes.push(res.scene);
+                hitTargets.push(...res.hitTargets);
+                totalValidDatumCount += res.validDatumCount;
+            }
+        }
+
+        return {
+            hitTargets,
+            seriesScenes,
+            validDatumCount: totalValidDatumCount
+        };
+    }
+
     public static computeSeries(options: CartesianMarkerSeriesLayoutOptions): CartesianMarkerSeriesLayoutResult | null {
         const {
             bubbleSizeDomain,
@@ -303,75 +372,6 @@ export class CartesianMarkerLayout {
             hitTargets,
             scene,
             validDatumCount
-        };
-    }
-
-    public static compute(options: CartesianMarkerLayoutOptions): CartesianMarkerLayoutResult {
-        const {
-            bubbleSizeDomain,
-            linearXScale,
-            plotRect,
-            renderOrderCounter,
-            rootData,
-            rootXField,
-            series,
-            styleResolver,
-            timeScale,
-            xAxisFormatter,
-            xAxisType,
-            xTimeSpanMs,
-            yAxisFormatter,
-            yScale
-        } = options;
-
-        const seriesScenes: (ChartBubbleSeriesScene | ChartScatterSeriesScene)[] = [];
-        const hitTargets: SceneHitTarget[] = [];
-        let totalValidDatumCount = 0;
-
-        const effectiveBubbleSizeDomain =
-            bubbleSizeDomain ??
-            CartesianMarkerLayout.calculateBubbleSizeDomain(
-                series.filter(s => s.type === "bubble" && s.visible()) as ChartBubbleSeriesRegistration[],
-                rootData,
-                rootXField,
-                xAxisType
-            );
-
-        for (let sIdx = 0; sIdx < series.length; sIdx++) {
-            const s = series[sIdx];
-            if (!s.visible() || (s.type !== "scatter" && s.type !== "bubble")) {
-                continue;
-            }
-
-            const res = this.computeSeries({
-                bubbleSizeDomain: effectiveBubbleSizeDomain,
-                linearXScale,
-                plotRect,
-                renderOrderCounter,
-                rootData,
-                rootXField,
-                series: s,
-                seriesIndex: sIdx,
-                styleResolver,
-                timeScale,
-                xAxisFormatter,
-                xAxisType,
-                xTimeSpanMs,
-                yAxisFormatter,
-                yScale
-            });
-
-            if (res) {
-                seriesScenes.push(res.scene);
-                hitTargets.push(...res.hitTargets);
-                totalValidDatumCount += res.validDatumCount;
-            }
-        }
-
-        return {
-            hitTargets,
-            seriesScenes,
-            validDatumCount: totalValidDatumCount
         };
     }
 }

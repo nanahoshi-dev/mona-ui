@@ -68,31 +68,29 @@ interface SampleItem {
     `
 })
 class TestCartesianHostComponent {
+    public readonly barDataLabels = signal<boolean | object>(false);
+    public readonly brushSelectionBehavior = signal<"none" | "replace" | "add" | "remove" | "toggle">("replace");
+    public readonly controlledSelection = signal<string[] | undefined>(undefined);
     public readonly data = signal<SampleItem[]>([
         { name: "Alpha", value: 10 },
         { name: "Beta", value: 20 },
         { name: "Gamma", value: 30 }
     ]);
-    public readonly lineDataLabels = signal<boolean | object>(true);
-    public readonly barDataLabels = signal<boolean | object>(false);
-    public readonly useCustomDataLabelTemplate = signal(false);
-
-    public readonly enableSelection = signal(true);
-    public readonly selectionMode = signal<"single" | "multiple">("single");
-    public readonly controlledSelection = signal<string[] | undefined>(undefined);
     public readonly defaultSelection = signal<string[]>([]);
-    public lastSelectionEvent: ChartSelectionChangeEvent | null = null;
-
     public readonly enableBrush = signal(true);
-    public readonly brushSelectionBehavior = signal<"none" | "replace" | "add" | "remove" | "toggle">("replace");
+    public readonly enableSelection = signal(true);
+    public readonly lineDataLabels = signal<boolean | object>(true);
+    public readonly selectionMode = signal<"single" | "multiple">("single");
+    public readonly useCustomDataLabelTemplate = signal(false);
     public lastBrushEvent: ChartBrushChangeEvent | null = null;
-
-    public onSelectionChange(evt: ChartSelectionChangeEvent): void {
-        this.lastSelectionEvent = evt;
-    }
+    public lastSelectionEvent: ChartSelectionChangeEvent | null = null;
 
     public onBrushChange(evt: ChartBrushChangeEvent): void {
         this.lastBrushEvent = evt;
+    }
+
+    public onSelectionChange(evt: ChartSelectionChangeEvent): void {
+        this.lastSelectionEvent = evt;
     }
 }
 

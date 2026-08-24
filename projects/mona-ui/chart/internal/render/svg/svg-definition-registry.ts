@@ -23,12 +23,11 @@ export interface RadialGradientDefinition {
 }
 
 export class SvgDefinitionRegistry {
-    #defsElement: SVGDefsElement | null;
+    readonly #elementsById: Map<string, SVGElement>;
     readonly #namespace: SvgIdNamespace;
     readonly #prefix: string;
     readonly #usedIds: Set<string>;
-    readonly #elementsById: Map<string, SVGElement>;
-
+    #defsElement: SVGDefsElement | null;
     public constructor(
         defsElement: SVGDefsElement,
         namespace: SvgIdNamespace,
@@ -43,19 +42,60 @@ export class SvgDefinitionRegistry {
         this.#usedIds = usedIds ?? new Set<string>();
     }
 
-    public withScope(prefix: string): SvgDefinitionRegistry {
-        const fullPrefix = this.#prefix ? `${this.#prefix}-${prefix}` : prefix;
-        return new SvgDefinitionRegistry(
-            this.#defsElement as SVGDefsElement,
-            this.#namespace,
-            fullPrefix,
-            this.#elementsById,
-            this.#usedIds
-        );
+    #syncStops(gradient: SVGGradientElement, stops: readonly { readonly color: string; readonly offset: number }[]): void {
+        const existingStops = Array.from(gradient.children) as SVGStopElement[];
+        while (existingStops.length > stops.length) {
+            existingStops.pop()?.remove();
+        }
+        for (let i = 0; i < stops.length; i++) {
+            let stop = existingStops[i];
+            if (!stop) {
+                stop = createSvgElement("stop");
+                gradient.appendChild(stop);
+            }
+            setSvgAttribute(stop, "offset", `${formatSvgNumber(stops[i].offset * 100)}%`);
+
+            const rawColor = stops[i].color;
+            const parsed = parse(rawColor);
+            if (parsed) {
+                const rgbOnly = formatRgb({ ...parsed, alpha: undefined });
+                setSvgAttribute(stop, "stop-color", rgbOnly || rawColor);
+                if (parsed.alpha !== undefined) {
+                    setSvgAttribute(stop, "stop-opacity", formatSvgNumber(parsed.alpha));
+                } else {
+                    setSvgAttribute(stop, "stop-opacity", "1");
+                }
+            } else {
+                setSvgAttribute(stop, "stop-color", rawColor);
+                setSvgAttribute(stop, "stop-opacity", "1");
+            }
+        }
     }
 
     public beginFrame(): void {
         this.#usedIds.clear();
+    }
+
+    public clear(): void {
+        for (const element of this.#elementsById.values()) {
+            element.remove();
+        }
+        this.#elementsById.clear();
+        this.#usedIds.clear();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#defsElement = null;
+    }
+
+    public endFrame(): void {
+        for (const [id, element] of this.#elementsById.entries()) {
+            if (!this.#usedIds.has(id)) {
+                element.remove();
+                this.#elementsById.delete(id);
+            }
+        }
     }
 
     public useClipRect(idSuffix: string, x: number, y: number, width: number, height: number): string {
@@ -146,55 +186,14 @@ export class SvgDefinitionRegistry {
         return `url(#${fullId})`;
     }
 
-    public endFrame(): void {
-        for (const [id, element] of this.#elementsById.entries()) {
-            if (!this.#usedIds.has(id)) {
-                element.remove();
-                this.#elementsById.delete(id);
-            }
-        }
-    }
-
-    public clear(): void {
-        for (const element of this.#elementsById.values()) {
-            element.remove();
-        }
-        this.#elementsById.clear();
-        this.#usedIds.clear();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#defsElement = null;
-    }
-
-    #syncStops(gradient: SVGGradientElement, stops: readonly { readonly color: string; readonly offset: number }[]): void {
-        const existingStops = Array.from(gradient.children) as SVGStopElement[];
-        while (existingStops.length > stops.length) {
-            existingStops.pop()?.remove();
-        }
-        for (let i = 0; i < stops.length; i++) {
-            let stop = existingStops[i];
-            if (!stop) {
-                stop = createSvgElement("stop");
-                gradient.appendChild(stop);
-            }
-            setSvgAttribute(stop, "offset", `${formatSvgNumber(stops[i].offset * 100)}%`);
-
-            const rawColor = stops[i].color;
-            const parsed = parse(rawColor);
-            if (parsed) {
-                const rgbOnly = formatRgb({ ...parsed, alpha: undefined });
-                setSvgAttribute(stop, "stop-color", rgbOnly || rawColor);
-                if (parsed.alpha !== undefined) {
-                    setSvgAttribute(stop, "stop-opacity", formatSvgNumber(parsed.alpha));
-                } else {
-                    setSvgAttribute(stop, "stop-opacity", "1");
-                }
-            } else {
-                setSvgAttribute(stop, "stop-color", rawColor);
-                setSvgAttribute(stop, "stop-opacity", "1");
-            }
-        }
+    public withScope(prefix: string): SvgDefinitionRegistry {
+        const fullPrefix = this.#prefix ? `${this.#prefix}-${prefix}` : prefix;
+        return new SvgDefinitionRegistry(
+            this.#defsElement as SVGDefsElement,
+            this.#namespace,
+            fullPrefix,
+            this.#elementsById,
+            this.#usedIds
+        );
     }
 }

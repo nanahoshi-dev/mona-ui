@@ -13,6 +13,14 @@ export class SvgCartesianInteractionRenderer {
         this.#keyedGroup = new SvgKeyedGroup<SceneHitTarget, SVGGElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(
         scene: CartesianXYChartScene,
         interactionState: ChartInteractionState | null,
@@ -201,13 +209,5 @@ export class SvgCartesianInteractionRenderer {
                 }
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

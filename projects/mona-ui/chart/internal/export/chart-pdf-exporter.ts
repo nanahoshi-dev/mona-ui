@@ -11,8 +11,8 @@ import {
 import { resolvePdfLayout, resolvePdfRasterPixelRatio } from "./chart-export-geometry";
 
 export interface ChartExportPdfInstrumentation {
-    onPdfVectorConvert?(): void;
     onFullRasterize?(): void;
+    onPdfVectorConvert?(): void;
 }
 
 let activePdfInstrumentation: ChartExportPdfInstrumentation | null = null;

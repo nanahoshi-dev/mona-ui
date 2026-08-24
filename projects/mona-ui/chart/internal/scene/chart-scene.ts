@@ -32,17 +32,17 @@ export interface CartesianStackSceneConfig {
 
 /** Internal diagnostics describing per-series render reduction for one projection. */
 export interface ChartSeriesDensityMetadata {
-    readonly algorithm: string;
     readonly actualRenderedMarkerCount?: number;
+    readonly algorithm: string;
     readonly centerVisibleCount?: number;
     readonly renderCandidateCount?: number;
-    /** Number of selected real source marks before topology-only scene sentinels. */
-    readonly selectedDefinedCount?: number;
-    /** Number of points/markers actually materialized in the scene. */
-    readonly scenePointCount?: number;
     readonly renderedCount: number;
     readonly sampled: boolean;
+    /** Number of points/markers actually materialized in the scene. */
+    readonly scenePointCount?: number;
     readonly selectedCount?: number;
+    /** Number of selected real source marks before topology-only scene sentinels. */
+    readonly selectedDefinedCount?: number;
     readonly sourceCount: number;
     readonly visibleSourceCount: number;
 }
@@ -85,13 +85,13 @@ export interface CartesianXYChartScene extends CartesianSceneBase {
     barHitTargets?: readonly SceneHitTarget[];
     cartesianKind: "xy";
     coordinateSpace?: CartesianAxisCoordinateSpace;
-    /** Retained structural density authority for this projection revision (internal). */
-    densityRuntime?: import("../density/cartesian-density-runtime").CartesianDensityRuntime;
     /** Exact raw interaction provider for dense series, frozen to this projection (internal). */
     denseInteraction?: ReadonlyMap<
         string,
         import("../density/cartesian-dense-interaction-provider").CartesianDenseInteractionProvider
     >;
+    /** Retained structural density authority for this projection revision (internal). */
+    densityRuntime?: import("../density/cartesian-density-runtime").CartesianDensityRuntime;
     financialIndex?: CartesianFinancialIndex;
     interactionAxis?: ChartInteractionAxis;
     interactionBucketLookup?: ReadonlyMap<ChartInteractionXKey, ChartInteractionBucket>;

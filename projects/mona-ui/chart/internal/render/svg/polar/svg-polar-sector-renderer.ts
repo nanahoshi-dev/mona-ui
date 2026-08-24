@@ -11,14 +11,12 @@ import { SvgKeyedGroup } from "../svg-keyed-group";
 
 export class SvgPolarSectorSeriesRenderer {
     readonly #container: SVGGElement;
-    readonly #slicesGroup: SVGGElement;
-    readonly #linesGroup: SVGGElement;
     readonly #highlightGroup: SVGGElement;
-
+    readonly #linesGroup: SVGGElement;
     readonly #sliceKeyedGroup: SvgKeyedGroup<SceneSectorSlice, SVGPathElement>;
-    #linePath: SVGPathElement | null = null;
+    readonly #slicesGroup: SVGGElement;
     #highlightPath: SVGPathElement | null = null;
-
+    #linePath: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
 
@@ -35,6 +33,27 @@ export class SvgPolarSectorSeriesRenderer {
         this.#container.appendChild(this.#highlightGroup);
 
         this.#sliceKeyedGroup = new SvgKeyedGroup<SceneSectorSlice, SVGPathElement>(this.#slicesGroup);
+    }
+
+    public clear(): void {
+        this.#sliceKeyedGroup.clear();
+        if (this.#linePath) {
+            this.#linePath.remove();
+            this.#linePath = null;
+        }
+        if (this.#highlightPath) {
+            this.#highlightPath.remove();
+            this.#highlightPath = null;
+        }
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#sliceKeyedGroup.destroy();
+        this.#slicesGroup.remove();
+        this.#linesGroup.remove();
+        this.#highlightGroup.remove();
+        this.#container.remove();
     }
 
     public render(
@@ -183,27 +202,6 @@ export class SvgPolarSectorSeriesRenderer {
             this.#highlightPath = null;
         }
     }
-
-    public clear(): void {
-        this.#sliceKeyedGroup.clear();
-        if (this.#linePath) {
-            this.#linePath.remove();
-            this.#linePath = null;
-        }
-        if (this.#highlightPath) {
-            this.#highlightPath.remove();
-            this.#highlightPath = null;
-        }
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#sliceKeyedGroup.destroy();
-        this.#slicesGroup.remove();
-        this.#linesGroup.remove();
-        this.#highlightGroup.remove();
-        this.#container.remove();
-    }
 }
 
 interface SvgPolarSectorSeriesEntry {
@@ -217,6 +215,20 @@ export class SvgPolarSectorRenderer {
 
     public constructor(container: SVGGElement) {
         this.#container = container;
+    }
+
+    public clear(): void {
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.clear();
+        }
+    }
+
+    public destroy(): void {
+        for (const entry of this.#seriesRenderers.values()) {
+            entry.renderer.destroy();
+            entry.container.remove();
+        }
+        this.#seriesRenderers.clear();
     }
 
     public render(
@@ -258,19 +270,5 @@ export class SvgPolarSectorRenderer {
                 this.#seriesRenderers.delete(id);
             }
         }
-    }
-
-    public clear(): void {
-        for (const entry of this.#seriesRenderers.values()) {
-            entry.renderer.clear();
-        }
-    }
-
-    public destroy(): void {
-        for (const entry of this.#seriesRenderers.values()) {
-            entry.renderer.destroy();
-            entry.container.remove();
-        }
-        this.#seriesRenderers.clear();
     }
 }

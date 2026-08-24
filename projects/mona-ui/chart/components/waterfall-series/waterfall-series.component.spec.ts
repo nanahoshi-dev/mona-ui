@@ -29,8 +29,8 @@ class TestWaterfallHostComponent {
     public readonly field = signal("value");
     public readonly keyField = signal<string | undefined>(undefined);
     public readonly startValue = signal(0);
-    public readonly xField = signal<string | undefined>("category");
     public readonly visible = signal(true);
+    public readonly xField = signal<string | undefined>("category");
 }
 
 describe("WaterfallSeriesComponent", () => {

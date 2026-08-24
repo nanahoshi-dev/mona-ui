@@ -60,23 +60,20 @@ import { RangeAreaSeriesComponent } from "../range-area-series/range-area-series
     `
 })
 class ComprehensiveRangeHostComponent {
+    public readonly borderRadius = signal<number>(6);
     public readonly data = signal<readonly Record<string, unknown>[]>([
         { category: "A", fromVal: 10, maxVal: 50, minVal: 20, toVal: 40 },
         { category: "B", fromVal: 35, maxVal: 30, minVal: 30, toVal: 25 }, // zero-length bar (30-30) and crossing area (35->25)
         { category: "C", fromVal: null, maxVal: 60, minVal: 15, toVal: null }, // null range area
         { category: "D", fromVal: 20, maxVal: 45, minVal: 25, toVal: 50 }
     ]);
-    public readonly sharedTooltip = signal<boolean>(false);
-    public readonly rangeBarVisible = signal<boolean>(true);
     public readonly rangeAreaVisible = signal<boolean>(true);
+    public readonly rangeBarVisible = signal<boolean>(true);
+    public readonly sharedTooltip = signal<boolean>(false);
     public readonly showPoints = signal<boolean>(true);
-    public readonly borderRadius = signal<number>(6);
-
     public lastPointClick: ChartPointEvent | null = null;
     public lastPointFocus: ChartPointFocusEvent | null = null;
     public lastVisibilityChange: ChartSeriesVisibilityEvent | null = null;
-
-    public readonly rangeFormatter = (val: unknown): string => `${val} mm`;
 
     public onPointClick(event: ChartPointEvent): void {
         this.lastPointClick = event;
@@ -89,6 +86,8 @@ class ComprehensiveRangeHostComponent {
     public onSeriesVisibilityChange(event: ChartSeriesVisibilityEvent): void {
         this.lastVisibilityChange = event;
     }
+
+    public readonly rangeFormatter = (val: unknown): string => `${val} mm`;
 }
 
 describe("Comprehensive Range Chart Features", () => {

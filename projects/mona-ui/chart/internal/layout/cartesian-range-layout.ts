@@ -224,25 +224,25 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
 
 export interface RangeAreaLayoutContext {
     bandScale?: ChartBandScale;
+    identity?: import("../animation/chart-series-mark-identity-authority").ChartSeriesMarkIdentityAuthority;
     /** Sampled source-index view; null renders every datum (ordinary layout). */
     indexView?: readonly number[] | null;
     linearXScale?: ChartContinuousScale;
-    /** Segment ordinal per source index (-1 = invalid) for gap topology when sampled. */
-    rangeSegmentIds?: Int32Array;
+    plotRect: ChartRect;
     /** endIndexExclusive per segment ordinal for gap-marker lookup when sampled. */
     rangeSegmentEnds?: readonly number[];
+    /** Segment ordinal per source index (-1 = invalid) for gap topology when sampled. */
+    rangeSegmentIds?: Int32Array;
     /** Contiguous range slice for non-sampled visible window projection */
     rangeSlice?: { readonly startIndex: number; readonly endIndexExclusive: number } | null;
-    /** Segment ordinal per source index (-1 = invalid) for gap topology when sampled. (deprecated alias) */
-    scalarSegmentIds?: Int32Array;
-    /** endIndexExclusive per segment ordinal for gap-marker lookup when sampled. (deprecated alias) */
-    scalarSegmentEnds?: readonly number[];
-    identity?: import("../animation/chart-series-mark-identity-authority").ChartSeriesMarkIdentityAuthority;
-    plotRect: ChartRect;
     recordHitTarget: (target: SceneHitTarget, isBar: boolean, isPoint: boolean) => void;
     renderOrderCounter: { value: number };
     rootData: readonly unknown[];
     rootXField?: ChartField;
+    /** endIndexExclusive per segment ordinal for gap-marker lookup when sampled. (deprecated alias) */
+    scalarSegmentEnds?: readonly number[];
+    /** Segment ordinal per source index (-1 = invalid) for gap topology when sampled. (deprecated alias) */
+    scalarSegmentIds?: Int32Array;
     series: ChartRangeAreaSeriesRegistration;
     seriesDisplayName: string;
     readonly sourceVisitMode?: ChartDensityStageCVisitMode;

@@ -43,6 +43,14 @@ export class SvgCartesianDataLabelRenderer {
         this.#keyedGroup = new SvgKeyedGroup<SceneDefaultDataLabel, SVGGElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(labels: readonly SceneDefaultDataLabel[], plotClipUrl?: string): void {
         if (labels.length === 0) {
             this.#keyedGroup.clear();
@@ -113,13 +121,5 @@ export class SvgCartesianDataLabelRenderer {
                 }
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

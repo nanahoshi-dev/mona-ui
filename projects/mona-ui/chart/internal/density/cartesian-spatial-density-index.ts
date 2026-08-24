@@ -18,11 +18,11 @@ export interface SpatialHierarchyNode {
 }
 
 export interface SpatialDistanceMetric {
+    /** Positive means the candidate wins when distance and secondary distance tie. */
+    compareEqualDistanceIndices?(candidateIndex: number, currentBestIndex: number): number;
     distanceToPoint(index: number): number;
     lowerBoundDistanceToNode(bounds: readonly [number, number, number, number]): number;
     secondaryDistanceToPoint?(index: number): number;
-    /** Positive means the candidate wins when distance and secondary distance tie. */
-    compareEqualDistanceIndices?(candidateIndex: number, currentBestIndex: number): number;
 }
 
 export interface CartesianSpatialDensityBuildStats {
@@ -117,14 +117,6 @@ interface MutableHierarchyNode extends SpatialHierarchyNode {
  * and the largest bubble per relevant node (§58).
  */
 export class CartesianSpatialDensityIndex {
-    readonly #nodes: MutableHierarchyNode[] = [];
-    readonly #orderedPointIndices: Int32Array;
-    readonly #pointCount: number;
-    readonly #root: number;
-    readonly #largestIndex: number;
-    readonly #u: Float64Array;
-    readonly #v: Float64Array;
-    readonly #degenerateSizeIndexes = new Map<number, DegenerateSizeThresholdIndex>();
     readonly #buildStats: {
         fallbackNodeCount: number;
         fallbackRowsPartitioned: number;
@@ -138,7 +130,14 @@ export class CartesianSpatialDensityIndex {
         maxChildFanout: 0,
         maxFallbackDepth: 0
     };
-
+    readonly #degenerateSizeIndexes = new Map<number, DegenerateSizeThresholdIndex>();
+    readonly #largestIndex: number;
+    readonly #nodes: MutableHierarchyNode[] = [];
+    readonly #orderedPointIndices: Int32Array;
+    readonly #pointCount: number;
+    readonly #root: number;
+    readonly #u: Float64Array;
+    readonly #v: Float64Array;
     public constructor(uCoords: Float64Array, vCoords: Float64Array, sizes?: Float64Array) {
         this.#u = uCoords;
         this.#v = vCoords;
@@ -237,72 +236,150 @@ export class CartesianSpatialDensityIndex {
         return { ...this.#buildStats };
     }
 
-    public getNode(index: number): SpatialHierarchyNode | undefined {
-        return this.#nodes[index];
+    #buildBalancedFallbackChildren(
+        node: MutableHierarchyNode,
+        indices: number[],
+        sizes: Float64Array | undefined,
+        depth: number,
+        leafPointsMap: Map<number, number[]>
+    ): void {
+        this.#buildStats.fallbackNodeCount++;
+        this.#buildStats.fallbackRowsPartitioned += indices.length;
+        this.#buildStats.fallbackSortInputTotal += indices.length;
+        this.#buildStats.maxFallbackDepth = Math.max(this.#buildStats.maxFallbackDepth, depth);
+        const tightBounds = computeTightBounds(indices, this.#u, this.#v);
+        const spanU = tightBounds[2];
+        const spanV = tightBounds[3];
+        const sorted = [...indices].sort((a, b) => {
+            const primary = spanU >= spanV ? this.#u[a] - this.#u[b] : this.#v[a] - this.#v[b];
+            if (primary !== 0) return primary;
+            const secondary = spanU >= spanV ? this.#v[a] - this.#v[b] : this.#u[a] - this.#u[b];
+            return secondary !== 0 ? secondary : a - b;
+        });
+        const midpoint = Math.max(1, Math.min(sorted.length - 1, Math.floor(sorted.length / 2)));
+        const left = sorted.slice(0, midpoint);
+        const right = sorted.slice(midpoint);
+        this.#setChildren(node, [
+            this.#buildNode(left, sizes, computeTightBounds(left, this.#u, this.#v), depth + 1, leafPointsMap, true),
+            this.#buildNode(right, sizes, computeTightBounds(right, this.#u, this.#v), depth + 1, leafPointsMap, true)
+        ]);
     }
 
-    /**
-     * Exact count of points in the visible normalized window (§219).
-     * Fully contained internal nodes contribute their sub-tree count in O(1)
-     * without leaf traversal.
-     */
-    public countPointsInWindow(
-        window: readonly [number, number, number, number],
-        onNodeVisited?: () => void,
-        onPointMembershipTested?: () => void
+    #buildNode(
+        indices: number[],
+        sizes: Float64Array | undefined,
+        bounds: readonly [number, number, number, number],
+        depth: number,
+        leafPointsMap: Map<number, number[]>,
+        fallbackMode = false
     ): number {
-        if (this.#root < 0) {
-            return 0;
-        }
-        let total = 0;
-        const stack: number[] = [this.#root];
+        const nodeIndex = this.#nodes.length;
+        const [bx, by, bw, bh] = bounds;
+        const centroidU = bx + bw / 2;
+        const centroidV = by + bh / 2;
 
-        while (stack.length > 0) {
-            const nodeIndex = stack.pop()!;
-            const node = this.#nodes[nodeIndex];
-            onNodeVisited?.();
+        let representativeIndex = indices[0];
+        let bestCentroidDistanceSq = Number.POSITIVE_INFINITY;
+        let largestIndex = indices[0];
+        let largestSize = Number.NEGATIVE_INFINITY;
+        let topmostIndex = indices[0];
 
-            if (!intersects(node.bounds, window)) {
-                continue;
+        for (const idx of indices) {
+            const du = this.#u[idx] - centroidU;
+            const dv = this.#v[idx] - centroidV;
+            const d = du * du + dv * dv;
+            if (d < bestCentroidDistanceSq || (d === bestCentroidDistanceSq && idx < representativeIndex)) {
+                bestCentroidDistanceSq = d;
+                representativeIndex = idx;
             }
-
-            if (contains(window, node.bounds)) {
-                total += node.count;
-                continue;
+            const size = sizes ? sizes[idx] : 0;
+            if (size > largestSize || (size === largestSize && idx < largestIndex)) {
+                largestSize = size;
+                largestIndex = idx;
             }
-
-            if (node.degenerate) {
-                onPointMembershipTested?.();
-                if (containsPoint(window, this.#u[node.representativeIndex], this.#v[node.representativeIndex])) {
-                    total += node.count;
-                }
-                continue;
-            }
-
-            if (node.children && node.children.length > 0) {
-                for (let i = node.children.length - 1; i >= 0; i--) {
-                    stack.push(node.children[i]);
-                }
-            } else if (node.sliceStart >= 0) {
-                for (let i = node.sliceStart; i < node.sliceStart + node.sliceCount; i++) {
-                    const idx = this.#orderedPointIndices[i];
-                    const u = this.#u[idx];
-                    const v = this.#v[idx];
-                    onPointMembershipTested?.();
-                    if (containsPoint(window, u, v)) {
-                        total++;
-                    }
-                }
+            if (idx > topmostIndex) {
+                topmostIndex = idx;
             }
         }
-        return total;
+
+        const node: MutableHierarchyNode = {
+            bounds,
+            count: indices.length,
+            largestIndex,
+            maxSize: Math.max(0, largestSize),
+            representativeIndex,
+            sliceCount: 0,
+            sliceStart: -1,
+            topmostIndex
+        };
+        this.#nodes.push(node);
+
+        const allIdentical = coordinatesEffectivelyIdentical(indices, this.#u, this.#v);
+        if (allIdentical || indices.length <= maxPointsPerLeaf) {
+            if (allIdentical) {
+                node.degenerate = true;
+            }
+            leafPointsMap.set(nodeIndex, fallbackMode ? [...indices].sort((a, b) => a - b) : indices);
+            return nodeIndex;
+        }
+
+        if (depth >= maxDepth) {
+            this.#buildBalancedFallbackChildren(node, indices, sizes, depth, leafPointsMap);
+            return nodeIndex;
+        }
+
+        const midU = bx + bw / 2;
+        const midV = by + bh / 2;
+        const quadrants: number[][] = [[], [], [], []];
+        for (const idx of indices) {
+            const right = this.#u[idx] >= midU;
+            const bottom = this.#v[idx] >= midV;
+            quadrants[(right ? 1 : 0) + (bottom ? 2 : 0)].push(idx);
+        }
+        const occupied = quadrants.filter(q => q.length > 0).length;
+        if (occupied <= 1) {
+            const allIdentical = coordinatesEffectivelyIdentical(indices, this.#u, this.#v);
+            if (allIdentical) {
+                node.degenerate = true;
+                leafPointsMap.set(nodeIndex, fallbackMode ? [...indices].sort((a, b) => a - b) : indices);
+                return nodeIndex;
+            }
+
+            const activeQuadrant = quadrants.findIndex(q => q.length > 0);
+            const childBounds = computeTightBounds(quadrants[activeQuadrant], this.#u, this.#v);
+            const childIdx = this.#buildNode(
+                quadrants[activeQuadrant],
+                sizes,
+                childBounds,
+                depth + 1,
+                leafPointsMap,
+                fallbackMode
+            );
+            this.#setChildren(node, [childIdx]);
+            return nodeIndex;
+        }
+
+        const directChildren: number[] = [];
+        for (let q = 0; q < 4; q++) {
+            if (quadrants[q].length === 0) {
+                continue;
+            }
+            const childBounds: readonly [number, number, number, number] = [
+                q % 2 === 0 ? bx : midU,
+                q < 2 ? by : midV,
+                bw / 2,
+                bh / 2
+            ];
+            const childIdx = this.#buildNode(quadrants[q], sizes, childBounds, depth + 1, leafPointsMap, fallbackMode);
+            directChildren.push(childIdx);
+        }
+        this.#setChildren(node, directChildren);
+        return nodeIndex;
     }
 
-    /**
-     * Compatibility alias for countPointsInWindow.
-     */
-    public countInWindow(window: readonly [number, number, number, number]): number {
-        return this.countPointsInWindow(window);
+    #setChildren(node: MutableHierarchyNode, children: readonly number[]): void {
+        node.children = children;
+        this.#buildStats.maxChildFanout = Math.max(this.#buildStats.maxChildFanout, children.length);
     }
 
     /**
@@ -440,6 +517,70 @@ export class CartesianSpatialDensityIndex {
         }
     }
 
+    /**
+     * Compatibility alias for countPointsInWindow.
+     */
+    public countInWindow(window: readonly [number, number, number, number]): number {
+        return this.countPointsInWindow(window);
+    }
+
+    /**
+     * Exact count of points in the visible normalized window (§219).
+     * Fully contained internal nodes contribute their sub-tree count in O(1)
+     * without leaf traversal.
+     */
+    public countPointsInWindow(
+        window: readonly [number, number, number, number],
+        onNodeVisited?: () => void,
+        onPointMembershipTested?: () => void
+    ): number {
+        if (this.#root < 0) {
+            return 0;
+        }
+        let total = 0;
+        const stack: number[] = [this.#root];
+
+        while (stack.length > 0) {
+            const nodeIndex = stack.pop()!;
+            const node = this.#nodes[nodeIndex];
+            onNodeVisited?.();
+
+            if (!intersects(node.bounds, window)) {
+                continue;
+            }
+
+            if (contains(window, node.bounds)) {
+                total += node.count;
+                continue;
+            }
+
+            if (node.degenerate) {
+                onPointMembershipTested?.();
+                if (containsPoint(window, this.#u[node.representativeIndex], this.#v[node.representativeIndex])) {
+                    total += node.count;
+                }
+                continue;
+            }
+
+            if (node.children && node.children.length > 0) {
+                for (let i = node.children.length - 1; i >= 0; i--) {
+                    stack.push(node.children[i]);
+                }
+            } else if (node.sliceStart >= 0) {
+                for (let i = node.sliceStart; i < node.sliceStart + node.sliceCount; i++) {
+                    const idx = this.#orderedPointIndices[i];
+                    const u = this.#u[idx];
+                    const v = this.#v[idx];
+                    onPointMembershipTested?.();
+                    if (containsPoint(window, u, v)) {
+                        total++;
+                    }
+                }
+            }
+        }
+        return total;
+    }
+
     /** Returns the topmost source mark in a degenerate leaf meeting a size threshold. */
     public findTopmostIndexInDegenerateLeafAtLeast(nodeIndex: number, threshold: number): number | null {
         return this.#degenerateSizeIndexes.get(nodeIndex)?.findTopmostAtLeast(threshold) ?? null;
@@ -455,6 +596,89 @@ export class CartesianSpatialDensityIndex {
         return (
             this.#degenerateSizeIndexes.get(nodeIndex)?.findTopmostProjectedAtLeast(threshold, project, epsilon) ?? null
         );
+    }
+
+    public getNode(index: number): SpatialHierarchyNode | undefined {
+        return this.#nodes[index];
+    }
+
+    /**
+     * Bounded pointer-neighborhood discovery. Degenerate identical-position
+     * leaves expose only their painter-topmost and largest representatives;
+     * the provider performs exact current-pixel containment afterward.
+     */
+    public queryPointerNeighborhood(
+        window: readonly [number, number, number, number],
+        visit: (index: number) => void,
+        onNodeVisited?: () => void,
+        onDegenerateLeaf?: (nodeIndex: number, node: SpatialHierarchyNode) => void
+    ): void {
+        if (this.#root < 0) {
+            return;
+        }
+        const stack: number[] = [this.#root];
+        while (stack.length > 0) {
+            const nodeIndex = stack.pop()!;
+            const node = this.#nodes[nodeIndex];
+            onNodeVisited?.();
+            if (!intersects(node.bounds, window)) {
+                continue;
+            }
+
+            if (node.children && node.children.length > 0) {
+                for (let i = node.children.length - 1; i >= 0; i--) {
+                    stack.push(node.children[i]);
+                }
+                continue;
+            }
+
+            if (node.degenerate) {
+                if (onDegenerateLeaf) {
+                    onDegenerateLeaf(nodeIndex, node);
+                    continue;
+                }
+                visit(node.topmostIndex);
+                if (node.largestIndex !== node.topmostIndex && node.largestIndex >= 0) {
+                    visit(node.largestIndex);
+                }
+                continue;
+            }
+
+            if (node.sliceStart >= 0) {
+                for (let i = node.sliceStart; i < node.sliceStart + node.sliceCount; i++) {
+                    visit(this.#orderedPointIndices[i]);
+                }
+            }
+        }
+    }
+
+    /** Rectangular range query returning raw candidate indices (candidate discovery, not final acceptance). */
+    public queryRangeNormalized(
+        window: readonly [number, number, number, number],
+        visit: (index: number) => void,
+        onNodeVisited?: () => void
+    ): void {
+        if (this.#root < 0) {
+            return;
+        }
+        const stack: number[] = [this.#root];
+        while (stack.length > 0) {
+            const nodeIndex = stack.pop()!;
+            const node = this.#nodes[nodeIndex];
+            onNodeVisited?.();
+            if (!intersects(node.bounds, window)) {
+                continue;
+            }
+            if (node.children && node.children.length > 0) {
+                for (const c of node.children) {
+                    stack.push(c);
+                }
+            } else if (node.sliceStart >= 0) {
+                for (let i = node.sliceStart; i < node.sliceStart + node.sliceCount; i++) {
+                    visit(this.#orderedPointIndices[i]);
+                }
+            }
+        }
     }
 
     /**
@@ -630,231 +854,6 @@ export class CartesianSpatialDensityIndex {
             }
         }
         return null;
-    }
-
-    /** Rectangular range query returning raw candidate indices (candidate discovery, not final acceptance). */
-    public queryRangeNormalized(
-        window: readonly [number, number, number, number],
-        visit: (index: number) => void,
-        onNodeVisited?: () => void
-    ): void {
-        if (this.#root < 0) {
-            return;
-        }
-        const stack: number[] = [this.#root];
-        while (stack.length > 0) {
-            const nodeIndex = stack.pop()!;
-            const node = this.#nodes[nodeIndex];
-            onNodeVisited?.();
-            if (!intersects(node.bounds, window)) {
-                continue;
-            }
-            if (node.children && node.children.length > 0) {
-                for (const c of node.children) {
-                    stack.push(c);
-                }
-            } else if (node.sliceStart >= 0) {
-                for (let i = node.sliceStart; i < node.sliceStart + node.sliceCount; i++) {
-                    visit(this.#orderedPointIndices[i]);
-                }
-            }
-        }
-    }
-
-    /**
-     * Bounded pointer-neighborhood discovery. Degenerate identical-position
-     * leaves expose only their painter-topmost and largest representatives;
-     * the provider performs exact current-pixel containment afterward.
-     */
-    public queryPointerNeighborhood(
-        window: readonly [number, number, number, number],
-        visit: (index: number) => void,
-        onNodeVisited?: () => void,
-        onDegenerateLeaf?: (nodeIndex: number, node: SpatialHierarchyNode) => void
-    ): void {
-        if (this.#root < 0) {
-            return;
-        }
-        const stack: number[] = [this.#root];
-        while (stack.length > 0) {
-            const nodeIndex = stack.pop()!;
-            const node = this.#nodes[nodeIndex];
-            onNodeVisited?.();
-            if (!intersects(node.bounds, window)) {
-                continue;
-            }
-
-            if (node.children && node.children.length > 0) {
-                for (let i = node.children.length - 1; i >= 0; i--) {
-                    stack.push(node.children[i]);
-                }
-                continue;
-            }
-
-            if (node.degenerate) {
-                if (onDegenerateLeaf) {
-                    onDegenerateLeaf(nodeIndex, node);
-                    continue;
-                }
-                visit(node.topmostIndex);
-                if (node.largestIndex !== node.topmostIndex && node.largestIndex >= 0) {
-                    visit(node.largestIndex);
-                }
-                continue;
-            }
-
-            if (node.sliceStart >= 0) {
-                for (let i = node.sliceStart; i < node.sliceStart + node.sliceCount; i++) {
-                    visit(this.#orderedPointIndices[i]);
-                }
-            }
-        }
-    }
-
-    #buildNode(
-        indices: number[],
-        sizes: Float64Array | undefined,
-        bounds: readonly [number, number, number, number],
-        depth: number,
-        leafPointsMap: Map<number, number[]>,
-        fallbackMode = false
-    ): number {
-        const nodeIndex = this.#nodes.length;
-        const [bx, by, bw, bh] = bounds;
-        const centroidU = bx + bw / 2;
-        const centroidV = by + bh / 2;
-
-        let representativeIndex = indices[0];
-        let bestCentroidDistanceSq = Number.POSITIVE_INFINITY;
-        let largestIndex = indices[0];
-        let largestSize = Number.NEGATIVE_INFINITY;
-        let topmostIndex = indices[0];
-
-        for (const idx of indices) {
-            const du = this.#u[idx] - centroidU;
-            const dv = this.#v[idx] - centroidV;
-            const d = du * du + dv * dv;
-            if (d < bestCentroidDistanceSq || (d === bestCentroidDistanceSq && idx < representativeIndex)) {
-                bestCentroidDistanceSq = d;
-                representativeIndex = idx;
-            }
-            const size = sizes ? sizes[idx] : 0;
-            if (size > largestSize || (size === largestSize && idx < largestIndex)) {
-                largestSize = size;
-                largestIndex = idx;
-            }
-            if (idx > topmostIndex) {
-                topmostIndex = idx;
-            }
-        }
-
-        const node: MutableHierarchyNode = {
-            bounds,
-            count: indices.length,
-            largestIndex,
-            maxSize: Math.max(0, largestSize),
-            representativeIndex,
-            sliceCount: 0,
-            sliceStart: -1,
-            topmostIndex
-        };
-        this.#nodes.push(node);
-
-        const allIdentical = coordinatesEffectivelyIdentical(indices, this.#u, this.#v);
-        if (allIdentical || indices.length <= maxPointsPerLeaf) {
-            if (allIdentical) {
-                node.degenerate = true;
-            }
-            leafPointsMap.set(nodeIndex, fallbackMode ? [...indices].sort((a, b) => a - b) : indices);
-            return nodeIndex;
-        }
-
-        if (depth >= maxDepth) {
-            this.#buildBalancedFallbackChildren(node, indices, sizes, depth, leafPointsMap);
-            return nodeIndex;
-        }
-
-        const midU = bx + bw / 2;
-        const midV = by + bh / 2;
-        const quadrants: number[][] = [[], [], [], []];
-        for (const idx of indices) {
-            const right = this.#u[idx] >= midU;
-            const bottom = this.#v[idx] >= midV;
-            quadrants[(right ? 1 : 0) + (bottom ? 2 : 0)].push(idx);
-        }
-        const occupied = quadrants.filter(q => q.length > 0).length;
-        if (occupied <= 1) {
-            const allIdentical = coordinatesEffectivelyIdentical(indices, this.#u, this.#v);
-            if (allIdentical) {
-                node.degenerate = true;
-                leafPointsMap.set(nodeIndex, fallbackMode ? [...indices].sort((a, b) => a - b) : indices);
-                return nodeIndex;
-            }
-
-            const activeQuadrant = quadrants.findIndex(q => q.length > 0);
-            const childBounds = computeTightBounds(quadrants[activeQuadrant], this.#u, this.#v);
-            const childIdx = this.#buildNode(
-                quadrants[activeQuadrant],
-                sizes,
-                childBounds,
-                depth + 1,
-                leafPointsMap,
-                fallbackMode
-            );
-            this.#setChildren(node, [childIdx]);
-            return nodeIndex;
-        }
-
-        const directChildren: number[] = [];
-        for (let q = 0; q < 4; q++) {
-            if (quadrants[q].length === 0) {
-                continue;
-            }
-            const childBounds: readonly [number, number, number, number] = [
-                q % 2 === 0 ? bx : midU,
-                q < 2 ? by : midV,
-                bw / 2,
-                bh / 2
-            ];
-            const childIdx = this.#buildNode(quadrants[q], sizes, childBounds, depth + 1, leafPointsMap, fallbackMode);
-            directChildren.push(childIdx);
-        }
-        this.#setChildren(node, directChildren);
-        return nodeIndex;
-    }
-
-    #setChildren(node: MutableHierarchyNode, children: readonly number[]): void {
-        node.children = children;
-        this.#buildStats.maxChildFanout = Math.max(this.#buildStats.maxChildFanout, children.length);
-    }
-
-    #buildBalancedFallbackChildren(
-        node: MutableHierarchyNode,
-        indices: number[],
-        sizes: Float64Array | undefined,
-        depth: number,
-        leafPointsMap: Map<number, number[]>
-    ): void {
-        this.#buildStats.fallbackNodeCount++;
-        this.#buildStats.fallbackRowsPartitioned += indices.length;
-        this.#buildStats.fallbackSortInputTotal += indices.length;
-        this.#buildStats.maxFallbackDepth = Math.max(this.#buildStats.maxFallbackDepth, depth);
-        const tightBounds = computeTightBounds(indices, this.#u, this.#v);
-        const spanU = tightBounds[2];
-        const spanV = tightBounds[3];
-        const sorted = [...indices].sort((a, b) => {
-            const primary = spanU >= spanV ? this.#u[a] - this.#u[b] : this.#v[a] - this.#v[b];
-            if (primary !== 0) return primary;
-            const secondary = spanU >= spanV ? this.#v[a] - this.#v[b] : this.#u[a] - this.#u[b];
-            return secondary !== 0 ? secondary : a - b;
-        });
-        const midpoint = Math.max(1, Math.min(sorted.length - 1, Math.floor(sorted.length / 2)));
-        const left = sorted.slice(0, midpoint);
-        const right = sorted.slice(midpoint);
-        this.#setChildren(node, [
-            this.#buildNode(left, sizes, computeTightBounds(left, this.#u, this.#v), depth + 1, leafPointsMap, true),
-            this.#buildNode(right, sizes, computeTightBounds(right, this.#u, this.#v), depth + 1, leafPointsMap, true)
-        ]);
     }
 }
 

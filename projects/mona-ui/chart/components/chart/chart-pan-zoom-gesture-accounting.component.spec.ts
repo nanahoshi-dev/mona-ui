@@ -47,17 +47,16 @@ interface DataItem {
 })
 class SeventhRemediationHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
-    public readonly yField = "y";
     public readonly data = signal<DataItem[]>([
         { x: 0, y: 10 },
         { x: 50, y: 25 },
         { x: 100, y: 50 }
     ]);
-    public readonly xField = signal("x");
+    public readonly emittedEvents: ChartViewportChangeEvent[] = [];
     public readonly navigation = signal<ChartNavigationInput>(true);
     public readonly viewport = signal<ChartViewportState | undefined>(undefined);
-    public readonly emittedEvents: ChartViewportChangeEvent[] = [];
-
+    public readonly xField = signal("x");
+    public readonly yField = "y";
     public onViewportChange(event: ChartViewportChangeEvent): void {
         this.emittedEvents.push(event);
     }

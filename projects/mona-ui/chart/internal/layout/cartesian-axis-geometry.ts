@@ -71,6 +71,78 @@ export class CartesianAxisGeometry {
         }
     }
 
+    public static computeLabelLeft(
+        axis: ResolvedCartesianAxisDescriptor,
+        coordinate: number,
+        plotRect: ChartRect,
+        sideOffset: number
+    ): number {
+        if (axis.dimension === "x") {
+            return coordinate;
+        }
+        const tickMarksOffset = axis.tickMarks ? (axis.tickSize ?? 6) : 0;
+        const labelPadding = axis.labelPadding ?? 4;
+        return axis.position === "right"
+            ? plotRect.x + plotRect.width + sideOffset + tickMarksOffset + labelPadding
+            : plotRect.x - sideOffset - tickMarksOffset - labelPadding;
+    }
+
+    public static computeLabelTop(
+        axis: ResolvedCartesianAxisDescriptor,
+        coordinate: number,
+        plotRect: ChartRect,
+        sideOffset: number
+    ): number {
+        if (axis.dimension === "y") {
+            return coordinate;
+        }
+        const tickMarksOffset = axis.tickMarks ? (axis.tickSize ?? 6) : 0;
+        const labelPadding = axis.labelPadding ?? 4;
+        return axis.position === "top"
+            ? plotRect.y - sideOffset - tickMarksOffset - labelPadding
+            : plotRect.y + plotRect.height + sideOffset + tickMarksOffset + labelPadding;
+    }
+
+    public static computeLabelTransform(
+        position: "bottom" | "left" | "right" | "top",
+        rotation: ChartAxisLabelRotation
+    ): string {
+        const rot = typeof rotation === "number" ? rotation : 0;
+        if (position === "bottom") {
+            if (rot === 0) return "translateX(-50%)";
+            return rot > 0 ? `rotate(${rot}deg)` : `translate(-100%, 0) rotate(${rot}deg)`;
+        }
+        if (position === "top") {
+            if (rot === 0) return "translate(-50%, -100%)";
+            return `translate(0, -100%) rotate(${rot}deg)`;
+        }
+        if (position === "right") {
+            if (rot === 0) return "translate(0, -50%)";
+            return `translate(0, -50%) rotate(${rot}deg)`;
+        }
+        // Left
+        if (rot === 0) return "translate(-100%, -50%)";
+        return `translate(-100%, -50%) rotate(${rot}deg)`;
+    }
+
+    public static computeLabelTransformOrigin(
+        position: "bottom" | "left" | "right" | "top",
+        rotation: ChartAxisLabelRotation
+    ): string {
+        const rot = typeof rotation === "number" ? rotation : 0;
+        if (position === "bottom") {
+            return rot > 0 ? "top left" : rot < 0 ? "top right" : "center center";
+        }
+        if (position === "top") {
+            return rot > 0 ? "bottom left" : rot < 0 ? "bottom right" : "center center";
+        }
+        if (position === "right") {
+            return rot === 0 ? "center center" : "left center";
+        }
+        // Left
+        return rot === 0 ? "center center" : "right center";
+    }
+
     public static computeTickMarks(
         axis: ResolvedCartesianAxisDescriptor,
         ticks: readonly { value: unknown; coordinate: number }[],
@@ -123,78 +195,6 @@ export class CartesianAxisGeometry {
                     };
             }
         });
-    }
-
-    public static computeLabelTransform(
-        position: "bottom" | "left" | "right" | "top",
-        rotation: ChartAxisLabelRotation
-    ): string {
-        const rot = typeof rotation === "number" ? rotation : 0;
-        if (position === "bottom") {
-            if (rot === 0) return "translateX(-50%)";
-            return rot > 0 ? `rotate(${rot}deg)` : `translate(-100%, 0) rotate(${rot}deg)`;
-        }
-        if (position === "top") {
-            if (rot === 0) return "translate(-50%, -100%)";
-            return `translate(0, -100%) rotate(${rot}deg)`;
-        }
-        if (position === "right") {
-            if (rot === 0) return "translate(0, -50%)";
-            return `translate(0, -50%) rotate(${rot}deg)`;
-        }
-        // Left
-        if (rot === 0) return "translate(-100%, -50%)";
-        return `translate(-100%, -50%) rotate(${rot}deg)`;
-    }
-
-    public static computeLabelTransformOrigin(
-        position: "bottom" | "left" | "right" | "top",
-        rotation: ChartAxisLabelRotation
-    ): string {
-        const rot = typeof rotation === "number" ? rotation : 0;
-        if (position === "bottom") {
-            return rot > 0 ? "top left" : rot < 0 ? "top right" : "center center";
-        }
-        if (position === "top") {
-            return rot > 0 ? "bottom left" : rot < 0 ? "bottom right" : "center center";
-        }
-        if (position === "right") {
-            return rot === 0 ? "center center" : "left center";
-        }
-        // Left
-        return rot === 0 ? "center center" : "right center";
-    }
-
-    public static computeLabelLeft(
-        axis: ResolvedCartesianAxisDescriptor,
-        coordinate: number,
-        plotRect: ChartRect,
-        sideOffset: number
-    ): number {
-        if (axis.dimension === "x") {
-            return coordinate;
-        }
-        const tickMarksOffset = axis.tickMarks ? (axis.tickSize ?? 6) : 0;
-        const labelPadding = axis.labelPadding ?? 4;
-        return axis.position === "right"
-            ? plotRect.x + plotRect.width + sideOffset + tickMarksOffset + labelPadding
-            : plotRect.x - sideOffset - tickMarksOffset - labelPadding;
-    }
-
-    public static computeLabelTop(
-        axis: ResolvedCartesianAxisDescriptor,
-        coordinate: number,
-        plotRect: ChartRect,
-        sideOffset: number
-    ): number {
-        if (axis.dimension === "y") {
-            return coordinate;
-        }
-        const tickMarksOffset = axis.tickMarks ? (axis.tickSize ?? 6) : 0;
-        const labelPadding = axis.labelPadding ?? 4;
-        return axis.position === "top"
-            ? plotRect.y - sideOffset - tickMarksOffset - labelPadding
-            : plotRect.y + plotRect.height + sideOffset + tickMarksOffset + labelPadding;
     }
 
     public static computeTitleLeft(

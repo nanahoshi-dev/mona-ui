@@ -52,25 +52,25 @@ import type {
     `
 })
 class BrushAuthorityHostComponent {
+    public readonly brushActivation = signal<ChartBrushActivation>("drag");
+    public readonly brushBorderColor = signal<string | undefined>(undefined);
+    public readonly brushBorderWidth = signal<number | undefined>(undefined);
+    public readonly brushEnabled = signal(true);
+    public readonly brushFillColor = signal<string | undefined>(undefined);
+    public readonly brushFillOpacity = signal<number | undefined>(undefined);
+    public readonly brushHitPolicy = signal<ChartBrushHitPolicy>("intersect");
+    public readonly brushLineStyle = signal<ChartBrushLineStyle | undefined>(undefined);
+    public readonly brushMinDragDistance = signal<number>(4);
+    public readonly brushMode = signal<ChartBrushMode>("xy");
+    public readonly brushSelectionBehavior = signal<ChartBrushSelectionBehavior>("none");
+    public readonly brushXAxisId = signal<string | undefined>(undefined);
+    public readonly brushYAxisId = signal<string | undefined>(undefined);
     public readonly chart = viewChild.required(ChartComponent);
     public readonly data = signal([
         { name: "A", value: 10 },
         { name: "B", value: 20 },
         { name: "C", value: 30 }
     ]);
-    public readonly brushEnabled = signal(true);
-    public readonly brushActivation = signal<ChartBrushActivation>("drag");
-    public readonly brushMode = signal<ChartBrushMode>("xy");
-    public readonly brushHitPolicy = signal<ChartBrushHitPolicy>("intersect");
-    public readonly brushSelectionBehavior = signal<ChartBrushSelectionBehavior>("none");
-    public readonly brushMinDragDistance = signal<number>(4);
-    public readonly brushXAxisId = signal<string | undefined>(undefined);
-    public readonly brushYAxisId = signal<string | undefined>(undefined);
-    public readonly brushFillColor = signal<string | undefined>(undefined);
-    public readonly brushFillOpacity = signal<number | undefined>(undefined);
-    public readonly brushBorderColor = signal<string | undefined>(undefined);
-    public readonly brushBorderWidth = signal<number | undefined>(undefined);
-    public readonly brushLineStyle = signal<ChartBrushLineStyle | undefined>(undefined);
     public brushEvents: ChartBrushChangeEvent[] = [];
 
     public onBrushChange(evt: ChartBrushChangeEvent): void {

@@ -100,8 +100,8 @@ export interface ChartAxisRegistrationBase {
     labelMaxWidth?: Signal<number | undefined>;
     labelPadding?: Signal<number | undefined>;
     labelRotation?: Signal<ChartAxisLabelRotation | undefined>;
-    labels?: Signal<boolean | undefined>;
     labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
+    labels?: Signal<boolean | undefined>;
     logBase?: Signal<number | undefined>;
     nice: Signal<boolean>;
     registrationId: string;
@@ -138,8 +138,8 @@ export interface ChartAngularAxisRegistration {
     formatter: Signal<ChartAxisFormatter | undefined>;
     gridLines: Signal<boolean>;
     labelOffset: Signal<number>;
-    labels: Signal<boolean>;
     labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
+    labels: Signal<boolean>;
     rotation: Signal<number>;
     tickCount: Signal<number | undefined>;
     userClass?: Signal<string>;
@@ -153,8 +153,8 @@ export interface ChartRadialAxisRegistration {
     gridShape: Signal<ChartRadialGridShape>;
     labelAngle: Signal<number>;
     labelOffset: Signal<number>;
-    labels: Signal<boolean>;
     labelTemplate: Signal<ChartAxisLabelTemplateDirective | undefined>;
+    labels: Signal<boolean>;
     max: Signal<number | undefined>;
     min: Signal<number | undefined>;
     nice: Signal<boolean>;
@@ -193,8 +193,8 @@ export interface ChartScalarSeriesRegistrationBase extends ChartSeriesRegistrati
 
 export interface ChartCartesianSeriesRegistrationBase extends ChartSeriesRegistrationBase {
     color: Signal<string>;
-    dataLabels?: Signal<ChartDataLabelsInput>;
     dataLabelTemplate?: Signal<ChartDataLabelTemplateDirective | undefined>;
+    dataLabels?: Signal<ChartDataLabelsInput>;
     toggleVisibility?: () => boolean;
     xAxisId: Signal<string | undefined>;
     xField: Signal<ChartField | undefined>;
@@ -380,8 +380,8 @@ export interface ChartFinancialSeriesRegistrationBase {
     readonly closeField: Signal<ChartField>;
     readonly color?: Signal<string | undefined>;
     readonly data: Signal<readonly unknown[] | undefined>;
-    readonly dataLabels?: Signal<ChartDataLabelsInput>;
     readonly dataLabelTemplate?: Signal<ChartDataLabelTemplateDirective | undefined>;
+    readonly dataLabels?: Signal<ChartDataLabelsInput>;
     readonly element?: ElementRef<HTMLElement>;
     readonly fallingColor: Signal<string>;
     readonly highField: Signal<ChartField>;
@@ -705,6 +705,7 @@ export interface ChartSelectionRegistration {
     readonly clickSelection: Signal<boolean>;
     readonly color: Signal<string | undefined>;
     readonly defaultSelectedMarkIds: Signal<readonly string[]>;
+    emitSelectionChange(event: ChartSelectionChangeEvent): void;
     readonly enabled: Signal<boolean>;
     readonly fillOpacity: Signal<number | undefined>;
     readonly keyboardSelection: Signal<boolean>;
@@ -712,13 +713,13 @@ export interface ChartSelectionRegistration {
     readonly retainOnDataChange: Signal<boolean>;
     readonly selectedMarkIds: Signal<readonly string[] | undefined>;
     readonly strokeWidth: Signal<number | undefined>;
-    emitSelectionChange(event: ChartSelectionChangeEvent): void;
 }
 
 export interface ChartBrushRegistration {
     readonly activation: Signal<ChartBrushActivation>;
     readonly borderColor: Signal<string | undefined>;
     readonly borderWidth: Signal<number | undefined>;
+    emitBrushChange(event: ChartBrushChangeEvent): void;
     readonly enabled: Signal<boolean>;
     readonly fillColor: Signal<string | undefined>;
     readonly fillOpacity: Signal<number | undefined>;
@@ -729,7 +730,6 @@ export interface ChartBrushRegistration {
     readonly selectionBehavior: Signal<ChartBrushSelectionBehavior>;
     readonly xAxisId: Signal<string | undefined>;
     readonly yAxisId: Signal<string | undefined>;
-    emitBrushChange(event: ChartBrushChangeEvent): void;
 }
 
 export interface ChartRegistrationContext {

@@ -45,9 +45,9 @@ import { ChartComponent } from "./chart.component";
     `
 })
 class StackedHostComponent {
+    public readonly showStack = signal(true);
     public readonly stackChart = viewChild.required(ChartComponent);
     public readonly stackData = signal<readonly unknown[]>([]);
-    public readonly showStack = signal(true);
 }
 
 @Component({
@@ -107,28 +107,28 @@ class StackedHostComponent {
     `
 })
 class DenseHostComponent {
+    public readonly axisMax = signal<number | undefined>(undefined);
+    public readonly axisMin = signal<number | undefined>(undefined);
+    public readonly axisNice = signal(true);
     public readonly chart = viewChild.required(ChartComponent);
+    public readonly curve = signal<ChartCurve>("linear");
     public readonly data = signal<readonly unknown[]>([]);
     public readonly downsampling = signal<ChartDownsamplingInput>(true);
-    public readonly curve = signal<ChartCurve>("linear");
-    public readonly seriesKind = signal<"line" | "area" | "range" | "scatter" | "bubble">("line");
-    public readonly viewport = signal<ChartViewportState | undefined>(undefined);
     public readonly markerRadius = signal(60);
-    public readonly axisMin = signal<number | undefined>(undefined);
-    public readonly axisMax = signal<number | undefined>(undefined);
-    public readonly axisNice = signal(true);
     public readonly rangePointRadius = signal(60);
     public readonly rangeShowPoints = signal(false);
+    public readonly seriesKind = signal<"line" | "area" | "range" | "scatter" | "bubble">("line");
+    public readonly viewport = signal<ChartViewportState | undefined>(undefined);
 }
 
 class FakeResizeObserver {
     public constructor(public readonly callback: ResizeObserverCallback) {}
 
+    public disconnect(): void {}
+
     public observe(): void {}
 
     public unobserve(): void {}
-
-    public disconnect(): void {}
 }
 
 describe("indexed dense projection", () => {

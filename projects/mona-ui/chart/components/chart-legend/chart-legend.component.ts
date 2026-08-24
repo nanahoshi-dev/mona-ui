@@ -18,12 +18,17 @@ import { chartLegendBaseThemeVariants, chartLegendItemBaseThemeVariants } from "
     }
 })
 export class ChartLegendComponent implements OnInit {
-    readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
-    readonly #destroyRef = inject(DestroyRef);
-
     protected readonly containerClasses = computed(() =>
         twMerge(chartLegendBaseThemeVariants({ position: this.position() }), this.userClass())
     );
+    protected readonly gradientCss = computed(() => {
+        const scale = this.legendScale();
+        if (!scale || !scale.stops || scale.stops.length === 0) return "";
+        const isVertical = this.position() === "left" || this.position() === "right";
+        const dir = isVertical ? "to top" : "to right";
+        const stopStrs = scale.stops.map(s => `${s.color} ${Math.round(s.offset * 100)}%`).join(", ");
+        return `linear-gradient(${dir}, ${stopStrs})`;
+    });
     protected readonly hostClasses = computed(() => {
         const pos = this.position();
         if (pos === "top" || pos === "bottom") return "block w-full flex-shrink-0";
@@ -34,28 +39,13 @@ export class ChartLegendComponent implements OnInit {
         const pos = this.position();
         return pos === "top" || pos === "left" ? 0 : 1;
     });
-    protected readonly itemTemplate = contentChild(ChartLegendItemTemplateDirective);
-    protected readonly legendItems = computed(() => this.#chartContext?.legendItems() ?? []);
-    protected readonly legendScale = computed<ChartColorLegendScale | null>(
-        () => this.#chartContext?.legendScale?.() ?? null
-    );
-
     protected readonly isColorScaleMode = computed(() => {
         const m = this.mode();
         if (m === "color") return true;
         if (m === "series") return false;
         return Boolean(this.legendScale());
     });
-
-    protected readonly gradientCss = computed(() => {
-        const scale = this.legendScale();
-        if (!scale || !scale.stops || scale.stops.length === 0) return "";
-        const isVertical = this.position() === "left" || this.position() === "right";
-        const dir = isVertical ? "to top" : "to right";
-        const stopStrs = scale.stops.map(s => `${s.color} ${Math.round(s.offset * 100)}%`).join(", ");
-        return `linear-gradient(${dir}, ${stopStrs})`;
-    });
-
+    protected readonly itemTemplate = contentChild(ChartLegendItemTemplateDirective);
     protected readonly legendAriaLabel = computed(() => {
         const scale = this.legendScale();
         if (!scale) return "Chart legend";
@@ -65,7 +55,12 @@ export class ChartLegendComponent implements OnInit {
         }
         return `${title}, ${scale.formattedMin} to ${scale.formattedMax}`;
     });
-
+    protected readonly legendItems = computed(() => this.#chartContext?.legendItems() ?? []);
+    protected readonly legendScale = computed<ChartColorLegendScale | null>(
+        () => this.#chartContext?.legendScale?.() ?? null
+    );
+    readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
+    readonly #destroyRef = inject(DestroyRef);
     /**
      * @description Whether clicking or pressing Enter/Space on legend items toggles series visibility.
      * @default true

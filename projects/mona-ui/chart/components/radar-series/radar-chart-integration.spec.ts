@@ -14,9 +14,9 @@ import { ChartComponent } from "../chart/chart.component";
 import { RadarSeriesComponent } from "./radar-series.component";
 
 interface CharacterStat {
+    mage: number;
     metric: string;
     warrior: number;
-    mage: number;
 }
 
 @Component({

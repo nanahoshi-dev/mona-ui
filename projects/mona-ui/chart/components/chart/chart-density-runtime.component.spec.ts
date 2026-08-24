@@ -46,11 +46,11 @@ class DensityRuntimeHostComponent {
 class FakeResizeObserver {
     public constructor(public readonly callback: ResizeObserverCallback) {}
 
+    public disconnect(): void {}
+
     public observe(): void {}
 
     public unobserve(): void {}
-
-    public disconnect(): void {}
 }
 
 describe("density runtime structural attachment", () => {

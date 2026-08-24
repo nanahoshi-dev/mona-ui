@@ -15,15 +15,15 @@ export class CartesianScalePolicy {
         return true;
     }
 
+    public static normalizeExponent(e?: number): number {
+        return Number.isFinite(e) && (e ?? 0) > 0 ? (e as number) : 1;
+    }
+
     public static normalizeLogBase(base?: number): number {
         return Number.isFinite(base) && (base ?? 0) > 0 && base !== 1 ? (base as number) : 10;
     }
 
     public static normalizeSymlogConstant(c?: number): number {
         return Number.isFinite(c) && (c ?? 0) > 0 ? (c as number) : 1;
-    }
-
-    public static normalizeExponent(e?: number): number {
-        return Number.isFinite(e) && (e ?? 0) > 0 ? (e as number) : 1;
     }
 }

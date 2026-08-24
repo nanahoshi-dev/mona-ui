@@ -3,15 +3,15 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartRenderPresentationState } from "./chart-render-presentation-state";
 
 export interface ChartRenderFrame {
-    readonly scene: ChartScene;
     readonly presentation: ChartRenderPresentationState | null;
+    readonly scene: ChartScene;
     readonly styleResolver: ChartStyleResolver;
 }
 
 export interface ChartCrossfadeRenderFrame {
     readonly fromScene: ChartScene | null;
-    readonly toScene: ChartScene;
-    readonly progress: number;
     readonly presentation: ChartRenderPresentationState | null;
+    readonly progress: number;
     readonly styleResolver: ChartStyleResolver;
+    readonly toScene: ChartScene;
 }

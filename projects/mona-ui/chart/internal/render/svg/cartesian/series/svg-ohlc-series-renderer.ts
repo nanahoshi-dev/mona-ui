@@ -10,6 +10,14 @@ export class SvgOhlcSeriesRenderer {
         this.#keyedGroup = new SvgKeyedGroup<SceneOhlcMark, SVGPathElement>(container);
     }
 
+    public clear(): void {
+        this.#keyedGroup.clear();
+    }
+
+    public destroy(): void {
+        this.#keyedGroup.destroy();
+    }
+
     public render(scene: ChartOhlcSeriesScene): void {
         const marks = scene.marks ?? [];
         const { style } = scene;
@@ -55,13 +63,5 @@ export class SvgOhlcSeriesRenderer {
                 setSvgAttribute(element, "shape-rendering", "crispEdges");
             }
         });
-    }
-
-    public clear(): void {
-        this.#keyedGroup.clear();
-    }
-
-    public destroy(): void {
-        this.#keyedGroup.destroy();
     }
 }

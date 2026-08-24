@@ -36,6 +36,18 @@ export class CartesianScaleRegistry {
         return this.#yScales.get(this.#primaryYAxisId);
     }
 
+    public getAllXScales(): ReadonlyMap<string, ChartPositionScale> {
+        return this.#xScales;
+    }
+
+    public getAllYScales(): ReadonlyMap<string, ChartPositionScale> {
+        return this.#yScales;
+    }
+
+    public getScale(axisId: string): ChartPositionScale | undefined {
+        return this.#xScales.get(axisId) ?? this.#yScales.get(axisId);
+    }
+
     public getXScale(axisId?: string): ChartPositionScale | undefined {
         if (!axisId) {
             return this.primaryXScale;
@@ -48,17 +60,5 @@ export class CartesianScaleRegistry {
             return this.primaryYScale;
         }
         return this.#yScales.get(axisId);
-    }
-
-    public getScale(axisId: string): ChartPositionScale | undefined {
-        return this.#xScales.get(axisId) ?? this.#yScales.get(axisId);
-    }
-
-    public getAllXScales(): ReadonlyMap<string, ChartPositionScale> {
-        return this.#xScales;
-    }
-
-    public getAllYScales(): ReadonlyMap<string, ChartPositionScale> {
-        return this.#yScales;
     }
 }

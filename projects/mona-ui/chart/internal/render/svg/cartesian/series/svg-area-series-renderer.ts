@@ -10,12 +10,32 @@ import { SvgKeyedGroup } from "../../svg-keyed-group";
 export class SvgAreaSeriesRenderer {
     readonly #container: SVGGElement;
     #fillPathElement: SVGPathElement | null = null;
-    #strokePathElement: SVGPathElement | null = null;
-    #markersGroup: SVGGElement | null = null;
     #markerKeyedGroup: SvgKeyedGroup<SceneAreaPoint, SVGCircleElement> | null = null;
-
+    #markersGroup: SVGGElement | null = null;
+    #strokePathElement: SVGPathElement | null = null;
     public constructor(container: SVGGElement) {
         this.#container = container;
+    }
+
+    public clear(): void {
+        if (this.#fillPathElement) {
+            this.#fillPathElement.remove();
+            this.#fillPathElement = null;
+        }
+        if (this.#strokePathElement) {
+            this.#strokePathElement.remove();
+            this.#strokePathElement = null;
+        }
+        if (this.#markersGroup) {
+            this.#markerKeyedGroup?.clear();
+            this.#markersGroup.remove();
+            this.#markersGroup = null;
+            this.#markerKeyedGroup = null;
+        }
+    }
+
+    public destroy(): void {
+        this.clear();
     }
 
     public render(scene: ChartAreaSeriesScene, defs: SvgDefinitionRegistry): void {
@@ -105,26 +125,5 @@ export class SvgAreaSeriesRenderer {
             this.#markersGroup = null;
             this.#markerKeyedGroup = null;
         }
-    }
-
-    public clear(): void {
-        if (this.#fillPathElement) {
-            this.#fillPathElement.remove();
-            this.#fillPathElement = null;
-        }
-        if (this.#strokePathElement) {
-            this.#strokePathElement.remove();
-            this.#strokePathElement = null;
-        }
-        if (this.#markersGroup) {
-            this.#markerKeyedGroup?.clear();
-            this.#markersGroup.remove();
-            this.#markersGroup = null;
-            this.#markerKeyedGroup = null;
-        }
-    }
-
-    public destroy(): void {
-        this.clear();
     }
 }

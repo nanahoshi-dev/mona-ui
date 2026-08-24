@@ -10,51 +10,6 @@ export interface FunnelStageIdentityResult {
 }
 
 export class FunnelIdentity {
-    public static isValidFunnelValue(value: unknown): value is number {
-        return typeof value === "number" && Number.isFinite(value) && value >= 0;
-    }
-
-    public static resolveStageIdentity(
-        datum: unknown,
-        sourceIndex: number,
-        seriesId: string,
-        keyField?: ChartField,
-        seenExplicitKeys?: Set<string>,
-        warnedDiagnosticSignatures?: Set<string>,
-        seriesName = "Funnel"
-    ): FunnelStageIdentityResult {
-        let explicitKey: string | undefined;
-
-        if (keyField) {
-            const rawKey = resolveValue(datum, keyField, sourceIndex);
-            const keyPart = serializeKeyPart(rawKey);
-            if (keyPart !== null) {
-                const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
-                if (seenExplicitKeys?.has(keyStr)) {
-                    if (warnedDiagnosticSignatures) {
-                        ChartDiagnostics.warnOnce(
-                            warnedDiagnosticSignatures,
-                            `Funnel series "${seriesName}" encountered duplicate explicit key "${String(rawKey)}" at index ${sourceIndex}. Falling back to index identity.`,
-                            `${seriesId}:duplicate-keys`
-                        );
-                    }
-                } else {
-                    seenExplicitKeys?.add(keyStr);
-                    explicitKey = keyStr;
-                }
-            }
-        }
-
-        const stageId = explicitKey ?? `i:${sourceIndex}`;
-        const animationKey = `${seriesId}:funnel:${stageId}`;
-
-        return {
-            animationKey,
-            explicitKey,
-            stageId
-        };
-    }
-
     public static extractRetainedItemIdentities(options: {
         readonly data?: readonly unknown[] | unknown;
         readonly field?: ChartField;
@@ -103,5 +58,50 @@ export class FunnelIdentity {
         }
 
         return result;
+    }
+
+    public static isValidFunnelValue(value: unknown): value is number {
+        return typeof value === "number" && Number.isFinite(value) && value >= 0;
+    }
+
+    public static resolveStageIdentity(
+        datum: unknown,
+        sourceIndex: number,
+        seriesId: string,
+        keyField?: ChartField,
+        seenExplicitKeys?: Set<string>,
+        warnedDiagnosticSignatures?: Set<string>,
+        seriesName = "Funnel"
+    ): FunnelStageIdentityResult {
+        let explicitKey: string | undefined;
+
+        if (keyField) {
+            const rawKey = resolveValue(datum, keyField, sourceIndex);
+            const keyPart = serializeKeyPart(rawKey);
+            if (keyPart !== null) {
+                const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
+                if (seenExplicitKeys?.has(keyStr)) {
+                    if (warnedDiagnosticSignatures) {
+                        ChartDiagnostics.warnOnce(
+                            warnedDiagnosticSignatures,
+                            `Funnel series "${seriesName}" encountered duplicate explicit key "${String(rawKey)}" at index ${sourceIndex}. Falling back to index identity.`,
+                            `${seriesId}:duplicate-keys`
+                        );
+                    }
+                } else {
+                    seenExplicitKeys?.add(keyStr);
+                    explicitKey = keyStr;
+                }
+            }
+        }
+
+        const stageId = explicitKey ?? `i:${sourceIndex}`;
+        const animationKey = `${seriesId}:funnel:${stageId}`;
+
+        return {
+            animationKey,
+            explicitKey,
+            stageId
+        };
     }
 }

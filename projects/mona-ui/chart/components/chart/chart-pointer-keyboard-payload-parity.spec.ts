@@ -24,9 +24,8 @@ import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
     `
 })
 class HeatmapTestHostComponent {
-    public readonly data = signal([{ day: "Mon", hour: "10am", val: 42 }]);
     public readonly clickedEvents: ChartPointEvent[] = [];
-
+    public readonly data = signal([{ day: "Mon", hour: "10am", val: 42 }]);
     public onPointClick(event: ChartPointEvent): void {
         this.clickedEvents.push(event);
     }

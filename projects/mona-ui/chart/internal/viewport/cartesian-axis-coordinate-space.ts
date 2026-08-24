@@ -35,10 +35,10 @@ export interface CartesianAxisCoordinateSnapshot {
     readonly baseDomain: readonly unknown[];
     readonly baseScale: ChartPositionScale<unknown>;
     readonly categoryIndex?: CartesianCategoryGeometryIndex;
+    readonly normalizedBaseMapper?: CartesianNormalizedBaseMapper;
     readonly range: readonly [number, number];
     readonly ref: ChartViewportAxisRef;
     readonly resolvedType: ResolvedChartCartesianAxisType;
-    readonly normalizedBaseMapper?: CartesianNormalizedBaseMapper;
     readonly valid: boolean;
     readonly viewportDomain: readonly unknown[];
     readonly viewportScale: ChartPositionScale<unknown>;
@@ -187,6 +187,22 @@ export class CartesianAxisCoordinateSpace {
         this.y = ensureCategoryIndices(y);
     }
 
+    public static clampPointToPlot(point: ChartPoint, plotRect: ChartRect): ChartPoint {
+        return {
+            x: Math.max(plotRect.x, Math.min(plotRect.x + plotRect.width, point.x)),
+            y: Math.max(plotRect.y, Math.min(plotRect.y + plotRect.height, point.y))
+        };
+    }
+
+    public static containsPlotPoint(point: ChartPoint, plotRect: ChartRect): boolean {
+        return (
+            point.x >= plotRect.x &&
+            point.x <= plotRect.x + plotRect.width &&
+            point.y >= plotRect.y &&
+            point.y <= plotRect.y + plotRect.height
+        );
+    }
+
     public static fromBaseAuthority(
         preparation: import("../layout/cartesian-multi-axis-coordinator").CartesianDomainPreparation,
         chrome: import("../layout/cartesian-multi-axis-coordinator").CartesianAxisChromeLayout
@@ -262,14 +278,10 @@ export class CartesianAxisCoordinateSpace {
         return ref.axis === "x" ? this.x.get(ref.axisId) : this.y.get(ref.axisId);
     }
 
-    public map(ref: ChartViewportAxisRef, value: unknown): number | undefined {
+    public getNormalizedBasePosition(ref: ChartViewportAxisRef, value: unknown): number | undefined {
         const snap = this.get(ref);
-        return snap?.viewportScale.map(value as never);
-    }
-
-    public mapBase(ref: ChartViewportAxisRef, value: unknown): number | undefined {
-        const snap = this.get(ref);
-        return snap?.baseScale.map(value as never);
+        if (!snap) return undefined;
+        return resolveCartesianNormalizedBaseMapper(snap)?.map(value);
     }
 
     public invert(ref: ChartViewportAxisRef, pixel: number): unknown | undefined {
@@ -284,133 +296,44 @@ export class CartesianAxisCoordinateSpace {
         return (snap.baseScale as ChartContinuousPositionScale<number | Date>).invert?.(pixel);
     }
 
-    public toResolvedAxisInfoMap(): {
-        readonly x: ReadonlyMap<string, { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }>;
-        readonly y: ReadonlyMap<string, { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }>;
-    } {
-        const xMap = new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>();
-        const yMap = new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>();
-
-        for (const [id, snap] of this.x) {
-            xMap.set(id, { baseDomain: snap.baseDomain, resolvedType: snap.resolvedType });
-        }
-        for (const [id, snap] of this.y) {
-            yMap.set(id, { baseDomain: snap.baseDomain, resolvedType: snap.resolvedType });
-        }
-
-        return { x: xMap, y: yMap };
+    public invertNormalizedBasePosition(ref: ChartViewportAxisRef, u: number): unknown | undefined {
+        const snap = this.get(ref);
+        if (!snap || snap.resolvedType === "category") return undefined;
+        return resolveCartesianNormalizedBaseMapper(snap)?.invert(u);
     }
 
-    /**
-     * Resolves category band geometry by category key.
-     *
-     * Semantic lookup contract:
-     * - Invalid axes (valid === false) return undefined.
-     * - In 'viewport' space, categories outside the current viewport return undefined.
-     * - In 'base' space, geometry is mapped against base scale authority; viewportIndex is undefined if not in viewport.
-     */
-    public resolveCategoryByKey(
+    public map(ref: ChartViewportAxisRef, value: unknown): number | undefined {
+        const snap = this.get(ref);
+        return snap?.viewportScale.map(value as never);
+    }
+
+    public mapBase(ref: ChartViewportAxisRef, value: unknown): number | undefined {
+        const snap = this.get(ref);
+        return snap?.baseScale.map(value as never);
+    }
+
+    public mapCategoryBand(
         ref: ChartViewportAxisRef,
         key: unknown,
         space: "viewport" | "base" = "viewport"
-    ): ResolvedCategoryGeometry | undefined {
-        const snap = this.get(ref);
-        if (!snap || snap.resolvedType !== "category" || snap.valid === false) {
+    ): { readonly bandEnd: number; readonly bandStart: number; readonly bandwidth: number } | undefined {
+        const geom = this.resolveCategoryByKey(ref, key, space);
+        if (!geom) {
             return undefined;
         }
-
-        const categoryIndex = snap.categoryIndex;
-        if (!categoryIndex) {
-            return undefined;
-        }
-
-        const keyStr = String(key);
-        const geom = categoryIndex.byKey.get(keyStr);
-
-        if (space === "viewport") {
-            return geom?.visibleInViewport ? geom : undefined;
-        }
-
-        // Base space geometry: resolved lazily
-        const baseIndexMap = getOrCreateBaseCategoryIndex(snap.baseDomain);
-        const baseIndex = geom ? geom.baseIndex : baseIndexMap.get(keyStr);
-        if (baseIndex === undefined) {
-            return undefined;
-        }
-
-        const baseBandScale = snap.baseScale as ChartBandPositionScale<string>;
-        const baseBandwidth = typeof baseBandScale.bandwidth === "function" ? baseBandScale.bandwidth() : 0;
-        const baseStart = baseBandScale.map(keyStr);
-        if (baseStart === undefined) {
-            return undefined;
-        }
-
         return {
-            bandCenter: baseStart + baseBandwidth / 2,
-            bandEnd: baseStart + baseBandwidth,
-            bandStart: baseStart,
-            bandwidth: baseBandwidth,
-            baseIndex,
-            key: keyStr,
-            viewportIndex: geom?.visibleInViewport ? geom.viewportIndex : undefined,
-            visibleInViewport: geom?.visibleInViewport ?? false
+            bandEnd: geom.bandEnd,
+            bandStart: geom.bandStart,
+            bandwidth: geom.bandwidth
         };
     }
 
-    /**
-     * Resolves continuous coordinate values safely at the specified pixel coordinate.
-     * Returns undefined for unknown, invalid, or category axes, or if inverted value is non-finite.
-     */
-    public resolveContinuousAtPixel(
+    public mapCategoryCenter(
         ref: ChartViewportAxisRef,
-        pixel: number,
+        key: unknown,
         space: "viewport" | "base" = "viewport"
-    ): ResolvedContinuousCoordinate | undefined {
-        const snap = this.get(ref);
-        if (!snap || snap.resolvedType === "category" || snap.valid === false) {
-            return undefined;
-        }
-        if (!Number.isFinite(pixel)) {
-            return undefined;
-        }
-
-        const scale = (space === "base" ? snap.baseScale : snap.viewportScale) as ChartContinuousPositionScale<number | Date>;
-        if (typeof scale.invert !== "function") {
-            return undefined;
-        }
-
-        const rawValue = scale.invert(pixel);
-        if (rawValue === undefined || rawValue === null) {
-            return undefined;
-        }
-
-        if (rawValue instanceof Date) {
-            if (Number.isNaN(rawValue.getTime())) {
-                return undefined;
-            }
-            return {
-                axis: ref.axis,
-                axisId: ref.axisId,
-                pixel,
-                resolvedType: snap.resolvedType,
-                value: rawValue
-            };
-        }
-
-        if (typeof rawValue === "number") {
-            if (!Number.isFinite(rawValue)) {
-                return undefined;
-            }
-            return {
-                axis: ref.axis,
-                axisId: ref.axisId,
-                pixel,
-                resolvedType: snap.resolvedType,
-                value: rawValue
-            };
-        }
-
-        return undefined;
+    ): number | undefined {
+        return this.resolveCategoryByKey(ref, key, space)?.bandCenter;
     }
 
     /**
@@ -450,30 +373,6 @@ export class CartesianAxisCoordinateSpace {
         }
 
         return pixel;
-    }
-
-    public mapCategoryCenter(
-        ref: ChartViewportAxisRef,
-        key: unknown,
-        space: "viewport" | "base" = "viewport"
-    ): number | undefined {
-        return this.resolveCategoryByKey(ref, key, space)?.bandCenter;
-    }
-
-    public mapCategoryBand(
-        ref: ChartViewportAxisRef,
-        key: unknown,
-        space: "viewport" | "base" = "viewport"
-    ): { readonly bandEnd: number; readonly bandStart: number; readonly bandwidth: number } | undefined {
-        const geom = this.resolveCategoryByKey(ref, key, space);
-        if (!geom) {
-            return undefined;
-        }
-        return {
-            bandEnd: geom.bandEnd,
-            bandStart: geom.bandStart,
-            bandwidth: geom.bandwidth
-        };
     }
 
     /**
@@ -574,6 +473,62 @@ export class CartesianAxisCoordinateSpace {
             index: bestIndex,
             key: bestGeom.key,
             viewportIndex: bestIndex
+        };
+    }
+
+    /**
+     * Resolves category band geometry by category key.
+     *
+     * Semantic lookup contract:
+     * - Invalid axes (valid === false) return undefined.
+     * - In 'viewport' space, categories outside the current viewport return undefined.
+     * - In 'base' space, geometry is mapped against base scale authority; viewportIndex is undefined if not in viewport.
+     */
+    public resolveCategoryByKey(
+        ref: ChartViewportAxisRef,
+        key: unknown,
+        space: "viewport" | "base" = "viewport"
+    ): ResolvedCategoryGeometry | undefined {
+        const snap = this.get(ref);
+        if (!snap || snap.resolvedType !== "category" || snap.valid === false) {
+            return undefined;
+        }
+
+        const categoryIndex = snap.categoryIndex;
+        if (!categoryIndex) {
+            return undefined;
+        }
+
+        const keyStr = String(key);
+        const geom = categoryIndex.byKey.get(keyStr);
+
+        if (space === "viewport") {
+            return geom?.visibleInViewport ? geom : undefined;
+        }
+
+        // Base space geometry: resolved lazily
+        const baseIndexMap = getOrCreateBaseCategoryIndex(snap.baseDomain);
+        const baseIndex = geom ? geom.baseIndex : baseIndexMap.get(keyStr);
+        if (baseIndex === undefined) {
+            return undefined;
+        }
+
+        const baseBandScale = snap.baseScale as ChartBandPositionScale<string>;
+        const baseBandwidth = typeof baseBandScale.bandwidth === "function" ? baseBandScale.bandwidth() : 0;
+        const baseStart = baseBandScale.map(keyStr);
+        if (baseStart === undefined) {
+            return undefined;
+        }
+
+        return {
+            bandCenter: baseStart + baseBandwidth / 2,
+            bandEnd: baseStart + baseBandwidth,
+            bandStart: baseStart,
+            bandwidth: baseBandwidth,
+            baseIndex,
+            key: keyStr,
+            viewportIndex: geom?.visibleInViewport ? geom.viewportIndex : undefined,
+            visibleInViewport: geom?.visibleInViewport ?? false
         };
     }
 
@@ -734,31 +689,76 @@ export class CartesianAxisCoordinateSpace {
         };
     }
 
-    public getNormalizedBasePosition(ref: ChartViewportAxisRef, value: unknown): number | undefined {
+    /**
+     * Resolves continuous coordinate values safely at the specified pixel coordinate.
+     * Returns undefined for unknown, invalid, or category axes, or if inverted value is non-finite.
+     */
+    public resolveContinuousAtPixel(
+        ref: ChartViewportAxisRef,
+        pixel: number,
+        space: "viewport" | "base" = "viewport"
+    ): ResolvedContinuousCoordinate | undefined {
         const snap = this.get(ref);
-        if (!snap) return undefined;
-        return resolveCartesianNormalizedBaseMapper(snap)?.map(value);
+        if (!snap || snap.resolvedType === "category" || snap.valid === false) {
+            return undefined;
+        }
+        if (!Number.isFinite(pixel)) {
+            return undefined;
+        }
+
+        const scale = (space === "base" ? snap.baseScale : snap.viewportScale) as ChartContinuousPositionScale<number | Date>;
+        if (typeof scale.invert !== "function") {
+            return undefined;
+        }
+
+        const rawValue = scale.invert(pixel);
+        if (rawValue === undefined || rawValue === null) {
+            return undefined;
+        }
+
+        if (rawValue instanceof Date) {
+            if (Number.isNaN(rawValue.getTime())) {
+                return undefined;
+            }
+            return {
+                axis: ref.axis,
+                axisId: ref.axisId,
+                pixel,
+                resolvedType: snap.resolvedType,
+                value: rawValue
+            };
+        }
+
+        if (typeof rawValue === "number") {
+            if (!Number.isFinite(rawValue)) {
+                return undefined;
+            }
+            return {
+                axis: ref.axis,
+                axisId: ref.axisId,
+                pixel,
+                resolvedType: snap.resolvedType,
+                value: rawValue
+            };
+        }
+
+        return undefined;
     }
 
-    public invertNormalizedBasePosition(ref: ChartViewportAxisRef, u: number): unknown | undefined {
-        const snap = this.get(ref);
-        if (!snap || snap.resolvedType === "category") return undefined;
-        return resolveCartesianNormalizedBaseMapper(snap)?.invert(u);
-    }
+    public toResolvedAxisInfoMap(): {
+        readonly x: ReadonlyMap<string, { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }>;
+        readonly y: ReadonlyMap<string, { readonly baseDomain: readonly unknown[]; readonly resolvedType: ResolvedChartCartesianAxisType }>;
+    } {
+        const xMap = new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>();
+        const yMap = new Map<string, { baseDomain: readonly unknown[]; resolvedType: ResolvedChartCartesianAxisType }>();
 
-    public static containsPlotPoint(point: ChartPoint, plotRect: ChartRect): boolean {
-        return (
-            point.x >= plotRect.x &&
-            point.x <= plotRect.x + plotRect.width &&
-            point.y >= plotRect.y &&
-            point.y <= plotRect.y + plotRect.height
-        );
-    }
+        for (const [id, snap] of this.x) {
+            xMap.set(id, { baseDomain: snap.baseDomain, resolvedType: snap.resolvedType });
+        }
+        for (const [id, snap] of this.y) {
+            yMap.set(id, { baseDomain: snap.baseDomain, resolvedType: snap.resolvedType });
+        }
 
-    public static clampPointToPlot(point: ChartPoint, plotRect: ChartRect): ChartPoint {
-        return {
-            x: Math.max(plotRect.x, Math.min(plotRect.x + plotRect.width, point.x)),
-            y: Math.max(plotRect.y, Math.min(plotRect.y + plotRect.height, point.y))
-        };
+        return { x: xMap, y: yMap };
     }
 }

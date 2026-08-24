@@ -48,6 +48,11 @@ import type { ChartRenderOverlayState } from "../../internal/render/cartesian-ch
 })
 class LifecycleHostComponent {
     public readonly chart = viewChild.required(ChartComponent);
+    public readonly crosshairEnabled = signal(true);
+    public readonly crosshairMode = signal<ChartCrosshairMode>("xy");
+    public readonly crosshairSnap = signal<ChartCrosshairSnapMode>("nearest");
+    public readonly crosshairXAxisId = signal<string | undefined>(undefined);
+    public readonly crosshairYAxisId = signal<string | undefined>(undefined);
     public readonly data = signal([
         { x: 0, y: 10 },
         { x: 50, y: 50 },
@@ -62,11 +67,6 @@ class LifecycleHostComponent {
     public readonly showTooltip = signal(false);
     public readonly tooltipEnabled = signal(true);
     public readonly tooltipShared = signal(false);
-    public readonly crosshairEnabled = signal(true);
-    public readonly crosshairMode = signal<ChartCrosshairMode>("xy");
-    public readonly crosshairSnap = signal<ChartCrosshairSnapMode>("nearest");
-    public readonly crosshairXAxisId = signal<string | undefined>(undefined);
-    public readonly crosshairYAxisId = signal<string | undefined>(undefined);
 }
 
 describe("ChartCrosshairOwnerLifecycle", () => {

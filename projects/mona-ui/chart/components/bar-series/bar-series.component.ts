@@ -41,15 +41,12 @@ export class BarSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly data = input<readonly unknown[] | undefined>(undefined);
-
+    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
     /**
      * @description Data label display options or boolean flag enabling default labels.
      * @default false
      */
     public readonly dataLabels = input<ChartDataLabelsInput>(false);
-
-    public readonly dataLabelTemplate = contentChild(ChartDataLabelTemplateDirective);
-
     /**
      * @description Property key or accessor extracting the Y/value for each bar.
      * @default ""

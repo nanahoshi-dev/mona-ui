@@ -15,16 +15,30 @@ import { SvgPolarSectorRenderer } from "./svg-polar-sector-renderer";
 
 export class SvgPolarChartRenderer {
     readonly #container: SVGGElement;
-    #sectorRenderer: SvgPolarSectorRenderer | null = null;
-    #axisRenderer: SvgPolarAxisRenderer | null = null;
-    #arcRenderer: SvgPolarArcRenderer | null = null;
-
-    #sectorContainer: SVGGElement | null = null;
-    #axisContainer: SVGGElement | null = null;
     #arcContainer: SVGGElement | null = null;
-
+    #arcRenderer: SvgPolarArcRenderer | null = null;
+    #axisContainer: SVGGElement | null = null;
+    #axisRenderer: SvgPolarAxisRenderer | null = null;
+    #sectorContainer: SVGGElement | null = null;
+    #sectorRenderer: SvgPolarSectorRenderer | null = null;
     public constructor(containerOrLayers: SVGGElement | SvgRootLayers) {
         this.#container = "series" in containerOrLayers ? containerOrLayers.series : containerOrLayers;
+    }
+
+    public clear(): void {
+        this.#sectorRenderer?.clear();
+        this.#axisRenderer?.clear();
+        this.#arcRenderer?.clear();
+    }
+
+    public destroy(): void {
+        this.clear();
+        this.#sectorRenderer?.destroy();
+        this.#axisRenderer?.destroy();
+        this.#arcRenderer?.destroy();
+        this.#sectorContainer?.remove();
+        this.#axisContainer?.remove();
+        this.#arcContainer?.remove();
     }
 
     public render(
@@ -71,21 +85,5 @@ export class SvgPolarChartRenderer {
                 break;
             }
         }
-    }
-
-    public clear(): void {
-        this.#sectorRenderer?.clear();
-        this.#axisRenderer?.clear();
-        this.#arcRenderer?.clear();
-    }
-
-    public destroy(): void {
-        this.clear();
-        this.#sectorRenderer?.destroy();
-        this.#axisRenderer?.destroy();
-        this.#arcRenderer?.destroy();
-        this.#sectorContainer?.remove();
-        this.#axisContainer?.remove();
-        this.#arcContainer?.remove();
     }
 }

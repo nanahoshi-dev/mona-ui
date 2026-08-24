@@ -43,14 +43,14 @@ import type { ChartAnimationInput } from "../../models/chart-animation.models";
     `
 })
 class AnimationOverlayHostComponent {
+    public readonly animationConfig = signal<ChartAnimationInput>({ duration: 200, easing: "linear" });
     public readonly chart = viewChild.required(ChartComponent);
     public readonly data = signal([
         { name: "A", value: 10 },
         { name: "B", value: 20 }
     ]);
-    public readonly animationConfig = signal<ChartAnimationInput>({ duration: 200, easing: "linear" });
-    public readonly xAxisType = signal<import("../../models/chart-axis.models").ChartXAxisType>("category");
     public readonly selectedMarkIds = signal<readonly string[]>(["s0:0"]);
+    public readonly xAxisType = signal<import("../../models/chart-axis.models").ChartXAxisType>("category");
 }
 
 describe("Chart Persistent Presentation Animation Suppression", () => {

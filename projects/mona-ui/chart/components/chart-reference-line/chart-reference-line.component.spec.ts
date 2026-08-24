@@ -30,11 +30,11 @@ import type { ChartOverlayLayer, ChartReferenceLineStyle } from "../../models/ch
     `
 })
 class TestHostComponent {
-    public readonly value = signal<number | string>(500);
     public readonly label = signal("Threshold");
     public readonly layer = signal<ChartOverlayLayer>("underlay");
     public readonly lineStyle = signal<ChartReferenceLineStyle>("dashed");
     public readonly useTemplate = signal(false);
+    public readonly value = signal<number | string>(500);
 }
 
 describe("ChartReferenceLineComponent", () => {

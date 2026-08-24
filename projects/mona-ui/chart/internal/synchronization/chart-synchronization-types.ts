@@ -68,19 +68,19 @@ export interface ChartSynchronizationPublishCrosshairPayload {
 }
 
 export interface ChartSynchronizationMember {
-    readonly memberId: string;
     clearCrosshair(message: ChartSynchronizationCrosshairClearMessage): void;
     getCoordinateSpace(): CartesianAxisCoordinateSpace | null;
     getOptions(): NormalizedChartSynchronizationOptions | null;
     getViewport(): InternalCartesianViewportState | null;
+    readonly memberId: string;
     receiveCrosshair(message: ChartSynchronizationCrosshairMessage): void;
     receiveViewport(message: ChartSynchronizationViewportMessage): void;
 }
 
 export interface ChartSynchronizationRegistration {
-    readonly memberId: string;
     clearCrosshair(): void;
     destroy(): void;
+    readonly memberId: string;
     publishCrosshair(payload: ChartSynchronizationPublishCrosshairPayload): void;
     publishViewport(payload: ChartSynchronizationPublishViewportPayload): void;
     updateOptions(options: NormalizedChartSynchronizationOptions | null): void;

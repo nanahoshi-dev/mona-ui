@@ -39,8 +39,8 @@ export interface ChartAxisScene {
     sideOffset?: number;
     stackIndex?: number;
     tickMarks?: boolean;
-    ticks: readonly ChartAxisSceneTick[];
     tickSize?: number;
+    ticks: readonly ChartAxisSceneTick[];
     title: string;
     titlePadding?: number;
     unitMode?: "percent" | "raw";
