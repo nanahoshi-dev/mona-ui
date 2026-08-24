@@ -4,7 +4,6 @@ import type { ChartTreemapSeriesRegistration } from "../context/chart-registrati
 import type { ChartTreemapSeriesScene } from "../scene/hierarchical-scene";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartLayoutEngine, resolveChartCoordinateSystem } from "./chart-layout-engine";
-import { HierarchicalLayoutEngine } from "./hierarchical-layout-engine";
 
 function createMockTreemapRegistration(data?: readonly unknown[] | unknown): ChartTreemapSeriesRegistration {
     return {

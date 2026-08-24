@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { CartesianXYChartScene } from "../scene/chart-scene";
+import type {} from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import { CartesianInteractionGeometryIndex } from "../interaction/cartesian-interaction-geometry-index";
-import { resolveSynchronizationLocalTarget } from "./chart-synchronization-local-target-resolver";
 import { ChartSynchronizationCoordinator } from "./chart-synchronization-coordinator";
 import { ChartDensityTracker } from "../layout/chart-density-instrumentation";
 import type { ChartSynchronizationMember, ChartSynchronizationViewportMessage } from "./chart-synchronization-types";

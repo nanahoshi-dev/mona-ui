@@ -3,9 +3,8 @@ import { describe, expect, it } from "vitest";
 import type {
     ChartBubbleSeriesRegistration,
     ChartFinancialSeriesRegistration,
-    ChartLineSeriesRegistration,
-    ChartRangeBarSeriesRegistration,
-    ChartXAxisRegistration,
+    ChartLineSeriesRegistration
+    ,ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import { CartesianAxisDomainResolver } from "./cartesian-axis-domain-resolver";

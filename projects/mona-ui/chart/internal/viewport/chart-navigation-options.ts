@@ -1,8 +1,7 @@
 import type {
     ChartNavigationAxisTarget,
-    ChartNavigationInput,
-    ChartNavigationOptions,
-    ChartViewportConstraint,
+    ChartNavigationInput
+    ,ChartViewportConstraint,
     ChartViewportLinkGroup
 } from "../../models/chart-viewport.models";
 

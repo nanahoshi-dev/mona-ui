@@ -1,5 +1,5 @@
 import type { ChartPoint } from "../../models/chart.models";
-import type { ChartRadialCurve, ChartRadialFillMode, ChartRadialGridShape } from "../../models/chart-polar.models";
+import type { ChartRadialCurve, ChartRadialFillMode } from "../../models/chart-polar.models";
 
 export interface SceneRadialPoint {
     angle: number;

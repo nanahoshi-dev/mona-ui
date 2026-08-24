@@ -1,4 +1,4 @@
-import type { ChartPoint } from "../../../models/chart.models";
+import type {} from "../../../models/chart.models";
 import type {
     ChartGaugeSeriesScene,
     ChartRadialArcSeriesScene,

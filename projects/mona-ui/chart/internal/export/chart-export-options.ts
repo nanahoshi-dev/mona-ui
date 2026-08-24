@@ -3,9 +3,8 @@ import {
     type ChartDownloadOptions,
     type ChartExportBackground,
     type ChartExportFormat,
-    type ChartExportOptions,
-    type ChartExportPresentationOptions,
-    type ChartPdfMargins,
+    type ChartExportOptions
+    ,type ChartPdfMargins,
     type ChartPdfPageOptions,
     type ChartPdfPageSize,
     type ChartPdfRenderMode
@@ -274,6 +273,7 @@ export function sanitizeFileName(
     let name = (fileName ?? defaultTitle ?? "chart").trim();
 
     // Strip ASCII control characters (0x00-0x1F, 0x7F) and invalid path chars: / \ ? % * : | " < > (EXP-20)
+    // eslint-disable-next-line no-control-regex -- intentional: sanitizing control characters out of file names
     name = name.replace(/[\x00-\x1f\x7f/\\?%*:|"<>]/g, "_").trim();
 
     // Strip leading and trailing dots and spaces

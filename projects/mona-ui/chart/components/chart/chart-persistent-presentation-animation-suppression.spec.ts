@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartComponent } from "./chart.component";
 import { BarSeriesComponent } from "../bar-series/bar-series.component";
-import { LineSeriesComponent } from "../line-series/line-series.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { ChartSelectionComponent } from "../chart-selection/chart-selection.component";

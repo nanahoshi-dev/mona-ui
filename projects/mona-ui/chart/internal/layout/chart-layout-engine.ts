@@ -11,13 +11,11 @@ import type {
     ChartAngularAxisRegistration,
     ChartCartesianSeriesRegistration,
     ChartFunnelSeriesRegistration,
-    ChartHeatmapSeriesRegistration,
-    ChartHierarchicalSeriesRegistration,
-    ChartRadialArcSeriesRegistration,
+    ChartHeatmapSeriesRegistration
+    ,ChartRadialArcSeriesRegistration,
     ChartRadialAxisRegistration,
-    ChartRadialSeriesRegistration,
-    ChartSectorSeriesRegistration,
-    ChartSeriesRegistration,
+    ChartRadialSeriesRegistration
+    ,ChartSeriesRegistration,
     ChartTreemapSeriesRegistration,
     ChartWaterfallSeriesRegistration,
     ChartXAxisRegistration,

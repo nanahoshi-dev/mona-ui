@@ -1,6 +1,5 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { By } from "@angular/platform-browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChartCurve } from "../../models/chart-series.models";
 import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
@@ -521,15 +520,13 @@ describe("indexed dense projection", () => {
         render();
 
         const denseTarget = host
-            .chart()
-            ["cartesianXYScene"]()
+            .chart()["cartesianXYScene"]()
             ?.hitTargets.find(target => target.seriesType === "rangeArea");
 
         host.downsampling.set(false);
         render();
         const fullTarget = host
-            .chart()
-            ["cartesianXYScene"]()
+            .chart()["cartesianXYScene"]()
             ?.hitTargets.find(target => target.seriesType === "rangeArea");
 
         expect(denseTarget).toMatchObject({ radius: 16, visualRadius: 0 });
@@ -542,10 +539,9 @@ describe("indexed dense projection", () => {
 
         let stageA = 0;
         let stageB = 0;
-        let densityBuildsBefore: number;
         let densityBuildsAfter: number;
         const instrumentation = ChartDensityTracker.install();
-        densityBuildsBefore = instrumentation.snapshot.densityRuntimeBuilds;
+        const densityBuildsBefore = instrumentation.snapshot.densityRuntimeBuilds;
         CartesianStageTracker.current = {
             onStageA: () => stageA++,
             onStageB: () => stageB++
@@ -656,15 +652,13 @@ describe("indexed dense projection", () => {
         host.data.set(data);
         render();
         const before = host
-            .chart()
-            ["cartesianXYScene"]()
+            .chart()["cartesianXYScene"]()
             ?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
 
         host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 20, min: 0 }] });
         render();
         const after = host
-            .chart()
-            ["cartesianXYScene"]()
+            .chart()["cartesianXYScene"]()
             ?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
 
         expect(after).toBeDefined();

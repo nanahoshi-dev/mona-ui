@@ -42,7 +42,7 @@ describe("ChartKeyboardNavigation — Axis Namespace Awareness (PZV-000B)", () =
             yValue: 20
         };
 
-        const hitX2_B: SceneHitTarget = {
+        const hitX2B: SceneHitTarget = {
             datum: { x: "B", y: 30 },
             index: 1,
             point: { x: 180, y: 120 },
@@ -75,7 +75,7 @@ describe("ChartKeyboardNavigation — Axis Namespace Awareness (PZV-000B)", () =
 
         const bucketSecondaryB: ChartInteractionBucket = {
             anchor: { x: 180, y: 120 },
-            hits: [hitX2_B],
+            hits: [hitX2B],
             order: 1,
             xKey: "B",
             xValue: "B"
@@ -125,7 +125,7 @@ describe("ChartKeyboardNavigation — Axis Namespace Awareness (PZV-000B)", () =
             coordinateSystem: "cartesian",
             hasRenderableData: true,
             height: 300,
-            hitTargets: [hitX1, hitX2, hitX2_B],
+            hitTargets: [hitX1, hitX2, hitX2B],
             interactionAxis: "x",
             interactionBucketLookup: new Map([["A", bucketPrimary]]),
             interactionBuckets: [bucketPrimary],

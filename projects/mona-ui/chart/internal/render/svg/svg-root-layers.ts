@@ -26,13 +26,10 @@ export const SVG_LAYER_ORDER: readonly SvgLayerName[] = [
 ] as const;
 
 export class SvgRootLayers {
-    readonly #root: SVGSVGElement | null;
     readonly #defs: SVGDefsElement;
     readonly #layers: ReadonlyMap<SvgLayerName, SVGGElement>;
 
     public constructor(root: SVGSVGElement) {
-        this.#root = root;
-
         let defs = root.querySelector("defs");
         if (!defs) {
             defs = createSvgElement("defs");

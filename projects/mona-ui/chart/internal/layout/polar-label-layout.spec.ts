@@ -3,9 +3,8 @@ import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type { ScenePolarSlice } from "../scene/polar-scene";
 import {
     formatPolarLabelText,
-    layoutOutsidePolarLabels,
-    OUTSIDE_LABEL_HORIZONTAL_LENGTH,
-    OUTSIDE_LABEL_RADIAL_SEGMENT_LENGTH
+    layoutOutsidePolarLabels
+    
 } from "./polar-label-layout";
 
 function createSlice(id: string, startAngle: number, endAngle: number, value: number): ScenePolarSlice {
@@ -120,11 +119,11 @@ describe("polar-label-layout", () => {
         expect(l2.position.y).toBeLessThan(l3.position.y);
 
         // Required separation check: min gap between adjacent labels
-        const gap1_2 = (l2.position.y - l2.heightEstimate / 2) - (l1.position.y + l1.heightEstimate / 2);
-        const gap2_3 = (l3.position.y - l3.heightEstimate / 2) - (l2.position.y + l2.heightEstimate / 2);
+        const gapBetween1And2 = (l2.position.y - l2.heightEstimate / 2) - (l1.position.y + l1.heightEstimate / 2);
+        const gapBetween2And3 = (l3.position.y - l3.heightEstimate / 2) - (l2.position.y + l2.heightEstimate / 2);
 
-        expect(gap1_2).toBeGreaterThanOrEqual(3.9);
-        expect(gap2_3).toBeGreaterThanOrEqual(3.9);
+        expect(gapBetween1And2).toBeGreaterThanOrEqual(3.9);
+        expect(gapBetween2And3).toBeGreaterThanOrEqual(3.9);
     });
 
     it("should respect top and bottom vertical bounds", () => {

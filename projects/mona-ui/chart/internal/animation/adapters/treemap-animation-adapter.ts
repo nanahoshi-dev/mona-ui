@@ -1,6 +1,6 @@
 import type { ChartRect } from "../../../models/chart.models";
 import type { ChartTreemapSeriesScene, SceneTreemapNode } from "../../scene/hierarchical-scene";
-import { lerp, lerpOpacity } from "../animation-math";
+import {  lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
 import { RectGeometryTransition } from "../primitives/rect-geometry-transition";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";

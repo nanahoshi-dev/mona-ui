@@ -1,6 +1,6 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type {
-    ChartNavigationAxisTarget,
+    
     ChartViewportChangeEvent,
     ChartViewportConstraint,
     ChartViewportLinkGroup
@@ -10,7 +10,7 @@ import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportOperationCoordinator } from "./cartesian-viewport-operation-coordinator";
 import {
-    areInternalViewportStatesEqual,
+    
     diffInternalViewportStates,
     toPublicViewportState,
     type InternalCartesianViewportState

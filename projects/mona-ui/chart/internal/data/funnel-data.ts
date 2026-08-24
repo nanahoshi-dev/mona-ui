@@ -1,5 +1,5 @@
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
-import type { ChartFunnelPointMetadata } from "../../models/chart-funnel.models";
+import type {} from "../../models/chart-funnel.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";

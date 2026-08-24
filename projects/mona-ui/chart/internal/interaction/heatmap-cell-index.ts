@@ -18,7 +18,6 @@ export class HeatmapCellIndex {
     readonly #byCoordinate = new Map<string, SceneHitTarget>();
     readonly #byIndex = new Map<string, SceneHeatmapCell>();
     readonly #cellCount: number;
-    readonly #cellGap: number;
     readonly #plotRect: ChartRect;
     readonly #xBandWidth: number;
     readonly #xCount: number;
@@ -26,8 +25,7 @@ export class HeatmapCellIndex {
     readonly #yCount: number;
 
     public constructor(options: HeatmapCellIndexOptions) {
-        const { cellGap, cells, hitTargets, plotRect, xBandWidth, xCount, yBandHeight, yCount } = options;
-        this.#cellGap = cellGap;
+        const { cells, hitTargets, plotRect, xBandWidth, xCount, yBandHeight, yCount } = options;
         this.#plotRect = plotRect;
         this.#xBandWidth = xBandWidth;
         this.#xCount = xCount;

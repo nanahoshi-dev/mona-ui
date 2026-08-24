@@ -1,6 +1,6 @@
 import type {
-    ChartCategoryViewportWindow,
-    ChartContinuousViewportWindow,
+    
+    
     ChartViewportAxisRef,
     ChartViewportConstraint,
     ChartViewportState,
@@ -8,7 +8,6 @@ import type {
 } from "../../models/chart-viewport.models";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
-import { clamp } from "../utils/number-utils";
 import type { CartesianAxisCoordinateSnapshot } from "./cartesian-axis-coordinate-space";
 import { resolveCartesianNormalizedBaseMapper } from "./cartesian-normalized-base-mapper";
 

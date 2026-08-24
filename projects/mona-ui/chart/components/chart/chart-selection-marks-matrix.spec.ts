@@ -4,8 +4,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { ChartComponent } from "./chart.component";
 import { BarSeriesComponent } from "../bar-series/bar-series.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
-import { AreaSeriesComponent } from "../area-series/area-series.component";
-import { ScatterSeriesComponent } from "../scatter-series/scatter-series.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";
 import { ChartSelectionComponent } from "../chart-selection/chart-selection.component";

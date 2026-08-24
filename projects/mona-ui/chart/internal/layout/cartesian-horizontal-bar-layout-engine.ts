@@ -1,15 +1,14 @@
-import type { ChartAxisFormatter, ChartAxisPosition, ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
+import type {  ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
-import type { ChartField, ChartRect } from "../../models/chart.models";
+import type { ChartField } from "../../models/chart.models";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { CartesianBarGeometry } from "./cartesian-bar-geometry";
 import { CartesianBarSlots } from "./cartesian-bar-slots";
 import type {
-    ChartBarSeriesRegistration,
+    
     ChartCartesianSeriesRegistration,
     ChartRangeBarSeriesRegistration
 } from "../context/chart-registration-context";
-import { calculateCategoryDomain } from "../data/chart-domain";
 import { resolveFiniteRangeValues } from "../data/chart-range-resolver";
 import {
     resolveData,
@@ -18,9 +17,9 @@ import {
 } from "../data/chart-value-resolver";
 import { CartesianScaleFactory, type BandScale } from "../scale/cartesian-scale-factory";
 import type {
-    ChartAxisScene,
-    ChartBarSeriesScene,
-    ChartRangeBarSeriesScene,
+    
+    
+    
     ChartSeriesScene
 } from "../scene/cartesian-scene";
 import type {
@@ -33,7 +32,7 @@ import type {
     CartesianXYLayoutRuntime
 } from "./cartesian-layout-engine";
 import type {
-    ChartCornerRadii,
+    
     ChartInteractionBucket,
     ChartInteractionXKey,
     SceneBar,
@@ -41,7 +40,6 @@ import type {
     SceneRangeBar
 } from "../scene/scene-geometry";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
-import { formatPercentagePoint, formatXValue, formatYValue } from "../utils/chart-formatter";
 import {
     clamp,
     formatCompactNumber,

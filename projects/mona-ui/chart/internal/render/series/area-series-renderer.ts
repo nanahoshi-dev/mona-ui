@@ -1,6 +1,6 @@
 import { area, line } from "d3-shape";
 import type { ChartAreaSeriesScene } from "../../scene/cartesian-scene";
-import type { SceneAreaPoint, ScenePoint } from "../../scene/scene-geometry";
+import type { SceneAreaPoint } from "../../scene/scene-geometry";
 import { drawPointMarker } from "../../utils/canvas-utils";
 import { createAreaGradientSpec, withAlpha } from "./area-gradient";
 import { resolveCurveFactory } from "../geometry/chart-curve-factory";

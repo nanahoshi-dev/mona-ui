@@ -1,7 +1,6 @@
 import {
-    normalizeNonNegativeNumber,
-    normalizeOpacity,
-    normalizePositiveNumber,
+    normalizeNonNegativeNumber
+    ,normalizePositiveNumber,
     normalizeRatio
 } from "../utils/number-utils";
 import { degreesToRadians } from "../utils/angle-utils";

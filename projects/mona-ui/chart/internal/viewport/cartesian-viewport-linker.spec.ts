@@ -7,7 +7,7 @@ import {
 } from "./cartesian-axis-coordinate-space";
 import { CartesianViewportLinker } from "./cartesian-viewport-linker";
 import {
-    createEmptyInternalViewportState,
+    
     type InternalCartesianViewportState
 } from "./cartesian-viewport-normalizer";
 

@@ -1,4 +1,4 @@
-import type { ChartDownsamplingAlgorithm, ChartDownsamplingInput, ChartDownsamplingOptions } from "../../models/chart-downsampling.models";
+import type { ChartDownsamplingAlgorithm, ChartDownsamplingInput } from "../../models/chart-downsampling.models";
 
 export interface NormalizedChartDownsamplingOptions {
     readonly algorithm: ChartDownsamplingAlgorithm;

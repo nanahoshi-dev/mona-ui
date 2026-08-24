@@ -1,5 +1,5 @@
 import type { ChartAxisLabelRotation } from "../../models/chart-axis.models";
-import type { ChartPositionScale } from "../scale/chart-scale";
+import type {} from "../scale/chart-scale";
 import type { ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
 
 export interface ChartRect {

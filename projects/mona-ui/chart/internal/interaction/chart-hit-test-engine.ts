@@ -1,15 +1,11 @@
 import type { ChartPoint } from "../../models/chart.models";
-import type { CartesianHeatmapChartScene, CartesianXYChartScene, ChartScene, PolarAxisChartScene, PolarSectorChartScene } from "../scene/chart-scene";
-import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
-import { distance, isPointInRect } from "../utils/geometry-utils";
+import type {   ChartScene  } from "../scene/chart-scene";
+import type {} from "../scene/scene-geometry";
 import type { ChartInteractionState } from "./chart-interaction-state";
 import {
     ChartPointerCandidateResolver,
     type ChartPointerCandidates
 } from "./chart-pointer-candidate-resolver";
-import { HeatmapHitTester } from "./heatmap-hit-tester";
-import { PolarAxisHitTester } from "./polar-axis-hit-tester";
-import { PolarSectorHitTester } from "./polar-sector-hit-tester";
 
 export {
     findNearestInteractionBucketByX,

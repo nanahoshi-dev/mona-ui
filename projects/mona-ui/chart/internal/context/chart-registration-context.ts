@@ -22,9 +22,8 @@ import type {
 } from "../../models/chart-annotation.models";
 import type {
     ChartAxisFormatter,
-    ChartAxisLabelRotation,
-    ChartAxisPosition,
-    ChartXAxisPosition,
+    ChartAxisLabelRotation
+    ,ChartXAxisPosition,
     ChartXAxisType,
     ChartYAxisPosition,
     ChartYAxisType

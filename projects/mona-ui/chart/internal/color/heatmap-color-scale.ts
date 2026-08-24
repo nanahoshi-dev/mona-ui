@@ -1,7 +1,7 @@
 import { isDevMode } from "@angular/core";
 import { formatRgb, interpolate, parse, wcagContrast, type Color } from "culori";
 import type {
-    ChartColorLegendScale,
+    
     ChartColorLegendStop,
     ChartColorLegendTick,
     ChartHeatmapColorMode,

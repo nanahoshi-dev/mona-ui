@@ -1,6 +1,6 @@
-import type { ChartAxisPosition, ChartXAxisType } from "../../models/chart-axis.models";
+import type { ChartAxisPosition } from "../../models/chart-axis.models";
 import type { ChartField, ChartRect } from "../../models/chart.models";
-import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import type {} from "../context/chart-registration-context";
 import {
     CartesianStackEngine,
     type CartesianStackAnalysis,

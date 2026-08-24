@@ -3,9 +3,8 @@ import type { NormalizedChartDownsamplingOptions } from "./chart-downsampling-op
 import { buildRangeDensityData, buildScalarDensityData } from "./cartesian-density-preparer";
 import {
     projectRangeEnvelopeIndexView,
-    projectScalarIndexView,
-    projectSegmentedLttb,
-    selectConnectedCandidatesUnderBudget
+    projectScalarIndexView
+    ,selectConnectedCandidatesUnderBudget
 } from "./cartesian-density-projector";
 import { resolveDensityRetention } from "./cartesian-density-runtime";
 import { resolveSemanticNumericRun } from "./cartesian-semantic-key";

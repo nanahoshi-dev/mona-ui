@@ -10,16 +10,14 @@ import type {
     ChartFunnelSeriesRegistration,
     ChartGaugeSeriesRegistration,
     ChartHeatmapSeriesRegistration,
-    ChartPolarSeriesRegistration,
-    ChartRadialArcSeriesRegistration,
-    ChartRadialBarSeriesRegistration,
+    ChartPolarSeriesRegistration
+    ,ChartRadialBarSeriesRegistration,
     ChartRadialSeriesRegistration,
     ChartReferenceBandRegistration,
     ChartReferenceLineRegistration,
     ChartRoseSeriesRegistration,
-    ChartSelectionRegistration,
-    ChartSeriesRegistration,
-    ChartTreemapSeriesRegistration,
+    ChartSelectionRegistration
+    ,ChartTreemapSeriesRegistration,
     ChartWaterfallSeriesRegistration
 } from "../context/chart-registration-context";
 import type { ChartField } from "../../models/chart.models";
@@ -765,7 +763,7 @@ export class ChartStyleResolver {
                         rawVar = inner;
                     }
                 }
-                let resolved = this.#styleSnapshot.get(rawVar)?.trim();
+                const resolved = this.#styleSnapshot.get(rawVar)?.trim();
                 if (!resolved && fallback) {
                     current = fallback;
                     continue;

@@ -1,7 +1,6 @@
 import type { ChartExportSnapshot } from "./chart-export-snapshot";
 import type { NormalizedChartExportRequest } from "./chart-export-options";
 import type { FinalizedSvgOutput } from "./chart-export-svg-finalizer";
-import { PDF_POINTS_PER_PX } from "./chart-export-options";
 import { ChartPdfCapabilityAnalyzer } from "./chart-pdf-capability-analyzer";
 import { ChartPngExporter } from "./chart-png-exporter";
 import {
@@ -177,7 +176,9 @@ export class ChartPdfExporter {
                     settled = true;
                     try {
                         reader.abort();
-                    } catch {}
+                    } catch {
+                        // Ignore: the reader may already be idle or finished.
+                    }
                     reject(new DOMException("Export was aborted", "AbortError"));
                 };
 

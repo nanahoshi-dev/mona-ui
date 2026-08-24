@@ -1,11 +1,11 @@
-import { Directive, TemplateRef } from "@angular/core";
+import { Directive, inject, TemplateRef } from "@angular/core";
 import type { ChartFunnelLabelTemplateContext } from "../models/chart-funnel.models";
 
 @Directive({
     selector: "ng-template[monaChartFunnelLabelTemplate]"
 })
 export class ChartFunnelLabelTemplateDirective {
-    public constructor(public readonly templateRef: TemplateRef<ChartFunnelLabelTemplateContext>) {}
+    public readonly templateRef = inject(TemplateRef<ChartFunnelLabelTemplateContext>);
 
     public static ngTemplateContextGuard(
         _dir: ChartFunnelLabelTemplateDirective,

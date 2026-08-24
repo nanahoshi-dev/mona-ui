@@ -1,8 +1,8 @@
-import { Component, signal, viewChild, viewChildren } from "@angular/core";
+import { Component, signal ,viewChildren } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ChartSynchronizationInput } from "../../models/chart-synchronization.models";
+import type {} from "../../models/chart-synchronization.models";
 import { ChartCrosshairComponent } from "../chart-crosshair/chart-crosshair.component";
 import { ChartXAxisComponent } from "../chart-x-axis/chart-x-axis.component";
 import { ChartYAxisComponent } from "../chart-y-axis/chart-y-axis.component";

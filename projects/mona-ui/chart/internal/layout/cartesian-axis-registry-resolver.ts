@@ -1,6 +1,6 @@
 import type { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import type {
-    ChartAxisRegistration,
+    
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";

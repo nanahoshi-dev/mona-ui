@@ -5,11 +5,11 @@ import { ChartExportDomCollector } from "./chart-export-dom-collector";
 import { ChartExportDomFreezer } from "./chart-export-dom-freezer";
 import { ChartExportColorNormalizer } from "./chart-export-color-normalizer";
 import {
-    ChartExportSvgMetadataStripper,
+    
     ChartExportSvgValidator
 } from "./chart-export-svg-validator";
 import {
-    resolveChartExportContainTransform,
+    
     resolveEffectiveIslandScale
 } from "./chart-export-geometry";
 import { ChartExportError } from "../../models/chart-export.models";

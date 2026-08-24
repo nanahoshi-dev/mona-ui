@@ -2,8 +2,7 @@ import type { ChartRect } from "../../../models/chart.models";
 import type {
     ChartWaterfallSeriesScene,
     SceneWaterfallBar,
-    SceneWaterfallConnector,
-    SceneWaterfallLabel
+    SceneWaterfallConnector
 } from "../../scene/waterfall-scene";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";

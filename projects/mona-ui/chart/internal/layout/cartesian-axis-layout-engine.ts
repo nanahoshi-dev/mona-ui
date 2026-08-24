@@ -1,15 +1,13 @@
 import type {
     ChartAxisFormatter,
-    ChartAxisPosition,
-    ChartXAxisPosition,
-    ChartXAxisType,
-    ChartYAxisPosition,
-    ChartYAxisType
+    ChartAxisPosition
+    ,ChartXAxisType
+    ,ChartYAxisType
 } from "../../models/chart-axis.models";
 import type { ChartAxisRegistrationBase } from "../context/chart-registration-context";
 import type { ChartAxisScene, ChartAxisSceneTick } from "../scene/cartesian-scene";
 import { formatXValue } from "../utils/chart-formatter";
-import { clamp, isFiniteNumber, normalizeNonNegativeNumber, normalizePositiveNumber, normalizeTickCount } from "../utils/number-utils";
+import { clamp ,normalizeNonNegativeNumber, normalizePositiveNumber, normalizeTickCount } from "../utils/number-utils";
 import { CartesianAxisLabelGeometry } from "./cartesian-axis-label-geometry";
 
 export interface CartesianScaleLike {

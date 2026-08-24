@@ -1,4 +1,4 @@
-import type { ChartDataLabelTemplateDirective } from "../../directives/chart-data-label-template.directive";
+import type {} from "../../directives/chart-data-label-template.directive";
 import type { ChartRect, ChartSize } from "../../models/chart.models";
 import type {
     ChartCartesianSeriesRegistrationBase,
@@ -15,8 +15,7 @@ import { ChartMarkIdentityResolver } from "../interaction/chart-mark-identity-re
 import { ChartDataLabelCollisionIndex } from "./chart-data-label-collision-index";
 import { ChartDataLabelContextBuilder } from "./chart-data-label-context-builder";
 import {
-    normalizeChartDataLabelOptions,
-    type NormalizedChartDataLabelOptions
+    normalizeChartDataLabelOptions
 } from "./chart-data-label-options";
 import { ChartDataLabelPlacement } from "./chart-data-label-placement";
 import { ChartDataLabelTextMeasurer } from "./chart-data-label-text-measurer";

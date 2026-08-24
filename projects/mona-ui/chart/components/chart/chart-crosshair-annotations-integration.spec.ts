@@ -14,7 +14,7 @@ import { ChartCrosshairLabelTemplateDirective } from "../../directives/chart-cro
 import { ChartReferenceLabelTemplateDirective } from "../../directives/chart-reference-label-template.directive";
 import { ChartAnnotationLabelTemplateDirective } from "../../directives/chart-annotation-label-template.directive";
 import type { ChartCrosshairMode, ChartCrosshairSnapMode } from "../../models/chart-crosshair.models";
-import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
+import type {} from "../../internal/scene/chart-scene";
 
 interface SampleDatum {
     x: number;

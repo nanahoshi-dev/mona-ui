@@ -19,7 +19,7 @@ export class ChartDiagnostics {
         if (!warnedSignatures.has(sig)) {
             warnedSignatures.add(sig);
             const outputMsg = msg.startsWith("[MonaChart]") ? msg : `[MonaChart] ${msg}`;
-            // eslint-disable-next-line no-console
+             
             console.warn(outputMsg);
         }
     }

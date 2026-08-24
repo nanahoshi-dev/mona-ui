@@ -267,21 +267,14 @@ export class ChartSynchronizationController {
     }
 
     #createMember(): import("./chart-synchronization-types").ChartSynchronizationMember {
-        const controller = this;
         return {
-            clearCrosshair(message) {
-                controller.#onRemoteCrosshairClear(message.originMemberId);
-            },
+            clearCrosshair: message => this.#onRemoteCrosshairClear(message.originMemberId),
             getCoordinateSpace: () => this.#host.getCoordinateSpace(),
             getOptions: () => this.#options,
             getViewport: () => this.#host.getViewport(),
             memberId: this.#memberId,
-            receiveCrosshair(message) {
-                controller.#onRemoteCrosshair(message);
-            },
-            receiveViewport(message) {
-                controller.#receiveViewport(message);
-            }
+            receiveCrosshair: message => this.#onRemoteCrosshair(message),
+            receiveViewport: message => this.#receiveViewport(message)
         };
     }
 
@@ -322,7 +315,7 @@ export class ChartSynchronizationController {
 
         // Recipient intra-chart link propagation belongs to the same inbound transaction.
         let composed = mapped.viewport;
-        let changedAxes = [...mapped.changedAxes];
+        const changedAxes = [...mapped.changedAxes];
         if (mapped.changedAxes.length > 0) {
             const linked = CartesianViewportLinker.propagateLinks(
                 composed,

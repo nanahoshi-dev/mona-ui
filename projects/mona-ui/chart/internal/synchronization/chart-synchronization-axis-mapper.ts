@@ -1,5 +1,5 @@
 import type { ChartSynchronizationAxisMapping } from "../../models/chart-synchronization.models";
-import type { ChartViewportAxisRef, ChartViewportConstraint } from "../../models/chart-viewport.models";
+import type { ChartViewportAxisRef } from "../../models/chart-viewport.models";
 import {
     mapContinuousRelativeWindow,
     mapCategoryRelativeWindow,

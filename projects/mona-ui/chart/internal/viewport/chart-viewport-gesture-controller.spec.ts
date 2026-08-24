@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ChartAxisScene } from "../scene/cartesian-scene";
-import type { ChartPoint, ChartRect } from "../../models/chart.models";
+import type {  ChartRect } from "../../models/chart.models";
 import type { ChartViewportChangeEvent } from "../../models/chart-viewport.models";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import {

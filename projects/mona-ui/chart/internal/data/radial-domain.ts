@@ -53,7 +53,7 @@ export function computeRadialDomain(
     }
 
     const rawTicks = scale.ticks(tickCount);
-    let ticks = [...rawTicks];
+    const ticks = [...rawTicks];
     if (ticks.length === 0) {
         ticks.push(min, max);
     }

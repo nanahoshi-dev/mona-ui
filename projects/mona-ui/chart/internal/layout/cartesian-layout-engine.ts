@@ -1,5 +1,5 @@
-import type { ChartAxisTick, ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
-import type { ChartField, ChartPadding, ChartPoint, ChartRect } from "../../models/chart.models";
+import type {  ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
+import type { ChartField ,ChartRect } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
     ChartAreaSeriesRegistration,
@@ -15,27 +15,20 @@ import type {
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
-import { calculateCategoryDomain } from "../data/chart-domain";
 import { resolveData, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
 import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { BandScale, CartesianScaleFactory, LinearScale, TimeScale, UtcScale } from "../scale/cartesian-scale-factory";
 import type {
-    ChartPositionScale,
-    ChartBandPositionScale,
-    ChartContinuousPositionScale,
+    ChartPositionScale
+    ,ChartContinuousPositionScale,
     ResolvedChartCartesianAxisType
 } from "../scale/chart-scale";
 import type {
-    ChartAreaSeriesScene,
-    ChartAxisScene,
-    ChartBarSeriesScene,
-    ChartCandlestickSeriesScene,
-    ChartLineSeriesScene,
-    ChartOhlcSeriesScene,
-    ChartRangeAreaSeriesScene,
-    ChartRangeBarSeriesScene,
-    ChartSeriesScene
+    ChartAreaSeriesScene
+    ,ChartBarSeriesScene
+    ,ChartLineSeriesScene
+    ,ChartSeriesScene
 } from "../scene/cartesian-scene";
 import type { ChartSeriesDensityMetadata } from "../scene/chart-scene";
 import { projectRangeEnvelopeIndexView, projectScalarIndexView } from "../density/cartesian-density-projector";
@@ -46,13 +39,11 @@ import { CartesianStackedAreaDenseInteractionProvider } from "../density/cartesi
 import { createDenseHitMaterializer } from "../density/cartesian-dense-hit-materializer";
 import { CartesianMarkerSpatialInteractionProvider } from "../density/cartesian-marker-dense-provider";
 import {
-    materializeCartesianMarkerDatum,
+    
     resolveCartesianMarkerDatum,
     type ResolveMarkerDatumContext
 } from "../density/cartesian-marker-hit-materializer";
 import { resolveCartesianMarkerGeometry } from "./cartesian-marker-geometry-resolver";
-import { createBubbleRadiusScale, normalizeBubbleRadiusRange } from "../scale/bubble-size-scale";
-import { normalizeMarkerRadius } from "../utils/number-utils";
 import { ChartDensityTracker, type ChartDensityStageCVisitMode } from "./chart-density-instrumentation";
 import { computeSharedStackProjection, type StackProjectionResult } from "../density/cartesian-stack-downsampler";
 import {
@@ -82,9 +73,8 @@ import { CartesianLegendBuilder } from "./cartesian-legend-builder";
 import { CartesianMarkerLayout } from "./cartesian-marker-layout";
 import { CartesianOrientationPolicy } from "./cartesian-orientation-policy";
 import {
-    CartesianAxisRegistryResolver,
-    type ResolvedCartesianAxisDescriptor,
-    type CartesianAxisRegistryResolution
+    CartesianAxisRegistryResolver
+    ,type CartesianAxisRegistryResolution
 } from "./cartesian-axis-registry-resolver";
 import {
     CartesianSeriesAxisBindingResolver,

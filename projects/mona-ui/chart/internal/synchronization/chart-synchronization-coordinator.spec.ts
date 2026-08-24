@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ChartSynchronizationCoordinator } from "./chart-synchronization-coordinator";
 import { ChartSynchronizationTracker } from "../layout/chart-density-instrumentation";
 import type {

@@ -1,9 +1,8 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type {
-    ChartBarSeriesRegistration,
-    ChartCartesianSeriesRegistration,
-    ChartXAxisRegistration,
+    ChartBarSeriesRegistration
+    ,ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import { ChartStyleResolver } from "../style/chart-style-resolver";

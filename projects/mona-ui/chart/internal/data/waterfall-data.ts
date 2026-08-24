@@ -6,7 +6,6 @@ import type { ChartWaterfallSeriesStyle } from "../scene/waterfall-scene";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { serializeKeyPart } from "../animation/animation-identity";
 import { resolveValue } from "./chart-value-resolver";
-import { isFiniteNumber } from "../utils/number-utils";
 
 export interface PreparedWaterfallPoint {
     readonly animationKey: string;

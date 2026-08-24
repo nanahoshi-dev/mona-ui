@@ -126,39 +126,59 @@ export default [
                 },
                 {
                     selector: ["classMethod", "function"],
-                    format: ["strictCamelCase"]
-                },
-                {
-                    selector: "classProperty",
-                    format: ["strictCamelCase"]
-                },
-                {
-                    selector: ["objectLiteralProperty"],
                     format: ["camelCase"]
                 },
                 {
+                    selector: "classProperty",
+                    modifiers: ["static", "readonly"],
+                    leadingUnderscore: "allow",
+                    format: ["camelCase", "UPPER_CASE"]
+                },
+                {
+                    selector: "classProperty",
+                    leadingUnderscore: "allow",
+                    format: ["camelCase"]
+                },
+                {
+                    selector: ["objectLiteralProperty", "typeProperty"],
+                    format: ["camelCase"],
+                    filter: {
+                        regex: "^([\\[(].*[\\])]|--.*|[A-Za-z]+-[A-Za-z-]*|[A-Z][A-Za-z]*)$",
+                        match: false
+                    }
+                },
+                {
                     selector: "parameter",
-                    format: ["strictCamelCase"]
+                    leadingUnderscore: "allow",
+                    format: ["camelCase"]
                 },
                 {
                     selector: "typeParameter",
                     format: ["PascalCase"]
                 },
                 {
-                    selector: "typeProperty",
-                    format: ["camelCase"]
-                },
-                {
                     selector: "variable",
                     modifiers: ["const"],
-                    format: ["strictCamelCase", "UPPER_CASE"]
+                    leadingUnderscore: "allow",
+                    format: ["camelCase", "UPPER_CASE"]
                 },
                 {
                     selector: "variable",
-                    format: ["strictCamelCase"]
+                    leadingUnderscore: "allow",
+                    format: ["camelCase"]
                 }
             ],
-            "@typescript-eslint/no-inferrable-types": "off"
+            "@typescript-eslint/no-inferrable-types": "off",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    args: "after-used",
+                    argsIgnorePattern: "^_",
+                    caughtErrorsIgnorePattern: "^_",
+                    destructuredArrayIgnorePattern: "^_",
+                    varsIgnorePattern: "^_"
+                }
+            ]
         }
     },
     ...angular.configs.templateRecommended.map(config => ({

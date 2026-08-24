@@ -8,8 +8,7 @@ import type {
 import type { CartesianAxisCoordinateSpace } from "./cartesian-axis-coordinate-space";
 import {
     CartesianViewportController,
-    type CartesianViewportTransformIntent,
-    type ViewportControllerOptions
+    type CartesianViewportTransformIntent
 } from "./cartesian-viewport-controller";
 import { CartesianViewportLinker } from "./cartesian-viewport-linker";
 import {

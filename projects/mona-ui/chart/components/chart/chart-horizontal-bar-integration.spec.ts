@@ -14,7 +14,7 @@ import { AreaSeriesComponent } from "../area-series/area-series.component";
 import { LineSeriesComponent } from "../line-series/line-series.component";
 import { RangeBarSeriesComponent } from "../range-bar-series/range-bar-series.component";
 import { RangeBarSeriesRenderer } from "../../internal/render/series/range-bar-series-renderer";
-import type { ChartAreaSeriesScene, ChartBarSeriesScene, ChartLineSeriesScene, ChartRangeBarSeriesScene } from "../../internal/scene/cartesian-scene";
+import type {  ChartBarSeriesScene ,ChartRangeBarSeriesScene } from "../../internal/scene/cartesian-scene";
 import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 

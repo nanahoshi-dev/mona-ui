@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-    ChartSelectionController,
-    toSelectedPoint
+    ChartSelectionController
 } from "./chart-selection-controller";
 import { ChartVisibleMarkIndex } from "../interaction/chart-visible-mark-index";
 import type { SceneHitTarget } from "../scene/scene-geometry";

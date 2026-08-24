@@ -112,7 +112,6 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
     #identityIndex: DenseMarkIdentityIndex | null = null;
     readonly #identity?: ChartSeriesMarkIdentityAuthority;
     readonly #materialize: (sourceIndex: number) => SceneHitTarget | null;
-    readonly #maxNeighbors: number;
     readonly #scalar: CartesianScalarDensityData;
     readonly #xScale: ChartContinuousPositionScale<number | Date>;
     readonly #yScale: ChartContinuousPositionScale<number | Date>;
@@ -122,7 +121,6 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
 
     public constructor(input: {
         readonly identity?: ChartSeriesMarkIdentityAuthority;
-        readonly maxNeighbors?: number;
         readonly materialize: (sourceIndex: number) => SceneHitTarget | null;
         readonly scalar: CartesianScalarDensityData;
         readonly seriesId?: string;
@@ -136,7 +134,6 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
         this.#materialize = input.materialize;
         this.#xScale = input.xScale;
         this.#yScale = input.yScale;
-        this.#maxNeighbors = Math.max(2, input.maxNeighbors ?? 6);
         this.seriesId = input.seriesId;
         this.xAxisId = input.xAxisId;
         this.yAxisId = input.yAxisId;

@@ -5,9 +5,8 @@ import {
     computeSourceNormalizedWindow,
     mapCategoryDomainWindow,
     mapCategoryRelativeWindow,
-    mapContinuousDomainWindow,
-    mapContinuousRelativeWindow,
-    mapDomainWindow,
+    mapContinuousDomainWindow
+    ,mapDomainWindow,
     mapRelativeWindow
 } from "./cartesian-viewport-semantic-mapper";
 import type { InternalCategoryViewport, InternalContinuousViewport } from "./cartesian-viewport-normalizer";

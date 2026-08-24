@@ -1,7 +1,7 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type {
-    ChartBarSeriesRegistration,
+    
     ChartLineSeriesRegistration,
     ChartXAxisRegistration,
     ChartYAxisRegistration

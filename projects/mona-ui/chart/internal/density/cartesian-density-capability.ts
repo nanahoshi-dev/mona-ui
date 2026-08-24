@@ -2,7 +2,7 @@ import type { ChartDownsamplingInput } from "../../models/chart-downsampling.mod
 import type { ChartSeriesType } from "../../models/chart-series.models";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import {
-    normalizeChartDownsamplingOptions,
+    
     resolveEffectiveDownsamplingPolicy,
     type NormalizedChartDownsamplingOptions
 } from "./chart-downsampling-options";

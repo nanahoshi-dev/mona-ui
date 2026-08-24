@@ -126,7 +126,7 @@ export class ChartDataLabelPlacement {
             const key = `${seriesType}:${requested}`;
             if (!ChartDataLabelPlacement.#warnedPositions.has(key)) {
                 ChartDataLabelPlacement.#warnedPositions.add(key);
-                // eslint-disable-next-line no-console
+                 
                 console.warn(
                     `[Mona Chart] Data label position "${requested}" is not supported for "${seriesType}" series. Falling back to "${fallback}".`
                 );

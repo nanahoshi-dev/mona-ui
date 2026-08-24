@@ -200,7 +200,7 @@ describe("Chart Axis Presentation & Header Layout", () => {
 
         const chartCmp = fixture.debugElement.query(By.directive(ChartComponent)).componentInstance as ChartComponent;
         const scene = chartCmp.scene() as CartesianXYChartScene;
-        const yAxisScene = scene?.axes.find(a => a.axis === "y")!;
+        const yAxisScene = scene.axes.find(a => a.axis === "y")!;
 
         expect(yAxisScene?.labelRotation).toBe(90);
         expect(yAxisScene.ticks.length).toBeGreaterThan(0);

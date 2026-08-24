@@ -1,7 +1,7 @@
 import type { ChartAreaSeriesScene } from "../../../../scene/cartesian-scene";
 import type { SceneAreaPoint } from "../../../../scene/scene-geometry";
 import { buildAreaFillPath, buildAreaStrokePath } from "../../../geometry/area-path-builder";
-import { createAreaGradientSpec, withAlpha } from "../../../series/area-gradient";
+import { createAreaGradientSpec } from "../../../series/area-gradient";
 import { createSvgElement } from "../../svg-element-utils";
 import { setSvgAttribute, withSvgAlpha } from "../../svg-attribute-utils";
 import type { SvgDefinitionRegistry } from "../../svg-definition-registry";

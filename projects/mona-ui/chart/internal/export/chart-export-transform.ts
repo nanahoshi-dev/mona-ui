@@ -126,7 +126,7 @@ function analyzeWithoutDomMatrix(value: string): ChartExportTransformAnalysis {
     }
 
     let isPureTranslation = true;
-    let is2dAffine = true;
+    const is2dAffine = true;
 
     for (const fn of functions) {
         if (THREE_D_FUNCTION_NAMES.has(fn.name)) {

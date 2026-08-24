@@ -1,5 +1,5 @@
 import { Component, signal, viewChild } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import {  TestBed } from "@angular/core/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toSelectedPoint } from "../../internal/selection/chart-selection-controller";
 import { ChartDataLabelContextBuilder } from "../../internal/data-label/chart-data-label-context-builder";
@@ -13,7 +13,7 @@ import { ChartSelectionComponent } from "../chart-selection/chart-selection.comp
 import type { ChartSelectionChangeEvent } from "../../models/chart-selection.models";
 
 @Component({
-    selector: "test-stacked-host",
+    selector: "mona-test-stacked-host",
     imports: [
         ChartComponent,
         BarSeriesComponent,
@@ -59,7 +59,7 @@ class StackedSelectionHostComponent {
 }
 
 @Component({
-    selector: "test-percent-stacked-host",
+    selector: "mona-test-percent-stacked-host",
     imports: [
         ChartComponent,
         BarSeriesComponent,

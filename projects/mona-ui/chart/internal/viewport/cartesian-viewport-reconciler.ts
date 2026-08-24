@@ -5,9 +5,8 @@ import {
     areAxisViewportsEqual,
     isFullContinuousViewport,
     type InternalAxisViewport,
-    type InternalCartesianViewportState,
-    type InternalCategoryViewport,
-    type InternalContinuousViewport
+    type InternalCartesianViewportState
+    
 } from "./cartesian-viewport-normalizer";
 
 export interface ViewportReconciliationResult {

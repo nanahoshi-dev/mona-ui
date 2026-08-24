@@ -1,5 +1,5 @@
 import type { ChartCandlestickSeriesScene } from "../../scene/cartesian-scene";
-import type { SceneCandlestickMark } from "../../scene/scene-geometry";
+import type {} from "../../scene/scene-geometry";
 import { crispPixel } from "../../utils/canvas-utils";
 
 export class CandlestickSeriesRenderer {

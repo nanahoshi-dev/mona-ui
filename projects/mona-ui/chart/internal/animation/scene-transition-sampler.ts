@@ -1,11 +1,10 @@
 import type {
-    CartesianChartScene,
+    
     CartesianFunnelChartScene,
     CartesianHeatmapChartScene,
     CartesianWaterfallChartScene,
-    CartesianXYChartScene,
-    ChartScene,
-    PolarArcChartScene,
+    CartesianXYChartScene
+    ,PolarArcChartScene,
     PolarAxisChartScene,
     PolarSectorChartScene,
     TreemapChartScene
@@ -28,7 +27,7 @@ import type {
 } from "../scene/cartesian-scene";
 import type { ChartSectorSeriesScene } from "../scene/polar-scene";
 import type { ChartContinuousPolarSeriesScene, ChartRadarSeriesScene } from "../scene/polar-axis-scene";
-import type { ChartGaugeSeriesScene, ChartRadialArcSeriesScene, ChartRoseSeriesScene, SceneRadialArcMark } from "../scene/polar-arc-scene";
+import type { ChartGaugeSeriesScene ,ChartRoseSeriesScene, SceneRadialArcMark } from "../scene/polar-arc-scene";
 import type {
     ChartInteractionBucket,
     ChartInteractionXKey,

@@ -1,5 +1,5 @@
 import type { ChartPoint, ChartRect } from "../../../models/chart.models";
-import type { ChartFunnelSeriesScene, SceneFunnelLabel, SceneFunnelStage } from "../../scene/funnel-scene";
+import type { ChartFunnelSeriesScene ,SceneFunnelStage } from "../../scene/funnel-scene";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
 import type { ChartSeriesAnimationAdapter } from "./chart-series-animation-adapter";

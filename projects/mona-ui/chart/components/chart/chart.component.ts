@@ -9,9 +9,8 @@ import {
     effect,
     ElementRef,
     inject,
-    input,
-    model,
-    output,
+    input
+    ,output,
     Signal,
     signal,
     untracked,
@@ -42,9 +41,8 @@ import {
     type ChartFunnelSeriesRegistration,
     type ChartGaugeSeriesRegistration,
     type ChartHeatmapSeriesRegistration,
-    type ChartLegendRegistration,
-    type ChartPolarSeriesRegistration,
-    type ChartRadialAxisRegistration,
+    type ChartLegendRegistration
+    ,type ChartRadialAxisRegistration,
     type ChartRadialBarSeriesRegistration,
     type ChartReferenceBandRegistration,
     type ChartReferenceLineRegistration,
@@ -87,8 +85,7 @@ import {
 } from "../../internal/brush/cartesian-brush-target-resolver";
 import { normalizeSeriesKey } from "../../internal/animation/animation-identity";
 import {
-    CartesianCrosshairResolver,
-    type CartesianCrosshairResolution
+    CartesianCrosshairResolver
 } from "../../internal/interaction/cartesian-crosshair-resolver";
 import {
     ChartPointerInteractionResolver,
@@ -108,14 +105,13 @@ import type {
 } from "../../internal/scene/cartesian-overlay-scene";
 import {
     ChartKeyboardNavigation,
-    type ChartKeyboardAxisNamespace,
-    getAvailableAxisNamespaces,
-    resolveInteractionBuckets
+    type ChartKeyboardAxisNamespace
+    ,resolveInteractionBuckets
 } from "../../internal/interaction/chart-keyboard-navigation";
 import { ChartLabelMeasurementPruner } from "../../internal/layout/chart-label-measurement-pruner";
 import { ChartLayoutEngine } from "../../internal/layout/chart-layout-engine";
 import { formatPolarLabelText } from "../../internal/layout/polar-label-layout";
-import { CanvasChartRenderer, type ChartRenderOverlayState } from "../../internal/render/canvas-chart-renderer";
+import { CanvasChartRenderer } from "../../internal/render/canvas-chart-renderer";
 import type { ChartRendererMode } from "../../models/chart-renderer.models";
 import type { ChartRenderBackend } from "../../internal/render/chart-render-backend";
 import { createChartRenderBackend } from "../../internal/render/chart-render-backend-factory";
@@ -206,19 +202,16 @@ import {
 } from "../../internal/density/cartesian-dense-selection";
 import { normalizeChartNavigationOptions } from "../../internal/viewport/chart-navigation-options";
 import {
-    areInternalViewportStatesEqual,
-    areViewportStatesEqual,
-    diffInternalViewportStates,
+    areInternalViewportStatesEqual
+    ,diffInternalViewportStates,
     normalizeViewportState,
     toPublicViewportState,
     type InternalCartesianViewportState
 } from "../../internal/viewport/cartesian-viewport-normalizer";
-import { CartesianViewportController } from "../../internal/viewport/cartesian-viewport-controller";
 import type { CartesianAxisCoordinateSpace } from "../../internal/viewport/cartesian-axis-coordinate-space";
 import { CartesianViewportOperationCoordinator } from "../../internal/viewport/cartesian-viewport-operation-coordinator";
 import { CartesianViewportReconciler } from "../../internal/viewport/cartesian-viewport-reconciler";
 import { CartesianViewportTargetResolver } from "../../internal/viewport/cartesian-viewport-target-resolver";
-import { CartesianViewportLinker } from "../../internal/viewport/cartesian-viewport-linker";
 import { ChartViewportGestureController } from "../../internal/viewport/chart-viewport-gesture-controller";
 import { ChartViewportKeyboardController } from "../../internal/viewport/chart-viewport-keyboard-controller";
 import { CartesianLayoutEngine, type CartesianXYLayoutRuntime } from "../../internal/layout/cartesian-layout-engine";
@@ -227,7 +220,7 @@ import type {
     ChartSliceContext,
     ChartSliceLabelTemplateContext
 } from "../../models/chart-polar.models";
-import type { ResolvedChartCartesianAxisType } from "../../internal/scale/chart-scale";
+import type {} from "../../internal/scale/chart-scale";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
 import type { ChartField, ChartPoint, ChartRect, ChartSize } from "../../models/chart.models";
@@ -354,7 +347,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#currentWidth = rect.width;
                 this.#currentHeight = rect.height;
                 this.#updateCanvasBackingStore(rect.width, rect.height);
-                this.#layoutReady = true;
             }
         }
 
@@ -376,7 +368,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #hasInitializedDefaultViewport = signal(false);
     #isDestroyed = false;
     #lastNormalizedControlledViewport: InternalCartesianViewportState | null = null;
-    #layoutReady: boolean = false;
     #suppressNextCanvasClick: boolean = false;
     readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
     #lastPointerResolution: ChartPointerResolution | null = null;
@@ -438,7 +429,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly viewportCursor = signal<string | null>(null);
     protected readonly crosshairState = signal<ChartCrosshairState | null>(null);
-    #remoteSyncCrosshair: ChartCrosshairState | null = null;
     protected readonly axisLabelClasses = computed(() => chartAxisLabelBaseThemeVariants());
     protected readonly crosshairLabelClasses = computed(() => chartCrosshairLabelBaseThemeVariants());
     protected readonly referenceLabelClasses = computed(() => chartReferenceLabelBaseThemeVariants());
@@ -900,7 +890,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        let currentScene = this.#renderScene ?? this.scene();
+        const currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
             if (changed) {
                 this.#paint();
@@ -1750,7 +1740,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const svg = this.svgElement()?.nativeElement ?? null;
             this.#setupRenderBackend(mode, canvas, svg);
             this.#canvasReady = true;
-            this.#layoutReady = true;
             if (!this.scene()) {
                 this.#renderScheduler.flushWithDefault(ChartInvalidationReason.Data | ChartInvalidationReason.Size);
             } else if (this.#currentWidth !== oldWidth || this.#currentHeight !== oldHeight) {
@@ -1785,13 +1774,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     try {
                         const el = target ?? this.#getSurfaceElement();
                         el?.releasePointerCapture?.(pointerId);
-                    } catch {}
+                    } catch {
+                        // Ignore: the pointer may already be released or the element detached.
+                    }
                 },
                 setPointerCapture: (pointerId: number, target?: Element | null) => {
                     try {
                         const el = target ?? this.#getSurfaceElement();
                         el?.setPointerCapture?.(pointerId);
-                    } catch {}
+                    } catch {
+                        // Ignore: the element may not support pointer capture in this environment.
+                    }
                 },
                 warnedDiagnosticSignatures: this.#warnedDiagnosticSignatures
             };
@@ -1829,7 +1822,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             if (surfaceRef) {
                 this.#initCanvasAndObserver();
                 this.#canvasReady = true;
-                this.#layoutReady = true;
             }
         }
         this.#recomputeAndPaint(reason);
@@ -2713,7 +2705,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      */
     #applyRemoteCrosshairState(state: ChartCrosshairState | null): void {
         if (this.#isDestroyed) return;
-        this.#remoteSyncCrosshair = state;
         const crosshairEnabled = this.#crosshair()?.enabled() !== false && this.#crosshair() !== null;
         if (!crosshairEnabled) {
             return;
@@ -3493,7 +3484,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#currentWidth = rect.width;
                 this.#currentHeight = rect.height;
                 this.#updateCanvasBackingStore(rect.width, rect.height);
-                this.#layoutReady = true;
             }
         }
 

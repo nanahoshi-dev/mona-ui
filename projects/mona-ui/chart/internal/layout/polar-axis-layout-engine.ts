@@ -1,5 +1,5 @@
 import { scaleLinear } from "d3-scale";
-import type { ChartLabelMeasurement, ChartRadialCurve, ChartRadialFillMode, ChartRadialGridShape } from "../../models/chart-polar.models";
+import type { ChartLabelMeasurement, ChartRadialCurve, ChartRadialFillMode } from "../../models/chart-polar.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartPadding, ChartPoint, ChartRect } from "../../models/chart.models";
 import type {
@@ -27,7 +27,7 @@ import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geom
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { canonicalPolarAngle, degreesToRadians, normalizeDegrees } from "../utils/angle-utils";
-import { clamp, isFiniteNumber, normalizeNonNegativeNumber, normalizeTickCount } from "../utils/number-utils";
+import { clamp ,normalizeNonNegativeNumber, normalizeTickCount } from "../utils/number-utils";
 
 export interface PolarAxisLayoutOptions {
     angularAxis?: ChartAngularAxisRegistration;

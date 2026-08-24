@@ -1,5 +1,5 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
-import type { ChartInteractionBucket, SceneHitTarget } from "../scene/scene-geometry";
+import type {  SceneHitTarget } from "../scene/scene-geometry";
 
 export class CartesianViewportHitPolicy {
     public static isPointInPlot(point: ChartPoint, plotRect: ChartRect, tolerance = 4): boolean {

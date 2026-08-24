@@ -1,9 +1,8 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import type {
     ChartNavigationAxisTarget,
-    ChartViewportAxisRef,
-    ChartViewportChangeEvent,
-    ChartViewportConstraint,
+    ChartViewportAxisRef
+    ,ChartViewportConstraint,
     ChartViewportLinkGroup,
     ChartViewportState
 } from "../../models/chart-viewport.models";

@@ -114,7 +114,7 @@ export class ChartMarkKeyResolver {
         if (count > 0 && isExplicit && typeof ngDevMode !== "undefined" && ngDevMode) {
             if (!this.#warnedDuplicateKeys.has(baseKey)) {
                 this.#warnedDuplicateKeys.add(baseKey);
-                // eslint-disable-next-line no-console
+                 
                 console.warn(
                     `[Mona Chart] Duplicate explicit keyField value "${part.value}" encountered in series "${this.#seriesId}". Suffixing occurrence to maintain unique identity.`
                 );

@@ -13,7 +13,7 @@ import { CartesianLayoutEngine } from "../../internal/layout/cartesian-layout-en
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
 import type { ChartSelectionChangeEvent } from "../../models/chart-selection.models";
-import type { ChartDataLabelOptions, ChartDataLabelPosition } from "../../models/chart-data-label.models";
+import type { ChartDataLabelOptions } from "../../models/chart-data-label.models";
 
 class TestResizeObserver {
     public static instances: TestResizeObserver[] = [];

@@ -203,7 +203,7 @@ describe("Chart Brush RAF Coalescing", () => {
 
     it("cancels scheduled RAF handle on manual flush and allows subsequent pointermove to schedule a new frame", () => {
         const chartEl = fixture.nativeElement.querySelector("canvas") as HTMLCanvasElement;
-        let rafCallbacks: FrameRequestCallback[] = [];
+        const rafCallbacks: FrameRequestCallback[] = [];
         const cancelSpy = vi.spyOn(window, "cancelAnimationFrame");
         const rafSpy = vi.spyOn(window, "requestAnimationFrame").mockImplementation(cb => {
             rafCallbacks.push(cb);

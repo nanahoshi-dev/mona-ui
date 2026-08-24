@@ -6,7 +6,6 @@ import type {
     ChartViewportChangeEvent,
     ChartViewportState
 } from "../../models/chart-viewport.models";
-import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import { CartesianStageTracker } from "../../internal/layout/cartesian-stage-instrumentation";
 import type { CartesianXYChartScene, PolarSectorChartScene } from "../../internal/scene/chart-scene";
 import type { ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";

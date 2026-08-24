@@ -14,7 +14,7 @@ import type {
 } from "../context/chart-registration-context";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
-import type { ChartXAxisType } from "../../models/chart-axis.models";
+import type {} from "../../models/chart-axis.models";
 import { getOrCreateBaseCategoryIndex } from "../viewport/cartesian-axis-coordinate-space";
 import { formatCartesianAxisSemanticValue } from "../utils/chart-formatter";
 

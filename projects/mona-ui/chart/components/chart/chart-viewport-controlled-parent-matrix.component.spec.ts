@@ -6,7 +6,6 @@ import type {
     ChartViewportChangeEvent,
     ChartViewportState
 } from "../../models/chart-viewport.models";
-import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import { CartesianStageTracker } from "../../internal/layout/cartesian-stage-instrumentation";
 import type { CartesianXYChartScene } from "../../internal/scene/chart-scene";
 import type { ChartXAxisType, ChartYAxisType } from "../../models/chart-axis.models";
@@ -458,7 +457,7 @@ describe("Controlled Parent State Management and Structural Mutation Matrix", ()
             expect(zoomInRes.changed).toBe(true);
             const nextX = zoomInRes.viewport.x.get("x-neg-log") as { min: number; max: number } | undefined;
             expect(nextX).toBeDefined();
-            expect(nextX?.min! <= nextX?.max!).toBe(true);
+            expect(nextX!.min <= nextX!.max).toBe(true);
             expect(Number.isNaN(nextX?.min)).toBe(false);
             expect(Number.isNaN(nextX?.max)).toBe(false);
         });

@@ -1,22 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
-    allocateSegmentBudgets,
-    enforceSourcePointCap,
-    planExactConnectedProjection,
-    projectRangeEnvelopeIndexView,
-    projectScalarIndexView,
-    projectSegmentedLttb,
-    resolveViewportContinuityNeighbors
+    allocateSegmentBudgets
+    
+    ,projectRangeEnvelopeIndexView,
+    projectScalarIndexView
 } from "./cartesian-density-projector";
 import { buildScalarDensityData, buildRangeDensityData } from "./cartesian-density-preparer";
-import { materializeStackedAreaHitTarget, resolveStackEntryXCoordinate } from "./cartesian-stack-geometry-resolver";
+import { materializeStackedAreaHitTarget } from "./cartesian-stack-geometry-resolver";
 import { computeSharedStackProjection } from "./cartesian-stack-downsampler";
-import { buildStackGroupDensityRuntime, resolveStackGroupPolicy } from "./cartesian-stack-density-runtime";
-import { buildDensityRuntime } from "./cartesian-density-runtime";
-import { LinearScale, TimeScale } from "../scale/cartesian-scale-factory";
+import { buildStackGroupDensityRuntime } from "./cartesian-stack-density-runtime";
+import { LinearScale } from "../scale/cartesian-scale-factory";
 import type { CartesianStackEntry, CartesianStackGroup } from "../data/cartesian-stack-engine";
 import { ChartDensityTracker } from "../layout/chart-density-instrumentation";
-import { CartesianDefinedSegmentIndex } from "./cartesian-density-segments";
 
 describe("Cartesian Density Viewport Crossing and Segment Budget Regressions", () => {
     describe("Exact Line Crossing Viewport with Zero In-Window Points", () => {

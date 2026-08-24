@@ -1,4 +1,4 @@
-import { clamp, isFiniteNumber, normalizeNonNegativeNumber } from "../utils/number-utils";
+import { clamp, isFiniteNumber } from "../utils/number-utils";
 
 export interface FinancialWidthOptions {
     readonly bandwidth?: number;

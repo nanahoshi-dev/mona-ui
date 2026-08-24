@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { HeatmapDataResolver, toCategoryKey, toFormattedCategoryValue } from "./heatmap-data-resolver";
+import { HeatmapDataResolver, toCategoryKey } from "./heatmap-data-resolver";
 
 describe("HeatmapDataResolver", () => {
     it("should convert primitive values and Dates to stable category keys", () => {

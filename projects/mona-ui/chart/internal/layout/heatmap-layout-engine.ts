@@ -2,7 +2,7 @@ import type { ChartAxisTick } from "../../models/chart-axis.models";
 import type { ChartField, ChartRect } from "../../models/chart.models";
 import type { ChartLegendItem } from "../../models/chart-series.models";
 import type {
-    ChartAxisRegistrationBase,
+    
     ChartHeatmapSeriesRegistration,
     ChartXAxisRegistration,
     ChartYAxisRegistration
@@ -18,11 +18,10 @@ import { HeatmapCellIndex } from "../interaction/heatmap-cell-index";
 import { BandScale } from "../scale/cartesian-scale-factory";
 import type { ChartAxisScene } from "../scene/cartesian-scene";
 import type {
-    CartesianHeatmapChartScene,
-    ChartCartesianKind
+    CartesianHeatmapChartScene
 } from "../scene/chart-scene";
 import type {
-    ChartHeatmapCategory,
+    
     ChartHeatmapSeriesScene,
     SceneHeatmapCell
 } from "../../models/chart-heatmap.models";

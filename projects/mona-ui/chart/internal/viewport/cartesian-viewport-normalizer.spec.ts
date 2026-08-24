@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { ChartViewportState } from "../../models/chart-viewport.models";
 import {
-    areAxisViewportsEqual,
-    areInternalViewportStatesEqual,
+    
+    
     areViewportStatesEqual,
     normalizeViewportState,
     toPublicViewportState,

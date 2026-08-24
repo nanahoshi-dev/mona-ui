@@ -1,5 +1,5 @@
 import type { ChartOhlcSeriesScene } from "../../scene/cartesian-scene";
-import type { SceneOhlcMark } from "../../scene/scene-geometry";
+import type {} from "../../scene/scene-geometry";
 import { crispPixel } from "../../utils/canvas-utils";
 
 export class OhlcSeriesRenderer {
