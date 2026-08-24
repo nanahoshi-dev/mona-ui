@@ -6,6 +6,7 @@ import {
 import { CartesianBrushRangeResolver } from "./cartesian-brush-range-resolver";
 import type { ResolvedCartesianBrushTarget } from "./cartesian-brush-target-resolver";
 import type { ChartBrushCategoryRange } from "../../models/chart-brush.models";
+import type { ChartPositionScale } from "../scale/chart-scale";
 
 describe("Cartesian Brush Category Extent O(log C) Performance & Boundary Semantics", () => {
     it("resolves category extent in O(log C) time over a large category domain (50,000 categories)", () => {
@@ -32,24 +33,24 @@ describe("Cartesian Brush Category Extent O(log C) Performance & Boundary Semant
 
         const xSnap: CartesianAxisCoordinateSnapshot = {
             baseDomain: categories,
-            baseScale: bandMock as any,
+            baseScale: bandMock as unknown as ChartPositionScale<unknown>,
             range: [0, 500000],
             ref: { axis: "x", axisId: "xAxis" },
             resolvedType: "category",
             valid: true,
             viewportDomain: categories,
-            viewportScale: bandMock as any
+            viewportScale: bandMock as unknown as ChartPositionScale<unknown>
         };
 
         const ySnap: CartesianAxisCoordinateSnapshot = {
             baseDomain: [0, 100],
-            baseScale: { domain: () => [0, 100], range: () => [300, 0] } as any,
+            baseScale: { domain: () => [0, 100], range: () => [300, 0] } as unknown as ChartPositionScale<unknown>,
             range: [300, 0],
             ref: { axis: "y", axisId: "yAxis" },
             resolvedType: "linear",
             valid: true,
             viewportDomain: [0, 100],
-            viewportScale: { domain: () => [0, 100], range: () => [300, 0] } as any
+            viewportScale: { domain: () => [0, 100], range: () => [300, 0] } as unknown as ChartPositionScale<unknown>
         };
 
         const coordSpace = new CartesianAxisCoordinateSpace(
@@ -100,24 +101,24 @@ describe("Cartesian Brush Category Extent O(log C) Performance & Boundary Semant
 
         const xSnap: CartesianAxisCoordinateSnapshot = {
             baseDomain: categories,
-            baseScale: bandMock as any,
+            baseScale: bandMock as unknown as ChartPositionScale<unknown>,
             range: [0, 300],
             ref: { axis: "x", axisId: "xAxis" },
             resolvedType: "category",
             valid: true,
             viewportDomain: categories,
-            viewportScale: bandMock as any
+            viewportScale: bandMock as unknown as ChartPositionScale<unknown>
         };
 
         const ySnap: CartesianAxisCoordinateSnapshot = {
             baseDomain: [0, 100],
-            baseScale: { domain: () => [0, 100], range: () => [300, 0] } as any,
+            baseScale: { domain: () => [0, 100], range: () => [300, 0] } as unknown as ChartPositionScale<unknown>,
             range: [300, 0],
             ref: { axis: "y", axisId: "yAxis" },
             resolvedType: "linear",
             valid: true,
             viewportDomain: [0, 100],
-            viewportScale: { domain: () => [0, 100], range: () => [300, 0] } as any
+            viewportScale: { domain: () => [0, 100], range: () => [300, 0] } as unknown as ChartPositionScale<unknown>
         };
 
         const coordSpace = new CartesianAxisCoordinateSpace(

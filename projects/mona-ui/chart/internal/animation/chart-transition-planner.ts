@@ -53,6 +53,8 @@ function haveSameRelativeOrder(prev: readonly string[], target: readonly string[
     return true;
 }
 
+type SceneSeriesWithOptionalAxisId = { xAxisId?: string; yAxisId?: string };
+
 export class ChartTransitionPlanner {
     public static isPathTopologyCompatible(
         prevPoints: readonly { readonly animationKey?: string; readonly defined?: boolean; readonly synthetic?: boolean }[],
@@ -555,14 +557,14 @@ export class ChartTransitionPlanner {
                             };
                         }
 
-                        const prevHasX = "xAxisId" in prevSeries && (prevSeries as any).xAxisId !== undefined;
-                        const targetHasX = "xAxisId" in targetSeries && (targetSeries as any).xAxisId !== undefined;
-                        const prevHasY = "yAxisId" in prevSeries && (prevSeries as any).yAxisId !== undefined;
-                        const targetHasY = "yAxisId" in targetSeries && (targetSeries as any).yAxisId !== undefined;
+                        const prevHasX = "xAxisId" in prevSeries && (prevSeries as SceneSeriesWithOptionalAxisId).xAxisId !== undefined;
+                        const targetHasX = "xAxisId" in targetSeries && (targetSeries as SceneSeriesWithOptionalAxisId).xAxisId !== undefined;
+                        const prevHasY = "yAxisId" in prevSeries && (prevSeries as SceneSeriesWithOptionalAxisId).yAxisId !== undefined;
+                        const targetHasY = "yAxisId" in targetSeries && (targetSeries as SceneSeriesWithOptionalAxisId).yAxisId !== undefined;
 
                         if (
-                            (prevHasX && targetHasX && (targetSeries as any).xAxisId !== (prevSeries as any).xAxisId) ||
-                            (prevHasY && targetHasY && (targetSeries as any).yAxisId !== (prevSeries as any).yAxisId)
+                            (prevHasX && targetHasX && (targetSeries as SceneSeriesWithOptionalAxisId).xAxisId !== (prevSeries as SceneSeriesWithOptionalAxisId).xAxisId) ||
+                            (prevHasY && targetHasY && (targetSeries as SceneSeriesWithOptionalAxisId).yAxisId !== (prevSeries as SceneSeriesWithOptionalAxisId).yAxisId)
                         ) {
                             return {
                                 complexity,

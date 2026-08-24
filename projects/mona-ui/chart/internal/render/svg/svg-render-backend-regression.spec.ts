@@ -9,8 +9,10 @@ import type {
     PolarAxisChartScene,
     PolarSectorChartScene
 } from "../../scene/chart-scene";
+import type { ChartSeriesScene } from "../../scene/cartesian-scene";
 import type { PolarArcChartScene } from "../../scene/polar-arc-scene";
 import type { SceneBar, SceneHitTarget } from "../../scene/scene-geometry";
+import type { HeatmapCellIndex } from "../../interaction/heatmap-cell-index";
 import type { ChartSeriesStyle } from "../../../models/chart-style.models";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
 import { SvgKeyedGroup } from "./svg-keyed-group";
@@ -100,7 +102,7 @@ describe("SVG Render Backend Regressions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 
@@ -170,7 +172,7 @@ describe("SVG Render Backend Regressions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 
@@ -188,7 +190,7 @@ describe("SVG Render Backend Regressions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 
@@ -608,7 +610,7 @@ describe("SVG Render Backend Regressions", () => {
             const scene = {
                 axes: [],
                 cartesianKind: "heatmap" as const,
-                cellIndex: {} as any,
+                cellIndex: {} as unknown as HeatmapCellIndex,
                 colorScale: {
                     domain: [0, 100] as const,
                     emptyCellColor: "gray",
@@ -745,7 +747,7 @@ describe("SVG Render Backend Regressions", () => {
             // 1. Render [s1, s2]
             backend.render({
                 presentation: null,
-                scene: createMockCartesianXYScene({ series: [s1, s2] as any }),
+                scene: createMockCartesianXYScene({ series: [s1, s2] as unknown as ChartSeriesScene[] }),
                 styleResolver
             });
 
@@ -756,7 +758,7 @@ describe("SVG Render Backend Regressions", () => {
             // 2. Reorder to [s2, s1]
             backend.render({
                 presentation: null,
-                scene: createMockCartesianXYScene({ series: [s2, s1] as any }),
+                scene: createMockCartesianXYScene({ series: [s2, s1] as unknown as ChartSeriesScene[] }),
                 styleResolver
             });
 
@@ -805,7 +807,7 @@ describe("SVG Render Backend Regressions", () => {
                         visible: true,
                         xAxisId: "x",
                         yAxisId: "y"
-                    } as any
+                    } as unknown as ChartSeriesScene
                 ]
             });
 

@@ -33,6 +33,13 @@ function isTemporalSample(val: unknown): boolean {
     return false;
 }
 
+type SeriesWithOptionalFieldAccessors = {
+    closeField?: () => ChartField | undefined;
+    data?: () => readonly unknown[] | undefined;
+    field?: () => ChartField | undefined;
+    fromField?: () => ChartField | undefined;
+};
+
 export class CartesianAxisCompatibilityPolicy {
     public static isSeriesCompatibleWithAxis(
         series: ChartSeriesRegistration,
@@ -154,7 +161,7 @@ export class CartesianAxisCompatibilityPolicy {
         const isCategoryDim = orientation === "horizontal" ? axis.dimension === "y" : axis.dimension === "x";
 
         for (const s of boundSeries) {
-            const data = resolveData("data" in s && typeof (s as any).data === "function" ? ((s as any).data() as readonly unknown[] | undefined) : undefined, rootData);
+            const data = resolveData("data" in s && typeof (s as SeriesWithOptionalFieldAccessors).data === "function" ? (s as SeriesWithOptionalFieldAccessors).data!() : undefined, rootData);
             for (let i = 0; i < data.length && samples.length < maxSamples; i++) {
                 const item = data[i];
                 if (isCategoryDim) {
@@ -166,14 +173,14 @@ export class CartesianAxisCompatibilityPolicy {
                         samples.push(val);
                     }
                 } else {
-                    if ("field" in s && typeof (s as any).field === "function") {
-                        const val = resolveValue(item, (s as any).field(), i);
+                    if ("field" in s && typeof (s as SeriesWithOptionalFieldAccessors).field === "function") {
+                        const val = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).field!(), i);
                         if (val !== null && val !== undefined) samples.push(val);
-                    } else if ("fromField" in s && typeof (s as any).fromField === "function") {
-                        const fv = resolveValue(item, (s as any).fromField(), i);
+                    } else if ("fromField" in s && typeof (s as SeriesWithOptionalFieldAccessors).fromField === "function") {
+                        const fv = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).fromField!(), i);
                         if (fv !== null && fv !== undefined) samples.push(fv);
-                    } else if ("closeField" in s && typeof (s as any).closeField === "function") {
-                        const cv = resolveValue(item, (s as any).closeField(), i);
+                    } else if ("closeField" in s && typeof (s as SeriesWithOptionalFieldAccessors).closeField === "function") {
+                        const cv = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).closeField!(), i);
                         if (cv !== null && cv !== undefined) samples.push(cv);
                     }
                 }

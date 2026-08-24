@@ -221,8 +221,8 @@ export class CartesianMultiAxisCoordinator {
             ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
             : (scale as ChartBandPositionScale).domain();
 
-        const step = typeof (scale as any).step === "function"
-            ? (scale as any).step()
+        const step = typeof (scale as ChartBandPositionScale).step === "function"
+            ? (scale as ChartBandPositionScale).step()
             : rawTicks.length > 1
                 ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
                 : 60;
@@ -304,9 +304,9 @@ export class CartesianMultiAxisCoordinator {
         const rawTicks = "ticks" in scale
             ? (scale as ChartContinuousPositionScale<number>).ticks(axis.tickCount ?? 5)
             : (scale as ChartBandPositionScale).domain();
-        const bandwidth = typeof (scale as any).bandwidth === "function" ? (scale as any).bandwidth() : 0;
-        const step = typeof (scale as any).step === "function"
-            ? (scale as any).step()
+        const bandwidth = typeof (scale as ChartBandPositionScale).bandwidth === "function" ? (scale as ChartBandPositionScale).bandwidth() : 0;
+        const step = typeof (scale as ChartBandPositionScale).step === "function"
+            ? (scale as ChartBandPositionScale).step()
             : rawTicks.length > 1
                 ? (axis.dimension === "x" ? plotRect.width : plotRect.height) / rawTicks.length
                 : 60;
@@ -326,7 +326,7 @@ export class CartesianMultiAxisCoordinator {
 
         for (let i = 0; i < rawTicks.length; i++) {
             const val = rawTicks[i];
-            let coord = (scale as ChartPositionScale<any>).map(val);
+            let coord = (scale as unknown as { map(value: unknown): number | undefined }).map(val);
             if (coord === undefined || !Number.isFinite(coord)) {
                 continue;
             }

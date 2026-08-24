@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ChartRangeAreaSeriesScene } from "../../scene/cartesian-scene";
 import type { ChartSeriesStyle } from "../../../models/chart-style.models";
 import { RangeAreaSeriesAnimationAdapter } from "./range-area-animation-adapter";
+import type { ChartAnimationPlanningContext } from "../chart-transition-types";
 
 const mockStyle: ChartSeriesStyle = {
     areaFillColor: "rgba(236, 72, 153, 0.2)",
@@ -50,7 +51,7 @@ describe("RangeAreaSeriesAnimationAdapter", () => {
             yAxisId: "default-y"
         };
 
-        const plan = adapter.createPlan(null, targetScene, {} as any);
+        const plan = adapter.createPlan(null, targetScene, {} as unknown as ChartAnimationPlanningContext);
         expect(plan.adapterType).toBe("rangeArea");
 
         const sample0 = plan.sample(0);
@@ -93,7 +94,7 @@ describe("RangeAreaSeriesAnimationAdapter", () => {
             yAxisId: "default-y"
         };
 
-        const plan = adapter.createPlan(null, targetScene, {} as any);
+        const plan = adapter.createPlan(null, targetScene, {} as unknown as ChartAnimationPlanningContext);
         const sample0 = plan.sample(0);
         expect(sample0!.points[0].defined).toBe(false);
     });
@@ -157,7 +158,7 @@ describe("RangeAreaSeriesAnimationAdapter", () => {
             yAxisId: "default-y"
         };
 
-        const plan = adapter.createPlan(previousScene, targetScene, {} as any);
+        const plan = adapter.createPlan(previousScene, targetScene, {} as unknown as ChartAnimationPlanningContext);
         const sample0 = plan.sample(0);
         expect(sample0!.points[0].defined).toBe(true);
         expect(sample0!.points[0].fromPoint!.y).toBe(70);

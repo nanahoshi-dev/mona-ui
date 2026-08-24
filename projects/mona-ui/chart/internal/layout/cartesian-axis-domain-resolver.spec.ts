@@ -94,7 +94,7 @@ describe("CartesianAxisDomainResolver", () => {
                 type: "line",
                 visible: signal(true),
                 xAxisId: signal("x1"),
-                xField: signal((d: any) => d.info.label),
+                xField: signal((d: { info: { label: string } }) => d.info.label),
                 yAxisId: signal("y1")
             };
 
@@ -123,7 +123,7 @@ describe("CartesianAxisDomainResolver", () => {
                 type: "line",
                 visible: signal(true),
                 xAxisId: signal("x1"),
-                xField: signal((d: any) => d.dateStr),
+                xField: signal((d: { dateStr: string }) => d.dateStr),
                 yAxisId: signal("y1")
             };
 
@@ -214,7 +214,7 @@ describe("CartesianAxisDomainResolver", () => {
             const series: ChartFinancialSeriesRegistration = {
                 bodyWidth: signal(undefined),
                 bodyWidthRatio: signal(0.8),
-                closeField: signal((d: any) => d.close),
+                closeField: signal((d: { close: number }) => d.close),
                 data: signal([
                     { close: 105, high: 110, low: 90, open: 100 },
                     { close: 200, high: 150, low: 100, open: 120 } // Invalid: high < close
@@ -222,15 +222,15 @@ describe("CartesianAxisDomainResolver", () => {
                 element: { nativeElement: {} as HTMLElement },
                 fallingColor: signal("#ef4444"),
                 fillMode: signal<"filled" | "hollow">("filled"),
-                highField: signal((d: any) => d.high),
+                highField: signal((d: { high: number }) => d.high),
                 id: "fin-1",
                 keyField: signal(undefined),
-                lowField: signal((d: any) => d.low),
+                lowField: signal((d: { low: number }) => d.low),
                 maxBodyWidth: signal(40),
                 name: signal("Candlestick"),
                 neutralColor: signal("#94a3b8"),
                 opacity: signal(undefined),
-                openField: signal((d: any) => d.open),
+                openField: signal((d: { open: number }) => d.open),
                 risingColor: signal("#22c55e"),
                 type: "candlestick",
                 valueFormatter: signal(undefined),
@@ -256,12 +256,12 @@ describe("CartesianAxisDomainResolver", () => {
                     { radius: -5, y: -999 } // Invalid size < 0
                 ]),
                 element: { nativeElement: {} as HTMLElement },
-                field: signal((d: any) => d.y),
+                field: signal((d: { y: number }) => d.y),
                 id: "bub-1",
                 maxRadius: signal(30),
                 minRadius: signal(5),
                 name: signal("Bubble"),
-                sizeField: signal((d: any) => d.radius),
+                sizeField: signal((d: { radius: number }) => d.radius),
                 type: "bubble",
                 visible: signal(true),
                 xAxisId: signal("x1"),

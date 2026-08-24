@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ChartCandlestickSeriesScene, ChartOhlcSeriesScene } from "../../scene/cartesian-scene";
 import type { SceneCandlestickMark, SceneOhlcMark } from "../../scene/scene-geometry";
 import { FinancialSeriesAnimationAdapter } from "./financial-animation-adapter";
+import type { ChartAnimationPlanningContext } from "../chart-transition-types";
 
 describe("FinancialSeriesAnimationAdapter", () => {
     const adapter = new FinancialSeriesAnimationAdapter();
@@ -67,7 +68,7 @@ describe("FinancialSeriesAnimationAdapter", () => {
         };
 
         const targetScene = createCandlestickScene([mark], 16);
-        const plan = adapter.createPlan(null, targetScene, {} as any);
+        const plan = adapter.createPlan(null, targetScene, {} as unknown as ChartAnimationPlanningContext);
 
         const sampled0 = plan.sample(0) as ChartCandlestickSeriesScene;
         expect(sampled0.marks[0].renderOpacity).toBe(0);
@@ -104,7 +105,7 @@ describe("FinancialSeriesAnimationAdapter", () => {
         };
 
         const sourceScene = createOhlcScene([mark], 16);
-        const plan = adapter.createPlan(sourceScene, null, {} as any);
+        const plan = adapter.createPlan(sourceScene, null, {} as unknown as ChartAnimationPlanningContext);
 
         const sampled0 = plan.sample(0) as ChartOhlcSeriesScene;
         expect(sampled0.marks[0].renderOpacity).toBe(1);
@@ -161,7 +162,7 @@ describe("FinancialSeriesAnimationAdapter", () => {
             xValue: "2026-01-01"
         };
 
-        const plan = adapter.createPlan(createCandlestickScene([markA], 20), createCandlestickScene([markB], 30), {} as any);
+        const plan = adapter.createPlan(createCandlestickScene([markA], 20), createCandlestickScene([markB], 30), {} as unknown as ChartAnimationPlanningContext);
 
         const mid = plan.sample(0.5) as ChartCandlestickSeriesScene;
         expect(mid.marks[0].centerX).toBe(125);
