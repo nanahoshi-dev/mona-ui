@@ -145,7 +145,7 @@ export function resolveCartesianMarkerDatum(
 
     const yVal = Number(rawYVal);
     const xPos = resolvedX.coordinate;
-    const yPos = (context.yScale as any).map(yVal);
+    const yPos = context.yScale.map(yVal);
     if (xPos === undefined || yPos === undefined || !Number.isFinite(xPos) || !Number.isFinite(yPos)) {
         return null;
     }
@@ -195,7 +195,7 @@ export function resolveCartesianMarkerDatum(
         datum,
         formattedCategory: formatXValue(rawXVal, sourceIndex, context.xAxisFormatter, context.xAxisType, context.xTimeSpanMs),
         formattedSize: formattedSizeStr,
-        formattedValue: formatYValue(yVal, sourceIndex, context.yAxisFormatter ?? (context.valueFormatter as any)),
+        formattedValue: formatYValue(yVal, sourceIndex, context.yAxisFormatter ?? (context.valueFormatter as ChartAxisFormatter<unknown> | undefined)),
         index: sourceIndex,
         markerInteractionOrder: {
             seriesOrdinal: context.seriesOrdinal ?? 0,

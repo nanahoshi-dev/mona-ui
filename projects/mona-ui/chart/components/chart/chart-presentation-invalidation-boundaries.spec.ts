@@ -13,7 +13,7 @@ import { CartesianLayoutEngine } from "../../internal/layout/cartesian-layout-en
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartBrushChangeEvent } from "../../models/chart-brush.models";
 import type { ChartSelectionChangeEvent } from "../../models/chart-selection.models";
-import type { ChartDataLabelOptions } from "../../models/chart-data-label.models";
+import type { ChartDataLabelContext, ChartDataLabelOptions } from "../../models/chart-data-label.models";
 
 class TestResizeObserver {
     public static instances: TestResizeObserver[] = [];
@@ -185,7 +185,7 @@ describe("Chart Presentation Stage Invalidation Boundaries", () => {
             stroke: vi.fn(),
             strokeRect: vi.fn(),
             strokeText: vi.fn()
-        } as any);
+        } as unknown as CanvasRenderingContext2D);
 
         stageASpy = vi.spyOn(ChartLayoutEngine, "prepareStructural");
         stageBSpy = vi.spyOn(CartesianLayoutEngine, "recomputeChrome");
@@ -345,7 +345,7 @@ describe("Chart Presentation Stage Invalidation Boundaries", () => {
 
             host.dataLabelOptions.set({
                 color: "#10b981",
-                formatter: (ctx: any) => `${ctx.value} pts`
+                formatter: (ctx: ChartDataLabelContext) => `${ctx.value} pts`
             });
             fixture.detectChanges();
 

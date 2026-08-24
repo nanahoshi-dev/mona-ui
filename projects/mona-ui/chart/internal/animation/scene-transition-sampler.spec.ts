@@ -6,6 +6,7 @@ import type {
     PolarSectorChartScene
 } from "../scene/chart-scene";
 import type { ChartBarSeriesScene } from "../scene/cartesian-scene";
+import type { ChartRadialBarSeriesScene, PolarArcChartScene } from "../scene/polar-arc-scene";
 import { BarSeriesAnimationAdapter } from "./adapters/bar-animation-adapter";
 import { FinancialSeriesAnimationAdapter } from "./adapters/financial-animation-adapter";
 import { FunnelAnimationAdapter } from "./adapters/funnel-animation-adapter";
@@ -301,7 +302,7 @@ describe("SceneTransitionSampler", () => {
     });
 
     it("should sample radial bar scene correctly at progress 0.5 without squared opacity", () => {
-        const toScene: any = {
+        const toScene = {
             arcMode: "radialBar",
             center: { x: 200, y: 200 },
             coordinateSystem: "polar",
@@ -347,7 +348,7 @@ describe("SceneTransitionSampler", () => {
                 }
             ],
             width: 400
-        };
+        } as unknown as PolarArcChartScene;
 
         const adapter = new RadialArcAnimationAdapter();
         const seriesPlan = adapter.createPlan(null, toScene.series[0], {
@@ -368,9 +369,10 @@ describe("SceneTransitionSampler", () => {
         };
 
         const frameMid = SceneTransitionSampler.sampleFrame(plan, 0.5);
-        const sampled = frameMid.scene as any;
-        expect(sampled.series[0].renderOpacity).toBe(1);
-        expect(sampled.series[0].marks[0].renderOpacity).toBeCloseTo(0.5, 2);
+        const sampled = frameMid.scene as PolarArcChartScene;
+        const radialBarSeries = sampled.series[0] as ChartRadialBarSeriesScene;
+        expect(radialBarSeries.renderOpacity).toBe(1);
+        expect(radialBarSeries.marks[0].renderOpacity).toBeCloseTo(0.5, 2);
     });
 
     it("should sample waterfall scene and query sampled geometry without target-slot bias (FWF-C10)", () => {

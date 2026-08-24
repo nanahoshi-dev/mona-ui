@@ -246,7 +246,7 @@ describe("Chart Financial Series Integration (Candlestick & OHLC)", () => {
     });
 
     it("should render candlestick marks properly when xAxisType is auto", () => {
-        host.xAxisType.set("auto" as any);
+        host.xAxisType.set("auto" as unknown as "category" | "linear" | "time");
         fixture.detectChanges();
 
         const scene = chartComponent.scene();
@@ -264,7 +264,7 @@ describe("Chart Financial Series Integration (Candlestick & OHLC)", () => {
     it("should render OHLC marks properly when showOhlc is active and xAxisType is auto", () => {
         host.showCandlestick.set(false);
         host.showOhlc.set(true);
-        host.xAxisType.set("auto" as any);
+        host.xAxisType.set("auto" as unknown as "category" | "linear" | "time");
         fixture.detectChanges();
 
         const scene = chartComponent.scene();

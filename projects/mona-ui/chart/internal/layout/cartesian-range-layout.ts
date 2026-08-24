@@ -107,8 +107,8 @@ export function computeRangeBarLayout(ctx: RangeBarLayoutContext): ChartRangeBar
             continue;
         }
 
-        const rawFromY = (yScale as any).map(range.fromValue);
-        const rawToY = (yScale as any).map(range.toValue);
+        const rawFromY = yScale.map(range.fromValue);
+        const rawToY = yScale.map(range.toValue);
         if (rawFromY === undefined || !Number.isFinite(rawFromY) || rawToY === undefined || !Number.isFinite(rawToY)) {
             continue;
         }

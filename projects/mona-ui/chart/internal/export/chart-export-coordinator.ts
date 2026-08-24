@@ -76,10 +76,10 @@ export class ChartExportCoordinator {
                 case "pdf":
                     return await ChartPdfExporter.exportPdf(finalizedSvg, snapshot, request);
                 default:
-                    throw new ChartExportError("not-ready", `Unsupported format: ${(request as any).format}`);
+                    throw new ChartExportError("not-ready", `Unsupported format: ${(request as unknown as { format: unknown }).format}`);
             }
-        } catch (err: any) {
-            if (err instanceof ChartExportError || err?.name === "AbortError") {
+        } catch (err: unknown) {
+            if (err instanceof ChartExportError || (err as { name?: string } | undefined)?.name === "AbortError") {
                 throw err;
             }
 
@@ -94,7 +94,7 @@ export class ChartExportCoordinator {
 
             throw new ChartExportError(
                 fallbackCode,
-                `Chart export failed during ${stage}: ${err?.message ?? err}`,
+                `Chart export failed during ${stage}: ${(err as { message?: string } | undefined)?.message ?? err}`,
                 { cause: err }
             );
         }

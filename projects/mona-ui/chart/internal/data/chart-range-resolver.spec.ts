@@ -74,8 +74,8 @@ describe("chart-range-resolver", () => {
         const datum = { values: [15, 45] };
         const resolved = resolveFiniteRangeValues(
             datum,
-            (d: any) => d.values[0],
-            (d: any) => d.values[1],
+            (d: { values: number[] }) => d.values[0],
+            (d: { values: number[] }) => d.values[1],
             0
         );
         expect(resolved).toEqual({

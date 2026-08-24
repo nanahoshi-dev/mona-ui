@@ -16,6 +16,11 @@ import { SvgOhlcSeriesRenderer } from "./series/svg-ohlc-series-renderer";
 import { SvgRangeAreaSeriesRenderer } from "./series/svg-range-area-series-renderer";
 import { SvgRangeBarSeriesRenderer } from "./series/svg-range-bar-series-renderer";
 
+interface SvgSeriesRendererLike {
+    clear(): void;
+    render(scene: ChartSeriesScene, defs?: SvgDefinitionRegistry): void;
+}
+
 export class SvgCartesianContentRenderer {
     readonly #axesGroup: SVGGElement;
     readonly #axisRenderer: SvgCartesianAxisRenderer;
@@ -26,7 +31,7 @@ export class SvgCartesianContentRenderer {
     readonly #overlayRenderer: SvgCartesianOverlayRenderer;
     readonly #seriesContainers = new Map<string, SVGGElement>();
     readonly #seriesGroup: SVGGElement;
-    readonly #seriesRenderers = new Map<string, { renderer: any; type: string }>();
+    readonly #seriesRenderers = new Map<string, { renderer: SvgSeriesRendererLike; type: string }>();
     readonly #underlayGroup: SVGGElement;
     public constructor(container: SVGGElement) {
         this.#container = container;
@@ -84,7 +89,7 @@ export class SvgCartesianContentRenderer {
             }
 
             if (!entry) {
-                let renderer: any = null;
+                let renderer: SvgSeriesRendererLike | null = null;
                 switch (s.type) {
                     case "area":
                         renderer = new SvgAreaSeriesRenderer(group);
