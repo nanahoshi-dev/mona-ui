@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ChartExportDomCollector } from "./chart-export-dom-collector";
 import { ChartExportDomFreezer } from "./chart-export-dom-freezer";
 import { ChartPdfCapabilityAnalyzer } from "./chart-pdf-capability-analyzer";
@@ -20,6 +20,15 @@ const ONE_PX_PNG_BYTES = Uint8Array.from(
     atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="),
     c => c.charCodeAt(0)
 );
+
+const mountedTestRoots = new Set<HTMLElement>();
+
+afterEach(() => {
+    for (const root of mountedTestRoots) {
+        root.remove();
+    }
+    mountedTestRoots.clear();
+});
 
 /**
  * Deterministic bitmap-decode fake mirroring real-browser admission on the
@@ -79,6 +88,7 @@ function createHostWithRect(width = 600, height = 400): HTMLElement {
         value: () => ({ bottom: height, height, left: 0, right: width, top: 0, width, x: 0, y: 0 })
     });
     document.body.appendChild(host);
+    mountedTestRoots.add(host);
     return host;
 }
 
@@ -101,6 +111,7 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
             picture.appendChild(img);
             source.appendChild(picture);
             document.body.appendChild(source);
+            mountedTestRoots.add(source);
 
             const clone = source.cloneNode(true) as HTMLElement;
             ChartExportDomFreezer.freeze(source, clone);
@@ -435,6 +446,7 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
             el.setAttribute("data-mona-chart-export-role", "data-label-template");
             el.textContent = "Template";
             document.body.appendChild(el);
+            mountedTestRoots.add(el);
             return el;
         }
 

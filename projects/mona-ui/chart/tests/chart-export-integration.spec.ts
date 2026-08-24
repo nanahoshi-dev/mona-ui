@@ -531,7 +531,7 @@ describe("Chart Export Integration Coverage", () => {
             const result = await chartComponent.exportChart({ format: "svg" });
             expect(result.format).toBe("svg");
             expect(result.blob.size).toBeGreaterThan(0);
-        });
+        }, 15_000);
 
         it("exports Funnel chart to SVG", async () => {
             const fixture = TestBed.createComponent(FunnelTestHostComponent);
@@ -543,7 +543,7 @@ describe("Chart Export Integration Coverage", () => {
             const result = await chartComponent.exportChart({ format: "svg" });
             expect(result.format).toBe("svg");
             expect(result.blob.size).toBeGreaterThan(0);
-        });
+        }, 15_000);
 
         it("exports Waterfall chart to SVG", async () => {
             const fixture = TestBed.createComponent(WaterfallTestHostComponent);

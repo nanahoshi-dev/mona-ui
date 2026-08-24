@@ -365,21 +365,21 @@ describe("TabListComponent", () => {
 
         it("should scroll horizontally when clicking the next control", async () => {
             const scrollBy = vi.fn();
-            (Element.prototype as unknown as { scrollBy: unknown }).scrollBy = scrollBy;
             mockOverflow("x");
             fixture.componentRef.setInput("tabList", makeTabs());
             fixture.detectChanges();
             await flushAsync();
             fixture.detectChanges();
+            const tabListElement = fixture.debugElement.query(By.css("ul[role='tablist']"))
+                .nativeElement as HTMLUListElement;
+            Object.defineProperty(tabListElement, "scrollBy", { configurable: true, value: scrollBy });
             const nextButton = overflowButtons()[1];
             nextButton.triggerEventHandler("click", {});
-            await new Promise(resolve => setTimeout(resolve, 100));
-            expect(scrollBy).toHaveBeenCalledWith({ left: 100, behavior: "smooth" });
+            await vi.waitFor(() => expect(scrollBy).toHaveBeenCalledWith({ left: 100, behavior: "smooth" }));
         });
 
         it("should scroll vertically when clicking the next control", async () => {
             const scrollBy = vi.fn();
-            (Element.prototype as unknown as { scrollBy: unknown }).scrollBy = scrollBy;
             fixture.componentRef.setInput("position", "left");
             fixture.detectChanges();
             mockOverflow("y");
@@ -387,10 +387,12 @@ describe("TabListComponent", () => {
             fixture.detectChanges();
             await flushAsync();
             fixture.detectChanges();
+            const tabListElement = fixture.debugElement.query(By.css("ul[role='tablist']"))
+                .nativeElement as HTMLUListElement;
+            Object.defineProperty(tabListElement, "scrollBy", { configurable: true, value: scrollBy });
             const nextButton = overflowButtons()[1];
             nextButton.triggerEventHandler("click", {});
-            await new Promise(resolve => setTimeout(resolve, 100));
-            expect(scrollBy).toHaveBeenCalledWith({ top: 100, behavior: "smooth" });
+            await vi.waitFor(() => expect(scrollBy).toHaveBeenCalledWith({ top: 100, behavior: "smooth" }));
         });
 
         it("should stop continuous scrolling on pointercancel", async () => {
