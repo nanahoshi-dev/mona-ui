@@ -308,8 +308,8 @@ describe("CartesianHorizontalBarLayoutEngine", () => {
 
     it("emits diagnostics when non-linear X axis or non-category Y axis is configured", () => {
         const barSeries = createMockBarSeries();
-        const xAxis = createMockXAxis({ type: signal("category" as any) });
-        const yAxis = createMockYAxis({ type: signal("linear" as any) });
+        const xAxis = createMockXAxis({ type: signal("category") });
+        const yAxis = createMockYAxis({ type: signal("linear") });
         const warned = new Set<string>();
 
         CartesianHorizontalBarLayoutEngine.computeLayout({

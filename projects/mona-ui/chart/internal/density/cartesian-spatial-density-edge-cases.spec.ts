@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CartesianSpatialDensityIndex } from "./cartesian-spatial-density-index";
 import { CartesianMarkerSpatialInteractionProvider } from "./cartesian-marker-dense-provider";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
+import type { ChartContinuousPositionScale } from "../scale/chart-scale";
 
 describe("Cartesian Spatial Density Edge Cases", () => {
     it("handles dynamic root bounds containing normalized points outside [0, 1]", () => {
@@ -98,10 +99,10 @@ describe("Cartesian Spatial Density Edge Cases", () => {
             seriesId: "scatter-1",
             xAxisId: "x-main",
             xBaseNormalize: val => Number(val) / 100,
-            xViewportScale: xScale as any,
+            xViewportScale: xScale as unknown as ChartContinuousPositionScale<number>,
             yAxisId: "y-main",
             yBaseNormalize: val => Number(val) / 100,
-            yViewportScale: yScale as any
+            yViewportScale: yScale as unknown as ChartContinuousPositionScale<number>
         });
 
         // Query box near but not touching the center (center is at 200, query is 185 to 195)

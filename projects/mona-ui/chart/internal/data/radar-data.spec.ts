@@ -1,4 +1,5 @@
 import { signal } from "@angular/core";
+import type { ElementRef } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type { ChartRadarSeriesRegistration } from "../context/chart-registration-context";
 import { formatRadarValue, prepareRadarData } from "./radar-data";
@@ -18,7 +19,7 @@ function createRadarSeries(config: {
         connectNulls: signal(false),
         curve: signal("linear"),
         data: signal(config.data),
-        element: {} as any,
+        element: {} as unknown as ElementRef<HTMLElement>,
         field: signal(config.field ?? "value"),
         fillMode: signal("none"),
         fillOpacity: signal(undefined),
@@ -28,7 +29,7 @@ function createRadarSeries(config: {
         showPoints: signal(true),
         strokeWidth: signal(undefined),
         type: "radar",
-        valueFormatter: signal(config.valueFormatter as any),
+        valueFormatter: signal(config.valueFormatter),
         visible: signal(config.visible ?? true)
     };
 }

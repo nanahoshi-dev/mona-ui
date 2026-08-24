@@ -1,4 +1,4 @@
-import { signal, type ElementRef } from "@angular/core";
+import { signal, type ElementRef, type WritableSignal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type { ChartBarSeriesRegistration } from "../context/chart-registration-context";
 import { CartesianStackEngine } from "../data/cartesian-stack-engine";
@@ -109,9 +109,9 @@ describe("CartesianBarSlots", () => {
 
     it("should isolate stack slots when series have different axis bindings with same stack name", () => {
         const s1 = createMockBarSeries({ field: "a", id: "s1", stack: "sales" });
-        (s1.yAxisId as any).set("y1");
+        (s1.yAxisId as WritableSignal<string | undefined>).set("y1");
         const s2 = createMockBarSeries({ field: "b", id: "s2", stack: "sales" });
-        (s2.yAxisId as any).set("y2");
+        (s2.yAxisId as WritableSignal<string | undefined>).set("y2");
 
         const series = [s1, s2];
         const stackLayout = CartesianStackEngine.computeLayout({

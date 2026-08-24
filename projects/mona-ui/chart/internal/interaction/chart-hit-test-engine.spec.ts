@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ChartScene } from "../scene/chart-scene";
-import type { SceneHitTarget } from "../scene/scene-geometry";
+import type { ChartInteractionXKey, SceneHitTarget } from "../scene/scene-geometry";
+import type { CartesianFinancialIndex } from "./cartesian-financial-index";
 import { ChartHitTestEngine } from "./chart-hit-test-engine";
 
 describe("ChartHitTestEngine", () => {
@@ -255,7 +256,7 @@ describe("ChartHitTestEngine", () => {
             yValue: 25
         };
 
-        const bucketLookup = new Map<string, any>([
+        const bucketLookup = new Map<ChartInteractionXKey, { anchor: { x: number; y: number }; hits: SceneHitTarget[]; order: number; xKey: string; xValue: number }>([
             ["10", { anchor: { x: 100, y: 100 }, hits: [bottomMarker, topMarker], order: 0, xKey: "10", xValue: 10 }]
         ]);
 
@@ -455,7 +456,7 @@ describe("ChartHitTestEngine", () => {
                 axes: [],
                 cartesianKind: "xy",
                 coordinateSystem: "cartesian",
-                financialIndex: financialIndex as any,
+                financialIndex: financialIndex as unknown as CartesianFinancialIndex,
                 hasRenderableData: true,
                 height: 300,
                 hitTargets: [targetBottom, targetTop],

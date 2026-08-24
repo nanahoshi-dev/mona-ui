@@ -65,11 +65,11 @@ function installResourceCaptureMocks(dataUrl: string): () => void {
             setTimeout(() => this.onloadend?.(), 0);
         }
     }
-    (window as any).FileReader = MockFileReader;
+    (window as unknown as { FileReader: unknown }).FileReader = MockFileReader;
 
     return () => {
         window.fetch = originalFetch;
-        (window as any).FileReader = originalFileReader;
+        (window as unknown as { FileReader: unknown }).FileReader = originalFileReader;
     };
 }
 
