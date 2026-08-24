@@ -27,6 +27,7 @@ describe("TabListComponent", () => {
         fixture.componentRef.setInput("tabList", makeTabs());
         fixture.detectChanges();
         await fixture.whenStable();
+        await fixture.whenRenderingDone();
     });
 
     it("should create", () => {

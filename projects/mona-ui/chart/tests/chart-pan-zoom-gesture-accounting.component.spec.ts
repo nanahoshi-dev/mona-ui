@@ -122,6 +122,7 @@ describe("Pan and Zoom Gesture Accounting and Boundary Handling", () => {
         fixture = TestBed.createComponent(SeventhRemediationHostComponent);
         host = fixture.componentInstance;
         fixture.detectChanges();
+        await fixture.whenRenderingDone();
     });
 
     afterEach(() => {
