@@ -14,13 +14,16 @@ import {
 import { buildScalarDensityData } from "./cartesian-density-preparer";
 import { LinearScale } from "../scale/cartesian-scale-factory";
 import type { CartesianStackEntry } from "../data/cartesian-stack-engine";
+import type { CartesianDenseMarkIdentityQuery } from "./cartesian-dense-interaction-provider";
+import type { ChartAreaSeriesRegistration } from "../context/chart-registration-context";
+import type { SceneHitTarget } from "../scene/scene-geometry";
 
 describe("Cartesian Density Marker Identity and Downsampling Regressions", () => {
     describe("Unified Mark Identity Authority", () => {
         it("resolves and locates keys without materializing source data arrays", () => {
             const data = [{ x: 10, y: 100 }, { x: 20, y: 200 }, { x: 30, y: 300 }];
             const authority = new ChartSeriesMarkIdentityAuthority("s1", data, {
-                extractNaturalKey: (d: any) => d.x
+                extractNaturalKey: (d: unknown) => (d as { x: number }).x
             });
 
             const key = authority.resolveKeyAt(1, 20, data[1]);
@@ -34,7 +37,7 @@ describe("Cartesian Density Marker Identity and Downsampling Regressions", () =>
                 value: rawValue
             };
 
-            const located = authority.locate(query as any);
+            const located = authority.locate(query as unknown as CartesianDenseMarkIdentityQuery);
             expect(located).toBe(1);
         });
     });
@@ -134,7 +137,7 @@ describe("Cartesian Density Marker Identity and Downsampling Regressions", () =>
 
             const provider = new CartesianStackedAreaDenseInteractionProvider({
                 groupRuntime: runtime!,
-                series: { id: "s1" } as any,
+                series: { id: "s1" } as unknown as ChartAreaSeriesRegistration,
                 seriesDisplayName: "Series 1",
                 xAxisId: "default-x",
                 xScale: new LinearScale([0, 10], [0, 100]),
@@ -163,7 +166,7 @@ describe("Cartesian Density Marker Identity and Downsampling Regressions", () =>
                     datum: { x: 50, y: idx === 0 ? 20 : 80 },
                     point: { x: 50, y: idx === 0 ? 20 : 80 },
                     seriesId: "marker-s1"
-                } as any),
+                } as unknown as SceneHitTarget),
                 maxVisualRadius: 4,
                 seriesId: "marker-s1",
                 sourceData: [{ x: 50, y: 20 }, { x: 50, y: 80 }],

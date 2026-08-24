@@ -12,6 +12,7 @@ import { buildStackGroupDensityRuntime } from "./cartesian-stack-density-runtime
 import { LinearScale } from "../scale/cartesian-scale-factory";
 import type { CartesianStackEntry, CartesianStackGroup } from "../data/cartesian-stack-engine";
 import { ChartDensityTracker } from "../layout/chart-density-instrumentation";
+import type { ChartAreaSeriesRegistration, ChartXAxisRegistration, ChartYAxisRegistration } from "../context/chart-registration-context";
 
 describe("Cartesian Density Viewport Crossing and Segment Budget Regressions", () => {
     describe("Exact Line Crossing Viewport with Zero In-Window Points", () => {
@@ -346,7 +347,7 @@ describe("Cartesian Density Viewport Crossing and Segment Budget Regressions", (
                 field: () => "val",
                 id: "s1",
                 visible: () => true
-            } as any;
+            } as unknown as ChartAreaSeriesRegistration;
 
             const target = materializeStackedAreaHitTarget({
                 baseY: 200,
@@ -357,11 +358,11 @@ describe("Cartesian Density Viewport Crossing and Segment Budget Regressions", (
                 topY: 100,
                 x: 150,
                 xFormatter: (v: unknown) => `Date: ${v}`,
-                xAxis: { formatter: (v: unknown) => `Date: ${v}` } as any,
+                xAxis: { formatter: (v: unknown) => `Date: ${v}` } as unknown as ChartXAxisRegistration,
                 xAxisId: "x1",
                 xScaleType: "time",
                 yFormatter: (v: unknown) => `${v}%`,
-                yAxis: { formatter: (v: unknown) => `${v}%` } as any, // percent formatter on Y axis
+                yAxis: { formatter: (v: unknown) => `${v}%` } as unknown as ChartYAxisRegistration, // percent formatter on Y axis
                 yAxisId: "y1"
             });
 
@@ -395,7 +396,7 @@ describe("Cartesian Density Viewport Crossing and Segment Budget Regressions", (
                 pointRadius: () => 8,
                 showPoints: () => true,
                 visible: () => true
-            } as any;
+            } as unknown as ChartAreaSeriesRegistration;
 
             const target = materializeStackedAreaHitTarget({
                 baseY: 200,

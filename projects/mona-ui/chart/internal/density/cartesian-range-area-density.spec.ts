@@ -4,6 +4,7 @@ import { projectRangeEnvelopeIndexView } from "./cartesian-density-projector";
 import { CartesianRangeAreaDenseInteractionProvider } from "./cartesian-range-dense-interaction-provider";
 import { CartesianScaleFactory } from "../scale/cartesian-scale-factory";
 import type { ChartRangeAreaSeriesRegistration } from "../context/chart-registration-context";
+import type { ChartContinuousPositionScale } from "../scale/chart-scale";
 
 describe("Cartesian Range Area Density", () => {
     it("builds range density data with lowExtrema and highExtrema indexes", () => {
@@ -65,7 +66,7 @@ describe("Cartesian Range Area Density", () => {
             plotSpanPx: 500,
             range,
             samplesPerPixel: 1,
-            viewportScale: scale as any
+            viewportScale: scale as ChartContinuousPositionScale<number | Date>
         });
 
         expect(envelope.sampled).toBe(true);
@@ -109,16 +110,16 @@ describe("Cartesian Range Area Density", () => {
             toField: () => "to",
             type: "rangeArea",
             visible: () => true
-        } as any;
+        } as unknown as ChartRangeAreaSeriesRegistration;
 
         const provider = new CartesianRangeAreaDenseInteractionProvider({
             range,
             series: mockSeries,
             seriesDisplayName: "Range Area 1",
             xAxisId: "x-main",
-            xScale: xScale as any,
+            xScale: xScale as ChartContinuousPositionScale<number | Date>,
             yAxisId: "y-main",
-            yScale: yScale as any
+            yScale: yScale as ChartContinuousPositionScale<number>
         });
 
         const hit = provider.materializeAt(1);

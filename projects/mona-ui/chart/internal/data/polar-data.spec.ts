@@ -115,10 +115,10 @@ describe("polar-data", () => {
 
     it("should respect custom formatters and accessors", () => {
         const series = createMockPieSeries({
-            categoryField: signal((d: any) => d.name.toUpperCase()),
-            categoryFormatter: signal((c: any) => `Browser: ${c}`),
-            field: signal((d: any) => d.val * 2),
-            valueFormatter: signal((v: any) => `$${v}`)
+            categoryField: signal((d: { name: string }) => d.name.toUpperCase()),
+            categoryFormatter: signal((c: unknown) => `Browser: ${c}`),
+            field: signal((d: { val: number }) => d.val * 2),
+            valueFormatter: signal((v: unknown) => `$${v}`)
         });
         const rootData = [{ name: "Chrome", val: 10 }];
 

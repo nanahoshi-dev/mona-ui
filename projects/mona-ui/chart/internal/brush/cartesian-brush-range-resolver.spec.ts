@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CartesianBrushRangeResolver } from "./cartesian-brush-range-resolver";
-import type { CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
+import type { CartesianAxisCoordinateSnapshot, CartesianAxisCoordinateSpace } from "../viewport/cartesian-axis-coordinate-space";
 
 describe("CartesianBrushRangeResolver", () => {
     it("should return empty object if brush is invalid", () => {
@@ -15,15 +15,15 @@ describe("CartesianBrushRangeResolver", () => {
 
     it("should resolve continuous x and y ranges", () => {
         const xMap = new Map([
-            ["x-main", { axisId: "x-main", resolvedType: "linear", valid: true } as any]
+            ["x-main", { axisId: "x-main", resolvedType: "linear", valid: true } as unknown as CartesianAxisCoordinateSnapshot]
         ]);
         const yMap = new Map([
-            ["y-main", { axisId: "y-main", resolvedType: "linear", valid: true } as any]
+            ["y-main", { axisId: "y-main", resolvedType: "linear", valid: true } as unknown as CartesianAxisCoordinateSnapshot]
         ]);
 
         const mockCoordSpace: Partial<CartesianAxisCoordinateSpace> = {
-            x: xMap as any,
-            y: yMap as any,
+            x: xMap as unknown as ReadonlyMap<string, CartesianAxisCoordinateSnapshot>,
+            y: yMap as unknown as ReadonlyMap<string, CartesianAxisCoordinateSnapshot>,
             resolveContinuousAtPixel: (ref, pixel) => ({
                 axis: ref.axis,
                 axisId: ref.axisId,
