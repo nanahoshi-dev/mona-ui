@@ -169,7 +169,7 @@ describe("ChartTreemapIntegration", () => {
         const fixture = TestBed.createComponent(TestTreemapChartComponent);
         fixture.detectChanges();
 
-        const chart = fixture.debugElement.children[0].componentInstance as any;
+        const chart = fixture.debugElement.children[0].componentInstance as unknown as { activeAccessibilityText: () => string };
         const rootDiv = fixture.nativeElement.querySelector('[tabindex="0"]') as HTMLElement;
 
         // 1. Initial ArrowRight initiates selection at first node

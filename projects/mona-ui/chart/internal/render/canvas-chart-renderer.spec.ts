@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ChartScene } from "../scene/chart-scene";
+import type { TreemapHitIndex } from "../interaction/treemap-hit-index";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { CanvasChartRenderer } from "./canvas-chart-renderer";
 
@@ -470,7 +471,7 @@ describe("CanvasChartRenderer", () => {
             hasRenderableData: true,
             height: 300,
             hierarchicalKind: "treemap",
-            hitIndex: { query: vi.fn() } as any,
+            hitIndex: { query: vi.fn() } as unknown as TreemapHitIndex,
             hitTargets: [],
             interactionBuckets: [],
             layoutSignature: "sig",

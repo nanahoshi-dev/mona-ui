@@ -85,7 +85,7 @@ describe("Chart 9-Layer Authoritative Render Ordering", () => {
             stroke: vi.fn(),
             strokeRect: vi.fn(),
             strokeText: vi.fn()
-        } as any);
+        } as unknown as CanvasRenderingContext2D);
 
         await TestBed.configureTestingModule({
             imports: [NineLayerRenderOrderHostComponent]

@@ -2,6 +2,7 @@ import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type {
     ChartCartesianSeriesRegistration,
+    ChartFinancialSeriesRegistration,
     ChartPieSeriesRegistration
 } from "../context/chart-registration-context";
 import { ChartStyleResolver, toCanvasColor } from "./chart-style-resolver";
@@ -212,7 +213,7 @@ describe("ChartStyleResolver", () => {
             xField: signal("x")
         };
 
-        const style = resolver.resolveFinancialSeriesStyle(mockFinancial as any);
+        const style = resolver.resolveFinancialSeriesStyle(mockFinancial as unknown as ChartFinancialSeriesRegistration);
 
         expect(style.risingColor).toBe("#00ffaa");
         expect(style.fallingColor).toBe("#ff00aa");

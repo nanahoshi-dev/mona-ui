@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ChartWaterfallSeriesScene, SceneWaterfallBar } from "../../scene/waterfall-scene";
+import type { ChartWaterfallSeriesScene, ChartWaterfallSeriesStyle, SceneWaterfallBar } from "../../scene/waterfall-scene";
 import { WaterfallAnimationAdapter } from "./waterfall-animation-adapter";
 
 describe("WaterfallAnimationAdapter", () => {
@@ -48,7 +48,7 @@ describe("WaterfallAnimationAdapter", () => {
         name: "Waterfall",
         renderOpacity: 1,
         sequenceSignature: "sig1",
-        style: {} as any,
+        style: {} as unknown as ChartWaterfallSeriesStyle,
         type: "waterfall"
     };
 

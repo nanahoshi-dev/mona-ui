@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ChartInteractionState } from "../../interaction/chart-interaction-state";
-import type { CartesianHeatmapChartScene, PolarAxisChartScene, PolarSectorChartScene } from "../../scene/chart-scene";
+import type { CartesianFunnelChartScene, CartesianHeatmapChartScene, PolarAxisChartScene, PolarSectorChartScene } from "../../scene/chart-scene";
 import type { PolarArcChartScene } from "../../scene/polar-arc-scene";
 import type { SceneHitTarget } from "../../scene/scene-geometry";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
@@ -451,7 +451,7 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                     }
                 ],
                 width: 300
-            } as any;
+            } as unknown as CartesianFunnelChartScene;
 
             const interaction = createMockInteraction({
                 activeHitTarget: createMockHitTarget({
@@ -465,7 +465,7 @@ describe("SVG Retained DOM and Structural Mark Stability", () => {
                     ],
                     seriesId: "funnel-1",
                     stageIndex: 0
-                } as any),
+                } as unknown as Partial<SceneHitTarget>),
                 pointerPosition: { x: 50, y: 20 },
                 source: "pointer"
             });

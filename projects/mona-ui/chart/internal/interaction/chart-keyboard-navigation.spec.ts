@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { PolarAxisChartScene } from "../scene/chart-scene";
+import type { ChartScene, PolarAxisChartScene } from "../scene/chart-scene";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import { ChartKeyboardNavigation } from "./chart-keyboard-navigation";
 
@@ -195,7 +195,7 @@ describe("ChartKeyboardNavigation", () => {
             xValue: "Child"
         };
 
-        const treemapScene: any = {
+        const treemapScene = {
             coordinateSystem: "hierarchical",
             hasRenderableData: true,
             height: 300,
@@ -214,7 +214,7 @@ describe("ChartKeyboardNavigation", () => {
             plotRect: { height: 300, width: 500, x: 0, y: 0 },
             series: [],
             width: 500
-        };
+        } as unknown as ChartScene;
 
         const eventEnterChild = createKeyEvent("ArrowRight");
         const res = ChartKeyboardNavigation.handleKeyDown(eventEnterChild, treemapScene, 0, "tm-1", "k:parent");

@@ -578,7 +578,7 @@ export class CartesianHorizontalBarLayoutEngine {
             stackSignature,
             viewport: viewportState,
             width: containerWidth,
-            xAxisType: primaryXType as any,
+            xAxisType: primaryXType as ChartXAxisType,
             yAxisType: primaryYType as ChartYAxisType
         };
     }

@@ -125,7 +125,7 @@ describe("Chart Keyboard Selection vs Activation", () => {
         expect(host.selectionEvents[0].addedMarkIds.length).toBe(1);
 
         // Must update live region announcement
-        const liveText = (host.chart() as any).activeAccessibilityText();
+        const liveText = (host.chart() as unknown as { activeAccessibilityText: () => string }).activeAccessibilityText();
         expect(liveText).toContain("selected");
     });
 });

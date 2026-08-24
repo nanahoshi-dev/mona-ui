@@ -26,7 +26,7 @@ describe("CartesianConnectedPathInteractionProvider", () => {
     });
 
     const authority = new ChartSeriesMarkIdentityAuthority("series-1", data, {
-        extractNaturalKey: (d: any) => d.x
+        extractNaturalKey: (d: unknown) => (d as { x: number }).x
     });
     const keyResolver = new ChartMarkKeyResolver("series-1", undefined, undefined);
     const materialize = createDenseHitMaterializer({

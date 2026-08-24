@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ChartScatterSeriesScene } from "../../scene/cartesian-scene";
+import type { ChartBubbleSeriesScene, ChartScatterSeriesScene } from "../../scene/cartesian-scene";
 import { MarkerSeriesRenderer } from "./marker-series-renderer";
 
 describe("MarkerSeriesRenderer", () => {
@@ -119,7 +119,7 @@ describe("MarkerSeriesRenderer", () => {
 
     it("should render individual circle fills for translucent bubble series (SB-020)", () => {
         const ctx = createMockContext();
-        const bubbleScene: any = {
+        const bubbleScene: ChartBubbleSeriesScene = {
             id: "b1",
             markers: [
                 {
@@ -152,7 +152,9 @@ describe("MarkerSeriesRenderer", () => {
                 strokeColor: "#ffffff",
                 strokeWidth: 1.5
             },
-            type: "bubble"
+            type: "bubble",
+            xAxisId: "x",
+            yAxisId: "y"
         };
 
         MarkerSeriesRenderer.render(ctx, bubbleScene);

@@ -95,7 +95,7 @@ describe("Chart Persistent Presentation Animation Suppression", () => {
             stroke: vi.fn(),
             strokeRect: vi.fn(),
             strokeText: vi.fn()
-        } as any);
+        } as unknown as CanvasRenderingContext2D);
 
         await TestBed.configureTestingModule({
             imports: [AnimationOverlayHostComponent]

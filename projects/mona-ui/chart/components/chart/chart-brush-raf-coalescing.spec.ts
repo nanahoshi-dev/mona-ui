@@ -86,7 +86,7 @@ describe("Chart Brush RAF Coalescing", () => {
             setTransform: vi.fn(),
             stroke: vi.fn(),
             strokeRect: vi.fn()
-        } as any);
+        } as unknown as CanvasRenderingContext2D);
 
         await TestBed.configureTestingModule({
             imports: [BrushRafHostComponent]

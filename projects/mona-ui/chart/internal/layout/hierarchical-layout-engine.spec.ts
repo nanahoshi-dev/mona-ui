@@ -1,6 +1,6 @@
 import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
-import type { ChartTreemapSeriesRegistration } from "../context/chart-registration-context";
+import type { ChartSeriesRegistration, ChartTreemapSeriesRegistration } from "../context/chart-registration-context";
 import type { ChartTreemapSeriesScene } from "../scene/hierarchical-scene";
 import { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartLayoutEngine, resolveChartCoordinateSystem } from "./chart-layout-engine";
@@ -57,7 +57,7 @@ describe("HierarchicalLayoutEngine & ChartLayoutEngine (Hierarchical)", () => {
     it("warns when treemap is mixed with Cartesian or Polar series", () => {
         const warned = new Set<string>();
         const tm = createMockTreemapRegistration([{ name: "A", value: 10 }]);
-        const bar: any = { type: "bar" };
+        const bar = { type: "bar" } as unknown as ChartSeriesRegistration;
 
         const coord = resolveChartCoordinateSystem([tm, bar], warned);
         expect(coord).toBe("hierarchical");

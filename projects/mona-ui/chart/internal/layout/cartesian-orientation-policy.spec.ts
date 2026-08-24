@@ -273,7 +273,7 @@ describe("CartesianOrientationPolicy", () => {
 
     it("normalizes invalid orientation runtime values to vertical and warns", () => {
         const series: ChartCartesianSeriesRegistration[] = [
-            createBarSeries("b1", "diagonal" as any, true)
+            createBarSeries("b1", "diagonal" as unknown as "horizontal" | "vertical", true)
         ];
 
         const resolution = CartesianOrientationPolicy.resolve(series);

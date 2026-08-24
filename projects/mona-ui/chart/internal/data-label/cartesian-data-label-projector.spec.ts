@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CartesianDataLabelProjector } from "./cartesian-data-label-projector";
 import type { ChartSeriesRegistration } from "../context/chart-registration-context";
+import type { ChartDataLabelTemplateDirective } from "../../directives/chart-data-label-template.directive";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import { signal } from "@angular/core";
 
@@ -67,7 +68,7 @@ describe("CartesianDataLabelProjector", () => {
     });
 
     it("should set selected = true in template data label context when markId is in selectedMarkIds", () => {
-        const dummyTemplate = {} as any;
+        const dummyTemplate = {} as unknown as ChartDataLabelTemplateDirective;
         const series: Partial<ChartSeriesRegistration> = {
             dataLabels: signal(true),
             dataLabelTemplate: signal(dummyTemplate),

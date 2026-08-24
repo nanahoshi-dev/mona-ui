@@ -22,7 +22,7 @@ import type { ChartAnimationInput } from "../../models/chart-animation.models";
 })
 class TestHostComponent {
     public readonly animation = signal<ChartAnimationInput>(true);
-    public readonly data = signal<any[]>([
+    public readonly data = signal<{ category: string; id: string; val1: number; val2: number }[]>([
         { category: "A", id: "k1", val1: 10, val2: 20 },
         { category: "B", id: "k2", val1: 30, val2: 40 }
     ]);

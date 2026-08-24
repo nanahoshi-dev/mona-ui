@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type {
+    CartesianFunnelChartScene,
     CartesianHeatmapChartScene,
     CartesianWaterfallChartScene,
     CartesianXYChartScene,
@@ -7,6 +8,7 @@ import type {
     PolarSectorChartScene,
     TreemapChartScene
 } from "../../scene/chart-scene";
+import type { ChartScene } from "../../scene/chart-scene";
 import type { PolarArcChartScene } from "../../scene/polar-arc-scene";
 import type { ChartSeriesStyle } from "../../../models/chart-style.models";
 import { ChartStyleResolver } from "../../style/chart-style-resolver";
@@ -56,10 +58,9 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                     orientation: "vertical",
                     style: createMockSeriesStyle("#3b82f6"),
                     type: "bar",
-                    visible: true,
                     xAxisId: "x",
                     yAxisId: "y"
-                } as any
+                }
             ],
             width: 300
         };
@@ -89,7 +90,7 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
     });
 
     it("executes render -> clear -> render seamlessly across all 8 chart scene families", () => {
-        const families: { name: string; scene: any; markSelector: string }[] = [
+        const families: { name: string; scene: ChartScene; markSelector: string }[] = [
             {
                 markSelector: "g[data-layer='series'] rect, g[data-layer='series'] path",
                 name: "Cartesian XY",
@@ -170,7 +171,7 @@ describe("SVG Lifecycle and Memory Leak Prevention", () => {
                         }
                     ],
                     width: 300
-                }
+                } as unknown as CartesianFunnelChartScene
             },
             {
                 markSelector: "g[data-waterfall-layer='bars'] rect, g[data-waterfall-layer='bars'] path",

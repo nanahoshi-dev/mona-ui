@@ -234,7 +234,7 @@ export class SvgHeatmapRenderer {
         if (interactionState) {
             const isKeyboard = interactionState.source === "keyboard";
             const hit = interactionState.activeHitTarget ?? interactionState.activeHits[0];
-            const b = hit?.visualBounds ?? hit?.bounds ?? (hit as any)?.rect;
+            const b = hit?.visualBounds ?? hit?.bounds ?? (hit as unknown as { rect?: { height: number; width: number; x: number; y: number } } | undefined)?.rect;
             if (hit && b) {
                 const radius = hit.borderRadius ?? 0;
                 const highlightEl = radius > 0 ? createSvgElement("path") : createSvgElement("rect");
