@@ -19,7 +19,9 @@ export interface CategoryLabelThinningParams {
 }
 
 export class CartesianAxisLabelGeometry {
+    static #cachedGetContext: typeof HTMLCanvasElement.prototype.getContext | null = null;
     static #measureCanvas: HTMLCanvasElement | null = null;
+    static #measureCtx: CanvasRenderingContext2D | null = null;
 
     public static createTickKey(axis: "x" | "y", axisType: string, value: unknown, index: number): string {
         if (axisType === "category") {
@@ -46,10 +48,22 @@ export class CartesianAxisLabelGeometry {
                 if (!CartesianAxisLabelGeometry.#measureCanvas) {
                     CartesianAxisLabelGeometry.#measureCanvas = document.createElement("canvas");
                 }
-                // Re-resolve the 2D context on every call rather than caching it: the canvas
-                // element itself is cheap to reuse, but caching the *context* would freeze in
-                // whatever mock/implementation was active the first time this ran.
-                const ctx = CartesianAxisLabelGeometry.#measureCanvas.getContext("2d");
+                // Cache the resolved 2D context, but invalidate it whenever
+                // HTMLCanvasElement.prototype.getContext itself has changed identity (e.g. a test
+                // installs/restores a vi.spyOn mock) so a swapped implementation is never frozen in
+                // stale. This keeps the common case (thousands of tick-label measurements against a
+                // stable getContext) a cheap reference reuse instead of re-invoking getContext (and,
+                // under test mocks that fabricate a fresh context object per call, re-allocating one)
+                // on every single call.
+                const currentGetContext = CartesianAxisLabelGeometry.#measureCanvas.getContext;
+                if (
+                    !CartesianAxisLabelGeometry.#measureCtx ||
+                    CartesianAxisLabelGeometry.#cachedGetContext !== currentGetContext
+                ) {
+                    CartesianAxisLabelGeometry.#measureCtx = CartesianAxisLabelGeometry.#measureCanvas.getContext("2d");
+                    CartesianAxisLabelGeometry.#cachedGetContext = currentGetContext;
+                }
+                const ctx = CartesianAxisLabelGeometry.#measureCtx;
                 if (ctx) {
                     ctx.font = font;
                     const measuredWidth = ctx.measureText(formattedText).width;
