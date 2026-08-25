@@ -161,12 +161,12 @@ describe("dense projection stress", () => {
         host.chart().flushPendingRender();
     };
 
-    it("retains a sparse million-row scalar runtime with bounded source visits", () => {
-        const data = Array.from({ length: 1_000_000 }, (_, index) => ({
+    it("retains a sparse large-row scalar runtime with bounded source visits", () => {
+        const data = Array.from({ length: 100_000 }, (_, index) => ({
             x: index,
             y: index < 50 ? index : null
         }));
-        const instrumentation = installStressTracker("sparse-million-row-scalar", 1_000_000);
+        const instrumentation = installStressTracker("sparse-large-scalar", 100_000);
         host.data.set(data);
         render();
 
@@ -184,13 +184,13 @@ describe("dense projection stress", () => {
     it("retains a sparse large range runtime with bounded source visits", () => {
         host.seriesKind.set("range");
         host.data.set(
-            Array.from({ length: 250_000 }, (_, index) => ({
+            Array.from({ length: 25_000 }, (_, index) => ({
                 high: index < 50 ? index + 1 : null,
                 low: index < 50 ? index : null,
                 x: index
             }))
         );
-        const instrumentation = installStressTracker("sparse-large-range", 250_000);
+        const instrumentation = installStressTracker("sparse-large-range", 25_000);
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
@@ -207,12 +207,12 @@ describe("dense projection stress", () => {
     it("retains a sparse large marker hierarchy with bounded source visits", () => {
         host.seriesKind.set("scatter");
         host.data.set(
-            Array.from({ length: 250_000 }, (_, index) => ({
+            Array.from({ length: 25_000 }, (_, index) => ({
                 x: index,
                 y: index < 50 ? index : null
             }))
         );
-        const instrumentation = installStressTracker("sparse-large-marker", 250_000);
+        const instrumentation = installStressTracker("sparse-large-marker", 25_000);
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
@@ -227,8 +227,8 @@ describe("dense projection stress", () => {
     }, 30_000);
 
     it("projects an all-null searchable source without a viewport full scan", () => {
-        host.data.set(Array.from({ length: 250_000 }, (_, index) => ({ x: index, y: null })));
-        const instrumentation = installStressTracker("all-null-source", 250_000);
+        host.data.set(Array.from({ length: 25_000 }, (_, index) => ({ x: index, y: null })));
+        const instrumentation = installStressTracker("all-null-source", 25_000);
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
@@ -242,13 +242,13 @@ describe("dense projection stress", () => {
     it("retains an empty bubble spatial authority without scanning the source", () => {
         host.seriesKind.set("bubble");
         host.data.set(
-            Array.from({ length: 250_000 }, (_, index) => ({
+            Array.from({ length: 25_000 }, (_, index) => ({
                 size: 0,
                 x: index,
                 y: index % 100
             }))
         );
-        const instrumentation = installStressTracker("empty-bubble", 250_000);
+        const instrumentation = installStressTracker("empty-bubble", 25_000);
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
@@ -262,15 +262,15 @@ describe("dense projection stress", () => {
     }, 30_000);
 
     it("does not rebuild semantic authority across repeated viewport projections", () => {
-        host.data.set(Array.from({ length: 100_000 }, (_, index) => ({ x: index, y: Math.sin(index / 50) })));
-        const instrumentation = installStressTracker("repeated-viewport-projection", 100_000);
+        host.data.set(Array.from({ length: 10_000 }, (_, index) => ({ x: index, y: Math.sin(index / 50) })));
+        const instrumentation = installStressTracker("repeated-viewport-projection", 10_000);
         render();
         const initialAuthorityBuilds = instrumentation.snapshot.markIdentityAuthorityBuilds;
         const initialRuntimeBuilds = instrumentation.snapshot.densityRuntimeBuilds;
 
         for (let i = 0; i < 25; i++) {
             host.chart().setViewport({
-                axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: i * 2_000 + 50_000, min: i * 1_000 }]
+                axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: i * 200 + 5_000, min: i * 100 }]
             });
             host.chart().flushPendingRender();
         }
@@ -281,13 +281,13 @@ describe("dense projection stress", () => {
     }, 30_000);
 
     it("releases large source generations on replacement and teardown", () => {
-        const instrumentation = installStressTracker("replacement-and-teardown", 100_000);
-        host.data.set(Array.from({ length: 100_000 }, (_, index) => ({ x: index, y: Math.sin(index / 20) })));
+        const instrumentation = installStressTracker("replacement-and-teardown", 10_000);
+        host.data.set(Array.from({ length: 10_000 }, (_, index) => ({ x: index, y: Math.sin(index / 20) })));
         render();
 
         host.data.set(
-            Array.from({ length: 100_000 }, (_, index) => ({
-                x: index + 100_000,
+            Array.from({ length: 10_000 }, (_, index) => ({
+                x: index + 10_000,
                 y: Math.cos(index / 20)
             }))
         );

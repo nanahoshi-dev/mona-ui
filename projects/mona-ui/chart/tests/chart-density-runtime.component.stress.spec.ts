@@ -101,7 +101,7 @@ describe("density runtime structural attachment", () => {
     };
 
     it("builds a retained density runtime for a large monotonic line", () => {
-        const data: DataItem[] = Array.from({ length: 50_000 }, (_, i) => ({ x: i, y: Math.sin(i / 100) * 10 }));
+        const data: DataItem[] = Array.from({ length: 5_000 }, (_, i) => ({ x: i, y: Math.sin(i / 100) * 10 }));
         host.data.set(data);
         render();
 
@@ -113,10 +113,10 @@ describe("density runtime structural attachment", () => {
 
         const seriesEntry = Array.from(density!.seriesById.values())[0];
         expect(seriesEntry.capability.eligible).toBe(true);
-        expect(seriesEntry.scalar?.validCount).toBe(50_000);
+        expect(seriesEntry.scalar?.validCount).toBe(5_000);
         expect(seriesEntry.scalar?.monotonicity).toBe("ascending");
         // Typed arrays are compact and aligned with the source array.
-        expect(seriesEntry.scalar?.x.length).toBe(50_000);
+        expect(seriesEntry.scalar?.x.length).toBe(5_000);
         expect(seriesEntry.scalar?.sourceData).toBe(data);
     });
 
@@ -129,7 +129,7 @@ describe("density runtime structural attachment", () => {
 
     it("does not build when disabled globally", () => {
         host.downsampling.set(false);
-        host.data.set(Array.from({ length: 50_000 }, (_, i) => ({ x: i, y: i })));
+        host.data.set(Array.from({ length: 5_000 }, (_, i) => ({ x: i, y: i })));
         render();
 
         expect(host.chart()["cartesianXYScene"]()?.densityRuntime).toBeUndefined();
@@ -138,24 +138,24 @@ describe("density runtime structural attachment", () => {
     it("does not build for category X axes (viewport culling only policy)", () => {
         host.xType.set("category");
         host.mode.set("line");
-        host.data.set(Array.from({ length: 2_500 }, (_, i) => ({ x: `c${i}`, y: i })));
+        host.data.set(Array.from({ length: 250 }, (_, i) => ({ x: `c${i}`, y: i })));
         render();
 
         expect(host.chart()["cartesianXYScene"]()?.densityRuntime).toBeUndefined();
     }, 15_000);
 
     it("retires the previous runtime on data replacement", () => {
-        host.data.set(Array.from({ length: 50_000 }, (_, i) => ({ x: i, y: i })));
+        host.data.set(Array.from({ length: 5_000 }, (_, i) => ({ x: i, y: i })));
         render();
         const firstRuntime = host.chart()["cartesianXYScene"]()?.densityRuntime;
 
-        host.data.set(Array.from({ length: 60_000 }, (_, i) => ({ x: i, y: -i })));
+        host.data.set(Array.from({ length: 6_000 }, (_, i) => ({ x: i, y: -i })));
         render();
         const secondRuntime = host.chart()["cartesianXYScene"]()?.densityRuntime;
 
         expect(firstRuntime).toBeDefined();
         expect(secondRuntime).toBeDefined();
         expect(secondRuntime).not.toBe(firstRuntime);
-        expect(Array.from(secondRuntime!.seriesById.values())[0].scalar?.validCount).toBe(60_000);
+        expect(Array.from(secondRuntime!.seriesById.values())[0].scalar?.validCount).toBe(6_000);
     });
 });

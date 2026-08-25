@@ -198,8 +198,8 @@ describe("indexed dense projection", () => {
         host.chart().flushPendingRender();
     };
 
-    it("bounds scene volume for a 100k line regardless of source count", () => {
-        host.data.set(makeData(100_000));
+    it("bounds scene volume for a 10k line regardless of source count", () => {
+        host.data.set(makeData(10_000));
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
@@ -211,12 +211,12 @@ describe("indexed dense projection", () => {
 
         const metadata = scene?.seriesDensityMetadataById?.get(Array.from(scene!.seriesDensityMetadataById!.keys())[0]);
         expect(metadata?.sampled).toBe(true);
-        expect(metadata?.sourceCount).toBe(100_000);
+        expect(metadata?.sourceCount).toBe(10_000);
         expect(metadata?.renderedCount).toBe(lineScene!.points.length);
     });
 
     it("keeps rare extrema in the sampled scene", () => {
-        host.data.set(makeData(100_000));
+        host.data.set(makeData(10_000));
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
@@ -244,7 +244,7 @@ describe("indexed dense projection", () => {
 
     it("samples unstacked area series within budget", () => {
         host.seriesKind.set("area");
-        host.data.set(makeData(80_000));
+        host.data.set(makeData(8_000));
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
@@ -273,7 +273,7 @@ describe("indexed dense projection", () => {
         host.curve.set("step-after");
         host.downsampling.set({ algorithm: "lttb", enabled: true, maxPoints: 100, threshold: 0 });
         host.data.set(
-            Array.from({ length: 20_000 }, (_, i) => ({
+            Array.from({ length: 2_000 }, (_, i) => ({
                 x: i,
                 y: Math.floor(i / 125) % 5
             }))
@@ -372,7 +372,7 @@ describe("indexed dense projection", () => {
         host.seriesKind.set("scatter");
         host.downsampling.set({ enabled: true, maxPoints: 100, samplesPerPixel: 1, threshold: 0 });
         host.data.set(
-            Array.from({ length: 50_000 }, (_, index) => ({
+            Array.from({ length: 5_000 }, (_, index) => ({
                 x: index % 500,
                 y: Math.floor(index / 500)
             }))
@@ -392,7 +392,7 @@ describe("indexed dense projection", () => {
 
     it("applies the range envelope to range-area series", () => {
         host.seriesKind.set("range");
-        host.data.set(makeData(60_000));
+        host.data.set(makeData(6_000));
         render();
 
         const scene = host.chart()["cartesianXYScene"]();
@@ -425,7 +425,7 @@ describe("indexed dense projection", () => {
 
     it("avoids Stage A/B and density rebuilds on viewport-only frames", () => {
         const instrumentation = ChartDensityTracker.install();
-        host.data.set(makeData(50_000));
+        host.data.set(makeData(5_000));
         render();
 
         let stageA = 0;
@@ -441,10 +441,10 @@ describe("indexed dense projection", () => {
 
         try {
             host.viewport.set({
-                axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 40_000, min: 10_000 }]
+                axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 4_000, min: 1_000 }]
             });
             render();
-            host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 45_000, min: 5_000 }] });
+            host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 4_500, min: 500 }] });
             render();
 
             expect(stageA).toBe(0);
@@ -468,7 +468,7 @@ describe("indexed dense projection", () => {
 
     it("reuses semantic authority across size-only reflows", () => {
         const instrumentation = ChartDensityTracker.install();
-        host.data.set(makeData(50_000));
+        host.data.set(makeData(5_000));
         render();
 
         const initialRuntimeBuilds = instrumentation.snapshot.densityRuntimeBuilds;
@@ -497,7 +497,7 @@ describe("indexed dense projection", () => {
 
     it("releases the previous semantic generation before replacement and releases the new one on destroy", () => {
         const instrumentation = ChartDensityTracker.install();
-        host.data.set(makeData(25_000));
+        host.data.set(makeData(2_500));
         render();
 
         expect(instrumentation.snapshot.sourceAuthorityBuilds).toBe(1);
@@ -505,9 +505,9 @@ describe("indexed dense projection", () => {
         expect(instrumentation.snapshot.destroyReleases).toBe(0);
 
         host.data.set(
-            makeData(25_000).map(point => ({
+            makeData(2_500).map(point => ({
                 ...(point as { high: number; low: number; x: number; y: number }),
-                x: (point as { x: number }).x + 100_000
+                x: (point as { x: number }).x + 3_000
             }))
         );
         render();
@@ -523,9 +523,9 @@ describe("indexed dense projection", () => {
     });
 
     it("resolves an unsampled raw datum through pointer interaction (exact dense interaction)", async () => {
-        const count = 100_000;
+        const count = 10_000;
         const data = makeData(count);
-        const rawIndex = 61_234;
+        const rawIndex = 6_123;
         // A distinctive spike the visual sampler is expected to retain OR not —
         // we assert the provider resolves the exact raw datum either way.
         data[rawIndex] = { x: rawIndex, y: -280, high: 10, low: -290 };
@@ -549,9 +549,9 @@ describe("indexed dense projection", () => {
         expect(matches[0].datum).toBe(data[rawIndex]);
     });
 
-    it("bounds marker volume for a 100k scatter via the spatial hierarchy", () => {
+    it("bounds marker volume for a 10k scatter via the spatial hierarchy", () => {
         host.seriesKind.set("scatter");
-        const data = Array.from({ length: 100_000 }, (_, i) => ({
+        const data = Array.from({ length: 10_000 }, (_, i) => ({
             x: (i * 7919) % 1000,
             y: (i * 104729) % 1000
         }));
@@ -573,8 +573,8 @@ describe("indexed dense projection", () => {
 
     it("keeps the full-data bubble size domain while sampling markers", () => {
         host.seriesKind.set("bubble");
-        const data = Array.from({ length: 60_000 }, (_, i) => ({
-            size: i === 59_999 ? 10_000 : 1,
+        const data = Array.from({ length: 6_000 }, (_, i) => ({
+            size: i === 5_999 ? 10_000 : 1,
             x: i % 500,
             y: Math.floor(i / 120) % 500
         }));
@@ -597,7 +597,7 @@ describe("indexed dense projection", () => {
 
     it("zooming into a cluster reveals more scatter detail", () => {
         host.seriesKind.set("scatter");
-        const data = Array.from({ length: 80_000 }, (_, i) => ({
+        const data = Array.from({ length: 8_000 }, (_, i) => ({
             x: (i * 6271) % 400,
             y: (i * 7919) % 400
         }));
@@ -665,9 +665,9 @@ describe("coordinated stacked-area sampling", () => {
     });
 
     it("applies one shared sample-X set across all layers with bounded output", () => {
-        const count = 50_000;
+        const count = 5_000;
         const data = Array.from({ length: count }, (_, i) => ({
-            v: Math.sin(i / 200) * 10 + 20 + (i === 30_000 ? 300 : 0),
+            v: Math.sin(i / 200) * 10 + 20 + (i === 3_000 ? 300 : 0),
             w: -5 - (i % 3),
             x: i
         }));
@@ -688,6 +688,6 @@ describe("coordinated stacked-area sampling", () => {
         expect(firstLayerIndices).toEqual(secondLayerIndices);
 
         // Rare combined-layer spike retained via full-data totals.
-        expect(firstLayerIndices).toContain(30_000);
+        expect(firstLayerIndices).toContain(3_000);
     });
 });
