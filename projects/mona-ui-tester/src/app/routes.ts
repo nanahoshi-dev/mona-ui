@@ -79,6 +79,11 @@ export const routes: Routes = [
                     import("./docs/components/card-doc/card-doc.component").then(m => m.CardDocComponent)
             },
             {
+                path: "chart",
+                loadComponent: () =>
+                    import("./docs/components/chart-doc/chart-doc.component").then(m => m.ChartDocComponent)
+            },
+            {
                 path: "checkbox",
                 loadComponent: () =>
                     import("./docs/components/checkbox-doc/checkbox-doc.component").then(m => m.CheckboxDocComponent)

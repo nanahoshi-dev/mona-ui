@@ -1,6 +1,7 @@
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
+import angular from "angular-eslint";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,23 +14,25 @@ const compat = new FlatCompat({
 });
 
 export default [
-    ...compat
-        .extends(
-            "eslint:recommended",
-            "plugin:@typescript-eslint/recommended",
-            "plugin:@angular-eslint/recommended",
-            "plugin:@angular-eslint/template/process-inline-templates"
-        )
-        .map(config => ({
-            ...config,
-            files: ["**/*.ts"]
-        })),
+    {
+        ignores: ["projects/mona-ui-tester/src/app/test-data/**"]
+    },
+    ...compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended").map(config => ({
+        ...config,
+        files: ["**/*.ts"]
+    })),
+    ...angular.configs.tsRecommended.map(config => ({
+        ...config,
+        files: ["**/*.ts"]
+    })),
     {
         files: ["**/*.ts"],
 
         plugins: {
             "@typescript-eslint": typescriptEslint
         },
+
+        processor: angular.processInlineTemplates,
 
         languageOptions: {
             ecmaVersion: 5,
@@ -70,11 +73,11 @@ export default [
                             "private-static-field",
                             "protected-static-field",
                             "public-static-field",
-                            "private-readonly-instance-field",
+                            "private-instance-readonly-field",
                             "private-instance-field",
-                            "protected-readonly-instance-field",
+                            "protected-instance-readonly-field",
                             "protected-instance-field",
-                            "public-readonly-instance-field",
+                            "public-instance-readonly-field",
                             "public-instance-field",
                             "private-decorated-field",
                             "protected-decorated-field",
@@ -115,45 +118,70 @@ export default [
                 },
                 {
                     selector: "accessor",
-                    format: ["PascalCase"]
-                },
-                {
-                    selector: ["typeLike"],
-                    format: ["StrictPascalCase"]
-                },
-                {
-                    selector: ["classMethod", "function"],
-                    format: ["strictCamelCase"]
-                },
-                {
-                    selector: "classProperty",
-                    format: ["strictCamelCase"]
-                },
-                {
-                    selector: ["objectLiteralProperty"],
                     format: ["camelCase"]
                 },
                 {
+                    selector: ["typeLike"],
+                    format: ["PascalCase"]
+                },
+                {
+                    selector: ["classMethod", "function"],
+                    format: ["camelCase"]
+                },
+                {
+                    selector: "classProperty",
+                    modifiers: ["static", "readonly"],
+                    leadingUnderscore: "allow",
+                    format: ["camelCase", "UPPER_CASE"]
+                },
+                {
+                    selector: "classProperty",
+                    leadingUnderscore: "allow",
+                    format: ["camelCase"]
+                },
+                {
+                    selector: ["objectLiteralProperty", "typeProperty"],
+                    format: ["camelCase"],
+                    filter: {
+                        regex: "^([\\[(].*[\\])]|--.*|[A-Za-z]+-[A-Za-z-]*|[A-Z][A-Za-z]*)$",
+                        match: false
+                    }
+                },
+                {
                     selector: "parameter",
-                    format: ["strictCamelCase"]
+                    leadingUnderscore: "allow",
+                    format: ["camelCase"]
                 },
                 {
                     selector: "typeParameter",
                     format: ["PascalCase"]
                 },
                 {
-                    selector: "typeProperty",
-                    format: ["camelCase"]
+                    selector: "variable",
+                    modifiers: ["const"],
+                    leadingUnderscore: "allow",
+                    format: ["camelCase", "UPPER_CASE"]
                 },
                 {
                     selector: "variable",
-                    format: ["strictCamelCase"]
+                    leadingUnderscore: "allow",
+                    format: ["camelCase"]
                 }
             ],
-            "@typescript-eslint/no-inferrable-types": "off"
+            "@typescript-eslint/no-inferrable-types": "off",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    args: "after-used",
+                    argsIgnorePattern: "^_",
+                    caughtErrorsIgnorePattern: "^_",
+                    destructuredArrayIgnorePattern: "^_",
+                    varsIgnorePattern: "^_"
+                }
+            ]
         }
     },
-    ...compat.extends("plugin:@angular-eslint/template/recommended").map(config => ({
+    ...angular.configs.templateRecommended.map(config => ({
         ...config,
         files: ["**/*.html"]
     })),

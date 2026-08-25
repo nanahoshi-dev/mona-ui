@@ -1,0 +1,40 @@
+export type ChartXAxisPosition = "bottom" | "top";
+export type ChartYAxisPosition = "left" | "right";
+export type ChartAxisPosition = ChartXAxisPosition | ChartYAxisPosition;
+
+export type ChartNumericScaleType = "linear" | "log" | "symlog" | "pow" | "sqrt";
+
+export type ChartXAxisType = "auto" | "category" | ChartNumericScaleType | "time" | "utc";
+export type ChartYAxisType = "auto" | "category" | ChartNumericScaleType;
+
+export type ChartAxisLabelRotation = "auto" | number;
+export type ChartHeaderAlignment = "center" | "left" | "right";
+
+export type ChartAxisFormatter<T = unknown> = (value: T, index: number) => string;
+
+export interface ChartAxisLabelTemplateContext<T = unknown> {
+    $implicit: T;
+    axis: "angular" | "radial" | "x" | "y";
+    axisId?: string;
+    index: number;
+    position?: ChartAxisPosition;
+    scaleType?: ChartXAxisType | string;
+    value: T;
+}
+
+export interface ChartAxisTick<T = unknown> {
+    coordinate: number;
+    formattedValue: string;
+    index: number;
+    value: T;
+}
+
+export interface ChartTitleTemplateContext {
+    readonly $implicit: string;
+    readonly title: string;
+}
+
+export interface ChartSubtitleTemplateContext {
+    readonly $implicit: string;
+    readonly subtitle: string;
+}

@@ -1,16 +1,18 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
+import { describe, expect, it } from "vitest";
+import { PageService } from "./page.service";
 
-import { PageService } from './page.service';
+describe("PageService", () => {
+    let service: PageService;
 
-describe('PageService', () => {
-  let service: PageService;
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [PageService]
+        });
+        service = TestBed.inject(PageService);
+    });
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(PageService);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
+    it("should be created", () => {
+        expect(service).toBeTruthy();
+    });
 });

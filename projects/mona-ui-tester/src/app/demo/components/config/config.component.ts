@@ -47,7 +47,7 @@ export class ConfigComponent<C> {
             Object.keys(metadata).length > 0 &&
             (!config.outputs || Object.keys(config.outputs).length === 0)
         ) {
-            updatedOutputs = where(metadata.inputs, i => i.kind === "output")
+            updatedOutputs = where(Object.values(metadata.inputs ?? {}), i => i.kind === "output")
                 .select(i => [i.name, { type: "event" }] as const)
                 .toObject(
                     e => e[0],

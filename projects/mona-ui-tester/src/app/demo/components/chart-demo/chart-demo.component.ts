@@ -1,0 +1,1975 @@
+import { Component, computed, inject, signal, viewChild } from "@angular/core";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import {
+    ChartAnnotationComponent,
+    ChartAnnotationLabelTemplateDirective,
+    ChartAxisLabelTemplateDirective,
+    ChartBrushComponent,
+    ChartCenterTemplateDirective,
+    ChartCrosshairComponent,
+    ChartCrosshairLabelTemplateDirective,
+    ChartDataLabelTemplateDirective,
+    ChartFunnelLabelTemplateDirective,
+    ChartGaugeCenterTemplateDirective,
+    ChartLegendItemTemplateDirective,
+    ChartNoDataTemplateDirective,
+    ChartReferenceBandComponent,
+    ChartReferenceLabelTemplateDirective,
+    ChartReferenceLineComponent,
+    ChartSelectionComponent,
+    ChartSliceLabelTemplateDirective,
+    ChartSubtitleTemplateDirective,
+    ChartTitleTemplateDirective,
+    ChartTooltipTemplateDirective,
+    ChartTreemapLabelTemplateDirective,
+    ChartWaterfallLabelTemplateDirective,
+    AreaSeriesComponent,
+    BarSeriesComponent,
+    BubbleSeriesComponent,
+    CandlestickSeriesComponent,
+    ChartAngularAxisComponent,
+    ChartComponent,
+    ChartLegendComponent,
+    ChartRadialAxisComponent,
+    ChartTooltipComponent,
+    ChartXAxisComponent,
+    ChartYAxisComponent,
+    DonutSeriesComponent,
+    FunnelSeriesComponent,
+    GaugeSeriesComponent,
+    HeatmapSeriesComponent,
+    LineSeriesComponent,
+    OhlcSeriesComponent,
+    PieSeriesComponent,
+    PolarSeriesComponent,
+    RadarSeriesComponent,
+    RadialBarSeriesComponent,
+    RangeAreaSeriesComponent,
+    RangeBarSeriesComponent,
+    RoseSeriesComponent,
+    ScatterSeriesComponent,
+    TreemapSeriesComponent,
+    WaterfallSeriesComponent,
+    type ChartAnnotationLabelPlacement,
+    type ChartAnnotationMarker,
+    type ChartAreaFillMode,
+    type ChartAxisLabelRotation,
+    type ChartBarOrientation,
+    type ChartBrushActivation,
+    type ChartBrushChangeEvent,
+    type ChartBrushHitPolicy,
+    type ChartBrushMode,
+    type ChartBrushSelectionBehavior,
+    type ChartCrosshairLineStyle,
+    type ChartCrosshairMode,
+    type ChartCrosshairSnapMode,
+    type ChartCurve,
+    type ChartDownsamplingInput,
+    type ChartDataLabelPosition,
+    type ChartFinancialFillMode,
+    type ChartFunnelLabelContent,
+    type ChartFunnelOrientation,
+    type ChartFunnelStageVisibilityEvent,
+    type ChartGaugeIndicator,
+    type ChartHeaderAlignment,
+    type ChartHeatmapColorMode,
+    type ChartNavigationInput,
+    type ChartOverlayLayer,
+    type ChartPointEvent,
+    type ChartPointFocusEvent,
+    type ChartPolarFillMode,
+    type ChartPolarLabelContent,
+    type ChartPolarLabelPosition,
+    type ChartRadialArcFillMode,
+    type ChartRadialCurve,
+    type ChartRadialFillMode,
+    type ChartRadialGridShape,
+    type ChartReferenceLabelPosition,
+    type ChartReferenceLineStyle,
+    type ChartRendererMode,
+    type ChartRoseScaleMode,
+    type ChartSelectionChangeEvent,
+    type ChartSelectionMode,
+    type ChartSeriesVisibilityEvent,
+    type ChartSliceVisibilityEvent,
+    type ChartTreemapLabelTemplateContext,
+    type ChartTreemapNodeVisibilityEvent,
+    type ChartTreemapSort,
+    type ChartTreemapTile,
+    type ChartViewportChangeEvent,
+    type ChartViewportState,
+    type ChartYAxisPosition
+} from "@nanahoshi/mona-ui/chart";
+import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
+import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
+import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
+import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui/tabs";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+
+interface DemoLogEntry {
+    readonly details: string;
+    readonly eventType: string;
+    readonly id: number;
+    readonly timestamp: string;
+}
+
+interface MonthlyMetric {
+    readonly actual: number;
+    readonly forecast: number;
+    readonly month: string;
+    readonly target: number;
+}
+
+interface TimePointMetric {
+    readonly cpu: number;
+    readonly memory: number;
+    readonly timestamp: Date;
+}
+
+interface MarketShareDatum {
+    readonly category: string;
+    readonly color?: string;
+    readonly value: number;
+}
+
+interface SkillMetric {
+    readonly mage: number;
+    readonly metric: string;
+    readonly rogue: number;
+    readonly warrior: number;
+}
+
+interface SignalDataPoint {
+    readonly angle: number;
+    readonly gain: number | null;
+    readonly noise: number | null;
+}
+
+interface ScatterDataPoint {
+    readonly height: number;
+    readonly id?: string;
+    readonly weight: number;
+    readonly wingspan: number;
+}
+
+interface BubbleDataPoint {
+    readonly country: string;
+    readonly gdp: number;
+    readonly id?: string;
+    readonly lifeExp: number;
+    readonly population: number;
+}
+
+interface PanZoomTelemetryMetric {
+    readonly cpu: number;
+    readonly date: Date;
+    readonly memory: number;
+    readonly requests: number;
+}
+
+interface StepDensityMetric {
+    readonly date: Date;
+    readonly high: number;
+    readonly layerA: number;
+    readonly layerB: number;
+    readonly low: number;
+    readonly status: number;
+}
+
+interface MultiAxisMetric {
+    readonly load: number;
+    readonly margin: number;
+    readonly month: string;
+    readonly quarter: string;
+    readonly revenue: number;
+}
+
+@Component({
+    imports: [
+        ButtonDirective,
+        CheckBoxComponent,
+        DropdownListComponent,
+        TextBoxComponent,
+        NumericTextBoxComponent,
+        ChartComponent,
+        ChartXAxisComponent,
+        ChartYAxisComponent,
+        ChartAngularAxisComponent,
+        ChartRadialAxisComponent,
+        LineSeriesComponent,
+        AreaSeriesComponent,
+        BarSeriesComponent,
+        PieSeriesComponent,
+        DonutSeriesComponent,
+        RadarSeriesComponent,
+        PolarSeriesComponent,
+        ScatterSeriesComponent,
+        BubbleSeriesComponent,
+        CandlestickSeriesComponent,
+        OhlcSeriesComponent,
+        RangeBarSeriesComponent,
+        RangeAreaSeriesComponent,
+        HeatmapSeriesComponent,
+        RadialBarSeriesComponent,
+        RoseSeriesComponent,
+        GaugeSeriesComponent,
+        ChartGaugeCenterTemplateDirective,
+        TreemapSeriesComponent,
+        ChartTreemapLabelTemplateDirective,
+        FunnelSeriesComponent,
+        ChartFunnelLabelTemplateDirective,
+        WaterfallSeriesComponent,
+        ChartWaterfallLabelTemplateDirective,
+        ChartLegendComponent,
+        ChartTooltipComponent,
+        ChartCrosshairComponent,
+        ChartReferenceLineComponent,
+        ChartReferenceBandComponent,
+        ChartAnnotationComponent,
+        ChartCrosshairLabelTemplateDirective,
+        ChartReferenceLabelTemplateDirective,
+        ChartAnnotationLabelTemplateDirective,
+        ChartAxisLabelTemplateDirective,
+        ChartLegendItemTemplateDirective,
+        ChartNoDataTemplateDirective,
+        ChartTooltipTemplateDirective,
+        ChartSliceLabelTemplateDirective,
+        ChartCenterTemplateDirective,
+        ChartTitleTemplateDirective,
+        ChartSubtitleTemplateDirective,
+        ChartSelectionComponent,
+        ChartBrushComponent,
+        ChartDataLabelTemplateDirective,
+        TabsComponent,
+        TabComponent,
+        TabContentTemplateDirective
+    ],
+    selector: "app-chart-demo",
+    templateUrl: "./chart-demo.component.html"
+})
+export class ChartDemoComponent {
+    readonly #themeService = inject(ThemeService, { optional: true });
+    #logId: number = 0;
+
+    protected readonly activeTab = signal<
+        | "bubble"
+        | "candlestick"
+        | "custom"
+        | "donut"
+        | "funnel"
+        | "gauge"
+        | "grouped"
+        | "heatmap"
+        | "horizontal"
+        | "mixed"
+        | "multi-axis"
+        | "ohlc"
+        | "overlays"
+        | "pan-zoom"
+        | "percent-area"
+        | "percent-bar"
+        | "pie"
+        | "polar"
+        | "radar"
+        | "radial-bar"
+        | "range-area"
+        | "range-bar"
+        | "rose"
+        | "scatter"
+        | "selection-brush"
+        | "stacked-area"
+        | "stacked-bar"
+        | "time"
+        | "treemap"
+        | "waterfall"
+    >("mixed");
+    protected readonly animationEnabled = signal<boolean>(true);
+
+    // Selection, Brush & Data Labels Controls
+    protected readonly selectionEnabled = signal<boolean>(true);
+    protected readonly selectionMode = signal<ChartSelectionMode>("multiple");
+    protected readonly selectionRetainOnDataChange = signal<boolean>(true);
+    protected readonly selectedMarkIds = signal<string[]>([]);
+    protected readonly selectionModeOptions: readonly { label: string; value: ChartSelectionMode }[] = [
+        { label: "Multiple Marks", value: "multiple" },
+        { label: "Single Mark", value: "single" }
+    ];
+
+    protected readonly brushEnabled = signal<boolean>(true);
+    protected readonly brushMode = signal<ChartBrushMode>("xy");
+    protected readonly brushActivation = signal<ChartBrushActivation>("drag");
+    protected readonly brushSelectionBehavior = signal<ChartBrushSelectionBehavior>("replace");
+    protected readonly brushHitPolicy = signal<ChartBrushHitPolicy>("intersect");
+
+    protected readonly brushModeOptions: readonly { label: string; value: ChartBrushMode }[] = [
+        { label: "XY (2D Box)", value: "xy" },
+        { label: "X-Axis Only", value: "x" },
+        { label: "Y-Axis Only", value: "y" }
+    ];
+    protected readonly brushActivationOptions: readonly { label: string; value: ChartBrushActivation }[] = [
+        { label: "Direct Drag", value: "drag" },
+        { label: "Shift + Drag", value: "shift-drag" }
+    ];
+    protected readonly brushSelectionBehaviorOptions: readonly { label: string; value: ChartBrushSelectionBehavior }[] = [
+        { label: "Replace Selection", value: "replace" },
+        { label: "Add to Selection", value: "add" },
+        { label: "Remove from Selection", value: "remove" },
+        { label: "Toggle Selection", value: "toggle" },
+        { label: "None (Range Only)", value: "none" }
+    ];
+    protected readonly brushHitPolicyOptions: readonly { label: string; value: ChartBrushHitPolicy }[] = [
+        { label: "Intersect (Overlaps)", value: "intersect" },
+        { label: "Center (Point Enclosed)", value: "center" }
+    ];
+
+    protected readonly dataLabelsEnabled = signal<boolean>(true);
+    protected readonly dataLabelsPosition = signal<ChartDataLabelPosition>("auto");
+    protected readonly dataLabelsAllowOverlap = signal<boolean>(false);
+    protected readonly useCustomDataLabelTemplate = signal<boolean>(false);
+    protected readonly dataLabelsPositionOptions: readonly { label: string; value: ChartDataLabelPosition }[] = [
+        { label: "Auto (Smart Fit)", value: "auto" },
+        { label: "Top", value: "top" },
+        { label: "Bottom", value: "bottom" },
+        { label: "Left", value: "left" },
+        { label: "Right", value: "right" },
+        { label: "Inside Center", value: "inside-center" },
+        { label: "Inside End", value: "inside-end" },
+        { label: "Outside End", value: "outside-end" }
+    ];
+
+    protected readonly dataLabelOptions = computed(() => {
+        if (!this.dataLabelsEnabled()) {
+            return false;
+        }
+        return {
+            allowOverlap: this.dataLabelsAllowOverlap(),
+            position: this.dataLabelsPosition()
+        };
+    });
+
+    // Overlays, Crosshairs & Annotations Controls
+    protected readonly crosshairColor = signal<string>("#3b82f6");
+    protected readonly crosshairEnabled = signal<boolean>(true);
+    protected readonly crosshairLineStyle = signal<ChartCrosshairLineStyle>("dashed");
+    protected readonly crosshairLineStyleOptions: readonly { label: string; value: ChartCrosshairLineStyle }[] = [
+        { label: "Dashed", value: "dashed" },
+        { label: "Solid", value: "solid" },
+        { label: "Dotted", value: "dotted" }
+    ];
+    protected readonly crosshairLineWidth = signal<number>(1.5);
+    protected readonly crosshairMode = signal<ChartCrosshairMode>("xy");
+    protected readonly crosshairModeOptions: readonly { label: string; value: ChartCrosshairMode }[] = [
+        { label: "XY (Dual Axis)", value: "xy" },
+        { label: "Auto (Primary Axis)", value: "auto" },
+        { label: "X Axis Only", value: "x" },
+        { label: "Y Axis Only", value: "y" }
+    ];
+    protected readonly crosshairSnap = signal<ChartCrosshairSnapMode>("nearest");
+    protected readonly crosshairSnapOptions: readonly { label: string; value: ChartCrosshairSnapMode }[] = [
+        { label: "Nearest Data Point", value: "nearest" },
+        { label: "Free Pointer Position", value: "pointer" }
+    ];
+    protected readonly showCrosshairAxisLabels = signal<boolean>(true);
+    protected readonly useCustomCrosshairTemplate = signal<boolean>(false);
+
+    // Reference Line Controls
+    protected readonly showReferenceLine = signal<boolean>(true);
+    protected readonly referenceLineValue = signal<number>(6500);
+    protected readonly referenceLineLayer = signal<ChartOverlayLayer>("overlay");
+    protected readonly referenceLineStyle = signal<ChartReferenceLineStyle>("dashed");
+    protected readonly referenceLinePosition = signal<ChartReferenceLabelPosition>("end");
+    protected readonly referenceLinePositionOptions: readonly { label: string; value: ChartReferenceLabelPosition }[] = [
+        { label: "End (Right / Top)", value: "end" },
+        { label: "Center", value: "center" },
+        { label: "Start (Left / Bottom)", value: "start" }
+    ];
+    protected readonly useCustomRefLineTemplate = signal<boolean>(false);
+
+    // Reference Band Controls
+    protected readonly showReferenceBand = signal<boolean>(true);
+    protected readonly referenceBandFrom = signal<number>(4800);
+    protected readonly referenceBandTo = signal<number>(7000);
+    protected readonly referenceBandLayer = signal<ChartOverlayLayer>("underlay");
+    protected readonly overlayLayerOptions: readonly { label: string; value: ChartOverlayLayer }[] = [
+        { label: "Underlay (Behind Marks)", value: "underlay" },
+        { label: "Overlay (Above Marks)", value: "overlay" }
+    ];
+    protected readonly useCustomRefBandTemplate = signal<boolean>(false);
+
+    // Annotation Controls
+    protected readonly showAnnotation = signal<boolean>(true);
+    protected readonly annotationMarker = signal<ChartAnnotationMarker>("diamond");
+    protected readonly annotationMarkerOptions: readonly { label: string; value: ChartAnnotationMarker }[] = [
+        { label: "Diamond Marker", value: "diamond" },
+        { label: "Circle Marker", value: "circle" },
+        { label: "No Marker", value: "none" }
+    ];
+    protected readonly annotationConnector = signal<boolean>(true);
+    protected readonly annotationPlacement = signal<ChartAnnotationLabelPlacement>("top");
+    protected readonly annotationPlacementOptions: readonly { label: string; value: ChartAnnotationLabelPlacement }[] = [
+        { label: "Top Anchor", value: "top" },
+        { label: "Bottom Anchor", value: "bottom" },
+        { label: "Left Anchor", value: "left" },
+        { label: "Right Anchor", value: "right" }
+    ];
+    protected readonly useCustomAnnotationTemplate = signal<boolean>(false);
+
+    public onCrosshairModeChange(mode: unknown): void {
+        if (mode === "auto" || mode === "x" || mode === "y" || mode === "xy") {
+            this.crosshairMode.set(mode);
+            this.#addLog("settingChange", `Crosshair Mode: ${mode}`);
+        }
+    }
+
+    public onCrosshairSnapChange(snap: unknown): void {
+        if (snap === "nearest" || snap === "pointer") {
+            this.crosshairSnap.set(snap);
+            this.#addLog("settingChange", `Crosshair Snap: ${snap}`);
+        }
+    }
+
+    public onCrosshairLineStyleChange(style: unknown): void {
+        if (style === "dashed" || style === "solid" || style === "dotted") {
+            this.crosshairLineStyle.set(style);
+            this.#addLog("settingChange", `Crosshair Style: ${style}`);
+        }
+    }
+
+    public onReferenceLineLayerChange(layer: unknown): void {
+        if (layer === "underlay" || layer === "overlay") {
+            this.referenceLineLayer.set(layer);
+            this.#addLog("settingChange", `Reference Line Layer: ${layer}`);
+        }
+    }
+
+    public onReferenceBandLayerChange(layer: unknown): void {
+        if (layer === "underlay" || layer === "overlay") {
+            this.referenceBandLayer.set(layer);
+            this.#addLog("settingChange", `Reference Band Layer: ${layer}`);
+        }
+    }
+
+    public onAnnotationMarkerChange(marker: unknown): void {
+        if (marker === "diamond" || marker === "circle" || marker === "none") {
+            this.annotationMarker.set(marker);
+            this.#addLog("settingChange", `Annotation Marker: ${marker}`);
+        }
+    }
+
+    public onAnnotationPlacementChange(placement: unknown): void {
+        if (placement === "top" || placement === "bottom" || placement === "left" || placement === "right") {
+            this.annotationPlacement.set(placement);
+            this.#addLog("settingChange", `Annotation Placement: ${placement}`);
+        }
+    }
+
+    // Chart Title & Subtitle Controls
+    protected readonly chartTitle = signal<string>("Quarterly Revenue & Targets");
+    protected readonly chartSubtitle = signal<string>("Comparison across regional performance metrics");
+    protected readonly chartTitleAlign = signal<ChartHeaderAlignment>("left");
+    protected readonly titleAlignOptions: readonly { label: string; value: ChartHeaderAlignment }[] = [
+        { label: "Left", value: "left" },
+        { label: "Center", value: "center" },
+        { label: "Right", value: "right" }
+    ];
+    protected readonly useCustomTitleTemplate = signal<boolean>(false);
+
+    // Bar Orientation Controls
+    protected readonly barOrientation = signal<ChartBarOrientation>("vertical");
+    protected readonly barOrientationOptions: readonly { label: string; value: ChartBarOrientation }[] = [
+        { label: "Vertical", value: "vertical" },
+        { label: "Horizontal", value: "horizontal" }
+    ];
+
+    // Axis Presentation Controls
+    protected readonly xAxisLabels = signal<boolean>(true);
+    protected readonly yAxisLabels = signal<boolean>(true);
+    protected readonly xAxisLabelRotation = signal<ChartAxisLabelRotation>(0);
+    protected readonly yAxisLabelRotation = signal<ChartAxisLabelRotation>(0);
+    protected readonly labelRotationOptions: readonly { label: string; value: ChartAxisLabelRotation }[] = [
+        { label: "0° (Horizontal)", value: 0 },
+        { label: "45° Angle", value: 45 },
+        { label: "90° (Vertical)", value: 90 },
+        { label: "-45° Angle", value: -45 },
+        { label: "-90° (Vertical)", value: -90 },
+        { label: "Auto Rotation / Thinning", value: "auto" }
+    ];
+    protected readonly xAxisTickMarks = signal<boolean>(false);
+    protected readonly yAxisTickMarks = signal<boolean>(false);
+    protected readonly xAxisTickSize = signal<number>(6);
+    protected readonly yAxisTickSize = signal<number>(6);
+    protected readonly xAxisLabelMaxWidth = signal<number | undefined>(undefined);
+    protected readonly xAxisLabelPadding = signal<number>(4);
+    protected readonly yAxisLabelPadding = signal<number>(6);
+
+    // Candlestick & OHLC Chart Data & Controls
+    protected readonly candlestickData = signal<
+        readonly { close: number; date: string; high: number; low: number; open: number }[]
+    >([
+        { close: 104, date: "Mar 1", high: 108, low: 98, open: 100 },
+        { close: 102, date: "Mar 2", high: 107, low: 100, open: 105 },
+        { close: 112, date: "Mar 3", high: 115, low: 101, open: 102 },
+        { close: 110, date: "Mar 4", high: 116, low: 108, open: 112 },
+        { close: 118, date: "Mar 5", high: 122, low: 109, open: 110 },
+        { close: 118, date: "Mar 6", high: 121, low: 114, open: 118 },
+        { close: 114, date: "Mar 7", high: 120, low: 112, open: 119 },
+        { close: 125, date: "Mar 8", high: 128, low: 113, open: 114 }
+    ]);
+    protected readonly candlestickFillMode = signal<ChartFinancialFillMode>("filled");
+    protected readonly candlestickWickWidth = signal<number>(1);
+    protected readonly candlestickBodyWidthRatio = signal<number>(0.7);
+
+    protected readonly ohlcData = signal<
+        readonly { close: number; date: string; high: number; low: number; open: number }[]
+    >([
+        { close: 1850, date: "Mar 1", high: 1880, low: 1820, open: 1830 },
+        { close: 1820, date: "Mar 2", high: 1860, low: 1810, open: 1850 },
+        { close: 1910, date: "Mar 3", high: 1930, low: 1815, open: 1820 },
+        { close: 1890, date: "Mar 4", high: 1920, low: 1870, open: 1905 },
+        { close: 1960, date: "Mar 5", high: 1980, low: 1880, open: 1890 },
+        { close: 1960, date: "Mar 6", high: 1990, low: 1940, open: 1960 },
+        { close: 1920, date: "Mar 7", high: 1970, low: 1910, open: 1965 },
+        { close: 2010, date: "Mar 8", high: 2040, low: 1915, open: 1920 }
+    ]);
+    protected readonly ohlcWickWidth = signal<number>(1);
+
+    // Heatmap Chart Data & Controls
+    protected readonly heatmapDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    protected readonly heatmapTimes = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"];
+    protected readonly heatmapData = signal<readonly { day: string; time: string; value: number }[]>([
+        { day: "Mon", time: "00:00", value: 12 },
+        { day: "Mon", time: "04:00", value: 5 },
+        { day: "Mon", time: "08:00", value: 45 },
+        { day: "Mon", time: "12:00", value: 85 },
+        { day: "Mon", time: "16:00", value: 92 },
+        { day: "Mon", time: "20:00", value: 64 },
+
+        { day: "Tue", time: "00:00", value: 8 },
+        { day: "Tue", time: "04:00", value: 3 },
+        { day: "Tue", time: "08:00", value: 52 },
+        { day: "Tue", time: "12:00", value: 88 },
+        { day: "Tue", time: "16:00", value: 95 },
+        { day: "Tue", time: "20:00", value: 70 },
+
+        { day: "Wed", time: "00:00", value: 15 },
+        { day: "Wed", time: "04:00", value: 7 },
+        { day: "Wed", time: "08:00", value: 60 },
+        { day: "Wed", time: "12:00", value: 96 },
+        { day: "Wed", time: "16:00", value: 100 },
+        { day: "Wed", time: "20:00", value: 75 },
+
+        { day: "Thu", time: "00:00", value: 10 },
+        { day: "Thu", time: "04:00", value: 4 },
+        { day: "Thu", time: "08:00", value: 48 },
+        { day: "Thu", time: "12:00", value: 82 },
+        { day: "Thu", time: "16:00", value: 90 },
+        { day: "Thu", time: "20:00", value: 68 },
+
+        { day: "Fri", time: "00:00", value: 18 },
+        { day: "Fri", time: "04:00", value: 9 },
+        { day: "Fri", time: "08:00", value: 40 },
+        { day: "Fri", time: "12:00", value: 76 },
+        { day: "Fri", time: "16:00", value: 84 },
+        { day: "Fri", time: "20:00", value: 80 },
+
+        { day: "Sat", time: "00:00", value: 30 },
+        { day: "Sat", time: "04:00", value: 15 },
+        { day: "Sat", time: "08:00", value: 22 },
+        { day: "Sat", time: "12:00", value: 50 },
+        { day: "Sat", time: "16:00", value: 62 },
+        { day: "Sat", time: "20:00", value: 55 },
+
+        { day: "Sun", time: "00:00", value: 25 },
+        { day: "Sun", time: "04:00", value: 12 },
+        { day: "Sun", time: "08:00", value: 18 },
+        { day: "Sun", time: "12:00", value: 42 },
+        { day: "Sun", time: "16:00", value: 58 },
+        { day: "Sun", time: "20:00", value: 48 }
+    ]);
+    protected readonly heatmapColorMode = signal<ChartHeatmapColorMode>("sequential");
+    protected readonly heatmapBorderRadius = signal<number>(4);
+    protected readonly heatmapCellGap = signal<number>(2);
+    protected readonly heatmapShowValues = signal<boolean>(false);
+    protected readonly heatmapColorPreset = signal<"blue" | "emerald" | "sunset">("emerald");
+
+    protected readonly heatmapColors = computed<readonly string[] | undefined>(() => {
+        const preset = this.heatmapColorPreset();
+        if (preset === "emerald") {
+            return ["#ecfdf5", "#a7f3d0", "#34d399", "#059669", "#064e3b"];
+        }
+        if (preset === "sunset") {
+            return ["#fef3c7", "#f97316", "#dc2626", "#7f1d1d"];
+        }
+        return undefined; // fallback to theme palette
+    });
+
+    // Range Chart Data & Controls
+    protected readonly rangeBarData = signal<readonly { high: number; low: number; month: string }[]>([
+        { high: 28, low: 14, month: "Jan" },
+        { high: 32, low: 16, month: "Feb" },
+        { high: 38, low: 22, month: "Mar" },
+        { high: 45, low: 28, month: "Apr" },
+        { high: 52, low: 35, month: "May" },
+        { high: 58, low: 42, month: "Jun" }
+    ]);
+    protected readonly rangeBarRadius = signal<number>(6);
+    protected readonly rangeBarMaxBarWidth = signal<number>(36);
+    protected readonly rangeBarOpacity = signal<number>(0.85);
+
+    protected readonly rangeAreaData = signal<readonly { actual: number; high: number; low: number; month: string }[]>([
+        { actual: 38, high: 48, low: 28, month: "Jan" },
+        { actual: 44, high: 56, low: 32, month: "Feb" },
+        { actual: 52, high: 65, low: 40, month: "Mar" },
+        { actual: 61, high: 74, low: 48, month: "Apr" },
+        { actual: 70, high: 85, low: 55, month: "May" },
+        { actual: 78, high: 92, low: 64, month: "Jun" }
+    ]);
+    protected readonly rangeAreaOpacity = signal<number>(0.25);
+    protected readonly rangeAreaShowPoints = signal<boolean>(true);
+    protected readonly rangeAreaCurve = signal<ChartCurve>("monotone-x");
+    protected readonly areaFillMode = signal<ChartAreaFillMode>("gradient");
+    protected readonly areaFillModeOptions: readonly { label: string; value: ChartAreaFillMode }[] = [
+        { label: "Gradient (Fade to 0)", value: "gradient" },
+        { label: "Solid Fill", value: "solid" }
+    ];
+    protected readonly stackedBarData = signal<
+        readonly { month: string; online: number; partner: number; retail: number }[]
+    >([
+        { month: "Jan", online: 1200, partner: 600, retail: 2400 },
+        { month: "Feb", online: 1800, partner: 800, retail: 2100 },
+        { month: "Mar", online: 2200, partner: 1100, retail: 2900 },
+        { month: "Apr", online: 2600, partner: 1300, retail: 2700 },
+        { month: "May", online: 3100, partner: 1600, retail: 3400 },
+        { month: "Jun", online: 3800, partner: 1900, retail: 3200 }
+    ]);
+    protected readonly stackedAreaData = signal<
+        readonly { direct: number; organic: number; referral: number; year: number }[]
+    >([
+        { direct: 240, organic: 520, referral: 180, year: 2019 },
+        { direct: 310, organic: 680, referral: 240, year: 2020 },
+        { direct: 420, organic: 890, referral: 310, year: 2021 },
+        { direct: 560, organic: 1150, referral: 430, year: 2022 },
+        { direct: 720, organic: 1480, referral: 590, year: 2023 },
+        { direct: 910, organic: 1820, referral: 780, year: 2024 }
+    ]);
+    protected readonly currencyFormatter = (value: unknown): string => {
+        if (typeof value === "number") {
+            const formatted = Math.abs(value).toLocaleString();
+            return value < 0 ? `-$${formatted}` : `$${formatted}`;
+        }
+        return String(value);
+    };
+    protected readonly curveOptions: readonly { label: string; value: ChartCurve }[] = [
+        { label: "Linear", value: "linear" },
+        { label: "Monotone X (Smooth)", value: "monotone-x" },
+        { label: "Natural (Spline)", value: "natural" },
+        { label: "Step After", value: "step-after" }
+    ];
+    protected readonly curveType = signal<ChartCurve>("monotone-x");
+    protected readonly dateData = signal<readonly TimePointMetric[]>([
+        { cpu: 32, memory: 48, timestamp: new Date(2026, 0, 1, 8, 0) },
+        { cpu: 45, memory: 52, timestamp: new Date(2026, 0, 1, 9, 0) },
+        { cpu: 78, memory: 65, timestamp: new Date(2026, 0, 1, 10, 0) },
+        { cpu: 56, memory: 60, timestamp: new Date(2026, 0, 1, 11, 0) },
+        { cpu: 89, memory: 75, timestamp: new Date(2026, 0, 1, 12, 0) },
+        { cpu: 64, memory: 68, timestamp: new Date(2026, 0, 1, 13, 0) },
+        { cpu: 42, memory: 55, timestamp: new Date(2026, 0, 1, 14, 0) }
+    ]);
+    protected readonly displayedMonthlyData = computed(() => {
+        return this.isDataEmpty() ? [] : this.monthlyData();
+    });
+
+    // Polar Sector (Pie & Donut) Data & Controls
+    protected readonly donutCornerRadius = signal<number>(4);
+    protected readonly donutData = signal<readonly MarketShareDatum[]>([
+        { category: "Compute Engine", value: 45000 },
+        { category: "Cloud Storage", value: 28000 },
+        { category: "Cloud SQL & Spanner", value: 22000 },
+        { category: "Kubernetes Engine", value: 35000 },
+        { category: "BigQuery Analytics", value: 19000 },
+        { category: "Networking & CDN", value: 11000 }
+    ]);
+    protected readonly donutFillMode = signal<ChartPolarFillMode>("solid");
+    protected readonly donutInnerRadiusRatio = signal<number>(0.62);
+    protected readonly donutLabelPosition = signal<ChartPolarLabelPosition>("outside");
+    protected readonly donutOuterRatio = signal<number>(0.9);
+    protected readonly donutPadAngle = signal<number>(2);
+    protected readonly donutShowLabels = signal<boolean>(false);
+    protected readonly donutUseCenterSummary = signal<boolean>(true);
+
+    public readonly eventLogs = signal<readonly DemoLogEntry[]>([]);
+    protected readonly fillModeOptions: readonly { label: string; value: ChartPolarFillMode }[] = [
+        { label: "Solid", value: "solid" },
+        { label: "Gradient (Center to Arc)", value: "gradient" }
+    ];
+    protected readonly includeNegativeValues = signal<boolean>(false);
+    protected readonly isDataEmpty = signal<boolean>(false);
+    protected readonly labelPositionOptions: readonly { label: string; value: ChartPolarLabelPosition }[] = [
+        { label: "Outside (Leader Lines)", value: "outside" },
+        { label: "Inside (Slice Center)", value: "inside" }
+    ];
+    protected readonly legendPosition = signal<"bottom" | "left" | "right" | "top">("bottom");
+    protected readonly legendPositionOptions: readonly { label: string; value: "bottom" | "left" | "right" | "top" }[] =
+        [
+            { label: "Bottom", value: "bottom" },
+            { label: "Top", value: "top" },
+            { label: "Left", value: "left" },
+            { label: "Right", value: "right" }
+        ];
+    protected readonly monthlyData = signal<readonly MonthlyMetric[]>([
+        { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
+        { actual: 5100, forecast: 4800, month: "Feb", target: 5000 },
+        { actual: 6400, forecast: 5900, month: "Mar", target: 5800 },
+        { actual: 5800, forecast: 6100, month: "Apr", target: 6200 },
+        { actual: 7200, forecast: 6800, month: "May", target: 6700 },
+        { actual: 8100, forecast: 7500, month: "Jun", target: 7600 }
+    ]);
+    protected readonly niceAxes = signal<boolean>(true);
+
+    // Pie series controls
+    protected readonly pieCornerRadius = signal<number>(0);
+    protected readonly pieData = signal<readonly MarketShareDatum[]>([
+        { category: "Chrome", value: 65 },
+        { category: "Safari", value: 18 },
+        { category: "Edge", value: 8 },
+        { category: "Firefox", value: 5 },
+        { category: "Opera", value: 3 },
+        { category: "Other", value: 1 }
+    ]);
+    protected readonly pieEndAngle = signal<number>(360);
+    protected readonly pieFillMode = signal<ChartPolarFillMode>("solid");
+    protected readonly pieLabelContent = signal<ChartPolarLabelContent>("percentage");
+    protected readonly pieLabelContentOptions: readonly { label: string; value: ChartPolarLabelContent }[] = [
+        { label: "Percentage (e.g. 65%)", value: "percentage" },
+        { label: "Category (e.g. Chrome)", value: "category" },
+        { label: "Value (e.g. 65)", value: "value" },
+        { label: "Category & Percentage", value: "category-percentage" }
+    ];
+    protected readonly pieLabelPosition = signal<ChartPolarLabelPosition>("outside");
+    protected readonly pieOuterRatio = signal<number>(0.9);
+    protected readonly piePadAngle = signal<number>(1);
+    protected readonly pieShowLabels = signal<boolean>(true);
+    protected readonly pieStartAngle = signal<number>(0);
+    protected readonly pieUseCustomLabelTemplate = signal<boolean>(false);
+
+    // Radar Series Data & Controls
+    protected readonly radarData = signal<readonly SkillMetric[]>([
+        { mage: 30, metric: "Strength", rogue: 65, warrior: 95 },
+        { mage: 98, metric: "Intelligence", rogue: 70, warrior: 35 },
+        { mage: 55, metric: "Agility", rogue: 95, warrior: 60 },
+        { mage: 40, metric: "Defense", rogue: 50, warrior: 90 },
+        { mage: 100, metric: "Mana", rogue: 45, warrior: 20 },
+        { mage: 60, metric: "Stealth", rogue: 98, warrior: 15 }
+    ]);
+    protected readonly radarFillMode = signal<ChartRadialFillMode>("gradient");
+    protected readonly radialFillModeOptions: readonly { label: string; value: ChartRadialFillMode }[] = [
+        { label: "Gradient (Center to Max)", value: "gradient" },
+        { label: "Solid Wash", value: "solid" },
+        { label: "None (Outline Only)", value: "none" }
+    ];
+    protected readonly radialCurveOptions: readonly { label: string; value: ChartRadialCurve }[] = [
+        { label: "Linear", value: "linear" },
+        { label: "Smooth (Catmull-Rom)", value: "smooth" }
+    ];
+    protected readonly radialGridShapeOptions: readonly { label: string; value: ChartRadialGridShape }[] = [
+        { label: "Auto (Default)", value: "auto" },
+        { label: "Polygon", value: "polygon" },
+        { label: "Circle", value: "circle" }
+    ];
+    protected readonly radarCurve = signal<ChartRadialCurve>("linear");
+    protected readonly radarShowPoints = signal<boolean>(true);
+    protected readonly radarGridShape = signal<ChartRadialGridShape>("auto");
+    protected readonly radarRotation = signal<number>(0);
+    protected readonly radarShowWarrior = signal<boolean>(true);
+    protected readonly radarShowMage = signal<boolean>(true);
+    protected readonly radarShowRogue = signal<boolean>(true);
+
+    // Continuous Polar Data & Controls
+    protected readonly polarData = signal<readonly SignalDataPoint[]>([
+        { angle: 0, gain: 85, noise: 20 },
+        { angle: 30, gain: 70, noise: 25 },
+        { angle: 60, gain: 45, noise: 30 },
+        { angle: 90, gain: 20, noise: 35 },
+        { angle: 120, gain: 30, noise: 25 },
+        { angle: 150, gain: 60, noise: 20 },
+        { angle: 180, gain: 90, noise: 15 },
+        { angle: 210, gain: 65, noise: 20 },
+        { angle: 240, gain: 35, noise: 25 },
+        { angle: 270, gain: 15, noise: 30 },
+        { angle: 300, gain: 40, noise: 25 },
+        { angle: 330, gain: 75, noise: 20 }
+    ]);
+    protected readonly continuousPolarFillMode = signal<ChartRadialFillMode>("gradient");
+    protected readonly continuousPolarCurve = signal<ChartRadialCurve>("smooth");
+    protected readonly continuousPolarConnectNulls = signal<boolean>(false);
+    protected readonly continuousPolarShowPoints = signal<boolean>(true);
+    protected readonly continuousPolarGridShape = signal<ChartRadialGridShape>("circle");
+    protected readonly continuousPolarTickCount = signal<number>(12);
+
+    // Scatter Plot Data & Controls
+    protected readonly scatterData = signal<readonly ScatterDataPoint[]>([
+        { height: 165, id: "p1", weight: 60, wingspan: 168 },
+        { height: 170, id: "p2", weight: 68, wingspan: 172 },
+        { height: 172, id: "p3", weight: 65, wingspan: 175 },
+        { height: 175, id: "p4", weight: 72, wingspan: 180 },
+        { height: 178, id: "p5", weight: 78, wingspan: 182 },
+        { height: 180, id: "p6", weight: 75, wingspan: 185 },
+        { height: 182, id: "p7", weight: 82, wingspan: 188 },
+        { height: 185, id: "p8", weight: 88, wingspan: 192 },
+        { height: 188, id: "p9", weight: 90, wingspan: 194 },
+        { height: 192, id: "p10", weight: 96, wingspan: 200 }
+    ]);
+    protected readonly scatterPointRadius = signal<number>(6);
+    protected readonly scatterFillOpacity = signal<number>(0.85);
+    protected readonly showScatterWeight = signal<boolean>(true);
+    protected readonly showScatterWingspan = signal<boolean>(true);
+
+    // Bubble Chart Data & Controls
+    protected readonly bubbleData = signal<readonly BubbleDataPoint[]>([
+        { country: "Japan", gdp: 39000, id: "jp", lifeExp: 84.6, population: 125 },
+        { country: "United States", gdp: 70000, id: "us", lifeExp: 77.3, population: 335 },
+        { country: "Germany", gdp: 51000, id: "de", lifeExp: 81.0, population: 84 },
+        { country: "Brazil", gdp: 8900, id: "br", lifeExp: 75.9, population: 215 },
+        { country: "India", gdp: 2400, id: "in", lifeExp: 70.4, population: 1420 },
+        { country: "Nigeria", gdp: 2100, id: "ng", lifeExp: 54.0, population: 218 },
+        { country: "Australia", gdp: 56000, id: "au", lifeExp: 83.2, population: 26 },
+        { country: "South Korea", gdp: 35000, id: "kr", lifeExp: 83.5, population: 52 },
+        { country: "Canada", gdp: 52000, id: "ca", lifeExp: 82.5, population: 39 },
+        { country: "France", gdp: 44000, id: "fr", lifeExp: 82.7, population: 68 }
+    ]);
+    protected readonly bubbleMinRadius = signal<number>(5);
+    protected readonly bubbleMaxRadius = signal<number>(30);
+    protected readonly bubbleFillOpacity = signal<number>(0.6);
+    protected readonly bubbleSizeFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value.toLocaleString()}M` : String(value);
+
+    protected readonly radialBarData = signal<{ category: string; color?: string; value: number }[]>([
+        { category: "Disk Usage", color: "#3b82f6", value: 78 },
+        { category: "Memory", color: "#10b981", value: 62 },
+        { category: "CPU Load", color: "#f59e0b", value: 45 },
+        { category: "Network I/O", color: "#ec4899", value: 89 }
+    ]);
+    protected readonly radialBarFillMode = signal<ChartRadialArcFillMode>("solid");
+    protected readonly radialBarThickness = signal<number>(20);
+    protected readonly radialBarGap = signal<number>(6);
+    protected readonly radialBarCornerRadius = signal<number>(6);
+    protected readonly radialBarStartAngle = signal<number>(0);
+    protected readonly radialBarEndAngle = signal<number>(360);
+    protected readonly radialBarShowTracks = signal<boolean>(true);
+
+    protected readonly roseData = signal<{ direction: string; value: number }[]>([
+        { direction: "N", value: 45 },
+        { direction: "NE", value: 85 },
+        { direction: "E", value: 65 },
+        { direction: "SE", value: 30 },
+        { direction: "S", value: 95 },
+        { direction: "SW", value: 55 },
+        { direction: "W", value: 75 },
+        { direction: "NW", value: 40 }
+    ]);
+    protected readonly roseScaleMode = signal<ChartRoseScaleMode>("area");
+    protected readonly roseFillMode = signal<ChartRadialArcFillMode>("solid");
+    protected readonly rosePadAngle = signal<number>(2);
+    protected readonly roseCornerRadius = signal<number>(4);
+
+    protected readonly gaugeValue = signal<number>(76);
+    protected readonly gaugeMin = signal<number>(0);
+    protected readonly gaugeMax = signal<number>(100);
+    protected readonly gaugeIndicator = signal<ChartGaugeIndicator>("both");
+    protected readonly gaugeStartAngle = signal<number>(-120);
+    protected readonly gaugeEndAngle = signal<number>(120);
+    protected readonly gaugeInnerRadiusRatio = signal<number>(0.72);
+    protected readonly gaugeThickness = signal<number>(24);
+    protected readonly gaugeNeedleWidth = signal<number>(3);
+    protected readonly gaugeShowValue = signal<boolean>(true);
+    protected readonly gaugeCustomTemplate = signal<boolean>(false);
+
+    // Treemap Controls & Data
+    protected readonly treemapData = signal<readonly unknown[]>([
+        {
+            name: "Frontend",
+            children: [
+                { name: "Angular", value: 120 },
+                { name: "React", value: 110 },
+                { name: "Vue", value: 75 },
+                { name: "Svelte", value: 45 }
+            ]
+        },
+        {
+            name: "Backend",
+            children: [
+                { name: "Node.js", value: 95 },
+                { name: "Go", value: 130 },
+                { name: "Rust", value: 115 },
+                { name: "Java", value: 140 }
+            ]
+        },
+        {
+            name: "Database",
+            children: [
+                { name: "PostgreSQL", value: 110 },
+                { name: "Redis", value: 65 },
+                { name: "MongoDB", value: 55 },
+                { name: "DuckDB", value: 40 }
+            ]
+        },
+        {
+            name: "DevOps",
+            children: [
+                { name: "Kubernetes", value: 150 },
+                { name: "Docker", value: 90 },
+                { name: "Terraform", value: 70 },
+                { name: "AWS", value: 130 }
+            ]
+        }
+    ]);
+
+    protected readonly treemapTile = signal<ChartTreemapTile>("squarify");
+    protected readonly treemapSort = signal<ChartTreemapSort>("descending");
+    protected readonly treemapShowParentLabels = signal<boolean>(true);
+    protected readonly treemapShowValues = signal<boolean>(true);
+    protected readonly treemapBorderRadius = signal<number>(4);
+    protected readonly treemapStrokeWidth = signal<number>(1);
+    protected readonly treemapStrokeColor = signal<string>("#ffffff");
+    protected readonly treemapParentFillOpacity = signal<number>(0.15);
+    protected readonly treemapPaddingInner = signal<number>(2);
+    protected readonly treemapPaddingOuter = signal<number>(4);
+    protected readonly treemapParentHeaderHeight = signal<number>(22);
+    protected readonly treemapMaxDepth = signal<number | undefined>(undefined);
+    protected readonly treemapUseCustomTemplate = signal<boolean>(false);
+
+    protected readonly treemapTileOptions: readonly { label: string; value: ChartTreemapTile }[] = [
+        { label: "Squarify (Golden Ratio)", value: "squarify" },
+        { label: "Binary (Recursive)", value: "binary" },
+        { label: "Dice (Horizontal)", value: "dice" },
+        { label: "Slice (Vertical)", value: "slice" },
+        { label: "Slice-Dice (Alternating)", value: "slice-dice" }
+    ];
+
+    protected readonly treemapSortOptions: readonly { label: string; value: ChartTreemapSort }[] = [
+        { label: "Descending", value: "descending" },
+        { label: "Ascending", value: "ascending" },
+        { label: "None (Preserve Order)", value: "none" }
+    ];
+
+    public onTreemapTileChange(tile: unknown): void {
+        const val = typeof tile === "string" ? tile : (tile as { value?: string })?.value;
+        if (val) {
+            this.treemapTile.set(val as ChartTreemapTile);
+            this.#addLog("settingChange", `Treemap Tile Algorithm: ${val}`);
+        }
+    }
+
+    public onTreemapSortChange(sort: unknown): void {
+        const val = typeof sort === "string" ? sort : (sort as { value?: string })?.value;
+        if (val) {
+            this.treemapSort.set(val as ChartTreemapSort);
+            this.#addLog("settingChange", `Treemap Sibling Sort: ${val}`);
+        }
+    }
+
+    // Funnel Controls & Data
+    protected readonly funnelData = signal<readonly { stage: string; value: number }[]>([
+        { stage: "Website Visits", value: 12500 },
+        { stage: "Product Views", value: 7200 },
+        { stage: "Add to Cart", value: 3400 },
+        { stage: "Checkout Started", value: 1600 },
+        { stage: "Purchases", value: 850 }
+    ]);
+    protected readonly funnelOrientation = signal<ChartFunnelOrientation>("vertical");
+    protected readonly funnelGap = signal<number>(4);
+    protected readonly funnelWidthRatio = signal<number>(0.85);
+    protected readonly funnelLabelContent = signal<ChartFunnelLabelContent>("category-value-conversion");
+    protected readonly funnelShowLabels = signal<boolean>(true);
+    protected readonly funnelUseCustomTemplate = signal<boolean>(false);
+
+    protected readonly funnelOrientationOptions: readonly { label: string; value: ChartFunnelOrientation }[] = [
+        { label: "Vertical (Top down)", value: "vertical" },
+        { label: "Horizontal (Left to right)", value: "horizontal" }
+    ];
+
+    protected readonly funnelLabelContentOptions: readonly { label: string; value: ChartFunnelLabelContent }[] = [
+        { label: "Category & Value & Conversion", value: "category-value-conversion" },
+        { label: "Category & Value", value: "category-value" },
+        { label: "Category Only", value: "category" },
+        { label: "Value Only", value: "value" }
+    ];
+
+    public onFunnelOrientationChange(val: unknown): void {
+        const v = typeof val === "string" ? val : (val as { value?: string })?.value;
+        if (v) {
+            this.funnelOrientation.set(v as ChartFunnelOrientation);
+            this.#addLog("settingChange", `Funnel Orientation: ${v}`);
+        }
+    }
+
+    public onFunnelLabelContentChange(val: unknown): void {
+        const v = typeof val === "string" ? val : (val as { value?: string })?.value;
+        if (v) {
+            this.funnelLabelContent.set(v as ChartFunnelLabelContent);
+            this.#addLog("settingChange", `Funnel Label Content: ${v}`);
+        }
+    }
+
+    public onFunnelStageVisibilityChange(event: ChartFunnelStageVisibilityEvent): void {
+        this.#addLog("stageVisibilityChange", `Stage "${event.formattedCategory}" visibility: ${event.visible}`);
+    }
+
+    public randomizeFunnelData(): void {
+        let val = Math.floor(10000 + Math.random() * 5000);
+        const stages = ["Website Visits", "Product Views", "Add to Cart", "Checkout Started", "Purchases"];
+        const next = stages.map(stage => {
+            const stageVal = val;
+            val = Math.max(10, Math.floor(val * (0.35 + Math.random() * 0.35)));
+            return { stage, value: stageVal };
+        });
+        this.funnelData.set(next);
+        this.#addLog("dataUpdate", "Randomized Funnel stages");
+    }
+
+    // Waterfall Controls & Data
+    protected readonly waterfallData = signal<readonly { category: string; kind?: "change" | "subtotal" | "total"; value?: number }[]>([
+        { category: "Opening Balance", kind: "total", value: 45000 },
+        { category: "Product Sales", kind: "change", value: 32000 },
+        { category: "Subscriptions", kind: "change", value: 15000 },
+        { category: "Gross Revenue", kind: "subtotal" },
+        { category: "Salaries", kind: "change", value: -22000 },
+        { category: "Infrastructure", kind: "change", value: -5500 },
+        { category: "Marketing", kind: "change", value: -7000 },
+        { category: "Operating Profit", kind: "subtotal" },
+        { category: "Taxes", kind: "change", value: -4500 },
+        { category: "Net Closing Balance", kind: "total" }
+    ]);
+    protected readonly waterfallShowConnectors = signal<boolean>(true);
+    protected readonly waterfallShowLabels = signal<boolean>(true);
+    protected readonly waterfallUseCustomTemplate = signal<boolean>(false);
+    protected readonly waterfallBorderRadius = signal<number>(4);
+
+    public randomizeWaterfallData(): void {
+        const initial = Math.floor(30000 + Math.random() * 25000);
+        const sales = Math.floor(20000 + Math.random() * 20000);
+        const sub = Math.floor(10000 + Math.random() * 10000);
+        const salaries = -Math.floor(15000 + Math.random() * 10000);
+        const infra = -Math.floor(3000 + Math.random() * 5000);
+        const marketing = -Math.floor(4000 + Math.random() * 6000);
+        const tax = -Math.floor(2000 + Math.random() * 4000);
+
+        this.waterfallData.set([
+            { category: "Opening Balance", kind: "total", value: initial },
+            { category: "Product Sales", kind: "change", value: sales },
+            { category: "Subscriptions", kind: "change", value: sub },
+            { category: "Gross Revenue", kind: "subtotal" },
+            { category: "Salaries", kind: "change", value: salaries },
+            { category: "Infrastructure", kind: "change", value: infra },
+            { category: "Marketing", kind: "change", value: marketing },
+            { category: "Operating Profit", kind: "subtotal" },
+            { category: "Taxes", kind: "change", value: tax },
+            { category: "Net Closing Balance", kind: "total" }
+        ]);
+        this.#addLog("dataUpdate", "Randomized Waterfall cashflow");
+    }
+
+    protected readonly sharedTooltip = signal<boolean>(false);
+    protected readonly showArea = signal<boolean>(true);
+    protected readonly showAxisTitles = signal<boolean>(false);
+    protected readonly showBars = signal<boolean>(true);
+    protected readonly showLine = signal<boolean>(true);
+    protected readonly showPoints = signal<boolean>(true);
+    protected readonly timeFormatter = (value: unknown): string =>
+        value instanceof Date
+            ? `${value.getHours().toString().padStart(2, "0")}:${value.getMinutes().toString().padStart(2, "0")}`
+            : String(value);
+    protected readonly percentFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value}%` : String(value);
+    protected readonly heightFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value} cm` : String(value);
+    protected readonly weightFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value} kg` : String(value);
+    protected readonly lifeExpFormatter = (value: unknown): string =>
+        typeof value === "number" ? `${value} yrs` : String(value);
+    protected readonly useCustomNoData = signal<boolean>(false);
+    protected readonly useIndependentSeriesData = signal<boolean>(false);
+    protected readonly xAxisLine = signal<boolean>(true);
+    protected readonly xAxisPosition = signal<"bottom" | "top">("bottom");
+    protected readonly xGridLines = signal<boolean>(false);
+    protected readonly yAxisLine = signal<boolean>(true);
+    protected readonly yAxisPosition = signal<"left" | "right">("left");
+    protected readonly yGridLines = signal<boolean>(true);
+
+    public clearLogs(): void {
+        this.eventLogs.set([]);
+    }
+
+    public onAreaFillModeChange(mode: unknown): void {
+        if (mode === "gradient" || mode === "solid") {
+            this.areaFillMode.set(mode);
+            this.#addLog("settingChange", `Area Fill Mode: ${mode}`);
+        }
+    }
+
+    public onRadarFillModeChange(mode: unknown): void {
+        if (mode === "gradient" || mode === "solid" || mode === "none") {
+            this.radarFillMode.set(mode);
+            this.#addLog("settingChange", `Radar Fill Mode: ${mode}`);
+        }
+    }
+
+    public onRadarCurveChange(curve: unknown): void {
+        if (curve === "linear" || curve === "smooth") {
+            this.radarCurve.set(curve);
+            this.#addLog("settingChange", `Radar Curve: ${curve}`);
+        }
+    }
+
+    public onRadarGridShapeChange(shape: unknown): void {
+        if (shape === "auto" || shape === "polygon" || shape === "circle") {
+            this.radarGridShape.set(shape);
+            this.#addLog("settingChange", `Radar Grid Shape: ${shape}`);
+        }
+    }
+
+    public onContinuousPolarFillModeChange(mode: unknown): void {
+        if (mode === "gradient" || mode === "solid" || mode === "none") {
+            this.continuousPolarFillMode.set(mode);
+            this.#addLog("settingChange", `Polar Fill Mode: ${mode}`);
+        }
+    }
+
+    public onContinuousPolarCurveChange(curve: unknown): void {
+        if (curve === "linear" || curve === "smooth") {
+            this.continuousPolarCurve.set(curve);
+            this.#addLog("settingChange", `Polar Curve: ${curve}`);
+        }
+    }
+
+    public onContinuousPolarGridShapeChange(shape: unknown): void {
+        if (shape === "auto" || shape === "polygon" || shape === "circle") {
+            this.continuousPolarGridShape.set(shape);
+            this.#addLog("settingChange", `Polar Grid Shape: ${shape}`);
+        }
+    }
+
+    public onCurveTypeChange(curve: unknown): void {
+        if (typeof curve === "string") {
+            this.curveType.set(curve as ChartCurve);
+            this.#addLog("settingChange", `Line Curve: ${curve}`);
+        }
+    }
+
+    public onDonutFillModeChange(mode: unknown): void {
+        if (mode === "solid" || mode === "gradient") {
+            this.donutFillMode.set(mode);
+            this.#addLog("settingChange", `Donut Fill Mode: ${mode}`);
+        }
+    }
+
+    public onDonutLabelPositionChange(pos: unknown): void {
+        if (pos === "outside" || pos === "inside") {
+            this.donutLabelPosition.set(pos);
+            this.#addLog("settingChange", `Donut Label Position: ${pos}`);
+        }
+    }
+
+    public onLabelContentChange(content: unknown): void {
+        this.onPieLabelContentChange(content);
+    }
+
+    public onLegendPositionChange(pos: unknown): void {
+        if (pos === "bottom" || pos === "top" || pos === "left" || pos === "right") {
+            this.legendPosition.set(pos);
+            this.#addLog("settingChange", `Legend Position: ${pos}`);
+        }
+    }
+
+    public onPieFillModeChange(mode: unknown): void {
+        if (mode === "solid" || mode === "gradient") {
+            this.pieFillMode.set(mode);
+            this.#addLog("settingChange", `Pie Fill Mode: ${mode}`);
+        }
+    }
+
+    public onPieLabelContentChange(content: unknown): void {
+        if (typeof content === "string") {
+            this.pieLabelContent.set(content as ChartPolarLabelContent);
+            this.#addLog("settingChange", `Pie Label Content: ${content}`);
+        }
+    }
+
+    public onPieLabelPositionChange(pos: unknown): void {
+        if (pos === "outside" || pos === "inside") {
+            this.pieLabelPosition.set(pos);
+            this.#addLog("settingChange", `Pie Label Position: ${pos}`);
+        }
+    }
+
+    public onPointClick(event: ChartPointEvent): void {
+        const polarDetails =
+            event.percentage !== undefined
+                ? ` | (${(event.percentage * 100).toFixed(1)}%)`
+                : event.yCategory !== undefined
+                  ? ` | Cell: [${event.formattedXValue ?? event.category}, ${event.formattedYCategory ?? event.yCategory}]`
+                  : event.category
+                    ? ` | Category: "${event.category}"`
+                    : "";
+        const valueDisplay = Array.isArray(event.value)
+            ? `[${event.value.join(", ")}]`
+            : event.value !== undefined
+              ? String(event.value)
+              : event.yValue !== undefined
+                ? String(event.yValue)
+                : "undefined";
+        this.#addLog(
+            "pointClick",
+            `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${valueDisplay} | Index: ${event.dataIndex}`
+        );
+    }
+
+    public onPointFocusChange(event: ChartPointFocusEvent): void {
+        const polarDetails =
+            event.yCategory !== undefined
+                ? ` | Cell: [${event.formattedXValue ?? event.category}, ${event.formattedYCategory ?? event.yCategory}]`
+                : event.category
+                  ? ` | Category: "${event.category}"`
+                  : "";
+        const valueDisplay = Array.isArray(event.value)
+            ? `[${event.value.join(", ")}]`
+            : event.value !== undefined
+              ? String(event.value)
+              : event.yValue !== undefined
+                ? String(event.yValue)
+                : "undefined";
+        this.#addLog(
+            "pointFocusChange",
+            `Series: "${event.seriesName}" (${event.seriesType})${polarDetails} | Value: ${valueDisplay} | Index: ${event.dataIndex}`
+        );
+    }
+
+    public onSeriesVisibilityChange(event: ChartSeriesVisibilityEvent): void {
+        this.#addLog("seriesVisibilityChange", `Series: "${event.seriesName}" | Visible: ${event.visible}`);
+    }
+
+    public onSliceVisibilityChange(event: ChartSliceVisibilityEvent): void {
+        this.#addLog(
+            "sliceVisibilityChange",
+            `Slice: "${event.category}" | DataIndex: ${event.dataIndex} | Visible: ${event.visible}`
+        );
+    }
+
+    public randomizeData(): void {
+        this.useIndependentSeriesData.set(false);
+        const minVal = this.includeNegativeValues() ? -4000 : 2000;
+        const range = this.includeNegativeValues() ? 12000 : 6000;
+        this.monthlyData.update(list =>
+            list.map(item => {
+                const actual = Math.round(minVal + Math.random() * range);
+                return {
+                    actual,
+                    forecast: actual,
+                    month: item.month,
+                    target: actual
+                };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized monthly dataset (same data across all series)");
+    }
+
+    public randomizeDonutData(): void {
+        this.donutData.update(list =>
+            list.map(item => ({
+                ...item,
+                value: Math.max(5000, Math.round(5000 + Math.random() * 50000))
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized donut cloud revenue dataset");
+    }
+
+    public randomizeIndividually(): void {
+        this.useIndependentSeriesData.set(true);
+        const minVal = this.includeNegativeValues() ? -4000 : 2000;
+        const range = this.includeNegativeValues() ? 12000 : 6000;
+        this.monthlyData.update(list =>
+            list.map(item => ({
+                actual: Math.round(minVal + Math.random() * range),
+                forecast: Math.round(minVal + Math.random() * range),
+                month: item.month,
+                target: Math.round(minVal + Math.random() * range)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized monthly dataset (individual data for each series)");
+    }
+
+    public randomizePieData(): void {
+        this.pieData.update(list =>
+            list.map(item => ({
+                ...item,
+                value: Math.max(2, Math.round(5 + Math.random() * 80))
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized pie chart slice values");
+    }
+
+    public randomizeRadarData(): void {
+        this.radarData.update(list =>
+            list.map(item => ({
+                mage: Math.round(20 + Math.random() * 80),
+                metric: item.metric,
+                rogue: Math.round(20 + Math.random() * 80),
+                warrior: Math.round(20 + Math.random() * 80)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized radar skill matrix");
+    }
+
+    public appendDataPoint(): void {
+        const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const currLen = this.monthlyData().length;
+        const nextMonth = months[currLen % months.length];
+        const val = Math.round(3000 + Math.random() * 6000);
+        this.monthlyData.update(list => [
+            ...list,
+            { actual: val, forecast: val - 200, month: `${nextMonth}*`, target: val + 500 }
+        ]);
+        this.#addLog("dataUpdate", `Appended data point for ${nextMonth}`);
+    }
+
+    public appendDonutSlice(): void {
+        const services = ["Cloud Functions", "Cloud Spanner", "Vertex AI", "Cloud Run", "Memorystore"];
+        const currLen = this.donutData().length;
+        const nextService = services[currLen % services.length];
+        const val = Math.round(5000 + Math.random() * 25000);
+        this.donutData.update(list => [...list, { category: nextService, value: val }]);
+        this.#addLog("dataUpdate", `Appended donut service "${nextService}" ($${val.toLocaleString()})`);
+    }
+
+    public appendPieSlice(): void {
+        const browsers = ["Brave", "Vivaldi", "Tor", "Samsung Internet", "UC Browser"];
+        const currLen = this.pieData().length;
+        const nextBrowser = browsers[currLen % browsers.length];
+        const val = Math.round(2 + Math.random() * 10);
+        this.pieData.update(list => [...list, { category: nextBrowser, value: val }]);
+        this.#addLog("dataUpdate", `Appended pie slice "${nextBrowser}" (${val}%)`);
+    }
+
+    public loadDensePieData(): void {
+        this.pieData.set([
+            { category: "Chrome", value: 62 },
+            { category: "Safari", value: 16 },
+            { category: "Edge", value: 7 },
+            { category: "Firefox", value: 4 },
+            { category: "Opera", value: 3 },
+            { category: "Brave", value: 3 },
+            { category: "Vivaldi", value: 2 },
+            { category: "Tor", value: 1 },
+            { category: "Other", value: 2 }
+        ]);
+        this.#addLog("dataUpdate", "Loaded dense browser market share dataset (9 slices)");
+    }
+
+    public loadProfitLossData(): void {
+        this.monthlyData.set([
+            { actual: 3500, forecast: 4000, month: "Jan", target: 4500 },
+            { actual: -1200, forecast: 2000, month: "Feb", target: 3000 },
+            { actual: 5400, forecast: 4800, month: "Mar", target: 5000 },
+            { actual: -2800, forecast: -1000, month: "Apr", target: 2000 },
+            { actual: 6100, forecast: 5500, month: "May", target: 6000 },
+            { actual: 4800, forecast: 4500, month: "Jun", target: 5000 }
+        ]);
+        this.includeNegativeValues.set(true);
+        this.#addLog("dataUpdate", "Loaded dataset with negative profit/loss values");
+    }
+
+    public randomizePolarData(): void {
+        this.polarData.update(list =>
+            list.map(item => ({
+                angle: item.angle,
+                gain: Math.round(10 + Math.random() * 90),
+                noise: Math.round(5 + Math.random() * 30)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized continuous polar radiation pattern");
+    }
+
+    public randomizeScatterData(): void {
+        this.scatterData.update(list =>
+            list.map(item => ({
+                height: item.height,
+                id: item.id,
+                weight: Math.round(55 + Math.random() * 45),
+                wingspan: Math.round(item.height - 5 + Math.random() * 15)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized scatter plot biometric distribution");
+    }
+
+    public randomizeBubbleData(): void {
+        this.bubbleData.update(list =>
+            list.map(item => ({
+                country: item.country,
+                gdp: Math.round(1500 + Math.random() * 75000),
+                id: item.id,
+                lifeExp: Number((50 + Math.random() * 35).toFixed(1)),
+                population: Math.round(10 + Math.random() * 1400)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized bubble global socioeconomic dataset");
+    }
+
+    public randomizeRangeBarData(): void {
+        this.rangeBarData.update(list =>
+            list.map(item => {
+                const low = Math.round(10 + Math.random() * 20);
+                const high = Math.round(low + 10 + Math.random() * 30);
+                return { high, low, month: item.month };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized temperature range bars dataset");
+    }
+
+    public randomizeRangeAreaData(): void {
+        this.rangeAreaData.update(list =>
+            list.map(item => {
+                const low = Math.round(20 + Math.random() * 30);
+                const high = Math.round(low + 20 + Math.random() * 40);
+                const actual = Math.round(low + (high - low) * (0.3 + Math.random() * 0.4));
+                return { actual, high, low, month: item.month };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized range area confidence band dataset");
+    }
+
+    public randomizeCandlestickData(): void {
+        this.candlestickData.update(list =>
+            list.map(item => {
+                const open = Math.round(90 + Math.random() * 40);
+                const close = Math.round(90 + Math.random() * 40);
+                const high = Math.round(Math.max(open, close) + Math.random() * 15);
+                const low = Math.round(Math.min(open, close) - Math.random() * 15);
+                return { close, date: item.date, high, low, open };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized candlestick daily OHLC session dataset");
+    }
+
+    public randomizeOhlcData(): void {
+        this.ohlcData.update(list =>
+            list.map(item => {
+                const open = Math.round(1800 + Math.random() * 300);
+                const close = Math.round(1800 + Math.random() * 300);
+                const high = Math.round(Math.max(open, close) + Math.random() * 80);
+                const low = Math.round(Math.min(open, close) - Math.random() * 80);
+                return { close, date: item.date, high, low, open };
+            })
+        );
+        this.#addLog("dataUpdate", "Randomized OHLC tick and spine session dataset");
+    }
+
+    public randomizeHeatmapData(): void {
+        this.heatmapData.update(list =>
+            list.map(item => ({
+                day: item.day,
+                time: item.time,
+                value: Math.round(Math.random() * 100)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized heatmap 2D server activity matrix");
+    }
+
+    public randomizeRadialBarData(): void {
+        this.radialBarData.update(list =>
+            list.map(item => ({
+                ...item,
+                value: Math.round(20 + Math.random() * 80)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized Radial Bar ring values");
+    }
+
+    public randomizeRoseData(): void {
+        this.roseData.update(list =>
+            list.map(item => ({
+                ...item,
+                value: Math.round(15 + Math.random() * 85)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized Rose wind petal speeds");
+    }
+
+    public randomizeGaugeValue(): void {
+        const val = Math.round(Math.random() * 100);
+        this.gaugeValue.set(val);
+        this.#addLog("dataUpdate", `Updated Gauge value to ${val}`);
+    }
+
+    public randomizeTreemapData(): void {
+        this.treemapData.update(roots =>
+            (roots as { name: string; children: { name: string; value: number }[] }[]).map(root => ({
+                ...root,
+                children: root.children.map(c => ({
+                    ...c,
+                    value: Math.round(20 + Math.random() * 150)
+                }))
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized Treemap leaf values");
+    }
+
+    public onTreemapNodeVisibilityChange(event: ChartTreemapNodeVisibilityEvent): void {
+        this.#addLog(
+            "nodeVisibilityChange",
+            `Treemap node "${event.formattedLabel ?? event.nodeId}" visibility -> ${event.visible}`
+        );
+    }
+
+    public resetData(): void {
+        this.monthlyData.set([
+            { actual: 4200, forecast: 4000, month: "Jan", target: 4500 },
+            { actual: 5100, forecast: 4800, month: "Feb", target: 5000 },
+            { actual: 6400, forecast: 5900, month: "Mar", target: 5800 },
+            { actual: 5800, forecast: 6100, month: "Apr", target: 6200 },
+            { actual: 7200, forecast: 6800, month: "May", target: 6700 },
+            { actual: 8100, forecast: 7500, month: "Jun", target: 7600 }
+        ]);
+        this.candlestickData.set([
+            { close: 104, date: "Mar 1", high: 108, low: 98, open: 100 },
+            { close: 112, date: "Mar 2", high: 115, low: 102, open: 105 },
+            { close: 108, date: "Mar 3", high: 114, low: 106, open: 111 },
+            { close: 118, date: "Mar 4", high: 120, low: 107, open: 109 },
+            { close: 115, date: "Mar 5", high: 122, low: 113, open: 119 },
+            { close: 125, date: "Mar 6", high: 128, low: 114, open: 116 }
+        ]);
+        this.radialBarData.set([
+            { category: "CPU Usage", color: "#3b82f6", value: 78 },
+            { category: "Memory Allocation", color: "#10b981", value: 62 },
+            { category: "Disk IOPS", color: "#f59e0b", value: 88 },
+            { category: "Network Throughput", color: "#8b5cf6", value: 45 }
+        ]);
+        this.roseData.set([
+            { direction: "N", value: 45 },
+            { direction: "NE", value: 85 },
+            { direction: "E", value: 65 },
+            { direction: "SE", value: 30 },
+            { direction: "S", value: 95 },
+            { direction: "SW", value: 55 },
+            { direction: "W", value: 75 },
+            { direction: "NW", value: 40 }
+        ]);
+        this.treemapData.set([
+            {
+                name: "Frontend",
+                children: [
+                    { name: "Angular", value: 120 },
+                    { name: "React", value: 110 },
+                    { name: "Vue", value: 75 },
+                    { name: "Svelte", value: 45 }
+                ]
+            },
+            {
+                name: "Backend",
+                children: [
+                    { name: "Node.js", value: 95 },
+                    { name: "Go", value: 130 },
+                    { name: "Rust", value: 115 },
+                    { name: "Java", value: 140 }
+                ]
+            },
+            {
+                name: "Database",
+                children: [
+                    { name: "PostgreSQL", value: 110 },
+                    { name: "Redis", value: 65 },
+                    { name: "MongoDB", value: 55 },
+                    { name: "DuckDB", value: 40 }
+                ]
+            },
+            {
+                name: "DevOps",
+                children: [
+                    { name: "Kubernetes", value: 150 },
+                    { name: "Docker", value: 90 },
+                    { name: "Terraform", value: 70 },
+                    { name: "AWS", value: 130 }
+                ]
+            }
+        ]);
+        this.gaugeValue.set(76);
+        this.useIndependentSeriesData.set(false);
+        this.includeNegativeValues.set(false);
+        this.isDataEmpty.set(false);
+        this.#addLog("dataUpdate", "Reset dataset to defaults");
+    }
+
+    public onBarOrientationChange(val: unknown): void {
+        const v = typeof val === "string" ? val : (val as { value?: string })?.value;
+        if (v === "vertical" || v === "horizontal") {
+            this.barOrientation.set(v);
+            this.#addLog("settingChange", `Bar Orientation: ${v}`);
+        }
+    }
+
+    public onTitleAlignChange(val: unknown): void {
+        const v = typeof val === "string" ? val : (val as { value?: string })?.value;
+        if (v === "left" || v === "center" || v === "right") {
+            this.chartTitleAlign.set(v);
+            this.#addLog("settingChange", `Chart Title Alignment: ${v}`);
+        }
+    }
+
+    public onXAxisLabelRotationChange(val: unknown): void {
+        const v = typeof val === "number" || typeof val === "string" ? val : (val as { value?: ChartAxisLabelRotation })?.value;
+        if (v !== undefined) {
+            this.xAxisLabelRotation.set(v as ChartAxisLabelRotation);
+            this.#addLog("settingChange", `X-Axis Label Rotation: ${v}`);
+        }
+    }
+
+    public onYAxisLabelRotationChange(val: unknown): void {
+        const v = typeof val === "number" || typeof val === "string" ? val : (val as { value?: ChartAxisLabelRotation })?.value;
+        if (v !== undefined) {
+            this.yAxisLabelRotation.set(v as ChartAxisLabelRotation);
+            this.#addLog("settingChange", `Y-Axis Label Rotation: ${v}`);
+        }
+    }
+
+    protected readonly mixedChart = viewChild<ChartComponent>("mixedChart");
+    protected readonly panZoomChart = viewChild<ChartComponent>("panZoomChart");
+    protected readonly multiAxisChart = viewChild<ChartComponent>("multiAxisChart");
+
+    protected async exportMixedChart(format: "png" | "svg" | "pdf"): Promise<void> {
+        const chart = this.mixedChart();
+        if (!chart) return;
+        await chart.downloadChart({
+            fileName: "mixed-studio-chart",
+            format,
+            mode: "auto",
+            pixelRatio: 2
+        });
+    }
+
+    // Pan & Zoom Viewport Controls & State
+    protected readonly panZoomEnabled = signal<boolean>(true);
+    protected readonly dragPanEnabled = signal<boolean>(true);
+    protected readonly wheelZoomEnabled = signal<boolean>(true);
+    protected readonly pinchZoomEnabled = signal<boolean>(true);
+    protected readonly keyboardEnabled = signal<boolean>(true);
+    protected readonly panZoomClampToData = signal<boolean>(true);
+    protected readonly panZoomAxisTarget = signal<"auto" | "x" | "y" | "xy">("auto");
+    protected readonly panZoomAxisTargetOptions: readonly { label: string; value: "auto" | "x" | "y" | "xy" }[] = [
+        { label: "Both Axes (Auto)", value: "auto" },
+        { label: "X-Axis Only (Horizontal)", value: "x" },
+        { label: "Y-Axis Only (Vertical)", value: "y" },
+        { label: "Both Axes (XY)", value: "xy" }
+    ];
+    protected readonly panZoomNavigationOptions = computed<ChartNavigationInput>(() => ({
+        clampToData: this.panZoomClampToData(),
+        dragPan: this.dragPanEnabled(),
+        enabled: this.panZoomEnabled(),
+        keyboard: this.keyboardEnabled(),
+        pan: this.panZoomEnabled(),
+        panAxes: this.panZoomAxisTarget(),
+        pinchZoom: this.pinchZoomEnabled(),
+        wheelZoom: this.wheelZoomEnabled(),
+        zoom: this.panZoomEnabled(),
+        zoomAxes: this.panZoomAxisTarget()
+    }));
+    protected readonly panZoomViewportState = signal<ChartViewportState | undefined>(undefined);
+    protected readonly panZoomData = signal<readonly PanZoomTelemetryMetric[]>(this.#generateTelemetryData());
+    protected readonly activeViewportSummary = signal<string>("Full Range (100% visible)");
+
+    // Deterministic density capability fixture: step, range, and stack data.
+    protected readonly stepDensityEnabled = signal<boolean>(true);
+    protected readonly stepDensityCurve = signal<ChartCurve>("step-after");
+    protected readonly stepDensityMaxPoints = signal<number>(160);
+    protected readonly stepDensityCurveOptions: readonly { label: string; value: ChartCurve }[] = [
+        { label: "Step", value: "step" },
+        { label: "Step After", value: "step-after" }
+    ];
+    protected readonly stepDensityMaxPointsOptions: readonly { label: string; value: number }[] = [
+        { label: "1 mark", value: 1 },
+        { label: "2 marks", value: 2 },
+        { label: "3 marks", value: 3 },
+        { label: "4 marks", value: 4 },
+        { label: "16 marks", value: 16 },
+        { label: "160 marks", value: 160 }
+    ];
+    protected readonly stepDensityRenderer = signal<ChartRendererMode>("svg");
+    protected readonly stepDensityRendererOptions: readonly { label: string; value: ChartRendererMode }[] = [
+        { label: "Canvas", value: "canvas" },
+        { label: "SVG", value: "svg" }
+    ];
+    protected readonly stepDensityPolicy = computed<ChartDownsamplingInput>(() =>
+        this.stepDensityEnabled() ? { enabled: true, maxPoints: this.stepDensityMaxPoints(), threshold: 0 } : false
+    );
+    protected readonly stepDensityData = signal<readonly StepDensityMetric[]>(this.#generateStepDensityData());
+
+    // Multi-Axis Controls & State
+    protected readonly multiAxisData = signal<readonly MultiAxisMetric[]>([
+        { load: 42, margin: 28.5, month: "Jan", quarter: "Q1", revenue: 125 },
+        { load: 51, margin: 31.2, month: "Feb", quarter: "Q1", revenue: 148 },
+        { load: 68, margin: 35.0, month: "Mar", quarter: "Q1", revenue: 195 },
+        { load: 58, margin: 30.8, month: "Apr", quarter: "Q2", revenue: 165 },
+        { load: 74, margin: 38.4, month: "May", quarter: "Q2", revenue: 215 },
+        { load: 83, margin: 42.0, month: "Jun", quarter: "Q2", revenue: 260 },
+        { load: 79, margin: 39.5, month: "Jul", quarter: "Q3", revenue: 235 },
+        { load: 88, margin: 44.1, month: "Aug", quarter: "Q3", revenue: 280 },
+        { load: 92, margin: 46.0, month: "Sep", quarter: "Q3", revenue: 295 },
+        { load: 94, margin: 49.2, month: "Oct", quarter: "Q4", revenue: 320 },
+        { load: 97, margin: 52.8, month: "Nov", quarter: "Q4", revenue: 355 },
+        { load: 99, margin: 56.4, month: "Dec", quarter: "Q4", revenue: 395 }
+    ]);
+    protected readonly multiAxisShowSecondaryX = signal<boolean>(true);
+    protected readonly multiAxisShowSecondaryY = signal<boolean>(true);
+    protected readonly multiAxisSecondaryYPosition = signal<ChartYAxisPosition>("right");
+    protected readonly multiAxisSecondaryYPositionOptions: readonly { label: string; value: ChartYAxisPosition }[] = [
+        { label: "Right Position", value: "right" },
+        { label: "Left Position", value: "left" }
+    ];
+    protected readonly multiAxisPrimaryYGridLines = signal<boolean>(true);
+    protected readonly multiAxisSecondaryYGridLines = signal<boolean>(false);
+    protected readonly multiAxisPrimaryXGridLines = signal<boolean>(false);
+    protected readonly multiAxisSecondaryXGridLines = signal<boolean>(false);
+    protected readonly multiAxisNavigation = signal<boolean>(true);
+
+    public onPanZoomAxisTargetChange(target: "auto" | "x" | "y" | "xy" | null): void {
+        if (target) {
+            this.panZoomAxisTarget.set(target);
+            this.#addLog("settingChange", `Pan & Zoom Target Axes: ${target}`);
+        }
+    }
+
+    public onMultiAxisSecondaryYPositionChange(pos: ChartYAxisPosition | null): void {
+        if (pos) {
+            this.multiAxisSecondaryYPosition.set(pos);
+            this.#addLog("settingChange", `Secondary Y Position: ${pos}`);
+        }
+    }
+
+    public onPanZoomViewportChange(event: ChartViewportChangeEvent): void {
+        const ranges = event.viewport.axes
+            .map(a => {
+                if (a.kind === "continuous") {
+                    const minStr =
+                        a.min instanceof Date
+                            ? a.min.toISOString().slice(0, 10)
+                            : typeof a.min === "number"
+                              ? a.min.toFixed(1)
+                              : String(a.min);
+                    const maxStr =
+                        a.max instanceof Date
+                            ? a.max.toISOString().slice(0, 10)
+                            : typeof a.max === "number"
+                              ? a.max.toFixed(1)
+                              : String(a.max);
+                    return `${a.axisId} (${minStr} - ${maxStr})`;
+                }
+                return `${a.axisId} [${a.startIndex}..${a.endIndexExclusive}]`;
+            })
+            .join(", ");
+        this.activeViewportSummary.set(ranges || "Full Range (100% visible)");
+        this.#addLog("viewportChange", `Source: ${event.source} | Phase: ${event.phase} | Axes: ${ranges || "Full Range"}`);
+    }
+
+    public zoomInPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.zoom(1.25, undefined, target);
+        this.#addLog("programmaticNav", `Zoom In (+25%) [${target}]`);
+    }
+
+    public zoomOutPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.zoom(0.8, undefined, target);
+        this.#addLog("programmaticNav", `Zoom Out (-20%) [${target}]`);
+    }
+
+    public panLeftPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.pan({ x: -80, y: 0 }, target);
+        this.#addLog("programmaticNav", `Pan Left (-80px) [${target}]`);
+    }
+
+    public panRightPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.pan({ x: 80, y: 0 }, target);
+        this.#addLog("programmaticNav", `Pan Right (+80px) [${target}]`);
+    }
+
+    public panUpPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.pan({ x: 0, y: 50 }, target);
+        this.#addLog("programmaticNav", `Pan Up (+50px) [${target}]`);
+    }
+
+    public panDownPanZoom(): void {
+        const target = this.panZoomAxisTarget();
+        this.panZoomChart()?.pan({ x: 0, y: -50 }, target);
+        this.#addLog("programmaticNav", `Pan Down (-50px) [${target}]`);
+    }
+
+    public resetPanZoom(): void {
+        this.panZoomChart()?.resetViewport();
+        this.#addLog("programmaticNav", "Reset Viewport");
+    }
+
+    public fitPanZoomWindow(): void {
+        const data = this.panZoomData();
+        if (data.length > 20) {
+            const start = data[Math.floor(data.length * 0.25)].date;
+            const end = data[Math.floor(data.length * 0.75)].date;
+            this.panZoomChart()?.fit({
+                axis: "x",
+                axisId: "telemetry-time",
+                kind: "continuous",
+                max: end,
+                min: start
+            });
+            this.#addLog("programmaticNav", "Fit Viewport Window to Middle 50%");
+        }
+    }
+
+    public randomizeTelemetryData(): void {
+        this.panZoomData.set(this.#generateTelemetryData());
+        this.#addLog("dataUpdate", "Generated new 120-point Telemetry dataset");
+    }
+
+    public randomizeMultiAxisData(): void {
+        this.multiAxisData.update(list =>
+            list.map(item => ({
+                ...item,
+                load: Math.floor(30 + Math.random() * 65),
+                margin: Number((20 + Math.random() * 35).toFixed(1)),
+                revenue: Math.floor(100 + Math.random() * 300)
+            }))
+        );
+        this.#addLog("dataUpdate", "Randomized multi-axis metrics");
+    }
+
+    #generateStepDensityData(): StepDensityMetric[] {
+        const result: StepDensityMetric[] = [];
+        let timestamp = Date.UTC(2026, 0, 1);
+        for (let i = 0; i < 50_000; i++) {
+            timestamp += 1_000 + (i % 11) * 137;
+            const status = Math.floor(i / 250) % 4;
+            const pulse = i % 97 === 0 ? 0.75 : 0;
+            result.push({
+                date: new Date(timestamp),
+                high: status + 0.45 + pulse,
+                layerA: status + 1,
+                layerB: (i % 13) / 13 + 0.5,
+                low: status - 0.45 - pulse,
+                status
+            });
+        }
+        return result;
+    }
+
+    #generateTelemetryData(): PanZoomTelemetryMetric[] {
+        const result: PanZoomTelemetryMetric[] = [];
+        const baseDate = new Date("2026-01-01T00:00:00Z");
+        let cpu = 40;
+        let memory = 50;
+        let requests = 120;
+        for (let i = 0; i < 120; i++) {
+            const date = new Date(baseDate.getTime() + i * 24 * 60 * 60 * 1000);
+            cpu = Math.max(10, Math.min(95, cpu + (Math.random() - 0.48) * 8));
+            memory = Math.max(20, Math.min(98, memory + (Math.random() - 0.47) * 5));
+            requests = Math.max(30, Math.min(450, requests + (Math.random() - 0.48) * 25));
+            result.push({
+                cpu: Math.round(cpu * 10) / 10,
+                date,
+                memory: Math.round(memory * 10) / 10,
+                requests: Math.round(requests)
+            });
+        }
+        return result;
+    }
+
+    public setTab(
+        tab:
+            | "bubble"
+            | "candlestick"
+            | "custom"
+            | "donut"
+            | "funnel"
+            | "gauge"
+            | "grouped"
+            | "heatmap"
+            | "horizontal"
+            | "mixed"
+            | "multi-axis"
+            | "ohlc"
+            | "overlays"
+            | "pan-zoom"
+            | "percent-area"
+            | "percent-bar"
+            | "pie"
+            | "polar"
+            | "radar"
+            | "radial-bar"
+            | "range-area"
+            | "range-bar"
+            | "rose"
+            | "scatter"
+            | "selection-brush"
+            | "stacked-area"
+            | "stacked-bar"
+            | "time"
+            | "treemap"
+            | "waterfall"
+    ): void {
+        this.activeTab.set(tab);
+    }
+
+    protected onSelectionChange(event: ChartSelectionChangeEvent): void {
+        this.selectedMarkIds.set([...event.selectedMarkIds]);
+        this.#addLog(
+            "selectionChange",
+            `Source: ${event.source} | Selected (${event.selectedMarkIds.length}): [${event.selectedMarkIds.join(", ")}] | Added: [${event.addedMarkIds.join(", ")}] | Removed: [${event.removedMarkIds.join(", ")}]`
+        );
+    }
+
+    protected onBrushChange(event: ChartBrushChangeEvent): void {
+        const formatVal = (v: number | Date) =>
+            v instanceof Date
+                ? v.toISOString().slice(0, 10)
+                : typeof v === "number"
+                  ? v.toFixed(1)
+                  : String(v);
+
+        const xInfo = event.xRange
+            ? event.xRange.kind === "continuous"
+                ? `X: [${formatVal(event.xRange.from)}, ${formatVal(event.xRange.to)}]`
+                : `X: [${event.xRange.fromValue ?? ""}..${event.xRange.toValue ?? ""}]`
+            : "";
+        const yInfo = event.yRange
+            ? event.yRange.kind === "continuous"
+                ? `Y: [${formatVal(event.yRange.from)}, ${formatVal(event.yRange.to)}]`
+                : ""
+            : "";
+        const matchedInfo = event.matchedMarkIds ? ` | Matched: ${event.matchedMarkIds.length}` : "";
+        const boundsInfo = event.pixelBounds
+            ? `Bounds: {x:${Math.round(event.pixelBounds.x)}, y:${Math.round(event.pixelBounds.y)}, w:${Math.round(event.pixelBounds.width)}, h:${Math.round(event.pixelBounds.height)}}`
+            : "";
+
+        this.#addLog(
+            "brushChange",
+            `Phase: ${event.phase} | Mode: ${event.mode} | ${boundsInfo} ${xInfo} ${yInfo}${matchedInfo}${event.cancelReason ? ` | Cancel: ${event.cancelReason}` : ""}`
+        );
+    }
+
+    protected clearSelection(): void {
+        this.selectedMarkIds.set([]);
+        this.#addLog("selectionClear", "Cleared all selected marks.");
+    }
+
+    #addLog(eventType: string, details: string): void {
+        const now = new Date();
+        const timestamp = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}.${now.getMilliseconds().toString().padStart(3, "0")}`;
+        const newEntry: DemoLogEntry = {
+            details,
+            eventType,
+            id: ++this.#logId,
+            timestamp
+        };
+        this.eventLogs.update(logs => [newEntry, ...logs.slice(0, 49)]);
+    }
+}

@@ -5,10 +5,12 @@ import HighlightJS from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
 import typescript from "highlight.js/lib/languages/typescript";
 import html from "highlight.js/lib/languages/xml";
+import plaintext from "highlight.js/lib/languages/plaintext";
 
 HighlightJS.registerLanguage("typescript", typescript);
 HighlightJS.registerLanguage("html", html);
 HighlightJS.registerLanguage("json", json);
+HighlightJS.registerLanguage("plaintext", plaintext);
 
 @Component({
     selector: "app-code-viewer",

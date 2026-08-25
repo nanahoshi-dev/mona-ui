@@ -1,23 +1,26 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { beforeEach, describe, expect, it } from "vitest";
+import { SectionComponent } from "./section.component";
+import { PageService } from "../../services/page.service";
 
-import { SectionComponent } from './section.component';
+describe("SectionComponent", () => {
+    let component: SectionComponent;
+    let fixture: ComponentFixture<SectionComponent>;
 
-describe('SectionComponent', () => {
-  let component: SectionComponent;
-  let fixture: ComponentFixture<SectionComponent>;
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [SectionComponent],
+            providers: [PageService]
+        }).compileComponents();
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [SectionComponent]
-    })
-    .compileComponents();
+        fixture = TestBed.createComponent(SectionComponent);
+        component = fixture.componentInstance;
+        fixture.componentRef.setInput("id", "test-section");
+        fixture.componentRef.setInput("headerType", "h2");
+        fixture.detectChanges();
+    });
 
-    fixture = TestBed.createComponent(SectionComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it("should create", () => {
+        expect(component).toBeTruthy();
+    });
 });

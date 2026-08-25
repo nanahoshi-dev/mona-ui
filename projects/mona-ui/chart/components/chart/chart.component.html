@@ -1,0 +1,618 @@
+@if (hasHeader()) {
+    <div [class]="headerClasses()" [style.text-align]="titleAlign()">
+        @if (titleTemplate(); as tpl) {
+            <div data-mona-chart-export-role="title-template">
+                <ng-container
+                    [ngTemplateOutlet]="tpl.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: title(), title: title() }" />
+            </div>
+        } @else if (title()) {
+            <div [class]="titleClasses()" data-mona-chart-export-role="title">{{ title() }}</div>
+        }
+        @if (subtitleTemplate(); as subTpl) {
+            <div data-mona-chart-export-role="subtitle-template">
+                <ng-container
+                    [ngTemplateOutlet]="subTpl.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: subtitle(), subtitle: subtitle() }" />
+            </div>
+        } @else if (subtitle()) {
+            <div [class]="subtitleClasses()" data-mona-chart-export-role="subtitle">{{ subtitle() }}</div>
+        }
+    </div>
+}
+<div [class]="layoutClasses()">
+    <div
+        #plotSurface
+        class="relative flex-1 min-h-0 min-w-0 w-full h-full overflow-hidden"
+        [style.order]="plotOrder()"
+        [style.touch-action]="touchActionStyle()"
+        [style.cursor]="viewportCursor() ?? 'default'"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerCancel($event)"
+        (lostpointercapture)="onLostPointerCapture($event)"
+        (pointerleave)="onPointerLeave($event)"
+        (wheel)="onWheel($event)"
+        (click)="onCanvasClick($event)">
+        @if (renderer() === "canvas") {
+            <canvas #canvas class="absolute inset-0 block h-full w-full pointer-events-none"></canvas>
+        } @else {
+            <svg
+                #svgSurface
+                aria-hidden="true"
+                focusable="false"
+                class="absolute inset-0 block h-full w-full pointer-events-none"
+                xmlns="http://www.w3.org/2000/svg"></svg>
+        }
+
+        <!-- DOM Cartesian Axis Labels & Titles -->
+        @if (cartesianScene(); as cart) {
+            @for (axisScene of cart.axes; track axisScene.axis + ":" + (axisScene.axisId ?? "")) {
+                @if (axisScene.visible) {
+                    @if (axisScene.labels !== false) {
+                        @for (
+                            tick of axisScene.ticks;
+                            track tick.tickKey ? tick.tickKey + ":" + tick.index : tick.index
+                        ) {
+                            @if (tick.labelVisible !== false) {
+                                <div
+                                    [class]="axisLabelClasses()"
+                                    [monaChartLabelMeasure]="tick.tickKey ?? ''"
+                                    data-mona-chart-export-role="axis-label"
+                                    [attr.data-mona-chart-export-mode]="
+                                        resolveAxisLabelTemplate(axisScene) ? 'raster' : 'vector'
+                                    "
+                                    [style.left.px]="axisLabelLeft(cart, axisScene, tick)"
+                                    [style.top.px]="axisLabelTop(cart, axisScene, tick)"
+                                    [style.max-width.px]="axisScene.labelMaxWidth ?? null"
+                                    [style.transform]="axisLabelTransform(axisScene, tick)"
+                                    [style.transform-origin]="axisLabelTransformOrigin(axisScene)">
+                                    @if (resolveAxisLabelTemplate(axisScene); as template) {
+                                        <ng-container
+                                            [ngTemplateOutlet]="template.templateRef"
+                                            [ngTemplateOutletContext]="{
+                                                $implicit: tick.value,
+                                                axis: axisScene.axis,
+                                                axisId: axisScene.axisId,
+                                                index: tick.index,
+                                                position: axisScene.position,
+                                                scaleType: axisScene.scaleType,
+                                                value: tick.value
+                                            }" />
+                                    } @else {
+                                        {{ tick.formattedValue }}
+                                    }
+                                </div>
+                            }
+                        }
+                    }
+
+                    <!-- Axis Title -->
+                    @if (axisScene.title) {
+                        <div
+                            class="mona-chart-axis-title absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
+                            data-mona-chart-export-role="axis-title"
+                            data-mona-chart-export-mode="vector"
+                            [style.left.px]="axisTitleLeft(cart, axisScene)"
+                            [style.top.px]="axisTitleTop(cart, axisScene)"
+                            [style.transform]="
+                                axisScene.axis === 'x'
+                                    ? axisScene.position === 'top'
+                                        ? 'translate(-50%, 0)'
+                                        : 'translate(-50%, -100%)'
+                                    : axisScene.position === 'right'
+                                      ? 'translate(-50%, -50%) rotate(90deg)'
+                                      : 'translate(-50%, -50%) rotate(-90deg)'
+                            ">
+                            {{ axisScene.title }}
+                        </div>
+                    }
+                }
+            }
+        }
+
+        <!-- DOM Sector Slice Labels and Donut Center Overlay -->
+        @if (polarSectorScene(); as pol) {
+            @for (seriesScene of pol.series; track seriesScene.id) {
+                @for (slice of seriesScene.slices; track slice.sliceId) {
+                    @if (shouldShowSliceLabel(slice)) {
+                        @if (isOutsideLabel() && slice.label) {
+                            <div
+                                aria-hidden="true"
+                                class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                                [class.opacity-0]="isAnimating() && isStructuralAnimation()"
+                                [attr.data-mona-chart-export-animation-suppression]="
+                                    isAnimating() && isStructuralAnimation() ? 'opacity' : null
+                                "
+                                [monaChartLabelMeasure]="'sector:' + slice.sliceId"
+                                data-mona-chart-export-role="sector-label"
+                                [attr.data-mona-chart-export-mode]="
+                                    polarSeriesRegistration()?.sliceLabelTemplate?.() ? 'raster' : 'vector'
+                                "
+                                [style.left.px]="slice.label.position.x"
+                                [style.top.px]="slice.label.position.y"
+                                [style.transform]="
+                                    slice.label.side === 'right' ? 'translate(0, -50%)' : 'translate(-100%, -50%)'
+                                ">
+                                @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="labelTemplate.templateRef"
+                                        [ngTemplateOutletContext]="sliceLabelContext(slice)" />
+                                } @else {
+                                    {{ sliceLabelText(slice) }}
+                                }
+                            </div>
+                        } @else {
+                            <div
+                                aria-hidden="true"
+                                class="absolute pointer-events-none text-xs font-semibold select-none whitespace-nowrap flex items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                                [class.opacity-0]="isAnimating() && isStructuralAnimation()"
+                                [attr.data-mona-chart-export-animation-suppression]="
+                                    isAnimating() && isStructuralAnimation() ? 'opacity' : null
+                                "
+                                data-mona-chart-export-role="sector-label"
+                                [attr.data-mona-chart-export-mode]="
+                                    polarSeriesRegistration()?.sliceLabelTemplate?.() ? 'raster' : 'vector'
+                                "
+                                [style.left.px]="slice.insideLabelPoint.x"
+                                [style.top.px]="slice.insideLabelPoint.y"
+                                [style.transform]="'translate(-50%, -50%)'"
+                                [style.color]="sliceContrastColor(slice)">
+                                @if (polarSeriesRegistration()?.sliceLabelTemplate?.(); as labelTemplate) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="labelTemplate.templateRef"
+                                        [ngTemplateOutletContext]="sliceLabelContext(slice)" />
+                                } @else {
+                                    {{ sliceLabelText(slice) }}
+                                }
+                            </div>
+                        }
+                    }
+                }
+            }
+
+            @for (seriesScene of pol.series; track seriesScene.id) {
+                <!-- Donut Center Template -->
+                @if (
+                    seriesScene.type === "donut" &&
+                        pol.hasRenderableData &&
+                        seriesScene.slices.length > 0 &&
+                        donutSeriesRegistration()?.centerTemplate?.();
+                    as centerTemplate
+                ) {
+                    <div
+                        class="absolute pointer-events-none flex flex-col items-center justify-center text-center overflow-hidden"
+                        data-mona-chart-export-role="donut-center"
+                        data-mona-chart-export-mode="raster"
+                        [style.left.px]="pol.center.x"
+                        [style.top.px]="pol.center.y"
+                        [style.transform]="'translate(-50%, -50%)'"
+                        [style.max-width.px]="seriesScene.innerRadius * 1.6"
+                        [style.max-height.px]="seriesScene.innerRadius * 1.6">
+                        <ng-container
+                            [ngTemplateOutlet]="centerTemplate.templateRef"
+                            [ngTemplateOutletContext]="{
+                                $implicit: seriesScene.total,
+                                total: seriesScene.total,
+                                formattedTotal: seriesScene.formattedTotal,
+                                visibleSliceCount: seriesScene.slices.length,
+                                seriesId: seriesScene.id,
+                                seriesName: seriesScene.name
+                            }" />
+                    </div>
+                }
+            }
+        }
+
+        <!-- DOM Gauge Center Overlay -->
+        @if (polarArcScene(); as arcScene) {
+            @if (gaugeScene(); as gaugeSeries) {
+                @if (gaugeSeriesRegistration()?.centerTemplate?.(); as centerTemplate) {
+                    <div
+                        class="absolute pointer-events-none flex flex-col items-center justify-center text-center overflow-hidden"
+                        data-mona-chart-export-role="gauge-center"
+                        data-mona-chart-export-mode="raster"
+                        [style.left.px]="arcScene.center.x"
+                        [style.top.px]="arcScene.center.y"
+                        [style.transform]="'translate(-50%, -50%)'"
+                        [style.max-width.px]="gaugeSeries.value.innerRadius * 1.6"
+                        [style.max-height.px]="gaugeSeries.value.innerRadius * 1.6">
+                        <ng-container
+                            [ngTemplateOutlet]="centerTemplate.templateRef"
+                            [ngTemplateOutletContext]="gaugeCenterContext(gaugeSeries)" />
+                    </div>
+                } @else if (gaugeSeries.showValue) {
+                    <div
+                        class="absolute pointer-events-none flex flex-col items-center justify-center text-center font-bold text-foreground select-none"
+                        data-mona-chart-export-role="gauge-value"
+                        data-mona-chart-export-mode="vector"
+                        [style.left.px]="arcScene.center.x"
+                        [style.top.px]="arcScene.center.y"
+                        [style.transform]="'translate(-50%, -50%)'"
+                        [style.font-size.px]="gaugeFontSize(gaugeSeries)">
+                        <span>{{ gaugeSeries.value.formattedValue }}</span>
+                    </div>
+                }
+            }
+        }
+
+        <!-- DOM Radial Axis Labels (Angular Categories/Degrees and Radial Values) -->
+        @if (polarAxisScene(); as radScene) {
+            <!-- Angular Spoke Labels -->
+            @if (radScene.angularAxis?.visible && radScene.angularAxis?.labels) {
+                @for (tick of radScene.angularAxis.ticks; track tick.index) {
+                    @if (tick.visible) {
+                        <div
+                            aria-hidden="true"
+                            class="absolute pointer-events-none text-xs text-foreground select-none whitespace-nowrap"
+                            [monaChartLabelMeasure]="'angular:' + tick.tickKey"
+                            data-mona-chart-export-role="polar-angular-label"
+                            [attr.data-mona-chart-export-mode]="
+                                angularAxisRegistration()?.labelTemplate?.() ? 'raster' : 'vector'
+                            "
+                            [style.left.px]="tick.labelPoint.x"
+                            [style.top.px]="tick.labelPoint.y"
+                            [style.transform]="angularLabelTransform(tick)">
+                            @if (angularAxisRegistration()?.labelTemplate?.(); as template) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: tick.value,
+                                        axis: 'angular',
+                                        index: tick.index,
+                                        value: tick.value
+                                    }" />
+                            } @else {
+                                {{ tick.formattedValue }}
+                            }
+                        </div>
+                    }
+                }
+            }
+
+            <!-- Radial Numeric Tick Labels -->
+            @if (radScene.radialAxis?.visible && radScene.radialAxis?.labels) {
+                @for (tick of radScene.radialAxis.ticks; track tick.index) {
+                    @if (tick.visible) {
+                        <div
+                            aria-hidden="true"
+                            class="absolute pointer-events-none text-xs text-muted-foreground select-none whitespace-nowrap"
+                            [monaChartLabelMeasure]="'radial:' + tick.tickKey"
+                            data-mona-chart-export-role="polar-radial-label"
+                            [attr.data-mona-chart-export-mode]="
+                                radialAxisRegistration()?.labelTemplate?.() ? 'raster' : 'vector'
+                            "
+                            [style.left.px]="tick.labelPoint.x"
+                            [style.top.px]="tick.labelPoint.y"
+                            [style.transform]="radialLabelTransform(tick, radScene.radialAxis.labelAngle)">
+                            @if (radialAxisRegistration()?.labelTemplate?.(); as template) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: tick.value,
+                                        axis: 'radial',
+                                        index: tick.index,
+                                        value: tick.value
+                                    }" />
+                            } @else {
+                                {{ tick.formattedValue }}
+                            }
+                        </div>
+                    }
+                }
+            }
+        }
+
+        <!-- DOM Treemap Labels -->
+        @if (treemapScene(); as tm) {
+            @for (seriesScene of tm.series; track seriesScene.id) {
+                @for (lbl of seriesScene.labels; track lbl.nodeId) {
+                    <div
+                        aria-hidden="true"
+                        class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap px-1.5 py-0.5 flex flex-col justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                        [class.opacity-0]="isAnimating()"
+                        [attr.data-mona-chart-export-animation-suppression]="isAnimating() ? 'opacity' : null"
+                        data-mona-chart-export-role="treemap-label"
+                        data-mona-chart-export-mode="raster"
+                        [style.left.px]="lbl.bounds.x"
+                        [style.top.px]="lbl.bounds.y"
+                        [style.width.px]="lbl.bounds.width"
+                        [style.height.px]="lbl.bounds.height"
+                        [style.color]="lbl.textColor">
+                        @if (treemapSeriesRegistration()?.labelTemplate?.(); as labelTemplate) {
+                            <ng-container
+                                [ngTemplateOutlet]="labelTemplate.templateRef"
+                                [ngTemplateOutletContext]="treemapLabelContext(lbl, seriesScene)" />
+                        } @else {
+                            <span class="font-medium truncate">{{ lbl.formattedLabel }}</span>
+                            @if (lbl.showValue) {
+                                <span class="text-[11px] opacity-80 truncate">{{ lbl.formattedValue }}</span>
+                            }
+                        }
+                    </div>
+                }
+            }
+        }
+
+        <!-- DOM Funnel Labels -->
+        @if (funnelScene(); as fn) {
+            @for (seriesScene of fn.series; track seriesScene.id) {
+                @for (lbl of seriesScene.labels; track lbl.stageId) {
+                    <div
+                        aria-hidden="true"
+                        class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap flex flex-col items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                        [class.opacity-0]="isAnimating()"
+                        [attr.data-mona-chart-export-animation-suppression]="isAnimating() ? 'opacity' : null"
+                        data-mona-chart-export-role="funnel-label"
+                        data-mona-chart-export-mode="raster"
+                        [style.left.px]="lbl.bounds.x"
+                        [style.top.px]="lbl.bounds.y"
+                        [style.width.px]="lbl.bounds.width"
+                        [style.height.px]="lbl.bounds.height"
+                        [style.color]="lbl.textColor">
+                        @if (funnelSeriesRegistration()?.labelTemplate?.(); as labelTemplate) {
+                            <ng-container
+                                [ngTemplateOutlet]="labelTemplate.templateRef"
+                                [ngTemplateOutletContext]="funnelLabelContext(lbl, seriesScene)" />
+                        } @else {
+                            <span class="font-medium truncate">{{ lbl.text }}</span>
+                        }
+                    </div>
+                }
+            }
+        }
+
+        <!-- DOM Waterfall Labels -->
+        @if (waterfallScene(); as wf) {
+            @for (seriesScene of wf.series; track seriesScene.id) {
+                @for (lbl of seriesScene.labels; track lbl.itemId) {
+                    <div
+                        aria-hidden="true"
+                        class="absolute pointer-events-none text-xs select-none overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-center transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                        [class.opacity-0]="isAnimating()"
+                        [attr.data-mona-chart-export-animation-suppression]="isAnimating() ? 'opacity' : null"
+                        data-mona-chart-export-role="waterfall-label"
+                        data-mona-chart-export-mode="raster"
+                        [style.left.px]="lbl.bounds.x"
+                        [style.top.px]="lbl.bounds.y"
+                        [style.width.px]="lbl.bounds.width"
+                        [style.height.px]="lbl.bounds.height"
+                        [style.color]="lbl.textColor">
+                        @if (waterfallSeriesRegistration()?.labelTemplate?.(); as labelTemplate) {
+                            <ng-container
+                                [ngTemplateOutlet]="labelTemplate.templateRef"
+                                [ngTemplateOutletContext]="waterfallLabelContext(lbl, seriesScene)" />
+                        } @else {
+                            <span class="font-medium truncate">{{ lbl.text }}</span>
+                        }
+                    </div>
+                }
+            }
+        }
+
+        <!-- DOM Cartesian Overlays (Reference Lines, Reference Bands, Point Annotations) -->
+        @if (cartesianOverlayScene(); as overlays) {
+            <!-- Reference Lines -->
+            @for (line of overlays.referenceLines; track line.id) {
+                @if (line.label) {
+                    <div
+                        aria-hidden="true"
+                        [class]="referenceLabelClasses() + (line.label.labelClass ? ' ' + line.label.labelClass : '')"
+                        [class.hidden]="!line.label.formattedText && !resolveReferenceLineTemplate(line.id)"
+                        [monaChartOverlayLabelMeasure]="'overlay:line:' + line.id"
+                        data-mona-chart-export-role="reference-label"
+                        [attr.data-mona-chart-export-mode]="resolveReferenceLineTemplate(line.id) ? 'raster' : 'vector'"
+                        [style.left.px]="referenceLineLabelLeft(line)"
+                        [style.top.px]="referenceLineLabelTop(line)"
+                        [style.transform]="referenceLineLabelTransform(line)">
+                        @if (resolveReferenceLineTemplate(line.id); as template) {
+                            @if (resolveReferenceLineRegistration(line.id); as reg) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: reg.value(),
+                                        axis: line.axis,
+                                        axisId: line.axisId,
+                                        coordinate: line.coordinate,
+                                        formattedValue: line.formattedValue,
+                                        kind: 'line',
+                                        value: reg.value()
+                                    }" />
+                            }
+                        } @else {
+                            {{ line.label.formattedText }}
+                        }
+                    </div>
+                }
+            }
+
+            <!-- Reference Bands -->
+            @for (band of overlays.referenceBands; track band.id) {
+                @if (band.label) {
+                    <div
+                        aria-hidden="true"
+                        [class]="referenceLabelClasses() + (band.label.labelClass ? ' ' + band.label.labelClass : '')"
+                        [class.hidden]="!band.label.formattedText && !resolveReferenceBandTemplate(band.id)"
+                        [monaChartOverlayLabelMeasure]="'overlay:band:' + band.id"
+                        data-mona-chart-export-role="reference-label"
+                        [attr.data-mona-chart-export-mode]="resolveReferenceBandTemplate(band.id) ? 'raster' : 'vector'"
+                        [style.left.px]="referenceBandLabelLeft(band)"
+                        [style.top.px]="referenceBandLabelTop(band)"
+                        [style.transform]="referenceBandLabelTransform(band)">
+                        @if (resolveReferenceBandTemplate(band.id); as template) {
+                            @if (resolveReferenceBandRegistration(band.id); as reg) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: { from: reg.from(), to: reg.to() },
+                                        axis: band.axis,
+                                        axisId: band.axisId,
+                                        bounds: band.bounds,
+                                        formattedFrom: band.formattedFrom,
+                                        formattedTo: band.formattedTo,
+                                        from: reg.from(),
+                                        kind: 'band',
+                                        to: reg.to()
+                                    }" />
+                            }
+                        } @else {
+                            {{ band.label.formattedText }}
+                        }
+                    </div>
+                }
+            }
+
+            <!-- Point Annotations -->
+            @for (ann of overlays.annotations; track ann.id) {
+                @if (ann.label) {
+                    <div
+                        aria-hidden="true"
+                        [class]="annotationLabelClasses() + (ann.label.labelClass ? ' ' + ann.label.labelClass : '')"
+                        [class.hidden]="!ann.label.formattedText && !resolveAnnotationTemplate(ann.id)"
+                        [monaChartOverlayLabelMeasure]="'overlay:ann:' + ann.id"
+                        data-mona-chart-export-role="annotation-label"
+                        [attr.data-mona-chart-export-mode]="resolveAnnotationTemplate(ann.id) ? 'raster' : 'vector'"
+                        [style.left.px]="annotationLabelLeft(ann)"
+                        [style.top.px]="annotationLabelTop(ann)"
+                        [style.transform]="annotationLabelTransform(ann)">
+                        @if (resolveAnnotationTemplate(ann.id); as template) {
+                            @if (resolveAnnotationRegistration(ann.id); as reg) {
+                                <ng-container
+                                    [ngTemplateOutlet]="template.templateRef"
+                                    [ngTemplateOutletContext]="{
+                                        $implicit: ann.data,
+                                        data: ann.data,
+                                        formattedX: ann.formattedX,
+                                        formattedY: ann.formattedY,
+                                        point: ann.point,
+                                        x: reg.x(),
+                                        xAxisId: ann.xAxisId,
+                                        y: reg.y(),
+                                        yAxisId: ann.yAxisId
+                                    }" />
+                            }
+                        } @else {
+                            {{ ann.label.formattedText }}
+                        }
+                    </div>
+                }
+            }
+        }
+
+        <!-- DOM Cartesian Data Labels (Template Layer) -->
+        @if (cartesianDataLabelScene(); as labelScene) {
+            @for (label of labelScene.templateLabels; track label.seriesId + ":" + label.markId) {
+                <div
+                    aria-hidden="true"
+                    class="absolute pointer-events-none select-none whitespace-nowrap transition-opacity duration-[var(--mona-chart-animation-duration,300ms)] ease-[var(--mona-chart-animation-easing,cubic-bezier(0,0,0.2,1))]"
+                    [class.opacity-0]="isAnimating()"
+                    [attr.data-mona-chart-export-animation-suppression]="isAnimating() ? 'opacity' : null"
+                    [monaChartDataLabelMeasure]="label.seriesId + ':' + label.markId"
+                    data-mona-chart-export-role="data-label-template"
+                    data-mona-chart-export-mode="raster"
+                    [style.left.px]="label.bounds.x"
+                    [style.top.px]="label.bounds.y">
+                    <ng-container
+                        [ngTemplateOutlet]="label.template.templateRef"
+                        [ngTemplateOutletContext]="label.context" />
+                </div>
+            }
+        }
+
+        <!-- Crosshair DOM Axis Labels -->
+        @if (crosshairState(); as chState) {
+            @if (cartesianXYScene(); as cart) {
+                @if (resolveCrosshairRegistration(); as chReg) {
+                    @if (chReg.enabled() !== false) {
+                        @if (chState.x && chReg.showAxisLabels() !== false && chReg.showXLabel() !== false) {
+                            <div
+                                aria-hidden="true"
+                                [class]="crosshairLabelClasses()"
+                                [monaChartOverlayLabelMeasure]="'crosshair:x'"
+                                data-mona-chart-export-role="crosshair-label"
+                                [attr.data-mona-chart-export-mode]="chReg.template?.() ? 'raster' : 'vector'"
+                                [style.left.px]="crosshairXLabelLeft(cart, chState)"
+                                [style.top.px]="crosshairXLabelTop(cart, chState)"
+                                [style.transform]="crosshairXLabelTransform(cart, chState)">
+                                @if (chReg.template?.(); as template) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="template.templateRef"
+                                        [ngTemplateOutletContext]="{
+                                            $implicit: chState.x.value,
+                                            axis: 'x',
+                                            axisId: chState.x.axisId,
+                                            coordinate: chState.x.coordinate,
+                                            formattedValue: chState.x.formattedValue,
+                                            snapped: chState.snapped,
+                                            source: chState.source,
+                                            value: chState.x.value
+                                        }" />
+                                } @else {
+                                    {{ chState.x.formattedValue }}
+                                }
+                            </div>
+                        }
+
+                        @if (chState.y && chReg.showAxisLabels() !== false && chReg.showYLabel() !== false) {
+                            <div
+                                aria-hidden="true"
+                                [class]="crosshairLabelClasses()"
+                                [monaChartOverlayLabelMeasure]="'crosshair:y'"
+                                data-mona-chart-export-role="crosshair-label"
+                                [attr.data-mona-chart-export-mode]="chReg.template?.() ? 'raster' : 'vector'"
+                                [style.left.px]="crosshairYLabelLeft(cart, chState)"
+                                [style.top.px]="crosshairYLabelTop(cart, chState)"
+                                [style.transform]="crosshairYLabelTransform(cart, chState)">
+                                @if (chReg.template?.(); as template) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="template.templateRef"
+                                        [ngTemplateOutletContext]="{
+                                            $implicit: chState.y.value,
+                                            axis: 'y',
+                                            axisId: chState.y.axisId,
+                                            coordinate: chState.y.coordinate,
+                                            formattedValue: chState.y.formattedValue,
+                                            snapped: chState.snapped,
+                                            source: chState.source,
+                                            value: chState.y.value
+                                        }" />
+                                } @else {
+                                    {{ chState.y.formattedValue }}
+                                }
+                            </div>
+                        }
+                    }
+                }
+            }
+        }
+
+        <!-- Tooltip overlay in plot-local coordinates -->
+        <ng-content select="mona-chart-tooltip"></ng-content>
+
+        <!-- No Data Placeholder -->
+        @if (hasNoData()) {
+            <div
+                [class]="noDataClasses()"
+                data-mona-chart-export-role="no-data"
+                [attr.data-mona-chart-export-mode]="noDataTemplate() ? 'raster' : 'vector'">
+                @if (noDataTemplate(); as template) {
+                    <ng-container [ngTemplateOutlet]="template.templateRef" />
+                } @else {
+                    <span>No data available</span>
+                }
+            </div>
+        }
+
+        <!-- Off-screen Accessible Live Region for Keyboard/Screen-reader Exploration -->
+        <div class="sr-only" aria-live="polite" aria-atomic="true">
+            {{ activeAccessibilityText() }}
+        </div>
+    </div>
+
+    <!-- Projected Legend Outside Plot Container -->
+    <ng-content select="mona-chart-legend"></ng-content>
+
+    <!-- Other Projected Content (Series, Axes, Templates) -->
+    <ng-content></ng-content>
+</div>

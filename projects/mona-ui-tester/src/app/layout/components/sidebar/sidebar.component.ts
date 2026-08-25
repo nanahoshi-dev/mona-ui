@@ -34,6 +34,7 @@ export class SidebarComponent {
                 { text: "Button Group", path: "/button-group" },
                 { text: "Calendar", path: "/calendar" },
                 { text: "Card", path: "/card" },
+                { text: "Chart", path: "/chart" },
                 { text: "Checkbox", path: "/checkbox" },
                 { text: "Chip", path: "/chip" },
                 { text: "Circular Progress Bar", path: "/circular-progress-bar" },
