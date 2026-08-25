@@ -798,6 +798,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #dataLabelResizeObserver: ResizeObserver | null = null;
     #gestureController: ChartViewportGestureController | null = null;
     #hasCommittedVisualScene: boolean = false;
+    #initialMeasurementFrameId: number | null = null;
+    #initialMeasurementPending: boolean = true;
     #hasEmittedBrushStart = false;
     #hasPendingSizeReflow: boolean = false;
     #hasWarnedBrushWithoutSelection = false;
@@ -831,6 +833,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #renderBackend: ChartRenderBackend | null = null;
     #renderScene: ChartScene | null = null;
     #resizeObserver: ResizeObserver | null = null;
+    #resizeObserverTarget: HTMLElement | null = null;
     #suppressNextCanvasClick: boolean = false;
     #synchronizationController: ChartSynchronizationController | null = null;
     #themeObserver: MutationObserver | null = null;
@@ -948,10 +951,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 cancelAnimationFrame(this.#pointerFrameId);
                 this.#pointerFrameId = null;
             }
+            if (this.#initialMeasurementFrameId !== null) {
+                cancelAnimationFrame(this.#initialMeasurementFrameId);
+                this.#initialMeasurementFrameId = null;
+            }
             if (this.#resizeObserver) {
                 this.#resizeObserver.disconnect();
                 this.#resizeObserver = null;
             }
+            this.#resizeObserverTarget = null;
             if (this.#labelResizeObserver) {
                 this.#labelResizeObserver.disconnect();
                 this.#labelResizeObserver = null;
@@ -1774,33 +1782,101 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return this.plotSurfaceElement()?.nativeElement ?? this.canvasElement()?.nativeElement ?? null;
     }
 
+    #getPlotElement(): HTMLElement {
+        return (
+            this.plotSurfaceElement()?.nativeElement ||
+            this.canvasElement()?.nativeElement.parentElement ||
+            this.#elementRef.nativeElement
+        );
+    }
+
+    #measurePlotElement(plotEl: HTMLElement): { height: number; width: number } | null {
+        const rect = plotEl.getBoundingClientRect();
+        const width = rect.width > 0 ? rect.width : plotEl.offsetWidth;
+        const height = rect.height > 0 ? rect.height : plotEl.offsetHeight;
+        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+            return null;
+        }
+        return { height, width };
+    }
+
+    #applyMeasuredSize(width: number, height: number): boolean {
+        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+            return false;
+        }
+
+        const wasPending = this.#initialMeasurementPending;
+        const changed = Math.abs(width - this.#currentWidth) >= 0.5 || Math.abs(height - this.#currentHeight) >= 0.5;
+        this.#currentWidth = width;
+        this.#currentHeight = height;
+        this.#initialMeasurementPending = false;
+        const requiresRepaint = changed || wasPending;
+        if (requiresRepaint) {
+            this.#updateCanvasBackingStore(width, height);
+        }
+        return requiresRepaint;
+    }
+
+    #syncResizeObserverTarget(): HTMLElement {
+        const plotEl = this.#getPlotElement();
+        if (this.#resizeObserver && this.#resizeObserverTarget !== plotEl) {
+            if (this.#resizeObserverTarget) {
+                this.#resizeObserver.unobserve(this.#resizeObserverTarget);
+            }
+            this.#resizeObserverTarget = plotEl;
+            this.#resizeObserver.observe(plotEl);
+        }
+        return plotEl;
+    }
+
+    #scheduleInitialMeasurement(attempt = 0): void {
+        if (
+            !this.#initialMeasurementPending ||
+            this.#initialMeasurementFrameId !== null ||
+            typeof requestAnimationFrame === "undefined" ||
+            attempt >= 3
+        ) {
+            return;
+        }
+
+        this.#initialMeasurementFrameId = requestAnimationFrame(() => {
+            this.#initialMeasurementFrameId = null;
+            if (this.#isDestroyed) {
+                return;
+            }
+
+            const plotEl = this.#syncResizeObserverTarget();
+            const measurement = this.#measurePlotElement(plotEl);
+            if (measurement) {
+                if (this.#applyMeasuredSize(measurement.width, measurement.height)) {
+                    this.invalidate(ChartInvalidationReason.Size);
+                }
+                return;
+            }
+
+            this.#scheduleInitialMeasurement(attempt + 1);
+        });
+    }
+
     #initCanvasAndObserver(): void {
-        const plotSurfaceRef = this.plotSurfaceElement();
         const canvasRef = this.canvasElement();
         if (canvasRef?.nativeElement) {
             this.#canvasContext = canvasRef.nativeElement.getContext("2d");
         }
 
-        const plotEl =
-            plotSurfaceRef?.nativeElement || canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
+        const plotEl = this.#getPlotElement();
 
         if (typeof ResizeObserver !== "undefined") {
             this.#resizeObserver = new ResizeObserver(entries => {
+                this.#syncResizeObserverTarget();
                 for (const entry of entries) {
                     const { height, width } = entry.contentRect;
-                    if (
-                        width > 0 &&
-                        height > 0 &&
-                        (Math.abs(width - this.#currentWidth) >= 0.5 || Math.abs(height - this.#currentHeight) >= 0.5)
-                    ) {
-                        this.#currentWidth = width;
-                        this.#currentHeight = height;
-                        this.#updateCanvasBackingStore(width, height);
+                    if (width > 0 && height > 0 && this.#applyMeasuredSize(width, height)) {
                         this.invalidate(ChartInvalidationReason.Size);
                     }
                 }
             });
-            this.#resizeObserver.observe(plotEl);
+            this.#syncResizeObserverTarget();
         }
 
         if (typeof MutationObserver !== "undefined") {
@@ -1823,12 +1899,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         // Initial layout pass
-        const rect = plotEl.getBoundingClientRect();
-        const initialWidth = rect.width > 0 ? rect.width : plotEl.offsetWidth || 500;
-        const initialHeight = rect.height > 0 ? rect.height : plotEl.offsetHeight || 300;
-        this.#currentWidth = initialWidth;
-        this.#currentHeight = initialHeight;
-        this.#updateCanvasBackingStore(initialWidth, initialHeight);
+        const initialMeasurement = this.#measurePlotElement(plotEl);
+        if (initialMeasurement) {
+            this.#applyMeasuredSize(initialMeasurement.width, initialMeasurement.height);
+        } else {
+            this.#initialMeasurementPending = true;
+            this.#scheduleInitialMeasurement();
+        }
     }
 
     #normalizePointer(event: MouseEvent | PointerEvent): ChartPoint | null {
@@ -1936,16 +2013,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        if (this.#currentWidth <= 0 || this.#currentHeight <= 0) {
-            const plotEl =
-                this.plotSurfaceElement()?.nativeElement ||
-                this.canvasElement()?.nativeElement.parentElement ||
-                this.#elementRef.nativeElement;
-            const rect = plotEl.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) {
-                this.#currentWidth = rect.width;
-                this.#currentHeight = rect.height;
-                this.#updateCanvasBackingStore(rect.width, rect.height);
+        if (this.#initialMeasurementPending || this.#currentWidth <= 0 || this.#currentHeight <= 0) {
+            const measurement = this.#measurePlotElement(this.#getPlotElement());
+            if (measurement) {
+                this.#applyMeasuredSize(measurement.width, measurement.height);
             }
         }
 
@@ -1973,9 +2044,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             !hasInvalidationReason(reason, ChartInvalidationReason.Style) &&
             this.#cartesianLayoutRuntime !== null;
 
+        const isNonCartesianSizeChange =
+            hasInvalidationReason(reason, ChartInvalidationReason.Size) &&
+            sizeChanged &&
+            this.#cartesianLayoutRuntime === null;
+
         const requiresSceneRefresh =
             isStructural ||
             isChromeOnly ||
+            isNonCartesianSizeChange ||
             hasInvalidationReason(reason, ChartInvalidationReason.Style) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Viewport) ||
             !this.scene();
@@ -2094,6 +2171,21 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         // Commit semantic target scene immediately
         this.scene.set(newScene);
         this.#updateGestureController();
+
+        const isWaitingForInitialPolarSvgMeasurement =
+            this.#initialMeasurementPending &&
+            this.renderer() === "svg" &&
+            newScene.coordinateSystem === "polar" &&
+            newScene.polarKind === "arc";
+        if (isWaitingForInitialPolarSvgMeasurement) {
+            this.#renderScene = null;
+            this.#hasCommittedVisualScene = false;
+            this.#isAnimating.set(false);
+            this.#isStructuralAnimation.set(false);
+            this.#animationMode.set(null);
+            this.#isExitingData.set(false);
+            return;
+        }
 
         const isInitial = !this.#hasCommittedVisualScene;
         const isVisibility = hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
@@ -2882,7 +2974,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
         try {
             this.#renderBackend = createChartRenderBackend(mode, canvas, svg);
-            if (this.#currentWidth > 0 && this.#currentHeight > 0) {
+            if (!this.#initialMeasurementPending && this.#currentWidth > 0 && this.#currentHeight > 0) {
                 const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
                 this.#renderBackend.resize({
                     devicePixelRatio: dpr,
@@ -3209,16 +3301,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public ngAfterContentChecked(): void {
-        if (!this.#canvasReady) {
-            const plotEl =
-                this.plotSurfaceElement()?.nativeElement ||
-                this.canvasElement()?.nativeElement.parentElement ||
-                this.#elementRef.nativeElement;
-            const rect = plotEl.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) {
-                this.#currentWidth = rect.width;
-                this.#currentHeight = rect.height;
-                this.#updateCanvasBackingStore(rect.width, rect.height);
+        this.#syncResizeObserverTarget();
+        if (
+            !this.#canvasReady ||
+            this.#initialMeasurementPending ||
+            this.#currentWidth <= 0 ||
+            this.#currentHeight <= 0
+        ) {
+            const measurement = this.#measurePlotElement(this.#getPlotElement());
+            if (measurement) {
+                const changed = this.#applyMeasuredSize(measurement.width, measurement.height);
+                if (this.#canvasReady && changed) {
+                    this.invalidate(ChartInvalidationReason.Size);
+                }
             }
         }
 

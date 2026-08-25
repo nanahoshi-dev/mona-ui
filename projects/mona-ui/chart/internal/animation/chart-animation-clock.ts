@@ -22,7 +22,7 @@ export class BrowserAnimationClock implements ChartAnimationClock {
 
     public requestFrame(callback: FrameRequestCallback): number {
         if (typeof requestAnimationFrame !== "undefined") {
-            return requestAnimationFrame(callback);
+            return requestAnimationFrame(() => callback(this.now()));
         }
         return setTimeout(() => callback(this.now()), 16) as unknown as number;
     }
