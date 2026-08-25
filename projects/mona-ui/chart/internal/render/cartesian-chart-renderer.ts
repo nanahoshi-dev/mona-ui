@@ -2,7 +2,7 @@ import type { ChartInteractionState } from "../interaction/chart-interaction-sta
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
-import { crispPixel } from "../utils/canvas-utils";
+import { clipToPlotRect, crispPixel } from "../utils/canvas-utils";
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
 import { CandlestickSeriesRenderer } from "./series/candlestick-series-renderer";
@@ -316,9 +316,7 @@ export class CartesianChartRenderer {
     public static renderSeriesLayer(context: CanvasRenderingContext2D, scene: CartesianXYChartScene): void {
         const { plotRect, series } = scene;
         context.save();
-        context.beginPath();
-        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        context.clip();
+        clipToPlotRect(context, plotRect);
 
         for (const s of series) {
             switch (s.type) {

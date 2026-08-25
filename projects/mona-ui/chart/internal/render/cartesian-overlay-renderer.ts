@@ -5,7 +5,7 @@ import type {
     SceneReferenceBand,
     SceneReferenceLine
 } from "../scene/cartesian-overlay-scene";
-import { crispPixel, drawPointMarker } from "../utils/canvas-utils";
+import { clipToPlotRect, crispPixel, drawPointMarker } from "../utils/canvas-utils";
 
 function drawDiamondMarker(
     context: CanvasRenderingContext2D,
@@ -134,9 +134,7 @@ export class CartesianOverlayRenderer {
         }
 
         context.save();
-        context.beginPath();
-        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        context.clip();
+        clipToPlotRect(context, plotRect);
 
         // 1. Overlay Bands
         for (const band of overlayScene.referenceBands) {
@@ -171,9 +169,7 @@ export class CartesianOverlayRenderer {
         }
 
         context.save();
-        context.beginPath();
-        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        context.clip();
+        clipToPlotRect(context, plotRect);
 
         // 1. Underlay Bands
         for (const band of overlayScene.referenceBands) {

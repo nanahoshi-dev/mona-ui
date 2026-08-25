@@ -1,6 +1,7 @@
 import type { ChartRect } from "../../models/chart.models";
 import { CartesianMarkVisualGeometry } from "../interaction/cartesian-mark-visual-geometry";
 import type { CartesianSelectionScene } from "../scene/cartesian-selection-scene";
+import { clipToPlotRect } from "../utils/canvas-utils";
 
 export interface CartesianSelectionRenderOptions {
     readonly color?: string;
@@ -22,9 +23,7 @@ export class CartesianSelectionOverlayRenderer {
         const { color = "#3b82f6", fillOpacity = 0.12, plotRect, strokeWidth = 2 } = options;
 
         ctx.save();
-        ctx.beginPath();
-        ctx.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        ctx.clip();
+        clipToPlotRect(ctx, plotRect);
 
         ctx.strokeStyle = color;
         ctx.lineWidth = strokeWidth;

@@ -16,6 +16,13 @@ import { SvgOhlcSeriesRenderer } from "./series/svg-ohlc-series-renderer";
 import { SvgRangeAreaSeriesRenderer } from "./series/svg-range-area-series-renderer";
 import { SvgRangeBarSeriesRenderer } from "./series/svg-range-bar-series-renderer";
 
+/**
+ * Small overflow allowance so marks whose stroke or radius sits exactly at a
+ * domain extreme (a peak touching the max, a point at the first/last category)
+ * aren't visually chopped in half by the plot clip rectangle.
+ */
+const SERIES_CLIP_OVERFLOW = 8;
+
 interface SvgSeriesRendererLike {
     clear(): void;
     render(scene: ChartSeriesScene, defs?: SvgDefinitionRegistry): void;
@@ -176,7 +183,13 @@ export class SvgCartesianContentRenderer {
             return;
         }
 
-        const plotClipUrl = defs.useClipRect("plot-clip", plotRect.x, plotRect.y, plotRect.width, plotRect.height);
+        const plotClipUrl = defs.useClipRect(
+            "plot-clip",
+            plotRect.x - SERIES_CLIP_OVERFLOW,
+            plotRect.y - SERIES_CLIP_OVERFLOW,
+            plotRect.width + SERIES_CLIP_OVERFLOW * 2,
+            plotRect.height + SERIES_CLIP_OVERFLOW * 2
+        );
 
         // 1. Grid
         this.#gridRenderer.render(scene, styleResolver);

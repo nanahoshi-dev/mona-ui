@@ -2,7 +2,7 @@ import type { ChartRect } from "../../models/chart.models";
 import type { ChartCrosshairRegistration } from "../context/chart-registration-context";
 import type { ChartCrosshairState } from "../interaction/chart-crosshair-state";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { crispPixel } from "../utils/canvas-utils";
+import { clipToPlotRect, crispPixel } from "../utils/canvas-utils";
 
 function getCrosshairDash(style: string): readonly number[] {
     switch (style) {
@@ -43,9 +43,7 @@ export class CartesianCrosshairRenderer {
         const dash = getCrosshairDash(registration.lineStyle());
 
         context.save();
-        context.beginPath();
-        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        context.clip();
+        clipToPlotRect(context, plotRect);
 
         context.strokeStyle = style.color;
         context.lineWidth = style.width;

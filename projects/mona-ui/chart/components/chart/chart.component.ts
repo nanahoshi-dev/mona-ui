@@ -67,6 +67,7 @@ import { ChartMarkIdentityResolver } from "../../internal/interaction/chart-mark
 import { ChartVisibleMarkIndex } from "../../internal/interaction/chart-visible-mark-index";
 import { CartesianDataLabelProjector } from "../../internal/data-label/cartesian-data-label-projector";
 import type { CartesianDataLabelScene } from "../../internal/scene/cartesian-data-label-scene";
+import type { ChartAxisScene, ChartAxisSceneTick } from "../../internal/scene/cartesian-scene";
 import { CartesianSelectionProjector } from "../../internal/selection/cartesian-selection-projector";
 import type { CartesianSelectionScene } from "../../internal/scene/cartesian-selection-scene";
 import { ChartSelectionController, toSelectedPoint } from "../../internal/selection/chart-selection-controller";
@@ -1403,7 +1404,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         nextState: InternalCartesianViewportState,
         source: ChartViewportChangeSource,
         phase: ChartViewportChangePhase,
-        changedAxes?: readonly import("../../models/chart-viewport.models").ChartViewportAxisRef[]
+        changedAxes?: readonly ChartViewportAxisRef[]
     ): void {
         if (this.#isDestroyed) return;
         this.#retireTransientInteractionForViewportChange();
@@ -4430,11 +4431,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
-    protected axisLabelLeft(
-        cart: CartesianChartScene,
-        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene,
-        tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick
-    ): number {
+    protected axisLabelLeft(cart: CartesianChartScene, axisScene: ChartAxisScene, tick: ChartAxisSceneTick): number {
         if (axisScene.axis === "x") {
             return tick.coordinate;
         }
@@ -4446,11 +4443,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             : cart.plotRect.x - sideOffset - tickMarksOffset - labelPadding;
     }
 
-    protected axisLabelTop(
-        cart: CartesianChartScene,
-        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene,
-        tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick
-    ): number {
+    protected axisLabelTop(cart: CartesianChartScene, axisScene: ChartAxisScene, tick: ChartAxisSceneTick): number {
         if (axisScene.axis === "y") {
             return tick.coordinate;
         }
@@ -4462,10 +4455,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             : cart.plotRect.y + cart.plotRect.height + sideOffset + tickMarksOffset + labelPadding;
     }
 
-    protected axisLabelTransform(
-        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene,
-        _tick: import("../../internal/scene/cartesian-scene").ChartAxisSceneTick
-    ): string {
+    protected axisLabelTransform(axisScene: ChartAxisScene, _tick: ChartAxisSceneTick): string {
         const rot = axisScene.labelRotation ?? 0;
         if (axisScene.axis === "x") {
             if (axisScene.position === "top") {
@@ -4491,9 +4481,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return `translate(-100%, -50%) rotate(${rot}deg)`;
     }
 
-    protected axisLabelTransformOrigin(
-        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene
-    ): string {
+    protected axisLabelTransformOrigin(axisScene: ChartAxisScene): string {
         const rot = axisScene.labelRotation ?? 0;
         if (axisScene.axis === "x") {
             if (axisScene.position === "top") {
@@ -4507,10 +4495,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return rot === 0 ? "center center" : "right center";
     }
 
-    protected axisTitleLeft(
-        cart: CartesianChartScene,
-        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene
-    ): number {
+    protected axisTitleLeft(cart: CartesianChartScene, axisScene: ChartAxisScene): number {
         if (axisScene.axis === "x") {
             return cart.plotRect.x + cart.plotRect.width / 2;
         }
@@ -4521,10 +4506,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             : cart.plotRect.x - sideOffset - gutter + 12;
     }
 
-    protected axisTitleTop(
-        cart: CartesianChartScene,
-        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene
-    ): number {
+    protected axisTitleTop(cart: CartesianChartScene, axisScene: ChartAxisScene): number {
         if (axisScene.axis === "y") {
             return cart.plotRect.y + cart.plotRect.height / 2;
         }
@@ -4798,9 +4780,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return this.#annotationById().get(annId)?.template?.();
     }
 
-    protected resolveAxisLabelTemplate(
-        axisScene: import("../../internal/scene/cartesian-scene").ChartAxisScene
-    ): ChartAxisLabelTemplateDirective | undefined {
+    protected resolveAxisLabelTemplate(axisScene: ChartAxisScene): ChartAxisLabelTemplateDirective | undefined {
         if (axisScene.axis === "x") {
             const reg = this.#xAxes().find(
                 a => a.registrationId === axisScene.registrationId || (a.axisId?.() ?? "default-x") === axisScene.axisId

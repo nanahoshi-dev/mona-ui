@@ -1,7 +1,7 @@
 import type { ChartInteractionState } from "../interaction/chart-interaction-state";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { crispPixel, drawBarRect, drawBarRectOutline, drawPointMarker } from "../utils/canvas-utils";
+import { clipToPlotRect, crispPixel, drawBarRect, drawBarRectOutline, drawPointMarker } from "../utils/canvas-utils";
 
 export class CartesianInteractionOverlayRenderer {
     public static render(
@@ -35,9 +35,7 @@ export class CartesianInteractionOverlayRenderer {
         }
 
         context.save();
-        context.beginPath();
-        context.rect(plotRect.x, plotRect.y, plotRect.width, plotRect.height);
-        context.clip();
+        clipToPlotRect(context, plotRect);
 
         const markerStrokeColor =
             styleResolver.resolveCssVariable("--mona-chart-marker-stroke-color") ||

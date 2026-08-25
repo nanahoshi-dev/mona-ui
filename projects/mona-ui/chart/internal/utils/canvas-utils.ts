@@ -1,11 +1,34 @@
+import type { ChartRect } from "../../models/chart.models";
 import type { ChartCornerRadii } from "../scene/scene-geometry";
 import { clamp } from "./number-utils";
+
+/**
+ * Small overflow allowance so marks whose stroke or radius sits exactly at a
+ * domain extreme (a peak touching the max, a hovered point marker at the
+ * first/last category) aren't visually chopped in half by the plot clip rect.
+ */
+export const PLOT_CLIP_OVERFLOW = 8;
 
 export function crispPixel(pixel: number, lineWidth: number = 1): number {
     if (lineWidth % 2 === 1) {
         return Math.floor(pixel) + 0.5;
     }
     return Math.round(pixel);
+}
+
+/**
+ * Clips the canvas context to `plotRect`, inflated on all four sides by
+ * {@link PLOT_CLIP_OVERFLOW} so marks touching a domain extreme aren't cut in half.
+ */
+export function clipToPlotRect(context: CanvasRenderingContext2D, plotRect: ChartRect): void {
+    context.beginPath();
+    context.rect(
+        plotRect.x - PLOT_CLIP_OVERFLOW,
+        plotRect.y - PLOT_CLIP_OVERFLOW,
+        plotRect.width + PLOT_CLIP_OVERFLOW * 2,
+        plotRect.height + PLOT_CLIP_OVERFLOW * 2
+    );
+    context.clip();
 }
 
 export function drawRoundedRectCorners(
