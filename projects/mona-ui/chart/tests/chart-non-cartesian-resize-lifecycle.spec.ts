@@ -1,4 +1,4 @@
-import { Component, signal, viewChild } from "@angular/core";
+import { Component, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartComponent } from "../components/chart/chart.component";
