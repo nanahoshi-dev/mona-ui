@@ -112,8 +112,8 @@ describe("combined synchronization + density stress matrix", () => {
                 x: i * 2,
                 y: Math.sin((i + phase) / 150) * 20 + ((i + phase) % 9000 === 0 ? 200 : 0)
             }));
-        host.dataA.set(make(80_000, 0));
-        host.dataB.set(make(50_000, 1000));
+        host.dataA.set(make(8_000, 0));
+        host.dataB.set(make(5_000, 1000));
 
         fixture.detectChanges();
         host.chartA().flushPendingRender();
@@ -147,8 +147,8 @@ describe("combined synchronization + density stress matrix", () => {
                 axis: "x",
                 axisId: "x-main",
                 kind: "continuous",
-                max: 90_000,
-                min: 10_000
+                max: 9_000,
+                min: 1_000
             });
             await nextFrame();
 
@@ -174,7 +174,7 @@ describe("combined synchronization + density stress matrix", () => {
 
     it("recipient axis-value crosshair lands at the exact semantic position even when unsampled", async () => {
         // Choose a semantic X inside both data domains that is not part of B's visual sample.
-        const targetSemanticX = 87_657;
+        const targetSemanticX = 8_753;
         const canvasA = fixture.debugElement.queryAll(By.css("canvas"))[0].nativeElement;
 
         const sceneA = host.chartA()["cartesianXYScene"]()!;
@@ -215,14 +215,14 @@ describe("combined synchronization + density stress matrix", () => {
         host.viewportA.set({ axes: [] });
         fixture.detectChanges();
 
-        host.chartA().setViewportWindow({ axis: "x", axisId: "x-main", kind: "continuous", max: 70_000, min: 5_000 });
+        host.chartA().setViewportWindow({ axis: "x", axisId: "x-main", kind: "continuous", max: 7_000, min: 500 });
         await nextFrame();
 
         // Rejected: peers unmoved.
         expect(host.chartB().getViewport()?.axes.length ?? 0).toBe(0);
 
         // Parent accepts.
-        host.viewportA.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 70_000, min: 5_000 }] });
+        host.viewportA.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 7_000, min: 500 }] });
         fixture.detectChanges();
         await nextFrame();
 

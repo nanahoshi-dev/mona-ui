@@ -1,3 +1,4 @@
+import type { ChartSeriesScene } from "../../../scene/cartesian-scene";
 import type { CartesianXYChartScene } from "../../../scene/chart-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import type { ChartRenderPresentationState } from "../../chart-render-presentation-state";
@@ -24,8 +25,15 @@ import { SvgRangeBarSeriesRenderer } from "./series/svg-range-bar-series-rendere
 
 interface SvgSeriesRendererLike {
     clear(): void;
-    render(scene: import("../../../scene/cartesian-scene").ChartSeriesScene, defs?: SvgDefinitionRegistry): void;
+    render(scene: ChartSeriesScene, defs?: SvgDefinitionRegistry): void;
 }
+
+/**
+ * Small overflow allowance so marks whose stroke or radius sits exactly at a
+ * domain extreme (a peak touching the max, a point at the first/last category)
+ * aren't visually chopped in half by the plot clip rectangle.
+ */
+const SERIES_CLIP_OVERFLOW = 8;
 
 export class SvgCartesianChartRenderer {
     readonly #axisRenderer: SvgCartesianAxisRenderer;
@@ -261,7 +269,13 @@ export class SvgCartesianChartRenderer {
 
         this.#clearCrossfadeScopes();
 
-        const plotClipUrl = defs.useClipRect("plot-clip", plotRect.x, plotRect.y, plotRect.width, plotRect.height);
+        const plotClipUrl = defs.useClipRect(
+            "plot-clip",
+            plotRect.x - SERIES_CLIP_OVERFLOW,
+            plotRect.y - SERIES_CLIP_OVERFLOW,
+            plotRect.width + SERIES_CLIP_OVERFLOW * 2,
+            plotRect.height + SERIES_CLIP_OVERFLOW * 2
+        );
 
         // 1. Grid
         this.#gridRenderer.render(scene, styleResolver);
@@ -358,10 +372,10 @@ export class SvgCartesianChartRenderer {
         const toDefs = defs.withScope("cf-to");
         const toPlotClipUrl = toDefs.useClipRect(
             "plot-clip",
-            toScene.plotRect.x,
-            toScene.plotRect.y,
-            toScene.plotRect.width,
-            toScene.plotRect.height
+            toScene.plotRect.x - SERIES_CLIP_OVERFLOW,
+            toScene.plotRect.y - SERIES_CLIP_OVERFLOW,
+            toScene.plotRect.width + SERIES_CLIP_OVERFLOW * 2,
+            toScene.plotRect.height + SERIES_CLIP_OVERFLOW * 2
         );
 
         // Persistent selection and data labels are suppressed during animation
@@ -415,10 +429,10 @@ export class SvgCartesianChartRenderer {
             const fromDefs = defs.withScope("cf-from");
             const fromPlotClipUrl = fromDefs.useClipRect(
                 "plot-clip",
-                fromScene.plotRect.x,
-                fromScene.plotRect.y,
-                fromScene.plotRect.width,
-                fromScene.plotRect.height
+                fromScene.plotRect.x - SERIES_CLIP_OVERFLOW,
+                fromScene.plotRect.y - SERIES_CLIP_OVERFLOW,
+                fromScene.plotRect.width + SERIES_CLIP_OVERFLOW * 2,
+                fromScene.plotRect.height + SERIES_CLIP_OVERFLOW * 2
             );
 
             if (!this.#crossfadeFromScope) {

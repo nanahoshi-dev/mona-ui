@@ -19,6 +19,7 @@ export interface CategoryLabelThinningParams {
 }
 
 export class CartesianAxisLabelGeometry {
+    static #cachedGetContext: typeof HTMLCanvasElement.prototype.getContext | null = null;
     static #measureCanvas: HTMLCanvasElement | null = null;
     static #measureCtx: CanvasRenderingContext2D | null = null;
 
@@ -46,11 +47,26 @@ export class CartesianAxisLabelGeometry {
             try {
                 if (!CartesianAxisLabelGeometry.#measureCanvas) {
                     CartesianAxisLabelGeometry.#measureCanvas = document.createElement("canvas");
-                    CartesianAxisLabelGeometry.#measureCtx = CartesianAxisLabelGeometry.#measureCanvas.getContext("2d");
                 }
-                if (CartesianAxisLabelGeometry.#measureCtx) {
-                    CartesianAxisLabelGeometry.#measureCtx.font = font;
-                    const measuredWidth = CartesianAxisLabelGeometry.#measureCtx.measureText(formattedText).width;
+                // Cache the resolved 2D context, but invalidate it whenever
+                // HTMLCanvasElement.prototype.getContext itself has changed identity (e.g. a test
+                // installs/restores a vi.spyOn mock) so a swapped implementation is never frozen in
+                // stale. This keeps the common case (thousands of tick-label measurements against a
+                // stable getContext) a cheap reference reuse instead of re-invoking getContext (and,
+                // under test mocks that fabricate a fresh context object per call, re-allocating one)
+                // on every single call.
+                const currentGetContext = CartesianAxisLabelGeometry.#measureCanvas.getContext;
+                if (
+                    !CartesianAxisLabelGeometry.#measureCtx ||
+                    CartesianAxisLabelGeometry.#cachedGetContext !== currentGetContext
+                ) {
+                    CartesianAxisLabelGeometry.#measureCtx = CartesianAxisLabelGeometry.#measureCanvas.getContext("2d");
+                    CartesianAxisLabelGeometry.#cachedGetContext = currentGetContext;
+                }
+                const ctx = CartesianAxisLabelGeometry.#measureCtx;
+                if (ctx) {
+                    ctx.font = font;
+                    const measuredWidth = ctx.measureText(formattedText).width;
                     if (typeof measuredWidth === "number" && !isNaN(measuredWidth) && measuredWidth > 0) {
                         return {
                             height: 16,
