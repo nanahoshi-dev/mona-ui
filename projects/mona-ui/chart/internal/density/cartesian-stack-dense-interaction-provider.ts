@@ -40,11 +40,11 @@ export interface CartesianStackedAreaDenseProviderOptions {
 
 export class CartesianStackedAreaDenseInteractionProvider implements CartesianDenseInteractionProvider {
     readonly #options: CartesianStackedAreaDenseProviderOptions;
+    #geometryIndex: DenseSegmentGeometryIndex | null = null;
+    #indexedEntries: readonly CartesianStackEntry[] | null = null;
     public readonly seriesId: string;
     public readonly xAxisId: string;
     public readonly yAxisId: string;
-    #geometryIndex: DenseSegmentGeometryIndex | null = null;
-    #indexedEntries: readonly CartesianStackEntry[] | null = null;
     public constructor(options: CartesianStackedAreaDenseProviderOptions) {
         this.#options = options;
         this.seriesId = options.series.id;

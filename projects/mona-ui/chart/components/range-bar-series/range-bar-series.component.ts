@@ -23,6 +23,8 @@ export class RangeBarSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-range-bar-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Corner radius in pixels for the floating bar caps.
      * @default undefined
@@ -127,8 +129,6 @@ export class RangeBarSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

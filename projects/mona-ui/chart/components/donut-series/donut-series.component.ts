@@ -48,6 +48,8 @@ export class DonutSeriesComponent implements OnInit {
     readonly #seriesId = `mona-donut-series-${++nextDonutSeriesId}`;
     readonly #visibilityRevision = signal<number>(0);
 
+    #registered = false;
+
     protected readonly centerTemplate = contentChild(ChartCenterTemplateDirective);
     protected readonly sliceLabelTemplate = contentChild(ChartSliceLabelTemplateDirective);
 
@@ -205,8 +207,6 @@ export class DonutSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model<boolean>(true);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

@@ -6,13 +6,13 @@ export interface TreemapSpatialBin {
 }
 
 export class TreemapHitIndex {
-    readonly #plotRect: ChartRect;
-    readonly #cols: number;
-    readonly #rows: number;
-    readonly #cellWidth: number;
-    readonly #cellHeight: number;
-    readonly #grid: readonly (readonly SceneHitTarget[])[];
     readonly #allTargets: readonly SceneHitTarget[];
+    readonly #cellHeight: number;
+    readonly #cellWidth: number;
+    readonly #cols: number;
+    readonly #grid: readonly (readonly SceneHitTarget[])[];
+    readonly #plotRect: ChartRect;
+    readonly #rows: number;
 
     public constructor(plotRect: ChartRect, hitTargets: readonly SceneHitTarget[]) {
         this.#plotRect = plotRect;

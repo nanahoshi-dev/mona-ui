@@ -23,6 +23,8 @@ export class BubbleSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-bubble-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Explicit fill color for the bubbles.
      * @default ""
@@ -141,8 +143,6 @@ export class BubbleSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

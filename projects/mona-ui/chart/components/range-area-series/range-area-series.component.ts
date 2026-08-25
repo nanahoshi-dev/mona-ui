@@ -24,6 +24,8 @@ export class RangeAreaSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-range-area-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Explicit stroke and fill color override for the range area series.
      * @default ""
@@ -146,8 +148,6 @@ export class RangeAreaSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

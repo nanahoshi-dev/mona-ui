@@ -2,8 +2,8 @@ import type { ChartPoint } from "../../models/chart.models";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 
 export class CartesianPointSpatialIndex {
-    readonly #cells = new Map<string, SceneHitTarget[]>();
     readonly #cellSize: number;
+    readonly #cells = new Map<string, SceneHitTarget[]>();
 
     public constructor(cellSize = 32) {
         this.#cellSize = Math.max(8, cellSize);

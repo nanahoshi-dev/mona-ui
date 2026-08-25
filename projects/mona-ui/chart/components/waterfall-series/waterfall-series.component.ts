@@ -23,6 +23,7 @@ export class WaterfallSeriesComponent implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #seriesId = `mona-waterfall-series-${++nextWaterfallSeriesId}`;
+    #registered = false;
     /**
      * @description Corner radius in pixels applied to the four corners of waterfall bars.
      * @default undefined
@@ -158,7 +159,6 @@ export class WaterfallSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly xField = input<ChartField | undefined>(undefined);
-    #registered = false;
 
     public constructor() {
         effect(() => {

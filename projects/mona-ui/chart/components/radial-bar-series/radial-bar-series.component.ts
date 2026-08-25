@@ -30,6 +30,7 @@ export class RadialBarSeriesComponent implements OnInit {
     readonly #identityMap = new Map<string, { category: unknown; dataIndex: number; datum: unknown }>();
     readonly #seriesId = `mona-radial-bar-series-${++nextRadialBarSeriesId}`;
     readonly #visibilityRevision = signal<number>(0);
+    #registered = false;
 
     /**
      * @description Spacing in pixels between concentric radial rings.
@@ -195,7 +196,6 @@ export class RadialBarSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model<boolean>(true);
-    #registered = false;
 
     public constructor() {
         effect(() => {

@@ -46,6 +46,7 @@ export class TreemapSeriesComponent implements OnInit {
     readonly #identityMap = new Map<string, RootBranchIdentityInfo>();
     readonly #seriesId = `mona-treemap-series-${++nextTreemapSeriesId}`;
     readonly #visibilityRevision = signal<number>(0);
+    #registered = false;
 
     /**
      * @description Corner radius in pixels applied to leaf node rectangles.
@@ -234,7 +235,6 @@ export class TreemapSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model<boolean>(true);
-    #registered = false;
 
     public constructor() {
         effect(() => {

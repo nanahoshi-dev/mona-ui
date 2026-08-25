@@ -55,11 +55,11 @@ export interface CartesianRangeDenseProviderOptions {
 export class CartesianRangeAreaDenseInteractionProvider implements CartesianDenseInteractionProvider {
     readonly #keyResolver: ChartMarkKeyResolver;
     readonly #options: CartesianRangeDenseProviderOptions;
+    #geometryIndex: DenseSegmentGeometryIndex | null = null;
+    #identityIndex: DenseMarkIdentityIndex | null = null;
     public readonly seriesId: string;
     public readonly xAxisId: string;
     public readonly yAxisId: string;
-    #geometryIndex: DenseSegmentGeometryIndex | null = null;
-    #identityIndex: DenseMarkIdentityIndex | null = null;
     public constructor(options: CartesianRangeDenseProviderOptions) {
         this.#options = options;
         this.seriesId = options.series.id;

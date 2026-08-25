@@ -21,11 +21,12 @@ let nextGaugeSeriesId = 0;
     }
 })
 export class GaugeSeriesComponent implements OnInit {
-    protected readonly centerTemplate = contentChild(ChartGaugeCenterTemplateDirective);
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #seriesId = `mona-gauge-series-${++nextGaugeSeriesId}`;
+    #registered = false;
+    protected readonly centerTemplate = contentChild(ChartGaugeCenterTemplateDirective);
     /**
      * @description Primary color of the gauge value arc.
      * @default ""
@@ -156,7 +157,6 @@ export class GaugeSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model<boolean>(true);
-    #registered = false;
 
     public constructor() {
         effect(() => {

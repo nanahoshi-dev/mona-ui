@@ -24,6 +24,8 @@ export class BarSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-bar-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Corner radius in pixels for the bar caps.
      * @default undefined
@@ -136,8 +138,6 @@ export class BarSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         let initialVisible = true;

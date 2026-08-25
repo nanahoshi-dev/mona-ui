@@ -18,6 +18,8 @@ export class ChartRadialAxisComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
 
+    #registered = false;
+
     protected readonly labelTemplate = contentChild(ChartAxisLabelTemplateDirective);
 
     /**
@@ -97,8 +99,6 @@ export class ChartRadialAxisComponent implements OnInit {
      * @default true
      */
     public readonly visible = input(true);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

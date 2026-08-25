@@ -114,8 +114,8 @@ class DenseHostComponent {
 }
 
 class FakeResizeObserver {
-    public static instances: FakeResizeObserver[] = [];
     public readonly observed = new Set<Element>();
+    public static instances: FakeResizeObserver[] = [];
 
     public constructor(public readonly callback: ResizeObserverCallback) {
         FakeResizeObserver.instances.push(this);

@@ -25,6 +25,8 @@ export class AreaSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-area-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Explicit stroke and fill color override for the area series.
      * @default ""
@@ -158,8 +160,6 @@ export class AreaSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

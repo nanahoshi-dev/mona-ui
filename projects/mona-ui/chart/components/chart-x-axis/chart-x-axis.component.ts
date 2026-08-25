@@ -26,11 +26,13 @@ export class ChartXAxisComponent implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
     readonly #registrationId = `mona-x-axis-${++nextXAxisId}`;
 
-    protected readonly labelTemplate = contentChild(ChartAxisLabelTemplateDirective);
+    #registered = false;
 
     public get registrationId(): string {
         return this.#registrationId;
     }
+
+    protected readonly labelTemplate = contentChild(ChartAxisLabelTemplateDirective);
 
     /**
      * @description Optional semantic identifier for the X axis, referenced by series `xAxisId`.
@@ -169,8 +171,6 @@ export class ChartXAxisComponent implements OnInit {
      * @default true
      */
     public readonly visible = input(true);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

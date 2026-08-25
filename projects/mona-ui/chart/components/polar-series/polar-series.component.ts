@@ -21,6 +21,8 @@ export class PolarSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-polar-series-${++nextPolarSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Property key or accessor function extracting the degree angle (0° to 360°) for each data item.
      * @default "angle"
@@ -116,8 +118,6 @@ export class PolarSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model(true);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

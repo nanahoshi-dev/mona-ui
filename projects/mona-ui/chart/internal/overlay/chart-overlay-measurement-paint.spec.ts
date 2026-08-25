@@ -15,10 +15,10 @@ import { CartesianStageTracker } from "../layout/cartesian-stage-instrumentation
 import { ChartOverlayLabelMeasureDirective } from "../directives/chart-overlay-label-measure.directive";
 
 class TestResizeObserver {
-    public static instances: TestResizeObserver[] = [];
     public readonly observed = new Set<Element>();
     public readonly unobserved = new Set<Element>();
     public disconnected = false;
+    public static instances: TestResizeObserver[] = [];
 
     public constructor(public readonly callback: (entries: ResizeObserverEntry[]) => void) {
         TestResizeObserver.instances.push(this);

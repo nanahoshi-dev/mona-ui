@@ -113,11 +113,11 @@ export class CartesianConnectedPathInteractionProvider implements CartesianDense
     readonly #scalar: CartesianScalarDensityData;
     readonly #xScale: ChartContinuousPositionScale<number | Date>;
     readonly #yScale: ChartContinuousPositionScale<number | Date>;
+    #geometryIndex: DensePointGeometryIndex | null = null;
+    #identityIndex: DenseMarkIdentityIndex | null = null;
     public readonly seriesId?: string;
     public readonly xAxisId?: string;
     public readonly yAxisId?: string;
-    #geometryIndex: DensePointGeometryIndex | null = null;
-    #identityIndex: DenseMarkIdentityIndex | null = null;
     public constructor(input: {
         readonly identity?: ChartSeriesMarkIdentityAuthority;
         readonly materialize: (sourceIndex: number) => SceneHitTarget | null;

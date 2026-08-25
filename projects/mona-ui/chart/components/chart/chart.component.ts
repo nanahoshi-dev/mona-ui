@@ -279,6 +279,119 @@ type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | nul
     }
 })
 export class ChartComponent implements ChartRegistrationContext, AfterContentChecked {
+    readonly #activeBrushBounds = signal<ChartRect | null>(null);
+    readonly #activeExportControllers = new Set<AbortController>();
+    readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
+    readonly #animationController: ChartAnimationController;
+    readonly #animationMode = signal<"crossfade" | "morph" | null>(null);
+    readonly #annotationById = computed(() => {
+        const map = new Map<string, ChartAnnotationRegistration>();
+        for (const r of this.#annotations()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
+    readonly #annotations = signal<ChartAnnotationRegistration[]>([]);
+    readonly #brush = signal<ChartBrushRegistration | null>(null);
+    readonly #brushGestureController = new ChartBrushGestureController();
+    readonly #crosshair = signal<ChartCrosshairRegistration | null>(null);
+    readonly #dataLabelMeasurementRevision = signal(0);
+    readonly #dataLabelMeasurements = new Map<string, ChartSize>();
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #hasInitializedDefaultSelection = signal(false);
+    readonly #hasInitializedDefaultViewport = signal(false);
+    readonly #internalSelectedMarkIds = signal<readonly string[]>([]);
+    readonly #isAnimating = signal(false);
+    readonly #isExitingData = signal(false);
+    readonly #isStructuralAnimation = signal(false);
+    readonly #labelMeasurements = new Map<string, ChartLabelMeasurement>();
+    readonly #legend = signal<ChartLegendRegistration | null>(null);
+    readonly #observedDataLabelElements = new Map<Element, string>();
+    readonly #observedLabelElements = new Map<Element, string>();
+    readonly #observedOverlayLabelElements = new Map<Element, string>();
+    readonly #overlayLabelMeasurementRevision = signal(0);
+    readonly #overlayLabelMeasurements = new Map<string, ChartLabelMeasurement>();
+    readonly #radialAxis = signal<ChartRadialAxisRegistration | null>(null);
+    readonly #referenceBandById = computed(() => {
+        const map = new Map<string, ChartReferenceBandRegistration>();
+        for (const r of this.#referenceBands()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
+    readonly #referenceBands = signal<ChartReferenceBandRegistration[]>([]);
+    readonly #referenceLineById = computed(() => {
+        const map = new Map<string, ChartReferenceLineRegistration>();
+        for (const r of this.#referenceLines()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
+    readonly #referenceLines = signal<ChartReferenceLineRegistration[]>([]);
+    readonly #registeredSeries = signal<ChartSeriesRegistration[]>([]);
+    readonly #renderScheduler: ChartRenderScheduler;
+    readonly #selection = signal<ChartSelectionRegistration | null>(null);
+    readonly #styleResolver: ChartStyleResolver;
+    readonly #synchronizationCoordinator = inject(ChartSynchronizationCoordinator);
+    readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
+    readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
+    readonly #warnedDiagnosticSignatures = new Set<string>();
+    readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
+    readonly #yAxes = signal<ChartYAxisRegistration[]>([]);
+    #activeKeyboardBucketIndex: number = -1;
+    #activeKeyboardHitKey: string | null = null;
+    #activeKeyboardNamespace: ChartKeyboardAxisNamespace | null = null;
+    #activeKeyboardSeriesId: string | null = null;
+    #brushMarkIndex: CartesianBrushMarkIndex | null = null;
+    #brushMarkIndexScene: ChartScene | null = null;
+    #canvasContext: CanvasRenderingContext2D | null = null;
+    #canvasReady: boolean = false;
+    #cartesianLayoutRuntime: CartesianXYLayoutRuntime | null = null;
+    #currentHeight: number = 300;
+    #currentWidth: number = 500;
+    #dataLabelResizeObserver: ResizeObserver | null = null;
+    #gestureController: ChartViewportGestureController | null = null;
+    #hasCommittedVisualScene: boolean = false;
+    #hasEmittedBrushStart = false;
+    #hasPendingSizeReflow: boolean = false;
+    #hasWarnedBrushWithoutSelection = false;
+    #hasWarnedMultiBrush = false;
+    #hasWarnedMultiSelection = false;
+    #hasWarnedSelectionNonCartesian = false;
+    #initialMeasurementFrameId: number | null = null;
+    #initialMeasurementPending: boolean = true;
+    #interactionOwner: ChartTransientInteractionOwner = null;
+    #interactionRevision: number = 0;
+    #interactionState: ChartInteractionState | null = null;
+    #isDestroyed = false;
+    #labelResizeObserver: ResizeObserver | null = null;
+    #lastControlledSelection: readonly string[] | undefined = undefined;
+    #lastInteractionSource: "pointer" | "keyboard" | null = null;
+    #lastNormalizedControlledViewport: InternalCartesianViewportState | null = null;
+    #lastPointerResolution: ChartPointerResolution | null = null;
+    #lastSelectionMode: ChartSelectionMode | undefined = undefined;
+    #mediaQueryList: MediaQueryList | null = null;
+    #mediaQueryListener: ((e: MediaQueryListEvent) => void) | null = null;
+    #overlayLabelResizeObserver: ResizeObserver | null = null;
+    #pendingBrushFrame: {
+        event: PointerEvent;
+        phase: ChartBrushPhase;
+        result: BrushGestureResult;
+        scene: CartesianXYChartScene;
+        target: ResolvedCartesianBrushTarget;
+    } | null = null;
+    #pendingBrushRafId: number | null = null;
+    #pendingLabelMeasurementReason: number = 0;
+    #pendingPointerEvent: PointerEvent | null = null;
+    #pointerFrameId: number | null = null;
+    #renderBackend: ChartRenderBackend | null = null;
+    #renderScene: ChartScene | null = null;
+    #resizeObserver: ResizeObserver | null = null;
+    #resizeObserverTarget: HTMLElement | null = null;
+    #suppressNextCanvasClick: boolean = false;
+    #synchronizationController: ChartSynchronizationController | null = null;
+    #themeObserver: MutationObserver | null = null;
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly animationDurationCss = computed(() => `${this.normalizedAnimationOptions().duration}ms`);
     protected readonly animationEasingCss = computed(() => easingToCss(this.normalizedAnimationOptions().easing));
@@ -604,66 +717,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "waterfall") as ChartWaterfallSeriesRegistration) ?? null;
     });
-    readonly #activeBrushBounds = signal<ChartRect | null>(null);
-    readonly #activeExportControllers = new Set<AbortController>();
-    readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
-    readonly #animationController: ChartAnimationController;
-    readonly #animationMode = signal<"crossfade" | "morph" | null>(null);
-    readonly #annotationById = computed(() => {
-        const map = new Map<string, ChartAnnotationRegistration>();
-        for (const r of this.#annotations()) {
-            map.set(r.id, r);
-        }
-        return map;
-    });
-    readonly #annotations = signal<ChartAnnotationRegistration[]>([]);
-    readonly #brush = signal<ChartBrushRegistration | null>(null);
-    readonly #brushGestureController = new ChartBrushGestureController();
-    readonly #crosshair = signal<ChartCrosshairRegistration | null>(null);
-    readonly #dataLabelMeasurementRevision = signal(0);
-    readonly #dataLabelMeasurements = new Map<string, ChartSize>();
-    readonly #destroyRef = inject(DestroyRef);
-    readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #hasInitializedDefaultSelection = signal(false);
-    readonly #hasInitializedDefaultViewport = signal(false);
-    readonly #internalSelectedMarkIds = signal<readonly string[]>([]);
-    readonly #isAnimating = signal(false);
-    readonly #isExitingData = signal(false);
-    readonly #isStructuralAnimation = signal(false);
-    readonly #labelMeasurements = new Map<string, ChartLabelMeasurement>();
-    readonly #legend = signal<ChartLegendRegistration | null>(null);
-    readonly #observedDataLabelElements = new Map<Element, string>();
-    readonly #observedLabelElements = new Map<Element, string>();
-    readonly #observedOverlayLabelElements = new Map<Element, string>();
-    readonly #overlayLabelMeasurementRevision = signal(0);
-    readonly #overlayLabelMeasurements = new Map<string, ChartLabelMeasurement>();
-    readonly #radialAxis = signal<ChartRadialAxisRegistration | null>(null);
-    readonly #referenceBandById = computed(() => {
-        const map = new Map<string, ChartReferenceBandRegistration>();
-        for (const r of this.#referenceBands()) {
-            map.set(r.id, r);
-        }
-        return map;
-    });
-    readonly #referenceBands = signal<ChartReferenceBandRegistration[]>([]);
-    readonly #referenceLineById = computed(() => {
-        const map = new Map<string, ChartReferenceLineRegistration>();
-        for (const r of this.#referenceLines()) {
-            map.set(r.id, r);
-        }
-        return map;
-    });
-    readonly #referenceLines = signal<ChartReferenceLineRegistration[]>([]);
-    readonly #registeredSeries = signal<ChartSeriesRegistration[]>([]);
-    readonly #renderScheduler: ChartRenderScheduler;
-    readonly #selection = signal<ChartSelectionRegistration | null>(null);
-    readonly #styleResolver: ChartStyleResolver;
-    readonly #synchronizationCoordinator = inject(ChartSynchronizationCoordinator);
-    readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
-    readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
-    readonly #warnedDiagnosticSignatures = new Set<string>();
-    readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
-    readonly #yAxes = signal<ChartYAxisRegistration[]>([]);
     public readonly angularAxisRegistration: Signal<ChartAngularAxisRegistration | null> =
         this.#angularAxis.asReadonly();
     /**
@@ -784,56 +837,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public readonly xField = input<ChartField>("");
     public readonly yAxesRegistration: Signal<readonly ChartYAxisRegistration[]> = this.#yAxes.asReadonly();
     public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = computed(() => this.#yAxes()[0] ?? null);
-    #activeKeyboardBucketIndex: number = -1;
-    #activeKeyboardHitKey: string | null = null;
-    #activeKeyboardNamespace: ChartKeyboardAxisNamespace | null = null;
-    #activeKeyboardSeriesId: string | null = null;
-    #brushMarkIndex: CartesianBrushMarkIndex | null = null;
-    #brushMarkIndexScene: ChartScene | null = null;
-    #canvasContext: CanvasRenderingContext2D | null = null;
-    #canvasReady: boolean = false;
-    #cartesianLayoutRuntime: CartesianXYLayoutRuntime | null = null;
-    #currentHeight: number = 300;
-    #currentWidth: number = 500;
-    #dataLabelResizeObserver: ResizeObserver | null = null;
-    #gestureController: ChartViewportGestureController | null = null;
-    #hasCommittedVisualScene: boolean = false;
-    #hasEmittedBrushStart = false;
-    #hasPendingSizeReflow: boolean = false;
-    #hasWarnedBrushWithoutSelection = false;
-    #hasWarnedMultiBrush = false;
-    #hasWarnedMultiSelection = false;
-    #hasWarnedSelectionNonCartesian = false;
-    #interactionOwner: ChartTransientInteractionOwner = null;
-    #interactionRevision: number = 0;
-    #interactionState: ChartInteractionState | null = null;
-    #isDestroyed = false;
-    #labelResizeObserver: ResizeObserver | null = null;
-    #lastControlledSelection: readonly string[] | undefined = undefined;
-    #lastInteractionSource: "pointer" | "keyboard" | null = null;
-    #lastNormalizedControlledViewport: InternalCartesianViewportState | null = null;
-    #lastPointerResolution: ChartPointerResolution | null = null;
-    #lastSelectionMode: ChartSelectionMode | undefined = undefined;
-    #mediaQueryList: MediaQueryList | null = null;
-    #mediaQueryListener: ((e: MediaQueryListEvent) => void) | null = null;
-    #overlayLabelResizeObserver: ResizeObserver | null = null;
-    #pendingBrushFrame: {
-        event: PointerEvent;
-        phase: ChartBrushPhase;
-        result: BrushGestureResult;
-        scene: CartesianXYChartScene;
-        target: ResolvedCartesianBrushTarget;
-    } | null = null;
-    #pendingBrushRafId: number | null = null;
-    #pendingLabelMeasurementReason: number = 0;
-    #pendingPointerEvent: PointerEvent | null = null;
-    #pointerFrameId: number | null = null;
-    #renderBackend: ChartRenderBackend | null = null;
-    #renderScene: ChartScene | null = null;
-    #resizeObserver: ResizeObserver | null = null;
-    #suppressNextCanvasClick: boolean = false;
-    #synchronizationController: ChartSynchronizationController | null = null;
-    #themeObserver: MutationObserver | null = null;
 
     public constructor() {
         this.#styleResolver = new ChartStyleResolver(this.#elementRef.nativeElement);
@@ -948,10 +951,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 cancelAnimationFrame(this.#pointerFrameId);
                 this.#pointerFrameId = null;
             }
+            if (this.#initialMeasurementFrameId !== null) {
+                cancelAnimationFrame(this.#initialMeasurementFrameId);
+                this.#initialMeasurementFrameId = null;
+            }
             if (this.#resizeObserver) {
                 this.#resizeObserver.disconnect();
                 this.#resizeObserver = null;
             }
+            this.#resizeObserverTarget = null;
             if (this.#labelResizeObserver) {
                 this.#labelResizeObserver.disconnect();
                 this.#labelResizeObserver = null;
@@ -1774,33 +1782,101 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return this.plotSurfaceElement()?.nativeElement ?? this.canvasElement()?.nativeElement ?? null;
     }
 
+    #getPlotElement(): HTMLElement {
+        return (
+            this.plotSurfaceElement()?.nativeElement ||
+            this.canvasElement()?.nativeElement.parentElement ||
+            this.#elementRef.nativeElement
+        );
+    }
+
+    #measurePlotElement(plotEl: HTMLElement): { height: number; width: number } | null {
+        const rect = plotEl.getBoundingClientRect();
+        const width = rect.width > 0 ? rect.width : plotEl.offsetWidth;
+        const height = rect.height > 0 ? rect.height : plotEl.offsetHeight;
+        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+            return null;
+        }
+        return { height, width };
+    }
+
+    #applyMeasuredSize(width: number, height: number): boolean {
+        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+            return false;
+        }
+
+        const wasPending = this.#initialMeasurementPending;
+        const changed = Math.abs(width - this.#currentWidth) >= 0.5 || Math.abs(height - this.#currentHeight) >= 0.5;
+        this.#currentWidth = width;
+        this.#currentHeight = height;
+        this.#initialMeasurementPending = false;
+        const requiresRepaint = changed || wasPending;
+        if (requiresRepaint) {
+            this.#updateCanvasBackingStore(width, height);
+        }
+        return requiresRepaint;
+    }
+
+    #syncResizeObserverTarget(): HTMLElement {
+        const plotEl = this.#getPlotElement();
+        if (this.#resizeObserver && this.#resizeObserverTarget !== plotEl) {
+            if (this.#resizeObserverTarget) {
+                this.#resizeObserver.unobserve(this.#resizeObserverTarget);
+            }
+            this.#resizeObserverTarget = plotEl;
+            this.#resizeObserver.observe(plotEl);
+        }
+        return plotEl;
+    }
+
+    #scheduleInitialMeasurement(attempt = 0): void {
+        if (
+            !this.#initialMeasurementPending ||
+            this.#initialMeasurementFrameId !== null ||
+            typeof requestAnimationFrame === "undefined" ||
+            attempt >= 3
+        ) {
+            return;
+        }
+
+        this.#initialMeasurementFrameId = requestAnimationFrame(() => {
+            this.#initialMeasurementFrameId = null;
+            if (this.#isDestroyed) {
+                return;
+            }
+
+            const plotEl = this.#syncResizeObserverTarget();
+            const measurement = this.#measurePlotElement(plotEl);
+            if (measurement) {
+                if (this.#applyMeasuredSize(measurement.width, measurement.height)) {
+                    this.invalidate(ChartInvalidationReason.Size);
+                }
+                return;
+            }
+
+            this.#scheduleInitialMeasurement(attempt + 1);
+        });
+    }
+
     #initCanvasAndObserver(): void {
-        const plotSurfaceRef = this.plotSurfaceElement();
         const canvasRef = this.canvasElement();
         if (canvasRef?.nativeElement) {
             this.#canvasContext = canvasRef.nativeElement.getContext("2d");
         }
 
-        const plotEl =
-            plotSurfaceRef?.nativeElement || canvasRef?.nativeElement.parentElement || this.#elementRef.nativeElement;
+        const plotEl = this.#getPlotElement();
 
         if (typeof ResizeObserver !== "undefined") {
             this.#resizeObserver = new ResizeObserver(entries => {
+                this.#syncResizeObserverTarget();
                 for (const entry of entries) {
                     const { height, width } = entry.contentRect;
-                    if (
-                        width > 0 &&
-                        height > 0 &&
-                        (Math.abs(width - this.#currentWidth) >= 0.5 || Math.abs(height - this.#currentHeight) >= 0.5)
-                    ) {
-                        this.#currentWidth = width;
-                        this.#currentHeight = height;
-                        this.#updateCanvasBackingStore(width, height);
+                    if (width > 0 && height > 0 && this.#applyMeasuredSize(width, height)) {
                         this.invalidate(ChartInvalidationReason.Size);
                     }
                 }
             });
-            this.#resizeObserver.observe(plotEl);
+            this.#syncResizeObserverTarget();
         }
 
         if (typeof MutationObserver !== "undefined") {
@@ -1823,12 +1899,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         // Initial layout pass
-        const rect = plotEl.getBoundingClientRect();
-        const initialWidth = rect.width > 0 ? rect.width : plotEl.offsetWidth || 500;
-        const initialHeight = rect.height > 0 ? rect.height : plotEl.offsetHeight || 300;
-        this.#currentWidth = initialWidth;
-        this.#currentHeight = initialHeight;
-        this.#updateCanvasBackingStore(initialWidth, initialHeight);
+        const initialMeasurement = this.#measurePlotElement(plotEl);
+        if (initialMeasurement) {
+            this.#applyMeasuredSize(initialMeasurement.width, initialMeasurement.height);
+        } else {
+            this.#initialMeasurementPending = true;
+            this.#scheduleInitialMeasurement();
+        }
     }
 
     #normalizePointer(event: MouseEvent | PointerEvent): ChartPoint | null {
@@ -1936,16 +2013,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        if (this.#currentWidth <= 0 || this.#currentHeight <= 0) {
-            const plotEl =
-                this.plotSurfaceElement()?.nativeElement ||
-                this.canvasElement()?.nativeElement.parentElement ||
-                this.#elementRef.nativeElement;
-            const rect = plotEl.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) {
-                this.#currentWidth = rect.width;
-                this.#currentHeight = rect.height;
-                this.#updateCanvasBackingStore(rect.width, rect.height);
+        if (this.#initialMeasurementPending || this.#currentWidth <= 0 || this.#currentHeight <= 0) {
+            const measurement = this.#measurePlotElement(this.#getPlotElement());
+            if (measurement) {
+                this.#applyMeasuredSize(measurement.width, measurement.height);
             }
         }
 
@@ -1973,9 +2044,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             !hasInvalidationReason(reason, ChartInvalidationReason.Style) &&
             this.#cartesianLayoutRuntime !== null;
 
+        const isNonCartesianSizeChange =
+            hasInvalidationReason(reason, ChartInvalidationReason.Size) &&
+            sizeChanged &&
+            this.#cartesianLayoutRuntime === null;
+
         const requiresSceneRefresh =
             isStructural ||
             isChromeOnly ||
+            isNonCartesianSizeChange ||
             hasInvalidationReason(reason, ChartInvalidationReason.Style) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Viewport) ||
             !this.scene();
@@ -2094,6 +2171,21 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         // Commit semantic target scene immediately
         this.scene.set(newScene);
         this.#updateGestureController();
+
+        const isWaitingForInitialPolarSvgMeasurement =
+            this.#initialMeasurementPending &&
+            this.renderer() === "svg" &&
+            newScene.coordinateSystem === "polar" &&
+            newScene.polarKind === "arc";
+        if (isWaitingForInitialPolarSvgMeasurement) {
+            this.#renderScene = null;
+            this.#hasCommittedVisualScene = false;
+            this.#isAnimating.set(false);
+            this.#isStructuralAnimation.set(false);
+            this.#animationMode.set(null);
+            this.#isExitingData.set(false);
+            return;
+        }
 
         const isInitial = !this.#hasCommittedVisualScene;
         const isVisibility = hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
@@ -2882,7 +2974,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
         try {
             this.#renderBackend = createChartRenderBackend(mode, canvas, svg);
-            if (this.#currentWidth > 0 && this.#currentHeight > 0) {
+            if (!this.#initialMeasurementPending && this.#currentWidth > 0 && this.#currentHeight > 0) {
                 const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
                 this.#renderBackend.resize({
                     devicePixelRatio: dpr,
@@ -3209,16 +3301,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public ngAfterContentChecked(): void {
-        if (!this.#canvasReady) {
-            const plotEl =
-                this.plotSurfaceElement()?.nativeElement ||
-                this.canvasElement()?.nativeElement.parentElement ||
-                this.#elementRef.nativeElement;
-            const rect = plotEl.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) {
-                this.#currentWidth = rect.width;
-                this.#currentHeight = rect.height;
-                this.#updateCanvasBackingStore(rect.width, rect.height);
+        this.#syncResizeObserverTarget();
+        if (
+            !this.#canvasReady ||
+            this.#initialMeasurementPending ||
+            this.#currentWidth <= 0 ||
+            this.#currentHeight <= 0
+        ) {
+            const measurement = this.#measurePlotElement(this.#getPlotElement());
+            if (measurement) {
+                const changed = this.#applyMeasuredSize(measurement.width, measurement.height);
+                if (this.#canvasReady && changed) {
+                    this.invalidate(ChartInvalidationReason.Size);
+                }
             }
         }
 

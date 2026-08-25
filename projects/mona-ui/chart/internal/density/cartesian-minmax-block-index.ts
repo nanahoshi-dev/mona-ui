@@ -80,8 +80,8 @@ const noResult: MinMaxRangeResult = { firstValidIndex: -1, lastValidIndex: -1, m
  * blocks directly and scan summaries for whole interior blocks.
  */
 export class CartesianMinMaxBlockIndex {
-    readonly #blocks: CartesianMinMaxBlock[] = [];
     readonly #blockSize: number;
+    readonly #blocks: CartesianMinMaxBlock[] = [];
     readonly #y: Float64Array;
 
     public constructor(y: Float64Array, blockSize: number = 256) {

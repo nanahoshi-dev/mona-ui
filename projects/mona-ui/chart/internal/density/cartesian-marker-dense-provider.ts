@@ -48,10 +48,10 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
     readonly #yBaseDenormalize?: (normalized: number) => unknown;
     readonly #yBaseNormalize: (semanticValue: unknown) => number;
     readonly #yViewportScale: ChartPositionScale<unknown>;
+    #identityIndex: DenseMarkIdentityIndex | null = null;
     public readonly seriesId?: string;
     public readonly xAxisId?: string;
     public readonly yAxisId?: string;
-    #identityIndex: DenseMarkIdentityIndex | null = null;
     public constructor(input: {
         readonly bubbleRadiusScale?: (size: number) => number;
         readonly hierarchy: CartesianSpatialDensityIndex;
