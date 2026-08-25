@@ -206,7 +206,11 @@ import { CartesianViewportReconciler } from "../../internal/viewport/cartesian-v
 import { CartesianViewportTargetResolver } from "../../internal/viewport/cartesian-viewport-target-resolver";
 import { ChartViewportGestureController } from "../../internal/viewport/chart-viewport-gesture-controller";
 import { ChartViewportKeyboardController } from "../../internal/viewport/chart-viewport-keyboard-controller";
-import { CartesianLayoutEngine, type CartesianXYLayoutRuntime } from "../../internal/layout/cartesian-layout-engine";
+import {
+    CartesianLayoutEngine,
+    releaseCartesianLayoutRuntime,
+    type CartesianXYLayoutRuntime
+} from "../../internal/layout/cartesian-layout-engine";
 import type {
     ChartLabelMeasurement,
     ChartSliceContext,
@@ -925,6 +929,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         this.#destroyRef.onDestroy(() => {
             this.#isDestroyed = true;
+            releaseCartesianLayoutRuntime(this.#cartesianLayoutRuntime, "destroy");
+            this.#cartesianLayoutRuntime = null;
             this.#synchronizationController?.destroy();
             this.#synchronizationController = null;
             this.#cancelPendingPointerInteraction();
@@ -972,6 +978,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#renderBackend.destroy();
                 this.#renderBackend = null;
             }
+            this.#renderScene = null;
+            this.scene.set(null);
             for (const ctrl of this.#activeExportControllers) {
                 ctrl.abort();
             }
@@ -1949,11 +1957,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const isStructural =
             hasInvalidationReason(reason, ChartInvalidationReason.Data) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Layout) ||
-            (hasInvalidationReason(reason, ChartInvalidationReason.Size) && sizeChanged) ||
             hasInvalidationReason(reason, ChartInvalidationReason.Visibility);
 
         const isChromeOnly =
-            hasInvalidationReason(reason, ChartInvalidationReason.Chrome) &&
+            (hasInvalidationReason(reason, ChartInvalidationReason.Chrome) ||
+                (hasInvalidationReason(reason, ChartInvalidationReason.Size) && sizeChanged)) &&
             !isStructural &&
             !hasInvalidationReason(reason, ChartInvalidationReason.Style) &&
             this.#cartesianLayoutRuntime !== null;
@@ -2013,6 +2021,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             newScene = projectedComp.scene;
             this.#renderScheduler.consume(ChartInvalidationReason.Viewport);
         } else if (requiresSceneRefresh) {
+            // Drop the previous source generation before constructing its replacement so
+            // large source-dependent authorities do not overlap at peak allocation.
+            releaseCartesianLayoutRuntime(this.#cartesianLayoutRuntime, "source-replacement");
+            this.#cartesianLayoutRuntime = null;
             const preparation = ChartLayoutEngine.prepareStructural({
                 angularAxis: this.#angularAxis() ?? undefined,
                 containerHeight: this.#currentHeight,
@@ -2055,7 +2067,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#renderScheduler.consume(ChartInvalidationReason.Viewport);
             } else {
                 this.#beginInteractionAuthorityChange();
-                this.#cartesianLayoutRuntime = null;
                 newScene = preparation.scene;
             }
         } else {

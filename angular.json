@@ -33,8 +33,18 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "exclude": ["chart/tests/**/*.stress.spec.ts"],
                         "setupFiles": ["./test-setup.ts"],
                         "runnerConfig": "./vitest-base.config.ts"
+                    }
+                },
+                "test-density-stress": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "include": ["chart/tests/**/*.stress.spec.ts"],
+                        "isolate": true,
+                        "setupFiles": ["./test-setup.ts"],
+                        "runnerConfig": "./vitest-density-stress.config.ts"
                     }
                 }
             }

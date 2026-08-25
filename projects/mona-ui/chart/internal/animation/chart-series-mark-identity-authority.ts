@@ -6,10 +6,13 @@ import {
     type ChartAnimationMarkKey
 } from "./animation-identity";
 import type { CartesianDenseMarkIdentityQuery } from "../density/cartesian-dense-interaction-provider";
+import { ChartDensityTracker } from "../layout/chart-density-instrumentation";
 
 export interface ChartSeriesMarkIdentityOptions {
     readonly extractNaturalKey?: (datum: unknown, index: number) => unknown;
     readonly keyField?: ChartField;
+    /** Set only when the caller has already proved the extracted keys unique. */
+    readonly naturalKeysUnique?: boolean;
     readonly seriesKey?: string;
 }
 
@@ -21,11 +24,12 @@ export interface ChartSeriesMarkIdentityOptions {
 export class ChartSeriesMarkIdentityAuthority {
     readonly #extractNaturalKey?: (datum: unknown, index: number) => unknown;
     readonly #keyField?: ChartField;
-    readonly #occurrenceRanks: Int32Array;
+    #occurrenceRanks: Uint32Array | null;
     readonly #seriesId: string;
     readonly #seriesPrefix: string;
-    readonly #sourceData: readonly unknown[];
+    #sourceData: readonly unknown[] | null;
     #reverseMap: Map<string, number[]> | null = null;
+    #released = false;
 
     public constructor(seriesId: string, sourceData: readonly unknown[], options?: ChartSeriesMarkIdentityOptions) {
         this.#seriesId = seriesId;
@@ -36,8 +40,14 @@ export class ChartSeriesMarkIdentityAuthority {
         this.#seriesPrefix = normKey ?? seriesId;
 
         const n = sourceData.length;
-        const ranks = new Int32Array(n);
+        if (options?.naturalKeysUnique || (!this.#keyField && !this.#extractNaturalKey)) {
+            this.#occurrenceRanks = null;
+            ChartDensityTracker.current?.onMarkIdentityAuthorityBuild?.();
+            return;
+        }
+
         const tracker = new Map<string, number>();
+        let hasDuplicateKey = false;
 
         for (let i = 0; i < n; i++) {
             const datum = sourceData[i];
@@ -45,11 +55,17 @@ export class ChartSeriesMarkIdentityAuthority {
             const { part } = resolveMarkKeyPart(datum, this.#keyField, naturalKey, i);
             const baseKey = `${part.type}:${part.value}`;
             const count = tracker.get(baseKey) ?? 0;
-            ranks[i] = count;
+            if (count > 0) {
+                hasDuplicateKey = true;
+            }
             tracker.set(baseKey, count + 1);
         }
 
-        this.#occurrenceRanks = ranks;
+        this.#occurrenceRanks = hasDuplicateKey ? this.#buildOccurrenceRanks(sourceData) : null;
+        ChartDensityTracker.current?.onMarkIdentityAuthorityBuild?.();
+        if (hasDuplicateKey) {
+            ChartDensityTracker.current?.onOccurrenceRankBuild?.();
+        }
     }
 
     public get seriesId(): string {
@@ -61,16 +77,20 @@ export class ChartSeriesMarkIdentityAuthority {
     }
 
     public locate(query: CartesianDenseMarkIdentityQuery): number | null {
+        const sourceData = this.#sourceData;
+        if (!sourceData) {
+            return null;
+        }
         if (query.partType === "i") {
             const idx = Number(query.value);
-            return Number.isInteger(idx) && idx >= 0 && idx < this.#sourceData.length ? idx : null;
+            return Number.isInteger(idx) && idx >= 0 && idx < sourceData.length ? idx : null;
         }
 
         if (!this.#reverseMap) {
             const map = new Map<string, number[]>();
-            const n = this.#sourceData.length;
+            const n = sourceData.length;
             for (let i = 0; i < n; i++) {
-                const datum = this.#sourceData[i];
+                const datum = sourceData[i];
                 const naturalKey = this.#extractNaturalKey ? this.#extractNaturalKey(datum, i) : i;
                 const { part } = resolveMarkKeyPart(datum, this.#keyField, naturalKey, i);
                 const k = `${part.type}:${part.value}`;
@@ -93,17 +113,34 @@ export class ChartSeriesMarkIdentityAuthority {
     }
 
     public occurrenceRankAt(sourceIndex: number): number {
-        if (sourceIndex >= 0 && sourceIndex < this.#occurrenceRanks.length) {
+        if (this.#occurrenceRanks && sourceIndex >= 0 && sourceIndex < this.#occurrenceRanks.length) {
             return this.#occurrenceRanks[sourceIndex];
         }
         return 0;
     }
 
+    /** Releases source-dependent authority so replaced/destroyed charts do not retain old data. */
+    public release(reason: "destroy" | "source-replacement" = "source-replacement"): void {
+        if (this.#released) {
+            return;
+        }
+        this.#released = true;
+        this.#sourceData = null;
+        this.#occurrenceRanks = null;
+        this.#reverseMap = null;
+        if (reason === "destroy") {
+            ChartDensityTracker.current?.onDestroyRelease?.();
+        } else {
+            ChartDensityTracker.current?.onSourceGenerationRelease?.();
+        }
+    }
+
     public resolveKeyAt(sourceIndex: number, naturalKey?: unknown, datum?: unknown): ChartAnimationMarkKey {
-        if (sourceIndex < 0 || sourceIndex >= this.#sourceData.length) {
+        const sourceData = this.#sourceData;
+        if (!sourceData || sourceIndex < 0 || sourceIndex >= sourceData.length) {
             return JSON.stringify([this.#seriesPrefix, "i", sourceIndex, 0]);
         }
-        const rowDatum = datum !== undefined ? datum : this.#sourceData[sourceIndex];
+        const rowDatum = datum !== undefined ? datum : sourceData[sourceIndex];
         const rowNaturalKey =
             naturalKey !== undefined
                 ? naturalKey
@@ -111,7 +148,22 @@ export class ChartSeriesMarkIdentityAuthority {
                   ? this.#extractNaturalKey(rowDatum, sourceIndex)
                   : sourceIndex;
         const { part } = resolveMarkKeyPart(rowDatum, this.#keyField, rowNaturalKey, sourceIndex);
-        const rank = this.#occurrenceRanks[sourceIndex];
+        const rank = this.#occurrenceRanks?.[sourceIndex] ?? 0;
         return composeMarkKey(this.#seriesPrefix, part, rank);
+    }
+
+    #buildOccurrenceRanks(sourceData: readonly unknown[]): Uint32Array {
+        const ranks = new Uint32Array(sourceData.length);
+        const tracker = new Map<string, number>();
+        for (let i = 0; i < sourceData.length; i++) {
+            const datum = sourceData[i];
+            const naturalKey = this.#extractNaturalKey ? this.#extractNaturalKey(datum, i) : i;
+            const { part } = resolveMarkKeyPart(datum, this.#keyField, naturalKey, i);
+            const baseKey = `${part.type}:${part.value}`;
+            const count = tracker.get(baseKey) ?? 0;
+            ranks[i] = count;
+            tracker.set(baseKey, count + 1);
+        }
+        return ranks;
     }
 }

@@ -109,6 +109,7 @@ import type { CartesianNavigationProfile } from "../viewport/cartesian-viewport-
 import {
     attachDensityRuntime,
     buildDensityRuntime,
+    releaseDensityRuntime,
     type CartesianDensityRuntime
 } from "../density/cartesian-density-runtime";
 import { defaultDownsamplingOptions } from "../density/chart-downsampling-options";
@@ -1940,6 +1941,12 @@ export class CartesianLayoutEngine {
         measurements?: ReadonlyMap<string, { height: number; width: number }>,
         warnedDiagnosticSignatures?: Set<string>
     ): CartesianLayoutComputation {
+        if (runtime.density) {
+            ChartDensityTracker.current?.onDensityProjectionBuild?.();
+            if (viewport !== undefined) {
+                ChartDensityTracker.current?.onViewportInvalidation?.();
+            }
+        }
         if (runtime.orientation === "horizontal") {
             return CartesianHorizontalBarLayoutEngine.projectRuntime(
                 runtime,
@@ -2044,6 +2051,17 @@ export class CartesianLayoutEngine {
             plotRect: chrome.plotRect
         };
     }
+}
+
+/** Releases retained dense source authority when a structural runtime is discarded. */
+export function releaseCartesianLayoutRuntime(
+    runtime: CartesianXYLayoutRuntime | null | undefined,
+    reason: "destroy" | "source-replacement" = "source-replacement"
+): void {
+    if (runtime?.density && reason === "source-replacement") {
+        ChartDensityTracker.current?.onSemanticSourceInvalidation?.();
+    }
+    releaseDensityRuntime(runtime?.density, reason);
 }
 
 export type { ChartSeriesDensityMetadata };

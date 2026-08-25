@@ -11,6 +11,7 @@ import { RangeAreaSeriesComponent } from "../components/range-area-series/range-
 import { ScatterSeriesComponent } from "../components/scatter-series/scatter-series.component";
 import { CartesianStageTracker } from "../internal/layout/cartesian-stage-instrumentation";
 import { ChartDensityTracker } from "../internal/layout/chart-density-instrumentation";
+import { ChartInvalidationReason } from "../internal/context/chart-registration-context";
 import type { ChartDownsamplingInput } from "../models/chart-downsampling.models";
 import type { ChartCurve } from "../models/chart-series.models";
 import type { ChartViewportState } from "../models/chart-viewport.models";
@@ -113,11 +114,22 @@ class DenseHostComponent {
 }
 
 class FakeResizeObserver {
-    public constructor(public readonly callback: ResizeObserverCallback) {}
+    public static instances: FakeResizeObserver[] = [];
+    public readonly observed = new Set<Element>();
+
+    public constructor(public readonly callback: ResizeObserverCallback) {
+        FakeResizeObserver.instances.push(this);
+    }
+
+    public static reset(): void {
+        FakeResizeObserver.instances = [];
+    }
 
     public disconnect(): void {}
 
-    public observe(): void {}
+    public observe(target: Element): void {
+        this.observed.add(target);
+    }
 
     public unobserve(): void {}
 }
@@ -136,6 +148,7 @@ describe("indexed dense projection", () => {
         }));
 
     beforeEach(async () => {
+        FakeResizeObserver.reset();
         originalResizeObserver = globalThis.ResizeObserver;
         globalThis.ResizeObserver = FakeResizeObserver as unknown as typeof ResizeObserver;
         vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
@@ -166,6 +179,9 @@ describe("indexed dense projection", () => {
     });
 
     afterEach(() => {
+        if (fixture) {
+            fixture.destroy();
+        }
         CartesianStageTracker.current = null;
         ChartDensityTracker.uninstall();
         if (originalResizeObserver !== undefined) {
@@ -173,6 +189,7 @@ describe("indexed dense projection", () => {
         } else {
             delete (globalThis as Partial<typeof globalThis>).ResizeObserver;
         }
+        FakeResizeObserver.reset();
         vi.restoreAllMocks();
     });
 
@@ -294,97 +311,6 @@ describe("indexed dense projection", () => {
         expect(definedPoints.some(point => point.index === 500 && point.yValue === 10_000)).toBe(true);
     });
 
-    it("retains a sparse million-row scalar runtime and bounds Stage-C source visits", () => {
-        const data = Array.from({ length: 1_000_000 }, (_, index) => ({
-            x: index,
-            y: index < 50 ? index : null
-        }));
-        const instrumentation = ChartDensityTracker.install();
-        try {
-            host.data.set(data);
-            render();
-
-            const scene = host.chart()["cartesianXYScene"]();
-            const entry = scene?.densityRuntime?.seriesById.values().next().value as
-                { scalar?: { validCount: number } } | undefined;
-            expect(scene?.densityRuntime).toBeDefined();
-            expect(entry?.scalar?.validCount).toBe(50);
-            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBeLessThan(1_000);
-            expect(instrumentation.snapshot.sampledProjectedRowsVisited).toBeLessThan(10_000);
-        } finally {
-            ChartDensityTracker.uninstall();
-        }
-    }, 30_000);
-
-    it("retains a sparse large range runtime and bounds Stage-C source visits", () => {
-        host.seriesKind.set("range");
-        const data = Array.from({ length: 250_000 }, (_, index) => ({
-            high: index < 50 ? index + 1 : null,
-            low: index < 50 ? index : null,
-            x: index
-        }));
-        const instrumentation = ChartDensityTracker.install();
-        try {
-            host.data.set(data);
-            render();
-
-            const scene = host.chart()["cartesianXYScene"]();
-            const entry = scene?.densityRuntime?.seriesById.values().next().value as
-                { range?: { validCount: number } } | undefined;
-            const rangeScene = scene?.series.find(s => s.type === "rangeArea") as
-                { points: readonly unknown[] } | undefined;
-            expect(entry?.range?.validCount).toBe(50);
-            expect(rangeScene?.points.length).toBeLessThan(1_000);
-            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBeLessThan(1_000);
-            expect(instrumentation.snapshot.sampledProjectedRowsVisited).toBeLessThan(10_000);
-        } finally {
-            ChartDensityTracker.uninstall();
-        }
-    }, 30_000);
-
-    it("retains a sparse large marker hierarchy and bounds Stage-C source visits", () => {
-        host.seriesKind.set("scatter");
-        const data = Array.from({ length: 250_000 }, (_, index) => ({
-            x: index,
-            y: index < 50 ? index : null
-        }));
-        const instrumentation = ChartDensityTracker.install();
-        try {
-            host.data.set(data);
-            render();
-
-            const scene = host.chart()["cartesianXYScene"]();
-            const entry = scene?.densityRuntime?.seriesById.values().next().value as
-                { spatial?: { index: { pointCount: number } } } | undefined;
-            const scatterScene = scene?.series.find(s => s.type === "scatter") as
-                { markers: readonly unknown[] } | undefined;
-            expect(entry?.spatial?.index.pointCount).toBe(50);
-            expect(scatterScene?.markers.length).toBe(50);
-            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBeLessThan(1_000);
-            expect(instrumentation.snapshot.exactProjectedRowsVisited).toBeLessThan(1_000);
-        } finally {
-            ChartDensityTracker.uninstall();
-        }
-    }, 30_000);
-
-    it("projects an all-null searchable source without a viewport full scan", () => {
-        const data = Array.from({ length: 250_000 }, (_, index) => ({ x: index, y: null }));
-        const instrumentation = ChartDensityTracker.install();
-        try {
-            host.data.set(data);
-            render();
-
-            const scene = host.chart()["cartesianXYScene"]();
-            const lineScene = scene?.series.find(s => s.type === "line") as { points: readonly unknown[] } | undefined;
-            expect(lineScene?.points).toHaveLength(0);
-            expect(scene?.hasRenderableData).toBe(false);
-            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBe(0);
-            expect(instrumentation.snapshot.sampledProjectedRowsVisited).toBe(0);
-        } finally {
-            ChartDensityTracker.uninstall();
-        }
-    }, 30_000);
-
     it("enforces the marker hard cap through the production scene", () => {
         host.seriesKind.set("scatter");
         host.downsampling.set({ enabled: true, maxPoints: 100, samplesPerPixel: 1, threshold: 2000 });
@@ -442,31 +368,6 @@ describe("indexed dense projection", () => {
         expect(denseMarkers).toEqual([0, 1, 2]);
     });
 
-    it("retains an empty bubble spatial authority instead of scanning the source", () => {
-        host.seriesKind.set("bubble");
-        const data = Array.from({ length: 250_000 }, (_, index) => ({
-            size: 0,
-            x: index,
-            y: index % 100
-        }));
-        const instrumentation = ChartDensityTracker.install();
-        try {
-            host.data.set(data);
-            render();
-
-            const scene = host.chart()["cartesianXYScene"]();
-            const entry = scene?.densityRuntime?.seriesById.values().next().value as
-                { spatial?: { index: { pointCount: number } } } | undefined;
-            const bubbleScene = scene?.series.find(s => s.type === "bubble") as
-                { markers: readonly unknown[] } | undefined;
-            expect(entry?.spatial?.index.pointCount).toBe(0);
-            expect(bubbleScene?.markers).toHaveLength(0);
-            expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBe(0);
-        } finally {
-            ChartDensityTracker.uninstall();
-        }
-    }, 30_000);
-
     it("labels sampled marker projection work as sampled Stage C", () => {
         host.seriesKind.set("scatter");
         host.downsampling.set({ enabled: true, maxPoints: 100, samplesPerPixel: 1, threshold: 0 });
@@ -510,16 +411,12 @@ describe("indexed dense projection", () => {
         host.data.set([{ high: 60, low: 40, x: 50 }]);
         render();
 
-        const denseTarget = host
-            .chart()
-            ["cartesianXYScene"]()
+        const denseTarget = host.chart()["cartesianXYScene"]()
             ?.hitTargets.find(target => target.seriesType === "rangeArea");
 
         host.downsampling.set(false);
         render();
-        const fullTarget = host
-            .chart()
-            ["cartesianXYScene"]()
+        const fullTarget = host.chart()["cartesianXYScene"]()
             ?.hitTargets.find(target => target.seriesType === "rangeArea");
 
         expect(denseTarget).toMatchObject({ radius: 16, visualRadius: 0 });
@@ -527,14 +424,16 @@ describe("indexed dense projection", () => {
     });
 
     it("avoids Stage A/B and density rebuilds on viewport-only frames", () => {
+        const instrumentation = ChartDensityTracker.install();
         host.data.set(makeData(50_000));
         render();
 
         let stageA = 0;
         let stageB = 0;
         let densityBuildsAfter: number;
-        const instrumentation = ChartDensityTracker.install();
         const densityBuildsBefore = instrumentation.snapshot.densityRuntimeBuilds;
+        const sourceAuthorityBuildsBefore = instrumentation.snapshot.sourceAuthorityBuilds;
+        const identityAuthorityBuildsBefore = instrumentation.snapshot.markIdentityAuthorityBuilds;
         CartesianStageTracker.current = {
             onStageA: () => stageA++,
             onStageB: () => stageB++
@@ -552,6 +451,10 @@ describe("indexed dense projection", () => {
             expect(stageB).toBe(0);
             densityBuildsAfter = instrumentation.snapshot.densityRuntimeBuilds;
             expect(densityBuildsAfter - densityBuildsBefore).toBe(0);
+            expect(instrumentation.snapshot.sourceAuthorityBuilds).toBe(sourceAuthorityBuildsBefore);
+            expect(instrumentation.snapshot.markIdentityAuthorityBuilds).toBe(identityAuthorityBuildsBefore);
+            expect(instrumentation.snapshot.densityProjectionBuilds).toBeGreaterThan(1);
+            expect(instrumentation.snapshot.viewportInvalidations).toBeGreaterThan(0);
         } finally {
             CartesianStageTracker.current = null;
             ChartDensityTracker.uninstall();
@@ -561,6 +464,62 @@ describe("indexed dense projection", () => {
         const scene = host.chart()["cartesianXYScene"]();
         const lineScene = scene?.series.find(s => s.type === "line") as { points: readonly unknown[] };
         expect(lineScene.points.length).toBeLessThan(10_000);
+    });
+
+    it("reuses semantic authority across size-only reflows", () => {
+        const instrumentation = ChartDensityTracker.install();
+        host.data.set(makeData(50_000));
+        render();
+
+        const initialRuntimeBuilds = instrumentation.snapshot.densityRuntimeBuilds;
+        const initialSourceAuthorityBuilds = instrumentation.snapshot.sourceAuthorityBuilds;
+        const initialIdentityAuthorityBuilds = instrumentation.snapshot.markIdentityAuthorityBuilds;
+        const resizeObserver = FakeResizeObserver.instances.find(observer =>
+            [...observer.observed].some(element => element.classList.contains("min-h-0"))
+        );
+        if (!resizeObserver) {
+            throw new Error("The chart surface resize observer was not registered");
+        }
+
+        resizeObserver.callback(
+            [{ contentRect: { height: 500, width: 800 } } as ResizeObserverEntry],
+            resizeObserver as unknown as ResizeObserver
+        );
+        host.chart().recomputeScene(ChartInvalidationReason.Size);
+        fixture.detectChanges();
+
+        expect(host.chart().scene()?.width).toBe(800);
+        expect(instrumentation.snapshot.densityRuntimeBuilds).toBe(initialRuntimeBuilds);
+        expect(instrumentation.snapshot.sourceAuthorityBuilds).toBe(initialSourceAuthorityBuilds);
+        expect(instrumentation.snapshot.markIdentityAuthorityBuilds).toBe(initialIdentityAuthorityBuilds);
+        expect(instrumentation.snapshot.densityProjectionBuilds).toBeGreaterThan(1);
+    });
+
+    it("releases the previous semantic generation before replacement and releases the new one on destroy", () => {
+        const instrumentation = ChartDensityTracker.install();
+        host.data.set(makeData(25_000));
+        render();
+
+        expect(instrumentation.snapshot.sourceAuthorityBuilds).toBe(1);
+        expect(instrumentation.snapshot.markIdentityAuthorityBuilds).toBe(1);
+        expect(instrumentation.snapshot.destroyReleases).toBe(0);
+
+        host.data.set(
+            makeData(25_000).map(point => ({
+                ...(point as { high: number; low: number; x: number; y: number }),
+                x: (point as { x: number }).x + 100_000
+            }))
+        );
+        render();
+
+        expect(instrumentation.snapshot.semanticSourceInvalidations).toBe(1);
+        expect(instrumentation.snapshot.sourceAuthorityBuilds).toBe(2);
+        expect(instrumentation.snapshot.markIdentityAuthorityBuilds).toBe(2);
+        expect(instrumentation.snapshot.sourceGenerationReleases).toBe(1);
+        expect(instrumentation.snapshot.destroyReleases).toBe(0);
+
+        fixture.destroy();
+        expect(instrumentation.snapshot.destroyReleases).toBe(1);
     });
 
     it("resolves an unsampled raw datum through pointer interaction (exact dense interaction)", async () => {
@@ -644,16 +603,12 @@ describe("indexed dense projection", () => {
         }));
         host.data.set(data);
         render();
-        const before = host
-            .chart()
-            ["cartesianXYScene"]()
+        const before = host.chart()["cartesianXYScene"]()
             ?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
 
         host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 20, min: 0 }] });
         render();
-        const after = host
-            .chart()
-            ["cartesianXYScene"]()
+        const after = host.chart()["cartesianXYScene"]()
             ?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
 
         expect(after).toBeDefined();
@@ -698,6 +653,9 @@ describe("coordinated stacked-area sampling", () => {
     });
 
     afterEach(() => {
+        if (fixture) {
+            fixture.destroy();
+        }
         if (originalResizeObserver !== undefined) {
             globalThis.ResizeObserver = originalResizeObserver;
         } else {

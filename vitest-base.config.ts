@@ -1,8 +1,11 @@
 import { defineConfig } from "vitest/config";
+import { readPositiveIntegerEnv } from "./vitest-config-utils";
+
+const maxWorkers = readPositiveIntegerEnv("MONA_VITEST_MAX_WORKERS");
 
 export default defineConfig({
     test: {
-        maxWorkers: 1,
-        minWorkers: 1,
+        pool: "forks",
+        ...(maxWorkers === undefined ? {} : { maxWorkers })
     },
 });

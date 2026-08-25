@@ -9,8 +9,11 @@ export interface ChartDensityInstrumentation {
     onDefinedCountPrefixQuery?(): void;
     onDenseRawHitCandidateVisited?(): void;
     onDenseRawHitMaterialized?(): void;
+    onDensityProjectionBuild?(): void;
     onDensityRuntimeBuild?(sourceCount: number): void;
+    onDestroyRelease?(): void;
     onExactProjectedRowsVisited?(count?: number): void;
+    onMarkIdentityAuthorityBuild?(): void;
     onMarkerCounts?(
         centerVisibleCount: number,
         renderCandidateCount: number,
@@ -18,6 +21,7 @@ export interface ChartDensityInstrumentation {
         renderedCount: number
     ): void;
     onMemberTimelineRowsScanned?(count?: number): void;
+    onOccurrenceRankBuild?(): void;
     onOrdinaryGeometryNodeVisited?(): void;
     onOrdinaryTargetEvaluated?(): void;
     onRawIndexBuild?(): void;
@@ -31,6 +35,10 @@ export interface ChartDensityInstrumentation {
     onSegmentVisited?(): void;
     onSegmentsWalkedForExactCount?(count?: number): void;
     onSelectedSegment?(): void;
+    onSemanticSourceInvalidation?(): void;
+    onSourceAuthorityBuild?(sourceCount: number): void;
+    onSourceGenerationRelease?(): void;
+    onSourceIndexBufferAllocation?(bytes: number, reallocated?: boolean): void;
     onSpatialNodeVisited?(): void;
     onSpatialPointMembershipTested?(count?: number): void;
     onStackCoverageCandidateCheck?(count?: number): void;
@@ -38,6 +46,7 @@ export interface ChartDensityInstrumentation {
     onStackKeyMapLinearScan?(): void;
     onTimelineSemanticQuery?(): void;
     onUnsearchableXFallback?(): void;
+    onViewportInvalidation?(): void;
     onVisibleRangeQuery?(): void;
     onVisibleSegmentCount?(count: number): void;
 }
@@ -60,9 +69,13 @@ interface CartesianDensityCounterSnapshot {
     definedCountPrefixQueries: number;
     denseRawHitCandidatesVisited: number;
     denseRawHitsMaterialized: number;
+    densityProjectionBuilds: number;
     densityRuntimeBuilds: number;
+    destroyReleases: number;
     exactProjectedRowsVisited: number;
+    markIdentityAuthorityBuilds: number;
     memberTimelineRowsScanned: number;
+    occurrenceRankBuilds: number;
     ordinaryGeometryNodesVisited: number;
     ordinaryTargetsEvaluated: number;
     rawIndexBuilds: number;
@@ -78,6 +91,12 @@ interface CartesianDensityCounterSnapshot {
     segmentsWalkedForExactCount: number;
     selectedMarkerCount: number;
     selectedSegmentCount: number;
+    semanticSourceInvalidations: number;
+    sourceAuthorityBuilds: number;
+    sourceGenerationReleases: number;
+    sourceIndexBufferAllocations: number;
+    sourceIndexBufferReallocations: number;
+    sourceIndexCapacityBytes: number;
     spatialNodesVisited: number;
     spatialPointMembershipTests: number;
     stackCoverageCandidateChecks: number;
@@ -85,6 +104,7 @@ interface CartesianDensityCounterSnapshot {
     stackKeyMapLinearScans: number;
     timelineSemanticQueries: number;
     unsearchableXFallbacks: number;
+    viewportInvalidations: number;
     visibleRangeQueries: number;
     visibleSegmentCount: number;
 }
@@ -99,6 +119,8 @@ interface CartesianSynchronizationCounterSnapshot {
 
 const emptyDensitySnapshot = (): CartesianDensityCounterSnapshot => ({
     actualRenderedMarkerCount: 0,
+    destroyReleases: 0,
+    sourceGenerationReleases: 0,
     binaryXFallbacks: 0,
     binaryXQueries: 0,
     blockExtremaVisits: 0,
@@ -109,6 +131,7 @@ const emptyDensitySnapshot = (): CartesianDensityCounterSnapshot => ({
     definedCountPrefixQueries: 0,
     denseRawHitsMaterialized: 0,
     densityRuntimeBuilds: 0,
+    densityProjectionBuilds: 0,
     exactProjectedRowsVisited: 0,
     memberTimelineRowsScanned: 0,
     ordinaryGeometryNodesVisited: 0,
@@ -116,6 +139,14 @@ const emptyDensitySnapshot = (): CartesianDensityCounterSnapshot => ({
     rawIndexBuilds: 0,
     rawPointsNormalized: 0,
     rawStageCSourceRowsVisited: 0,
+    sourceAuthorityBuilds: 0,
+    sourceIndexBufferAllocations: 0,
+    sourceIndexBufferReallocations: 0,
+    sourceIndexCapacityBytes: 0,
+    markIdentityAuthorityBuilds: 0,
+    occurrenceRankBuilds: 0,
+    semanticSourceInvalidations: 0,
+    viewportInvalidations: 0,
     rawSourceRowsRead: 0,
     sampledProjectedRowsVisited: 0,
     renderCandidateCount: 0,
@@ -180,12 +211,24 @@ class CountingDensityInstrumentation implements ChartDensityInstrumentation {
         this.snapshot.denseRawHitsMaterialized += 1;
     }
 
+    public onDensityProjectionBuild(): void {
+        this.snapshot.densityProjectionBuilds += 1;
+    }
+
     public onDensityRuntimeBuild(_sourceCount: number): void {
         this.snapshot.densityRuntimeBuilds += 1;
     }
 
+    public onDestroyRelease(): void {
+        this.snapshot.destroyReleases += 1;
+    }
+
     public onExactProjectedRowsVisited(count = 1): void {
         this.snapshot.exactProjectedRowsVisited += count;
+    }
+
+    public onMarkIdentityAuthorityBuild(): void {
+        this.snapshot.markIdentityAuthorityBuilds += 1;
     }
 
     public onMarkerCounts(
@@ -202,6 +245,10 @@ class CountingDensityInstrumentation implements ChartDensityInstrumentation {
 
     public onMemberTimelineRowsScanned(count = 1): void {
         this.snapshot.memberTimelineRowsScanned += count;
+    }
+
+    public onOccurrenceRankBuild(): void {
+        this.snapshot.occurrenceRankBuilds += 1;
     }
 
     public onOrdinaryGeometryNodeVisited(): void {
@@ -256,6 +303,26 @@ class CountingDensityInstrumentation implements ChartDensityInstrumentation {
         this.snapshot.selectedSegmentCount += 1;
     }
 
+    public onSemanticSourceInvalidation(): void {
+        this.snapshot.semanticSourceInvalidations += 1;
+    }
+
+    public onSourceAuthorityBuild(_sourceCount: number): void {
+        this.snapshot.sourceAuthorityBuilds += 1;
+    }
+
+    public onSourceGenerationRelease(): void {
+        this.snapshot.sourceGenerationReleases += 1;
+    }
+
+    public onSourceIndexBufferAllocation(bytes: number, reallocated = false): void {
+        this.snapshot.sourceIndexBufferAllocations += 1;
+        if (reallocated) {
+            this.snapshot.sourceIndexBufferReallocations += 1;
+        }
+        this.snapshot.sourceIndexCapacityBytes = Math.max(this.snapshot.sourceIndexCapacityBytes, bytes);
+    }
+
     public onSpatialNodeVisited(): void {
         this.snapshot.spatialNodesVisited += 1;
     }
@@ -282,6 +349,10 @@ class CountingDensityInstrumentation implements ChartDensityInstrumentation {
 
     public onUnsearchableXFallback(): void {
         this.snapshot.unsearchableXFallbacks += 1;
+    }
+
+    public onViewportInvalidation(): void {
+        this.snapshot.viewportInvalidations += 1;
     }
 
     public onVisibleRangeQuery(): void {

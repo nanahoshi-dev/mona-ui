@@ -19,8 +19,10 @@
         "serve:tester": "ng serve mona-ui-tester",
         "watch": "ng build mona-ui --watch --configuration development",
         "test:lib": "ng test mona-ui --watch=false --coverage",
+        "test:lib:density-bench": "tsx projects/mona-ui/chart/scripts/chart-density-memory-benchmark.ts",
+        "test:lib:density-stress": "ng run mona-ui:test-density-stress --watch=false",
         "test:lib:watch": "ng test mona-ui --coverage --watch",
-        "test:app": "ng test mona-ui-tester",
+        "test:app": "ng test mona-ui-tester --watch=false",
         "test:theme-colors": "tsx projects/mona-ui-tester/scripts/check-theme-color-parity.ts"
     },
     "workspaces": [

@@ -56,6 +56,22 @@ Step and step-after series protect source adjacency around selected semantic anc
 
 Eligibility and activation are separate. A source below the activation threshold uses ordinary full rendering; it is not a capability failure. An explicit `maxPoints` can activate reduction below that threshold for an eligible continuous-X family. Category X remains a discrete viewport-culling policy, while unsorted, unsearchable, or non-finite X remains intentionally ineligible so connected-path source order is preserved.
 
+### Dense runtime ownership and stress workflow
+
+The dense runtime has three ownership layers: source-semantic authority, viewport/sample membership, and projected scene geometry. Source authority is tied to a semantic data generation and is reused for viewport, resize, and projection-only updates. Samples and projections retain compact source indexes; they do not become a replacement identity authority. Duplicate-key occurrence metadata is allocated only when duplicate semantic keys require it.
+
+When source semantics change, the previous dense runtime is invalidated before the replacement is prepared. Chart destruction releases source-dependent identity state and drops the retained scene. The million-row regression cases live in `*.stress.spec.ts` and run through the serial, non-coverage target:
+
+```text
+npm run test:lib
+npm run test:lib:density-stress
+npm run test:lib:density-bench
+```
+
+The one-worker stress policy is a resource boundary for those deliberately large cases; it is not a substitute for bounded source ownership or viewport cache reuse.
+
+The benchmark is intentionally non-gating and emits one compact JSON record for each 10k, 100k, 250k, and 1M source size. It measures normalization/index construction, lazy identity setup, 50 viewport index queries, source replacement, teardown release, and process memory before/after the run.
+
 ---
 
 ## Basic Usage

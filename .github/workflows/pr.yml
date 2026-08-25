@@ -29,6 +29,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Print tool versions
+        run: |
+          node --version
+          npm --version
+          npx ng version
+          npx vitest --version
+
       - name: Build Metadata
         run: npm run build:metadata
 
@@ -37,6 +44,11 @@ jobs:
 
       - name: Test Library
         run: npm run test:lib
+
+      - name: Test Chart Density Stress
+        run: npm run test:lib:density-stress
+        env:
+          MONA_VITEST_MAX_WORKERS: 1
 
       - name: Build Tester
         run: npm run build:tester

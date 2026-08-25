@@ -50,6 +50,7 @@ export interface CartesianScalarDensityInput {
 export function buildScalarDensityData(input: CartesianScalarDensityInput): CartesianScalarDensityData {
     const { data, temporal, xField, yField } = input;
     const count = data.length;
+    ChartDensityTracker.current?.onSourceAuthorityBuild?.(count);
     const x = new Float64Array(count);
     const y = new Float64Array(count);
 
@@ -77,6 +78,7 @@ export function buildScalarDensityData(input: CartesianScalarDensityInput): Cart
 
     const segments = buildDefinedSegments(x, y);
     const segmentIds = new Int32Array(count).fill(-1);
+    ChartDensityTracker.current?.onSourceIndexBufferAllocation?.(segmentIds.byteLength);
     for (let s = 0; s < segments.length; s++) {
         for (let i = segments[s].startIndex; i < segments[s].endIndexExclusive; i++) {
             segmentIds[i] = s;
@@ -134,6 +136,7 @@ export interface CartesianRangeDensityInput {
 export function buildRangeDensityData(input: CartesianRangeDensityInput): CartesianRangeDensityData {
     const { data, fromField, temporal, toField, xField } = input;
     const count = data.length;
+    ChartDensityTracker.current?.onSourceAuthorityBuild?.(count);
     const x = new Float64Array(count);
     const from = new Float64Array(count);
     const to = new Float64Array(count);
@@ -173,6 +176,7 @@ export function buildRangeDensityData(input: CartesianRangeDensityInput): Cartes
 
     const segments = buildDefinedSegments(x, combinedMin);
     const segmentIds = new Int32Array(count).fill(-1);
+    ChartDensityTracker.current?.onSourceIndexBufferAllocation?.(segmentIds.byteLength);
     for (let s = 0; s < segments.length; s++) {
         for (let i = segments[s].startIndex; i < segments[s].endIndexExclusive; i++) {
             segmentIds[i] = s;

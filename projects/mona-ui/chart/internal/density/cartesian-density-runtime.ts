@@ -75,6 +75,23 @@ export interface CartesianDensityRuntime {
     readonly stack?: import("./cartesian-stack-density-runtime").CartesianStackDensityRuntime;
 }
 
+/**
+ * Releases source-dependent authority for a discarded semantic generation.
+ * Viewport projections intentionally keep the runtime alive; callers use this
+ * only when replacing a source generation or destroying the chart.
+ */
+export function releaseDensityRuntime(
+    runtime: CartesianDensityRuntime | undefined,
+    reason: "destroy" | "source-replacement" = "source-replacement"
+): void {
+    if (!runtime) {
+        return;
+    }
+    for (const entry of runtime.seriesById.values()) {
+        entry.identity.release(reason);
+    }
+}
+
 interface DensitySeriesSpec {
     curve?(): unknown;
     data(): readonly unknown[] | undefined;
@@ -147,6 +164,7 @@ export function buildDensityRuntime(
         const seriesData = resolveData(registration.data(), rootData);
         const isRange = spec.type === "rangeArea";
         if (isRange) {
+            const keyField = spec.keyField?.();
             const range = buildRangeDensityData({
                 buildGeometryIndex: false,
                 data: seriesData,
@@ -179,7 +197,10 @@ export function buildDensityRuntime(
             };
             const identity = new ChartSeriesMarkIdentityAuthority(spec.id, seriesData, {
                 extractNaturalKey: (_, i) => retainedRange.x[i],
-                keyField: spec.keyField?.(),
+                keyField,
+                naturalKeysUnique:
+                    !keyField &&
+                    (range.monotonicity === "ascending" || range.monotonicity === "descending"),
                 seriesKey: typeof spec.seriesKey === "function" ? spec.seriesKey() : spec.seriesKey
             });
             seriesById.set(spec.id, { capability, identity, range: retainedRange, scalar: null });
@@ -189,6 +210,7 @@ export function buildDensityRuntime(
 
         const isMarker = capability.mode === "marker";
         const yField = spec.field?.() ?? "";
+        const keyField = spec.keyField?.();
 
         const scalar = buildScalarDensityData({
             buildGeometryIndex: false,
@@ -210,7 +232,10 @@ export function buildDensityRuntime(
 
         const identity = new ChartSeriesMarkIdentityAuthority(spec.id, seriesData, {
             extractNaturalKey: (_, i) => scalar.x[i],
-            keyField: spec.keyField?.(),
+            keyField,
+            naturalKeysUnique:
+                !keyField &&
+                (scalar.monotonicity === "ascending" || scalar.monotonicity === "descending"),
             seriesKey: typeof spec.seriesKey === "function" ? spec.seriesKey() : spec.seriesKey
         });
 
