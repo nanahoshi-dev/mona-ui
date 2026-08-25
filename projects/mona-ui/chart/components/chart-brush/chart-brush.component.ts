@@ -21,6 +21,7 @@ import type {
 export class ChartBrushComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    #registered = false;
     /**
      * @description Activation trigger gesture ('drag' or 'shift-drag').
      * @default "shift-drag"
@@ -91,7 +92,6 @@ export class ChartBrushComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-    #registered = false;
 
     public constructor() {
         effect(() => {

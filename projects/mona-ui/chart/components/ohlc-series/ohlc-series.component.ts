@@ -32,11 +32,13 @@ let nextSeriesId = 0;
     }
 })
 export class OhlcSeriesComponent implements OnInit {
-    protected readonly effectiveTickLength = computed(() => this.tickLength() ?? this.tickWidth());
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-ohlc-series-${++nextSeriesId}`;
+
+    #registered = false;
+    protected readonly effectiveTickLength = computed(() => this.tickLength() ?? this.tickWidth());
 
     /**
      * @description Explicit total width in pixels for open/close tick arms.
@@ -193,8 +195,6 @@ export class OhlcSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

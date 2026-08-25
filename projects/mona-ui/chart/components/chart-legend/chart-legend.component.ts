@@ -18,6 +18,8 @@ import { chartLegendBaseThemeVariants, chartLegendItemBaseThemeVariants } from "
     }
 })
 export class ChartLegendComponent implements OnInit {
+    readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
+    readonly #destroyRef = inject(DestroyRef);
     protected readonly containerClasses = computed(() =>
         twMerge(chartLegendBaseThemeVariants({ position: this.position() }), this.userClass())
     );
@@ -59,8 +61,6 @@ export class ChartLegendComponent implements OnInit {
     protected readonly legendScale = computed<ChartColorLegendScale | null>(
         () => this.#chartContext?.legendScale?.() ?? null
     );
-    readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
-    readonly #destroyRef = inject(DestroyRef);
     /**
      * @description Whether clicking or pressing Enter/Space on legend items toggles series visibility.
      * @default true

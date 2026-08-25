@@ -34,6 +34,7 @@ export class RoseSeriesComponent implements OnInit {
     readonly #identityMap = new Map<string, { category: unknown; dataIndex: number; datum: unknown }>();
     readonly #seriesId = `mona-rose-series-${++nextRoseSeriesId}`;
     readonly #visibilityRevision = signal<number>(0);
+    #registered = false;
 
     /**
      * @description Property key or accessor extracting the category label for each rose petal.
@@ -169,7 +170,6 @@ export class RoseSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model<boolean>(true);
-    #registered = false;
 
     public constructor() {
         effect(() => {

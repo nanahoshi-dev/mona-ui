@@ -75,11 +75,11 @@ export function composeMarkKey(
 }
 
 export class ChartMarkKeyResolver {
+    readonly #keyField?: ChartField;
     readonly #occurrenceTracker = new Map<string, number>();
-    readonly #warnedDuplicateKeys = new Set<string>();
     readonly #seriesId: string;
     readonly #seriesPrefix: string;
-    readonly #keyField?: ChartField;
+    readonly #warnedDuplicateKeys = new Set<string>();
 
     public constructor(seriesId: string, keyField?: ChartField, seriesKey?: string) {
         this.#seriesId = seriesId;

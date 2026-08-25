@@ -24,6 +24,8 @@ export class LineSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-line-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Explicit stroke color override for the series line.
      * @default ""
@@ -130,8 +132,6 @@ export class LineSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

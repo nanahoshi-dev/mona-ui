@@ -279,6 +279,119 @@ type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | nul
     }
 })
 export class ChartComponent implements ChartRegistrationContext, AfterContentChecked {
+    readonly #activeBrushBounds = signal<ChartRect | null>(null);
+    readonly #activeExportControllers = new Set<AbortController>();
+    readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
+    readonly #animationController: ChartAnimationController;
+    readonly #animationMode = signal<"crossfade" | "morph" | null>(null);
+    readonly #annotationById = computed(() => {
+        const map = new Map<string, ChartAnnotationRegistration>();
+        for (const r of this.#annotations()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
+    readonly #annotations = signal<ChartAnnotationRegistration[]>([]);
+    readonly #brush = signal<ChartBrushRegistration | null>(null);
+    readonly #brushGestureController = new ChartBrushGestureController();
+    readonly #crosshair = signal<ChartCrosshairRegistration | null>(null);
+    readonly #dataLabelMeasurementRevision = signal(0);
+    readonly #dataLabelMeasurements = new Map<string, ChartSize>();
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #hasInitializedDefaultSelection = signal(false);
+    readonly #hasInitializedDefaultViewport = signal(false);
+    readonly #internalSelectedMarkIds = signal<readonly string[]>([]);
+    readonly #isAnimating = signal(false);
+    readonly #isExitingData = signal(false);
+    readonly #isStructuralAnimation = signal(false);
+    readonly #labelMeasurements = new Map<string, ChartLabelMeasurement>();
+    readonly #legend = signal<ChartLegendRegistration | null>(null);
+    readonly #observedDataLabelElements = new Map<Element, string>();
+    readonly #observedLabelElements = new Map<Element, string>();
+    readonly #observedOverlayLabelElements = new Map<Element, string>();
+    readonly #overlayLabelMeasurementRevision = signal(0);
+    readonly #overlayLabelMeasurements = new Map<string, ChartLabelMeasurement>();
+    readonly #radialAxis = signal<ChartRadialAxisRegistration | null>(null);
+    readonly #referenceBandById = computed(() => {
+        const map = new Map<string, ChartReferenceBandRegistration>();
+        for (const r of this.#referenceBands()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
+    readonly #referenceBands = signal<ChartReferenceBandRegistration[]>([]);
+    readonly #referenceLineById = computed(() => {
+        const map = new Map<string, ChartReferenceLineRegistration>();
+        for (const r of this.#referenceLines()) {
+            map.set(r.id, r);
+        }
+        return map;
+    });
+    readonly #referenceLines = signal<ChartReferenceLineRegistration[]>([]);
+    readonly #registeredSeries = signal<ChartSeriesRegistration[]>([]);
+    readonly #renderScheduler: ChartRenderScheduler;
+    readonly #selection = signal<ChartSelectionRegistration | null>(null);
+    readonly #styleResolver: ChartStyleResolver;
+    readonly #synchronizationCoordinator = inject(ChartSynchronizationCoordinator);
+    readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
+    readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
+    readonly #warnedDiagnosticSignatures = new Set<string>();
+    readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
+    readonly #yAxes = signal<ChartYAxisRegistration[]>([]);
+    #activeKeyboardBucketIndex: number = -1;
+    #activeKeyboardHitKey: string | null = null;
+    #activeKeyboardNamespace: ChartKeyboardAxisNamespace | null = null;
+    #activeKeyboardSeriesId: string | null = null;
+    #brushMarkIndex: CartesianBrushMarkIndex | null = null;
+    #brushMarkIndexScene: ChartScene | null = null;
+    #canvasContext: CanvasRenderingContext2D | null = null;
+    #canvasReady: boolean = false;
+    #cartesianLayoutRuntime: CartesianXYLayoutRuntime | null = null;
+    #currentHeight: number = 300;
+    #currentWidth: number = 500;
+    #dataLabelResizeObserver: ResizeObserver | null = null;
+    #gestureController: ChartViewportGestureController | null = null;
+    #hasCommittedVisualScene: boolean = false;
+    #hasEmittedBrushStart = false;
+    #hasPendingSizeReflow: boolean = false;
+    #hasWarnedBrushWithoutSelection = false;
+    #hasWarnedMultiBrush = false;
+    #hasWarnedMultiSelection = false;
+    #hasWarnedSelectionNonCartesian = false;
+    #initialMeasurementFrameId: number | null = null;
+    #initialMeasurementPending: boolean = true;
+    #interactionOwner: ChartTransientInteractionOwner = null;
+    #interactionRevision: number = 0;
+    #interactionState: ChartInteractionState | null = null;
+    #isDestroyed = false;
+    #labelResizeObserver: ResizeObserver | null = null;
+    #lastControlledSelection: readonly string[] | undefined = undefined;
+    #lastInteractionSource: "pointer" | "keyboard" | null = null;
+    #lastNormalizedControlledViewport: InternalCartesianViewportState | null = null;
+    #lastPointerResolution: ChartPointerResolution | null = null;
+    #lastSelectionMode: ChartSelectionMode | undefined = undefined;
+    #mediaQueryList: MediaQueryList | null = null;
+    #mediaQueryListener: ((e: MediaQueryListEvent) => void) | null = null;
+    #overlayLabelResizeObserver: ResizeObserver | null = null;
+    #pendingBrushFrame: {
+        event: PointerEvent;
+        phase: ChartBrushPhase;
+        result: BrushGestureResult;
+        scene: CartesianXYChartScene;
+        target: ResolvedCartesianBrushTarget;
+    } | null = null;
+    #pendingBrushRafId: number | null = null;
+    #pendingLabelMeasurementReason: number = 0;
+    #pendingPointerEvent: PointerEvent | null = null;
+    #pointerFrameId: number | null = null;
+    #renderBackend: ChartRenderBackend | null = null;
+    #renderScene: ChartScene | null = null;
+    #resizeObserver: ResizeObserver | null = null;
+    #resizeObserverTarget: HTMLElement | null = null;
+    #suppressNextCanvasClick: boolean = false;
+    #synchronizationController: ChartSynchronizationController | null = null;
+    #themeObserver: MutationObserver | null = null;
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly animationDurationCss = computed(() => `${this.normalizedAnimationOptions().duration}ms`);
     protected readonly animationEasingCss = computed(() => easingToCss(this.normalizedAnimationOptions().easing));
@@ -604,66 +717,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "waterfall") as ChartWaterfallSeriesRegistration) ?? null;
     });
-    readonly #activeBrushBounds = signal<ChartRect | null>(null);
-    readonly #activeExportControllers = new Set<AbortController>();
-    readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
-    readonly #animationController: ChartAnimationController;
-    readonly #animationMode = signal<"crossfade" | "morph" | null>(null);
-    readonly #annotationById = computed(() => {
-        const map = new Map<string, ChartAnnotationRegistration>();
-        for (const r of this.#annotations()) {
-            map.set(r.id, r);
-        }
-        return map;
-    });
-    readonly #annotations = signal<ChartAnnotationRegistration[]>([]);
-    readonly #brush = signal<ChartBrushRegistration | null>(null);
-    readonly #brushGestureController = new ChartBrushGestureController();
-    readonly #crosshair = signal<ChartCrosshairRegistration | null>(null);
-    readonly #dataLabelMeasurementRevision = signal(0);
-    readonly #dataLabelMeasurements = new Map<string, ChartSize>();
-    readonly #destroyRef = inject(DestroyRef);
-    readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #hasInitializedDefaultSelection = signal(false);
-    readonly #hasInitializedDefaultViewport = signal(false);
-    readonly #internalSelectedMarkIds = signal<readonly string[]>([]);
-    readonly #isAnimating = signal(false);
-    readonly #isExitingData = signal(false);
-    readonly #isStructuralAnimation = signal(false);
-    readonly #labelMeasurements = new Map<string, ChartLabelMeasurement>();
-    readonly #legend = signal<ChartLegendRegistration | null>(null);
-    readonly #observedDataLabelElements = new Map<Element, string>();
-    readonly #observedLabelElements = new Map<Element, string>();
-    readonly #observedOverlayLabelElements = new Map<Element, string>();
-    readonly #overlayLabelMeasurementRevision = signal(0);
-    readonly #overlayLabelMeasurements = new Map<string, ChartLabelMeasurement>();
-    readonly #radialAxis = signal<ChartRadialAxisRegistration | null>(null);
-    readonly #referenceBandById = computed(() => {
-        const map = new Map<string, ChartReferenceBandRegistration>();
-        for (const r of this.#referenceBands()) {
-            map.set(r.id, r);
-        }
-        return map;
-    });
-    readonly #referenceBands = signal<ChartReferenceBandRegistration[]>([]);
-    readonly #referenceLineById = computed(() => {
-        const map = new Map<string, ChartReferenceLineRegistration>();
-        for (const r of this.#referenceLines()) {
-            map.set(r.id, r);
-        }
-        return map;
-    });
-    readonly #referenceLines = signal<ChartReferenceLineRegistration[]>([]);
-    readonly #registeredSeries = signal<ChartSeriesRegistration[]>([]);
-    readonly #renderScheduler: ChartRenderScheduler;
-    readonly #selection = signal<ChartSelectionRegistration | null>(null);
-    readonly #styleResolver: ChartStyleResolver;
-    readonly #synchronizationCoordinator = inject(ChartSynchronizationCoordinator);
-    readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
-    readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
-    readonly #warnedDiagnosticSignatures = new Set<string>();
-    readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
-    readonly #yAxes = signal<ChartYAxisRegistration[]>([]);
     public readonly angularAxisRegistration: Signal<ChartAngularAxisRegistration | null> =
         this.#angularAxis.asReadonly();
     /**
@@ -784,59 +837,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public readonly xField = input<ChartField>("");
     public readonly yAxesRegistration: Signal<readonly ChartYAxisRegistration[]> = this.#yAxes.asReadonly();
     public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = computed(() => this.#yAxes()[0] ?? null);
-    #activeKeyboardBucketIndex: number = -1;
-    #activeKeyboardHitKey: string | null = null;
-    #activeKeyboardNamespace: ChartKeyboardAxisNamespace | null = null;
-    #activeKeyboardSeriesId: string | null = null;
-    #brushMarkIndex: CartesianBrushMarkIndex | null = null;
-    #brushMarkIndexScene: ChartScene | null = null;
-    #canvasContext: CanvasRenderingContext2D | null = null;
-    #canvasReady: boolean = false;
-    #cartesianLayoutRuntime: CartesianXYLayoutRuntime | null = null;
-    #currentHeight: number = 300;
-    #currentWidth: number = 500;
-    #dataLabelResizeObserver: ResizeObserver | null = null;
-    #gestureController: ChartViewportGestureController | null = null;
-    #hasCommittedVisualScene: boolean = false;
-    #initialMeasurementFrameId: number | null = null;
-    #initialMeasurementPending: boolean = true;
-    #hasEmittedBrushStart = false;
-    #hasPendingSizeReflow: boolean = false;
-    #hasWarnedBrushWithoutSelection = false;
-    #hasWarnedMultiBrush = false;
-    #hasWarnedMultiSelection = false;
-    #hasWarnedSelectionNonCartesian = false;
-    #interactionOwner: ChartTransientInteractionOwner = null;
-    #interactionRevision: number = 0;
-    #interactionState: ChartInteractionState | null = null;
-    #isDestroyed = false;
-    #labelResizeObserver: ResizeObserver | null = null;
-    #lastControlledSelection: readonly string[] | undefined = undefined;
-    #lastInteractionSource: "pointer" | "keyboard" | null = null;
-    #lastNormalizedControlledViewport: InternalCartesianViewportState | null = null;
-    #lastPointerResolution: ChartPointerResolution | null = null;
-    #lastSelectionMode: ChartSelectionMode | undefined = undefined;
-    #mediaQueryList: MediaQueryList | null = null;
-    #mediaQueryListener: ((e: MediaQueryListEvent) => void) | null = null;
-    #overlayLabelResizeObserver: ResizeObserver | null = null;
-    #pendingBrushFrame: {
-        event: PointerEvent;
-        phase: ChartBrushPhase;
-        result: BrushGestureResult;
-        scene: CartesianXYChartScene;
-        target: ResolvedCartesianBrushTarget;
-    } | null = null;
-    #pendingBrushRafId: number | null = null;
-    #pendingLabelMeasurementReason: number = 0;
-    #pendingPointerEvent: PointerEvent | null = null;
-    #pointerFrameId: number | null = null;
-    #renderBackend: ChartRenderBackend | null = null;
-    #renderScene: ChartScene | null = null;
-    #resizeObserver: ResizeObserver | null = null;
-    #resizeObserverTarget: HTMLElement | null = null;
-    #suppressNextCanvasClick: boolean = false;
-    #synchronizationController: ChartSynchronizationController | null = null;
-    #themeObserver: MutationObserver | null = null;
 
     public constructor() {
         this.#styleResolver = new ChartStyleResolver(this.#elementRef.nativeElement);

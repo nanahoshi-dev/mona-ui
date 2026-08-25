@@ -3,7 +3,6 @@ import type { ChartRenderBackend, ChartRenderBackendKind, ChartRenderViewport } 
 import type { ChartCrossfadeRenderFrame, ChartRenderFrame } from "./chart-render-frame";
 
 export class CanvasChartRenderBackend implements ChartRenderBackend {
-    public readonly kind: ChartRenderBackendKind = "canvas";
     #canvas: HTMLCanvasElement | null;
     #context: CanvasRenderingContext2D | null = null;
     #viewport: ChartRenderViewport = {
@@ -11,6 +10,7 @@ export class CanvasChartRenderBackend implements ChartRenderBackend {
         height: 0,
         width: 0
     };
+    public readonly kind: ChartRenderBackendKind = "canvas";
 
     public constructor(canvas: HTMLCanvasElement) {
         this.#canvas = canvas;

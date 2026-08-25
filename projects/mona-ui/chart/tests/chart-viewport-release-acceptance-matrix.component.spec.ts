@@ -26,8 +26,8 @@ interface FlexibleDataItem {
 }
 
 class FakeResizeObserver {
-    public static instances: FakeResizeObserver[] = [];
     public readonly observedElements = new Set<Element>();
+    public static instances: FakeResizeObserver[] = [];
 
     public constructor(public readonly callback: ResizeObserverCallback) {
         FakeResizeObserver.instances.push(this);

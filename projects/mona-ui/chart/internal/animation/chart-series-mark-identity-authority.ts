@@ -24,12 +24,12 @@ export interface ChartSeriesMarkIdentityOptions {
 export class ChartSeriesMarkIdentityAuthority {
     readonly #extractNaturalKey?: (datum: unknown, index: number) => unknown;
     readonly #keyField?: ChartField;
-    #occurrenceRanks: Uint32Array | null;
     readonly #seriesId: string;
     readonly #seriesPrefix: string;
-    #sourceData: readonly unknown[] | null;
-    #reverseMap: Map<string, number[]> | null = null;
+    #occurrenceRanks: Uint32Array | null;
     #released = false;
+    #reverseMap: Map<string, number[]> | null = null;
+    #sourceData: readonly unknown[] | null;
 
     public constructor(seriesId: string, sourceData: readonly unknown[], options?: ChartSeriesMarkIdentityOptions) {
         this.#seriesId = seriesId;

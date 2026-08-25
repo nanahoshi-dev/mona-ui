@@ -14,6 +14,7 @@ import type { ChartSelectionChangeEvent, ChartSelectionMode } from "../../models
 export class ChartSelectionComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    #registered = false;
     /**
      * @description Whether clicking plot background clears active selection.
      * @default true
@@ -73,7 +74,6 @@ export class ChartSelectionComponent implements OnInit {
      * @default undefined
      */
     public readonly strokeWidth = input<number | undefined>(undefined);
-    #registered = false;
 
     public constructor() {
         effect(() => {

@@ -53,6 +53,7 @@ export class FunnelSeriesComponent implements OnInit {
     readonly #seriesId = `mona-funnel-series-${++nextFunnelSeriesId}`;
     readonly #stageIdentityMap = new Map<string, StageIdentityInfo>();
     readonly #visibilityRevision = signal<number>(0);
+    #registered = false;
     /**
      * @description Property key or accessor extracting stage names.
      * @default "category"
@@ -193,7 +194,6 @@ export class FunnelSeriesComponent implements OnInit {
      * @default 0.9
      */
     public readonly widthRatio = input<number>(0.9);
-    #registered = false;
 
     public constructor() {
         effect(() => {

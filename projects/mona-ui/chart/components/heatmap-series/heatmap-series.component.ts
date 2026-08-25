@@ -21,6 +21,8 @@ export class HeatmapSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-heatmap-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Corner radius in pixels for each individual heat cell.
      * @default undefined
@@ -156,8 +158,6 @@ export class HeatmapSeriesComponent implements OnInit {
      * @description Property key or accessor extracting the Y row category for each cell.
      */
     public readonly yField = input.required<ChartField>();
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

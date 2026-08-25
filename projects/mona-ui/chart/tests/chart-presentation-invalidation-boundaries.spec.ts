@@ -16,10 +16,10 @@ import type { ChartSelectionChangeEvent } from "../models/chart-selection.models
 import type { ChartDataLabelContext, ChartDataLabelOptions } from "../models/chart-data-label.models";
 
 class TestResizeObserver {
-    public static instances: TestResizeObserver[] = [];
     public readonly observed = new Set<Element>();
     public readonly unobserved = new Set<Element>();
     public disconnected = false;
+    public static instances: TestResizeObserver[] = [];
 
     public constructor(public readonly callback: (entries: ResizeObserverEntry[]) => void) {
         TestResizeObserver.instances.push(this);

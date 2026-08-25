@@ -47,6 +47,8 @@ export class PieSeriesComponent implements OnInit {
     readonly #seriesId = `mona-pie-series-${++nextPieSeriesId}`;
     readonly #visibilityRevision = signal<number>(0);
 
+    #registered = false;
+
     protected readonly sliceLabelTemplate = contentChild(ChartSliceLabelTemplateDirective);
 
     /**
@@ -197,8 +199,6 @@ export class PieSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model<boolean>(true);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

@@ -27,6 +27,8 @@ export class CandlestickSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-candlestick-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Explicit body width in pixels for candlestick candles.
      * @default undefined
@@ -177,8 +179,6 @@ export class CandlestickSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

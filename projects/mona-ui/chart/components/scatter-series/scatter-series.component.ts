@@ -23,6 +23,8 @@ export class ScatterSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-scatter-series-${++nextSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Explicit fill color for the scatter points.
      * @default ""
@@ -123,8 +125,6 @@ export class ScatterSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly yAxisId = input<string | undefined>(undefined);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {

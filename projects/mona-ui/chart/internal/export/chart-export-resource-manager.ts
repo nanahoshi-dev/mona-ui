@@ -361,8 +361,8 @@ async function readResponseBytesBounded(response: Response, maxBytes: number): P
  * media validation, and aggregate byte budget tracking (R5-02 / R5-03 / R5-12 / R6-01 / R6-03 / R6-06).
  */
 class ChartExportResourceTransaction {
-    #totalBytes = 0;
     readonly #cache = new Map<string, Promise<ChartExportCapturedImageResource>>();
+    #totalBytes = 0;
 
     public constructor(
         private readonly signal?: AbortSignal,

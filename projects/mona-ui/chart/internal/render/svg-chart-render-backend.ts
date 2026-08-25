@@ -35,7 +35,6 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
     readonly #root: SVGSVGElement;
     readonly #treemapRenderer: SvgTreemapRenderer;
     readonly #waterfallRenderer: SvgWaterfallRenderer;
-    public readonly kind: ChartRenderBackendKind = "svg";
     #fromCartesianRenderer: SvgCartesianContentRenderer | null = null;
     #fromFunnelRenderer: SvgFunnelRenderer | null = null;
     #fromHeatmapRenderer: SvgHeatmapRenderer | null = null;
@@ -51,6 +50,7 @@ export class SvgChartRenderBackend implements ChartRenderBackend {
     #toPolarRenderer: SvgPolarChartRenderer | null = null;
     #toTreemapRenderer: SvgTreemapRenderer | null = null;
     #toWaterfallRenderer: SvgWaterfallRenderer | null = null;
+    public readonly kind: ChartRenderBackendKind = "svg";
 
     public constructor(root: SVGSVGElement, instanceId?: number) {
         this.#root = root;

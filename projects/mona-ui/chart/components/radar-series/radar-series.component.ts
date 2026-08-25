@@ -21,6 +21,8 @@ export class RadarSeriesComponent implements OnInit {
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #id = `mona-radar-series-${++nextRadarSeriesId}`;
 
+    #registered = false;
+
     /**
      * @description Property key or accessor function extracting the angular spoke category for each data item.
      * @default "category"
@@ -116,8 +118,6 @@ export class RadarSeriesComponent implements OnInit {
      * @default true
      */
     public readonly visible = model(true);
-
-    #registered = false;
 
     public constructor() {
         effect(() => {
