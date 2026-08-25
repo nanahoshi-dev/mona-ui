@@ -20,7 +20,6 @@ export interface CategoryLabelThinningParams {
 
 export class CartesianAxisLabelGeometry {
     static #measureCanvas: HTMLCanvasElement | null = null;
-    static #measureCtx: CanvasRenderingContext2D | null = null;
 
     public static createTickKey(axis: "x" | "y", axisType: string, value: unknown, index: number): string {
         if (axisType === "category") {
@@ -46,11 +45,14 @@ export class CartesianAxisLabelGeometry {
             try {
                 if (!CartesianAxisLabelGeometry.#measureCanvas) {
                     CartesianAxisLabelGeometry.#measureCanvas = document.createElement("canvas");
-                    CartesianAxisLabelGeometry.#measureCtx = CartesianAxisLabelGeometry.#measureCanvas.getContext("2d");
                 }
-                if (CartesianAxisLabelGeometry.#measureCtx) {
-                    CartesianAxisLabelGeometry.#measureCtx.font = font;
-                    const measuredWidth = CartesianAxisLabelGeometry.#measureCtx.measureText(formattedText).width;
+                // Re-resolve the 2D context on every call rather than caching it: the canvas
+                // element itself is cheap to reuse, but caching the *context* would freeze in
+                // whatever mock/implementation was active the first time this ran.
+                const ctx = CartesianAxisLabelGeometry.#measureCanvas.getContext("2d");
+                if (ctx) {
+                    ctx.font = font;
+                    const measuredWidth = ctx.measureText(formattedText).width;
                     if (typeof measuredWidth === "number" && !isNaN(measuredWidth) && measuredWidth > 0) {
                         return {
                             height: 16,

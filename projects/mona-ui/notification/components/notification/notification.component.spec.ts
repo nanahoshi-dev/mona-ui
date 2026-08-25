@@ -1,6 +1,7 @@
 import { Component, signal, TemplateRef, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
+import { vi } from "vitest";
 import { NotificationData } from "../../models/NotificationData";
 import { notificationBaseThemeVariants, notificationIconThemeVariants } from "../../styles/notification.styles";
 import { NotificationComponent } from "./notification.component";
@@ -23,10 +24,6 @@ function createFixture(data: NotificationData): ComponentFixture<NotificationCom
     notificationFixture.componentRef.setInput("data", data);
     notificationFixture.detectChanges();
     return notificationFixture;
-}
-
-async function wait(ms: number): Promise<void> {
-    await new Promise<void>(resolve => setTimeout(resolve, ms));
 }
 
 describe("NotificationComponent", () => {
@@ -136,6 +133,16 @@ describe("NotificationComponent", () => {
         const generousMargin = 3000;
         const shortMargin = 100;
 
+        // Fake timers make the progress-bar countdown (rxjs `interval` + `asyncScheduler`)
+        // deterministic instead of racing real wall-clock time under CI/parallel test load.
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
         it("should call close() once the duration elapses", async () => {
             const data = createNotificationData({ duration, progressBar: true });
             createFixture(data);
@@ -143,7 +150,7 @@ describe("NotificationComponent", () => {
             const emitted: string[] = [];
             data.componentDestroy$.subscribe(id => emitted.push(id));
 
-            await wait(duration + generousMargin);
+            await vi.advanceTimersByTimeAsync(duration + generousMargin);
 
             expect(emitted).toEqual(["test-id"]);
         });
@@ -159,13 +166,13 @@ describe("NotificationComponent", () => {
             host.dispatchEvent(new Event("pointerenter"));
             durationFixture.detectChanges();
 
-            await wait(shortMargin);
+            await vi.advanceTimersByTimeAsync(shortMargin);
             expect(emitted).toEqual([]);
 
             host.dispatchEvent(new Event("pointerleave"));
             durationFixture.detectChanges();
 
-            await wait(duration + generousMargin);
+            await vi.advanceTimersByTimeAsync(duration + generousMargin);
             expect(emitted).toEqual(["test-id"]);
         });
 
@@ -180,13 +187,13 @@ describe("NotificationComponent", () => {
             host.dispatchEvent(new Event("focusin"));
             durationFixture.detectChanges();
 
-            await wait(shortMargin);
+            await vi.advanceTimersByTimeAsync(shortMargin);
             expect(emitted).toEqual([]);
 
             host.dispatchEvent(new Event("focusout"));
             durationFixture.detectChanges();
 
-            await wait(duration + generousMargin);
+            await vi.advanceTimersByTimeAsync(duration + generousMargin);
             expect(emitted).toEqual(["test-id"]);
         });
     });

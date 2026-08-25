@@ -764,15 +764,17 @@ describe("SVG Crossfade Transitions", () => {
             const fromClip = svg.querySelector("clipPath[id*='cf-from-plot-clip'] > rect");
             const toClip = svg.querySelector("clipPath[id*='cf-to-plot-clip'] > rect");
 
-            expect(fromClip?.getAttribute("x")).toBe("10");
-            expect(fromClip?.getAttribute("y")).toBe("10");
-            expect(fromClip?.getAttribute("width")).toBe("200");
-            expect(fromClip?.getAttribute("height")).toBe("150");
+            // Clip rects are inflated by PLOT_CLIP_OVERFLOW (8px) on all sides so marks
+            // touching a domain extreme aren't visually chopped in half.
+            expect(fromClip?.getAttribute("x")).toBe("2");
+            expect(fromClip?.getAttribute("y")).toBe("2");
+            expect(fromClip?.getAttribute("width")).toBe("216");
+            expect(fromClip?.getAttribute("height")).toBe("166");
 
-            expect(toClip?.getAttribute("x")).toBe("30");
-            expect(toClip?.getAttribute("y")).toBe("40");
-            expect(toClip?.getAttribute("width")).toBe("350");
-            expect(toClip?.getAttribute("height")).toBe("250");
+            expect(toClip?.getAttribute("x")).toBe("22");
+            expect(toClip?.getAttribute("y")).toBe("32");
+            expect(toClip?.getAttribute("width")).toBe("366");
+            expect(toClip?.getAttribute("height")).toBe("266");
         });
     });
 
