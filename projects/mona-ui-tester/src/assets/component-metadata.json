@@ -1353,6 +1353,13 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<PagerSettings> | \"\""
+      },
+      {
+        "description": "The current page. Supports two-way binding via `[(page)]`; updates when the user navigates the pager and can be set to navigate programmatically.",
+        "kind": "model",
+        "name": "page",
+        "type": "number",
+        "defaultValue": "1"
       }
     ]
   },
@@ -2700,18 +2707,18 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Whether to draw point markers at each data coordinate along the top boundary line.",
-        "kind": "input",
-        "name": "showPoints",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
         "description": "Optional stable key identifying this series for mark identity and selection across updates.",
         "kind": "input",
         "name": "seriesKey",
         "type": "string | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Whether to draw point markers at each data coordinate along the top boundary line.",
+        "kind": "input",
+        "name": "showPoints",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Named stack group to participate in. Series with matching trimmed stack names stack together.",
@@ -3256,13 +3263,6 @@
     "selector": "\"mona-chart\"",
     "inputs": [
       {
-        "description": "The rendering engine used to draw the chart surface (\"canvas\" | \"svg\").",
-        "kind": "input",
-        "name": "renderer",
-        "type": "ChartRendererMode",
-        "defaultValue": "\"canvas\""
-      },
-      {
         "description": "Animation settings for initial render and subsequent data or visibility transitions.",
         "kind": "input",
         "name": "animation",
@@ -3291,6 +3291,27 @@
         "defaultValue": "[]"
       },
       {
+        "description": "Initial default viewport window state for chart axes.",
+        "kind": "input",
+        "name": "defaultViewport",
+        "type": "ChartViewportState | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "High-density downsampling policy for eligible dense series.",
+        "kind": "input",
+        "name": "downsampling",
+        "type": "ChartDownsamplingInput",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Navigation, panning, and zooming options for the chart.",
+        "kind": "input",
+        "name": "navigation",
+        "type": "ChartNavigationInput",
+        "defaultValue": "false"
+      },
+      {
         "description": "Emits when a data point, vertex, or bar in the chart is clicked.",
         "kind": "output",
         "name": "pointClick",
@@ -3303,37 +3324,24 @@
         "type": "ChartPointFocusEvent"
       },
       {
+        "description": "The rendering engine used to draw the chart surface (\"canvas\" | \"svg\").",
+        "kind": "input",
+        "name": "renderer",
+        "type": "ChartRendererMode",
+        "defaultValue": "\"canvas\""
+      },
+      {
         "description": "Emits when a series visibility state is toggled via legend interaction.",
         "kind": "output",
         "name": "seriesVisibilityChange",
         "type": "ChartSeriesVisibilityEvent"
       },
       {
-        "description": "Navigation, panning, and zooming options for the chart.",
+        "description": "Subtitle text rendered beneath the title.",
         "kind": "input",
-        "name": "navigation",
-        "type": "ChartNavigationInput",
-        "defaultValue": "false"
-      },
-      {
-        "description": "Active viewport window state for chart axes.",
-        "kind": "input",
-        "name": "viewport",
-        "type": "ChartViewportState | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Initial default viewport window state for chart axes.",
-        "kind": "input",
-        "name": "defaultViewport",
-        "type": "ChartViewportState | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Emits when the chart viewport changes via pan, zoom, fit, reset, or keyboard navigation.",
-        "kind": "output",
-        "name": "viewportChange",
-        "type": "ChartViewportChangeEvent"
+        "name": "subtitle",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Cross-chart synchronization configuration. Accepts `false`, a group name shorthand, or full options.",
@@ -3343,23 +3351,9 @@
         "defaultValue": "false"
       },
       {
-        "description": "High-density downsampling policy for eligible dense series.",
-        "kind": "input",
-        "name": "downsampling",
-        "type": "ChartDownsamplingInput",
-        "defaultValue": "true"
-      },
-      {
         "description": "Title text rendered above the plot area.",
         "kind": "input",
         "name": "title",
-        "type": "string",
-        "defaultValue": "\"\""
-      },
-      {
-        "description": "Subtitle text rendered beneath the title.",
-        "kind": "input",
-        "name": "subtitle",
         "type": "string",
         "defaultValue": "\"\""
       },
@@ -3376,6 +3370,19 @@
         "name": "userClass",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Active viewport window state for chart axes.",
+        "kind": "input",
+        "name": "viewport",
+        "type": "ChartViewportState | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Emits when the chart viewport changes via pan, zoom, fit, reset, or keyboard navigation.",
+        "kind": "output",
+        "name": "viewportChange",
+        "type": "ChartViewportChangeEvent"
       },
       {
         "description": "Property key or accessor extracting the X-axis coordinate for each data item.",
@@ -3460,42 +3467,22 @@
     "selector": "\"mona-chart-annotation\"",
     "inputs": [
       {
-        "description": "X coordinate value or category key for the annotation anchor.",
+        "description": "Stroke and marker color for the annotation.",
         "kind": "input",
-        "name": "x",
-        "type": "ChartAnnotationAxisValue",
-        "required": true
-      },
-      {
-        "description": "Y coordinate value or category key for the annotation anchor.",
-        "kind": "input",
-        "name": "y",
-        "type": "ChartAnnotationAxisValue",
-        "required": true
-      },
-      {
-        "description": "Explicit target X axis identifier. Defaults to primary X axis.",
-        "kind": "input",
-        "name": "xAxisId",
+        "name": "color",
         "type": "string | undefined"
       },
       {
-        "description": "Explicit target Y axis identifier. Defaults to primary Y axis.",
+        "description": "Sets whether a connector line is drawn between the anchor point and the label.",
         "kind": "input",
-        "name": "yAxisId",
-        "type": "string | undefined"
-      },
-      {
-        "description": "Sets whether the annotation is visible.",
-        "kind": "input",
-        "name": "visible",
+        "name": "connector",
         "type": "boolean"
       },
       {
-        "description": "Text label displayed for the annotation.",
+        "description": "Connector stroke width in pixels.",
         "kind": "input",
-        "name": "label",
-        "type": "string"
+        "name": "connectorWidth",
+        "type": "number"
       },
       {
         "description": "Custom data object provided to template context.",
@@ -3504,10 +3491,22 @@
         "type": "unknown"
       },
       {
-        "description": "Stroke and marker color for the annotation.",
+        "description": "Text label displayed for the annotation.",
         "kind": "input",
-        "name": "color",
-        "type": "string | undefined"
+        "name": "label",
+        "type": "string"
+      },
+      {
+        "description": "Custom CSS class name applied to the label badge.",
+        "kind": "input",
+        "name": "labelClass",
+        "type": "string"
+      },
+      {
+        "description": "Relative placement of the label from the anchor point: 'top', 'bottom', 'left', or 'right'.",
+        "kind": "input",
+        "name": "labelPlacement",
+        "type": "ChartAnnotationLabelPlacement"
       },
       {
         "description": "Marker shape drawn at the anchor point: 'circle', 'diamond', or 'none'.",
@@ -3528,24 +3527,6 @@
         "type": "number"
       },
       {
-        "description": "Sets whether a connector line is drawn between the anchor point and the label.",
-        "kind": "input",
-        "name": "connector",
-        "type": "boolean"
-      },
-      {
-        "description": "Connector stroke width in pixels.",
-        "kind": "input",
-        "name": "connectorWidth",
-        "type": "number"
-      },
-      {
-        "description": "Relative placement of the label from the anchor point: 'top', 'bottom', 'left', or 'right'.",
-        "kind": "input",
-        "name": "labelPlacement",
-        "type": "ChartAnnotationLabelPlacement"
-      },
-      {
         "description": "Additional horizontal pixel offset for label positioning.",
         "kind": "input",
         "name": "offsetX",
@@ -3558,16 +3539,42 @@
         "type": "number"
       },
       {
-        "description": "Custom CSS class name applied to the label badge.",
-        "kind": "input",
-        "name": "labelClass",
-        "type": "string"
-      },
-      {
         "description": "Custom CSS class name applied to the annotation host.",
         "kind": "input",
         "name": "userClass",
         "type": "string"
+      },
+      {
+        "description": "Sets whether the annotation is visible.",
+        "kind": "input",
+        "name": "visible",
+        "type": "boolean"
+      },
+      {
+        "description": "X coordinate value or category key for the annotation anchor.",
+        "kind": "input",
+        "name": "x",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
+      },
+      {
+        "description": "Explicit target X axis identifier. Defaults to primary X axis.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Y coordinate value or category key for the annotation anchor.",
+        "kind": "input",
+        "name": "y",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
+      },
+      {
+        "description": "Explicit target Y axis identifier. Defaults to primary Y axis.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined"
       }
     ]
   },
@@ -3576,74 +3583,11 @@
     "selector": "\"mona-chart-brush\"",
     "inputs": [
       {
-        "description": "Whether brush gesture interaction is enabled.",
-        "kind": "input",
-        "name": "enabled",
-        "type": "boolean",
-        "defaultValue": "true"
-      },
-      {
-        "description": "Brush dimension constraint mode ('x', 'y', or 'xy').",
-        "kind": "input",
-        "name": "mode",
-        "type": "ChartBrushMode",
-        "defaultValue": "\"xy\""
-      },
-      {
         "description": "Activation trigger gesture ('drag' or 'shift-drag').",
         "kind": "input",
         "name": "activation",
         "type": "ChartBrushActivation",
         "defaultValue": "\"shift-drag\""
-      },
-      {
-        "description": "Optional Cartesian X axis ID to target.",
-        "kind": "input",
-        "name": "xAxisId",
-        "type": "string | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Optional Cartesian Y axis ID to target.",
-        "kind": "input",
-        "name": "yAxisId",
-        "type": "string | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Minimum drag distance in pixels before brush gesture activates.",
-        "kind": "input",
-        "name": "minDragDistance",
-        "type": "number",
-        "defaultValue": "4"
-      },
-      {
-        "description": "Mark spatial hit policy ('center' or 'intersect').",
-        "kind": "input",
-        "name": "hitPolicy",
-        "type": "ChartBrushHitPolicy",
-        "defaultValue": "\"intersect\""
-      },
-      {
-        "description": "Selection interaction behavior when brushing over marks.",
-        "kind": "input",
-        "name": "selectionBehavior",
-        "type": "ChartBrushSelectionBehavior",
-        "defaultValue": "\"none\""
-      },
-      {
-        "description": "Background fill color of the brush rectangle.",
-        "kind": "input",
-        "name": "fillColor",
-        "type": "string | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Fill opacity of the brush rectangle.",
-        "kind": "input",
-        "name": "fillOpacity",
-        "type": "number | undefined",
-        "defaultValue": "undefined"
       },
       {
         "description": "Border color of the brush rectangle.",
@@ -3660,6 +3604,40 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Emitted during brush lifecycle phases ('start', 'update', 'end', 'cancel').",
+        "kind": "output",
+        "name": "brushChange",
+        "type": "ChartBrushChangeEvent"
+      },
+      {
+        "description": "Whether brush gesture interaction is enabled.",
+        "kind": "input",
+        "name": "enabled",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Background fill color of the brush rectangle.",
+        "kind": "input",
+        "name": "fillColor",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Fill opacity of the brush rectangle.",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Mark spatial hit policy ('center' or 'intersect').",
+        "kind": "input",
+        "name": "hitPolicy",
+        "type": "ChartBrushHitPolicy",
+        "defaultValue": "\"intersect\""
+      },
+      {
         "description": "Stroke dash style of the brush rectangle border ('solid', 'dashed', or 'dotted').",
         "kind": "input",
         "name": "lineStyle",
@@ -3667,10 +3645,39 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Emitted during brush lifecycle phases ('start', 'update', 'end', 'cancel').",
-        "kind": "output",
-        "name": "brushChange",
-        "type": "ChartBrushChangeEvent"
+        "description": "Minimum drag distance in pixels before brush gesture activates.",
+        "kind": "input",
+        "name": "minDragDistance",
+        "type": "number",
+        "defaultValue": "4"
+      },
+      {
+        "description": "Brush dimension constraint mode ('x', 'y', or 'xy').",
+        "kind": "input",
+        "name": "mode",
+        "type": "ChartBrushMode",
+        "defaultValue": "\"xy\""
+      },
+      {
+        "description": "Selection interaction behavior when brushing over marks.",
+        "kind": "input",
+        "name": "selectionBehavior",
+        "type": "ChartBrushSelectionBehavior",
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Optional Cartesian X axis ID to target.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Optional Cartesian Y axis ID to target.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
       }
     ]
   },
@@ -3679,10 +3686,40 @@
     "selector": "\"mona-chart-crosshair\"",
     "inputs": [
       {
+        "description": "Stroke color for the crosshair line.",
+        "kind": "input",
+        "name": "color",
+        "type": "string | undefined"
+      },
+      {
         "description": "Sets whether crosshair interaction is enabled.",
         "kind": "input",
         "name": "enabled",
         "type": "boolean"
+      },
+      {
+        "description": "Pixel offset between axis line and crosshair label badge.",
+        "kind": "input",
+        "name": "labelOffset",
+        "type": "number"
+      },
+      {
+        "description": "Line dash style for the crosshair.",
+        "kind": "input",
+        "name": "lineStyle",
+        "type": "ChartCrosshairLineStyle"
+      },
+      {
+        "description": "Line stroke width in pixels.",
+        "kind": "input",
+        "name": "lineWidth",
+        "type": "number | undefined"
+      },
+      {
+        "description": "Maximum pixel distance for nearest mark snapping.",
+        "kind": "input",
+        "name": "maxSnapDistance",
+        "type": "number"
       },
       {
         "description": "Crosshair display mode: auto (follows interaction axis), x, y, or xy.",
@@ -3691,22 +3728,10 @@
         "type": "ChartCrosshairMode"
       },
       {
-        "description": "Snapping mode: nearest semantic mark or raw pointer position.",
+        "description": "Stroke opacity for the crosshair line (0 to 1).",
         "kind": "input",
-        "name": "snap",
-        "type": "ChartCrosshairSnapMode"
-      },
-      {
-        "description": "Explicit target X axis identifier.",
-        "kind": "input",
-        "name": "xAxisId",
-        "type": "string | undefined"
-      },
-      {
-        "description": "Explicit target Y axis identifier.",
-        "kind": "input",
-        "name": "yAxisId",
-        "type": "string | undefined"
+        "name": "opacity",
+        "type": "number | undefined"
       },
       {
         "description": "Sets whether axis value badges are displayed.",
@@ -3727,46 +3752,28 @@
         "type": "boolean | undefined"
       },
       {
-        "description": "Line dash style for the crosshair.",
+        "description": "Snapping mode: nearest semantic mark or raw pointer position.",
         "kind": "input",
-        "name": "lineStyle",
-        "type": "ChartCrosshairLineStyle"
-      },
-      {
-        "description": "Line stroke width in pixels.",
-        "kind": "input",
-        "name": "lineWidth",
-        "type": "number | undefined"
-      },
-      {
-        "description": "Stroke color for the crosshair line.",
-        "kind": "input",
-        "name": "color",
-        "type": "string | undefined"
-      },
-      {
-        "description": "Stroke opacity for the crosshair line (0 to 1).",
-        "kind": "input",
-        "name": "opacity",
-        "type": "number | undefined"
-      },
-      {
-        "description": "Maximum pixel distance for nearest mark snapping.",
-        "kind": "input",
-        "name": "maxSnapDistance",
-        "type": "number"
-      },
-      {
-        "description": "Pixel offset between axis line and crosshair label badge.",
-        "kind": "input",
-        "name": "labelOffset",
-        "type": "number"
+        "name": "snap",
+        "type": "ChartCrosshairSnapMode"
       },
       {
         "description": "Custom CSS class name applied to the crosshair.",
         "kind": "input",
         "name": "userClass",
         "type": "string"
+      },
+      {
+        "description": "Explicit target X axis identifier.",
+        "kind": "input",
+        "name": "xAxisId",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Explicit target Y axis identifier.",
+        "kind": "input",
+        "name": "yAxisId",
+        "type": "string | undefined"
       }
     ]
   },
@@ -3919,24 +3926,16 @@
         "type": "string | undefined"
       },
       {
-        "description": "Starting coordinate value or category key for the reference band.",
+        "description": "Border stroke color of the reference band.",
         "kind": "input",
-        "name": "from",
-        "type": "ChartAnnotationAxisValue",
-        "required": true
+        "name": "borderColor",
+        "type": "string | undefined"
       },
       {
-        "description": "Ending coordinate value or category key for the reference band.",
+        "description": "Border stroke width of the reference band in pixels.",
         "kind": "input",
-        "name": "to",
-        "type": "ChartAnnotationAxisValue",
-        "required": true
-      },
-      {
-        "description": "Sets whether the reference band is visible.",
-        "kind": "input",
-        "name": "visible",
-        "type": "boolean"
+        "name": "borderWidth",
+        "type": "number | undefined"
       },
       {
         "description": "Fill color of the reference band.",
@@ -3951,22 +3950,11 @@
         "type": "number | undefined"
       },
       {
-        "description": "Border stroke color of the reference band.",
+        "description": "Starting coordinate value or category key for the reference band.",
         "kind": "input",
-        "name": "borderColor",
-        "type": "string | undefined"
-      },
-      {
-        "description": "Border stroke width of the reference band in pixels.",
-        "kind": "input",
-        "name": "borderWidth",
-        "type": "number | undefined"
-      },
-      {
-        "description": "Render layer: 'underlay' (behind series) or 'overlay' (in front of series).",
-        "kind": "input",
-        "name": "layer",
-        "type": "ChartOverlayLayer"
+        "name": "from",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
       },
       {
         "description": "Text label displayed inside or alongside the reference band.",
@@ -3975,10 +3963,10 @@
         "type": "string"
       },
       {
-        "description": "Alignment position for the label: 'start', 'center', or 'end'.",
+        "description": "Custom CSS class name applied to the label badge.",
         "kind": "input",
-        "name": "labelPosition",
-        "type": "ChartReferenceLabelPosition"
+        "name": "labelClass",
+        "type": "string"
       },
       {
         "description": "Pixel offset between the band boundary and the label.",
@@ -3987,16 +3975,35 @@
         "type": "number"
       },
       {
-        "description": "Custom CSS class name applied to the label badge.",
+        "description": "Alignment position for the label: 'start', 'center', or 'end'.",
         "kind": "input",
-        "name": "labelClass",
-        "type": "string"
+        "name": "labelPosition",
+        "type": "ChartReferenceLabelPosition"
+      },
+      {
+        "description": "Render layer: 'underlay' (behind series) or 'overlay' (in front of series).",
+        "kind": "input",
+        "name": "layer",
+        "type": "ChartOverlayLayer"
+      },
+      {
+        "description": "Ending coordinate value or category key for the reference band.",
+        "kind": "input",
+        "name": "to",
+        "type": "ChartAnnotationAxisValue",
+        "required": true
       },
       {
         "description": "Custom CSS class name applied to the reference band host.",
         "kind": "input",
         "name": "userClass",
         "type": "string"
+      },
+      {
+        "description": "Sets whether the reference band is visible.",
+        "kind": "input",
+        "name": "visible",
+        "type": "boolean"
       }
     ]
   },
@@ -4018,6 +4025,60 @@
         "type": "string | undefined"
       },
       {
+        "description": "Stroke color of the reference line.",
+        "kind": "input",
+        "name": "color",
+        "type": "string | undefined"
+      },
+      {
+        "description": "Text label displayed alongside the reference line.",
+        "kind": "input",
+        "name": "label",
+        "type": "string"
+      },
+      {
+        "description": "Custom CSS class name applied to the label badge.",
+        "kind": "input",
+        "name": "labelClass",
+        "type": "string"
+      },
+      {
+        "description": "Pixel offset between the reference line and the label.",
+        "kind": "input",
+        "name": "labelOffset",
+        "type": "number"
+      },
+      {
+        "description": "Alignment position for the label: 'start', 'center', or 'end'.",
+        "kind": "input",
+        "name": "labelPosition",
+        "type": "ChartReferenceLabelPosition"
+      },
+      {
+        "description": "Render layer: 'underlay' (behind series) or 'overlay' (in front of series).",
+        "kind": "input",
+        "name": "layer",
+        "type": "ChartOverlayLayer"
+      },
+      {
+        "description": "Line dash style: 'dashed', 'dotted', or 'solid'.",
+        "kind": "input",
+        "name": "lineStyle",
+        "type": "ChartReferenceLineStyle"
+      },
+      {
+        "description": "Stroke opacity of the reference line (0 to 1).",
+        "kind": "input",
+        "name": "opacity",
+        "type": "number | undefined"
+      },
+      {
+        "description": "Custom CSS class name applied to the reference line host.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string"
+      },
+      {
         "description": "Semantic coordinate value or category key for the reference line.",
         "kind": "input",
         "name": "value",
@@ -4031,64 +4092,10 @@
         "type": "boolean"
       },
       {
-        "description": "Stroke color of the reference line.",
-        "kind": "input",
-        "name": "color",
-        "type": "string | undefined"
-      },
-      {
-        "description": "Stroke opacity of the reference line (0 to 1).",
-        "kind": "input",
-        "name": "opacity",
-        "type": "number | undefined"
-      },
-      {
         "description": "Stroke width of the reference line in pixels.",
         "kind": "input",
         "name": "width",
         "type": "number | undefined"
-      },
-      {
-        "description": "Line dash style: 'dashed', 'dotted', or 'solid'.",
-        "kind": "input",
-        "name": "lineStyle",
-        "type": "ChartReferenceLineStyle"
-      },
-      {
-        "description": "Render layer: 'underlay' (behind series) or 'overlay' (in front of series).",
-        "kind": "input",
-        "name": "layer",
-        "type": "ChartOverlayLayer"
-      },
-      {
-        "description": "Text label displayed alongside the reference line.",
-        "kind": "input",
-        "name": "label",
-        "type": "string"
-      },
-      {
-        "description": "Alignment position for the label: 'start', 'center', or 'end'.",
-        "kind": "input",
-        "name": "labelPosition",
-        "type": "ChartReferenceLabelPosition"
-      },
-      {
-        "description": "Pixel offset between the reference line and the label.",
-        "kind": "input",
-        "name": "labelOffset",
-        "type": "number"
-      },
-      {
-        "description": "Custom CSS class name applied to the label badge.",
-        "kind": "input",
-        "name": "labelClass",
-        "type": "string"
-      },
-      {
-        "description": "Custom CSS class name applied to the reference line host.",
-        "kind": "input",
-        "name": "userClass",
-        "type": "string"
       }
     ]
   },
@@ -4097,48 +4104,6 @@
     "selector": "\"mona-chart-selection\"",
     "inputs": [
       {
-        "description": "Whether selection interaction is enabled.",
-        "kind": "input",
-        "name": "enabled",
-        "type": "boolean",
-        "defaultValue": "true"
-      },
-      {
-        "description": "Selection mode ('single' or 'multiple').",
-        "kind": "input",
-        "name": "mode",
-        "type": "ChartSelectionMode",
-        "defaultValue": "\"single\""
-      },
-      {
-        "description": "Controlled selected mark IDs. When defined, component acts as controlled state.",
-        "kind": "input",
-        "name": "selectedMarkIds",
-        "type": "readonly string[] | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Default selected mark IDs to seed initial uncontrolled selection.",
-        "kind": "input",
-        "name": "defaultSelectedMarkIds",
-        "type": "readonly string[]",
-        "defaultValue": "[]"
-      },
-      {
-        "description": "Whether clicking marks selects/toggles them.",
-        "kind": "input",
-        "name": "clickSelection",
-        "type": "boolean",
-        "defaultValue": "true"
-      },
-      {
-        "description": "Whether keyboard Enter / Space on focused marks selects/toggles them.",
-        "kind": "input",
-        "name": "keyboardSelection",
-        "type": "boolean",
-        "defaultValue": "true"
-      },
-      {
         "description": "Whether clicking plot background clears active selection.",
         "kind": "input",
         "name": "clearOnBackgroundClick",
@@ -4146,9 +4111,9 @@
         "defaultValue": "true"
       },
       {
-        "description": "Whether selected mark IDs are retained across dataset changes.",
+        "description": "Whether clicking marks selects/toggles them.",
         "kind": "input",
-        "name": "retainOnDataChange",
+        "name": "clickSelection",
         "type": "boolean",
         "defaultValue": "true"
       },
@@ -4160,11 +4125,18 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Selection highlight stroke width override.",
+        "description": "Default selected mark IDs to seed initial uncontrolled selection.",
         "kind": "input",
-        "name": "strokeWidth",
-        "type": "number | undefined",
-        "defaultValue": "undefined"
+        "name": "defaultSelectedMarkIds",
+        "type": "readonly string[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Whether selection interaction is enabled.",
+        "kind": "input",
+        "name": "enabled",
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Selection highlight fill opacity override.",
@@ -4174,10 +4146,45 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Whether keyboard Enter / Space on focused marks selects/toggles them.",
+        "kind": "input",
+        "name": "keyboardSelection",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Selection mode ('single' or 'multiple').",
+        "kind": "input",
+        "name": "mode",
+        "type": "ChartSelectionMode",
+        "defaultValue": "\"single\""
+      },
+      {
+        "description": "Whether selected mark IDs are retained across dataset changes.",
+        "kind": "input",
+        "name": "retainOnDataChange",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Controlled selected mark IDs. When defined, component acts as controlled state.",
+        "kind": "input",
+        "name": "selectedMarkIds",
+        "type": "readonly string[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Emitted when mark selection is proposed or changed.",
         "kind": "output",
         "name": "selectionChange",
         "type": "ChartSelectionChangeEvent"
+      },
+      {
+        "description": "Selection highlight stroke width override.",
+        "kind": "input",
+        "name": "strokeWidth",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       }
     ]
   },
@@ -4727,13 +4734,6 @@
     "selector": "\"mona-funnel-series\"",
     "inputs": [
       {
-        "description": "Array of stage data items overriding chart-level root data.",
-        "kind": "input",
-        "name": "data",
-        "type": "readonly unknown[] | undefined",
-        "defaultValue": "undefined"
-      },
-      {
         "description": "Property key or accessor extracting stage names.",
         "kind": "input",
         "name": "categoryField",
@@ -4766,6 +4766,13 @@
         "kind": "input",
         "name": "colors",
         "type": "readonly string[] | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Array of stage data items overriding chart-level root data.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly unknown[] | undefined",
         "defaultValue": "undefined"
       },
       {
@@ -4846,6 +4853,12 @@
         "defaultValue": "true"
       },
       {
+        "description": "Emits when a stage's visibility is toggled via legend or API.",
+        "kind": "output",
+        "name": "stageVisibilityChange",
+        "type": "ChartFunnelStageVisibilityEvent"
+      },
+      {
         "description": "Stroke outline color for stage trapezoids.",
         "kind": "input",
         "name": "strokeColor",
@@ -4886,12 +4899,6 @@
         "name": "widthRatio",
         "type": "number",
         "defaultValue": "0.9"
-      },
-      {
-        "description": "Emits when a stage's visibility is toggled via legend or API.",
-        "kind": "output",
-        "name": "stageVisibilityChange",
-        "type": "ChartFunnelStageVisibilityEvent"
       }
     ]
   },
@@ -4900,9 +4907,16 @@
     "selector": "\"mona-gauge-series\"",
     "inputs": [
       {
-        "description": "Direct scalar value for the gauge. When defined, takes precedence over data/field.",
+        "description": "Primary color of the gauge value arc.",
         "kind": "input",
-        "name": "value",
+        "name": "color",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Corner radius in pixels applied to gauge arc endpoints.",
+        "kind": "input",
+        "name": "cornerRadius",
         "type": "number | undefined",
         "defaultValue": "undefined"
       },
@@ -4914,55 +4928,6 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Property key or accessor extracting the numeric gauge value when direct value is not set.",
-        "kind": "input",
-        "name": "field",
-        "type": "ChartField",
-        "defaultValue": "\"value\""
-      },
-      {
-        "description": "Property key or accessor extracting a stable datum identity across updates.",
-        "kind": "input",
-        "name": "keyField",
-        "type": "ChartField | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Series name used in tooltips and accessibility announcements.",
-        "kind": "input",
-        "name": "name",
-        "type": "string",
-        "defaultValue": "\"Gauge\""
-      },
-      {
-        "description": "Minimum domain value.",
-        "kind": "input",
-        "name": "min",
-        "type": "number",
-        "defaultValue": "0"
-      },
-      {
-        "description": "Maximum domain value.",
-        "kind": "input",
-        "name": "max",
-        "type": "number",
-        "defaultValue": "100"
-      },
-      {
-        "description": "Formatter callback for gauge numeric values.",
-        "kind": "input",
-        "name": "valueFormatter",
-        "type": "ChartValueFormatter | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Starting angle in degrees (0 is 12 o'clock, clockwise).",
-        "kind": "input",
-        "name": "startAngle",
-        "type": "number",
-        "defaultValue": "-120"
-      },
-      {
         "description": "Ending angle in degrees (clockwise from 12 o'clock).",
         "kind": "input",
         "name": "endAngle",
@@ -4970,39 +4935,11 @@
         "defaultValue": "120"
       },
       {
-        "description": "Inner radius ratio relative to outer radius (0 to 1).",
+        "description": "Property key or accessor extracting the numeric gauge value when direct value is not set.",
         "kind": "input",
-        "name": "innerRadiusRatio",
-        "type": "number",
-        "defaultValue": "0.72"
-      },
-      {
-        "description": "Outer radius ratio relative to available plot bounds (0.1 to 1).",
-        "kind": "input",
-        "name": "outerRadiusRatio",
-        "type": "number",
-        "defaultValue": "0.9"
-      },
-      {
-        "description": "Corner radius in pixels applied to gauge arc endpoints.",
-        "kind": "input",
-        "name": "cornerRadius",
-        "type": "number | undefined",
-        "defaultValue": "undefined"
-      },
-      {
-        "description": "Indicator mode: \"arc\" (progress arc), \"needle\" (pointer needle), or \"both\".",
-        "kind": "input",
-        "name": "indicator",
-        "type": "ChartGaugeIndicator",
-        "defaultValue": "\"arc\""
-      },
-      {
-        "description": "Primary color of the gauge value arc.",
-        "kind": "input",
-        "name": "color",
-        "type": "string",
-        "defaultValue": "\"\""
+        "name": "field",
+        "type": "ChartField",
+        "defaultValue": "\"value\""
       },
       {
         "description": "Fill style applied to gauge value arc (\"solid\" or radial \"gradient\").",
@@ -5019,6 +4956,97 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Radius in pixels of the needle center hub circle.",
+        "kind": "input",
+        "name": "hubRadius",
+        "type": "number",
+        "defaultValue": "5"
+      },
+      {
+        "description": "Indicator mode: \"arc\" (progress arc), \"needle\" (pointer needle), or \"both\".",
+        "kind": "input",
+        "name": "indicator",
+        "type": "ChartGaugeIndicator",
+        "defaultValue": "\"arc\""
+      },
+      {
+        "description": "Inner radius ratio relative to outer radius (0 to 1).",
+        "kind": "input",
+        "name": "innerRadiusRatio",
+        "type": "number",
+        "defaultValue": "0.72"
+      },
+      {
+        "description": "Property key or accessor extracting a stable datum identity across updates.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Maximum domain value.",
+        "kind": "input",
+        "name": "max",
+        "type": "number",
+        "defaultValue": "100"
+      },
+      {
+        "description": "Minimum domain value.",
+        "kind": "input",
+        "name": "min",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Series name used in tooltips and accessibility announcements.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"Gauge\""
+      },
+      {
+        "description": "Color of the needle and center hub.",
+        "kind": "input",
+        "name": "needleColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Length of the needle pointer as a fraction of outer radius (0.1 to 1).",
+        "kind": "input",
+        "name": "needleLengthRatio",
+        "type": "number",
+        "defaultValue": "0.78"
+      },
+      {
+        "description": "Stroke width in pixels for the needle pointer.",
+        "kind": "input",
+        "name": "needleWidth",
+        "type": "number",
+        "defaultValue": "2"
+      },
+      {
+        "description": "Outer radius ratio relative to available plot bounds (0.1 to 1).",
+        "kind": "input",
+        "name": "outerRadiusRatio",
+        "type": "number",
+        "defaultValue": "0.9"
+      },
+      {
+        "description": "Whether to display the formatted value in the center of the gauge.",
+        "kind": "input",
+        "name": "showValue",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Starting angle in degrees (0 is 12 o'clock, clockwise).",
+        "kind": "input",
+        "name": "startAngle",
+        "type": "number",
+        "defaultValue": "-120"
+      },
+      {
         "description": "Color of background track arc.",
         "kind": "input",
         "name": "trackColor",
@@ -5033,39 +5061,25 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Color of the needle and center hub.",
+        "description": "Additional CSS classes applied to the series.",
         "kind": "input",
-        "name": "needleColor",
+        "name": "userClass",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Stroke width in pixels for the needle pointer.",
+        "description": "Direct scalar value for the gauge. When defined, takes precedence over data/field.",
         "kind": "input",
-        "name": "needleWidth",
-        "type": "number",
-        "defaultValue": "2"
+        "name": "value",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
-        "description": "Length of the needle pointer as a fraction of outer radius (0.1 to 1).",
+        "description": "Formatter callback for gauge numeric values.",
         "kind": "input",
-        "name": "needleLengthRatio",
-        "type": "number",
-        "defaultValue": "0.78"
-      },
-      {
-        "description": "Radius in pixels of the needle center hub circle.",
-        "kind": "input",
-        "name": "hubRadius",
-        "type": "number",
-        "defaultValue": "5"
-      },
-      {
-        "description": "Whether to display the formatted value in the center of the gauge.",
-        "kind": "input",
-        "name": "showValue",
-        "type": "boolean",
-        "defaultValue": "true"
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Two-way bindable visibility of the series.",
@@ -5073,13 +5087,6 @@
         "name": "visible",
         "type": "boolean",
         "defaultValue": "true"
-      },
-      {
-        "description": "Additional CSS classes applied to the series.",
-        "kind": "input",
-        "name": "userClass",
-        "type": "string",
-        "defaultValue": "\"\""
       }
     ]
   },
@@ -6054,6 +6061,12 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Emits when an individual ring's visibility is toggled via the legend.",
+        "kind": "output",
+        "name": "datumVisibilityChange",
+        "type": "ChartRadialDatumVisibilityEvent"
+      },
+      {
         "description": "Ending angle in degrees (clockwise from 12 o'clock).",
         "kind": "input",
         "name": "endAngle",
@@ -6185,12 +6198,6 @@
         "name": "visible",
         "type": "boolean",
         "defaultValue": "true"
-      },
-      {
-        "description": "Emits when an individual ring's visibility is toggled via the legend.",
-        "kind": "output",
-        "name": "datumVisibilityChange",
-        "type": "ChartRadialDatumVisibilityEvent"
       }
     ]
   },
@@ -6526,6 +6533,12 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Emits when an individual petal's visibility is toggled via the legend.",
+        "kind": "output",
+        "name": "datumVisibilityChange",
+        "type": "ChartRadialDatumVisibilityEvent"
+      },
+      {
         "description": "Ending angle in degrees (clockwise from 12 o'clock).",
         "kind": "input",
         "name": "endAngle",
@@ -6636,12 +6649,6 @@
         "name": "visible",
         "type": "boolean",
         "defaultValue": "true"
-      },
-      {
-        "description": "Emits when an individual petal's visibility is toggled via the legend.",
-        "kind": "output",
-        "name": "datumVisibilityChange",
-        "type": "ChartRadialDatumVisibilityEvent"
       }
     ]
   },
@@ -6887,6 +6894,12 @@
         "defaultValue": "\"Treemap\""
       },
       {
+        "description": "Emits when an individual node or branch's visibility is toggled via the legend.",
+        "kind": "output",
+        "name": "nodeVisibilityChange",
+        "type": "ChartTreemapNodeVisibilityEvent"
+      },
+      {
         "description": "Inner padding in pixels between sibling treemap rectangles.",
         "kind": "input",
         "name": "paddingInner",
@@ -6983,12 +6996,6 @@
         "name": "visible",
         "type": "boolean",
         "defaultValue": "true"
-      },
-      {
-        "description": "Emits when an individual node or branch's visibility is toggled via the legend.",
-        "kind": "output",
-        "name": "nodeVisibilityChange",
-        "type": "ChartTreemapNodeVisibilityEvent"
       }
     ]
   },

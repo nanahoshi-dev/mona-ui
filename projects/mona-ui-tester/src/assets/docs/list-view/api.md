@@ -273,7 +273,14 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 | Name                   | Type                           | Default | Description                                                                                                                                                                                                                                                                                                                                                                                       |
 |------------------------|--------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `monaListViewPageable` | `Partial<PagerSettings> \| ""` | `""`    | Enables pagination. An empty string enables pagination with default settings (`type: "numeric"`, `previousNext: true`, `pageSizeValues: [5, 10, 20, 25, 50, 100]`, `visiblePages: 5`); pass an object to override any field. Has no visible effect while `monaListViewVirtualScroll` is enabled — see [Pagination and virtualization don't combine](#pagination-and-virtualization-dont-combine). |
+| `monaListViewPageable` | `Partial<PagerSettings> \| ""` | `""`    | Enables pagination. An empty string enables pagination with default settings (`type: "numeric"`, `previousNext: true`, `pageSize: 10`, `pageSizeValues: [5, 10, 20, 25, 50, 100]`, `visiblePages: 5`); pass an object to override any field. Has no visible effect while `monaListViewVirtualScroll` is enabled — see [Pagination and virtualization don't combine](#pagination-and-virtualization-dont-combine). |
+| `page`                 | `number`                       | `1`     | The current page. A `model()` input — supports two-way binding via `[(page)]`; also settable one-way via `[page]` and readable via `(pageChange)` to react to pager navigation.                                                                                                                                                                                                                 |
+
+#### Outputs
+
+| Name         | Type               | Description                                                                                        |
+|--------------|--------------------|-----------------------------------------------------------------------------------------------------|
+| `pageChange` | `EventEmitter<number>` | Emitted whenever the current page changes, whether from user navigation or a `[page]`/`[(page)]` update. |
 
 ---
 
@@ -314,6 +321,7 @@ Form integration is not applicable — List View is a display/selection widget, 
 |------------------|------------------------|-------------------------------------------------------------------------------------|
 | `enabled`        | `boolean`              | Whether the pager is active.                                                        |
 | `firstLast`      | `boolean`              | Whether first/last page buttons are shown.                                          |
+| `pageSize`       | `number`               | Number of items shown per page.                                                    |
 | `pageSizeValues` | `number[] \| boolean`  | Page size options shown in the pager, or `false`/`true` to hide/show a default set. |
 | `previousNext`   | `boolean`              | Whether previous/next page buttons are shown.                                       |
 | `showInfo`       | `boolean`              | Whether a page summary (e.g. "1-10 of 50") is shown.                                |
