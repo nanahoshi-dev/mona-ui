@@ -13,6 +13,13 @@ import { MAX_EXPORT_RESOURCE_DIMENSION, MAX_EXPORT_RESOURCE_PIXELS } from "./cha
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
+// `vi.unstubAllGlobals()` reverts every stubbed global (across all spec files, since
+// vitest's stub registry isn't isolated between test files here) back to whatever it
+// was the first time it was stubbed process-wide. This file only ever stubs `Image`,
+// so restore that one global explicitly instead of clobbering unrelated stubs (e.g.
+// the `ResizeObserver` mock installed in test-setup.ts) for the rest of the run.
+const originalImage = globalThis.Image;
+
 const ONE_PX_PNG_BASE64 =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 const ONE_PX_PNG_BYTES = Uint8Array.from(atob(ONE_PX_PNG_BASE64), c => c.charCodeAt(0));
@@ -312,7 +319,7 @@ function installEventImageSupport(): EventImageSupportControl {
         restore: () => {
             urlRecord["createObjectURL"] = originalCreateObjectURL;
             urlRecord["revokeObjectURL"] = originalRevokeObjectURL;
-            vi.unstubAllGlobals();
+            vi.stubGlobal("Image", originalImage);
         },
         revokedUrls
     };
@@ -334,7 +341,7 @@ describe("Chart Export Transaction Isolation and Fallback Budget Regressions", (
 
     afterEach(() => {
         window.fetch = originalFetch;
-        vi.unstubAllGlobals();
+        vi.stubGlobal("Image", originalImage);
         mockHtml2canvas.mockImplementation(async () => {
             const canvas = document.createElement("canvas");
             canvas.width = 100;
