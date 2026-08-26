@@ -71,6 +71,7 @@ export class ListService<TData> {
         enabled: false,
         firstLast: false,
         showInfo: true,
+        pageSize: 10,
         pageSizeValues: true,
         previousNext: false,
         type: "numeric",

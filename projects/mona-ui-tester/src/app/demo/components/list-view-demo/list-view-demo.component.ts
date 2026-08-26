@@ -198,6 +198,15 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                     name: "Show Previous/Next",
                     type: "boolean"
                 },
+                pageSize: {
+                    code: ``,
+                    hasCode: false,
+                    active: false,
+                    description: "Sets the number of items shown per page",
+                    name: "Page Size",
+                    type: "number",
+                    numericValue: 10
+                },
                 pageSizeValues: {
                     code: ``,
                     hasCode: false,
@@ -544,6 +553,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
             firstLast: subFeatures["firstLast"].active,
             type: subFeatures["type"].dropdownValue,
             previousNext: subFeatures["previousNext"].active,
+            pageSize: subFeatures["pageSize"].numericValue,
             pageSizeValues: subFeatures["pageSizeValues"].dropdownValue,
             visiblePages: subFeatures["visiblePages"].numericValue
         };
