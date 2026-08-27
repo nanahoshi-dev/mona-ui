@@ -28,10 +28,12 @@ describe("RangeBarSeriesRenderer", () => {
         areaFillOpacity: 1,
         color: "#3b82f6",
         fillOpacity: 1,
+        lineStyle: "solid",
         lineWidth: 1,
         opacity: 1,
         pointRadius: 4
     };
+
 
     it("should render floating range bar with 4-corner rounded rect", () => {
         const ctx = createMockContext();

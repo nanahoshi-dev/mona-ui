@@ -1,7 +1,7 @@
 import { area, line } from "d3-shape";
 import type { ChartAreaSeriesScene } from "../../scene/cartesian-scene";
 import type { SceneAreaPoint } from "../../scene/scene-geometry";
-import { drawPointMarker } from "../../utils/canvas-utils";
+import { drawPointMarker, resolveCanvasStrokeDashArray } from "../../utils/canvas-utils";
 import { createAreaGradientSpec, withAlpha } from "./area-gradient";
 import { resolveCurveFactory } from "../geometry/chart-curve-factory";
 
@@ -81,7 +81,10 @@ export class AreaSeriesRenderer {
 
         context.lineWidth = style.lineWidth;
         context.strokeStyle = style.color;
+        context.setLineDash([...resolveCanvasStrokeDashArray(style.lineStyle)]);
         context.stroke();
+        context.setLineDash([]);
+
 
         // 3. Draw Point Markers
         if (showPoints) {

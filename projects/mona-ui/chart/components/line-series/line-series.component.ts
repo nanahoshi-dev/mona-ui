@@ -4,8 +4,9 @@ import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartDataLabelsInput } from "../../models/chart-data-label.models";
 import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
-import type { ChartCurve } from "../../models/chart-series.models";
+import type { ChartCurve, ChartLineStyle } from "../../models/chart-series.models";
 import type { ChartField } from "../../models/chart.models";
+
 
 let nextSeriesId = 0;
 
@@ -72,6 +73,12 @@ export class LineSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
+     * @description Stroke pattern used to render the series line (`"solid"`, `"dashed"`, or `"dotted"`).
+     * @default "solid"
+     */
+    public readonly lineStyle = input<ChartLineStyle>("solid");
 
     /**
      * @description Name of the series displayed in legends and tooltips.
@@ -169,6 +176,7 @@ export class LineSeriesComponent implements OnInit {
 
         effect(() => {
             this.color();
+            this.lineStyle();
             this.userClass();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Style);
@@ -203,6 +211,7 @@ export class LineSeriesComponent implements OnInit {
             field: this.field,
             id: this.#id,
             keyField: this.keyField,
+            lineStyle: this.lineStyle,
             name: this.name,
             pointRadius: this.pointRadius,
             seriesKey: this.seriesKey,

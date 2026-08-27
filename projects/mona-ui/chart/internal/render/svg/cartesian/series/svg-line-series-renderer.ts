@@ -2,7 +2,7 @@ import type { ChartLineSeriesScene } from "../../../../scene/cartesian-scene";
 import type { ScenePoint } from "../../../../scene/scene-geometry";
 import { buildLinePath } from "../../../geometry/line-path-builder";
 import { createSvgElement } from "../../svg-element-utils";
-import { setSvgAttribute } from "../../svg-attribute-utils";
+import { resolveStrokeDashArray, setSvgAttribute } from "../../svg-attribute-utils";
 import { SvgKeyedGroup } from "../../svg-keyed-group";
 
 export class SvgLineSeriesRenderer {
@@ -53,7 +53,9 @@ export class SvgLineSeriesRenderer {
         setSvgAttribute(this.#pathElement, "fill", "none");
         setSvgAttribute(this.#pathElement, "stroke", style.color);
         setSvgAttribute(this.#pathElement, "stroke-width", style.lineWidth);
+        setSvgAttribute(this.#pathElement, "stroke-dasharray", resolveStrokeDashArray(style.lineStyle));
         setSvgAttribute(this.#pathElement, "opacity", seriesOpacity);
+
 
         if (showPoints) {
             if (!this.#markersGroup) {

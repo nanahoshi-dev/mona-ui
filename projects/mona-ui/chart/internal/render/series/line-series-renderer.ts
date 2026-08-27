@@ -1,7 +1,7 @@
 import { line } from "d3-shape";
 import type { ChartLineSeriesScene } from "../../scene/cartesian-scene";
 import type { ScenePoint } from "../../scene/scene-geometry";
-import { drawPointMarker } from "../../utils/canvas-utils";
+import { drawPointMarker, resolveCanvasStrokeDashArray } from "../../utils/canvas-utils";
 import { resolveCurveFactory } from "../geometry/chart-curve-factory";
 
 export class LineSeriesRenderer {
@@ -31,7 +31,10 @@ export class LineSeriesRenderer {
 
         context.lineWidth = style.lineWidth;
         context.strokeStyle = style.color;
+        context.setLineDash([...resolveCanvasStrokeDashArray(style.lineStyle)]);
         context.stroke();
+        context.setLineDash([]);
+
 
         if (showPoints) {
             for (const p of validPoints) {

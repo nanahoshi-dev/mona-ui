@@ -60,7 +60,13 @@ import type {
     ChartRadialArcFillMode,
     ChartRoseScaleMode
 } from "../../models/chart-radial-arc.models";
-import type { ChartAreaFillMode, ChartCurve, ChartLegendItem, ChartSeriesType } from "../../models/chart-series.models";
+import type {
+    ChartAreaFillMode,
+    ChartCurve,
+    ChartLegendItem,
+    ChartLineStyle,
+    ChartSeriesType
+} from "../../models/chart-series.models";
 import type { ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
 import type { ChartStackMode } from "../../models/chart-stack.models";
 import type { ChartScene } from "../scene/chart-scene";
@@ -206,6 +212,7 @@ export interface ChartLineSeriesRegistration extends ChartCartesianScalarSeriesR
     connectNulls?: Signal<boolean>;
     curve?: Signal<ChartCurve>;
     downsampling?: Signal<ChartDownsamplingInput | undefined>;
+    lineStyle?: Signal<ChartLineStyle>;
     pointRadius?: Signal<number | undefined>;
     showPoints?: Signal<boolean>;
     strokeWidth?: Signal<number | undefined>;
@@ -218,6 +225,7 @@ export interface ChartAreaSeriesRegistration extends ChartCartesianScalarSeriesR
     downsampling?: Signal<ChartDownsamplingInput | undefined>;
     fillMode?: Signal<ChartAreaFillMode>;
     fillOpacity?: Signal<number | undefined>;
+    lineStyle?: Signal<ChartLineStyle>;
     pointRadius?: Signal<number | undefined>;
     showPoints?: Signal<boolean>;
     stack: Signal<string | undefined>;

@@ -54,10 +54,12 @@ function createMockCartesianSceneWithBars(): CartesianXYChartScene {
                     areaFillOpacity: 0.2,
                     color: "#3b82f6",
                     fillOpacity: 1,
+                    lineStyle: "solid",
                     lineWidth: 2,
                     opacity: 1,
                     pointRadius: 4
                 },
+
                 type: "bar",
                 xAxisId: "default-x",
                 yAxisId: "default-y"
@@ -172,10 +174,12 @@ describe("ChartTransitionPlanner", () => {
                 areaFillOpacity: 0,
                 color: "#3b82f6",
                 fillOpacity: 1,
+                lineStyle: "solid",
                 lineWidth: 2,
                 opacity: 1,
                 pointRadius: 4
             },
+
             type: "line",
             xAxisId: "default-x",
             yAxisId: "default-y"
@@ -392,10 +396,12 @@ describe("ChartTransitionPlanner", () => {
                             areaFillOpacity: 0.2,
                             color: "#3b82f6",
                             fillOpacity: 1,
+                            lineStyle: "solid",
                             lineWidth: 2,
                             opacity: 1,
                             pointRadius: 4
                         },
+
                         type: "bar",
                         xAxisId: "default-x",
                         yAxisId: "default-y"
@@ -475,6 +481,7 @@ describe("ChartTransitionPlanner", () => {
                             areaFillOpacity: 0.2,
                             color: "#3b82f6",
                             fillOpacity: 1,
+                            lineStyle: "solid",
                             lineWidth: 2,
                             opacity: 1,
                             pointRadius: 4
@@ -534,6 +541,7 @@ describe("ChartTransitionPlanner", () => {
                             areaFillOpacity: 0,
                             color: "#3b82f6",
                             fillOpacity: 1,
+                            lineStyle: "solid",
                             lineWidth: 2,
                             opacity: 1,
                             pointRadius: 4
@@ -583,6 +591,7 @@ describe("ChartTransitionPlanner", () => {
                             areaFillOpacity: 0,
                             color: "#3b82f6",
                             fillOpacity: 1,
+                            lineStyle: "solid",
                             lineWidth: 2,
                             opacity: 1,
                             pointRadius: 4
@@ -596,6 +605,7 @@ describe("ChartTransitionPlanner", () => {
                 xAxisType: "linear",
                 yAxisType: "category"
             };
+
 
             const options = normalizeChartAnimationOptions(true);
             const plan = ChartTransitionPlanner.plan(prevVertical, nextHorizontal, "data", options);

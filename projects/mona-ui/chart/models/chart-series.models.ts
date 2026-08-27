@@ -2,6 +2,8 @@ export type ChartAreaFillMode = "gradient" | "solid";
 
 export type ChartCurve = "linear" | "monotone-x" | "natural" | "step" | "step-after";
 
+export type ChartLineStyle = "solid" | "dashed" | "dotted";
+
 export type ChartSeriesType =
     | "area"
     | "bar"

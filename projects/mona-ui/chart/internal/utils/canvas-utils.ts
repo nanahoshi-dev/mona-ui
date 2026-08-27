@@ -1,6 +1,8 @@
+import type { ChartLineStyle } from "../../models/chart-series.models";
 import type { ChartRect } from "../../models/chart.models";
 import type { ChartCornerRadii } from "../scene/scene-geometry";
 import { clamp } from "./number-utils";
+
 
 /**
  * Small overflow allowance so marks whose stroke or radius sits exactly at a
@@ -262,3 +264,16 @@ export function drawPointMarker(
         context.stroke();
     }
 }
+
+export function resolveCanvasStrokeDashArray(lineStyle?: ChartLineStyle | null): readonly number[] {
+    switch (lineStyle) {
+        case "dashed":
+            return [4, 4];
+        case "dotted":
+            return [2, 2];
+        case "solid":
+        default:
+            return [];
+    }
+}
+

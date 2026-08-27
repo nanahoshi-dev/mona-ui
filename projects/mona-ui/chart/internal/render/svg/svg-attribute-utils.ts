@@ -1,4 +1,5 @@
 import { formatRgb, parse } from "culori";
+import type { ChartLineStyle } from "../../../models/chart-series.models";
 import { clamp } from "../../utils/number-utils";
 
 export function formatSvgNumber(num: number): string {
@@ -40,7 +41,7 @@ export function resolveBrushDashArray(lineStyle?: "solid" | "dashed" | "dotted" 
     }
 }
 
-export function resolveStrokeDashArray(lineStyle?: "solid" | "dashed" | "dotted" | null): string | undefined {
+export function resolveStrokeDashArray(lineStyle?: ChartLineStyle | null): string | undefined {
     switch (lineStyle) {
         case "dashed":
             return "4 4";
@@ -51,6 +52,7 @@ export function resolveStrokeDashArray(lineStyle?: "solid" | "dashed" | "dotted"
             return undefined;
     }
 }
+
 
 export function withSvgAlpha(color: string, alpha: number): string {
     if (!color) {

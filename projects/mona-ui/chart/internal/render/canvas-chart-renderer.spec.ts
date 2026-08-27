@@ -99,10 +99,12 @@ describe("CanvasChartRenderer", () => {
                         areaFillOpacity: 0.2,
                         color: "#3f6be2",
                         fillOpacity: 0.2,
+                        lineStyle: "solid",
                         lineWidth: 2,
                         opacity: 1,
                         pointRadius: 3
                     },
+
                     type: "area",
                     xAxisId: "default-x",
                     yAxisId: "default-y"
@@ -156,10 +158,12 @@ describe("CanvasChartRenderer", () => {
                         areaFillOpacity: 0.2,
                         color: "#ef4444",
                         fillOpacity: 0.2,
+                        lineStyle: "solid",
                         lineWidth: 2,
                         opacity: 1,
                         pointRadius: 3
                     },
+
                     type: "area",
                     xAxisId: "default-x",
                     yAxisId: "default-y"
@@ -213,10 +217,12 @@ describe("CanvasChartRenderer", () => {
                         areaFillOpacity: 0.2,
                         color: "#10b981",
                         fillOpacity: 0.2,
+                        lineStyle: "solid",
                         lineWidth: 2,
                         opacity: 1,
                         pointRadius: 3
                     },
+
                     type: "area",
                     xAxisId: "default-x",
                     yAxisId: "default-y"
@@ -267,10 +273,12 @@ describe("CanvasChartRenderer", () => {
                         areaFillOpacity: 0.5,
                         color: "#3f6be2",
                         fillOpacity: 0.5,
+                        lineStyle: "solid",
                         lineWidth: 2,
                         opacity: 1,
                         pointRadius: 3
                     },
+
                     type: "area",
                     xAxisId: "default-x",
                     yAxisId: "default-y"
@@ -386,10 +394,12 @@ describe("CanvasChartRenderer", () => {
                         areaFillOpacity: 1,
                         color: "#3b82f6",
                         fillOpacity: 1,
+                        lineStyle: "solid",
                         lineWidth: 1,
                         opacity: 1,
                         pointRadius: 3
                     },
+
                     type: "bar",
                     xAxisId: "default-x",
                     yAxisId: "default-y"
