@@ -27,10 +27,12 @@ describe("RangeAreaSeriesRenderer", () => {
         areaFillOpacity: 0.25,
         color: "#3b82f6",
         fillOpacity: 0.25,
+        lineStyle: "solid",
         lineWidth: 2,
         opacity: 1,
         pointRadius: 4
     };
+
 
     it("should render fill band and two boundary lines using semantic fromPoint and toPoint (RNG-001)", () => {
         const ctx = createMockContext();

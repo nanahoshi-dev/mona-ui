@@ -167,12 +167,13 @@ The benchmark is intentionally non-gating and emits one compact JSON record for 
     <mona-chart-y-axis [nice]="true" />
 
     <mona-bar-series field="revenue" name="Revenue" [borderRadius]="4" />
-    <mona-line-series field="target" name="Target" curve="monotone-x" [showPoints]="true" />
-    <mona-area-series field="forecast" name="Forecast" fillMode="gradient" />
+    <mona-line-series field="target" name="Target" curve="monotone-x" lineStyle="dashed" [showPoints]="true" />
+    <mona-area-series field="forecast" name="Forecast" fillMode="gradient" lineStyle="dotted" />
 
     <mona-chart-legend position="bottom" [interactive]="true" />
     <mona-chart-tooltip [shared]="true" />
 </mona-chart>
+
 ```
 
 ### Stacked Bar Chart & 100% Stacked Bar Chart
@@ -348,26 +349,50 @@ Renders a Cartesian floating range bar series plotting discrete min-max interval
 | `valueFormatter` | `ChartValueFormatter` | `undefined`   | Custom formatter callback for formatting range bounds in tooltips and live region.      |
 | `visible`        | `model(boolean)`      | `true`        | Two-way bindable series visibility.                                                     |
 
+### `<mona-line-series>`
+
+Renders a continuous Cartesian line series connecting data points with configurable curve interpolation and stroke pattern.
+
+| Input / Output   | Type                     | Default      | Description                                                                                          |
+| :--------------- | :----------------------- | :----------- | :--------------------------------------------------------------------------------------------------- |
+| `field`          | `ChartField`             | `""`         | Property key or accessor extracting numeric Y value.                                                 |
+| `xField`         | `ChartField | undefined` | `undefined`  | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).              |
+| `keyField`       | `ChartField | undefined` | `undefined`  | Unique identifier field for stable mark tracking across animation transitions.                       |
+| `name`           | `string`                 | `""`         | Series name for tooltips, legend, and accessibility.                                                 |
+| `lineStyle`      | `ChartLineStyle`         | `"solid"`    | Stroke pattern used to render the series line (`"solid"`, `"dashed"`, or `"dotted"`).               |
+| `curve`          | `ChartCurve`             | `"linear"`   | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`).   |
+| `connectNulls`   | `boolean`                | `false`      | Whether to interpolate across null/missing data points without gaps.                                 |
+| `showPoints`     | `boolean`                | `false`      | Whether to render point markers at data coordinates.                                                 |
+| `pointRadius`    | `number | undefined`     | `undefined`  | Radius in pixels for point markers. Defaults to `--mona-chart-point-radius` (3px).                    |
+| `strokeWidth`    | `number | undefined`     | `undefined`  | Stroke width in pixels for the series line. Defaults to 2px.                                         |
+| `color`          | `string`                 | `""`         | Explicit stroke color override for the series line. Defaults to palette token.                       |
+| `visible`        | `model(boolean)`         | `true`       | Two-way bindable series visibility.                                                                  |
+
 ### `<mona-area-series>`
 
 Renders a continuous Cartesian area series supporting gradient fades, solid fills, cumulative stacking, and 100% normalized area bands.
 
-| Input / Output   | Type                  | Default      | Description                                                                                        |
-| :--------------- | :-------------------- | :----------- | :------------------------------------------------------------------------------------------------- |
-| `field`          | `ChartField`          | `"value"`    | Property key or accessor extracting numeric Y value.                                               |
-| `xField`         | `ChartField`          | `undefined`  | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).            |
-| `keyField`       | `ChartField`          | `undefined`  | Unique identifier field for stable mark tracking across animation transitions.                     |
-| `name`           | `string`              | `"Area"`     | Series name for tooltips, legend, and accessibility.                                               |
-| `stack`          | `string`              | `undefined`  | Stack group name. Series sharing the same stack identifier are stacked into cumulative bands.      |
-| `stackMode`      | `ChartStackMode`      | `"normal"`   | Stacking calculation mode: `"normal"` (raw cumulative sum) or `"percent"` (normalized to 100%).    |
-| `fillMode`       | `ChartAreaFillMode`   | `"gradient"` | Area fill style: `"gradient"`, `"solid"`, or `"none"`.                                             |
-| `fillOpacity`    | `number`              | `0.2`        | Area fill opacity between 0.0 and 1.0.                                                             |
-| `curve`          | `ChartCurve`          | `"linear"`   | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`). |
-| `connectNulls`   | `boolean`             | `false`      | Whether to interpolate across null/missing data points.                                            |
-| `showPoints`     | `boolean`             | `false`      | Whether to render point markers at data coordinates.                                               |
-| `color`          | `string`              | `undefined`  | Area line and fill color. Defaults to palette token.                                               |
-| `valueFormatter` | `ChartValueFormatter` | `undefined`  | Custom formatter callback for area raw values and stack totals in tooltips and live region.        |
-| `visible`        | `model(boolean)`      | `true`       | Two-way bindable series visibility.                                                                |
+| Input / Output   | Type                     | Default      | Description                                                                                          |
+| :--------------- | :----------------------- | :----------- | :--------------------------------------------------------------------------------------------------- |
+| `field`          | `ChartField`             | `""`         | Property key or accessor extracting numeric Y value.                                                 |
+| `xField`         | `ChartField | undefined` | `undefined`  | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).              |
+| `keyField`       | `ChartField | undefined` | `undefined`  | Unique identifier field for stable mark tracking across animation transitions.                       |
+| `name`           | `string`                 | `""`         | Series name for tooltips, legend, and accessibility.                                                 |
+| `stack`          | `string | undefined`     | `undefined`  | Stack group name. Series sharing the same stack identifier are stacked into cumulative bands.        |
+| `stackMode`      | `ChartStackMode`         | `"normal"`   | Stacking calculation mode: `"normal"` (raw cumulative sum) or `"percent"` (normalized to 100%).      |
+| `fillMode`       | `ChartAreaFillMode`      | `"gradient"` | Area fill style: `"gradient"` fading to zero baseline, or uniform `"solid"`.                        |
+| `lineStyle`      | `ChartLineStyle`         | `"solid"`    | Stroke pattern used for the area's boundary line (`"solid"`, `"dashed"`, or `"dotted"`). Fill is unaffected. |
+| `fillOpacity`    | `number | undefined`     | `undefined`  | Maximum opacity applied to the area fill. Defaults to 0.18.                                          |
+| `curve`          | `ChartCurve`             | `"linear"`   | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`).   |
+| `connectNulls`   | `boolean`                | `false`      | Whether to interpolate across null/missing data points without gaps.                                 |
+| `showPoints`     | `boolean`                | `false`      | Whether to render point markers at data coordinates.                                                 |
+| `pointRadius`    | `number | undefined`     | `undefined`  | Radius in pixels for point markers. Defaults to `--mona-chart-point-radius` (4px).                    |
+| `strokeWidth`    | `number | undefined`     | `undefined`  | Stroke width in pixels for the area boundary line. Defaults to 2px.                                  |
+| `color`          | `string`                 | `""`         | Explicit stroke and fill color override for the area series. Defaults to palette token.              |
+| `valueFormatter` | `ChartValueFormatter | undefined` | `undefined` | Custom formatter callback for area raw values and stack totals in tooltips and live region.       |
+| `visible`        | `model(boolean)`         | `true`       | Two-way bindable series visibility.                                                                  |
+
+
 
 ### `<mona-range-area-series>`
 

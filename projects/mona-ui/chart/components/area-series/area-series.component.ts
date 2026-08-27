@@ -4,7 +4,7 @@ import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartDataLabelsInput } from "../../models/chart-data-label.models";
 import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
-import type { ChartAreaFillMode, ChartCurve } from "../../models/chart-series.models";
+import type { ChartAreaFillMode, ChartCurve, ChartLineStyle } from "../../models/chart-series.models";
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
 import type { ChartStackMode } from "../../models/chart-stack.models";
 
@@ -85,6 +85,12 @@ export class AreaSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly keyField = input<ChartField | undefined>(undefined);
+
+    /**
+     * @description Stroke pattern used for the area's boundary line (`"solid"`, `"dashed"`, or `"dotted"`).
+     * @default "solid"
+     */
+    public readonly lineStyle = input<ChartLineStyle>("solid");
 
     /**
      * @description Name of the series displayed in legends and tooltips.
@@ -202,6 +208,7 @@ export class AreaSeriesComponent implements OnInit {
         effect(() => {
             this.color();
             this.fillMode();
+            this.lineStyle();
             this.userClass();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Style);
@@ -238,6 +245,7 @@ export class AreaSeriesComponent implements OnInit {
             fillOpacity: this.fillOpacity,
             id: this.#id,
             keyField: this.keyField,
+            lineStyle: this.lineStyle,
             name: this.name,
             pointRadius: this.pointRadius,
             seriesKey: this.seriesKey,

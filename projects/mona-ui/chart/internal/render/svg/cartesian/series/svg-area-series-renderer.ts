@@ -3,8 +3,9 @@ import type { SceneAreaPoint } from "../../../../scene/scene-geometry";
 import { buildAreaFillPath, buildAreaStrokePath } from "../../../geometry/area-path-builder";
 import { createAreaGradientSpec } from "../../../series/area-gradient";
 import { createSvgElement } from "../../svg-element-utils";
-import { setSvgAttribute, withSvgAlpha } from "../../svg-attribute-utils";
+import { resolveStrokeDashArray, setSvgAttribute, withSvgAlpha } from "../../svg-attribute-utils";
 import type { SvgDefinitionRegistry } from "../../svg-definition-registry";
+
 import { SvgKeyedGroup } from "../../svg-keyed-group";
 
 export class SvgAreaSeriesRenderer {
@@ -95,7 +96,9 @@ export class SvgAreaSeriesRenderer {
         setSvgAttribute(this.#strokePathElement, "fill", "none");
         setSvgAttribute(this.#strokePathElement, "stroke", style.color);
         setSvgAttribute(this.#strokePathElement, "stroke-width", style.lineWidth);
+        setSvgAttribute(this.#strokePathElement, "stroke-dasharray", resolveStrokeDashArray(style.lineStyle));
         setSvgAttribute(this.#strokePathElement, "opacity", seriesOpacity);
+
 
         // 3. Markers
         if (showPoints) {

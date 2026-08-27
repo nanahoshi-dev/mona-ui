@@ -69,10 +69,12 @@ describe("SceneTransitionSampler", () => {
                         areaFillOpacity: 0.2,
                         color: "#3b82f6",
                         fillOpacity: 1,
+                        lineStyle: "solid",
                         lineWidth: 2,
                         opacity: 1,
                         pointRadius: 4
                     },
+
                     type: "bar",
                     xAxisId: "default-x",
                     yAxisId: "default-y"

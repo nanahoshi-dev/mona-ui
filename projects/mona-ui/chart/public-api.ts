@@ -108,6 +108,7 @@ export type {
     ChartLegendItem,
     ChartLegendItemKind,
     ChartLegendItemTemplateContext,
+    ChartLineStyle,
     ChartSeriesFamily,
     ChartSeriesType
 } from "./models/chart-series.models";

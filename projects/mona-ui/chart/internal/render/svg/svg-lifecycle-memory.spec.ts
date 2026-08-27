@@ -26,11 +26,13 @@ function createMockSeriesStyle(color: string): ChartSeriesStyle {
         areaFillOpacity: 0.2,
         color,
         fillOpacity: 1,
+        lineStyle: "solid",
         lineWidth: 2,
         opacity: 1,
         pointRadius: 4
     };
 }
+
 
 describe("SVG Lifecycle and Memory Leak Prevention", () => {
     it("clear() and destroy() are idempotent and do not leave orphan nodes in root or defs", () => {

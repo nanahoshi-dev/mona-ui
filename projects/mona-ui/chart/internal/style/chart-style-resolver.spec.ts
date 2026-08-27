@@ -5,6 +5,7 @@ import type {
     ChartFinancialSeriesRegistration,
     ChartPieSeriesRegistration
 } from "../context/chart-registration-context";
+import type { ChartLineStyle } from "../../models/chart-series.models";
 import { ChartStyleResolver, toCanvasColor } from "./chart-style-resolver";
 
 function createMockSeries(
@@ -12,6 +13,7 @@ function createMockSeries(
     options?: {
         color?: string;
         fillOpacity?: number;
+        lineStyle?: ChartLineStyle;
         nativeElement?: HTMLElement;
         pointRadius?: number;
         strokeWidth?: number;
@@ -25,6 +27,7 @@ function createMockSeries(
         field: signal("val"),
         fillOpacity: signal(options?.fillOpacity),
         id: `mock-${type}`,
+        lineStyle: options?.lineStyle !== undefined ? signal(options.lineStyle) : undefined,
         name: signal("Mock Series"),
         pointRadius: signal(options?.pointRadius),
         stack: signal(undefined),
@@ -38,6 +41,7 @@ function createMockSeries(
         yAxisId: signal(undefined)
     } as ChartCartesianSeriesRegistration;
 }
+
 
 function createMockPieSeries(options?: {
     colorField?: string;
@@ -147,6 +151,22 @@ describe("ChartStyleResolver", () => {
         expect(style.areaFillColor).toBe("#8b5cf6");
         expect(style.areaFillOpacity).toBe(0.4);
     });
+
+    it("should resolve lineStyle correctly for line and area series", () => {
+        const resolver = new ChartStyleResolver();
+        const lineDashed = createMockSeries("line", { lineStyle: "dashed" });
+        const lineDotted = createMockSeries("line", { lineStyle: "dotted" });
+        const areaDashed = createMockSeries("area", { lineStyle: "dashed" });
+        const lineDefault = createMockSeries("line");
+        const barDefault = createMockSeries("bar");
+
+        expect(resolver.resolveSeriesStyle(lineDashed, 0).lineStyle).toBe("dashed");
+        expect(resolver.resolveSeriesStyle(lineDotted, 1).lineStyle).toBe("dotted");
+        expect(resolver.resolveSeriesStyle(areaDashed, 2).lineStyle).toBe("dashed");
+        expect(resolver.resolveSeriesStyle(lineDefault, 3).lineStyle).toBe("solid");
+        expect(resolver.resolveSeriesStyle(barDefault, 4).lineStyle).toBe("solid");
+    });
+
 
     it("should resolve polar series styles and slice colors", () => {
         const resolver = new ChartStyleResolver();

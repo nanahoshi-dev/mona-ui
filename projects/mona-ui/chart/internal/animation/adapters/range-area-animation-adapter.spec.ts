@@ -9,10 +9,12 @@ const mockStyle: ChartSeriesStyle = {
     areaFillOpacity: 0.2,
     color: "#ec4899",
     fillOpacity: 1,
+    lineStyle: "solid",
     lineWidth: 2,
     opacity: 1,
     pointRadius: 4
 };
+
 
 describe("RangeAreaSeriesAnimationAdapter", () => {
     const adapter = new RangeAreaSeriesAnimationAdapter();

@@ -16,11 +16,13 @@ function createMockSeriesStyle(color: string): ChartSeriesStyle {
         areaFillOpacity: 0.2,
         color,
         fillOpacity: 1,
+        lineStyle: "solid",
         lineWidth: 2,
         opacity: 1,
         pointRadius: 4
     };
 }
+
 
 describe("SVG and Canvas Renderer Switching", () => {
     it("switches back and forth between Canvas and SVG backends seamlessly with identical scene input", () => {

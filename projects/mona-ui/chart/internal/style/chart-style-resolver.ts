@@ -1499,6 +1499,7 @@ export class ChartStyleResolver {
         const explicitStrokeWidth = "strokeWidth" in series ? series.strokeWidth?.() : undefined;
         const explicitPointRadius = "pointRadius" in series ? series.pointRadius?.() : undefined;
         const explicitFillOpacity = "fillOpacity" in series ? series.fillOpacity?.() : undefined;
+        const explicitLineStyle = "lineStyle" in series ? series.lineStyle?.() : undefined;
 
         let elementColor = "";
         let cssLineWidth: number | undefined;
@@ -1571,16 +1572,19 @@ export class ChartStyleResolver {
                 ? Math.max(0, Math.min(1, explicitFillOpacity))
                 : (cssAreaFillOpacity ?? defaultFillOpacity);
         const resolvedAreaFillColor = cssAreaFillColor ? this.resolveCssVariable(cssAreaFillColor) : resolvedColor;
+        const lineStyle = explicitLineStyle ?? "solid";
 
         return {
             areaFillColor: resolvedAreaFillColor,
             areaFillOpacity: resolvedFillOpacity,
             color: resolvedColor,
             fillOpacity: resolvedFillOpacity,
+            lineStyle,
             lineWidth: resolvedLineWidth,
             opacity: 1,
             pointRadius: resolvedPointRadius
         };
+
     }
 
     public resolveSliceColor(

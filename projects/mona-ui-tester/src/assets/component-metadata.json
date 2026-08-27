@@ -2693,6 +2693,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "Stroke pattern used for the area's boundary line (`\"solid\"`, `\"dashed\"`, or `\"dotted\"`).",
+        "kind": "input",
+        "name": "lineStyle",
+        "type": "ChartLineStyle",
+        "defaultValue": "\"solid\""
+      },
+      {
         "description": "Name of the series displayed in legends and tooltips.",
         "kind": "input",
         "name": "name",
@@ -5316,6 +5323,13 @@
         "name": "keyField",
         "type": "ChartField | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Stroke pattern used to render the series line (`\"solid\"`, `\"dashed\"`, or `\"dotted\"`).",
+        "kind": "input",
+        "name": "lineStyle",
+        "type": "ChartLineStyle",
+        "defaultValue": "\"solid\""
       },
       {
         "description": "Name of the series displayed in legends and tooltips.",
