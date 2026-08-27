@@ -5,9 +5,8 @@ export interface ChartSeriesStyle {
     areaFillOpacity: number;
     color: string;
     fillOpacity: number;
-    lineStyle: ChartLineStyle;
+    lineStyle?: ChartLineStyle;
     lineWidth: number;
     opacity: number;
     pointRadius: number;
 }
-
