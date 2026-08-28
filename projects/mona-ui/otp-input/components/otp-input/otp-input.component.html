@@ -1,0 +1,77 @@
+<input
+    #input
+    [class]="inputClass()"
+    tabindex="0"
+    [value]="value()"
+    [disabled]="disabled()"
+    [readOnly]="readonly()"
+    [required]="required()"
+    [type]="nativeInputType()"
+    [attr.inputmode]="derivedInputMode()"
+    [attr.autocomplete]="derivedAutocomplete()"
+    [attr.autocapitalize]="'off'"
+    [attr.spellcheck]="'false'"
+    [attr.aria-label]="computedAriaLabel()"
+    [attr.aria-labelledby]="computedAriaLabelledby()"
+    [attr.aria-invalid]="invalidState() ? 'true' : null"
+    [attr.aria-required]="required() ? 'true' : null"
+    [attr.maxlength]="normalizedLength()"
+    [monaAttributeBinder]="sanitizedAttributes()"
+    (beforeinput)="onBeforeInput($event)"
+    (keydown)="onKeyDown($event)"
+    (input)="onInput($event)"
+    (paste)="onPaste($event)"
+    (focus)="onFocus($event)"
+    (blur)="onBlur($event)"
+    (select)="onSelect()"
+    (keyup)="onKeyUp()"
+    (compositionstart)="onCompositionStart()"
+    (compositionend)="onCompositionEnd($event)" />
+
+@for (group of visualGroups(); track group.index; let lastGroup = $last) {
+    <div
+        class="inline-flex items-center"
+        [class.gap-1.5]="spacing()"
+        [class.-space-x-px]="!spacing()"
+        [attr.data-group-index]="group.index">
+        @for (slot of group.slots; track slot.index) {
+            <span
+                class="otp-slot"
+                [class]="slot.classes"
+                [attr.data-slot-index]="slot.index"
+                [attr.data-active]="slot.active || null"
+                [attr.data-selected]="slot.selected || null"
+                [attr.data-filled]="slot.filled || null"
+                [attr.data-placeholder]="slot.placeholder || null"
+                [attr.data-disabled]="disabled() || null"
+                [attr.data-readonly]="readonly() || null"
+                [attr.data-invalid]="invalidState() || null"
+                (pointerdown)="onSlotPointerDown($event, slot.index)"
+                aria-hidden="true">
+                {{ slot.displayCharacter }}
+                @if (slot.active && !slot.filled && hasFocus() && !disabled() && !readonly()) {
+                    <span
+                        class="pointer-events-none absolute inset-y-2 w-0.5 animate-pulse motion-reduce:animate-none bg-foreground"
+                        aria-hidden="true"></span>
+                }
+            </span>
+        }
+    </div>
+
+    @if (!lastGroup && (separator() || separatorTemplate())) {
+        <span
+            class="inline-flex items-center justify-center text-muted-foreground select-none px-1"
+            [class]="separatorClass()"
+            aria-hidden="true">
+            @if (separatorTemplate(); as customTemplate) {
+                <ng-container
+                    *ngTemplateOutlet="
+                        customTemplate;
+                        context: { $implicit: group.index, groupIndex: group.index }
+                    "></ng-container>
+            } @else {
+                {{ separator() }}
+            }
+        </span>
+    }
+}

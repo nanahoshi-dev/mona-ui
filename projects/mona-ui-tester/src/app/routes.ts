@@ -242,6 +242,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "otp-input",
+                loadComponent: () =>
+                    import("./docs/components/otp-input-doc/otp-input-doc.component").then(
+                        m => m.OtpInputDocComponent
+                    )
+            },
+            {
                 path: "pager",
                 loadComponent: () =>
                     import("./docs/components/pager-doc/pager-doc.component").then(m => m.PagerDocComponent)

@@ -87,5 +87,27 @@ describe("AttributeBinderDirective", () => {
             expect(divElement.getAttribute("data-baz")).toBe("qux");
             expect(divElement.getAttribute("aria-hidden")).toBe("true");
         });
+
+        it("should remove previously set attribute when key is omitted in next config object", () => {
+            component.attributes.set({ "data-foo": "bar" });
+            fixture.detectChanges();
+            expect(divElement.getAttribute("data-foo")).toBe("bar");
+
+            component.attributes.set({});
+            fixture.detectChanges();
+            expect(divElement.hasAttribute("data-foo")).toBe(false);
+        });
+
+        it("should handle partial attribute replacement correctly", () => {
+            component.attributes.set({ "data-a": "1", "data-b": "2" });
+            fixture.detectChanges();
+            expect(divElement.getAttribute("data-a")).toBe("1");
+            expect(divElement.getAttribute("data-b")).toBe("2");
+
+            component.attributes.set({ "data-b": "3" });
+            fixture.detectChanges();
+            expect(divElement.hasAttribute("data-a")).toBe(false);
+            expect(divElement.getAttribute("data-b")).toBe("3");
+        });
     });
 });

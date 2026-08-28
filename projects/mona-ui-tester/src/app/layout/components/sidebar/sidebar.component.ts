@@ -61,6 +61,7 @@ export class SidebarComponent {
                 { text: "Multi Select", path: "/multi-select" },
                 { text: "Notification", path: "/notification" },
                 { text: "Numeric Text Box", path: "/numeric-textbox" },
+                { text: "OTP Input", path: "/otp-input" },
                 { text: "Pager", path: "/pager" },
                 { text: "Placeholder", path: "/placeholder" },
                 { text: "Popover", path: "/popover" },

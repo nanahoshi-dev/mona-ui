@@ -197,5 +197,18 @@ export default [
     {
         files: ["**/*.html"],
         rules: {}
+    },
+    {
+        files: ["projects/mona-ui-tester/**/*.ts"],
+        rules: {
+            "@angular-eslint/component-selector": [
+                "error",
+                {
+                    prefix: "app",
+                    style: "kebab-case",
+                    type: "element"
+                }
+            ]
+        }
     }
 ];
