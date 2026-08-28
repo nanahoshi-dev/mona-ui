@@ -27,6 +27,7 @@ import {
 import {
     filterCharacters,
     getSlotRoundedClasses,
+    isValidCharacter,
     normalizeGroupLengths,
     normalizeLength,
     patternTransform,
@@ -397,6 +398,33 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         return twMerge(baseClasses, extraRounding, this.slotClass());
     }
 
+    protected onBeforeInput(event: InputEvent): void {
+        if (this.disabled() || this.readonly() || this.isComposing()) {
+            return;
+        }
+        if (event.inputType === "insertText" && event.data) {
+            const inputEl = this.inputRef().nativeElement;
+            const start = inputEl.selectionStart ?? 0;
+            const end = inputEl.selectionEnd ?? 0;
+            const val = this.value();
+            const maxLen = this.normalizedLength();
+
+            if (!isValidCharacter(event.data, this.type(), this.pattern())) {
+                event.preventDefault();
+                return;
+            }
+
+            if (start >= maxLen && start === end) {
+                event.preventDefault();
+                return;
+            }
+
+            if (start === end && start < val.length) {
+                inputEl.setSelectionRange(start, start + 1);
+            }
+        }
+    }
+
     protected onBlur(event: FocusEvent): void {
         this.hasFocus.set(false);
         this.inputBlur.emit(event);
@@ -441,6 +469,38 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             this.complete.emit(nextVal);
         }
         this.syncSelection();
+    }
+
+    protected onKeyDown(event: KeyboardEvent): void {
+        if (this.disabled() || this.readonly() || this.isComposing() || event.isComposing) {
+            return;
+        }
+        if (event.ctrlKey || event.metaKey || event.altKey) {
+            return;
+        }
+        if (event.key.length !== 1) {
+            return;
+        }
+
+        const inputEl = this.inputRef().nativeElement;
+        const start = inputEl.selectionStart ?? 0;
+        const end = inputEl.selectionEnd ?? 0;
+        const val = this.value();
+        const maxLen = this.normalizedLength();
+
+        if (!isValidCharacter(event.key, this.type(), this.pattern())) {
+            event.preventDefault();
+            return;
+        }
+
+        if (start >= maxLen && start === end) {
+            event.preventDefault();
+            return;
+        }
+
+        if (start === end && start < val.length) {
+            inputEl.setSelectionRange(start, start + 1);
+        }
     }
 
     protected onKeyUp(): void {

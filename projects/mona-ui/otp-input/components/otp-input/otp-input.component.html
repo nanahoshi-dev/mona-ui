@@ -17,6 +17,8 @@
     [attr.aria-required]="required() ? 'true' : null"
     [attr.maxlength]="normalizedLength()"
     [monaAttributeBinder]="sanitizedAttributes()"
+    (beforeinput)="onBeforeInput($event)"
+    (keydown)="onKeyDown($event)"
     (input)="onInput($event)"
     (paste)="onPaste($event)"
     (focus)="onFocus($event)"

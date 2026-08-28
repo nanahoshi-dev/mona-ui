@@ -85,7 +85,7 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("OtpInputComponent");
-    protected readonly OtpInputWrapperComponent = OtpInputWrapperComponent;
+    protected readonly otpInputWrapperComponent = OtpInputWrapperComponent;
 }
 
 @Component({

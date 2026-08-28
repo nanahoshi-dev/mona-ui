@@ -367,6 +367,111 @@ describe("OtpInputComponent", () => {
 
             expect(host.completeEvents).toEqual(["1234", "1235"]);
         });
+
+        it("overwrites subsequent slots when typing at an earlier slot in a full code", async () => {
+            host.length.set(6);
+            host.value.set("123456");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const input = getNativeInput();
+            const slots = getSlots();
+
+            // Click first slot (0)
+            slots[0].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(input.selectionStart).toBe(0);
+            expect(input.selectionEnd).toBe(1);
+
+            // Type '9' replacing slot 0
+            const keydown9 = new KeyboardEvent("keydown", { key: "9", bubbles: true, cancelable: true });
+            input.dispatchEvent(keydown9);
+            input.value = "923456";
+            input.setSelectionRange(1, 1);
+            input.dispatchEvent(new Event("input"));
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("923456");
+            expect(input.selectionStart).toBe(1);
+            expect(input.selectionEnd).toBe(1);
+
+            // Type '8' at collapsed caret (1, 1) — keydown should select slot 1 for overwrite
+            const keydown8 = new KeyboardEvent("keydown", { key: "8", bubbles: true, cancelable: true });
+            input.dispatchEvent(keydown8);
+
+            expect(input.selectionStart).toBe(1);
+            expect(input.selectionEnd).toBe(2);
+
+            input.value = "983456";
+            input.setSelectionRange(2, 2);
+            input.dispatchEvent(new Event("input"));
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("983456");
+
+            // Type '7' at collapsed caret (2, 2)
+            const keydown7 = new KeyboardEvent("keydown", { key: "7", bubbles: true, cancelable: true });
+            input.dispatchEvent(keydown7);
+
+            expect(input.selectionStart).toBe(2);
+            expect(input.selectionEnd).toBe(3);
+
+            input.value = "987456";
+            input.setSelectionRange(3, 3);
+            input.dispatchEvent(new Event("input"));
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("987456");
+        });
+
+        it("prevents invalid character insertion via keydown", () => {
+            host.type.set("number");
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            const keydownA = new KeyboardEvent("keydown", { key: "a", bubbles: true, cancelable: true });
+            const notCancelled = input.dispatchEvent(keydownA);
+
+            expect(notCancelled).toBe(false);
+            expect(keydownA.defaultPrevented).toBe(true);
+        });
+
+        it("prevents keydown when input is full and caret is at end", async () => {
+            host.length.set(4);
+            host.value.set("1234");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const input = getNativeInput();
+            input.setSelectionRange(4, 4);
+
+            const keydown5 = new KeyboardEvent("keydown", { key: "5", bubbles: true, cancelable: true });
+            const notCancelled = input.dispatchEvent(keydown5);
+
+            expect(notCancelled).toBe(false);
+            expect(keydown5.defaultPrevented).toBe(true);
+        });
+
+        it("handles beforeinput insertText overwrite mode", async () => {
+            host.length.set(4);
+            host.value.set("1234");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const input = getNativeInput();
+            input.setSelectionRange(1, 1);
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "9",
+                inputType: "insertText"
+            });
+            input.dispatchEvent(beforeInputEvent);
+
+            expect(input.selectionStart).toBe(1);
+            expect(input.selectionEnd).toBe(2);
+        });
     });
 
     describe("Paste Behavior", () => {
