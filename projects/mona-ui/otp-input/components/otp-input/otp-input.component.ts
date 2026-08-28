@@ -418,6 +418,9 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             event.preventDefault();
             return;
         }
+        if (this.isComposing() || event.isComposing) {
+            return;
+        }
         const inputType = event.inputType;
         const inputEl = this.inputRef().nativeElement;
         const start = inputEl.selectionStart ?? 0;

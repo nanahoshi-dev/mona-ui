@@ -705,20 +705,152 @@ describe("OtpInputComponent", () => {
     });
 
     describe("Composition / IME", () => {
-        it("buffers during composition and normalizes on compositionend", () => {
+        it("buffers during composition and normalizes on compositionend with character filtering", () => {
+            host.type.set("number");
+            fixture.detectChanges();
+
             const input = getNativeInput();
             input.dispatchEvent(new Event("compositionstart"));
             fixture.detectChanges();
 
-            input.value = "abc1";
+            input.value = "12a";
             input.dispatchEvent(new Event("input"));
             fixture.detectChanges();
+
+            // While composing, model is not updated
+            expect(host.value()).toBe("");
 
             const compEndEvent = new Event("compositionend", { bubbles: true });
             input.dispatchEvent(compEndEvent);
             fixture.detectChanges();
 
-            expect(host.value()).toBe("abc1");
+            // After compositionend, value is normalized to only numbers
+            expect(host.value()).toBe("12");
+        });
+
+        it("does not intercept or prevent single-character insertText during active composition", () => {
+            host.type.set("number");
+            host.value.set("");
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+            fixture.detectChanges();
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "あ",
+                inputType: "insertText",
+                isComposing: true
+            });
+            input.dispatchEvent(beforeInputEvent);
+            fixture.detectChanges();
+
+            expect(beforeInputEvent.defaultPrevented).toBe(false);
+            expect(host.value()).toBe("");
+            expect(host.touchCount).toBe(0);
+            expect(host.completeEvents.length).toBe(0);
+        });
+
+        it("does not intercept multi-character insertText or invoke custom insertion during composition", () => {
+            host.type.set("number");
+            host.value.set("");
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+            fixture.detectChanges();
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "１２",
+                inputType: "insertText",
+                isComposing: true
+            });
+            input.dispatchEvent(beforeInputEvent);
+            fixture.detectChanges();
+
+            expect(beforeInputEvent.defaultPrevented).toBe(false);
+            expect(host.value()).toBe("");
+            expect(host.touchCount).toBe(0);
+            expect(host.completeEvents.length).toBe(0);
+        });
+
+        it("does not intercept insertReplacementText during composition", () => {
+            host.type.set("number");
+            host.value.set("");
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+            fixture.detectChanges();
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "12",
+                inputType: "insertReplacementText",
+                isComposing: true
+            });
+            input.dispatchEvent(beforeInputEvent);
+            fixture.detectChanges();
+
+            expect(beforeInputEvent.defaultPrevented).toBe(false);
+            expect(host.value()).toBe("");
+            expect(host.touchCount).toBe(0);
+            expect(host.completeEvents.length).toBe(0);
+        });
+
+        it("normalizes committed value after composition-stage beforeinput and input events", () => {
+            host.type.set("number");
+            host.value.set("");
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+            fixture.detectChanges();
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "12a",
+                inputType: "insertText",
+                isComposing: true
+            });
+            input.dispatchEvent(beforeInputEvent);
+            expect(beforeInputEvent.defaultPrevented).toBe(false);
+
+            input.value = "12a";
+            input.dispatchEvent(new Event("input"));
+            fixture.detectChanges();
+            expect(host.value()).toBe("");
+
+            input.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true }));
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("12");
+            expect(host.touchCount).toBe(1);
+        });
+
+        it("prevents beforeinput even during composition if disabled or readonly", () => {
+            host.disabled.set(true);
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+            fixture.detectChanges();
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "1",
+                inputType: "insertText",
+                isComposing: true
+            });
+            input.dispatchEvent(beforeInputEvent);
+            expect(beforeInputEvent.defaultPrevented).toBe(true);
         });
     });
 
