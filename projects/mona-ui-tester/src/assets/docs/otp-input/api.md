@@ -76,10 +76,14 @@ Accepts alphanumeric characters while masking the visual presentation slots with
 
 ## Custom Character Pattern
 
-Provide a `pattern` regular expression (`RegExp | null`) to customize per-character validation:
+Provide a `pattern` regular expression (`RegExp`, `RegExp[]`, `string`, or `null`) to customize per-character validation:
 
 ```typescript
+// Single RegExp
 protected readonly hexPattern = /^[A-F0-9]$/;
+
+// Multiple patterns (evaluated as an intersection where every pattern must match)
+protected readonly customPatterns = [/^[0-9]$/, /^[1-5]$/];
 ```
 
 ```html
@@ -89,6 +93,8 @@ protected readonly hexPattern = /^[A-F0-9]$/;
     [pattern]="hexPattern">
 </mona-otp-input>
 ```
+
+When integrating with Angular Signal Forms via `[formField]`, field-level `pattern(...)` validators are automatically bound to the component.
 
 ## Placeholder
 

@@ -384,8 +384,6 @@ describe("OtpInputComponent", () => {
             host.pattern.set(/^[A-Z]$/);
             fixture.detectChanges();
             await fixture.whenStable();
-            fixture.detectChanges();
-
             expect(host.value()).toBe("");
         });
 
