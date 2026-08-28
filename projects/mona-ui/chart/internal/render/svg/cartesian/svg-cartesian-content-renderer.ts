@@ -1,6 +1,7 @@
 import type { CartesianXYChartScene } from "../../../scene/chart-scene";
 import type { ChartSeriesScene } from "../../../scene/cartesian-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
+import { computeSeriesClipRect } from "../../../utils/canvas-utils";
 import { setSvgAttribute } from "../svg-attribute-utils";
 import type { SvgDefinitionRegistry } from "../svg-definition-registry";
 import { createSvgElement } from "../svg-element-utils";
@@ -15,13 +16,6 @@ import { SvgMarkerSeriesRenderer } from "./series/svg-marker-series-renderer";
 import { SvgOhlcSeriesRenderer } from "./series/svg-ohlc-series-renderer";
 import { SvgRangeAreaSeriesRenderer } from "./series/svg-range-area-series-renderer";
 import { SvgRangeBarSeriesRenderer } from "./series/svg-range-bar-series-renderer";
-
-/**
- * Small overflow allowance so marks whose stroke or radius sits exactly at a
- * domain extreme (a peak touching the max, a point at the first/last category)
- * aren't visually chopped in half by the plot clip rectangle.
- */
-const SERIES_CLIP_OVERFLOW = 8;
 
 interface SvgSeriesRendererLike {
     clear(): void;
@@ -183,12 +177,13 @@ export class SvgCartesianContentRenderer {
             return;
         }
 
+        const seriesClipRect = computeSeriesClipRect(plotRect, scene.axes);
         const plotClipUrl = defs.useClipRect(
             "plot-clip",
-            plotRect.x - SERIES_CLIP_OVERFLOW,
-            plotRect.y - SERIES_CLIP_OVERFLOW,
-            plotRect.width + SERIES_CLIP_OVERFLOW * 2,
-            plotRect.height + SERIES_CLIP_OVERFLOW * 2
+            seriesClipRect.x,
+            seriesClipRect.y,
+            seriesClipRect.width,
+            seriesClipRect.height
         );
 
         // 1. Grid

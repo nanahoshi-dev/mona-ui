@@ -2,6 +2,7 @@ import type { ChartInteractionState } from "../interaction/chart-interaction-sta
 import type { CartesianXYChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
+import type { ChartAxisScene } from "../scene/cartesian-scene";
 import { clipToPlotRect, crispPixel } from "../utils/canvas-utils";
 import { AreaSeriesRenderer } from "./series/area-series-renderer";
 import { BarSeriesRenderer } from "./series/bar-series-renderer";
@@ -33,7 +34,7 @@ export class CartesianChartRenderer {
         overlayState: ChartRenderOverlayState | ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        const { plotRect } = scene;
+        const { axes, plotRect } = scene;
 
         if (plotRect.width <= 0 || plotRect.height <= 0) {
             return;
@@ -60,15 +61,15 @@ export class CartesianChartRenderer {
         // 1. Grid
         this.renderGridLayer(context, scene, styleResolver);
         // 2. Static Underlays
-        this.renderStaticUnderlayLayer(context, cartesianOverlay, plotRect);
+        this.renderStaticUnderlayLayer(context, cartesianOverlay, plotRect, axes);
         // 3. Series
         this.renderSeriesLayer(context, scene);
         // 4. Persistent Selection Highlights
-        this.renderSelectionLayer(context, selectionScene, selectionOptions, plotRect, styleResolver);
+        this.renderSelectionLayer(context, selectionScene, selectionOptions, plotRect, styleResolver, axes);
         // 5. Data Labels (Canvas default labels)
         this.renderDataLabelLayer(context, cartesianDataLabels, plotRect);
         // 6. Static Overlays & Annotations
-        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
+        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors, axes);
         // 7. Axes
         this.renderAxisLayer(context, scene, styleResolver);
         // 8. Transient (Crosshair + Highlights)
@@ -173,7 +174,7 @@ export class CartesianChartRenderer {
         overlayState: ChartRenderOverlayState | ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        const { plotRect } = toScene;
+        const { axes, plotRect } = toScene;
         if (plotRect.width <= 0 || plotRect.height <= 0) {
             return;
         }
@@ -206,7 +207,7 @@ export class CartesianChartRenderer {
         }
 
         // 2. Target static underlay once (at full own opacity)
-        this.renderStaticUnderlayLayer(context, cartesianOverlay, plotRect);
+        this.renderStaticUnderlayLayer(context, cartesianOverlay, plotRect, axes);
 
         // 3. Series crossfade
         if (fromScene && progress < 1) {
@@ -223,7 +224,7 @@ export class CartesianChartRenderer {
         }
 
         // 4. Static overlay (at full own opacity)
-        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors);
+        this.renderStaticOverlayLayer(context, cartesianOverlay, plotRect, annotationBadgeAnchors, axes);
 
         // 7. Axes crossfade
         if (fromScene && progress < 1) {
@@ -300,11 +301,13 @@ export class CartesianChartRenderer {
         selectionScene: CartesianSelectionScene | null,
         options: { readonly color?: string; readonly fillOpacity?: number; readonly strokeWidth?: number } | null,
         plotRect: ChartRect,
-        styleResolver?: ChartStyleResolver
+        styleResolver?: ChartStyleResolver,
+        axes: readonly ChartAxisScene[] = []
     ): void {
         if (selectionScene && selectionScene.hits.length > 0) {
             const fallback = styleResolver?.resolveSelectionStyle(null);
             CartesianSelectionOverlayRenderer.render(context, selectionScene, {
+                axes,
                 color: options?.color ?? fallback?.color,
                 fillOpacity: options?.fillOpacity ?? fallback?.fillOpacity,
                 plotRect,
@@ -314,9 +317,9 @@ export class CartesianChartRenderer {
     }
 
     public static renderSeriesLayer(context: CanvasRenderingContext2D, scene: CartesianXYChartScene): void {
-        const { plotRect, series } = scene;
+        const { axes, plotRect, series } = scene;
         context.save();
-        clipToPlotRect(context, plotRect);
+        clipToPlotRect(context, plotRect, axes);
 
         for (const s of series) {
             switch (s.type) {
@@ -354,12 +357,14 @@ export class CartesianChartRenderer {
         context: CanvasRenderingContext2D,
         cartesianOverlay: CartesianOverlayScene | null,
         plotRect: ChartRect,
-        annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null
+        annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null,
+        axes: readonly ChartAxisScene[] = []
     ): void {
         CartesianOverlayRenderer.renderOverlays(
             context,
             cartesianOverlay,
             plotRect,
+            axes,
             annotationBadgeAnchors ?? undefined
         );
     }
@@ -367,9 +372,10 @@ export class CartesianChartRenderer {
     public static renderStaticUnderlayLayer(
         context: CanvasRenderingContext2D,
         cartesianOverlay: CartesianOverlayScene | null,
-        plotRect: ChartRect
+        plotRect: ChartRect,
+        axes: readonly ChartAxisScene[] = []
     ): void {
-        CartesianOverlayRenderer.renderUnderlays(context, cartesianOverlay, plotRect);
+        CartesianOverlayRenderer.renderUnderlays(context, cartesianOverlay, plotRect, axes);
     }
 
     public static renderTransientLayer(
@@ -378,7 +384,7 @@ export class CartesianChartRenderer {
         overlayState: ChartRenderOverlayState | ChartInteractionState | null,
         styleResolver: ChartStyleResolver
     ): void {
-        const { plotRect } = scene;
+        const { axes, plotRect } = scene;
         if (!overlayState) {
             return;
         }
@@ -395,7 +401,14 @@ export class CartesianChartRenderer {
         context.save();
         // Crosshair Lines
         if (crosshairState && crosshairRegistration) {
-            CartesianCrosshairRenderer.render(context, crosshairState, crosshairRegistration, plotRect, styleResolver);
+            CartesianCrosshairRenderer.render(
+                context,
+                crosshairState,
+                crosshairRegistration,
+                plotRect,
+                styleResolver,
+                axes
+            );
         }
 
         // Active Highlights
