@@ -58,51 +58,17 @@ export function normalizeLength(length: number): number {
     return Math.floor(length);
 }
 
-export function patternTransform(val: unknown): readonly RegExp[] {
-    if (!val) {
-        return [];
-    }
-    if (val instanceof RegExp) {
-        return [val];
-    }
-    if (Array.isArray(val)) {
-        const result: RegExp[] = [];
-        for (const item of val) {
-            if (item instanceof RegExp) {
-                result.push(item);
-            } else if (typeof item === "string" && item.length > 0) {
-                try {
-                    result.push(new RegExp(item));
-                } catch {
-                    // Ignore invalid regex string
-                }
-            }
-        }
-        return result;
-    }
-    if (typeof val === "string" && val.length > 0) {
-        try {
-            return [new RegExp(val)];
-        } catch {
-            return [];
-        }
-    }
-    return [];
-}
-
 export function isValidCharacter(
     char: string,
     type: OtpInputType,
-    pattern: readonly RegExp[] | null | undefined
+    characterPattern: RegExp | null | undefined
 ): boolean {
     if (!char || char.length !== 1) {
         return false;
     }
-    if (pattern != null && pattern.length > 0) {
-        return pattern.every(p => {
-            const sanitized = new RegExp(p.source, p.flags.replace(/[gy]/g, ""));
-            return sanitized.test(char);
-        });
+    if (characterPattern != null) {
+        const sanitized = new RegExp(characterPattern.source, characterPattern.flags.replace(/[gy]/g, ""));
+        return sanitized.test(char);
     }
     if (type === "number") {
         return /^[0-9]$/.test(char);
@@ -113,7 +79,7 @@ export function isValidCharacter(
 export function filterCharacters(
     raw: string,
     type: OtpInputType,
-    pattern: readonly RegExp[] | null | undefined,
+    characterPattern: RegExp | null | undefined,
     maxLength: number
 ): string {
     if (!raw) {
@@ -121,7 +87,7 @@ export function filterCharacters(
     }
     let result = "";
     for (const char of raw) {
-        if (isValidCharacter(char, type, pattern)) {
+        if (isValidCharacter(char, type, characterPattern)) {
             result += char;
             if (result.length >= maxLength) {
                 break;

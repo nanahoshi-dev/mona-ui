@@ -30,7 +30,6 @@ import {
     isValidCharacter,
     normalizeGroupLengths,
     normalizeLength,
-    patternTransform,
     sanitizeInputAttributes,
     toNonEmptyString
 } from "../../utils/otp-input.utils";
@@ -223,6 +222,12 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public readonly ariaLabel = input("Verification code");
 
     /**
+     * @description Regular expression used to determine whether each individual OTP character is allowed.
+     * @default null
+     */
+    public readonly characterPattern = input<RegExp | null>(null);
+
+    /**
      * @description Emitted when a user interaction completes the verification code.
      */
     public readonly complete = output<string>();
@@ -268,12 +273,6 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * @default 4
      */
     public readonly length = input(4);
-
-    /**
-     * @description Custom regular expression or list of regular expressions used to validate each candidate character.
-     * @default []
-     */
-    public readonly pattern = input<readonly RegExp[], unknown>([], { transform: patternTransform });
 
     /**
      * @description Hint character displayed in empty visual slots.
@@ -366,10 +365,10 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         effect(() => {
             const val = this.value();
             const inputType = this.type();
-            const pattern = this.pattern();
+            const characterPattern = this.characterPattern();
             const maxLen = this.normalizedLength();
 
-            const filtered = filterCharacters(val, inputType, pattern, maxLen);
+            const filtered = filterCharacters(val, inputType, characterPattern, maxLen);
             if (filtered !== val) {
                 this.value.set(filtered);
             }
@@ -415,7 +414,8 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     protected onBeforeInput(event: InputEvent): void {
-        if (this.disabled() || this.readonly() || this.isComposing()) {
+        if (this.disabled() || this.readonly()) {
+            event.preventDefault();
             return;
         }
         const inputType = event.inputType;
@@ -430,7 +430,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
                 return;
             }
             if (event.data.length === 1) {
-                if (!isValidCharacter(event.data, this.type(), this.pattern())) {
+                if (!isValidCharacter(event.data, this.type(), this.characterPattern())) {
                     event.preventDefault();
                     return;
                 }
@@ -488,7 +488,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const inputEl = this.inputRef().nativeElement;
         const rawVal = inputEl.value;
         const prevVal = this.value();
-        const nextVal = filterCharacters(rawVal, this.type(), this.pattern(), this.normalizedLength());
+        const nextVal = filterCharacters(rawVal, this.type(), this.characterPattern(), this.normalizedLength());
 
         inputEl.value = nextVal;
         const wasIncomplete = prevVal.length < this.normalizedLength();
@@ -518,7 +518,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const val = this.value();
         const maxLen = this.normalizedLength();
 
-        if (!isValidCharacter(event.key, this.type(), this.pattern())) {
+        if (!isValidCharacter(event.key, this.type(), this.characterPattern())) {
             event.preventDefault();
             return;
         }
@@ -549,11 +549,9 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         event.preventDefault();
 
         const inputEl = this.inputRef().nativeElement;
-        const currentVal = this.value();
-        const selStart = inputEl.selectionStart ?? currentVal.length;
-        const selEnd = inputEl.selectionEnd ?? selStart;
-
-        this.applyUserInsertion(pastedText, selStart, selEnd);
+        const start = inputEl.selectionStart ?? 0;
+        const end = inputEl.selectionEnd ?? 0;
+        this.applyUserInsertion(pastedText, start, end);
     }
 
     protected onSelect(): void {
@@ -565,19 +563,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             return;
         }
         event.preventDefault();
-        const el = this.inputRef().nativeElement;
-        el.focus();
-        const val = this.value();
-        if (index < val.length) {
-            el.setSelectionRange(index, index + 1);
-            this.selectionStart.set(index);
-            this.selectionEnd.set(index + 1);
-        } else {
-            const pos = Math.min(index, val.length);
-            el.setSelectionRange(pos, pos);
-            this.selectionStart.set(pos);
-            this.selectionEnd.set(pos);
-        }
+        this.focus(index);
     }
 
     private applyUserInsertion(text: string, selectionStart: number, selectionEnd: number): void {
@@ -588,7 +574,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const currentVal = this.value();
         const maxLen = this.normalizedLength();
 
-        const filtered = filterCharacters(text, this.type(), this.pattern(), Number.MAX_SAFE_INTEGER);
+        const filtered = filterCharacters(text, this.type(), this.characterPattern(), Number.MAX_SAFE_INTEGER);
         if (filtered.length === 0 && selectionStart === selectionEnd) {
             return;
         }

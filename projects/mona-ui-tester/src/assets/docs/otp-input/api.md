@@ -74,27 +74,23 @@ Accepts alphanumeric characters while masking the visual presentation slots with
 <mona-otp-input type="password" [length]="4"></mona-otp-input>
 ```
 
-## Custom Character Pattern
+## Allowed Character Pattern (`characterPattern`)
 
-Provide a `pattern` regular expression (`RegExp`, `RegExp[]`, `string`, or `null`) to customize per-character validation:
+Provide a `characterPattern` regular expression (`RegExp | null`) to customize per-character keystroke validation:
 
 ```typescript
-// Single RegExp
-protected readonly hexPattern = /^[A-F0-9]$/;
-
-// Multiple patterns (evaluated as an intersection where every pattern must match)
-protected readonly customPatterns = [/^[0-9]$/, /^[1-5]$/];
+protected readonly hexadecimalCharacter = /^[A-F0-9]$/;
 ```
 
 ```html
 <mona-otp-input
     type="text"
     [length]="6"
-    [pattern]="hexPattern">
+    [characterPattern]="hexadecimalCharacter">
 </mona-otp-input>
 ```
 
-When integrating with Angular Signal Forms via `[formField]`, field-level `pattern(...)` validators are automatically bound to the component.
+`characterPattern` is evaluated against each individual candidate character and restricts which characters may be entered.
 
 ## Placeholder
 
@@ -182,7 +178,7 @@ Configure corner radius via `rounded` (`"none"`, `"small"`, `"medium"`, `"large"
 
 ```typescript
 import { Component, signal } from "@angular/core";
-import { form, FormField, required } from "@angular/forms/signals";
+import { form, FormField, pattern, required } from "@angular/forms/signals";
 import { OtpInputComponent } from "@nanahoshi/mona-ui/otp-input";
 
 @Component({
@@ -191,20 +187,23 @@ import { OtpInputComponent } from "@nanahoshi/mona-ui/otp-input";
         <mona-otp-input
             type="number"
             [length]="6"
+            [characterPattern]="digitPattern"
             [formField]="loginForm.code">
         </mona-otp-input>
     `
 })
 export class OtpLoginComponent {
     readonly #loginModel = signal({ code: "" });
+    protected readonly digitPattern = /^[0-9]$/;
 
     protected readonly loginForm = form(this.#loginModel, schema => {
         required(schema.code);
+        pattern(schema.code, /^\d{6}$/);
     });
 }
 ```
 
-The `FormField` directive automatically synchronizes value, disabled, readonly, required, invalid, and touched state.
+The `FormField` directive automatically synchronizes value, disabled, readonly, required, invalid, and touched state. Signal Forms evaluates field-level `pattern(...)` validators over the complete string value and updates form field validity, while character filtering is configured separately via `characterPattern`.
 
 ## State Properties
 

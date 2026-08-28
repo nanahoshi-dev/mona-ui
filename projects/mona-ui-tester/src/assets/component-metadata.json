@@ -10607,6 +10607,13 @@
         "defaultValue": "\"Verification code\""
       },
       {
+        "description": "Regular expression used to determine whether each individual OTP character is allowed.",
+        "kind": "input",
+        "name": "characterPattern",
+        "type": "RegExp | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "Emitted when a user interaction completes the verification code.",
         "kind": "output",
         "name": "complete",
@@ -10658,13 +10665,6 @@
         "name": "length",
         "type": "number",
         "defaultValue": "4"
-      },
-      {
-        "description": "Custom regular expression or list of regular expressions used to validate each candidate character.",
-        "kind": "input",
-        "name": "pattern",
-        "type": "readonly RegExp[]",
-        "defaultValue": "[]"
       },
       {
         "description": "Hint character displayed in empty visual slots.",

@@ -1,6 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
+import { disabled, form, FormField, pattern, readonly, required } from "@angular/forms/signals";
 import { By } from "@angular/platform-browser";
 import axe from "axe-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -17,7 +17,7 @@ import { OtpInputComponent } from "./otp-input.component";
                 (valueChange)="value.set($event)"
                 [length]="length()"
                 [type]="type()"
-                [pattern]="pattern()"
+                [characterPattern]="characterPattern()"
                 [placeholder]="placeholder()"
                 [groupLength]="groupLength()"
                 [separator]="separator()"
@@ -50,6 +50,7 @@ import { OtpInputComponent } from "./otp-input.component";
 class TestHostComponent {
     public readonly ariaLabel = signal("Verification code");
     public readonly blurEvents: FocusEvent[] = [];
+    public readonly characterPattern = signal<RegExp | null>(null);
     public readonly completeEvents: string[] = [];
     public readonly containerDir = signal<"ltr" | "rtl">("ltr");
     public readonly disabled = signal(false);
@@ -58,7 +59,6 @@ class TestHostComponent {
     public readonly inputAttributes = signal<Record<string, unknown>>({});
     public readonly invalid = signal(false);
     public readonly length = signal(4);
-    public readonly pattern = signal<RegExp | readonly RegExp[] | string | null>(null);
     public readonly placeholder = signal("");
     public readonly readonly = signal(false);
     public readonly required = signal(false);
@@ -97,6 +97,7 @@ interface FormTestModel {
 }
 
 @Component({
+    selector: "mona-signal-form-host",
     imports: [OtpInputComponent, FormField],
     template: `
         <mona-otp-input [formField]="form.code" [length]="6" (complete)="onComplete($event)"></mona-otp-input>
@@ -115,6 +116,59 @@ class SignalFormHostComponent {
             disabled(schema.code, { when: () => this.isFieldDisabled() });
             readonly(schema.code, { when: () => this.isFieldReadonly() });
             required(schema.code, { when: () => this.isFieldRequired() });
+        });
+    }
+
+    public onComplete(value: string): void {
+        this.completeEvents.push(value);
+    }
+}
+
+@Component({
+    selector: "mona-signal-form-with-pattern-host",
+    imports: [OtpInputComponent, FormField],
+    template: `
+        <mona-otp-input [formField]="form.code" [length]="6" (complete)="onComplete($event)"></mona-otp-input>
+    `
+})
+class SignalFormWithPatternHostComponent {
+    public readonly completeEvents: string[] = [];
+    public readonly form;
+    public readonly formModel = signal<FormTestModel>({ code: "" });
+
+    public constructor() {
+        this.form = form(this.formModel, schema => {
+            pattern(schema.code, /^\d{6}$/);
+        });
+    }
+
+    public onComplete(value: string): void {
+        this.completeEvents.push(value);
+    }
+}
+
+@Component({
+    selector: "mona-signal-form-with-combined-pattern-host",
+    imports: [OtpInputComponent, FormField],
+    template: `
+        <mona-otp-input
+            type="text"
+            [characterPattern]="characterPattern()"
+            [formField]="form.code"
+            [length]="6"
+            (complete)="onComplete($event)">
+        </mona-otp-input>
+    `
+})
+class SignalFormWithCombinedPatternHostComponent {
+    public readonly characterPattern = signal<RegExp | null>(/^[0-9]$/);
+    public readonly completeEvents: string[] = [];
+    public readonly form;
+    public readonly formModel = signal<FormTestModel>({ code: "" });
+
+    public constructor() {
+        this.form = form(this.formModel, schema => {
+            pattern(schema.code, /^\d{6}$/);
         });
     }
 
@@ -318,7 +372,7 @@ describe("OtpInputComponent", () => {
         });
     });
 
-    describe("Type Filtering and Custom Pattern", () => {
+    describe("Type Filtering and Custom Character Pattern", () => {
         it("accepts only numbers when type=number and sets inputmode=numeric", async () => {
             host.type.set("number");
             host.value.set("12AB-9");
@@ -330,8 +384,8 @@ describe("OtpInputComponent", () => {
             expect(getNativeInput().getAttribute("inputmode")).toBe("numeric");
         });
 
-        it("uses default alphanumeric filtering when pattern is null", async () => {
-            host.pattern.set(null);
+        it("uses default alphanumeric filtering when characterPattern is null", async () => {
+            host.characterPattern.set(null);
             host.type.set("text");
             host.value.set("aB1!_2");
             fixture.detectChanges();
@@ -341,8 +395,8 @@ describe("OtpInputComponent", () => {
             expect(host.value()).toBe("aB12");
         });
 
-        it("uses custom pattern to filter characters", async () => {
-            host.pattern.set(/^[A-F0-9]$/);
+        it("uses custom characterPattern to filter characters", async () => {
+            host.characterPattern.set(/^[A-F0-9]$/);
             host.value.set("A1Z9F");
             fixture.detectChanges();
             await fixture.whenStable();
@@ -352,7 +406,7 @@ describe("OtpInputComponent", () => {
         });
 
         it("handles global (g) and sticky (y) pattern flags without state corruption", async () => {
-            host.pattern.set(/^[A-F0-9]$/gy);
+            host.characterPattern.set(/^[A-F0-9]$/gy);
             host.value.set("A1B2");
             fixture.detectChanges();
             await fixture.whenStable();
@@ -360,12 +414,12 @@ describe("OtpInputComponent", () => {
             expect(host.value()).toBe("A1B2");
         });
 
-        it("normalizes existing value on runtime pattern change", async () => {
+        it("normalizes existing value on runtime characterPattern change", async () => {
             host.value.set("ABCD");
             fixture.detectChanges();
             await fixture.whenStable();
 
-            host.pattern.set(/^[0-9]$/);
+            host.characterPattern.set(/^[0-9]$/);
             fixture.detectChanges();
             await fixture.whenStable();
             fixture.detectChanges();
@@ -373,36 +427,18 @@ describe("OtpInputComponent", () => {
             expect(host.value()).toBe("");
         });
 
-        it("normalizes existing value when switching between custom patterns", async () => {
-            host.pattern.set(/^[a-z]$/);
+        it("normalizes existing value when switching between custom character patterns", async () => {
+            host.characterPattern.set(/^[a-z]$/);
             host.value.set("abcd");
             fixture.detectChanges();
             await fixture.whenStable();
 
             expect(host.value()).toBe("abcd");
 
-            host.pattern.set(/^[A-Z]$/);
+            host.characterPattern.set(/^[A-Z]$/);
             fixture.detectChanges();
             await fixture.whenStable();
             expect(host.value()).toBe("");
-        });
-
-        it("supports string patterns and multiple pattern arrays", async () => {
-            host.pattern.set("^[0-9]$");
-            host.value.set("12a3");
-            fixture.detectChanges();
-            await fixture.whenStable();
-            fixture.detectChanges();
-
-            expect(host.value()).toBe("123");
-
-            host.pattern.set([/^[0-9]$/, /^[1-5]$/]);
-            host.value.set("1294");
-            fixture.detectChanges();
-            await fixture.whenStable();
-            fixture.detectChanges();
-
-            expect(host.value()).toBe("124");
         });
     });
 
@@ -1311,6 +1347,139 @@ describe("OtpInputComponent with Signal Forms", () => {
         const input = inputDebug.nativeElement as HTMLInputElement;
         expect(input.value).toBe("654321");
         expect(host.completeEvents.length).toBe(0);
+    });
+});
+
+describe("OtpInputComponent with Signal Forms whole-field pattern validation", () => {
+    let fixture: ComponentFixture<SignalFormWithPatternHostComponent>;
+    let host: SignalFormWithPatternHostComponent;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [SignalFormWithPatternHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(SignalFormWithPatternHostComponent);
+        host = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it("does not filter out partial input during typing and marks field as invalid", async () => {
+        const inputDebug = fixture.debugElement.query(By.css("input"));
+        const input = inputDebug.nativeElement as HTMLInputElement;
+
+        input.value = "123";
+        input.dispatchEvent(new Event("input"));
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(input.value).toBe("123");
+        expect(host.form.code().value()).toBe("123");
+        expect(host.form.code().invalid()).toBe(true);
+    });
+
+    it("accepts full 6-digit input, updates model, and marks field as valid", async () => {
+        const inputDebug = fixture.debugElement.query(By.css("input"));
+        const input = inputDebug.nativeElement as HTMLInputElement;
+
+        input.value = "123456";
+        input.dispatchEvent(new Event("input"));
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(input.value).toBe("123456");
+        expect(host.form.code().value()).toBe("123456");
+        expect(host.form.code().valid()).toBe(true);
+        expect(host.completeEvents).toEqual(["123456"]);
+    });
+
+    it("does not destroy programmatic valid value in normalization effect", async () => {
+        host.formModel.set({ code: "654321" });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        const inputDebug = fixture.debugElement.query(By.css("input"));
+        const input = inputDebug.nativeElement as HTMLInputElement;
+
+        expect(input.value).toBe("654321");
+        expect(host.form.code().value()).toBe("654321");
+        expect(host.form.code().valid()).toBe(true);
+        expect(host.completeEvents.length).toBe(0);
+    });
+
+    it("does not destroy programmatic partial value and marks field as invalid", async () => {
+        host.formModel.set({ code: "123" });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        const inputDebug = fixture.debugElement.query(By.css("input"));
+        const input = inputDebug.nativeElement as HTMLInputElement;
+
+        expect(input.value).toBe("123");
+        expect(host.form.code().value()).toBe("123");
+        expect(host.form.code().invalid()).toBe(true);
+    });
+
+    it("keeps invalid whole value editable and reports invalidity through form state", async () => {
+        const inputDebug = fixture.debugElement.query(By.css("input"));
+        const input = inputDebug.nativeElement as HTMLInputElement;
+
+        input.value = "ABC12";
+        input.dispatchEvent(new Event("input"));
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(input.value).toBe("ABC12");
+        expect(host.form.code().value()).toBe("ABC12");
+        expect(host.form.code().invalid()).toBe(true);
+    });
+});
+
+describe("OtpInputComponent with combined characterPattern and Signal Forms pattern validation", () => {
+    let fixture: ComponentFixture<SignalFormWithCombinedPatternHostComponent>;
+    let host: SignalFormWithCombinedPatternHostComponent;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [SignalFormWithCombinedPatternHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(SignalFormWithCombinedPatternHostComponent);
+        host = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it("applies per-character filtering during typing while Signal Forms validates whole-field pattern", async () => {
+        const inputDebug = fixture.debugElement.query(By.css("input"));
+        const input = inputDebug.nativeElement as HTMLInputElement;
+
+        // Type "12a3" -> characterPattern allows only digits -> filtered to "123"
+        input.value = "12a3";
+        input.dispatchEvent(new Event("input"));
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(input.value).toBe("123");
+        expect(host.form.code().value()).toBe("123");
+        expect(host.form.code().invalid()).toBe(true);
+
+        // Complete the code "123456"
+        input.value = "123456";
+        input.dispatchEvent(new Event("input"));
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(input.value).toBe("123456");
+        expect(host.form.code().value()).toBe("123456");
+        expect(host.form.code().valid()).toBe(true);
+        expect(host.completeEvents).toEqual(["123456"]);
     });
 });
 
