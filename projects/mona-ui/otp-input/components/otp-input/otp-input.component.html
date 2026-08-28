@@ -37,7 +37,14 @@
         @for (slot of group.slots; track slot.index; let firstSlot = $first; let lastSlot = $last) {
             <span
                 class="otp-slot"
-                [class]="getSlotClasses(slot, firstSlot, lastSlot, group.slots.length)"
+                monaOtpSlot
+                [firstSlot]="firstSlot"
+                [lastSlot]="lastSlot"
+                [groupSize]="group.slots.length"
+                [rounded]="rounded()"
+                [size]="size()"
+                [slotClass]="slotClass()"
+                [spacing]="spacing()"
                 [attr.data-slot-index]="slot.index"
                 [attr.data-active]="slot.active || null"
                 [attr.data-selected]="slot.selected || null"
@@ -51,7 +58,7 @@
                 {{ slot.displayCharacter }}
                 @if (slot.active && !slot.filled && hasFocus() && !disabled() && !readonly()) {
                     <span
-                        class="pointer-events-none absolute inset-y-2 w-0.5 animate-pulse bg-foreground"
+                        class="pointer-events-none absolute inset-y-2 w-0.5 animate-pulse motion-reduce:animate-none bg-foreground"
                         aria-hidden="true"></span>
                 }
             </span>

@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, effect, inject, input, model, signal } from "@angular/core";
+import { Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideHeart } from "@lucide/angular";
 import { OtpInputComponent, OtpInputSeparatorTemplateDirective } from "@nanahoshi/mona-ui/otp-input";
@@ -18,7 +18,7 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
         separatorTemplate: {
             code: ``,
             name: "Separator Template",
-            description: "The template to use for the separator between each slot.",
+            description: "The template to use for the separator rendered between OTP groups.",
             active: false
         }
     });
@@ -126,11 +126,21 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
 })
 export class OtpInputWrapperComponent implements ComponentInputsAsSignal<OtpInputComponent> {
     readonly #formModel = signal<OtpDemoFormModel>({ code: "" });
+    protected readonly displayedValue = computed(() => {
+        const val = this.form.code().value();
+        if (this.type() === "password") {
+            return "•".repeat(val.length);
+        }
+        return val || "(empty)";
+    });
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.code, { when: () => this.disabled() });
         readonly(schema.code, { when: () => this.readonly() });
         required(schema.code, { when: () => this.required() });
+    });
+    protected readonly isComplete = computed(() => {
+        return this.form.code().value().length === this.length();
     });
 
     public readonly disabled = input(false);
@@ -150,18 +160,6 @@ export class OtpInputWrapperComponent implements ComponentInputsAsSignal<OtpInpu
         effect(() => {
             this.form.code().value.set(this.value());
         });
-    }
-
-    protected displayedValue(): string {
-        const val = this.form.code().value();
-        if (this.type() === "password") {
-            return "•".repeat(val.length);
-        }
-        return val || "(empty)";
-    }
-
-    protected isComplete(): boolean {
-        return this.form.code().value().length === this.length();
     }
 
     protected onComplete(_value: string): void {

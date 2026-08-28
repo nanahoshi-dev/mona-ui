@@ -16,17 +16,17 @@ import { type FormValueControl } from "@angular/forms/signals";
 import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { OtpInputSeparatorTemplateDirective } from "../../directives/otp-input-separator-template.directive";
+import { OtpSlotDirective } from "../../directives/otp-slot.directive";
 import { OtpInputType } from "../../models/OtpInputType";
 import {
     otpInputFieldThemeVariants,
     otpInputHostThemeVariants,
-    otpInputSlotThemeVariants,
     OtpInputVariantInput,
     OtpInputVariantProps
 } from "../../styles/otp-input.styles";
 import {
     filterCharacters,
-    getSlotRoundedClasses,
+    findAttribute,
     isValidCharacter,
     normalizeGroupLengths,
     normalizeLength,
@@ -34,9 +34,8 @@ import {
     sanitizeInputAttributes
 } from "../../utils/otp-input.utils";
 
-export interface OtpSlotViewModel {
+interface OtpSlotViewModel {
     active: boolean;
-    character: string;
     displayCharacter: string;
     filled: boolean;
     index: number;
@@ -44,18 +43,18 @@ export interface OtpSlotViewModel {
     selected: boolean;
 }
 
-export interface OtpGroupViewModel {
+interface OtpGroupViewModel {
     index: number;
-    length: number;
     slots: OtpSlotViewModel[];
-    start: number;
 }
 
 @Component({
     selector: "mona-otp-input",
     templateUrl: "./otp-input.component.html",
-    imports: [NgTemplateOutlet, AttributeBinderDirective],
+    imports: [NgTemplateOutlet, AttributeBinderDirective, OtpSlotDirective],
     host: {
+        dir: "ltr",
+        "[attr.dir]": "'ltr'",
         "[attr.data-disabled]": "disabled() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null",
@@ -71,8 +70,8 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             return -1;
         }
         const totalLen = this.normalizedLength();
-        const start = this.selectionStart();
-        const end = this.selectionEnd();
+        const start = this.logicalSelectionStart();
+        const end = this.logicalSelectionEnd();
 
         if (start === end) {
             if (start < totalLen) {
@@ -88,26 +87,30 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     });
     protected readonly computedAriaLabel = computed(() => {
         const attrs = this.inputAttributes();
-        if (attrs["aria-labelledby"]) {
+        if (findAttribute(attrs, "aria-labelledby") != null) {
             return null;
         }
-        if (attrs["aria-label"] != null) {
-            return String(attrs["aria-label"]);
+        const label = findAttribute(attrs, "aria-label");
+        if (label != null) {
+            return String(label);
         }
         return this.ariaLabel();
     });
     protected readonly computedAriaLabelledby = computed(() => {
         const attrs = this.inputAttributes();
-        return attrs["aria-labelledby"] != null ? String(attrs["aria-labelledby"]) : null;
+        const labelledby = findAttribute(attrs, "aria-labelledby");
+        return labelledby != null ? String(labelledby) : null;
     });
     protected readonly derivedAutocomplete = computed(() => {
         const attrs = this.inputAttributes();
-        return attrs["autocomplete"] != null ? String(attrs["autocomplete"]) : "one-time-code";
+        const autocomplete = findAttribute(attrs, "autocomplete");
+        return autocomplete != null ? String(autocomplete) : "one-time-code";
     });
     protected readonly derivedInputMode = computed(() => {
         const attrs = this.inputAttributes();
-        if (attrs["inputmode"] != null) {
-            return String(attrs["inputmode"]);
+        const inputMode = findAttribute(attrs, "inputmode");
+        if (inputMode != null) {
+            return String(inputMode);
         }
         return this.type() === "number" ? "numeric" : "text";
     });
@@ -119,6 +122,16 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     );
     protected readonly isComplete = computed(() => this.value().length === this.normalizedLength());
     protected readonly isComposing = signal(false);
+    protected readonly logicalSelectionEnd = computed(() => {
+        const maxLogicalPosition = Math.min(this.value().length, this.normalizedLength());
+        const start = this.logicalSelectionStart();
+        const rawEnd = Math.max(0, Math.min(this.selectionEnd(), maxLogicalPosition));
+        return Math.max(start, rawEnd);
+    });
+    protected readonly logicalSelectionStart = computed(() => {
+        const maxLogicalPosition = Math.min(this.value().length, this.normalizedLength());
+        return Math.max(0, Math.min(this.selectionStart(), maxLogicalPosition));
+    });
     protected readonly nativeInputType = computed(() => (this.type() === "password" ? "password" : "text"));
     protected readonly normalizedLength = computed(() => normalizeLength(this.length()));
     protected readonly sanitizedAttributes = computed(() => sanitizeInputAttributes(this.inputAttributes()));
@@ -132,8 +145,8 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const groupSizes = normalizeGroupLengths(this.groupLength(), totalLen);
         const val = this.value();
         const activeIndex = this.activeSlotIndex();
-        const selStart = this.selectionStart();
-        const selEnd = this.selectionEnd();
+        const selStart = this.logicalSelectionStart();
+        const selEnd = this.logicalSelectionEnd();
         const focused = this.hasFocus();
         const inputType = this.type();
         const placeholderStr = this.placeholder();
@@ -164,7 +177,6 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
 
                 slots.push({
                     active,
-                    character,
                     displayCharacter,
                     filled,
                     index: slotIndex,
@@ -175,9 +187,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
 
             groups.push({
                 index: gIndex,
-                length: size,
-                slots,
-                start: slotCounter - size
+                slots
             });
         }
 
@@ -348,6 +358,8 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         this.inputRef().nativeElement.blur();
     }
 
+    public focus(options?: FocusOptions): void;
+    public focus(index?: number): void;
     public focus(target?: number | FocusOptions): void {
         if (this.disabled()) {
             return;
@@ -380,47 +392,43 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         this.syncSelection();
     }
 
-    protected getSlotClasses(slot: OtpSlotViewModel, firstSlot: boolean, lastSlot: boolean, groupSize: number): string {
-        const rounded = this.rounded();
-        const size = this.size();
-        const spacing = this.spacing();
-
-        const baseClasses = otpInputSlotThemeVariants({
-            rounded: spacing ? rounded : "none",
-            size
-        });
-
-        let extraRounding = "";
-        if (!spacing) {
-            extraRounding = getSlotRoundedClasses(rounded, firstSlot, lastSlot, groupSize);
-        }
-
-        return twMerge(baseClasses, extraRounding, this.slotClass());
-    }
-
     protected onBeforeInput(event: InputEvent): void {
         if (this.disabled() || this.readonly() || this.isComposing()) {
             return;
         }
-        if (event.inputType === "insertText" && event.data) {
-            const inputEl = this.inputRef().nativeElement;
-            const start = inputEl.selectionStart ?? 0;
-            const end = inputEl.selectionEnd ?? 0;
-            const val = this.value();
-            const maxLen = this.normalizedLength();
+        const inputType = event.inputType;
+        const inputEl = this.inputRef().nativeElement;
+        const start = inputEl.selectionStart ?? 0;
+        const end = inputEl.selectionEnd ?? 0;
+        const val = this.value();
+        const maxLen = this.normalizedLength();
 
-            if (!isValidCharacter(event.data, this.type(), this.pattern())) {
-                event.preventDefault();
+        if (inputType === "insertText") {
+            if (!event.data) {
                 return;
             }
+            if (event.data.length === 1) {
+                if (!isValidCharacter(event.data, this.type(), this.pattern())) {
+                    event.preventDefault();
+                    return;
+                }
 
-            if (start >= maxLen && start === end) {
+                if (start >= maxLen && start === end) {
+                    event.preventDefault();
+                    return;
+                }
+
+                if (start === end && start < val.length) {
+                    inputEl.setSelectionRange(start, start + 1);
+                }
+            } else {
                 event.preventDefault();
-                return;
+                this.applyUserInsertion(event.data, start, end);
             }
-
-            if (start === end && start < val.length) {
-                inputEl.setSelectionRange(start, start + 1);
+        } else if (inputType === "insertReplacementText" || inputType === "insertFromPaste") {
+            if (event.data) {
+                event.preventDefault();
+                this.applyUserInsertion(event.data, start, end);
             }
         }
     }
@@ -523,29 +531,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const selStart = inputEl.selectionStart ?? currentVal.length;
         const selEnd = inputEl.selectionEnd ?? selStart;
 
-        const filteredPasted = filterCharacters(pastedText, this.type(), this.pattern(), Number.MAX_SAFE_INTEGER);
-
-        const before = currentVal.substring(0, selStart);
-        const after = currentVal.substring(selEnd);
-        let combined = before + filteredPasted + after;
-        const maxLen = this.normalizedLength();
-        if (combined.length > maxLen) {
-            combined = combined.substring(0, maxLen);
-        }
-
-        const newCaretPos = Math.min(selStart + filteredPasted.length, maxLen);
-        const wasIncomplete = currentVal.length < maxLen;
-
-        inputEl.value = combined;
-        this.value.set(combined);
-        inputEl.setSelectionRange(newCaretPos, newCaretPos);
-        this.selectionStart.set(newCaretPos);
-        this.selectionEnd.set(newCaretPos);
-        this.touch.emit();
-
-        if (wasIncomplete && combined.length === maxLen) {
-            this.complete.emit(combined);
-        }
+        this.applyUserInsertion(pastedText, selStart, selEnd);
     }
 
     protected onSelect(): void {
@@ -569,6 +555,44 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             el.setSelectionRange(pos, pos);
             this.selectionStart.set(pos);
             this.selectionEnd.set(pos);
+        }
+    }
+
+    private applyUserInsertion(text: string, selectionStart: number, selectionEnd: number): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
+        const inputEl = this.inputRef().nativeElement;
+        const currentVal = this.value();
+        const maxLen = this.normalizedLength();
+
+        const filtered = filterCharacters(text, this.type(), this.pattern(), Number.MAX_SAFE_INTEGER);
+        if (filtered.length === 0 && selectionStart === selectionEnd) {
+            return;
+        }
+
+        const start = Math.max(0, Math.min(selectionStart, currentVal.length));
+        const end = Math.max(start, Math.min(selectionEnd, currentVal.length));
+
+        const before = currentVal.substring(0, start);
+        const after = currentVal.substring(end);
+        let combined = before + filtered + after;
+        if (combined.length > maxLen) {
+            combined = combined.substring(0, maxLen);
+        }
+
+        const newCaretPos = Math.min(start + filtered.length, maxLen);
+        const wasIncomplete = currentVal.length < maxLen;
+
+        inputEl.value = combined;
+        this.value.set(combined);
+        inputEl.setSelectionRange(newCaretPos, newCaretPos);
+        this.selectionStart.set(newCaretPos);
+        this.selectionEnd.set(newCaretPos);
+        this.touch.emit();
+
+        if (wasIncomplete && combined.length === maxLen) {
+            this.complete.emit(combined);
         }
     }
 

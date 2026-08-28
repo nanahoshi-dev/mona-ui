@@ -76,7 +76,7 @@ Accepts alphanumeric characters while masking the visual presentation slots with
 
 ## Custom Character Pattern
 
-Provide a `pattern` regular expression to customize per-character validation:
+Provide a `pattern` regular expression (`RegExp | null`) to customize per-character validation:
 
 ```typescript
 protected readonly hexPattern = /^[A-F0-9]$/;
@@ -176,7 +176,7 @@ Configure corner radius via `rounded` (`"none"`, `"small"`, `"medium"`, `"large"
 
 ```typescript
 import { Component, signal } from "@angular/core";
-import { form, FormField, required, disabled } from "@angular/forms/signals";
+import { form, FormField, required } from "@angular/forms/signals";
 import { OtpInputComponent } from "@nanahoshi/mona-ui/otp-input";
 
 @Component({
@@ -202,34 +202,41 @@ The `FormField` directive automatically synchronizes value, disabled, readonly, 
 
 ## State Properties
 
-- `disabled`: Disables user input, focuses, and pointer interaction while applying disabled theme styling.
+- `disabled`: Disables user input, focus, and pointer interaction while applying disabled theme styling.
 - `readonly`: Keeps the control focusable and selectable while preventing modifications to the value.
-- `required`: Marks the control as required. When incomplete and touched, the control enters the invalid error state.
-- `invalid`: Manually triggers the visual error border and focus ring.
-- `touched`: Controls error state visibility following user interaction.
+- `required`: Marks the control as required. When incomplete and touched, the control enters the visual error state. Note that Angular Signal Forms `required()` enforces non-empty strings; if form-level validity requires an exact code length, use appropriate length validators in your form schema.
+- `invalid`: Reports validation state. Visual error styling is displayed when the control is both `invalid` and `touched` (or `required` + `touched` + incomplete).
+- `touched`: Indicates whether the control has been interacted with. Error styling is only displayed when touched.
 
-## Clipboard Paste
+## Native Input Attributes (`inputAttributes`)
 
-Pasting is supported out of the box:
-- Formatted codes containing hyphens or spaces (e.g. `"12-34-56"`) are sanitized before being inserted.
-- Overlong clipboard text is truncated to the component's `length`.
-- Pasting with a selected slot replaces the selection.
-
-## One-Time-Code Autofill
-
-By default, the inner native input includes `autocomplete="one-time-code"`, allowing modern browsers and mobile operating systems (such as iOS and Android) to suggest incoming SMS verification codes.
-
-To override or disable autofill:
+The `inputAttributes` input allows forwarding custom HTML attributes to the underlying native `<input>` element:
 
 ```html
 <mona-otp-input
-    [inputAttributes]="{ autocomplete: 'off' }">
+    [inputAttributes]="{
+        id: 'otp-field',
+        name: 'two-factor-code',
+        'aria-describedby': 'otp-help-text'
+    }">
 </mona-otp-input>
 ```
 
+### Attribute Categories
+
+- **Protected structural & control attributes**: Attributes that control component mechanics and structure (`value`, `type`, `disabled`, `readonly`, `required`, `maxlength`, `aria-invalid`, `aria-required`, `aria-hidden`, `role`, `class`, `style`) cannot be overridden via `inputAttributes`. Comparison is case-insensitive.
+- **Component-managed overrides**: `autocomplete`, `inputmode`, `aria-label`, and `aria-labelledby` can be passed in `inputAttributes` to override component defaults. If omitted in subsequent updates, component defaults are automatically restored.
+- **Forwarded custom attributes**: Generic attributes such as `id`, `name`, `aria-describedby`, and `data-*` are forwarded directly and cleanly removed from the DOM if omitted in subsequent updates.
+
+## Clipboard Paste & Autofill
+
+- **Paste**: Pasted strings with delimiters or spaces (e.g. `"12-34-56"`) are sanitized before being inserted. Overlong values are bounded by `length`.
+- **Autofill**: By default, `autocomplete="one-time-code"` is set on the native input, enabling mobile operating systems (iOS and Android) and browsers to suggest incoming SMS verification codes.
+- **Multi-character input**: SMS autofill, replacement text, and virtual keyboard suggestions are supported without character-by-character blocking.
+
 ## Programmatic Focus
 
-Focus a specific slot or the next empty position using the component's `focus` method:
+Focus a specific slot index or the next unfilled slot using the component's `focus` method:
 
 ```typescript
 // Focus next incomplete slot
@@ -242,6 +249,10 @@ otpComponent.focus(2);
 otpComponent.blur();
 ```
 
+## Right-to-Left (RTL) Layout
+
+`OtpInputComponent` explicitly enforces `dir="ltr"` on its host element. When used inside an RTL page or container, the OTP token and slot sequence always maintain left-to-right ordering to eliminate ambiguity during verification code entry.
+
 ## Events
 
 - `complete`: Emitted when user interaction completes the verification code.
@@ -253,8 +264,9 @@ otpComponent.blur();
 
 - The component exposes **one accessible `<input>` control** to screen readers, preventing repetitive slot-by-slot field announcements.
 - Presentation slots and separators are marked with `aria-hidden="true"`.
-- Supports external labels via `[inputAttributes]="{ 'aria-labelledby': 'my-label-id' }"`.
-- Passes all standard **AXE** accessibility checks and conforms to WCAG AA guidelines.
+- External labels are supported via `[inputAttributes]="{ 'aria-labelledby': 'my-label-id' }"` or `[ariaLabel]`.
+- Decorative fake caret animation respects user reduced-motion preferences (`motion-reduce:animate-none`).
+- The component is designed to meet WCAG AA requirements and is verified with automated AXE accessibility checks.
 
 ## Security Notes
 

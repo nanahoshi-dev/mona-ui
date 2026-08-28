@@ -48,7 +48,7 @@ export default [
             "@angular-eslint/component-selector": [
                 "error",
                 {
-                    prefix: ["mona", "app"],
+                    prefix: "mona",
                     style: "kebab-case",
                     type: "element"
                 }
@@ -197,5 +197,18 @@ export default [
     {
         files: ["**/*.html"],
         rules: {}
+    },
+    {
+        files: ["projects/mona-ui-tester/**/*.ts"],
+        rules: {
+            "@angular-eslint/component-selector": [
+                "error",
+                {
+                    prefix: "app",
+                    style: "kebab-case",
+                    type: "element"
+                }
+            ]
+        }
     }
 ];

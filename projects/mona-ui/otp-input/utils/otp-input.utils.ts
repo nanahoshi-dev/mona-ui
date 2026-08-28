@@ -3,16 +3,36 @@ import { OtpInputType } from "../models/OtpInputType";
 import { OtpInputSlotVariantProps } from "../styles/otp-input.styles";
 
 const RESERVED_INPUT_ATTRIBUTES = new Set([
-    "value",
-    "type",
+    "aria-hidden",
+    "aria-invalid",
+    "aria-required",
+    "class",
     "disabled",
+    "maxlength",
     "readonly",
     "required",
-    "maxlength",
-    "maxLength",
-    "aria-invalid",
-    "aria-required"
+    "role",
+    "style",
+    "type",
+    "value"
 ]);
+
+const COMPONENT_MANAGED_ATTRIBUTES = new Set([
+    "aria-label",
+    "aria-labelledby",
+    "autocomplete",
+    "inputmode"
+]);
+
+export function findAttribute(attrs: AttributeConfig, name: string): unknown {
+    const target = name.toLowerCase();
+    for (const [key, value] of Object.entries(attrs)) {
+        if (key.toLowerCase() === target) {
+            return value;
+        }
+    }
+    return undefined;
+}
 
 export function normalizeLength(length: number): number {
     if (typeof length !== "number" || isNaN(length) || !isFinite(length) || length < 1) {
@@ -132,7 +152,8 @@ export function normalizeGroupLengths(
 export function sanitizeInputAttributes(attrs: AttributeConfig): AttributeConfig {
     const sanitized: AttributeConfig = {};
     for (const [key, val] of Object.entries(attrs)) {
-        if (!RESERVED_INPUT_ATTRIBUTES.has(key)) {
+        const normalizedKey = key.toLowerCase();
+        if (!RESERVED_INPUT_ATTRIBUTES.has(normalizedKey) && !COMPONENT_MANAGED_ATTRIBUTES.has(normalizedKey)) {
             sanitized[key] = val;
         }
     }

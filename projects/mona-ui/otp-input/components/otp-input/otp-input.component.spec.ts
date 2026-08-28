@@ -11,44 +11,47 @@ import { OtpInputComponent } from "./otp-input.component";
 @Component({
     imports: [OtpInputComponent, OtpInputSeparatorTemplateDirective],
     template: `
-        <mona-otp-input
-            [value]="value()"
-            (valueChange)="value.set($event)"
-            [length]="length()"
-            [type]="type()"
-            [pattern]="pattern()"
-            [placeholder]="placeholder()"
-            [groupLength]="groupLength()"
-            [separator]="separator()"
-            [spacing]="spacing()"
-            [size]="size()"
-            [rounded]="rounded()"
-            [disabled]="disabled()"
-            [readonly]="readonly()"
-            [required]="required()"
-            [invalid]="invalid()"
-            [touched]="touched()"
-            [ariaLabel]="ariaLabel()"
-            [inputAttributes]="inputAttributes()"
-            [slotClass]="slotClass()"
-            [separatorClass]="separatorClass()"
-            [class]="userClass()"
-            (complete)="onComplete($event)"
-            (touch)="onTouch()"
-            (inputFocus)="onFocus($event)"
-            (inputBlur)="onBlur($event)">
-            @if (useCustomSeparator()) {
-                <ng-template monaOtpInputSeparatorTemplate let-groupIndex="groupIndex">
-                    <span class="custom-sep">/{{ groupIndex }}</span>
-                </ng-template>
-            }
-        </mona-otp-input>
+        <div [attr.dir]="containerDir()">
+            <mona-otp-input
+                [value]="value()"
+                (valueChange)="value.set($event)"
+                [length]="length()"
+                [type]="type()"
+                [pattern]="pattern()"
+                [placeholder]="placeholder()"
+                [groupLength]="groupLength()"
+                [separator]="separator()"
+                [spacing]="spacing()"
+                [size]="size()"
+                [rounded]="rounded()"
+                [disabled]="disabled()"
+                [readonly]="readonly()"
+                [required]="required()"
+                [invalid]="invalid()"
+                [touched]="touched()"
+                [ariaLabel]="ariaLabel()"
+                [inputAttributes]="inputAttributes()"
+                [slotClass]="slotClass()"
+                [separatorClass]="separatorClass()"
+                [class]="userClass()"
+                (complete)="onComplete($event)"
+                (touch)="onTouch()"
+                (inputFocus)="onFocus($event)"
+                (inputBlur)="onBlur($event)">
+                @if (useCustomSeparator()) {
+                    <ng-template monaOtpInputSeparatorTemplate let-groupIndex="groupIndex">
+                        <span class="custom-sep">/{{ groupIndex }}</span>
+                    </ng-template>
+                }
+            </mona-otp-input>
+        </div>
     `
 })
 class TestHostComponent {
     public readonly ariaLabel = signal("Verification code");
     public readonly blurEvents: FocusEvent[] = [];
     public readonly completeEvents: string[] = [];
+    public readonly containerDir = signal<"ltr" | "rtl">("ltr");
     public readonly disabled = signal(false);
     public readonly focusEvents: FocusEvent[] = [];
     public readonly groupLength = signal<number | number[] | null>(null);
@@ -189,9 +192,24 @@ describe("OtpInputComponent", () => {
             expect(input.getAttribute("maxlength")).toBe("4");
         });
 
+        it("establishes dir=ltr on host", () => {
+            const hostEl = getHostElement();
+            expect(hostEl.getAttribute("dir")).toBe("ltr");
+        });
+
         it("does not render separators when no grouping is configured", () => {
             const separators = fixture.debugElement.queryAll(By.css(".custom-sep"));
             expect(separators.length).toBe(0);
+        });
+
+        it("includes motion-reduce:animate-none on the active fake caret", () => {
+            const input = getNativeInput();
+            input.focus();
+            fixture.detectChanges();
+
+            const caret = fixture.debugElement.query(By.css(".animate-pulse"));
+            expect(caret).not.toBeNull();
+            expect(caret.nativeElement.className).toContain("motion-reduce:animate-none");
         });
     });
 
@@ -321,9 +339,31 @@ describe("OtpInputComponent", () => {
 
             expect(host.value()).toBe("A19F");
         });
+
+        it("handles global (g) and sticky (y) pattern flags without state corruption", async () => {
+            host.pattern.set(/^[A-F0-9]$/gy);
+            host.value.set("A1B2");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(host.value()).toBe("A1B2");
+        });
+
+        it("normalizes existing value on runtime pattern change", async () => {
+            host.value.set("ABCD");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            host.pattern.set(/^[0-9]$/);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("");
+        });
     });
 
-    describe("Typing and Input Events", () => {
+    describe("Typing, Insertion, and Input Events", () => {
         it("updates value and emits touch on typing", () => {
             const input = getNativeInput();
             input.value = "12";
@@ -408,20 +448,6 @@ describe("OtpInputComponent", () => {
             fixture.detectChanges();
 
             expect(host.value()).toBe("983456");
-
-            // Type '7' at collapsed caret (2, 2)
-            const keydown7 = new KeyboardEvent("keydown", { key: "7", bubbles: true, cancelable: true });
-            input.dispatchEvent(keydown7);
-
-            expect(input.selectionStart).toBe(2);
-            expect(input.selectionEnd).toBe(3);
-
-            input.value = "987456";
-            input.setSelectionRange(3, 3);
-            input.dispatchEvent(new Event("input"));
-            fixture.detectChanges();
-
-            expect(host.value()).toBe("987456");
         });
 
         it("prevents invalid character insertion via keydown", () => {
@@ -452,7 +478,7 @@ describe("OtpInputComponent", () => {
             expect(keydown5.defaultPrevented).toBe(true);
         });
 
-        it("handles beforeinput insertText overwrite mode", async () => {
+        it("handles single-character beforeinput insertText overwrite mode", async () => {
             host.length.set(4);
             host.value.set("1234");
             fixture.detectChanges();
@@ -471,6 +497,79 @@ describe("OtpInputComponent", () => {
 
             expect(input.selectionStart).toBe(1);
             expect(input.selectionEnd).toBe(2);
+        });
+
+        it("handles multi-character beforeinput insertText without blocking autofill", () => {
+            const input = getNativeInput();
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "1234",
+                inputType: "insertText"
+            });
+            input.dispatchEvent(beforeInputEvent);
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("1234");
+            expect(host.completeEvents).toEqual(["1234"]);
+        });
+
+        it("sanitizes formatted multi-character beforeinput insertText before truncation", () => {
+            host.type.set("number");
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "1-2-3-4",
+                inputType: "insertText"
+            });
+            input.dispatchEvent(beforeInputEvent);
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("1234");
+        });
+
+        it("handles beforeinput insertReplacementText", () => {
+            host.value.set("12");
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            input.setSelectionRange(0, 2);
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "5678",
+                inputType: "insertReplacementText"
+            });
+            input.dispatchEvent(beforeInputEvent);
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("5678");
+            expect(host.completeEvents).toEqual(["5678"]);
+        });
+
+        it("replaces already-complete value with full insertion without duplicate complete events", async () => {
+            host.value.set("1234");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const input = getNativeInput();
+            input.setSelectionRange(0, 4);
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "9999",
+                inputType: "insertText"
+            });
+            input.dispatchEvent(beforeInputEvent);
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("9999");
+            expect(host.completeEvents.length).toBe(0);
         });
     });
 
@@ -536,7 +635,6 @@ describe("OtpInputComponent", () => {
             input.dispatchEvent(new Event("input"));
             fixture.detectChanges();
 
-            // While composing, value should not be prematurely altered
             const compEndEvent = new Event("compositionend", { bubbles: true });
             input.dispatchEvent(compEndEvent);
             fixture.detectChanges();
@@ -587,6 +685,22 @@ describe("OtpInputComponent", () => {
             expect(document.activeElement).toBe(input);
         });
 
+        it("public focus() without argument focuses next empty slot position", () => {
+            host.value.set("12");
+            fixture.detectChanges();
+
+            const otpComponentDebug = fixture.debugElement.query(By.directive(OtpInputComponent));
+            const otpComponent = otpComponentDebug.componentInstance as OtpInputComponent;
+            const input = getNativeInput();
+
+            otpComponent.focus();
+            fixture.detectChanges();
+
+            expect(document.activeElement).toBe(input);
+            expect(input.selectionStart).toBe(2);
+            expect(input.selectionEnd).toBe(2);
+        });
+
         it("public blur() blurs native input and emits blur and touch", () => {
             const otpComponentDebug = fixture.debugElement.query(By.directive(OtpInputComponent));
             const otpComponent = otpComponentDebug.componentInstance as OtpInputComponent;
@@ -602,6 +716,75 @@ describe("OtpInputComponent", () => {
 
             expect(host.blurEvents.length).toBe(1);
             expect(host.touchCount).toBeGreaterThan(0);
+        });
+    });
+
+    describe("Focused External Changes and Logical Selection", () => {
+        it("clamps visual active slot when external value shrinks while focused", async () => {
+            host.value.set("1234");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const input = getNativeInput();
+            input.focus();
+            input.setSelectionRange(4, 4);
+            input.dispatchEvent(new Event("select"));
+            fixture.detectChanges();
+
+            const slotsBefore = getSlots();
+            expect(slotsBefore[3].getAttribute("data-active")).toBe("true");
+
+            host.value.set("12");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const slotsAfter = getSlots();
+            expect(slotsAfter[2].getAttribute("data-active")).toBe("true");
+            expect(slotsAfter[3].getAttribute("data-active")).toBeNull();
+        });
+
+        it("clamps visual selection when length shrinks while focused", async () => {
+            host.length.set(6);
+            host.value.set("123456");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const input = getNativeInput();
+            input.focus();
+            input.setSelectionRange(5, 6);
+            input.dispatchEvent(new Event("select"));
+            fixture.detectChanges();
+
+            host.length.set(4);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const slots = getSlots();
+            expect(slots.length).toBe(4);
+            expect(slots[3].getAttribute("data-active")).toBe("true");
+        });
+
+        it("maintains coherent visual selection when type change filters out characters while focused", async () => {
+            host.value.set("AB12");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const input = getNativeInput();
+            input.focus();
+            input.setSelectionRange(4, 4);
+            input.dispatchEvent(new Event("select"));
+            fixture.detectChanges();
+
+            host.type.set("number");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("12");
+            const slots = getSlots();
+            expect(slots[2].getAttribute("data-active")).toBe("true");
         });
     });
 
@@ -651,7 +834,7 @@ describe("OtpInputComponent", () => {
         });
     });
 
-    describe("Appearance and Joined Layout", () => {
+    describe("Appearance, Joined Layout, and RTL", () => {
         it("applies joined border and rounded classes when spacing=false", async () => {
             host.length.set(4);
             host.spacing.set(false);
@@ -679,6 +862,14 @@ describe("OtpInputComponent", () => {
             slots.forEach(slot => {
                 expect(slot.className).toContain("custom-slot-class");
             });
+        });
+
+        it("establishes LTR code direction when parent container is RTL", () => {
+            host.containerDir.set("rtl");
+            fixture.detectChanges();
+
+            const hostEl = getHostElement();
+            expect(hostEl.getAttribute("dir")).toBe("ltr");
         });
     });
 
@@ -711,6 +902,30 @@ describe("OtpInputComponent", () => {
             expect(hostEl.getAttribute("data-readonly")).toBe("true");
         });
 
+        it("does not reflect invalid state when untouched even if invalid is true", () => {
+            host.invalid.set(true);
+            host.touched.set(false);
+            fixture.detectChanges();
+
+            const hostEl = getHostElement();
+            expect(hostEl.getAttribute("data-invalid")).toBeNull();
+
+            const input = getNativeInput();
+            expect(input.getAttribute("aria-invalid")).toBeNull();
+        });
+
+        it("reflects invalid state when touched and invalid is true", () => {
+            host.invalid.set(true);
+            host.touched.set(true);
+            fixture.detectChanges();
+
+            const hostEl = getHostElement();
+            expect(hostEl.getAttribute("data-invalid")).toBe("true");
+
+            const input = getNativeInput();
+            expect(input.getAttribute("aria-invalid")).toBe("true");
+        });
+
         it("reflects invalid state when touched and required incomplete", () => {
             host.required.set(true);
             host.touched.set(true);
@@ -725,7 +940,7 @@ describe("OtpInputComponent", () => {
         });
     });
 
-    describe("Attribute Forwarding and Sanitization", () => {
+    describe("Attribute Forwarding, Overrides, and Sanitization", () => {
         it("forwards safe custom attributes to native input", () => {
             host.inputAttributes.set({
                 "aria-describedby": "otp-help-text",
@@ -740,12 +955,35 @@ describe("OtpInputComponent", () => {
             expect(input.getAttribute("aria-describedby")).toBe("otp-help-text");
         });
 
-        it("does not allow reserved attributes to override component mechanics", () => {
+        it("removes omitted custom attributes when inputAttributes is updated", () => {
             host.inputAttributes.set({
-                disabled: false,
-                maxlength: 99,
-                type: "checkbox",
-                value: "hacked"
+                "aria-describedby": "otp-help-text",
+                id: "test-otp-input"
+            });
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            expect(input.id).toBe("test-otp-input");
+            expect(input.getAttribute("aria-describedby")).toBe("otp-help-text");
+
+            host.inputAttributes.set({});
+            fixture.detectChanges();
+
+            expect(input.id).toBe("");
+            expect(input.hasAttribute("aria-describedby")).toBe(false);
+        });
+
+        it("does not allow reserved attributes to override component mechanics regardless of case", () => {
+            host.inputAttributes.set({
+                "ARIA-INVALID": "false",
+                CLASS: "overridden-class",
+                DISABLED: false,
+                MAXLENGTH: 99,
+                READONLY: true,
+                ROLE: "button",
+                STYLE: "opacity: 1",
+                TYPE: "checkbox",
+                VALUE: "bad"
             });
             host.disabled.set(true);
             fixture.detectChanges();
@@ -754,6 +992,32 @@ describe("OtpInputComponent", () => {
             expect(input.type).toBe("text");
             expect(input.disabled).toBe(true);
             expect(input.maxLength).toBe(4);
+            expect(input.getAttribute("aria-hidden")).toBeNull();
+            expect(input.className).toContain("opacity-0");
+        });
+
+        it("handles component-managed overrides and restores defaults when omitted", () => {
+            host.inputAttributes.set({
+                "aria-label": "Custom Label",
+                "aria-labelledby": "custom-label-id",
+                autocomplete: "off",
+                inputmode: "decimal"
+            });
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            expect(input.getAttribute("autocomplete")).toBe("off");
+            expect(input.getAttribute("inputmode")).toBe("decimal");
+            expect(input.getAttribute("aria-labelledby")).toBe("custom-label-id");
+            expect(input.getAttribute("aria-label")).toBeNull();
+
+            host.inputAttributes.set({});
+            fixture.detectChanges();
+
+            expect(input.getAttribute("autocomplete")).toBe("one-time-code");
+            expect(input.getAttribute("inputmode")).toBe("text");
+            expect(input.getAttribute("aria-labelledby")).toBeNull();
+            expect(input.getAttribute("aria-label")).toBe("Verification code");
         });
     });
 
@@ -825,4 +1089,15 @@ describe("OtpInputComponent with Signal Forms", () => {
         fixture.detectChanges();
         expect(input.readOnly).toBe(true);
     });
+
+    it("updates slots when form value is updated programmatically without emitting complete", () => {
+        host.formModel.set({ code: "654321" });
+        fixture.detectChanges();
+
+        const inputDebug = fixture.debugElement.query(By.css("input"));
+        const input = inputDebug.nativeElement as HTMLInputElement;
+        expect(input.value).toBe("654321");
+        expect(host.completeEvents.length).toBe(0);
+    });
 });
+
