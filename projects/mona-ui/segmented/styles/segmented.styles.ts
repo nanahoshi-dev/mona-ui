@@ -14,6 +14,12 @@ export const segmentedContainerThemeVariants = cva(
     `,
     {
         variants: {
+            alignment: {
+                start: "justify-start",
+                center: "justify-center",
+                end: "justify-end",
+                stretch: "justify-stretch"
+            },
             rounded: {
                 none: "rounded-none",
                 small: "rounded-sm",
@@ -23,6 +29,7 @@ export const segmentedContainerThemeVariants = cva(
             }
         },
         defaultVariants: {
+            alignment: "stretch",
             rounded: "medium"
         }
     }
@@ -30,7 +37,7 @@ export const segmentedContainerThemeVariants = cva(
 
 export const segmentedOptionThemeVariants = cva(
     `
-        relative flex flex-1 cursor-pointer items-center justify-center gap-1
+        relative flex cursor-pointer items-center justify-center gap-1
         whitespace-nowrap
         transition-colors duration-(--mona-motion-fast)
         data-[disabled='true']:pointer-events-none
@@ -45,6 +52,12 @@ export const segmentedOptionThemeVariants = cva(
     `,
     {
         variants: {
+            alignment: {
+                start: "flex-none",
+                center: "flex-none",
+                end: "flex-none",
+                stretch: "flex-1"
+            },
             rounded: {
                 none: "rounded-none",
                 small: "rounded-xs",
@@ -59,6 +72,7 @@ export const segmentedOptionThemeVariants = cva(
             }
         },
         defaultVariants: {
+            alignment: "stretch",
             rounded: "medium",
             size: "medium"
         }

@@ -81,6 +81,26 @@ The control stretches to its container by default. Use the `class` input to appl
 </mona-segmented>
 ```
 
+### Alignment
+
+`alignment` controls how options are positioned within the container. `"stretch"` (the default) makes every option fill equal width — the "Full-width layout" behavior above. `"start"`, `"center"`, and `"end"` size each option to its own content instead, positioning the group within the container. `"start"`/`"end"` are logical directions that follow the current text direction, so they flip automatically in RTL layouts.
+
+| Value      | Behavior                                                          |
+|------------|--------------------------------------------------------------------|
+| `start`    | Content-sized options, positioned at the leading edge              |
+| `center`   | Content-sized options, centered in the container                   |
+| `end`      | Content-sized options, positioned at the trailing edge             |
+| `stretch`  | Default. Every option fills equal width across the container       |
+
+```html
+<mona-segmented
+    aria-label="Period"
+    alignment="center"
+    class="w-full"
+    [options]="periods">
+</mona-segmented>
+```
+
 ### Sizes
 
 `size` controls the height, horizontal padding, text size, and spacing of each option.
@@ -203,6 +223,7 @@ The component still owns the radio input, selection, and disabled semantics; the
 
 | Name             | Type                                                       | Default    | Description                                                                                                                                                                                                 |
 |------------------|------------------------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `alignment`      | `"start" \| "center" \| "end" \| "stretch"`                | `"stretch"`| Controls how options are positioned within the container. `"stretch"` makes every option fill equal width; `"start"`, `"center"`, `"end"` size options to their content. `"start"`/`"end"` follow the current text direction. |
 | `aria-label`     | `string \| null`                                           | `null`     | Accessible name for the radio group. Provide either `aria-label` or `aria-labelledby`.                                                                                                                      |
 | `aria-labelledby`| `string \| null`                                           | `null`     | ID of an external element that provides the accessible name for the radio group.                                                                                                                            |
 | `class`          | `string`                                                   | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                   |
@@ -255,7 +276,8 @@ When bound to a `Field`, the `Field` directive writes `invalid` and `touched` th
 ---
 
 <!-- verification-checklist
-- [x] SegmentedComponent inputs/outputs/defaults verified against segmented.component.ts source and cross-checked against component-metadata.json's SegmentedComponent entry (ariaLabel, ariaLabelledBy, class, disabled, invalid, options, rounded, size, touched, value, touch)
+- [x] SegmentedComponent inputs/outputs/defaults verified against segmented.component.ts source and cross-checked against component-metadata.json's SegmentedComponent entry (alignment, ariaLabel, ariaLabelledBy, class, disabled, invalid, options, rounded, size, touched, value, touch)
+- [x] alignment preset semantics verified against segmented.styles.ts segmentedContainerThemeVariants (justify-*) and segmentedOptionThemeVariants (flex-1 vs flex-none)
 - [x] SegmentedValue and SegmentedOption exported types verified against models/SegmentedValue.ts and models/SegmentedOption.ts
 - [x] Two-way value model behavior (no option checked when value matches nothing; null allowed initially) verified against segmented.component.ts's onOptionChange and value model declaration
 - [x] ARIA table verified against host bindings in segmented.component.ts (role="radiogroup", aria-label, aria-labelledby, aria-disabled, aria-invalid)

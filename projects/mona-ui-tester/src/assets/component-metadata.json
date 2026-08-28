@@ -11689,7 +11689,14 @@
     "selector": "\"mona-segmented\"",
     "inputs": [
       {
-        "description": "Controls whether the selection indicator animates between selected options.\nWhen false, selection changes are applied immediately without transition.",
+        "description": "Controls the alignment of the items inside the segmented component.",
+        "kind": "input",
+        "name": "alignment",
+        "type": "SegmentedVariantProps[\"alignment\"]",
+        "defaultValue": "\"stretch\""
+      },
+      {
+        "description": "Controls whether the selection indicator animates between selected options.\r\nWhen false, selection changes are applied immediately without transition.",
         "kind": "input",
         "name": "animate",
         "type": "boolean",
@@ -11717,7 +11724,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.",
+        "description": "Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.\r\nWhen bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -11751,7 +11758,7 @@
         "type": "void"
       },
       {
-        "description": "Marks the component as touched. When bound to a signal form field via `[formField]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the component as touched. When bound to a signal form field via `[formField]`,\r\nthis is written by the signal forms `Field` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -11765,7 +11772,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The currently selected value. When it matches no current option, no option is checked.\nA `null` value is allowed initially but cannot be restored through segmented interaction.",
+        "description": "The currently selected value. When it matches no current option, no option is checked.\r\nA `null` value is allowed initially but cannot be restored through segmented interaction.",
         "kind": "model",
         "name": "value",
         "type": "T | null",

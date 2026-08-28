@@ -26,6 +26,7 @@ const mixedOptions = [
 @Component({
     template: `
         <mona-segmented
+            [alignment]="alignment()"
             [animate]="animate()"
             [aria-label]="ariaLabel()"
             [aria-labelledby]="ariaLabelledBy()"
@@ -40,6 +41,7 @@ const mixedOptions = [
     imports: [SegmentedComponent]
 })
 class HostComponent {
+    public readonly alignment = signal<"start" | "center" | "end" | "stretch">("stretch");
     public readonly animate = signal(true);
     public readonly ariaLabel = signal<string | null>(null);
     public readonly ariaLabelledBy = signal<string | null>(null);
@@ -350,6 +352,48 @@ describe("SegmentedComponent", () => {
             expect(span?.classList.contains("peer-focus-visible:ring-2")).toBe(true);
             expect(span?.classList.contains("peer-focus-visible:ring-focus-indicator/35")).toBe(true);
             expect(span?.classList.contains("[border-radius:inherit]")).toBe(true);
+        });
+    });
+
+    describe("alignment", () => {
+        let fixture: ComponentFixture<HostComponent>;
+        let component: HostComponent;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [HostComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(HostComponent);
+            component = fixture.componentInstance;
+            await waitForStable(fixture);
+        });
+
+        it("defaults alignment to stretch", () => {
+            const componentInstance = fixture.debugElement
+                .query(By.directive(SegmentedComponent))
+                .componentInstance as SegmentedComponent;
+            expect(componentInstance.alignment()).toBe("stretch");
+
+            expect(getHostElement(fixture).classList.contains("justify-stretch")).toBe(true);
+            getLabels(fixture).forEach(label => {
+                expect(label.classList.contains("flex-1")).toBe(true);
+            });
+        });
+
+        it.each([
+            ["start", "justify-start"],
+            ["center", "justify-center"],
+            ["end", "justify-end"]
+        ] as const)("positions options at %s and sizes them to content", (alignment, containerClass) => {
+            component.alignment.set(alignment);
+            fixture.detectChanges();
+
+            expect(getHostElement(fixture).classList.contains(containerClass)).toBe(true);
+            getLabels(fixture).forEach(label => {
+                expect(label.classList.contains("flex-none")).toBe(true);
+                expect(label.classList.contains("flex-1")).toBe(false);
+            });
         });
     });
 
