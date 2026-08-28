@@ -8,8 +8,77 @@ import { clamp } from "./number-utils";
  * Small overflow allowance so marks whose stroke or radius sits exactly at a
  * domain extreme (a peak touching the max, a hovered point marker at the
  * first/last category) aren't visually chopped in half by the plot clip rect.
+ * Only applied on sides that don't already have a drawn axis boundary line
+ * (see {@link resolvePlotEdgeAxisLines}) — a side with a visible axis line
+ * clips flush against it instead, so series strokes don't visibly poke past it.
  */
 export const PLOT_CLIP_OVERFLOW = 8;
+
+/** The subset of ChartAxisScene fields needed to resolve which plot edges have a drawn axis line. */
+export interface PlotEdgeAxisDescriptor {
+    readonly axisLine: boolean;
+    readonly position: "bottom" | "left" | "right" | "top";
+    readonly sideOffset?: number;
+    readonly visible: boolean;
+}
+
+export interface PlotEdgeAxisLines {
+    readonly bottom: boolean;
+    readonly left: boolean;
+    readonly right: boolean;
+    readonly top: boolean;
+}
+
+/**
+ * Resolves which of the plot rect's four edges have a visible, boundary-hugging
+ * (sideOffset 0) axis line drawn on them. Stacked secondary axes (sideOffset > 0)
+ * don't count: their line is drawn further out, not at the plot boundary itself.
+ */
+export function resolvePlotEdgeAxisLines(axes: readonly PlotEdgeAxisDescriptor[]): PlotEdgeAxisLines {
+    let top = false;
+    let bottom = false;
+    let left = false;
+    let right = false;
+    for (const axis of axes) {
+        if (!axis.visible || !axis.axisLine || (axis.sideOffset ?? 0) !== 0) {
+            continue;
+        }
+        switch (axis.position) {
+            case "top":
+                top = true;
+                break;
+            case "bottom":
+                bottom = true;
+                break;
+            case "left":
+                left = true;
+                break;
+            case "right":
+                right = true;
+                break;
+        }
+    }
+    return { bottom, left, right, top };
+}
+
+/**
+ * Computes the clip rect for series/overlay content: `plotRect` inflated by
+ * {@link PLOT_CLIP_OVERFLOW} on each side, except sides with a visible boundary
+ * axis line, which stay flush so strokes don't visibly cross the axis line.
+ */
+export function computeSeriesClipRect(plotRect: ChartRect, axes: readonly PlotEdgeAxisDescriptor[]): ChartRect {
+    const edges = resolvePlotEdgeAxisLines(axes);
+    const left = edges.left ? 0 : PLOT_CLIP_OVERFLOW;
+    const right = edges.right ? 0 : PLOT_CLIP_OVERFLOW;
+    const top = edges.top ? 0 : PLOT_CLIP_OVERFLOW;
+    const bottom = edges.bottom ? 0 : PLOT_CLIP_OVERFLOW;
+    return {
+        height: plotRect.height + top + bottom,
+        width: plotRect.width + left + right,
+        x: plotRect.x - left,
+        y: plotRect.y - top
+    };
+}
 
 export function crispPixel(pixel: number, lineWidth: number = 1): number {
     if (lineWidth % 2 === 1) {
@@ -18,19 +87,23 @@ export function crispPixel(pixel: number, lineWidth: number = 1): number {
     return Math.round(pixel);
 }
 
-/**
- * Clips the canvas context to `plotRect`, inflated on all four sides by
- * {@link PLOT_CLIP_OVERFLOW} so marks touching a domain extreme aren't cut in half.
- */
-export function clipToPlotRect(context: CanvasRenderingContext2D, plotRect: ChartRect): void {
+/** Clips the canvas context to `rect` as-is, with no further inflation. */
+export function clipToRect(context: CanvasRenderingContext2D, rect: ChartRect): void {
     context.beginPath();
-    context.rect(
-        plotRect.x - PLOT_CLIP_OVERFLOW,
-        plotRect.y - PLOT_CLIP_OVERFLOW,
-        plotRect.width + PLOT_CLIP_OVERFLOW * 2,
-        plotRect.height + PLOT_CLIP_OVERFLOW * 2
-    );
+    context.rect(rect.x, rect.y, rect.width, rect.height);
     context.clip();
+}
+
+/**
+ * Clips the canvas context to `plotRect`, inflated per {@link computeSeriesClipRect}.
+ * Pass the scene's `axes` so sides with a visible boundary line clip flush against it.
+ */
+export function clipToPlotRect(
+    context: CanvasRenderingContext2D,
+    plotRect: ChartRect,
+    axes: readonly PlotEdgeAxisDescriptor[] = []
+): void {
+    clipToRect(context, computeSeriesClipRect(plotRect, axes));
 }
 
 export function drawRoundedRectCorners(

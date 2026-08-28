@@ -18,7 +18,7 @@ export class CartesianInteractionOverlayRenderer {
             return;
         }
 
-        const { plotRect, series } = scene;
+        const { axes, plotRect, series } = scene;
         if (plotRect.width <= 0 || plotRect.height <= 0) {
             return;
         }
@@ -35,7 +35,7 @@ export class CartesianInteractionOverlayRenderer {
         }
 
         context.save();
-        clipToPlotRect(context, plotRect);
+        clipToPlotRect(context, plotRect, axes);
 
         const markerStrokeColor =
             styleResolver.resolveCssVariable("--mona-chart-marker-stroke-color") ||

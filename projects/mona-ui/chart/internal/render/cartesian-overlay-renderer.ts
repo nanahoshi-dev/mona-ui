@@ -1,4 +1,5 @@
 import type { ChartPoint, ChartRect } from "../../models/chart.models";
+import type { ChartAxisScene } from "../scene/cartesian-scene";
 import type {
     CartesianOverlayScene,
     ScenePointAnnotation,
@@ -127,6 +128,7 @@ export class CartesianOverlayRenderer {
         context: CanvasRenderingContext2D,
         overlayScene: CartesianOverlayScene | null,
         plotRect: ChartRect,
+        axes: readonly ChartAxisScene[] = [],
         annotationBadgeAnchors?: ReadonlyMap<string, ChartPoint> | null
     ): void {
         if (!overlayScene) {
@@ -134,7 +136,7 @@ export class CartesianOverlayRenderer {
         }
 
         context.save();
-        clipToPlotRect(context, plotRect);
+        clipToPlotRect(context, plotRect, axes);
 
         // 1. Overlay Bands
         for (const band of overlayScene.referenceBands) {
@@ -162,14 +164,15 @@ export class CartesianOverlayRenderer {
     public static renderUnderlays(
         context: CanvasRenderingContext2D,
         overlayScene: CartesianOverlayScene | null,
-        plotRect: ChartRect
+        plotRect: ChartRect,
+        axes: readonly ChartAxisScene[] = []
     ): void {
         if (!overlayScene || (overlayScene.referenceBands.length === 0 && overlayScene.referenceLines.length === 0)) {
             return;
         }
 
         context.save();
-        clipToPlotRect(context, plotRect);
+        clipToPlotRect(context, plotRect, axes);
 
         // 1. Underlay Bands
         for (const band of overlayScene.referenceBands) {
