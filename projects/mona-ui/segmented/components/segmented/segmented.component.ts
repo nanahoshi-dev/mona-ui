@@ -58,7 +58,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     #resizeObserver: ResizeObserver | null = null;
 
     protected readonly containerClasses = computed(() => {
-        const classes = segmentedContainerThemeVariants({ rounded: this.rounded() });
+        const classes = segmentedContainerThemeVariants({ alignment: this.alignment(), rounded: this.rounded() });
         return twMerge(classes, this.userClass());
     });
     protected readonly groupName = createElementControlId();
@@ -74,9 +74,10 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly itemTemplate = contentChild(SegmentedItemTemplateDirective, { read: TemplateRef });
     protected readonly optionClasses = computed(() => {
+        const alignment = this.alignment();
         const rounded = this.rounded();
         const size = this.size();
-        return segmentedOptionThemeVariants({ rounded, size });
+        return segmentedOptionThemeVariants({ alignment, rounded, size });
     });
     protected readonly optionElements = viewChildren<ElementRef<HTMLLabelElement>>("optionElement");
     protected readonly selectedIndex = computed(() => {
@@ -91,6 +92,12 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         const option = this.options()[selectedIndex];
         return this.disabled() || !!option?.disabled;
     });
+
+    /**
+     * @description Controls the alignment of the items inside the segmented component.
+     * @default "stretch"
+     */
+    public readonly alignment = input<SegmentedVariantProps["alignment"]>("stretch");
 
     /**
      * @description Controls whether the selection indicator animates between selected options.
@@ -171,6 +178,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
             read: () => {
                 this.selectedIndex();
                 this.optionElements();
+                this.alignment();
                 this.rounded();
                 this.animate();
 

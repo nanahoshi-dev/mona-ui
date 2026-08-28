@@ -2,13 +2,11 @@ import { NgComponentOutlet } from "@angular/common";
 import { Component, inject, input, model, signal } from "@angular/core";
 import {
     LucideBell,
-    LucideDollarSign,
     LucideDynamicIcon,
     type LucideIconInput,
     LucideLock,
     LucidePlus,
     LucideUser,
-    LucideUser2,
     LucideUserCog
 } from "@lucide/angular";
 import {
@@ -39,6 +37,7 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
         code: `
             <mona-segmented
                 aria-label="Course section"
+                [alignment]="alignment()"
                 [animate]="animate()"
                 [disabled]="disabled()"
                 [options]="options"
@@ -51,6 +50,11 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
             <span>Selected value: {{ value() }}</span>
         `,
         inputs: {
+            alignment: {
+                type: "dropdown",
+                value: ["start", "center", "end", "stretch"],
+                defaultValue: "stretch"
+            },
             animate: {
                 type: "boolean",
                 value: true
@@ -89,12 +93,14 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
         <div class="flex w-full flex-col items-center gap-4">
             <mona-segmented
                 aria-label="Course section"
+                [alignment]="alignment()"
                 [animate]="animate()"
                 [disabled]="disabled()"
                 [options]="options()"
                 [rounded]="rounded()"
                 [size]="size()"
-                [(value)]="value">
+                [(value)]="value"
+                class="w-full">
                 @if (featureData["itemTemplate"].active) {
                     <ng-template monaSegmentedItemTemplate let-option>
                         <span class="flex items-center gap-1.5">
@@ -118,6 +124,7 @@ class SegmentedWrapperComponent implements ComponentInputsAsSignal<SegmentedComp
         notifications: LucideBell
     };
 
+    public readonly alignment = input<ReturnType<SegmentedComponent["alignment"]>>("stretch");
     public readonly animate = input(true);
     public readonly disabled = input(false);
     public readonly options = input<readonly SegmentedOption[]>([
