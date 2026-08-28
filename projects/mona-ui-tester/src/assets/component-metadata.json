@@ -10595,6 +10595,176 @@
       }
     ]
   },
+  "OtpInputComponent": {
+    "name": "OtpInputComponent",
+    "selector": "\"mona-otp-input\"",
+    "inputs": [
+      {
+        "description": "Accessible name for the inner `<input>` element.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"Verification code\""
+      },
+      {
+        "description": "Emitted when a user interaction completes the verification code.",
+        "kind": "output",
+        "name": "complete",
+        "type": "string"
+      },
+      {
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Configures slot grouping lengths. Accepts a uniform number or an array of group sizes.",
+        "kind": "input",
+        "name": "groupLength",
+        "type": "number | number[] | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Additional HTML attributes applied directly to the inner `<input>` element.",
+        "kind": "input",
+        "name": "inputAttributes",
+        "type": "AttributeConfig",
+        "defaultValue": "{}"
+      },
+      {
+        "description": "Emitted when the inner input loses focus.",
+        "kind": "output",
+        "name": "inputBlur",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Emitted when the inner input gains focus.",
+        "kind": "output",
+        "name": "inputFocus",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Marks the OTP input as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets the total number of characters accepted by the OTP input and the number of visual slots.",
+        "kind": "input",
+        "name": "length",
+        "type": "number",
+        "defaultValue": "4"
+      },
+      {
+        "description": "Custom regular expression or list of regular expressions used to validate each candidate character.",
+        "kind": "input",
+        "name": "pattern",
+        "type": "readonly RegExp[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Hint character displayed in empty visual slots.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Prevents value changes while preserving the component's focusability and visual state.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the OTP input as required. Triggers invalid state when touched and incomplete.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Border-radius preset applied to the OTP slots.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "OtpInputVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Text character or string displayed between visual slot groups.",
+        "kind": "input",
+        "name": "separator",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Additional CSS classes applied to separator elements.",
+        "kind": "input",
+        "name": "separatorClass",
+        "type": "string | string[]",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Size preset controlling the dimensions and font size of the OTP slots.",
+        "kind": "input",
+        "name": "size",
+        "type": "OtpInputVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Additional CSS classes applied to each visual slot element.",
+        "kind": "input",
+        "name": "slotClass",
+        "type": "string | string[]",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Determines whether visual slots within a group have spacing between them or are joined together.",
+        "kind": "input",
+        "name": "spacing",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emitted when the OTP input is interacted with — on blur or user value change.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Sets the touched state of the OTP input. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets the type of the OTP input (\"text\", \"number\", or \"password\").",
+        "kind": "input",
+        "name": "type",
+        "type": "OtpInputType",
+        "defaultValue": "\"text\""
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Two-way bindable current value of the OTP input.",
+        "kind": "model",
+        "name": "value",
+        "type": "string",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "PagerComponent": {
     "name": "PagerComponent",
     "selector": "\"mona-pager\"",

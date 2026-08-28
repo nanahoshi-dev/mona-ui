@@ -48,7 +48,7 @@ export default [
             "@angular-eslint/component-selector": [
                 "error",
                 {
-                    prefix: "mona",
+                    prefix: ["mona", "app"],
                     style: "kebab-case",
                     type: "element"
                 }

@@ -61,6 +61,7 @@
             "@nanahoshi/mona-ui/multi-select": ["./projects/mona-ui/multi-select/public-api.ts"],
             "@nanahoshi/mona-ui/notification": ["./projects/mona-ui/notification/public-api.ts"],
             "@nanahoshi/mona-ui/numeric-text-box": ["./projects/mona-ui/numeric-text-box/public-api.ts"],
+            "@nanahoshi/mona-ui/otp-input": ["./projects/mona-ui/otp-input/public-api.ts"],
             "@nanahoshi/mona-ui/pager": ["./projects/mona-ui/pager/public-api.ts"],
             "@nanahoshi/mona-ui/placeholder": ["./projects/mona-ui/placeholder/public-api.ts"],
             "@nanahoshi/mona-ui/popover": ["./projects/mona-ui/popover/public-api.ts"],
