@@ -16,7 +16,6 @@ import { type FormValueControl } from "@angular/forms/signals";
 import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { OtpInputSeparatorTemplateDirective } from "../../directives/otp-input-separator-template.directive";
-import { OtpSlotDirective } from "../../directives/otp-slot.directive";
 import { OtpInputType } from "../../models/OtpInputType";
 import {
     otpInputFieldThemeVariants,
@@ -25,17 +24,20 @@ import {
     OtpInputVariantProps
 } from "../../styles/otp-input.styles";
 import {
+    computeSlotClasses,
     filterCharacters,
-    findAttribute,
+    findUsableAttribute,
     isValidCharacter,
     normalizeGroupLengths,
     normalizeLength,
     patternTransform,
-    sanitizeInputAttributes
+    sanitizeInputAttributes,
+    toNonEmptyString
 } from "../../utils/otp-input.utils";
 
 interface OtpSlotViewModel {
     active: boolean;
+    classes: string;
     displayCharacter: string;
     filled: boolean;
     index: number;
@@ -51,7 +53,7 @@ interface OtpGroupViewModel {
 @Component({
     selector: "mona-otp-input",
     templateUrl: "./otp-input.component.html",
-    imports: [NgTemplateOutlet, AttributeBinderDirective, OtpSlotDirective],
+    imports: [NgTemplateOutlet, AttributeBinderDirective],
     host: {
         dir: "ltr",
         "[attr.dir]": "'ltr'",
@@ -86,29 +88,32 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         return twMerge(baseClasses, this.userClass());
     });
     protected readonly computedAriaLabel = computed(() => {
-        const attrs = this.inputAttributes();
-        if (findAttribute(attrs, "aria-labelledby") != null) {
+        const labelledby = this.computedAriaLabelledby();
+        if (labelledby != null) {
             return null;
         }
-        const label = findAttribute(attrs, "aria-label");
-        if (label != null) {
-            return String(label);
+        const attrs = this.inputAttributes();
+        const rawAttrLabel = findUsableAttribute(attrs, "aria-label");
+        const customAttrLabel = toNonEmptyString(rawAttrLabel);
+        if (customAttrLabel != null) {
+            return customAttrLabel;
         }
-        return this.ariaLabel();
+        const fallback = toNonEmptyString(this.ariaLabel());
+        return fallback ?? "Verification code";
     });
     protected readonly computedAriaLabelledby = computed(() => {
         const attrs = this.inputAttributes();
-        const labelledby = findAttribute(attrs, "aria-labelledby");
-        return labelledby != null ? String(labelledby) : null;
+        const raw = findUsableAttribute(attrs, "aria-labelledby");
+        return toNonEmptyString(raw);
     });
     protected readonly derivedAutocomplete = computed(() => {
         const attrs = this.inputAttributes();
-        const autocomplete = findAttribute(attrs, "autocomplete");
+        const autocomplete = findUsableAttribute(attrs, "autocomplete");
         return autocomplete != null ? String(autocomplete) : "one-time-code";
     });
     protected readonly derivedInputMode = computed(() => {
         const attrs = this.inputAttributes();
-        const inputMode = findAttribute(attrs, "inputmode");
+        const inputMode = findUsableAttribute(attrs, "inputmode");
         if (inputMode != null) {
             return String(inputMode);
         }
@@ -151,15 +156,19 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const inputType = this.type();
         const placeholderStr = this.placeholder();
         const placeholderChar = placeholderStr.length > 0 ? placeholderStr.charAt(0) : "";
+        const rounded = this.rounded();
+        const size = this.size();
+        const slotClass = this.slotClass();
+        const spacing = this.spacing();
 
         const groups: OtpGroupViewModel[] = [];
         let slotCounter = 0;
 
         for (let gIndex = 0; gIndex < groupSizes.length; gIndex++) {
-            const size = groupSizes[gIndex];
+            const groupSize = groupSizes[gIndex];
             const slots: OtpSlotViewModel[] = [];
 
-            for (let s = 0; s < size; s++) {
+            for (let s = 0; s < groupSize; s++) {
                 const slotIndex = slotCounter++;
                 const filled = slotIndex < val.length;
                 const character = filled ? val[slotIndex] : "";
@@ -169,14 +178,27 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
                 if (filled) {
                     displayCharacter = inputType === "password" ? "•" : character;
                 } else if (isPlaceholder) {
-                    displayCharacter = placeholderChar;
+                  displayCharacter = placeholderChar;
                 }
 
                 const active = focused && slotIndex === activeIndex;
                 const selected = focused && slotIndex >= selStart && slotIndex < selEnd;
 
+                const isFirstSlot = s === 0;
+                const isLastSlot = s === groupSize - 1;
+                const classes = computeSlotClasses({
+                    firstSlot: isFirstSlot,
+                    groupSize,
+                    lastSlot: isLastSlot,
+                    rounded,
+                    size,
+                    slotClass,
+                    spacing
+                });
+
                 slots.push({
                     active,
+                    classes,
                     displayCharacter,
                     filled,
                     index: slotIndex,

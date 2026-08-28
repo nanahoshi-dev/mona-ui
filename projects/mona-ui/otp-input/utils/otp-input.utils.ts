@@ -1,6 +1,7 @@
 import { AttributeConfig } from "@nanahoshi/mona-ui/internal";
+import { twMerge } from "tailwind-merge";
 import { OtpInputType } from "../models/OtpInputType";
-import { OtpInputSlotVariantProps } from "../styles/otp-input.styles";
+import { otpInputSlotThemeVariants, OtpInputSlotVariantProps } from "../styles/otp-input.styles";
 
 const RESERVED_INPUT_ATTRIBUTES = new Set([
     "aria-hidden",
@@ -34,6 +35,22 @@ export function findAttribute(attrs: AttributeConfig, name: string): unknown {
     return undefined;
 }
 
+export function findUsableAttribute(attrs: AttributeConfig, name: string): unknown {
+    const value = findAttribute(attrs, name);
+    if (value == null || value === false) {
+        return undefined;
+    }
+    return value;
+}
+
+export function toNonEmptyString(value: unknown): string | null {
+    if (value == null || value === false) {
+        return null;
+    }
+    const text = String(value).trim();
+    return text.length > 0 ? text : null;
+}
+
 export function normalizeLength(length: number): number {
     if (typeof length !== "number" || isNaN(length) || !isFinite(length) || length < 1) {
         return 4;
@@ -45,14 +62,30 @@ export function patternTransform(val: unknown): readonly RegExp[] {
     if (!val) {
         return [];
     }
-    if (Array.isArray(val)) {
-        return val.map(item => (typeof item === "string" ? new RegExp(item) : (item as RegExp)));
-    }
-    if (typeof val === "string") {
-        return [new RegExp(val)];
-    }
     if (val instanceof RegExp) {
         return [val];
+    }
+    if (Array.isArray(val)) {
+        const result: RegExp[] = [];
+        for (const item of val) {
+            if (item instanceof RegExp) {
+                result.push(item);
+            } else if (typeof item === "string" && item.length > 0) {
+                try {
+                    result.push(new RegExp(item));
+                } catch {
+                    // Ignore invalid regex string
+                }
+            }
+        }
+        return result;
+    }
+    if (typeof val === "string" && val.length > 0) {
+        try {
+            return [new RegExp(val)];
+        } catch {
+            return [];
+        }
     }
     return [];
 }
@@ -202,4 +235,25 @@ export function getSlotRoundedClasses(
         }
     }
     return "rounded-none";
+}
+
+export function computeSlotClasses(options: {
+    firstSlot: boolean;
+    groupSize: number;
+    lastSlot: boolean;
+    rounded: OtpInputSlotVariantProps["rounded"];
+    size: OtpInputSlotVariantProps["size"];
+    slotClass?: string | string[];
+    spacing: boolean;
+}): string {
+    const { firstSlot, groupSize, lastSlot, rounded, size, slotClass, spacing } = options;
+    const baseClasses = otpInputSlotThemeVariants({
+        rounded: spacing || groupSize === 1 ? rounded : "none",
+        size
+    });
+    let extraRounding = "";
+    if (!spacing) {
+        extraRounding = getSlotRoundedClasses(rounded, firstSlot, lastSlot, groupSize);
+    }
+    return twMerge(baseClasses, extraRounding, slotClass);
 }

@@ -34,17 +34,10 @@
         [class.gap-1.5]="spacing()"
         [class.-space-x-px]="!spacing()"
         [attr.data-group-index]="group.index">
-        @for (slot of group.slots; track slot.index; let firstSlot = $first; let lastSlot = $last) {
+        @for (slot of group.slots; track slot.index) {
             <span
                 class="otp-slot"
-                monaOtpSlot
-                [firstSlot]="firstSlot"
-                [lastSlot]="lastSlot"
-                [groupSize]="group.slots.length"
-                [rounded]="rounded()"
-                [size]="size()"
-                [slotClass]="slotClass()"
-                [spacing]="spacing()"
+                [class]="slot.classes"
                 [attr.data-slot-index]="slot.index"
                 [attr.data-active]="slot.active || null"
                 [attr.data-selected]="slot.selected || null"

@@ -236,7 +236,7 @@ The `inputAttributes` input allows forwarding custom HTML attributes to the unde
 
 ## Programmatic Focus
 
-Focus a specific slot index or the next unfilled slot using the component's `focus` method:
+Focus a specific slot index, pass standard browser `FocusOptions`, or focus the next unfilled slot using the component's `focus` method:
 
 ```typescript
 // Focus next incomplete slot
@@ -244,6 +244,9 @@ otpComponent.focus();
 
 // Focus specific slot index
 otpComponent.focus(2);
+
+// Focus with browser FocusOptions
+otpComponent.focus({ preventScroll: true });
 
 // Blur input
 otpComponent.blur();

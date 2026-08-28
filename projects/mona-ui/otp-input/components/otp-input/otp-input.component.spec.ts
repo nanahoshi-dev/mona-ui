@@ -330,6 +330,17 @@ describe("OtpInputComponent", () => {
             expect(getNativeInput().getAttribute("inputmode")).toBe("numeric");
         });
 
+        it("uses default alphanumeric filtering when pattern is null", async () => {
+            host.pattern.set(null);
+            host.type.set("text");
+            host.value.set("aB1!_2");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("aB12");
+        });
+
         it("uses custom pattern to filter characters", async () => {
             host.pattern.set(/^[A-F0-9]$/);
             host.value.set("A1Z9F");
@@ -360,6 +371,40 @@ describe("OtpInputComponent", () => {
             fixture.detectChanges();
 
             expect(host.value()).toBe("");
+        });
+
+        it("normalizes existing value when switching between custom patterns", async () => {
+            host.pattern.set(/^[a-z]$/);
+            host.value.set("abcd");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(host.value()).toBe("abcd");
+
+            host.pattern.set(/^[A-Z]$/);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("");
+        });
+
+        it("supports string patterns and multiple pattern arrays", async () => {
+            host.pattern.set("^[0-9]$");
+            host.value.set("12a3");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("123");
+
+            host.pattern.set([/^[0-9]$/, /^[1-5]$/]);
+            host.value.set("1294");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("124");
         });
     });
 
@@ -701,6 +746,19 @@ describe("OtpInputComponent", () => {
             expect(input.selectionEnd).toBe(2);
         });
 
+        it("public focus(options) focuses input with browser FocusOptions", () => {
+            const otpComponentDebug = fixture.debugElement.query(By.directive(OtpInputComponent));
+            const otpComponent = otpComponentDebug.componentInstance as OtpInputComponent;
+            const input = getNativeInput();
+            const focusSpy = vi.spyOn(input, "focus");
+
+            otpComponent.focus({ preventScroll: true });
+            fixture.detectChanges();
+
+            expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+            expect(document.activeElement).toBe(input);
+        });
+
         it("public blur() blurs native input and emits blur and touch", () => {
             const otpComponentDebug = fixture.debugElement.query(By.directive(OtpInputComponent));
             const otpComponent = otpComponentDebug.componentInstance as OtpInputComponent;
@@ -844,12 +902,78 @@ describe("OtpInputComponent", () => {
 
             const slots = getSlots();
             expect(slots[0].className).toContain("rounded-s-md");
+            expect(slots[0].className).toContain("rounded-e-none");
             expect(slots[1].className).toContain("rounded-none");
             expect(slots[2].className).toContain("rounded-none");
             expect(slots[3].className).toContain("rounded-e-md");
+            expect(slots[3].className).toContain("rounded-s-none");
         });
 
-        it("merges userClass and slotClass correctly", async () => {
+        it("applies complete rounding to a single slot when length=1 and spacing=false", async () => {
+            host.length.set(1);
+            host.spacing.set(false);
+            host.rounded.set("full");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const slots = getSlots();
+            expect(slots.length).toBe(1);
+            expect(slots[0].className).toContain("rounded-full");
+            expect(slots[0].className).not.toContain("rounded-none");
+            expect(slots[0].className).not.toContain("rounded-s-full");
+        });
+
+        it("applies complete rounding to every slot when groupLength=1 and spacing=false", async () => {
+            host.length.set(4);
+            host.groupLength.set(1);
+            host.spacing.set(false);
+            host.rounded.set("large");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const slots = getSlots();
+            expect(slots.length).toBe(4);
+            slots.forEach(slot => {
+                expect(slot.className).toContain("rounded-lg");
+                expect(slot.className).not.toContain("rounded-s-lg");
+                expect(slot.className).not.toContain("rounded-e-lg");
+            });
+        });
+
+        it("applies standard rounding to all slots when spacing=true", async () => {
+            host.length.set(4);
+            host.spacing.set(true);
+            host.rounded.set("large");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const slots = getSlots();
+            slots.forEach(slot => {
+                expect(slot.className).toContain("rounded-lg");
+                expect(slot.className).not.toContain("rounded-s-lg");
+                expect(slot.className).not.toContain("rounded-e-lg");
+            });
+        });
+
+        it("applies size variant classes", async () => {
+            host.size.set("small");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            let slots = getSlots();
+            expect(slots[0].className).toContain("h-8");
+            expect(slots[0].className).toContain("w-8");
+
+            host.size.set("large");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            slots = getSlots();
+            expect(slots[0].className).toContain("h-10");
+            expect(slots[0].className).toContain("w-10");
+        });
+
+        it("merges userClass and slotClass string and array correctly", async () => {
             host.userClass.set("custom-host-class");
             host.slotClass.set("custom-slot-class");
             fixture.detectChanges();
@@ -858,10 +982,33 @@ describe("OtpInputComponent", () => {
             const hostEl = getHostElement();
             expect(hostEl.className).toContain("custom-host-class");
 
-            const slots = getSlots();
+            let slots = getSlots();
             slots.forEach(slot => {
                 expect(slot.className).toContain("custom-slot-class");
             });
+
+            host.slotClass.set(["class-a", "class-b"]);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            slots = getSlots();
+            slots.forEach(slot => {
+                expect(slot.className).toContain("class-a");
+                expect(slot.className).toContain("class-b");
+            });
+        });
+
+        it("lets conflicting slotClass override size classes via tailwind-merge", async () => {
+            host.size.set("small");
+            host.slotClass.set("h-20 w-20");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const slots = getSlots();
+            expect(slots[0].classList).toContain("h-20");
+            expect(slots[0].classList).toContain("w-20");
+            expect(slots[0].classList).not.toContain("h-8");
+            expect(slots[0].classList).not.toContain("w-8");
         });
 
         it("establishes LTR code direction when parent container is RTL", () => {
@@ -1018,6 +1165,74 @@ describe("OtpInputComponent", () => {
             expect(input.getAttribute("inputmode")).toBe("text");
             expect(input.getAttribute("aria-labelledby")).toBeNull();
             expect(input.getAttribute("aria-label")).toBe("Verification code");
+        });
+
+        it("treats false for aria-labelledby as absent and preserves aria-label fallback", () => {
+            host.inputAttributes.set({
+                "aria-labelledby": false
+            });
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            expect(input.getAttribute("aria-labelledby")).toBeNull();
+            expect(input.getAttribute("aria-label")).toBe("Verification code");
+        });
+
+        it("treats false for aria-label as absent and restores component default", () => {
+            host.inputAttributes.set({
+                "aria-label": false
+            });
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            expect(input.getAttribute("aria-label")).toBe("Verification code");
+        });
+
+        it("treats blank or whitespace-only aria-labelledby as absent", () => {
+            host.inputAttributes.set({
+                "aria-labelledby": "   "
+            });
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            expect(input.getAttribute("aria-labelledby")).toBeNull();
+            expect(input.getAttribute("aria-label")).toBe("Verification code");
+        });
+
+        it("treats blank or whitespace-only aria-label as absent and uses default", () => {
+            host.inputAttributes.set({
+                "aria-label": ""
+            });
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            expect(input.getAttribute("aria-label")).toBe("Verification code");
+        });
+
+        it("treats false for autocomplete as absent and restores default", () => {
+            host.inputAttributes.set({
+                autocomplete: false
+            });
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            expect(input.getAttribute("autocomplete")).toBe("one-time-code");
+        });
+
+        it("treats false for inputmode as absent and restores default based on type", () => {
+            host.type.set("number");
+            host.inputAttributes.set({
+                inputmode: false
+            });
+            fixture.detectChanges();
+
+            const input = getNativeInput();
+            expect(input.getAttribute("inputmode")).toBe("numeric");
+
+            host.type.set("text");
+            fixture.detectChanges();
+
+            expect(input.getAttribute("inputmode")).toBe("text");
         });
     });
 
