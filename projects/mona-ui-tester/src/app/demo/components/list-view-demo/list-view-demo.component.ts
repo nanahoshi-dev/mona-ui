@@ -24,9 +24,35 @@ import { range } from "@mirei/ts-collections";
 import { twMerge } from "tailwind-merge";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const FOOTER_TEMPLATE_CODE = `<ng-template monaListViewFooterTemplate>
+    <div class="px-3 py-1 bg-secondary border-0 border-t border-solid border-border font-bold">
+        {{ listViewItems().length }} items
+    </div>
+</ng-template>`;
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaListViewHeaderTemplate>
+    <div class="px-3 py-1 bg-secondary border-0 border-b border-solid border-border font-bold">
+        Food List
+    </div>
+</ng-template>`;
+
+const ITEM_TEMPLATE_CODE = `<ng-template monaListViewItemTemplate let-item>
+    <div class="flex items-center gap-2 w-full">
+        <span class="flex-1">{{ item.text }}</span>
+        <span class="text-green-600">\${{ item.price }}</span>
+    </div>
+</ng-template>`;
+
+const NO_DATA_TEMPLATE_CODE = `<ng-template monaListViewNoDataTemplate>
+    <div class="w-full h-full flex items-center justify-center text-muted-foreground">
+        No items available.
+    </div>
+</ng-template>`;
 
 @Component({
     selector: "app-list-view-demo",
@@ -46,7 +72,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             dropdownValue: "foods"
         },
         footerTemplate: {
-            code: ``,
+            code: FOOTER_TEMPLATE_CODE,
             active: false,
             description: "Enables custom footer template for the list view",
             name: "Footer Template"
@@ -102,7 +128,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             }
         },
         headerTemplate: {
-            code: ``,
+            code: HEADER_TEMPLATE_CODE,
             active: false,
             description: "Enables custom header template for the list view",
             name: "Header Template"
@@ -116,7 +142,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             type: "boolean"
         },
         itemTemplate: {
-            code: ``,
+            code: ITEM_TEMPLATE_CODE,
             active: false,
             description: "Enables custom item template for the list view",
             name: "Item Template"
@@ -161,7 +187,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             }
         },
         noDataTemplate: {
-            code: ``,
+            code: NO_DATA_TEMPLATE_CODE,
             active: false,
             description: "Enables custom no data template for the list view",
             name: "No Data Template"
@@ -302,22 +328,19 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             }
         }
     });
-    protected readonly config = signal<ComponentConfig<ListViewComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<ListViewComponent>>(() => ({
+        inputs: deriveInputConfig<ListViewComponent>(this.metadata(), {
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: ""
+            },
             height: {
                 type: "string",
                 value: "300px"
             },
             items: {
                 type: "object"
-            },
-            listClass: {
-                type: "string",
-                value: ""
-            },
-            listItemClass: {
-                type: "string",
-                value: ""
             },
             listItemStyle: {
                 type: "dropdown",
@@ -351,13 +374,18 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                 type: "string",
                 value: "text"
             },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
+            },
             width: {
                 type: "string",
                 value: "200px"
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ListViewComponent");
     protected readonly ListViewWrapperComponent = ListViewWrapperComponent;
@@ -382,6 +410,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <mona-list-view
+            [aria-label]="ariaLabel()"
             [height]="height()"
             [items]="listViewItems() | slice: 0 : scrollBottomItemCount()"
             [listClass]="listClassInput()"
@@ -394,6 +423,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             [size]="size()"
             [textField]="textField()"
             [width]="listWidth()"
+            [class]="userClass()"
             [monaListViewGroupable]="grouping()"
             [groupBy]="groupBy()"
             [monaListViewNavigable]="navigation()"
@@ -593,6 +623,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         };
         return options;
     });
+    public readonly ariaLabel = input("");
     public readonly height = input<ReturnType<ListViewComponent["height"]>>("100%");
     public readonly listClass = input<ReturnType<ListViewComponent["listClass"]>>("");
     public readonly listItemClass = input<ReturnType<ListViewComponent["listItemClass"]>>("");
@@ -604,6 +635,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
     public readonly rounded = input<ReturnType<ListViewComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<ListViewComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListViewComponent["textField"]>>("");
+    public readonly userClass = input<ReturnType<ListViewComponent["userClass"]>>("");
     public readonly width = input<ReturnType<ListViewComponent["width"]>>("100%");
 
     public constructor() {
