@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { FieldsetComponent, FieldsetLegendTemplateDirective } from "@nanahoshi/mona-ui/fieldset";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { NgComponentOutlet } from "@angular/common";
 
@@ -21,8 +22,9 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
             description: "Use a custom template for the fieldset legend."
         }
     });
-    protected readonly config = signal<ComponentConfig<FieldsetComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<FieldsetComponent>>(() => ({
+        inputs: deriveInputConfig<FieldsetComponent>(this.metadata(), {
+            // The demo curates a non-empty starting legend instead of the library's "" default.
             legend: {
                 type: "string",
                 value: "Legend"
@@ -32,13 +34,14 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
             },
-            disabled: {
-                type: "boolean",
-                value: false
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("FieldsetComponent");
     protected readonly FieldsetWrapperComponent = FieldsetWrapperComponent;
@@ -48,7 +51,7 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
     imports: [FieldsetComponent, FieldsetLegendTemplateDirective],
     template: `
         @let featureData = features();
-        <mona-fieldset [legend]="legend()" [rounded]="rounded()" [disabled]="disabled()">
+        <mona-fieldset [legend]="legend()" [rounded]="rounded()" [disabled]="disabled()" [class]="userClass()">
             <p class="p-2">This is a fieldset content.</p>
             @if (featureData["legendTemplate"].active) {
                 <ng-template monaFieldsetLegendTemplate>
@@ -67,4 +70,5 @@ class FieldsetWrapperComponent implements ComponentInputsAsSignal<FieldsetCompon
     public readonly disabled = input<ReturnType<FieldsetComponent["disabled"]>>(false);
     public readonly legend = input<ReturnType<FieldsetComponent["legend"]>>("");
     public readonly rounded = input<ReturnType<FieldsetComponent["rounded"]>>("medium");
+    public readonly userClass = input<ReturnType<FieldsetComponent["userClass"]>>("");
 }

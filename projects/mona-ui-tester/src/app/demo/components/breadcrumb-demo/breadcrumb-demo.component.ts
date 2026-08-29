@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import {
     LucideChevronsRight,
     LucideCircleCheck,
@@ -19,6 +19,7 @@ import {
     BreadcrumbSeparatorTemplateDirective
 } from "@nanahoshi/mona-ui/breadcrumb";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -55,15 +56,21 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
         }
     });
     protected readonly BreadcrumbWrapperComponent = BreadcrumbWrapperComponent;
-    protected readonly config = signal<ComponentConfig<BreadcrumbComponent>>({
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
+    protected readonly config = computed<ComponentConfig<BreadcrumbComponent>>(() => ({
+        inputs: deriveInputConfig<BreadcrumbComponent>(this.metadata(), {
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: "Breadcrumb"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("BreadcrumbComponent");
 }
@@ -73,7 +80,7 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
-        <mona-breadcrumb [disabled]="disabled()">
+        <mona-breadcrumb [aria-label]="ariaLabel()" [disabled]="disabled()" [class]="userClass()">
             @for (item of items(); track $index) {
                 <mona-breadcrumb-item [disabled]="$index === 3" (itemClick)="onItemClick(item)">
                     <div class="flex flex-row gap-2 items-center">
@@ -119,7 +126,9 @@ class BreadcrumbWrapperComponent implements ComponentInputsAsSignal<BreadcrumbCo
         const dataSet = this.features()["dataSet"].dropdownValue;
         return dataSet === "Shopping" ? LucideChevronsRight : LucideSlash;
     });
+    public readonly ariaLabel = input<ReturnType<BreadcrumbComponent["ariaLabel"]>>("Breadcrumb");
     public readonly disabled = input<ReturnType<BreadcrumbComponent["disabled"]>>(false);
+    public readonly userClass = input<ReturnType<BreadcrumbComponent["userClass"]>>("");
 
     protected onItemClick(item: BreadcrumbDemoItem) {
         console.log(`Item clicked: ${item.text}`);

@@ -1,11 +1,12 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, input, model, signal } from "@angular/core";
+import { Component, computed, input, model } from "@angular/core";
 import {
     CollapsibleContentDirective,
     CollapsibleDirective,
     CollapsibleTriggerDirective
 } from "@nanahoshi/mona-ui/collapsible";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -15,22 +16,9 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./collapsible-demo.component.html"
 })
 export class CollapsibleDemoComponent extends AbstractDemoComponent<CollapsibleDirective> {
-    protected readonly config = signal<ComponentConfig<CollapsibleDirective>>({
-        inputs: {
-            animate: {
-                type: "boolean",
-                value: true
-            },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
-            expanded: {
-                type: "boolean",
-                value: false
-            }
-        }
-    });
+    protected readonly config = computed<ComponentConfig<CollapsibleDirective>>(() => ({
+        inputs: deriveInputConfig<CollapsibleDirective>(this.metadata(), {})
+    }));
     protected readonly metadata = this.getMetadata("CollapsibleDirective");
     protected readonly CollapsibleWrapperComponent = CollapsibleWrapperComponent;
 }
