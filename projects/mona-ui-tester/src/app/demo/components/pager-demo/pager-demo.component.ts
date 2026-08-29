@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
@@ -15,9 +15,120 @@ import {
 import { SliderComponent } from "@nanahoshi/mona-ui/slider";
 
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const INFO_TEMPLATE_CODE = `<ng-template
+    monaPagerInfoTemplate
+    let-currentPage="currentPage"
+    let-pageSize="pageSize"
+    let-skip="skip"
+    let-total="total"
+    let-totalPages="totalPages">
+    <div class="flex items-center justify-end flex-1">{{ currentPage }}/{{ totalPages }}</div>
+</ng-template>`;
+
+const FIRST_PAGE_BUTTON_TEMPLATE_CODE = `<ng-template
+    monaPagerNavigationButtonsTemplate
+    type="first"
+    let-disabled="disabled"
+    let-pageSize="pageSize"
+    let-totalPages="totalPages">
+    <button
+        monaButton
+        look="info"
+        [rounded]="rounded()"
+        [size]="size()"
+        (click)="skipValue.set(0)"
+        [disabled]="disabled"
+        class="mx-0.5">
+        F
+    </button>
+</ng-template>`;
+
+const NUMERIC_BUTTONS_TEMPLATE_CODE = `<ng-template monaPagerNumericButtonsTemplate let-totalPages="totalPages">
+    <div class="flex items-center h-full px-2">
+        <mona-slider
+            [minValue]="1"
+            [maxValue]="totalPages"
+            [showTicks]="false"
+            [showLabels]="false"
+            [value]="page()"
+            (valueChange)="onSliderChange($event)">
+        </mona-slider>
+    </div>
+</ng-template>`;
+
+const LAST_PAGE_BUTTON_TEMPLATE_CODE = `<ng-template
+    monaPagerNavigationButtonsTemplate
+    type="last"
+    let-totalPages="totalPages"
+    let-pageSize="pageSize"
+    let-disabled="disabled">
+    <button
+        monaButton
+        look="info"
+        [rounded]="rounded()"
+        [size]="size()"
+        (click)="skipValue.set((totalPages - 1) * pageSize)"
+        [disabled]="disabled"
+        class="mx-0.5">
+        L
+    </button>
+</ng-template>`;
+
+const NEXT_PAGE_BUTTON_TEMPLATE_CODE = `<ng-template
+    monaPagerNavigationButtonsTemplate
+    type="next"
+    let-disabled="disabled"
+    let-pageSize="pageSize"
+    let-totalPages="totalPages">
+    <button
+        monaButton
+        look="success"
+        [rounded]="rounded()"
+        [size]="size()"
+        (click)="skipValue.set(page() * pageSize)"
+        [disabled]="disabled"
+        class="mx-0.5">
+        N
+    </button>
+</ng-template>`;
+
+const PAGE_SIZE_TEMPLATE_CODE = `<ng-template monaPagerPageSizeTemplate let-pageSizeValues>
+    <mona-dropdown-list
+        [data]="pageSizeValues"
+        [ngModel]="pageSizeValue()"
+        (ngModelChange)="pageSizeValue.set($event)"
+        class="w-28">
+        <ng-template monaDropDownListValueTemplate let-dataItem>
+            <span class="px-2 text-blue-400">{{ dataItem }}</span>
+        </ng-template>
+        <ng-template monaDropDownListItemTemplate let-dataItem>
+            <span class="px-2">{{ dataItem }} / page</span>
+        </ng-template>
+    </mona-dropdown-list>
+</ng-template>`;
+
+const PREVIOUS_PAGE_BUTTON_TEMPLATE_CODE = `<ng-template
+    monaPagerNavigationButtonsTemplate
+    type="previous"
+    let-disabled="disabled"
+    let-pageSize="pageSize"
+    let-totalPages="totalPages">
+    <button
+        monaButton
+        look="success"
+        [rounded]="rounded()"
+        [size]="size()"
+        (click)="skipValue.set((page() - 2) * pageSize)"
+        [disabled]="disabled"
+        class="mx-0.5">
+        P
+    </button>
+</ng-template>`;
 
 @Component({
     selector: "app-pager-demo",
@@ -27,6 +138,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
     readonly #injector = createFeatureInjector({
         firstPageButtonTemplate: {
+            code: FIRST_PAGE_BUTTON_TEMPLATE_CODE,
             description: `
                 This template is used to customize the first page button display.
                 Only applicable when the firstLast input is set to true.
@@ -35,11 +147,13 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             active: false
         },
         infoTemplate: {
+            code: INFO_TEMPLATE_CODE,
             description: `This template is used to customize the pager info display.`,
             name: "Info Template",
             active: false
         },
         numericButtonsTemplate: {
+            code: NUMERIC_BUTTONS_TEMPLATE_CODE,
             description: `
                 This template is used to customize the numeric buttons display.
                 Only applicable when the pager type is set to "numeric".
@@ -48,6 +162,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             active: false
         },
         lastPageButtonTemplate: {
+            code: LAST_PAGE_BUTTON_TEMPLATE_CODE,
             description: `
                 This template is used to customize the last page button display.
                 Only applicable when the firstLast input is set to true.
@@ -56,6 +171,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             active: false
         },
         nextPageButtonTemplate: {
+            code: NEXT_PAGE_BUTTON_TEMPLATE_CODE,
             description: `
                 This template is used to customize the next page button display.
                 Only applicable when the previousNext input is set to true.
@@ -64,6 +180,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             active: false
         },
         pageSizeTemplate: {
+            code: PAGE_SIZE_TEMPLATE_CODE,
             description: `
                 This template is used to customize the page size dropdown display.
             `,
@@ -71,6 +188,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             active: false
         },
         previousPageButtonTemplate: {
+            code: PREVIOUS_PAGE_BUTTON_TEMPLATE_CODE,
             description: `
                 This template is used to customize the previous page button display.
                 Only applicable when the previousNext input is set to true.
@@ -79,16 +197,8 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<PagerComponent>>({
-        inputs: {
-            firstLast: {
-                type: "boolean",
-                value: true
-            },
-            pageInput: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<PagerComponent>>(() => ({
+        inputs: deriveInputConfig<PagerComponent>(this.metadata(), {
             pageSize: {
                 type: "number",
                 value: 5,
@@ -99,22 +209,10 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                 value: [true, false, [5, 10, 20, 50, 100], [10, 25, 50, 100, 200]],
                 defaultValue: [5, 10, 20, 50, 100]
             },
-            previousNext: {
-                type: "boolean",
-                value: true
-            },
-            responsive: {
-                type: "boolean",
-                value: true
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
-            },
-            showInfo: {
-                type: "boolean",
-                value: true
             },
             size: {
                 type: "dropdown",
@@ -126,6 +224,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                 value: 0,
                 min: 0
             },
+            // The demo curates a total of 100 instead of the library's default of 0.
             total: {
                 type: "number",
                 value: 100,
@@ -136,14 +235,19 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                 value: ["input", "numeric"],
                 defaultValue: "numeric"
             },
+            userClasses: {
+                alias: "class",
+                type: "string",
+                value: ""
+            },
             visiblePages: {
                 type: "number",
                 value: 5,
                 min: 1
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PagerComponent");
     protected readonly PagerWrapperComponent = PagerWrapperComponent;
@@ -169,6 +273,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             <span class="text-4xl font-semibold inline-flex items-center justify-center">{{ page() }}</span>
             <mona-pager
                 [firstLast]="firstLast()"
+                [navigable]="navigable()"
                 [pageInput]="pageInput()"
                 [pageSize]="pageSizeValue()"
                 [pageSizeValues]="pageSizeValues()"
@@ -181,6 +286,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                 [total]="total()"
                 [type]="type()"
                 [visiblePages]="visiblePages()"
+                [class]="userClasses()"
                 (pageChange)="onPageChange($event)">
                 @if (featureData["infoTemplate"].active) {
                     <ng-template
@@ -319,6 +425,7 @@ class PagerWrapperComponent implements ComponentInputsAsSignal<PagerComponent> {
         computation: skip => skip
     });
     public readonly firstLast = input<ReturnType<PagerComponent["firstLast"]>>(true);
+    public readonly navigable = input<ReturnType<PagerComponent["navigable"]>>(true);
     public readonly pageInput = input<ReturnType<PagerComponent["pageInput"]>>(false);
     public readonly pageSize = input<ReturnType<PagerComponent["pageSize"]>>(5);
     public readonly pageSizeValues = input<ReturnType<PagerComponent["pageSizeValues"]>>([5, 10, 20, 50, 100]);
@@ -330,6 +437,7 @@ class PagerWrapperComponent implements ComponentInputsAsSignal<PagerComponent> {
     public readonly skip = input<ReturnType<PagerComponent["skip"]>>(0);
     public readonly total = input<ReturnType<PagerComponent["total"]>>(0);
     public readonly type = input<ReturnType<PagerComponent["type"]>>("numeric");
+    public readonly userClasses = input<ReturnType<PagerComponent["userClasses"]>>("");
     public readonly visiblePages = input<ReturnType<PagerComponent["visiblePages"]>>(5);
 
     protected onPageChange(event: PageChangeEvent) {

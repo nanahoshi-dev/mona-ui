@@ -4,9 +4,14 @@ import { disabled, form, FormField, readonly, required } from "@angular/forms/si
 import { LucideHeart } from "@lucide/angular";
 import { OtpInputComponent, OtpInputSeparatorTemplateDirective } from "@nanahoshi/mona-ui/otp-input";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const SEPARATOR_TEMPLATE_CODE = `<ng-template monaOtpInputSeparatorTemplate>
+    <svg lucideHeart [size]="12" [color]="'red'"></svg>
+</ng-template>`;
 
 @Component({
     selector: "app-otp-input-demo",
@@ -16,18 +21,18 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputComponent> {
     readonly #injector = createFeatureInjector({
         separatorTemplate: {
-            code: ``,
+            code: SEPARATOR_TEMPLATE_CODE,
             name: "Separator Template",
             description: "The template to use for the separator rendered between OTP groups.",
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<OtpInputComponent>>({
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<OtpInputComponent>>(() => ({
+        inputs: deriveInputConfig<OtpInputComponent>(this.metadata(), {
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
+            touched: undefined,
             groupLength: {
                 max: 6,
                 min: 1,
@@ -35,29 +40,19 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
                 type: "number",
                 value: null
             },
+            // The demo curates a length of 6 instead of the library's default of 4.
             length: {
                 max: 12,
                 min: 1,
                 type: "number",
                 value: 6
             },
-            placeholder: {
-                type: "string",
-                value: ""
-            },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 defaultValue: "medium",
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"]
             },
+            // The demo curates a "-" separator instead of the library's "" default.
             separator: {
                 type: "string",
                 value: "-"
@@ -67,22 +62,19 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
                 type: "dropdown",
                 value: ["small", "medium", "large"]
             },
-            spacing: {
-                type: "boolean",
-                value: true
-            },
             type: {
                 defaultValue: "number",
                 type: "dropdown",
                 value: ["number", "text", "password"]
             },
-            value: {
+            userClass: {
+                alias: "class",
                 type: "string",
                 value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("OtpInputComponent");
     protected readonly otpInputWrapperComponent = OtpInputWrapperComponent;
@@ -105,6 +97,7 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
                 >
             </div>
             <mona-otp-input
+                [ariaLabel]="ariaLabel()"
                 [groupLength]="groupLength()"
                 [length]="length()"
                 [placeholder]="placeholder()"
@@ -114,6 +107,7 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
                 [spacing]="spacing()"
                 [type]="type()"
                 [formField]="form.code"
+                [class]="userClass()"
                 (complete)="onComplete($event)">
                 @if (featureData["separatorTemplate"].active) {
                     <ng-template monaOtpInputSeparatorTemplate>
@@ -143,6 +137,7 @@ export class OtpInputWrapperComponent implements ComponentInputsAsSignal<OtpInpu
         return this.form.code().value().length === this.length();
     });
 
+    public readonly ariaLabel = input("Verification code");
     public readonly disabled = input(false);
     public readonly groupLength = input<number | number[] | null>(null);
     public readonly length = input(6);
@@ -154,6 +149,7 @@ export class OtpInputWrapperComponent implements ComponentInputsAsSignal<OtpInpu
     public readonly size = input<ReturnType<OtpInputComponent["size"]>>("medium");
     public readonly spacing = input(true);
     public readonly type = input<ReturnType<OtpInputComponent["type"]>>("number");
+    public readonly userClass = input<ReturnType<OtpInputComponent["userClass"]>>("");
     public readonly value = model("");
 
     public constructor() {
