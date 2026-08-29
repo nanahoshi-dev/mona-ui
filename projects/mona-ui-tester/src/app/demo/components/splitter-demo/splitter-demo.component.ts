@@ -1,8 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { SplitterComponent, SplitterPaneComponent } from "@nanahoshi/mona-ui/splitter";
 import { compact } from "@mirei/ts-collections";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -96,16 +97,16 @@ export class SplitterDemoComponent extends AbstractDemoComponent<SplitterCompone
             }
         }
     });
-    protected readonly config = signal<ComponentConfig<SplitterComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<SplitterComponent>>(() => ({
+        inputs: deriveInputConfig<SplitterComponent>(this.metadata(), {
             orientation: {
                 type: "dropdown",
                 value: ["horizontal", "vertical"],
                 defaultValue: "vertical"
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SplitterComponent");
     protected readonly SplitterWrapperComponent = SplitterWrapperComponent;

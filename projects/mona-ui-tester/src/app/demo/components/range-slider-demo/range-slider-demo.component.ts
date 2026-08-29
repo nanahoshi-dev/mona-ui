@@ -8,9 +8,22 @@ import {
     SliderTickValueTemplateDirective
 } from "@nanahoshi/mona-ui/slider";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const LABEL_TEMPLATE_CODE = `<ng-template monaSliderTickValueTemplate let-value>
+    @if (value < 8 || value > 20) {
+        <svg lucideMoon [color]="'mediumpurple'"></svg>
+    } @else {
+        <svg lucideSun [color]="'#fafd0f'"></svg>
+    }
+</ng-template>`;
+
+const HANDLE_TEMPLATE_CODE = `<ng-template monaSliderHandleTemplate let-value>
+    <svg lucideStar [color]="'darkgoldenrod'" [title]="value"></svg>
+</ng-template>`;
 
 @Component({
     selector: "app-range-slider-demo",
@@ -20,31 +33,28 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderComponent> {
     readonly #injector = createFeatureInjector({
         handleTemplate: {
+            code: HANDLE_TEMPLATE_CODE,
             name: "Handle Template",
             description: "This template allows you to customize the handles displayed on the range slider.",
             active: false
         },
         labelTemplate: {
+            code: LABEL_TEMPLATE_CODE,
             name: "Label Template",
             description: "This template allows you to customize the label displayed on the slider ticks.",
             active: false
         }
     });
     protected readonly RangeSliderWrapperComponent = RangeSliderWrapperComponent;
-    protected readonly config = signal<ComponentConfig<RangeSliderComponent>>({
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<RangeSliderComponent>>(() => ({
+        inputs: deriveInputConfig<RangeSliderComponent>(this.metadata(), {
+            // invalid is written by the FormField directive via [formField] below; Angular
+            // forbids binding it directly, so exclude it rather than expose a dead control.
+            invalid: undefined,
             labelPosition: {
                 type: "dropdown",
                 value: ["before", "after"],
                 defaultValue: "after"
-            },
-            labelStep: {
-                type: "number",
-                value: 1
             },
             largeTickStep: {
                 type: "number",
@@ -52,13 +62,10 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
                 nullable: true,
                 value: null
             },
+            // The demo curates a 0-23 hour range instead of the library's 0-10 default.
             maxValue: {
                 type: "number",
                 value: 23
-            },
-            minValue: {
-                type: "number",
-                value: 0
             },
             orientation: {
                 type: "dropdown",
@@ -70,14 +77,11 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "full"
             },
-            shiftMultiplier: {
-                type: "number",
-                value: 10
-            },
             selectionBackground: {
                 type: "color",
                 value: "var(--color-primary)"
             },
+            // The library defaults labels/ticks to hidden; the demo has always shown them.
             showLabels: {
                 type: "boolean",
                 value: true
@@ -86,10 +90,7 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
                 type: "boolean",
                 value: true
             },
-            smallTickStep: {
-                type: "number",
-                value: 1
-            },
+            // The demo curates a step of 4 instead of the library's default of 1.
             step: {
                 type: "number",
                 value: 4
@@ -102,9 +103,9 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
                 type: "string",
                 value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("RangeSliderComponent");
 }
@@ -125,6 +126,8 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
         <div class="flex flex-col gap-4">
             <span>Range: {{ form.value().value()[0] }} - {{ form.value().value()[1] }}</span>
             <mona-range-slider
+                [aria-label-start]="ariaLabelStart()"
+                [aria-label-end]="ariaLabelEnd()"
                 [labelPosition]="labelPosition()"
                 [labelStep]="labelStep()"
                 [largeTickStep]="largeTickStep()"
@@ -169,6 +172,8 @@ export class RangeSliderWrapperComponent implements ComponentInputsAsSignal<Rang
     protected readonly size = computed(() =>
         this.orientation() === "horizontal" ? { width: "400px" } : { height: "400px" }
     );
+    public readonly ariaLabelEnd = input<ReturnType<RangeSliderComponent["ariaLabelEnd"]>>("Maximum value");
+    public readonly ariaLabelStart = input<ReturnType<RangeSliderComponent["ariaLabelStart"]>>("Minimum value");
     public readonly disabled = input(false);
     public readonly labelPosition = input<ReturnType<RangeSliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);
