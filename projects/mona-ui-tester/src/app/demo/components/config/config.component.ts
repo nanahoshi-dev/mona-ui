@@ -11,7 +11,7 @@ import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
 import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui/tabs";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
-import { generateFeatureCodeSample } from "../../utils/codeSample";
+import { generateDirectiveBindingCodeSample, generateFeatureCodeSample } from "../../utils/codeSample";
 import {
     ComponentConfig,
     ComponentConfigFeatureItem,
@@ -100,6 +100,12 @@ export class ConfigComponent<C> {
     }
 
     protected resolveFeatureCode(key: string, item: ComponentConfigFeatureItem[string]): string {
+        if (item.directiveBinding) {
+            const allFeatures = this.templateHandler()?.data();
+            if (allFeatures) {
+                return generateDirectiveBindingCodeSample(this.metadata().selector ?? "", item.directiveBinding, allFeatures);
+            }
+        }
         if (item.code) {
             return item.code;
         }

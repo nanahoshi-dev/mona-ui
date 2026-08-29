@@ -4,7 +4,6 @@ import { disabled, form, FormField, readonly, required } from "@angular/forms/si
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { FilterableOptions, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import {
     DropdownFilterableDirective,
     DropdownFooterTemplateDirective,
@@ -15,7 +14,6 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
-import { GroupableOptions } from "@nanahoshi/mona-ui/internal/list";
 import {
     MultiSelectComponent,
     MultiSelectSummaryTagDirective,
@@ -25,6 +23,9 @@ import {
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
+    buildFilterableOptions,
+    buildGroupableOptions,
+    buildVirtualScrollOptions,
     dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
     dropdownFooterTemplateFeatureConfig,
@@ -286,17 +287,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => {
-        const features = this.features();
-        const subFeatures = features["filtering"]?.subFeatures || {};
-        const filteringOptions: FilterableOptions = {
-            caseSensitive: subFeatures["caseSensitive"].active ?? false,
-            debounce: subFeatures["debounce"].numericValue ?? 0,
-            enabled: features["filtering"].active ?? false,
-            operator: subFeatures["operator"].dropdownValue
-        };
-        return filteringOptions;
-    });
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
         if (!value) {
@@ -313,17 +304,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
         const subFeatures = features["grouping"]?.subFeatures || {};
         return subFeatures["groupBy"].dropdownValue;
     });
-    protected readonly grouping = computed(() => {
-        const features = this.features();
-        const subFeatures = features["grouping"]?.subFeatures || {};
-        const groupingOptions: GroupableOptions = {
-            enabled: features["grouping"].active,
-            headerOrder: subFeatures["headerOrder"].dropdownValue,
-            orderBy: subFeatures["orderBy"].dropdownValue,
-            orderByDirection: subFeatures["orderByDirection"].dropdownValue
-        };
-        return groupingOptions;
-    });
+    protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly multiSelectData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
         if (dataSet === "Empty") {
@@ -349,15 +330,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
             template: active ? subFeatures["tagTemplate"].active : false
         };
     });
-    protected readonly virtualization = computed(() => {
-        const features = this.features();
-        const subFeatures = features["virtualization"]?.subFeatures || {};
-        const options: Partial<VirtualScrollOptions> = {
-            enabled: features["virtualization"].active,
-            height: subFeatures["itemHeight"].numericValue
-        };
-        return options;
-    });
+    protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
 
     public readonly autoClose = input<ReturnType<MultiSelectComponent["autoClose"]>>(false);
     public readonly checkboxes = input<ReturnType<MultiSelectComponent["checkboxes"]>>(false);

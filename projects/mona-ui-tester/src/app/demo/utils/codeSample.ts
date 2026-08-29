@@ -61,6 +61,23 @@ export function generateFeatureCodeSample(selector: string, key: string, item: F
     return generateComponentCodeSample(selector, [processedItem], { [key]: value });
 }
 
+/**
+ * Renders a feature's `directiveBinding` (a whole options object bound to one directive input,
+ * e.g. `[monaDropDownFilterable]="{...}"`) from live feature state, wrapped in the demoed
+ * component's own element tag so the sample reads as real, pasteable usage rather than a bare
+ * attribute. Takes priority over both a hand-authored `code` string and
+ * {@link generateFeatureCodeSample} - see `ConfigComponent`.
+ */
+export function generateDirectiveBindingCodeSample(
+    selector: string,
+    binding: NonNullable<FeatureItem["directiveBinding"]>,
+    allFeatures: ComponentConfigFeatureItem
+): string {
+    const { tag } = parseSelector(selector);
+    const attribute = `[${binding.hostAttribute}]="${formatBindingValue(binding.buildValue(allFeatures))}"`;
+    return formatElement(tag, [attribute]);
+}
+
 function mapFeatureConfigType(type: FeatureItem["type"]): ProcessedConfigItem["configType"] {
     switch (type) {
         case "number":

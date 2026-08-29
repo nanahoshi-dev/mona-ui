@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, model, sig
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { ComboBoxComponent } from "@nanahoshi/mona-ui/combo-box";
-import { FilterableOptions, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import {
     DropdownFilterableDirective,
     DropdownFooterTemplateDirective,
@@ -15,11 +14,14 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
-import { GroupableOptions } from "@nanahoshi/mona-ui/internal/list";
 import { ImmutableSet, range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
+    buildFilterableOptions,
+    buildGroupableOptions,
+    buildVirtualScrollOptions,
     dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
     dropdownFooterTemplateFeatureConfig,
@@ -53,38 +55,21 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         prefixTemplate: dropdownPrefixTemplateFeatureConfig("combo box"),
         virtualization: dropdownVirtualizationFeatureConfig("combo box")
     });
-    protected readonly config = signal<ComponentConfig<ComboBoxComponent>>({
-        inputs: {
-            allowCustomValue: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<ComboBoxComponent>>(() => ({
+        inputs: deriveInputConfig<ComboBoxComponent>(this.metadata(), {
             data: {
                 type: "iterable",
                 value: []
             },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
                 value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
-            },
-            loading: {
-                type: "boolean",
-                value: false
-            },
-            placeholder: {
-                type: "string",
-                value: ""
-            },
-            popupClass: {
-                type: "string",
-                value: ""
             },
             popupHeight: {
                 type: "number",
@@ -99,22 +84,10 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 min: 0,
                 value: null
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
-            },
-            showClearButton: {
-                type: "boolean",
-                value: false
             },
             size: {
                 type: "dropdown",
@@ -125,17 +98,19 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 type: "string",
                 value: "text"
             },
+            touched: undefined,
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: "w-50"
+            },
             valueField: {
                 type: "string",
                 value: "value"
-            },
-            valuePrimitive: {
-                type: "boolean",
-                value: false
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ComboBoxComponent");
     protected readonly ComboBoxWrapperComponent = ComboBoxWrapperComponent;
@@ -165,6 +140,9 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         <span>Selected Value: {{ formValueText() }}</span>
         <mona-combo-box
             [allowCustomValue]="allowCustomValue()"
+            [aria-describedby]="ariaDescribedBy()"
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [data]="comboBoxData()"
             [itemDisabled]="itemDisabled()"
             [loading]="loading()"
@@ -184,7 +162,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
             [formField]="form.value"
             [groupBy]="groupBy()"
             (valueAdd)="onValueAdd($event)"
-            class="w-50">
+            [class]="userClass()">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
                     <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
@@ -259,17 +237,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => {
-        const features = this.features();
-        const subFeatures = features["filtering"]?.subFeatures || {};
-        const filteringOptions: FilterableOptions = {
-            caseSensitive: subFeatures["caseSensitive"].active ?? false,
-            debounce: subFeatures["debounce"].numericValue ?? 0,
-            enabled: features["filtering"].active ?? false,
-            operator: subFeatures["operator"].dropdownValue
-        };
-        return filteringOptions;
-    });
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
         if (this.valuePrimitive()) {
@@ -283,27 +251,12 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
         const subFeatures = features["grouping"]?.subFeatures || {};
         return subFeatures["groupBy"].dropdownValue;
     });
-    protected readonly grouping = computed(() => {
-        const features = this.features();
-        const subFeatures = features["grouping"]?.subFeatures || {};
-        const groupingOptions: GroupableOptions = {
-            enabled: features["grouping"].active,
-            headerOrder: subFeatures["headerOrder"].dropdownValue,
-            orderBy: subFeatures["orderBy"].dropdownValue,
-            orderByDirection: subFeatures["orderByDirection"].dropdownValue
-        };
-        return groupingOptions;
-    });
-    protected readonly virtualization = computed(() => {
-        const features = this.features();
-        const subFeatures = features["virtualization"]?.subFeatures || {};
-        const options: Partial<VirtualScrollOptions> = {
-            enabled: features["virtualization"].active,
-            height: subFeatures["itemHeight"].numericValue
-        };
-        return options;
-    });
+    protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
+    protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
     public readonly allowCustomValue = model<ReturnType<ComboBoxComponent["allowCustomValue"]>>(false);
+    public readonly ariaDescribedBy = input<ReturnType<ComboBoxComponent["ariaDescribedBy"]>>("");
+    public readonly ariaLabel = input<ReturnType<ComboBoxComponent["ariaLabel"]>>("");
+    public readonly ariaLabelledBy = input<ReturnType<ComboBoxComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<ComboBoxComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<ComboBoxComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<ComboBoxComponent["itemDisabled"]>>(null);
@@ -318,6 +271,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     public readonly showClearButton = input<ReturnType<ComboBoxComponent["showClearButton"]>>(false);
     public readonly size = input<ReturnType<ComboBoxComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ComboBoxComponent["textField"]>>("text");
+    public readonly userClass = input<ReturnType<ComboBoxComponent["userClass"]>>("w-50");
     public readonly valueField = input<ReturnType<ComboBoxComponent["valueField"]>>("value");
     public readonly valuePrimitive = input<ReturnType<ComboBoxComponent["valuePrimitive"]>>(false);
 

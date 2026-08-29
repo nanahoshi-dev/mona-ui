@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ComponentConfigFeatureItemOptions, ProcessedConfigItem } from "./componentConfig";
-import { generateComponentCodeSample, generateFeatureCodeSample } from "./codeSample";
+import { ComponentConfigFeatureItem, ComponentConfigFeatureItemOptions, ProcessedConfigItem } from "./componentConfig";
+import { generateComponentCodeSample, generateDirectiveBindingCodeSample, generateFeatureCodeSample } from "./codeSample";
 
 function makeItem(overrides: Partial<ProcessedConfigItem> & Pick<ProcessedConfigItem, "name" | "configType">) {
     return {
@@ -138,5 +138,47 @@ describe("generateFeatureCodeSample", () => {
         expect(generateFeatureCodeSample("mona-chip", "size", item)).toBe(
             `<mona-chip [size]="'large'"></mona-chip>`
         );
+    });
+});
+
+describe("generateDirectiveBindingCodeSample", () => {
+    it("wraps the host attribute binding in the demoed component's own element tag", () => {
+        const allFeatures = {} as ComponentConfigFeatureItem;
+        const code = generateDirectiveBindingCodeSample(
+            "mona-auto-complete",
+            { hostAttribute: "monaDropDownFilterable", buildValue: () => ({ enabled: true, operator: "startsWith" }) },
+            allFeatures
+        );
+        expect(code).toBe(
+            [
+                "<mona-auto-complete",
+                `    [monaDropDownFilterable]="{"enabled":true,"operator":"startsWith"}">`,
+                "</mona-auto-complete>"
+            ].join("\n")
+        );
+    });
+
+    it("drops undefined members from the built value", () => {
+        const allFeatures = {} as ComponentConfigFeatureItem;
+        const code = generateDirectiveBindingCodeSample(
+            "mona-dropdown-list",
+            { hostAttribute: "monaDropDownGroupable", buildValue: () => ({ enabled: false, orderBy: undefined }) },
+            allFeatures
+        );
+        expect(code).toBe(
+            ["<mona-dropdown-list", `    [monaDropDownGroupable]="{"enabled":false}">`, "</mona-dropdown-list>"].join(
+                "\n"
+            )
+        );
+    });
+
+    it("unquotes a raw ts-morph selector literal", () => {
+        const allFeatures = {} as ComponentConfigFeatureItem;
+        const code = generateDirectiveBindingCodeSample(
+            `"mona-combo-box"`,
+            { hostAttribute: "monaDropDownVirtualScroll", buildValue: () => ({ enabled: true }) },
+            allFeatures
+        );
+        expect(code).toBe(`<mona-combo-box [monaDropDownVirtualScroll]="{"enabled":true}"></mona-combo-box>`);
     });
 });

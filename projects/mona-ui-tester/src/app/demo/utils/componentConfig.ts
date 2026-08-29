@@ -101,6 +101,16 @@ export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
     clearable?: boolean;
     codeVisible?: boolean;
     description: string;
+    /**
+     * Declares that this feature is bound to a single directive input taking a whole options
+     * object (e.g. `[monaDropDownFilterable]="{ enabled: true, ... }"`), rather than to a plain
+     * component input. When present, the Features-tab code sample renders this binding directly
+     * from live feature state instead of falling back to a hand-authored `code` string.
+     */
+    directiveBinding?: {
+        buildValue: (allFeatures: ComponentConfigFeatureItem) => unknown;
+        hostAttribute: string;
+    };
     dropdownDataSource?: Iterable<TDropdown>;
     dropdownDefaultValue?: TDropdown; // Only for the dropdown type
     dropdownTextField?: string; // Only for the dropdown type

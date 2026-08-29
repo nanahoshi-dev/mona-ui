@@ -4,7 +4,6 @@ import { disabled, form, FormField, readonly, required } from "@angular/forms/si
 import { LucideBox, LucideCheck, LucideSearch, LucideTriangleAlert } from "@lucide/angular";
 import { AutoCompleteComponent } from "@nanahoshi/mona-ui/auto-complete";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { FilterableOptions, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import {
     DropdownFilterableDirective,
     DropdownFooterTemplateDirective,
@@ -17,11 +16,13 @@ import {
     DropdownSuffixTemplateDirective,
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
-import type { GroupableOptions } from "@nanahoshi/mona-ui/internal/list";
 import { range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
+    buildFilterableOptions,
+    buildGroupableOptions,
+    buildVirtualScrollOptions,
     dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
     dropdownFooterTemplateFeatureConfig,
@@ -283,43 +284,15 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => {
-        const features = this.features();
-        const subFeatures = features["filtering"]?.subFeatures || {};
-        const filteringOptions: FilterableOptions = {
-            caseSensitive: subFeatures["caseSensitive"].active ?? false,
-            debounce: subFeatures["debounce"].numericValue ?? 0,
-            enabled: features["filtering"].active ?? false,
-            operator: subFeatures["operator"].dropdownValue
-        };
-        return filteringOptions;
-    });
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly groupBy = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};
         return subFeatures["groupBy"].dropdownValue;
     });
-    protected readonly grouping = computed(() => {
-        const features = this.features();
-        const subFeatures = features["grouping"]?.subFeatures || {};
-        const groupingOptions: GroupableOptions = {
-            enabled: features["grouping"].active,
-            headerOrder: subFeatures["headerOrder"].dropdownValue,
-            orderBy: subFeatures["orderBy"].dropdownValue,
-            orderByDirection: subFeatures["orderByDirection"].dropdownValue
-        };
-        return groupingOptions;
-    });
+    protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly selectedItem = signal<unknown>(null);
-    protected readonly virtualization = computed(() => {
-        const features = this.features();
-        const subFeatures = features["virtualization"]?.subFeatures || {};
-        const options: Partial<VirtualScrollOptions> = {
-            enabled: features["virtualization"].active,
-            height: subFeatures["itemHeight"].numericValue
-        };
-        return options;
-    });
+    protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
     public readonly highlightFirst = input<ReturnType<AutoCompleteComponent["highlightFirst"]>>(true);
