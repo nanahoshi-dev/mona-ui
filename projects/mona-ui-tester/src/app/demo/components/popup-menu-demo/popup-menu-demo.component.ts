@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, ElementRef, inject, input, signal, viewChild } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from "@angular/core";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import {
     LucideArrowBigLeft,
     LucideArrowBigRight,
@@ -27,9 +28,66 @@ import {
 } from "@nanahoshi/mona-ui/popup-menu";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const GROUP_TEMPLATE_CODE = `<ng-template monaPopupMenuGroupTemplate let-group>
+    <span class="text-teal-500 font-semibold">{{ group }}</span>
+</ng-template>`;
+
+const ICON_TEMPLATE_CODE = `<ng-template monaPopupMenuIconTemplate>
+    <svg lucideRotateCw [size]="14"></svg>
+</ng-template>`;
+
+const SHORTCUT_TEMPLATE_CODE = `<ng-template monaPopupMenuShortcutTemplate>
+    <span class="text-xs text-gray-500">Ctrl + Q</span>
+</ng-template>`;
+
+const TEXT_TEMPLATE_CODE = `<ng-template monaPopupMenuTextTemplate let-item>
+    <span class="text-blue-900 italic">{{ item.label }}</span>
+</ng-template>`;
+
+const TOP_LEVEL_GROUP_TEMPLATE_CODE = `<ng-template monaPopupMenuGroupTemplate let-group>
+    @if (group === "Navigation") {
+        <span class="text-blue-500 font-semibold">{{ group }}</span>
+    } @else if (group === "History") {
+        <span class="text-green-500 font-semibold">{{ group }}</span>
+    } @else if (group === "Bookmarks") {
+        <span class="text-purple-500 font-semibold">{{ group }}</span>
+    } @else {
+        <span class="text-gray-500 font-semibold">{{ group }}</span>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_ICON_TEMPLATE_CODE = `<ng-template monaPopupMenuIconTemplate let-item>
+    @if (item.label === "Settings") {
+        <svg lucideSettings [size]="14"></svg>
+    } @else if (item.label === "Back") {
+        <svg lucideArrowBigLeft [size]="14"></svg>
+    } @else if (item.label === "Forward") {
+        <svg lucideArrowBigRight [size]="14"></svg>
+    } @else {
+        <svg lucideHeart [size]="14" [color]="'' | randomColor"></svg>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_SHORTCUT_TEMPLATE_CODE = `<ng-template monaPopupMenuShortcutTemplate let-item>
+    @if (item.label === "Reload") {
+        <span class="text-xs text-gray-500">F5</span>
+    } @else if (item.label === "Exit") {
+        <span class="text-xs text-gray-500">Ctrl + Shift + Q</span>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_TEXT_TEMPLATE_CODE = `<ng-template monaPopupMenuTextTemplate let-item>
+    @if (item.label === "Help") {
+        <span class="text-rose-700 underline">{{ item.label }}</span>
+    } @else {
+        <span [style.color]="'' | randomColor">{{ item.label }}</span>
+    }
+</ng-template>`;
 
 @Component({
     selector: "app-popup-menu-demo",
@@ -45,13 +103,13 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             active: false
         },
         groupTemplate: {
-            code: ``,
+            code: GROUP_TEMPLATE_CODE,
             description: `This template is used to customize the group title in the popup menu.`,
             name: "Group Template",
             active: false
         },
         iconTemplate: {
-            code: ``,
+            code: ICON_TEMPLATE_CODE,
             description: `This template is used to customize the icon displayed in the popup menu items.`,
             name: "Icon Template",
             active: false
@@ -63,37 +121,37 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             active: false
         },
         shortcutTemplate: {
-            code: ``,
+            code: SHORTCUT_TEMPLATE_CODE,
             description: `This template is used to customize the shortcut text displayed in the popup menu items.`,
             name: "Shortcut Template",
             active: false
         },
         textTemplate: {
-            code: ``,
+            code: TEXT_TEMPLATE_CODE,
             description: `This template is used to customize the text displayed in the popup menu items.`,
             name: "Text Template",
             active: false
         },
         topLevelGroupTemplate: {
-            code: ``,
+            code: TOP_LEVEL_GROUP_TEMPLATE_CODE,
             description: `This template is defined at the top level and can be used to customize the appearance of all groups in the popup menu.`,
             name: "Top Level Group Template",
             active: false
         },
         topLevelIconTemplate: {
-            code: ``,
+            code: TOP_LEVEL_ICON_TEMPLATE_CODE,
             description: `This template is defined at the top level and can be used to customize the appearance of all icons in the popup menu.`,
             name: "Top Level Icon Template",
             active: false
         },
         topLevelShortcutTemplate: {
-            code: ``,
+            code: TOP_LEVEL_SHORTCUT_TEMPLATE_CODE,
             description: `This template is defined at the top level and can be used to customize the appearance of all shortcuts in the popup menu.`,
             name: "Top Level Shortcut Template",
             active: false
         },
         topLevelTextTemplate: {
-            code: ``,
+            code: TOP_LEVEL_TEXT_TEMPLATE_CODE,
             description: `This template is defined at the top level and can be used to customize the appearance of all text in the popup menu.`,
             name: "Top Level Text Template",
             active: false
@@ -105,8 +163,8 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<PopupMenuComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<PopupMenuComponent>>(() => ({
+        inputs: deriveInputConfig<PopupMenuComponent>(this.metadata(), {
             anchor: {
                 type: "object"
             },
@@ -155,10 +213,6 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
                 ],
                 defaultValue: "topleft"
             },
-            precise: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large"],
@@ -172,6 +226,7 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             target: {
                 type: "object"
             },
+            // The library's trigger type is a plain string; the demo curates a limited dropdown.
             trigger: {
                 type: "dropdown",
                 value: ["click", "contextmenu"],
@@ -181,9 +236,9 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
                 type: "string",
                 value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PopupMenuComponent");
     protected readonly PopupMenuWrapperComponent = PopupMenuWrapperComponent;
@@ -225,6 +280,7 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             [anchor]="popupAnchor()"
             [anchorConnectionPoint]="anchorConnectionPoint()"
             (close)="onClose($event)"
+            [id]="menuId()"
             (menuClick)="onMenuItemClick($event)"
             [minWidth]="minWidth()"
             (navigate)="onNavigate($event)"
@@ -235,7 +291,8 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             [size]="size()"
             [target]="popupTarget"
             [trigger]="trigger()"
-            [width]="width()">
+            [width]="width()"
+            [class]="userClass()">
             <mona-popup-menu-group title="Navigation">
                 <mona-popup-menu-item label="Back">
                     @if (featureData["iconTemplate"].active) {
@@ -395,6 +452,7 @@ export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupM
     public readonly anchor = input<ReturnType<PopupMenuComponent["anchor"]>>();
     public readonly anchorConnectionPoint = input<ReturnType<PopupMenuComponent["anchorConnectionPoint"]>>(null);
     public readonly items = input<any>([]);
+    public readonly menuId = input("");
     public readonly minWidth = input<ReturnType<PopupMenuComponent["minWidth"]>>();
     public readonly offset = input<ReturnType<PopupMenuComponent["offset"]>>({ horizontal: 0, vertical: 0 });
     public readonly popupConnectionPoint = input<ReturnType<PopupMenuComponent["popupConnectionPoint"]>>(null);
@@ -403,6 +461,9 @@ export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupM
     public readonly size = input<ReturnType<PopupMenuComponent["size"]>>("medium");
     public readonly target = input<ReturnType<PopupMenuComponent["target"]>>(document.body);
     public readonly trigger = input<ReturnType<PopupMenuComponent["trigger"]>>("click");
+    public readonly userClass = input<string, ClassInputType>(undefined, {
+        transform: value => classInputToClass(value)
+    });
     public readonly width = input<ReturnType<PopupMenuComponent["width"]>>();
 
     public onClose(event: any): void {

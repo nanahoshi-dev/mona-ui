@@ -2,6 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     inject,
     input,
     model,
@@ -27,9 +28,31 @@ import {
     WindowTitleTemplateDirective
 } from "@nanahoshi/mona-ui/window";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const ACTION_TEMPLATE_CODE = `<ng-template monaWindowActionTemplate>
+    <mona-switch
+        size="small"
+        [ngModel]="advancedMode()"
+        (ngModelChange)="advancedMode.set($event)"></mona-switch>
+</ng-template>`;
+
+const FOOTER_TEMPLATE_CODE = `<ng-template monaWindowFooterTemplate>
+    <div class="border-t border-border bg-secondary flex items-center justify-end p-2 gap-1">
+        <button monaButton size="small" look="primary">Save</button>
+        <button monaButton size="small" (click)="windowVisible.set(false)">Cancel</button>
+    </div>
+</ng-template>`;
+
+const TITLE_TEMPLATE_CODE = `<ng-template monaWindowTitleTemplate>
+    <div class="flex items-center gap-2">
+        <svg lucideUser [size]="16"></svg>
+        <span class="font-semibold">User Details</span>
+    </div>
+</ng-template>`;
 
 @Component({
     selector: "app-window-demo",
@@ -39,38 +62,26 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> {
     readonly #injector = createFeatureInjector({
         actionTemplate: {
-            code: ``,
+            code: ACTION_TEMPLATE_CODE,
             active: false,
             name: "Action Template",
             description: "Use a custom template for the window actions."
         },
         footerTemplate: {
-            code: ``,
+            code: FOOTER_TEMPLATE_CODE,
             active: false,
             name: "Footer Template",
             description: "Use a custom template for the window footer."
         },
         titleTemplate: {
-            code: ``,
+            code: TITLE_TEMPLATE_CODE,
             active: false,
             name: "Title Template",
             description: "Use a custom template for the window title."
         }
     });
-    protected readonly config = signal<ComponentConfig<WindowComponent>>({
-        inputs: {
-            closable: {
-                type: "boolean",
-                value: true
-            },
-            closeOnEscape: {
-                type: "boolean",
-                value: true
-            },
-            draggable: {
-                type: "boolean",
-                value: true
-            },
+    protected readonly config = computed<ComponentConfig<WindowComponent>>(() => ({
+        inputs: deriveInputConfig<WindowComponent>(this.metadata(), {
             focusedElement: {
                 type: "string",
                 value: ""
@@ -104,10 +115,6 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
                 nullable: true,
                 min: 0
             },
-            maximizable: {
-                type: "boolean",
-                value: true
-            },
             minHeight: {
                 type: "number",
                 value: undefined,
@@ -120,17 +127,10 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
                 nullable: true,
                 min: 0
             },
-            minimizable: {
-                type: "boolean",
-                value: true
-            },
+            // The demo curates a modal window instead of the library's false default.
             modal: {
                 type: "boolean",
                 value: true
-            },
-            resizable: {
-                type: "boolean",
-                value: false
             },
             rounded: {
                 type: "dropdown",
@@ -153,9 +153,9 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
                 nullable: true,
                 min: 0
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("WindowComponent");
     protected readonly WindowWrapperComponent = WindowWrapperComponent;
