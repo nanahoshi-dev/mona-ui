@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, effect, inject, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideList, LucideSearch } from "@lucide/angular";
@@ -14,6 +14,7 @@ import {
     TextBoxSuffixTemplateDirective
 } from "@nanahoshi/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -37,16 +38,8 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         }
     });
     protected readonly TextBoxWrapperComponent = TextBoxWrapperComponent;
-    protected readonly config = signal<ComponentConfig<TextBoxComponent>>({
-        inputs: {
-            clearButton: {
-                type: "boolean",
-                value: false
-            },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<TextBoxComponent>>(() => ({
+        inputs: deriveInputConfig<TextBoxComponent>(this.metadata(), {
             inputClass: {
                 type: "string",
                 value: ""
@@ -55,18 +48,10 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                 type: "string",
                 value: ""
             },
-            placeholder: {
-                type: "string",
-                value: ""
-            },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
+            touched: undefined,
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
@@ -77,18 +62,19 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
             },
-            value: {
-                type: "string",
-                value: ""
-            },
             type: {
                 type: "dropdown",
                 value: ["text", "password", "email"], // Add more types as needed
                 defaultValue: "text"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TextBoxComponent");
 }
@@ -122,7 +108,7 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                 [formField]="form.text"
                 (inputBlur)="onInputBlur($event)"
                 (inputFocus)="onInputFocus($event)"
-                class="w-48">
+                [class]="'w-48 ' + userClass()">
                 @if (featureData && featureData["prefixTemplate"].active) {
                     <ng-template monaTextBoxPrefixTemplate>
                         <svg lucideSearch [size]="20" class="pl-1"></svg>
@@ -161,6 +147,7 @@ export class TextBoxWrapperComponent implements ComponentInputsAsSignal<TextBoxC
     public readonly rounded = input<ReturnType<TextBoxComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<TextBoxComponent["size"]>>("medium");
     public readonly type = input<ReturnType<TextBoxComponent["type"]>>("text");
+    public readonly userClass = input<ReturnType<TextBoxComponent["userClass"]>>("");
     public readonly value = model<string>("");
 
     public constructor() {

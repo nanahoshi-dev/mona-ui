@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, inject, input, model, signal } from "@angular/core";
+import { Component, computed, inject, input, model } from "@angular/core";
 import { LucideFlame, LucideHeart } from "@lucide/angular";
 import {
     RatingComponent,
@@ -8,6 +8,7 @@ import {
     RatingSelectedItemTemplateDirective
 } from "@nanahoshi/mona-ui/rating";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -36,11 +37,22 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<RatingComponent>>({
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
+    protected readonly config = computed<ComponentConfig<RatingComponent>>(() => ({
+        inputs: deriveInputConfig<RatingComponent>(this.metadata(), {
+            ariaDescribedBy: {
+                alias: "aria-describedby",
+                type: "string",
+                value: ""
+            },
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: "Product rating"
+            },
+            ariaLabelledBy: {
+                alias: "aria-labelledby",
+                type: "string",
+                value: ""
             },
             color: {
                 type: "color",
@@ -72,10 +84,6 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 value: ["item", "half"],
                 defaultValue: "item"
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
             selection: {
                 type: "dropdown",
                 value: ["continuous", "single"],
@@ -86,6 +94,11 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
             },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
+            },
             value: {
                 type: "number",
                 min: 0,
@@ -93,9 +106,9 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 nullable: false,
                 value: 3
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("RatingComponent");
     protected readonly RatingWrapperComponent = RatingWrapperComponent;
@@ -114,10 +127,13 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
         @let featureData = features();
         <div class="flex w-full flex-col items-center gap-4">
             <mona-rating
-                aria-label="Product rating"
+                [aria-describedby]="ariaDescribedBy()"
+                [aria-label]="ariaLabel()"
+                [aria-labelledby]="ariaLabelledBy()"
                 [color]="color()"
                 [disabled]="disabled()"
                 [icon]="icon()"
+                [invalid]="invalid()"
                 [itemsCount]="itemsCount()"
                 [label]="label()"
                 [labelPosition]="labelPosition()"
@@ -125,7 +141,10 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 [readonly]="readonly()"
                 [selection]="selection()"
                 [size]="size()"
-                [(value)]="value">
+                [tabindex]="tabindex()"
+                [touched]="touched()"
+                [(value)]="value"
+                [class]="userClass()">
                 @if (featureData["itemTemplate"].active) {
                     <ng-template monaRatingItemTemplate let-itemValue="itemValue">
                         <span
@@ -151,9 +170,13 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
 })
 class RatingWrapperComponent implements ComponentInputsAsSignal<RatingComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly ariaDescribedBy = input<ReturnType<RatingComponent["ariaDescribedBy"]>>("");
+    public readonly ariaLabel = input<ReturnType<RatingComponent["ariaLabel"]>>("Product rating");
+    public readonly ariaLabelledBy = input<ReturnType<RatingComponent["ariaLabelledBy"]>>("");
     public readonly color = input<ReturnType<RatingComponent["color"]>>(null);
     public readonly disabled = input<ReturnType<RatingComponent["disabled"]>>(false);
     public readonly icon = input<ReturnType<RatingComponent["icon"]>>("star");
+    public readonly invalid = input(false);
     public readonly itemsCount = input<ReturnType<RatingComponent["itemsCount"]>>(5);
     public readonly label = input<ReturnType<RatingComponent["label"]>>(null);
     public readonly labelPosition = input<ReturnType<RatingComponent["labelPosition"]>>("after");
@@ -161,5 +184,10 @@ class RatingWrapperComponent implements ComponentInputsAsSignal<RatingComponent>
     public readonly readonly = input<ReturnType<RatingComponent["readonly"]>>(false);
     public readonly selection = input<ReturnType<RatingComponent["selection"]>>("continuous");
     public readonly size = input<ReturnType<RatingComponent["size"]>>("medium");
+    public readonly tabindex = input<number, number | string>(0, {
+        transform: value => (typeof value === "string" ? parseInt(value, 10) : value)
+    });
+    public readonly touched = input(false);
+    public readonly userClass = input<ReturnType<RatingComponent["userClass"]>>("");
     public readonly value = model<ReturnType<RatingComponent["value"]>>(0);
 }

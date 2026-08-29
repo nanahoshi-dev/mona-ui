@@ -1,6 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, ElementRef, inject, input, signal, viewChild } from "@angular/core";
+import { Component, computed, ElementRef, inject, input, viewChild } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import {
     SpinnerComponent,
     type SpinnerRef,
@@ -8,6 +9,7 @@ import {
 } from "@nanahoshi/mona-ui/spinner";
 import { timer } from "rxjs";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -20,25 +22,31 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class SpinnerDemoComponent extends AbstractDemoComponent<SpinnerComponent> {
     readonly #injector = createFeatureInjector({});
 
-    protected readonly config = signal<ComponentConfig<SpinnerComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<SpinnerComponent>>(() => ({
+        inputs: deriveInputConfig<SpinnerComponent>(this.metadata(), {
             appearance: {
                 type: "dropdown",
                 value: ["default", "pulsing", "pulsing-triad", "pulsing-ring", "converging-spinner"],
                 defaultValue: "default"
             },
-            decorative: {
-                type: "boolean",
-                value: false
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: "Loading"
             },
             size: {
                 type: "dropdown",
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SpinnerComponent");
     protected readonly SpinnerWrapperComponent = SpinnerWrapperComponent;
@@ -53,10 +61,11 @@ export class SpinnerDemoComponent extends AbstractDemoComponent<SpinnerComponent
                 <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Inline Component Preview</span>
                 <div class="flex items-center gap-3 p-4">
                     <mona-spinner
+                        [aria-label]="ariaLabel()"
                         [appearance]="appearance()"
                         [size]="size()"
                         [decorative]="decorative()"
-                        class="text-primary">
+                        [class]="'text-primary ' + userClass()">
                     </mona-spinner>
                     <span class="text-sm font-medium">Processing request...</span>
                 </div>
@@ -85,8 +94,12 @@ class SpinnerWrapperComponent implements ComponentInputsAsSignal<SpinnerComponen
     protected readonly panelRef = viewChild<ElementRef<HTMLElement>>("panel");
 
     public readonly appearance = input<ReturnType<SpinnerComponent["appearance"]>>("default");
+    public readonly ariaLabel = input("Loading");
     public readonly decorative = input<ReturnType<SpinnerComponent["decorative"]>>(false);
     public readonly size = input<ReturnType<SpinnerComponent["size"]>>("medium");
+    public readonly userClass = input<string, ClassInputType>("", {
+        transform: value => classInputToClass(value)
+    });
 
     protected showCancellableSpinner(): void {
         const target = this.panelRef()?.nativeElement;
