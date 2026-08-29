@@ -9,7 +9,11 @@ import { DropdownGroupableDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
-import { buildActiveFeatureAttributes, generateComponentCodeSample } from "../../utils/codeSample";
+import {
+    buildActiveFeatureAttributes,
+    buildActiveFeatureContent,
+    generateComponentCodeSample
+} from "../../utils/codeSample";
 import { ComponentConfig, createComponentInputConfigArray, extractConfigValues } from "../../utils/componentConfig";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ConfigComponent } from "../config/config.component";
@@ -83,11 +87,13 @@ export class DemoContainerComponent<TComponent> {
     protected readonly direction = signal<"ltr" | "rtl">("ltr");
     protected readonly generatedCode = computed(() => {
         const features = this.config().featureHandler?.data();
+        const metadataInputNames = this.#metadataInputNames();
         return generateComponentCodeSample(
             this.metadata().selector ?? "",
             createComponentInputConfigArray(this.config().inputs),
             this.liveValues(),
-            features ? buildActiveFeatureAttributes(features, this.#metadataInputNames()) : []
+            features ? buildActiveFeatureAttributes(features, metadataInputNames) : [],
+            features ? buildActiveFeatureContent(features, metadataInputNames) : []
         );
     });
     protected readonly liveValues = linkedSignal({

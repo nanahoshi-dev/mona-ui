@@ -17,12 +17,15 @@ const NON_BINDABLE_CONFIG_TYPES: ReadonlySet<ProcessedConfigItem["configType"]> 
  * empty default) are omitted so the snippet stays minimal. `additionalAttributes` (see
  * {@link buildActiveFeatureAttributes}) are appended as-is after the derived input bindings, so
  * currently-enabled Features-tab entries can be folded into the same top-level sample.
+ * `additionalContent` (see {@link buildActiveFeatureContent}) is rendered as nested markup
+ * between the opening and closing tags, for active template/content-projection features.
  */
 export function generateComponentCodeSample(
     selector: string,
     items: ProcessedConfigItem[],
     currentValues: Record<string, unknown>,
-    additionalAttributes: string[] = []
+    additionalAttributes: string[] = [],
+    additionalContent: string[] = []
 ): string {
     const { tag, hostAttribute } = parseSelector(selector);
     const attributes: string[] = [];
@@ -44,7 +47,7 @@ export function generateComponentCodeSample(
 
     attributes.push(...additionalAttributes);
 
-    return formatElement(tag, attributes);
+    return formatElement(tag, attributes, additionalContent);
 }
 
 /**
@@ -74,6 +77,72 @@ export function buildActiveFeatureAttributes(
         }
     }
     return attributes;
+}
+
+/**
+ * Builds one markup block per currently-active Features-tab entry - at any nesting depth, since a
+ * template feature (e.g. a group header template) is often a sub-feature of a parent toggle like
+ * "Grouping" - that has a hand-authored `code` sample and isn't already represented as an
+ * attribute by {@link buildActiveFeatureAttributes}. Each block is dedented so it composes
+ * cleanly as nested content in the top-level sample.
+ */
+export function buildActiveFeatureContent(
+    features: ComponentConfigFeatureItem,
+    metadataInputNames: ReadonlySet<string>
+): string[] {
+    const content: string[] = [];
+    collectActiveFeatureContent(features, metadataInputNames, content);
+    return content;
+}
+
+function collectActiveFeatureContent(
+    features: ComponentConfigFeatureItem,
+    metadataInputNames: ReadonlySet<string>,
+    content: string[]
+): void {
+    for (const [key, item] of Object.entries(features)) {
+        if (!item.active) {
+            continue;
+        }
+        if (!item.directiveBinding && !metadataInputNames.has(key) && item.code && item.code.trim().length > 0) {
+            content.push(dedent(item.code));
+        }
+        if (item.subFeatures) {
+            collectActiveFeatureContent(item.subFeatures, metadataInputNames, content);
+        }
+    }
+}
+
+/**
+ * Strips a single leading/trailing blank line and the common leading whitespace from a
+ * multi-line string, mirroring `CodeViewerComponent`'s own display normalization so hand-authored
+ * `code` template literals compose correctly wherever they're reused.
+ */
+export function dedent(code: string): string {
+    const lines = code.split("\n");
+
+    if (lines[0]?.trim() === "") {
+        lines.shift();
+    }
+    if (lines.length > 0 && lines[lines.length - 1].trim() === "") {
+        lines.pop();
+    }
+    if (lines.length === 0) {
+        return "";
+    }
+
+    const minIndent = lines.reduce((min, line) => {
+        if (line.trim().length === 0) {
+            return min;
+        }
+        const indent = line.match(/^\s*/)?.[0].length ?? 0;
+        return Math.min(min, indent);
+    }, Infinity);
+
+    if (minIndent === Infinity) {
+        return lines.join("\n");
+    }
+    return lines.map(line => line.substring(minIndent)).join("\n");
 }
 
 /**
@@ -214,16 +283,41 @@ function unquote(value: string): string {
     return trimmed;
 }
 
-function formatElement(tag: string, attributes: string[]): string {
-    if (attributes.length === 0) {
-        return `<${tag}></${tag}>`;
+function formatElement(tag: string, attributes: string[], content: string[] = []): string {
+    if (content.length === 0) {
+        if (attributes.length === 0) {
+            return `<${tag}></${tag}>`;
+        }
+
+        const singleLine = `<${tag} ${attributes.join(" ")}></${tag}>`;
+        if (singleLine.length <= 80) {
+            return singleLine;
+        }
+
+        const indentedAttributes = attributes.map(attribute => `    ${attribute}`).join("\n");
+        return `<${tag}\n${indentedAttributes}>\n</${tag}>`;
     }
 
-    const singleLine = `<${tag} ${attributes.join(" ")}></${tag}>`;
+    const openTag = formatOpenTag(tag, attributes);
+    const indentedContent = content.map(block => indentLines(block, 4)).join("\n");
+    return `${openTag}\n${indentedContent}\n</${tag}>`;
+}
+
+function formatOpenTag(tag: string, attributes: string[]): string {
+    if (attributes.length === 0) {
+        return `<${tag}>`;
+    }
+    const singleLine = `<${tag} ${attributes.join(" ")}>`;
     if (singleLine.length <= 80) {
         return singleLine;
     }
+    return `<${tag}\n${attributes.map(attribute => `    ${attribute}`).join("\n")}>`;
+}
 
-    const indentedAttributes = attributes.map(attribute => `    ${attribute}`).join("\n");
-    return `<${tag}\n${indentedAttributes}>\n</${tag}>`;
+function indentLines(text: string, spaces: number): string {
+    const prefix = " ".repeat(spaces);
+    return text
+        .split("\n")
+        .map(line => (line.length > 0 ? `${prefix}${line}` : line))
+        .join("\n");
 }

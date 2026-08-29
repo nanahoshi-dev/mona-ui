@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { ComponentConfigFeatureItem, ComponentConfigFeatureItemOptions, ProcessedConfigItem } from "./componentConfig";
 import {
     buildActiveFeatureAttributes,
+    buildActiveFeatureContent,
+    dedent,
     generateComponentCodeSample,
     generateDirectiveBindingCodeSample,
     generateFeatureCodeSample
@@ -247,5 +249,140 @@ describe("buildActiveFeatureAttributes", () => {
             dataSet: { active: false, description: "", name: "Data Set", type: "dropdown", dropdownValue: "Foods" }
         } as unknown as ComponentConfigFeatureItem;
         expect(buildActiveFeatureAttributes(features, new Set())).toEqual([]);
+    });
+});
+
+describe("dedent", () => {
+    it("strips a leading and trailing blank line and the common indentation", () => {
+        const code = `
+            <ng-template monaChipPrefixTemplate>
+                <svg lucideSearch></svg>
+            </ng-template>
+        `;
+        expect(dedent(code)).toBe(
+            ["<ng-template monaChipPrefixTemplate>", "    <svg lucideSearch></svg>", "</ng-template>"].join("\n")
+        );
+    });
+
+    it("returns an empty string for empty input", () => {
+        expect(dedent("")).toBe("");
+    });
+});
+
+describe("buildActiveFeatureContent", () => {
+    it("dedents the code of an active template feature", () => {
+        const features = {
+            prefixTemplate: {
+                active: true,
+                description: "",
+                name: "Prefix Template",
+                code: `
+                    <ng-template monaChipPrefixTemplate>
+                        <svg lucideSearch></svg>
+                    </ng-template>
+                `
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set())).toEqual([
+            ["<ng-template monaChipPrefixTemplate>", "    <svg lucideSearch></svg>", "</ng-template>"].join("\n")
+        ]);
+    });
+
+    it("skips inactive features and features with empty code", () => {
+        const features = {
+            prefixTemplate: { active: false, description: "", name: "Prefix Template", code: "<ng-template></ng-template>" },
+            headerTemplate: { active: true, description: "", name: "Header Template", code: "" }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set())).toEqual([]);
+    });
+
+    it("skips features already represented as an attribute (directiveBinding or matching input name)", () => {
+        const features = {
+            filtering: {
+                active: true,
+                description: "",
+                name: "Filtering",
+                code: "<should-not-appear></should-not-appear>",
+                directiveBinding: { hostAttribute: "monaDropDownFilterable", buildValue: () => ({}) }
+            },
+            highlightFirst: {
+                active: true,
+                description: "",
+                name: "Highlight First",
+                code: "<should-not-appear-either></should-not-appear-either>"
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set(["highlightFirst"]))).toEqual([]);
+    });
+
+    it("includes an active sub-feature's code even when its parent has no code of its own", () => {
+        const features = {
+            grouping: {
+                active: true,
+                description: "",
+                name: "Grouping",
+                directiveBinding: { hostAttribute: "monaDropDownGroupable", buildValue: () => ({}) },
+                subFeatures: {
+                    groupHeaderTemplate: {
+                        active: true,
+                        description: "",
+                        name: "Group Header Template",
+                        code: "<ng-template monaDropDownGroupHeaderTemplate let-group>\n    <span>{{ group }}</span>\n</ng-template>"
+                    },
+                    groupBy: {
+                        active: false,
+                        description: "",
+                        name: "Group By",
+                        type: "dropdown",
+                        dropdownValue: "category"
+                    }
+                }
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set())).toEqual([
+            "<ng-template monaDropDownGroupHeaderTemplate let-group>\n    <span>{{ group }}</span>\n</ng-template>"
+        ]);
+    });
+
+    it("skips an inactive sub-feature's code even when its parent is active", () => {
+        const features = {
+            grouping: {
+                active: true,
+                description: "",
+                name: "Grouping",
+                subFeatures: {
+                    groupHeaderTemplate: {
+                        active: false,
+                        description: "",
+                        name: "Group Header Template",
+                        code: "<should-not-appear></should-not-appear>"
+                    }
+                }
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set())).toEqual([]);
+    });
+});
+
+describe("generateComponentCodeSample with nested content", () => {
+    it("renders active template feature content as nested markup", () => {
+        const items = [makeItem({ name: "disabled", configType: "boolean", value: false })];
+        const code = generateComponentCodeSample("mona-chip", items, { disabled: true }, [], [
+            "<ng-template monaChipPrefixTemplate>\n    <svg lucideSearch></svg>\n</ng-template>"
+        ]);
+        expect(code).toBe(
+            [
+                `<mona-chip [disabled]="true">`,
+                "    <ng-template monaChipPrefixTemplate>",
+                "        <svg lucideSearch></svg>",
+                "    </ng-template>",
+                "</mona-chip>"
+            ].join("\n")
+        );
+    });
+
+    it("renders nested content with no attributes", () => {
+        const code = generateComponentCodeSample("mona-chip", [], {}, [], ["<ng-template></ng-template>"]);
+        expect(code).toBe(["<mona-chip>", "    <ng-template></ng-template>", "</mona-chip>"].join("\n"));
     });
 });
