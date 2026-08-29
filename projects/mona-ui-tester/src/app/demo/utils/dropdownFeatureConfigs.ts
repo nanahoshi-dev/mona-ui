@@ -200,11 +200,23 @@ export const dropdownFooterTemplateFeatureConfig = <TDropdown = any>(
     };
 };
 
+/**
+ * Every dropdown-family demo wrapper renders the exact same "no data" placeholder, so its markup
+ * lives here once - reused as this feature's code sample and interpolated directly into each
+ * wrapper's own template - instead of being retyped (and risking drift) in every demo.
+ */
+export const NO_DATA_TEMPLATE_CODE = `<ng-template monaDropDownNoDataTemplate>
+    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+        <svg lucideBox></svg>
+        <span>No items found</span>
+    </div>
+</ng-template>`;
+
 export const dropdownNoDataTemplateFeatureConfig = <TDropdown = any>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
-        code: ``,
+        code: NO_DATA_TEMPLATE_CODE,
         active: false,
         description: `Enable no data template for the ${type} list.`,
         name: "No Data Template"
@@ -222,11 +234,26 @@ export const dropdownHeaderTemplateFeatureConfig = <TDropdown = any>(
     };
 };
 
+/**
+ * Every dropdown-family demo's item template only ever references its `let-item` template-local
+ * variable (never a wrapper-specific signal name), so it's safe to share verbatim across demos -
+ * unlike e.g. a footer template, which typically interpolates each wrapper's own data signal.
+ */
+export const ITEM_TEMPLATE_CODE = `<ng-template monaDropDownItemTemplate let-item>
+    <div class="flex flex-row w-full">
+        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+        <span class="flex-1 {{ color }}">{{ item.text }}</span>
+        <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+            item.price | currency
+        }}</span>
+    </div>
+</ng-template>`;
+
 export const dropdownItemTemplateFeatureConfig = <TDropdown = any>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
-        code: ``,
+        code: ITEM_TEMPLATE_CODE,
         active: false,
         description: `Enable item template for the ${type} list.`,
         name: "Item Template"

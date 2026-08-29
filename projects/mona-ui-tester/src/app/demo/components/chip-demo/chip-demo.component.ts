@@ -8,6 +8,16 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const PREFIX_TEMPLATE_CODE = `<ng-template monaChipPrefixTemplate>
+    <mona-avatar
+        [label]="'N'"
+        [image]="'https://photos.smugmug.com/photos/i-fgmzcP4/0/LcnnHTpqhgGgTjHtbmvtjgmLWrVH2JhVGckRnpZqq/Th/i-fgmzcP4-Th.png'"
+        [width]="16"
+        [height]="16"
+        [borderRadius]="'50%'"
+        [borderWidth]="0"></mona-avatar>
+</ng-template>`;
+
 @Component({
     selector: "app-chip-demo",
     imports: [NgComponentOutlet, DemoContainerComponent],
@@ -16,7 +26,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
     readonly #injector = createFeatureInjector({
         prefixTemplate: {
-            code: ``,
+            code: PREFIX_TEMPLATE_CODE,
             active: false,
             name: "Prefix Template",
             description: "Allows custom prefix content to be displayed before the chip label."

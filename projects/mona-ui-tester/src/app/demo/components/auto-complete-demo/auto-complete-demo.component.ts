@@ -38,6 +38,43 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const FOOTER_TEMPLATE_CODE = `<ng-template monaDropDownFooterTemplate>
+    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+        Total items: {{ autoCompleteData().length }}
+    </div>
+</ng-template>`;
+
+const GROUP_HEADER_TEMPLATE_CODE = `<ng-template monaDropDownGroupHeaderTemplate let-group>
+    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+</ng-template>`;
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaDropDownHeaderTemplate>
+    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+        Select your favorite food
+    </div>
+</ng-template>`;
+
+const PREFIX_TEMPLATE_CODE = `<ng-template monaDropdownPrefixTemplate>
+    <svg lucideSearch [size]="16" class="h-full ml-1"></svg>
+</ng-template>`;
+
+const SUFFIX_TEMPLATE_CODE = `<ng-template monaDropdownSuffixTemplate>
+    @if (selectedItem()) {
+        <svg lucideCheck [size]="16" class="h-full mx-1" [style.color]="'var(--color-success)'"></svg>
+    } @else {
+        <svg lucideTriangleAlert [size]="16" class="h-full mx-1" [style.color]="'var(--color-warning)'"></svg>
+    }
+</ng-template>`;
+
+// A fresh object per call (not a module-level singleton) - createFeatureInjector wires each
+// instance's config into its own mutable FeatureConfigHandler, so sharing one object across demo
+// component instances would leak feature-toggle state between them.
+function buildGroupingFeatureConfig() {
+    const config = dropdownGroupingFeatureConfig("autocomplete");
+    config.subFeatures!["groupHeaderTemplate"].code = GROUP_HEADER_TEMPLATE_CODE;
+    return config;
+}
+
 @Component({
     selector: "app-auto-complete-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
@@ -48,12 +85,12 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("autocomplete"),
         filtering: dropdownFilteringFeatureConfig("autocomplete"),
-        footerTemplate: dropdownFooterTemplateFeatureConfig("autocomplete"),
-        grouping: dropdownGroupingFeatureConfig("autocomplete"),
-        headerTemplate: dropdownHeaderTemplateFeatureConfig("autocomplete"),
+        footerTemplate: { ...dropdownFooterTemplateFeatureConfig("autocomplete"), code: FOOTER_TEMPLATE_CODE },
+        grouping: buildGroupingFeatureConfig(),
+        headerTemplate: { ...dropdownHeaderTemplateFeatureConfig("autocomplete"), code: HEADER_TEMPLATE_CODE },
         itemTemplate: dropdownItemTemplateFeatureConfig("autocomplete"),
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("autocomplete"),
-        prefixTemplate: dropdownPrefixTemplateFeatureConfig("autocomplete"),
+        prefixTemplate: { ...dropdownPrefixTemplateFeatureConfig("autocomplete"), code: PREFIX_TEMPLATE_CODE },
         preventClose: {
             active: false,
             code: ``,
@@ -66,7 +103,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             description: `The "open" event is fired when the popup is about to open.`,
             name: "Prevent Open"
         },
-        suffixTemplate: dropdownSuffixTemplateFeatureConfig("autocomplete"),
+        suffixTemplate: { ...dropdownSuffixTemplateFeatureConfig("autocomplete"), code: SUFFIX_TEMPLATE_CODE },
         virtualization: dropdownVirtualizationFeatureConfig("autocomplete")
     });
     protected readonly config = signal<ComponentConfig<AutoCompleteComponent<any>>>({

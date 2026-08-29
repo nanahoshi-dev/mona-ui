@@ -37,6 +37,35 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const FOOTER_TEMPLATE_CODE = `<ng-template monaDropDownFooterTemplate>
+    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+        Total items: {{ comboBoxData().length }}
+    </div>
+</ng-template>`;
+
+const GROUP_HEADER_TEMPLATE_CODE = `<ng-template monaDropDownGroupHeaderTemplate let-group>
+    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+</ng-template>`;
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaDropDownHeaderTemplate>
+    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+        Select your favorite food
+    </div>
+</ng-template>`;
+
+const PREFIX_TEMPLATE_CODE = `<ng-template monaDropdownPrefixTemplate>
+    <svg lucideSearch [size]="16" class="h-full ml-1"></svg>
+</ng-template>`;
+
+// A fresh object per call (not a module-level singleton) - createFeatureInjector wires each
+// instance's config into its own mutable FeatureConfigHandler, so sharing one object across demo
+// component instances would leak feature-toggle state between them.
+function buildGroupingFeatureConfig() {
+    const config = dropdownGroupingFeatureConfig("combo box");
+    config.subFeatures!["groupHeaderTemplate"].code = GROUP_HEADER_TEMPLATE_CODE;
+    return config;
+}
+
 @Component({
     selector: "app-combo-box-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
@@ -47,12 +76,12 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("combo box"),
         filtering: dropdownFilteringFeatureConfig("combo box"),
-        footerTemplate: dropdownFooterTemplateFeatureConfig("combo box"),
-        grouping: dropdownGroupingFeatureConfig("combo box"),
-        headerTemplate: dropdownHeaderTemplateFeatureConfig("combo box"),
+        footerTemplate: { ...dropdownFooterTemplateFeatureConfig("combo box"), code: FOOTER_TEMPLATE_CODE },
+        grouping: buildGroupingFeatureConfig(),
+        headerTemplate: { ...dropdownHeaderTemplateFeatureConfig("combo box"), code: HEADER_TEMPLATE_CODE },
         itemTemplate: dropdownItemTemplateFeatureConfig("combo box"),
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("combo box"),
-        prefixTemplate: dropdownPrefixTemplateFeatureConfig("combo box"),
+        prefixTemplate: { ...dropdownPrefixTemplateFeatureConfig("combo box"), code: PREFIX_TEMPLATE_CODE },
         virtualization: dropdownVirtualizationFeatureConfig("combo box")
     });
     protected readonly config = computed<ComponentConfig<ComboBoxComponent>>(() => ({

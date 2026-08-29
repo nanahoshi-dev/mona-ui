@@ -42,6 +42,31 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const FOOTER_TEMPLATE_CODE = `<ng-template monaDropDownFooterTemplate>
+    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+        Total items: {{ multiSelectData().length }}
+    </div>
+</ng-template>`;
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaDropDownHeaderTemplate>
+    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+        Select your favorite foods
+    </div>
+</ng-template>`;
+
+const PREFIX_TEMPLATE_CODE = `<ng-template monaDropdownPrefixTemplate>
+    <svg lucideSearch [size]="16" class="h-full ms-1"></svg>
+</ng-template>`;
+
+const SUMMARY_TAG_TEMPLATE_CODE = `<ng-template monaMultiSelectSummaryTagTemplate let-items let-tagCount="tagCount">
+    @let prefix = tagCount !== 0 ? "and" : "";
+    <span class="text-blue-400"> {{ prefix }} {{ items.length - tagCount }} more... </span>
+</ng-template>`;
+
+const TAG_TEMPLATE_CODE = `<ng-template monaMultiSelectTagTemplate let-item>
+    <span class="italic text-violet-600">{{ item.text }}</span>
+</ng-template>`;
+
 @Component({
     selector: "app-multi-select-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
@@ -52,12 +77,12 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("multi select"),
         filtering: dropdownFilteringFeatureConfig("multi select"),
-        footerTemplate: dropdownFooterTemplateFeatureConfig("multi select"),
+        footerTemplate: { ...dropdownFooterTemplateFeatureConfig("multi select"), code: FOOTER_TEMPLATE_CODE },
         grouping: dropdownGroupingFeatureConfig("multi select"),
-        headerTemplate: dropdownHeaderTemplateFeatureConfig("multi select"),
+        headerTemplate: { ...dropdownHeaderTemplateFeatureConfig("multi select"), code: HEADER_TEMPLATE_CODE },
         itemTemplate: dropdownItemTemplateFeatureConfig("multi select"),
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("multi select"),
-        prefixTemplate: dropdownPrefixTemplateFeatureConfig("multi select"),
+        prefixTemplate: { ...dropdownPrefixTemplateFeatureConfig("multi select"), code: PREFIX_TEMPLATE_CODE },
         preventClose: dropdownPreventPopupEventFeatureConfig("close"),
         preventOpen: dropdownPreventPopupEventFeatureConfig("open"),
         summaryTag: {
@@ -76,7 +101,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                     numericValue: 3
                 },
                 tagTemplate: {
-                    code: ``,
+                    code: SUMMARY_TAG_TEMPLATE_CODE,
                     active: false,
                     name: "Tag Template",
                     description: "Customizes the summary tag for the multi-select component."
@@ -84,7 +109,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             }
         },
         tagTemplate: {
-            code: ``,
+            code: TAG_TEMPLATE_CODE,
             active: false,
             name: "Tag Template",
             description: "Customizes the tag for the multi-select component."

@@ -29,11 +29,49 @@ import {
     dropdownNoDataTemplateFeatureConfig,
     dropdownPrefixTemplateFeatureConfig,
     dropdownVirtualizationFeatureConfig,
-    getFormValueText
+    getFormValueText,
+    ITEM_TEMPLATE_CODE
 } from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const FOOTER_TEMPLATE_CODE = `<ng-template monaDropDownFooterTemplate>
+    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+        Total items: {{ dropdownData().length }}
+    </div>
+</ng-template>`;
+
+const GROUP_HEADER_TEMPLATE_CODE = `<ng-template monaDropDownGroupHeaderTemplate let-group>
+    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+</ng-template>`;
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaDropDownHeaderTemplate>
+    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+        Select your favorite food
+    </div>
+</ng-template>`;
+
+const PREFIX_TEMPLATE_CODE = `<ng-template monaDropdownPrefixTemplate>
+    <svg lucideUtensils [size]="16" class="h-full aspect-square flex items-center justify-center"></svg>
+</ng-template>`;
+
+const VALUE_TEMPLATE_CODE = `<ng-template monaDropDownListValueTemplate let-item>
+    @if (!item) {
+        <span class="text-gray-500">Select an option...</span>
+    } @else {
+        <span class="text-pink-600 font-bold truncate">{{ item?.text }}</span>
+    }
+</ng-template>`;
+
+// A fresh object per call (not a module-level singleton) - createFeatureInjector wires each
+// instance's config into its own mutable FeatureConfigHandler, so sharing one object across demo
+// component instances would leak feature-toggle state between them.
+function buildGroupingFeatureConfig() {
+    const config = dropdownGroupingFeatureConfig("dropdown");
+    config.subFeatures!["groupHeaderTemplate"].code = GROUP_HEADER_TEMPLATE_CODE;
+    return config;
+}
 
 @Component({
     selector: "app-dropdown-list-demo",
@@ -46,25 +84,25 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         filtering: dropdownFilteringFeatureConfig("dropdown"),
         footerTemplate: {
             active: false,
-            code: ``,
+            code: FOOTER_TEMPLATE_CODE,
             description: `This template is used to customize the footer template of the dropdown list.`,
             name: "Footer Template"
         },
-        grouping: dropdownGroupingFeatureConfig("dropdown"),
+        grouping: buildGroupingFeatureConfig(),
         headerTemplate: {
             active: false,
-            code: ``,
+            code: HEADER_TEMPLATE_CODE,
             description: `This template is used to customize the header template of the dropdown list.`,
             name: "Header Template"
         },
         itemTemplate: {
             active: false,
-            code: ``,
+            code: ITEM_TEMPLATE_CODE,
             description: `This template is used to customize the item template of the dropdown list.`,
             name: "Item Template"
         },
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("autocomplete"),
-        prefixTemplate: dropdownPrefixTemplateFeatureConfig("dropdown"),
+        prefixTemplate: { ...dropdownPrefixTemplateFeatureConfig("dropdown"), code: PREFIX_TEMPLATE_CODE },
         preventClose: {
             active: false,
             code: ``,
@@ -79,7 +117,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         },
         valueTemplate: {
             active: false,
-            code: ``,
+            code: VALUE_TEMPLATE_CODE,
             description: `This template is used to customize the value template of the dropdown list.`,
             name: "Value Template"
         },

@@ -9,6 +9,10 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const PREFIX_TEMPLATE_CODE = `<ng-template monaNumericTextBoxPrefixTemplate>
+    <svg lucideHash [size]="16" class="mx-0.5"></svg>
+</ng-template>`;
+
 @Component({
     selector: "app-numeric-textbox-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
@@ -25,9 +29,7 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
             active: false
         },
         prefixTemplate: {
-            code: `
-
-            `,
+            code: PREFIX_TEMPLATE_CODE,
             description: `This template is used to customize the prefix of the numeric text box.`,
             name: "Prefix Template",
             active: false
