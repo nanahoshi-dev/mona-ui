@@ -14,12 +14,15 @@ const NON_BINDABLE_CONFIG_TYPES: ReadonlySet<ProcessedConfigItem["configType"]> 
  * Generates an Angular template usage snippet for a component/directive from its selector,
  * its processed config items, and the current live values of those items. Attributes whose
  * resolved value matches the item's baseline (its configured default, or a type-appropriate
- * empty default) are omitted so the snippet stays minimal.
+ * empty default) are omitted so the snippet stays minimal. `additionalAttributes` (see
+ * {@link buildActiveFeatureAttributes}) are appended as-is after the derived input bindings, so
+ * currently-enabled Features-tab entries can be folded into the same top-level sample.
  */
 export function generateComponentCodeSample(
     selector: string,
     items: ProcessedConfigItem[],
-    currentValues: Record<string, unknown>
+    currentValues: Record<string, unknown>,
+    additionalAttributes: string[] = []
 ): string {
     const { tag, hostAttribute } = parseSelector(selector);
     const attributes: string[] = [];
@@ -39,7 +42,38 @@ export function generateComponentCodeSample(
         attributes.push(`[${item.alias ?? item.name}]="${formatBindingValue(resolvedValue)}"`);
     }
 
+    attributes.push(...additionalAttributes);
+
     return formatElement(tag, attributes);
+}
+
+/**
+ * Builds one binding string per currently-active top-level Features-tab entry, for folding into
+ * the top-level code sample alongside the plain input bindings. Only features with a
+ * `directiveBinding` (a whole options object bound to one directive input, e.g.
+ * `[monaDropDownFilterable]="{...}"`) or whose key matches a real input on the component being
+ * demoed are included - template/content-projection features (e.g. a custom prefix template)
+ * have no attribute-level representation and are left out, same as the per-feature code panel's
+ * fallback behavior.
+ */
+export function buildActiveFeatureAttributes(
+    features: ComponentConfigFeatureItem,
+    metadataInputNames: ReadonlySet<string>
+): string[] {
+    const attributes: string[] = [];
+    for (const [key, item] of Object.entries(features)) {
+        if (!item.active) {
+            continue;
+        }
+        if (item.directiveBinding) {
+            attributes.push(
+                `[${item.directiveBinding.hostAttribute}]="${formatBindingValue(item.directiveBinding.buildValue(features))}"`
+            );
+        } else if (metadataInputNames.has(key)) {
+            attributes.push(`[${key}]="${formatBindingValue(resolveFeatureValue(item))}"`);
+        }
+    }
+    return attributes;
 }
 
 /**

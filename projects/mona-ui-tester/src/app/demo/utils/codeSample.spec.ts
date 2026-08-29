@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { ComponentConfigFeatureItem, ComponentConfigFeatureItemOptions, ProcessedConfigItem } from "./componentConfig";
-import { generateComponentCodeSample, generateDirectiveBindingCodeSample, generateFeatureCodeSample } from "./codeSample";
+import {
+    buildActiveFeatureAttributes,
+    generateComponentCodeSample,
+    generateDirectiveBindingCodeSample,
+    generateFeatureCodeSample
+} from "./codeSample";
 
 function makeItem(overrides: Partial<ProcessedConfigItem> & Pick<ProcessedConfigItem, "name" | "configType">) {
     return {
@@ -101,6 +106,21 @@ describe("generateComponentCodeSample", () => {
             ].join("\n")
         );
     });
+
+    it("appends additionalAttributes after the derived input bindings", () => {
+        const items = [makeItem({ name: "disabled", configType: "boolean", value: false })];
+        const code = generateComponentCodeSample("mona-dropdown-list", items, { disabled: true }, [
+            `[monaDropDownFilterable]="{"enabled":true}"`
+        ]);
+        expect(code).toBe(
+            [
+                "<mona-dropdown-list",
+                `    [disabled]="true"`,
+                `    [monaDropDownFilterable]="{"enabled":true}">`,
+                "</mona-dropdown-list>"
+            ].join("\n")
+        );
+    });
 });
 
 describe("generateFeatureCodeSample", () => {
@@ -180,5 +200,52 @@ describe("generateDirectiveBindingCodeSample", () => {
             allFeatures
         );
         expect(code).toBe(`<mona-combo-box [monaDropDownVirtualScroll]="{"enabled":true}"></mona-combo-box>`);
+    });
+});
+
+describe("buildActiveFeatureAttributes", () => {
+    it("skips inactive features", () => {
+        const features = {
+            filtering: {
+                active: false,
+                description: "",
+                name: "Filtering",
+                directiveBinding: { hostAttribute: "monaDropDownFilterable", buildValue: () => ({ enabled: false }) }
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureAttributes(features, new Set())).toEqual([]);
+    });
+
+    it("builds a directive-binding attribute for an active feature", () => {
+        const features = {
+            filtering: {
+                active: true,
+                description: "",
+                name: "Filtering",
+                directiveBinding: {
+                    hostAttribute: "monaDropDownFilterable",
+                    buildValue: () => ({ enabled: true, operator: "startsWith" })
+                }
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureAttributes(features, new Set())).toEqual([
+            `[monaDropDownFilterable]="{"enabled":true,"operator":"startsWith"}"`
+        ]);
+    });
+
+    it("builds a plain attribute for an active feature matching a real input name", () => {
+        const features = {
+            highlightFirst: { active: true, description: "", name: "Highlight First" }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureAttributes(features, new Set(["highlightFirst"]))).toEqual([
+            `[highlightFirst]="true"`
+        ]);
+    });
+
+    it("skips active features with no directiveBinding and no matching input name", () => {
+        const features = {
+            dataSet: { active: false, description: "", name: "Data Set", type: "dropdown", dropdownValue: "Foods" }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureAttributes(features, new Set())).toEqual([]);
     });
 });

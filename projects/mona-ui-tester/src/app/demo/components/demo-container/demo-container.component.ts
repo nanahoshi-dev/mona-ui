@@ -9,7 +9,7 @@ import { DropdownGroupableDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
-import { generateComponentCodeSample } from "../../utils/codeSample";
+import { buildActiveFeatureAttributes, generateComponentCodeSample } from "../../utils/codeSample";
 import { ComponentConfig, createComponentInputConfigArray, extractConfigValues } from "../../utils/componentConfig";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ConfigComponent } from "../config/config.component";
@@ -69,6 +69,7 @@ import { ConfigComponent } from "../config/config.component";
 export class DemoContainerComponent<TComponent> {
     readonly #directionality = inject(Directionality);
     readonly #document = inject(DOCUMENT);
+    readonly #metadataInputNames = computed(() => new Set((this.metadata().inputs ?? []).map(i => i.name)));
     readonly #themeService = inject(ThemeService);
     protected readonly background = computed(() => {
         const customColor = this.customColor();
@@ -81,10 +82,12 @@ export class DemoContainerComponent<TComponent> {
     protected readonly customColor = signal<string | null>(null);
     protected readonly direction = signal<"ltr" | "rtl">("ltr");
     protected readonly generatedCode = computed(() => {
+        const features = this.config().featureHandler?.data();
         return generateComponentCodeSample(
             this.metadata().selector ?? "",
             createComponentInputConfigArray(this.config().inputs),
-            this.liveValues()
+            this.liveValues(),
+            features ? buildActiveFeatureAttributes(features, this.#metadataInputNames()) : []
         );
     });
     protected readonly liveValues = linkedSignal({
