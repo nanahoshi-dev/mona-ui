@@ -1,9 +1,10 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -13,16 +14,8 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./tooltip-demo.component.html"
 })
 export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent> {
-    protected readonly config = signal<ComponentConfig<TooltipComponent>>({
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
-            hideDelay: {
-                type: "number",
-                value: 0
-            },
+    protected readonly config = computed<ComponentConfig<TooltipComponent>>(() => ({
+        inputs: deriveInputConfig<TooltipComponent>(this.metadata(), {
             position: {
                 type: "dropdown",
                 value: ["top", "bottom", "left", "right"],
@@ -33,17 +26,13 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
                 value: ["full", "large", "medium", "none", "small"],
                 defaultValue: "medium"
             },
-            showDelay: {
-                type: "number",
-                value: 0
-            },
             target: {
                 type: "dropdown",
                 value: ["button[look='primary']", "button", "a", ".text-box"],
                 defaultValue: "a"
             }
-        }
-    });
+        })
+    }));
     protected readonly metadata = this.getMetadata("TooltipComponent");
     protected readonly TooltipWrapperComponent = TooltipWrapperComponent;
 }

@@ -1,7 +1,8 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, model } from "@angular/core";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -13,12 +14,17 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewComponent> {
     readonly #injector = createFeatureInjector({});
-    protected readonly config = signal<ComponentConfig<ScrollViewComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<ScrollViewComponent>>(() => ({
+        inputs: deriveInputConfig<ScrollViewComponent>(this.metadata(), {
             animate: {
                 type: "dropdown",
                 value: [true, false, 500, 1000, 2000],
                 defaultValue: true
+            },
+            // The demo has always shown arrows; preserve that instead of the library's false default.
+            arrows: {
+                type: "boolean",
+                value: true
             },
             data: {
                 type: "iterable",
@@ -42,21 +48,10 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
                 type: "string",
                 value: "360px"
             },
-            index: {
-                type: "number",
-                value: 0
-            },
-            infinite: {
-                type: "boolean",
-                value: false
-            },
+            // The demo has always shown the pager; preserve that instead of the library's false default.
             pageable: {
                 type: "boolean",
                 value: true
-            },
-            pagerBlur: {
-                type: "number",
-                value: 3
             },
             pagerOverlay: {
                 type: "dropdown",
@@ -73,13 +68,18 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
                 value: ["none", "small", "medium", "large"],
                 defaultValue: "none"
             },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
+            },
             width: {
                 type: "string",
                 value: "640px"
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ScrollViewComponent");
     protected readonly ScrollViewWrapperComponent = ScrollViewWrapperComponent;
@@ -101,7 +101,8 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
             [pagerOverlay]="pagerOverlay()"
             [pagerRounded]="pagerRounded()"
             [rounded]="rounded()"
-            [width]="width()">
+            [width]="width()"
+            [class]="userClass()">
             <ng-template let-item>
                 <img [src]="item" alt="" />
             </ng-template>
@@ -121,5 +122,6 @@ class ScrollViewWrapperComponent implements ComponentInputsAsSignal<ScrollViewCo
     public readonly pagerOverlay = input<ReturnType<ScrollViewComponent["pagerOverlay"]>>("dark");
     public readonly pagerRounded = input<ReturnType<ScrollViewComponent["pagerRounded"]>>("none");
     public readonly rounded = input<ReturnType<ScrollViewComponent["rounded"]>>("none");
+    public readonly userClass = input<ReturnType<ScrollViewComponent["userClass"]>>("");
     public readonly width = input.required<ReturnType<ScrollViewComponent["width"]>>();
 }
