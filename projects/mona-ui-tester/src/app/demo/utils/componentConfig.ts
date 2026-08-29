@@ -123,7 +123,6 @@ export interface ComponentConfigFeatureItem {
 }
 
 export type ComponentConfig<TComponent> = {
-    code?: string; // TODO: Remove this
     featureHandler?: FeatureConfigHandler;
     inputs: ComponentConfigInputType<TComponent>;
     outputs?: ComponentConfigOutputType<TComponent>;

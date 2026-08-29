@@ -83,7 +83,6 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         virtualization: dropdownVirtualizationFeatureConfig("dropdown")
     });
     protected readonly config = signal<ComponentConfig<DropdownListComponent<any>>>({
-        code: ``,
         inputs: {
             data: {
                 type: "object"

@@ -23,7 +23,6 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
         }
     });
     protected readonly config = signal<ComponentConfig<ColorPickerComponent>>({
-        code: ``,
         inputs: {
             closeOnSelect: {
                 type: "boolean",

@@ -14,18 +14,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> {
     protected readonly ButtonWrapperComponent = ButtonWrapperComponent;
     protected readonly config = signal<ComponentConfig<ButtonDirective>>({
-        code: `
-            <button
-                monaButton
-                [disabled]="disabled()"
-                [iconOnly]="iconOnly()"
-                [look]="look()"
-                [rounded]="rounded()"
-                [selected]="selected()"
-                [size]="size()"
-                [toggleable]="toggleable()">
-                Mona Button
-            </button>`,
         inputs: {
             disabled: {
                 type: "boolean",

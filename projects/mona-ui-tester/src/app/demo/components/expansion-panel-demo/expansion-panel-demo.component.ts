@@ -51,9 +51,6 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
         }
     });
     protected readonly config = signal<ComponentConfig<ExpansionPanelComponent>>({
-        code: `
-
-        `,
         inputs: {
             disabled: {
                 type: "boolean",

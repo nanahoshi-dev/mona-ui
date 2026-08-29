@@ -14,7 +14,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> {
     protected readonly InputWrapperComponent = InputWrapperComponent;
     protected readonly config = signal<ComponentConfig<TextBoxDirective>>({
-        code: ``,
         inputs: {
             rounded: {
                 type: "dropdown",

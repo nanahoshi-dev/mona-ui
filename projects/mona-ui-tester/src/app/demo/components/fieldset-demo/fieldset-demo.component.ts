@@ -22,7 +22,6 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
         }
     });
     protected readonly config = signal<ComponentConfig<FieldsetComponent>>({
-        code: ``,
         inputs: {
             legend: {
                 type: "string",

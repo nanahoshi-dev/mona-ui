@@ -134,9 +134,6 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
     });
     protected readonly SplitButtonWrapperComponent = SplitButtonWrapperComponent;
     protected readonly config = signal<ComponentConfig<SplitButtonComponent>>({
-        code: `
-
-        `,
         inputs: {
             disabled: {
                 type: "boolean",

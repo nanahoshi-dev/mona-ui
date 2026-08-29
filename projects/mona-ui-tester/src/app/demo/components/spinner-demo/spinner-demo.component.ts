@@ -21,13 +21,6 @@ export class SpinnerDemoComponent extends AbstractDemoComponent<SpinnerComponent
     readonly #injector = createFeatureInjector({});
 
     protected readonly config = signal<ComponentConfig<SpinnerComponent>>({
-        code: `
-            <mona-spinner
-                [appearance]="appearance()"
-                [size]="size()"
-                [decorative]="decorative()">
-            </mona-spinner>
-        `,
         inputs: {
             appearance: {
                 type: "dropdown",

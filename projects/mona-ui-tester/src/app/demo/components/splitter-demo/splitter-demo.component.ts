@@ -97,7 +97,6 @@ export class SplitterDemoComponent extends AbstractDemoComponent<SplitterCompone
         }
     });
     protected readonly config = signal<ComponentConfig<SplitterComponent>>({
-        code: ``,
         inputs: {
             orientation: {
                 type: "dropdown",

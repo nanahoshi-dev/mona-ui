@@ -91,7 +91,6 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         virtualization: dropdownVirtualizationFeatureConfig("multi select")
     });
     protected readonly config = signal<ComponentConfig<MultiSelectComponent>>({
-        code: ``,
         inputs: {
             autoClose: {
                 type: "boolean",

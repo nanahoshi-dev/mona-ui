@@ -303,7 +303,6 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
         }
     });
     protected readonly config = signal<ComponentConfig<ListViewComponent>>({
-        code: ``,
         inputs: {
             height: {
                 type: "string",

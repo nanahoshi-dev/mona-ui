@@ -69,7 +69,6 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         virtualization: dropdownVirtualizationFeatureConfig("autocomplete")
     });
     protected readonly config = signal<ComponentConfig<AutoCompleteComponent<any>>>({
-        code: ``,
         inputs: {
             data: {
                 type: "iterable",

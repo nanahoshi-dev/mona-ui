@@ -20,24 +20,6 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
         }
     });
     protected readonly config = signal<ComponentConfig<ProgressBarComponent>>({
-        code: `
-            <mona-progress-bar
-                [animate]="animate()"
-                [color]="color()"
-                [disabled]="disabled()"
-                [indeterminate]="indeterminate()"
-                [labelPosition]="labelPosition()"
-                [labelStyles]="labelStyles()"
-                [labelVisible]="labelVisible()"
-                [max]="max()"
-                [min]="min()"
-                [rounded]="rounded()"
-                [value]="value()">
-                <ng-template monaProgressBarLabelTemplate let-value let-min="min" let-max="max">
-                    <span class="text-xs px-2"> {{ value }} | {{ max }} </span>
-                </ng-template>
-            </mona-progress-bar>
-        `,
         inputs: {
             animate: {
                 type: "boolean",

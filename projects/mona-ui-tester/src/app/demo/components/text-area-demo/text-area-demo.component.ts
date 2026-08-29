@@ -13,7 +13,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class TextAreaDemoComponent extends AbstractDemoComponent<TextAreaDirective> {
     protected readonly config = signal<ComponentConfig<TextAreaDirective>>({
-        code: `<textarea monaTextArea [rounded]="rounded()"></textarea>`,
         inputs: {
             rounded: {
                 type: "dropdown",

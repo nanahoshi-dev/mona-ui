@@ -14,7 +14,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewComponent> {
     readonly #injector = createFeatureInjector({});
     protected readonly config = signal<ComponentConfig<ScrollViewComponent>>({
-        code: ``,
         inputs: {
             animate: {
                 type: "dropdown",

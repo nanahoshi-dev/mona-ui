@@ -13,7 +13,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
     protected readonly config = signal<ComponentConfig<LabelComponent>>({
-        code: ``,
         inputs: {
             text: {
                 type: "string",

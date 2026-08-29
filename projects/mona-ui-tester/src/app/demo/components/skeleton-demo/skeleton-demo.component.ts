@@ -12,12 +12,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class SkeletonDemoComponent extends AbstractDemoComponent<SkeletonComponent> {
     protected readonly config = signal<ComponentConfig<SkeletonComponent>>({
-        code: `
-            <mona-skeleton
-                [height]="height()"
-                [rounded]="rounded()"
-                [width]="width()"></mona-skeleton>
-        `,
         inputs: {
             height: {
                 type: "dropdown",

@@ -377,7 +377,6 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         }
     });
     protected readonly config = signal<ComponentConfig<GridComponent<unknown>>>({
-        code: ``,
         inputs: {
             data: {
                 type: "iterable",

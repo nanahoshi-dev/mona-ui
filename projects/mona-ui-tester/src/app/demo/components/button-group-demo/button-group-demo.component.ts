@@ -14,19 +14,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupComponent> {
     protected readonly ButtonGroupWrapperComponent = ButtonGroupWrapperComponent;
     protected readonly config = signal<ComponentConfig<ButtonGroupComponent>>({
-        code: `
-            <mona-button-group
-                [allowEmpty]="allowEmpty()"
-                [disabled]="disabled()"
-                [selection]="selection()"
-                [look]="look()"
-                [rounded]="rounded()"
-                [size]="size()">
-                <button monaButton>B1</button>
-                <button monaButton>B2</button>
-                <button monaButton>B3</button>
-            </mona-button-group>
-        `,
         inputs: {
             allowEmpty: {
                 type: "boolean",

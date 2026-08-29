@@ -33,9 +33,6 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
         }
     });
     protected readonly config = signal<ComponentConfig<NumericTextBoxComponent>>({
-        code: `
-
-        `,
         inputs: {
             decimals: {
                 type: "number",

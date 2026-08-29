@@ -31,7 +31,6 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
     });
     protected readonly TimePickerWrapperComponent = TimePickerWrapperComponent;
     protected readonly config = signal<ComponentConfig<TimePickerComponent>>({
-        code: ``,
         inputs: {
             disabled: {
                 type: "boolean",

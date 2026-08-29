@@ -30,7 +30,6 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
         yearCellTemplate: calendarYearCellTemplateFeatureConfig()
     });
     protected readonly config = signal<ComponentConfig<CalendarComponent>>({
-        code: ``,
         inputs: {
             disabled: {
                 type: "boolean",

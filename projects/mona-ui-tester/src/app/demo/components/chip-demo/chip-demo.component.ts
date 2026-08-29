@@ -23,18 +23,6 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
     });
     protected readonly ChipWrapperComponent = ChipWrapperComponent;
     protected readonly config = signal<ComponentConfig<ChipComponent>>({
-        code: `
-             <mona-chip
-                [look]="look()"
-                [disabled]="disabled()"
-                [removable]="removable()"
-                [rounded]="rounded()"
-                [size]="size()"
-                [label]="label()"
-                (remove)="onRemove($event)">
-                Chip
-            </mona-chip>
-        `,
         inputs: {
             disabled: {
                 type: "boolean",

@@ -139,9 +139,6 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
         }
     });
     protected readonly config = signal<ComponentConfig<ContextMenuComponent>>({
-        code: `
-
-        `,
         inputs: {
             // context: { type: "object", value: { prop: "Context menu context" } },
             items: {

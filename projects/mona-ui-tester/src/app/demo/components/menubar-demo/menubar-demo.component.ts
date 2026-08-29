@@ -205,9 +205,6 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
         }
     });
     protected readonly config = signal<ComponentConfig<MenubarComponent>>({
-        code: `
-
-        `,
         inputs: {
             disabled: {
                 type: "boolean",

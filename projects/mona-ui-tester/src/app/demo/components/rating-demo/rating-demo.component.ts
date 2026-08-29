@@ -37,7 +37,6 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
         }
     });
     protected readonly config = signal<ComponentConfig<RatingComponent>>({
-        code: ``,
         inputs: {
             disabled: {
                 type: "boolean",

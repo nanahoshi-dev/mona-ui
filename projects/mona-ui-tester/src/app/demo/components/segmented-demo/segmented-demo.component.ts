@@ -34,21 +34,6 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
         }
     });
     protected readonly config = signal<ComponentConfig<SegmentedComponent>>({
-        code: `
-            <mona-segmented
-                aria-label="Course section"
-                [alignment]="alignment()"
-                [animate]="animate()"
-                [disabled]="disabled()"
-                [options]="options"
-                [rounded]="rounded()"
-                [size]="size()"
-                [(value)]="value"
-                class="w-full">
-            </mona-segmented>
-
-            <span>Selected value: {{ value() }}</span>
-        `,
         inputs: {
             alignment: {
                 type: "dropdown",

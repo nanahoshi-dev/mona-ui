@@ -35,7 +35,6 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
         }
     });
     protected readonly config = signal<ComponentConfig<TabsComponent>>({
-        code: ``,
         inputs: {
             closable: {
                 type: "boolean",

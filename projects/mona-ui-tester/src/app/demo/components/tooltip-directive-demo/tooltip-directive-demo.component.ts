@@ -13,7 +13,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<TooltipDirective> {
     protected readonly config = signal<ComponentConfig<TooltipDirective>>({
-        code: ``,
         inputs: {
             disabled: {
                 type: "boolean",

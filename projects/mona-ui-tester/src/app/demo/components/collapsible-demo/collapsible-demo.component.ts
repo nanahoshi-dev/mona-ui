@@ -16,21 +16,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class CollapsibleDemoComponent extends AbstractDemoComponent<CollapsibleDirective> {
     protected readonly config = signal<ComponentConfig<CollapsibleDirective>>({
-        code: `
-            <section
-                monaCollapsible
-                [animate]="animate()"
-                [disabled]="disabled()"
-                [(expanded)]="expanded">
-                <button monaCollapsibleTrigger type="button">
-                    <span>Project details</span>
-                    <span aria-hidden="true">{{ expanded() ? "−" : "+" }}</span>
-                </button>
-                <div monaCollapsibleContent>
-                    <p>Content is revealed without adding a wrapper element.</p>
-                </div>
-            </section>
-        `,
         inputs: {
             animate: {
                 type: "boolean",

@@ -106,7 +106,6 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
         }
     });
     protected readonly config = signal<ComponentConfig<PopupMenuComponent>>({
-        code: ``,
         inputs: {
             anchor: {
                 type: "object"

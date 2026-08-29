@@ -14,25 +14,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent> {
     protected readonly config = signal<ComponentConfig<TooltipComponent>>({
-        code: `
-            <div class="flex flex-row flex-wrap items-center justify-center gap-8 border border-border p-4 mb-4">
-                <button monaButton look="primary" #primary>Primary Button</button>
-                <button monaButton>Button</button>
-                <a href="#" class="ml-2">Link 1</a>
-                <a href="#" class="ml-2">Link 2</a>
-                <input type="text" class="w-32 text-box" monaTextBox />
-            </div>
-
-            <mona-tooltip
-                [disabled]="disabled()"
-                [hideDelay]="hideDelay()"
-                [position]="position()"
-                [rounded]="rounded()"
-                [showDelay]="showDelay()"
-                [target]="target()">
-                <div class="p-2">This is a <span class="text-green-600 font-semibold">tooltip</span>.</div>
-            </mona-tooltip>
-        `,
         inputs: {
             disabled: {
                 type: "boolean",

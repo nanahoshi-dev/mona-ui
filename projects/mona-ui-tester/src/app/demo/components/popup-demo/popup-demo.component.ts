@@ -22,7 +22,6 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
         { horizontal: -120, vertical: -20 }
     ];
     protected readonly config = signal<ComponentConfig<PopupComponent>>({
-        code: ``,
         inputs: {
             anchor: {
                 type: "object",

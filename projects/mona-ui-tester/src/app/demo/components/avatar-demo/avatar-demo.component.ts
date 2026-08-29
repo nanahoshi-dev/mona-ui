@@ -13,20 +13,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> {
     protected readonly AvatarWrapperComponent = AvatarWrapperComponent;
     protected readonly config = signal<ComponentConfig<AvatarComponent>>({
-        code: `
-            <mona-avatar
-                [backgroundColor]="backgroundColor()"
-                [borderColor]="borderColor()"
-                [borderRadius]="borderRadius()"
-                [borderWidth]="borderWidth()"
-                [height]="height()"
-                [image]="image()"
-                [label]="label()"
-                [labelColor]="labelColor()"
-                [labelFontSize]="labelFontSize()"
-                [labelFontWeight]="labelFontWeight()"
-                [width]="width()"></mona-avatar>
-        `,
         inputs: {
             alt: {
                 type: "string",

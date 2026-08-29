@@ -54,7 +54,6 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         virtualization: dropdownVirtualizationFeatureConfig("combo box")
     });
     protected readonly config = signal<ComponentConfig<ComboBoxComponent>>({
-        code: ``,
         inputs: {
             allowCustomValue: {
                 type: "boolean",
