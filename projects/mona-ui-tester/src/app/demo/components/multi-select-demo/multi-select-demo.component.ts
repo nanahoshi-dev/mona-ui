@@ -22,6 +22,7 @@ import {
 } from "@nanahoshi/mona-ui/multi-select";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
     buildFilterableOptions,
     buildGroupableOptions,
@@ -116,37 +117,20 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         },
         virtualization: dropdownVirtualizationFeatureConfig("multi select")
     });
-    protected readonly config = signal<ComponentConfig<MultiSelectComponent>>({
-        inputs: {
-            autoClose: {
-                type: "boolean",
-                value: false
-            },
-            checkboxes: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<MultiSelectComponent>>(() => ({
+        inputs: deriveInputConfig<MultiSelectComponent>(this.metadata(), {
             data: {
                 type: "object"
             },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
                 value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
-            },
-            loading: {
-                type: "boolean",
-                value: false
-            },
-            popupClass: {
-                type: "string",
-                value: ""
             },
             popupHeight: {
                 type: "number",
@@ -161,22 +145,17 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                 min: 0,
                 value: null
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
             },
+            // The wrapper's own showClearButton defaults to true (unlike the library's own
+            // false default) and nothing previously overrode it, so the demo has always shown
+            // the clear button - override to keep that same effective behavior.
             showClearButton: {
                 type: "boolean",
-                value: false
+                value: true
             },
             size: {
                 type: "dropdown",
@@ -187,17 +166,19 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                 type: "string",
                 value: "text"
             },
+            touched: undefined,
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: "w-60"
+            },
             valueField: {
                 type: "string",
                 value: "value"
-            },
-            valuePrimitive: {
-                type: "boolean",
-                value: false
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("MultiSelectComponent");
     protected readonly MultiSelectWrapperComponent = MultiSelectWrapperComponent;
@@ -227,6 +208,8 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         @let tagConfigData = tagConfig();
         <span>Selected Items: {{ formValueText() }}</span>
         <mona-multi-select
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [autoClose]="autoClose()"
             [checkboxes]="checkboxes()"
             [data]="multiSelectData()"
@@ -251,7 +234,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             (closed)="onPopupClosed()"
             (open)="onPopupOpen($event)"
             (opened)="onPopupOpened()"
-            class="w-60">
+            [class]="userClass()">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
                     <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
@@ -357,6 +340,8 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     });
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
 
+    public readonly ariaLabel = input<ReturnType<MultiSelectComponent["ariaLabel"]>>("");
+    public readonly ariaLabelledBy = input<ReturnType<MultiSelectComponent["ariaLabelledBy"]>>("");
     public readonly autoClose = input<ReturnType<MultiSelectComponent["autoClose"]>>(false);
     public readonly checkboxes = input<ReturnType<MultiSelectComponent["checkboxes"]>>(false);
     public readonly data = input<ReturnType<MultiSelectComponent["data"]>>([]);
@@ -374,6 +359,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     public readonly summaryTagTemplate = input<ReturnType<MultiSelectComponent["summaryTagTemplate"]>>(null);
     public readonly tagCount = input<ReturnType<MultiSelectComponent["tagCount"]>>(-1);
     public readonly textField = input<ReturnType<MultiSelectComponent["textField"]>>("text");
+    public readonly userClass = input<ReturnType<MultiSelectComponent["userClass"]>>("w-60");
     public readonly valueField = input<ReturnType<MultiSelectComponent["valueField"]>>("value");
     public readonly valuePrimitive = input<ReturnType<MultiSelectComponent["valuePrimitive"]>>(false);
 

@@ -1,8 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -12,22 +13,19 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./label-demo.component.html"
 })
 export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
-    protected readonly config = signal<ComponentConfig<LabelComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<LabelComponent>>(() => ({
+        inputs: deriveInputConfig<LabelComponent>(this.metadata(), {
             text: {
                 type: "string",
                 value: "Email address"
             },
-            optional: {
-                type: "boolean",
-                value: false
-            },
-            optionalText: {
+            userClass: {
+                alias: "class",
                 type: "string",
-                value: "Optional"
+                value: ""
             }
-        }
-    });
+        })
+    }));
     protected readonly LabelWrapperComponent = LabelWrapperComponent;
     protected readonly metadata = this.getMetadata("LabelComponent");
 }
@@ -35,7 +33,11 @@ export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
 @Component({
     imports: [LabelComponent, TextBoxComponent],
     template: `
-        <mona-label [text]="text()" [optional]="optional()" [optionalText]="optionalText()">
+        <mona-label
+            [text]="text()"
+            [optional]="optional()"
+            [optionalText]="optionalText()"
+            [class]="userClass()">
             <mona-text-box placeholder="Enter an email address"></mona-text-box>
         </mona-label>
     `,
@@ -47,4 +49,5 @@ class LabelWrapperComponent implements ComponentInputsAsSignal<LabelComponent> {
     public readonly optional = input<ReturnType<LabelComponent["optional"]>>(false);
     public readonly optionalText = input<ReturnType<LabelComponent["optionalText"]>>("Optional");
     public readonly text = input<ReturnType<LabelComponent["text"]>>("Email address");
+    public readonly userClass = input<ReturnType<LabelComponent["userClass"]>>("");
 }
