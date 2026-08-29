@@ -17,6 +17,10 @@ export class InputPropertyPipe implements PipeTransform {
         if (!input) {
             return "";
         }
-        return input[propertyType].replaceAll("\r", "\n") || "";
+        const rawValue = input[propertyType];
+        if (typeof rawValue === "string") {
+            return rawValue.replaceAll("\r", "\n") || "";
+        }
+        return rawValue === undefined ? "" : String(rawValue);
     }
 }

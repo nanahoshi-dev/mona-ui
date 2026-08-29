@@ -4,6 +4,7 @@ import { disabled, form, FormField, readonly, required } from "@angular/forms/si
 import { LucideHash } from "@lucide/angular";
 import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "@nanahoshi/mona-ui/numeric-text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -32,20 +33,19 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<NumericTextBoxComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<NumericTextBoxComponent>>(() => ({
+        inputs: deriveInputConfig<NumericTextBoxComponent>(this.metadata(), {
             decimals: {
                 type: "number",
                 value: 2
-            },
-            disabled: {
-                type: "boolean",
-                value: false
             },
             formatter: {
                 type: "function",
                 value: (value: number | null) => (value == null ? "" : `$ ${value.toString()}`)
             },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
             maxValue: {
                 type: "number",
                 value: 100,
@@ -60,14 +60,6 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
                 type: "boolean",
                 value: false
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
@@ -78,17 +70,15 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
             },
-            spinners: {
-                type: "boolean",
-                value: true
-            },
-            step: {
-                type: "number",
-                value: 1
+            touched: undefined,
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: "w-40"
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("NumericTextBoxComponent");
     protected readonly NumericTextboxWrapperComponent = NumericTextboxWrapperComponent;
@@ -110,8 +100,9 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
                 [size]="size()"
                 [spinners]="spinners()"
                 [step]="step()"
+                [tabindex]="tabindex()"
                 [formField]="form.amount"
-                class="w-40">
+                [class]="userClass()">
                 @if (featureData && featureData["prefixTemplate"].active) {
                     <ng-template monaNumericTextBoxPrefixTemplate>
                         <svg lucideHash [size]="16" class="mx-0.5"></svg>
@@ -147,6 +138,8 @@ export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<N
     public readonly size = input<ReturnType<NumericTextBoxComponent["size"]>>("medium");
     public readonly spinners = input(true);
     public readonly step = input(1);
+    public readonly tabindex = input(0);
+    public readonly userClass = input("w-40");
     public readonly value = model<number | null>(null);
 
     public constructor() {

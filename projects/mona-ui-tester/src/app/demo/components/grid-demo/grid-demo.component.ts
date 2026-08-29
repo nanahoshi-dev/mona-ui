@@ -65,6 +65,7 @@ import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@nanahoshi/mon
 import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
@@ -376,8 +377,8 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             }
         }
     });
-    protected readonly config = signal<ComponentConfig<GridComponent<unknown>>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<GridComponent<unknown>>>(() => ({
+        inputs: deriveInputConfig<GridComponent<unknown>>(this.metadata(), {
             data: {
                 type: "iterable",
                 value: []
@@ -403,10 +404,15 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                 type: "dropdown",
                 value: ["small", "medium", "large", "none"],
                 defaultValue: "medium"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: "w-full h-112"
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("GridComponent");
     protected readonly GridWrapperComponent = GridWrapperComponent;
@@ -492,7 +498,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [monaGridStatePersistence]="statePersistence()"
             [state]="state()"
             (stateChange)="onStateChange($event)"
-            class="w-full h-112">
+            [class]="userClass()">
             <ng-template monaGridToolbarTemplate let-addRowVisible="addRowVisible">
                 <button monaButton monaGridAddCommand [disabled]="addRowVisible">Add</button>
             </ng-template>
@@ -856,6 +862,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
     public readonly resizeMethod = input<ReturnType<GridComponent<unknown>["resizeMethod"]>>("fitView");
     public readonly rounded = input<ReturnType<GridComponent<unknown>["rounded"]>>("medium");
     public readonly responsivePager = input<ReturnType<GridComponent<unknown>["responsivePager"]>>(false);
+    public readonly userClass = input<ReturnType<GridComponent<unknown>["userClass"]>>("w-full h-112");
 
     public constructor() {
         effect(() => {

@@ -1,7 +1,8 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
 import { CheckBoxComponent, CheckboxDirective } from "@nanahoshi/mona-ui/check-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -11,28 +12,11 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./checkbox-demo.component.html"
 })
 export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxComponent> {
-    protected readonly config = signal<ComponentConfig<CheckBoxComponent>>({
-        inputs: {
-            checked: {
-                type: "boolean",
-                value: false
-            },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
-            indeterminate: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<CheckBoxComponent>>(() => ({
+        inputs: deriveInputConfig<CheckBoxComponent>(this.metadata(), {
             label: {
                 type: "string",
                 value: "Checkbox Component"
-            },
-            labelPosition: {
-                type: "dropdown",
-                value: ["before", "after"],
-                defaultValue: "after"
             },
             labelSize: {
                 type: "dropdown",
@@ -43,9 +27,14 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        }
-    });
+        })
+    }));
     protected readonly metadata = this.getMetadata("CheckBoxComponent");
     protected readonly CheckBoxWrapperComponent = CheckBoxWrapperComponent;
 }
@@ -57,10 +46,15 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
             [checked]="checked()"
             [disabled]="disabled()"
             [indeterminate]="indeterminate()"
+            [invalid]="invalid()"
             [label]="label()"
             [labelPosition]="labelPosition()"
             [labelSize]="labelSize()"
+            [required]="required()"
             [rounded]="rounded()"
+            [tabIndex]="tabIndex()"
+            [touched]="touched()"
+            [class]="userClass()"
             (inputBlur)="onInputBlur($event)"
             (inputChange)="onInputChange($event)"
             (inputFocus)="onInputFocus($event)">
@@ -83,10 +77,15 @@ export class CheckBoxWrapperComponent implements ComponentInputsAsSignal<CheckBo
     public readonly checked = model(false);
     public readonly disabled = input(false);
     public readonly indeterminate = input(false);
+    public readonly invalid = input(false);
     public readonly label = input("Checkbox Label");
     public readonly labelPosition = input<ReturnType<CheckBoxComponent["labelPosition"]>>("after");
     public readonly labelSize = input<ReturnType<CheckBoxComponent["labelSize"]>>("medium");
+    public readonly required = input(false);
     public readonly rounded = input<ReturnType<CheckBoxComponent["rounded"]>>("medium");
+    public readonly tabIndex = input(0);
+    public readonly touched = input(false);
+    public readonly userClass = input("");
 
     protected onInputBlur(event: FocusEvent): void {
         console.log("Checkbox blurred", event);
