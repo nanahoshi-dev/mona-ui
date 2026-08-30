@@ -55,6 +55,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     #lastAnimatedIndex: number | null = null;
     #lastOptions: readonly SegmentedOption<T>[] | null = null;
     #lastSize: SegmentedVariantProps["size"] | null = null;
+    #observedOptionElements: readonly HTMLLabelElement[] = [];
     #resizeObserver: ResizeObserver | null = null;
 
     protected readonly containerClasses = computed(() => {
@@ -177,7 +178,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         afterRenderEffect({
             read: () => {
                 this.selectedIndex();
-                this.optionElements();
+                const optionElements = this.optionElements();
                 this.alignment();
                 this.rounded();
                 this.animate();
@@ -190,6 +191,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
 
                 this.#lastSize = size;
                 this.#lastOptions = options;
+                this.observeOptionElements(optionElements);
                 this.updateIndicatorGeometry({ suppressTransition });
             }
         });
@@ -197,6 +199,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         afterNextRender({
             read: () => {
                 this.setupResizeObserver();
+                this.scheduleSettledGeometryUpdate();
             }
         });
 
@@ -227,6 +230,42 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         this.touch.emit();
     }
 
+    private observeOptionElements(optionElements: readonly ElementRef<HTMLLabelElement>[]): void {
+        if (!this.#resizeObserver) {
+            return;
+        }
+
+        const elements = optionElements.map(optionElement => optionElement.nativeElement);
+        for (const element of this.#observedOptionElements) {
+            if (!elements.includes(element)) {
+                this.#resizeObserver.unobserve(element);
+            }
+        }
+        for (const element of elements) {
+            if (!this.#observedOptionElements.includes(element)) {
+                this.#resizeObserver.observe(element);
+            }
+        }
+        this.#observedOptionElements = elements;
+    }
+
+    /**
+     * Guards against a stale indicator snapshot when the control mounts inside a container that is
+     * still transitioning in (e.g. a popup's enter animation): the host's own box may not change once
+     * that settles, so the ResizeObserver on it alone would never re-fire to correct the geometry.
+     */
+    private scheduleSettledGeometryUpdate(): void {
+        const win = this.#hostElementRef.nativeElement.ownerDocument.defaultView;
+        if (!win) {
+            return;
+        }
+        win.requestAnimationFrame(() => {
+            win.requestAnimationFrame(() => {
+                this.updateIndicatorGeometry({ suppressTransition: true });
+            });
+        });
+    }
+
     private setupResizeObserver(): void {
         if (typeof ResizeObserver === "undefined") {
             return;
@@ -235,6 +274,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
             this.updateIndicatorGeometry({ suppressTransition: true });
         });
         this.#resizeObserver.observe(this.#hostElementRef.nativeElement);
+        this.observeOptionElements(this.optionElements());
     }
 
     private updateIndicatorGeometry(options?: { suppressTransition?: boolean }): void {
