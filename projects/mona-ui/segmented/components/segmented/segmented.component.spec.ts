@@ -137,6 +137,36 @@ function mockOptionBounds(
     });
 }
 
+class TrackingResizeObserver {
+    readonly #callback: ResizeObserverCallback;
+    public readonly observedElements: Element[] = [];
+    public static instances: TrackingResizeObserver[] = [];
+
+    public constructor(callback: ResizeObserverCallback) {
+        this.#callback = callback;
+        TrackingResizeObserver.instances.push(this);
+    }
+
+    public disconnect(): void {
+        this.observedElements.length = 0;
+    }
+
+    public observe(element: Element): void {
+        this.observedElements.push(element);
+    }
+
+    public trigger(): void {
+        this.#callback([], this as unknown as ResizeObserver);
+    }
+
+    public unobserve(element: Element): void {
+        const index = this.observedElements.indexOf(element);
+        if (index !== -1) {
+            this.observedElements.splice(index, 1);
+        }
+    }
+}
+
 describe("SegmentedComponent", () => {
     describe("rendering", () => {
         let fixture: ComponentFixture<HostComponent>;
@@ -486,6 +516,50 @@ describe("SegmentedComponent", () => {
 
             expect(getIndicator(fixture)).toBeNull();
             expect(component.value()).toBe("discover");
+        });
+
+        it("corrects a stale indicator snapshot once an observed option element resizes (e.g. inside an animating popup)", async () => {
+            const originalResizeObserver = globalThis.ResizeObserver;
+            globalThis.ResizeObserver = TrackingResizeObserver as unknown as typeof ResizeObserver;
+
+            try {
+                await TestBed.resetTestingModule();
+                await TestBed.configureTestingModule({
+                    imports: [HostComponent]
+                }).compileComponents();
+
+                const localFixture = TestBed.createComponent(HostComponent);
+                localFixture.detectChanges();
+                mockOptionBounds(localFixture, [
+                    { height: 32, left: 4, top: 4, width: 100 },
+                    { height: 32, left: 108, top: 4, width: 100 }
+                ]);
+                localFixture.componentInstance.options.set([...stringOptions]);
+                await waitForStable(localFixture);
+
+                const labels = getLabels(localFixture);
+                const observer = TrackingResizeObserver.instances.at(-1);
+                expect(observer?.observedElements).toContain(labels[0]);
+
+                const indicatorBefore = getIndicator(localFixture);
+                expect(indicatorBefore?.style.width).toBe("100px");
+
+                // Simulate an option's layout settling to a different size after the initial
+                // measurement (e.g. once an ancestor popup's enter transition finishes) without
+                // any change to the host's own outer box, then let the per-option observer react.
+                mockOptionBounds(localFixture, [
+                    { height: 32, left: 4, top: 4, width: 130 },
+                    { height: 32, left: 134, top: 4, width: 130 }
+                ]);
+                observer?.trigger();
+                await waitForStable(localFixture);
+
+                const indicatorAfter = getIndicator(localFixture);
+                expect(indicatorAfter?.style.transform).toBe("translate3d(4px, 4px, 0)");
+                expect(indicatorAfter?.style.width).toBe("130px");
+            } finally {
+                globalThis.ResizeObserver = originalResizeObserver;
+            }
         });
 
         it("restores indicator when matching option reappears without sliding from stale coords", async () => {
