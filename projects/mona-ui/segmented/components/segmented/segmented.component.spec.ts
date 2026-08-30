@@ -104,36 +104,22 @@ function selectRadio(fixture: ComponentFixture<unknown>, index: number): void {
     fixture.detectChanges();
 }
 
+/**
+ * The component reads `offsetLeft`/`offsetTop`/`offsetWidth`/`offsetHeight` (already relative to
+ * the host, which is the option's positioned offsetParent), not `getBoundingClientRect()`, so that
+ * an ancestor's CSS transform (e.g. mona-popup's enter animation) can't distort the measurement.
+ */
 function mockOptionBounds(
     fixture: ComponentFixture<HostComponent>,
     bounds: { height: number; left: number; top: number; width: number }[]
 ): void {
-    const host = getHostElement(fixture);
-    vi.spyOn(host, "getBoundingClientRect").mockReturnValue({
-        bottom: 40,
-        height: 40,
-        left: 0,
-        right: 300,
-        top: 0,
-        width: 300,
-        x: 0,
-        y: 0,
-        toJSON: () => ({})
-    });
     const labels = getLabels(fixture);
     labels.forEach((label, i) => {
         const bound = bounds[i] ?? { height: 32, left: 4 + i * 140, top: 4, width: 140 };
-        vi.spyOn(label, "getBoundingClientRect").mockReturnValue({
-            bottom: bound.top + bound.height,
-            height: bound.height,
-            left: bound.left,
-            right: bound.left + bound.width,
-            top: bound.top,
-            width: bound.width,
-            x: bound.left,
-            y: bound.top,
-            toJSON: () => ({})
-        });
+        Object.defineProperty(label, "offsetLeft", { configurable: true, value: bound.left });
+        Object.defineProperty(label, "offsetTop", { configurable: true, value: bound.top });
+        Object.defineProperty(label, "offsetWidth", { configurable: true, value: bound.width });
+        Object.defineProperty(label, "offsetHeight", { configurable: true, value: bound.height });
     });
 }
 
@@ -516,6 +502,40 @@ describe("SegmentedComponent", () => {
 
             expect(getIndicator(fixture)).toBeNull();
             expect(component.value()).toBe("discover");
+        });
+
+        it("ignores an ancestor's CSS transform when measuring (e.g. mid-scale during a popup's enter animation)", async () => {
+            fixture.detectChanges();
+            mockOptionBounds(fixture, [
+                { height: 32, left: 4, top: 4, width: 140 },
+                { height: 32, left: 148, top: 4, width: 140 }
+            ]);
+            const labels = getLabels(fixture);
+            // Simulate mona-popup's `mona-popup-scale-in` animation being 95% of the way through:
+            // getBoundingClientRect() on a transformed ancestor's descendants reports scaled-down
+            // values, while the real (untransformed) CSS layout box - reflected by offsetLeft/Top/
+            // Width/Height - never changes. If the component still read getBoundingClientRect() for
+            // this, the indicator would end up ~5% undersized and mispositioned.
+            labels.forEach(label => {
+                vi.spyOn(label, "getBoundingClientRect").mockReturnValue({
+                    bottom: 0,
+                    height: label.offsetHeight * 0.95,
+                    left: label.offsetLeft * 0.95,
+                    right: 0,
+                    top: label.offsetTop * 0.95,
+                    width: label.offsetWidth * 0.95,
+                    x: 0,
+                    y: 0,
+                    toJSON: () => ({})
+                });
+            });
+            component.options.set([...stringOptions]);
+            await waitForStable(fixture);
+
+            const indicator = getIndicator(fixture);
+            expect(indicator?.style.transform).toBe("translate3d(4px, 4px, 0)");
+            expect(indicator?.style.width).toBe("140px");
+            expect(indicator?.style.height).toBe("32px");
         });
 
         it("corrects a stale indicator snapshot once an observed option element resizes (e.g. inside an animating popup)", async () => {
