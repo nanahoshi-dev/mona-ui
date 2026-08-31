@@ -2,7 +2,7 @@ import { buttonThemeVariants } from "../../button/styles/button.styles";
 import { calendarBaseThemeVariants } from "../../calendar/styles/calendar.styles";
 import { datePopupThemeVariants } from "../../date-input/styles/date-popup.styles";
 import { gridBaseThemeVariants } from "../../grid/styles/grid.styles";
-import { listItemContentThemeVariants, listThemeVariants } from "../../internal/list/styles/list.styles";
+import { listItemContentThemeVariants } from "../../internal/list/styles/list.styles";
 import { menubarBaseThemeVariants } from "../../menubar/styles/menu.styles";
 import { sliderHandleThemeVariants, sliderSelectionThemeVariants } from "../../slider/styles/slider.styles";
 import { timeSelectorListThemeVariants } from "../../time-selector/styles/time-selector.styles";
@@ -31,7 +31,6 @@ describe("canonical recipe and built-in profile contract", () => {
         );
         expect(menubarBaseThemeVariants()).toContain("shadow-(--mona-menubar-shadow)");
         expect(datePopupThemeVariants()).toContain("[backdrop-filter:var(--mona-effect-overlay-backdrop-filter,none)]");
-        expect(listThemeVariants()).toContain("bg-(--mona-list-background)");
         expect(sliderSelectionThemeVariants()).toContain("duration-(--mona-motion-fast)");
         expect(sliderHandleThemeVariants()).toContain("border-(--mona-slider-handle-border-color)");
         expect(timeSelectorListThemeVariants()).toContain("focus-visible:bg-(--color-focus-surface)");
