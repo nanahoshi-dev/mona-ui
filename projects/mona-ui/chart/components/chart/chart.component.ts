@@ -355,7 +355,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #gestureController: ChartViewportGestureController | null = null;
     #hasCommittedVisualScene: boolean = false;
     #hasEmittedBrushStart = false;
-    #hasPendingSizeReflow: boolean = false;
     #hasWarnedBrushWithoutSelection = false;
     #hasWarnedMultiBrush = false;
     #hasWarnedMultiSelection = false;
@@ -2018,13 +2017,25 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const measurement = this.#measurePlotElement(this.#getPlotElement());
             if (measurement) {
                 this.#applyMeasuredSize(measurement.width, measurement.height);
+            } else if (
+                // SVG sector paths embed their measured center and radii. Painting the
+                // fallback scene would leave those coordinates clipped if lazy layout
+                // settles after the first render.
+                this.renderer() === "svg" &&
+                typeof ResizeObserver !== "undefined" &&
+                this.#registeredSeries().some(series => series.type === "donut" || series.type === "pie")
+            ) {
+                this.#initialMeasurementPending = true;
+                this.#scheduleInitialMeasurement();
+                return;
             }
         }
 
+        const previousScene = this.scene();
         const sizeChanged =
-            !this.scene() ||
-            Math.abs(this.scene()!.width - this.#currentWidth) >= 0.5 ||
-            Math.abs(this.scene()!.height - this.#currentHeight) >= 0.5;
+            !previousScene ||
+            Math.abs(previousScene.width - this.#currentWidth) >= 0.5 ||
+            Math.abs(previousScene.height - this.#currentHeight) >= 0.5;
 
         const isStructural =
             hasInvalidationReason(reason, ChartInvalidationReason.Data) ||
@@ -2260,13 +2271,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        const isPassiveSizeReflow = trigger === "layout" && hasInvalidationReason(reason, ChartInvalidationReason.Size);
-        if (isPassiveSizeReflow && this.#animationController.isRunning()) {
-            this.#hasPendingSizeReflow = true;
-            return;
-        }
+        // The render surface has already adopted the new viewport. Reusing or morphing
+        // from geometry computed for the previous viewport would paint off-center marks.
+        const mustCommitSizeImmediately =
+            sizeChanged && hasInvalidationReason(reason, ChartInvalidationReason.Size) && previousScene !== null;
 
-        if (isAnimationDisabled) {
+        if (isAnimationDisabled || mustCommitSizeImmediately) {
             this.#animationController.cancel("keep-current");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
@@ -2274,13 +2284,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#isStructuralAnimation.set(false);
             this.#animationMode.set(null);
             this.#isExitingData.set(false);
-            if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
-                const reasonToInvalidate =
-                    this.#pendingLabelMeasurementReason !== 0
-                        ? this.#pendingLabelMeasurementReason
-                        : ChartInvalidationReason.Layout;
+            if (this.#pendingLabelMeasurementReason !== 0) {
+                const reasonToInvalidate = this.#pendingLabelMeasurementReason;
                 this.#pendingLabelMeasurementReason = 0;
-                this.#hasPendingSizeReflow = false;
                 this.invalidate(reasonToInvalidate as ChartInvalidationReason);
             }
             this.#paint();
@@ -2298,13 +2304,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#isStructuralAnimation.set(false);
             this.#animationMode.set(null);
             this.#isExitingData.set(false);
-            if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
-                const reasonToInvalidate =
-                    this.#pendingLabelMeasurementReason !== 0
-                        ? this.#pendingLabelMeasurementReason
-                        : ChartInvalidationReason.Layout;
+            if (this.#pendingLabelMeasurementReason !== 0) {
+                const reasonToInvalidate = this.#pendingLabelMeasurementReason;
                 this.#pendingLabelMeasurementReason = 0;
-                this.#hasPendingSizeReflow = false;
                 this.invalidate(reasonToInvalidate as ChartInvalidationReason);
             }
             this.#paint();
@@ -2330,13 +2332,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     this.#isStructuralAnimation.set(false);
                     this.#animationMode.set(null);
                     this.#isExitingData.set(false);
-                    if (this.#pendingLabelMeasurementReason !== 0 || this.#hasPendingSizeReflow) {
-                        const reasonToInvalidate =
-                            this.#pendingLabelMeasurementReason !== 0
-                                ? this.#pendingLabelMeasurementReason
-                                : ChartInvalidationReason.Layout;
+                    if (this.#pendingLabelMeasurementReason !== 0) {
+                        const reasonToInvalidate = this.#pendingLabelMeasurementReason;
                         this.#pendingLabelMeasurementReason = 0;
-                        this.#hasPendingSizeReflow = false;
                         this.invalidate(reasonToInvalidate as ChartInvalidationReason);
                     }
                     this.#paint();
