@@ -41,12 +41,14 @@ export class ListItemDirective<TData> {
         const disabled = this.disabled();
         const highlighted = this.highlighted();
         const selected = this.selected();
-        const checkboxes = this.#listService.selectableOptions().checkboxes;
+        const selectableOptions = this.#listService.selectableOptions();
+        const checkboxes = selectableOptions.checkboxes;
         const classes = listItemContentThemeVariants({
             disabled,
             highlighted,
             selected,
-            checkboxes
+            checkboxes,
+            selectable: selectableOptions.enabled
         });
         return twMerge(classes);
     });
