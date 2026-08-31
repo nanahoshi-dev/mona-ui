@@ -199,7 +199,6 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         afterNextRender({
             read: () => {
                 this.setupResizeObserver();
-                this.scheduleSettledGeometryUpdate();
             }
         });
 
@@ -249,23 +248,6 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         this.#observedOptionElements = elements;
     }
 
-    /**
-     * Guards against a stale indicator snapshot when the control mounts inside a container that is
-     * still transitioning in (e.g. a popup's enter animation): the host's own box may not change once
-     * that settles, so the ResizeObserver on it alone would never re-fire to correct the geometry.
-     */
-    private scheduleSettledGeometryUpdate(): void {
-        const win = this.#hostElementRef.nativeElement.ownerDocument.defaultView;
-        if (!win) {
-            return;
-        }
-        win.requestAnimationFrame(() => {
-            win.requestAnimationFrame(() => {
-                this.updateIndicatorGeometry({ suppressTransition: true });
-            });
-        });
-    }
-
     private setupResizeObserver(): void {
         if (typeof ResizeObserver === "undefined") {
             return;
@@ -295,16 +277,19 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
             return;
         }
 
-        const host = this.#hostElementRef.nativeElement;
         const option = selectedElementRef.nativeElement;
 
-        const hostRect = host.getBoundingClientRect();
-        const optionRect = option.getBoundingClientRect();
-
-        const x = optionRect.left - hostRect.left - (host.clientLeft || 0);
-        const y = optionRect.top - hostRect.top - (host.clientTop || 0);
-        const width = optionRect.width;
-        const height = optionRect.height;
+        // `offsetLeft`/`offsetTop`/`offsetWidth`/`offsetHeight` are pure layout values, relative to
+        // the nearest positioned ancestor (the host, which is `position: relative` and the option's
+        // direct parent). Unlike `getBoundingClientRect()`, they are unaffected by any CSS transform
+        // an ancestor applies — e.g. the scale animation `mona-popup` plays while opening. Measuring
+        // with `getBoundingClientRect()` there could capture a mid-transition (e.g. 95%-scaled)
+        // snapshot that never gets corrected once the animation settles, undersizing/misplacing the
+        // indicator relative to the option's real, final box.
+        const x = option.offsetLeft;
+        const y = option.offsetTop;
+        const width = option.offsetWidth;
+        const height = option.offsetHeight;
 
         const shouldAnimate =
             !options?.suppressTransition &&
