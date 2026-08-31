@@ -55,6 +55,7 @@
             [pageSize]="pageState.take"
             [previousNext]="pageableOptions.previousNext"
             [showInfo]="pageableOptions.showInfo"
+            [size]="size()"
             (pageChange)="onPageChange($event)"
             (pageSizeChange)="onPageSizeChange($event)"
             class="border-b-0 border-l-0 border-r-0 rounded-t-none"></mona-pager>
