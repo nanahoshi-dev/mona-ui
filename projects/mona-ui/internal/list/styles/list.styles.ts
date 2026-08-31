@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const listThemeVariants = cva(`flex h-full flex-col overflow-hidden bg-(--mona-list-background) outline-none`);
+export const listThemeVariants = cva(`flex h-full flex-col overflow-hidden outline-none`);
 
 export const listInnerListThemeVariants = cva(
     `m-0 h-full list-none overflow-x-hidden overflow-y-auto p-0 outline-none [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]`
