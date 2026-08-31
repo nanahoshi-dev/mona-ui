@@ -24,10 +24,11 @@ export const listGroupHeaderTextThemeVariants = cva(`select-none text-muted-fore
 export const listItemBaseThemeVariants = cva(`flex h-full w-full items-center gap-2`);
 
 export const listItemContentThemeVariants = cva(
-    `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none hover:bg-hover focus:bg-hover`,
+    `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none`,
     {
         variants: {
             checkboxes: { true: "gap-2", false: "" },
+            selectable: { true: "hover:bg-hover focus:bg-hover", false: "" },
             highlighted: {
                 true: "bg-hover text-foreground inset-ring-1 inset-ring-focus-indicator/35",
                 false: ""
@@ -35,10 +36,15 @@ export const listItemContentThemeVariants = cva(
             selected: { true: "bg-(--color-selected) text-(--color-selected-foreground)", false: "" },
             disabled: {
                 true: "pointer-events-none cursor-default bg-(--mona-list-disabled-background) text-disabled-foreground",
-                false: "cursor-pointer"
+                false: ""
             }
         },
         compoundVariants: [
+            {
+                selectable: true,
+                disabled: false,
+                class: "cursor-pointer"
+            },
             {
                 selected: true,
                 checkboxes: false,
