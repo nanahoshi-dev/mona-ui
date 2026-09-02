@@ -520,7 +520,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Emitted when the chip body is clicked or activated via Enter or Space.\r\nNot emitted when the remove button is activated.",
+        "description": "Emitted when a toggleable chip body is activated via click, Enter, or Space.\r\nNot emitted when the remove button is activated or for non-toggleable chips.",
         "kind": "output",
         "name": "contentClick",
         "type": "void"
@@ -595,7 +595,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Tab index override for the chip host element. When not set, computed automatically:\r\n`0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
+        "description": "Tab index override for the chip host element. When not set, computed automatically:\r\n`0` when `toggleable` is `true` or functioning as a link, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
         "kind": "input",
         "name": "tabindex",
         "type": "number | string",
