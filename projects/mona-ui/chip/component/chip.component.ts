@@ -13,6 +13,7 @@ import {
     TemplateRef
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { RouterLink } from "@angular/router";
 import { LucideCircleX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { filter, fromEvent } from "rxjs";
@@ -36,6 +37,8 @@ import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../style
 export class ChipComponent implements ChipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #routerLink = inject(RouterLink, { optional: true });
+
     protected readonly ariaChecked = computed(() => {
         if (!this.toggleable()) {
             return undefined;
@@ -44,14 +47,18 @@ export class ChipComponent implements ChipVariantInputs {
     });
     protected readonly baseClass = computed(() => {
         const disabled = this.disabled();
+        const interactive = this.bodyInteractive();
         const look = this.look();
         const rounded = this.rounded();
         const size = this.size();
         const selected = this.selected();
         const userClass = this.userClass();
-        const variantClasses = chipThemeVariants({ disabled, look, rounded, size, selected });
+        const variantClasses = chipThemeVariants({ disabled, interactive, look, rounded, size, selected });
         return twMerge(variantClasses, userClass);
     });
+    protected readonly bodyInteractive = computed(
+        () => !this.disabled() && (this.toggleable() || this.isLink())
+    );
     protected readonly effectiveAriaLabel = computed(() => {
         const explicitLabel = this.ariaLabel();
         if (explicitLabel) {
@@ -71,7 +78,7 @@ export class ChipComponent implements ChipVariantInputs {
         if (explicitTabindex != null) {
             return explicitTabindex;
         }
-        if (this.toggleable() || this.removable()) {
+        if (this.toggleable() || this.isLink()) {
             return 0;
         }
         return -1;
@@ -89,6 +96,7 @@ export class ChipComponent implements ChipVariantInputs {
                 return 14;
         }
     });
+    protected readonly isLink = computed(() => !!this.#routerLink);
     protected readonly prefixTemplate = contentChild(ChipPrefixTemplateDirective, { read: TemplateRef });
     protected readonly role = computed(() => {
         if (this.toggleable()) {
@@ -105,8 +113,8 @@ export class ChipComponent implements ChipVariantInputs {
     public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
-     * @description Emitted when the chip body is clicked or activated via Enter or Space.
-     * Not emitted when the remove button is activated.
+     * @description Emitted when a toggleable chip body is activated via click, Enter, or Space.
+     * Not emitted when the remove button is activated or for non-toggleable chips.
      */
     public readonly contentClick = output<void>();
 
@@ -175,7 +183,7 @@ export class ChipComponent implements ChipVariantInputs {
 
     /**
      * @description Tab index override for the chip host element. When not set, computed automatically:
-     * `0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.
+     * `0` when `toggleable` is `true` or functioning as a link, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.
      * @default undefined
      */
     public readonly tabindex = input<number | string>();
@@ -215,9 +223,10 @@ export class ChipComponent implements ChipVariantInputs {
     }
 
     #handleActivation(): void {
-        if (this.toggleable()) {
-            this.selected.set(!this.selected());
+        if (!this.toggleable() || this.disabled()) {
+            return;
         }
+        this.selected.set(!this.selected());
         this.contentClick.emit();
     }
 
@@ -226,7 +235,7 @@ export class ChipComponent implements ChipVariantInputs {
 
         fromEvent<KeyboardEvent>(element, "keydown")
             .pipe(
-                filter(event => !this.disabled() && (event.key === "Enter" || event.key === " ")),
+                filter(event => !this.disabled() && this.toggleable() && (event.key === "Enter" || event.key === " ")),
                 takeUntilDestroyed(this.#destroyRef)
             )
             .subscribe(event => {
@@ -240,7 +249,7 @@ export class ChipComponent implements ChipVariantInputs {
 
         fromEvent<MouseEvent>(element, "click")
             .pipe(
-                filter(() => !this.disabled()),
+                filter(() => !this.disabled() && this.toggleable()),
                 takeUntilDestroyed(this.#destroyRef)
             )
             .subscribe(() => {
