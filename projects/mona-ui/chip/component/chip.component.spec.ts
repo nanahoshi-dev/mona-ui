@@ -1,6 +1,8 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { provideRouter, RouterLink } from "@angular/router";
+import { twMerge } from "tailwind-merge";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
 import { ChipVariantProps } from "../styles/chip.styles";
@@ -36,9 +38,14 @@ import { ChipComponent } from "./chip.component";
 })
 class TestChipHostComponent {
     ariaLabel = signal<string | undefined>(undefined);
+    chipComponent = viewChild.required(ChipComponent);
+    content = signal("Chip Content");
     disabled = signal(false);
     label = signal("");
     look = signal<ChipVariantProps["look"]>("default");
+    onContentClick = vi.fn();
+    onRemove = vi.fn();
+    onSelectedChange = vi.fn();
     removable = signal(false);
     removeLabel = signal<string | undefined>(undefined);
     rounded = signal<ChipVariantProps["rounded"]>("full");
@@ -48,13 +55,6 @@ class TestChipHostComponent {
     toggleable = signal(false);
     userClass = signal("");
     value = signal<unknown>(undefined);
-    content = signal("Chip Content");
-
-    onContentClick = vi.fn();
-    onRemove = vi.fn();
-    onSelectedChange = vi.fn();
-
-    chipComponent = viewChild.required(ChipComponent);
 }
 
 @Component({
@@ -69,6 +69,27 @@ class TestChipHostComponent {
 })
 class TestChipWithPrefixHostComponent {
     label = signal("Chip Label");
+}
+
+@Component({
+    template: `
+        <mona-chip
+            [routerLink]="linkUrl()"
+            [disabled]="disabled()"
+            [removable]="removable()"
+            [class]="userClass()"
+            (remove)="onRemove($event)">
+            Link Chip
+        </mona-chip>
+    `,
+    imports: [ChipComponent, RouterLink]
+})
+class TestChipWithRouterLinkHostComponent {
+    disabled = signal(false);
+    linkUrl = signal("/test-path");
+    onRemove = vi.fn();
+    removable = signal(false);
+    userClass = signal("");
 }
 
 // =============================================================================
@@ -261,10 +282,10 @@ describe("ChipComponent", () => {
             expect(component.onContentClick).not.toHaveBeenCalled();
         });
 
-        it("should set tabindex=0 when removable", () => {
+        it("should keep host tabindex=-1 when removable", () => {
             component.removable.set(true);
             fixture.detectChanges();
-            expect(chipElement.getAttribute("tabindex")).toBe("0");
+            expect(chipElement.getAttribute("tabindex")).toBe("-1");
         });
 
         it("should NOT emit remove when disabled", async () => {
@@ -400,7 +421,7 @@ describe("ChipComponent", () => {
     // Look Input Tests
     // =========================================================================
     describe("look input", () => {
-        it("should apply default look with a raised neutral surface", () => {
+        it("should apply default look with a raised neutral surface and no passive hover", () => {
             component.look.set("default");
             fixture.detectChanges();
             expect(
@@ -409,7 +430,8 @@ describe("ChipComponent", () => {
                 )
             ).toBe(true);
             expect(chipElement.classList.contains("text-foreground")).toBe(true);
-            expect(chipElement.classList.contains("hover:bg-hover")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-hover")).toBe(false);
+            expect(chipElement.classList.contains("cursor-pointer")).toBe(false);
         });
 
         it("should apply primary look with bg-primary and text-primary-foreground", () => {
@@ -417,6 +439,7 @@ describe("ChipComponent", () => {
             fixture.detectChanges();
             expect(chipElement.classList.contains("bg-primary")).toBe(true);
             expect(chipElement.classList.contains("text-primary-foreground")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-primary-hover")).toBe(false);
         });
 
         it("should apply success look with bg-success and text-success-foreground", () => {
@@ -424,6 +447,7 @@ describe("ChipComponent", () => {
             fixture.detectChanges();
             expect(chipElement.classList.contains("bg-success")).toBe(true);
             expect(chipElement.classList.contains("text-success-foreground")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-success-hover")).toBe(false);
         });
 
         it("should apply error look with bg-error and text-error-foreground", () => {
@@ -431,6 +455,7 @@ describe("ChipComponent", () => {
             fixture.detectChanges();
             expect(chipElement.classList.contains("bg-error")).toBe(true);
             expect(chipElement.classList.contains("text-error-foreground")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-error-hover")).toBe(false);
         });
 
         it("should apply warning look with bg-warning and text-warning-foreground", () => {
@@ -438,6 +463,7 @@ describe("ChipComponent", () => {
             fixture.detectChanges();
             expect(chipElement.classList.contains("bg-warning")).toBe(true);
             expect(chipElement.classList.contains("text-warning-foreground")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-warning-hover")).toBe(false);
         });
 
         it("should apply info look with bg-info and text-info-foreground", () => {
@@ -445,13 +471,14 @@ describe("ChipComponent", () => {
             fixture.detectChanges();
             expect(chipElement.classList.contains("bg-info")).toBe(true);
             expect(chipElement.classList.contains("text-info-foreground")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-info-hover")).toBe(false);
         });
 
-        it("should apply outline look with a control boundary and neutral interaction", () => {
+        it("should apply outline look with a control boundary and no passive hover", () => {
             component.look.set("outline");
             fixture.detectChanges();
             expect(chipElement.classList.contains("border-input-border")).toBe(true);
-            expect(chipElement.classList.contains("hover:bg-hover")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-hover")).toBe(false);
         });
 
         it("should apply secondary look with bg-secondary and text-secondary-foreground", () => {
@@ -459,14 +486,14 @@ describe("ChipComponent", () => {
             fixture.detectChanges();
             expect(chipElement.classList.contains("bg-secondary")).toBe(true);
             expect(chipElement.classList.contains("text-secondary-foreground")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-secondary-hover")).toBe(false);
         });
 
-        it("should apply ghost look with neutral interaction", () => {
+        it("should apply ghost look with no passive hover", () => {
             component.look.set("ghost");
             fixture.detectChanges();
             expect(chipElement.classList.contains("bg-transparent")).toBe(true);
-            expect(chipElement.classList.contains("hover:bg-hover")).toBe(true);
-            expect(chipElement.classList.contains("hover:bg-secondary-hover")).toBe(false);
+            expect(chipElement.classList.contains("hover:bg-hover")).toBe(false);
         });
 
         it.each(["default", "outline", "ghost"] as const)("uses neutral selection for the %s look", look => {
@@ -486,6 +513,50 @@ describe("ChipComponent", () => {
 
             expect(chipElement.classList.contains("bg-primary-selected")).toBe(true);
             expect(chipElement.classList.contains("text-primary-foreground")).toBe(true);
+        });
+
+        it.each([
+            "default",
+            "primary",
+            "secondary",
+            "success",
+            "error",
+            "warning",
+            "info",
+            "outline",
+            "ghost"
+        ] as const)("does NOT apply pointer cursor or hover classes for %s look when passive", look => {
+            component.look.set(look);
+            component.toggleable.set(false);
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("cursor-pointer")).toBe(false);
+            expect(chipElement.classList.contains("hover:bg-hover")).toBe(false);
+            expect(chipElement.classList.contains("hover:bg-primary-hover")).toBe(false);
+            expect(chipElement.classList.contains("hover:bg-secondary-hover")).toBe(false);
+            expect(chipElement.classList.contains("hover:bg-success-hover")).toBe(false);
+            expect(chipElement.classList.contains("hover:bg-error-hover")).toBe(false);
+            expect(chipElement.classList.contains("hover:bg-warning-hover")).toBe(false);
+            expect(chipElement.classList.contains("hover:bg-info-hover")).toBe(false);
+        });
+
+        it.each([
+            "default",
+            "primary",
+            "secondary",
+            "success",
+            "error",
+            "warning",
+            "info",
+            "outline",
+            "ghost"
+        ] as const)("applies cursor-pointer and focus-visible classes for %s look when toggleable", look => {
+            component.look.set(look);
+            component.toggleable.set(true);
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("cursor-pointer")).toBe(true);
+            expect(chipElement.classList.contains("focus-visible:ring-2")).toBe(true);
         });
     });
 
@@ -554,11 +625,11 @@ describe("ChipComponent", () => {
             expect(chipElement.getAttribute("tabindex")).toBe("0");
         });
 
-        it("should return 0 when removable and no explicit value", () => {
+        it("should return -1 when removable and no explicit value", () => {
             component.removable.set(true);
             component.tabindex.set(undefined);
             fixture.detectChanges();
-            expect(chipElement.getAttribute("tabindex")).toBe("0");
+            expect(chipElement.getAttribute("tabindex")).toBe("-1");
         });
 
         it("should return -1 when not interactive and no explicit value", () => {
@@ -618,6 +689,87 @@ describe("ChipComponent", () => {
             fixture.detectChanges();
             expect(chipElement.classList.contains("class-a")).toBe(true);
             expect(chipElement.classList.contains("class-b")).toBe(true);
+        });
+
+        it("should override horizontal padding with px-*", () => {
+            component.size.set("medium");
+            component.userClass.set("px-6");
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("px-6")).toBe(true);
+            expect(chipElement.classList.contains("px-1.5")).toBe(false);
+            expect(chipElement.classList.contains("py-1")).toBe(true);
+        });
+
+        it("should override vertical padding with py-*", () => {
+            component.size.set("medium");
+            component.userClass.set("py-4");
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("py-4")).toBe(true);
+            expect(chipElement.classList.contains("py-1")).toBe(false);
+            expect(chipElement.classList.contains("px-1.5")).toBe(true);
+        });
+
+        it("should override all padding with p-*", () => {
+            component.size.set("medium");
+            component.userClass.set("p-4");
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("p-4")).toBe(true);
+            expect(chipElement.classList.contains("px-1.5")).toBe(false);
+            expect(chipElement.classList.contains("py-1")).toBe(false);
+        });
+
+        it("should support targeted logical side customization with ps-* and pe-*", () => {
+            component.size.set("medium");
+            component.userClass.set("ps-4 pe-0");
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("ps-4")).toBe(true);
+            expect(chipElement.classList.contains("pe-0")).toBe(true);
+        });
+
+        it("should update classes dynamically when class signal changes", () => {
+            component.userClass.set("px-2");
+            fixture.detectChanges();
+            expect(chipElement.classList.contains("px-2")).toBe(true);
+
+            component.userClass.set("px-8");
+            fixture.detectChanges();
+            expect(chipElement.classList.contains("px-8")).toBe(true);
+            expect(chipElement.classList.contains("px-2")).toBe(false);
+        });
+
+        it("should preserve user class override after dynamic size change", () => {
+            component.size.set("small");
+            component.userClass.set("px-8");
+            fixture.detectChanges();
+            expect(chipElement.classList.contains("px-8")).toBe(true);
+            expect(chipElement.classList.contains("px-1")).toBe(false);
+
+            component.size.set("large");
+            fixture.detectChanges();
+            expect(chipElement.classList.contains("px-8")).toBe(true);
+            expect(chipElement.classList.contains("px-2")).toBe(false);
+        });
+
+        it("should support multiple utility category overrides", () => {
+            component.userClass.set("px-5 py-2 rounded-full shadow-none");
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("px-5")).toBe(true);
+            expect(chipElement.classList.contains("py-2")).toBe(true);
+            expect(chipElement.classList.contains("rounded-full")).toBe(true);
+            expect(chipElement.classList.contains("shadow-none")).toBe(true);
+        });
+
+        it("validates tailwind-merge padding resolution contract directly", () => {
+            expect(twMerge("px-1.5 py-1", "px-6")).toBe("py-1 px-6");
+            expect(twMerge("px-1.5 py-1", "py-4")).toBe("px-1.5 py-4");
+            expect(twMerge("px-1.5 py-1", "p-4")).toBe("p-4");
+            expect(twMerge("px-1.5 py-1", "ps-4")).toBe("px-1.5 py-1 ps-4");
+            expect(twMerge("px-1.5 py-1", "pe-4")).toBe("px-1.5 py-1 pe-4");
         });
     });
 
@@ -739,7 +891,7 @@ describe("ChipComponent", () => {
             expect(component.onContentClick).not.toHaveBeenCalled();
         });
 
-        it("should emit contentClick on Enter key for non-toggleable chip with explicit tabindex", async () => {
+        it("should NOT emit contentClick on Enter key for non-toggleable chip even with explicit tabindex", async () => {
             component.toggleable.set(false);
             component.tabindex.set(0);
             await waitForStable(fixture);
@@ -748,7 +900,18 @@ describe("ChipComponent", () => {
             chipElement.dispatchEvent(event);
             await waitForStable(fixture);
 
-            expect(component.onContentClick).toHaveBeenCalled();
+            expect(component.onContentClick).not.toHaveBeenCalled();
+        });
+
+        it("should NOT emit contentClick on Space key for non-toggleable chip", async () => {
+            component.toggleable.set(false);
+            await waitForStable(fixture);
+
+            const event = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+            chipElement.dispatchEvent(event);
+            await waitForStable(fixture);
+
+            expect(component.onContentClick).not.toHaveBeenCalled();
         });
     });
 
@@ -756,7 +919,7 @@ describe("ChipComponent", () => {
     // Click Interaction Tests
     // =========================================================================
     describe("click interaction", () => {
-        it("should emit contentClick on click", async () => {
+        it("should emit contentClick on click when toggleable", async () => {
             component.toggleable.set(true);
             await waitForStable(fixture);
 
@@ -764,6 +927,27 @@ describe("ChipComponent", () => {
             await waitForStable(fixture);
 
             expect(component.onContentClick).toHaveBeenCalled();
+        });
+
+        it("should NOT emit contentClick when passive chip is clicked", async () => {
+            component.toggleable.set(false);
+            await waitForStable(fixture);
+
+            chipElement.click();
+            await waitForStable(fixture);
+
+            expect(component.onContentClick).not.toHaveBeenCalled();
+        });
+
+        it("should NOT emit contentClick when removable-only chip host is clicked", async () => {
+            component.removable.set(true);
+            component.toggleable.set(false);
+            await waitForStable(fixture);
+
+            chipElement.click();
+            await waitForStable(fixture);
+
+            expect(component.onContentClick).not.toHaveBeenCalled();
         });
 
         it("should NOT emit contentClick when disabled", async () => {
@@ -807,5 +991,70 @@ describe("ChipComponent with Prefix Template", () => {
         const prefixContent = fixture.debugElement.query(By.css("[data-testid='prefix-content']"));
         expect(prefixContent).toBeTruthy();
         expect(chipElement.textContent).toContain("Chip Label");
+    });
+});
+
+// =============================================================================
+// RouterLink Tests
+// =============================================================================
+
+describe("ChipComponent with RouterLink", () => {
+    let fixture: ComponentFixture<TestChipWithRouterLinkHostComponent>;
+    let component: TestChipWithRouterLinkHostComponent;
+    let chipElement: HTMLElement;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [TestChipWithRouterLinkHostComponent],
+            providers: [provideRouter([])]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(TestChipWithRouterLinkHostComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+        chipElement = fixture.debugElement.query(By.css("mona-chip")).nativeElement;
+    });
+
+    it("should apply interactive affordances when functioning as a link", () => {
+        expect(chipElement.classList.contains("cursor-pointer")).toBe(true);
+        expect(chipElement.classList.contains("focus-visible:ring-2")).toBe(true);
+    });
+
+    it("should set tabindex=0 for link chip when enabled", () => {
+        expect(chipElement.getAttribute("tabindex")).toBe("0");
+    });
+
+    it("should remove interactive affordances and set tabindex=-1 when link chip is disabled", () => {
+        component.disabled.set(true);
+        fixture.detectChanges();
+
+        expect(chipElement.getAttribute("tabindex")).toBe("-1");
+        expect(chipElement.getAttribute("aria-disabled")).toBe("true");
+        expect(chipElement.classList.contains("cursor-pointer")).toBe(false);
+        expect(chipElement.classList.contains("pointer-events-none")).toBe(true);
+    });
+
+    it("should support class overrides on link chips", () => {
+        component.userClass.set("px-6 py-3");
+        fixture.detectChanges();
+
+        expect(chipElement.classList.contains("px-6")).toBe(true);
+        expect(chipElement.classList.contains("py-3")).toBe(true);
+        expect(chipElement.classList.contains("px-1.5")).toBe(false);
+        expect(chipElement.classList.contains("py-1")).toBe(false);
+    });
+
+    it("should keep remove button independently interactive on a link chip", async () => {
+        component.removable.set(true);
+        await waitForStable(fixture);
+
+        const removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
+        expect(removeButton).toBeTruthy();
+        expect(removeButton.nativeElement.getAttribute("tabindex")).toBe("0");
+
+        removeButton.triggerEventHandler("click", new MouseEvent("click"));
+        await waitForStable(fixture);
+
+        expect(component.onRemove).toHaveBeenCalled();
     });
 });

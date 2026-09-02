@@ -1,6 +1,6 @@
 ## Overview
 
-`ChipComponent` is a compact interactive label element used to represent filterable tags, toggleable options, or removable selections. It supports three content modes — a `label` input string, projected content via `<ng-content>`, or a mix of both with an optional prefix template — and three optional behaviors: toggle selection, removability, and plain click emission.
+`ChipComponent` is a compact label element used to represent filterable tags, toggleable options, removable selections, or navigation chips. It supports three content modes — a `label` input string, projected content via `<ng-content>`, or a mix of both with an optional prefix template — and three optional behaviors: toggle selection, removability, and RouterLink navigation.
 
 When `toggleable` is `true`, each activation flips the `selected` model. When `removable` is `true`, a remove button appears inside the chip. Both behaviors can be combined.
 
@@ -10,11 +10,11 @@ When `toggleable` is `true`, each activation flips the `selected` model. When `r
 - Represent filterable categories that the user can toggle on and off
 - Show selectable option badges in a compact collection (skill tags, interest categories)
 - Label entities with an optional avatar or icon prefix (contact chips)
+- Render compact, styled navigation items with `[routerLink]`
 
 **Do not use when:**
 
 - A standalone action button is needed — use `<button monaButton>` instead
-- Navigation to a URL is required — the chip does not support anchor semantics
 
 ## Import & Basic Usage
 
@@ -44,6 +44,18 @@ Add the imported symbols to your standalone component's `imports` array.
 <mona-chip label="Remove me" [removable]="true" (remove)="onRemove($event)"></mona-chip>
 ```
 
+**RouterLink navigation chip:**
+
+```html
+<mona-chip label="Overview" [routerLink]="['/overview']"></mona-chip>
+```
+
+**Custom padding & class override:**
+
+```html
+<mona-chip label="Custom Padding" class="px-6 py-2"></mona-chip>
+```
+
 **Projected content:**
 
 ```html
@@ -68,7 +80,7 @@ When `label` is non-empty it takes precedence over projected content — both ar
 
 The prefix template renders before the label or projected content. It receives no template context.
 
-> **Keyboard access:** Chips receive `tabindex="0"` automatically when `toggleable` or `removable` is `true`. For a chip that emits `contentClick` without either flag, set `[tabindex]="0"` explicitly so it can be reached by keyboard.
+> **Keyboard access:** Chips receive `tabindex="0"` automatically when `toggleable` is `true` or when functioning as a link (`[routerLink]`). Passive chips and removable-only chips have `tabindex="-1"` on the host body, leaving keyboard access directly on the child remove button.
 
 ## Appearance & Styling
 
@@ -114,9 +126,10 @@ Each `look` value applies a distinct selected appearance when `selected` is `tru
 
 ```html
 <mona-chip label="Tag" class="font-bold tracking-wide"></mona-chip>
+<mona-chip label="Custom Padding" class="px-6 py-2"></mona-chip>
 ```
 
-Classes passed via `class` are merged with variant classes using `tailwind-merge`.
+Classes passed via `class` are merged with variant classes using `tailwind-merge`. Consumer utilities override Mona UI defaults (e.g. `class="px-6 py-2"` replaces default size padding). Targeted logical side utilities (such as `ps-*` and `pe-*`) can be used for RTL-aware edge specialization.
 
 ## Accessibility Notes
 
@@ -129,7 +142,7 @@ The following attributes are managed automatically on the host element:
 | `aria-checked`  | `toggleable` is `true`                         | `"true"` or `"false"`                |
 | `aria-disabled` | `disabled` is `true`                           | `"true"`                             |
 | `role`          | `toggleable` is `true`                         | `"checkbox"`                         |
-| `tabindex`      | Always                                         | `0` when interactive, `-1` otherwise |
+| `tabindex`      | Always                                         | `0` when interactive (toggleable or link), `-1` otherwise |
 
 **Remove button:** When `removable` is `true`, the remove button inside the chip has an automatically computed accessible label: `"Remove, <label>"` using the `label` input, or `"Remove, item"` when no `label` is set. Override this with the `removeLabel` input.
 
@@ -163,16 +176,16 @@ Keyboard activation (Enter and Space) fires when the chip host has focus. When k
 | `rounded`     | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                           | `'full'`    | Border-radius preset applied to the chip.                                                                                                                                                          |
 | `selected`    | `boolean`                                                                                                      | `false`     | Two-way bindable selected state. When `toggleable` is `true`, each activation flips this value. Use `[(selected)]` for two-way binding.                                                            |
 | `size`        | `'small' \| 'medium' \| 'large'`                                                                               | `'medium'`  | Size preset controlling the chip's padding and remove button dimensions.                                                                                                                           |
-| `tabindex`    | `number \| string`                                                                                             | —           | Tab index override. When not set, computed automatically: `0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.                            |
+| `tabindex`    | `number \| string`                                                                                             | —           | Tab index override for the chip host element. When not set, computed automatically: `0` when `toggleable` is `true` or functioning as a link, `-1` otherwise. Overridden to `-1` when `disabled` is `true`. |
 | `toggleable`  | `boolean`                                                                                                      | `false`     | Enables toggle behavior. When `true`, each activation flips `selected` and the host receives `role="checkbox"` with `aria-checked`.                                                                |
 | `value`       | `unknown`                                                                                                      | —           | Arbitrary value associated with this chip. Useful for identifying which chip was selected or removed in a collection.                                                                              |
 
 #### Outputs
 
-| Name           | Type    | Description                                                                                                             |
-|----------------|---------|-------------------------------------------------------------------------------------------------------------------------|
-| `contentClick` | `void`  | Emitted when the chip body is clicked or activated via Enter or Space. Not emitted when the remove button is activated. |
-| `remove`       | `Event` | Emitted when the remove button is clicked. Only fires when `removable` is `true`. Emits the originating `Event`.        |
+| Name           | Type    | Description                                                                                                                                              |
+|----------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `contentClick` | `void`  | Emitted when a toggleable chip body is activated via click, Enter, or Space. Not emitted when the remove button is activated or for non-toggleable chips. |
+| `remove`       | `Event` | Emitted when the remove button is clicked. Only fires when `removable` is `true`. Emits the originating `Event`.                                         |
 
 ---
 
