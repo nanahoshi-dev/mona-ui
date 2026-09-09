@@ -8,8 +8,16 @@ import { ListViewHeaderTemplateDirective } from "../../directives/list-view-head
 import { ListViewItemTemplateDirective } from "../../directives/list-view-item-template.directive";
 import { ListViewNavigableDirective } from "../../directives/list-view-navigable.directive";
 import { ListViewNoDataTemplateDirective } from "../../directives/list-view-no-data-template.directive";
+import { ListViewPageableDirective } from "../../directives/list-view-pageable.directive";
 
 import { ListViewComponent } from "./list-view.component";
+
+interface ListViewComponentInternals {
+    itemTemplate: () => unknown;
+    listService: ListService<unknown>;
+    onPageChange: (event: { page: number; skip: number; take: number }) => void;
+    onPageSizeChange: (event: PageSizeChangeEvent) => void;
+}
 
 describe("ListViewComponent", () => {
     let component: ListViewComponent;
@@ -37,20 +45,42 @@ describe("ListViewComponent", () => {
     });
 
     it("should update the page and skip in the list service on page change", () => {
-        const listService = (component as any).listService as ListService<unknown>;
-        (component as any).onPageChange({ page: 3, skip: 20, take: 10 });
-        expect(listService.pageState()).toEqual(expect.objectContaining({ page: 3, skip: 20 }));
+        const internals = component as unknown as ListViewComponentInternals;
+        internals.onPageChange({ page: 3, skip: 20, take: 10 });
+        expect(internals.listService.pageState()).toEqual(expect.objectContaining({ page: 3, skip: 20 }));
     });
 
     it("should reset the page and skip and apply the new page size on page size change", () => {
-        const listService = (component as any).listService as ListService<unknown>;
-        listService.pageState.set({ page: 3, skip: 20, take: 10 });
-        (component as any).onPageSizeChange(new PageSizeChangeEvent(25, 10));
-        expect(listService.pageState()).toEqual({ page: 1, skip: 0, take: 25 });
+        const internals = component as unknown as ListViewComponentInternals;
+        internals.listService.pageState.set({ page: 3, skip: 20, take: 10 });
+        internals.onPageSizeChange(new PageSizeChangeEvent(25, 10));
+        expect(internals.listService.pageState()).toEqual({ page: 1, skip: 0, take: 25 });
     });
 
     it("should not display the item template's directive when no template is provided", () => {
-        expect((component as any).itemTemplate()).toBeUndefined();
+        const internals = component as unknown as ListViewComponentInternals;
+        expect(internals.itemTemplate()).toBeUndefined();
+    });
+});
+
+@Component({
+    imports: [ListViewComponent, ListViewPageableDirective],
+    template: `<mona-list-view [items]="items" monaListViewPageable></mona-list-view>`
+})
+class PagedListViewTestComponent {
+    protected readonly items = ["Item 1", "Item 2"];
+}
+
+describe("ListViewComponent with pager", () => {
+    it("uses logical border utilities on inner pager", () => {
+        const fixture = TestBed.createComponent(PagedListViewTestComponent);
+        fixture.detectChanges();
+
+        const pager = fixture.nativeElement.querySelector("mona-pager");
+        expect(pager).not.toBeNull();
+        expect(pager.classList.contains("border-x-0")).toBe(true);
+        expect(pager.classList.contains("border-l-0")).toBe(false);
+        expect(pager.classList.contains("border-r-0")).toBe(false);
     });
 });
 
@@ -174,7 +204,7 @@ describe("ListViewComponent scrollBottom", () => {
     it("should not accumulate duplicate scroll listeners when virtualScrollOptions changes", () => {
         const listViewDebugElement = fixture.debugElement.children[0];
         const listViewComponent: ListViewComponent = listViewDebugElement.componentInstance;
-        const listService = (listViewComponent as any).listService as ListService<unknown>;
+        const listService = (listViewComponent as unknown as ListViewComponentInternals).listService;
         const emitted: Event[] = [];
         listViewComponent.scrollBottom.subscribe(event => emitted.push(event));
 

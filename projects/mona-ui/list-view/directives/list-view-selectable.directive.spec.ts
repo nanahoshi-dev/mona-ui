@@ -23,9 +23,9 @@ class TestComponent {
         { name: "two", value: 2 }
     ];
     protected readonly selectedKeys = [2];
-    protected lastEmittedKeys: number[] | null = null;
+    public lastEmittedKeys: number[] | null = null;
 
-    protected onSelectedKeysChange(keys: number[]): void {
+    public onSelectedKeysChange(keys: number[]): void {
         this.lastEmittedKeys = keys;
     }
 }
@@ -62,6 +62,6 @@ describe("ListViewSelectableDirective", () => {
 
     it("should emit selectedKeysChange when the list service reports a selection change", () => {
         listService.selectedKeysChange$.next([1]);
-        expect((component as any).lastEmittedKeys).toEqual([1]);
+        expect(component.lastEmittedKeys).toEqual([1]);
     });
 });

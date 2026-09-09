@@ -11,7 +11,7 @@ import { ListViewPageableDirective } from "./list-view-pageable.directive";
     template: ` <mona-list-view [items]="data" textField="name" monaListViewPageable></mona-list-view> `
 })
 class TestComponent {
-    protected readonly data: any[] = [
+    protected readonly data = [
         {
             id: 1,
             name: "name"
@@ -52,7 +52,7 @@ describe("ListViewPageableDirective", () => {
     template: ` <mona-list-view [items]="data" textField="name" [monaListViewPageable]="{ pageSize: 25 }"></mona-list-view> `
 })
 class CustomPageSizeTestComponent {
-    protected readonly data: any[] = [
+    protected readonly data = [
         {
             id: 1,
             name: "name"
@@ -92,7 +92,7 @@ describe("ListViewPageableDirective with custom pageSize", () => {
         [(page)]="page"></mona-list-view> `
 })
 class PageBindingTestComponent {
-    protected readonly data: any[] = [
+    protected readonly data = [
         { id: 1, name: "a" },
         { id: 2, name: "b" },
         { id: 3, name: "c" }
