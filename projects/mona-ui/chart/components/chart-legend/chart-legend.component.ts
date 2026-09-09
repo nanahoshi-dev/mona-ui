@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, DestroyRef, effect, inject, input, OnInit } from "@angular/core";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
 import { CHART_DEFAULT_MESSAGES } from "../../i18n/chart.default-messages";
@@ -22,6 +22,7 @@ import { chartLegendBaseThemeVariants, chartLegendItemBaseThemeVariants } from "
 export class ChartLegendComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
     protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly containerClasses = computed(() =>
@@ -31,7 +32,7 @@ export class ChartLegendComponent implements OnInit {
         const scale = this.legendScale();
         if (!scale || !scale.stops || scale.stops.length === 0) return "";
         const isVertical = this.position() === "left" || this.position() === "right";
-        const dir = isVertical ? "to top" : "to right";
+        const dir = isVertical ? "to top" : this.#direction() === "rtl" ? "to left" : "to right";
         const stopStrs = scale.stops.map(s => `${s.color} ${Math.round(s.offset * 100)}%`).join(", ");
         return `linear-gradient(${dir}, ${stopStrs})`;
     });

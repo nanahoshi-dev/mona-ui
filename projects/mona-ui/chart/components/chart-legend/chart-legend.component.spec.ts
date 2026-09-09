@@ -11,16 +11,19 @@ import { ChartLegendComponent } from "./chart-legend.component";
 @Component({
     imports: [ChartLegendComponent, ChartLegendItemTemplateDirective],
     template: `
-        <mona-chart-legend [interactive]="interactive()" [position]="position()">
-            @if (useCustomTemplate()) {
-                <ng-template monaChartLegendItemTemplate let-item>
-                    <span class="custom-item">{{ item.name }} ({{ item.seriesType }})</span>
-                </ng-template>
-            }
-        </mona-chart-legend>
+        <div [attr.dir]="dir()">
+            <mona-chart-legend [interactive]="interactive()" [position]="position()">
+                @if (useCustomTemplate()) {
+                    <ng-template monaChartLegendItemTemplate let-item>
+                        <span class="custom-item">{{ item.name }} ({{ item.seriesType }})</span>
+                    </ng-template>
+                }
+            </mona-chart-legend>
+        </div>
     `
 })
 class TestHostComponent {
+    public readonly dir = signal<string | null>(null);
     public readonly interactive = signal(true);
     public readonly position = signal<"bottom" | "left" | "right" | "top">("bottom");
     public readonly useCustomTemplate = signal(false);
@@ -153,5 +156,96 @@ describe("MonaChartLegendComponent", () => {
         expect(textContent).toContain("Intensity");
         expect(textContent).toContain("0");
         expect(textContent).toContain("100");
+
+        const gradientBar = colorFixture.debugElement.query(By.css("[aria-hidden='true']"));
+        expect(gradientBar.nativeElement.style.background).toContain("to right");
+    });
+
+    it("should render horizontal color scale gradient with 'to left' in RTL", async () => {
+        const mockScale = signal({
+            formattedMax: "100",
+            formattedMin: "0",
+            kind: "color" as const,
+            mode: "sequential" as const,
+            stops: [
+                { color: "#eff6ff", offset: 0, value: 0 },
+                { color: "#3b82f6", offset: 1, value: 100 }
+            ],
+            ticks: [
+                { formattedValue: "0", offset: 0, value: 0 },
+                { formattedValue: "100", offset: 1, value: 100 }
+            ],
+            title: "Intensity"
+        });
+
+        const colorChartContext: Partial<ChartRegistrationContext> = {
+            invalidate: () => {},
+            legendItems: mockLegendItems,
+            legendScale: mockScale,
+            registerLegend: () => () => {},
+            toggleLegendItem: () => {},
+            toggleSeriesVisibility: () => {}
+        };
+
+        TestBed.resetTestingModule();
+        await TestBed.configureTestingModule({
+            imports: [TestHostComponent],
+            providers: [{ provide: CHART_CONTEXT, useValue: colorChartContext }]
+        }).compileComponents();
+
+        const rtlFixture = TestBed.createComponent(TestHostComponent);
+        rtlFixture.componentInstance.dir.set("rtl");
+        rtlFixture.detectChanges();
+
+        const gradientBar = rtlFixture.debugElement.query(By.css("[aria-hidden='true']"));
+        expect(gradientBar.nativeElement.style.background).toContain("to left");
+    });
+
+    it("should maintain 'to top' vertical gradient in both LTR and RTL", async () => {
+        const mockScale = signal({
+            formattedMax: "100",
+            formattedMin: "0",
+            kind: "color" as const,
+            mode: "sequential" as const,
+            stops: [
+                { color: "#eff6ff", offset: 0, value: 0 },
+                { color: "#3b82f6", offset: 1, value: 100 }
+            ],
+            ticks: [],
+            title: "Vertical Scale"
+        });
+
+        const colorChartContext: Partial<ChartRegistrationContext> = {
+            invalidate: () => {},
+            legendItems: mockLegendItems,
+            legendScale: mockScale,
+            registerLegend: () => () => {},
+            toggleLegendItem: () => {},
+            toggleSeriesVisibility: () => {}
+        };
+
+        TestBed.resetTestingModule();
+        await TestBed.configureTestingModule({
+            imports: [TestHostComponent],
+            providers: [{ provide: CHART_CONTEXT, useValue: colorChartContext }]
+        }).compileComponents();
+
+        // LTR vertical
+        const fixtureLtr = TestBed.createComponent(TestHostComponent);
+        fixtureLtr.componentInstance.position.set("right");
+        fixtureLtr.componentInstance.dir.set("ltr");
+        fixtureLtr.detectChanges();
+
+        const gradientBarLtr = fixtureLtr.debugElement.query(By.css("[aria-hidden='true']"));
+        expect(gradientBarLtr.nativeElement.style.background).toContain("to top");
+
+        // RTL vertical
+        const fixtureRtl = TestBed.createComponent(TestHostComponent);
+        fixtureRtl.componentInstance.position.set("right");
+        fixtureRtl.componentInstance.dir.set("rtl");
+        fixtureRtl.detectChanges();
+
+        const gradientBarRtl = fixtureRtl.debugElement.query(By.css("[aria-hidden='true']"));
+        expect(gradientBarRtl.nativeElement.style.background).toContain("to top");
     });
 });
