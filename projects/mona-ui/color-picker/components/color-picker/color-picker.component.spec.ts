@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
 import axe from "axe-core";
 import { afterEach, describe, expect, it } from "vitest";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
 import { ColorPickerComponent } from "./color-picker.component";
@@ -12,6 +13,7 @@ const TEST_PALETTE = ["#111111", "#222222", "#333333"] as const;
 @Component({
     template: `
         <mona-color-picker
+            [aria-label]="ariaLabel()"
             [(value)]="value"
             [disabled]="disabled()"
             [palette]="palette"
@@ -23,6 +25,7 @@ const TEST_PALETTE = ["#111111", "#222222", "#333333"] as const;
 })
 class ValueBindingColorPickerHostComponent {
     protected readonly palette = TEST_PALETTE;
+    public readonly ariaLabel = signal("");
     public readonly disabled = signal(false);
     public readonly readonlyState = signal(false);
     public readonly value = signal<string | null>("#222222");
@@ -36,12 +39,12 @@ class ValueBindingColorPickerHostComponent {
 class SignalFormColorPickerHostComponent {
     readonly #formModel = signal<ColorPickerFormModel>({ color: "#111111" });
     protected readonly palette = TEST_PALETTE;
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldReadonly(schema.color, { when: () => this.readonlyState() });
         required(schema.color, { when: () => this.requiredState() });
     });
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 @Component({
@@ -426,6 +429,77 @@ describe("ColorPickerComponent gradient state propagation", () => {
 
         const gradient = document.body.querySelector("mona-color-gradient") as HTMLElement;
         expect(gradient.getAttribute("data-disabled")).toBe("true");
+    });
+});
+
+describe("ColorPickerComponent i18n", () => {
+    afterEach(() => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use(MONA_DEFAULT_LOCALE);
+        document.querySelectorAll(".cdk-overlay-container").forEach(element => element.remove());
+    });
+
+    it("renders default aria-label on combobox", async () => {
+        const fixture = await createValueBindingFixture();
+        expect(getPicker(fixture).getAttribute("aria-label")).toBe("Color picker");
+    });
+
+    it("supports custom aria-label input override", async () => {
+        const fixture = await createValueBindingFixture();
+        fixture.componentInstance.ariaLabel.set("Custom color picker");
+        await waitForStable(fixture);
+
+        expect(getPicker(fixture).getAttribute("aria-label")).toBe("Custom color picker");
+    });
+
+    it("renders default aria-label on palette dialog and clear button", async () => {
+        await TestBed.configureTestingModule({
+            imports: [ClearButtonColorPickerHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(ClearButtonColorPickerHostComponent);
+        await waitForStable(fixture);
+        await openPicker(fixture);
+
+        const paletteDialog = document.body.querySelector("[data-palette-container]");
+        expect(paletteDialog?.getAttribute("aria-label")).toBe("Color palette picker");
+
+        const clearButton = document.body.querySelector('[role="dialog"] button');
+        expect(clearButton?.getAttribute("aria-label")).toBe("Clear color");
+    });
+
+    it("renders default aria-label on gradient dialog", async () => {
+        const fixture = await createValueBindingFixture();
+        fixture.componentInstance.view.set("gradient");
+        await waitForStable(fixture);
+        await openPicker(fixture);
+
+        const gradientDialog = document.body.querySelector('[role="dialog"][aria-label="Color gradient picker"]');
+        expect(gradientDialog).not.toBeNull();
+    });
+
+    it("updates labels dynamically when MonaI18nService locale changes", async () => {
+        const fixture = await createValueBindingFixture();
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            direction: "ltr",
+            id: "es-ES",
+            messages: {
+                colorPicker: {
+                    clearColor: "Borrar color",
+                    colorGradientPicker: "Selector de gradiente de color",
+                    colorPalettePicker: "Selector de paleta de colores",
+                    colorPicker: "Selector de color"
+                }
+            }
+        });
+        await waitForStable(fixture);
+
+        expect(getPicker(fixture).getAttribute("aria-label")).toBe("Selector de color");
+
+        await openPicker(fixture);
+        const paletteDialog = document.body.querySelector("[data-palette-container]");
+        expect(paletteDialog?.getAttribute("aria-label")).toBe("Selector de paleta de colores");
     });
 });
 

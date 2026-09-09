@@ -7722,6 +7722,13 @@
     "selector": "\"mona-color-picker\"",
     "inputs": [
       {
+        "description": "Accessible label for the color picker combobox.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Whether to close the color picker when a color is selected.\r\nOnly applies when the view is set to \"palette\".",
         "kind": "input",
         "name": "closeOnSelect",
@@ -7771,6 +7778,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Sets whether the color picker is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Border-radius preset applied to the color picker.",
         "kind": "input",
         "name": "rounded",
@@ -7792,20 +7806,6 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "The view mode of the color picker.\r\nThis can be either \"palette\" or \"gradient\".",
-        "kind": "input",
-        "name": "view",
-        "type": "ColorPickerView",
-        "defaultValue": "\"gradient\""
-      },
-      {
-        "description": "Sets whether the color picker is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
-        "kind": "input",
-        "name": "required",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
         "description": "Emitted when the color picker is interacted with on blur or color selection.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
@@ -7824,6 +7824,13 @@
         "name": "value",
         "type": "string | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "The view mode of the color picker.\r\nThis can be either \"palette\" or \"gradient\".",
+        "kind": "input",
+        "name": "view",
+        "type": "ColorPickerView",
+        "defaultValue": "\"gradient\""
       }
     ]
   },

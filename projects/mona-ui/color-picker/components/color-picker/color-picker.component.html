@@ -18,12 +18,12 @@
             [class]="palettePopupClasses"
             tabindex="0"
             role="dialog"
-            aria-label="Color palette picker"
+            [attr.aria-label]="messages().colorPalettePicker"
             data-palette-container
             (keydown)="onPaletteContainerKeyDown($event)">
             @if (showClearButton()) {
                 <div class="flex items-center justify-end p-1">
-                    <button monaButton look="ghost" size="small" (click)="onClearClick()">
+                    <button monaButton look="ghost" size="small" [attr.aria-label]="messages().clearColor" (click)="onClearClick()">
                         <i class="ri-blur-off-line"></i>
                     </button>
                 </div>
@@ -42,7 +42,7 @@
             [class]="gradientPopupClasses"
             tabindex="0"
             role="dialog"
-            aria-label="Color gradient picker">
+            [attr.aria-label]="messages().colorGradientPicker">
             <mona-color-gradient
                 [opacity]="opacity()"
                 [rounded]="rounded()"
