@@ -7633,6 +7633,13 @@
     "selector": "\"mona-color-palette\"",
     "inputs": [
       {
+        "description": "Accessible label for the color palette grid.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "The number of columns in the color palette grid.\nOnly applicable when using a custom palette.",
         "kind": "input",
         "name": "columns",
@@ -7668,18 +7675,18 @@
         "defaultValue": "false"
       },
       {
-        "description": "Border-radius preset applied to the color palette items.",
-        "kind": "input",
-        "name": "rounded",
-        "type": "ColorPaletteVariantProps[\"rounded\"]",
-        "defaultValue": "\"none\""
-      },
-      {
         "description": "Sets whether the color palette is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Border-radius preset applied to the color palette items.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "ColorPaletteVariantProps[\"rounded\"]",
+        "defaultValue": "\"none\""
       },
       {
         "description": "The size of each tile in the color palette grid.",

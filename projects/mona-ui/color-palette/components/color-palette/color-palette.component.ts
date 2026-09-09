@@ -1,6 +1,7 @@
 import { Component, computed, ElementRef, inject, input, model, output, signal, Signal } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
 import { PaletteType } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import type { ColorScheme } from "@nanahoshi/mona-ui/internal";
 import { count } from "@mirei/ts-collections";
 import {
@@ -9,6 +10,7 @@ import {
     ColorPaletteVariantInput,
     ColorPaletteVariantProps
 } from "../../styles/color-palette.styles";
+import { COLOR_PALETTE_DEFAULT_MESSAGES } from "../../i18n/color-palette.default-messages";
 import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../utils/colorSchemes";
 
 @Component({
@@ -23,7 +25,7 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
         "[attr.data-readonly]": "readonly()",
         "[attr.data-required]": "required() || null",
         "[attr.role]": "'grid'",
-        "[attr.aria-label]": "'Color palette'",
+        "[attr.aria-label]": "ariaLabel() || messages().colorPalette",
         "[attr.aria-disabled]": "disabled()",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-readonly]": "readonly()",
@@ -32,8 +34,20 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
 })
 export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValueControl<string | null> {
     readonly #elementRef = inject(ElementRef<HTMLElement>);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly activeColorIndex = computed(() =>
+        this.focusedColorIndex() === -1 ? 0 : this.focusedColorIndex()
+    );
     protected readonly baseClasses = computed(() => {
         return colorPaletteBaseThemeVariants();
+    });
+    protected readonly colorRows = computed(() => {
+        const { colors, columns } = this.colorScheme();
+        const rows: string[][] = [];
+        for (let i = 0; i < colors.length; i += columns) {
+            rows.push(colors.slice(i, i + columns));
+        }
+        return rows;
     });
     protected readonly colorScheme: Signal<ColorScheme> = computed(() => {
         const palette = this.palette();
@@ -53,25 +67,21 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
             name: "custom"
         };
     });
+    protected readonly focusedColorIndex = signal<number>(-1);
+    protected readonly invalidState = computed(
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
+    );
+    protected readonly messages = this.#i18n.componentMessages("colorPalette", COLOR_PALETTE_DEFAULT_MESSAGES);
     protected readonly paletteItemClasses = computed(() => {
         const rounded = this.rounded();
         return colorPaletteItemThemeVariants({ rounded });
     });
-    protected readonly colorRows = computed(() => {
-        const { colors, columns } = this.colorScheme();
-        const rows: string[][] = [];
-        for (let i = 0; i < colors.length; i += columns) {
-            rows.push(colors.slice(i, i + columns));
-        }
-        return rows;
-    });
-    protected readonly focusedColorIndex = signal<number>(-1);
-    protected readonly activeColorIndex = computed(() =>
-        this.focusedColorIndex() === -1 ? 0 : this.focusedColorIndex()
-    );
-    protected readonly invalidState = computed(
-        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
-    );
+
+    /**
+     * @description Accessible label for the color palette grid.
+     * @default ""
+     */
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
      * @description The number of columns in the color palette grid.
@@ -108,17 +118,17 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
     public readonly readonly = input(false);
 
     /**
-     * @description Border-radius preset applied to the color palette items.
-     * @default "none"
-     */
-    public readonly rounded = input<ColorPaletteVariantProps["rounded"]>("none");
-
-    /**
      * @description Sets whether the color palette is required. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
     public readonly required = input(false);
+
+    /**
+     * @description Border-radius preset applied to the color palette items.
+     * @default "none"
+     */
+    public readonly rounded = input<ColorPaletteVariantProps["rounded"]>("none");
 
     /**
      * @description The size of each tile in the color palette grid.
@@ -180,15 +190,18 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
 
         const colors = this.colorScheme().colors;
         const columns = this.colorScheme().columns;
+        const isRtl = this.#i18n.direction() === "rtl";
+        const prevKey = isRtl ? "ArrowRight" : "ArrowLeft";
+        const nextKey = isRtl ? "ArrowLeft" : "ArrowRight";
         let newIndex = colorIndex;
         let handled = false;
 
         switch (event.key) {
-            case "ArrowLeft":
+            case prevKey:
                 newIndex = Math.max(0, colorIndex - 1);
                 handled = true;
                 break;
-            case "ArrowRight":
+            case nextKey:
                 newIndex = Math.min(colors.length - 1, colorIndex + 1);
                 handled = true;
                 break;

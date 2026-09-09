@@ -1,6 +1,9 @@
 import type { MonaAutoCompleteMessages } from "../message-types/auto-complete.messages";
 import type { MonaCardMessages } from "../message-types/card.messages";
 import type { MonaChipMessages } from "../message-types/chip.messages";
+import type { MonaColorGradientMessages } from "../message-types/color-gradient.messages";
+import type { MonaColorPaletteMessages } from "../message-types/color-palette.messages";
+import type { MonaColorPickerMessages } from "../message-types/color-picker.messages";
 import type { MonaComboBoxMessages } from "../message-types/combo-box.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
@@ -19,6 +22,9 @@ export interface MonaLocaleMessages extends Record<string, object> {
     autoComplete: MonaAutoCompleteMessages;
     card: MonaCardMessages;
     chip: MonaChipMessages;
+    colorGradient: MonaColorGradientMessages;
+    colorPalette: MonaColorPaletteMessages;
+    colorPicker: MonaColorPickerMessages;
     comboBox: MonaComboBoxMessages;
     dropdownList: MonaDropdownListMessages;
     dropdowns: MonaDropdownsMessages;
