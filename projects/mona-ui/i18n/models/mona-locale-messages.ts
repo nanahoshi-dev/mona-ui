@@ -17,6 +17,7 @@ import type { MonaOtpInputMessages } from "../message-types/otp-input.messages";
 import type { MonaPagerMessages } from "../message-types/pager.messages";
 import type { MonaRatingMessages } from "../message-types/rating.messages";
 import type { MonaScrollViewMessages } from "../message-types/scroll-view.messages";
+import type { MonaSheetMessages } from "../message-types/sheet.messages";
 import type { MonaSliderMessages } from "../message-types/slider.messages";
 import type { MonaSpinnerMessages } from "../message-types/spinner.messages";
 import type { MonaSplitButtonMessages } from "../message-types/split-button.messages";
@@ -46,6 +47,7 @@ export interface MonaLocaleMessages extends Record<string, object> {
     pager: MonaPagerMessages;
     rating: MonaRatingMessages;
     scrollView: MonaScrollViewMessages;
+    sheet: MonaSheetMessages;
     slider: MonaSliderMessages;
     spinner: MonaSpinnerMessages;
     splitButton: MonaSplitButtonMessages;

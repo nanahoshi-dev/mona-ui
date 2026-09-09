@@ -25,7 +25,7 @@
                         type="button"
                         look="ghost"
                         [iconOnly]="true"
-                        aria-label="Close sheet"
+                        [attr.aria-label]="resolvedMessages().closeSheet"
                         size="small"
                         [class]="closeButtonClass()"
                         (click)="closeSheet()">

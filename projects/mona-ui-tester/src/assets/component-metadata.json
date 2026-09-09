@@ -12257,6 +12257,12 @@
         "type": "number | string"
       },
       {
+        "description": "Internationalization message overrides for accessible labels.",
+        "kind": "input",
+        "name": "messages",
+        "type": "Partial<SheetMessages>"
+      },
+      {
         "description": "Edge of the viewport from which the sheet opens.",
         "kind": "input",
         "name": "side",

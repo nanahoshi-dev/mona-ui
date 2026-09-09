@@ -27,6 +27,7 @@ export * from "./message-types/otp-input.messages";
 export * from "./message-types/pager.messages";
 export * from "./message-types/rating.messages";
 export * from "./message-types/scroll-view.messages";
+export * from "./message-types/sheet.messages";
 export * from "./message-types/slider.messages";
 export * from "./message-types/spinner.messages";
 export * from "./message-types/split-button.messages";

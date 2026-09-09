@@ -9,8 +9,9 @@ import { cva, type VariantProps } from "class-variance-authority";
 export const sheetBaseVariants = cva(
     `
         relative flex h-full w-full min-w-0 min-h-0 max-h-[inherit] flex-col overflow-clip
-        pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)]
-        pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]
+        pt-[env(safe-area-inset-top)] pe-[env(safe-area-inset-right)]
+        pb-[env(safe-area-inset-bottom)] ps-[env(safe-area-inset-left)]
+        rtl:pe-[env(safe-area-inset-left)] rtl:ps-[env(safe-area-inset-right)]
         ${themeOverlaySurfaceClasses} text-foreground
         shadow-(--shadow-overlay) outline-none
     `,
@@ -18,9 +19,9 @@ export const sheetBaseVariants = cva(
         variants: {
             side: {
                 top: "border-b border-border",
-                right: "border-l border-border",
+                right: "border-s border-border rtl:border-e rtl:border-s-0",
                 bottom: "border-t border-border",
-                left: "border-r border-border"
+                left: "border-e border-border rtl:border-s rtl:border-e-0"
             }
         },
         defaultVariants: {
