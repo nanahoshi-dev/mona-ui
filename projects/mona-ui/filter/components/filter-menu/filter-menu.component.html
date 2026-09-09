@@ -1,7 +1,7 @@
 <div [class]="filterMenuItemClass()">
     @if (type() === "string") {
         <mona-dropdown-list
-            [data]="stringFilterMenuDataItems | operatorFilter: operators()"
+            [data]="stringFilterMenuDataItems() | operatorFilter: operators()"
             textField="text"
             valueField="value"
             [size]="size()"
@@ -17,7 +17,7 @@
 
     @if (type() === "number") {
         <mona-dropdown-list
-            [data]="numericFilterMenuDataItems | operatorFilter: operators()"
+            [data]="numericFilterMenuDataItems() | operatorFilter: operators()"
             textField="text"
             valueField="value"
             [size]="size()"
@@ -34,7 +34,7 @@
 
     @if (type() === "date") {
         <mona-dropdown-list
-            [data]="dateFilterMenuDataItems | operatorFilter: operators()"
+            [data]="dateFilterMenuDataItems() | operatorFilter: operators()"
             textField="text"
             valueField="value"
             [size]="size()"
@@ -55,7 +55,7 @@
 
     @if (type() === "boolean") {
         <mona-dropdown-list
-            [data]="booleanFilterMenuDataItems | operatorFilter: operators()"
+            [data]="booleanFilterMenuDataItems() | operatorFilter: operators()"
             textField="text"
             valueField="value"
             [ngModel]="selectedFilterMenuDataItemList()[0]"
@@ -67,7 +67,7 @@
 @if (firstFilterValid()) {
     <div [class]="filterMenuItemClass()">
         <mona-button-group selection="single" [size]="size()" [rounded]="rounded()" [disabled]="!firstFilterValid()">
-            @for (item of connectorDataItems; track item) {
+            @for (item of connectorDataItems(); track item.value) {
                 <button
                     monaButton
                     [selected]="item.value === selectedConnectorItem()?.value"
@@ -82,7 +82,7 @@
     <div [class]="filterMenuItemClass()">
         @if (type() === "string") {
             <mona-dropdown-list
-                [data]="stringFilterMenuDataItems | operatorFilter: operators()"
+                [data]="stringFilterMenuDataItems() | operatorFilter: operators()"
                 textField="text"
                 valueField="value"
                 [size]="size()"
@@ -97,7 +97,7 @@
 
         @if (type() === "number") {
             <mona-dropdown-list
-                [data]="numericFilterMenuDataItems | operatorFilter: operators()"
+                [data]="numericFilterMenuDataItems() | operatorFilter: operators()"
                 textField="text"
                 valueField="value"
                 [size]="size()"
@@ -115,7 +115,7 @@
 
         @if (type() === "date") {
             <mona-dropdown-list
-                [data]="dateFilterMenuDataItems | operatorFilter: operators()"
+                [data]="dateFilterMenuDataItems() | operatorFilter: operators()"
                 textField="text"
                 valueField="value"
                 [size]="size()"
@@ -136,7 +136,7 @@
 
         @if (type() === "boolean") {
             <mona-dropdown-list
-                [data]="booleanFilterMenuDataItems | operatorFilter: operators()"
+                [data]="booleanFilterMenuDataItems() | operatorFilter: operators()"
                 textField="text"
                 valueField="value"
                 [size]="size()"
@@ -154,7 +154,7 @@
         [size]="size()"
         [rounded]="rounded()"
         [disabled]="applyDisabled()">
-        Apply
+        {{ messages().apply }}
     </button>
-    <button monaButton (click)="onFilterClear()" [look]="'default'" [size]="size()" [rounded]="rounded()">Clear</button>
+    <button monaButton (click)="onFilterClear()" [look]="'default'" [size]="size()" [rounded]="rounded()">{{ messages().clear }}</button>
 </div>
