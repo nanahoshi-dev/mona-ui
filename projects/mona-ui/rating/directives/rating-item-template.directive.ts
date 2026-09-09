@@ -13,8 +13,8 @@ export class RatingItemTemplateDirective {
 
     public static ngTemplateContextGuard(
         _directive: RatingItemTemplateDirective,
-        context: unknown
-    ): context is RatingItemTemplateContext {
+        _context: unknown
+    ): _context is RatingItemTemplateContext {
         return true;
     }
 }
