@@ -99,14 +99,16 @@ describe("TreeComponent", () => {
             expect(treeService.isExpanded(node1)).toBe(false);
         });
 
-        it("inverts expand/collapse keys in RTL (ArrowLeft expands, ArrowRight collapses)", () => {
+        it("inverts expand/collapse keys in RTL (ArrowLeft expands, ArrowRight collapses)", async () => {
             const i18n = TestBed.inject(MonaI18nService);
             i18n.use({
                 direction: "rtl",
                 id: "ar",
                 messages: {}
             });
+            fixture.nativeElement.setAttribute("dir", "rtl");
             fixture.detectChanges();
+            await fixture.whenStable();
 
             setupTree();
             dispatchKeydown("Home");

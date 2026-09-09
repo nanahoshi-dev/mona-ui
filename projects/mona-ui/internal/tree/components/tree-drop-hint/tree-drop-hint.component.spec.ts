@@ -24,7 +24,7 @@ describe("TreeDropHintComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("computes left style for LTR and RTL directions", () => {
+    it("computes left style for LTR and RTL directions", async () => {
         const i18n = TestBed.inject(MonaI18nService);
         const treeService = TestBed.inject(TreeService);
         treeService.setDataStructure("hierarchical");
@@ -65,7 +65,9 @@ describe("TreeDropHintComponent", () => {
             id: "ar",
             messages: {}
         });
+        fixture.nativeElement.setAttribute("dir", "rtl");
         fixture.detectChanges();
+        await fixture.whenStable();
         expect(internals.dropHintStyles().left).toBe("110px");
     });
 });
