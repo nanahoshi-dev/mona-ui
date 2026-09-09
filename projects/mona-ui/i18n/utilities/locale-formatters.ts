@@ -119,7 +119,20 @@ export function normalizeLocalizedInput(text: string, localeId: string): string 
     return cleaned;
 }
 
-export function parseLocalizedNumber(text: string | null | undefined, localeId: string): number | null {
+export interface ParseLocalizedNumberOptions {
+    /**
+     * When true, an alternate decimal separator (such as '.' in comma-decimal locales)
+     * is treated as a decimal separator in an ungrouped edit context rather than being
+     * interpreted as a thousands grouping separator.
+     */
+    alternateDecimal?: boolean;
+}
+
+export function parseLocalizedNumber(
+    text: string | null | undefined,
+    localeId: string,
+    options?: ParseLocalizedNumberOptions
+): number | null {
     if (text == null) {
         return null;
     }
@@ -156,6 +169,8 @@ export function parseLocalizedNumber(text: string | null | undefined, localeId: 
             if (dotParts.length > 2) {
                 // Multiple dots => group separators (e.g. 1.000.000)
                 cleaned = cleaned.replace(/\./g, "");
+            } else if (options?.alternateDecimal) {
+                // In edit mode with alternate decimal enabled, a single dot is the decimal separator (e.g. 1.234 -> 1.234)
             } else if (dotParts[1].length !== 3) {
                 // Single dot not followed by exactly 3 digits => numpad dot (e.g. 12.5)
             } else {

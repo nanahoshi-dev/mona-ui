@@ -8,7 +8,7 @@
     [disabled]="disabled()"
     [required]="required()"
     [type]="'text'"
-    inputmode="numeric"
+    [attr.inputmode]="decimals() > 0 ? 'decimal' : 'numeric'"
     [readonly]="readonly()"
     [tabIndex]="tabindex()"
     [ngModel]="formattedValue()"

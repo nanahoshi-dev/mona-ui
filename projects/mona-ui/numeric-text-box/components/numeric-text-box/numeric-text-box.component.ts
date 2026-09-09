@@ -452,7 +452,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             return null;
         }
 
-        const parsed = parseLocalizedNumber(normalizedValue, this.#i18n.localeId());
+        const parsed = parseLocalizedNumber(normalizedValue, this.#i18n.localeId(), { alternateDecimal: true });
         if (parsed === null) {
             return this.value();
         }
@@ -464,7 +464,9 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         this.beforeInput$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe((event: InputEvent): void => {
             const inputElement = event.target as HTMLInputElement;
 
-            const insertedText = event.data;
+            const insertedText =
+                event.data ??
+                (event as unknown as { dataTransfer?: DataTransfer }).dataTransfer?.getData("text/plain");
             if (insertedText == null) {
                 return;
             }
@@ -477,6 +479,57 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             const proposedValue = value.slice(0, selectionStart) + insertedText + value.slice(selectionEnd);
             const localeId = this.#i18n.localeId();
             const symbols = getNumberSymbols(localeId);
+            const decimals = this.decimals();
+
+            const isPaste = event.inputType === "insertFromPaste" || insertedText.length > 1;
+            if (isPaste) {
+                const parsed = parseLocalizedNumber(proposedValue, localeId, { alternateDecimal: true });
+                if (parsed === null || !Number.isFinite(parsed)) {
+                    event.preventDefault();
+                    return;
+                }
+                if (decimals === 0) {
+                    const hasDecimal =
+                        proposedValue.includes(symbols.decimal) ||
+                        proposedValue.includes(".") ||
+                        proposedValue.includes("\u066B") ||
+                        !Number.isInteger(parsed);
+                    if (hasDecimal) {
+                        event.preventDefault();
+                        return;
+                    }
+                } else {
+                    let decimalIndex = -1;
+                    if (symbols.decimal === ",") {
+                        if (proposedValue.includes(",")) {
+                            decimalIndex = proposedValue.lastIndexOf(",");
+                        } else if (proposedValue.includes(".")) {
+                            const dotParts = proposedValue.split(".");
+                            if (dotParts.length === 2) {
+                                decimalIndex = proposedValue.indexOf(".");
+                            }
+                        }
+                    } else {
+                        if (proposedValue.includes(symbols.decimal)) {
+                            decimalIndex = proposedValue.lastIndexOf(symbols.decimal);
+                        } else if (proposedValue.includes(".")) {
+                            decimalIndex = proposedValue.lastIndexOf(".");
+                        } else if (proposedValue.includes("\u066B")) {
+                            decimalIndex = proposedValue.lastIndexOf("\u066B");
+                        }
+                    }
+                    if (decimalIndex !== -1) {
+                        const fracStr = proposedValue
+                            .slice(decimalIndex + 1)
+                            .replace(/[^\d\u0660-\u0669\u06F0-\u06F9]/g, "");
+                        if (fracStr.length > decimals) {
+                            event.preventDefault();
+                            return;
+                        }
+                    }
+                }
+                return;
+            }
 
             // Normalize minus, bidi controls, and digits
             const normalized = normalizeLocalizedInput(proposedValue, localeId);
@@ -499,7 +552,6 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                 return;
             }
 
-            const decimals = this.decimals();
             if (decimals === 0 && sepCount > 0) {
                 event.preventDefault();
                 return;

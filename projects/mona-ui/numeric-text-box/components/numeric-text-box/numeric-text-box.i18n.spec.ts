@@ -255,4 +255,186 @@ describe("NumericTextBoxComponent i18n integration", () => {
         await waitForStable(fixture);
         expect(input.value).toBe("12.50");
     });
+
+    it("renders inputmode='decimal' when decimals > 0 and inputmode='numeric' when decimals === 0", async () => {
+        await TestBed.configureTestingModule({
+            imports: [NumericTextBoxI18nTestHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+        const host = fixture.componentInstance;
+        await waitForStable(fixture);
+
+        const input = getInput(fixture);
+        expect(input.getAttribute("inputmode")).toBe("decimal");
+
+        host.decimals.set(0);
+        await waitForStable(fixture);
+        expect(input.getAttribute("inputmode")).toBe("numeric");
+    });
+
+    it("supports sequential typing with alternate dot in comma-decimal locales without corrupting semantic value", async () => {
+        await TestBed.configureTestingModule({
+            imports: [NumericTextBoxI18nTestHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+        const host = fixture.componentInstance;
+        const i18n = TestBed.inject(MonaI18nService);
+        host.decimals.set(3);
+        i18n.use(DE_LOCALE);
+        await waitForStable(fixture);
+
+        const input = getInput(fixture);
+        focusInput(input);
+        await waitForStable(fixture);
+
+        async function typeChar(char: string): Promise<void> {
+            const start = input.selectionStart ?? input.value.length;
+            const end = input.selectionEnd ?? input.value.length;
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: char,
+                inputType: "insertText"
+            });
+            const allowed = input.dispatchEvent(event);
+            if (allowed && !event.defaultPrevented) {
+                input.value = input.value.slice(0, start) + char + input.value.slice(end);
+                input.selectionStart = input.selectionEnd = start + char.length;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                await waitForStable(fixture);
+            }
+        }
+
+        // Type 1 . 2 3 4 in de-DE
+        await typeChar("1");
+        expect(host.value()).toBe(1);
+        await typeChar(".");
+        expect(host.value()).toBe(1);
+        await typeChar("2");
+        expect(host.value()).toBe(1.2);
+        await typeChar("3");
+        expect(host.value()).toBe(1.23);
+        await typeChar("4");
+        // Must be 1.234 and NEVER silently become 1234
+        expect(host.value()).toBe(1.234);
+        expect(host.value()).not.toBe(1234);
+
+        // Test tr-TR with 0 . 1 2 3
+        i18n.use(TR_LOCALE);
+        host.value.set(null);
+        await waitForStable(fixture);
+        focusInput(input);
+        await waitForStable(fixture);
+
+        await typeChar("0");
+        expect(host.value()).toBe(0);
+        await typeChar(".");
+        expect(host.value()).toBe(0);
+        await typeChar("1");
+        expect(host.value()).toBe(0.1);
+        await typeChar("2");
+        expect(host.value()).toBe(0.12);
+        await typeChar("3");
+        // Must be 0.123 and NEVER 123
+        expect(host.value()).toBe(0.123);
+        expect(host.value()).not.toBe(123);
+
+        // Test native comma in de-DE
+        i18n.use(DE_LOCALE);
+        host.value.set(null);
+        await waitForStable(fixture);
+        focusInput(input);
+        await waitForStable(fixture);
+
+        await typeChar("1");
+        await typeChar(",");
+        await typeChar("2");
+        await typeChar("3");
+        await typeChar("4");
+        expect(host.value()).toBe(1.234);
+    });
+
+    it("supports pasting localized grouped numbers across locales and validates decimals", async () => {
+        await TestBed.configureTestingModule({
+            imports: [NumericTextBoxI18nTestHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+        const host = fixture.componentInstance;
+        const i18n = TestBed.inject(MonaI18nService);
+        host.decimals.set(2);
+        await waitForStable(fixture);
+
+        const input = getInput(fixture);
+        focusInput(input);
+        await waitForStable(fixture);
+
+        function paste(text: string): boolean {
+            input.value = "";
+            input.selectionStart = input.selectionEnd = 0;
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: text,
+                inputType: "insertFromPaste"
+            });
+            const allowed = input.dispatchEvent(event);
+            if (allowed && !event.defaultPrevented) {
+                input.value = text;
+                input.selectionStart = input.selectionEnd = text.length;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                fixture.detectChanges();
+                return true;
+            }
+            return false;
+        }
+
+        // en-US paste
+        expect(paste("1,234.5")).toBe(true);
+        expect(host.value()).toBe(1234.5);
+
+        // de-DE paste
+        i18n.use(DE_LOCALE);
+        await waitForStable(fixture);
+        expect(paste("1.234,5")).toBe(true);
+        expect(host.value()).toBe(1234.5);
+
+        // fr-FR paste
+        i18n.use(FR_LOCALE);
+        await waitForStable(fixture);
+        expect(paste("1 234,5")).toBe(true);
+        expect(host.value()).toBe(1234.5);
+
+        // ar-SA paste
+        i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+        await waitForStable(fixture);
+        expect(paste("١٢٬٣٤٥٫٦")).toBe(true);
+        expect(host.value()).toBe(12345.6);
+
+        // Reject paste that exceeds decimals limit (decimals is 2, paste has 3 decimals)
+        i18n.use({ id: "en-US", direction: "ltr", messages: {} });
+        await waitForStable(fixture);
+        expect(paste("1,234.567")).toBe(false);
+
+        // Reject paste with fractional decimals when decimals is 0
+        host.decimals.set(0);
+        await waitForStable(fixture);
+        expect(paste("1,234.5")).toBe(false);
+        // But integer paste is allowed
+        expect(paste("1,234")).toBe(true);
+        expect(host.value()).toBe(1234);
+    });
+
+    describe("parseLocalizedNumber ambiguity contract", () => {
+        it("documents generic locale parser interpretation of 1.234 in de-DE vs edit mode", () => {
+            // In public generic parser, 1.234 without edit mode treats single dot with 3 digits as grouping
+            expect(parseLocalizedNumber("1.234", "de-DE")).toBe(1234);
+
+            // In edit mode with alternateDecimal enabled, 1.234 is treated as decimal 1.234
+            expect(parseLocalizedNumber("1.234", "de-DE", { alternateDecimal: true })).toBe(1.234);
+            expect(parseLocalizedNumber("0.123", "tr-TR", { alternateDecimal: true })).toBe(0.123);
+        });
+    });
 });
