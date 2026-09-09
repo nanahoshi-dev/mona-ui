@@ -1,5 +1,6 @@
 import type { MonaCardMessages } from "../message-types/card.messages";
 import type { MonaChipMessages } from "../message-types/chip.messages";
+import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
 import type { MonaNumericTextBoxMessages } from "../message-types/numeric-text-box.messages";
@@ -13,6 +14,7 @@ import type { MonaTextBoxMessages } from "../message-types/text-box.messages";
 export interface MonaLocaleMessages extends Record<string, object> {
     card: MonaCardMessages;
     chip: MonaChipMessages;
+    dropdownList: MonaDropdownListMessages;
     dropdowns: MonaDropdownsMessages;
     list: MonaListMessages;
     numericTextBox: MonaNumericTextBoxMessages;

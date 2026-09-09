@@ -9,6 +9,7 @@ import {
     required
 } from "@angular/forms/signals";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
 import { DropdownListComponent } from "./dropdown-list.component";
@@ -567,6 +568,32 @@ describe("DropdownListComponent", () => {
         fixture.detectChanges();
 
         expect(fixture.nativeElement.getAttribute("aria-label")).toBe("Select a food");
+    });
+
+    describe("i18n", () => {
+        it("renders default English clear label on indicator icon", async () => {
+            const fixture = await createObjectModeFixture();
+            const clearBtn = getClearButton(fixture);
+            expect(clearBtn.getAttribute("aria-label")).toBe("Clear");
+        });
+
+        it("updates clear label dynamically when locale changes", async () => {
+            const fixture = await createObjectModeFixture();
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    dropdownList: {
+                        clear: "Temizle"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            const clearBtn = getClearButton(fixture);
+            expect(clearBtn.getAttribute("aria-label")).toBe("Temizle");
+        });
     });
 });
 

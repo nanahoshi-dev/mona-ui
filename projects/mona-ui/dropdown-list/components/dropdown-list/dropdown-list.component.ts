@@ -55,9 +55,11 @@ import {
     SelectionChangeEvent
 } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
+import { DROPDOWN_LIST_DEFAULT_MESSAGES } from "../../i18n/dropdown-list.default-messages";
 import {
     dropdownListAffixContainerThemeVariants,
     dropdownListInputThemeVariants,
@@ -124,8 +126,9 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     readonly #dropdownListService = inject(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #navigatedItem = linkedSignal<TData | null>(() => this.selectedDataItem());
+    readonly #i18n = inject(MonaI18nService);
     readonly #listService = inject<ListService<TData>>(ListService);
+    readonly #navigatedItem = linkedSignal<TData | null>(() => this.selectedDataItem());
     readonly #typeaheadKey = new Subject<string>();
 
     protected readonly activeDescendant = computed(() => {
@@ -175,6 +178,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
+    protected readonly messages = this.#i18n.componentMessages("dropdownList", DROPDOWN_LIST_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
