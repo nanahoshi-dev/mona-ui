@@ -279,3 +279,5 @@ export type {
     ChartPngExportOptions,
     ChartSvgExportOptions
 } from "./models/chart-export.models";
+
+export { CHART_DEFAULT_MESSAGES } from "./i18n/chart.default-messages";

@@ -256,32 +256,10 @@ export const ALLOWLIST: AllowlistEntry[] = [
         reason: "Segmented pill offsetLeft calculation relative to parent container"
     },
 
-    // Temporary exemptions pending Phase 2 (Chart) and Phase 3 (TS sweep)
-    {
-        category: "i18n-text",
-        filePattern: "projects/mona-ui/chart/components/chart-tooltip/chart-tooltip.component.html",
-        reason: "Pending Phase 2 Chart tooltip i18n migration"
-    },
-    {
-        category: "i18n-text",
-        filePattern: "projects/mona-ui/chart/components/chart/chart.component.html",
-        lineSnippet: "No data available",
-        reason: "Pending Phase 2 Chart empty state text migration"
-    },
     {
         category: "i18n-text",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-resource-manager.ts",
         reason: "Internal export rejection diagnostic error messages"
-    },
-    {
-        category: "i18n-aria",
-        filePattern: "projects/mona-ui/chart/components/chart-legend/chart-legend.component.ts",
-        reason: "Pending Phase 2 Chart legend accessibility i18n migration"
-    },
-    {
-        category: "i18n-aria",
-        filePattern: "projects/mona-ui/chart/components/chart/chart.component.ts",
-        reason: "Pending Phase 2 Chart container accessibility label migration"
     },
     {
         category: "i18n-text",

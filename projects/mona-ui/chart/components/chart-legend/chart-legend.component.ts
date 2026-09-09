@@ -1,7 +1,9 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, DestroyRef, effect, inject, input, OnInit } from "@angular/core";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import { ChartLegendItemTemplateDirective } from "../../directives/chart-legend-item-template.directive";
+import { CHART_DEFAULT_MESSAGES } from "../../i18n/chart.default-messages";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartColorLegendScale, ChartLegendMode } from "../../models/chart-heatmap.models";
@@ -20,6 +22,8 @@ import { chartLegendBaseThemeVariants, chartLegendItemBaseThemeVariants } from "
 export class ChartLegendComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly containerClasses = computed(() =>
         twMerge(chartLegendBaseThemeVariants({ position: this.position() }), this.userClass())
     );
@@ -50,12 +54,18 @@ export class ChartLegendComponent implements OnInit {
     protected readonly itemTemplate = contentChild(ChartLegendItemTemplateDirective);
     protected readonly legendAriaLabel = computed(() => {
         const scale = this.legendScale();
-        if (!scale) return "Chart legend";
-        const title = scale.title || "Color scale";
+        const msgs = this.messages();
+        if (!scale) return msgs.chartLegend;
+        const title = scale.title || msgs.colorScale;
         if (scale.mode === "diverging" && scale.formattedMidpoint) {
-            return `${title}, ${scale.formattedMin} to ${scale.formattedMidpoint} to ${scale.formattedMax}`;
+            return msgs.divergingRangeDescription(
+                title,
+                scale.formattedMin,
+                scale.formattedMidpoint,
+                scale.formattedMax
+            );
         }
-        return `${title}, ${scale.formattedMin} to ${scale.formattedMax}`;
+        return msgs.rangeDescription(title, scale.formattedMin, scale.formattedMax);
     });
     protected readonly legendItems = computed(() => this.#chartContext?.legendItems() ?? []);
     protected readonly legendScale = computed<ChartColorLegendScale | null>(
