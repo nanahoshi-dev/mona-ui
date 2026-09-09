@@ -13,7 +13,7 @@ import { ComponentPortal } from "@angular/cdk/portal";
 import { ScrollDispatcher, type ScrollDispatcherTarget } from "@angular/cdk/scrolling";
 import { DestroyRef, DOCUMENT, ElementRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MonaI18nService, resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
+import { MonaI18nService, observeComponentDirection, resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
@@ -208,6 +208,7 @@ export class PopupService {
         this.setupScrollTracking(settings, overlayRef, popupReference);
         this.setupEscapeKeyListener(settings, popupReference);
         this.setupPositionChangeTracking(settings, overlayRef, popupReference);
+        this.setupDirectionTracking(settings, overlayRef, popupReference);
 
         return popupReference.popupRef;
     }
@@ -541,6 +542,24 @@ export class PopupService {
                 .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
                 .subscribe(change => popupReference.positionChanges$.next(change.connectionPair));
         }
+    }
+
+    private setupDirectionTracking(
+        settings: PopupSettings,
+        overlayRef: OverlayRef,
+        popupReference: PopupReference
+    ): void {
+        const resolvedAnchor = this.resolveAnchor(settings.anchor);
+        const anchorElement = this.getAnchorElement(resolvedAnchor);
+        const cleanup = observeComponentDirection(anchorElement, this.#directionality, nextDir => {
+            overlayRef.setDirection(nextDir);
+            overlayRef.updatePosition();
+            popupReference.componentRef?.changeDetectorRef.markForCheck();
+        });
+
+        popupReference.closed.pipe(take(1)).subscribe(() => {
+            cleanup();
+        });
     }
 
     private setupScrollClosing(settings: PopupSettings, popupReference: PopupReference, overlayRef: OverlayRef): void {

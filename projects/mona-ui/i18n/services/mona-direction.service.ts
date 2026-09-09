@@ -21,8 +21,13 @@ export function resolveComponentDirection(
         if (rawDir === "rtl" || rawDir === "ltr") {
             return rawDir;
         }
-        if (rawDir === "auto" && typeof window !== "undefined") {
-            const computedDir = window.getComputedStyle(element).direction?.toLowerCase();
+        if (rawDir === "auto") {
+            const defaultView = element.ownerDocument?.defaultView;
+            const computedDir = defaultView
+                ? defaultView.getComputedStyle(element).direction?.toLowerCase()
+                : typeof window !== "undefined"
+                  ? window.getComputedStyle(element).direction?.toLowerCase()
+                  : undefined;
             if (computedDir === "rtl" || computedDir === "ltr") {
                 return computedDir;
             }
@@ -32,6 +37,98 @@ export function resolveComponentDirection(
         return directionality.value;
     }
     return "ltr";
+}
+
+interface DocumentObserverEntry {
+    refCount: number;
+    readonly observer: MutationObserver;
+    readonly callbacks: Set<() => void>;
+}
+
+const documentObservers = new WeakMap<Document, DocumentObserverEntry>();
+
+function observeDocumentDirChanges(doc: Document, callback: () => void): () => void {
+    let entry = documentObservers.get(doc);
+    if (!entry) {
+        const callbacks = new Set<() => void>();
+        const observer = new MutationObserver(() => {
+            for (const cb of Array.from(callbacks)) {
+                cb();
+            }
+        });
+        if (doc.documentElement) {
+            observer.observe(doc.documentElement, {
+                attributes: true,
+                attributeFilter: ["dir"],
+                subtree: true
+            });
+        }
+        entry = { refCount: 0, observer, callbacks };
+        documentObservers.set(doc, entry);
+    }
+
+    entry.refCount++;
+    entry.callbacks.add(callback);
+
+    let cleanedUp = false;
+    return () => {
+        if (cleanedUp || !entry) {
+            return;
+        }
+        cleanedUp = true;
+        entry.callbacks.delete(callback);
+        entry.refCount--;
+        if (entry.refCount <= 0) {
+            entry.observer.disconnect();
+            documentObservers.delete(doc);
+        }
+    };
+}
+
+export function observeComponentDirection(
+    hostElement: ElementRef<HTMLElement> | HTMLElement | null | undefined,
+    directionality: Directionality | null | undefined,
+    onChange: (dir: MonaTextDirection) => void
+): () => void {
+    const element = hostElement instanceof ElementRef ? hostElement.nativeElement : hostElement;
+    let currentDir = resolveComponentDirection(element, directionality);
+
+    const check = () => {
+        const nextDir = resolveComponentDirection(element, directionality);
+        if (nextDir !== currentDir) {
+            currentDir = nextDir;
+            onChange(nextDir);
+        }
+    };
+
+    const cleanupFns: Array<() => void> = [];
+
+    if (directionality) {
+        const sub = directionality.change.subscribe(dir => {
+            if (dir === "rtl" || dir === "ltr") {
+                check();
+            }
+        });
+        cleanupFns.push(() => sub.unsubscribe());
+    }
+
+    if (typeof MutationObserver !== "undefined") {
+        if (element) {
+            const elObserver = new MutationObserver(() => check());
+            elObserver.observe(element, { attributes: true, attributeFilter: ["dir"] });
+            cleanupFns.push(() => elObserver.disconnect());
+
+            if (element.ownerDocument) {
+                cleanupFns.push(observeDocumentDirChanges(element.ownerDocument, check));
+            }
+        }
+    }
+
+    return () => {
+        for (const fn of cleanupFns) {
+            fn();
+        }
+    };
 }
 
 export function injectComponentDirection(hostElementRef?: ElementRef<HTMLElement>): Signal<MonaTextDirection> {
@@ -57,22 +154,11 @@ export function injectComponentDirection(hostElementRef?: ElementRef<HTMLElement
             });
     }
 
-    if (typeof MutationObserver !== "undefined" && destroyRef) {
-        const observer = new MutationObserver(() => {
+    if (destroyRef) {
+        const cleanup = observeComponentDirection(hostRef, directionality, () => {
             domVersion.update(v => v + 1);
         });
-        const element = hostRef instanceof ElementRef ? hostRef.nativeElement : hostRef;
-        if (element) {
-            observer.observe(element, { attributes: true, attributeFilter: ["dir"] });
-            if (element.ownerDocument?.documentElement) {
-                observer.observe(element.ownerDocument.documentElement, {
-                    attributes: true,
-                    attributeFilter: ["dir"],
-                    subtree: true
-                });
-            }
-        }
-        destroyRef.onDestroy(() => observer.disconnect());
+        destroyRef.onDestroy(() => cleanup());
     }
 
     return computed(() => {
@@ -83,8 +169,13 @@ export function injectComponentDirection(hostElementRef?: ElementRef<HTMLElement
             if (rawDir === "rtl" || rawDir === "ltr") {
                 return rawDir;
             }
-            if (rawDir === "auto" && typeof window !== "undefined") {
-                const computedDir = window.getComputedStyle(element).direction?.toLowerCase();
+            if (rawDir === "auto") {
+                const defaultView = element.ownerDocument?.defaultView;
+                const computedDir = defaultView
+                    ? defaultView.getComputedStyle(element).direction?.toLowerCase()
+                    : typeof window !== "undefined"
+                      ? window.getComputedStyle(element).direction?.toLowerCase()
+                      : undefined;
                 if (computedDir === "rtl" || computedDir === "ltr") {
                     return computedDir;
                 }
@@ -106,5 +197,12 @@ export class MonaDirectionService {
 
     public isRtl(element?: ElementRef<HTMLElement> | HTMLElement | null): boolean {
         return this.getDirection(element) === "rtl";
+    }
+
+    public observeDirection(
+        element: ElementRef<HTMLElement> | HTMLElement | null | undefined,
+        onChange: (dir: MonaTextDirection) => void
+    ): () => void {
+        return observeComponentDirection(element, this.#directionality, onChange);
     }
 }
