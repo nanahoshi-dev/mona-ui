@@ -1,3 +1,4 @@
+import type { MonaAutoCompleteMessages } from "../message-types/auto-complete.messages";
 import type { MonaCardMessages } from "../message-types/card.messages";
 import type { MonaChipMessages } from "../message-types/chip.messages";
 import type { MonaComboBoxMessages } from "../message-types/combo-box.messages";
@@ -13,6 +14,7 @@ import type { MonaSpinnerMessages } from "../message-types/spinner.messages";
 import type { MonaTextBoxMessages } from "../message-types/text-box.messages";
 
 export interface MonaLocaleMessages extends Record<string, object> {
+    autoComplete: MonaAutoCompleteMessages;
     card: MonaCardMessages;
     chip: MonaChipMessages;
     comboBox: MonaComboBoxMessages;

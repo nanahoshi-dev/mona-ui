@@ -3,3 +3,4 @@
  */
 
 export * from "./components/auto-complete.component";
+export * from "./i18n/auto-complete.default-messages";
