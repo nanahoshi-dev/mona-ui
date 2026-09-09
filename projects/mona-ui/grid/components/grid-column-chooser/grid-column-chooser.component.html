@@ -19,11 +19,11 @@
     </ng-template>
     <ng-template monaListViewFooterTemplate>
         <div class="flex px-3 py-1 font-medium bg-header-background border-t border-t-border">
-            {{ selectedColumnFields().length }} selected columns
+            {{ messages().columnsSelected(selectedColumnFields().length) }}
         </div>
         <div class="flex gap-2 px-2 py-2 bg-header-background border-t border-t-border">
-            <button class="flex-1" monaButton [size]="'small'" look="primary" (click)="onApplyClick()">Apply</button>
-            <button class="flex-1" monaButton [size]="'small'" (click)="onCancelClick()">Cancel</button>
+            <button class="flex-1" monaButton [size]="'small'" look="primary" (click)="onApplyClick()">{{ messages().apply }}</button>
+            <button class="flex-1" monaButton [size]="'small'" (click)="onCancelClick()">{{ messages().cancel }}</button>
         </div>
     </ng-template>
 </mona-list-view>

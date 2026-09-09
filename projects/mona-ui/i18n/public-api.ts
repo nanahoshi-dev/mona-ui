@@ -21,6 +21,7 @@ export * from "./message-types/datetime-picker.messages";
 export * from "./message-types/dialog.messages";
 export * from "./message-types/dropdown-list.messages";
 export * from "./message-types/dropdowns.messages";
+export * from "./message-types/grid.messages";
 export * from "./message-types/list.messages";
 export * from "./message-types/list-box.messages";
 export * from "./message-types/multi-select.messages";

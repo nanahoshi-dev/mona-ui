@@ -11,6 +11,7 @@ import type { MonaDateTimePickerMessages } from "../message-types/datetime-picke
 import type { MonaDialogMessages } from "../message-types/dialog.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
+import type { MonaGridMessages } from "../message-types/grid.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
 import type { MonaListBoxMessages } from "../message-types/list-box.messages";
 import type { MonaMultiSelectMessages } from "../message-types/multi-select.messages";
@@ -46,6 +47,7 @@ export interface MonaLocaleMessages extends Record<string, object> {
     dialog: MonaDialogMessages;
     dropdownList: MonaDropdownListMessages;
     dropdowns: MonaDropdownsMessages;
+    grid: MonaGridMessages;
     list: MonaListMessages;
     listBox: MonaListBoxMessages;
     multiSelect: MonaMultiSelectMessages;

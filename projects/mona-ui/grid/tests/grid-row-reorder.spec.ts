@@ -14,6 +14,7 @@ import { GridVirtualScrollDirective } from "../directives/grid-virtual-scroll.di
 import type { GridEditEvent } from "../models/GridEditEvent";
 import type { RowReorderEvent } from "../models/RowReorderEvent";
 import type { SelectableOptions } from "../models/SelectableOptions";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { GridService } from "../services/grid.service";
 
 interface ReorderRow extends Record<PropertyKey, unknown> {
@@ -221,6 +222,27 @@ describe("grid row reordering integration", () => {
             const cells = [...firstRow.querySelectorAll("td")];
             expect(cells.indexOf(reorderCell)).toBeLessThan(cells.indexOf(detailCell));
             expect(cells.indexOf(detailCell)).toBeLessThan(cells.indexOf(selectionCell));
+        });
+
+        it("renders the reorder column header with accessible label from i18n messages", async () => {
+            const reorderTh = fixture.nativeElement.querySelector("th[aria-label='Row reorder']");
+            expect(reorderTh).not.toBeNull();
+
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                ...MONA_DEFAULT_LOCALE,
+                messages: {
+                    grid: {
+                        rowReorder: "Satır yeniden sıralama"
+                    }
+                }
+            });
+            await settleFixture(fixture);
+
+            const updatedReorderTh = fixture.nativeElement.querySelector("th[aria-label='Satır yeniden sıralama']");
+            expect(updatedReorderTh).not.toBeNull();
+
+            i18n.use(MONA_DEFAULT_LOCALE);
         });
 
         it("keeps header and body column counts in sync", async () => {

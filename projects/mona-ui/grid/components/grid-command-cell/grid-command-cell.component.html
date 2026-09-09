@@ -18,8 +18,8 @@
                 look="ghost"
                 size="small"
                 [iconOnly]="true"
-                aria-label="Save row"
-                title="Save"
+                [attr.aria-label]="messages().saveRow"
+                [attr.title]="messages().save"
                 class="w-6 h-6"
                 [tabindex]="-1"
                 (click)="save($event)">
@@ -30,8 +30,8 @@
                 look="ghost"
                 size="small"
                 [iconOnly]="true"
-                aria-label="Cancel row edit"
-                title="Cancel"
+                [attr.aria-label]="messages().cancelRowEdit"
+                [attr.title]="messages().cancel"
                 class="w-6 h-6"
                 [tabindex]="-1"
                 (click)="cancel($event)">
@@ -44,8 +44,8 @@
                     look="ghost"
                     size="small"
                     [iconOnly]="true"
-                    aria-label="Edit row"
-                    title="Edit"
+                    [attr.aria-label]="messages().editRow"
+                    [attr.title]="messages().edit"
                     class="w-6 h-6"
                     [tabindex]="-1"
                     (click)="edit($event)">
@@ -57,8 +57,8 @@
                 look="ghost"
                 size="small"
                 [iconOnly]="true"
-                aria-label="Remove row"
-                title="Remove"
+                [attr.aria-label]="messages().removeRow"
+                [attr.title]="messages().remove"
                 class="w-6 h-6"
                 [tabindex]="-1"
                 (click)="remove($event)">

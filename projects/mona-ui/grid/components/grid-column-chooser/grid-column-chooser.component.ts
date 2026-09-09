@@ -33,18 +33,20 @@ export class GridColumnChooserComponent {
         return source.where(item => item.title.toLowerCase().includes(filterText.toLowerCase())).toImmutableSet();
     });
     protected readonly filterText = signal("");
+    protected readonly messages = computed(() => this.#gridService.messages());
+    protected readonly selectedColumnFields = linkedSignal(() =>
+        this.selectedColumns()
+            .select(c => c.field)
+            .toImmutableSet()
+    );
     protected readonly selectedColumns = computed(() =>
         this.#gridService
             .columns()
             .where(c => !c.hidden)
             .toImmutableSet()
     );
-    protected readonly selectedColumnFields = linkedSignal(() =>
-        this.selectedColumns()
-            .select(c => c.field)
-            .toImmutableSet()
-    );
     public readonly apply = output<void>();
+    // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly cancel = output<void>();
 
     public constructor() {

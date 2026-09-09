@@ -1,6 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import { type FieldTree, type SchemaPathTree, validate } from "@angular/forms/signals";
 import { ImmutableList } from "@mirei/ts-collections";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import type { Column } from "../models/Column";
 import type { GridEditSchemaFactory } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
@@ -1081,6 +1082,38 @@ describe("GridService", () => {
             service.setRows([{ id: 2 }, { id: 3 }]);
 
             expect(service.rows().size()).toBe(2);
+        });
+    });
+
+    describe("i18n messages", () => {
+        it("returns default english messages", () => {
+            expect(service.messages().saveRow).toBe("Save row");
+            expect(service.messages().cancelRowEdit).toBe("Cancel row edit");
+            expect(service.messages().editRow).toBe("Edit row");
+            expect(service.messages().removeRow).toBe("Remove row");
+            expect(service.messages().rowReorder).toBe("Row reorder");
+            expect(service.messages().noData).toBe("No data");
+            expect(service.messages().reorderRow(1)).toBe("Reorder row 1");
+            expect(service.messages().columnsSelected(3)).toBe("3 selected columns");
+        });
+
+        it("updates messages dynamically when locale changes", () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                ...MONA_DEFAULT_LOCALE,
+                messages: {
+                    grid: {
+                        noData: "Veri yok",
+                        rowReorder: "Satır yeniden sıralama"
+                    }
+                }
+            });
+
+            expect(service.messages().noData).toBe("Veri yok");
+            expect(service.messages().rowReorder).toBe("Satır yeniden sıralama");
+            expect(service.messages().saveRow).toBe("Save row");
+
+            i18n.use(MONA_DEFAULT_LOCALE);
         });
     });
 });

@@ -56,3 +56,4 @@ export type { ColumnResizeEvent } from "./models/ColumnResizeEvent";
 export type { ColumnSortEvent } from "./models/ColumnSortEvent";
 export * from "./models/GridState";
 export type { ResizeMethod } from "./models/ResizeMethod";
+export * from "./i18n/grid.default-messages";
