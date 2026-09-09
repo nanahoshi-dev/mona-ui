@@ -7,6 +7,7 @@ import type { MonaColorPaletteMessages } from "../message-types/color-palette.me
 import type { MonaColorPickerMessages } from "../message-types/color-picker.messages";
 import type { MonaComboBoxMessages } from "../message-types/combo-box.messages";
 import type { MonaDatePickerMessages } from "../message-types/date-picker.messages";
+import type { MonaDateTimePickerMessages } from "../message-types/datetime-picker.messages";
 import type { MonaDialogMessages } from "../message-types/dialog.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
@@ -41,6 +42,7 @@ export interface MonaLocaleMessages extends Record<string, object> {
     colorPicker: MonaColorPickerMessages;
     comboBox: MonaComboBoxMessages;
     datePicker: MonaDatePickerMessages;
+    dateTimePicker: MonaDateTimePickerMessages;
     dialog: MonaDialogMessages;
     dropdownList: MonaDropdownListMessages;
     dropdowns: MonaDropdownsMessages;
