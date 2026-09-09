@@ -6,6 +6,7 @@ import axe from "axe-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { OtpInputSeparatorTemplateDirective } from "../../directives/otp-input-separator-template.directive";
 import { OtpInputType } from "../../models/OtpInputType";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { OtpInputComponent } from "./otp-input.component";
 
 @Component({
@@ -48,7 +49,7 @@ import { OtpInputComponent } from "./otp-input.component";
     `
 })
 class TestHostComponent {
-    public readonly ariaLabel = signal("Verification code");
+    public readonly ariaLabel = signal<string | null>(null);
     public readonly blurEvents: FocusEvent[] = [];
     public readonly characterPattern = signal<RegExp | null>(null);
     public readonly completeEvents: string[] = [];
@@ -1612,6 +1613,41 @@ describe("OtpInputComponent with combined characterPattern and Signal Forms patt
         expect(host.form.code().value()).toBe("123456");
         expect(host.form.code().valid()).toBe(true);
         expect(host.completeEvents).toEqual(["123456"]);
+    });
+});
+
+describe("OtpInputComponent i18n and localization", () => {
+    let fixture: ComponentFixture<TestHostComponent>;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [TestHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(TestHostComponent);
+        fixture.detectChanges();
+    });
+
+    it("uses default English verificationCode aria-label", () => {
+        const input = fixture.debugElement.query(By.css("input")).nativeElement as HTMLInputElement;
+        expect(input.getAttribute("aria-label")).toBe("Verification code");
+    });
+
+    it("dynamically updates aria-label when locale changes", () => {
+        const i18nService = TestBed.inject(MonaI18nService);
+        i18nService.use({
+            direction: "ltr",
+            id: "tr-TR",
+            messages: {
+                otpInput: {
+                    verificationCode: "Doğrulama kodu"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        const input = fixture.debugElement.query(By.css("input")).nativeElement as HTMLInputElement;
+        expect(input.getAttribute("aria-label")).toBe("Doğrulama kodu");
     });
 });
 

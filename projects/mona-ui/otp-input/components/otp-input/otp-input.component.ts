@@ -5,6 +5,7 @@ import {
     contentChild,
     effect,
     ElementRef,
+    inject,
     input,
     model,
     output,
@@ -15,7 +16,9 @@ import {
 import { type FormValueControl } from "@angular/forms/signals";
 import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { OtpInputSeparatorTemplateDirective } from "../../directives/otp-input-separator-template.directive";
+import { OTP_INPUT_DEFAULT_MESSAGES } from "../../i18n/otp-input.default-messages";
 import { OtpInputType } from "../../models/OtpInputType";
 import {
     otpInputFieldThemeVariants,
@@ -66,6 +69,8 @@ interface OtpGroupViewModel {
     }
 })
 export class OtpInputComponent implements OtpInputVariantInput, FormValueControl<string> {
+    readonly #i18n = inject(MonaI18nService);
+
     protected readonly activeSlotIndex = computed(() => {
         if (!this.hasFocus()) {
             return -1;
@@ -98,7 +103,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             return customAttrLabel;
         }
         const fallback = toNonEmptyString(this.ariaLabel());
-        return fallback ?? "Verification code";
+        return fallback ?? this.messages().verificationCode;
     });
     protected readonly computedAriaLabelledby = computed(() => {
         const attrs = this.inputAttributes();
@@ -136,6 +141,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const maxLogicalPosition = Math.min(this.value().length, this.normalizedLength());
         return Math.max(0, Math.min(this.selectionStart(), maxLogicalPosition));
     });
+    protected readonly messages = this.#i18n.componentMessages("otpInput", OTP_INPUT_DEFAULT_MESSAGES);
     protected readonly nativeInputType = computed(() => (this.type() === "password" ? "password" : "text"));
     protected readonly normalizedLength = computed(() => normalizeLength(this.length()));
     protected readonly sanitizedAttributes = computed(() => sanitizeInputAttributes(this.inputAttributes()));
@@ -217,9 +223,9 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
 
     /**
      * @description Accessible name for the inner `<input>` element.
-     * @default "Verification code"
+     * @default null
      */
-    public readonly ariaLabel = input("Verification code");
+    public readonly ariaLabel = input<string | null>(null);
 
     /**
      * @description Regular expression used to determine whether each individual OTP character is allowed.

@@ -10793,8 +10793,8 @@
         "description": "Accessible name for the inner `<input>` element.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string",
-        "defaultValue": "\"Verification code\""
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "Regular expression used to determine whether each individual OTP character is allowed.",
