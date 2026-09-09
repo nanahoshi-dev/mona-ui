@@ -340,8 +340,8 @@ export const sidebarThemeVariants = cva(
             // variant's margins, rounding and transparency are all dropped for it.
             { drawer: true, side: "start", class: "start-0" },
             { drawer: true, side: "end", class: "end-0" },
-            { drawer: true, open: false, side: "start", class: "-translate-x-full" },
-            { drawer: true, open: false, side: "end", class: "translate-x-full" },
+            { drawer: true, open: false, side: "start", class: "-translate-x-full rtl:translate-x-full" },
+            { drawer: true, open: false, side: "end", class: "translate-x-full rtl:-translate-x-full" },
             { drawer: true, variant: "floating", class: "rounded-none" },
             { drawer: true, variant: "inset", class: "bg-(--color-sidebar)" }
         ]

@@ -38,6 +38,9 @@ jobs:
       - name: Test
         run: npm run test:lib -- --watch=false --coverage
 
+      - name: Audit i18n and RTL readiness
+        run: npm run audit:i18n-rtl:strict
+
       - name: Build
         run: npm run build:prod
 

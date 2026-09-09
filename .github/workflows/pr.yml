@@ -40,7 +40,7 @@ jobs:
         run: npm run build:metadata
 
       - name: Audit i18n and RTL readiness
-        run: npm run audit:i18n-rtl
+        run: npm run audit:i18n-rtl:strict
 
       - name: Build Library
         run: npm run build:prod

@@ -2,6 +2,7 @@ import { existsSync, globSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
     type AST,
+    BindingType,
     Interpolation,
     LiteralPrimitive,
     parseTemplate,
@@ -17,16 +18,19 @@ import {
     TmplAstText,
     TmplAstTextAttribute
 } from "@angular/compiler";
+import { Node, Project, SyntaxKind } from "ts-morph";
+
+export type AuditCategory = "i18n-text" | "i18n-aria" | "rtl-physical-style" | "rtl-manual-review";
 
 export interface AuditViolation {
-    category: "i18n-text" | "i18n-aria" | "rtl-physical-style";
+    category: AuditCategory;
     detail: string;
     file: string;
     line: number;
 }
 
 export interface AllowlistEntry {
-    category: "i18n-text" | "i18n-aria" | "rtl-physical-style";
+    category: AuditCategory;
     filePattern: string;
     lineRange?: [number, number];
     lineSnippet?: string;
@@ -44,7 +48,7 @@ const PHYSICAL_TAILWIND_PATTERNS = [
         label: "Physical padding utility (pl-*/pr-* -> ps-*/pe-*)"
     },
     {
-        regex: /(?<![a-zA-Z0-9_-])(?:[a-z0-9-]+:)*-?(?:left|right)-[0-9a-z_[\].-]+/g,
+        regex: /(?<![a-zA-Z0-9_-])(?:[a-z0-9-]+:)*-?(?:left|right)-(?=[0-9a-zA-Z_\[])[0-9a-z_[\].-]+/g,
         label: "Physical position utility (left-*/right-* -> start-*/end-*)"
     },
     {
@@ -116,36 +120,77 @@ const PHYSICAL_CSS_POSITION_PATTERN = {
 };
 
 // Patterns for hard-coded TS ARIA and titles
-const HARD_CODED_ARIA_PATTERNS = [
+export const HARD_CODED_ARIA_PATTERNS = [
     { regex: /\baria-label="([^"{}]+)"/g, label: "Static aria-label attribute" },
     { regex: /\[attr\.aria-label\]="'([^']+)'"/g, label: "Static [attr.aria-label] binding" }
 ];
 
-// Documented intentional allowlist entries (e.g. geometric canvas, chart math, color gradients)
-const ALLOWLIST: AllowlistEntry[] = [
+// Patterns for manual-review RTL constructs
+export const MANUAL_REVIEW_PATTERNS = [
     {
-        category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/chart/",
-        reason: "Chart Cartesian coordinate geometry is strictly physical canvas/SVG math"
+        regex: /\b(?:scrollLeft|offsetLeft|clientLeft)\b/g,
+        label: "Manual review: DOM scroll/offset coordinate property"
     },
     {
-        category: "i18n-text",
-        filePattern: "projects/mona-ui/chart/",
-        reason: "Chart tooltip and empty state strings are planned for subsequent chart feature release"
+        regex: /\b(?:DOMRect\.(?:left|right)|\.getBoundingClientRect\(\)\.(?:left|right))\b/g,
+        label: "Manual review: DOMRect left/right coordinate"
+    },
+    {
+        regex: /(?<!\w)style\.(?:left|right)\b/g,
+        label: "Manual review: physical inline style.left/right assignment"
+    }
+];
+
+// Documented intentional allowlist entries (narrowed to specific files/lines)
+export const ALLOWLIST: AllowlistEntry[] = [
+    // Narrow physical style exemptions
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/chart/components/chart/chart.component.html",
+        lineSnippet: "[style.left.px]",
+        reason: "DOM overlay positioned from Cartesian chart scene x coordinate"
     },
     {
         category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/color-gradient/",
+        filePattern: "projects/mona-ui/chart/components/chart-tooltip/chart-tooltip.component.html",
+        lineSnippet: "[style.left.px]",
+        reason: "Tooltip floating placement uses Cartesian screen coordinate x position"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
+        lineSnippet: "stagingContainer.style.left",
+        reason: "Chart export staging container offscreen positioning (-99999px)"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
+        lineSnippet: "island.frozenRoot.style.left",
+        reason: "Chart export island root staging position"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/color-gradient/styles/color-gradient.styles.ts",
         reason: "Color picker gradient coordinate space is physical 2D hue/saturation mapping"
     },
     {
         category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/color-palette/",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        reason: "Color gradient 2D coordinate space mapping"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.html",
+        reason: "Color gradient trackBackground physical rainbow color stops"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/color-palette/components/color-palette/color-palette.component.html",
         reason: "Color palette grid uses physical direction"
     },
     {
         category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/color-picker/",
+        filePattern: "projects/mona-ui/color-picker/components/color-picker/color-picker.component.html",
         reason: "Color picker canvas coordinates are physical"
     },
     {
@@ -165,17 +210,126 @@ const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/spinner/",
-        reason: "Spinner radial coordinate geometry for 2D circular/polygon dot positions"
+        filePattern: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+        reason: "Spinner radial keyframe dot positions in circular coordinate geometry"
+    },
+
+    // Manual review exemptions for legitimate DOM/coordinate operations
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/",
+        reason: "Desktop window floating coordinate management operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/grid/services/grid.service.ts",
+        reason: "Synchronizes horizontal scrollLeft across grid header, body, and footer"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/grid/components/grid-virtual-list/grid-virtual-list.component.ts",
+        reason: "Synchronizes horizontal scrollLeft for virtual row container"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/grid/directives/grid-locked-cell.directive.ts",
+        reason: "Sticky column positioning calculates left and right offset boundaries"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/export/",
+        reason: "Chart export raster island staging and DOM freezer position capture"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/numeric-text-box/components/numeric-text-box/numeric-text-box.component.ts",
+        reason: "NumericTextBox scrolls input to end on focus"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/text-box/components/text-box/text-box.component.ts",
+        reason: "TextBox scrolls input to end on focus"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/segmented/components/segmented/segmented.component.ts",
+        reason: "Segmented pill offsetLeft calculation relative to parent container"
+    },
+
+    // Temporary exemptions pending Phase 2 (Chart) and Phase 3 (TS sweep)
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/chart/components/chart-tooltip/chart-tooltip.component.html",
+        reason: "Pending Phase 2 Chart tooltip i18n migration"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/chart/components/chart/chart.component.html",
+        lineSnippet: "No data available",
+        reason: "Pending Phase 2 Chart empty state text migration"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-resource-manager.ts",
+        reason: "Internal export rejection diagnostic error messages"
+    },
+    {
+        category: "i18n-aria",
+        filePattern: "projects/mona-ui/chart/components/chart-legend/chart-legend.component.ts",
+        reason: "Pending Phase 2 Chart legend accessibility i18n migration"
+    },
+    {
+        category: "i18n-aria",
+        filePattern: "projects/mona-ui/chart/components/chart/chart.component.ts",
+        reason: "Pending Phase 2 Chart container accessibility label migration"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/editor/components/editor-headings/editor-headings.component.ts",
+        reason: "Pending Phase 3 Editor headings i18n migration"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/editor/components/editor-link/editor-link.component.ts",
+        reason: "Pending Phase 3 Editor link prompt text migration"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/grid/components/grid-filter-row-cell/grid-filter-row-cell.component.html",
+        reason: "Pending Phase 3 Grid filter row placeholder migration"
+    },
+    {
+        category: "i18n-aria",
+        filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
+        lineSnippet: "carousel",
+        reason: "Pending Phase 3 ScrollView carousel role description migration"
+    },
+    {
+        category: "i18n-aria",
+        filePattern: "projects/mona-ui/grid/directives/grid-column-resize-handler.directive.ts",
+        lineSnippet: "Resize column",
+        reason: "Pending Phase 3 Grid column resize handler ARIA migration"
+    },
+    {
+        category: "i18n-aria",
+        filePattern: "projects/mona-ui/button-group/components/button-group/button-group.component.ts",
+        lineSnippet: "Button group",
+        reason: "Pending Phase 3 ButtonGroup default aria-label migration"
     }
 ];
 
-function isAllowlisted(violation: AuditViolation, lineContent?: string): boolean {
-    for (const entry of ALLOWLIST) {
+export function isAllowlisted(
+    violation: AuditViolation,
+    lineContent?: string,
+    allowlist: AllowlistEntry[] = ALLOWLIST
+): boolean {
+    const normalizedFile = violation.file.replace(/\\/g, "/");
+    for (const entry of allowlist) {
         if (entry.category !== violation.category) {
             continue;
         }
-        if (!violation.file.includes(entry.filePattern)) {
+        const normalizedPattern = entry.filePattern.replace(/\\/g, "/");
+        if (!normalizedFile.includes(normalizedPattern)) {
             continue;
         }
         if (entry.lineRange) {
@@ -184,7 +338,7 @@ function isAllowlisted(violation: AuditViolation, lineContent?: string): boolean
                 continue;
             }
         }
-        if (entry.lineSnippet && lineContent && !lineContent.includes(entry.lineSnippet)) {
+        if (entry.lineSnippet && (!lineContent || !lineContent.includes(entry.lineSnippet))) {
             continue;
         }
         return true;
@@ -193,7 +347,7 @@ function isAllowlisted(violation: AuditViolation, lineContent?: string): boolean
 }
 
 // Check if string contains actual user-facing text vs purely numbers/symbols/formatting tokens
-function isUserFacingText(text: string): boolean {
+export function isUserFacingText(text: string): boolean {
     const trimmed = text.trim();
     if (!trimmed) {
         return false;
@@ -214,7 +368,215 @@ function isUserFacingText(text: string): boolean {
     return /[a-zA-Z]/.test(trimmed);
 }
 
-function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violations: AuditViolation[]): void {
+export const TECHNICAL_SEMANTIC_STRINGS = new Set([
+    "",
+    "A",
+    "H",
+    "S",
+    "V",
+    "R",
+    "G",
+    "B",
+    "horizontal",
+    "vertical",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "ArrowDown",
+    "button",
+    "menuitem",
+    "checkbox",
+    "radio",
+    "combobox",
+    "grid",
+    "tab",
+    "dialog",
+    "alert",
+    "none",
+    "presentation",
+    "start",
+    "center",
+    "end",
+    "left",
+    "right",
+    "top",
+    "bottom",
+    "auto",
+    "contains",
+    "doesnotcontain",
+    "startswith",
+    "endswith",
+    "eq",
+    "neq",
+    "gte",
+    "gt",
+    "lte",
+    "lt",
+    "isnull",
+    "isnotnull",
+    "isempty",
+    "isnotempty",
+    "aria-label",
+    "aria-labelledby",
+    "aria-describedby",
+    "aria-roledescription",
+    "aria-label-start",
+    "aria-label-end"
+]);
+
+export const SEMANTIC_OBJECT_KEYS = new Set([
+    "text",
+    "label",
+    "title",
+    "placeholder",
+    "ariaLabel",
+    "ariaDescription",
+    "ariaRoleDescription",
+    "emptyText",
+    "description",
+    "tooltip",
+    "message"
+]);
+
+const sharedTsProject = new Project({
+    useInMemoryFileSystem: true,
+    compilerOptions: {
+        target: 99
+    }
+});
+
+export function scanTypeScriptAst(
+    filePath: string,
+    content: string,
+    violations: AuditViolation[],
+    project: Project = sharedTsProject
+): void {
+    const sf = project.createSourceFile(`virtual-${Date.now()}-${Math.random()}.ts`, content, { overwrite: true });
+
+    try {
+        // 1. Angular host metadata inspection
+        for (const classDecl of sf.getClasses()) {
+            for (const decorator of classDecl.getDecorators()) {
+                const name = decorator.getName();
+                if (name === "Component" || name === "Directive") {
+                    const args = decorator.getArguments();
+                    if (args.length > 0 && Node.isObjectLiteralExpression(args[0])) {
+                        const hostProp = args[0].getProperty("host");
+                        if (hostProp && Node.isPropertyAssignment(hostProp)) {
+                            const hostInit = hostProp.getInitializer();
+                            if (hostInit && Node.isObjectLiteralExpression(hostInit)) {
+                                for (const prop of hostInit.getProperties()) {
+                                    if (Node.isPropertyAssignment(prop)) {
+                                        const propName = prop.getName().replace(/['"]/g, "");
+                                        const isAria = [
+                                            "aria-label",
+                                            "[attr.aria-label]",
+                                            "aria-description",
+                                            "[attr.aria-description]",
+                                            "aria-roledescription",
+                                            "[attr.aria-roledescription]",
+                                            "aria-valuetext",
+                                            "[attr.aria-valuetext]"
+                                        ].includes(propName);
+                                        const isText = ["title", "[attr.title]"].includes(propName);
+                                        if (isAria || isText) {
+                                            const init = prop.getInitializer();
+                                            if (
+                                                init &&
+                                                (Node.isStringLiteral(init) ||
+                                                    Node.isNoSubstitutionTemplateLiteral(init))
+                                            ) {
+                                                let rawVal = init.getLiteralText().trim();
+                                                const isBound = propName.startsWith("[");
+                                                let isStaticLiteral = false;
+                                                if (isBound) {
+                                                    if (
+                                                        (rawVal.startsWith("'") && rawVal.endsWith("'")) ||
+                                                        (rawVal.startsWith('"') && rawVal.endsWith('"'))
+                                                    ) {
+                                                        rawVal = rawVal.slice(1, -1).trim();
+                                                        isStaticLiteral = true;
+                                                    }
+                                                } else {
+                                                    isStaticLiteral = true;
+                                                }
+                                                if (
+                                                    isStaticLiteral &&
+                                                    isUserFacingText(rawVal) &&
+                                                    !rawVal.startsWith("messages().") &&
+                                                    !rawVal.startsWith("{{")
+                                                ) {
+                                                    violations.push({
+                                                        category: isAria ? "i18n-aria" : "i18n-text",
+                                                        detail: `Static host binding ${propName}: "${rawVal}"`,
+                                                        file: filePath,
+                                                        line: prop.getStartLineNumber()
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Object literal properties with semantic keys
+        for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+            for (const prop of obj.getProperties()) {
+                if (Node.isPropertyAssignment(prop)) {
+                    const propName = prop.getName();
+                    if (SEMANTIC_OBJECT_KEYS.has(propName)) {
+                        const init = prop.getInitializer();
+                        if (init && (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init))) {
+                            const val = init.getLiteralText().trim();
+                            if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                                violations.push({
+                                    category: "i18n-text",
+                                    detail: `Hard-coded literal property "${propName}": "${val}"`,
+                                    file: filePath,
+                                    line: prop.getStartLineNumber()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Computed accessibility properties and string getters
+        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+            const propName = prop.getName();
+            if (propName.toLowerCase().includes("arialabel") || propName.toLowerCase().includes("announcement")) {
+                const init = prop.getInitializer();
+                if (init && Node.isCallExpression(init)) {
+                    const text = init.getText();
+                    if (!text.includes("messages()") && !text.includes("this.#i18n") && !text.includes("this.i18n")) {
+                        const stringLiterals = init.getDescendantsOfKind(SyntaxKind.StringLiteral);
+                        for (const sl of stringLiterals) {
+                            const val = sl.getLiteralText().trim();
+                            if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                                violations.push({
+                                    category: "i18n-aria",
+                                    detail: `Hard-coded text in accessibility property "${propName}": "${val}"`,
+                                    file: filePath,
+                                    line: sl.getStartLineNumber()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } finally {
+        project.removeSourceFile(sf);
+    }
+}
+
+export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violations: AuditViolation[]): void {
     for (const node of nodes) {
         if (node instanceof TmplAstText) {
             const raw = node.value;
@@ -305,11 +667,19 @@ function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violations: A
                     }
                 }
 
-                // Check [style.left] or [style.right]
-                if (name === "style.left" || name === "style.right") {
+                // Check [style.left] or [style.right] (including units like .px, %, etc.)
+                if (
+                    (input.type === BindingType.Style && (name === "left" || name === "right")) ||
+                    name.startsWith("style.left") ||
+                    name.startsWith("style.right")
+                ) {
+                    const styleName =
+                        input.type === BindingType.Style
+                            ? `style.${input.name}${input.unit ? "." + input.unit : ""}`
+                            : input.name;
                     violations.push({
                         category: "rtl-physical-style",
-                        detail: `Physical [${input.name}] style binding`,
+                        detail: `Physical [${styleName}] style binding`,
                         file: filePath,
                         line: input.sourceSpan.start.line + 1
                     });
@@ -329,8 +699,8 @@ function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violations: A
                 scanTemplateNodes(node.empty.children, filePath, violations);
             }
         } else if (node instanceof TmplAstSwitchBlock) {
-            for (const caseNode of node.cases) {
-                scanTemplateNodes(caseNode.children, filePath, violations);
+            for (const group of node.groups) {
+                scanTemplateNodes(group.children, filePath, violations);
             }
         } else if (node instanceof TmplAstDeferredBlock) {
             scanTemplateNodes(node.children, filePath, violations);
@@ -434,7 +804,31 @@ function scanFile(filePath: string, violations: AuditViolation[]): void {
             }
         }
 
-        // Scan TS host ARIA bindings
+        // Scan manual review patterns
+        if (normalizedPath.endsWith(".ts") || normalizedPath.endsWith(".html")) {
+            for (const pattern of MANUAL_REVIEW_PATTERNS) {
+                if (pattern.label.includes("inline style.left/right") && !normalizedPath.endsWith(".ts")) {
+                    continue;
+                }
+                pattern.regex.lastIndex = 0;
+                const matches = line.match(pattern.regex);
+                if (matches) {
+                    for (const match of matches) {
+                        const violation: AuditViolation = {
+                            category: "rtl-manual-review",
+                            detail: `${pattern.label}: "${match.trim()}"`,
+                            file: normalizedPath,
+                            line: lineNumber
+                        };
+                        if (!isAllowlisted(violation, line)) {
+                            violations.push(violation);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Scan TS host ARIA bindings regex
         if (normalizedPath.endsWith(".ts")) {
             for (const pattern of HARD_CODED_ARIA_PATTERNS) {
                 pattern.regex.lastIndex = 0;
@@ -457,21 +851,45 @@ function scanFile(filePath: string, violations: AuditViolation[]): void {
         }
     }
 
-    // 2. Angular template AST scanning for HTML templates
+    // 2. TypeScript AST scanning
+    if (normalizedPath.endsWith(".ts")) {
+        const tsViolations: AuditViolation[] = [];
+        scanTypeScriptAst(normalizedPath, content, tsViolations);
+        for (const tv of tsViolations) {
+            const lineContent = lines[tv.line - 1] ?? "";
+            if (!isAllowlisted(tv, lineContent)) {
+                violations.push(tv);
+            }
+        }
+    }
+
+    // 3. Angular template AST scanning for HTML templates
     if (normalizedPath.endsWith(".html")) {
+        let parsed;
         try {
-            const parsed = parseTemplate(content, normalizedPath, { preserveWhitespaces: false });
-            if (parsed.nodes) {
-                const templateViolations: AuditViolation[] = [];
-                scanTemplateNodes(parsed.nodes, normalizedPath, templateViolations);
-                for (const tv of templateViolations) {
-                    if (!isAllowlisted(tv)) {
-                        violations.push(tv);
-                    }
+            parsed = parseTemplate(content, normalizedPath, { preserveWhitespaces: false });
+        } catch (err) {
+            console.error(`AUDIT ERROR: Exception parsing template ${normalizedPath}:`, err);
+            process.exit(1);
+        }
+
+        if (parsed.errors && parsed.errors.length > 0) {
+            console.error(`AUDIT ERROR: Could not parse template ${normalizedPath}:`);
+            for (const e of parsed.errors) {
+                console.error(`  ${e.msg} at line ${e.span.start.line + 1}`);
+            }
+            process.exit(1);
+        }
+
+        if (parsed.nodes) {
+            const templateViolations: AuditViolation[] = [];
+            scanTemplateNodes(parsed.nodes, normalizedPath, templateViolations);
+            for (const tv of templateViolations) {
+                const lineContent = lines[tv.line - 1] ?? "";
+                if (!isAllowlisted(tv, lineContent)) {
+                    violations.push(tv);
                 }
             }
-        } catch {
-            // If template parsing encounters an unexpected syntax, skip AST pass
         }
     }
 }
@@ -509,7 +927,7 @@ function saveBaseline(violations: AuditViolation[]): void {
     console.log(`Baseline updated with ${list.length} entries at ${BASELINE_PATH}`);
 }
 
-function runAudit(): void {
+export function runAudit(): void {
     const isReportMode = process.argv.includes("--report");
     const isUpdateBaseline = process.argv.includes("--update-baseline");
     const isStrict = process.argv.includes("--strict");
@@ -529,6 +947,7 @@ function runAudit(): void {
     const physicalViolations = violations.filter(v => v.category === "rtl-physical-style");
     const ariaViolations = violations.filter(v => v.category === "i18n-aria");
     const textViolations = violations.filter(v => v.category === "i18n-text");
+    const manualReviewViolations = violations.filter(v => v.category === "rtl-manual-review");
 
     console.log("==================================================");
     console.log("  Mona UI i18n & RTL Readiness Audit Report");
@@ -537,6 +956,7 @@ function runAudit(): void {
     console.log(`Hard-coded text violations (i18n-text): ${textViolations.length}`);
     console.log(`Hard-coded ARIA violations (i18n-aria): ${ariaViolations.length}`);
     console.log(`Physical style violations (rtl-physical): ${physicalViolations.length}`);
+    console.log(`Manual review items (rtl-manual-review): ${manualReviewViolations.length}`);
     console.log("--------------------------------------------------");
 
     if (isReportMode) {
@@ -559,6 +979,14 @@ function runAudit(): void {
         if (physicalViolations.length > 0) {
             console.log("\n--- Physical style violations ---");
             for (const v of physicalViolations) {
+                const relative = v.file.replace(/.*projects\/mona-ui\//, "");
+                console.log(`  ${relative}:${v.line} -> ${v.detail}`);
+            }
+        }
+
+        if (manualReviewViolations.length > 0) {
+            console.log("\n--- Manual review violations ---");
+            for (const v of manualReviewViolations) {
                 const relative = v.file.replace(/.*projects\/mona-ui\//, "");
                 console.log(`  ${relative}:${v.line} -> ${v.detail}`);
             }
@@ -591,4 +1019,10 @@ function runAudit(): void {
     console.log("\nSUCCESS: All scanned files satisfy i18n & RTL rules (no unapproved violations).");
 }
 
-runAudit();
+if (
+    process.env["VITEST"] !== "true" &&
+    process.argv[1] &&
+    (process.argv[1].endsWith("audit-i18n-rtl.ts") || process.argv[1].endsWith("audit-i18n-rtl.js"))
+) {
+    runAudit();
+}
