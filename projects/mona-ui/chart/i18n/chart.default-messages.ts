@@ -1,4 +1,4 @@
-import type { MonaChartMessages } from "../../i18n/message-types/chart.messages";
+import type { MonaChartMessages } from "@nanahoshi/mona-ui/i18n";
 
 export const CHART_DEFAULT_MESSAGES: MonaChartMessages = {
     change: "Change",

@@ -2466,8 +2466,7 @@
         "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\nso screen reader users can distinguish them.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string",
-        "defaultValue": "\"Button group\""
+        "type": "string | undefined"
       },
       {
         "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction.",
