@@ -2,6 +2,7 @@ import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideRouter, RouterLink } from "@angular/router";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
@@ -813,6 +814,59 @@ describe("ChipComponent", () => {
 
             const removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
             expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Remove, Fallback");
+        });
+    });
+
+    // =========================================================================
+    // Localization & i18n Tests
+    // =========================================================================
+    describe("localization and i18n", () => {
+        it("should dynamically update remove label when MonaI18nService locale changes", () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            component.removable.set(true);
+            component.label.set("Tag");
+            fixture.detectChanges();
+
+            let removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
+            expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Remove, Tag");
+
+            i18n.use({
+                id: "tr-TR",
+                direction: "ltr",
+                messages: {
+                    chip: {
+                        removeLabel: label => (label ? `Kaldır: ${label}` : "Öğeyi kaldır")
+                    }
+                }
+            });
+            fixture.detectChanges();
+
+            removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
+            expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Kaldır: Tag");
+
+            component.label.set("");
+            fixture.detectChanges();
+            expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Öğeyi kaldır");
+        });
+
+        it("should prefer explicit removeLabel input over localized message", () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                id: "tr-TR",
+                direction: "ltr",
+                messages: {
+                    chip: {
+                        removeLabel: label => (label ? `Kaldır: ${label}` : "Öğeyi kaldır")
+                    }
+                }
+            });
+            component.removable.set(true);
+            component.label.set("Tag");
+            component.removeLabel.set("Custom override");
+            fixture.detectChanges();
+
+            const removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
+            expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Custom override");
         });
     });
 
