@@ -17,9 +17,15 @@ export function resolveComponentDirection(
 ): MonaTextDirection {
     const element = hostElement instanceof ElementRef ? hostElement.nativeElement : hostElement;
     if (typeof element?.closest === "function") {
-        const domDir = element.closest("[dir]")?.getAttribute("dir");
-        if (domDir === "rtl" || domDir === "ltr") {
-            return domDir;
+        const rawDir = element.closest("[dir]")?.getAttribute("dir")?.trim().toLowerCase();
+        if (rawDir === "rtl" || rawDir === "ltr") {
+            return rawDir;
+        }
+        if (rawDir === "auto" && typeof window !== "undefined") {
+            const computedDir = window.getComputedStyle(element).direction?.toLowerCase();
+            if (computedDir === "rtl" || computedDir === "ltr") {
+                return computedDir;
+            }
         }
     }
     if (directionality?.value === "rtl" || directionality?.value === "ltr") {
@@ -73,9 +79,15 @@ export function injectComponentDirection(hostElementRef?: ElementRef<HTMLElement
         domVersion();
         const element = hostRef instanceof ElementRef ? hostRef.nativeElement : hostRef;
         if (typeof element?.closest === "function") {
-            const domDir = element.closest("[dir]")?.getAttribute("dir");
-            if (domDir === "rtl" || domDir === "ltr") {
-                return domDir;
+            const rawDir = element.closest("[dir]")?.getAttribute("dir")?.trim().toLowerCase();
+            if (rawDir === "rtl" || rawDir === "ltr") {
+                return rawDir;
+            }
+            if (rawDir === "auto" && typeof window !== "undefined") {
+                const computedDir = window.getComputedStyle(element).direction?.toLowerCase();
+                if (computedDir === "rtl" || computedDir === "ltr") {
+                    return computedDir;
+                }
             }
         }
         return cdkDir();

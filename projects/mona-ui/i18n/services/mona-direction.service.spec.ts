@@ -137,5 +137,54 @@ describe("MonaDirectionService and direction utilities", () => {
             expect(i18n.direction()).toBe("ltr");
             expect(fixture.componentInstance.direction()).toBe("rtl");
         });
+
+        it("handles case-insensitive dir attribute values ('RTL', ' LTR ')", () => {
+            const div = document.createElement("div");
+            div.setAttribute("dir", "RTL");
+            const child = document.createElement("span");
+            div.appendChild(child);
+
+            expect(resolveComponentDirection(child, null)).toBe("rtl");
+
+            div.setAttribute("dir", " LTR ");
+            expect(resolveComponentDirection(child, null)).toBe("ltr");
+        });
+
+        it("resolves dir='auto' using computed style direction", () => {
+            const div = document.createElement("div");
+            div.setAttribute("dir", "auto");
+            div.style.direction = "rtl";
+            document.body.appendChild(div);
+
+            const child = document.createElement("span");
+            div.appendChild(child);
+
+            expect(resolveComponentDirection(child, null)).toBe("rtl");
+            document.body.removeChild(div);
+        });
+
+        it("detects dynamic ancestor dir change via mutation observer", async () => {
+            const parent = document.createElement("div");
+            parent.setAttribute("dir", "ltr");
+            document.body.appendChild(parent);
+
+            TestBed.configureTestingModule({
+                imports: [TestDirectionConsumerComponent]
+            });
+            const fixture = TestBed.createComponent(TestDirectionConsumerComponent);
+            parent.appendChild(fixture.nativeElement);
+            fixture.detectChanges();
+
+            expect(fixture.componentInstance.direction()).toBe("ltr");
+
+            parent.setAttribute("dir", "rtl");
+            // Wait for MutationObserver callback to trigger
+            await new Promise(resolve => setTimeout(resolve, 20));
+            fixture.detectChanges();
+
+            expect(fixture.componentInstance.direction()).toBe("rtl");
+
+            document.body.removeChild(parent);
+        });
     });
 });
