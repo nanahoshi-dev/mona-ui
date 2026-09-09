@@ -44,7 +44,7 @@
                         <i class="ri-arrow-up-line"></i>
                     }
                     <span>{{ groupColumn.title }}</span>
-                    <span class="ml-2" (click)="$event.stopPropagation()" #groupReorder>
+                    <span class="ms-2" (click)="$event.stopPropagation()" #groupReorder>
                         <i class="ri-more-2-fill"></i>
                     </span>
                     <mona-popup-menu size="small" [target]="groupReorder">
@@ -52,14 +52,14 @@
                             [disabled]="$first"
                             (menuClick)="onGroupColumnReorder(groupColumn, 'prev')">
                             <ng-template monaPopupMenuTextTemplate>
-                                <i class="ri-arrow-left-fill"></i> Move as previous
+                                <i class="ri-arrow-left-fill rtl:rotate-180"></i> Move as previous
                             </ng-template>
                         </mona-popup-menu-item>
                         <mona-popup-menu-item
                             [disabled]="$last"
                             (menuClick)="onGroupColumnReorder(groupColumn, 'next')">
                             <ng-template monaPopupMenuTextTemplate>
-                                <i class="ri-arrow-right-fill"></i> Move as next
+                                <i class="ri-arrow-right-fill rtl:rotate-180"></i> Move as next
                             </ng-template>
                         </mona-popup-menu-item>
                     </mona-popup-menu>
@@ -102,7 +102,7 @@
                             [lockedCellHeader]="true"
                             [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                             scope="col"
-                            class="border-r border-border"
+                            class="border-e border-border"
                             [attr.colspan]="1"
                             [style.width.px]="gridService.groupColumnWidth"></th>
                     }
@@ -125,7 +125,7 @@
                             "
                             scope="col"
                             [attr.aria-label]="gridService.messages().rowReorder"
-                            class="border-r border-border"
+                            class="border-e border-border"
                             [attr.colspan]="1"
                             [style.width.px]="gridService.rowReorderColumnWidth"></th>
                     }
@@ -135,7 +135,7 @@
                             [lockedCellHeader]="true"
                             [structuralColumn]="'detail'"
                             scope="col"
-                            class="border-r border-border"
+                            class="border-e border-border"
                             [attr.colspan]="1"
                             [style.width.px]="gridService.detailColumnWidth"></th>
                     }
@@ -160,7 +160,7 @@
                             "
                             [lastInRow]="gridService.visibleColumns().length === 0"
                             scope="col"
-                            class="border-r border-border"
+                            class="border-e border-border"
                             [attr.colspan]="1"
                             [style.width.px]="gridService.selectionColumnWidth">
                             @if (
@@ -312,7 +312,7 @@
                                 [lockedCellHeader]="true"
                                 [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                 scope="col"
-                                class="border-r border-border"
+                                class="border-e border-border"
                                 [style.width.px]="gridService.groupColumnWidth"></th>
                         }
                         @if (gridService.rowReorderColumnVisible()) {
@@ -321,7 +321,7 @@
                                 [lockedCellHeader]="true"
                                 [structuralColumn]="'reorder'"
                                 scope="col"
-                                class="border-r border-border"
+                                class="border-e border-border"
                                 [style.width.px]="gridService.rowReorderColumnWidth"></th>
                         }
                         @if (gridService.masterDetailTemplate()) {
@@ -330,7 +330,7 @@
                                 [lockedCellHeader]="true"
                                 [structuralColumn]="'detail'"
                                 scope="col"
-                                class="border-r border-border"
+                                class="border-e border-border"
                                 [style.width.px]="gridService.detailColumnWidth"></th>
                         }
                         @if (gridService.selectionColumnVisible()) {
@@ -339,7 +339,7 @@
                                 [lockedCellHeader]="true"
                                 [structuralColumn]="'selection'"
                                 scope="col"
-                                class="border-r border-border"
+                                class="border-e border-border"
                                 [style.width.px]="gridService.selectionColumnWidth"></th>
                         }
                         @for (column of gridService.visibleColumns(); track $index) {
@@ -348,7 +348,7 @@
                                 [column]="column"
                                 [lockedCellHeader]="true"
                                 scope="col"
-                                class="border-r border-border overflow-hidden"
+                                class="border-e border-border overflow-hidden"
                                 [style.width.px]="column.calculatedWidth"
                                 [attr.aria-label]="'Filter by ' + column.title">
                                 @if (column.kind === "data" && column.field && column.filterable) {
