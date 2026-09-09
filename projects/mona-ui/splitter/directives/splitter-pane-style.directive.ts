@@ -29,6 +29,10 @@ export class SplitterPaneStyleDirective {
     public readonly pane = input.required<SplitterPaneComponent>();
     public readonly paneList = input.required<Iterable<SplitterPaneComponent>>();
 
+    protected getPaneFlexShrink(pane: SplitterPaneComponent): string {
+        return pane.collapsible() && pane.collapsed() ? "0" : "1";
+    }
+
     private getFractionalWeight(size: string | null): number | null {
         if (typeof size !== "string") {
             return null;
@@ -65,10 +69,6 @@ export class SplitterPaneStyleDirective {
             return "1";
         }
         return size === null ? "1" : "0";
-    }
-
-    protected getPaneFlexShrink(pane: SplitterPaneComponent): string {
-        return pane.collapsible() && pane.collapsed() ? "0" : "1";
     }
 
     private getPaneSize(pane: SplitterPaneComponent): string | null {

@@ -1,4 +1,3 @@
-import { Directionality } from "@angular/cdk/bidi";
 import {
     afterNextRender,
     afterRenderEffect,
@@ -13,14 +12,16 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { compact } from "@mirei/ts-collections";
 import { filter, fromEvent, map, merge, skipUntil, takeUntil, tap } from "rxjs";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { SPLITTER_DEFAULT_MESSAGES } from "../../i18n/splitter.default-messages";
 import { splitterResizerThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
 import { SplitterPaneComponent } from "../splitter-pane/splitter-pane.component";
 import { SplitterResizerHandleComponent } from "../splitter-resizer-handle/splitter-resizer-handle.component";
 import { SplitterComponent } from "../splitter/splitter.component";
 
 interface PaneElementData {
-    pane: SplitterPaneComponent;
     element: HTMLElement;
+    pane: SplitterPaneComponent;
     size: number;
 }
 
@@ -33,6 +34,7 @@ interface PaneElementData {
         "[style.cursor]": "resizable() ? (orientation()==='horizontal' ? 'ew-resize' : 'ns-resize') : 'auto'",
         "(dblclick)": "toggleCollapse()",
         role: "separator",
+        "[attr.aria-label]": "ariaLabel() || messages().resizer",
         "[attr.aria-orientation]": "orientation()",
         "[attr.aria-valuemax]": "ariaValueMax()",
         "[attr.aria-valuemin]": "ariaValueMin()",
@@ -42,8 +44,8 @@ interface PaneElementData {
 })
 export class SplitterResizerComponent {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #directionality = inject(Directionality);
     readonly #hostElementRef = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #paneSizeMemory = new WeakMap<SplitterPaneComponent, number>();
     readonly #splitter = inject(SplitterComponent);
     protected readonly ariaValueMax = signal(0);
@@ -58,6 +60,7 @@ export class SplitterResizerComponent {
     protected readonly isInert = computed(() => {
         return !this.resizable() && this.getCollapsibleTargetPane() === null;
     });
+    protected readonly messages = this.#i18n.componentMessages("splitter", SPLITTER_DEFAULT_MESSAGES);
     protected readonly nextCollapseControlsVisible = computed(() => {
         return this.hovered() && this.nextPane().collapsible() && !this.nextPane().collapsed();
     });
@@ -68,6 +71,12 @@ export class SplitterResizerComponent {
         return this.previousPane().resizable() && this.nextPane().resizable();
     });
     protected readonly resizing = signal(false);
+
+    /**
+     * @description Accessible label for the separator element.
+     * @default ""
+     */
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
     public readonly nextPane = input.required<SplitterPaneComponent>();
     public readonly orientation = input.required<SplitterVariantProps["orientation"]>();
     public readonly previousPane = input.required<SplitterPaneComponent>();
@@ -186,7 +195,7 @@ export class SplitterResizerComponent {
     }
 
     private distributeSpaceToNeighbors(space: number, neighbors: PaneElementData[]): void {
-        let remaining = space;
+        const remaining = space;
         const capacities = neighbors.map(neighbor => {
             const max = this.getMaxSize(neighbor.pane);
             const capacity =
@@ -203,7 +212,7 @@ export class SplitterResizerComponent {
             return;
         }
 
-        let available = capacities.reduce((sum, c) => sum + c.capacity, 0);
+        const available = capacities.reduce((sum, c) => sum + c.capacity, 0);
         if (available <= 0) {
             return;
         }
@@ -391,7 +400,7 @@ export class SplitterResizerComponent {
         const orientation = this.orientation();
 
         if (orientation === "horizontal") {
-            const isRtl = this.#directionality.value === "rtl";
+            const isRtl = this.#i18n.direction() === "rtl";
             if (key === "ArrowLeft") {
                 this.collapsePane(isRtl ? "next" : "previous");
                 return true;
@@ -440,7 +449,7 @@ export class SplitterResizerComponent {
             return false;
         }
         if (orientation === "horizontal") {
-            const isRtl = this.#directionality.value === "rtl";
+            const isRtl = this.#i18n.direction() === "rtl";
             if (key === "ArrowLeft") {
                 this.nudgeSplitter(isRtl ? step : -step);
                 return true;
@@ -601,7 +610,10 @@ export class SplitterResizerComponent {
     private updateHorizontalPaneSizes(event: PointerEvent): void {
         const [previousRect, nextRect] = this.getPaneRectangles();
         const maxWidth = previousRect.width + nextRect.width;
-        const desiredPrevWidth = Math.min(Math.max(event.clientX - previousRect.left, 0), maxWidth);
+        const isRtl = this.#i18n.direction() === "rtl";
+        const desiredPrevWidth = isRtl
+            ? Math.min(Math.max(previousRect.right - event.clientX, 0), maxWidth)
+            : Math.min(Math.max(event.clientX - previousRect.left, 0), maxWidth);
         const [previousPaneWidth, nextPaneWidth] = this.clampPaneSizes(
             maxWidth,
             desiredPrevWidth,

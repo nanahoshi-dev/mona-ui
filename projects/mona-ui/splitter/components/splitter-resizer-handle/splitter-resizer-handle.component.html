@@ -4,10 +4,10 @@
             monaButton
             look="secondary"
             [rounded]="'none'"
-            aria-label="Collapse previous pane"
+            [attr.aria-label]="messages().collapsePrevious"
             (click)="collapsePrevious.emit($event)"
             (pointerdown)="onPointerDown($event)">
-            <svg lucideChevronLeft [size]="12"></svg>
+            <svg lucideChevronLeft [size]="12" class="rtl:rotate-180"></svg>
         </button>
     }
     @if (resizable()) {
@@ -18,10 +18,10 @@
             monaButton
             look="secondary"
             [rounded]="'none'"
-            aria-label="Collapse next pane"
+            [attr.aria-label]="messages().collapseNext"
             (click)="collapseNext.emit($event)"
             (pointerdown)="onPointerDown($event)">
-            <svg lucideChevronRight [size]="12"></svg>
+            <svg lucideChevronRight [size]="12" class="rtl:rotate-180"></svg>
         </button>
     }
 } @else {
@@ -30,7 +30,7 @@
             monaButton
             look="secondary"
             [rounded]="'none'"
-            aria-label="Collapse pane above"
+            [attr.aria-label]="messages().collapseUp"
             (click)="collapsePrevious.emit($event)"
             (pointerdown)="onPointerDown($event)">
             <svg lucideChevronUp [size]="12"></svg>
@@ -44,7 +44,7 @@
             monaButton
             look="secondary"
             [rounded]="'none'"
-            aria-label="Collapse pane below"
+            [attr.aria-label]="messages().collapseDown"
             (click)="collapseNext.emit($event)"
             (pointerdown)="onPointerDown($event)">
             <svg lucideChevronDown [size]="12"></svg>

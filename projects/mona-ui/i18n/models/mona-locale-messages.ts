@@ -17,6 +17,7 @@ import type { MonaRatingMessages } from "../message-types/rating.messages";
 import type { MonaSliderMessages } from "../message-types/slider.messages";
 import type { MonaSpinnerMessages } from "../message-types/spinner.messages";
 import type { MonaSplitButtonMessages } from "../message-types/split-button.messages";
+import type { MonaSplitterMessages } from "../message-types/splitter.messages";
 import type { MonaStepperMessages } from "../message-types/stepper.messages";
 import type { MonaTabsMessages } from "../message-types/tabs.messages";
 import type { MonaTextBoxMessages } from "../message-types/text-box.messages";
@@ -41,6 +42,7 @@ export interface MonaLocaleMessages extends Record<string, object> {
     slider: MonaSliderMessages;
     spinner: MonaSpinnerMessages;
     splitButton: MonaSplitButtonMessages;
+    splitter: MonaSplitterMessages;
     stepper: MonaStepperMessages;
     tabs: MonaTabsMessages;
     textBox: MonaTextBoxMessages;

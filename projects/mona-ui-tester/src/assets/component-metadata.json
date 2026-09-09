@@ -13277,16 +13277,16 @@
     "selector": "\"mona-splitter-pane\"",
     "inputs": [
       {
-        "description": "Whether the pane is collapsible.",
-        "kind": "input",
-        "name": "collapsible",
+        "description": "Whether the pane is collapsed.",
+        "kind": "model",
+        "name": "collapsed",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Whether the pane is collapsed.",
-        "kind": "model",
-        "name": "collapsed",
+        "description": "Whether the pane is collapsible.",
+        "kind": "input",
+        "name": "collapsible",
         "type": "boolean",
         "defaultValue": "false"
       },
@@ -13324,6 +13324,13 @@
     "name": "SplitterResizerComponent",
     "selector": "\"mona-splitter-resizer\"",
     "inputs": [
+      {
+        "description": "Accessible label for the separator element.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "",
         "kind": "input",
