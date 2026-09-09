@@ -1,7 +1,6 @@
 import { cva } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
-import type { TabsPosition } from "../models/TabsPosition";
 
 export const tabListBaseThemeVariants = cva(
     `
@@ -12,8 +11,8 @@ export const tabListBaseThemeVariants = cva(
             position: {
                 top: "flex-row border-b border-border",
                 bottom: "flex-row border-t border-border",
-                left: "flex-col max-h-full min-h-0 border-r border-border",
-                right: "flex-col max-h-full min-h-0 border-l border-border"
+                left: "flex-col max-h-full min-h-0 border-e border-border",
+                right: "flex-col max-h-full min-h-0 border-s border-border"
             }
         },
         defaultVariants: {
@@ -67,8 +66,8 @@ export const tabListListItemThemeVariants = cva(
             position: {
                 top: "items-center justify-center whitespace-nowrap after:inset-x-0 after:bottom-0 after:h-[2px]",
                 bottom: "items-center justify-center whitespace-nowrap after:inset-x-0 after:top-0 after:h-[2px]",
-                left: "w-full items-center justify-start text-start after:inset-y-0 after:right-0 after:w-[2px]",
-                right: "w-full items-center justify-start text-start after:inset-y-0 after:left-0 after:w-[2px]"
+                left: "w-full items-center justify-start text-start after:inset-y-0 after:end-0 after:w-[2px]",
+                right: "w-full items-center justify-start text-start after:inset-y-0 after:start-0 after:w-[2px]"
             },
             size: {
                 small: "h-8 px-2 text-xs",

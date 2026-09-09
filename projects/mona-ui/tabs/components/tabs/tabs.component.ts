@@ -1,10 +1,8 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChildren,
-    inject,
     input,
     linkedSignal,
     output,
@@ -27,15 +25,12 @@ import { TabComponent } from "../tab/tab.component";
 @Component({
     selector: "mona-tabs",
     templateUrl: "./tabs.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet, TabListComponent],
     host: {
         "[class]": "baseClass()"
     }
 })
 export class TabsComponent implements TabsVariantInput {
-    private readonly tabListComponent = viewChild.required(TabListComponent);
-    private readonly tabs = contentChildren(TabComponent);
     protected readonly baseClass = computed(() => {
         const variantClass = tabsBaseThemeVariants({ position: this.position() });
         const userClass = this.userClass();
@@ -60,6 +55,8 @@ export class TabsComponent implements TabsVariantInput {
             .tap((t, tx) => (t.index = tx))
             .toImmutableSet();
     });
+    protected readonly tabListComponent = viewChild.required(TabListComponent);
+    protected readonly tabs = contentChildren(TabComponent);
 
     /**
      * @description Displays a close button on each tab, unless overridden per tab.

@@ -69,21 +69,21 @@ describe("TabListItemDirective", () => {
         expect(classes).toContain("after:h-[2px]");
     });
 
-    it("applies right-side indicator for left position", () => {
+    it("applies end-side indicator for left position", () => {
         host.position.set("left");
         fixture.detectChanges();
         const classes = tabItem().className.split(/\s+/);
         expect(classes).toContain("after:inset-y-0");
-        expect(classes).toContain("after:right-0");
+        expect(classes).toContain("after:end-0");
         expect(classes).toContain("after:w-[2px]");
     });
 
-    it("applies left-side indicator for right position", () => {
+    it("applies start-side indicator for right position", () => {
         host.position.set("right");
         fixture.detectChanges();
         const classes = tabItem().className.split(/\s+/);
         expect(classes).toContain("after:inset-y-0");
-        expect(classes).toContain("after:left-0");
+        expect(classes).toContain("after:start-0");
         expect(classes).toContain("after:w-[2px]");
     });
 

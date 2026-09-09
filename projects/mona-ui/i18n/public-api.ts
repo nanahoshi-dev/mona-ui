@@ -27,6 +27,7 @@ export * from "./message-types/rating.messages";
 export * from "./message-types/slider.messages";
 export * from "./message-types/spinner.messages";
 export * from "./message-types/split-button.messages";
+export * from "./message-types/tabs.messages";
 export * from "./message-types/text-box.messages";
 
 export * from "./tokens/mona-i18n-config.token";

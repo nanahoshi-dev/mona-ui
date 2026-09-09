@@ -9,3 +9,4 @@ export * from "./directives/tab-content-template.directive";
 export * from "./directives/tab-title-template.directive";
 export * from "./components/tabs/tabs.component";
 export * from "./components/tab/tab.component";
+export * from "./i18n/tabs.default-messages";
