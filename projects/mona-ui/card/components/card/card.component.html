@@ -14,7 +14,7 @@
             </div>
         }
         @if (actionTemplate().length > 0) {
-            <div [class]="actionsCellClass" role="group" aria-label="Card actions">
+            <div [class]="actionsCellClass" role="group" [attr.aria-label]="messages().actionsLabel">
                 @for (template of actionTemplate(); track template) {
                     <ng-container [ngTemplateOutlet]="template" />
                 }

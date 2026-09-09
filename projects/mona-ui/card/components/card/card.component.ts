@@ -1,9 +1,12 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input } from "@angular/core";
 import { classInputToClass } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import { CardContentDirective } from "../../directives/card-content.directive";
+import { CARD_DEFAULT_MESSAGES } from "../../i18n/card.default-messages";
 import { CardService } from "../../services/card.service";
+
 import {
     cardBaseThemeVariants,
     cardFooterThemeVariants,
@@ -28,8 +31,9 @@ import {
 })
 export class CardComponent implements CardVariantInput {
     readonly #cardService = inject(CardService);
-    protected readonly actionsCellClass = cardHeaderActionsThemeVariants();
+    readonly #i18n = inject(MonaI18nService);
     protected readonly actionTemplate = this.#cardService.actionTemplate.asReadonly();
+    protected readonly actionsCellClass = cardHeaderActionsThemeVariants();
     protected readonly baseClass = computed(() => {
         const rounded = this.rounded();
         const hasHeader = !!this.headerTemplate();
@@ -56,6 +60,7 @@ export class CardComponent implements CardVariantInput {
         return twMerge(variantClass, userClass);
     });
     protected readonly headerTemplate = this.#cardService.headerTemplate.asReadonly();
+    protected readonly messages = this.#i18n.componentMessages("card", CARD_DEFAULT_MESSAGES);
     protected readonly titleCellClass = cardHeaderTitleThemeVariants();
     protected readonly titleId = this.#cardService.titleId.asReadonly();
     protected readonly titleTemplate = this.#cardService.titleTemplate.asReadonly();

@@ -8,6 +8,7 @@ export * from "./models/mona-i18n-config";
 export * from "./models/mona-locale";
 export * from "./models/mona-locale-messages";
 
+export * from "./message-types/card.messages";
 export * from "./message-types/chip.messages";
 export * from "./message-types/pager.messages";
 

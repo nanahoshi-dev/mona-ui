@@ -1,5 +1,6 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { CardActionDirective } from "../../directives/card-action.directive";
 import { CardContentDirective } from "../../directives/card-content.directive";
 import { CardDescriptionDirective } from "../../directives/card-description.directive";
@@ -108,4 +109,25 @@ describe("CardComponent", () => {
         expect(group).toBeTruthy();
         expect(group.getAttribute("aria-label")).toBe("Card actions");
     });
+
+    it("dynamically updates the card actions aria-label on locale change", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        let group: HTMLElement = fixture.nativeElement.querySelector('[role="group"]');
+        expect(group.getAttribute("aria-label")).toBe("Card actions");
+
+        i18n.use({
+            id: "tr-TR",
+            direction: "ltr",
+            messages: {
+                card: {
+                    actionsLabel: "Kart eylemleri"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        group = fixture.nativeElement.querySelector('[role="group"]');
+        expect(group.getAttribute("aria-label")).toBe("Kart eylemleri");
+    });
 });
+
