@@ -46,7 +46,7 @@ import {
     DropdownPopupInputToken,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -110,11 +110,13 @@ import {
 export class DateTimePickerComponent implements FormValueControl<Date | null>, DropdownPopupInput {
     readonly #calendarService = inject(CalendarService);
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #id = createElementControlId();
     readonly #timeSelectorService = inject(TimeSelectorService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
 
     protected readonly activeView = signal<ActiveView>("date");
     protected readonly baseClass = computed(() => {
@@ -518,12 +520,12 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         }
         if (event.altKey && event.key === "ArrowRight" && popupOpen) {
             event.preventDefault();
-            this.activeView.set(this.#i18n.direction() === "rtl" ? "date" : "time");
+            this.activeView.set(this.isRtl() ? "date" : "time");
             return;
         }
         if (event.altKey && event.key === "ArrowLeft" && popupOpen) {
             event.preventDefault();
-            this.activeView.set(this.#i18n.direction() === "rtl" ? "time" : "date");
+            this.activeView.set(this.isRtl() ? "time" : "date");
             return;
         }
         if (event.key === "Enter" && popupOpen) {
@@ -588,10 +590,10 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
                     this.closePopup();
                 } else if (keyboardEvent.altKey && keyboardEvent.key === "ArrowRight") {
                     keyboardEvent.preventDefault();
-                    this.activeView.set(this.#i18n.direction() === "rtl" ? "date" : "time");
+                    this.activeView.set(this.isRtl() ? "date" : "time");
                 } else if (keyboardEvent.altKey && keyboardEvent.key === "ArrowLeft") {
                     keyboardEvent.preventDefault();
-                    this.activeView.set(this.#i18n.direction() === "rtl" ? "time" : "date");
+                    this.activeView.set(this.isRtl() ? "time" : "date");
                 } else if (keyboardEvent.key === "Enter" && this.activeView() === "time") {
                     const target = keyboardEvent.target as HTMLElement;
                     if (target.tagName === "BUTTON" || target.closest("button")) {

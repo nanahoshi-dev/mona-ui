@@ -3,7 +3,7 @@ import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, O
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideCheck, LucideChevronRight } from "@lucide/angular";
 import { createElementControlId, isNavigationKey, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupCloseEvent, PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { groupBy, selectMany } from "@mirei/ts-collections";
 import { filter, fromEvent, Observable, Subject, switchMap, take, takeUntil, tap } from "rxjs";
@@ -61,8 +61,10 @@ export class PopupMenuListComponent implements OnInit {
         return data;
     });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #host = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     readonly #navigationItems = computed(() => {
         const items = this.#parentConfig.items;
         return selectMany(items, i => i.source)
@@ -123,7 +125,7 @@ export class PopupMenuListComponent implements OnInit {
                 this.#host.nativeElement.firstElementChild?.focus();
                 if (!this.#parentConfig.isRoot && this.#parentConfig.viaKeyboardNavigation) {
                     const item = this.focusFirstItem();
-                    const isRtl = this.#i18n.direction() === "rtl";
+                    const isRtl = this.isRtl();
                     this.notifyNavigation(item, isRtl ? "left" : "right");
                 }
             }
@@ -289,7 +291,7 @@ export class PopupMenuListComponent implements OnInit {
     }
 
     private handleNavigationKey(event: KeyboardEvent): void {
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const openKey = isRtl ? "ArrowLeft" : "ArrowRight";
         const closeKey = isRtl ? "ArrowRight" : "ArrowLeft";
         const forwardDir = isRtl ? "left" : "right";
@@ -408,7 +410,7 @@ export class PopupMenuListComponent implements OnInit {
                 takeUntilDestroyed(this.#destroyRef),
                 tap(() => {
                     const activeItem = this.activeMenuItem();
-                    const isRtl = this.#i18n.direction() === "rtl";
+                    const isRtl = this.isRtl();
                     this.notifyNavigation(activeItem, isRtl ? "right" : "left");
                     this.closePopup();
                 })

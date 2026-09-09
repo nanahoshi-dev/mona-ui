@@ -82,7 +82,7 @@ describe("SplitterResizerComponent", () => {
             expect(resizer.getAttribute("aria-label")).toBe("فاصل المقسم");
         });
 
-        it("inverts horizontal arrow keyboard nudge in RTL mode", () => {
+        it("inverts horizontal arrow keyboard nudge in RTL mode", async () => {
             const i18n = TestBed.inject(MonaI18nService);
             const resizer = hostFixture.nativeElement.querySelector("mona-splitter-resizer") as HTMLElement;
             const prevElement = resizer.previousElementSibling as HTMLElement;
@@ -111,7 +111,7 @@ describe("SplitterResizerComponent", () => {
                 toJSON: () => {}
             });
 
-            // Set RTL
+            // Set RTL locale
             i18n.use({
                 direction: "rtl",
                 id: "ar-EG",
@@ -119,11 +119,18 @@ describe("SplitterResizerComponent", () => {
             });
             hostFixture.detectChanges();
 
-            // In RTL, pressing ArrowLeft nudges the splitter to the left (increasing previous pane width)
+            // Case 2: RTL locale + LTR DOM -> ArrowLeft nudges splitter leftwards, shrinking prev pane in LTR
             resizer.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
             hostFixture.detectChanges();
-
             const prevPane = hostComponent.panes()[0];
+            expect(prevPane.size()).toBe("190px");
+
+            // Case 4: RTL locale + RTL DOM -> ArrowLeft nudges splitter leftwards, expanding prev pane in RTL
+            hostFixture.nativeElement.setAttribute("dir", "rtl");
+            await hostFixture.whenStable();
+            hostFixture.detectChanges();
+            resizer.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
+            hostFixture.detectChanges();
             expect(prevPane.size()).toBe("210px");
         });
 
@@ -159,12 +166,13 @@ describe("SplitterResizerComponent", () => {
             const prevPane = hostComponent.panes()[0];
             const nextPane = hostComponent.panes()[1];
 
-            // Set RTL
+            // Set RTL locale and DOM
             i18n.use({
                 direction: "rtl",
                 id: "ar-EG",
                 messages: {}
             });
+            hostFixture.nativeElement.setAttribute("dir", "rtl");
             hostFixture.detectChanges();
             await hostFixture.whenStable();
 

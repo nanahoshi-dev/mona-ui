@@ -50,6 +50,7 @@ export * from "./message-types/window.messages";
 
 export * from "./tokens/mona-i18n-config.token";
 export * from "./services/mona-i18n.service";
+export * from "./services/mona-direction.service";
 export * from "./providers/provide-mona-i18n";
 
 export * from "./utilities/merge-messages";

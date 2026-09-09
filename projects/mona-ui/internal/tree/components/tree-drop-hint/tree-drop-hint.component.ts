@@ -8,7 +8,7 @@ import {
 } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { twMerge } from "tailwind-merge";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { DropPositionChangeEvent } from "../../models/DropPositionChangeEvent";
 import { TreeService } from "../../services/tree.service";
 import { treeDropHintBaseThemeVariants, treeDropHintIconThemeVariants } from "../../styles/tree.styles";
@@ -21,6 +21,7 @@ import { treeDropHintBaseThemeVariants, treeDropHintIconThemeVariants } from "..
     }
 })
 export class TreeDropHintComponent<T> {
+    readonly #direction = injectComponentDirection();
     readonly #dropPositionChange: Signal<DropPositionChangeEvent<T> | null> = toSignal(
         inject(TreeService).dropPositionChange$,
         {
@@ -29,6 +30,7 @@ export class TreeDropHintComponent<T> {
     );
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly baseClass = computed(() => {
         return treeDropHintBaseThemeVariants();
     });
@@ -49,7 +51,7 @@ export class TreeDropHintComponent<T> {
         }
         const rect = nodeElement.getBoundingClientRect();
         const position = dropPositionData.position;
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const left = isRtl ? `${rect.right - 40}px` : `${rect.left}px`;
         if (position === "before") {
             return {

@@ -207,6 +207,9 @@ describe("PopupMenuListComponent", () => {
             direction: "rtl",
             id: "ar"
         });
+        fixture.nativeElement.setAttribute("dir", "rtl");
+        await fixture.whenStable();
+        fixture.detectChanges();
 
         // RTL: ArrowLeft opens submenu
         dispatchKey(fixture, "ArrowLeft");
@@ -243,6 +246,9 @@ describe("PopupMenuListComponent", () => {
             direction: "rtl",
             id: "ar"
         });
+        fixture.nativeElement.setAttribute("dir", "rtl");
+        await fixture.whenStable();
+        fixture.detectChanges();
 
         // RTL: ArrowRight requests close
         dispatchKey(fixture, "ArrowRight");

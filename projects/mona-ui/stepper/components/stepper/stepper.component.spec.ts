@@ -1123,7 +1123,18 @@ describe("StepperComponent", () => {
                     id: "ar-EG",
                     messages: {}
                 });
+                fixture.nativeElement.setAttribute("dir", "rtl");
                 await waitForStable(fixture);
+            });
+
+            it("Case 2: RTL locale + LTR DOM maintains normal LTR navigation", async () => {
+                fixture.nativeElement.setAttribute("dir", "ltr");
+                await waitForStable(fixture);
+
+                const stepper = getStepperElement(fixture);
+                dispatchKeydown(stepper, "ArrowRight");
+                await waitForStable(fixture);
+                expect(getIndicators(fixture)[1].getAttribute("tabindex")).toBe("0");
             });
 
             it("should move highlight to step 1 on ArrowLeft from step 0 in RTL", async () => {

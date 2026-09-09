@@ -301,6 +301,19 @@ describe("RangeSliderComponent", () => {
             });
             await waitForStable(fixture);
 
+            // Case 2: RTL locale + LTR DOM -> ArrowRight still increases value (normal LTR)
+            dispatchKeydown(getSecondaryHandle(fixture), "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 9]);
+
+            dispatchKeydown(getSecondaryHandle(fixture), "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+
+            // Case 4: RTL locale + RTL DOM -> inverts horizontal navigation
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            await waitForStable(fixture);
+
             // In RTL, ArrowRight decreases value, ArrowLeft increases value
             dispatchKeydown(getSecondaryHandle(fixture), "ArrowRight");
             await waitForStable(fixture);

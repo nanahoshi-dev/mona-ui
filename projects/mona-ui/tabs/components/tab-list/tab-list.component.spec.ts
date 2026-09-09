@@ -66,6 +66,7 @@ describe("TabListComponent", () => {
     it("should navigate to previous tab with ArrowRight in horizontal RTL", () => {
         const i18n = TestBed.inject(MonaI18nService);
         i18n.use({ direction: "rtl", id: "ar-EG", messages: {} });
+        fixture.nativeElement.setAttribute("dir", "rtl");
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
 
@@ -81,6 +82,7 @@ describe("TabListComponent", () => {
     it("should navigate to next tab with ArrowLeft in horizontal RTL", () => {
         const i18n = TestBed.inject(MonaI18nService);
         i18n.use({ direction: "rtl", id: "ar-EG", messages: {} });
+        fixture.nativeElement.setAttribute("dir", "rtl");
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
 
@@ -88,6 +90,21 @@ describe("TabListComponent", () => {
         const preventDefaultSpy = vi.fn();
 
         fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowLeft", preventDefault: preventDefaultSpy });
+        fixture.detectChanges();
+        expect(preventDefaultSpy).toHaveBeenCalled();
+        expect(emitSpy.mock.calls[0][0].index).toBe(1);
+    });
+
+    it("Case 2: should maintain normal LTR navigation when RTL locale is used with LTR DOM", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({ direction: "rtl", id: "ar-EG", messages: {} });
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        const preventDefaultSpy = vi.fn();
+
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight", preventDefault: preventDefaultSpy });
         fixture.detectChanges();
         expect(preventDefaultSpy).toHaveBeenCalled();
         expect(emitSpy.mock.calls[0][0].index).toBe(1);

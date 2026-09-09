@@ -13,7 +13,7 @@ import { ComponentPortal } from "@angular/cdk/portal";
 import { ScrollDispatcher, type ScrollDispatcherTarget } from "@angular/cdk/scrolling";
 import { DestroyRef, DOCUMENT, ElementRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { MonaI18nService, resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
@@ -131,7 +131,13 @@ export class PopupService {
     private createOverlay(settings: PopupSettings): OverlayRef {
         const positionStrategy = this.createPositionStrategy(settings);
         const panelClass = this.buildPanelClass(settings.popupClass);
-        const direction = this.#i18n?.direction() ?? this.#directionality?.value;
+        const anchorElement =
+            settings.anchor instanceof ElementRef
+                ? settings.anchor.nativeElement
+                : settings.anchor instanceof HTMLElement
+                  ? settings.anchor
+                  : null;
+        const direction = resolveComponentDirection(anchorElement, this.#directionality);
         return this.#overlay.create(
             new OverlayConfig({
                 positionStrategy,

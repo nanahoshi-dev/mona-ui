@@ -395,7 +395,22 @@ describe("ColorPaletteComponent i18n & RTL", () => {
         });
         await waitForStable(fixture);
 
-        const tile0 = getTile(fixture, 0);
+        // Case 2: RTL locale + LTR DOM -> maintains normal LTR navigation
+        let tile0 = getTile(fixture, 0);
+        dispatchKeyDown(tile0, "ArrowRight");
+        await waitForKeyboardNavigation(fixture);
+        expect(getTile(fixture, 1).getAttribute("tabindex")).toBe("0");
+
+        // Reset to tile 0
+        dispatchKeyDown(getTile(fixture, 1), "ArrowLeft");
+        await waitForKeyboardNavigation(fixture);
+        expect(getTile(fixture, 0).getAttribute("tabindex")).toBe("0");
+
+        // Case 4: RTL locale + RTL DOM -> inverts horizontal navigation
+        fixture.nativeElement.setAttribute("dir", "rtl");
+        await waitForStable(fixture);
+
+        tile0 = getTile(fixture, 0);
         dispatchKeyDown(tile0, "ArrowLeft");
         await waitForKeyboardNavigation(fixture);
 

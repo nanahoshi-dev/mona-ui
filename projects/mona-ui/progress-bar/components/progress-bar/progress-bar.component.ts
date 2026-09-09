@@ -1,7 +1,7 @@
 import { DecimalPipe, NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input } from "@angular/core";
 import { getPercentage } from "@nanahoshi/mona-ui/common";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { Action } from "@nanahoshi/mona-ui/internal";
 
 import { twMerge } from "tailwind-merge";
@@ -52,7 +52,9 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
         const progress = this.progress();
         return typeof color === "string" ? color : color?.(progress);
     });
+    readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
         const classes = progressBarBaseThemeVariants({ rounded });
@@ -68,7 +70,7 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     protected readonly labelTemplate = contentChild(ProgressBarLabelTemplateDirective);
     protected readonly nextTrackClipPath = computed(() => {
         const progress = this.progress();
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         return isRtl
             ? `inset(-1px ${progress}% -1px -1px)`
             : `inset(-1px -1px -1px ${progress}%)`;
@@ -80,7 +82,7 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
             return `inset(-1px -1px -1px -1px)`;
         }
         const offset = progress < 100 ? 8 : 0;
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         return isRtl
             ? `inset(-1px 0px -1px ${offset}px)`
             : `inset(-1px ${offset}px -1px 0px)`;

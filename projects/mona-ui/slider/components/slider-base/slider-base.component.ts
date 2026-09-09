@@ -15,7 +15,7 @@ import {
 } from "@angular/core";
 import { Orientation } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
 import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-value-template.directive";
 import { SliderTickDirective } from "../../directives/slider-tick.directive";
@@ -51,9 +51,10 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return { background: "transparent", border: "none", boxShadow: "none" };
     });
+    protected readonly direction = injectComponentDirection();
     protected readonly hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     protected readonly i18n = inject(MonaI18nService);
-    protected readonly isRtl = computed(() => this.i18n.direction() === "rtl");
+    protected readonly isRtl = computed(() => this.direction() === "rtl");
     protected readonly labelStyleArgs = computed<LabelStyleArgs>(() => {
         const labelPosition = this.labelPosition();
         const max = this.maxValue();

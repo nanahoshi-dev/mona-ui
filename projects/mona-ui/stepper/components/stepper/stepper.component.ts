@@ -17,7 +17,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { select } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { StepperIndicatorTemplateDirective } from "../../directives/stepper-indicator-template.directive";
 import { StepperIndicatorDirective } from "../../directives/stepper-indicator.directive";
 import { StepperLabelTemplateDirective } from "../../directives/stepper-label-template.directive";
@@ -48,8 +48,10 @@ import {
 })
 export class StepperComponent implements StepperVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     readonly #trackItemSize = computed(() => {
         const stepCount = this.viewSteps().length;
         return stepCount !== 0 ? 100 / stepCount : 0;
@@ -266,7 +268,7 @@ export class StepperComponent implements StepperVariantInput {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 const orientation = this.orientation();
-                const isRtl = this.#i18n.direction() === "rtl";
+                const isRtl = this.isRtl();
                 let previousKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
                 let nextKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
                 if (orientation === "horizontal" && isRtl) {

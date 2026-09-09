@@ -12,7 +12,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { compact } from "@mirei/ts-collections";
 import { filter, fromEvent, map, merge, skipUntil, takeUntil, tap } from "rxjs";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SPLITTER_DEFAULT_MESSAGES } from "../../i18n/splitter.default-messages";
 import { splitterResizerThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
 import { SplitterPaneComponent } from "../splitter-pane/splitter-pane.component";
@@ -44,10 +44,12 @@ interface PaneElementData {
 })
 export class SplitterResizerComponent {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #paneSizeMemory = new WeakMap<SplitterPaneComponent, number>();
     readonly #splitter = inject(SplitterComponent);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly ariaValueMax = signal(0);
     protected readonly ariaValueMin = signal(0);
     protected readonly ariaValueNow = signal(0);
@@ -400,7 +402,7 @@ export class SplitterResizerComponent {
         const orientation = this.orientation();
 
         if (orientation === "horizontal") {
-            const isRtl = this.#i18n.direction() === "rtl";
+            const isRtl = this.isRtl();
             if (key === "ArrowLeft") {
                 this.collapsePane(isRtl ? "next" : "previous");
                 return true;
@@ -449,7 +451,7 @@ export class SplitterResizerComponent {
             return false;
         }
         if (orientation === "horizontal") {
-            const isRtl = this.#i18n.direction() === "rtl";
+            const isRtl = this.isRtl();
             if (key === "ArrowLeft") {
                 this.nudgeSplitter(isRtl ? step : -step);
                 return true;
@@ -610,7 +612,7 @@ export class SplitterResizerComponent {
     private updateHorizontalPaneSizes(event: PointerEvent): void {
         const [previousRect, nextRect] = this.getPaneRectangles();
         const maxWidth = previousRect.width + nextRect.width;
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const desiredPrevWidth = isRtl
             ? Math.min(Math.max(previousRect.right - event.clientX, 0), maxWidth)
             : Math.min(Math.max(event.clientX - previousRect.left, 0), maxWidth);

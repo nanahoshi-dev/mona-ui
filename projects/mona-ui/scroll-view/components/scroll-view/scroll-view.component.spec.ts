@@ -140,7 +140,7 @@ describe("ScrollViewComponent", () => {
         expect(component.index()).toBe(0);
     });
 
-    it("inverts horizontal keyboard navigation with ArrowRight and ArrowLeft in RTL mode", () => {
+    it("maintains LTR keyboard navigation when locale is RTL but DOM is LTR (direction mismatch)", () => {
         const i18n = TestBed.inject(MonaI18nService);
         i18n.use({ direction: "rtl", id: "ar-EG", messages: {} });
 
@@ -149,12 +149,30 @@ describe("ScrollViewComponent", () => {
         fixture.detectChanges();
 
         const host = fixture.nativeElement as HTMLElement;
-        // In RTL, ArrowLeft navigates forward (next)
+        // In LTR DOM, ArrowRight navigates forward even with RTL locale
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+        fixture.detectChanges();
+        expect(component.index()).toBe(1);
+
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
+        fixture.detectChanges();
+        expect(component.index()).toBe(0);
+    });
+
+    it("inverts horizontal keyboard navigation when DOM is RTL", () => {
+        fixture.componentRef.setInput("data", ["Item 1", "Item 2", "Item 3"]);
+        fixture.componentRef.setInput("index", 0);
+
+        const host = fixture.nativeElement as HTMLElement;
+        host.setAttribute("dir", "rtl");
+        fixture.detectChanges();
+
+        // In RTL DOM, ArrowLeft navigates forward (next)
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
         fixture.detectChanges();
         expect(component.index()).toBe(1);
 
-        // In RTL, ArrowRight navigates backward (previous)
+        // In RTL DOM, ArrowRight navigates backward (previous)
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
         fixture.detectChanges();
         expect(component.index()).toBe(0);

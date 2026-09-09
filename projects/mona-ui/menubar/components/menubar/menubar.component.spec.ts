@@ -129,6 +129,7 @@ describe("MenubarComponent", () => {
         });
 
         const hostFixture = TestBed.createComponent(TestMenubarHostComponent);
+        hostFixture.nativeElement.setAttribute("dir", "rtl");
         hostFixture.detectChanges();
 
         const items = hostFixture.nativeElement.querySelectorAll('li[role="menuitem"]') as NodeListOf<HTMLElement>;
@@ -144,6 +145,29 @@ describe("MenubarComponent", () => {
         items[1].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
         hostFixture.detectChanges();
         expect(document.activeElement).toBe(items[0]);
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
+    it("Case 2: RTL locale + LTR DOM maintains normal LTR arrow key navigation", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            direction: "rtl",
+            id: "ar"
+        });
+
+        const hostFixture = TestBed.createComponent(TestMenubarHostComponent);
+        hostFixture.detectChanges();
+
+        const items = hostFixture.nativeElement.querySelectorAll('li[role="menuitem"]') as NodeListOf<HTMLElement>;
+        items[0].focus();
+        expect(document.activeElement).toBe(items[0]);
+
+        // In LTR: ArrowRight advances to next menu (Edit)
+        items[0].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+        hostFixture.detectChanges();
+        expect(document.activeElement).toBe(items[1]);
 
         i18n.use(MONA_DEFAULT_LOCALE);
     });

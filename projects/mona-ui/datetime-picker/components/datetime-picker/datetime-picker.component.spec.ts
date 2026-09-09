@@ -134,7 +134,7 @@ describe("DateTimePickerComponent", () => {
         i18n.use(MONA_DEFAULT_LOCALE);
     });
 
-    it("inverts alt+arrow keyboard tab switching in RTL mode", () => {
+    it("inverts alt+arrow keyboard tab switching in RTL mode", async () => {
         const i18n = TestBed.inject(MonaI18nService);
         const toggleBtn = fixture.nativeElement.querySelector("button[monaButton]") as HTMLButtonElement;
         toggleBtn.click();
@@ -148,11 +148,13 @@ describe("DateTimePickerComponent", () => {
         let popup = document.querySelector("div[role='dialog']") as HTMLElement;
         expect(popup.querySelector("div[aria-label='Time picker']")).not.toBeNull();
 
-        // Switch to RTL
+        // Switch to RTL locale and DOM
         i18n.use({
             ...MONA_DEFAULT_LOCALE,
             direction: "rtl"
         });
+        host.setAttribute("dir", "rtl");
+        await fixture.whenStable();
         fixture.detectChanges();
 
         // In RTL: Alt+ArrowRight moves to date

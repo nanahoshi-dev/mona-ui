@@ -56,7 +56,7 @@ describe("ProgressBarComponent", () => {
         expect(filledTrack.getAttribute("data-end")).toBe("true");
     });
 
-    it("computes clip-paths appropriately for LTR and RTL directions", () => {
+    it("computes clip-paths appropriately for LTR and RTL directions and respects DOM direction over locale", async () => {
         const i18n = TestBed.inject(MonaI18nService);
         fixture.componentRef.setInput("value", 40);
         fixture.detectChanges();
@@ -65,16 +65,42 @@ describe("ProgressBarComponent", () => {
         let filledTrack = host.querySelector("[data-prev='true']") as HTMLElement;
         let remainingTrack = host.querySelector("[data-next='true']") as HTMLElement;
 
-        // LTR defaults
+        // Case 1: LTR locale + LTR DOM
         expect(remainingTrack.style.clipPath).toBe("inset(-1px -1px -1px 40%)");
         expect(filledTrack.style.clipPath).toBe("inset(-1px 8px -1px 0px)");
 
-        // Switch to RTL
+        // Case 2: RTL locale + LTR DOM -> maintains LTR clip-path
         i18n.use({
             id: "ar-EG",
             direction: "rtl",
             messages: {}
         });
+        fixture.detectChanges();
+
+        filledTrack = host.querySelector("[data-prev='true']") as HTMLElement;
+        remainingTrack = host.querySelector("[data-next='true']") as HTMLElement;
+
+        expect(remainingTrack.style.clipPath).toBe("inset(-1px -1px -1px 40%)");
+        expect(filledTrack.style.clipPath).toBe("inset(-1px 8px -1px 0px)");
+
+        // Case 4: RTL locale + RTL DOM -> uses RTL clip-path
+        host.setAttribute("dir", "rtl");
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        filledTrack = host.querySelector("[data-prev='true']") as HTMLElement;
+        remainingTrack = host.querySelector("[data-next='true']") as HTMLElement;
+
+        expect(remainingTrack.style.clipPath).toBe("inset(-1px 40% -1px -1px)");
+        expect(filledTrack.style.clipPath).toBe("inset(-1px 0px -1px 8px)");
+
+        // Case 3: LTR locale + RTL DOM -> maintains RTL clip-path
+        i18n.use({
+            id: "en-US",
+            direction: "ltr",
+            messages: {}
+        });
+        await fixture.whenStable();
         fixture.detectChanges();
 
         filledTrack = host.querySelector("[data-prev='true']") as HTMLElement;

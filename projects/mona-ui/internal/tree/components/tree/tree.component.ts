@@ -15,7 +15,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { asapScheduler, filter, fromEvent, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
@@ -42,11 +42,13 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
 })
 export class TreeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly activeDescendantId = computed<string | null>(() => {
         const node = this.treeService.navigatedNode();
         return node === null ? null : this.treeService.getNodeElementId(node.uid);
@@ -185,7 +187,7 @@ export class TreeComponent<T> {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 const navigatedNode = this.treeService.navigatedNode();
-                const isRtl = this.#i18n.direction() === "rtl";
+                const isRtl = this.isRtl();
                 const collapseKey = isRtl ? "ArrowRight" : "ArrowLeft";
                 const expandKey = isRtl ? "ArrowLeft" : "ArrowRight";
                 if (event.key === "ArrowUp") {

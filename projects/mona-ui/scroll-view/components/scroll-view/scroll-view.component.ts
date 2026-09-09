@@ -33,7 +33,7 @@ import {
     timer
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ScrollViewActivePageDirective } from "../../directives/scroll-view-active-page.directive";
 import { SCROLL_VIEW_DEFAULT_MESSAGES } from "../../i18n/scroll-view.default-messages";
 import { PagerOverlay } from "../../models/PagerOverlay";
@@ -121,6 +121,7 @@ import {
 })
 export class ScrollViewComponent implements ScrollViewVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #directionFromIndex: Signal<"left" | "right">;
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
@@ -157,15 +158,16 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         return scrollViewContentThemeVariants();
     });
     protected readonly contentTemplate = contentChild(TemplateRef);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly enterAnimation = computed(() => {
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const dir = this.#directionFromIndex();
         const effectiveDir = isRtl ? (dir === "right" ? "left" : "right") : dir;
         return effectiveDir === "right" ? "slide-in-from-right" : "slide-in-from-left";
     });
     protected readonly itemCount = computed(() => this.viewData().length);
     protected readonly leaveAnimation = computed(() => {
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const dir = this.#directionFromIndex();
         const effectiveDir = isRtl ? (dir === "right" ? "left" : "right") : dir;
         return effectiveDir === "right" ? "slide-out-to-left" : "slide-out-to-right";
@@ -339,7 +341,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         if (type === "continuous") {
             this.#document.addEventListener("mouseup", this.#scrollMouseUpHandler, { once: true });
         }
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const timeFunction = type === "single" ? timer : interval;
         timeFunction(60)
             .pipe(takeUntil(this.#scroll$), takeUntilDestroyed(this.#destroyRef))
@@ -423,7 +425,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
                 takeUntilDestroyed(this.#destroyRef),
                 filter(event => event.key === "ArrowLeft" || event.key === "ArrowRight"),
                 tap(event => {
-                    const isRtl = this.#i18n.direction() === "rtl";
+                    const isRtl = this.isRtl();
                     let direction: ScrollDirection;
                     if (event.key === "ArrowLeft") {
                         direction = isRtl ? "right" : "left";

@@ -25,7 +25,7 @@ import {
 } from "@lucide/angular";
 import { firstOrDefault } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
 import { TABS_DEFAULT_MESSAGES } from "../../i18n/tabs.default-messages";
@@ -63,10 +63,12 @@ import {
 })
 export class TabListComponent implements TabListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
     readonly #keydown$ = new Subject<KeyboardEvent>();
     readonly #scrollIntent$ = new Subject<ScrollIntent | null>();
     #resizeObserver: ResizeObserver | null = null;
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly baseClass = computed(() => {
         return tabListBaseThemeVariants({ position: this.position() });
     });
@@ -217,7 +219,7 @@ export class TabListComponent implements TabListVariantInput {
             }
             return null;
         }
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         if (event.key === "ArrowLeft") {
             return isRtl ? "next" : "previous";
         }
@@ -292,7 +294,7 @@ export class TabListComponent implements TabListVariantInput {
             element.scrollBy({ top: offset, behavior: "smooth" });
             return;
         }
-        if (this.#i18n.direction() === "rtl") {
+        if (this.isRtl()) {
             offset = -offset;
         }
         element.scrollBy({ left: offset, behavior: "smooth" });

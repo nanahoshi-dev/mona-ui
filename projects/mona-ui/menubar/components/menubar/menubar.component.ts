@@ -19,7 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { rotate, zip } from "@mirei/ts-collections";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
     PopupMenuComponent,
     PopupMenuGroupTemplateDirective,
@@ -64,9 +64,11 @@ import { MenuComponent } from "../menu/menu.component";
 })
 export class MenubarComponent implements MenubarVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly activeIndex = signal(0);
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
@@ -209,7 +211,7 @@ export class MenubarComponent implements MenubarVariantInput {
             return;
         }
 
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const nextMenuKey = isRtl ? "ArrowLeft" : "ArrowRight";
         const prevMenuKey = isRtl ? "ArrowRight" : "ArrowLeft";
 
@@ -384,7 +386,7 @@ export class MenubarComponent implements MenubarVariantInput {
                 startWith(null),
                 pairwise(),
                 tap(([prev, next]) => {
-                    const isRtl = this.#i18n.direction() === "rtl";
+                    const isRtl = this.isRtl();
                     const nextDir = isRtl ? "left" : "right";
                     const prevDir = isRtl ? "right" : "left";
                     if (next && next.direction === nextDir && (next.level === 0 || (next.level > 0 && !next.item))) {

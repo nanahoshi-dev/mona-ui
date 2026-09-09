@@ -27,7 +27,7 @@ import {
     TimeLimiterPipe,
     TimeSelectorService
 } from "@nanahoshi/mona-ui/date-input";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { DateTime } from "luxon";
 import { fromEvent, tap } from "rxjs";
@@ -66,10 +66,12 @@ import {
 })
 export class TimeSelectorComponent implements FormValueControl<Date | null>, TimeSelectorVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
     readonly #timeSelectorService = inject(TimeSelectorService, { optional: true });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
 
     protected readonly amMeridiemVisible = computed(() => {
         const min = this.min();
@@ -347,7 +349,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
             lists.push("meridiem");
         }
         const currentIndex = lists.indexOf(current);
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const effectiveDirection = isRtl ? (direction === "left" ? "right" : "left") : direction;
         if (effectiveDirection === "right") {
             return lists[(currentIndex + 1) % lists.length];

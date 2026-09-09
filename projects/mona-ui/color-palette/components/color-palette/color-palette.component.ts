@@ -1,7 +1,7 @@
 import { Component, computed, ElementRef, inject, input, model, output, signal, Signal } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
 import { PaletteType } from "@nanahoshi/mona-ui/common";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import type { ColorScheme } from "@nanahoshi/mona-ui/internal";
 import { count } from "@mirei/ts-collections";
 import {
@@ -33,8 +33,10 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
     }
 })
 export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValueControl<string | null> {
+    readonly #direction = injectComponentDirection();
     readonly #elementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly activeColorIndex = computed(() =>
         this.focusedColorIndex() === -1 ? 0 : this.focusedColorIndex()
     );
@@ -190,7 +192,7 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
 
         const colors = this.colorScheme().colors;
         const columns = this.colorScheme().columns;
-        const isRtl = this.#i18n.direction() === "rtl";
+        const isRtl = this.isRtl();
         const prevKey = isRtl ? "ArrowRight" : "ArrowLeft";
         const nextKey = isRtl ? "ArrowLeft" : "ArrowRight";
         let newIndex = colorIndex;

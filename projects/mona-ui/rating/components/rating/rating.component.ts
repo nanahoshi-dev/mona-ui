@@ -24,7 +24,7 @@ import {
 } from "@lucide/angular";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { range } from "@mirei/ts-collections";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { RATING_DEFAULT_MESSAGES } from "../../i18n/rating.default-messages";
 import { twMerge } from "tailwind-merge";
 import { RatingHoveredItemTemplateDirective } from "../../directives/rating-hovered-item-template.directive";
@@ -77,6 +77,7 @@ const ratingIcons = {
     imports: [NgTemplateOutlet, LucideDynamicIcon]
 })
 export class RatingComponent implements RatingVariantInput, FormValueControl<number> {
+    readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
 
     protected readonly activeState = computed<"hovered" | "selected">(() =>
@@ -113,7 +114,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     protected readonly interactionDisabled = computed(() => this.disabled() || this.readonly());
     protected readonly interactionStep = computed(() => getRatingStep(this.precision()));
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
-    protected readonly isRtl = computed(() => this.#i18n.direction() === "rtl");
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly itemClasses = computed(() => ratingItemThemeVariants({ size: this.size() }));
     protected readonly itemTemplate = contentChild(RatingItemTemplateDirective, { read: TemplateRef });
     protected readonly items = computed<readonly RatingItemDescriptor[]>(() =>
