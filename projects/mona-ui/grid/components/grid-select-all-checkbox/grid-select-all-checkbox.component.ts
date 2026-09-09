@@ -14,6 +14,7 @@ import { gridSelectAllCellThemeVariants } from "../../styles/grid.styles";
 })
 export class GridSelectAllCheckboxComponent {
     readonly #gridService = inject(GridService);
+    protected readonly messages = this.#gridService.messages;
     protected readonly checked = computed(() => this.#gridService.allBulkSelectionRowsSelected());
     protected readonly hostClass = computed(() => gridSelectAllCellThemeVariants());
     protected readonly indeterminate = computed(() => this.#gridService.someBulkSelectionRowsSelected());

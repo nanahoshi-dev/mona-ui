@@ -31,7 +31,7 @@
             <span [class]="cellTextClass()">{{ formattedDisplayValue() }}</span>
         }
         @if (!isCellPristine()) {
-            <span aria-hidden="true" [class]="cellDirtyIndicatorClass()" title="Modified"></span>
+            <span aria-hidden="true" [class]="cellDirtyIndicatorClass()" [title]="gridService.messages().modified"></span>
         }
     </div>
 }

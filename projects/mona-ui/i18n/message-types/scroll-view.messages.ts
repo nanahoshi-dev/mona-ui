@@ -5,4 +5,5 @@ export interface MonaScrollViewMessages {
     readonly previousPage: string;
     readonly scrollPagerLeft: string;
     readonly scrollPagerRight: string;
+    readonly slide: string;
 }

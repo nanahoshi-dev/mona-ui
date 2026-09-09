@@ -6,5 +6,6 @@ export const SCROLL_VIEW_DEFAULT_MESSAGES: MonaScrollViewMessages = {
     pageOf: (current: number, total: number) => `Page ${current} of ${total}`,
     previousPage: "Previous page",
     scrollPagerLeft: "Scroll pager left",
-    scrollPagerRight: "Scroll pager right"
+    scrollPagerRight: "Scroll pager right",
+    slide: "slide"
 };

@@ -4,7 +4,7 @@
             @if ($index === viewIndex()) {
                 <li
                     role="group"
-                    aria-roledescription="slide"
+                    [attr.aria-roledescription]="messages().slide"
                     [attr.aria-label]="messages().pageOf($index + 1, itemCount())"
                     [animate.enter]="enterAnimation()"
                     [animate.leave]="leaveAnimation()"
