@@ -1,12 +1,18 @@
-import { signal } from "@angular/core";
+import { Signal, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { groupBy } from "@mirei/ts-collections";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { PopupCloseEvent, PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { Subject } from "rxjs";
-import { PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
 import { PopupMenuListComponent } from "./popup-menu-list.component";
+
+interface TestPopupMenuListComponent {
+    activeMenuItem: Signal<PopupMenuItem | null>;
+    popupRef: Partial<PopupRef> | null;
+}
 
 const createItem = (overrides: Partial<PopupMenuItem> & { label: string; uid: string }): PopupMenuItem => ({
     disabled: false,
@@ -20,6 +26,7 @@ const createItem = (overrides: Partial<PopupMenuItem> & { label: string; uid: st
 });
 
 const createConfig = (menuItems: PopupMenuItem[]): PopupMenuListConfig => ({
+    childCloseRequest$: new Subject(),
     isRoot: true,
     items: groupBy(menuItems, i => i.group).toArray(),
     level: 0,
@@ -77,7 +84,7 @@ describe("PopupMenuListComponent", () => {
 
     it("ArrowDown selects the first item, then advances and wraps", async () => {
         const fixture = await setup(items);
-        const component = fixture.componentInstance as any;
+        const component = fixture.componentInstance as unknown as TestPopupMenuListComponent;
 
         dispatchKey(fixture, "ArrowDown");
         expect(component.activeMenuItem()).toBe(items[0]);
@@ -94,7 +101,7 @@ describe("PopupMenuListComponent", () => {
 
     it("ArrowUp selects the last item when nothing is active, then moves backward", async () => {
         const fixture = await setup(items);
-        const component = fixture.componentInstance as any;
+        const component = fixture.componentInstance as unknown as TestPopupMenuListComponent;
 
         dispatchKey(fixture, "ArrowUp");
         expect(component.activeMenuItem()).toBe(items[2]);
@@ -105,7 +112,7 @@ describe("PopupMenuListComponent", () => {
 
     it("Home selects the first item and End selects the last item", async () => {
         const fixture = await setup(items);
-        const component = fixture.componentInstance as any;
+        const component = fixture.componentInstance as unknown as TestPopupMenuListComponent;
 
         dispatchKey(fixture, "ArrowDown");
         dispatchKey(fixture, "End");
@@ -136,7 +143,7 @@ describe("PopupMenuListComponent", () => {
             createItem({ label: "Banana", uid: "b-1" })
         ];
         const fixture = await setup(typeaheadItems);
-        const component = fixture.componentInstance as any;
+        const component = fixture.componentInstance as unknown as TestPopupMenuListComponent;
 
         dispatchKey(fixture, "a");
 
@@ -145,7 +152,7 @@ describe("PopupMenuListComponent", () => {
 
     it("Escape closes an open submenu popup reference", async () => {
         const fixture = await setup(items);
-        const component = fixture.componentInstance as any;
+        const component = fixture.componentInstance as unknown as TestPopupMenuListComponent;
         const closeSpy = vi.fn();
         component.popupRef = { close: closeSpy };
 
@@ -175,5 +182,72 @@ describe("PopupMenuListComponent", () => {
         const fixture = await setup(items);
         const event = dispatchKey(fixture, "ArrowDown");
         expect(event.defaultPrevented).toBe(true);
+    });
+
+    it("opens submenu with ArrowRight in LTR and ArrowLeft in RTL", async () => {
+        const subItem = createItem({ label: "Sub Item", uid: "sub-1" });
+        const parentItem = createItem({ label: "Parent", uid: "parent-1", items: [subItem] });
+        const fixture = await setup([parentItem]);
+        const popupService = TestBed.inject(PopupService);
+        const createSpy = vi.spyOn(popupService, "create").mockReturnValue({
+            close: vi.fn(),
+            closed: new Subject<PopupCloseEvent>()
+        } as unknown as PopupRef);
+
+        dispatchKey(fixture, "ArrowDown");
+
+        // LTR: ArrowRight opens submenu
+        dispatchKey(fixture, "ArrowRight");
+        expect(createSpy).toHaveBeenCalledTimes(1);
+
+        // Switch to RTL
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            direction: "rtl",
+            id: "ar"
+        });
+
+        // RTL: ArrowLeft opens submenu
+        dispatchKey(fixture, "ArrowLeft");
+        expect(createSpy).toHaveBeenCalledTimes(2);
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
+    it("triggers close request with ArrowLeft in LTR and ArrowRight in RTL", async () => {
+        const config = createConfig(items);
+        config.level = 1;
+        let closeRequestCount = 0;
+        config.childCloseRequest$ = new Subject<void>();
+        config.childCloseRequest$.subscribe(() => closeRequestCount++);
+
+        await TestBed.configureTestingModule({
+            imports: [PopupMenuListComponent],
+            providers: [{ provide: PopupDataInjectionToken, useValue: config }]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(PopupMenuListComponent);
+        fixture.detectChanges();
+
+        dispatchKey(fixture, "ArrowDown");
+
+        // LTR: ArrowLeft requests close
+        dispatchKey(fixture, "ArrowLeft");
+        expect(closeRequestCount).toBe(1);
+
+        // Switch to RTL
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            direction: "rtl",
+            id: "ar"
+        });
+
+        // RTL: ArrowRight requests close
+        dispatchKey(fixture, "ArrowRight");
+        expect(closeRequestCount).toBe(2);
+
+        i18n.use(MONA_DEFAULT_LOCALE);
     });
 });

@@ -10412,17 +10412,17 @@
         "type": "MenuItemClickEvent"
       },
       {
-        "description": "Sets the size of the menubar.",
-        "kind": "input",
-        "name": "size",
-        "type": "MenubarVariantProps[\"size\"]",
-        "defaultValue": "\"medium\""
-      },
-      {
         "description": "Sets the rounded style of the menubar.",
         "kind": "input",
         "name": "rounded",
         "type": "MenubarVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Sets the size of the menubar.",
+        "kind": "input",
+        "name": "size",
+        "type": "MenubarVariantProps[\"size\"]",
         "defaultValue": "\"medium\""
       },
       {

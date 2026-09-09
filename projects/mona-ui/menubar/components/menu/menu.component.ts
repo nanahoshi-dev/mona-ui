@@ -42,11 +42,11 @@ export class MenuComponent {
             .map(item => item.getPopupMenuItem())
             .flatMap(i => i);
     });
-    public readonly textTemplate = contentChild(MenuTextTemplateDirective, { read: TemplateRef });
     /**
      * @description The text of the menu.
      */
     public readonly text = input("");
+    public readonly textTemplate = contentChild(MenuTextTemplateDirective, { read: TemplateRef });
     public readonly uid = v4();
     public popupMenu: PopupMenuComponent | null = null;
 }

@@ -3,6 +3,7 @@ import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, O
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideCheck, LucideChevronRight } from "@lucide/angular";
 import { createElementControlId, isNavigationKey, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupCloseEvent, PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { groupBy, selectMany } from "@mirei/ts-collections";
 import { filter, fromEvent, Observable, Subject, switchMap, take, takeUntil, tap } from "rxjs";
@@ -61,6 +62,7 @@ export class PopupMenuListComponent implements OnInit {
     });
     readonly #destroyRef = inject(DestroyRef);
     readonly #host = inject(ElementRef<HTMLElement>);
+    readonly #i18n = inject(MonaI18nService);
     readonly #navigationItems = computed(() => {
         const items = this.#parentConfig.items;
         return selectMany(items, i => i.source)
@@ -82,10 +84,7 @@ export class PopupMenuListComponent implements OnInit {
     });
     protected readonly groupHeaderClasses = computed(() => {
         const size = this.#parentConfig.size();
-        const hasIcon = this.iconAreaVisible();
-        const variantClasses = popupMenuGroupHeaderThemeVariants({ size });
-        const iconClasses = ""; //hasIcon ? "pl-8" : "pl-2";
-        return twMerge(variantClasses, iconClasses);
+        return popupMenuGroupHeaderThemeVariants({ size });
     });
     protected readonly iconAreaVisible = computed(() => {
         const items = this.#parentConfig.items;
@@ -106,7 +105,7 @@ export class PopupMenuListComponent implements OnInit {
         const size = this.#parentConfig.size();
         const hasIcon = this.iconAreaVisible();
         const variantClasses = popupMenuItemThemeVariants({ rounded, size });
-        const iconClasses = hasIcon ? "pl-8" : "pl-2";
+        const iconClasses = hasIcon ? "ps-8" : "ps-2";
         return twMerge(variantClasses, iconClasses);
     });
     protected readonly menuItems = computed(() => this.#parentConfig.items);
@@ -124,7 +123,8 @@ export class PopupMenuListComponent implements OnInit {
                 this.#host.nativeElement.firstElementChild?.focus();
                 if (!this.#parentConfig.isRoot && this.#parentConfig.viaKeyboardNavigation) {
                     const item = this.focusFirstItem();
-                    this.notifyNavigation(item, "right");
+                    const isRtl = this.#i18n.direction() === "rtl";
+                    this.notifyNavigation(item, isRtl ? "left" : "right");
                 }
             }
         });
@@ -149,6 +149,10 @@ export class PopupMenuListComponent implements OnInit {
             this.popupRef = null;
         }
         this.#close$.next();
+    }
+
+    private closeSubmenu(): void {
+        this.#parentConfig.childCloseRequest$?.next();
     }
 
     private createSubmenu(target: HTMLElement, viaKeyboard: boolean): Observable<PopupCloseEvent> {
@@ -228,26 +232,6 @@ export class PopupMenuListComponent implements OnInit {
         return firstItem;
     }
 
-    private handleArrowLeftKey(): void {
-        this.#parentConfig.childCloseRequest$?.next();
-    }
-
-    private handleArrowRightKey(): { item: PopupMenuItem | null; hasChild: boolean } {
-        const activeItem = this.activeMenuItem();
-        if (!activeItem) {
-            return { item: null, hasChild: false };
-        }
-        const target = this.#host.nativeElement.querySelector('[data-active="true"]');
-        if (target && activeItem.items.length > 0) {
-            this.createSubmenu(target as HTMLElement, true).subscribe();
-            return { item: activeItem, hasChild: true };
-        }
-        if (activeItem && activeItem.items.length > 0) {
-            return { item: activeItem, hasChild: true };
-        }
-        return { item: null, hasChild: false };
-    }
-
     private handleArrowUpKey(): PopupMenuItem | null {
         if (!this.activeMenuItem()) {
             const lastItem = this.#navigationItems().lastOrDefault();
@@ -305,19 +289,25 @@ export class PopupMenuListComponent implements OnInit {
     }
 
     private handleNavigationKey(event: KeyboardEvent): void {
+        const isRtl = this.#i18n.direction() === "rtl";
+        const openKey = isRtl ? "ArrowLeft" : "ArrowRight";
+        const closeKey = isRtl ? "ArrowRight" : "ArrowLeft";
+        const forwardDir = isRtl ? "left" : "right";
+        const backwardDir = isRtl ? "right" : "left";
+
         let item: PopupMenuItem | null = null;
         if (event.key === "ArrowDown") {
             item = this.handleArrowDownKey();
             this.notifyNavigation(item, "down");
-        } else if (event.key === "ArrowLeft") {
-            this.handleArrowLeftKey();
+        } else if (event.key === closeKey) {
+            this.closeSubmenu();
             if (this.#parentConfig.level === 0) {
-                this.notifyNavigation(null, "left");
+                this.notifyNavigation(null, backwardDir);
             }
-        } else if (event.key === "ArrowRight") {
-            const result = this.handleArrowRightKey();
+        } else if (event.key === openKey) {
+            const result = this.openSubmenu();
             if (!result.hasChild) {
-                this.notifyNavigation(item, "right");
+                this.notifyNavigation(item, forwardDir);
             }
         } else if (event.key === "ArrowUp") {
             item = this.handleArrowUpKey();
@@ -346,6 +336,22 @@ export class PopupMenuListComponent implements OnInit {
         });
     }
 
+    private openSubmenu(): { item: PopupMenuItem | null; hasChild: boolean } {
+        const activeItem = this.activeMenuItem();
+        if (!activeItem) {
+            return { item: null, hasChild: false };
+        }
+        const target = this.#host.nativeElement.querySelector('[data-active="true"]');
+        if (target && activeItem.items.length > 0) {
+            this.createSubmenu(target as HTMLElement, true).subscribe();
+            return { item: activeItem, hasChild: true };
+        }
+        if (activeItem && activeItem.items.length > 0) {
+            return { item: activeItem, hasChild: true };
+        }
+        return { item: null, hasChild: false };
+    }
+
     private setKeyboardEvents(): void {
         const element = this.#host.nativeElement.firstElementChild as HTMLDivElement;
         fromEvent<KeyboardEvent>(element, "keydown")
@@ -360,25 +366,6 @@ export class PopupMenuListComponent implements OnInit {
                         e.preventDefault();
                         this.handleTypeaheadKey(e);
                     }
-                })
-            )
-            .subscribe();
-    }
-
-    private setPopupCloseSubscription(): void {
-        this.#parentConfig.parentClose$
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                tap(() => this.closePopup())
-            )
-            .subscribe();
-        this.#childCloseRequest$
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                tap(() => {
-                    const activeItem = this.activeMenuItem();
-                    this.notifyNavigation(activeItem, "left");
-                    this.closePopup();
                 })
             )
             .subscribe();
@@ -407,6 +394,26 @@ export class PopupMenuListComponent implements OnInit {
         this.pointerLeave$
             .pipe(takeUntilDestroyed(this.#destroyRef), takeUntil(this.pointerEnter$))
             .subscribe(() => this.popupRef?.close());
+    }
+
+    private setPopupCloseSubscription(): void {
+        this.#parentConfig.parentClose$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                tap(() => this.closePopup())
+            )
+            .subscribe();
+        this.#childCloseRequest$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                tap(() => {
+                    const activeItem = this.activeMenuItem();
+                    const isRtl = this.#i18n.direction() === "rtl";
+                    this.notifyNavigation(activeItem, isRtl ? "right" : "left");
+                    this.closePopup();
+                })
+            )
+            .subscribe();
     }
 
     private setSubscriptions(): void {

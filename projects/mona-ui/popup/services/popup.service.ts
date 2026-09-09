@@ -13,6 +13,7 @@ import { ComponentPortal } from "@angular/cdk/portal";
 import { ScrollDispatcher, type ScrollDispatcherTarget } from "@angular/cdk/scrolling";
 import { DestroyRef, DOCUMENT, ElementRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
@@ -30,11 +31,12 @@ export class PopupService {
     readonly #destroyRef = inject(DestroyRef);
     readonly #directionality = inject(Directionality, { optional: true });
     readonly #document = inject(DOCUMENT);
+    readonly #i18n = inject(MonaI18nService, { optional: true });
     readonly #injector = inject(Injector);
     readonly #outsideEventsToClose = ["click", "mousedown", "dblclick", "contextmenu", "auxclick"];
     readonly #overlay = inject(Overlay);
-    readonly #selectorSubscriptions = new Map<string, Subscription[]>();
     readonly #scrollDispatcher = inject(ScrollDispatcher);
+    readonly #selectorSubscriptions = new Map<string, Subscription[]>();
 
     public create(settings: PopupSettings): PopupRef {
         if (typeof settings.anchor === "string") {
@@ -129,7 +131,7 @@ export class PopupService {
     private createOverlay(settings: PopupSettings): OverlayRef {
         const positionStrategy = this.createPositionStrategy(settings);
         const panelClass = this.buildPanelClass(settings.popupClass);
-        const direction = this.#directionality?.value;
+        const direction = this.#i18n?.direction() ?? this.#directionality?.value;
         return this.#overlay.create(
             new OverlayConfig({
                 positionStrategy,
@@ -256,6 +258,22 @@ export class PopupService {
         return Array.from(scrollablesByElement.values());
     }
 
+    private handleFocusRestoration(settings: PopupSettings, originallyFocusedElement?: HTMLElement | null): void {
+        const restoreFocus = settings.restoreFocus ?? "auto";
+
+        if (restoreFocus === false) {
+            return;
+        }
+
+        if (restoreFocus === "auto") {
+            if (originallyFocusedElement) {
+                originallyFocusedElement.focus();
+            }
+            return;
+        }
+        this.restoreFocusToAnchor(settings.anchor);
+    }
+
     private isScrollableElement(element: HTMLElement): boolean {
         const defaultView = this.#document.defaultView;
         if (!defaultView) {
@@ -274,22 +292,6 @@ export class PopupService {
 
     private isScrollableOverflow(value: string): boolean {
         return value === "auto" || value === "scroll" || value === "overlay";
-    }
-
-    private handleFocusRestoration(settings: PopupSettings, originallyFocusedElement?: HTMLElement | null): void {
-        const restoreFocus = settings.restoreFocus ?? "auto";
-
-        if (restoreFocus === false) {
-            return;
-        }
-
-        if (restoreFocus === "auto") {
-            if (originallyFocusedElement) {
-                originallyFocusedElement.focus();
-            }
-            return;
-        }
-        this.restoreFocusToAnchor(settings.anchor);
     }
 
     /**
