@@ -6,6 +6,7 @@ import {
     Interpolation,
     LiteralPrimitive,
     parseTemplate,
+    RecursiveAstVisitor,
     TmplAstBoundAttribute,
     TmplAstBoundText,
     TmplAstDeferredBlock,
@@ -185,13 +186,13 @@ export const ALLOWLIST: AllowlistEntry[] = [
         reason: "Tooltip floating placement uses Cartesian screen coordinate x position"
     },
     {
-        category: "rtl-physical-style",
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
         lineSnippet: "stagingContainer.style.left",
         reason: "Chart export staging container offscreen positioning (-99999px)"
     },
     {
-        category: "rtl-physical-style",
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
         lineSnippet: "island.frozenRoot.style.left",
         reason: "Chart export island root staging position"
@@ -247,6 +248,7 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+        lineRange: [60, 190],
         reason: "Spinner radial keyframe dot positions in circular coordinate geometry"
     },
 
@@ -326,46 +328,79 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/grid/services/grid.service.ts",
+        lineSnippet: "scrollLeft",
         reason: "Synchronizes horizontal scrollLeft across grid header, body, and footer"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/grid/components/grid-virtual-list/grid-virtual-list.component.ts",
+        lineSnippet: "scrollLeft",
         reason: "Synchronizes horizontal scrollLeft for virtual row container"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/grid/directives/grid-locked-cell.directive.ts",
-        reason: "Sticky column positioning calculates left and right offset boundaries"
+        lineSnippet: "[style.left.px]",
+        reason: "Sticky column positioning calculates left offset boundary"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/grid/directives/grid-locked-cell.directive.ts",
+        lineSnippet: "[style.right.px]",
+        reason: "Sticky column positioning calculates right offset boundary"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
-        reason: "Chart export raster island staging and DOM freezer position capture"
+        lineSnippet: "scrollLeft",
+        reason: "Chart export scrollLeft snapshot restoration"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
+        lineSnippet: "wrapperRect.left",
+        reason: "Chart export raster island staging geometry measurement"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
+        lineSnippet: "childRect.left",
+        reason: "Chart export raster island staging geometry measurement"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-dom-freezer.ts",
+        lineSnippet: "scrollLeft",
         reason: "Chart export scrollLeft snapshot capture"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-dom-collector.ts",
-        reason: "Chart export DOM collector Cartesian positioning"
+        lineSnippet: "hostRect.left",
+        reason: "Chart export DOM collector Cartesian relative positioning"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-dom-collector.ts",
+        lineSnippet: "nodeRect.left",
+        reason: "Chart export DOM collector Cartesian relative positioning"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/numeric-text-box/components/numeric-text-box/numeric-text-box.component.ts",
+        lineSnippet: "scrollLeft",
         reason: "NumericTextBox scrolls input to end on focus"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/text-box/components/text-box/text-box.component.ts",
+        lineSnippet: "scrollLeft",
         reason: "TextBox scrolls input to end on focus"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/segmented/components/segmented/segmented.component.ts",
+        lineSnippet: "offsetLeft",
         reason: "Segmented pill offsetLeft calculation relative to parent container"
     },
     {
@@ -510,7 +545,20 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "i18n-text",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-resource-manager.ts",
+        lineSnippet: 'message: "',
         reason: "Internal export rejection diagnostic error messages"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/notification/components/notification/notification.component.html",
+        lineSnippet: "data().options.closeTitle || 'Close'",
+        reason: "Notification close button fallback title when closeTitle option is not specified"
+    },
+    {
+        category: "i18n-aria",
+        filePattern: "projects/mona-ui/notification/components/notification/notification.component.html",
+        lineSnippet: "data().options.closeTitle || 'Close'",
+        reason: "Notification close button fallback aria-label when closeTitle option is not specified"
     }
 ];
 
@@ -713,6 +761,38 @@ export function scanTypeScriptAst(
                                 }
                             }
                         }
+
+                        if (name === "Component") {
+                            const templateProp = args[0].getProperty("template");
+                            if (templateProp && Node.isPropertyAssignment(templateProp)) {
+                                const templateInit = templateProp.getInitializer();
+                                if (
+                                    templateInit &&
+                                    (Node.isStringLiteral(templateInit) ||
+                                        Node.isNoSubstitutionTemplateLiteral(templateInit))
+                                ) {
+                                    const templateText = templateInit.getLiteralText();
+                                    if (templateText.trim()) {
+                                        try {
+                                            const parsed = parseTemplate(templateText, filePath, {
+                                                preserveWhitespaces: false
+                                            });
+                                            if (parsed.nodes) {
+                                                const inlineViolations: AuditViolation[] = [];
+                                                scanTemplateNodes(parsed.nodes, filePath, inlineViolations);
+                                                const templateStartLine = templateInit.getStartLineNumber();
+                                                for (const iv of inlineViolations) {
+                                                    iv.line = templateStartLine + iv.line - 1;
+                                                    violations.push(iv);
+                                                }
+                                            }
+                                        } catch {
+                                            // Ignore parsing errors for template expressions that cannot be parsed standalone
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -814,6 +894,30 @@ export function scanTypeScriptAst(
     }
 }
 
+export class LiteralStringCollector extends RecursiveAstVisitor {
+    public readonly literals: string[] = [];
+
+    public override visitLiteralPrimitive(ast: LiteralPrimitive): void {
+        if (typeof ast.value === "string") {
+            this.literals.push(ast.value);
+        }
+    }
+}
+
+export function collectLiteralStrings(ast: unknown): string[] {
+    const collector = new LiteralStringCollector();
+    const actualAst =
+        ast && typeof ast === "object"
+            ? "visit" in ast
+                ? (ast as AST)
+                : ((ast as { ast?: AST }).ast ?? null)
+            : null;
+    if (actualAst && typeof actualAst.visit === "function") {
+        actualAst.visit(collector);
+    }
+    return collector.literals;
+}
+
 export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violations: AuditViolation[]): void {
     for (const node of nodes) {
         if (node instanceof TmplAstText) {
@@ -828,8 +932,8 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
             }
         } else if (node instanceof TmplAstBoundText) {
             const ast = node.value;
-            if (ast instanceof Interpolation || (ast as { ast?: AST }).ast instanceof Interpolation) {
-                const interpolation = ast instanceof Interpolation ? ast : (ast as { ast: Interpolation }).ast;
+            const interpolation = ast instanceof Interpolation ? ast : (ast as { ast?: AST }).ast;
+            if (interpolation instanceof Interpolation) {
                 for (const str of interpolation.strings) {
                     if (isUserFacingText(str)) {
                         violations.push({
@@ -838,6 +942,19 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
                             file: filePath,
                             line: node.sourceSpan.start.line + 1
                         });
+                    }
+                }
+                for (const expr of interpolation.expressions) {
+                    const literals = collectLiteralStrings(expr);
+                    for (const lit of literals) {
+                        if (isUserFacingText(lit)) {
+                            violations.push({
+                                category: "i18n-text",
+                                detail: `Hard-coded text in interpolation expression: "${lit.trim()}"`,
+                                file: filePath,
+                                line: node.sourceSpan.start.line + 1
+                            });
+                        }
                     }
                 }
             }
@@ -868,27 +985,18 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
                 }
             }
 
-            // Check bound attributes with literal strings
+            // Check bound attributes with literal strings (including nested in expressions and ternaries)
             for (const input of node.inputs) {
                 const rawName = input.name.toLowerCase();
                 const cleanName = rawName.startsWith("attr.") ? rawName.slice(5) : rawName;
-                const valueAst = input.value;
-                const innerAst = (valueAst as { ast?: AST }).ast ?? valueAst;
-                if (innerAst instanceof LiteralPrimitive && typeof innerAst.value === "string") {
-                    const strVal = innerAst.value;
-                    if (ARIA_TEXT_ATTRIBUTES.has(cleanName)) {
+                const isAria = ARIA_TEXT_ATTRIBUTES.has(cleanName);
+                const isText = GENERAL_TEXT_ATTRIBUTES.has(cleanName);
+                if (isAria || isText) {
+                    const literals = collectLiteralStrings(input.value);
+                    for (const strVal of literals) {
                         if (isUserFacingText(strVal)) {
                             violations.push({
-                                category: "i18n-aria",
-                                detail: `Literal string in [${input.name}] binding: "${strVal.trim()}"`,
-                                file: filePath,
-                                line: input.sourceSpan.start.line + 1
-                            });
-                        }
-                    } else if (GENERAL_TEXT_ATTRIBUTES.has(cleanName)) {
-                        if (isUserFacingText(strVal)) {
-                            violations.push({
-                                category: "i18n-text",
+                                category: isAria ? "i18n-aria" : "i18n-text",
                                 detail: `Literal string in [${input.name}] binding: "${strVal.trim()}"`,
                                 file: filePath,
                                 line: input.sourceSpan.start.line + 1
@@ -947,7 +1055,7 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
     }
 }
 
-function scanFile(filePath: string, violations: AuditViolation[]): void {
+export function scanFile(filePath: string, violations: AuditViolation[]): void {
     const normalizedPath = filePath.replace(/\\/g, "/");
     // Skip spec files, i18n package itself, tester app, scripts, tests directories, and generated files
     if (
@@ -962,6 +1070,11 @@ function scanFile(filePath: string, violations: AuditViolation[]): void {
     }
 
     const content = readFileSync(filePath, "utf-8");
+    scanFileContent(normalizedPath, content, violations);
+}
+
+export function scanFileContent(filePath: string, content: string, violations: AuditViolation[]): void {
+    const normalizedPath = filePath.replace(/\\/g, "/");
     const lines = content.split("\n");
 
     // 1. Line-by-line scanning for physical styles and regex patterns
@@ -1035,9 +1148,19 @@ function scanFile(filePath: string, violations: AuditViolation[]): void {
         }
 
         // Scan manual review patterns
-        if (normalizedPath.endsWith(".ts") || normalizedPath.endsWith(".html")) {
+        if (
+            normalizedPath.endsWith(".ts") ||
+            normalizedPath.endsWith(".html") ||
+            normalizedPath.endsWith(".scss") ||
+            normalizedPath.endsWith(".css")
+        ) {
             for (const pattern of MANUAL_REVIEW_PATTERNS) {
-                if (pattern.label.includes("inline style.left/right") && !normalizedPath.endsWith(".ts")) {
+                if (
+                    (pattern.label.includes("DOM scroll/offset") ||
+                        pattern.label.includes("DOMRect") ||
+                        pattern.label.includes("inline style.left/right")) &&
+                    !normalizedPath.endsWith(".ts")
+                ) {
                     continue;
                 }
                 pattern.regex.lastIndex = 0;

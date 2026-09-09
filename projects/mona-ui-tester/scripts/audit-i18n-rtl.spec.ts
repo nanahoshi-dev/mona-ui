@@ -3,9 +3,11 @@ import { parseTemplate } from "@angular/compiler";
 import {
     type AllowlistEntry,
     type AuditViolation,
+    collectLiteralStrings,
     isAllowlisted,
     isUserFacingText,
     MANUAL_REVIEW_PATTERNS,
+    scanFileContent,
     scanTemplateNodes,
     scanTypeScriptAst
 } from "./audit-i18n-rtl";
@@ -318,6 +320,150 @@ describe("audit-i18n-rtl", () => {
 
             expect("translateX(-50%)".match(translateXPattern!.regex)).not.toBeNull();
             expect("translateY(-50%)".match(translateXPattern!.regex)).toBeNull();
+        });
+
+        it("scans CSS and SCSS files through scanFileContent for directional gradients and translateX", () => {
+            const cssContent = `
+                .header-gradient {
+                    background: linear-gradient(to right, #fff, #000);
+                }
+                .slide-item {
+                    transform: translateX(10px);
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanFileContent("projects/mona-ui/test/test.component.css", cssContent, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-manual-review",
+                detail: expect.stringContaining("directional gradient"),
+                line: 3
+            });
+            expect(violations[1]).toMatchObject({
+                category: "rtl-manual-review",
+                detail: expect.stringContaining("translateX"),
+                line: 6
+            });
+
+            const scssContent = `
+                .badge-track {
+                    background: linear-gradient(90deg, red, blue);
+                }
+            `;
+            const scssViolations: AuditViolation[] = [];
+            scanFileContent("projects/mona-ui/test/test.component.scss", scssContent, scssViolations);
+            expect(scssViolations).toHaveLength(1);
+            expect(scssViolations[0]).toMatchObject({
+                category: "rtl-manual-review",
+                detail: expect.stringContaining("directional gradient")
+            });
+        });
+    });
+
+    describe("Nested Angular expression AST traversal", () => {
+        it("detects hard-coded strings in ternary conditional expressions inside interpolations", () => {
+            const html = `<div>{{ active ? 'Active' : 'Inactive' }}</div>`;
+            const parsed = parseTemplate(html, "test.html");
+            const violations: AuditViolation[] = [];
+            scanTemplateNodes(parsed.nodes, "test.html", violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations[0]).toMatchObject({
+                category: "i18n-text",
+                detail: expect.stringContaining('Hard-coded text in interpolation expression: "Active"')
+            });
+            expect(violations[1]).toMatchObject({
+                category: "i18n-text",
+                detail: expect.stringContaining('Hard-coded text in interpolation expression: "Inactive"')
+            });
+        });
+
+        it("detects hard-coded strings in binary expressions and ternaries in ARIA bindings", () => {
+            const html = `
+                <button [attr.aria-label]="isExpanded ? 'Collapse panel' : 'Expand panel'"></button>
+                <div [attr.title]="'Details: ' + title"></div>
+            `;
+            const parsed = parseTemplate(html, "test.html");
+            const violations: AuditViolation[] = [];
+            scanTemplateNodes(parsed.nodes, "test.html", violations);
+
+            expect(violations).toHaveLength(3);
+            expect(violations[0]).toMatchObject({
+                category: "i18n-aria",
+                detail: expect.stringContaining('Literal string in [aria-label] binding: "Collapse panel"')
+            });
+            expect(violations[1]).toMatchObject({
+                category: "i18n-aria",
+                detail: expect.stringContaining('Literal string in [aria-label] binding: "Expand panel"')
+            });
+            expect(violations[2]).toMatchObject({
+                category: "i18n-text",
+                detail: expect.stringContaining('Literal string in [title] binding: "Details:"')
+            });
+        });
+
+        it("collects nested literal strings with collectLiteralStrings helper", () => {
+            const html = `{{ a ? (b ? 'One' : 'Two') : 'Three' }}`;
+            const parsed = parseTemplate(html, "test.html");
+            const boundText = parsed.nodes[0] as unknown as { value: unknown };
+            const literals = collectLiteralStrings(boundText.value);
+
+            expect(literals).toContain("One");
+            expect(literals).toContain("Two");
+            expect(literals).toContain("Three");
+        });
+    });
+
+    describe("Inline @Component template scanning", () => {
+        it("detects hard-coded text and ARIA strings inside inline Component templates", () => {
+            const code = `
+                @Component({
+                    selector: "mona-test-inline",
+                    template: \`
+                        <div class="header">
+                            <span>Unlocalized inline label</span>
+                            <button [attr.aria-label]="'Inline close button'"></button>
+                        </div>
+                    \`
+                })
+                export class TestInlineComponent {}
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-inline.component.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Unlocalized inline label"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Inline close button"))).toBe(true);
+        });
+    });
+
+    describe("Allowlist lineRange matching", () => {
+        const rangeAllowlist: AllowlistEntry[] = [
+            {
+                category: "rtl-physical-style",
+                filePattern: "spinner/components/spinner/spinner.component.css",
+                lineRange: [60, 190],
+                reason: "Spinner radial keyframe dot positions"
+            }
+        ];
+
+        it("suppresses violations falling within lineRange and preserves outside", () => {
+            const insideViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical CSS property",
+                file: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+                line: 100
+            };
+            expect(isAllowlisted(insideViolation, "left: 39%;", rangeAllowlist)).toBe(true);
+
+            const outsideViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical CSS property",
+                file: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+                line: 210
+            };
+            expect(isAllowlisted(outsideViolation, "left: 10px;", rangeAllowlist)).toBe(false);
         });
     });
 });

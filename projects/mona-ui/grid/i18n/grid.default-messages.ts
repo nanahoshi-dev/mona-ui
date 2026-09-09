@@ -13,6 +13,7 @@ export const GRID_DEFAULT_MESSAGES = {
     dragColumnHeaderToGroup: "Drag a column header here to group",
     edit: "Edit",
     editRow: "Edit row",
+    filterByColumn: (column: string) => `Filter by ${column}`,
     filterPlaceholder: "Filter...",
     modified: "Modified",
     moveAsNext: "Move as next",

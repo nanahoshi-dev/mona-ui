@@ -350,7 +350,7 @@
                                 scope="col"
                                 class="border-e border-border overflow-hidden"
                                 [style.width.px]="column.calculatedWidth"
-                                [attr.aria-label]="'Filter by ' + column.title">
+                                [attr.aria-label]="messages().filterByColumn(column.title)">
                                 @if (column.kind === "data" && column.field && column.filterable) {
                                     <mona-grid-filter-row-cell
                                         [column]="column"
