@@ -23,7 +23,7 @@
                     }}</span>
                 </div>
                 <div>
-                    {{ messages().value }}: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                    {{ messages().value }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
                 </div>
             </div>
         } @else if (context.point.seriesType === "pie" || context.point.seriesType === "donut") {
@@ -51,11 +51,11 @@
             </div>
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 <div>
-                    {{ messages().value }}: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                    {{ messages().value }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
                 </div>
                 @if (context.point.formattedRadialMin && context.point.formattedRadialMax) {
                     <div>
-                        {{ messages().range }}:
+                        {{ messages().range }}{{ messages().labelValueSeparator }}
                         <span class="font-medium text-foreground"
                             >{{ context.point.formattedRadialMin }} – {{ context.point.formattedRadialMax }}</span
                         >
@@ -82,7 +82,7 @@
                 }
                 <div class="flex items-center gap-2">
                     <span
-                        >{{ messages().value }}: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span></span
+                        >{{ messages().value }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedY }}</span></span
                     >
                     @if (
                         context.point.hierarchy?.percentageOfRoot !== undefined &&
@@ -104,14 +104,14 @@
             </div>
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 <div>
-                    {{ messages().value }}:
+                    {{ messages().value }}{{ messages().labelValueSeparator }}
                     <span class="font-medium text-foreground">{{
                         context.point.funnel?.formattedValue || context.point.formattedY
                     }}</span>
                 </div>
                 @if (context.point.funnel?.formattedConversionRate) {
                     <div>
-                        {{ messages().conversion }}:
+                        {{ messages().conversion }}{{ messages().labelValueSeparator }}
                         <span class="font-medium text-foreground">{{
                             context.point.funnel!.formattedConversionRate
                         }}</span>
@@ -119,7 +119,7 @@
                 }
                 @if (context.point.funnel?.formattedOverallConversionRate) {
                     <div>
-                        {{ messages().overall }}:
+                        {{ messages().overall }}{{ messages().labelValueSeparator }}
                         <span class="font-medium text-foreground">{{
                             context.point.funnel!.formattedOverallConversionRate
                         }}</span>
@@ -127,7 +127,7 @@
                 }
                 @if (context.point.funnel?.dropOff !== undefined && context.point.funnel!.dropOff > 0) {
                     <div>
-                        {{ messages().dropOff }}: <span class="font-medium text-foreground">{{ context.point.funnel!.dropOff }}</span>
+                        {{ messages().dropOff }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.funnel!.dropOff }}</span>
                     </div>
                 }
             </div>
@@ -143,7 +143,7 @@
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 @if (context.point.waterfall?.kind === "change") {
                     <div>
-                        {{ messages().change }}:
+                        {{ messages().change }}{{ messages().labelValueSeparator }}
                         <span class="font-medium text-foreground">{{
                             context.point.waterfall?.formattedDelta || context.point.formattedY
                         }}</span>
@@ -153,7 +153,7 @@
                         context.point.waterfall?.formattedCumulativeAfter
                     ) {
                         <div>
-                            {{ messages().runningTotal }}:
+                            {{ messages().runningTotal }}{{ messages().labelValueSeparator }}
                             <span class="font-medium text-foreground"
                                 >{{ context.point.waterfall!.formattedCumulativeBefore }} →
                                 {{ context.point.waterfall!.formattedCumulativeAfter }}</span
@@ -161,7 +161,7 @@
                         </div>
                     } @else if (context.point.waterfall?.formattedCumulativeAfter) {
                         <div>
-                            {{ messages().runningTotal }}:
+                            {{ messages().runningTotal }}{{ messages().labelValueSeparator }}
                             <span class="font-medium text-foreground">{{
                                 context.point.waterfall!.formattedCumulativeAfter
                             }}</span>
@@ -169,7 +169,7 @@
                     }
                 } @else {
                     <div>
-                        {{ messages().value }}: <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                        {{ messages().value }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
                     </div>
                 }
             </div>
@@ -188,7 +188,7 @@
                                 </div>
                                 @if (pt.financialDirection; as dir) {
                                     <span
-                                        class="text-[10px] font-medium px-1 py-0.2 rounded capitalize"
+                                        class="text-[10px] font-medium px-1 py-0.2 rounded"
                                         [style.background-color]="
                                             dir === 'rising'
                                                 ? 'rgba(34, 197, 94, 0.15)'
@@ -203,25 +203,25 @@
                             </div>
                             <div class="text-[11px] text-muted-foreground ps-3.5 flex items-center gap-1 flex-wrap">
                                 <span
-                                    >{{ messages().openAbbreviation }}:
+                                    >{{ messages().openAbbreviation }}{{ messages().labelValueSeparator }}
                                     <span class="font-medium text-foreground">{{
                                         pt.formattedOpen || pt.open
                                     }}</span></span
                                 >
                                 <span
-                                    >{{ messages().highAbbreviation }}:
+                                    >{{ messages().highAbbreviation }}{{ messages().labelValueSeparator }}
                                     <span class="font-medium text-foreground">{{
                                         pt.formattedHigh || pt.high
                                     }}</span></span
                                 >
                                 <span
-                                    >{{ messages().lowAbbreviation }}:
+                                    >{{ messages().lowAbbreviation }}{{ messages().labelValueSeparator }}
                                     <span class="font-medium text-foreground">{{
                                         pt.formattedLow || pt.low
                                     }}</span></span
                                 >
                                 <span
-                                    >{{ messages().closeAbbreviation }}:
+                                    >{{ messages().closeAbbreviation }}{{ messages().labelValueSeparator }}
                                     <span class="font-medium text-foreground">{{
                                         pt.formattedClose || pt.close
                                     }}</span></span
@@ -282,7 +282,7 @@
                 </div>
                 @if (context.point.financialDirection; as dir) {
                     <span
-                        class="text-[10px] font-medium px-1 py-0.5 rounded capitalize"
+                        class="text-[10px] font-medium px-1 py-0.5 rounded"
                         [style.background-color]="
                             dir === 'rising'
                                 ? 'rgba(34, 197, 94, 0.15)'
@@ -300,25 +300,25 @@
             </div>
             <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs">
                 <div class="flex items-center justify-between gap-1.5">
-                    <span class="text-muted-foreground">{{ messages().open }}:</span>
+                    <span class="text-muted-foreground">{{ messages().open }}{{ messages().labelValueSeparator }}</span>
                     <span class="font-medium text-foreground">{{
                         context.point.formattedOpen || context.point.open
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-1.5">
-                    <span class="text-muted-foreground">{{ messages().high }}:</span>
+                    <span class="text-muted-foreground">{{ messages().high }}{{ messages().labelValueSeparator }}</span>
                     <span class="font-medium text-foreground">{{
                         context.point.formattedHigh || context.point.high
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-1.5">
-                    <span class="text-muted-foreground">{{ messages().low }}:</span>
+                    <span class="text-muted-foreground">{{ messages().low }}{{ messages().labelValueSeparator }}</span>
                     <span class="font-medium text-foreground">{{
                         context.point.formattedLow || context.point.low
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-1.5">
-                    <span class="text-muted-foreground">{{ messages().close }}:</span>
+                    <span class="text-muted-foreground">{{ messages().close }}{{ messages().labelValueSeparator }}</span>
                     <span class="font-medium text-foreground">{{
                         context.point.formattedClose || context.point.close
                     }}</span>
@@ -326,7 +326,7 @@
             </div>
             @if (context.point.formattedChange || context.point.change !== undefined) {
                 <div class="mt-1 pt-1 border-t border-border/50 flex items-center justify-between text-xs">
-                    <span class="text-muted-foreground">{{ messages().change }}:</span>
+                    <span class="text-muted-foreground">{{ messages().change }}{{ messages().labelValueSeparator }}</span>
                     <span class="font-medium text-foreground">
                         {{ context.point.formattedChange || context.point.change }}
                         @if (context.point.formattedChangePercentage) {
@@ -349,7 +349,7 @@
                 }
                 @if (context.point.formattedSize) {
                     <span class="ms-1.5"
-                        >({{ messages().size }}: <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span>)</span>
+                        >({{ messages().size }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span>)</span>
                 }
             </div>
         }

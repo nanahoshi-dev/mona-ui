@@ -16,6 +16,7 @@ export interface MonaChartMessages {
     readonly falling: string;
     readonly high: string;
     readonly highAbbreviation: string;
+    readonly labelValueSeparator: string;
     readonly low: string;
     readonly lowAbbreviation: string;
     readonly noData: string;

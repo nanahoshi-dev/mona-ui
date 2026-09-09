@@ -67,7 +67,9 @@ describe("Chart i18n", () => {
         expect(CHART_DEFAULT_MESSAGES.runningTotal).toBe("Running Total");
         expect(CHART_DEFAULT_MESSAGES.openAbbreviation).toBe("O");
         expect(CHART_DEFAULT_MESSAGES.closeAbbreviation).toBe("C");
-        expect(CHART_DEFAULT_MESSAGES.rising).toBe("rising");
-        expect(CHART_DEFAULT_MESSAGES.falling).toBe("falling");
+        expect(CHART_DEFAULT_MESSAGES.rising).toBe("Rising");
+        expect(CHART_DEFAULT_MESSAGES.falling).toBe("Falling");
+        expect(CHART_DEFAULT_MESSAGES.unchanged).toBe("Unchanged");
+        expect(CHART_DEFAULT_MESSAGES.labelValueSeparator).toBe(":");
     });
 });
