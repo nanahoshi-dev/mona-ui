@@ -156,11 +156,12 @@ export const Indent = Extension.create<IndentOptions>({
                             }
 
                             return {
-                                style: `margin-left: ${indent}px;`
+                                style: `margin-inline-start: ${indent}px;`
                             };
                         },
                         parseHTML: element => {
-                            const raw = (element as HTMLElement).style.marginLeft;
+                            const el = element as HTMLElement;
+                            const raw = el.style.marginInlineStart || el.style.marginLeft;
                             const parsed = raw ? parseInt(raw, 10) : NaN;
                             return Number.isNaN(parsed) ? this.options.defaultIndentLevel : parsed;
                         }
