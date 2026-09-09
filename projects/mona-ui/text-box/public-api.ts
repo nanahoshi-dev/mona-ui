@@ -6,5 +6,6 @@ export * from "./components/text-box/text-box.component";
 export * from "./directives/text-box.directive";
 export * from "./directives/text-box-prefix-template.directive";
 export * from "./directives/text-box-suffix-template.directive";
+export * from "./i18n/text-box.default-messages";
 export * from "./models/InputType";
 export type { TextBoxVariantProps } from "./styles/textbox.styles";

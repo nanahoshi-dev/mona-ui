@@ -11637,6 +11637,13 @@
     "selector": "\"mona-progress-bar\"",
     "inputs": [
       {
+        "description": "Enables CSS transitions on fill and color changes.\nSet to `false` when updating `value` at high frequency (e.g., a real-time byte counter).",
+        "kind": "input",
+        "name": "animate",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
         "description": "Accessible label for the progress bar host element.\nUse to describe what is being measured (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role and numeric values only.",
         "kind": "input",
         "name": "ariaLabel",
@@ -11649,13 +11656,6 @@
         "name": "ariaValueText",
         "type": "string",
         "defaultValue": "\"\""
-      },
-      {
-        "description": "Enables CSS transitions on fill and color changes.\nSet to `false` when updating `value` at high frequency (e.g., a real-time byte counter).",
-        "kind": "input",
-        "name": "animate",
-        "type": "boolean",
-        "defaultValue": "true"
       },
       {
         "description": "Fill color of the progress track.\nPass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\nWhen empty, falls back to the primary theme color.",
@@ -12937,11 +12937,11 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Accessible text announced by assistive technology when the spinner is not decorative.",
+        "description": "Accessible text announced by assistive technology when the spinner is not decorative.\nWhen not set, falls back to the localized loading text.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string",
-        "defaultValue": "\"Loading\""
+        "type": "string | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "When `true`, removes the `status` role and hides the spinner from assistive technology with `aria-hidden=\"true\"`.\nUseful when a parent element already manages loading semantics (such as `aria-busy=\"true\"` on a button).",
@@ -12984,18 +12984,18 @@
         "type": "void"
       },
       {
+        "description": "Label text displayed inside the cancellation button.\nWhen not set, falls back to the localized cancel text.",
+        "kind": "input",
+        "name": "cancelText",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether the cancellation button is displayed in the overlay.",
         "kind": "input",
         "name": "cancellable",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Label text displayed inside the cancellation button.",
-        "kind": "input",
-        "name": "cancelText",
-        "type": "string",
-        "defaultValue": "\"Cancel\""
       },
       {
         "description": "Whether the overlay is fixed across the viewport or absolute within a target container.",
@@ -13718,17 +13718,17 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Emitted when the inner input gains focus.",
-        "kind": "output",
-        "name": "inputFocus",
-        "type": "FocusEvent"
-      },
-      {
         "description": "Additional CSS classes applied to the inner `<input>` element.",
         "kind": "input",
         "name": "inputClass",
         "type": "string | string[]",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when the inner input gains focus.",
+        "kind": "output",
+        "name": "inputFocus",
+        "type": "FocusEvent"
       },
       {
         "description": "Inline styles applied to the inner `<input>` element.\nAccepts a style string or a `CSSStyleDeclaration` partial.",

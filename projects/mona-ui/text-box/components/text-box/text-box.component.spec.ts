@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { TextBoxComponent } from "./text-box.component";
 
 describe("TextBoxComponent", () => {
@@ -35,4 +35,31 @@ describe("TextBoxComponent", () => {
         expect(element.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);
         expect(element.classList.contains("opacity-50")).toBe(false);
     });
+
+    it("renders clear button with default English aria-label and updates dynamically on locale change", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.componentRef.setInput("clearButton", true);
+        fixture.componentRef.setInput("value", "Hello");
+        fixture.detectChanges();
+
+        const host = fixture.nativeElement as HTMLElement;
+        let button = host.querySelector("button");
+        expect(button).toBeTruthy();
+        expect(button?.getAttribute("aria-label")).toBe("Clear");
+
+        i18n.use({
+            id: "tr-TR",
+            direction: "ltr",
+            messages: {
+                textBox: {
+                    clear: "Temizle"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        button = host.querySelector("button");
+        expect(button?.getAttribute("aria-label")).toBe("Temizle");
+    });
 });
+
