@@ -4,7 +4,6 @@ import {
     Component,
     computed,
     inject,
-    signal,
     TemplateRef,
     viewChild,
     ViewContainerRef
@@ -13,6 +12,7 @@ import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { NotificationRef, NotificationService } from "@nanahoshi/mona-ui/notification";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -118,12 +118,12 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
             }
         }
     });
-    protected readonly config = signal<ComponentConfig<never>>({
-        inputs: {},
+    protected readonly config = computed<ComponentConfig<never>>(() => ({
+        inputs: deriveInputConfig<never>(this.metadata(), {}),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
-    protected readonly metadata = this.getMetadata("");
+    protected readonly metadata = this.getMetadata("NotificationComponent");
     protected readonly NotificationWrapperComponent = NotificationWrapperComponent;
 }
 

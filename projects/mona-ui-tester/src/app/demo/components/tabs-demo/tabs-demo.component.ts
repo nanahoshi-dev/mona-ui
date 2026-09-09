@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, inject, input, signal } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { range } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@nanahoshi/mona-ui/tabs";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -34,17 +35,8 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             numericValue: 0
         }
     });
-    protected readonly config = signal<ComponentConfig<TabsComponent>>({
-        code: ``,
-        inputs: {
-            closable: {
-                type: "boolean",
-                value: false
-            },
-            keepTabContent: {
-                type: "boolean",
-                value: true
-            },
+    protected readonly config = computed<ComponentConfig<TabsComponent>>(() => ({
+        inputs: deriveInputConfig<TabsComponent>(this.metadata(), {
             position: {
                 type: "dropdown",
                 value: ["top", "bottom", "left", "right"],
@@ -54,10 +46,15 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                 type: "dropdown",
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TabsComponent");
     protected readonly TabsWrapperComponent = TabsWrapperComponent;
@@ -68,12 +65,13 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
     template: `
         <mona-tabs
             [closable]="closable()"
+            [disabled]="disabled()"
             [keepTabContent]="keepTabContent()"
             [position]="position()"
             [size]="size()"
             (tabClose)="onTabClose($event)"
             (tabSelect)="onTabSelect($event)"
-            class="w-96"
+            [class]="'w-96 ' + userClass()"
             [class.h-96]="position() === 'left' || position() === 'right'">
             <mona-tab title="Register" [selected]="true">
                 <ng-template monaTabContentTemplate>
@@ -132,9 +130,11 @@ export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsCompone
         return range(1, tabCount).toImmutableSet();
     });
     public readonly closable = input<ReturnType<TabsComponent["closable"]>>(false);
+    public readonly disabled = input(false);
     public readonly keepTabContent = input<ReturnType<TabsComponent["keepTabContent"]>>(true);
     public readonly position = input<ReturnType<TabsComponent["position"]>>("top");
     public readonly size = input<ReturnType<TabsComponent["size"]>>("medium");
+    public readonly userClass = input<ReturnType<TabsComponent["userClass"]>>("");
 
     protected onTabClose(event: TabCloseEvent): void {
         console.log("Tab closed", event);

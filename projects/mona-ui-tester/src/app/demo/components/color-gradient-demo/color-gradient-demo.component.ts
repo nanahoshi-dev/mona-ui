@@ -1,8 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, input, signal } from "@angular/core";
-import { disabled, form, FormField } from "@angular/forms/signals";
+import { Component, computed, input, signal } from "@angular/core";
+import { disabled, form, FormField, required } from "@angular/forms/signals";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -13,52 +14,29 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradientComponent> {
     protected readonly ColorGradientWrapperComponent = ColorGradientWrapperComponent;
-    protected readonly config = signal<ComponentConfig<ColorGradientComponent>>({
-        code: `
-            <mona-color-gradient
-                [disabled]="disabled()"
-                [format]="format()"
-                [opacity]="opacity()"
-                [rounded]="rounded()"
-                [showButtons]="showButtons()"
-                [showHexInput]="showHexInput()"
-                [showColorInputs]="showColorInputs()"
-                class="bg-surface-raised border border-border-subtle shadow-control">
-            </mona-color-gradient>
-        `,
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<ColorGradientComponent>>(() => ({
+        inputs: deriveInputConfig<ColorGradientComponent>(this.metadata(), {
             format: {
                 type: "dropdown",
                 value: ["hex", "rgb"],
                 defaultValue: "hex"
             },
-            opacity: {
-                type: "boolean",
-                value: true
-            },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
+            touched: undefined,
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
             },
+            // The demo curates showButtons off instead of the library's true default.
             showButtons: {
                 type: "boolean",
                 value: false
-            },
-            showHexInput: {
-                type: "boolean",
-                value: true
-            },
-            showColorInputs: {
-                type: "boolean",
-                value: true
             }
-        }
-    });
+        })
+    }));
     protected readonly metadata = this.getMetadata("ColorGradientComponent");
 }
 
@@ -84,10 +62,12 @@ export class ColorGradientWrapperComponent implements ComponentInputsAsSignal<Co
     readonly #formModel = signal<ColorGradientFormModel>({ color: "" });
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.color, { when: () => this.disabled() });
+        required(schema.color, { when: () => this.required() });
     });
     public readonly disabled = input<ReturnType<ColorGradientComponent["disabled"]>>(false);
     public readonly format = input<ReturnType<ColorGradientComponent["format"]>>("hex");
     public readonly opacity = input<ReturnType<ColorGradientComponent["opacity"]>>(true);
+    public readonly required = input<ReturnType<ColorGradientComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<ColorGradientComponent["rounded"]>>("medium");
     public readonly showButtons = input<ReturnType<ColorGradientComponent["showButtons"]>>(true);
     public readonly showHexInput = input<ReturnType<ColorGradientComponent["showHexInput"]>>(true);

@@ -4,7 +4,6 @@ import { disabled, form, FormField, readonly, required } from "@angular/forms/si
 import { LucideBox, LucideCheck, LucideSearch, LucideTriangleAlert } from "@lucide/angular";
 import { AutoCompleteComponent } from "@nanahoshi/mona-ui/auto-complete";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { FilterableOptions, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import {
     DropdownFilterableDirective,
     DropdownFooterTemplateDirective,
@@ -17,11 +16,14 @@ import {
     DropdownSuffixTemplateDirective,
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
-import type { GroupableOptions } from "@nanahoshi/mona-ui/internal/list";
 import { range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
+    buildFilterableOptions,
+    buildGroupableOptions,
+    buildVirtualScrollOptions,
     dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
     dropdownFooterTemplateFeatureConfig,
@@ -37,6 +39,43 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const FOOTER_TEMPLATE_CODE = `<ng-template monaDropDownFooterTemplate>
+    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+        Total items: {{ autoCompleteData().length }}
+    </div>
+</ng-template>`;
+
+const GROUP_HEADER_TEMPLATE_CODE = `<ng-template monaDropDownGroupHeaderTemplate let-group>
+    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+</ng-template>`;
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaDropDownHeaderTemplate>
+    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+        Select your favorite food
+    </div>
+</ng-template>`;
+
+const PREFIX_TEMPLATE_CODE = `<ng-template monaDropdownPrefixTemplate>
+    <svg lucideSearch [size]="16" class="h-full ml-1"></svg>
+</ng-template>`;
+
+const SUFFIX_TEMPLATE_CODE = `<ng-template monaDropdownSuffixTemplate>
+    @if (selectedItem()) {
+        <svg lucideCheck [size]="16" class="h-full mx-1" [style.color]="'var(--color-success)'"></svg>
+    } @else {
+        <svg lucideTriangleAlert [size]="16" class="h-full mx-1" [style.color]="'var(--color-warning)'"></svg>
+    }
+</ng-template>`;
+
+// A fresh object per call (not a module-level singleton) - createFeatureInjector wires each
+// instance's config into its own mutable FeatureConfigHandler, so sharing one object across demo
+// component instances would leak feature-toggle state between them.
+function buildGroupingFeatureConfig() {
+    const config = dropdownGroupingFeatureConfig("autocomplete");
+    config.subFeatures!["groupHeaderTemplate"].code = GROUP_HEADER_TEMPLATE_CODE;
+    return config;
+}
+
 @Component({
     selector: "app-auto-complete-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
@@ -47,12 +86,12 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("autocomplete"),
         filtering: dropdownFilteringFeatureConfig("autocomplete"),
-        footerTemplate: dropdownFooterTemplateFeatureConfig("autocomplete"),
-        grouping: dropdownGroupingFeatureConfig("autocomplete"),
-        headerTemplate: dropdownHeaderTemplateFeatureConfig("autocomplete"),
+        footerTemplate: { ...dropdownFooterTemplateFeatureConfig("autocomplete"), code: FOOTER_TEMPLATE_CODE },
+        grouping: buildGroupingFeatureConfig(),
+        headerTemplate: { ...dropdownHeaderTemplateFeatureConfig("autocomplete"), code: HEADER_TEMPLATE_CODE },
         itemTemplate: dropdownItemTemplateFeatureConfig("autocomplete"),
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("autocomplete"),
-        prefixTemplate: dropdownPrefixTemplateFeatureConfig("autocomplete"),
+        prefixTemplate: { ...dropdownPrefixTemplateFeatureConfig("autocomplete"), code: PREFIX_TEMPLATE_CODE },
         preventClose: {
             active: false,
             code: ``,
@@ -65,50 +104,24 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             description: `The "open" event is fired when the popup is about to open.`,
             name: "Prevent Open"
         },
-        suffixTemplate: dropdownSuffixTemplateFeatureConfig("autocomplete"),
+        suffixTemplate: { ...dropdownSuffixTemplateFeatureConfig("autocomplete"), code: SUFFIX_TEMPLATE_CODE },
         virtualization: dropdownVirtualizationFeatureConfig("autocomplete")
     });
-    protected readonly config = signal<ComponentConfig<AutoCompleteComponent<any>>>({
-        code: ``,
-        inputs: {
+    protected readonly config = computed<ComponentConfig<AutoCompleteComponent<any>>>(() => ({
+        inputs: deriveInputConfig<AutoCompleteComponent<any>>(this.metadata(), {
             data: {
                 type: "iterable",
                 value: []
             },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
-            highlightFirst: {
-                type: "boolean",
-                value: true
-            },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
                 value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
-            },
-            loading: {
-                type: "boolean",
-                value: false
-            },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
-            placeholder: {
-                type: "string",
-                value: ""
-            },
-            popupClass: {
-                type: "string",
-                value: ""
             },
             popupHeight: {
                 type: "number",
@@ -141,13 +154,19 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 type: "string",
                 value: "text"
             },
+            touched: undefined,
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: "w-50"
+            },
             valueField: {
                 type: "string",
                 value: "value"
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("AutoCompleteComponent");
     protected readonly AutoCompleteWrapperComponent = AutoCompleteWrapperComponent;
@@ -179,6 +198,9 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ form.value().value() }}</span>
         <mona-auto-complete
+            [aria-describedby]="ariaDescribedBy()"
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [data]="autoCompleteData()"
             [highlightFirst]="highlightFirst()"
             [itemDisabled]="itemDisabled()"
@@ -199,7 +221,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             [formField]="form.value"
             (close)="onPopupClose($event)"
             (open)="onPopupOpen($event)"
-            class="w-50">
+            [class]="userClass()">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
                     <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
@@ -284,43 +306,18 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => {
-        const features = this.features();
-        const subFeatures = features["filtering"]?.subFeatures || {};
-        const filteringOptions: FilterableOptions = {
-            caseSensitive: subFeatures["caseSensitive"].active ?? false,
-            debounce: subFeatures["debounce"].numericValue ?? 0,
-            enabled: features["filtering"].active ?? false,
-            operator: subFeatures["operator"].dropdownValue
-        };
-        return filteringOptions;
-    });
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly groupBy = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};
         return subFeatures["groupBy"].dropdownValue;
     });
-    protected readonly grouping = computed(() => {
-        const features = this.features();
-        const subFeatures = features["grouping"]?.subFeatures || {};
-        const groupingOptions: GroupableOptions = {
-            enabled: features["grouping"].active,
-            headerOrder: subFeatures["headerOrder"].dropdownValue,
-            orderBy: subFeatures["orderBy"].dropdownValue,
-            orderByDirection: subFeatures["orderByDirection"].dropdownValue
-        };
-        return groupingOptions;
-    });
+    protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly selectedItem = signal<unknown>(null);
-    protected readonly virtualization = computed(() => {
-        const features = this.features();
-        const subFeatures = features["virtualization"]?.subFeatures || {};
-        const options: Partial<VirtualScrollOptions> = {
-            enabled: features["virtualization"].active,
-            height: subFeatures["itemHeight"].numericValue
-        };
-        return options;
-    });
+    protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
+    public readonly ariaDescribedBy = input<ReturnType<AutoCompleteComponent["ariaDescribedBy"]>>("");
+    public readonly ariaLabel = input<ReturnType<AutoCompleteComponent["ariaLabel"]>>("");
+    public readonly ariaLabelledBy = input<ReturnType<AutoCompleteComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
     public readonly highlightFirst = input<ReturnType<AutoCompleteComponent["highlightFirst"]>>(true);
@@ -336,6 +333,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     public readonly showClearButton = input<ReturnType<AutoCompleteComponent["showClearButton"]>>(false);
     public readonly size = input<ReturnType<AutoCompleteComponent["size"]>>("small");
     public readonly textField = input<ReturnType<AutoCompleteComponent["textField"]>>("text");
+    public readonly userClass = input<ReturnType<AutoCompleteComponent["userClass"]>>("w-50");
     public readonly valueField = input<ReturnType<AutoCompleteComponent["valueField"]>>("value");
 
     protected onPopupClose(event: PreventableEvent) {

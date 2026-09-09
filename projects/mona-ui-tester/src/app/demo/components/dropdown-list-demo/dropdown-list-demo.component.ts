@@ -2,7 +2,7 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideUtensils } from "@lucide/angular";
-import { FilterableOptions, PreventableEvent, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
 import {
     DropdownFilterableDirective,
@@ -15,22 +15,63 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
-import { GroupableOptions } from "@nanahoshi/mona-ui/internal/list";
 import { range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
-import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
+    buildFilterableOptions,
+    buildGroupableOptions,
+    buildVirtualScrollOptions,
     dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
     dropdownGroupingFeatureConfig,
     dropdownNoDataTemplateFeatureConfig,
     dropdownPrefixTemplateFeatureConfig,
     dropdownVirtualizationFeatureConfig,
-    getFormValueText
+    getFormValueText,
+    ITEM_TEMPLATE_CODE
 } from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const FOOTER_TEMPLATE_CODE = `<ng-template monaDropDownFooterTemplate>
+    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+        Total items: {{ dropdownData().length }}
+    </div>
+</ng-template>`;
+
+const GROUP_HEADER_TEMPLATE_CODE = `<ng-template monaDropDownGroupHeaderTemplate let-group>
+    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+</ng-template>`;
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaDropDownHeaderTemplate>
+    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+        Select your favorite food
+    </div>
+</ng-template>`;
+
+const PREFIX_TEMPLATE_CODE = `<ng-template monaDropdownPrefixTemplate>
+    <svg lucideUtensils [size]="16" class="h-full aspect-square flex items-center justify-center"></svg>
+</ng-template>`;
+
+const VALUE_TEMPLATE_CODE = `<ng-template monaDropDownListValueTemplate let-item>
+    @if (!item) {
+        <span class="text-gray-500">Select an option...</span>
+    } @else {
+        <span class="text-pink-600 font-bold truncate">{{ item?.text }}</span>
+    }
+</ng-template>`;
+
+// A fresh object per call (not a module-level singleton) - createFeatureInjector wires each
+// instance's config into its own mutable FeatureConfigHandler, so sharing one object across demo
+// component instances would leak feature-toggle state between them.
+function buildGroupingFeatureConfig() {
+    const config = dropdownGroupingFeatureConfig("dropdown");
+    config.subFeatures!["groupHeaderTemplate"].code = GROUP_HEADER_TEMPLATE_CODE;
+    return config;
+}
 
 @Component({
     selector: "app-dropdown-list-demo",
@@ -43,25 +84,25 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         filtering: dropdownFilteringFeatureConfig("dropdown"),
         footerTemplate: {
             active: false,
-            code: ``,
+            code: FOOTER_TEMPLATE_CODE,
             description: `This template is used to customize the footer template of the dropdown list.`,
             name: "Footer Template"
         },
-        grouping: dropdownGroupingFeatureConfig("dropdown"),
+        grouping: buildGroupingFeatureConfig(),
         headerTemplate: {
             active: false,
-            code: ``,
+            code: HEADER_TEMPLATE_CODE,
             description: `This template is used to customize the header template of the dropdown list.`,
             name: "Header Template"
         },
         itemTemplate: {
             active: false,
-            code: ``,
+            code: ITEM_TEMPLATE_CODE,
             description: `This template is used to customize the item template of the dropdown list.`,
             name: "Item Template"
         },
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("autocomplete"),
-        prefixTemplate: dropdownPrefixTemplateFeatureConfig("dropdown"),
+        prefixTemplate: { ...dropdownPrefixTemplateFeatureConfig("dropdown"), code: PREFIX_TEMPLATE_CODE },
         preventClose: {
             active: false,
             code: ``,
@@ -76,22 +117,20 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         },
         valueTemplate: {
             active: false,
-            code: ``,
+            code: VALUE_TEMPLATE_CODE,
             description: `This template is used to customize the value template of the dropdown list.`,
             name: "Value Template"
         },
         virtualization: dropdownVirtualizationFeatureConfig("dropdown")
     });
-    protected readonly config = signal<ComponentConfig<DropdownListComponent<any>>>({
-        code: ``,
-        inputs: {
+    protected readonly config = computed(() => ({
+        inputs: deriveInputConfig<DropdownListComponent<any>>(this.metadata(), {
             data: {
                 type: "object"
             },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
                 value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
@@ -99,17 +138,9 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 clearable: true,
                 placeholder: "Select a condition..."
             },
-            loading: {
-                type: "boolean",
-                value: false
-            },
             placeholder: {
                 type: "string",
                 value: "Select an option"
-            },
-            popupClass: {
-                type: "string",
-                value: ""
             },
             popupHeight: {
                 type: "number",
@@ -124,22 +155,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 min: 0,
                 value: null
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
-            },
-            showClearButton: {
-                type: "boolean",
-                value: false
             },
             size: {
                 type: "dropdown",
@@ -150,17 +169,19 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 type: "string",
                 value: "text"
             },
+            touched: undefined,
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: "w-44"
+            },
             valueField: {
                 type: "string",
                 value: "value"
-            },
-            valuePrimitive: {
-                type: "boolean",
-                value: false
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DropdownListComponent");
     protected readonly DropdownListWrapperComponent = DropdownListWrapperComponent;
@@ -190,6 +211,8 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ formValueText() }}</span>
         <mona-dropdown-list
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [data]="dropdownData()"
             [itemDisabled]="itemDisabled()"
             [loading]="loading()"
@@ -210,7 +233,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             [groupBy]="groupBy()"
             (close)="onPopupClose($event)"
             (open)="onPopupOpen($event)"
-            class="w-44">
+            [class]="userClass()">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
                     <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
@@ -290,17 +313,7 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => {
-        const features = this.features();
-        const subFeatures = features["filtering"]?.subFeatures || {};
-        const filteringOptions: FilterableOptions = {
-            caseSensitive: subFeatures["caseSensitive"].active ?? false,
-            debounce: subFeatures["debounce"].numericValue ?? 0,
-            enabled: features["filtering"].active ?? false,
-            operator: subFeatures["operator"].dropdownValue
-        };
-        return filteringOptions;
-    });
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
         if (this.valuePrimitive()) {
@@ -314,26 +327,10 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         const subFeatures = features["grouping"]?.subFeatures || {};
         return subFeatures["groupBy"].dropdownValue;
     });
-    protected readonly grouping = computed(() => {
-        const features = this.features();
-        const subFeatures = features["grouping"]?.subFeatures || {};
-        const groupingOptions: GroupableOptions = {
-            enabled: features["grouping"].active,
-            headerOrder: subFeatures["headerOrder"].dropdownValue,
-            orderBy: subFeatures["orderBy"].dropdownValue,
-            orderByDirection: subFeatures["orderByDirection"].dropdownValue
-        };
-        return groupingOptions;
-    });
-    protected readonly virtualization = computed(() => {
-        const features = this.features();
-        const subFeatures = features["virtualization"]?.subFeatures || {};
-        const options: Partial<VirtualScrollOptions> = {
-            enabled: features["virtualization"].active,
-            height: subFeatures["itemHeight"].numericValue
-        };
-        return options;
-    });
+    protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
+    protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
+    public readonly ariaLabel = input<ReturnType<DropdownListComponent["ariaLabel"]>>("");
+    public readonly ariaLabelledBy = input<ReturnType<DropdownListComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<DropdownListComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<DropdownListComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<DropdownListComponent["itemDisabled"]>>("active");
@@ -348,6 +345,7 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     public readonly showClearButton = input<ReturnType<DropdownListComponent["showClearButton"]>>(false);
     public readonly size = input<ReturnType<DropdownListComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<DropdownListComponent["textField"]>>("text");
+    public readonly userClass = input<ReturnType<DropdownListComponent["userClass"]>>("w-44");
     public readonly valueField = input<ReturnType<DropdownListComponent["valueField"]>>("value");
     public readonly valuePrimitive = input<ReturnType<DropdownListComponent["valuePrimitive"]>>(false);
 

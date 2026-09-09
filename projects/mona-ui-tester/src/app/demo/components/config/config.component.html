@@ -149,7 +149,7 @@
             </div>
             @if (entry[1].codeVisible) {
                 <div class="px-2">
-                    <app-code-viewer [code]="entry[1].code" language="html"></app-code-viewer>
+                    <app-code-viewer [code]="resolveFeatureCode(entry[0], entry[1])" language="html"></app-code-viewer>
                 </div>
             }
         </li>

@@ -1,5 +1,5 @@
 import { NgComponentOutlet, NgOptimizedImage } from "@angular/common";
-import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input } from "@angular/core";
 import { LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
@@ -8,9 +8,34 @@ import {
     PopoverTitleTemplateDirective
 } from "@nanahoshi/mona-ui/popover";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const FOOTER_TEMPLATE_CODE = `<ng-template monaPopoverFooterTemplate>
+    <div class="p-2 border-t flex border-t-border">
+        <p class="italic text-xs flex-1 select-none">Photo by Lorenzo Castellino</p>
+        <p class="text-xs select-none">
+            See at
+            <a
+                class="text-primary"
+                target="_blank"
+                href="https://www.pexels.com/photo/scenic-riverside-in-arashiyama-kyoto-japan-33145847/"
+                >Pexels</a
+            >
+        </p>
+    </div>
+</ng-template>`;
+
+const TITLE_TEMPLATE_CODE = `<ng-template monaPopoverTitleTemplate>
+    <div class="flex w-full bg-accent border-b border-b-border">
+        <p class="flex items-center flex-1 px-2 py-1.5">Arashiyama, Japan</p>
+        <button monaButton [look]="'ghost'" (click)="p.close()">
+            <svg lucideX [size]="14"></svg>
+        </button>
+    </div>
+</ng-template>`;
 
 @Component({
     selector: "app-popover-demo",
@@ -20,22 +45,20 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent> {
     readonly #injector = createFeatureInjector({
         footerTemplate: {
+            code: FOOTER_TEMPLATE_CODE,
             description: `This template is used to customize the footer of the popover.`,
             name: "Footer Template",
             active: false
         },
         titleTemplate: {
+            code: TITLE_TEMPLATE_CODE,
             description: `This template is used to customize the title of the popover.`,
             name: "Title Template",
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<PopoverComponent>>({
-        inputs: {
-            displayArrow: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<PopoverComponent>>(() => ({
+        inputs: deriveInputConfig<PopoverComponent>(this.metadata(), {
             position: {
                 type: "dropdown",
                 value: ["top", "bottom", "left", "right"],
@@ -53,14 +76,10 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
                 type: "dropdown",
                 value: ["click", "hover", "contextmenu", "none"],
                 defaultValue: "click"
-            },
-            title: {
-                type: "string",
-                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PopoverComponent");
     protected readonly PopoverWrapperComponent = PopoverWrapperComponent;

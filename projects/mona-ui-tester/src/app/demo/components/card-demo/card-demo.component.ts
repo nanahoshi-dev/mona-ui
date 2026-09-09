@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, inject, input, signal } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     CardActionDirective,
@@ -13,6 +13,7 @@ import {
 import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -37,16 +38,21 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
             name: "Header"
         }
     });
-    protected readonly config = signal<ComponentConfig<CardComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<CardComponent>>(() => ({
+        inputs: deriveInputConfig<CardComponent>(this.metadata(), {
             rounded: {
                 type: "dropdown",
                 value: ["small", "medium", "large", "xlarge", "xxlarge", "none"],
                 defaultValue: "medium"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("CardComponent");
     protected readonly CardWrapperComponent = CardWrapperComponent;
@@ -67,7 +73,7 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
     ],
     template: `
         @let featureData = features();
-        <mona-card [rounded]="rounded()" class="w-96">
+        <mona-card [rounded]="rounded()" [class]="'w-96 ' + userClass()">
             @if (featureData["header"].active) {
                 <mona-card-header>
                     <h3 class="font-semibold text-sm" *monaCardTitle="let id" [id]="id">Login to your account</h3>
@@ -101,4 +107,5 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
 export class CardWrapperComponent implements ComponentInputsAsSignal<CardComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly rounded = input<ReturnType<CardComponent["rounded"]>>("medium");
+    public readonly userClass = input<ReturnType<CardComponent["userClass"]>>("");
 }

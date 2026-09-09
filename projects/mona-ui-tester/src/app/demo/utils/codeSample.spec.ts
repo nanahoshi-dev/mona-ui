@@ -1,0 +1,388 @@
+import { describe, expect, it } from "vitest";
+import { ComponentConfigFeatureItem, ComponentConfigFeatureItemOptions, ProcessedConfigItem } from "./componentConfig";
+import {
+    buildActiveFeatureAttributes,
+    buildActiveFeatureContent,
+    dedent,
+    generateComponentCodeSample,
+    generateDirectiveBindingCodeSample,
+    generateFeatureCodeSample
+} from "./codeSample";
+
+function makeItem(overrides: Partial<ProcessedConfigItem> & Pick<ProcessedConfigItem, "name" | "configType">) {
+    return {
+        valueType: "string",
+        ...overrides
+    } as ProcessedConfigItem;
+}
+
+describe("generateComponentCodeSample", () => {
+    it("renders a plain element selector with no attributes when nothing is customized", () => {
+        const code = generateComponentCodeSample("mona-switch", [], {});
+        expect(code).toBe("<mona-switch></mona-switch>");
+    });
+
+    it("skips boolean attributes at their false baseline and includes them when true", () => {
+        const items = [
+            makeItem({ name: "disabled", configType: "boolean", value: false }),
+            makeItem({ name: "checked", configType: "boolean", value: false })
+        ];
+        const code = generateComponentCodeSample("mona-switch", items, { checked: true });
+        expect(code).toBe(`<mona-switch [checked]="true"></mona-switch>`);
+    });
+
+    it("formats string values with single quotes and skips empty strings", () => {
+        const items = [
+            makeItem({ name: "placeholder", configType: "string", value: "" }),
+            makeItem({ name: "separator", configType: "string", value: "-" })
+        ];
+        const code = generateComponentCodeSample("mona-otp-input", items, { separator: "*" });
+        expect(code).toBe(`<mona-otp-input [separator]="'*'"></mona-otp-input>`);
+    });
+
+    it("formats numbers unquoted and skips values equal to the item default", () => {
+        const items = [makeItem({ name: "length", configType: "number", value: 6, defaultValue: 6 })];
+        expect(generateComponentCodeSample("mona-otp-input", items, {})).toBe(
+            "<mona-otp-input></mona-otp-input>"
+        );
+        expect(generateComponentCodeSample("mona-otp-input", items, { length: 10 })).toBe(
+            `<mona-otp-input [length]="10"></mona-otp-input>`
+        );
+    });
+
+    it("uses the item alias for the rendered attribute name", () => {
+        const items = [makeItem({ name: "roundedValue", alias: "rounded", configType: "string", value: "medium" })];
+        const code = generateComponentCodeSample("mona-text-box", items, { roundedValue: "large" });
+        expect(code).toBe(`<mona-text-box [rounded]="'large'"></mona-text-box>`);
+    });
+
+    it("skips disabled items and non-bindable config types", () => {
+        const items = [
+            makeItem({ name: "onClick", configType: "function", value: () => {} }),
+            makeItem({ name: "click", configType: "event" }),
+            makeItem({ name: "note", configType: "string", value: "hi", disabled: true })
+        ];
+        const code = generateComponentCodeSample("mona-button", items, {});
+        expect(code).toBe("<mona-button></mona-button>");
+    });
+
+    it("unquotes a raw ts-morph selector literal", () => {
+        const code = generateComponentCodeSample(`"mona-otp-input"`, [], {});
+        expect(code).toBe("<mona-otp-input></mona-otp-input>");
+    });
+
+    it("renders attribute-selector directives as a host attribute on their tag", () => {
+        const items = [
+            makeItem({ name: "rounded", configType: "dropdown", value: ["none", "medium"], defaultValue: "medium" })
+        ];
+        const code = generateComponentCodeSample("textarea[monaTextArea]", items, { rounded: "medium" });
+        expect(code).toBe(`<textarea monaTextArea></textarea>`);
+
+        const codeWithOverride = generateComponentCodeSample("textarea[monaTextArea]", items, { rounded: "large" });
+        expect(codeWithOverride).toBe(`<textarea monaTextArea [rounded]="'large'"></textarea>`);
+    });
+
+    it("falls back to a div host for a bare attribute-only selector", () => {
+        const code = generateComponentCodeSample("[monaButton]", [], {});
+        expect(code).toBe(`<div monaButton></div>`);
+    });
+
+    it("wraps attributes onto multiple indented lines when the single-line form is too long", () => {
+        const items = [
+            makeItem({ name: "aVeryLongPropertyNameOne", configType: "string", value: "" }),
+            makeItem({ name: "aVeryLongPropertyNameTwo", configType: "string", value: "" }),
+            makeItem({ name: "aVeryLongPropertyNameThree", configType: "string", value: "" })
+        ];
+        const code = generateComponentCodeSample("mona-some-really-long-component-selector", items, {
+            aVeryLongPropertyNameOne: "value-one",
+            aVeryLongPropertyNameTwo: "value-two",
+            aVeryLongPropertyNameThree: "value-three"
+        });
+        expect(code).toBe(
+            [
+                "<mona-some-really-long-component-selector",
+                `    [aVeryLongPropertyNameOne]="'value-one'"`,
+                `    [aVeryLongPropertyNameTwo]="'value-two'"`,
+                `    [aVeryLongPropertyNameThree]="'value-three'">`,
+                "</mona-some-really-long-component-selector>"
+            ].join("\n")
+        );
+    });
+
+    it("appends additionalAttributes after the derived input bindings", () => {
+        const items = [makeItem({ name: "disabled", configType: "boolean", value: false })];
+        const code = generateComponentCodeSample("mona-dropdown-list", items, { disabled: true }, [
+            `[monaDropDownFilterable]="{"enabled":true}"`
+        ]);
+        expect(code).toBe(
+            [
+                "<mona-dropdown-list",
+                `    [disabled]="true"`,
+                `    [monaDropDownFilterable]="{"enabled":true}">`,
+                "</mona-dropdown-list>"
+            ].join("\n")
+        );
+    });
+});
+
+describe("generateFeatureCodeSample", () => {
+    it("renders an inactive boolean feature as an empty element", () => {
+        const item: ComponentConfigFeatureItemOptions = {
+            active: false,
+            description: "Enable filtering.",
+            name: "Filterable"
+        };
+        expect(generateFeatureCodeSample("mona-dropdown-list", "filterable", item)).toBe(
+            "<mona-dropdown-list></mona-dropdown-list>"
+        );
+    });
+
+    it("renders an active boolean feature as a true binding", () => {
+        const item: ComponentConfigFeatureItemOptions = {
+            active: true,
+            description: "Enable filtering.",
+            name: "Filterable"
+        };
+        expect(generateFeatureCodeSample("mona-dropdown-list", "filterable", item)).toBe(
+            `<mona-dropdown-list [filterable]="true"></mona-dropdown-list>`
+        );
+    });
+
+    it("renders a dropdown-type feature's current value", () => {
+        const item: ComponentConfigFeatureItemOptions = {
+            active: true,
+            description: "Sets the size.",
+            name: "Size",
+            type: "dropdown",
+            dropdownValue: "large",
+            dropdownDefaultValue: "medium"
+        };
+        expect(generateFeatureCodeSample("mona-chip", "size", item)).toBe(
+            `<mona-chip [size]="'large'"></mona-chip>`
+        );
+    });
+});
+
+describe("generateDirectiveBindingCodeSample", () => {
+    it("wraps the host attribute binding in the demoed component's own element tag", () => {
+        const allFeatures = {} as ComponentConfigFeatureItem;
+        const code = generateDirectiveBindingCodeSample(
+            "mona-auto-complete",
+            { hostAttribute: "monaDropDownFilterable", buildValue: () => ({ enabled: true, operator: "startsWith" }) },
+            allFeatures
+        );
+        expect(code).toBe(
+            [
+                "<mona-auto-complete",
+                `    [monaDropDownFilterable]="{"enabled":true,"operator":"startsWith"}">`,
+                "</mona-auto-complete>"
+            ].join("\n")
+        );
+    });
+
+    it("drops undefined members from the built value", () => {
+        const allFeatures = {} as ComponentConfigFeatureItem;
+        const code = generateDirectiveBindingCodeSample(
+            "mona-dropdown-list",
+            { hostAttribute: "monaDropDownGroupable", buildValue: () => ({ enabled: false, orderBy: undefined }) },
+            allFeatures
+        );
+        expect(code).toBe(
+            ["<mona-dropdown-list", `    [monaDropDownGroupable]="{"enabled":false}">`, "</mona-dropdown-list>"].join(
+                "\n"
+            )
+        );
+    });
+
+    it("unquotes a raw ts-morph selector literal", () => {
+        const allFeatures = {} as ComponentConfigFeatureItem;
+        const code = generateDirectiveBindingCodeSample(
+            `"mona-combo-box"`,
+            { hostAttribute: "monaDropDownVirtualScroll", buildValue: () => ({ enabled: true }) },
+            allFeatures
+        );
+        expect(code).toBe(`<mona-combo-box [monaDropDownVirtualScroll]="{"enabled":true}"></mona-combo-box>`);
+    });
+});
+
+describe("buildActiveFeatureAttributes", () => {
+    it("skips inactive features", () => {
+        const features = {
+            filtering: {
+                active: false,
+                description: "",
+                name: "Filtering",
+                directiveBinding: { hostAttribute: "monaDropDownFilterable", buildValue: () => ({ enabled: false }) }
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureAttributes(features, new Set())).toEqual([]);
+    });
+
+    it("builds a directive-binding attribute for an active feature", () => {
+        const features = {
+            filtering: {
+                active: true,
+                description: "",
+                name: "Filtering",
+                directiveBinding: {
+                    hostAttribute: "monaDropDownFilterable",
+                    buildValue: () => ({ enabled: true, operator: "startsWith" })
+                }
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureAttributes(features, new Set())).toEqual([
+            `[monaDropDownFilterable]="{"enabled":true,"operator":"startsWith"}"`
+        ]);
+    });
+
+    it("builds a plain attribute for an active feature matching a real input name", () => {
+        const features = {
+            highlightFirst: { active: true, description: "", name: "Highlight First" }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureAttributes(features, new Set(["highlightFirst"]))).toEqual([
+            `[highlightFirst]="true"`
+        ]);
+    });
+
+    it("skips active features with no directiveBinding and no matching input name", () => {
+        const features = {
+            dataSet: { active: false, description: "", name: "Data Set", type: "dropdown", dropdownValue: "Foods" }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureAttributes(features, new Set())).toEqual([]);
+    });
+});
+
+describe("dedent", () => {
+    it("strips a leading and trailing blank line and the common indentation", () => {
+        const code = `
+            <ng-template monaChipPrefixTemplate>
+                <svg lucideSearch></svg>
+            </ng-template>
+        `;
+        expect(dedent(code)).toBe(
+            ["<ng-template monaChipPrefixTemplate>", "    <svg lucideSearch></svg>", "</ng-template>"].join("\n")
+        );
+    });
+
+    it("returns an empty string for empty input", () => {
+        expect(dedent("")).toBe("");
+    });
+});
+
+describe("buildActiveFeatureContent", () => {
+    it("dedents the code of an active template feature", () => {
+        const features = {
+            prefixTemplate: {
+                active: true,
+                description: "",
+                name: "Prefix Template",
+                code: `
+                    <ng-template monaChipPrefixTemplate>
+                        <svg lucideSearch></svg>
+                    </ng-template>
+                `
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set())).toEqual([
+            ["<ng-template monaChipPrefixTemplate>", "    <svg lucideSearch></svg>", "</ng-template>"].join("\n")
+        ]);
+    });
+
+    it("skips inactive features and features with empty code", () => {
+        const features = {
+            prefixTemplate: { active: false, description: "", name: "Prefix Template", code: "<ng-template></ng-template>" },
+            headerTemplate: { active: true, description: "", name: "Header Template", code: "" }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set())).toEqual([]);
+    });
+
+    it("skips features already represented as an attribute (directiveBinding or matching input name)", () => {
+        const features = {
+            filtering: {
+                active: true,
+                description: "",
+                name: "Filtering",
+                code: "<should-not-appear></should-not-appear>",
+                directiveBinding: { hostAttribute: "monaDropDownFilterable", buildValue: () => ({}) }
+            },
+            highlightFirst: {
+                active: true,
+                description: "",
+                name: "Highlight First",
+                code: "<should-not-appear-either></should-not-appear-either>"
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set(["highlightFirst"]))).toEqual([]);
+    });
+
+    it("includes an active sub-feature's code even when its parent has no code of its own", () => {
+        const features = {
+            grouping: {
+                active: true,
+                description: "",
+                name: "Grouping",
+                directiveBinding: { hostAttribute: "monaDropDownGroupable", buildValue: () => ({}) },
+                subFeatures: {
+                    groupHeaderTemplate: {
+                        active: true,
+                        description: "",
+                        name: "Group Header Template",
+                        code: "<ng-template monaDropDownGroupHeaderTemplate let-group>\n    <span>{{ group }}</span>\n</ng-template>"
+                    },
+                    groupBy: {
+                        active: false,
+                        description: "",
+                        name: "Group By",
+                        type: "dropdown",
+                        dropdownValue: "category"
+                    }
+                }
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set())).toEqual([
+            "<ng-template monaDropDownGroupHeaderTemplate let-group>\n    <span>{{ group }}</span>\n</ng-template>"
+        ]);
+    });
+
+    it("skips an inactive sub-feature's code even when its parent is active", () => {
+        const features = {
+            grouping: {
+                active: true,
+                description: "",
+                name: "Grouping",
+                subFeatures: {
+                    groupHeaderTemplate: {
+                        active: false,
+                        description: "",
+                        name: "Group Header Template",
+                        code: "<should-not-appear></should-not-appear>"
+                    }
+                }
+            }
+        } as unknown as ComponentConfigFeatureItem;
+        expect(buildActiveFeatureContent(features, new Set())).toEqual([]);
+    });
+});
+
+describe("generateComponentCodeSample with nested content", () => {
+    it("renders active template feature content as nested markup", () => {
+        const items = [makeItem({ name: "disabled", configType: "boolean", value: false })];
+        const code = generateComponentCodeSample("mona-chip", items, { disabled: true }, [], [
+            "<ng-template monaChipPrefixTemplate>\n    <svg lucideSearch></svg>\n</ng-template>"
+        ]);
+        expect(code).toBe(
+            [
+                `<mona-chip [disabled]="true">`,
+                "    <ng-template monaChipPrefixTemplate>",
+                "        <svg lucideSearch></svg>",
+                "    </ng-template>",
+                "</mona-chip>"
+            ].join("\n")
+        );
+    });
+
+    it("renders nested content with no attributes", () => {
+        const code = generateComponentCodeSample("mona-chip", [], {}, [], ["<ng-template></ng-template>"]);
+        expect(code).toBe(["<mona-chip>", "    <ng-template></ng-template>", "</mona-chip>"].join("\n"));
+    });
+});

@@ -1,7 +1,8 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { ProgressBarComponent, ProgressBarLabelTemplateDirective } from "@nanahoshi/mona-ui/progress-bar";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -19,41 +20,11 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
             name: "Label Template"
         }
     });
-    protected readonly config = signal<ComponentConfig<ProgressBarComponent>>({
-        code: `
-            <mona-progress-bar
-                [animate]="animate()"
-                [color]="color()"
-                [disabled]="disabled()"
-                [indeterminate]="indeterminate()"
-                [labelPosition]="labelPosition()"
-                [labelStyles]="labelStyles()"
-                [labelVisible]="labelVisible()"
-                [max]="max()"
-                [min]="min()"
-                [rounded]="rounded()"
-                [value]="value()">
-                <ng-template monaProgressBarLabelTemplate let-value let-min="min" let-max="max">
-                    <span class="text-xs px-2"> {{ value }} | {{ max }} </span>
-                </ng-template>
-            </mona-progress-bar>
-        `,
-        inputs: {
-            animate: {
-                type: "boolean",
-                value: true
-            },
+    protected readonly config = computed<ComponentConfig<ProgressBarComponent>>(() => ({
+        inputs: deriveInputConfig<ProgressBarComponent>(this.metadata(), {
             color: {
                 type: "color",
                 value: ""
-            },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
-            indeterminate: {
-                type: "boolean",
-                value: false
             },
             labelPosition: {
                 type: "dropdown",
@@ -66,30 +37,23 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
                 defaultValue: {},
                 clearable: true
             },
-            labelVisible: {
-                type: "boolean",
-                value: true
-            },
-            max: {
-                type: "number",
-                value: 100
-            },
-            min: {
-                type: "number",
-                value: 0
-            },
             rounded: {
                 type: "dropdown",
                 value: ["small", "medium", "large", "full", "none"],
                 defaultValue: "medium"
             },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
+            },
             value: {
                 type: "number",
                 value: 25
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ProgressBarComponent");
     protected readonly ProgressBarWrapperComponent = ProgressBarWrapperComponent;
@@ -100,6 +64,8 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
     template: `
         @let featureData = features();
         <mona-progress-bar
+            [aria-label]="ariaLabel()"
+            [aria-valuetext]="ariaValueText()"
             [animate]="animate()"
             [color]="color()"
             [disabled]="disabled()"
@@ -110,7 +76,8 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
             [max]="max()"
             [min]="min()"
             [rounded]="rounded()"
-            [value]="value()">
+            [value]="value()"
+            [class]="userClass()">
             @if (featureData["labelTemplate"].active) {
                 <ng-template monaProgressBarLabelTemplate let-value let-min="min" let-max="max">
                     <span class="text-xs px-2"> {{ value }} | {{ max }} </span>
@@ -127,6 +94,8 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
 class ProgressBarWrapperComponent implements ComponentInputsAsSignal<ProgressBarComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly animate = input<ReturnType<ProgressBarComponent["animate"]>>(true);
+    public readonly ariaLabel = input("");
+    public readonly ariaValueText = input("");
     public readonly color = input<ReturnType<ProgressBarComponent["color"]>>(``);
     public readonly disabled = input(false);
     public readonly indeterminate = input(false);
@@ -136,5 +105,6 @@ class ProgressBarWrapperComponent implements ComponentInputsAsSignal<ProgressBar
     public readonly max = input(100);
     public readonly min = input(0);
     public readonly rounded = input<ReturnType<ProgressBarComponent["rounded"]>>("medium");
+    public readonly userClass = input<ReturnType<ProgressBarComponent["userClass"]>>("");
     public readonly value = input(0);
 }

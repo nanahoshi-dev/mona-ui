@@ -12,6 +12,7 @@ import { DateInputPrefixTemplateDirective } from "@nanahoshi/mona-ui/date-input"
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
     calendarDecadeCellTemplateFeatureConfig,
     calendarMonthCellTemplateFeatureConfig,
@@ -21,6 +22,30 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const DECADE_CELL_TEMPLATE_CODE = `<ng-template monaCalendarDecadeCellTemplate let-year>
+    <span class="text-violet-700 underline">{{ year }}</span>
+</ng-template>`;
+
+const MONTH_CELL_TEMPLATE_CODE = `<ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+    <span [class.text-amber-600]="day % 5 === 0" [class.text-indigo-500]="day % 2 !== 0">
+        {{ day }}
+    </span>
+</ng-template>`;
+
+const YEAR_CELL_TEMPLATE_CODE = `<ng-template monaCalendarYearCellTemplate let-month let-text="text">
+    <span
+        >{{ text }} /
+        <span class="text-fuchsia-500">{{ month }}</span>
+    </span>
+</ng-template>`;
+
+const PREFIX_TEMPLATE_CODE = `<ng-template monaDateInputPrefixTemplate>
+    <svg
+        [lucideIcon]="prefixIcon()"
+        [size]="16"
+        class="h-full aspect-square flex items-center justify-center"></svg>
+</ng-template>`;
+
 @Component({
     selector: "app-datetime-picker-demo",
     templateUrl: "./datetime-picker-demo.component.html",
@@ -28,10 +53,11 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimePickerComponent> {
     readonly #injector = createFeatureInjector({
-        decadeCellTemplate: calendarDecadeCellTemplateFeatureConfig(),
-        monthCellTemplate: calendarMonthCellTemplateFeatureConfig(),
+        decadeCellTemplate: { ...calendarDecadeCellTemplateFeatureConfig(), code: DECADE_CELL_TEMPLATE_CODE },
+        monthCellTemplate: { ...calendarMonthCellTemplateFeatureConfig(), code: MONTH_CELL_TEMPLATE_CODE },
         prefixTemplate: {
             active: false,
+            code: PREFIX_TEMPLATE_CODE,
             description: `Enable prefix template for the date time picker .`,
             name: "Prefix Template"
         },
@@ -45,15 +71,11 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
             description: `The "open" event is fired when the popup is about to open.`,
             name: "Prevent Open"
         },
-        yearCellTemplate: calendarYearCellTemplateFeatureConfig()
+        yearCellTemplate: { ...calendarYearCellTemplateFeatureConfig(), code: YEAR_CELL_TEMPLATE_CODE }
     });
     protected readonly DateTimePickerWrapperComponent = DateTimePickerWrapperComponent;
-    protected readonly config = signal<ComponentConfig<DateTimePickerComponent>>({
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<DateTimePickerComponent>>(() => ({
+        inputs: deriveInputConfig<DateTimePickerComponent>(this.metadata(), {
             disabledDates: {
                 type: "iterable",
                 value: []
@@ -63,6 +85,7 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 value: ["sunday", "monday"],
                 defaultValue: "monday"
             },
+            // The demo curates a format including seconds instead of the library's default.
             format: {
                 type: "string",
                 value: "dd/MM/yyyy HH:mm:ss"
@@ -78,6 +101,10 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 min: 1,
                 max: 24
             },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
+            touched: undefined,
             max: {
                 type: "dropdown",
                 value: [DateTime.now().plus({ day: 5 }).toJSDate()],
@@ -94,13 +121,10 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 min: 1,
                 max: 60
             },
+            // The demo curates a starting placeholder instead of the library's empty default.
             placeholder: {
                 type: "string",
                 value: "Select a date..."
-            },
-            popupClass: {
-                type: "string",
-                value: ""
             },
             popupHeight: {
                 type: "number",
@@ -114,18 +138,6 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 min: 0,
                 value: null
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            readonlyInput: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large"],
@@ -137,26 +149,19 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 min: 1,
                 max: 60
             },
-            showClearButton: {
-                type: "boolean",
-                value: false
-            },
-            showSeconds: {
-                type: "boolean",
-                value: false
-            },
             size: {
                 type: "dropdown",
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
             },
-            weekNumber: {
-                type: "boolean",
-                value: false
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DateTimePickerComponent");
 }
@@ -194,6 +199,7 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
             [showSeconds]="showSeconds()"
             [size]="size()"
             [weekNumber]="weekNumber()"
+            [class]="userClass()"
             (close)="onPopupClose($event)"
             (open)="onPopupOpen($event)">
             @if (featureData && featureData["decadeCellTemplate"].active) {
@@ -275,6 +281,7 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
     public readonly showClearButton = input<ReturnType<DateTimePickerComponent["showClearButton"]>>(false);
     public readonly showSeconds = input<ReturnType<DateTimePickerComponent["showSeconds"]>>(false);
     public readonly size = input<ReturnType<DateTimePickerComponent["size"]>>("medium");
+    public readonly userClass = input<ReturnType<DateTimePickerComponent["userClass"]>>("");
     public readonly weekNumber = input<ReturnType<DateTimePickerComponent["weekNumber"]>>(false);
 
     protected onPopupClose(event: PreventableEvent) {

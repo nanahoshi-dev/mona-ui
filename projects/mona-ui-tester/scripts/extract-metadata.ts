@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { CallExpression, JSDocTag, Node, Project } from "ts-morph";
+import { CallExpression, JSDocTag, Node, Project, SyntaxKind } from "ts-morph";
 
 interface ComponentInputMetadata {
     defaultValue?: string;
@@ -59,6 +59,44 @@ function simplifyType(fullType: string): string {
     }
 
     return simplified.trim();
+}
+
+/**
+ * Extracts a safely re-serializable literal default value from an `input()`/`model()` call's
+ * first argument, for use when the property has no `@default` JSDoc tag. Only handles literals
+ * that can be written back into a JSON string and later parsed as JS (numbers, booleans, plain
+ * strings, `null`, an empty array, and negative numbers) - anything else (identifiers, function
+ * expressions, object literals) is left undefined, exactly as when no default exists at all.
+ * @param argument The call expression's first argument node, if any.
+ * @returns The argument's source text, or undefined if it isn't a safely-reserializable literal.
+ */
+function extractLiteralDefaultText(argument: Node | undefined): string | undefined {
+    if (!argument) {
+        return undefined;
+    }
+    if (
+        Node.isNumericLiteral(argument) ||
+        Node.isTrueLiteral(argument) ||
+        Node.isFalseLiteral(argument) ||
+        Node.isStringLiteral(argument) ||
+        Node.isNoSubstitutionTemplateLiteral(argument)
+    ) {
+        return argument.getText();
+    }
+    if (Node.isNullLiteral(argument)) {
+        return "null";
+    }
+    if (Node.isArrayLiteralExpression(argument) && argument.getElements().length === 0) {
+        return "[]";
+    }
+    if (
+        Node.isPrefixUnaryExpression(argument) &&
+        argument.getOperatorToken() === SyntaxKind.MinusToken &&
+        Node.isNumericLiteral(argument.getOperand())
+    ) {
+        return argument.getText();
+    }
+    return undefined;
 }
 
 /**
@@ -134,6 +172,11 @@ function extractInputsFromInheritanceChain(
                     if (defaultTag) {
                         defaultValue = defaultTag.getCommentText()?.toString().trim();
                     }
+                }
+                if (defaultValue === undefined && (functionName === "input" || functionName === "model")) {
+                    // No @default JSDoc tag - fall back to the literal default passed to input()/model()
+                    // itself. Skipped for .required variants, whose first argument isn't a default value.
+                    defaultValue = extractLiteralDefaultText(callExpression.getArguments()[0]);
                 }
 
                 const item: ComponentInputMetadata = {

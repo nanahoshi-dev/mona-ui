@@ -5,6 +5,7 @@ import { TimePickerComponent } from "@nanahoshi/mona-ui/time-picker";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -30,27 +31,17 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
         }
     });
     protected readonly TimePickerWrapperComponent = TimePickerWrapperComponent;
-    protected readonly config = signal<ComponentConfig<TimePickerComponent>>({
-        code: ``,
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
-            format: {
-                type: "string",
-                value: "HH:mm"
-            },
+    protected readonly config = computed<ComponentConfig<TimePickerComponent>>(() => ({
+        inputs: deriveInputConfig<TimePickerComponent>(this.metadata(), {
             hourFormat: {
                 type: "dropdown",
                 value: ["12", "24"],
                 defaultValue: "24"
             },
-            hourStep: {
-                type: "number",
-                value: 1
-            },
-
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
+            touched: undefined,
             max: {
                 type: "dropdown",
                 value: [DateTime.now().plus({ day: 5 }).toJSDate()],
@@ -60,10 +51,6 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 type: "dropdown",
                 value: [DateTime.now().minus({ day: 10 }).toJSDate()],
                 defaultValue: null
-            },
-            minuteStep: {
-                type: "number",
-                value: 1
             },
             popupHeight: {
                 type: "number",
@@ -78,43 +65,24 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 min: 0,
                 value: null
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            readonlyInput: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
             },
-            secondStep: {
-                type: "number",
-                value: 1
-            },
-            showClearButton: {
-                type: "boolean",
-                value: false
-            },
-            showSeconds: {
-                type: "boolean",
-                value: false
-            },
             size: {
                 type: "dropdown",
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TimePickerComponent");
 }
@@ -130,6 +98,8 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
             [hourFormat]="hourFormat()"
             [hourStep]="hourStep()"
             [minuteStep]="minuteStep()"
+            [placeholder]="placeholder()"
+            [popupClass]="popupClass()"
             [popupHeight]="popupHeight()"
             [popupWidth]="popupWidth()"
             [readonlyInput]="readonlyInput()"
@@ -140,7 +110,7 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
             [size]="size()"
             (close)="onPopupClose($event)"
             (open)="onPopupOpen($event)"
-            class="w-32">
+            [class]="'w-32 ' + userClass()">
         </mona-time-picker>
     `
 })
@@ -178,6 +148,8 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
         transform: value => (value instanceof Date ? value : undefined)
     });
     public readonly minuteStep = input<ReturnType<TimePickerComponent["minuteStep"]>>(1);
+    public readonly placeholder = input<ReturnType<TimePickerComponent["placeholder"]>>("");
+    public readonly popupClass = input<ReturnType<TimePickerComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<TimePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<TimePickerComponent["popupWidth"]>>(null);
     public readonly readonly = input<ReturnType<TimePickerComponent["readonly"]>>(false);
@@ -188,6 +160,7 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
     public readonly showClearButton = input<ReturnType<TimePickerComponent["showClearButton"]>>(false);
     public readonly showSeconds = input<ReturnType<TimePickerComponent["showSeconds"]>>(false);
     public readonly size = input<ReturnType<TimePickerComponent["size"]>>("medium");
+    public readonly userClass = input<ReturnType<TimePickerComponent["userClass"]>>("");
 
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;

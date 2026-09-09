@@ -4,7 +4,6 @@ import { disabled, form, FormField, readonly, required } from "@angular/forms/si
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { FilterableOptions, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import {
     DropdownFilterableDirective,
     DropdownFooterTemplateDirective,
@@ -15,7 +14,6 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
-import { GroupableOptions } from "@nanahoshi/mona-ui/internal/list";
 import {
     MultiSelectComponent,
     MultiSelectSummaryTagDirective,
@@ -24,7 +22,11 @@ import {
 } from "@nanahoshi/mona-ui/multi-select";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
+    buildFilterableOptions,
+    buildGroupableOptions,
+    buildVirtualScrollOptions,
     dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
     dropdownFooterTemplateFeatureConfig,
@@ -41,6 +43,31 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const FOOTER_TEMPLATE_CODE = `<ng-template monaDropDownFooterTemplate>
+    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+        Total items: {{ multiSelectData().length }}
+    </div>
+</ng-template>`;
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaDropDownHeaderTemplate>
+    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+        Select your favorite foods
+    </div>
+</ng-template>`;
+
+const PREFIX_TEMPLATE_CODE = `<ng-template monaDropdownPrefixTemplate>
+    <svg lucideSearch [size]="16" class="h-full ms-1"></svg>
+</ng-template>`;
+
+const SUMMARY_TAG_TEMPLATE_CODE = `<ng-template monaMultiSelectSummaryTagTemplate let-items let-tagCount="tagCount">
+    @let prefix = tagCount !== 0 ? "and" : "";
+    <span class="text-blue-400"> {{ prefix }} {{ items.length - tagCount }} more... </span>
+</ng-template>`;
+
+const TAG_TEMPLATE_CODE = `<ng-template monaMultiSelectTagTemplate let-item>
+    <span class="italic text-violet-600">{{ item.text }}</span>
+</ng-template>`;
+
 @Component({
     selector: "app-multi-select-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
@@ -51,12 +78,12 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("multi select"),
         filtering: dropdownFilteringFeatureConfig("multi select"),
-        footerTemplate: dropdownFooterTemplateFeatureConfig("multi select"),
+        footerTemplate: { ...dropdownFooterTemplateFeatureConfig("multi select"), code: FOOTER_TEMPLATE_CODE },
         grouping: dropdownGroupingFeatureConfig("multi select"),
-        headerTemplate: dropdownHeaderTemplateFeatureConfig("multi select"),
+        headerTemplate: { ...dropdownHeaderTemplateFeatureConfig("multi select"), code: HEADER_TEMPLATE_CODE },
         itemTemplate: dropdownItemTemplateFeatureConfig("multi select"),
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("multi select"),
-        prefixTemplate: dropdownPrefixTemplateFeatureConfig("multi select"),
+        prefixTemplate: { ...dropdownPrefixTemplateFeatureConfig("multi select"), code: PREFIX_TEMPLATE_CODE },
         preventClose: dropdownPreventPopupEventFeatureConfig("close"),
         preventOpen: dropdownPreventPopupEventFeatureConfig("open"),
         summaryTag: {
@@ -75,7 +102,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                     numericValue: 3
                 },
                 tagTemplate: {
-                    code: ``,
+                    code: SUMMARY_TAG_TEMPLATE_CODE,
                     active: false,
                     name: "Tag Template",
                     description: "Customizes the summary tag for the multi-select component."
@@ -83,45 +110,27 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             }
         },
         tagTemplate: {
-            code: ``,
+            code: TAG_TEMPLATE_CODE,
             active: false,
             name: "Tag Template",
             description: "Customizes the tag for the multi-select component."
         },
         virtualization: dropdownVirtualizationFeatureConfig("multi select")
     });
-    protected readonly config = signal<ComponentConfig<MultiSelectComponent>>({
-        code: ``,
-        inputs: {
-            autoClose: {
-                type: "boolean",
-                value: false
-            },
-            checkboxes: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<MultiSelectComponent>>(() => ({
+        inputs: deriveInputConfig<MultiSelectComponent>(this.metadata(), {
             data: {
                 type: "object"
             },
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
                 value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
-            },
-            loading: {
-                type: "boolean",
-                value: false
-            },
-            popupClass: {
-                type: "string",
-                value: ""
             },
             popupHeight: {
                 type: "number",
@@ -136,22 +145,17 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                 min: 0,
                 value: null
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
             },
+            // The wrapper's own showClearButton defaults to true (unlike the library's own
+            // false default) and nothing previously overrode it, so the demo has always shown
+            // the clear button - override to keep that same effective behavior.
             showClearButton: {
                 type: "boolean",
-                value: false
+                value: true
             },
             size: {
                 type: "dropdown",
@@ -162,17 +166,19 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                 type: "string",
                 value: "text"
             },
+            touched: undefined,
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: "w-60"
+            },
             valueField: {
                 type: "string",
                 value: "value"
-            },
-            valuePrimitive: {
-                type: "boolean",
-                value: false
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("MultiSelectComponent");
     protected readonly MultiSelectWrapperComponent = MultiSelectWrapperComponent;
@@ -202,6 +208,8 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         @let tagConfigData = tagConfig();
         <span>Selected Items: {{ formValueText() }}</span>
         <mona-multi-select
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [autoClose]="autoClose()"
             [checkboxes]="checkboxes()"
             [data]="multiSelectData()"
@@ -226,7 +234,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             (closed)="onPopupClosed()"
             (open)="onPopupOpen($event)"
             (opened)="onPopupOpened()"
-            class="w-60">
+            [class]="userClass()">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
                     <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
@@ -287,17 +295,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => {
-        const features = this.features();
-        const subFeatures = features["filtering"]?.subFeatures || {};
-        const filteringOptions: FilterableOptions = {
-            caseSensitive: subFeatures["caseSensitive"].active ?? false,
-            debounce: subFeatures["debounce"].numericValue ?? 0,
-            enabled: features["filtering"].active ?? false,
-            operator: subFeatures["operator"].dropdownValue
-        };
-        return filteringOptions;
-    });
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
         if (!value) {
@@ -314,17 +312,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
         const subFeatures = features["grouping"]?.subFeatures || {};
         return subFeatures["groupBy"].dropdownValue;
     });
-    protected readonly grouping = computed(() => {
-        const features = this.features();
-        const subFeatures = features["grouping"]?.subFeatures || {};
-        const groupingOptions: GroupableOptions = {
-            enabled: features["grouping"].active,
-            headerOrder: subFeatures["headerOrder"].dropdownValue,
-            orderBy: subFeatures["orderBy"].dropdownValue,
-            orderByDirection: subFeatures["orderByDirection"].dropdownValue
-        };
-        return groupingOptions;
-    });
+    protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly multiSelectData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
         if (dataSet === "Empty") {
@@ -350,16 +338,10 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
             template: active ? subFeatures["tagTemplate"].active : false
         };
     });
-    protected readonly virtualization = computed(() => {
-        const features = this.features();
-        const subFeatures = features["virtualization"]?.subFeatures || {};
-        const options: Partial<VirtualScrollOptions> = {
-            enabled: features["virtualization"].active,
-            height: subFeatures["itemHeight"].numericValue
-        };
-        return options;
-    });
+    protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
 
+    public readonly ariaLabel = input<ReturnType<MultiSelectComponent["ariaLabel"]>>("");
+    public readonly ariaLabelledBy = input<ReturnType<MultiSelectComponent["ariaLabelledBy"]>>("");
     public readonly autoClose = input<ReturnType<MultiSelectComponent["autoClose"]>>(false);
     public readonly checkboxes = input<ReturnType<MultiSelectComponent["checkboxes"]>>(false);
     public readonly data = input<ReturnType<MultiSelectComponent["data"]>>([]);
@@ -377,6 +359,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     public readonly summaryTagTemplate = input<ReturnType<MultiSelectComponent["summaryTagTemplate"]>>(null);
     public readonly tagCount = input<ReturnType<MultiSelectComponent["tagCount"]>>(-1);
     public readonly textField = input<ReturnType<MultiSelectComponent["textField"]>>("text");
+    public readonly userClass = input<ReturnType<MultiSelectComponent["userClass"]>>("w-60");
     public readonly valueField = input<ReturnType<MultiSelectComponent["valueField"]>>("value");
     public readonly valuePrimitive = input<ReturnType<MultiSelectComponent["valuePrimitive"]>>(false);
 

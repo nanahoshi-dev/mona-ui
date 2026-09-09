@@ -1,7 +1,8 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { AvatarComponent } from "@nanahoshi/mona-ui/avatar";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -12,30 +13,8 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> {
     protected readonly AvatarWrapperComponent = AvatarWrapperComponent;
-    protected readonly config = signal<ComponentConfig<AvatarComponent>>({
-        code: `
-            <mona-avatar
-                [backgroundColor]="backgroundColor()"
-                [borderColor]="borderColor()"
-                [borderRadius]="borderRadius()"
-                [borderWidth]="borderWidth()"
-                [height]="height()"
-                [image]="image()"
-                [label]="label()"
-                [labelColor]="labelColor()"
-                [labelFontSize]="labelFontSize()"
-                [labelFontWeight]="labelFontWeight()"
-                [width]="width()"></mona-avatar>
-        `,
-        inputs: {
-            alt: {
-                type: "string",
-                value: ""
-            },
-            ariaLabel: {
-                type: "string",
-                value: ""
-            },
+    protected readonly config = computed<ComponentConfig<AvatarComponent>>(() => ({
+        inputs: deriveInputConfig<AvatarComponent>(this.metadata(), {
             backgroundColor: {
                 type: "color",
                 value: "#f0f0f0"
@@ -79,12 +58,17 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
                 type: "string",
                 value: "normal"
             },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
+            },
             width: {
                 type: "string",
                 value: "100px"
             }
-        }
-    });
+        })
+    }));
     protected readonly metadata = this.getMetadata("AvatarComponent");
 }
 
@@ -106,7 +90,8 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
             [labelColor]="labelColor()"
             [labelFontSize]="labelFontSize()"
             [labelFontWeight]="labelFontWeight()"
-            [width]="width()"></mona-avatar>
+            [width]="width()"
+            [class]="userClass()"></mona-avatar>
     `
 })
 export class AvatarWrapperComponent implements ComponentInputsAsSignal<AvatarComponent> {
@@ -146,6 +131,7 @@ export class AvatarWrapperComponent implements ComponentInputsAsSignal<AvatarCom
     public readonly labelColor = input("#000000");
     public readonly labelFontSize = input("1.2em");
     public readonly labelFontWeight = input("normal");
+    public readonly userClass = input("");
     public readonly width = input("64px", {
         transform: (value: string | number) => {
             if (typeof value === "string") {

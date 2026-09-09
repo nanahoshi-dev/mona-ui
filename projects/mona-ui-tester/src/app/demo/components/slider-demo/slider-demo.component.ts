@@ -8,6 +8,7 @@ import {
     SliderTickValueTemplateDirective
 } from "@nanahoshi/mona-ui/slider";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -30,20 +31,25 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<SliderComponent>>({
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
+    protected readonly config = computed<ComponentConfig<SliderComponent>>(() => ({
+        inputs: deriveInputConfig<SliderComponent>(this.metadata(), {
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: "Slider value"
             },
+            ariaLabelledBy: {
+                alias: "aria-labelledby",
+                type: "string",
+                value: ""
+            },
+            // invalid is written by the FormField directive via [formField] below; Angular
+            // forbids binding it directly, so exclude it rather than expose a dead control.
+            invalid: undefined,
             labelPosition: {
                 type: "dropdown",
                 value: ["before", "after"],
                 defaultValue: "after"
-            },
-            labelStep: {
-                type: "number",
-                value: 1
             },
             largeTickStep: {
                 type: "number",
@@ -51,13 +57,10 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 nullable: true,
                 value: null
             },
+            // The demo curates a 0-23 hour range instead of the library's 0-10 default.
             maxValue: {
                 type: "number",
                 value: 23
-            },
-            minValue: {
-                type: "number",
-                value: 0
             },
             orientation: {
                 type: "dropdown",
@@ -73,6 +76,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 type: "color",
                 value: "var(--color-primary)"
             },
+            // The library defaults labels/ticks to hidden; the demo has always shown them.
             showLabels: {
                 type: "boolean",
                 value: true
@@ -81,10 +85,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 type: "boolean",
                 value: true
             },
-            smallTickStep: {
-                type: "number",
-                value: 1
-            },
+            // The demo curates a step of 4 instead of the library's default of 1.
             step: {
                 type: "number",
                 value: 4
@@ -97,13 +98,14 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 type: "string",
                 value: ""
             },
+            // The demo curates an initial value of 4 instead of the library's default of 0.
             value: {
                 type: "number",
                 value: 4
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SliderComponent");
     protected readonly SliderWrapperComponent = SliderWrapperComponent;
@@ -122,6 +124,8 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
     template: `
         @let featureData = features();
         <mona-slider
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [labelPosition]="labelPosition()"
             [labelStep]="labelStep()"
             [largeTickStep]="largeTickStep()"
@@ -130,6 +134,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             [orientation]="orientation()"
             [rounded]="rounded()"
             [selectionBackground]="selectionBackground()"
+            [shiftMultiplier]="shiftMultiplier()"
             [showLabels]="showLabels()"
             [showTicks]="showTicks()"
             [smallTickStep]="smallTickStep()"
@@ -164,6 +169,8 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     protected readonly size = computed(() =>
         this.orientation() === "horizontal" ? { width: "400px" } : { height: "400px" }
     );
+    public readonly ariaLabel = input<ReturnType<SliderComponent["ariaLabel"]>>("Slider value");
+    public readonly ariaLabelledBy = input<ReturnType<SliderComponent["ariaLabelledBy"]>>("");
     public readonly disabled = input(false);
     public readonly labelPosition = input<ReturnType<SliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);
@@ -173,6 +180,7 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     public readonly orientation = input<ReturnType<SliderComponent["orientation"]>>("horizontal");
     public readonly rounded = input<ReturnType<SliderComponent["rounded"]>>("full");
     public readonly selectionBackground = input<ReturnType<SliderComponent["selectionBackground"]>>("transparent");
+    public readonly shiftMultiplier = input(10);
     public readonly showLabels = input(false);
     public readonly showTicks = input(false);
     public readonly smallTickStep = input(1);

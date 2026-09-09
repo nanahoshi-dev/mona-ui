@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { LucideHeart, LucideSettings, LucideUser, LucideUsers } from "@lucide/angular";
 import {
     SplitButtonCheckboxItemComponent,
@@ -19,9 +19,54 @@ import {
 import { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const TEXT_TEMPLATE_CODE = `<ng-template monaSplitButtonTextTemplate>
+    <span class="text-pink-600">Mona</span>
+</ng-template>`;
+
+const MENU_BUTTON_TEMPLATE_CODE = `<ng-template monaSplitButtonMenuButtonTemplate let-item>
+    <svg lucideSettings [size]="10"></svg>
+</ng-template>`;
+
+const MENU_ITEM_ICON_TEMPLATE_CODE = `<ng-template monaSplitButtonMenuItemIconTemplate let-item>
+    <svg lucideUser [size]="14"></svg>
+</ng-template>`;
+
+const MENU_ITEM_SHORTCUT_TEMPLATE_CODE = `<ng-template monaSplitButtonMenuItemShortcutTemplate let-item>
+    <span class="text-xs text-gray-500">Ctrl + Shift + I</span>
+</ng-template>`;
+
+const MENU_ITEM_TEXT_TEMPLATE_CODE = `<ng-template monaSplitButtonMenuItemTextTemplate let-item>
+    <span class="text-red-500">{{ item.label }}</span>
+</ng-template>`;
+
+const TOP_LEVEL_GROUP_TEMPLATE_CODE = `<ng-template monaSplitButtonMenuGroupTemplate let-group>
+    <span [style.color]="'' | randomColor">{{ group }}</span>
+</ng-template>`;
+
+const TOP_LEVEL_ICON_TEMPLATE_CODE = `<ng-template monaSplitButtonMenuItemIconTemplate let-item>
+    <svg lucideHeart [size]="14" [color]="'' | randomColor"></svg>
+</ng-template>`;
+
+const TOP_LEVEL_SHORTCUT_TEMPLATE_CODE = `<ng-template monaSplitButtonMenuItemShortcutTemplate let-item>
+    @if (item.label === "Manage Team") {
+        <span class="text-xs text-gray-500">Ctrl + F7</span>
+    } @else if (item.label === "Sign Out") {
+        <span class="text-xs text-gray-500">Ctrl + Shift + Q</span>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_TEXT_TEMPLATE_CODE = `<ng-template monaSplitButtonMenuItemTextTemplate let-item>
+    @if (item.label === "Help") {
+        <span class="text-rose-700 underline">{{ item.label }}</span>
+    } @else {
+        <span [style.color]="'' | randomColor">{{ item.label }}</span>
+    }
+</ng-template>`;
 
 @Component({
     selector: "app-split-button-demo",
@@ -33,114 +78,71 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
     readonly #injector = createFeatureInjector({
         textTemplate: {
             active: false,
-            code: `
-                <mona-split-button>
-                     <ng-template monaSplitButtonTextTemplate>
-                        <span class="text-pink-600">Mona</span>
-                    </ng-template>
-                </mona-split-button>
-            `,
+            code: TEXT_TEMPLATE_CODE,
             description: `This template is used to customize the text of the split button.`,
             name: "Text Template"
         },
         menuButtonTemplate: {
             active: false,
-            code: `
-
-            `,
+            code: MENU_BUTTON_TEMPLATE_CODE,
             description: `This template is used to customize the button that opens the menu of the split button.`,
             name: "Menu Button Template"
         },
         menuItemIconTemplate: {
             active: false,
-            code: `
-
-            `,
+            code: MENU_ITEM_ICON_TEMPLATE_CODE,
             description: `This template is used to customize the icon of menu items.`,
             name: "Menu Item Icon Template"
         },
         menuItemShortcutTemplate: {
             active: false,
-            code: `
-                <mona-split-button>
-                    <mona-split-button-item label="Invite Members">
-                        <ng-template monaSplitButtonMenuItemShortcutTemplate let-item>
-                            <span class="text-xs text-gray-500">Ctrl + Shift + I</span>
-                        </ng-template>
-                    </mona-split-button-item>
-                </mona-split-button>
-            `,
+            code: MENU_ITEM_SHORTCUT_TEMPLATE_CODE,
             description: `This template is used to customize the shortcut of menu items.`,
             name: "Menu Item Shortcut Template"
         },
         menuItemTextTemplate: {
             active: false,
-            code: `
-                <mona-split-button>
-                    <mona-split-button-item label="Sign Out">
-                        <ng-template monaSplitButtonMenuItemTextTemplate let-item>
-                            <span class="text-red-500">{{ item.label }}</span>
-                        </ng-template>
-                    </mona-split-button-item>
-                </mona-split-button>
-            `,
+            code: MENU_ITEM_TEXT_TEMPLATE_CODE,
             description: `This template is used to customize the text of menu items.`,
             name: "Menu Item Text Template"
         },
         topLevelGroupTemplate: {
-            code: `
-                <mona-split-button>
-                    <ng-template monaSplitButtonMenuGroupTemplate let-group>
-                        <span [style.color]="'' | randomColor">{{ group }}</span>
-                    </ng-template>
-                </mona-split-button>
-            `,
+            code: TOP_LEVEL_GROUP_TEMPLATE_CODE,
             description: `This template is defined at the top level and can be used to customize the appearance of all groups in the split button menu.`,
             name: "Top Level Group Template",
             active: false
         },
         topLevelIconTemplate: {
-            code: `
-
-            `,
+            code: TOP_LEVEL_ICON_TEMPLATE_CODE,
             description: `This template is defined at the top level and can be used to customize the appearance of all icons in the split button menu.`,
             name: "Top Level Icon Template",
             active: false
         },
         topLevelShortcutTemplate: {
-            code: `
-
-            `,
+            code: TOP_LEVEL_SHORTCUT_TEMPLATE_CODE,
             description: `This template is defined at the top level and can be used to customize the appearance of all shortcuts in the split button menu.`,
             name: "Top Level Shortcut Template",
             active: false
         },
         topLevelTextTemplate: {
-            code: `
-                <mona-split-button-button>
-                    <ng-template monaSplitButtonMenuItemTextTemplate let-item>
-                        @if (item.label === "Help") {
-                            <span class="text-rose-700 underline">{{ item.label }}</span>
-                        } @else {
-                            <span [style.color]="'' | randomColor">{{ item.label }}</span>
-                        }
-                    </ng-template>
-                </mona-split-button-button>
-            `,
+            code: TOP_LEVEL_TEXT_TEMPLATE_CODE,
             description: `This template is defined at the top level and can be used to customize the appearance of all text in the split button menu.`,
             name: "Top Level Text Template",
             active: false
         }
     });
     protected readonly SplitButtonWrapperComponent = SplitButtonWrapperComponent;
-    protected readonly config = signal<ComponentConfig<SplitButtonComponent>>({
-        code: `
-
-        `,
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
+    protected readonly config = computed<ComponentConfig<SplitButtonComponent>>(() => ({
+        inputs: deriveInputConfig<SplitButtonComponent>(this.metadata(), {
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: ""
+            },
+            ariaLabelledby: {
+                alias: "aria-labelledby",
+                type: "string",
+                value: ""
             },
             look: {
                 type: "dropdown",
@@ -157,13 +159,19 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
                 value: ["medium", "small", "large"],
                 defaultValue: "medium"
             },
+            // The demo curates a non-empty starting text instead of the library's "" default.
             text: {
                 type: "string",
                 value: "Mona"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SplitButtonComponent");
 }
@@ -193,13 +201,18 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
     template: `
         @let featureData = features();
         <mona-split-button
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledby()"
             (buttonClick)="onButtonClick()"
             [disabled]="disabled()"
             [look]="look()"
+            [menuButtonAriaLabel]="menuButtonAriaLabel()"
             (menuItemClick)="onMenuItemClick($event)"
+            [popupWidth]="popupWidth()"
             [rounded]="rounded()"
             [size]="size()"
-            [text]="text()">
+            [text]="text()"
+            [class]="userClass()">
             <mona-split-button-group [title]="'My Account'">
                 <mona-split-button-item label="Profile">
                     @if (featureData["menuItemIconTemplate"].active) {
@@ -316,11 +329,16 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
 export class SplitButtonWrapperComponent implements ComponentInputsAsSignal<SplitButtonComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly selectedOption = signal<string>("o1");
+    public readonly ariaLabel = input("");
+    public readonly ariaLabelledby = input("");
     public readonly disabled = input(false);
     public readonly look = input<ReturnType<SplitButtonComponent["look"]>>("default");
+    public readonly menuButtonAriaLabel = input("Show menu options");
+    public readonly popupWidth = input(0);
     public readonly rounded = input<ReturnType<SplitButtonComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<SplitButtonComponent["size"]>>("medium");
     public readonly text = input("Mona");
+    public readonly userClass = input("");
 
     protected onButtonClick(): void {
         console.log("Main button clicked");

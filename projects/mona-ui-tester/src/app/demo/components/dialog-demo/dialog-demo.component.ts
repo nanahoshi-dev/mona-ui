@@ -1,5 +1,14 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal, TemplateRef, viewChild } from "@angular/core";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    input,
+    signal,
+    TemplateRef,
+    viewChild
+} from "@angular/core";
 import { LucideFileXCorner } from "@lucide/angular";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -19,9 +28,41 @@ import {
 } from "@nanahoshi/mona-ui/dialog";
 import { take } from "rxjs";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const CONTENT_TEMPLATE_CODE = `<ng-template monaDialogContentTemplate>
+    <div class="flex flex-col gap-2">
+        <mona-text-box [placeholder]="'Enter your email...'" type="email"></mona-text-box>
+        <input
+            type="password"
+            placeholder="Enter your password..."
+            class="dialog-password"
+            monaTextBox />
+    </div>
+</ng-template>`;
+
+const DESCRIPTION_TEMPLATE_CODE = `<ng-template monaDialogDescriptionTemplate>
+    <p class="text-sm text-rose-500">{{ description() }}</p>
+</ng-template>`;
+
+const FOOTER_TEMPLATE_CODE = `<ng-template monaDialogFooterTemplate>
+    <div class="flex gap-2 flex-row items-center pl-6 pr-4 py-2">
+        <mona-check-box [label]="'Do not show again'" class="flex-1 text-sm"></mona-check-box>
+        <button monaButton look="primary" (click)="dialogVisible.set(false)">OK</button>
+        <button monaButton (click)="dialogVisible.set(false)">Cancel</button>
+    </div>
+</ng-template>`;
+
+const ICON_TEMPLATE_CODE = `<ng-template monaDialogIconTemplate>
+    <svg lucideFileXCorner [size]="32"></svg>
+</ng-template>`;
+
+const TITLE_TEMPLATE_CODE = `<ng-template monaDialogTitleTemplate>
+    <h2 class="text-violet-600 italic">Custom Title</h2>
+</ng-template>`;
 
 @Component({
     selector: "app-dialog-demo",
@@ -53,13 +94,13 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
     ];
     readonly #injector = createFeatureInjector({
         contentTemplate: {
-            code: ``,
+            code: CONTENT_TEMPLATE_CODE,
             active: false,
             name: "Content Template",
             description: "Customize the content of the dialog."
         },
         descriptionTemplate: {
-            code: ``,
+            code: DESCRIPTION_TEMPLATE_CODE,
             active: false,
             name: "Description Template",
             description: "Customize the description of the dialog."
@@ -71,26 +112,26 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
             description: "Customize the content of the dialog opened by dialog service."
         },
         footerTemplate: {
-            code: ``,
+            code: FOOTER_TEMPLATE_CODE,
             active: false,
             name: "Footer Template",
             description: "Customize the footer of the dialog."
         },
         iconTemplate: {
-            code: ``,
+            code: ICON_TEMPLATE_CODE,
             active: false,
             name: "Icon Template",
             description: "Customize the icon of the dialog."
         },
         titleTemplate: {
-            code: ``,
+            code: TITLE_TEMPLATE_CODE,
             active: false,
             name: "Title Template",
             description: "Customize the title of the dialog."
         }
     });
-    protected readonly config = signal<ComponentConfig<DialogComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<DialogComponent>>(() => ({
+        inputs: deriveInputConfig<DialogComponent>(this.metadata(), {
             actions: {
                 type: "customDropdown",
                 value: this.#actions,
@@ -103,14 +144,7 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
                 value: ["start", "center", "end", "stretched"],
                 defaultValue: "end"
             },
-            closable: {
-                type: "boolean",
-                value: true
-            },
-            closeOnEscape: {
-                type: "boolean",
-                value: true
-            },
+            // The demo curates a starting description instead of the library's empty default.
             description: {
                 type: "string",
                 value: "Make changes to your profile here. Click save when you're done."
@@ -145,19 +179,17 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
                 type: "number",
                 value: undefined
             },
-            modal: {
-                type: "boolean",
-                value: true
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large"],
                 defaultValue: "medium"
             },
+            // The demo curates starting text instead of the library's empty default.
             text: {
                 type: "string",
                 value: "Dialog text will appear here."
             },
+            // The demo curates a starting title instead of the library's empty default.
             title: {
                 type: "string",
                 value: "Edit Content"
@@ -174,13 +206,14 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
                 defaultValue: "info",
                 clearable: true
             },
+            // The demo curates a width of 400 instead of the library's undefined default.
             width: {
                 type: "number",
                 value: 400
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DialogComponent");
     protected readonly DialogWrapperComponent = DialogWrapperComponent;

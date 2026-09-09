@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, model } from "@angular/core";
 import { LucideArrowDown, LucideArrowUp, LucideSettings } from "@lucide/angular";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import {
@@ -10,8 +10,34 @@ import {
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { NgComponentOutlet } from "@angular/common";
+
+const TITLE_TEMPLATE_CODE = `<ng-template monaExpansionPanelTitleTemplate>
+    <span class="text-sm uppercase" [style.color]="country.color">{{ country.name }}</span>
+</ng-template>`;
+
+const ICON_TEMPLATE_CODE = `<ng-template monaExpansionPanelIconTemplate let-expanded>
+    <div class="px-2">
+        @if (expanded) {
+            <svg lucideArrowUp [size]="14"></svg>
+        } @else {
+            <svg lucideArrowDown [size]="14"></svg>
+        }
+    </div>
+</ng-template>`;
+
+const ACTIONS_TEMPLATE_CODE = `<ng-template monaExpansionPanelActionsTemplate>
+    <button
+        monaButton
+        look="ghost"
+        [size]="'small'"
+        [iconOnly]="true"
+        (click)="$event.stopPropagation()">
+        <svg lucideSettings [size]="14"></svg>
+    </button>
+</ng-template>`;
 
 @Component({
     selector: "app-expansion-panel-demo",
@@ -23,58 +49,33 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
     readonly #injector = createFeatureInjector({
         actionsTemplate: {
             active: false,
-            code: `
-
-            `,
+            code: ACTIONS_TEMPLATE_CODE,
             name: "Actions Template",
             description: "Custom template for the expansion panel actions."
         },
         iconTemplate: {
             active: false,
-            code: `
-
-            `,
+            code: ICON_TEMPLATE_CODE,
             name: "Icon Template",
             description: "Custom template for the expansion panel icon."
         },
         titleTemplate: {
             active: false,
-            code: `
-                <mona-expansion-panel>
-                    <ng-template monaExpansionPanelTitleTemplate>
-                        <span class="text-sm uppercase" [style.color]="country.color">{{ country.name }}</span>
-                    </ng-template>
-                </mona-expansion-panel>
-            `,
+            code: TITLE_TEMPLATE_CODE,
             name: "Title Template",
             description: "Custom template for the expansion panel title."
         }
     });
-    protected readonly config = signal<ComponentConfig<ExpansionPanelComponent>>({
-        code: `
-
-        `,
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
-            expanded: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<ExpansionPanelComponent>>(() => ({
+        inputs: deriveInputConfig<ExpansionPanelComponent>(this.metadata(), {
             rounded: {
                 type: "dropdown",
                 value: ["small", "medium", "large", "none"],
                 defaultValue: "medium"
-            },
-            title: {
-                type: "string",
-                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ExpansionPanelComponent");
     protected readonly ExpansionPanelWrapperComponent = ExpansionPanelWrapperComponent;
@@ -98,7 +99,8 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
                 [disabled]="disabled()"
                 [expanded]="expanded()"
                 [rounded]="rounded()"
-                [title]="title() || country.name">
+                [title]="title() || country.name"
+                [userClass]="userClass()">
                 <p class="w-full h-full p-2 text-justify">{{ country.description }}</p>
                 @if (featureData["titleTemplate"].active) {
                     <ng-template monaExpansionPanelTitleTemplate>
@@ -180,4 +182,5 @@ class ExpansionPanelWrapperComponent implements ComponentInputsAsSignal<Expansio
     public readonly expanded = model(false);
     public readonly rounded = input<ReturnType<ExpansionPanelComponent["rounded"]>>("medium");
     public readonly title = input("");
+    public readonly userClass = input("");
 }

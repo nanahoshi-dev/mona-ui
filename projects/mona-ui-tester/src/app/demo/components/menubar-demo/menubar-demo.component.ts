@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { LucideFile, LucideFolderOpen, LucideHeart, LucideInfo, LucideSave, LucideView } from "@lucide/angular";
 import {
     MenubarComponent,
@@ -20,9 +20,80 @@ import {
 } from "@nanahoshi/mona-ui/menubar";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const DISABLE_MENU_CODE = `<mona-menu text="Edit" [disabled]="true">
+    <!-- Menu items here -->
+</mona-menu>`;
+
+const GROUP_TEMPLATE_CODE = `<ng-template monaMenuGroupTemplate let-group>
+    <span class="text-blue-600 font-semibold">{{ group }}</span>
+</ng-template>`;
+
+const MENU_ICON_TEMPLATE_CODE = `<ng-template monaMenuIconTemplate>
+    <svg lucideView [size]="14" class="mr-0.5"></svg>
+</ng-template>`;
+
+const MENU_TEXT_TEMPLATE_CODE = `<ng-template monaMenuTextTemplate>
+    <span class="text-pink-600 font-semibold">View</span>
+</ng-template>`;
+
+const MENU_ITEM_ICON_TEMPLATE_CODE = `<ng-template monaMenuItemIconTemplate let-item>
+    <svg lucideSave [size]="12"></svg>
+</ng-template>`;
+
+const MENU_ITEM_SHORTCUT_TEMPLATE_CODE = `<ng-template monaMenuItemShortcutTemplate let-item>
+    <span class="text-amber-500">Ctrl+S</span>
+</ng-template>`;
+
+const MENU_ITEM_TEXT_TEMPLATE_CODE = `<ng-template monaMenuItemTextTemplate let-item>
+    <span class="text-blue-600 font-semibold">{{ item.label }}</span>
+</ng-template>`;
+
+const TOP_LEVEL_GROUP_TEMPLATE_CODE = `<ng-template monaMenuGroupTemplate let-group>
+    <span class="text-emerald-700 font-semibold">{{ group }}</span>
+</ng-template>`;
+
+const TOP_LEVEL_MENU_ITEM_ICON_TEMPLATE_CODE = `<ng-template monaMenuItemIconTemplate let-item>
+    @if (item.label === "Open") {
+        <svg lucideFolderOpen [size]="12"></svg>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_MENU_ITEM_SHORTCUT_TEMPLATE_CODE = `<ng-template monaMenuItemShortcutTemplate let-item>
+    @if (item.label === "New") {
+        <span class="text-gray-500">Ctrl+N</span>
+    } @else if (item.label === "Open") {
+        <span class="text-gray-500">Ctrl+O</span>
+    } @else if (item.label === "Save") {
+        <span class="text-gray-500">Ctrl+S</span>
+    } @else if (item.label === "Save As") {
+        <span class="text-gray-500">Ctrl+Shift+S</span>
+    } @else if (item.label === "Close") {
+        <span class="text-gray-500">Ctrl+W</span>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_MENU_ITEM_TEXT_TEMPLATE_CODE = `<ng-template monaMenuItemTextTemplate let-item>
+    @if (item.label === "Save As") {
+        <span class="text-blue-600 font-semibold">{{ item.label }}</span>
+    } @else {
+        <span>{{ item.label }}</span>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_MENU_ICON_TEMPLATE_CODE = `<ng-template monaMenuIconTemplate let-menu let-items="items">
+    @if (menu === "File") {
+        <svg lucideFile [size]="14" class="mr-0.5"></svg>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_MENU_TEXT_TEMPLATE_CODE = `<ng-template monaMenuTextTemplate let-menu let-items="items">
+    <span [style.color]="'' | randomColor">{{ menu }} ({{ items.length }})</span>
+</ng-template>`;
 
 @Component({
     selector: "app-menubar-demo",
@@ -32,25 +103,13 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent> {
     readonly #injector = createFeatureInjector({
         disableMenu: {
-            code: `
-                <mona-menubar>
-                    <mona-menu [text]="'Edit'" [disabled]="true">
-                        <!-- Menu items here -->
-                    </mona-menu>
-                </mona-menubar>
-            `,
+            code: DISABLE_MENU_CODE,
             description: `Disable the Edit menu on the menubar.`,
             name: "Disable Menu",
             active: false
         },
         groupTemplate: {
-            code: `
-                <mona-menu-group [title]="'Text Operations'">
-                    <ng-template monaMenuGroupTemplate let-group>
-                        <span class="text-blue-600 font-semibold">{{ group }}</span>
-                    </ng-template>
-                </mona-menu-group>
-            `,
+            code: GROUP_TEMPLATE_CODE,
             description: `
                 This template is used to customize the title of menu item groups.
                 It will override the top level group template if both are used.
@@ -59,9 +118,7 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
             active: false
         },
         menuIconTemplate: {
-            code: `
-
-            `,
+            code: MENU_ICON_TEMPLATE_CODE,
             description: `
                 This template is used to customize the icon of the menu on the menubar.
                 It will override the top level icon template if both are used.
@@ -70,13 +127,7 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
             active: false
         },
         menuTextTemplate: {
-            code: `
-                <mona-menu [text]="'View'">
-                    <ng-template monaMenuTextTemplate>
-                        <span class="text-pink-600 font-semibold">View</span>
-                    </ng-template>
-                </mona-menu>
-            `,
+            code: MENU_TEXT_TEMPLATE_CODE,
             description: `
                 This template is used to customize the text of the menu on the menubar.
                 It will override the top level text template if both are used.
@@ -85,9 +136,7 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
             active: false
         },
         menuItemIconTemplate: {
-            code: `
-
-            `,
+            code: MENU_ITEM_ICON_TEMPLATE_CODE,
             description: `
                 This template is used to customize the icon of the menu item.
                 It will override the top level icon template if both are used.
@@ -96,13 +145,7 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
             active: false
         },
         menuItemShortcutTemplate: {
-            code: `
-                <mona-menu-item label="Save">
-                    <ng-template monaMenuItemShortcutTemplate let-item>
-                        <span class="text-amber-500">Ctrl+S</span>
-                    </ng-template>
-                </mona-menu-item>
-            `,
+            code: MENU_ITEM_SHORTCUT_TEMPLATE_CODE,
             description: `
                 This template is used to customize the shortcut of the menu item.
                 It will override the top level shortcut template if both are used.
@@ -111,13 +154,7 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
             active: false
         },
         menuItemTextTemplate: {
-            code: `
-                <mona-menu-item label="Export">
-                    <ng-template monaMenuItemTextTemplate let-item>
-                        <span class="text-blue-600 font-semibold">{{ item.label }}</span>
-                    </ng-template>
-                </mona-menu-item>
-            `,
+            code: MENU_ITEM_TEXT_TEMPLATE_CODE,
             description: `
                 This template is used to customize the text of the menu item.
                 It will override the top level text template if both are used.
@@ -126,93 +163,44 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
             active: false
         },
         topLevelGroupTemplate: {
-            code: `
-                <mona-menubar>
-                    <ng-template monaMenuGroupTemplate let-group>
-                        <span class="text-emerald-700 font-semibold">{{ group }}</span>
-                    </ng-template>
-                </mona-menubar>
-            `,
+            code: TOP_LEVEL_GROUP_TEMPLATE_CODE,
             description: `This template is used to customize the title of all menu item groups.`,
             name: "Top Level Group Template",
             active: false
         },
         topLevelMenuItemIconTemplate: {
-            code: `
-
-            `,
+            code: TOP_LEVEL_MENU_ITEM_ICON_TEMPLATE_CODE,
             description: `This template is used to customize the icons of all menu items.`,
             name: "Top Level Menu Item Icon Template",
             active: false
         },
         topLevelMenuItemShortcutTemplate: {
-            code: `
-                <mona-menubar>
-                    <ng-template monaMenuItemShortcutTemplate let-item>
-                        @if (item.label === "New") {
-                            <span class="text-gray-500">Ctrl+N</span>
-                        } @else if (item.label === "Open") {
-                            <span class="text-gray-500">Ctrl+O</span>
-                        } @else if (item.label === "Save") {
-                            <span class="text-gray-500">Ctrl+S</span>
-                        } @else if (item.label === "Save As") {
-                            <span class="text-gray-500">Ctrl+Shift+S</span>
-                        } @else if (item.label === "Close") {
-                            <span class="text-gray-500">Ctrl+W</span>
-                        }
-                    </ng-template>
-                </mona-menubar>
-            `,
+            code: TOP_LEVEL_MENU_ITEM_SHORTCUT_TEMPLATE_CODE,
             description: `This template is used to customize the shortcuts of all menu items.`,
             name: "Top Level Menu Item Shortcut Template",
             active: false
         },
         topLevelMenuItemTextTemplate: {
-            code: `
-                <mona-menubar>
-                    <ng-template monaMenuItemTextTemplate let-item>
-                        @if (item.label === "Save As") {
-                            <span class="text-blue-600 font-semibold">{{ item.label }}</span>
-                        } @else {
-                            <span>{{ item.label }}</span>
-                        }
-                    </ng-template>
-                </mona-menubar>
-            `,
+            code: TOP_LEVEL_MENU_ITEM_TEXT_TEMPLATE_CODE,
             description: `This template is used to customize the text of all menu items.`,
             name: "Top Level Menu Item Text Template",
             active: false
         },
         topLevelMenuIconTemplate: {
-            code: `
-
-            `,
+            code: TOP_LEVEL_MENU_ICON_TEMPLATE_CODE,
             description: `This template is used to customize the icon of all menus on the menubar.`,
             name: "Top Level Menu Icon Template",
             active: false
         },
         topLevelMenuTextTemplate: {
-            code: `
-                <mona-menubar>
-                    <ng-template monaMenuTextTemplate let-menu let-items="items">
-                        <span [style.color]="'' | randomColor">{{ menu }} ({{ items.length }})</span>
-                    </ng-template>
-                </mona-menubar>
-            `,
+            code: TOP_LEVEL_MENU_TEXT_TEMPLATE_CODE,
             description: `This template is used to customize the text of all menus on the menubar.`,
             name: "Top Level Menu Text Template",
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<MenubarComponent>>({
-        code: `
-
-        `,
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<MenubarComponent>>(() => ({
+        inputs: deriveInputConfig<MenubarComponent>(this.metadata(), {
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large"],
@@ -222,10 +210,15 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
                 type: "dropdown",
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
+            },
+            userClasses: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("MenubarComponent");
     protected readonly MenubarWrapperComponent = MenubarWrapperComponent;
@@ -259,9 +252,12 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
     template: `
         @let featureData = features();
         <mona-menubar
+            [ariaLabel]="ariaLabel()"
+            [ariaLabelledby]="ariaLabelledby()"
             [disabled]="disabled()"
             [rounded]="rounded()"
             [size]="size()"
+            [class]="userClasses()"
             (menuItemClick)="onMenuItemClick($event)">
             <mona-menu [text]="'File'">
                 <mona-menu-item label="New">
@@ -451,9 +447,12 @@ class MenubarWrapperComponent implements ComponentInputsAsSignal<MenubarComponen
     protected readonly snapToGrid = signal(false);
     protected readonly selectedFontSize = signal("md");
     protected readonly selectedTheme = signal("system");
+    public readonly ariaLabel = input("");
+    public readonly ariaLabelledby = input("");
     public readonly disabled = input(false);
     public readonly size = input<ReturnType<MenubarComponent["size"]>>("medium");
     public readonly rounded = input<ReturnType<MenubarComponent["rounded"]>>("medium");
+    public readonly userClasses = input("");
 
     protected onMenuItemClick(event: MenuItemClickEvent): void {
         // event.preventDefault();

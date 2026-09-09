@@ -5,8 +5,10 @@ export interface ComponentMetadata {
 }
 
 export interface ComponentPropertyMetadata {
+    defaultValue?: string;
     description: string;
     kind: string;
     name: string;
+    required?: boolean;
     type: string;
 }

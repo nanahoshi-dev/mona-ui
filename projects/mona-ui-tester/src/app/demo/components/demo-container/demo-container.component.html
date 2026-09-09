@@ -43,11 +43,11 @@
             animate.enter="demo-code-panel-enter"
             animate.leave="demo-code-panel-leave">
             <div class="min-h-0 overflow-hidden p-2">
-                <app-code-viewer [code]="config().code || ''" language="html"></app-code-viewer>
+                <app-code-viewer [code]="generatedCode()" language="html"></app-code-viewer>
             </div>
         </div>
     }
     <div>
-        <app-config [config]="config()" [metadata]="metadata()" (valueChange)="valueChange.emit($event)"></app-config>
+        <app-config [config]="config()" [metadata]="metadata()" (valueChange)="onValueChange($event)"></app-config>
     </div>
 </div>

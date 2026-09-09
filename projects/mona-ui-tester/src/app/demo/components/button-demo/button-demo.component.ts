@@ -1,8 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
 import { LucideLayers } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -13,31 +14,12 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> {
     protected readonly ButtonWrapperComponent = ButtonWrapperComponent;
-    protected readonly config = signal<ComponentConfig<ButtonDirective>>({
-        code: `
-            <button
-                monaButton
-                [disabled]="disabled()"
-                [iconOnly]="iconOnly()"
-                [look]="look()"
-                [rounded]="rounded()"
-                [selected]="selected()"
-                [size]="size()"
-                [toggleable]="toggleable()">
-                Mona Button
-            </button>`,
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
-            iconOnly: {
-                type: "boolean",
-                value: false
-            },
-            loading: {
-                type: "boolean",
-                value: false
+    protected readonly config = computed<ComponentConfig<ButtonDirective>>(() => ({
+        inputs: deriveInputConfig<ButtonDirective>(this.metadata(), {
+            ariaHasPopup: {
+                alias: "aria-haspopup",
+                type: "string",
+                value: "false"
             },
             look: {
                 type: "dropdown",
@@ -61,21 +43,18 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
                 value: ["small", "medium", "large", "full", "none"],
                 defaultValue: "medium"
             },
-            selected: {
-                type: "boolean",
-                value: false
-            },
             size: {
                 type: "dropdown",
                 value: ["medium", "small", "large"],
                 defaultValue: "medium"
             },
-            toggleable: {
-                type: "boolean",
-                value: false
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        }
-    });
+        })
+    }));
     protected readonly metadata = this.getMetadata("ButtonDirective");
 }
 
@@ -85,6 +64,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
     template: `
         <button
             monaButton
+            [aria-haspopup]="ariaHasPopup()"
             [disabled]="disabled()"
             [iconOnly]="iconOnly()"
             [loading]="loading()"
@@ -92,7 +72,10 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
             [rounded]="rounded()"
             [selected]="selected()"
             [size]="size()"
-            [toggleable]="toggleable()">
+            [tabindex]="tabindex()"
+            [toggleable]="toggleable()"
+            [type]="type()"
+            [class]="userClass()">
             @if (iconOnly()) {
                 <svg lucideLayers [size]="14"></svg>
             } @else {
@@ -107,6 +90,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
 })
 export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDirective> {
     public readonly ariaDescribedby = input("aria-describedby");
+    public readonly ariaHasPopup = input<ReturnType<ButtonDirective["ariaHasPopup"]>>("false");
     public readonly ariaLabel = input("Button");
     public readonly ariaLabelledby = input("aria-labelledby");
     public readonly disabled = model(false);
@@ -116,5 +100,10 @@ export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDir
     public readonly rounded = input<ReturnType<ButtonDirective["rounded"]>>("medium");
     public readonly selected = model<ReturnType<ButtonDirective["selected"]>>(false);
     public readonly size = input<ReturnType<ButtonDirective["size"]>>("medium");
+    public readonly tabindex = input<number, number | string>(0, {
+        transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
+    });
     public readonly toggleable = input<boolean>();
+    public readonly type = input<ReturnType<ButtonDirective["type"]>>("button");
+    public readonly userClass = input<ReturnType<ButtonDirective["userClass"]>>("");
 }

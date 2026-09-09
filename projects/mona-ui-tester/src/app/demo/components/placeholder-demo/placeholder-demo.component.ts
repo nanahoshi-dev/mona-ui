@@ -1,7 +1,8 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, inject, input, signal } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -26,15 +27,16 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
             description: "Display a custom content instead of a text for the placeholder content."
         }
     });
-    protected readonly config = signal<ComponentConfig<PlaceholderComponent>>({
-        inputs: {
-            text: {
+    protected readonly config = computed<ComponentConfig<PlaceholderComponent>>(() => ({
+        inputs: deriveInputConfig<PlaceholderComponent>(this.metadata(), {
+            userClass: {
+                alias: "class",
                 type: "string",
                 value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PlaceholderComponent");
     protected readonly PlaceholderWrapperComponent = PlaceholderWrapperComponent;
@@ -48,7 +50,7 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
             @if (featureData["content"].active) {
                 <div class="text-foreground">This is the actual content replacing the placeholder.</div>
             } @else {
-                <mona-placeholder [text]="text()" class="select-none">
+                <mona-placeholder [text]="text()" [class]="'select-none ' + userClass()">
                     @if (featureData["customContent"].active) {
                         <div class="text-foreground italic">Custom Placeholder Content</div>
                     }
@@ -60,4 +62,5 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
 class PlaceholderWrapperComponent implements ComponentInputsAsSignal<PlaceholderComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly text = input<ReturnType<PlaceholderComponent["text"]>>("");
+    public readonly userClass = input<ReturnType<PlaceholderComponent["userClass"]>>("");
 }

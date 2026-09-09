@@ -16,9 +16,37 @@ import {
     ToolbarOptions
 } from "@nanahoshi/mona-ui/list-box";
 import { ComponentConfig, type ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ImmutableSet, toImmutableSet } from "@mirei/ts-collections";
+
+const HEADER_TEMPLATE_CODE = `<ng-template monaListBoxHeaderTemplate>
+    <div class="px-3 py-2 border-b border-input-border font-medium">Food Items</div>
+</ng-template>`;
+
+const FOOTER_TEMPLATE_CODE = `<ng-template monaListBoxFooterTemplate>
+    <div class="px-3 py-2 border-t border-input-border text-sm text-muted-foreground">
+        Total items: {{ viewItems().length }}
+    </div>
+</ng-template>`;
+
+const ITEM_TEMPLATE_CODE = `<ng-template monaListBoxItemTemplate let-item>
+    <div class="flex flex-row w-full">
+        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+        <span class="flex-1 flex items-center {{ color }}">{{ item.text }}</span>
+        <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+            item.price | currency
+        }}</span>
+    </div>
+</ng-template>`;
+
+const NO_DATA_TEMPLATE_CODE = `<ng-template monaListBoxNoDataTemplate>
+    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+        <svg lucideBox></svg>
+        <span>List box has no items.</span>
+    </div>
+</ng-template>`;
 
 @Component({
     selector: "app-list-box-demo",
@@ -118,27 +146,36 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
         },
         footerTemplate: {
             active: false,
+            code: FOOTER_TEMPLATE_CODE,
             name: "Footer Template",
             description: "Display footer template"
         },
         headerTemplate: {
             active: false,
+            code: HEADER_TEMPLATE_CODE,
             name: "Header Template",
             description: "Display header template"
         },
         itemTemplate: {
             active: false,
+            code: ITEM_TEMPLATE_CODE,
             name: "Item Template",
             description: "Display item template"
         },
         noDataTemplate: {
             active: false,
+            code: NO_DATA_TEMPLATE_CODE,
             name: "No Data Template",
             description: "This template sets the view when the list box is empty."
         }
     });
-    protected readonly config = signal<ComponentConfig<ListBoxComponent>>({
-        inputs: {
+    protected readonly config = computed<ComponentConfig<ListBoxComponent>>(() => ({
+        inputs: deriveInputConfig<ListBoxComponent>(this.metadata(), {
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: ""
+            },
             connectedList: {
                 type: "object"
             },
@@ -156,7 +193,6 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 value: ["value"],
                 defaultValue: "value"
             },
-
             selectionMode: {
                 type: "dropdown",
                 value: ["single", "multiple"],
@@ -180,9 +216,9 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 type: "string",
                 value: "280px"
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ListBoxComponent");
     protected readonly ListBoxWrapperComponent = ListBoxWrapperComponent;
@@ -201,6 +237,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
     template: `
         @let featureData = features();
         <mona-list-box
+            [aria-label]="ariaLabel()"
             (actionClick)="onActionClick($event, 'first')"
             [selectBy]="selectBy()"
             [selectionMode]="selectionMode()"
@@ -211,6 +248,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             [height]="height()"
             [items]="viewItems()"
             [rounded]="rounded()"
+            [singleSelectionToggleable]="singleSelectionToggleable()"
             [size]="size()"
             [textField]="textField()"
             [toolbar]="toolbarCustomizations()"
@@ -320,11 +358,13 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         return { actions, position } as ToolbarOptions;
     });
     protected readonly viewItems = computed(() => this.#listData());
+    public readonly ariaLabel = input("");
     public readonly connectedList = input<ReturnType<ListBoxComponent["connectedList"]>>(null);
     public readonly height = input<ReturnType<ListBoxComponent["height"]>>("100%");
     public readonly rounded = input<ReturnType<ListBoxComponent["rounded"]>>("medium");
     public readonly selectBy = input<ReturnType<ListBoxComponent["selectBy"]>>("value");
     public readonly selectionMode = input<ReturnType<ListBoxComponent["selectionMode"]>>("single");
+    public readonly singleSelectionToggleable = input(true);
     public readonly size = input<ReturnType<ListBoxComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListBoxComponent["textField"]>>("");
     public readonly toolbar = input<ReturnType<ListBoxComponent["toolbar"]>>(true);

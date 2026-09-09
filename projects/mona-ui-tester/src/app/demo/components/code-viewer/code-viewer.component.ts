@@ -6,6 +6,7 @@ import json from "highlight.js/lib/languages/json";
 import typescript from "highlight.js/lib/languages/typescript";
 import html from "highlight.js/lib/languages/xml";
 import plaintext from "highlight.js/lib/languages/plaintext";
+import { dedent } from "../../utils/codeSample";
 
 HighlightJS.registerLanguage("typescript", typescript);
 HighlightJS.registerLanguage("html", html);
@@ -40,29 +41,7 @@ export class CodeViewerComponent {
         const lineCount = codeValue.split("\n").length;
         return Array.from({ length: lineCount }, (_, i) => i + 1);
     });
-    protected readonly processedCode = computed(() => {
-        const rawCode = this.code();
-        let lines = rawCode.split("\n");
-
-        if (lines[0]?.trim() === "") {
-            lines.shift();
-        }
-        if (lines.length > 0 && lines[lines.length - 1].trim() === "") {
-            lines.pop();
-        }
-        if (lines.length === 0) return "";
-
-        const minIndent = lines.reduce((min, line) => {
-            if (line.trim().length === 0) return min; // Ignore empty lines
-            const indent = line.match(/^\s*/)?.[0].length ?? 0;
-            return Math.min(min, indent);
-        }, Infinity);
-
-        if (minIndent === Infinity) {
-            return lines.join("\n");
-        }
-        return lines.map(line => line.substring(minIndent)).join("\n");
-    });
+    protected readonly processedCode = computed(() => dedent(this.code()));
     public readonly code = input.required<string>();
     public readonly language = input<string>("plaintext");
     protected copyToClipboard(): void {

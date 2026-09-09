@@ -1,8 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { TooltipDirective } from "@nanahoshi/mona-ui/tooltip";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -12,26 +13,13 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./tooltip-directive-demo.component.html"
 })
 export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<TooltipDirective> {
-    protected readonly config = signal<ComponentConfig<TooltipDirective>>({
-        code: ``,
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<TooltipDirective>>(() => ({
+        inputs: deriveInputConfig<TooltipDirective>(this.metadata(), {
+            // The demo curates a set of CSS selectors instead of the library's "[title]" default.
             filter: {
                 type: "dropdown",
                 value: ["button[look='primary']", "button[look='error']", "button"],
                 defaultValue: "button"
-            },
-            hideDelay: {
-                type: "number",
-                value: 0
-            },
-            mode: {
-                type: "dropdown",
-                value: ["host", "content"],
-                defaultValue: "host"
             },
             position: {
                 type: "dropdown",
@@ -43,13 +31,9 @@ export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<Tooltip
                 value: ["full", "large", "medium", "none", "small"],
                 defaultValue: "medium",
                 alias: "tooltipRounded"
-            },
-            showDelay: {
-                type: "number",
-                value: 0
             }
-        }
-    });
+        })
+    }));
     protected readonly metadata = this.getMetadata("TooltipDirective");
     protected readonly TooltipDirectiveWrapperComponent = TooltipDirectiveWrapperComponent;
 }

@@ -1,13 +1,4 @@
-import {
-    Component,
-    inject,
-    Injector,
-    linkedSignal,
-    Signal,
-    signal,
-    WritableSignal,
-    ChangeDetectionStrategy
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, Injector, linkedSignal, Signal, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { filter, map } from "rxjs";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
@@ -39,6 +30,6 @@ export abstract class AbstractDemoComponent<TComponent> {
         );
     }
 
-    protected abstract config: WritableSignal<ComponentConfig<TComponent>>;
+    protected abstract config: Signal<ComponentConfig<TComponent>>;
     protected abstract metadata: Signal<ComponentMetadata>;
 }

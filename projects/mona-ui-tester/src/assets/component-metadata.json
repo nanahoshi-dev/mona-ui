@@ -335,7 +335,8 @@
         "description": "",
         "kind": "input",
         "name": "selectedDate",
-        "type": "Date | null"
+        "type": "Date | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
@@ -659,7 +660,8 @@
         "description": "",
         "kind": "input",
         "name": "filter",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
@@ -671,13 +673,15 @@
         "description": "",
         "kind": "input",
         "name": "filterPlaceholder",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "options",
-        "type": "Partial<FilterableOptions> | \"\""
+        "type": "Partial<FilterableOptions> | \"\"",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -689,13 +693,15 @@
         "description": "",
         "kind": "input",
         "name": "groupBy",
-        "type": "string | Selector<TData, any> | null | undefined"
+        "type": "string | Selector<TData, any> | null | undefined",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "options",
-        "type": "GroupableOptions<TData, any> | \"\""
+        "type": "GroupableOptions<TData, any> | \"\"",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -707,7 +713,8 @@
         "description": "",
         "kind": "input",
         "name": "options",
-        "type": "Partial<VirtualScrollOptions> | \"\""
+        "type": "Partial<VirtualScrollOptions> | \"\"",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -719,61 +726,71 @@
         "description": "",
         "kind": "input",
         "name": "dataCell",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "groupHeader",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "groupToggle",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "grouped",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "indentCell",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "lastInRow",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "masterDetailContent",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "masterDetailToggle",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "nextRowType",
-        "type": "GridRowNeighborType"
+        "type": "GridRowNeighborType",
+        "defaultValue": "null"
       },
       {
         "description": "",
         "kind": "input",
         "name": "prevRowType",
-        "type": "GridRowNeighborType"
+        "type": "GridRowNeighborType",
+        "defaultValue": "null"
       }
     ]
   },
@@ -810,7 +827,8 @@
         "description": "",
         "kind": "input",
         "name": "row",
-        "type": "Row | null"
+        "type": "Row | null",
+        "defaultValue": "null"
       }
     ]
   },
@@ -822,7 +840,8 @@
         "description": "",
         "kind": "input",
         "name": "row",
-        "type": "Row | null"
+        "type": "Row | null",
+        "defaultValue": "null"
       }
     ]
   },
@@ -834,7 +853,8 @@
         "description": "",
         "kind": "input",
         "name": "nextRowType",
-        "type": "GridRowNeighborType"
+        "type": "GridRowNeighborType",
+        "defaultValue": "null"
       }
     ]
   },
@@ -846,7 +866,8 @@
         "description": "",
         "kind": "input",
         "name": "nextRowType",
-        "type": "GridRowNeighborType"
+        "type": "GridRowNeighborType",
+        "defaultValue": "null"
       }
     ]
   },
@@ -888,7 +909,8 @@
         "description": "",
         "kind": "input",
         "name": "options",
-        "type": "EditableOptions | \"\""
+        "type": "EditableOptions | \"\"",
+        "defaultValue": "\"\""
       },
       {
         "description": "Emitted when a row remove command is triggered.",
@@ -938,19 +960,22 @@
         "description": "",
         "kind": "input",
         "name": "footerCellMinWidth",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
         "kind": "input",
         "name": "footerCellWidth",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
         "kind": "input",
         "name": "footerColumn",
-        "type": "Column | null"
+        "type": "Column | null",
+        "defaultValue": "null"
       }
     ]
   },
@@ -993,25 +1018,29 @@
         "description": "",
         "kind": "input",
         "name": "groupPrefixWidth",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
         "kind": "input",
         "name": "lockedCellHeader",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "lockedStructuralOffset",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
         "kind": "input",
         "name": "structuralColumn",
-        "type": "StructuralColumnKind | null"
+        "type": "StructuralColumnKind | null",
+        "defaultValue": "null"
       }
     ]
   },
@@ -1023,7 +1052,8 @@
         "description": "",
         "kind": "input",
         "name": "cellKind",
-        "type": "GridCellKind | null"
+        "type": "GridCellKind | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
@@ -1048,7 +1078,8 @@
         "description": "Marks the cell as a participant in Tab-driven cell edit traversal.",
         "kind": "input",
         "name": "editable",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
@@ -1061,7 +1092,8 @@
         "description": "",
         "kind": "input",
         "name": "groupHeader",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
@@ -1093,7 +1125,8 @@
         "description": "",
         "kind": "input",
         "name": "section",
-        "type": "GridNavigationSection | null"
+        "type": "GridNavigationSection | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
@@ -1247,13 +1280,15 @@
         "description": "State persistence options such as schema version and page size persistence.",
         "kind": "input",
         "name": "options",
-        "type": "GridStatePersistenceOptions | \"\""
+        "type": "GridStatePersistenceOptions | \"\"",
+        "defaultValue": "\"\""
       },
       {
         "description": "The persisted grid state to apply and update when the grid state changes.",
         "kind": "model",
         "name": "state",
-        "type": "GridState | null"
+        "type": "GridState | null",
+        "defaultValue": "null"
       }
     ]
   },
@@ -1322,13 +1357,15 @@
         "description": "",
         "kind": "input",
         "name": "groupBy",
-        "type": "ListKeySelector<T, K> | undefined"
+        "type": "ListKeySelector<T, K> | undefined",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "options",
-        "type": "GroupableOptions<T, K> | \"\""
+        "type": "GroupableOptions<T, K> | \"\"",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -1340,7 +1377,8 @@
         "description": "",
         "kind": "input",
         "name": "options",
-        "type": "Partial<NavigableOptions> | \"\""
+        "type": "Partial<NavigableOptions> | \"\"",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -1352,7 +1390,8 @@
         "description": "",
         "kind": "input",
         "name": "options",
-        "type": "Partial<PagerSettings> | \"\""
+        "type": "Partial<PagerSettings> | \"\"",
+        "defaultValue": "\"\""
       },
       {
         "description": "The current page. Supports two-way binding via `[(page)]`; updates when the user navigates the pager and can be set to navigate programmatically.",
@@ -1377,19 +1416,22 @@
         "description": "",
         "kind": "input",
         "name": "options",
-        "type": "Partial<SelectableOptions> | \"\""
+        "type": "Partial<SelectableOptions> | \"\"",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "selectBy",
-        "type": "ListKeySelector<T, K> | undefined"
+        "type": "ListKeySelector<T, K> | undefined",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "selectedKeys",
-        "type": "Iterable<K>"
+        "type": "Iterable<K>",
+        "defaultValue": "[]"
       }
     ]
   },
@@ -1936,19 +1978,22 @@
         "description": "The position of the tooltip relative to the target element.",
         "kind": "input",
         "name": "position",
-        "type": "Position"
+        "type": "Position",
+        "defaultValue": "\"top\""
       },
       {
         "description": "The border radius of the tooltip.",
         "kind": "input",
         "name": "rounded",
-        "type": "TooltipVariantProps[\"rounded\"]"
+        "type": "TooltipVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "The unique id for the tooltip element, used for aria-describedby linkage.",
         "kind": "input",
         "name": "tooltipId",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -2193,7 +2238,8 @@
         "description": "",
         "kind": "input",
         "name": "draggable",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "",
@@ -2475,7 +2521,8 @@
         "description": "Sets the disabled state of the calendar.",
         "kind": "model",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the disabled dates of the calendar.\nAccepts either an iterable of Date objects or a predicate function.",
@@ -2554,7 +2601,8 @@
         "description": "Adds custom CSS classes to the calendar host element.",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The current value of the calendar.",
@@ -3483,13 +3531,15 @@
         "description": "Sets whether a connector line is drawn between the anchor point and the label.",
         "kind": "input",
         "name": "connector",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Connector stroke width in pixels.",
         "kind": "input",
         "name": "connectorWidth",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "Custom data object provided to template context.",
@@ -3501,61 +3551,71 @@
         "description": "Text label displayed for the annotation.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Custom CSS class name applied to the label badge.",
         "kind": "input",
         "name": "labelClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Relative placement of the label from the anchor point: 'top', 'bottom', 'left', or 'right'.",
         "kind": "input",
         "name": "labelPlacement",
-        "type": "ChartAnnotationLabelPlacement"
+        "type": "ChartAnnotationLabelPlacement",
+        "defaultValue": "\"top\""
       },
       {
         "description": "Marker shape drawn at the anchor point: 'circle', 'diamond', or 'none'.",
         "kind": "input",
         "name": "marker",
-        "type": "ChartAnnotationMarker"
+        "type": "ChartAnnotationMarker",
+        "defaultValue": "\"circle\""
       },
       {
         "description": "Marker radius in pixels.",
         "kind": "input",
         "name": "markerRadius",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "4"
       },
       {
         "description": "Marker stroke width in pixels.",
         "kind": "input",
         "name": "markerStrokeWidth",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "1.5"
       },
       {
         "description": "Additional horizontal pixel offset for label positioning.",
         "kind": "input",
         "name": "offsetX",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "0"
       },
       {
         "description": "Additional vertical pixel offset for label positioning.",
         "kind": "input",
         "name": "offsetY",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "0"
       },
       {
         "description": "Custom CSS class name applied to the annotation host.",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets whether the annotation is visible.",
         "kind": "input",
         "name": "visible",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "X coordinate value or category key for the annotation anchor.",
@@ -3702,19 +3762,22 @@
         "description": "Sets whether crosshair interaction is enabled.",
         "kind": "input",
         "name": "enabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Pixel offset between axis line and crosshair label badge.",
         "kind": "input",
         "name": "labelOffset",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "4"
       },
       {
         "description": "Line dash style for the crosshair.",
         "kind": "input",
         "name": "lineStyle",
-        "type": "ChartCrosshairLineStyle"
+        "type": "ChartCrosshairLineStyle",
+        "defaultValue": "\"dashed\""
       },
       {
         "description": "Line stroke width in pixels.",
@@ -3726,13 +3789,15 @@
         "description": "Maximum pixel distance for nearest mark snapping.",
         "kind": "input",
         "name": "maxSnapDistance",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "32"
       },
       {
         "description": "Crosshair display mode: auto (follows interaction axis), x, y, or xy.",
         "kind": "input",
         "name": "mode",
-        "type": "ChartCrosshairMode"
+        "type": "ChartCrosshairMode",
+        "defaultValue": "\"auto\""
       },
       {
         "description": "Stroke opacity for the crosshair line (0 to 1).",
@@ -3744,7 +3809,8 @@
         "description": "Sets whether axis value badges are displayed.",
         "kind": "input",
         "name": "showAxisLabels",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Sets whether the X axis label badge is displayed.",
@@ -3762,13 +3828,15 @@
         "description": "Snapping mode: nearest semantic mark or raw pointer position.",
         "kind": "input",
         "name": "snap",
-        "type": "ChartCrosshairSnapMode"
+        "type": "ChartCrosshairSnapMode",
+        "defaultValue": "\"nearest\""
       },
       {
         "description": "Custom CSS class name applied to the crosshair.",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Explicit target X axis identifier.",
@@ -3967,31 +4035,36 @@
         "description": "Text label displayed inside or alongside the reference band.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Custom CSS class name applied to the label badge.",
         "kind": "input",
         "name": "labelClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Pixel offset between the band boundary and the label.",
         "kind": "input",
         "name": "labelOffset",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "6"
       },
       {
         "description": "Alignment position for the label: 'start', 'center', or 'end'.",
         "kind": "input",
         "name": "labelPosition",
-        "type": "ChartReferenceLabelPosition"
+        "type": "ChartReferenceLabelPosition",
+        "defaultValue": "\"center\""
       },
       {
         "description": "Render layer: 'underlay' (behind series) or 'overlay' (in front of series).",
         "kind": "input",
         "name": "layer",
-        "type": "ChartOverlayLayer"
+        "type": "ChartOverlayLayer",
+        "defaultValue": "\"underlay\""
       },
       {
         "description": "Ending coordinate value or category key for the reference band.",
@@ -4004,13 +4077,15 @@
         "description": "Custom CSS class name applied to the reference band host.",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets whether the reference band is visible.",
         "kind": "input",
         "name": "visible",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       }
     ]
   },
@@ -4041,37 +4116,43 @@
         "description": "Text label displayed alongside the reference line.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Custom CSS class name applied to the label badge.",
         "kind": "input",
         "name": "labelClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Pixel offset between the reference line and the label.",
         "kind": "input",
         "name": "labelOffset",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "6"
       },
       {
         "description": "Alignment position for the label: 'start', 'center', or 'end'.",
         "kind": "input",
         "name": "labelPosition",
-        "type": "ChartReferenceLabelPosition"
+        "type": "ChartReferenceLabelPosition",
+        "defaultValue": "\"end\""
       },
       {
         "description": "Render layer: 'underlay' (behind series) or 'overlay' (in front of series).",
         "kind": "input",
         "name": "layer",
-        "type": "ChartOverlayLayer"
+        "type": "ChartOverlayLayer",
+        "defaultValue": "\"overlay\""
       },
       {
         "description": "Line dash style: 'dashed', 'dotted', or 'solid'.",
         "kind": "input",
         "name": "lineStyle",
-        "type": "ChartReferenceLineStyle"
+        "type": "ChartReferenceLineStyle",
+        "defaultValue": "\"dashed\""
       },
       {
         "description": "Stroke opacity of the reference line (0 to 1).",
@@ -4083,7 +4164,8 @@
         "description": "Custom CSS class name applied to the reference line host.",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Semantic coordinate value or category key for the reference line.",
@@ -4096,7 +4178,8 @@
         "description": "Sets whether the reference line is visible.",
         "kind": "input",
         "name": "visible",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Stroke width of the reference line in pixels.",
@@ -7955,13 +8038,15 @@
         "description": "Reserved for an ARIA label on the context menu.\r\nNot currently applied to the target element or the rendered menu.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The menu items to render. When provided, these take precedence over\r\ncontent-projected `mona-contextmenu-item` (and related) components.",
         "kind": "input",
         "name": "items",
-        "type": "Iterable<PopupMenuItem>"
+        "type": "Iterable<PopupMenuItem>",
+        "defaultValue": "[]"
       },
       {
         "description": "Emits when a menu item is clicked.",
@@ -7979,13 +8064,15 @@
         "description": "Sets the rounded state of the context menu.",
         "kind": "input",
         "name": "rounded",
-        "type": "ContextMenuVariantProps[\"rounded\"]"
+        "type": "ContextMenuVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Sets the size of the context menu.",
         "kind": "input",
         "name": "size",
-        "type": "ContextMenuVariantProps[\"size\"]"
+        "type": "ContextMenuVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "The target element that will be used to trigger the context menu.",
@@ -8010,7 +8097,8 @@
         "description": "Sets the checked state of the menu item.",
         "kind": "input",
         "name": "checked",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when the checked state of the menu item changes.",
@@ -8022,13 +8110,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -8058,13 +8148,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -8082,13 +8174,15 @@
         "description": "The title of the radio group.",
         "kind": "input",
         "name": "title",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The value of the selected radio item.",
         "kind": "model",
         "name": "value",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -8100,13 +8194,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -8143,7 +8239,8 @@
         "description": "Sets the disabled state of the date picker.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the disabled dates of the date picker.\nAccepts either an iterable of Date objects or a predicate function.",
@@ -8155,13 +8252,15 @@
         "description": "Sets the first day of the week.",
         "kind": "input",
         "name": "firstDay",
-        "type": "FirstDayOfWeek"
+        "type": "FirstDayOfWeek",
+        "defaultValue": "\"monday\""
       },
       {
         "description": "Sets the date format of the date picker.",
         "kind": "input",
         "name": "format",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"dd/MM/yyyy\""
       },
       {
         "description": "Marks the date picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
@@ -8198,7 +8297,8 @@
         "description": "Sets the placeholder of the date picker.",
         "kind": "input",
         "name": "placeholder",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the class of the popup element.",
@@ -8225,7 +8325,8 @@
         "description": "Sets the readonly state of the date picker.",
         "kind": "input",
         "name": "readonly",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "When true, the input is readonly but the calendar button remains enabled.",
@@ -8245,19 +8346,22 @@
         "description": "Sets the border radius of the date picker.",
         "kind": "input",
         "name": "rounded",
-        "type": "DatePickerVariantProps[\"rounded\"]"
+        "type": "DatePickerVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Sets the visibility of the clear button.",
         "kind": "input",
         "name": "showClearButton",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the size of the date picker.",
         "kind": "input",
         "name": "size",
-        "type": "DatePickerVariantProps[\"size\"]"
+        "type": "DatePickerVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Emitted when the date picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
@@ -8276,7 +8380,8 @@
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Two-way bindable current date value.",
@@ -8314,7 +8419,8 @@
         "description": "Sets the disabled state of the date time picker.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the disabled dates of the date time picker.\nAccepts either an iterable of Date objects or a predicate function.",
@@ -8326,13 +8432,15 @@
         "description": "Sets the first day of the week.",
         "kind": "input",
         "name": "firstDay",
-        "type": "FirstDayOfWeek"
+        "type": "FirstDayOfWeek",
+        "defaultValue": "\"monday\""
       },
       {
         "description": "Sets the date format of the date time picker.",
         "kind": "input",
         "name": "format",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"dd/MM/yyyy HH:mm\""
       },
       {
         "description": "Sets the hour format of the time picker.",
@@ -8390,7 +8498,8 @@
         "description": "Sets the placeholder of the date time picker.",
         "kind": "input",
         "name": "placeholder",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the class of the popup element.",
@@ -8417,7 +8526,8 @@
         "description": "Sets the readonly state of the date time picker.",
         "kind": "input",
         "name": "readonly",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "When true, the input is readonly but the popup button remains enabled.",
@@ -8437,7 +8547,8 @@
         "description": "Sets the border radius of the date time picker.",
         "kind": "input",
         "name": "rounded",
-        "type": "DateTimePickerVariantProps[\"rounded\"]"
+        "type": "DateTimePickerVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Sets the second step of the time picker.",
@@ -8450,19 +8561,22 @@
         "description": "Sets the visibility of the clear button.",
         "kind": "input",
         "name": "showClearButton",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the visibility of the second selector.",
         "kind": "input",
         "name": "showSeconds",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the size of the date time picker.",
         "kind": "input",
         "name": "size",
-        "type": "DateTimePickerVariantProps[\"size\"]"
+        "type": "DateTimePickerVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Emitted when the date time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
@@ -8481,7 +8595,8 @@
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Two-way bindable current date time value.",
@@ -8734,7 +8849,8 @@
         "description": "Sets the checked state of the menu item.",
         "kind": "input",
         "name": "checked",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when the checked state of the menu item changes.",
@@ -8746,13 +8862,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -8782,13 +8900,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -8806,13 +8926,15 @@
         "description": "The title of the radio group.",
         "kind": "input",
         "name": "title",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The value of the selected radio item.",
         "kind": "model",
         "name": "value",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -8824,13 +8946,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -9087,7 +9211,8 @@
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -9223,31 +9348,36 @@
         "description": "",
         "kind": "model",
         "name": "field",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "model",
         "name": "operators",
-        "type": "Iterable<FilterOperators>"
+        "type": "Iterable<FilterOperators>",
+        "defaultValue": "[]"
       },
       {
         "description": "",
         "kind": "input",
         "name": "rounded",
-        "type": "FilterMenuVariantProps[\"rounded\"]"
+        "type": "FilterMenuVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "size",
-        "type": "FilterMenuVariantProps[\"size\"]"
+        "type": "FilterMenuVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "",
         "kind": "model",
         "name": "type",
-        "type": "DataType"
+        "type": "DataType",
+        "defaultValue": "\"string\""
       },
       {
         "description": "",
@@ -9265,7 +9395,8 @@
         "description": "The row data to be displayed in the grid.",
         "kind": "input",
         "name": "data",
-        "type": "Iterable<T>"
+        "type": "Iterable<T>",
+        "defaultValue": "[]"
       },
       {
         "description": "The number of items to be displayed on a page.",
@@ -9357,25 +9488,29 @@
         "description": "The aggregate shown in the grid footer for this column.",
         "kind": "input",
         "name": "aggregate",
-        "type": "AggregateFunction | null"
+        "type": "AggregateFunction | null",
+        "defaultValue": "null"
       },
       {
         "description": "Whether this column is editable when the grid is in edit mode.",
         "kind": "input",
         "name": "editable",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "The field name of the data property to display in this column.",
         "kind": "input",
         "name": "field",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Whether this column can be filtered when grid filtering is enabled. Has no effect if filtering is disabled on the grid.",
         "kind": "input",
         "name": "filterable",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text.",
@@ -9387,49 +9522,57 @@
         "description": "Whether this column is hidden from the rendered grid.",
         "kind": "input",
         "name": "hidden",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Whether this column remains fixed while the grid scrolls horizontally.",
         "kind": "input",
         "name": "locked",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The side of the grid where this locked column is fixed.",
         "kind": "input",
         "name": "lockedPosition",
-        "type": "GridColumnLockedPosition"
+        "type": "GridColumnLockedPosition",
+        "defaultValue": "\"left\""
       },
       {
         "description": "The maximum width of this column in pixels.",
         "kind": "input",
         "name": "maxWidth",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "The minimum width of this column in pixels.",
         "kind": "input",
         "name": "minWidth",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "40"
       },
       {
         "description": "A stable key used to persist state for columns whose field is empty or unstable.",
         "kind": "input",
         "name": "stateKey",
-        "type": "string | null"
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "The title displayed in the column header.",
         "kind": "input",
         "name": "title",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The data type of the column. Determines the edit component and filter behavior.",
         "kind": "input",
         "name": "type",
-        "type": "DataType"
+        "type": "DataType",
+        "defaultValue": "\"string\""
       },
       {
         "description": "The fixed width of this column in pixels. If not set, the column width is calculated automatically.",
@@ -9472,13 +9615,15 @@
         "description": "",
         "kind": "input",
         "name": "newRow",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "row",
-        "type": "Row | null"
+        "type": "Row | null",
+        "defaultValue": "null"
       }
     ]
   },
@@ -9490,55 +9635,64 @@
         "description": "Whether this command column is hidden from the rendered grid.",
         "kind": "input",
         "name": "hidden",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Whether this command column remains fixed while the grid scrolls horizontally.",
         "kind": "input",
         "name": "locked",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The side of the grid where this locked command column is fixed.",
         "kind": "input",
         "name": "lockedPosition",
-        "type": "GridColumnLockedPosition"
+        "type": "GridColumnLockedPosition",
+        "defaultValue": "\"left\""
       },
       {
         "description": "The maximum width of this command column in pixels.",
         "kind": "input",
         "name": "maxWidth",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "The minimum width of this command column in pixels.",
         "kind": "input",
         "name": "minWidth",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "Whether the built-in remove command asks for confirmation before emitting remove.",
         "kind": "input",
         "name": "removeConfirmation",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "A stable key used to persist state for this command column.",
         "kind": "input",
         "name": "stateKey",
-        "type": "string | null"
+        "type": "string | null",
+        "defaultValue": "\"commands\""
       },
       {
         "description": "The title displayed in the command column header.",
         "kind": "input",
         "name": "title",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"Commands\""
       },
       {
         "description": "The fixed width of this command column in pixels.",
         "kind": "input",
         "name": "width",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "160"
       }
     ]
   },
@@ -9550,7 +9704,8 @@
         "description": "Controls whether the editor focuses its input after it renders.",
         "kind": "input",
         "name": "autoFocus",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "",
@@ -9575,7 +9730,8 @@
         "description": "",
         "kind": "input",
         "name": "isNew",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
@@ -9594,7 +9750,8 @@
         "description": "Enables Tab and Shift+Tab traversal between editable cells while cell editing.",
         "kind": "input",
         "name": "tabNavigationEnabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       }
     ]
   },
@@ -9619,7 +9776,8 @@
         "description": "",
         "kind": "input",
         "name": "type",
-        "type": "DataType"
+        "type": "DataType",
+        "defaultValue": "\"string\""
       }
     ]
   },
@@ -9664,7 +9822,8 @@
         "description": "",
         "kind": "input",
         "name": "groupKey",
-        "type": "string | null"
+        "type": "string | null",
+        "defaultValue": "null"
       }
     ]
   },
@@ -10058,19 +10217,22 @@
         "description": "Sets the menu as disabled.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the items of the menu.\r\nIf provided, it will override the menu items defined by the menu item components.",
         "kind": "input",
         "name": "items",
-        "type": "Iterable<MenuItem>"
+        "type": "Iterable<MenuItem>",
+        "defaultValue": "[]"
       },
       {
         "description": "The text of the menu.",
         "kind": "input",
         "name": "text",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -10082,7 +10244,8 @@
         "description": "Sets the checked state of the menu item.",
         "kind": "input",
         "name": "checked",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when the checked state of the menu item changes.",
@@ -10094,13 +10257,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -10130,13 +10295,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -10154,13 +10321,15 @@
         "description": "The title of the radio group.",
         "kind": "input",
         "name": "title",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The value of the selected radio item.",
         "kind": "model",
         "name": "value",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -10172,13 +10341,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -10203,19 +10374,22 @@
         "description": "ARIA label for the menubar.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "ARIA labelledby for the menubar.",
         "kind": "input",
         "name": "ariaLabelledby",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the disabled state of menubar.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when a menu item is clicked.",
@@ -10227,19 +10401,22 @@
         "description": "Sets the size of the menubar.",
         "kind": "input",
         "name": "size",
-        "type": "MenubarVariantProps[\"size\"]"
+        "type": "MenubarVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Sets the rounded style of the menubar.",
         "kind": "input",
         "name": "rounded",
-        "type": "MenubarVariantProps[\"rounded\"]"
+        "type": "MenubarVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Additional CSS classes to apply to the menubar, merged with the computed theme classes.",
         "kind": "input",
         "name": "userClasses",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -10460,7 +10637,8 @@
         "description": "ARIA label for the input.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string | null"
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "Number of decimals to show.",
@@ -10473,13 +10651,15 @@
         "description": "Sets whether the input is disabled.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Formats the value to be displayed in the input when the input is not focused.",
         "kind": "input",
         "name": "formatter",
-        "type": "Action<number | null, string> | null"
+        "type": "Action<number | null, string> | null",
+        "defaultValue": "null"
       },
       {
         "description": "Emits when the inner input element is blurred.",
@@ -10503,31 +10683,36 @@
         "description": "Maximum value that can be entered.",
         "kind": "input",
         "name": "maxValue",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "Minimum value that can be entered.",
         "kind": "input",
         "name": "minValue",
-        "type": "number | null"
+        "type": "number | null",
+        "defaultValue": "null"
       },
       {
         "description": "Sets whether the input can be empty.",
         "kind": "input",
         "name": "nullable",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Sets whether the input is readonly.",
         "kind": "input",
         "name": "readonly",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets whether the input is required.",
         "kind": "input",
         "name": "required",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
@@ -10540,31 +10725,36 @@
         "description": "Sets the border radius of the input.",
         "kind": "input",
         "name": "rounded",
-        "type": "NumericTextboxVariantProps[\"rounded\"]"
+        "type": "NumericTextboxVariantProps[\"rounded\"]",
+        "defaultValue": "`medium`"
       },
       {
         "description": "Sets the size of the input.",
         "kind": "input",
         "name": "size",
-        "type": "NumericTextboxVariantProps[\"size\"]"
+        "type": "NumericTextboxVariantProps[\"size\"]",
+        "defaultValue": "`medium`"
       },
       {
         "description": "Sets whether the spin buttons are visible.",
         "kind": "input",
         "name": "spinners",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Step value to increment or decrement the value.",
         "kind": "input",
         "name": "step",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "Tab index of the input.",
         "kind": "input",
         "name": "tabindex",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "0"
       },
       {
         "description": "Emitted when the numeric text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
@@ -10916,7 +11106,8 @@
         "description": "Display the arrow of the popover.",
         "kind": "input",
         "name": "displayArrow",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when the popover is about to be closed.\nThis event is preventable.",
@@ -10934,13 +11125,15 @@
         "description": "The position of the popover relative to the target element.",
         "kind": "input",
         "name": "position",
-        "type": "Position"
+        "type": "Position",
+        "defaultValue": "\"top\""
       },
       {
         "description": "The border radius of the popover.",
         "kind": "input",
         "name": "rounded",
-        "type": "PopoverVariantProps[\"rounded\"]"
+        "type": "PopoverVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Emits when the popover is about to be shown.\nThis event is preventable.",
@@ -10965,13 +11158,15 @@
         "description": "The title of the popover.",
         "kind": "input",
         "name": "title",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The trigger that opens/closes the popover.\n\"click\" toggles on click, \"hover\" opens on pointer enter and closes on\npointer leave, \"none\" disables automatic triggering (use `open()`/`close()`\ninstead). Any other DOM event name is also accepted and used as-is.",
         "kind": "input",
         "name": "trigger",
-        "type": "PopoverTrigger"
+        "type": "PopoverTrigger",
+        "defaultValue": "\"click\""
       }
     ]
   },
@@ -10990,19 +11185,22 @@
         "description": "The connection point for the popup anchor.",
         "kind": "input",
         "name": "anchorConnectionPoint",
-        "type": "ConnectionPoint"
+        "type": "ConnectionPoint",
+        "defaultValue": "\"bottomcenter\""
       },
       {
         "description": "The animation settings for the popup.",
         "kind": "input",
         "name": "animation",
-        "type": "boolean | PopupAnimationSettings"
+        "type": "boolean | PopupAnimationSettings",
+        "defaultValue": "true"
       },
       {
         "description": "The class or classes to apply to the backdrop of the popup.",
         "kind": "input",
         "name": "backdropClass",
-        "type": "string | string[]"
+        "type": "string | string[]",
+        "defaultValue": "[]"
       },
       {
         "description": "Emits when the popup is closed.",
@@ -11014,25 +11212,29 @@
         "description": "Whether to close the popup when clicking on the backdrop.\r\nOnly applies when the popup has a backdrop.",
         "kind": "input",
         "name": "closeOnBackdropClick",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Whether to close the popup when the escape key is pressed.",
         "kind": "input",
         "name": "closeOnEscape",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Whether to close the popup when the mouse leaves the anchor element.",
         "kind": "input",
         "name": "closeOnMouseLeave",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Whether to close the popup when clicking outside of it.",
         "kind": "input",
         "name": "closeOnOutsideClick",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Arbitrary data to pass to the popup.",
@@ -11044,7 +11246,8 @@
         "description": "Whether the popup should have a backdrop.",
         "kind": "input",
         "name": "hasBackdrop",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The height of the popup.",
@@ -11092,25 +11295,29 @@
         "description": "The class or classes to apply to the popup.",
         "kind": "input",
         "name": "popupClass",
-        "type": "string | string[]"
+        "type": "string | string[]",
+        "defaultValue": "[]"
       },
       {
         "description": "The connection point for the popup.",
         "kind": "input",
         "name": "popupConnectionPoint",
-        "type": "ConnectionPoint"
+        "type": "ConnectionPoint",
+        "defaultValue": "\"topcenter\""
       },
       {
         "description": "The class or classes to apply to the popup wrapper.",
         "kind": "input",
         "name": "popupWrapperClass",
-        "type": "string | string[]"
+        "type": "string | string[]",
+        "defaultValue": "[]"
       },
       {
         "description": "The strategy for positioning the popup.\r\n`global` means the popup will be positioned relative to the viewport,\r\n`connected` means the popup will be positioned relative to the anchor element.",
         "kind": "input",
         "name": "positionStrategy",
-        "type": "\"global\" | \"connected\""
+        "type": "\"global\" | \"connected\"",
+        "defaultValue": "\"connected\""
       },
       {
         "description": "The positions to use for the popup.\r\nThe popup will try to position itself in the first position that fits.\r\nThis is only used when the `positionStrategy` is set to `connected`.",
@@ -11128,13 +11335,15 @@
         "description": "The providers that will be injected into the popup.",
         "kind": "input",
         "name": "providers",
-        "type": "StaticProvider[]"
+        "type": "StaticProvider[]",
+        "defaultValue": "[]"
       },
       {
         "description": "The trigger event for opening the popup.",
         "kind": "input",
         "name": "trigger",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"click\""
       },
       {
         "description": "The width of the popup.",
@@ -11146,25 +11355,29 @@
         "description": "Whether to push the popup into the screen when it is opened.",
         "kind": "input",
         "name": "withPush",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Whether to close the popup when the user scrolls within a scrollable container.",
         "kind": "input",
         "name": "closeOnScroll",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Controls focus restoration when the popup closes.\r\n- `true`: always restore focus to the anchor element.\r\n- `false`: never restore focus (recommended for tooltips).\r\n- `\"auto\"`: restore focus only if the anchor was focused when the popup opened.",
         "kind": "input",
         "name": "restoreFocus",
-        "type": "boolean | \"auto\""
+        "type": "boolean | \"auto\"",
+        "defaultValue": "\"auto\""
       },
       {
         "description": "Whether the popup should track scroll events and reposition itself.",
         "kind": "input",
         "name": "withScrollTracking",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       }
     ]
   },
@@ -11194,7 +11407,8 @@
         "description": "The items to render in the popup menu.\nIf provided, it will override the menu items defined by projected menu item components.",
         "kind": "input",
         "name": "items",
-        "type": "Iterable<PopupMenuItem | MenuItem>"
+        "type": "Iterable<PopupMenuItem | MenuItem>",
+        "defaultValue": "[]"
       },
       {
         "description": "The event that is emitted when a menu item is clicked.",
@@ -11206,7 +11420,8 @@
         "description": "The id of the popup menu's root element.",
         "kind": "input",
         "name": "menuId",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the minimum width of the popup menu.\nThis will be applied to the root menu and all submenus.",
@@ -11242,19 +11457,22 @@
         "description": "Whether the context menu should be opened with precise positioning.\nIf true, the context menu will be positioned at the mouse cursor position.\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
         "kind": "input",
         "name": "precise",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the border radius of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input",
         "name": "rounded",
-        "type": "PopupMenuVariantProps[\"rounded\"]"
+        "type": "PopupMenuVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Sets the size of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input",
         "name": "size",
-        "type": "PopupMenuVariantProps[\"size\"]"
+        "type": "PopupMenuVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "The target element that will be used to trigger the popup menu.",
@@ -11267,7 +11485,8 @@
         "description": "The event that triggers the popup menu.",
         "kind": "input",
         "name": "trigger",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"click\""
       },
       {
         "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
@@ -11291,7 +11510,8 @@
         "description": "Sets the checked state of the menu item.",
         "kind": "input",
         "name": "checked",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when the checked state of the menu item changes.",
@@ -11303,13 +11523,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -11339,13 +11561,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -11363,13 +11587,15 @@
         "description": "The title of the radio group.",
         "kind": "input",
         "name": "title",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The value of the selected radio item.",
         "kind": "model",
         "name": "value",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -11381,13 +11607,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -11782,7 +12010,8 @@
         "description": "Sets the data of the scroll view.",
         "kind": "input",
         "name": "data",
-        "type": "Iterable<unknown>"
+        "type": "Iterable<unknown>",
+        "defaultValue": "[]"
       },
       {
         "description": "Sets the height of the scroll view.\nThis property is required.",
@@ -11809,7 +12038,8 @@
         "description": "Sets whether the pager is visible.",
         "kind": "input",
         "name": "pageable",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the background blur of the pager in pixels.",
@@ -11843,7 +12073,8 @@
         "description": "Sets custom CSS classes on the component host element. Merged with base classes via tailwind-merge.",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the width of the scroll view.",
@@ -12892,7 +13123,8 @@
         "description": "Sets the checked state of the menu item.",
         "kind": "input",
         "name": "checked",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when the checked state of the menu item changes.",
@@ -12904,13 +13136,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -12940,13 +13174,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -12964,13 +13200,15 @@
         "description": "The title of the radio group.",
         "kind": "input",
         "name": "title",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The value of the selected radio item.",
         "kind": "model",
         "name": "value",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -12982,13 +13220,15 @@
         "description": "Sets the disabled state of the menu item.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The text of the menu item.",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
@@ -13026,37 +13266,43 @@
         "description": "Whether the pane is collapsible.",
         "kind": "input",
         "name": "collapsible",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Whether the pane is collapsed.",
         "kind": "model",
         "name": "collapsed",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The maximum size of the pane.",
         "kind": "input",
         "name": "max",
-        "type": "string | number | null"
+        "type": "string | number | null",
+        "defaultValue": "null"
       },
       {
         "description": "The minimum size of the pane.",
         "kind": "input",
         "name": "min",
-        "type": "string | number | null"
+        "type": "string | number | null",
+        "defaultValue": "null"
       },
       {
         "description": "Whether the pane is resizable.",
         "kind": "input",
         "name": "resizable",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "The size of the pane.",
         "kind": "model",
         "name": "size",
-        "type": "string | number"
+        "type": "string | number",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -13155,7 +13401,8 @@
         "description": "Sets the orientation of the stepper.",
         "kind": "input",
         "name": "orientation",
-        "type": "StepperVariantProps[\"orientation\"]"
+        "type": "StepperVariantProps[\"orientation\"]",
+        "defaultValue": "\"horizontal\""
       },
       {
         "description": "Sets the accessible label for the progress bar element.",
@@ -13168,19 +13415,22 @@
         "description": "Sets the roundness of the stepper steps.",
         "kind": "input",
         "name": "rounded",
-        "type": "StepperVariantProps[\"rounded\"]"
+        "type": "StepperVariantProps[\"rounded\"]",
+        "defaultValue": "\"full\""
       },
       {
         "description": "Sets the active step of the stepper.",
         "kind": "model",
         "name": "step",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "0"
       },
       {
         "description": "Sets the steps of the stepper.",
         "kind": "input",
         "name": "steps",
-        "type": "Iterable<StepOptions>"
+        "type": "Iterable<StepOptions>",
+        "defaultValue": "[]"
       }
     ]
   },
@@ -13322,13 +13572,15 @@
         "description": "",
         "kind": "input",
         "name": "closable",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Placement of the tab list relative to the tab content.",
@@ -13342,7 +13594,8 @@
         "description": "",
         "kind": "model",
         "name": "selectedTabId",
-        "type": "string | null"
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "Size preset controlling the tabs' dimensions.",
@@ -13582,13 +13835,15 @@
         "description": "Sets the disabled state of the time picker.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the format of the time picker.",
         "kind": "input",
         "name": "format",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"HH:mm\""
       },
       {
         "description": "Sets the hour format of the time picker.",
@@ -13648,7 +13903,8 @@
         "description": "Sets the placeholder of the time picker.",
         "kind": "input",
         "name": "placeholder",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the class of the popup element.",
@@ -13675,7 +13931,8 @@
         "description": "Sets the readonly state of the time picker.",
         "kind": "input",
         "name": "readonly",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "When true, the input is readonly but the popup button remains enabled.",
@@ -13695,7 +13952,8 @@
         "description": "Sets the border radius of the time picker.",
         "kind": "input",
         "name": "rounded",
-        "type": "TimePickerVariantProps[\"rounded\"]"
+        "type": "TimePickerVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Sets the second step of the time picker.",
@@ -13708,19 +13966,22 @@
         "description": "Sets the visibility of the clear button.",
         "kind": "input",
         "name": "showClearButton",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the visibility of the second selector.",
         "kind": "input",
         "name": "showSeconds",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the size of the time picker.",
         "kind": "input",
         "name": "size",
-        "type": "TimePickerVariantProps[\"size\"]"
+        "type": "TimePickerVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Emitted when the time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
@@ -13739,7 +14000,8 @@
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Two-way bindable current time value.",
@@ -13758,37 +14020,43 @@
         "description": "",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"Time selector\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "focusOnMount",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "",
         "kind": "input",
         "name": "footer",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "",
         "kind": "input",
         "name": "hourFormat",
-        "type": "HourFormat"
+        "type": "HourFormat",
+        "defaultValue": "\"24\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "hourStep",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "Marks the time selector as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
@@ -13813,7 +14081,8 @@
         "description": "",
         "kind": "input",
         "name": "minuteStep",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "Prevents value changes while preserving the component's visual state.",
@@ -13833,25 +14102,29 @@
         "description": "",
         "kind": "input",
         "name": "rounded",
-        "type": "ButtonVariantProps[\"rounded\"]"
+        "type": "ButtonVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "secondStep",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "",
         "kind": "input",
         "name": "showSeconds",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "size",
-        "type": "TimeSelectorVariantProps[\"size\"]"
+        "type": "TimeSelectorVariantProps[\"size\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Emitted when the time selector is interacted with via blur or value selection.\nThe `FormField` directive listens to this to mark the field as touched.",
@@ -13883,7 +14156,8 @@
         "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown.",
         "kind": "input",
         "name": "disabled",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emitted when the tooltip popup is hidden.",
@@ -13895,25 +14169,29 @@
         "description": "The delay in milliseconds before hiding the tooltip after the trigger event ends.",
         "kind": "input",
         "name": "hideDelay",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "0"
       },
       {
         "description": "The position of the tooltip relative to the target element.",
         "kind": "input",
         "name": "position",
-        "type": "Position"
+        "type": "Position",
+        "defaultValue": "\"top\""
       },
       {
         "description": "The border radius of the tooltip.",
         "kind": "input",
         "name": "rounded",
-        "type": "TooltipVariantProps[\"rounded\"]"
+        "type": "TooltipVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "The delay in milliseconds before showing the tooltip after the trigger event.",
         "kind": "input",
         "name": "showDelay",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "0"
       },
       {
         "description": "Emitted when the tooltip popup is shown.",
@@ -14178,13 +14456,15 @@
         "description": "",
         "kind": "input",
         "name": "debounce",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "0"
       },
       {
         "description": "",
         "kind": "input",
         "name": "filter",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
@@ -14208,13 +14488,15 @@
         "description": "",
         "kind": "input",
         "name": "placeholder",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "size",
-        "type": "ReturnType<TextBoxComponent[\"size\"]>"
+        "type": "ReturnType<TextBoxComponent[\"size\"]>",
+        "defaultValue": "\"medium\""
       }
     ]
   },
@@ -14232,37 +14514,43 @@
         "description": "",
         "kind": "input",
         "name": "icon",
-        "type": "LucideIconInput | null"
+        "type": "LucideIconInput | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
         "kind": "input",
         "name": "interactive",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
         "name": "label",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "preset",
-        "type": "IndicatorIconPreset | null"
+        "type": "IndicatorIconPreset | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
         "kind": "input",
         "name": "size",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "16"
       },
       {
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -14281,13 +14569,15 @@
         "description": "",
         "kind": "input",
         "name": "data",
-        "type": "Iterable<TData> | null | undefined"
+        "type": "Iterable<TData> | null | undefined",
+        "defaultValue": "null"
       },
       {
         "description": "",
         "kind": "input",
         "name": "focusOnMount",
-        "type": "boolean"
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "",
@@ -14305,19 +14595,22 @@
         "description": "",
         "kind": "input",
         "name": "listClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "listId",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "listItemClass",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
@@ -14347,13 +14640,15 @@
         "description": "",
         "kind": "input",
         "name": "size",
-        "type": "ReturnType<TextBoxComponent[\"size\"]>"
+        "type": "ReturnType<TextBoxComponent[\"size\"]>",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "",
         "kind": "input",
         "name": "textField",
-        "type": "ListKeySelector<TData, string> | undefined"
+        "type": "ListKeySelector<TData, string> | undefined",
+        "defaultValue": "null"
       },
       {
         "description": "",
@@ -14423,7 +14718,8 @@
         "description": "",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "",
@@ -14441,13 +14737,15 @@
         "description": "",
         "kind": "input",
         "name": "depth",
-        "type": "number"
+        "type": "number",
+        "defaultValue": "0"
       },
       {
         "description": "",
         "kind": "input",
         "name": "node",
-        "type": "TreeNode<T> | null"
+        "type": "TreeNode<T> | null",
+        "defaultValue": "null"
       }
     ]
   }

@@ -9,6 +9,7 @@ import {
     CalendarYearCellTemplateDirective
 } from "@nanahoshi/mona-ui/calendar";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
     calendarDecadeCellTemplateFeatureConfig,
     calendarMonthCellTemplateFeatureConfig,
@@ -18,6 +19,23 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
+const DECADE_CELL_TEMPLATE_CODE = `<ng-template monaCalendarDecadeCellTemplate let-year>
+    <span class="text-amber-700 italic">{{ year }}</span>
+</ng-template>`;
+
+const MONTH_CELL_TEMPLATE_CODE = `<ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+    <span [class.text-violet-600]="day % 2 === 0" [class.text-blue-500]="day % 2 !== 0">
+        {{ day }}
+    </span>
+</ng-template>`;
+
+const YEAR_CELL_TEMPLATE_CODE = `<ng-template monaCalendarYearCellTemplate let-month let-text="text">
+    <span
+        >{{ text }} |
+        <span class="text-green-500">{{ month }}</span>
+    </span>
+</ng-template>`;
+
 @Component({
     selector: "app-calendar-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
@@ -25,17 +43,12 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class CalendarDemoComponent extends AbstractDemoComponent<CalendarComponent> {
     readonly #injector = createFeatureInjector({
-        decadeCellTemplate: calendarDecadeCellTemplateFeatureConfig(),
-        monthCellTemplate: calendarMonthCellTemplateFeatureConfig(),
-        yearCellTemplate: calendarYearCellTemplateFeatureConfig()
+        decadeCellTemplate: { ...calendarDecadeCellTemplateFeatureConfig(), code: DECADE_CELL_TEMPLATE_CODE },
+        monthCellTemplate: { ...calendarMonthCellTemplateFeatureConfig(), code: MONTH_CELL_TEMPLATE_CODE },
+        yearCellTemplate: { ...calendarYearCellTemplateFeatureConfig(), code: YEAR_CELL_TEMPLATE_CODE }
     });
-    protected readonly config = signal<ComponentConfig<CalendarComponent>>({
-        code: ``,
-        inputs: {
-            disabled: {
-                type: "boolean",
-                value: false
-            },
+    protected readonly config = computed<ComponentConfig<CalendarComponent>>(() => ({
+        inputs: deriveInputConfig<CalendarComponent>(this.metadata(), {
             disabledDates: {
                 type: "dropdown",
                 value: [[DateTime.now().minus({ day: 2 }).toJSDate()], (date: Date) => date.getDay() === 0],
@@ -47,6 +60,10 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 value: ["sunday", "monday"],
                 defaultValue: "monday"
             },
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            invalid: undefined,
+            touched: undefined,
             maxDate: {
                 type: "dropdown",
                 value: [DateTime.now().plus({ day: 5 }).toJSDate()],
@@ -59,14 +76,6 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 defaultValue: null,
                 clearable: true
             },
-            readonly: {
-                type: "boolean",
-                value: false
-            },
-            required: {
-                type: "boolean",
-                value: false
-            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
@@ -77,13 +86,14 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 value: ["single", "multiple", "range"],
                 defaultValue: "single"
             },
-            weekNumber: {
-                type: "boolean",
-                value: false
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("CalendarComponent");
     protected readonly CalendarWrapperComponent = CalendarWrapperComponent;
@@ -109,7 +119,8 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
             [minDate]="minDate()"
             [rounded]="rounded()"
             [selection]="selection()"
-            [weekNumber]="weekNumber()">
+            [weekNumber]="weekNumber()"
+            [class]="userClass()">
             @if (featureData && featureData["decadeCellTemplate"].active) {
                 <ng-template monaCalendarDecadeCellTemplate let-year>
                     <span class="text-amber-700 italic">{{ year }}</span>
@@ -158,6 +169,7 @@ export class CalendarWrapperComponent implements ComponentInputsAsSignal<Calenda
     public readonly required = input<ReturnType<CalendarComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<CalendarComponent["rounded"]>>("none");
     public readonly selection = input<ReturnType<CalendarComponent["selection"]>>("single");
+    public readonly userClass = input<ReturnType<CalendarComponent["userClass"]>>("");
     public readonly weekNumber = input<ReturnType<CalendarComponent["weekNumber"]>>(false);
 }
 

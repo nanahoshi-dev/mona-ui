@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import {
     LucideArrowUpNarrowWide,
     LucideClipboardPaste,
@@ -23,9 +23,44 @@ import {
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const GROUP_TEMPLATE_CODE = `<ng-template monaContextMenuGroupTemplate let-title>
+    <span class="text-blue-500">{{ title }}</span>
+</ng-template>`;
+
+const ICON_TEMPLATE_CODE = `<ng-template monaContextMenuIconTemplate>
+    <svg lucideClipboardPaste [size]="14"></svg>
+</ng-template>`;
+
+const SHORTCUT_TEMPLATE_CODE = `<ng-template monaContextMenuShortcutTemplate>
+    <div class="flex items-center gap-1 text-gray-600">Ctrl + Shift + V</div>
+</ng-template>`;
+
+const TEXT_TEMPLATE_CODE = `<ng-template monaContextMenuTextTemplate let-item>
+    <span class="text-amber-600">{{ item.label }}</span>
+</ng-template>`;
+
+const TOP_LEVEL_ICON_TEMPLATE_CODE = `<ng-template monaContextMenuIconTemplate let-item>
+    <svg lucideHeart [size]="14" [color]="'' | randomColor"></svg>
+</ng-template>`;
+
+const TOP_LEVEL_GROUP_TEMPLATE_CODE = `<ng-template monaContextMenuGroupTemplate let-group>
+    <div class="text-green-500 p-2">{{ group }}</div>
+</ng-template>`;
+
+const TOP_LEVEL_SHORTCUT_TEMPLATE_CODE = `<ng-template monaContextMenuShortcutTemplate let-item>
+    @if (item.label === "Properties") {
+        <div class="flex items center gap-1"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd></div>
+    }
+</ng-template>`;
+
+const TOP_LEVEL_TEXT_TEMPLATE_CODE = `<ng-template monaContextMenuTextTemplate let-item>
+    <span [style.color]="'' | randomColor">{{ item.text }}</span>
+</ng-template>`;
 
 @Component({
     selector: "app-contextmenu-demo",
@@ -36,13 +71,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuComponent> {
     readonly #injector = createFeatureInjector({
         groupTemplate: {
-            code: `
-                <mona-contextmenu-group [title]="'System Actions'">
-                    <ng-template monaContextMenuGroupTemplate let-title>
-                        <span class="text-blue-500">{{ title }}</span>
-                    </ng-template>
-                </mona-contextmenu-group>
-            `,
+            code: GROUP_TEMPLATE_CODE,
             description: `
                 This template is used to customize the title of menu item groups.
                 It will override the top level group template if both are used.
@@ -51,9 +80,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
             active: false
         },
         iconTemplate: {
-            code: `
-
-            `,
+            code: ICON_TEMPLATE_CODE,
             description: `
                 This template is used to customize the icon of the menu item.
                 It will override the top level icon template if both are used.
@@ -62,13 +89,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
             active: false
         },
         shortcutTemplate: {
-            code: `
-                <mona-contextmenu-item label="Paste Shortcut">
-                    <ng-template monaContextMenuShortcutTemplate>
-                        <div class="flex items-center gap-1 text-gray-600">Ctrl + Shift + V</div>
-                    </ng-template>
-                </mona-contextmenu-item>
-            `,
+            code: SHORTCUT_TEMPLATE_CODE,
             description: `
                 This template is used to customize the shortcut of the menu item.
                 It will override the top level shortcut template if both are used.
@@ -77,13 +98,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
             active: false
         },
         textTemplate: {
-            code: `
-                <mona-contextmenu-item label="Paste">
-                    <ng-template monaContextMenuTextTemplate let-item>
-                        <span class="text-amber-600">{{ item.label }}</span>
-                    </ng-template>
-                </mona-contextmenu-item>
-            `,
+            code: TEXT_TEMPLATE_CODE,
             description: `
                 This template is used to customize the text of the menu item.
                 It will override the top level text template if both are used.
@@ -92,57 +107,32 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
             active: false
         },
         topLevelIconTemplate: {
-            code: `
-
-            `,
+            code: TOP_LEVEL_ICON_TEMPLATE_CODE,
             description: `This template is used to customize the icons of all menu items.`,
             name: "Top Level Icon Template",
             active: false
         },
         topLevelGroupTemplate: {
-            code: `
-                <mona-contextmenu>
-                    <ng-template monaContextMenuGroupTemplate let-group>
-                        <div class="text-green-500 p-2">{{ group }}</div>
-                    </ng-template>
-                </mona-contextmenu>
-            `,
+            code: TOP_LEVEL_GROUP_TEMPLATE_CODE,
             description: `This template is used to customize the title of all menu item groups.`,
             name: "Top Level Group Template",
             active: false
         },
         topLevelShortcutTemplate: {
-            code: `
-                <mona-contextmenu>
-                    <ng-template monaContextMenuShortcutTemplate let-item>
-                        @if (item.label === "Properties") {
-                            <div class="flex items center gap-1"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd></div>
-                        }
-                    </ng-template>
-                </mona-contextmenu>
-            `,
+            code: TOP_LEVEL_SHORTCUT_TEMPLATE_CODE,
             description: `This template is used to customize the shortcuts of all menu items.`,
             name: "Top Level Shortcut Template",
             active: false
         },
         topLevelTextTemplate: {
-            code: `
-                <mona-contextmenu>
-                     <ng-template monaContextMenuTextTemplate let-item>
-                        <span [style.color]="'' | randomColor">{{ item.text }}</span>
-                    </ng-template>
-                </mona-contextmenu>
-            `,
+            code: TOP_LEVEL_TEXT_TEMPLATE_CODE,
             description: `This template is used to customize the text of tall menu items.`,
             name: "Top Level Text Template",
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<ContextMenuComponent>>({
-        code: `
-
-        `,
-        inputs: {
+    protected readonly config = computed<ComponentConfig<ContextMenuComponent>>(() => ({
+        inputs: deriveInputConfig<ContextMenuComponent>(this.metadata(), {
             // context: { type: "object", value: { prop: "Context menu context" } },
             items: {
                 type: "object"
@@ -168,9 +158,9 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
                 type: "string",
                 value: ""
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ContextMenuComponent");
     protected readonly ContextMenuWrapperComponent = ContextMenuWrapperComponent;
@@ -202,6 +192,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
         @let featureData = features();
         <button monaButton class="mr-4" #menuTarget>Context Menu Target</button>
         <mona-contextmenu
+            [ariaLabel]="ariaLabel()"
             (menuClick)="onMenuClick($event, 'mona-contextmenu')"
             [minWidth]="minWidth()"
             [rounded]="rounded()"
@@ -324,6 +315,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
 })
 class ContextMenuWrapperComponent implements ComponentInputsAsSignal<ContextMenuComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly ariaLabel = input("");
     public readonly items = input<ReturnType<ContextMenuComponent["items"]>>([]);
     public readonly minWidth = input<ReturnType<ContextMenuComponent["minWidth"]>>();
     public readonly rounded = input<ReturnType<ContextMenuComponent["rounded"]>>("medium");

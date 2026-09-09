@@ -43,10 +43,26 @@ import {
 } from "@nanahoshi/mona-ui/tree-view";
 import { asapScheduler, of, switchMap, timer } from "rxjs";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { EventViewerComponent } from "../event-viewer/event-viewer.component";
+
+const NODE_TEMPLATE_CODE = `<ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
+    <div class="flex items-center gap-2">
+        @if (mode() === "hierarchical") {
+            @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
+            <svg [lucideIcon]="icon" [size]="14"></svg>
+            <span>{{ dataItem.text }}</span>
+        } @else {
+            @if (dataItem.icon) {
+                <svg [lucideIcon]="dataItem.icon" [size]="14"></svg>
+            }
+            <span>{{ dataItem.text }}</span>
+        }
+    </div>
+</ng-template>`;
 
 interface TreeNodeDataItem {
     id: string;
@@ -194,7 +210,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             }
         },
         nodeTemplate: {
-            code: ``,
+            code: NODE_TEMPLATE_CODE,
             name: "Node Template",
             description: `Template for rendering tree nodes.`,
             active: false
@@ -228,12 +244,8 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             }
         }
     });
-    protected readonly config = signal<ComponentConfig<TreeViewComponent<TreeNodeDataItem>>>({
-        inputs: {
-            animate: {
-                type: "boolean",
-                value: true
-            },
+    protected readonly config = computed<ComponentConfig<TreeViewComponent<TreeNodeDataItem>>>(() => ({
+        inputs: deriveInputConfig<TreeViewComponent<TreeNodeDataItem>>(this.metadata(), {
             children: {
                 type: "customDropdown",
                 value: childSelectors,
@@ -251,26 +263,18 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 defaultValue: hasChildrenPredicates[0],
                 disabled: true
             },
-            idField: {
-                type: "string",
-                value: "id"
-            },
             mode: {
                 type: "dropdown",
                 value: ["flat", "hierarchical"],
                 defaultValue: "hierarchical"
             },
-            parentIdField: {
-                type: "string",
-                value: "parentId"
-            },
             textField: {
                 type: "string",
                 value: "text"
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TreeViewComponent");
     protected readonly TreeViewWrapperComponent = TreeViewWrapperComponent;
@@ -294,6 +298,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         @if (treeVisible()) {
             <mona-tree-view
                 [animate]="animate()"
+                [ariaLabel]="ariaLabel()"
                 [children]="children()"
                 [data]="$any(treeData())"
                 [hasChildren]="hasChildren()"
@@ -437,6 +442,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     });
     protected readonly treeVisible = signal(true);
     public readonly animate = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["animate"]>>(true);
+    public readonly ariaLabel = input("");
     public readonly children = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["children"]>>(x => x.items);
     public readonly data = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["data"]>>([]);
     public readonly hasChildren = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["hasChildren"]>>(null);

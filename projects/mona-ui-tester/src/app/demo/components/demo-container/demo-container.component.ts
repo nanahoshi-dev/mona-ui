@@ -1,5 +1,5 @@
 import { Directionality } from "@angular/cdk/bidi";
-import { Component, computed, DOCUMENT, inject, input, output, signal } from "@angular/core";
+import { Component, computed, DOCUMENT, inject, input, linkedSignal, output, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
@@ -9,7 +9,12 @@ import { DropdownGroupableDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
-import { ComponentConfig } from "../../utils/componentConfig";
+import {
+    buildActiveFeatureAttributes,
+    buildActiveFeatureContent,
+    generateComponentCodeSample
+} from "../../utils/codeSample";
+import { ComponentConfig, createComponentInputConfigArray, extractConfigValues } from "../../utils/componentConfig";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ConfigComponent } from "../config/config.component";
 
@@ -68,6 +73,7 @@ import { ConfigComponent } from "../config/config.component";
 export class DemoContainerComponent<TComponent> {
     readonly #directionality = inject(Directionality);
     readonly #document = inject(DOCUMENT);
+    readonly #metadataInputNames = computed(() => new Set((this.metadata().inputs ?? []).map(i => i.name)));
     readonly #themeService = inject(ThemeService);
     protected readonly background = computed(() => {
         const customColor = this.customColor();
@@ -79,6 +85,21 @@ export class DemoContainerComponent<TComponent> {
     protected readonly codeVisible = signal(false);
     protected readonly customColor = signal<string | null>(null);
     protected readonly direction = signal<"ltr" | "rtl">("ltr");
+    protected readonly generatedCode = computed(() => {
+        const features = this.config().featureHandler?.data();
+        const metadataInputNames = this.#metadataInputNames();
+        return generateComponentCodeSample(
+            this.metadata().selector ?? "",
+            createComponentInputConfigArray(this.config().inputs),
+            this.liveValues(),
+            features ? buildActiveFeatureAttributes(features, metadataInputNames) : [],
+            features ? buildActiveFeatureContent(features, metadataInputNames) : []
+        );
+    });
+    protected readonly liveValues = linkedSignal({
+        source: signal({}),
+        computation: () => extractConfigValues(this.config())
+    });
     protected readonly selectedTheme = computed(() => {
         return this.themeDropdownData.find(
             theme =>
@@ -105,5 +126,10 @@ export class DemoContainerComponent<TComponent> {
             return;
         }
         this.#themeService.setTheme(item);
+    }
+
+    protected onValueChange(value: Record<string, unknown>): void {
+        this.liveValues.update(currentValues => ({ ...currentValues, ...value }));
+        this.valueChange.emit(value);
     }
 }

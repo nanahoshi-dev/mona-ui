@@ -11,7 +11,13 @@ import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
 import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui/tabs";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
-import { ComponentConfig, ComponentInputs, createComponentPropertyConfig } from "../../utils/componentConfig";
+import { generateDirectiveBindingCodeSample, generateFeatureCodeSample } from "../../utils/codeSample";
+import {
+    ComponentConfig,
+    ComponentConfigFeatureItem,
+    ComponentInputs,
+    createComponentPropertyConfig
+} from "../../utils/componentConfig";
 import { ApiInputListItemComponent } from "../api-input-list-item/api-input-list-item.component";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 
@@ -57,6 +63,7 @@ export class ConfigComponent<C> {
         }
         return createComponentPropertyConfig(updatedConfig);
     });
+    readonly #metadataInputNames = computed(() => new Set((this.metadata().inputs ?? []).map(i => i.name)));
     public readonly config = input.required<ComponentConfig<C>>();
     public readonly inputProperties = computed(() => {
         return this.#componentPropertyConfig().inputs;
@@ -90,6 +97,22 @@ export class ConfigComponent<C> {
 
     public onValueChange(key: string, value: unknown): void {
         this.outputObject.update(o => ({ ...o, [key]: value }));
+    }
+
+    protected resolveFeatureCode(key: string, item: ComponentConfigFeatureItem[string]): string {
+        if (item.directiveBinding) {
+            const allFeatures = this.templateHandler()?.data();
+            if (allFeatures) {
+                return generateDirectiveBindingCodeSample(this.metadata().selector ?? "", item.directiveBinding, allFeatures);
+            }
+        }
+        if (item.code) {
+            return item.code;
+        }
+        if (!this.#metadataInputNames().has(key)) {
+            return "";
+        }
+        return generateFeatureCodeSample(this.metadata().selector ?? "", key, item);
     }
 
     protected readonly Object = Object;

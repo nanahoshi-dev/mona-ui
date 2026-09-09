@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, model } from "@angular/core";
 import {
     LucideCheck,
     LucideCreditCard,
@@ -16,9 +16,68 @@ import {
 } from "@nanahoshi/mona-ui/stepper";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+const INDICATOR_TEMPLATE_CODE = `<ng-template
+    monaStepperIndicatorTemplate
+    let-dataItem
+    let-active="active"
+    let-index="index"
+    let-currentIndex="currentIndex">
+    @if (index < currentIndex || currentIndex === 5) {
+        <svg lucideCheck class="text-lime-300 font-bold" [size]="16"></svg>
+    } @else {
+        @switch (dataItem.label) {
+            @case ("Cart") {
+                <svg lucideShoppingCart class="font-bold" [size]="16"></svg>
+            }
+            @case ("Address") {
+                <svg lucideMapPinHouse class="font-bold" [size]="16"></svg>
+            }
+            @case ("Shipping") {
+                <svg lucideTruck class="font-bold" [size]="16"></svg>
+            }
+            @case ("Payment") {
+                <svg lucideCreditCard class="font-bold" [size]="16"></svg>
+            }
+            @case ("Review") {
+                <svg lucideFileSearchCorner class="font-bold" [size]="16"></svg>
+            }
+            @case ("Complete") {
+                <svg lucideCheck class="font-bold" [size]="16"></svg>
+            }
+        }
+    }
+</ng-template>`;
+
+const LABEL_TEMPLATE_CODE = `<ng-template
+    monaStepperLabelTemplate
+    let-dataItem
+    let-active="active"
+    let-index="index"
+    let-currentIndex="currentIndex">
+    <div class="flex items-center">
+        @if (index < currentIndex || currentIndex === 5) {
+            <span class="text-lime-600 font-bold">{{ dataItem.label }}</span>
+        } @else {
+            {{ dataItem.label }}
+        }
+    </div>
+</ng-template>`;
+
+const STEP_TEMPLATE_CODE = `<ng-template monaStepperStepTemplate let-step let-index="index" let-active="active">
+    @let icon = active ? "✦" : "✧";
+    @let color = active ? ("" | randomColor) : "";
+    @let marginClass = orientation() === "vertical" ? "-ml-0.75" : "-mt-5";
+    <span
+        class="text-[3em] {{ marginClass }} h-16 flex items-center justify-center"
+        [style.color]="color">
+        {{ icon }}
+    </span>
+</ng-template>`;
 
 @Component({
     selector: "app-stepper-demo",
@@ -29,26 +88,25 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
     readonly #injector = createFeatureInjector({
         indicatorTemplate: {
             active: false,
+            code: INDICATOR_TEMPLATE_CODE,
             name: "Indicator Template",
             description: "Use a custom template for the step indicator."
         },
         labelTemplate: {
             active: false,
+            code: LABEL_TEMPLATE_CODE,
             name: "Label Template",
             description: "Use a custom template for the step label."
         },
         stepTemplate: {
             active: false,
+            code: STEP_TEMPLATE_CODE,
             name: "Step Template",
             description: "Use a custom template for the step content."
         }
     });
-    protected readonly config = signal<ComponentConfig<StepperComponent>>({
-        inputs: {
-            linear: {
-                type: "boolean",
-                value: true
-            },
+    protected readonly config = computed<ComponentConfig<StepperComponent>>(() => ({
+        inputs: deriveInputConfig<StepperComponent>(this.metadata(), {
             orientation: {
                 type: "dropdown",
                 value: ["horizontal", "vertical"],
@@ -76,9 +134,9 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
                     { label: "Complete" }
                 ]
             }
-        },
+        }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
-    });
+    }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("StepperComponent");
     protected readonly StepperWrapperComponent = StepperWrapperComponent;
@@ -101,8 +159,10 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
     template: `
         @let featureData = features();
         <mona-stepper
+            [aria-label]="ariaLabel()"
             [linear]="linear()"
             [orientation]="orientation()"
+            [progressAriaLabel]="progressAriaLabel()"
             [rounded]="rounded()"
             [step]="step()"
             (stepChange)="onStepChange($event)"
@@ -178,8 +238,10 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
 })
 export class StepperWrapperComponent implements ComponentInputsAsSignal<StepperComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly ariaLabel = input("Progress");
     public readonly linear = input<ReturnType<StepperComponent["linear"]>>(true);
     public readonly orientation = input<ReturnType<StepperComponent["orientation"]>>("horizontal");
+    public readonly progressAriaLabel = input("Step progress");
     public readonly rounded = input<ReturnType<StepperComponent["rounded"]>>("full");
     public readonly step = model<ReturnType<StepperComponent["step"]>>(1);
     public readonly steps = input<ReturnType<StepperComponent["steps"]>>([]);
