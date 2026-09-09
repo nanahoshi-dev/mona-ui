@@ -86,8 +86,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected readonly messages = this.#i18n.componentMessages("calendar", CALENDAR_DEFAULT_MESSAGES);
     readonly #monthDict = computed(() => {
         const day = this.navigatedDate();
-        const firstDayOfMonth = DateTime.fromJSDate(day).startOf("month");
-        const lastDayOfMonth = DateTime.fromJSDate(day).endOf("month");
+        const firstDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).startOf("month");
+        const lastDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).endOf("month");
         const firstDayOfWeek = this.firstDay() === "monday" ? 1 : 0;
 
         let firstDayOfCalendar: DateTime;
@@ -115,14 +115,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             dictionary.add(i.toJSDate(), i.day);
         }
 
-        if (monthEndWeekday === 7) {
-            for (let i = 0; i < 7; i++) {
-                dictionary.add(
-                    lastDayOfMonth.plus({ days: i + 1 }).toJSDate(),
-                    lastDayOfMonth.plus({ days: i + 1 }).day
-                );
-            }
-        }
         return dictionary.toImmutableDictionary(
             e => e.key,
             e => e.value
@@ -182,7 +174,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     });
     protected readonly decadeStart = computed(() => {
         const navigatedDate = this.navigatedDate();
-        const date = DateTime.fromJSDate(navigatedDate);
+        const date = gregorianDateTime(navigatedDate, this.#i18n.localeId());
         const year = date.year;
         return year - (year % 10);
     });
@@ -202,8 +194,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     );
     protected readonly monthBounds = computed(() => {
         const navigatedDate = this.navigatedDate();
-        const firstDayOfMonth = DateTime.fromJSDate(navigatedDate).startOf("month");
-        const lastDayOfMonth = DateTime.fromJSDate(navigatedDate).endOf("month");
+        const firstDayOfMonth = gregorianDateTime(navigatedDate, this.#i18n.localeId()).startOf("month");
+        const lastDayOfMonth = gregorianDateTime(navigatedDate, this.#i18n.localeId()).endOf("month");
         return { start: firstDayOfMonth.toJSDate(), end: lastDayOfMonth.toJSDate() };
     });
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
@@ -532,7 +524,13 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     protected getWeekNumber(date: Date): number {
-        return DateTime.fromJSDate(date).setLocale(this.#i18n.localeId()).weekNumber;
+        let dt = gregorianDateTime(date, this.#i18n.localeId());
+        if (this.firstDay() === "sunday") {
+            // In Sunday-first calendar, date is Sunday (day 0 of [Sun..Sat] row).
+            // Thursday (day 4 of row) represents the majority of the row and defines its ISO 8601 week number.
+            dt = dt.plus({ days: 4 });
+        }
+        return dt.weekNumber;
     }
 
     protected onTodayButtonClick(): void {

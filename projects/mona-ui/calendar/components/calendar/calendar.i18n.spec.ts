@@ -344,4 +344,128 @@ describe("CalendarComponent i18n", () => {
         await fixture.whenStable();
         expect(getHeading()).toBe("May 2026");
     });
+
+    it("correctly calculates calendar grid boundaries for month ends falling on Sunday or Saturday", async () => {
+        @Component({
+            template: `
+                <mona-calendar
+                    [value]="value()"
+                    [firstDay]="firstDay()">
+                </mona-calendar>
+            `,
+            imports: [CalendarComponent]
+        })
+        class BoundaryHostComponent {
+            public readonly value = signal<Date>(new Date(2026, 4, 15)); // May 2026 (ends Sunday May 31)
+            public readonly firstDay = signal<"sunday" | "monday">("sunday");
+        }
+
+        TestBed.configureTestingModule({
+            imports: [BoundaryHostComponent]
+        });
+        const fixture = TestBed.createComponent(BoundaryHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const getDayCells = () =>
+            Array.from(fixture.nativeElement.querySelectorAll("[monaMonthDay]")) as HTMLElement[];
+
+        // 1. May 2026 with firstDay="sunday": May 31 is Sunday (new row start), completed through Sat June 6 (42 cells)
+        fixture.componentInstance.firstDay.set("sunday");
+        fixture.componentInstance.value.set(new Date(2026, 4, 15));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        let cells = getDayCells();
+        expect(cells.length).toBe(42);
+        expect(cells[0].textContent?.trim()).toBe("26"); // Sun Apr 26
+        expect(cells[35].textContent?.trim()).toBe("31"); // Sun May 31 (start of 6th row)
+        expect(cells[41].textContent?.trim()).toBe("6"); // Sat Jun 6 (end of 6th row)
+
+        // 2. May 2026 with firstDay="monday": May 31 is Sunday (row end), exactly 5 rows (35 cells, no redundant 6th row)
+        fixture.componentInstance.firstDay.set("monday");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        cells = getDayCells();
+        expect(cells.length).toBe(35);
+        expect(cells[0].textContent?.trim()).toBe("27"); // Mon Apr 27
+        expect(cells[34].textContent?.trim()).toBe("31"); // Sun May 31 (end of 5th row)
+
+        // 3. February 2027 (starts Monday Feb 1, ends Sunday Feb 28)
+        // Monday-first: exact 4 rows (28 cells)
+        fixture.componentInstance.value.set(new Date(2027, 1, 15));
+        fixture.componentInstance.firstDay.set("monday");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        cells = getDayCells();
+        expect(cells.length).toBe(28);
+        expect(cells[0].textContent?.trim()).toBe("1"); // Mon Feb 1
+        expect(cells[27].textContent?.trim()).toBe("28"); // Sun Feb 28
+
+        // Sunday-first: Feb 1 is Monday (Sun Jan 31 start), Feb 28 is Sunday (Sat Mar 6 end) -> 5 rows (35 cells)
+        fixture.componentInstance.firstDay.set("sunday");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        cells = getDayCells();
+        expect(cells.length).toBe(35);
+        expect(cells[0].textContent?.trim()).toBe("31"); // Sun Jan 31
+        expect(cells[28].textContent?.trim()).toBe("28"); // Sun Feb 28
+        expect(cells[34].textContent?.trim()).toBe("6"); // Sat Mar 6
+    });
+
+    it("aligns ISO week numbers for Sunday-first rows to represent the majority of the row", async () => {
+        @Component({
+            template: `
+                <mona-calendar
+                    [value]="value()"
+                    [firstDay]="firstDay()"
+                    [weekNumber]="true">
+                </mona-calendar>
+            `,
+            imports: [CalendarComponent]
+        })
+        class WeekNumberHostComponent {
+            public readonly value = signal<Date>(new Date(2026, 0, 15)); // January 2026 (Jan 1 is Thursday)
+            public readonly firstDay = signal<"sunday" | "monday">("sunday");
+        }
+
+        TestBed.configureTestingModule({
+            imports: [WeekNumberHostComponent]
+        });
+        const fixture = TestBed.createComponent(WeekNumberHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const getWeekNumberTexts = () => {
+            const grid = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[1] as HTMLElement;
+            return Array.from(grid.children)
+                .filter(el => !el.hasAttribute("monaMonthDay"))
+                .map(el => el.textContent?.trim());
+        };
+
+        // 1. Sunday-first: Jan 1, 2026 is Thursday.
+        // Row 1 (Sun Dec 28 - Sat Jan 3) contains Thu Jan 1 -> Week 1
+        // Row 2 (Sun Jan 4 - Sat Jan 10) contains Thu Jan 8 -> Week 2
+        fixture.componentInstance.firstDay.set("sunday");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        let weekNumbers = getWeekNumberTexts();
+        expect(weekNumbers[0]).toBe("1");
+        expect(weekNumbers[1]).toBe("2");
+
+        // 2. Monday-first: Jan 1, 2026 is Thursday.
+        // Row 1 (Mon Dec 29 - Sun Jan 4) -> Week 1
+        // Row 2 (Mon Jan 5 - Sun Jan 11) -> Week 2
+        fixture.componentInstance.firstDay.set("monday");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        weekNumbers = getWeekNumberTexts();
+        expect(weekNumbers[0]).toBe("1");
+        expect(weekNumbers[1]).toBe("2");
+    });
 });
