@@ -41,8 +41,7 @@
                     [ngTemplateOutlet]="summaryTagTemplate()"
                     [ngTemplateOutletContext]="{ $implicit: selectedDataItems(), tagCount: tagCount() }"></ng-container>
             } @else {
-                @let itemLabel = remainingCount === 1 ? "item" : "items";
-                + {{ remainingCount }} {{ itemLabel }}
+                {{ messages().itemsCount(remainingCount) }}
             }
         </mona-chip>
     }
@@ -53,7 +52,7 @@
         preset="clear"
         [class]="indicatorClass()"
         [interactive]="true"
-        label="Clear"
+        [label]="messages().clear"
         (activate)="onValueClear($event)"></mona-indicator-icon>
 }
 

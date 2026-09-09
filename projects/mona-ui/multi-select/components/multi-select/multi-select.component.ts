@@ -41,6 +41,7 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId, restoreOverlayScroll, rxFromResize } from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
@@ -58,6 +59,7 @@ import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
+import { MULTI_SELECT_DEFAULT_MESSAGES } from "../../i18n/multi-select.default-messages";
 import { MultiSelectService } from "../../services/multi-select.service";
 import {
     multiSelectAffixContainerThemeVariants,
@@ -131,6 +133,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #listService = inject(ListService<TData>);
     readonly #multiSelectService = inject(MultiSelectService);
     readonly #popupRef = this.#dropdownService.popupRef;
@@ -178,6 +181,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
+    protected readonly messages = this.#i18n.componentMessages("multiSelect", MULTI_SELECT_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });

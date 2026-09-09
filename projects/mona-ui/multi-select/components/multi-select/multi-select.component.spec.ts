@@ -8,6 +8,7 @@ import {
     required
 } from "@angular/forms/signals";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { MultiSelectVariantProps } from "../../styles/multi-select.styles";
 import { MultiSelectSummaryTagDirective } from "../../directives/multi-select-summary-tag.directive";
@@ -37,15 +38,15 @@ class ObjectModeHostComponent {
     readonly #formModel = signal<MultiSelectFormModel>({ value: [FOOD_ITEMS[1]] });
     protected readonly data = FOOD_ITEMS;
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
-    public readonly size = signal<MultiSelectVariantProps["size"]>("medium");
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
+    public readonly size = signal<MultiSelectVariantProps["size"]>("medium");
 }
 
 @Component({
@@ -67,15 +68,15 @@ class PrimitiveModeHostComponent {
     readonly #formModel = signal<PrimitiveMultiSelectFormModel>({ value: [2] });
     public readonly data = signal<readonly FoodItem[]>(FOOD_ITEMS);
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
-    public readonly size = signal<MultiSelectVariantProps["size"]>("medium");
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
+    public readonly size = signal<MultiSelectVariantProps["size"]>("medium");
 }
 
 @Component({
@@ -424,6 +425,56 @@ describe("MultiSelectComponent", () => {
         expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getHost(fixture).getAttribute("aria-required")).toBe("true");
         expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
+    });
+
+    describe("i18n", () => {
+        it("renders default English clear label on indicator icon", async () => {
+            const fixture = await createObjectModeFixture();
+            const clearBtn = getClearButton(fixture);
+            expect(clearBtn.getAttribute("aria-label")).toBe("Clear");
+        });
+
+        it("updates clear label dynamically when locale changes", async () => {
+            const fixture = await createObjectModeFixture();
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    multiSelect: {
+                        clear: "Temizle",
+                        itemsCount: (count: number) => `+ ${count} öğe`
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            const clearBtn = getClearButton(fixture);
+            expect(clearBtn.getAttribute("aria-label")).toBe("Temizle");
+        });
+
+        it("renders default English summary tag items count", async () => {
+            const fixture = await createObjectFixture(SummaryTagHostComponent);
+            expect(getHost(fixture).textContent).toContain("+ 2 items");
+        });
+
+        it("updates summary tag items count dynamically when locale changes", async () => {
+            const fixture = await createObjectFixture(SummaryTagHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    multiSelect: {
+                        clear: "Temizle",
+                        itemsCount: (count: number) => `+ ${count} öğe`
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            expect(getHost(fixture).textContent).toContain("+ 2 öğe");
+        });
     });
 });
 
