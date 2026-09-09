@@ -3,7 +3,7 @@ import type { DeepPartial } from "../models/deep-partial";
 import { MONA_DEFAULT_LOCALE, type MonaLocale } from "../models/mona-locale";
 import type { MonaLocaleMessages } from "../models/mona-locale-messages";
 import { MONA_I18N_CONFIG } from "../tokens/mona-i18n-config.token";
-import { mergeMessages } from "../utilities/merge-messages";
+import { mergeMessages, mergeTwo } from "../utilities/merge-messages";
 
 @Injectable({
     providedIn: "root"
@@ -17,6 +17,10 @@ export class MonaI18nService {
     public readonly locale = this.#locale.asReadonly();
     public readonly localeId = computed(() => this.#locale().id);
 
+    public clearMessages(): void {
+        this.#overrides.set({});
+    }
+
     public componentMessages<K extends keyof MonaLocaleMessages>(
         namespace: K,
         fallback: MonaLocaleMessages[K]
@@ -26,6 +30,10 @@ export class MonaI18nService {
             const overrideMessages = this.#overrides()[namespace];
             return mergeMessages(fallback, localeMessages, overrideMessages);
         });
+    }
+
+    public patchMessages(messages: DeepPartial<MonaLocaleMessages>): void {
+        this.#overrides.update(current => mergeTwo(current, messages));
     }
 
     public setMessages(messages: DeepPartial<MonaLocaleMessages>): void {

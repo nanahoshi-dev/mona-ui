@@ -10,6 +10,7 @@ export * from "./models/mona-locale-messages";
 
 export * from "./message-types/auto-complete.messages";
 export * from "./message-types/breadcrumb.messages";
+export * from "./message-types/calendar.messages";
 export * from "./message-types/card.messages";
 export * from "./message-types/chip.messages";
 export * from "./message-types/color-gradient.messages";
@@ -21,6 +22,8 @@ export * from "./message-types/datetime-picker.messages";
 export * from "./message-types/dialog.messages";
 export * from "./message-types/dropdown-list.messages";
 export * from "./message-types/dropdowns.messages";
+export * from "./message-types/editor.messages";
+export * from "./message-types/filter.messages";
 export * from "./message-types/grid.messages";
 export * from "./message-types/list.messages";
 export * from "./message-types/list-box.messages";

@@ -133,6 +133,81 @@ describe("MonaI18nService", () => {
         // Locale still active for non-overridden keys
         expect(messages().pageLabel(5)).toBe("Sayfa 5");
     });
+
+    it("partially updates messages reactively when patchMessages() is called", () => {
+        TestBed.configureTestingModule({});
+        const service = TestBed.inject(MonaI18nService);
+
+        const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+
+        service.setMessages({
+            pager: {
+                firstPageLabel: "Custom First",
+                lastPageLabel: "Custom Last"
+            }
+        });
+        expect(messages().firstPageLabel).toBe("Custom First");
+        expect(messages().lastPageLabel).toBe("Custom Last");
+
+        // Patch only firstPageLabel
+        service.patchMessages({
+            pager: {
+                firstPageLabel: "Patched First"
+            }
+        });
+        expect(messages().firstPageLabel).toBe("Patched First");
+        // lastPageLabel remains untouched
+        expect(messages().lastPageLabel).toBe("Custom Last");
+        expect(messages().nextPageLabel).toBe("Next page");
+    });
+
+    it("resets overrides back to locale/fallback when clearMessages() is called", () => {
+        TestBed.configureTestingModule({});
+        const service = TestBed.inject(MonaI18nService);
+        service.use(SAMPLE_TR_LOCALE);
+
+        const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+
+        service.setMessages({
+            pager: {
+                firstPageLabel: "Overridden First"
+            }
+        });
+        expect(messages().firstPageLabel).toBe("Overridden First");
+
+        service.clearMessages();
+        // Returns back to SAMPLE_TR_LOCALE
+        expect(messages().firstPageLabel).toBe("İlk sayfa");
+        // Fallback still active for non-locale keys
+        expect(messages().lastPageLabel).toBe("Last page");
+    });
+
+    it("supports en-XA pseudo-localization with expanded Unicode characters and delimiters", () => {
+        const PSEUDO_EN_XA_LOCALE: MonaLocale = {
+            direction: "ltr",
+            id: "en-XA",
+            messages: {
+                pager: {
+                    firstPageLabel: "[!!! Ƒįřśţ ρåĝë !!!]",
+                    nextPageLabel: "[!!! Ñëxţ ρåĝë !!!]",
+                    pageLabel: page => `[!!! Ƥåĝë ${page} !!!]`
+                }
+            }
+        };
+
+        TestBed.configureTestingModule({});
+        const service = TestBed.inject(MonaI18nService);
+        service.use(PSEUDO_EN_XA_LOCALE);
+
+        expect(service.localeId()).toBe("en-XA");
+        const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+
+        expect(messages().firstPageLabel).toBe("[!!! Ƒįřśţ ρåĝë !!!]");
+        expect(messages().nextPageLabel).toBe("[!!! Ñëxţ ρåĝë !!!]");
+        expect(messages().pageLabel(42)).toBe("[!!! Ƥåĝë 42 !!!]");
+        // Unlocalized fallback preserves English
+        expect(messages().lastPageLabel).toBe("Last page");
+    });
 });
 
 describe("mergeMessages utility", () => {

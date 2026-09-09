@@ -1,5 +1,6 @@
 import type { MonaAutoCompleteMessages } from "../message-types/auto-complete.messages";
 import type { MonaBreadcrumbMessages } from "../message-types/breadcrumb.messages";
+import type { MonaCalendarMessages } from "../message-types/calendar.messages";
 import type { MonaCardMessages } from "../message-types/card.messages";
 import type { MonaChipMessages } from "../message-types/chip.messages";
 import type { MonaColorGradientMessages } from "../message-types/color-gradient.messages";
@@ -11,6 +12,8 @@ import type { MonaDateTimePickerMessages } from "../message-types/datetime-picke
 import type { MonaDialogMessages } from "../message-types/dialog.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
+import type { MonaEditorMessages } from "../message-types/editor.messages";
+import type { MonaFilterMessages } from "../message-types/filter.messages";
 import type { MonaGridMessages } from "../message-types/grid.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
 import type { MonaListBoxMessages } from "../message-types/list-box.messages";
@@ -36,6 +39,7 @@ import type { MonaWindowMessages } from "../message-types/window.messages";
 export interface MonaLocaleMessages extends Record<string, object> {
     autoComplete: MonaAutoCompleteMessages;
     breadcrumb: MonaBreadcrumbMessages;
+    calendar: MonaCalendarMessages;
     card: MonaCardMessages;
     chip: MonaChipMessages;
     colorGradient: MonaColorGradientMessages;
@@ -47,6 +51,8 @@ export interface MonaLocaleMessages extends Record<string, object> {
     dialog: MonaDialogMessages;
     dropdownList: MonaDropdownListMessages;
     dropdowns: MonaDropdownsMessages;
+    editor: MonaEditorMessages;
+    filter: MonaFilterMessages;
     grid: MonaGridMessages;
     list: MonaListMessages;
     listBox: MonaListBoxMessages;

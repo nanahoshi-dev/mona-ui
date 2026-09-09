@@ -4,7 +4,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function mergeTwo<T extends object>(base: T, source?: DeepPartial<T>): T {
+export function mergeTwo<T extends object>(base: T, source?: DeepPartial<T>): T {
     if (!source) {
         return base;
     }
