@@ -201,7 +201,7 @@
                                     </span>
                                 }
                             </div>
-                            <div class="text-[11px] text-muted-foreground pl-3.5 flex items-center gap-1 flex-wrap">
+                            <div class="text-[11px] text-muted-foreground ps-3.5 flex items-center gap-1 flex-wrap">
                                 <span
                                     >O:
                                     <span class="font-medium text-foreground">{{
@@ -348,10 +348,8 @@
                     <span class="font-medium text-foreground">{{ context.point.formattedStackPercentage }}</span>
                 }
                 @if (context.point.formattedSize) {
-                    <span class="ml-1.5"
-                        >(size: <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span
-                        >)</span
-                    >
+                    <span class="ms-1.5"
+                        >(size: <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span>)</span>
                 }
             </div>
         }
