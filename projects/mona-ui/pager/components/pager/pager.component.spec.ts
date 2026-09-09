@@ -855,5 +855,113 @@ describe("PagerComponent i18n and localization", () => {
         expect(host.className).not.toContain("px-2");
         expect(host.className).not.toContain("py-1");
     });
+
+    describe("RTL and direction-aware keyboard navigation", () => {
+        function dispatchKey(element: Element, key: string): void {
+            element.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key }));
+            fixture.detectChanges();
+        }
+
+        function getActivePageNumber(): number {
+            const button = fixture.nativeElement.querySelector("button[aria-current='page']");
+            return Number(button?.textContent?.trim());
+        }
+
+        it("renders rtl:rotate-180 class on navigation chevron icons", () => {
+            setup(100, 10, 20);
+            const svgs = Array.from(fixture.nativeElement.querySelectorAll("button svg")) as SVGElement[];
+            const rotatedSvgs = svgs.filter(s => s.classList.contains("rtl:rotate-180"));
+
+            expect(rotatedSvgs.length).toBe(4);
+        });
+
+        it("navigates with ArrowLeft=prev and ArrowRight=next in LTR DOM", () => {
+            setup(100, 10, 20); // starts at page 3
+            expect(getActivePageNumber()).toBe(3);
+
+            const host = fixture.nativeElement as HTMLElement;
+            host.focus();
+
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(2);
+
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+        });
+
+        it("navigates with ArrowLeft=next and ArrowRight=prev in RTL DOM", async () => {
+            setup(100, 10, 20); // starts at page 3
+            expect(getActivePageNumber()).toBe(3);
+
+            const host = fixture.nativeElement as HTMLElement;
+            host.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            host.focus();
+
+            // In RTL: ArrowLeft moves visually forward -> page + 1
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(4);
+
+            // In RTL: ArrowRight moves visually backward -> page - 1
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+        });
+
+        it("respects DOM direction over locale direction across mismatch combinations", async () => {
+            const host = fixture.nativeElement as HTMLElement;
+
+            // 1. RTL locale + LTR DOM -> ArrowLeft = prev, ArrowRight = next
+            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            host.setAttribute("dir", "ltr");
+            setup(100, 10, 20); // page 3
+            await fixture.whenStable();
+            host.focus();
+
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(2);
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+
+            // 2. LTR locale + RTL DOM -> ArrowLeft = next, ArrowRight = prev
+            i18nService.use({ id: "en-US", direction: "ltr", messages: {} });
+            host.setAttribute("dir", "rtl");
+            setup(100, 10, 20); // page 3
+            await fixture.whenStable();
+            host.focus();
+
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(4);
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+
+            // 3. RTL locale + RTL DOM -> ArrowLeft = next, ArrowRight = prev
+            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            host.setAttribute("dir", "rtl");
+            setup(100, 10, 20); // page 3
+            await fixture.whenStable();
+            host.focus();
+
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(4);
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+        });
+
+        it("retains semantic PageUp=prev and PageDown=next regardless of direction", async () => {
+            setup(100, 10, 20); // page 3
+            const host = fixture.nativeElement as HTMLElement;
+            host.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            host.focus();
+
+            dispatchKey(host, "PageUp");
+            expect(getActivePageNumber()).toBe(2);
+
+            dispatchKey(host, "PageDown");
+            expect(getActivePageNumber()).toBe(3);
+        });
+    });
 });
 

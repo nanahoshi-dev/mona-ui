@@ -32,7 +32,7 @@ import { SlicePipe } from "@nanahoshi/mona-ui/common";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownVirtualScrollDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { NavigationKeys } from "@nanahoshi/mona-ui/internal";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { twMerge } from "tailwind-merge";
 import { PAGER_DEFAULT_MESSAGES } from "../../i18n/pager.default-messages";
@@ -85,6 +85,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
     }
 })
 export class PagerComponent implements PagerVariantInputs {
+    readonly #direction = injectComponentDirection();
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
@@ -395,12 +396,22 @@ export class PagerComponent implements PagerVariantInputs {
                 event.preventDefault();
                 this.activateInnerNavigation();
                 break;
-            case NavigationKeys.ArrowLeft:
+            case NavigationKeys.ArrowLeft: {
+                event.preventDefault();
+                const delta = this.#direction() === "rtl" ? 1 : -1;
+                this.setKeyboardPage(this.page() + delta);
+                break;
+            }
+            case NavigationKeys.ArrowRight: {
+                event.preventDefault();
+                const delta = this.#direction() === "rtl" ? -1 : 1;
+                this.setKeyboardPage(this.page() + delta);
+                break;
+            }
             case NavigationKeys.PageUp:
                 event.preventDefault();
                 this.setKeyboardPage(this.page() - 1);
                 break;
-            case NavigationKeys.ArrowRight:
             case NavigationKeys.PageDown:
                 event.preventDefault();
                 this.setKeyboardPage(this.page() + 1);
