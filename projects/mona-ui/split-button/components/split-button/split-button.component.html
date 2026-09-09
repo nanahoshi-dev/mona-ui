@@ -5,7 +5,7 @@
     [look]="look()"
     [size]="size()"
     [rounded]="rounded()"
-    class="rounded-tr-none rounded-br-none"
+    class="rounded-e-none"
     [attr.aria-label]="splitButtonAriaLabel() || null"
     [attr.aria-labelledby]="ariaLabelledby() || null"
     [tabindex]="disabled() ? -1 : 0"
@@ -23,11 +23,11 @@
     [look]="look()"
     [size]="size()"
     [rounded]="rounded()"
-    class="rounded-tl-none rounded-bl-none border-l-0"
+    class="rounded-s-none border-s-0"
     [attr.aria-haspopup]="'menu'"
     [attr.aria-expanded]="menuOpen()"
     [attr.aria-controls]="menuId"
-    [attr.aria-label]="menuButtonAriaLabel()"
+    [attr.aria-label]="effectiveMenuButtonAriaLabel()"
     [tabindex]="disabled() ? -1 : 0"
     #menuButton>
     @if (menuButtonTemplate()) {

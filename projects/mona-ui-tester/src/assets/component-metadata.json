@@ -13066,11 +13066,11 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Accessible name for the menu toggle button.\nOverride to provide a localized label for non-English applications.",
+        "description": "Accessible name for the menu toggle button.\nIf not provided, falls back to the localized default message.",
         "kind": "input",
         "name": "menuButtonAriaLabel",
         "type": "string",
-        "defaultValue": "\"Show menu options\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Emitted when a menu item in the popup is clicked.",
