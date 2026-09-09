@@ -175,7 +175,12 @@ export class PagerComponent implements PagerVariantInputs {
     protected readonly pagerInfo = computed(() => {
         const start = (this.page() - 1) * this.pagerPageSize() + 1;
         const end = Math.min(this.page() * this.pagerPageSize(), this.total());
-        return this.messages().rangeLabel(start, end, this.total());
+        const messages = this.messages();
+        const formatter =
+            messages.rangeStatus !== PAGER_DEFAULT_MESSAGES.rangeStatus
+                ? messages.rangeStatus
+                : (messages.rangeLabel ?? messages.rangeStatus);
+        return formatter(start, end, this.total());
     });
     protected readonly pagerInfoTemplate = contentChild(PagerInfoTemplateDirective);
     protected readonly pagerInfoTemplateContext = computed(() => {

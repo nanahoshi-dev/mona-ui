@@ -10,9 +10,11 @@ export interface MonaPagerMessages {
 
     pageLabel(page: number): string;
     pageSizeLabel(pageSize: number): string;
+    pageStatus(page: number, totalPages: number): string;
 
     readonly pageText: string;
     readonly previousPageLabel: string;
 
     rangeLabel(start: number, end: number, total: number): string;
+    rangeStatus(start: number, end: number, total: number): string;
 }

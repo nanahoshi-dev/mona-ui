@@ -341,7 +341,7 @@
                 <span class="font-semibold text-foreground">{{ context.point.seriesName }}</span>
             </div>
             <div class="text-muted-foreground">
-                {{ context.point.formattedX }}:
+                {{ context.point.formattedX }}{{ messages().labelValueSeparator }}
                 <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
                 @if (context.point.formattedStackPercentage) {
                     <span>·</span>

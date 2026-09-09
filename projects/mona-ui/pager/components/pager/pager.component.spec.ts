@@ -715,7 +715,8 @@ describe("PagerComponent i18n and localization", () => {
                 pageSizeLabel: pageSize => `${pageSize} / sayfa`,
                 pageText: "Sayfa",
                 previousPageLabel: "Önceki sayfa",
-                rangeLabel: (start, end, total) => `${start} - ${end} / ${total} öğe`
+                rangeLabel: (start, end, total) => `${start} - ${end} / ${total} öğe`,
+                rangeStatus: (start, end, total) => `${start} - ${end} / ${total} öğe`
             }
         }
     };
@@ -820,6 +821,38 @@ describe("PagerComponent i18n and localization", () => {
 
         expect(spanTexts).toContain("Sayfa");
         expect(spanTexts).toContain("/");
+    });
+
+    it("applies localized pageStatus to page input aria-label", () => {
+        fixture.componentRef.setInput("type", "input");
+        fixture.componentRef.setInput("total", 100);
+        fixture.componentRef.setInput("pageSize", 10);
+        fixture.detectChanges();
+
+        const inputEl = fixture.nativeElement.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+        expect(inputEl.getAttribute("aria-label")).toBe("Page 1 of 10");
+
+        i18nService.patchMessages({
+            pager: {
+                pageStatus: (page, total) => `Sayfa ${page} / ${total}`
+            }
+        });
+        fixture.detectChanges();
+
+        expect(inputEl.getAttribute("aria-label")).toBe("Sayfa 1 / 10");
+    });
+
+    it("uses rangeStatus message when calculating pagerInfo", () => {
+        setup(100, 10, 20);
+
+        i18nService.patchMessages({
+            pager: {
+                rangeStatus: (start, end, total) => `${start} ila ${end} arası (${total} kayıt)`
+            }
+        });
+        fixture.detectChanges();
+
+        expect(getInfoText()).toContain("21 ila 30 arası (100 kayıt)");
     });
 
     it("respects application-level message overrides over locale and fallback", () => {

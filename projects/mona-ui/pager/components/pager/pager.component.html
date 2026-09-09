@@ -115,6 +115,7 @@
                         [maxValue]="pageCount()"
                         [rounded]="rounded()"
                         [size]="size()"
+                        [aria-label]="messages().pageStatus(page(), pageCount())"
                         [ngModel]="inputValue()"
                         (ngModelChange)="inputValue.set($event)"
                         (inputBlur)="onPageInputBlur()"></mona-numeric-text-box>
@@ -175,6 +176,7 @@
                         [maxValue]="pageCount()"
                         [rounded]="rounded()"
                         [size]="size()"
+                        [aria-label]="messages().pageStatus(page(), pageCount())"
                         [ngModel]="inputValue()"
                         (ngModelChange)="inputValue.set($event)"
                         (inputBlur)="onPageInputBlur()"></mona-numeric-text-box>

@@ -7,6 +7,7 @@ import type { ChartRegistrationContext } from "../../internal/context/chart-regi
 import type { ChartScene } from "../../internal/scene/chart-scene";
 import type { ChartPoint } from "../../models/chart.models";
 import type { ChartTooltipPointContext, ChartTooltipTemplateContext } from "../../models/chart-tooltip.models";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ChartTooltipComponent } from "./chart-tooltip.component";
 
 function createMockPointContext(x: string, y: string, yVal: number = 50): ChartTooltipPointContext {
@@ -247,5 +248,22 @@ describe("MonaChartTooltipComponent", () => {
         expect(tooltipEl.nativeElement.textContent).toContain("Subtotal");
         expect(tooltipEl.nativeElement.textContent).toContain("Value: 120");
         expect(tooltipEl.nativeElement.textContent).not.toContain("Running Total");
+    });
+
+    it("should render fallback tooltip with localized labelValueSeparator", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.patchMessages({
+            chart: {
+                labelValueSeparator: " —"
+            }
+        });
+        tooltipPositionSignal.set({ x: 400, y: 200 });
+        tooltipContextSignal.set(createMockTemplateContext(createMockPointContext("Jan", "50", 50)));
+        fixture.detectChanges();
+
+        const tooltipEl = fixture.debugElement.query(By.css("mona-chart-tooltip > div"));
+        expect(tooltipEl).not.toBeNull();
+        expect(tooltipEl.nativeElement.textContent).toContain("Jan —");
+        expect(tooltipEl.nativeElement.textContent).toContain("50");
     });
 });
