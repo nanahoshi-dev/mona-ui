@@ -26,6 +26,8 @@ import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { DateTime, DurationObjectUnits } from "luxon";
 import { fromEvent, skip } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { CALENDAR_DEFAULT_MESSAGES } from "../../i18n/calendar.default-messages";
 import { CalendarDecadeCellTemplateDirective } from "../../directives/calendar-decade-cell-template.directive";
 import { CalendarMonthCellTemplateDirective } from "../../directives/calendar-month-cell-template.directive";
 import { CalendarYearCellTemplateDirective } from "../../directives/calendar-year-cell-template.directive";
@@ -74,6 +76,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     readonly #calendarService = inject(CalendarService, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly messages = this.#i18n.componentMessages("calendar", CALENDAR_DEFAULT_MESSAGES);
     readonly #monthDict = computed(() => {
         const day = this.navigatedDate();
         const firstDayOfMonth = DateTime.fromJSDate(day).startOf("month");
@@ -139,14 +143,16 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected readonly ariaLabel = computed(() => {
         const view = this.calendarView();
         const navigatedDate = this.navigatedDate();
-        const date = DateTime.fromJSDate(navigatedDate);
+        const locale = this.#i18n.localeId();
+        const date = DateTime.fromJSDate(navigatedDate).setLocale(locale);
+        const messages = this.messages();
         switch (view) {
             case "month":
-                return `Calendar, ${date.toFormat("MMMM yyyy")}`;
+                return messages.calendarLabel(date.toFormat("MMMM yyyy"));
             case "year":
-                return `Year view, ${date.toFormat("yyyy")}`;
+                return messages.yearViewLabel(date.toFormat("yyyy"));
             case "decade":
-                return `Decade view, ${this.decadeStart()} - ${this.decadeEnd()}`;
+                return messages.decadeViewLabel(this.decadeStart(), this.decadeEnd());
         }
     });
     protected readonly baseClass = computed(() => {
@@ -210,8 +216,19 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected readonly monthGridHeaderClass = computed(() => {
         return calendarMonthViewGridHeaderThemeVariants();
     });
+    protected readonly headerMonthYear = computed(() => {
+        const locale = this.#i18n.localeId();
+        return DateTime.fromJSDate(this.navigatedDate()).setLocale(locale).toFormat("MMMM yyyy");
+    });
+    protected readonly headerYear = computed(() => {
+        const locale = this.#i18n.localeId();
+        return DateTime.fromJSDate(this.navigatedDate()).setLocale(locale).toFormat("yyyy");
+    });
     protected readonly months = computed(() => {
-        const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const locale = this.#i18n.localeId();
+        const names = range(1, 12)
+            .select(m => DateTime.fromObject({ year: 2024, month: m, day: 1 }).setLocale(locale).toFormat("LLL"))
+            .toArray();
         return index(names)
             .chunk(3)
             .select(e => e.select(m => [m[0] + 1, m[1]] as const).toImmutableSet())
@@ -220,24 +237,26 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected readonly navigatedDate = signal(new Date());
     protected readonly nextButtonLabel = computed(() => {
         const view = this.calendarView();
+        const messages = this.messages();
         switch (view) {
             case "month":
-                return "Next month";
+                return messages.nextMonth;
             case "year":
-                return "Next year";
+                return messages.nextYear;
             case "decade":
-                return "Next decade";
+                return messages.nextDecade;
         }
     });
     protected readonly prevButtonLabel = computed(() => {
         const view = this.calendarView();
+        const messages = this.messages();
         switch (view) {
             case "month":
-                return "Previous month";
+                return messages.previousMonth;
             case "year":
-                return "Previous year";
+                return messages.previousYear;
             case "decade":
-                return "Previous decade";
+                return messages.previousDecade;
         }
     });
     protected readonly pendingRangeStart = signal<Date | null>(null);
@@ -272,32 +291,37 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     });
     protected readonly timezone = DateTime.local().zoneName ?? undefined;
     protected readonly todayButtonLabel = computed(() => {
-        const today = DateTime.now();
-        return `Go to today, ${today.toFormat("MMMM d, yyyy")}`;
+        const locale = this.#i18n.localeId();
+        const today = DateTime.now().setLocale(locale);
+        return this.messages().goToToday(today.toFormat("MMMM d, yyyy"));
     });
     protected readonly viewSwitchButtonLabel = computed(() => {
         const view = this.calendarView();
-        const date = DateTime.fromJSDate(this.navigatedDate());
+        const locale = this.#i18n.localeId();
+        const date = DateTime.fromJSDate(this.navigatedDate()).setLocale(locale);
+        const messages = this.messages();
         switch (view) {
             case "month":
-                return `Switch to year view, currently ${date.toFormat("MMMM yyyy")}`;
+                return messages.switchToYearView(date.toFormat("MMMM yyyy"));
             case "year":
-                return `Switch to decade view, currently ${date.toFormat("yyyy")}`;
+                return messages.switchToDecadeView(date.toFormat("yyyy"));
             case "decade":
-                return `${this.decadeStart()} to ${this.decadeEnd()}`;
+                return messages.decadeRange(this.decadeStart(), this.decadeEnd());
         }
     });
     protected readonly weekdays = computed(() => {
         const firstDayOfWeek = this.firstDay();
-        const days = [
-            { short: "Sun", full: "Sunday" },
-            { short: "Mon", full: "Monday" },
-            { short: "Tue", full: "Tuesday" },
-            { short: "Wed", full: "Wednesday" },
-            { short: "Thu", full: "Thursday" },
-            { short: "Fri", full: "Friday" },
-            { short: "Sat", full: "Saturday" }
-        ];
+        const locale = this.#i18n.localeId();
+        // 2024-01-07 was a Sunday
+        const days = range(0, 7)
+            .select(i => {
+                const dt = DateTime.fromObject({ year: 2024, month: 1, day: 7 + i }).setLocale(locale);
+                return {
+                    short: dt.toFormat("ccc"),
+                    full: dt.toFormat("cccc")
+                };
+            })
+            .toArray();
         return firstDayOfWeek === "monday" ? [...days.slice(1), days[0]] : days;
     });
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);

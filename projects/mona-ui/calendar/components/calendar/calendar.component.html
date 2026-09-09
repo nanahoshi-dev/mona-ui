@@ -6,7 +6,7 @@
         [size]="'small'"
         (click)="onTodayButtonClick()"
         [attr.aria-label]="todayButtonLabel()">
-        <span>Today</span>
+        <span>{{ messages().today }}</span>
     </button>
     @switch (calendarView()) {
         @case ("month") {
@@ -17,7 +17,7 @@
                 (click)="onViewChangeClick('year')"
                 [attr.aria-label]="viewSwitchButtonLabel()">
                 <span class="text-primary font-semibold" [id]="gridId + '-heading'">{{
-                    navigatedDate() | date: "MMMM yyyy" : timezone
+                    headerMonthYear()
                 }}</span>
             </button>
         }
@@ -29,7 +29,7 @@
                 (click)="onViewChangeClick('decade')"
                 [attr.aria-label]="viewSwitchButtonLabel()">
                 <span class="text-primary font-semibold" [id]="gridId + '-heading'">{{
-                    navigatedDate() | date: "yyyy" : timezone
+                    headerYear()
                 }}</span>
             </button>
         }
