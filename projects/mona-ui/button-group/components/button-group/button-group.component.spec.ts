@@ -29,14 +29,13 @@ import { ButtonGroupComponent } from "./button-group.component";
     imports: [ButtonGroupComponent, ButtonDirective]
 })
 class TestButtonGroupHostComponent {
+    buttonGroup = viewChild.required(ButtonGroupComponent);
     disabled = signal(false);
     look = signal<ButtonGroupVariantProps["look"]>("outline");
     rounded = signal<ButtonGroupVariantProps["rounded"]>("medium");
-    size = signal<ButtonGroupVariantProps["size"]>("medium");
     selection = signal<SelectionMode>("multiple");
+    size = signal<ButtonGroupVariantProps["size"]>("medium");
     userClass = signal("");
-
-    buttonGroup = viewChild.required(ButtonGroupComponent);
 }
 
 @Component({
@@ -50,10 +49,9 @@ class TestButtonGroupHostComponent {
     imports: [ButtonGroupComponent, ButtonDirective]
 })
 class TestButtonGroupSelectionHostComponent {
-    selection = signal<SelectionMode>("single");
-    selectedIndices = signal<number[]>([]);
-
     buttonGroup = viewChild.required(ButtonGroupComponent);
+    selectedIndices = signal<number[]>([]);
+    selection = signal<SelectionMode>("single");
 }
 
 // =============================================================================
