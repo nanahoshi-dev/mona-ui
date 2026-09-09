@@ -6,6 +6,7 @@ import {
     computed,
     contentChildren,
     DestroyRef,
+    effect,
     ElementRef,
     inject,
     input,
@@ -14,6 +15,7 @@ import {
     Signal,
     signal,
     TemplateRef,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -36,7 +38,7 @@ import {
     timer
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, getNumberSymbols, MonaI18nService, parseLocalizedNumber } from "@nanahoshi/mona-ui/i18n";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
 import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../../i18n/numeric-text-box.default-messages";
@@ -235,6 +237,14 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public readonly value = model<number | null>(null);
 
     public constructor() {
+        effect(() => {
+            this.#i18n.localeId();
+            untracked(() => {
+                if (this.focused() && !this.readonly()) {
+                    this.rawInputValue.set(this.formatRawValue(this.value()));
+                }
+            });
+        });
         afterNextRender({
             read: () => {
                 this.setSubscriptions();
@@ -247,7 +257,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                         this.focused.set(isFocused);
                         if (isFocused && !this.readonly()) {
                             const currentValue = this.value();
-                            const rawValue = currentValue?.toString() ?? "";
+                            const rawValue = this.formatRawValue(currentValue);
                             this.rawInputValue.set(rawValue);
                         }
                     });
@@ -288,14 +298,14 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public decrease(): void {
         const value = this.value();
         if (value == null) {
-            this.applyRawValue("0");
+            this.applyRawValue(this.formatRawValue(0));
         } else {
             let result = NumericTextBoxComponent.calculate(value, this.step(), "-");
             const min = this.minValue();
             if (min != null && result < min) {
                 result = min;
             }
-            this.applyRawValue(result.toString());
+            this.applyRawValue(this.formatRawValue(result));
         }
         this.focus();
     }
@@ -310,14 +320,14 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public increase(): void {
         const value = this.value();
         if (value == null) {
-            this.applyRawValue("0");
+            this.applyRawValue(this.formatRawValue(0));
         } else {
             let result = NumericTextBoxComponent.calculate(value, this.step(), "+");
             const max = this.maxValue();
             if (max != null && result > max) {
                 result = max;
             }
-            this.applyRawValue(result.toString());
+            this.applyRawValue(this.formatRawValue(result));
         }
         this.focus();
     }
@@ -349,21 +359,31 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             if (this.nullable()) {
                 this.applyRawValue("");
             } else if (min != null) {
-                this.applyRawValue(min.toString());
+                this.applyRawValue(this.formatRawValue(min));
             } else {
-                this.applyRawValue("0");
+                this.applyRawValue(this.formatRawValue(0));
             }
             return true;
         }
         if (min != null && value < min) {
-            this.applyRawValue(min.toString());
+            this.applyRawValue(this.formatRawValue(min));
             return true;
         }
         if (max != null && value > max) {
-            this.applyRawValue(max.toString());
+            this.applyRawValue(this.formatRawValue(max));
             return true;
         }
         return false;
+    }
+
+    private formatRawValue(value: number | null): string {
+        if (value == null) {
+            return "";
+        }
+        return formatNumber(value, this.#i18n.localeId(), {
+            maximumFractionDigits: 20,
+            useGrouping: false
+        });
     }
 
     private formatValueForDisplay(value: number | null): string {
@@ -376,9 +396,15 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         }
         const decimals = this.decimals();
         if (decimals > 0) {
-            return value.toFixed(decimals);
+            return formatNumber(value, this.#i18n.localeId(), {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+                useGrouping: false
+            });
         }
-        return value.toString();
+        return formatNumber(value, this.#i18n.localeId(), {
+            useGrouping: false
+        });
     }
 
     private parseValue(value: string | null | undefined): number | null {
@@ -388,12 +414,12 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             return null;
         }
 
-        const sanitizedValue = normalizedValue.replace(/,/g, "");
-        if (!NumericTextBoxComponent.isNumeric(sanitizedValue)) {
+        const parsed = parseLocalizedNumber(normalizedValue, this.#i18n.localeId());
+        if (parsed === null) {
             return this.value();
         }
 
-        return parseFloat(sanitizedValue);
+        return parsed;
     }
 
     private setBeforeInputSubscription(): void {
@@ -416,25 +442,32 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                 return;
             }
 
-            if ((proposedValue.match(/\./g) || []).length > 1) {
+            const symbols = getNumberSymbols(this.#i18n.localeId());
+            const decimalSep = symbols.decimal;
+
+            const sepChars = decimalSep === "." ? ["\\."] : ["\\.", decimalSep];
+            const sepRegex = new RegExp(`[${sepChars.join("")}]`, "g");
+            const sepCount = (proposedValue.match(sepRegex) || []).length;
+            if (sepCount > 1) {
                 event.preventDefault();
                 return;
             }
 
-            if (this.decimals() === 0 && proposedValue.includes(".")) {
+            if (this.decimals() === 0 && sepCount > 0) {
                 event.preventDefault();
                 return;
             }
 
-            if (proposedValue.includes(".")) {
-                const decimalPart = proposedValue.split(".")[1];
+            if (sepCount === 1) {
+                const sepChar = proposedValue.includes(decimalSep) ? decimalSep : ".";
+                const decimalPart = proposedValue.split(sepChar)[1];
                 if (decimalPart && decimalPart.length > this.decimals()) {
                     event.preventDefault();
                     return;
                 }
             }
 
-            const numericRegex = new RegExp(`^-?\\d*\\.?\\d{0,${this.decimals()}}$`);
+            const numericRegex = new RegExp(`^-?\\d*[${sepChars.join("")}]?\\d{0,${this.decimals()}}$`);
             if (!numericRegex.test(proposedValue)) {
                 event.preventDefault();
             }
