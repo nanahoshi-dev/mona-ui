@@ -11,6 +11,7 @@ export * from "./models/mona-locale-messages";
 export * from "./message-types/card.messages";
 export * from "./message-types/chip.messages";
 export * from "./message-types/pager.messages";
+export * from "./message-types/spinner.messages";
 
 export * from "./tokens/mona-i18n-config.token";
 export * from "./services/mona-i18n.service";

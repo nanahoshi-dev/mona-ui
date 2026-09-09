@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SpinnerComponent } from "./spinner.component";
 
 describe("SpinnerComponent", () => {
@@ -110,4 +111,24 @@ describe("SpinnerComponent", () => {
         );
         expect(allIds.length).toBe(0);
     });
+
+    it("dynamically updates the default loading aria-label when locale changes", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        expect(host.getAttribute("aria-label")).toBe("Loading");
+
+        i18n.use({
+            id: "tr-TR",
+            direction: "ltr",
+            messages: {
+                spinner: {
+                    cancel: "İptal",
+                    loading: "Yükleniyor"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        expect(host.getAttribute("aria-label")).toBe("Yükleniyor");
+    });
 });
+
