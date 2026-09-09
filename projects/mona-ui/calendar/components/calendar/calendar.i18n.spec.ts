@@ -241,4 +241,107 @@ describe("CalendarComponent i18n", () => {
         fixture.detectChanges();
         expect(getFocusedDay()).toBe("15");
     });
+
+    it("enforces Gregorian output calendar across fa-IR, th-TH, and explicit u-ca-* extensions", async () => {
+        @Component({
+            template: `<mona-calendar [(value)]="value"></mona-calendar>`,
+            imports: [CalendarComponent]
+        })
+        class TestHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 4, 31));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [TestHostComponent]
+        });
+        const fixture = TestBed.createComponent(TestHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+        const getHeading = () => calendarEl.querySelector("[id$='-heading']")?.textContent?.trim();
+
+        // 1. en-US default: May 2026
+        expect(getHeading()).toBe("May 2026");
+
+        // 2. fa-IR default: must describe Gregorian May 2026, never Persian month Khordad 1405
+        i18n.use({ id: "fa-IR", direction: "rtl", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const faHeading = getHeading();
+        expect(faHeading).not.toContain("خرداد");
+        expect(faHeading).not.toContain("۱۴۰۵");
+        expect(faHeading).toContain("۲۰۲۶");
+
+        // 3. th-TH: must describe Gregorian 2026, not Buddhist 2569
+        i18n.use({ id: "th-TH", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const thHeading = getHeading();
+        expect(thHeading).not.toContain("2569");
+        expect(thHeading).toContain("2026");
+
+        // 4. en-US-u-ca-persian: extension must be overridden to Gregorian
+        i18n.use({ id: "en-US-u-ca-persian", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBe("May 2026");
+
+        // 5. en-US-u-ca-buddhist: extension must be overridden to Gregorian
+        i18n.use({ id: "en-US-u-ca-buddhist", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBe("May 2026");
+
+        // 6. Selected model Date remains unchanged
+        expect(fixture.componentInstance.value()?.getFullYear()).toBe(2026);
+        expect(fixture.componentInstance.value()?.getMonth()).toBe(4);
+        expect(fixture.componentInstance.value()?.getDate()).toBe(31);
+    });
+
+    it("uses locale-native token ordering for built-in calendar labels (ja-JP, zh-CN, de-DE, en-US)", async () => {
+        @Component({
+            template: `<mona-calendar [(value)]="value"></mona-calendar>`,
+            imports: [CalendarComponent]
+        })
+        class TestHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 4, 31));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [TestHostComponent]
+        });
+        const fixture = TestBed.createComponent(TestHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+        const getHeading = () => calendarEl.querySelector("[id$='-heading']")?.textContent?.trim();
+
+        // ja-JP: Year before Month (2026年5月)
+        i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBe("2026年5月");
+
+        // zh-CN: Year before Month (2026年5月)
+        i18n.use({ id: "zh-CN", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBe("2026年5月");
+
+        // de-DE: Mai 2026
+        i18n.use({ id: "de-DE", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBe("Mai 2026");
+
+        // en-US: May 2026
+        i18n.use({ id: "en-US", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBe("May 2026");
+    });
 });

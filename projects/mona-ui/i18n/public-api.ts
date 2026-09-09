@@ -55,4 +55,5 @@ export * from "./providers/provide-mona-i18n";
 
 export * from "./utilities/merge-messages";
 export * from "./utilities/locale-formatters";
+export * from "./utilities/gregorian-date";
 export * from "./utilities/pseudo-locale";

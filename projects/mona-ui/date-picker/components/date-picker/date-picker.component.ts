@@ -43,7 +43,7 @@ import {
     DropdownPopupInputToken,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { gregorianDateTime, MonaI18nService, parseGregorianDate } from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -121,7 +121,7 @@ export class DatePickerComponent
         if (!value) {
             return "";
         }
-        return DateTime.fromJSDate(value).setLocale(locale).toFormat(format);
+        return gregorianDateTime(value, locale).toFormat(format);
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
@@ -343,14 +343,14 @@ export class DatePickerComponent
         }
 
         const locale = this.#i18n.localeId();
-        const dateTime = DateTime.fromFormat(this.currentDateString(), this.format(), { locale });
+        const dateTime = parseGregorianDate(this.currentDateString(), this.format(), locale);
         if (this.dateStringEquals(this.value(), dateTime.toJSDate())) {
             this.touch.emit();
             return;
         }
         if (dateTime.isValid) {
             const value = this.value();
-            if (value && DateTime.fromJSDate(value).setLocale(locale).equals(dateTime)) {
+            if (value && gregorianDateTime(value, locale).equals(dateTime)) {
                 this.touch.emit();
                 return;
             }
@@ -394,8 +394,8 @@ export class DatePickerComponent
         if (date1 && date2) {
             const locale = this.#i18n.localeId();
             return (
-                DateTime.fromJSDate(date1).setLocale(locale).toFormat(this.format()) ===
-                DateTime.fromJSDate(date2).setLocale(locale).toFormat(this.format())
+                gregorianDateTime(date1, locale).toFormat(this.format()) ===
+                gregorianDateTime(date2, locale).toFormat(this.format())
             );
         }
         return date1 === date2;
