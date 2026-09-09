@@ -4,7 +4,6 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import {
     SpinnerComponent,
-    type SpinnerRef,
     SpinnerService
 } from "@nanahoshi/mona-ui/spinner";
 import { timer } from "rxjs";
@@ -49,7 +48,7 @@ export class SpinnerDemoComponent extends AbstractDemoComponent<SpinnerComponent
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SpinnerComponent");
-    protected readonly SpinnerWrapperComponent = SpinnerWrapperComponent;
+    protected readonly spinnerWrapperComponent = SpinnerWrapperComponent;
 }
 
 @Component({
@@ -94,7 +93,7 @@ class SpinnerWrapperComponent implements ComponentInputsAsSignal<SpinnerComponen
     protected readonly panelRef = viewChild<ElementRef<HTMLElement>>("panel");
 
     public readonly appearance = input<ReturnType<SpinnerComponent["appearance"]>>("default");
-    public readonly ariaLabel = input("Loading");
+    public readonly ariaLabel = input<ReturnType<SpinnerComponent["ariaLabel"]>>("Loading");
     public readonly decorative = input<ReturnType<SpinnerComponent["decorative"]>>(false);
     public readonly size = input<ReturnType<SpinnerComponent["size"]>>("medium");
     public readonly userClass = input<string, ClassInputType>("", {
