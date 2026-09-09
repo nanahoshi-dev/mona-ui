@@ -1,4 +1,5 @@
 import type { MonaAutoCompleteMessages } from "../message-types/auto-complete.messages";
+import type { MonaBreadcrumbMessages } from "../message-types/breadcrumb.messages";
 import type { MonaCardMessages } from "../message-types/card.messages";
 import type { MonaChipMessages } from "../message-types/chip.messages";
 import type { MonaColorGradientMessages } from "../message-types/color-gradient.messages";
@@ -20,6 +21,7 @@ import type { MonaTextBoxMessages } from "../message-types/text-box.messages";
 
 export interface MonaLocaleMessages extends Record<string, object> {
     autoComplete: MonaAutoCompleteMessages;
+    breadcrumb: MonaBreadcrumbMessages;
     card: MonaCardMessages;
     chip: MonaChipMessages;
     colorGradient: MonaColorGradientMessages;

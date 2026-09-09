@@ -93,7 +93,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     protected readonly messages = this.#i18n.componentMessages("colorPicker", COLOR_PICKER_DEFAULT_MESSAGES);
     protected readonly palettePopupClasses = `flex flex-col p-0.5 ${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none`;
     protected readonly popupId = createElementControlId();
-    protected readonly popupTemplate: Signal<TemplateRef<unknown>> = viewChild.required("popupTemplate");
+    protected readonly popupTemplate: Signal<TemplateRef<void>> = viewChild.required("popupTemplate");
     protected readonly valueTemplate = contentChild(ColorPickerValueTemplateDirective, { read: TemplateRef });
 
     /**

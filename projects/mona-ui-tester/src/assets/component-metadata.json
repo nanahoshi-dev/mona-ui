@@ -2414,7 +2414,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
-        "defaultValue": "\"Breadcrumb\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items.",

@@ -1,14 +1,15 @@
 import { Component, signal } from "@angular/core";
-import { describe, beforeEach, it } from "vitest";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.component";
 
 import { BreadcrumbComponent } from "./breadcrumb.component";
 
 @Component({
     template: `
-        <mona-breadcrumb>
+        <mona-breadcrumb [aria-label]="ariaLabel()">
             @for (item of items(); track $index) {
                 <mona-breadcrumb-item [disabled]="item.disabled" (itemClick)="onItemClick(item)">
                     <span [title]="item.title">{{ item.text }}</span>
@@ -19,6 +20,8 @@ import { BreadcrumbComponent } from "./breadcrumb.component";
     imports: [BreadcrumbComponent, BreadcrumbItemComponent]
 })
 class TestHostComponent {
+    public readonly ariaLabel = signal("");
+    public readonly clickedItems: unknown[] = [];
     public readonly items = signal([
         {
             text: "Home",
@@ -36,7 +39,6 @@ class TestHostComponent {
             disabled: false
         }
     ]);
-    public readonly clickedItems: unknown[] = [];
 
     public onItemClick(item: unknown): void {
         this.clickedItems.push(item);
@@ -54,6 +56,10 @@ describe("BreadcrumbComponent", () => {
         hostFixture = TestBed.createComponent(TestHostComponent);
         hostComponent = hostFixture.componentInstance;
         hostFixture.detectChanges();
+    });
+
+    afterEach(() => {
+        TestBed.inject(MonaI18nService).use(MONA_DEFAULT_LOCALE);
     });
 
     it("should create", () => {
@@ -84,9 +90,16 @@ describe("BreadcrumbComponent", () => {
             expect(host.nativeElement.getAttribute("role")).toBe("navigation");
         });
 
-        it("should have aria-label='Breadcrumb' on the host element", () => {
+        it("should have aria-label='Breadcrumb' on the host element by default", () => {
             const host = hostFixture.debugElement.query(By.directive(BreadcrumbComponent));
             expect(host.nativeElement.getAttribute("aria-label")).toBe("Breadcrumb");
+        });
+
+        it("should allow custom aria-label override", () => {
+            hostComponent.ariaLabel.set("Custom breadcrumb navigation");
+            hostFixture.detectChanges();
+            const host = hostFixture.debugElement.query(By.directive(BreadcrumbComponent));
+            expect(host.nativeElement.getAttribute("aria-label")).toBe("Custom breadcrumb navigation");
         });
 
         it("should set aria-current='page' on the last item only", () => {
@@ -167,6 +180,32 @@ describe("BreadcrumbComponent", () => {
             lastItem.nativeElement.click();
             hostFixture.detectChanges();
             expect(hostComponent.clickedItems.length).toBe(0);
+        });
+    });
+
+    describe("i18n and RTL", () => {
+        it("should update aria-label dynamically when MonaI18nService locale changes", () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "rtl",
+                id: "ar-EG",
+                messages: {
+                    breadcrumb: {
+                        breadcrumb: "مسار التنقل"
+                    }
+                }
+            });
+            hostFixture.detectChanges();
+            const host = hostFixture.debugElement.query(By.directive(BreadcrumbComponent));
+            expect(host.nativeElement.getAttribute("aria-label")).toBe("مسار التنقل");
+        });
+
+        it("should include rtl:rotate-180 class on default separator chevrons", () => {
+            const separatorIcons = hostFixture.debugElement.queryAll(By.css("li[aria-hidden='true'] svg"));
+            expect(separatorIcons.length).toBe(2);
+            for (const icon of separatorIcons) {
+                expect(icon.nativeElement.classList.contains("rtl:rotate-180")).toBe(true);
+            }
         });
     });
 });

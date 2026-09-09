@@ -23,7 +23,7 @@
                         [ngTemplateOutlet]="separatorTemplate()"
                         [ngTemplateOutletContext]="{ $implicit: $index }"></ng-container>
                 } @else {
-                    <svg lucideChevronRight [size]="18"></svg>
+                    <svg lucideChevronRight [size]="18" class="rtl:rotate-180"></svg>
                 }
             </li>
         }
