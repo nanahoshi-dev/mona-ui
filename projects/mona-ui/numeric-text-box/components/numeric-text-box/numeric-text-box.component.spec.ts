@@ -272,7 +272,7 @@ describe("NumericTextBoxComponent", () => {
             expect(buttons[1].nativeElement.getAttribute("aria-label")).toBe("Değeri azalt");
         });
 
-        it("formats zero decimals strictly when decimals option is 0", async () => {
+        it("formats zero decimals strictly when blurred but preserves precision when editing", async () => {
             const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
             hostFixture.componentInstance.decimals.set(0);
             hostFixture.componentInstance.value.set(1.23456);
@@ -283,7 +283,12 @@ describe("NumericTextBoxComponent", () => {
 
             focusInput(input);
             await waitForStable(hostFixture);
+            expect(input.value).toBe("1.23456");
+
+            blurInput(input);
+            await waitForStable(hostFixture);
             expect(input.value).toBe("1");
+            expect(hostFixture.componentInstance.value()).toBe(1.23456);
         });
 
         it("formats explicit decimals when decimals is set to 2", async () => {
@@ -377,6 +382,119 @@ describe("NumericTextBoxComponent", () => {
             });
             input.dispatchEvent(event);
             expect(event.defaultPrevented).toBe(false);
+        });
+
+        it("increments fractional steps accurately when decimals is default 0", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(0);
+            hostFixture.componentInstance.step.set(0.5);
+            hostFixture.componentInstance.value.set(1);
+            await waitForStable(hostFixture);
+
+            const numericComponent = hostFixture.debugElement.query(
+                By.directive(NumericTextBoxComponent)
+            ).componentInstance as NumericTextBoxComponent;
+
+            numericComponent.increase();
+            await waitForStable(hostFixture);
+
+            expect(hostFixture.componentInstance.value()).toBe(1.5);
+        });
+
+        it("clamps to fractional minValue accurately without mutating through decimals=0", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(0);
+            hostFixture.componentInstance.minValue.set(0.5);
+            hostFixture.componentInstance.value.set(-1);
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            blurInput(input);
+            await waitForStable(hostFixture);
+
+            expect(hostFixture.componentInstance.value()).toBe(0.5);
+        });
+
+        it("clamps to fractional maxValue accurately without mutating through decimals=0", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(0);
+            hostFixture.componentInstance.maxValue.set(5.5);
+            hostFixture.componentInstance.value.set(10);
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            blurInput(input);
+            await waitForStable(hostFixture);
+
+            expect(hostFixture.componentInstance.value()).toBe(5.5);
+        });
+
+        it("preserves programmatic precision on focus and blur when decimals=0", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(0);
+            hostFixture.componentInstance.value.set(1.75);
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            expect(input.value).toBe("2");
+
+            focusInput(input);
+            await waitForStable(hostFixture);
+            expect(input.value).toBe("1.75");
+
+            blurInput(input);
+            await waitForStable(hostFixture);
+            expect(input.value).toBe("2");
+            expect(hostFixture.componentInstance.value()).toBe(1.75);
+        });
+
+        it("normalizes negative decimals to 0 without throwing regex SyntaxError", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(-1);
+            hostFixture.componentInstance.value.set(5);
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "3"
+            });
+            expect(() => input.dispatchEvent(event)).not.toThrow();
+        });
+
+        it("supports fractional step across de-DE, ar-SA, and fa-IR locales", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(0);
+            hostFixture.componentInstance.step.set(0.5);
+            const numericComponent = hostFixture.debugElement.query(
+                By.directive(NumericTextBoxComponent)
+            ).componentInstance as NumericTextBoxComponent;
+            const i18nService = TestBed.inject(MonaI18nService);
+
+            // de-DE
+            i18nService.use({ id: "de-DE", direction: "ltr", messages: {} });
+            hostFixture.componentInstance.value.set(1);
+            await waitForStable(hostFixture);
+            numericComponent.increase();
+            await waitForStable(hostFixture);
+            expect(hostFixture.componentInstance.value()).toBe(1.5);
+
+            // ar-SA
+            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            hostFixture.componentInstance.value.set(1);
+            await waitForStable(hostFixture);
+            numericComponent.increase();
+            await waitForStable(hostFixture);
+            expect(hostFixture.componentInstance.value()).toBe(1.5);
+
+            // fa-IR
+            i18nService.use({ id: "fa-IR", direction: "rtl", messages: {} });
+            hostFixture.componentInstance.value.set(1);
+            await waitForStable(hostFixture);
+            numericComponent.increase();
+            await waitForStable(hostFixture);
+            expect(hostFixture.componentInstance.value()).toBe(1.5);
         });
     });
 });

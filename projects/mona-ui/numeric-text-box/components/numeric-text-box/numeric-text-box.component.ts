@@ -133,7 +133,12 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
      * @description Number of decimals to show.
      * @default 0
      */
-    public readonly decimals = input(0);
+    public readonly decimals = input(0, {
+        transform: (value: number) => {
+            const num = Math.trunc(value);
+            return Number.isNaN(num) || num < 0 ? 0 : num;
+        }
+    });
 
     /**
      * @description Sets whether the input is disabled.
@@ -247,7 +252,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             this.#i18n.localeId();
             untracked(() => {
                 if (this.focused() && !this.readonly()) {
-                    this.rawInputValue.set(this.formatRawValue(this.value()));
+                    this.rawInputValue.set(this.formatEditValue(this.value()));
                 }
             });
         });
@@ -263,7 +268,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                         this.focused.set(isFocused);
                         if (isFocused && !this.readonly()) {
                             const currentValue = this.value();
-                            const rawValue = this.formatRawValue(currentValue);
+                            const rawValue = this.formatEditValue(currentValue);
                             this.rawInputValue.set(rawValue);
                         }
                     });
@@ -304,14 +309,23 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public decrease(): void {
         const value = this.value();
         if (value == null) {
-            this.applyRawValue(this.formatRawValue(0));
+            const min = this.minValue();
+            const max = this.maxValue();
+            let initial = 0;
+            if (min != null && initial < min) {
+                initial = min;
+            }
+            if (max != null && initial > max) {
+                initial = max;
+            }
+            this.commitNumericValue(initial);
         } else {
             let result = NumericTextBoxComponent.calculate(value, this.step(), "-");
             const min = this.minValue();
             if (min != null && result < min) {
                 result = min;
             }
-            this.applyRawValue(this.formatRawValue(result));
+            this.commitNumericValue(result);
         }
         this.focus();
     }
@@ -326,14 +340,23 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public increase(): void {
         const value = this.value();
         if (value == null) {
-            this.applyRawValue(this.formatRawValue(0));
+            const min = this.minValue();
+            const max = this.maxValue();
+            let initial = 0;
+            if (min != null && initial < min) {
+                initial = min;
+            }
+            if (max != null && initial > max) {
+                initial = max;
+            }
+            this.commitNumericValue(initial);
         } else {
             let result = NumericTextBoxComponent.calculate(value, this.step(), "+");
             const max = this.maxValue();
             if (max != null && result > max) {
                 result = max;
             }
-            this.applyRawValue(this.formatRawValue(result));
+            this.commitNumericValue(result);
         }
         this.focus();
     }
@@ -356,6 +379,16 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         this.valueChange$.next(text);
     }
 
+    private commitNumericValue(value: number | null): void {
+        this.value.set(value);
+        this.rawInputValue.set(
+            this.focused() && !this.readonly()
+                ? this.formatEditValue(value)
+                : this.formatValueForDisplay(value)
+        );
+        this.touch.emit();
+    }
+
     private correctValue(): boolean {
         const value = this.value();
         const min = this.minValue();
@@ -363,32 +396,35 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
 
         if (value == null) {
             if (this.nullable()) {
-                this.applyRawValue("");
+                if (this.rawInputValue() !== "") {
+                    this.rawInputValue.set("");
+                }
+                return false;
             } else if (min != null) {
-                this.applyRawValue(this.formatRawValue(min));
+                this.commitNumericValue(min);
+                return true;
             } else {
-                this.applyRawValue(this.formatRawValue(0));
+                this.commitNumericValue(0);
+                return true;
             }
-            return true;
         }
         if (min != null && value < min) {
-            this.applyRawValue(this.formatRawValue(min));
+            this.commitNumericValue(min);
             return true;
         }
         if (max != null && value > max) {
-            this.applyRawValue(this.formatRawValue(max));
+            this.commitNumericValue(max);
             return true;
         }
         return false;
     }
 
-    private formatRawValue(value: number | null): string {
+    private formatEditValue(value: number | null): string {
         if (value == null) {
             return "";
         }
-        const decimals = this.decimals();
         return formatNumber(value, this.#i18n.localeId(), {
-            maximumFractionDigits: decimals >= 0 ? decimals : 20,
+            maximumFractionDigits: 20,
             useGrouping: false
         });
     }
@@ -402,14 +438,9 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             return formatter(value);
         }
         const decimals = this.decimals();
-        if (decimals >= 0) {
-            return formatNumber(value, this.#i18n.localeId(), {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals,
-                useGrouping: false
-            });
-        }
         return formatNumber(value, this.#i18n.localeId(), {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
             useGrouping: false
         });
     }
