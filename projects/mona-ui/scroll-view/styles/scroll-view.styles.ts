@@ -49,16 +49,16 @@ export const scrollViewArrowThemeVariants = cva(
     `,
     {
         variants: {
+            end: {
+                true: "end-0",
+                false: ""
+            },
             hidden: {
                 true: "hidden",
                 false: ""
             },
-            left: {
-                true: "left-0",
-                false: ""
-            },
-            right: {
-                true: "right-0",
+            start: {
+                true: "start-0",
                 false: ""
             }
         }
@@ -67,7 +67,7 @@ export const scrollViewArrowThemeVariants = cva(
 
 export const scrollViewPagerThemeVariants = cva(
     `
-        absolute right-0 bottom-0 left-0 flex items-center justify-center
+        absolute inset-x-0 bottom-0 flex items-center justify-center
     `,
     {
         variants: {
@@ -183,7 +183,7 @@ export type ScrollViewVariantProps = ScrollViewBaseVariantProps &
 export type ScrollViewVariantInput = ScrollViewBaseVariantInput &
     ScrollViewContentVariantInput &
     ScrollViewListVariantInput &
-    Omit<ScrollViewArrowVariantInput, "hidden" | "left" | "right"> &
+    Omit<ScrollViewArrowVariantInput, "end" | "hidden" | "start"> &
     ScrollViewPagerVariantInput &
     ScrollViewPagerListContainerVariantInput &
     ScrollViewPagerListVariantInput &

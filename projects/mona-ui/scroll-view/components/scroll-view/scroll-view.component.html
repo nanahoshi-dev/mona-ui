@@ -5,7 +5,7 @@
                 <li
                     role="group"
                     aria-roledescription="slide"
-                    [attr.aria-label]="$index + 1 + ' of ' + itemCount()"
+                    [attr.aria-label]="messages().pageOf($index + 1, itemCount())"
                     [animate.enter]="enterAnimation()"
                     [animate.leave]="leaveAnimation()"
                     [style.animation-duration.ms]="animationDuration()">
@@ -24,7 +24,7 @@
     [class]="leftArrowClass()"
     (click)="onArrowClick('left')"
     [attr.data-navigate-prev]="true"
-    aria-label="Previous page">
+    [attr.aria-label]="messages().previousPage">
     <svg
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
@@ -36,7 +36,7 @@
         stroke-width="2"
         stroke-linecap="round"
         stroke-linejoin="round"
-        class="lucide lucide-chevron-left-icon lucide-chevron-left">
+        class="lucide lucide-chevron-left-icon lucide-chevron-left rtl:rotate-180">
         <path d="m15 18-6-6 6-6" />
     </svg>
 </button>
@@ -45,7 +45,7 @@
     [class]="rightArrowClass()"
     (click)="onArrowClick('right')"
     [attr.data-navigate-next]="true"
-    aria-label="Next page">
+    [attr.aria-label]="messages().nextPage">
     <svg
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +57,7 @@
         stroke-width="2"
         stroke-linecap="round"
         stroke-linejoin="round"
-        class="lucide lucide-chevron-right-icon lucide-chevron-right">
+        class="lucide lucide-chevron-right-icon lucide-chevron-right rtl:rotate-180">
         <path d="m9 18 6-6-6-6" />
     </svg>
 </button>
@@ -68,7 +68,7 @@
             <button
                 type="button"
                 [class]="pagerArrowClass()"
-                aria-label="Scroll pager left"
+                [attr.aria-label]="messages().scrollPagerLeft"
                 (click)="onPagerScroll(pagerListElement, 'left', 'single')"
                 (mousedown)="onPagerScroll(pagerListElement, 'left', 'continuous')">
                 <svg
@@ -82,7 +82,7 @@
                     stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    class="lucide lucide-chevron-left-icon lucide-chevron-left">
+                    class="lucide lucide-chevron-left-icon lucide-chevron-left rtl:rotate-180">
                     <path d="m15 18-6-6 6-6" />
                 </svg>
             </button>
@@ -98,7 +98,7 @@
                             [rounded]="pagerRounded()"
                             [attr.data-active-page]="$index === viewIndex()"
                             [attr.aria-current]="$index === viewIndex() ? true : null"
-                            [attr.aria-label]="'Page ' + ($index + 1)"
+                            [attr.aria-label]="messages().page($index + 1)"
                             (click)="onPageClick($index, pagerItemElement)"
                             #pagerItemElement></button>
                     </li>
@@ -109,7 +109,7 @@
             <button
                 type="button"
                 [class]="pagerArrowClass()"
-                aria-label="Scroll pager right"
+                [attr.aria-label]="messages().scrollPagerRight"
                 (click)="onPagerScroll(pagerListElement, 'right', 'single')"
                 (mousedown)="onPagerScroll(pagerListElement, 'right', 'continuous')">
                 <svg
@@ -123,7 +123,7 @@
                     stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    class="lucide lucide-chevron-right-icon lucide-chevron-right">
+                    class="lucide lucide-chevron-right-icon lucide-chevron-right rtl:rotate-180">
                     <path d="m9 18 6-6-6-6" />
                 </svg>
             </button>

@@ -11,6 +11,7 @@ import {
     input,
     model,
     signal,
+    Signal,
     TemplateRef,
     viewChild
 } from "@angular/core";
@@ -32,7 +33,9 @@ import {
     timer
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ScrollViewActivePageDirective } from "../../directives/scroll-view-active-page.directive";
+import { SCROLL_VIEW_DEFAULT_MESSAGES } from "../../i18n/scroll-view.default-messages";
 import { PagerOverlay } from "../../models/PagerOverlay";
 import { ScrollViewListItem } from "../../models/ScrollViewListItem";
 import {
@@ -118,7 +121,10 @@ import {
 })
 export class ScrollViewComponent implements ScrollViewVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #directionFromIndex: Signal<"left" | "right">;
     readonly #document = inject(DOCUMENT);
+    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #viewIndex = computed(() => {
         const infinite = this.infinite();
         const index = this.index();
@@ -128,30 +134,6 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
         return infinite ? index % viewData.length : index;
     });
-    readonly #directionFromIndex = toSignal(
-        toObservable(this.#viewIndex).pipe(
-            startWith(0),
-            pairwise(),
-            map(([prevIndex, index]) => {
-                const infinite = this.infinite();
-                const totalItems = this.itemCount();
-                if (infinite && totalItems > 1) {
-                    const lastIndex = totalItems - 1;
-                    if (prevIndex === lastIndex && index === 0) {
-                        return "right";
-                    }
-                    if (prevIndex === 0 && index === lastIndex) {
-                        return "left";
-                    }
-                }
-                return index < prevIndex ? "left" : "right";
-            })
-        ),
-        {
-            initialValue: "right"
-        }
-    );
-    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
     #scrollMouseUpHandler = () => this.onPagerScrollEnd();
@@ -159,6 +141,11 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     protected readonly animationDuration = computed(() => {
         const animate = this.animate();
         return typeof animate === "boolean" ? (animate ? 500 : 0) : animate;
+    });
+    protected readonly ariaLabel = computed(() => {
+        const index = this.viewIndex();
+        const count = this.itemCount();
+        return count > 0 ? this.messages().pageOf(index + 1, count) : undefined;
     });
     protected readonly baseClass = computed(() => {
         const rounded = this.rounded();
@@ -171,19 +158,26 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     });
     protected readonly contentTemplate = contentChild(TemplateRef);
     protected readonly enterAnimation = computed(() => {
-        return this.#directionFromIndex() === "right" ? "slide-in-from-right" : "slide-in-from-left";
+        const isRtl = this.#i18n.direction() === "rtl";
+        const dir = this.#directionFromIndex();
+        const effectiveDir = isRtl ? (dir === "right" ? "left" : "right") : dir;
+        return effectiveDir === "right" ? "slide-in-from-right" : "slide-in-from-left";
     });
     protected readonly itemCount = computed(() => this.viewData().length);
     protected readonly leaveAnimation = computed(() => {
-        return this.#directionFromIndex() === "right" ? "slide-out-to-left" : "slide-out-to-right";
+        const isRtl = this.#i18n.direction() === "rtl";
+        const dir = this.#directionFromIndex();
+        const effectiveDir = isRtl ? (dir === "right" ? "left" : "right") : dir;
+        return effectiveDir === "right" ? "slide-out-to-left" : "slide-out-to-right";
     });
     protected readonly leftArrowClass = computed(() => {
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== 0);
-        return scrollViewArrowThemeVariants({ left: true, hidden });
+        return scrollViewArrowThemeVariants({ hidden, start: true });
     });
     protected readonly listClass = computed(() => {
         return scrollViewListThemeVariants();
     });
+    protected readonly messages = this.#i18n.componentMessages("scrollView", SCROLL_VIEW_DEFAULT_MESSAGES);
     protected readonly pagerArrowClass = computed(() => {
         return scrollViewPagerArrowThemeVariants();
     });
@@ -201,7 +195,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     protected readonly pagerListElementRef = viewChild<ElementRef<HTMLUListElement>>("pagerListElement");
     protected readonly rightArrowClass = computed(() => {
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== this.itemCount() - 1);
-        return scrollViewArrowThemeVariants({ right: true, hidden });
+        return scrollViewArrowThemeVariants({ end: true, hidden });
     });
     protected readonly scrollViewHeight = computed(() => {
         const height = this.height();
@@ -216,12 +210,6 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         return select(data, d => ({ data: d }) as ScrollViewListItem).toImmutableSet();
     });
     protected readonly viewIndex = this.#viewIndex;
-
-    protected readonly ariaLabel = computed(() => {
-        const index = this.viewIndex();
-        const count = this.itemCount();
-        return count > 0 ? `Page ${index + 1} of ${count}` : undefined;
-    });
 
     /**
      * @description Sets whether page transitions are animated.
@@ -299,6 +287,29 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     public readonly width = input.required<string | number>();
 
     public constructor() {
+        this.#directionFromIndex = toSignal(
+            toObservable(this.#viewIndex).pipe(
+                startWith(0),
+                pairwise(),
+                map(([prevIndex, index]) => {
+                    const infinite = this.infinite();
+                    const totalItems = this.itemCount();
+                    if (infinite && totalItems > 1) {
+                        const lastIndex = totalItems - 1;
+                        if (prevIndex === lastIndex && index === 0) {
+                            return "right";
+                        }
+                        if (prevIndex === 0 && index === lastIndex) {
+                            return "left";
+                        }
+                    }
+                    return index < prevIndex ? "left" : "right";
+                })
+            ),
+            {
+                initialValue: "right"
+            }
+        );
         this.#destroyRef.onDestroy(() => {
             this.#scroll$.complete();
             this.#resizeObserver?.disconnect();
@@ -328,21 +339,16 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         if (type === "continuous") {
             this.#document.addEventListener("mouseup", this.#scrollMouseUpHandler, { once: true });
         }
+        const isRtl = this.#i18n.direction() === "rtl";
         const timeFunction = type === "single" ? timer : interval;
         timeFunction(60)
             .pipe(takeUntil(this.#scroll$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
-                let left: number = 0;
-                switch (direction) {
-                    case "left":
-                        left = Math.max(element.scrollLeft - 100, 0);
-                        element.scrollTo({ left, behavior: "smooth" });
-                        break;
-                    case "right":
-                        left = Math.min(element.scrollLeft + 100, element.scrollWidth);
-                        element.scrollTo({ left, behavior: "smooth" });
-                        break;
+                let offset = direction === "left" ? -100 : 100;
+                if (isRtl) {
+                    offset = -offset;
                 }
+                element.scrollBy?.({ behavior: "smooth", left: offset });
             });
     }
 
@@ -417,7 +423,13 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
                 takeUntilDestroyed(this.#destroyRef),
                 filter(event => event.key === "ArrowLeft" || event.key === "ArrowRight"),
                 tap(event => {
-                    const direction = event.key === "ArrowLeft" ? "left" : "right";
+                    const isRtl = this.#i18n.direction() === "rtl";
+                    let direction: ScrollDirection;
+                    if (event.key === "ArrowLeft") {
+                        direction = isRtl ? "right" : "left";
+                    } else {
+                        direction = isRtl ? "left" : "right";
+                    }
                     this.navigate(direction, this.infinite());
                 })
             )

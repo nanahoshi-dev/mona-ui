@@ -1,4 +1,4 @@
-import { computed, Directive, inject, input } from "@angular/core";
+import { computed, Directive, input } from "@angular/core";
 import { scrollViewPagerListItemThemeVariants, type ScrollViewVariantProps } from "../styles/scroll-view.styles";
 
 @Directive({
