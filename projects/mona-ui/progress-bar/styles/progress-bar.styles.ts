@@ -56,8 +56,8 @@ export const progressBarTrackThemeVariants = cva(
         data-[next='true']:duration-(--mona-motion-fast)
         data-[next='true']:ease-in
         data-[value='0']:bg-transparent
-        data-[left='true']:justify-start
-        data-[right='true']:justify-end
+        data-[start='true']:justify-start
+        data-[end='true']:justify-end
     `,
     {
         variants: {
