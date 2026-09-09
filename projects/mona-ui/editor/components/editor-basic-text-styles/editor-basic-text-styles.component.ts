@@ -1,6 +1,8 @@
 import { Component, computed, inject } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import { EditorService } from "../../services/editor.service";
 
 @Component({
@@ -9,6 +11,8 @@ import { EditorService } from "../../services/editor.service";
     templateUrl: "./editor-basic-text-styles.component.html"
 })
 export class EditorBasicTextStylesComponent {
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly anyToolVisible = computed(() => {
         return (
             this.boldVisible() ||

@@ -6,7 +6,7 @@
     [class]="dropdownListClass()"
     textField="text"
     valueField="value"
-    title="Format">
+    [title]="messages().format">
     <ng-template monaDropDownListItemTemplate let-dataItem>
         @switch (dataItem.value) {
             @case (HeadingType.Heading1) {

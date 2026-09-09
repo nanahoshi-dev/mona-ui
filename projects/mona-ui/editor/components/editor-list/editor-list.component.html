@@ -4,7 +4,7 @@
         [selected]="unorderedListSelected()"
         [toggleable]="false"
         (click)="onUnorderedListToggle()"
-        title="Insert unordered list">
+        [title]="messages().insertUnorderedList">
         <i class="ri-list-unordered"></i>
     </button>
     <button
@@ -12,7 +12,7 @@
         [selected]="orderedListSelected()"
         [toggleable]="false"
         (click)="onOrderedListToggle()"
-        title="Insert ordered list">
+        [title]="messages().insertOrderedList">
         <i class="ri-list-ordered-2"></i>
     </button>
 </mona-button-group>

@@ -1,26 +1,26 @@
 <form [formRoot]="iForm" [class]="formClass()">
     <div [class]="rowClass()">
-        <div [class]="rowLabelClass()">Image URL</div>
+        <div [class]="rowLabelClass()">{{ messages().imageUrl }}</div>
         <mona-text-box [size]="'small'" [formField]="iForm.link"></mona-text-box>
     </div>
     <div [class]="rowClass()">
-        <div [class]="rowLabelClass()">Alt Text</div>
+        <div [class]="rowLabelClass()">{{ messages().altText }}</div>
         <mona-text-box [size]="'small'" [formField]="iForm.alt"></mona-text-box>
     </div>
     <div class="flex gap-2">
         <div [class]="rowClass()">
-            <div [class]="rowLabelClass()">Width (px)</div>
+            <div [class]="rowLabelClass()">{{ messages().widthPx }}</div>
             <mona-numeric-text-box [size]="'small'" [formField]="iForm.width"></mona-numeric-text-box>
         </div>
         <div [class]="rowClass()">
-            <div [class]="rowLabelClass()">Height (px)</div>
+            <div [class]="rowLabelClass()">{{ messages().heightPx }}</div>
             <mona-numeric-text-box [size]="'small'" [formField]="iForm.height"></mona-numeric-text-box>
         </div>
     </div>
     <div [class]="actionsClass()">
         <button monaButton [size]="'small'" [disabled]="!iForm().valid()" look="primary" (click)="onImageInsert()">
-            Insert
+            {{ messages().insert }}
         </button>
-        <button monaButton [size]="'small'" [look]="'secondary'" (click)="onCancel()">Cancel</button>
+        <button monaButton [size]="'small'" [look]="'secondary'" (click)="onCancel()">{{ messages().cancel }}</button>
     </div>
 </form>

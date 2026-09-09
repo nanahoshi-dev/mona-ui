@@ -1,6 +1,8 @@
 import { Component, computed, inject } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import { EditorService } from "../../services/editor.service";
 
 @Component({
@@ -10,6 +12,8 @@ import { EditorService } from "../../services/editor.service";
 })
 export class EditorHistoryComponent {
     readonly #editorService: EditorService = inject(EditorService);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly redoDisabled = computed(() => {
         this.#editorService.state();
         return !this.#editorService.editor.can().redo();

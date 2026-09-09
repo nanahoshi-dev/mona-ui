@@ -4,7 +4,7 @@
     (valueChange)="onFontFamilyChange($event)"
     [size]="'small'"
     [class]="dropdownListClass()"
-    title="Select font family">
+    [title]="messages().selectFontFamily">
     <ng-template monaDropDownListItemTemplate let-font>
         <span [style.font-family]="font">{{ font }}</span>
     </ng-template>
