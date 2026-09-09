@@ -59,8 +59,10 @@ import {
 } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { debounceTime, filter, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { COMBO_BOX_DEFAULT_MESSAGES } from "../../i18n/combo-box.default-messages";
 
 import {
     comboBoxAffixContainerThemeVariants,
@@ -126,6 +128,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     readonly #dropdownListService = inject(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #listService = inject(ListService);
     readonly #navigatedItem = signal<TData | null>(null);
     readonly #popupRef = this.#dropdownService.popupRef;
@@ -174,6 +177,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
+    protected readonly messages = this.#i18n.componentMessages("comboBox", COMBO_BOX_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });

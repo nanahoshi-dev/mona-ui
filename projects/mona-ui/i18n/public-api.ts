@@ -10,6 +10,7 @@ export * from "./models/mona-locale-messages";
 
 export * from "./message-types/card.messages";
 export * from "./message-types/chip.messages";
+export * from "./message-types/combo-box.messages";
 export * from "./message-types/dropdown-list.messages";
 export * from "./message-types/dropdowns.messages";
 export * from "./message-types/list.messages";
