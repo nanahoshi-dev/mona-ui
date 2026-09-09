@@ -119,6 +119,22 @@ const PHYSICAL_CSS_POSITION_PATTERN = {
     label: "Physical CSS position (left/right -> inset-inline-start/end)"
 };
 
+// Accessibility text attributes that require internationalization
+export const ARIA_TEXT_ATTRIBUTES = new Set([
+    "aria-label",
+    "aria-description",
+    "aria-roledescription",
+    "aria-placeholder",
+    "aria-valuetext"
+]);
+
+// General user-facing text attributes that require internationalization
+export const GENERAL_TEXT_ATTRIBUTES = new Set([
+    "title",
+    "placeholder",
+    "alt"
+]);
+
 // Patterns for hard-coded TS ARIA and titles
 export const HARD_CODED_ARIA_PATTERNS = [
     { regex: /\baria-label="([^"{}]+)"/g, label: "Static aria-label attribute" },
@@ -138,6 +154,18 @@ export const MANUAL_REVIEW_PATTERNS = [
     {
         regex: /(?<!\w)style\.(?:left|right)\b/g,
         label: "Manual review: physical inline style.left/right assignment"
+    },
+    {
+        regex: /linear-gradient\([^)]*\b(?:to[\s_]+(?:left|right)|(?:90|270)deg)\b/g,
+        label: "Manual review: directional gradient (horizontal orientation)"
+    },
+    {
+        regex: /(?<![a-zA-Z0-9_-])(?:[a-z0-9-]+:)*-?translate-x-[0-9a-z_[\].-]+/g,
+        label: "Manual review: physical horizontal translate utility (translate-x-*)"
+    },
+    {
+        regex: /\btranslateX\s*\([^)]+\)/g,
+        label: "Manual review: physical translateX transform"
     }
 ];
 
@@ -170,43 +198,51 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/color-gradient/styles/color-gradient.styles.ts",
-        reason: "Color picker gradient coordinate space is physical 2D hue/saturation mapping"
-    },
-    {
-        category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
-        reason: "Color gradient 2D coordinate space mapping"
-    },
-    {
-        category: "rtl-physical-style",
         filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.html",
-        reason: "Color gradient trackBackground physical rainbow color stops"
-    },
-    {
-        category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/color-palette/components/color-palette/color-palette.component.html",
-        reason: "Color palette grid uses physical direction"
-    },
-    {
-        category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/color-picker/components/color-picker/color-picker.component.html",
-        reason: "Color picker canvas coordinates are physical"
+        lineSnippet: "[style.left.px]",
+        reason: "Color gradient 2D coordinate space mapping handle position"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/tooltip/styles/tooltip.styles.ts",
+        lineSnippet: 'data-[position="',
         reason: "Tooltip arrow pointer geometry uses 45-degree rotated box Cartesian coordinates"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/popover/styles/popover.styles.ts",
+        lineSnippet: 'data-[position="',
         reason: "Popover arrow pointer geometry uses 45-degree rotated box Cartesian coordinates"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/notification/styles/notification.styles.ts",
+        lineSnippet: "bottomleft",
         reason: "Notification screen dock coordinates are physical viewport screen positions"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/notification/styles/notification.styles.ts",
+        lineSnippet: "bottomright",
+        reason: "Notification screen dock coordinates are physical viewport screen positions"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/notification/styles/notification.styles.ts",
+        lineSnippet: "topleft",
+        reason: "Notification screen dock coordinates are physical viewport screen positions"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/notification/styles/notification.styles.ts",
+        lineSnippet: "topright",
+        reason: "Notification screen dock coordinates are physical viewport screen positions"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/notification/styles/notification.styles.ts",
+        lineSnippet: "left-1/2",
+        reason: "Notification center positioning uses 50% screen coordinate"
     },
     {
         category: "rtl-physical-style",
@@ -214,11 +250,78 @@ export const ALLOWLIST: AllowlistEntry[] = [
         reason: "Spinner radial keyframe dot positions in circular coordinate geometry"
     },
 
-    // Manual review exemptions for legitimate DOM/coordinate operations
+    // Manual review exemptions for directional gradients, translate transforms, and DOM/coordinate operations
     {
         category: "rtl-manual-review",
-        filePattern: "projects/mona-ui/window/",
+        filePattern: "projects/mona-ui/color-gradient/styles/color-gradient.styles.ts",
+        lineSnippet: "linear-gradient(to_right",
+        reason: "Color picker gradient coordinate space is physical 2D hue/saturation mapping"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: "linear-gradient(to right",
+        reason: "Alpha slider gradient tracks physical left-to-right opacity"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: "containerRect.left",
+        reason: "Color gradient 2D coordinate space mapping"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.html",
+        lineSnippet: "linear-gradient(to right",
+        reason: "Hue rainbow slider spectrum track is physical 0-360 color wheel"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/notification/styles/notification.styles.ts",
+        lineSnippet: "-translate-x-1/2",
+        reason: "Notification container centered horizontally using 50% left and -50% translateX"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/components/chart/chart.component.ts",
+        lineSnippet: "translateX(-50%)",
+        reason: "Cartesian chart horizontal axis tick label center alignment"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/models/WindowReference.ts",
+        lineSnippet: "element.style.left",
         reason: "Desktop window floating coordinate management operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/components/window-content/window-content.component.ts",
+        lineSnippet: "element.offsetLeft",
+        reason: "Desktop window floating coordinate management operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
+        lineSnippet: "element.style.left",
+        reason: "Desktop window drag handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
+        lineSnippet: "getBoundingClientRect().left",
+        reason: "Desktop window drag handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/directives/window-resize-handler.directive.ts",
+        lineSnippet: "element.style.left",
+        reason: "Desktop window resize handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/directives/window-resize-handler.directive.ts",
+        lineSnippet: "rect.left",
+        reason: "Desktop window resize handler operates in 2D viewport coordinates"
     },
     {
         category: "rtl-manual-review",
@@ -237,8 +340,18 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
-        filePattern: "projects/mona-ui/chart/internal/export/",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
         reason: "Chart export raster island staging and DOM freezer position capture"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-dom-freezer.ts",
+        reason: "Chart export scrollLeft snapshot capture"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-dom-collector.ts",
+        reason: "Chart export DOM collector Cartesian positioning"
     },
     {
         category: "rtl-manual-review",
@@ -254,6 +367,144 @@ export const ALLOWLIST: AllowlistEntry[] = [
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/segmented/components/segmented/segmented.component.ts",
         reason: "Segmented pill offsetLeft calculation relative to parent container"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/popup-menu/components/popup-menu/popup-menu.component.ts",
+        lineSnippet: "center.left + center.width / 2",
+        reason: "Popup menu calculates midpoint of target element for keyboard context menu"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/popup-menu/components/popup-menu/popup-menu.component.ts",
+        lineSnippet: "rect.left + rect.width / 2",
+        reason: "Popup menu calculates midpoint of target element for positioning"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/internal/tree/components/tree-drop-hint/tree-drop-hint.component.ts",
+        lineSnippet: "rect.right - 40",
+        reason: "Tree drop hint position calculation explicitly branches on isRtl"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/internal/tree/components/tree-drop-hint/tree-drop-hint.component.ts",
+        lineSnippet: "rect.left",
+        reason: "Tree drop hint position calculation explicitly branches on isRtl"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/stepper/styles/stepper.styles.ts",
+        lineSnippet: "-translate-x-3 rtl:translate-x-3",
+        reason: "Stepper connector offset with explicit RTL counterpart"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/styles/slider.styles.ts",
+        lineSnippet: "translate-x-[-50%]",
+        reason: "Slider handle centering with explicit RTL counterpart"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
+        lineSnippet: "translateX(-50%)",
+        reason: "Slider label center alignment on tick"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/pipes/tick-style.pipe.ts",
+        lineSnippet: "translateX(-50%)",
+        reason: "Slider tick mark center alignment"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/components/slider-base/slider-base.component.ts",
+        lineSnippet: "rect.left",
+        reason: "Slider coordinate mapping"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/components/slider-base/slider-base.component.ts",
+        lineSnippet: "containerRect.right",
+        reason: "Slider RTL coordinate calculation"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/components/slider-base/slider-base.component.ts",
+        lineSnippet: "containerRect.left",
+        reason: "Slider LTR coordinate calculation"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.ts",
+        lineSnippet: "containerRect.right",
+        reason: "Range slider RTL coordinate calculation"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.ts",
+        lineSnippet: "containerRect.left",
+        reason: "Range slider LTR coordinate calculation"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.ts",
+        lineSnippet: "primaryRect.left",
+        reason: "Range slider primary handle positioning"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.ts",
+        lineSnippet: "secondaryRect.left",
+        reason: "Range slider secondary handle positioning"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+        lineSnippet: "-translate-x-full rtl:translate-x-full",
+        reason: "Sidebar slide-in transform with explicit RTL counterpart"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+        lineSnippet: "translate-x-full rtl:-translate-x-full",
+        reason: "Sidebar slide-out transform with explicit RTL counterpart"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
+        lineSnippet: "translateX(",
+        reason: "ScrollView slide animation transforms"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/popup/components/popup-wrapper/popup-wrapper.component.ts",
+        lineSnippet: "translateX(",
+        reason: "Popup slide animation keyframes"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/layout/cartesian-axis-geometry.ts",
+        lineSnippet: "translateX(-50%)",
+        reason: "Cartesian chart axis tick label center alignment"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-snapshot-builder.ts",
+        lineSnippet: "plotRect.left",
+        reason: "Chart export Cartesian relative X coordinate"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/internal/brush/chart-brush-gesture-controller.ts",
+        lineSnippet: "rect.left",
+        reason: "Chart brush gesture Cartesian coordinate calculation"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/chart/components/chart/chart.component.ts",
+        lineSnippet: "rect.left",
+        reason: "Chart pointer event Cartesian relative X coordinate"
     },
 
     {
@@ -297,8 +548,8 @@ export function isUserFacingText(text: string): boolean {
     if (!trimmed) {
         return false;
     }
-    // Pure numbers or digits with symbols like #1, 100%, 1.5
-    if (/^#?\s*[-+]?\d+([.,]\d+)?\s*%?$/.test(trimmed)) {
+    // Pure numbers or digits (ASCII or localized) with symbols like #1, 100%, 1.5
+    if (/^#?\s*[-+]?[\d\p{N}]+([.,][\d\p{N}]+)?\s*%?$/u.test(trimmed)) {
         return false;
     }
     // Pure symbols/punctuation/math/HTML entities
@@ -309,8 +560,8 @@ export function isUserFacingText(text: string): boolean {
     if (/^&(?:times|nbsp|bull|hellip|#\d+);$/.test(trimmed)) {
         return false;
     }
-    // Contains letters
-    return /[a-zA-Z]/.test(trimmed);
+    // Contains letters or marks across any script (Unicode-aware)
+    return /[\p{L}\p{M}]/u.test(trimmed);
 }
 
 export const TECHNICAL_SEMANTIC_STRINGS = new Set([
@@ -412,18 +663,16 @@ export function scanTypeScriptAst(
                             if (hostInit && Node.isObjectLiteralExpression(hostInit)) {
                                 for (const prop of hostInit.getProperties()) {
                                     if (Node.isPropertyAssignment(prop)) {
-                                        const propName = prop.getName().replace(/['"]/g, "");
-                                        const isAria = [
-                                            "aria-label",
-                                            "[attr.aria-label]",
-                                            "aria-description",
-                                            "[attr.aria-description]",
-                                            "aria-roledescription",
-                                            "[attr.aria-roledescription]",
-                                            "aria-valuetext",
-                                            "[attr.aria-valuetext]"
-                                        ].includes(propName);
-                                        const isText = ["title", "[attr.title]"].includes(propName);
+                                        const rawPropName = prop.getName().replace(/['"]/g, "").toLowerCase();
+                                        const strippedPropName =
+                                            rawPropName.startsWith("[") && rawPropName.endsWith("]")
+                                                ? rawPropName.slice(1, -1)
+                                                : rawPropName;
+                                        const cleanPropName = strippedPropName.startsWith("attr.")
+                                            ? strippedPropName.slice(5)
+                                            : strippedPropName;
+                                        const isAria = ARIA_TEXT_ATTRIBUTES.has(cleanPropName);
+                                        const isText = GENERAL_TEXT_ATTRIBUTES.has(cleanPropName);
                                         if (isAria || isText) {
                                             const init = prop.getInitializer();
                                             if (
@@ -432,7 +681,7 @@ export function scanTypeScriptAst(
                                                     Node.isNoSubstitutionTemplateLiteral(init))
                                             ) {
                                                 let rawVal = init.getLiteralText().trim();
-                                                const isBound = propName.startsWith("[");
+                                                const isBound = rawPropName.startsWith("[");
                                                 let isStaticLiteral = false;
                                                 if (isBound) {
                                                     if (
@@ -453,7 +702,7 @@ export function scanTypeScriptAst(
                                                 ) {
                                                     violations.push({
                                                         category: isAria ? "i18n-aria" : "i18n-text",
-                                                        detail: `Static host binding ${propName}: "${rawVal}"`,
+                                                        detail: `Static host binding ${rawPropName}: "${rawVal}"`,
                                                         file: filePath,
                                                         line: prop.getStartLineNumber()
                                                     });
@@ -516,6 +765,50 @@ export function scanTypeScriptAst(
                 }
             }
         }
+
+        // 4. Indirect DOMRect access tracking
+        const domRectVarNames = new Set<string>();
+        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+            const init = varDecl.getInitializer();
+            if (init && Node.isCallExpression(init)) {
+                const exprText = init.getExpression().getText();
+                if (exprText.endsWith("getBoundingClientRect")) {
+                    const nameNode = varDecl.getNameNode();
+                    if (Node.isObjectBindingPattern(nameNode)) {
+                        for (const element of nameNode.getElements()) {
+                            const boundName = element.getName();
+                            if (boundName === "left" || boundName === "right") {
+                                violations.push({
+                                    category: "rtl-manual-review",
+                                    detail: `Manual review: destructured DOMRect.${boundName} from getBoundingClientRect()`,
+                                    file: filePath,
+                                    line: element.getStartLineNumber()
+                                });
+                            }
+                        }
+                    } else {
+                        domRectVarNames.add(varDecl.getName());
+                    }
+                }
+            }
+        }
+
+        if (domRectVarNames.size > 0) {
+            for (const propAccess of sf.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)) {
+                const propName = propAccess.getName();
+                if (propName === "left" || propName === "right") {
+                    const expr = propAccess.getExpression();
+                    if (Node.isIdentifier(expr) && domRectVarNames.has(expr.getText())) {
+                        violations.push({
+                            category: "rtl-manual-review",
+                            detail: `Manual review: indirect DOMRect.${propName} access via "${expr.getText()}.${propName}"`,
+                            file: filePath,
+                            line: propAccess.getStartLineNumber()
+                        });
+                    }
+                }
+            }
+        }
     } finally {
         project.removeSourceFile(sf);
     }
@@ -551,17 +844,10 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
         } else if (node instanceof TmplAstElement) {
             // Check static attributes
             for (const attr of node.attributes) {
-                const name = attr.name.toLowerCase();
+                const rawName = attr.name.toLowerCase();
+                const cleanName = rawName.startsWith("attr.") ? rawName.slice(5) : rawName;
                 const val = attr.value;
-                if (
-                    [
-                        "aria-label",
-                        "aria-description",
-                        "aria-roledescription",
-                        "aria-placeholder",
-                        "aria-valuetext"
-                    ].includes(name)
-                ) {
+                if (ARIA_TEXT_ATTRIBUTES.has(cleanName)) {
                     if (isUserFacingText(val)) {
                         violations.push({
                             category: "i18n-aria",
@@ -570,7 +856,7 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
                             line: attr.sourceSpan.start.line + 1
                         });
                     }
-                } else if (["title", "placeholder", "alt"].includes(name)) {
+                } else if (GENERAL_TEXT_ATTRIBUTES.has(cleanName)) {
                     if (isUserFacingText(val)) {
                         violations.push({
                             category: "i18n-text",
@@ -584,12 +870,13 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
 
             // Check bound attributes with literal strings
             for (const input of node.inputs) {
-                const name = input.name.toLowerCase();
+                const rawName = input.name.toLowerCase();
+                const cleanName = rawName.startsWith("attr.") ? rawName.slice(5) : rawName;
                 const valueAst = input.value;
                 const innerAst = (valueAst as { ast?: AST }).ast ?? valueAst;
                 if (innerAst instanceof LiteralPrimitive && typeof innerAst.value === "string") {
                     const strVal = innerAst.value;
-                    if (["aria-label", "attr.aria-label", "aria-description", "attr.aria-description"].includes(name)) {
+                    if (ARIA_TEXT_ATTRIBUTES.has(cleanName)) {
                         if (isUserFacingText(strVal)) {
                             violations.push({
                                 category: "i18n-aria",
@@ -598,9 +885,7 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
                                 line: input.sourceSpan.start.line + 1
                             });
                         }
-                    } else if (
-                        ["title", "attr.title", "placeholder", "attr.placeholder", "alt", "attr.alt"].includes(name)
-                    ) {
+                    } else if (GENERAL_TEXT_ATTRIBUTES.has(cleanName)) {
                         if (isUserFacingText(strVal)) {
                             violations.push({
                                 category: "i18n-text",
@@ -614,9 +899,9 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
 
                 // Check [style.left] or [style.right] (including units like .px, %, etc.)
                 if (
-                    (input.type === BindingType.Style && (name === "left" || name === "right")) ||
-                    name.startsWith("style.left") ||
-                    name.startsWith("style.right")
+                    (input.type === BindingType.Style && (rawName === "left" || rawName === "right")) ||
+                    rawName.startsWith("style.left") ||
+                    rawName.startsWith("style.right")
                 ) {
                     const styleName =
                         input.type === BindingType.Style

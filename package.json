@@ -24,6 +24,7 @@
         "test:lib:watch": "ng test mona-ui --coverage --watch",
         "test:app": "ng test mona-ui-tester --watch=false",
         "test:theme-colors": "tsx projects/mona-ui-tester/scripts/check-theme-color-parity.ts",
+        "test:audit": "vitest run projects/mona-ui-tester/scripts/audit-i18n-rtl.spec.ts",
         "audit:i18n-rtl": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts",
         "audit:i18n-rtl:strict": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts --strict"
     },

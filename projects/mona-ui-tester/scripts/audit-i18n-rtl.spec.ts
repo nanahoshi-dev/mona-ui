@@ -5,16 +5,24 @@ import {
     type AuditViolation,
     isAllowlisted,
     isUserFacingText,
+    MANUAL_REVIEW_PATTERNS,
     scanTemplateNodes,
     scanTypeScriptAst
 } from "./audit-i18n-rtl";
 
 describe("audit-i18n-rtl", () => {
     describe("isUserFacingText", () => {
-        it("returns true for natural language text", () => {
+        it("returns true for natural language text across multiple scripts (Unicode-aware)", () => {
             expect(isUserFacingText("Hello world")).toBe(true);
             expect(isUserFacingText("Button group")).toBe(true);
             expect(isUserFacingText("Enter the URL")).toBe(true);
+            expect(isUserFacingText("Türkçe")).toBe(true);
+            expect(isUserFacingText("العربية")).toBe(true);
+            expect(isUserFacingText("Русский")).toBe(true);
+            expect(isUserFacingText("Ελληνικά")).toBe(true);
+            expect(isUserFacingText("日本語")).toBe(true);
+            expect(isUserFacingText("中文")).toBe(true);
+            expect(isUserFacingText("한국어")).toBe(true);
         });
 
         it("returns false for pure numbers and symbols", () => {
@@ -24,6 +32,8 @@ describe("audit-i18n-rtl", () => {
             expect(isUserFacingText("100%")).toBe(false);
             expect(isUserFacingText("-12.5")).toBe(false);
             expect(isUserFacingText("#1")).toBe(false);
+            expect(isUserFacingText("١٢٣")).toBe(false);
+            expect(isUserFacingText("۱۲۳%")).toBe(false);
             expect(isUserFacingText("&times;")).toBe(false);
             expect(isUserFacingText("&nbsp;")).toBe(false);
             expect(isUserFacingText("->")).toBe(false);
@@ -119,6 +129,40 @@ describe("audit-i18n-rtl", () => {
                 detail: expect.stringContaining('Hard-coded text in accessibility property "legendAriaLabel": "Chart legend"')
             });
         });
+
+        it("detects indirect DOMRect.left / right coordinate access", () => {
+            const code = `
+                function getPosition(el: HTMLElement) {
+                    const rect = el.getBoundingClientRect();
+                    return rect.left + 10;
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-manual-review",
+                detail: expect.stringContaining('Manual review: indirect DOMRect.left access via "rect.left"')
+            });
+        });
+
+        it("detects destructured DOMRect.left from getBoundingClientRect()", () => {
+            const code = `
+                function getPosition(el: HTMLElement) {
+                    const { left } = el.getBoundingClientRect();
+                    return left;
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-manual-review",
+                detail: expect.stringContaining("Manual review: destructured DOMRect.left from getBoundingClientRect()")
+            });
+        });
     });
 
     describe("HTML Template AST scanning", () => {
@@ -145,6 +189,36 @@ describe("audit-i18n-rtl", () => {
             expect(violations[0]).toMatchObject({
                 category: "i18n-aria",
                 detail: expect.stringContaining('Static aria-label attribute: "Close dialog"')
+            });
+        });
+
+        it("detects bound literal accessibility attributes across all ARIA text attributes", () => {
+            const html = `
+                <div [attr.aria-roledescription]="'carousel'"></div>
+                <div [attr.aria-valuetext]="'Loading'"></div>
+                <div [aria-placeholder]="'Search'"></div>
+                <div [attr.title]="'Information'"></div>
+            `;
+            const parsed = parseTemplate(html, "test.html");
+            const violations: AuditViolation[] = [];
+            scanTemplateNodes(parsed.nodes, "test.html", violations);
+
+            expect(violations).toHaveLength(4);
+            expect(violations[0]).toMatchObject({
+                category: "i18n-aria",
+                detail: expect.stringContaining('Literal string in [aria-roledescription] binding: "carousel"')
+            });
+            expect(violations[1]).toMatchObject({
+                category: "i18n-aria",
+                detail: expect.stringContaining('Literal string in [aria-valuetext] binding: "Loading"')
+            });
+            expect(violations[2]).toMatchObject({
+                category: "i18n-aria",
+                detail: expect.stringContaining('Literal string in [aria-placeholder] binding: "Search"')
+            });
+            expect(violations[3]).toMatchObject({
+                category: "i18n-text",
+                detail: expect.stringContaining('Literal string in [title] binding: "Information"')
             });
         });
 
@@ -212,6 +286,38 @@ describe("audit-i18n-rtl", () => {
             };
             const line = '<div [style.left.px]="x"></div>';
             expect(isAllowlisted(otherViolation, line, customAllowlist)).toBe(false);
+        });
+    });
+
+    describe("Manual review pattern detection", () => {
+        it("detects directional horizontal gradients in CSS and styles", () => {
+            const pattern = MANUAL_REVIEW_PATTERNS.find(p => p.label.includes("directional gradient"));
+            expect(pattern).toBeDefined();
+
+            expect("linear-gradient(to right, red, blue)".match(pattern!.regex)).not.toBeNull();
+            expect("linear-gradient(to left, red, blue)".match(pattern!.regex)).not.toBeNull();
+            expect("linear-gradient(to_right, white, transparent)".match(pattern!.regex)).not.toBeNull();
+            expect("linear-gradient(90deg, red, blue)".match(pattern!.regex)).not.toBeNull();
+            expect("linear-gradient(270deg, red, blue)".match(pattern!.regex)).not.toBeNull();
+            // Vertical or diagonal gradients are not flagged as horizontal directional gradients
+            expect("linear-gradient(to top, red, blue)".match(pattern!.regex)).toBeNull();
+            expect("linear-gradient(135deg, red, blue)".match(pattern!.regex)).toBeNull();
+        });
+
+        it("detects physical horizontal translate utility and transforms", () => {
+            const translateUtilPattern = MANUAL_REVIEW_PATTERNS.find(p => p.label.includes("translate-x-*"));
+            const translateXPattern = MANUAL_REVIEW_PATTERNS.find(p => p.label.includes("translateX"));
+
+            expect(translateUtilPattern).toBeDefined();
+            expect(translateXPattern).toBeDefined();
+
+            expect("-translate-x-3".match(translateUtilPattern!.regex)).not.toBeNull();
+            expect("translate-x-1/2".match(translateUtilPattern!.regex)).not.toBeNull();
+            expect("rtl:translate-x-3".match(translateUtilPattern!.regex)).not.toBeNull();
+            expect("translate-y-4".match(translateUtilPattern!.regex)).toBeNull();
+
+            expect("translateX(-50%)".match(translateXPattern!.regex)).not.toBeNull();
+            expect("translateY(-50%)".match(translateXPattern!.regex)).toBeNull();
         });
     });
 });
