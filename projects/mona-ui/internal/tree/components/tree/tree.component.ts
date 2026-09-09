@@ -15,6 +15,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { asapScheduler, filter, fromEvent, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
@@ -43,6 +44,7 @@ export class TreeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
     protected readonly activeDescendantId = computed<string | null>(() => {
@@ -53,9 +55,9 @@ export class TreeComponent<T> {
         return treeBaseThemeVariants();
     });
     public readonly ariaLabel = input<string>("");
-    public readonly treeService: TreeService<T> = inject(TreeService);
-    public readonly nodeTemplate = contentChild(TreeNodeTemplateDirective, { read: TemplateRef });
     public readonly data = input<Iterable<T>>();
+    public readonly nodeTemplate = contentChild(TreeNodeTemplateDirective, { read: TemplateRef });
+    public readonly treeService: TreeService<T> = inject(TreeService);
 
     public constructor() {
         effect(() => {
@@ -183,13 +185,16 @@ export class TreeComponent<T> {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 const navigatedNode = this.treeService.navigatedNode();
+                const isRtl = this.#i18n.direction() === "rtl";
+                const collapseKey = isRtl ? "ArrowRight" : "ArrowLeft";
+                const expandKey = isRtl ? "ArrowLeft" : "ArrowRight";
                 if (event.key === "ArrowUp") {
                     event.preventDefault();
                     this.treeService.navigate("previous");
                 } else if (event.key === "ArrowDown") {
                     event.preventDefault();
                     this.treeService.navigate("next");
-                } else if (event.key === "ArrowLeft") {
+                } else if (event.key === collapseKey) {
                     event.preventDefault();
                     if (!navigatedNode || !navigatedNode.nodeItem.hasChildren) {
                         return;
@@ -200,7 +205,7 @@ export class TreeComponent<T> {
                         this.treeService.setNodeExpand(navigatedNode, false);
                     }
                     this.treeService.navigatedNode.set(navigatedNode);
-                } else if (event.key === "ArrowRight") {
+                } else if (event.key === expandKey) {
                     event.preventDefault();
                     if (!navigatedNode || !navigatedNode.nodeItem.hasChildren) {
                         return;

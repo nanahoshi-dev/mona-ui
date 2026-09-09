@@ -14248,6 +14248,12 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Emitted when the tree-view loses focus.",
+        "kind": "output",
+        "name": "blur",
+        "type": "FocusEvent"
+      },
+      {
         "description": "Property name or accessor used to derive a node's children from a data item. Accepts a property name, a function returning the children, or a function returning an observable of the children.",
         "kind": "input",
         "name": "children",
@@ -14260,6 +14266,12 @@
         "name": "data",
         "type": "Iterable<T>",
         "defaultValue": "[]"
+      },
+      {
+        "description": "Emitted when the tree-view gains focus.",
+        "kind": "output",
+        "name": "focus",
+        "type": "FocusEvent"
       },
       {
         "description": "Predicate that determines whether a node has children. Required when the children selector returns an observable.",
@@ -14281,18 +14293,6 @@
         "name": "mode",
         "type": "DataStructure",
         "defaultValue": "\"hierarchical\""
-      },
-      {
-        "description": "Emitted when the tree-view loses focus.",
-        "kind": "output",
-        "name": "blur",
-        "type": "FocusEvent"
-      },
-      {
-        "description": "Emitted when the tree-view gains focus.",
-        "kind": "output",
-        "name": "focus",
-        "type": "FocusEvent"
       },
       {
         "description": "Emitted when a node is clicked.",

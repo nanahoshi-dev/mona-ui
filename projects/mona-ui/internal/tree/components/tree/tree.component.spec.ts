@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { TreeService } from "../../services/tree.service";
 import { SubTreeComponent } from "../sub-tree/sub-tree.component";
 import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.component";
@@ -6,29 +7,29 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
 import { TreeComponent } from "./tree.component";
 
 interface TestItem {
+    children?: TestItem[];
     id: string;
     text: string;
-    children?: TestItem[];
 }
 
 function buildData(): TestItem[] {
     return [
         {
-            id: "1",
-            text: "Node 1",
             children: [
                 { id: "1.1", text: "Node 1.1" },
                 { id: "1.2", text: "Node 1.2" }
-            ]
+            ],
+            id: "1",
+            text: "Node 1"
         },
         { id: "2", text: "Node 2" }
     ];
 }
 
 describe("TreeComponent", () => {
-    let component: TreeComponent<any>;
-    let fixture: ComponentFixture<TreeComponent<any>>;
-    let treeService: TreeService<any>;
+    let component: TreeComponent<TestItem>;
+    let fixture: ComponentFixture<TreeComponent<TestItem>>;
+    let treeService: TreeService<TestItem>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -36,7 +37,7 @@ describe("TreeComponent", () => {
             providers: [TreeService]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TreeComponent);
+        fixture = TestBed.createComponent(TreeComponent) as unknown as ComponentFixture<TreeComponent<TestItem>>;
         component = fixture.componentInstance;
         treeService = fixture.debugElement.injector.get(TreeService);
         fixture.detectChanges();
@@ -95,6 +96,27 @@ describe("TreeComponent", () => {
             expect(treeService.isExpanded(node1)).toBe(true);
 
             dispatchKeydown("ArrowLeft");
+            expect(treeService.isExpanded(node1)).toBe(false);
+        });
+
+        it("inverts expand/collapse keys in RTL (ArrowLeft expands, ArrowRight collapses)", () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "rtl",
+                id: "ar",
+                messages: {}
+            });
+            fixture.detectChanges();
+
+            setupTree();
+            dispatchKeydown("Home");
+            const node1 = treeService.navigatedNode()!;
+            expect(treeService.isExpanded(node1)).toBe(false);
+
+            dispatchKeydown("ArrowLeft");
+            expect(treeService.isExpanded(node1)).toBe(true);
+
+            dispatchKeydown("ArrowRight");
             expect(treeService.isExpanded(node1)).toBe(false);
         });
 

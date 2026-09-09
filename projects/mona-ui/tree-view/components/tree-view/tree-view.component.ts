@@ -28,7 +28,9 @@ import {
     TreeService
 } from "@nanahoshi/mona-ui/internal/tree";
 import { Predicate, Selector } from "@mirei/ts-collections";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { TreeViewNodeTemplateDirective } from "../../directives/tree-view-node-template.directive";
+import { TREE_VIEW_DEFAULT_MESSAGES } from "../../i18n/tree-view.default-messages";
 import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateContext";
 
 @Component({
@@ -39,16 +41,18 @@ import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateCo
 })
 export class TreeViewComponent<T> implements ITreeView<T> {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #i18n = inject(MonaI18nService);
 
+    protected readonly filterAriaLabel = computed<string>(() => {
+        const ariaLabel = this.ariaLabel();
+        return ariaLabel ? `${this.messages().filter} ${ariaLabel}` : this.messages().filterTree;
+    });
+    protected readonly messages = this.#i18n.componentMessages("treeView", TREE_VIEW_DEFAULT_MESSAGES);
     protected readonly nodeTemplate = contentChild<
         TreeViewNodeTemplateDirective,
         TemplateRef<TreeViewNodeTemplateContext<T>>
     >(TreeViewNodeTemplateDirective, { read: TemplateRef });
     protected readonly treeService = inject(TreeService<T>);
-    protected readonly filterAriaLabel = computed<string>(() => {
-        const ariaLabel = this.ariaLabel();
-        return ariaLabel ? `Filter ${ariaLabel}` : "Filter tree";
-    });
 
     /**
      * @description Enables CSS transitions when nodes expand or collapse.
@@ -63,6 +67,12 @@ export class TreeViewComponent<T> implements ITreeView<T> {
     public readonly ariaLabel = input<string>("");
 
     /**
+     * @description Emitted when the tree-view loses focus.
+     */
+    // eslint-disable-next-line @angular-eslint/no-output-native
+    public readonly blur = output<FocusEvent>();
+
+    /**
      * @description Property name or accessor used to derive a node's children from a data item. Accepts a property name, a function returning the children, or a function returning an observable of the children.
      * @default ""
      */
@@ -73,6 +83,12 @@ export class TreeViewComponent<T> implements ITreeView<T> {
      * @default []
      */
     public readonly data = input<Iterable<T>>([]);
+
+    /**
+     * @description Emitted when the tree-view gains focus.
+     */
+    // eslint-disable-next-line @angular-eslint/no-output-native
+    public readonly focus = output<FocusEvent>();
 
     /**
      * @description Predicate that determines whether a node has children. Required when the children selector returns an observable.
@@ -91,16 +107,6 @@ export class TreeViewComponent<T> implements ITreeView<T> {
      * @default "hierarchical"
      */
     public readonly mode = input<DataStructure>("hierarchical");
-
-    /**
-     * @description Emitted when the tree-view loses focus.
-     */
-    public readonly blur = output<FocusEvent>();
-
-    /**
-     * @description Emitted when the tree-view gains focus.
-     */
-    public readonly focus = output<FocusEvent>();
 
     /**
      * @description Emitted when a node is clicked.
