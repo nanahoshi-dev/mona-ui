@@ -26,7 +26,7 @@ import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { DateTime, DurationObjectUnits } from "luxon";
 import { fromEvent, skip } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { CALENDAR_DEFAULT_MESSAGES } from "../../i18n/calendar.default-messages";
 import { CalendarDecadeCellTemplateDirective } from "../../directives/calendar-decade-cell-template.directive";
 import { CalendarMonthCellTemplateDirective } from "../../directives/calendar-month-cell-template.directive";
@@ -74,6 +74,7 @@ import { compareDates } from "../../utils/compareDates";
 export class CalendarComponent implements CalendarVariantInput, FormValueControl<Date | Date[] | null> {
     readonly #calendarService = inject(CalendarService, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     protected readonly messages = this.#i18n.componentMessages("calendar", CALENDAR_DEFAULT_MESSAGES);
@@ -655,18 +656,18 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             case "ArrowLeft":
                 event.preventDefault();
                 if (isCtrlOrCmd) {
-                    this.navigatePeriodKeyboard("prev");
+                    this.navigatePeriodKeyboard(this.horizontalPeriodDirection("ArrowLeft"));
                 } else {
-                    this.navigateByDaysOrCells(-1, view);
+                    this.navigateByDaysOrCells(this.horizontalCellDelta("ArrowLeft"), view);
                 }
                 shouldFocusCell = true;
                 break;
             case "ArrowRight":
                 event.preventDefault();
                 if (isCtrlOrCmd) {
-                    this.navigatePeriodKeyboard("next");
+                    this.navigatePeriodKeyboard(this.horizontalPeriodDirection("ArrowRight"));
                 } else {
-                    this.navigateByDaysOrCells(1, view);
+                    this.navigateByDaysOrCells(this.horizontalCellDelta("ArrowRight"), view);
                 }
                 shouldFocusCell = true;
                 break;
@@ -770,11 +771,11 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             switch (event.key) {
                 case "ArrowLeft":
                     event.preventDefault();
-                    this.extendSelection(-1);
+                    this.extendSelection(this.horizontalCellDelta("ArrowLeft"));
                     return true;
                 case "ArrowRight":
                     event.preventDefault();
-                    this.extendSelection(1);
+                    this.extendSelection(this.horizontalCellDelta("ArrowRight"));
                     return true;
                 case "ArrowUp":
                     event.preventDefault();
@@ -838,6 +839,22 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     private isEmptyValue(): boolean {
         const value = this.value();
         return value == null || (Array.isArray(value) && value.length === 0);
+    }
+
+    private horizontalCellDelta(key: "ArrowLeft" | "ArrowRight"): -1 | 1 {
+        const isRtl = this.#direction() === "rtl";
+        if (key === "ArrowLeft") {
+            return isRtl ? 1 : -1;
+        }
+        return isRtl ? -1 : 1;
+    }
+
+    private horizontalPeriodDirection(key: "ArrowLeft" | "ArrowRight"): "prev" | "next" {
+        const isRtl = this.#direction() === "rtl";
+        if (key === "ArrowLeft") {
+            return isRtl ? "next" : "prev";
+        }
+        return isRtl ? "prev" : "next";
     }
 
     private navigateByDaysOrCells(offset: number, view: CalendarView): void {

@@ -49,7 +49,7 @@
         [size]="'small'"
         (click)="onNavigationClick('prev')"
         [attr.aria-label]="prevButtonLabel()">
-        <svg lucideChevronLeft></svg>
+        <svg lucideChevronLeft class="rtl:rotate-180"></svg>
     </button>
     <button
         monaButton
@@ -59,7 +59,7 @@
         [size]="'small'"
         (click)="onNavigationClick('next')"
         [attr.aria-label]="nextButtonLabel()">
-        <svg lucideChevronRight></svg>
+        <svg lucideChevronRight class="rtl:rotate-180"></svg>
     </button>
 </div>
 

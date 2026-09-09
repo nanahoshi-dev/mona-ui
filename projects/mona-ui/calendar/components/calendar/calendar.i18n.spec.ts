@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
 import { describe, expect, it } from "vitest";
@@ -107,5 +107,138 @@ describe("CalendarComponent i18n", () => {
 
         expect(getWeekdayHeaders()).toContain("Mo");
         expect(getWeekdayHeaders()).toContain("So");
+    });
+
+    it("renders rtl:rotate-180 on header navigation chevron icons", () => {
+        TestBed.configureTestingModule({});
+        const fixture = TestBed.createComponent(CalendarTestHostComponent);
+        fixture.detectChanges();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const prevButton = hostEl.querySelector('button[aria-label*="Previous"]') as HTMLButtonElement;
+        const nextButton = hostEl.querySelector('button[aria-label*="Next"]') as HTMLButtonElement;
+
+        expect(prevButton.querySelector("svg")?.getAttribute("class")).toContain("rtl:rotate-180");
+        expect(nextButton.querySelector("svg")?.getAttribute("class")).toContain("rtl:rotate-180");
+    });
+
+    it("navigates days with ArrowLeft/Right according to DOM direction", async () => {
+        @Component({
+            template: `<mona-calendar [(value)]="value"></mona-calendar>`,
+            imports: [CalendarComponent]
+        })
+        class TestHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 8, 15));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [TestHostComponent]
+        });
+        const fixture = TestBed.createComponent(TestHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+        const getFocusedDay = () => calendarEl.querySelector("[monaMonthDay][tabindex='0']")?.textContent?.trim();
+
+        expect(getFocusedDay()).toBe("15");
+
+        // 1. In LTR DOM: ArrowLeft = prev (-1 day), ArrowRight = next (+1 day)
+        calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
+        fixture.detectChanges();
+        expect(getFocusedDay()).toBe("14");
+
+        calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+        fixture.detectChanges();
+        expect(getFocusedDay()).toBe("15");
+
+        // 2. In RTL DOM: ArrowLeft = next (+1 day), ArrowRight = prev (-1 day)
+        calendarEl.setAttribute("dir", "rtl");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
+        fixture.detectChanges();
+        expect(getFocusedDay()).toBe("16");
+
+        calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+        fixture.detectChanges();
+        expect(getFocusedDay()).toBe("15");
+    });
+
+    it("navigates periods with Ctrl+ArrowLeft/Right according to DOM direction", async () => {
+        @Component({
+            template: `<mona-calendar [(value)]="value"></mona-calendar>`,
+            imports: [CalendarComponent]
+        })
+        class TestHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 8, 15));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [TestHostComponent]
+        });
+        const fixture = TestBed.createComponent(TestHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+        const getHeading = () => calendarEl.querySelector("[id$='-heading']")?.textContent?.trim();
+
+        expect(getHeading()).toBe("September 2026");
+
+        // In RTL DOM: Ctrl+ArrowLeft = next period ("next"), Ctrl+ArrowRight = prev period ("prev")
+        calendarEl.setAttribute("dir", "rtl");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", ctrlKey: true, bubbles: true, cancelable: true }));
+        fixture.detectChanges();
+        expect(getHeading()).toBe("October 2026");
+
+        calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", ctrlKey: true, bubbles: true, cancelable: true }));
+        fixture.detectChanges();
+        expect(getHeading()).toBe("September 2026");
+    });
+
+    it("respects DOM direction over locale direction across mismatch scenarios", async () => {
+        @Component({
+            template: `<mona-calendar [(value)]="value"></mona-calendar>`,
+            imports: [CalendarComponent]
+        })
+        class TestHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 8, 15));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [TestHostComponent]
+        });
+        const fixture = TestBed.createComponent(TestHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+        const getFocusedDay = () => calendarEl.querySelector("[monaMonthDay][tabindex='0']")?.textContent?.trim();
+
+        // RTL locale + LTR DOM -> ArrowLeft = prev (-1 day)
+        i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+        calendarEl.setAttribute("dir", "ltr");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
+        fixture.detectChanges();
+        expect(getFocusedDay()).toBe("14");
+
+        // LTR locale + RTL DOM -> ArrowLeft = next (+1 day)
+        i18n.use({ id: "en-US", direction: "ltr", messages: {} });
+        calendarEl.setAttribute("dir", "rtl");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
+        fixture.detectChanges();
+        expect(getFocusedDay()).toBe("15");
     });
 });
