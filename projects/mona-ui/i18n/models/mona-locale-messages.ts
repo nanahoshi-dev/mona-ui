@@ -25,6 +25,7 @@ import type { MonaSplitterMessages } from "../message-types/splitter.messages";
 import type { MonaStepperMessages } from "../message-types/stepper.messages";
 import type { MonaTabsMessages } from "../message-types/tabs.messages";
 import type { MonaTextBoxMessages } from "../message-types/text-box.messages";
+import type { MonaTimePickerMessages } from "../message-types/time-picker.messages";
 import type { MonaTimeSelectorMessages } from "../message-types/time-selector.messages";
 import type { MonaTreeViewMessages } from "../message-types/tree-view.messages";
 import type { MonaWindowMessages } from "../message-types/window.messages";
@@ -57,6 +58,7 @@ export interface MonaLocaleMessages extends Record<string, object> {
     stepper: MonaStepperMessages;
     tabs: MonaTabsMessages;
     textBox: MonaTextBoxMessages;
+    timePicker: MonaTimePickerMessages;
     timeSelector: MonaTimeSelectorMessages;
     treeView: MonaTreeViewMessages;
     window: MonaWindowMessages;

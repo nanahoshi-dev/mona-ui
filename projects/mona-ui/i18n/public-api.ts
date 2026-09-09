@@ -35,6 +35,7 @@ export * from "./message-types/splitter.messages";
 export * from "./message-types/stepper.messages";
 export * from "./message-types/tabs.messages";
 export * from "./message-types/text-box.messages";
+export * from "./message-types/time-picker.messages";
 export * from "./message-types/time-selector.messages";
 export * from "./message-types/tree-view.messages";
 export * from "./message-types/window.messages";

@@ -29,6 +29,7 @@ import {
     dropdownPopupThemeVariants,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -37,6 +38,7 @@ import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { TIME_PICKER_DEFAULT_MESSAGES } from "../../i18n/time-picker.default-messages";
 import {
     timePickerBaseThemeVariants,
     TimePickerVariantInput,
@@ -71,6 +73,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #id = createElementControlId();
 
     protected readonly baseClass = computed(() => {
@@ -108,6 +111,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly messages = this.#i18n.componentMessages("timePicker", TIME_PICKER_DEFAULT_MESSAGES);
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {
         const rounded = this.rounded();
@@ -122,6 +126,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     /**
      * @description Emits when the popup is about to close. This event is preventable.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly close = output<PopupCloseEvent>();
 
     /**
@@ -291,6 +296,14 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         });
     }
 
+    public focus(): void {
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input && !this.readonly()) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
+    }
+
     protected onDateStringEdit(dateString: string): void {
         this.currentDateString.set(dateString);
     }
@@ -325,14 +338,6 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
             );
         }
         return date1 === date2;
-    }
-
-    public focus(): void {
-        const input = this.#hostElementRef.nativeElement.querySelector("input");
-        if (input && !this.readonly()) {
-            input.focus();
-            input.setSelectionRange(input.value.length, input.value.length);
-        }
     }
 
     private generateValidDateTime(dateString: string): DateTime | null {
@@ -375,7 +380,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     }
 
     private processTimeInput(inputText: string): void {
-        let dateTime = this.generateValidDateTime(inputText);
+        const dateTime = this.generateValidDateTime(inputText);
         if (!dateTime) {
             this.setCurrentDate(null);
             return;
