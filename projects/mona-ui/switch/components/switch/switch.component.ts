@@ -93,9 +93,6 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         const classes = switchThemeVariants({ rounded, size });
         return twMerge(classes, this.userClass());
     });
-    protected readonly invalidState = computed(
-        () => this.touched() && (this.invalid() || (this.required() && !this.checked()))
-    );
     protected readonly handleClasses = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -105,6 +102,9 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     protected readonly handleContentTemplate = contentChild(SwitchHandleContentTemplateDirective, {
         read: TemplateRef
     });
+    protected readonly invalidState = computed(
+        () => this.touched() && (this.invalid() || (this.required() && !this.checked()))
+    );
     protected readonly labelClasses = computed(() => {
         const classes = switchLabelThemeVariants();
         return twMerge(classes);

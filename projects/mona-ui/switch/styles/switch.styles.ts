@@ -53,7 +53,7 @@ export const switchHandleThemeVariants = cva(
         ${themeRaisedSurfaceClasses} text-foreground
         border border-border-subtle shadow-(--shadow-control)
         outline-none
-        transition-[left,background] duration-(--mona-motion-standard) ease-in-out
+        transition-[inset-inline-start,background] duration-(--mona-motion-standard) ease-in-out
         data-[active='true']:bg-primary-foreground
         group-data-[disabled='true']:border-disabled-border
         group-data-[disabled='true']:bg-disabled-background
@@ -70,22 +70,23 @@ export const switchHandleThemeVariants = cva(
             size: {
                 large: `
                     h-6 w-6
-                    data-[active='true']:left-[calc(100%-26px)]
-                    data-[active='false']:left-0.5
+                    data-[active='true']:start-[calc(100%-26px)]
+                    data-[active='false']:start-0.5
                 `,
                 medium: `
                     h-5 w-5
-                    data-[active='true']:left-[calc(100%-22px)]
-                    data-[active='false']:left-0.5
+                    data-[active='true']:start-[calc(100%-22px)]
+                    data-[active='false']:start-0.5
                 `,
                 small: `
                     h-4 w-4
-                    data-[active='true']:left-[calc(100%-18px)]
-                    data-[active='false']:left-0.5
+                    data-[active='true']:start-[calc(100%-18px)]
+                    data-[active='false']:start-0.5
                 `
             }
         }
     }
+
 );
 
 export const switchLabelThemeVariants = cva(
