@@ -135,7 +135,7 @@ describe("GridComponent", () => {
 
         expect(gridClasses).toContain("bg-surface");
         expect(gridClasses).toContain("border-border");
-        expect(headerCellClasses).toContain("border-r-border-subtle");
+        expect(headerCellClasses).toContain("border-e-border-subtle");
         expect(headerCellClasses).toContain("focus:after:ring-focus-indicator/35");
         expect(headerCellClasses).not.toContain("ring-primary");
     });
