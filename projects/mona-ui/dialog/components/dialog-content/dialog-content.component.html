@@ -30,7 +30,7 @@
                         look="ghost"
                         size="small"
                         [iconOnly]="true"
-                        aria-label="Close dialog"
+                        [attr.aria-label]="messages().closeDialog"
                         (click)="onCloseClick()">
                         <svg lucideX [size]="16"></svg>
                     </button>
@@ -57,12 +57,12 @@
     </div>
 </div>
 
-@if (data.footerTemplate || (data.actions | monaAny)) {
+@if (data.footerTemplate || (actions() | monaAny)) {
     @if (data.footerTemplate) {
         <ng-container [ngTemplateOutlet]="data.footerTemplate"></ng-container>
     } @else {
         <div [class]="footerClass()">
-            @for (action of data.actions; track $index) {
+            @for (action of actions(); track $index) {
                 <button
                     monaButton
                     type="button"

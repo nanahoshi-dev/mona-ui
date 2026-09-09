@@ -6,6 +6,7 @@ import type { MonaColorGradientMessages } from "../message-types/color-gradient.
 import type { MonaColorPaletteMessages } from "../message-types/color-palette.messages";
 import type { MonaColorPickerMessages } from "../message-types/color-picker.messages";
 import type { MonaComboBoxMessages } from "../message-types/combo-box.messages";
+import type { MonaDialogMessages } from "../message-types/dialog.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
@@ -34,6 +35,7 @@ export interface MonaLocaleMessages extends Record<string, object> {
     colorPalette: MonaColorPaletteMessages;
     colorPicker: MonaColorPickerMessages;
     comboBox: MonaComboBoxMessages;
+    dialog: MonaDialogMessages;
     dropdownList: MonaDropdownListMessages;
     dropdowns: MonaDropdownsMessages;
     list: MonaListMessages;

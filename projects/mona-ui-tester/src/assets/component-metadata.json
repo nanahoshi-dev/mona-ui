@@ -8666,17 +8666,17 @@
         "type": "PopupCloseEvent"
       },
       {
-        "description": "Emits when the dialog is closed.",
-        "kind": "output",
-        "name": "closed",
-        "type": "void"
-      },
-      {
         "description": "Sets whether the dialog should close when the escape key is pressed.",
         "kind": "input",
         "name": "closeOnEscape",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Emits when the dialog is closed.",
+        "kind": "output",
+        "name": "closed",
+        "type": "void"
       },
       {
         "description": "Sets the description of the dialog.",
@@ -8713,6 +8713,12 @@
         "kind": "input",
         "name": "maxWidth",
         "type": "number"
+      },
+      {
+        "description": "Sets the custom messages for the dialog.",
+        "kind": "input",
+        "name": "messages",
+        "type": "Partial<DialogMessages>"
       },
       {
         "description": "Sets the minimum height of the dialog.",

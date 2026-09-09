@@ -1,11 +1,9 @@
-import { DialogAction } from "../models/DialogAction";
 import { DialogInjectorData } from "../models/DialogInjectorData";
 import { DialogSettings } from "../models/DialogSettings";
-import { DialogVariantProps } from "../styles/dialog.styles";
 
 export const createDialogInjectorData = (settings: Partial<DialogSettings>): DialogInjectorData => {
     return {
-        actions: settings.actions ?? getDefaultActions(settings.type),
+        actions: settings.actions,
         actionsLayout: settings.actionsLayout ?? "end",
         closable: settings.closable ?? true,
         closeOnEscape: settings.closeOnEscape ?? true,
@@ -18,6 +16,7 @@ export const createDialogInjectorData = (settings: Partial<DialogSettings>): Dia
         height: settings.height,
         iconTemplate: settings.iconTemplate,
         left: settings.left,
+        messages: settings.messages,
         modal: settings.modal ?? true,
         rounded: settings.rounded ?? "medium",
         text: settings.text ?? "",
@@ -28,13 +27,3 @@ export const createDialogInjectorData = (settings: Partial<DialogSettings>): Dia
         width: settings.width ?? 450
     };
 };
-
-function getDefaultActions(type: DialogVariantProps["type"] | undefined): DialogAction[] {
-    if (type === "confirm") {
-        return [
-            { cssClass: "", iconOnly: false, look: "primary", rounded: "medium", text: "OK" },
-            { cssClass: "", iconOnly: false, look: "default", rounded: "medium", text: "Cancel" }
-        ];
-    }
-    return [{ cssClass: "", iconOnly: false, look: "primary", rounded: "medium", text: "OK" }];
-}

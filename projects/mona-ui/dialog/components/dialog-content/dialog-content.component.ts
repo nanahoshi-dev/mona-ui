@@ -1,6 +1,6 @@
 import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, ElementRef, inject } from "@angular/core";
+import { afterNextRender, Component, computed, ElementRef, inject } from "@angular/core";
 import {
     LucideBadgeInfo,
     LucideBadgeQuestionMark,
@@ -13,8 +13,10 @@ import {
 } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { AnyPipe } from "@nanahoshi/mona-ui/common";
+import { mergeMessages, type MonaDialogMessages, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId, focusElement } from "@nanahoshi/mona-ui/internal";
 import { PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
+import { DIALOG_DEFAULT_MESSAGES } from "../../i18n/dialog.default-messages";
 import { DialogAction } from "../../models/DialogAction";
 import { DialogInjectorData } from "../../models/DialogInjectorData";
 import {
@@ -38,7 +40,6 @@ type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; 
 @Component({
     templateUrl: "./dialog-content.component.html",
     imports: [ButtonDirective, NgTemplateOutlet, AnyPipe, LucideX, LucideDynamicIcon],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()",
         "[attr.aria-describedby]": "describedById()",
@@ -49,6 +50,7 @@ type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; 
 })
 export class DialogContentComponent {
     readonly #hostElementRef = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #iconMap: IconMap = {
         confirm: { color: "var(--color-success)", icon: LucideBadgeQuestionMark },
         error: { color: "var(--color-error)", icon: LucideOctagonX },
@@ -57,7 +59,15 @@ export class DialogContentComponent {
         warning: { color: "var(--color-warning)", icon: LucideOctagonAlert }
     };
     readonly #injectedData = inject<DialogInjectorData>(PopupDataInjectionToken);
+    readonly #localeMessages = this.#i18n.componentMessages("dialog", DIALOG_DEFAULT_MESSAGES);
     readonly #trapFocus = inject(CdkTrapFocus);
+    protected readonly actions = computed(() => {
+        const data = this.dialogData();
+        if (data.actions != null) {
+            return data.actions;
+        }
+        return this.getDefaultActions(data.type);
+    });
     protected readonly baseClass = computed(() => {
         const rounded = this.dialogData().rounded;
         return dialogBaseThemeVariants({ rounded });
@@ -105,6 +115,9 @@ export class DialogContentComponent {
     protected readonly iconContainerClass = computed(() => {
         return dialogIconContainerThemeVariants();
     });
+    protected readonly messages = computed<MonaDialogMessages>(() => {
+        return mergeMessages(this.#localeMessages(), this.dialogData().messages);
+    });
     protected readonly role = computed(() => {
         const type = this.dialogData().type;
         return type === "confirm" || type === "error" || type === "warning" ? "alertdialog" : "dialog";
@@ -145,5 +158,15 @@ export class DialogContentComponent {
         }
         const dialogElement = this.#hostElementRef.nativeElement;
         focusElement(dialogElement, element);
+    }
+
+    private getDefaultActions(type: DialogVariantProps["type"] | undefined): DialogAction[] {
+        if (type === "confirm") {
+            return [
+                { cssClass: "", iconOnly: false, look: "primary", rounded: "medium", text: this.messages().ok },
+                { cssClass: "", iconOnly: false, look: "default", rounded: "medium", text: this.messages().cancel }
+            ];
+        }
+        return [{ cssClass: "", iconOnly: false, look: "primary", rounded: "medium", text: this.messages().ok }];
     }
 }

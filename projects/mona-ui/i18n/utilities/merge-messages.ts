@@ -29,8 +29,8 @@ function mergeTwo<T extends object>(base: T, source?: DeepPartial<T>): T {
 
 export function mergeMessages<T extends object>(
     fallback: T,
-    localeMessages?: DeepPartial<T>,
-    overrideMessages?: DeepPartial<T>
+    localeMessages?: DeepPartial<NoInfer<T>>,
+    overrideMessages?: DeepPartial<NoInfer<T>>
 ): T {
     const withLocale = mergeTwo(fallback, localeMessages);
     return mergeTwo(withLocale, overrideMessages);

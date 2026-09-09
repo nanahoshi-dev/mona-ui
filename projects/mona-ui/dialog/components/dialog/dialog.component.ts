@@ -23,6 +23,7 @@ import { DialogAction } from "../../models/DialogAction";
 import { DialogActionEvent } from "../../models/DialogActionEvent";
 import { DialogRef } from "../../models/DialogRef";
 import { DialogService } from "../../services/dialog.service";
+import { DialogMessages } from "@nanahoshi/mona-ui/i18n";
 import { DialogVariantInput, DialogVariantProps } from "../../styles/dialog.styles";
 
 @Component({
@@ -71,18 +72,19 @@ export class DialogComponent implements DialogVariantInput {
      * @description Emits when the user clicks on the close button or presses the escape key.
      * This event is preventable.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly close = output<PopupCloseEvent>();
-
-    /**
-     * @description Emits when the dialog is closed.
-     */
-    public readonly closed = output<void>();
 
     /**
      * @description Sets whether the dialog should close when the escape key is pressed.
      * @default true
      */
     public readonly closeOnEscape = input(true);
+
+    /**
+     * @description Emits when the dialog is closed.
+     */
+    public readonly closed = output<void>();
 
     /**
      * @description Sets the description of the dialog.
@@ -114,6 +116,11 @@ export class DialogComponent implements DialogVariantInput {
      * @description Sets the maximum width of the dialog.
      */
     public readonly maxWidth = input<number>();
+
+    /**
+     * @description Sets the custom messages for the dialog.
+     */
+    public readonly messages = input<Partial<DialogMessages>>();
 
     /**
      * @description Sets the minimum height of the dialog.
@@ -175,6 +182,7 @@ export class DialogComponent implements DialogVariantInput {
                 actionsLayout: this.actionsLayout(),
                 closable: this.closable(),
                 description: this.description(),
+                messages: this.messages(),
                 rounded: this.rounded(),
                 text: this.text(),
                 title: this.title(),
@@ -202,6 +210,7 @@ export class DialogComponent implements DialogVariantInput {
             left: this.left(),
             maxHeight: this.maxHeight(),
             maxWidth: this.maxWidth(),
+            messages: this.messages(),
             minHeight: this.minHeight(),
             minWidth: this.minWidth(),
             modal: this.modal(),

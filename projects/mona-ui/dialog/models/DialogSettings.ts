@@ -1,4 +1,5 @@
 import { ElementRef, TemplateRef } from "@angular/core";
+import { DialogMessages } from "@nanahoshi/mona-ui/i18n";
 import { DialogVariantProps } from "../styles/dialog.styles";
 import { ActionsLayout } from "./ActionsLayout";
 import { DialogAction } from "./DialogAction";
@@ -18,6 +19,7 @@ export interface DialogSettings {
     left?: number;
     maxHeight?: number;
     maxWidth?: number;
+    messages?: Partial<DialogMessages>;
     minHeight?: number;
     minWidth?: number;
     modal?: boolean;
