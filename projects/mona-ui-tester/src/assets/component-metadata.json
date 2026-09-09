@@ -14050,11 +14050,11 @@
     "selector": "\"mona-time-selector\"",
     "inputs": [
       {
-        "description": "",
+        "description": "Accessible label for the time selector group.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
-        "defaultValue": "\"Time selector\""
+        "defaultValue": "\"\""
       },
       {
         "description": "",

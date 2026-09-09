@@ -1,4 +1,4 @@
-import { computed, Directive, inject, input } from "@angular/core";
+import { computed, Directive, input } from "@angular/core";
 import {
     timeSelectorListThemeVariants,
     TimeSelectorListVariantInput,

@@ -27,12 +27,14 @@ import {
     TimeLimiterPipe,
     TimeSelectorService
 } from "@nanahoshi/mona-ui/date-input";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { DateTime } from "luxon";
 import { fromEvent, tap } from "rxjs";
 import { filter } from "rxjs/operators";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
 import { TimeSelectorListDirective } from "../../directives/time-selector-list.directive";
+import { TIME_SELECTOR_DEFAULT_MESSAGES } from "../../i18n/time-selector.default-messages";
 import { TimeListType } from "../../models/TimeListType";
 import {
     timeSelectorBaseThemeVariants,
@@ -50,7 +52,7 @@ import {
     imports: [DecimalPipe, TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective, TimeSelectorListDirective],
     host: {
         role: "group",
-        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-label]": "ariaLabel() || messages().timeSelector",
         "[attr.aria-disabled]": "disabled()",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-readonly]": "readonly()",
@@ -66,6 +68,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     readonly #destroyRef = inject(DestroyRef);
     readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #i18n = inject(MonaI18nService);
     readonly #timeSelectorService = inject(TimeSelectorService, { optional: true });
 
     protected readonly amMeridiemVisible = computed(() => {
@@ -108,6 +111,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly meridiem = signal<Meridiem>("AM");
     protected readonly meridiemListId = createElementControlId();
     protected readonly meridiemListRef = viewChild<ElementRef<HTMLOListElement>>("meridiemList");
+    protected readonly messages = this.#i18n.componentMessages("timeSelector", TIME_SELECTOR_DEFAULT_MESSAGES);
     protected readonly minDate = computed(() => {
         const min = this.min();
         return min ? DateTime.fromJSDate(min) : null;
@@ -136,7 +140,11 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         return generateHourSet(hourFormat, meridiem, hourStep);
     });
 
-    public readonly ariaLabel = input<string>("Time selector");
+    /**
+     * @description Accessible label for the time selector group.
+     * @default ""
+     */
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
     public readonly disabled = input(false);
     public readonly focusOnMount = input(true);
     public readonly footer = input(true);
@@ -267,7 +275,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         this.navigatedDate.update(date => date.set({ minute }));
     }
 
-    protected onNowClick(event: Event): void {
+    protected onNowClick(_event: Event): void {
         if (this.disabled() || this.readonly()) {
             return;
         }
@@ -303,6 +311,15 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         this.updateValue(this.navigatedDate().toJSDate(), true);
     }
 
+    private dateValuesEqual(date1: Date | null, date2: Date | null): boolean {
+        return date1?.getTime() === date2?.getTime();
+    }
+
+    private focusList(listType: TimeListType): void {
+        const listRef = this.getListRef(listType);
+        listRef?.nativeElement.focus();
+    }
+
     private getListRef(listType: TimeListType): ElementRef<HTMLOListElement> | undefined {
         switch (listType) {
             case "hours":
@@ -325,7 +342,9 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
             lists.push("meridiem");
         }
         const currentIndex = lists.indexOf(current);
-        if (direction === "right") {
+        const isRtl = this.#i18n.direction() === "rtl";
+        const effectiveDirection = isRtl ? (direction === "left" ? "right" : "left") : direction;
+        if (effectiveDirection === "right") {
             return lists[(currentIndex + 1) % lists.length];
         } else {
             return lists[(currentIndex - 1 + lists.length) % lists.length];
@@ -383,15 +402,6 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
                 this.updateValue(this.navigatedDate().toJSDate(), true);
                 break;
         }
-    }
-
-    private focusList(listType: TimeListType): void {
-        const listRef = this.getListRef(listType);
-        listRef?.nativeElement.focus();
-    }
-
-    private dateValuesEqual(date1: Date | null, date2: Date | null): boolean {
-        return date1?.getTime() === date2?.getTime();
     }
 
     private initializeNavigatedDate(date: Date | null): void {
