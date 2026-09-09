@@ -21,3 +21,5 @@ export * from "./services/dropdown.service";
 export * from "./services/dropdown-list.service";
 
 export * from "./styles/dropdown-popup.styles";
+
+export * from "./i18n/dropdowns.default-messages";
