@@ -15,6 +15,7 @@ import {
 } from "@angular/core";
 import { Orientation } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
 import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-value-template.directive";
 import { SliderTickDirective } from "../../directives/slider-tick.directive";
@@ -38,12 +39,9 @@ import { valueToPosition } from "../../utils/valueToPosition";
 
 @Directive()
 export abstract class SliderBaseComponent implements SliderVariantInputs {
+    protected readonly baseClasses = computed(() => sliderBaseThemeVariants());
     protected readonly destroyRef = inject(DestroyRef);
     protected readonly dragging = signal(false);
-    protected readonly hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
-    protected readonly tickElements = viewChildren(SliderTickDirective);
-    protected readonly zone: NgZone = inject(NgZone);
-    protected readonly baseClasses = computed(() => sliderBaseThemeVariants());
     protected readonly effectiveDisabled = computed(() => this.disabled());
     protected readonly handleTemplate = contentChild(SliderHandleTemplateDirective, { read: TemplateRef });
     protected readonly handleTemplateStyles = computed<Partial<CSSStyleDeclaration>>(() => {
@@ -53,6 +51,9 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return { background: "transparent", border: "none", boxShadow: "none" };
     });
+    protected readonly hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
+    protected readonly i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.i18n.direction() === "rtl");
     protected readonly labelStyleArgs = computed<LabelStyleArgs>(() => {
         const labelPosition = this.labelPosition();
         const max = this.maxValue();
@@ -120,6 +121,7 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         return `${number}px`;
     });
     protected readonly tickClasses = computed(() => sliderTickThemeVariants());
+    protected readonly tickElements = viewChildren(SliderTickDirective);
     protected readonly tickLabelClasses = computed(() => sliderTickLabelThemeVariants());
     protected readonly tickLabelListClasses = computed(() => sliderTickLabelListThemeVariants());
     protected readonly tickListClasses = computed(() => sliderTickListThemeVariants());
@@ -158,6 +160,7 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         const rounded = this.rounded();
         return sliderTrackThemeVariants({ rounded });
     });
+    protected readonly zone: NgZone = inject(NgZone);
 
     /**
      * @description Human-readable override for the `aria-valuenow` announcement. Pass a function that receives the current value and returns the string to announce.
@@ -298,15 +301,18 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         const min = this.minValue();
         const max = this.maxValue();
         const step = this.step();
+        const isRtl = this.isRtl();
+        const decreaseKey = isRtl ? "ArrowRight" : "ArrowLeft";
+        const increaseKey = isRtl ? "ArrowLeft" : "ArrowRight";
 
         let newValue = currentValue;
 
         switch (event.key) {
-            case "ArrowLeft":
+            case decreaseKey:
             case "ArrowDown":
                 newValue = currentValue - (event.shiftKey ? step * this.shiftMultiplier() : step);
                 break;
-            case "ArrowRight":
+            case increaseKey:
             case "ArrowUp":
                 newValue = currentValue + (event.shiftKey ? step * this.shiftMultiplier() : step);
                 break;
@@ -357,7 +363,9 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         let normalizedHandlePos: number;
 
         if (this.orientation() === "horizontal") {
-            const handlePos = event.clientX - containerRect.left;
+            const handlePos = this.isRtl()
+                ? containerRect.right - event.clientX
+                : event.clientX - containerRect.left;
             normalizedHandlePos = (handlePos / containerRect.width) * 100;
         } else {
             const handlePos = event.clientY - containerRect.top;

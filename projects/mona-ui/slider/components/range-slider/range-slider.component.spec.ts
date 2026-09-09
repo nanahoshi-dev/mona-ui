@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled as fieldDisabled, form, FormField } from "@angular/forms/signals";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
 import type { SliderVariantProps } from "../../styles/slider.styles";
 import { RangeSliderComponent } from "./range-slider.component";
@@ -240,6 +241,74 @@ describe("RangeSliderComponent", () => {
             expect(handles.length).toBe(2);
             expect((handles[0].nativeElement as HTMLElement).textContent?.trim()).toBe("2");
             expect((handles[1].nativeElement as HTMLElement).textContent?.trim()).toBe("8");
+        });
+    });
+
+    describe("i18n and RTL", () => {
+        it("renders default English aria-labels on handles", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            await waitForStable(fixture);
+
+            expect(getPrimaryHandle(fixture).getAttribute("aria-label")).toBe("Minimum value");
+            expect(getSecondaryHandle(fixture).getAttribute("aria-label")).toBe("Maximum value");
+        });
+
+        it("updates aria-labels dynamically when locale changes", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    slider: {
+                        maximumValue: "Maksimum değer",
+                        minimumValue: "Minimum değer",
+                        sliderValue: "Sürgü değeri"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            expect(getPrimaryHandle(fixture).getAttribute("aria-label")).toBe("Minimum değer");
+            expect(getSecondaryHandle(fixture).getAttribute("aria-label")).toBe("Maksimum değer");
+        });
+
+        it("inverts horizontal arrow key navigation in RTL direction", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "rtl",
+                id: "ar-EG",
+                messages: {
+                    slider: {
+                        maximumValue: "القيمة القصوى",
+                        minimumValue: "القيمة الدنيا",
+                        sliderValue: "قيمة شريط التمرير"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            // In RTL, ArrowRight decreases value, ArrowLeft increases value
+            dispatchKeydown(getSecondaryHandle(fixture), "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 7]);
+
+            dispatchKeydown(getSecondaryHandle(fixture), "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
         });
     });
 });

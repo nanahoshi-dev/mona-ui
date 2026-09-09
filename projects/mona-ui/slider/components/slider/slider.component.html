@@ -8,8 +8,8 @@
         [class]="selectionClasses()"
         [attr.data-orientation]="orientation()"
         [attr.data-dragging]="dragging()"
-        [style.left.%]="orientation() === 'horizontal' ? selectionLeft() : undefined"
-        [style.right.%]="orientation() === 'horizontal' ? 100 - selectionRight() : undefined"
+        [style.inset-inline-start.%]="orientation() === 'horizontal' ? selectionLeft() : undefined"
+        [style.inset-inline-end.%]="orientation() === 'horizontal' ? 100 - selectionRight() : undefined"
         [style.bottom.%]="orientation() === 'vertical' ? selectionLeft() : undefined"
         [style.top.%]="orientation() === 'vertical' ? 100 - selectionRight() : undefined"
         [style]="selectionBackgroundStyle()"></div>
@@ -58,7 +58,7 @@
     [attr.data-dragging]="dragging()"
     [attr.data-focused]="handleFocused()"
     [style]="handleStyle()"
-    [style.left.%]="orientation() === 'horizontal' ? handlePosition() : undefined"
+    [style.inset-inline-start.%]="orientation() === 'horizontal' ? handlePosition() : undefined"
     [style.bottom.%]="orientation() === 'vertical' ? handlePosition() : undefined"
     [attr.tabindex]="effectiveDisabled() ? -1 : 0"
     [attr.role]="'slider'"
@@ -70,7 +70,7 @@
     [attr.aria-disabled]="effectiveDisabled() || null"
     [attr.aria-invalid]="invalid() || null"
     [attr.data-invalid]="invalid() || null"
-    [attr.aria-label]="ariaLabel()"
+    [attr.aria-label]="computedAriaLabel()"
     [attr.aria-labelledby]="ariaLabelledBy()"
     #sliderHandle>
     @if (handleTemplate()) {

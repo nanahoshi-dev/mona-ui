@@ -13,6 +13,7 @@ export * from "./message-types/chip.messages";
 export * from "./message-types/numeric-text-box.messages";
 export * from "./message-types/otp-input.messages";
 export * from "./message-types/pager.messages";
+export * from "./message-types/slider.messages";
 export * from "./message-types/spinner.messages";
 export * from "./message-types/text-box.messages";
 

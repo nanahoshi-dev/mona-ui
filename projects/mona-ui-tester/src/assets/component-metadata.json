@@ -12436,14 +12436,14 @@
         "kind": "input",
         "name": "ariaLabelEnd",
         "type": "string | null",
-        "defaultValue": "\"Maximum value\""
+        "defaultValue": "null"
       },
       {
         "description": "Accessible name for the lower-value (primary) handle.",
         "kind": "input",
         "name": "ariaLabelStart",
         "type": "string | null",
-        "defaultValue": "\"Minimum value\""
+        "defaultValue": "null"
       },
       {
         "description": "Selected range as `[minimum, maximum]`.\r\nValues outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 ≤ index 1.",
@@ -12609,7 +12609,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
-        "defaultValue": "\"Slider value\""
+        "defaultValue": "null"
       },
       {
         "description": "ID of an external element that provides the accessible name for the host element.",

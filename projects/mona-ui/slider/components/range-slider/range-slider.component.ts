@@ -6,6 +6,7 @@ import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
 import { SliderTickDirective } from "../../directives/slider-tick.directive";
 import { LabelStylePipe } from "../../pipes/label-style.pipe";
 import { TickStylePipe } from "../../pipes/tick-style.pipe";
+import { SLIDER_DEFAULT_MESSAGES } from "../../i18n/slider.default-messages";
 import { SliderBaseComponent } from "../slider-base/slider-base.component";
 
 @Component({
@@ -21,6 +22,8 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
     }
 })
 export class RangeSliderComponent extends SliderBaseComponent implements FormValueControl<[number, number]> {
+    protected readonly computedAriaLabelEnd = computed(() => this.ariaLabelEnd() ?? this.messages().maximumValue);
+    protected readonly computedAriaLabelStart = computed(() => this.ariaLabelStart() ?? this.messages().minimumValue);
     protected readonly handlePositions = computed<[number, number]>(() => [
         this.positionFromValue(this.normalizedValue()[0]),
         this.positionFromValue(this.normalizedValue()[1])
@@ -29,6 +32,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
         const values = this.normalizedValue();
         return values[0] === values[1];
     });
+    protected readonly messages = this.i18n.componentMessages("slider", SLIDER_DEFAULT_MESSAGES);
     protected readonly normalizedValue = computed<[number, number]>(() => {
         const value = this.value();
         const minValue = this.snapValue(value[0]);
@@ -62,15 +66,15 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
 
     /**
      * @description Accessible name for the upper-value (secondary) handle.
-     * @default "Maximum value"
+     * @default null
      */
-    public readonly ariaLabelEnd = input<string | null>("Maximum value", { alias: "aria-label-end" });
+    public readonly ariaLabelEnd = input<string | null>(null, { alias: "aria-label-end" });
 
     /**
      * @description Accessible name for the lower-value (primary) handle.
-     * @default "Minimum value"
+     * @default null
      */
-    public readonly ariaLabelStart = input<string | null>("Minimum value", { alias: "aria-label-start" });
+    public readonly ariaLabelStart = input<string | null>(null, { alias: "aria-label-start" });
 
     /**
      * @description Selected range as `[minimum, maximum]`.
@@ -103,7 +107,9 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
             let normalizedClickPos: number;
 
             if (this.orientation() === "horizontal") {
-                const clickPos = event.clientX - containerRect.left;
+                const clickPos = this.isRtl()
+                    ? containerRect.right - event.clientX
+                    : event.clientX - containerRect.left;
                 normalizedClickPos = (clickPos / containerRect.width) * 100;
             } else {
                 const clickPos = event.clientY - containerRect.top;
