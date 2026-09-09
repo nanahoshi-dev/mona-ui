@@ -33,4 +33,10 @@ describe("CheckBoxComponent", () => {
         expect(checkmarkElement.classList.contains("peer-disabled:bg-disabled-background")).toBe(true);
         expect(checkmarkElement.classList.contains("opacity-50")).toBe(false);
     });
+
+    it("uses logical padding on the checkmark element for RTL readiness", () => {
+        const checkmarkElement = fixture.nativeElement.querySelector("span") as HTMLSpanElement;
+        expect(checkmarkElement.classList.contains("ps-0.25")).toBe(true);
+    });
 });
+
