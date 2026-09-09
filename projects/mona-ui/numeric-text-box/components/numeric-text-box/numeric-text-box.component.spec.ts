@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled as fieldDisabled, form, FormField } from "@angular/forms/signals";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { NumericTextBoxComponent } from "./numeric-text-box.component";
 
 @Component({
@@ -231,6 +232,44 @@ describe("NumericTextBoxComponent", () => {
             await waitForStable(fixture);
 
             expect(component.form.amount().value()).toBe(15);
+        });
+    });
+
+    describe("i18n and accessibility", () => {
+        let fixture: ComponentFixture<ValueBindingNumericTextBoxHostComponent>;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingNumericTextBoxHostComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            await waitForStable(fixture);
+        });
+
+        it("renders default English aria-labels for spinner buttons", () => {
+            const buttons = fixture.debugElement.queryAll(By.css("button"));
+            expect(buttons[0].nativeElement.getAttribute("aria-label")).toBe("Increase value");
+            expect(buttons[1].nativeElement.getAttribute("aria-label")).toBe("Decrease value");
+        });
+
+        it("updates spinner button aria-labels dynamically when locale changes", async () => {
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    numericTextBox: {
+                        decrease: "Değeri azalt",
+                        increase: "Değeri artır"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            const buttons = fixture.debugElement.queryAll(By.css("button"));
+            expect(buttons[0].nativeElement.getAttribute("aria-label")).toBe("Değeri artır");
+            expect(buttons[1].nativeElement.getAttribute("aria-label")).toBe("Değeri azalt");
         });
     });
 });

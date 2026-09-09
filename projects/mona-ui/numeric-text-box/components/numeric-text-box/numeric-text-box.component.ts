@@ -36,8 +36,10 @@ import {
     timer
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
+import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../../i18n/numeric-text-box.default-messages";
 import {
     numericTextboxButtonThemeVariants,
     numericTextboxInputThemeVariants,
@@ -64,6 +66,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #i18n = inject(MonaI18nService);
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
     protected readonly classes = computed(() => {
@@ -73,13 +76,6 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
-    protected readonly inputClasses = computed(() => {
-        const hasPrefixTemplate = this.prefixTemplateList().length > 0;
-        const leftRounded = hasPrefixTemplate ? "none" : this.rounded();
-        const rightRounded = this.spinners() ? "none" : this.rounded();
-        const inputVariants = numericTextboxInputThemeVariants({ leftRounded, rightRounded });
-        return twMerge(inputVariants);
-    });
     protected readonly focused = signal(false);
     protected readonly formattedValue = computed(() => {
         if (this.focused() && !this.readonly()) {
@@ -87,11 +83,26 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         }
         return this.formatValueForDisplay(this.value());
     });
+    protected readonly inputClasses = computed(() => {
+        const hasPrefixTemplate = this.prefixTemplateList().length > 0;
+        const startRounded = hasPrefixTemplate ? "none" : this.rounded();
+        const endRounded = this.spinners() ? "none" : this.rounded();
+        const inputVariants = numericTextboxInputThemeVariants({ endRounded, startRounded });
+        return twMerge(inputVariants);
+    });
     protected readonly invalidInput = computed(
         () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
     protected readonly keydown$ = new Subject<KeyboardEvent>();
+    protected readonly messages = this.#i18n.componentMessages(
+        "numericTextBox",
+        NUMERIC_TEXT_BOX_DEFAULT_MESSAGES
+    );
+    protected readonly prefixTemplateList = contentChildren(NumericTextBoxPrefixTemplateDirective, {
+        read: TemplateRef
+    });
     protected readonly rawInputValue = signal("");
+    protected readonly spin$ = new Subject<Sign>();
     protected readonly spinButtonClasses = computed(() => {
         const size = this.size();
         return numericTextboxButtonThemeVariants({ size });
@@ -100,11 +111,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         const size = this.size();
         return size === "large" ? 20 : size === "medium" ? 16 : 14;
     });
-    protected readonly spin$ = new Subject<Sign>();
     protected readonly spinStop$ = new Subject<void>();
-    protected readonly prefixTemplateList = contentChildren(NumericTextBoxPrefixTemplateDirective, {
-        read: TemplateRef
-    });
     protected readonly valueChange$ = new Subject<string>();
     protected readonly valueTextBoxRef: Signal<ElementRef<HTMLInputElement>> = viewChild.required("valueTextBox");
     protected readonly wheel$ = new Subject<WheelEvent>();
@@ -146,6 +153,13 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public readonly inputFocusOut = output<FocusEvent>();
 
     /**
+     * @description Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Maximum value that can be entered.
      */
     public readonly maxValue = input<number | null>(null);
@@ -169,13 +183,6 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
      * @description Sets whether the input is required.
      */
     public readonly required = input(false);
-
-    /**
-     * @description Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,
-     * this is written by the `FormField` directive.
-     * @default false
-     */
-    public readonly invalid = input(false);
 
     /**
      * @description Sets the border radius of the input.
@@ -328,6 +335,11 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         this.inputBlur.emit(event);
     }
 
+    protected applyRawValue(text: string): void {
+        this.rawInputValue.set(text);
+        this.valueChange$.next(text);
+    }
+
     private correctValue(): boolean {
         const value = this.value();
         const min = this.minValue();
@@ -369,9 +381,19 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         return value.toString();
     }
 
-    protected applyRawValue(text: string): void {
-        this.rawInputValue.set(text);
-        this.valueChange$.next(text);
+    private parseValue(value: string | null | undefined): number | null {
+        const normalizedValue = value == null ? "" : value;
+        this.rawInputValue.set(normalizedValue);
+        if (normalizedValue === "" || normalizedValue === "-") {
+            return null;
+        }
+
+        const sanitizedValue = normalizedValue.replace(/,/g, "");
+        if (!NumericTextBoxComponent.isNumeric(sanitizedValue)) {
+            return this.value();
+        }
+
+        return parseFloat(sanitizedValue);
     }
 
     private setBeforeInputSubscription(): void {
@@ -501,20 +523,5 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                     this.decrease();
                 }
             });
-    }
-
-    private parseValue(value: string | null | undefined): number | null {
-        const normalizedValue = value == null ? "" : value;
-        this.rawInputValue.set(normalizedValue);
-        if (normalizedValue === "" || normalizedValue === "-") {
-            return null;
-        }
-
-        const sanitizedValue = normalizedValue.replace(/,/g, "");
-        if (!NumericTextBoxComponent.isNumeric(sanitizedValue)) {
-            return this.value();
-        }
-
-        return parseFloat(sanitizedValue);
     }
 }

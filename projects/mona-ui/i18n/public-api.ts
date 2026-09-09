@@ -10,6 +10,7 @@ export * from "./models/mona-locale-messages";
 
 export * from "./message-types/card.messages";
 export * from "./message-types/chip.messages";
+export * from "./message-types/numeric-text-box.messages";
 export * from "./message-types/pager.messages";
 export * from "./message-types/spinner.messages";
 export * from "./message-types/text-box.messages";

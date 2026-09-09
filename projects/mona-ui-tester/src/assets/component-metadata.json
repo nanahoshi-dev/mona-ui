@@ -10680,6 +10680,13 @@
         "type": "FocusEvent"
       },
       {
+        "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Maximum value that can be entered.",
         "kind": "input",
         "name": "maxValue",
@@ -10711,13 +10718,6 @@
         "description": "Sets whether the input is required.",
         "kind": "input",
         "name": "required",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
-        "kind": "input",
-        "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },

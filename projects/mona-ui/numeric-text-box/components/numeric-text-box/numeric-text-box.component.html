@@ -46,7 +46,7 @@
             (pointerdown)="spin$.next('+')"
             (pointerup)="spinStop$.next()"
             (pointerleave)="spinStop$.next()"
-            aria-label="Increase value">
+            [attr.aria-label]="messages().increase">
             <svg lucideChevronUp [size]="spinButtonIconSize()"></svg>
         </button>
         <button
@@ -59,7 +59,7 @@
             (pointerdown)="spin$.next('-')"
             (pointerup)="spinStop$.next()"
             (pointerleave)="spinStop$.next()"
-            aria-label="Decrease value">
+            [attr.aria-label]="messages().decrease">
             <svg lucideChevronDown [size]="spinButtonIconSize()"></svg>
         </button>
     </div>
