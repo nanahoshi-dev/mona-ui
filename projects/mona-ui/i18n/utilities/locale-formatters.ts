@@ -1,7 +1,8 @@
 export interface NumberSymbols {
-    decimal: string;
-    group: string;
-    minus: string;
+    readonly decimal: string;
+    readonly group: string;
+    readonly minus: string;
+    readonly digits: ReadonlyMap<string, string>;
 }
 
 const numberSymbolsCache = new Map<string, NumberSymbols>();
@@ -18,14 +19,41 @@ function serializeOptions(options?: Intl.NumberFormatOptions): string {
 export function getNumberSymbols(localeId: string): NumberSymbols {
     let symbols = numberSymbolsCache.get(localeId);
     if (!symbols) {
+        const digitMap = new Map<string, string>();
+
+        // Seed digit map with common localized scripts as fallback
+        for (let i = 0; i <= 9; i++) {
+            digitMap.set(String(i), String(i));
+            digitMap.set(String.fromCharCode(0x0660 + i), String(i)); // Arabic-Indic
+            digitMap.set(String.fromCharCode(0x06f0 + i), String(i)); // Eastern Arabic-Indic / Persian
+            digitMap.set(String.fromCharCode(0x09e6 + i), String(i)); // Bengali
+        }
+
         try {
             const parts = new Intl.NumberFormat(localeId).formatToParts(-12345.6);
             const decimal = parts.find(p => p.type === "decimal")?.value ?? ".";
             const group = parts.find(p => p.type === "group")?.value ?? ",";
             const minus = parts.find(p => p.type === "minusSign")?.value ?? "-";
-            symbols = { decimal, group, minus };
+
+            // Dynamically query localized digit glyphs for this locale
+            try {
+                const digitFormatter = new Intl.NumberFormat(localeId, {
+                    useGrouping: false,
+                    maximumFractionDigits: 0
+                });
+                for (let i = 0; i <= 9; i++) {
+                    const glyph = digitFormatter.format(i).replace(/[\u061C\u200E\u200F\s]/g, "");
+                    if (glyph) {
+                        digitMap.set(glyph, String(i));
+                    }
+                }
+            } catch {
+                // Ignore formatter failure
+            }
+
+            symbols = { decimal, group, minus, digits: digitMap };
         } catch {
-            symbols = { decimal: ".", group: ",", minus: "-" };
+            symbols = { decimal: ".", group: ",", minus: "-", digits: digitMap };
         }
         numberSymbolsCache.set(localeId, symbols);
     }
@@ -46,6 +74,51 @@ export function formatNumber(value: number, locale: string, options?: Intl.Numbe
     return getNumberFormatter(locale, options).format(value);
 }
 
+export function normalizeLocalizedDigits(text: string, localeId?: string): string {
+    if (!text) {
+        return text;
+    }
+    const symbols = localeId ? getNumberSymbols(localeId) : null;
+    let result = "";
+    for (const char of text) {
+        if (symbols?.digits.has(char)) {
+            result += symbols.digits.get(char)!;
+        } else {
+            const code = char.charCodeAt(0);
+            if (code >= 0x0660 && code <= 0x0669) {
+                result += String(code - 0x0660);
+            } else if (code >= 0x06f0 && code <= 0x06f9) {
+                result += String(code - 0x06f0);
+            } else if (code >= 0x09e6 && code <= 0x09ef) {
+                result += String(code - 0x09e6);
+            } else {
+                result += char;
+            }
+        }
+    }
+    return result;
+}
+
+export function normalizeLocalizedMinus(text: string, symbols?: NumberSymbols): string {
+    if (!text) {
+        return text;
+    }
+    let result = text
+        .replace(/[\u2212\uFE63\uFF0D]/g, "-")
+        .replace(/[\u061C\u200E\u200F]/g, "");
+    if (symbols?.minus && symbols.minus !== "-") {
+        result = result.replaceAll(symbols.minus, "-");
+    }
+    return result;
+}
+
+export function normalizeLocalizedInput(text: string, localeId: string): string {
+    const symbols = getNumberSymbols(localeId);
+    let cleaned = normalizeLocalizedMinus(text, symbols);
+    cleaned = normalizeLocalizedDigits(cleaned, localeId);
+    return cleaned;
+}
+
 export function parseLocalizedNumber(text: string | null | undefined, localeId: string): number | null {
     if (text == null) {
         return null;
@@ -55,19 +128,23 @@ export function parseLocalizedNumber(text: string | null | undefined, localeId: 
         return null;
     }
 
-    // Normalize minus signs and strip bidi controls
-    cleaned = cleaned
-        .replace(/[\u2212\uFE63\uFF0D]/g, "-")
-        .replace(/[\u061C\u200E\u200F]/g, "");
+    const symbols = getNumberSymbols(localeId);
+
+    // Normalize minus signs, bidi controls, and localized digits
+    cleaned = normalizeLocalizedMinus(cleaned, symbols);
+    cleaned = normalizeLocalizedDigits(cleaned, localeId);
 
     if (cleaned === "-" || cleaned === "+") {
         return null;
     }
 
-    const symbols = getNumberSymbols(localeId);
+    // Remove all whitespace, non-breaking spaces, and Arabic thousands separator
+    cleaned = cleaned.replace(/[\s\u00A0\u202F\u066C]/g, "");
 
-    // Remove all whitespace and non-breaking spaces
-    cleaned = cleaned.replace(/[\s\u00A0\u202F]/g, "");
+    // Also remove grouping separator if present
+    if (symbols.group && symbols.group !== ".") {
+        cleaned = cleaned.replaceAll(symbols.group, "");
+    }
 
     if (symbols.decimal === ",") {
         if (cleaned.includes(",")) {
@@ -87,15 +164,17 @@ export function parseLocalizedNumber(text: string | null | undefined, localeId: 
             }
         }
     } else {
-        // Decimal separator is '.' or non-comma symbol
+        // Decimal separator is '.' or non-comma symbol (e.g. Arabic decimal separator '٫' U+066B)
         if (symbols.decimal !== ".") {
-            cleaned = cleaned.replace(new RegExp(`\\${symbols.decimal}`, "g"), ".");
+            cleaned = cleaned.replaceAll(symbols.decimal, ".");
         }
-        if (symbols.group && symbols.group !== ".") {
-            cleaned = cleaned.replace(new RegExp(`\\${symbols.group}`, "g"), "");
-        } else {
-            cleaned = cleaned.replace(/,/g, "");
+        // Also support Arabic decimal separator literal in case locale symbols differed
+        cleaned = cleaned.replace(/\u066B/g, ".");
+        // Support Persian '/' decimal separator if used
+        if (cleaned.includes("/")) {
+            cleaned = cleaned.replace(/\//g, ".");
         }
+        cleaned = cleaned.replace(/,/g, "");
     }
 
     const num = Number(cleaned);

@@ -38,7 +38,13 @@ import {
     timer
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { formatNumber, getNumberSymbols, MonaI18nService, parseLocalizedNumber } from "@nanahoshi/mona-ui/i18n";
+import {
+    formatNumber,
+    getNumberSymbols,
+    MonaI18nService,
+    normalizeLocalizedInput,
+    parseLocalizedNumber
+} from "@nanahoshi/mona-ui/i18n";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
 import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../../i18n/numeric-text-box.default-messages";
@@ -380,8 +386,9 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         if (value == null) {
             return "";
         }
+        const decimals = this.decimals();
         return formatNumber(value, this.#i18n.localeId(), {
-            maximumFractionDigits: 20,
+            maximumFractionDigits: decimals >= 0 ? decimals : 20,
             useGrouping: false
         });
     }
@@ -395,7 +402,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             return formatter(value);
         }
         const decimals = this.decimals();
-        if (decimals > 0) {
+        if (decimals >= 0) {
             return formatNumber(value, this.#i18n.localeId(), {
                 minimumFractionDigits: decimals,
                 maximumFractionDigits: decimals,
@@ -437,15 +444,23 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             }
 
             const proposedValue = value.slice(0, selectionStart) + insertedText + value.slice(selectionEnd);
-            if (proposedValue.lastIndexOf("-") > 0) {
+            const localeId = this.#i18n.localeId();
+            const symbols = getNumberSymbols(localeId);
+
+            // Normalize minus, bidi controls, and digits
+            const normalized = normalizeLocalizedInput(proposedValue, localeId);
+
+            if (normalized.lastIndexOf("-") > 0) {
+                event.preventDefault();
+                return;
+            }
+            if ((normalized.match(/-/g) || []).length > 1) {
                 event.preventDefault();
                 return;
             }
 
-            const symbols = getNumberSymbols(this.#i18n.localeId());
             const decimalSep = symbols.decimal;
-
-            const sepChars = decimalSep === "." ? ["\\."] : ["\\.", decimalSep];
+            const sepChars = decimalSep === "." ? ["\\."] : ["\\.", `\\${decimalSep}`];
             const sepRegex = new RegExp(`[${sepChars.join("")}]`, "g");
             const sepCount = (proposedValue.match(sepRegex) || []).length;
             if (sepCount > 1) {
@@ -453,7 +468,8 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                 return;
             }
 
-            if (this.decimals() === 0 && sepCount > 0) {
+            const decimals = this.decimals();
+            if (decimals === 0 && sepCount > 0) {
                 event.preventDefault();
                 return;
             }
@@ -461,14 +477,18 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             if (sepCount === 1) {
                 const sepChar = proposedValue.includes(decimalSep) ? decimalSep : ".";
                 const decimalPart = proposedValue.split(sepChar)[1];
-                if (decimalPart && decimalPart.length > this.decimals()) {
+                if (decimalPart && decimalPart.length > decimals) {
                     event.preventDefault();
                     return;
                 }
             }
 
-            const numericRegex = new RegExp(`^-?\\d*[${sepChars.join("")}]?\\d{0,${this.decimals()}}$`);
-            if (!numericRegex.test(proposedValue)) {
+            let normalizedForRegex = normalized;
+            if (decimalSep !== "." && normalizedForRegex.includes(decimalSep)) {
+                normalizedForRegex = normalizedForRegex.replaceAll(decimalSep, ".");
+            }
+            const numericRegex = new RegExp(`^-?\\d*(\\.\\d{0,${decimals}})?$`);
+            if (!numericRegex.test(normalizedForRegex)) {
                 event.preventDefault();
             }
         });

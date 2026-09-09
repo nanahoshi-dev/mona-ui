@@ -271,6 +271,113 @@ describe("NumericTextBoxComponent", () => {
             expect(buttons[0].nativeElement.getAttribute("aria-label")).toBe("Değeri artır");
             expect(buttons[1].nativeElement.getAttribute("aria-label")).toBe("Değeri azalt");
         });
+
+        it("formats zero decimals strictly when decimals option is 0", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(0);
+            hostFixture.componentInstance.value.set(1.23456);
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            expect(input.value).toBe("1");
+
+            focusInput(input);
+            await waitForStable(hostFixture);
+            expect(input.value).toBe("1");
+        });
+
+        it("formats explicit decimals when decimals is set to 2", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(2);
+            hostFixture.componentInstance.value.set(1.23456);
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            expect(input.value).toBe("1.23");
+        });
+
+        it("parses localized Arabic-Indic digits in ar-SA", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.maxValue.set(2000);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "rtl",
+                id: "ar-SA",
+                messages: {}
+            });
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            focusInput(input);
+            await waitForStable(hostFixture);
+
+            updateInputValue(hostFixture, "١٢٣٤٫٥");
+            blurInput(input);
+            await waitForStable(hostFixture);
+
+            expect(hostFixture.componentInstance.value()).toBe(1234.5);
+        });
+
+        it("parses localized Persian digits and minus in fa-IR", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.minValue.set(-100);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "rtl",
+                id: "fa-IR",
+                messages: {}
+            });
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            focusInput(input);
+            await waitForStable(hostFixture);
+
+            updateInputValue(hostFixture, "−۱۲٫۵");
+            blurInput(input);
+            await waitForStable(hostFixture);
+
+            expect(hostFixture.componentInstance.value()).toBe(-12.5);
+        });
+
+        it("prevents typing decimal separator when decimals is 0", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            hostFixture.componentInstance.decimals.set(0);
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "."
+            });
+            input.dispatchEvent(event);
+            expect(event.defaultPrevented).toBe(true);
+        });
+
+        it("allows typing localized digits in beforeinput for Arabic locale", async () => {
+            const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "rtl",
+                id: "ar-SA",
+                messages: {}
+            });
+            await waitForStable(hostFixture);
+
+            const input = getInput(hostFixture);
+            input.value = "";
+            input.selectionStart = 0;
+            input.selectionEnd = 0;
+
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "١"
+            });
+            input.dispatchEvent(event);
+            expect(event.defaultPrevented).toBe(false);
+        });
     });
 });
 
