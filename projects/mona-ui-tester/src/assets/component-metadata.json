@@ -13402,7 +13402,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
-        "defaultValue": "\"Progress\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the flow of the stepper.\nIf set to true, the user will only be able to navigate to the previous or the next step.",
@@ -13423,7 +13423,7 @@
         "kind": "input",
         "name": "progressAriaLabel",
         "type": "string",
-        "defaultValue": "\"Step progress\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the roundness of the stepper steps.",

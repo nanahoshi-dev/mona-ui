@@ -1,11 +1,16 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { beforeEach, describe, expect, it } from "vitest";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { StepperIndicatorTemplateDirective } from "../../directives/stepper-indicator-template.directive";
 import { StepperLabelTemplateDirective } from "../../directives/stepper-label-template.directive";
 import { StepperStepTemplateDirective } from "../../directives/stepper-step-template.directive";
 import type { StepOptions } from "../../models/Step";
+import {
+    stepperStepListThemeVariants,
+    stepperTrackLineThemeVariants
+} from "../../styles/stepper.styles";
 import { StepperComponent } from "./stepper.component";
 
 // =============================================================================
@@ -15,6 +20,8 @@ import { StepperComponent } from "./stepper.component";
 @Component({
     template: `
         <mona-stepper
+            [aria-label]="ariaLabel()"
+            [progressAriaLabel]="progressAriaLabel()"
             [steps]="steps()"
             [step]="step()"
             [linear]="linear()"
@@ -25,8 +32,10 @@ import { StepperComponent } from "./stepper.component";
     imports: [StepperComponent]
 })
 class TestStepperHostComponent {
+    ariaLabel = signal("");
     linear = signal(true);
     orientation = signal<"horizontal" | "vertical">("horizontal");
+    progressAriaLabel = signal("");
     rounded = signal<"small" | "medium" | "large" | "full" | "none">("full");
     step = signal(0);
     steps = signal<StepOptions[]>([{ label: "Step 1" }, { label: "Step 2" }, { label: "Step 3" }]);
@@ -121,7 +130,6 @@ describe("StepperComponent", () => {
     // =========================================================================
     describe("basic functionality", () => {
         let fixture: ComponentFixture<TestStepperHostComponent>;
-        let component: TestStepperHostComponent;
 
         beforeEach(async () => {
             await TestBed.configureTestingModule({
@@ -129,7 +137,6 @@ describe("StepperComponent", () => {
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestStepperHostComponent);
-            component = fixture.componentInstance;
             await waitForStable(fixture);
         });
 
@@ -1053,6 +1060,114 @@ describe("StepperComponent", () => {
                     .queryAll(By.css("[role='button']"))
                     .map(de => de.nativeElement as HTMLElement);
                 expect(buttons[1].getAttribute("tabindex")).toBe("0");
+            });
+        });
+    });
+
+    // =========================================================================
+    // i18n and RTL
+    // =========================================================================
+    describe("i18n and RTL", () => {
+        let fixture: ComponentFixture<TestStepperHostComponent>;
+        let component: TestStepperHostComponent;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [TestStepperHostComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(TestStepperHostComponent);
+            component = fixture.componentInstance;
+            await waitForStable(fixture);
+        });
+
+        afterEach(() => {
+            TestBed.inject(MonaI18nService).use(MONA_DEFAULT_LOCALE);
+            TestBed.resetTestingModule();
+        });
+
+        it("should update aria-label and progressbar aria-label dynamically when MonaI18nService locale changes", async () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "ltr",
+                id: "es-ES",
+                messages: {
+                    stepper: {
+                        stepProgress: "Progreso de paso",
+                        stepper: "Progreso de solicitud"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            expect(getStepperElement(fixture).getAttribute("aria-label")).toBe("Progreso de solicitud");
+            const pb = fixture.debugElement.query(By.css("[role='progressbar']")).nativeElement;
+            expect(pb.getAttribute("aria-label")).toBe("Progreso de paso");
+        });
+
+        it("should prefer user-provided aria-label and progressAriaLabel over i18n defaults", async () => {
+            component.ariaLabel.set("Custom Stepper Flow");
+            component.progressAriaLabel.set("Custom Bar Progress");
+            await waitForStable(fixture);
+
+            expect(getStepperElement(fixture).getAttribute("aria-label")).toBe("Custom Stepper Flow");
+            const pb = fixture.debugElement.query(By.css("[role='progressbar']")).nativeElement;
+            expect(pb.getAttribute("aria-label")).toBe("Custom Bar Progress");
+        });
+
+        describe("RTL keyboard navigation (horizontal)", () => {
+            beforeEach(async () => {
+                const i18n = TestBed.inject(MonaI18nService);
+                i18n.use({
+                    direction: "rtl",
+                    id: "ar-EG",
+                    messages: {}
+                });
+                await waitForStable(fixture);
+            });
+
+            it("should move highlight to step 1 on ArrowLeft from step 0 in RTL", async () => {
+                const stepper = getStepperElement(fixture);
+                dispatchKeydown(stepper, "ArrowLeft");
+                await waitForStable(fixture);
+                expect(getIndicators(fixture)[1].getAttribute("tabindex")).toBe("0");
+            });
+
+            it("should move highlight back to step 0 on ArrowRight from step 1 in RTL", async () => {
+                component.step.set(1);
+                await waitForStable(fixture);
+
+                const stepper = getStepperElement(fixture);
+                dispatchKeydown(stepper, "ArrowRight");
+                await waitForStable(fixture);
+                expect(getIndicators(fixture)[0].getAttribute("tabindex")).toBe("0");
+            });
+
+            it("should still use ArrowDown and ArrowUp for vertical orientation in RTL", async () => {
+                component.orientation.set("vertical");
+                await waitForStable(fixture);
+
+                const stepper = getStepperElement(fixture);
+                dispatchKeydown(stepper, "ArrowDown");
+                await waitForStable(fixture);
+                expect(getIndicators(fixture)[1].getAttribute("tabindex")).toBe("0");
+
+                dispatchKeydown(stepper, "ArrowUp");
+                await waitForStable(fixture);
+                expect(getIndicators(fixture)[0].getAttribute("tabindex")).toBe("0");
+            });
+        });
+
+        describe("RTL styles", () => {
+            it("should include rtl:translate-x-3 for vertical step list", () => {
+                const classes = stepperStepListThemeVariants({ orientation: "vertical" });
+                expect(classes).toContain("rtl:translate-x-3");
+            });
+
+            it("should include start-0 top-0 on track line", () => {
+                const classes = stepperTrackLineThemeVariants({ orientation: "horizontal" });
+                expect(classes).toContain("start-0");
+                expect(classes).toContain("top-0");
             });
         });
     });

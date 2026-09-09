@@ -8,8 +8,8 @@ import { stepperStepIndicatorThemeVariants, StepperVariantProps } from "../style
     }
 })
 export class StepperIndicatorDirective {
-    #wasFocused = false;
     readonly #host = inject(ElementRef);
+    #wasFocused = false;
     protected readonly stepIndicatorClass = computed(() => {
         const active = this.active();
         const focused = this.focused();

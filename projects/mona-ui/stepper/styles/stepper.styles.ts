@@ -33,7 +33,7 @@ export const stepperStepListThemeVariants = cva(
                 `,
                 vertical: `
                     h-full w-max flex-col
-                    -translate-x-3
+                    -translate-x-3 rtl:translate-x-3
                 `
             }
         },
@@ -108,7 +108,7 @@ export const stepperTrackThemeVariants = cva(
 
 export const stepperTrackLineThemeVariants = cva(
     `
-        absolute bg-primary
+        absolute start-0 top-0 bg-primary
     `,
     {
         variants: {
