@@ -8,7 +8,7 @@ export const pagerBaseThemeVariants = cva(
         text-sm
         bg-(--mona-pager-background) ${themeRaisedBackdropClasses} text-foreground
         border border-border-subtle
-        [&_mona-numeric-text-box]:ml-4
+        [&_mona-numeric-text-box]:ms-4
         [&_mona-numeric-text-box]:w-12
         [&_mona-numeric-text-box_input]:bg-input-background
         [&_mona-numeric-text-box_input]:text-center
@@ -35,7 +35,7 @@ export const pagerBaseThemeVariants = cva(
 
 export const pagerInfoThemeVariants = cva(
     `
-        flex flex-1 items-center justify-end pl-2
+        flex flex-1 items-center justify-end ps-2
         whitespace-nowrap text-muted-foreground
     `
 );

@@ -11,3 +11,5 @@ export * from "./directives/pager-page-size-template.directive";
 
 export * from "./models/PageChangeEvent";
 export * from "./models/PageSizeChangeEvent";
+
+export * from "./i18n/pager.default-messages";

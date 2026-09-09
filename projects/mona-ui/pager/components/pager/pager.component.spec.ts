@@ -10,12 +10,13 @@ import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-num
 import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size-template.directive";
 import type { PageChangeEvent } from "../../models/PageChangeEvent";
 import type { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
+import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
 import { pagerBaseThemeVariants, pagerInfoThemeVariants } from "../../styles/pager.styles";
 import { PagerComponent } from "./pager.component";
 
 class MockResizeObserver implements ResizeObserver {
-    public static instances: MockResizeObserver[] = [];
     public readonly callback: ResizeObserverCallback;
+    public static instances: MockResizeObserver[] = [];
 
     public constructor(callback: ResizeObserverCallback) {
         this.callback = callback;
@@ -688,7 +689,171 @@ describe("Pager visual contract", () => {
 
         expect(baseClasses).toContain("bg-(--mona-pager-background)");
         expect(baseClasses).toContain("border-border-subtle");
+        expect(baseClasses).toContain("[&_mona-numeric-text-box]:ms-4");
         expect(baseClasses).not.toContain("bg-primary");
         expect(infoClasses).toContain("text-muted-foreground");
+        expect(infoClasses).toContain("ps-2");
     });
 });
+
+describe("PagerComponent i18n and localization", () => {
+    let fixture: ComponentFixture<PagerComponent>;
+    let i18nService: MonaI18nService;
+
+    const testTurkishLocale: MonaLocale = {
+        direction: "ltr",
+        id: "tr-TR",
+        messages: {
+            pager: {
+                firstPageLabel: "İlk sayfa",
+                jumpBackwardLabel: pages => `${pages} sayfa geri git`,
+                jumpForwardLabel: pages => `${pages} sayfa ileri git`,
+                lastPageLabel: "Son sayfa",
+                nextPageLabel: "Sonraki sayfa",
+                ofText: "/",
+                pageLabel: page => `Sayfa ${page}`,
+                pageSizeLabel: pageSize => `${pageSize} / sayfa`,
+                pageText: "Sayfa",
+                previousPageLabel: "Önceki sayfa",
+                rangeLabel: (start, end, total) => `${start} - ${end} / ${total} öğe`
+            }
+        }
+    };
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [PagerComponent],
+            providers: []
+        });
+        fixture = TestBed.createComponent(PagerComponent);
+        i18nService = TestBed.inject(MonaI18nService);
+        i18nService.use(MONA_DEFAULT_LOCALE);
+        i18nService.setMessages({});
+    });
+
+    function setup(total: number, pageSize: number, skip: number = 0): void {
+        fixture.componentRef.setInput("total", total);
+        fixture.componentRef.setInput("pageSize", pageSize);
+        fixture.componentRef.setInput("skip", skip);
+        fixture.detectChanges();
+    }
+
+    function resizeHost(width: number): void {
+        const hostElement: HTMLElement = fixture.nativeElement;
+        const observer = MockResizeObserver.instances[MockResizeObserver.instances.length - 1];
+        expect(observer).toBeTruthy();
+
+        Object.defineProperty(hostElement, "clientWidth", { value: width, configurable: true });
+        observer.callback([], observer);
+        fixture.detectChanges();
+    }
+
+    function getInfoText(): string {
+        return fixture.nativeElement.textContent.replace(/\s+/g, " ").trim();
+    }
+
+    it("renders default English accessibility labels and text", async () => {
+        setup(100, 10, 0);
+        await fixture.whenStable();
+        resizeHost(900);
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+
+        expect(labels).toContain("First page");
+        expect(labels).toContain("Previous page");
+        expect(labels).toContain("Next page");
+        expect(labels).toContain("Last page");
+        expect(labels).toContain("Page 1");
+
+        expect(getInfoText()).toContain("1 - 10 of 100 items");
+    });
+
+    it("updates labels and text immediately on runtime locale switch", async () => {
+        setup(100, 10, 0);
+        await fixture.whenStable();
+        resizeHost(900);
+
+        i18nService.use(testTurkishLocale);
+        fixture.detectChanges();
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+
+        expect(labels).toContain("İlk sayfa");
+        expect(labels).toContain("Önceki sayfa");
+        expect(labels).toContain("Sonraki sayfa");
+        expect(labels).toContain("Son sayfa");
+        expect(labels).toContain("Sayfa 1");
+
+        expect(getInfoText()).toContain("1 - 10 / 100 öğe");
+    });
+
+    it("localizes jumper labels according to active locale", () => {
+        fixture.componentRef.setInput("total", 1000);
+        fixture.componentRef.setInput("pageSize", 5);
+        fixture.componentRef.setInput("skip", 500);
+        fixture.componentRef.setInput("visiblePages", 5);
+        fixture.detectChanges();
+
+        i18nService.use(testTurkishLocale);
+        fixture.detectChanges();
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+
+        expect(labels).toContain("5 sayfa geri git");
+        expect(labels).toContain("5 sayfa ileri git");
+    });
+
+    it("localizes input mode text ('Page' and 'of')", () => {
+        fixture.componentRef.setInput("type", "input");
+        fixture.componentRef.setInput("total", 100);
+        fixture.componentRef.setInput("pageSize", 10);
+        fixture.detectChanges();
+
+        i18nService.use(testTurkishLocale);
+        fixture.detectChanges();
+
+        const spans = Array.from(fixture.nativeElement.querySelectorAll("span")) as HTMLElement[];
+        const spanTexts = spans.map(s => s.textContent?.trim());
+
+        expect(spanTexts).toContain("Sayfa");
+        expect(spanTexts).toContain("/");
+    });
+
+    it("respects application-level message overrides over locale and fallback", () => {
+        fixture.componentRef.setInput("total", 100);
+        fixture.componentRef.setInput("pageSize", 10);
+        fixture.detectChanges();
+
+        i18nService.use(testTurkishLocale);
+        i18nService.setMessages({
+            pager: {
+                nextPageLabel: "Sonraki Sayfaya Atla"
+            }
+        });
+        fixture.detectChanges();
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+
+        expect(labels).toContain("Sonraki Sayfaya Atla");
+        expect(labels).toContain("İlk sayfa");
+    });
+
+    it("applies logical styles and allows consumer class overrides to take precedence", () => {
+        fixture.componentRef.setInput("total", 100);
+        fixture.componentRef.setInput("pageSize", 10);
+        fixture.componentRef.setInput("class", "p-8 bg-red-500 border-dashed");
+        fixture.detectChanges();
+
+        const host = fixture.nativeElement as HTMLElement;
+        expect(host.className).toContain("p-8");
+        expect(host.className).toContain("bg-red-500");
+        expect(host.className).toContain("border-dashed");
+        expect(host.className).not.toContain("px-2");
+        expect(host.className).not.toContain("py-1");
+    });
+});
+

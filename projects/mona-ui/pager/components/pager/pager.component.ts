@@ -32,8 +32,10 @@ import { SlicePipe } from "@nanahoshi/mona-ui/common";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownVirtualScrollDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { NavigationKeys } from "@nanahoshi/mona-ui/internal";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { twMerge } from "tailwind-merge";
+import { PAGER_DEFAULT_MESSAGES } from "../../i18n/pager.default-messages";
 import { PagerFocusableDirective } from "../../directives/pager-focusable.directive";
 import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";
 import { PagerNavigationButtonsTemplateDirective } from "../../directives/pager-navigation-buttons-template.directive";
@@ -85,13 +87,14 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
 export class PagerComponent implements PagerVariantInputs {
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #infoVisible = signal(true);
     readonly #innerNavigationActive = signal(false);
     readonly #managedFocusTargets = new Set<HTMLElement>();
     readonly #originalTabIndices = new WeakMap<HTMLElement, string | null>();
     readonly #skip = linkedSignal(() => this.skip());
-    #widthObserver: ResizeObserver | null = null;
     #previousPageSize = 10;
+    #widthObserver: ResizeObserver | null = null;
     private readonly navigationButtonsTemplateList = contentChildren(PagerNavigationButtonsTemplateDirective);
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
@@ -99,7 +102,6 @@ export class PagerComponent implements PagerVariantInputs {
         const classes = pagerBaseThemeVariants({ rounded });
         return twMerge(classes, userClasses);
     });
-    protected readonly firstPageLabel = "First page";
     protected readonly firstPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "first");
@@ -129,9 +131,8 @@ export class PagerComponent implements PagerVariantInputs {
         return pagerInputThemeVariants();
     });
     protected readonly inputValue = linkedSignal(() => this.page());
-    protected readonly jumpNextLabel = computed(() => `Jump forward ${this.visiblePages()} pages`);
-    protected readonly jumpPreviousLabel = computed(() => `Jump back ${this.visiblePages()} pages`);
-    protected readonly lastPageLabel = "Last page";
+    protected readonly jumpNextLabel = computed(() => this.messages().jumpForwardLabel(this.visiblePages()));
+    protected readonly jumpPreviousLabel = computed(() => this.messages().jumpBackwardLabel(this.visiblePages()));
     protected readonly lastPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "last");
@@ -139,12 +140,12 @@ export class PagerComponent implements PagerVariantInputs {
     protected readonly listClasses = computed(() => {
         return pagerListThemeVariants();
     });
+    protected readonly messages = this.#i18n.componentMessages("pager", PAGER_DEFAULT_MESSAGES);
     protected readonly nextJumperVisible = computed(() => {
         const pages = this.pages();
         const visiblePages = this.visiblePages();
         return pages.length > visiblePages && pages[pages.length - 1].page - pages[pages.length - 2].page > 1;
     });
-    protected readonly nextPageLabel = "Next page";
     protected readonly nextPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "next");
@@ -157,8 +158,6 @@ export class PagerComponent implements PagerVariantInputs {
         return range(1, this.pageCount()).toArray();
     });
     protected readonly pageListVisible = signal(true);
-    protected readonly pageSizeDropdownList: Signal<DropdownListComponent<number> | undefined> =
-        viewChild("pageSizeDropdownList");
     protected readonly pageSizeDropdownData = computed(() => {
         const values = this.pageSizeValues();
         if (values === false || (Array.isArray(values) && values.length === 0)) {
@@ -169,11 +168,13 @@ export class PagerComponent implements PagerVariantInputs {
         }
         return [5, 10, 20, 50, 100] as number[];
     });
+    protected readonly pageSizeDropdownList: Signal<DropdownListComponent<number> | undefined> =
+        viewChild("pageSizeDropdownList");
     protected readonly pageSizeTemplate = contentChild(PagerPageSizeTemplateDirective, { read: TemplateRef });
     protected readonly pagerInfo = computed(() => {
         const start = (this.page() - 1) * this.pagerPageSize() + 1;
         const end = Math.min(this.page() * this.pagerPageSize(), this.total());
-        return `${start} - ${end} of ${this.total()} items`;
+        return this.messages().rangeLabel(start, end, this.total());
     });
     protected readonly pagerInfoTemplate = contentChild(PagerInfoTemplateDirective);
     protected readonly pagerInfoTemplateContext = computed(() => {
@@ -192,7 +193,6 @@ export class PagerComponent implements PagerVariantInputs {
     protected readonly previousJumperVisible = computed(
         () => this.pages().length > this.visiblePages() && this.pages()[1].page - 1 > 1
     );
-    protected readonly previousPageLabel = "Previous page";
     protected readonly previousPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "previous");
@@ -555,7 +555,7 @@ export class PagerComponent implements PagerVariantInputs {
 
     private preparePages(currentPage: number, visiblePages: number, maxPages: number): Page[] {
         const half = Math.floor(visiblePages / 2);
-        let first = 1;
+        const first = 1;
         let index = 0;
         const pages: Page[] = [];
         if (maxPages <= 5) {
