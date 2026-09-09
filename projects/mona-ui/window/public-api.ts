@@ -8,6 +8,8 @@ export * from "./directives/window-content-template.directive";
 export * from "./directives/window-footer-template.directive";
 export * from "./directives/window-title-template.directive";
 
+export * from "./i18n/window.default-messages";
+
 export * from "./services/window.service";
 
 export * from "./models/MoveEvent";

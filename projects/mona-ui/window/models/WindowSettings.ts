@@ -1,4 +1,5 @@
 import { ElementRef, TemplateRef, Type } from "@angular/core";
+import { WindowMessages } from "@nanahoshi/mona-ui/i18n";
 import { Action } from "@nanahoshi/mona-ui/internal";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { WindowVariantProps } from "../styles/window.styles";
@@ -18,6 +19,7 @@ export interface WindowSettings {
     maxHeight?: number;
     maxWidth?: number;
     maximizable?: boolean;
+    messages?: Partial<WindowMessages>;
     minHeight?: number;
     minWidth?: number;
     minimizable?: boolean;

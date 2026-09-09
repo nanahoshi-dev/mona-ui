@@ -4,10 +4,10 @@ import { fromEvent } from "rxjs";
 import { WindowReference } from "../models/WindowReference";
 import { WindowResizeHandlerDirection } from "../models/WindowResizeHandlerDirection";
 import {
-    DefaultMaxWindowHeight,
-    DefaultMaxWindowWidth,
-    DefaultMinWindowHeight,
-    DefaultMinWindowWidth
+    DEFAULT_MAX_WINDOW_HEIGHT,
+    DEFAULT_MAX_WINDOW_WIDTH,
+    DEFAULT_MIN_WINDOW_HEIGHT,
+    DEFAULT_MIN_WINDOW_WIDTH
 } from "../utils/defaults";
 
 interface ResizeBox {
@@ -26,8 +26,8 @@ interface ResizeBounds {
     minWidth: number;
 }
 
-const KeyboardResizeStep = 10;
-const KeyboardResizeStepFine = 1;
+const KEYBOARD_RESIZE_STEP = 10;
+const KEYBOARD_RESIZE_STEP_FINE = 1;
 
 @Directive({
     selector: "div[monaWindowResizeHandler]",
@@ -57,7 +57,7 @@ export class WindowResizeHandlerDirective {
     }
 
     protected onKeydown(event: KeyboardEvent): void {
-        const step = event.shiftKey ? KeyboardResizeStepFine : KeyboardResizeStep;
+        const step = event.shiftKey ? KEYBOARD_RESIZE_STEP_FINE : KEYBOARD_RESIZE_STEP;
         let deltaX = 0;
         let deltaY = 0;
 
@@ -116,13 +116,13 @@ export class WindowResizeHandlerDirective {
     }
 
     #bounds(): ResizeBounds {
-        const innerWidth = this.#document.defaultView?.innerWidth || DefaultMaxWindowWidth;
-        const innerHeight = this.#document.defaultView?.innerHeight || DefaultMaxWindowHeight;
+        const innerWidth = this.#document.defaultView?.innerWidth || DEFAULT_MAX_WINDOW_WIDTH;
+        const innerHeight = this.#document.defaultView?.innerHeight || DEFAULT_MAX_WINDOW_HEIGHT;
         return {
             innerWidth,
             innerHeight,
-            minWidth: this.minWidth() || DefaultMinWindowWidth,
-            minHeight: this.minHeight() || DefaultMinWindowHeight,
+            minWidth: this.minWidth() || DEFAULT_MIN_WINDOW_WIDTH,
+            minHeight: this.minHeight() || DEFAULT_MIN_WINDOW_HEIGHT,
             maxWidth: this.maxWidth() ?? innerWidth,
             maxHeight: this.maxHeight() ?? innerHeight
         };

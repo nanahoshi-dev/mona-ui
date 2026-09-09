@@ -26,6 +26,7 @@ import type { MonaStepperMessages } from "../message-types/stepper.messages";
 import type { MonaTabsMessages } from "../message-types/tabs.messages";
 import type { MonaTextBoxMessages } from "../message-types/text-box.messages";
 import type { MonaTreeViewMessages } from "../message-types/tree-view.messages";
+import type { MonaWindowMessages } from "../message-types/window.messages";
 
 export interface MonaLocaleMessages extends Record<string, object> {
     autoComplete: MonaAutoCompleteMessages;
@@ -56,6 +57,7 @@ export interface MonaLocaleMessages extends Record<string, object> {
     tabs: MonaTabsMessages;
     textBox: MonaTextBoxMessages;
     treeView: MonaTreeViewMessages;
+    window: MonaWindowMessages;
 }
 
 

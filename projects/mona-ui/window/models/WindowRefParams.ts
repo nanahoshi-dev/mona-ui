@@ -5,13 +5,10 @@ import { MoveEvent } from "./MoveEvent";
 import { ResizeEvent } from "./ResizeEvent";
 
 export interface WindowRefParams<R = unknown> {
-    close: (result?: R) => void;
     center: () => void;
-    closeWithDelay: (delay: number, result?: R) => void;
-    move: (params: { top?: number; left?: number }) => void;
-    resize: (params: { width?: number; height?: number; center?: boolean }) => void;
-
+    close: (result?: R) => void;
     get close$(): Observable<PopupCloseEvent<R>>;
+    closeWithDelay: (delay: number, result?: R) => void;
     get closed$(): Observable<void>;
     get component(): ComponentRef<unknown> | null;
     get drag$(): Observable<MoveEvent>;
@@ -19,7 +16,9 @@ export interface WindowRefParams<R = unknown> {
     get dragStart$(): Observable<void>;
     get element(): HTMLElement;
     get height(): number;
+    move: (params: { top?: number; left?: number }) => void;
     get popupRef(): PopupRef;
+    resize: (params: { width?: number; height?: number; center?: boolean }) => void;
     get resize$(): Observable<ResizeEvent>;
     get width(): number;
 }

@@ -54,14 +54,14 @@ export const windowResizerThemeVariants = cva(
     {
         variants: {
             position: {
-                east: "top-0 bottom-0 -right-0.5 w-2 cursor-ew-resize",
-                north: "left-0 right-0 -top-0.5 h-2 cursor-ns-resize",
-                south: "left-0 right-0 -bottom-0.5 h-2 cursor-ns-resize",
-                west: "top-0 bottom-0 -left-0.5 w-2 cursor-ew-resize",
-                northeast: "-top-0.5 -right-0.5 w-2 h-2 cursor-nesw-resize",
-                northwest: "-top-0.5 -left-0.5 w-2 h-2 cursor-nwse-resize",
-                southeast: "-bottom-0.5 -right-0.5 w-2 h-2 cursor-nwse-resize",
-                southwest: "-bottom-0.5 -left-0.5 w-2 h-2 cursor-nesw-resize"
+                east: "inset-y-0 -end-0.5 w-2 cursor-ew-resize rtl:-start-0.5 rtl:end-auto",
+                north: "inset-x-0 -top-0.5 h-2 cursor-ns-resize",
+                south: "inset-x-0 -bottom-0.5 h-2 cursor-ns-resize",
+                west: "inset-y-0 -start-0.5 w-2 cursor-ew-resize rtl:-end-0.5 rtl:start-auto",
+                northeast: "-top-0.5 -end-0.5 w-2 h-2 cursor-nesw-resize rtl:-start-0.5 rtl:end-auto",
+                northwest: "-top-0.5 -start-0.5 w-2 h-2 cursor-nwse-resize rtl:-end-0.5 rtl:start-auto",
+                southeast: "-bottom-0.5 -end-0.5 w-2 h-2 cursor-nwse-resize rtl:-start-0.5 rtl:end-auto",
+                southwest: "-bottom-0.5 -start-0.5 w-2 h-2 cursor-nesw-resize rtl:-end-0.5 rtl:start-auto"
             }
         }
     }

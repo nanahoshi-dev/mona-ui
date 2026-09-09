@@ -1,7 +1,7 @@
 import { ComponentRef } from "@angular/core";
 import { PopupCloseEvent, PopupCloseSource, PopupRef } from "@nanahoshi/mona-ui/popup";
 import { asapScheduler, map, Observable, Subject } from "rxjs";
-import { DefaultMaxWindowHeight, DefaultMaxWindowWidth } from "../utils/defaults";
+import { DEFAULT_MAX_WINDOW_HEIGHT, DEFAULT_MAX_WINDOW_WIDTH } from "../utils/defaults";
 import { MoveEvent } from "./MoveEvent";
 import { ResizeEvent } from "./ResizeEvent";
 import { WindowRef } from "./WindowRef";
@@ -29,8 +29,8 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
         const element = this.#popupRefOrThrow.overlayRef.overlayElement;
         const width = element.getBoundingClientRect().width;
         const height = element.getBoundingClientRect().height;
-        const left = (this.document.defaultView?.innerWidth || DefaultMaxWindowWidth - width) / 2;
-        const top = (this.document.defaultView?.innerHeight || DefaultMaxWindowHeight - height) / 2;
+        const left = (this.document.defaultView?.innerWidth || DEFAULT_MAX_WINDOW_WIDTH - width) / 2;
+        const top = (this.document.defaultView?.innerHeight || DEFAULT_MAX_WINDOW_HEIGHT - height) / 2;
         element.style.left = `${left}px`;
         element.style.top = `${top}px`;
     }

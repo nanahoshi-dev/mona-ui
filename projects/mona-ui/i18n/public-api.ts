@@ -36,6 +36,7 @@ export * from "./message-types/stepper.messages";
 export * from "./message-types/tabs.messages";
 export * from "./message-types/text-box.messages";
 export * from "./message-types/tree-view.messages";
+export * from "./message-types/window.messages";
 
 export * from "./tokens/mona-i18n-config.token";
 export * from "./services/mona-i18n.service";

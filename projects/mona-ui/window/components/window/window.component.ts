@@ -13,6 +13,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { WindowMessages } from "@nanahoshi/mona-ui/i18n";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { take } from "rxjs";
 import { WindowActionTemplateDirective } from "../../directives/window-action-template.directive";
@@ -45,21 +46,19 @@ export class WindowComponent implements WindowVariantInput {
      */
     public readonly closable = input(true);
 
-    /**
-     * @description Emits when the window is about to be closed.
-     */
+    // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly close = output<PopupCloseEvent>();
-
-    /**
-     * @description Emitted after the window has fully closed (post-animation). Preventing this event has no effect.
-     */
-    public readonly closed = output<void>();
 
     /**
      * @description Sets whether the window should close when the escape key is pressed.
      * @default true
      */
     public readonly closeOnEscape = input(true);
+
+    /**
+     * @description Emitted after the window has fully closed (post-animation). Preventing this event has no effect.
+     */
+    public readonly closed = output<void>();
 
     /**
      * @description Emits when the window dragging ends.
@@ -114,6 +113,11 @@ export class WindowComponent implements WindowVariantInput {
      * @default true
      */
     public readonly maximizable = input<boolean>();
+
+    /**
+     * @description Internationalization message overrides for accessible labels.
+     */
+    public readonly messages = input<Partial<WindowMessages>>();
 
     /**
      * @description Sets the minimum height of the window.
@@ -221,6 +225,7 @@ export class WindowComponent implements WindowVariantInput {
             maxHeight: this.maxHeight(),
             maxWidth: this.maxWidth(),
             maximizable: this.maximizable(),
+            messages: this.messages(),
             minHeight: this.minHeight(),
             minWidth: this.minWidth(),
             minimizable: this.minimizable(),

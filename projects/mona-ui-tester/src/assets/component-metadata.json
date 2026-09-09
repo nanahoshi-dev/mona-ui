@@ -14340,16 +14340,10 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emits when the window is about to be closed.",
+        "description": "",
         "kind": "output",
         "name": "close",
         "type": "PopupCloseEvent"
-      },
-      {
-        "description": "Emitted after the window has fully closed (post-animation). Preventing this event has no effect.",
-        "kind": "output",
-        "name": "closed",
-        "type": "void"
       },
       {
         "description": "Sets whether the window should close when the escape key is pressed.",
@@ -14357,6 +14351,12 @@
         "name": "closeOnEscape",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Emitted after the window has fully closed (post-animation). Preventing this event has no effect.",
+        "kind": "output",
+        "name": "closed",
+        "type": "void"
       },
       {
         "description": "Emits when the window dragging ends.",
@@ -14420,6 +14420,12 @@
         "name": "maximizable",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Internationalization message overrides for accessible labels.",
+        "kind": "input",
+        "name": "messages",
+        "type": "Partial<WindowMessages>"
       },
       {
         "description": "Sets the minimum height of the window.",
