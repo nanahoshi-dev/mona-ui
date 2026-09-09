@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ListService } from "../../services/list.service";
 
 import { ListComponent } from "./list.component";
@@ -139,5 +140,43 @@ describe("ListComponent keydown handling with navigation enabled", () => {
 
         expect(arrowEvent.defaultPrevented).toBe(true);
         expect(listService.highlightedItem()?.data).toEqual({ name: "two" });
+    });
+});
+
+describe("ListComponent i18n", () => {
+    it("renders default English 'No data' when list has no items", async () => {
+        await TestBed.configureTestingModule({
+            imports: [ListComponent],
+            providers: [ListService]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(ListComponent);
+        fixture.detectChanges();
+
+        const placeholder = fixture.nativeElement.querySelector("mona-placeholder");
+        expect(placeholder?.textContent?.trim()).toBe("No data");
+    });
+
+    it("updates empty message dynamically when locale changes", async () => {
+        await TestBed.configureTestingModule({
+            imports: [ListComponent],
+            providers: [ListService]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(ListComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            direction: "ltr",
+            id: "tr-TR",
+            messages: {
+                list: {
+                    noData: "Hiç veri yok"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        const placeholder = fixture.nativeElement.querySelector("mona-placeholder");
+        expect(placeholder?.textContent?.trim()).toBe("Hiç veri yok");
     });
 });

@@ -19,12 +19,14 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { FilterInputComponent } from "@nanahoshi/mona-ui/internal/filter-input";
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { asyncScheduler, filter, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { LIST_DEFAULT_MESSAGES } from "../../i18n/list.default-messages";
 import { ListFooterTemplateDirective } from "../../directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../directives/list-group-header-template.directive";
 import { ListHeaderTemplateDirective } from "../../directives/list-header-template.directive";
@@ -66,6 +68,7 @@ import { ListItemComponent } from "../list-item/list-item.component";
 export class ListComponent<TData> implements OnInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #typeaheadKey$ = new Subject<string>();
     private readonly filterInput = viewChild(FilterInputComponent);
     protected readonly classes = computed(() => {
@@ -82,12 +85,12 @@ export class ListComponent<TData> implements OnInit {
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListHeaderTemplateDirective, { read: TemplateRef });
     protected readonly hostTabIndex = computed(() => (this.listService.focusableItem() ? -1 : 0));
-    protected readonly itemTemplate = contentChild(ListItemTemplateDirective, { read: TemplateRef });
     protected readonly innerListClasses = computed(() => {
         const classes = listInnerListThemeVariants();
         const listClass = this.listClass();
         return twMerge(classes, listClass);
     });
+    protected readonly itemTemplate = contentChild(ListItemTemplateDirective, { read: TemplateRef });
     protected readonly listHeight = computed(() => {
         const height = this.height();
         if (height == null) {
@@ -129,6 +132,7 @@ export class ListComponent<TData> implements OnInit {
         }
         return width;
     });
+    protected readonly messages = this.#i18n.componentMessages("list", LIST_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(ListNoDataTemplateDirective, { read: TemplateRef });
     protected readonly viewportHeight: Signal<ListSizeType> = computed(() => {
         const listHeight = this.listHeight();
