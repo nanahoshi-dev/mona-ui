@@ -8,7 +8,7 @@ import { GridService } from "../services/grid.service";
 @Directive({
     selector: "[monaGridColumnResizeHandler]",
     host: {
-        "[attr.aria-label]": "'Resize column'",
+        "[attr.aria-label]": "messages().resizeColumn",
         "[attr.aria-orientation]": "'vertical'",
         "[attr.role]": "'separator'"
     }
@@ -18,6 +18,7 @@ export class GridColumnResizeHandlerDirective {
     readonly #document = inject(DOCUMENT);
     readonly #gridService = inject(GridService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    protected readonly messages = this.#gridService.messages;
 
     public readonly column = input.required<Column>();
     public readonly resizeEnd = output<ColumnResizeEvent>();

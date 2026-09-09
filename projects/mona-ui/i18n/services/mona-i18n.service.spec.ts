@@ -208,6 +208,17 @@ describe("MonaI18nService", () => {
         // Unlocalized fallback preserves English
         expect(messages().lastPageLabel).toBe("Last page");
     });
+
+    it("strictly types message namespace keys and rejects invalid namespaces", () => {
+        TestBed.configureTestingModule({});
+        const service = TestBed.inject(MonaI18nService);
+
+        const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+        expect(messages()).toBeDefined();
+
+        // @ts-expect-error Invalid namespace must not be allowed
+        service.componentMessages("invalidNamespace", {});
+    });
 });
 
 describe("mergeMessages utility", () => {

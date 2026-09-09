@@ -115,7 +115,7 @@ import {
         "[style.height]": "scrollViewHeight()",
         "[style.width]": "scrollViewWidth()",
         "[attr.role]": "'region'",
-        "[attr.aria-roledescription]": "'carousel'",
+        "[attr.aria-roledescription]": "messages().carousel",
         "[attr.aria-label]": "ariaLabel()"
     }
 })

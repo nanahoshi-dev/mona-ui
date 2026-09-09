@@ -1,5 +1,6 @@
 import type { MonaAutoCompleteMessages } from "../message-types/auto-complete.messages";
 import type { MonaBreadcrumbMessages } from "../message-types/breadcrumb.messages";
+import type { MonaButtonGroupMessages } from "../message-types/button-group.messages";
 import type { MonaCalendarMessages } from "../message-types/calendar.messages";
 import type { MonaCardMessages } from "../message-types/card.messages";
 import type { MonaChartMessages } from "../message-types/chart.messages";
@@ -37,9 +38,10 @@ import type { MonaTimeSelectorMessages } from "../message-types/time-selector.me
 import type { MonaTreeViewMessages } from "../message-types/tree-view.messages";
 import type { MonaWindowMessages } from "../message-types/window.messages";
 
-export interface MonaLocaleMessages extends Record<string, object> {
+export interface MonaLocaleMessages {
     autoComplete: MonaAutoCompleteMessages;
     breadcrumb: MonaBreadcrumbMessages;
+    buttonGroup: MonaButtonGroupMessages;
     calendar: MonaCalendarMessages;
     card: MonaCardMessages;
     chart: MonaChartMessages;
@@ -77,6 +79,8 @@ export interface MonaLocaleMessages extends Record<string, object> {
     treeView: MonaTreeViewMessages;
     window: MonaWindowMessages;
 }
+
+export type MonaMessageNamespace = keyof MonaLocaleMessages;
 
 
 

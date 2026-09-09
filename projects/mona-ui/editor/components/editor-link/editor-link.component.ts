@@ -31,7 +31,7 @@ export class EditorLinkComponent {
             title: this.messages().insertLink,
             type: "info",
             // inputType: "string",
-            text: "Enter the URL"
+            text: this.messages().enterUrl
             // value: link
         });
         // dialogRef.result.pipe(take(1)).subscribe(result => this.setLink(result.value as string));

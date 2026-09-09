@@ -7,7 +7,7 @@
                 size="small"
                 [ngModel]="stringValue()"
                 (ngModelChange)="onStringChange($event)"
-                placeholder="Filter..." />
+                [placeholder]="messages().filterPlaceholder" />
             <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
                 <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
             </button>
@@ -80,7 +80,7 @@
                 [data]="booleanFilterMenuItems"
                 textField="text"
                 valueField="value"
-                placeholder="(All)"
+                [placeholder]="messages().all"
                 [ngModel]="booleanValue()"
                 (ngModelChange)="onBooleanChange($event)"
                 [style.width.%]="100" />

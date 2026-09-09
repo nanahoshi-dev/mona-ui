@@ -16,8 +16,10 @@ export interface MonaEditorMessages {
     readonly deleteColumn: string;
     readonly deleteRow: string;
     readonly deleteTable: string;
+    readonly enterUrl: string;
     readonly fontSize: string;
     readonly format: string;
+    readonly heading: (level: number) => string;
     readonly heightPx: string;
     readonly imageUrl: string;
     readonly indent: string;
@@ -32,6 +34,7 @@ export interface MonaEditorMessages {
     readonly justify: string;
     readonly mergeCells: string;
     readonly outdent: string;
+    readonly paragraph: string;
     readonly quotation: string;
     readonly redo: string;
     readonly removeLink: string;

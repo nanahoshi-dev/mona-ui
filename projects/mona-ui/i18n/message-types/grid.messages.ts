@@ -1,4 +1,5 @@
 export interface MonaGridMessages {
+    readonly all: string;
     readonly apply: string;
     readonly cancel: string;
     readonly cancelRowEdit: string;
@@ -10,6 +11,7 @@ export interface MonaGridMessages {
     readonly dragColumnHeaderToGroup: string;
     readonly edit: string;
     readonly editRow: string;
+    readonly filterPlaceholder: string;
     readonly modified: string;
     readonly moveAsNext: string;
     readonly moveAsPrevious: string;
@@ -18,6 +20,7 @@ export interface MonaGridMessages {
     readonly remove: string;
     readonly removeRow: string;
     reorderRow(rowNumber: number): string;
+    readonly resizeColumn: string;
     readonly rowReorder: string;
     readonly rowReorderKeyboardHint: string;
     readonly rowValidationError: string;

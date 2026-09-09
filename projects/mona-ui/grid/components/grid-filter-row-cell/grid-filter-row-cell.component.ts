@@ -69,6 +69,7 @@ export class GridFilterRowCellComponent {
     protected readonly baseClass = computed(() => {
         return gridFilterRowCellThemeVariants();
     });
+    protected readonly messages = this.#gridService.messages;
     protected readonly isFilterActive = computed(() => {
         const op = this.selectedOperator();
         if (op === "isnull" || op === "isnotnull") {

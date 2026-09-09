@@ -260,39 +260,6 @@ export const ALLOWLIST: AllowlistEntry[] = [
         category: "i18n-text",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-resource-manager.ts",
         reason: "Internal export rejection diagnostic error messages"
-    },
-    {
-        category: "i18n-text",
-        filePattern: "projects/mona-ui/editor/components/editor-headings/editor-headings.component.ts",
-        reason: "Pending Phase 3 Editor headings i18n migration"
-    },
-    {
-        category: "i18n-text",
-        filePattern: "projects/mona-ui/editor/components/editor-link/editor-link.component.ts",
-        reason: "Pending Phase 3 Editor link prompt text migration"
-    },
-    {
-        category: "i18n-text",
-        filePattern: "projects/mona-ui/grid/components/grid-filter-row-cell/grid-filter-row-cell.component.html",
-        reason: "Pending Phase 3 Grid filter row placeholder migration"
-    },
-    {
-        category: "i18n-aria",
-        filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
-        lineSnippet: "carousel",
-        reason: "Pending Phase 3 ScrollView carousel role description migration"
-    },
-    {
-        category: "i18n-aria",
-        filePattern: "projects/mona-ui/grid/directives/grid-column-resize-handler.directive.ts",
-        lineSnippet: "Resize column",
-        reason: "Pending Phase 3 Grid column resize handler ARIA migration"
-    },
-    {
-        category: "i18n-aria",
-        filePattern: "projects/mona-ui/button-group/components/button-group/button-group.component.ts",
-        lineSnippet: "Button group",
-        reason: "Pending Phase 3 ButtonGroup default aria-label migration"
     }
 ];
 
