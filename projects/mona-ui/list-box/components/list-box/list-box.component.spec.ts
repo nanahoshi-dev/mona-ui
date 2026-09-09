@@ -1,5 +1,7 @@
 import { Component, computed, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { afterEach } from "vitest";
 import { ButtonDirective } from "../../../button/directives/button.directive";
 import { SelectionMode } from "@nanahoshi/mona-ui/common";
 import { ListBoxActionEvent } from "../../models/ListBoxActionClickEvent";
@@ -26,6 +28,11 @@ describe("ListBoxComponent", () => {
         fixture = TestBed.createComponent(ListBoxComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+    });
+
+    afterEach(() => {
+        TestBed.inject(MonaI18nService).use(MONA_DEFAULT_LOCALE);
+        TestBed.resetTestingModule();
     });
 
     it("should create", () => {
@@ -70,7 +77,7 @@ function clickToolbarButton(host: HTMLElement, ariaLabel: string): void {
 }
 
 @Component({
-    selector: "app-list-box-harness",
+    selector: "mona-list-box-harness",
     imports: [ListBoxComponent],
     template: `
         <mona-list-box
@@ -90,6 +97,9 @@ function clickToolbarButton(host: HTMLElement, ariaLabel: string): void {
     `
 })
 class ListBoxHarnessComponent {
+    protected readonly connectedList = computed(() =>
+        this.useThirdAsConnectedList() ? (this.third() ?? null) : (this.second() ?? null)
+    );
     protected readonly first = viewChild.required<ListBoxComponent<Item, number>>("first");
     protected readonly firstItems = signal<Item[]>([
         { id: 1, text: "A" },
@@ -104,9 +114,6 @@ class ListBoxHarnessComponent {
     protected readonly thirdItems = signal<Item[]>([{ id: 20, text: "Y" }]);
     protected readonly toolbar = signal<boolean | Partial<ToolbarOptions>>(true);
     protected readonly useThirdAsConnectedList = signal(false);
-    protected readonly connectedList = computed(() =>
-        this.useThirdAsConnectedList() ? (this.third() ?? null) : (this.second() ?? null)
-    );
 
     public readonly actionEvents: ListBoxActionEvent<Item>[] = [];
     public readonly selectedKeysChangeEvents: number[][] = [];
@@ -269,5 +276,86 @@ describe("ListBoxComponent behavior", () => {
         clickItemByText(listBoxHosts()[2] as HTMLElement, "Y");
         await settle(fixture);
         expect(first.selectedItems().any()).toBe(false);
+    });
+
+    it("renders default English accessible labels and titles on toolbar buttons", async () => {
+        harness["firstSelectedKeys"].set([1]);
+        await settle(fixture);
+
+        const firstHost = hostElement.querySelectorAll("mona-list-box")[0] as HTMLElement;
+        const buttons = Array.from(firstHost.querySelectorAll("button[monaButton]")) as HTMLButtonElement[];
+        expect(buttons.length).toBe(8);
+
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+        expect(labels).toEqual([
+            "Move Up",
+            "Move Down",
+            "Transfer From",
+            "Transfer To",
+            "Transfer All From",
+            "Transfer All To",
+            "Clear Selection",
+            "Remove"
+        ]);
+
+        const titles = buttons.map(b => b.getAttribute("title"));
+        expect(titles).toEqual([
+            "Move Up",
+            "Move Down",
+            "Transfer From",
+            "Transfer To",
+            "Transfer All From",
+            "Transfer All To",
+            "Clear Selection",
+            "Remove"
+        ]);
+    });
+
+    it("updates toolbar buttons dynamically when locale is changed via MonaI18nService", async () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            direction: "ltr",
+            id: "de-DE",
+            messages: {
+                listBox: {
+                    clearSelection: "Auswahl aufheben",
+                    moveDown: "Nach unten verschieben",
+                    moveUp: "Nach oben verschieben",
+                    remove: "Entfernen",
+                    transferAllFrom: "Alle von hier übertragen",
+                    transferAllTo: "Alle hierher übertragen",
+                    transferFrom: "Von hier übertragen",
+                    transferTo: "Hierher übertragen"
+                }
+            }
+        });
+        await settle(fixture);
+
+        const firstHost = hostElement.querySelectorAll("mona-list-box")[0] as HTMLElement;
+        const buttons = Array.from(firstHost.querySelectorAll("button[monaButton]")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+        expect(labels).toEqual([
+            "Nach oben verschieben",
+            "Nach unten verschieben",
+            "Von hier übertragen",
+            "Hierher übertragen",
+            "Alle von hier übertragen",
+            "Alle hierher übertragen",
+            "Auswahl aufheben",
+            "Entfernen"
+        ]);
+    });
+
+    it("includes rtl:rotate-180 class on directional transfer buttons", async () => {
+        const firstHost = hostElement.querySelectorAll("mona-list-box")[0] as HTMLElement;
+        const transferFromBtn = firstHost.querySelector("button[aria-label='Transfer From'] svg");
+        const transferToBtn = firstHost.querySelector("button[aria-label='Transfer To'] svg");
+        const transferAllFromBtn = firstHost.querySelector("button[aria-label='Transfer All From'] svg");
+        const transferAllToBtn = firstHost.querySelector("button[aria-label='Transfer All To'] svg");
+
+        expect(transferFromBtn?.classList.contains("rtl:rotate-180")).toBe(true);
+        expect(transferToBtn?.classList.contains("rtl:rotate-180")).toBe(true);
+        expect(transferAllFromBtn?.classList.contains("rtl:rotate-180")).toBe(true);
+        expect(transferAllToBtn?.classList.contains("rtl:rotate-180")).toBe(true);
     });
 });

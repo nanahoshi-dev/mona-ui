@@ -10132,6 +10132,13 @@
         "defaultValue": "100%"
       },
       {
+        "description": "Collection of items to render.",
+        "kind": "input",
+        "name": "items",
+        "type": "Iterable<T>",
+        "defaultValue": "[]"
+      },
+      {
         "description": "Sets the classes of the inner UL element.",
         "kind": "input",
         "name": "listClass",
@@ -10158,13 +10165,6 @@
         "name": "listStyle",
         "type": "Partial<CSSStyleDeclaration>",
         "defaultValue": "{}"
-      },
-      {
-        "description": "Collection of items to render.",
-        "kind": "input",
-        "name": "items",
-        "type": "Iterable<T>",
-        "defaultValue": "[]"
       },
       {
         "description": "Sets the maximum height of the list.",

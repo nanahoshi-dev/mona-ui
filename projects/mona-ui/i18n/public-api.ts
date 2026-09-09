@@ -19,6 +19,7 @@ export * from "./message-types/combo-box.messages";
 export * from "./message-types/dropdown-list.messages";
 export * from "./message-types/dropdowns.messages";
 export * from "./message-types/list.messages";
+export * from "./message-types/list-box.messages";
 export * from "./message-types/multi-select.messages";
 export * from "./message-types/numeric-text-box.messages";
 export * from "./message-types/otp-input.messages";

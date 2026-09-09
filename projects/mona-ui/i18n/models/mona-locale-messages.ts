@@ -9,6 +9,7 @@ import type { MonaComboBoxMessages } from "../message-types/combo-box.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
+import type { MonaListBoxMessages } from "../message-types/list-box.messages";
 import type { MonaMultiSelectMessages } from "../message-types/multi-select.messages";
 import type { MonaNumericTextBoxMessages } from "../message-types/numeric-text-box.messages";
 import type { MonaOtpInputMessages } from "../message-types/otp-input.messages";
@@ -35,6 +36,7 @@ export interface MonaLocaleMessages extends Record<string, object> {
     dropdownList: MonaDropdownListMessages;
     dropdowns: MonaDropdownsMessages;
     list: MonaListMessages;
+    listBox: MonaListBoxMessages;
     multiSelect: MonaMultiSelectMessages;
     numericTextBox: MonaNumericTextBoxMessages;
     otpInput: MonaOtpInputMessages;

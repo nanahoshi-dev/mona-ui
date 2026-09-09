@@ -16,3 +16,4 @@ export * from "./models/ListBoxRemoveEvent";
 export * from "./models/ListBoxSelectionEvent";
 export * from "./models/ListBoxTransferEvent";
 export * from "./models/ToolbarOptions";
+export { LIST_BOX_DEFAULT_MESSAGES } from "./i18n/list-box.default-messages";
