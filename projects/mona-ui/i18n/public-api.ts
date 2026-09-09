@@ -16,6 +16,7 @@ export * from "./message-types/color-gradient.messages";
 export * from "./message-types/color-palette.messages";
 export * from "./message-types/color-picker.messages";
 export * from "./message-types/combo-box.messages";
+export * from "./message-types/date-picker.messages";
 export * from "./message-types/dialog.messages";
 export * from "./message-types/dropdown-list.messages";
 export * from "./message-types/dropdowns.messages";

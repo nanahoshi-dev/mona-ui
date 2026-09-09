@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled, form, FormField, required } from "@angular/forms/signals";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { datePopupThemeVariants } from "../../../date-input/styles/date-popup.styles";
 import { DatePickerComponent } from "./date-picker.component";
 
@@ -89,6 +90,42 @@ describe("DatePickerComponent", () => {
         expect(input.getAttribute("aria-invalid")).toBe("true");
     });
 
+    it("renders default english accessible labels for toggle button and popup", () => {
+        const toggleBtn = fixture.nativeElement.querySelector("button[monaButton]") as HTMLButtonElement;
+        expect(toggleBtn.getAttribute("aria-label")).toBe("Open calendar");
+
+        toggleBtn.click();
+        fixture.detectChanges();
+
+        const popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup?.getAttribute("aria-label")).toBe("Date picker");
+    });
+
+    it("updates messages dynamically when locale changes", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            messages: {
+                datePicker: {
+                    datePicker: "Tarih seçici",
+                    openCalendar: "Takvimi aç"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        const toggleBtn = fixture.nativeElement.querySelector("button[monaButton]") as HTMLButtonElement;
+        expect(toggleBtn.getAttribute("aria-label")).toBe("Takvimi aç");
+
+        toggleBtn.click();
+        fixture.detectChanges();
+
+        const popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup?.getAttribute("aria-label")).toBe("Tarih seçici");
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
     function getInput(): HTMLInputElement {
         const input = fixture.nativeElement.querySelector("input");
         if (!(input instanceof HTMLInputElement)) {
@@ -98,20 +135,21 @@ describe("DatePickerComponent", () => {
     }
 });
 
+interface DatePickerFormModel {
+    date: Date | null;
+}
+
 @Component({
     imports: [DatePickerComponent, FormField],
     template: `<mona-date-picker [formField]="form.date" format="dd/MM/yyyy"></mona-date-picker>`
 })
 class DatePickerHostComponent {
-    public readonly disabled = signal(false);
-    public readonly required = signal(false);
     readonly #model = signal<DatePickerFormModel>({ date: new Date(2026, 0, 2) });
+
+    public readonly disabled = signal(false);
     public readonly form = form(this.#model, schema => {
         disabled(schema.date, { when: () => this.disabled() });
         required(schema.date, { when: () => this.required() });
     });
-}
-
-interface DatePickerFormModel {
-    date: Date | null;
+    public readonly required = signal(false);
 }

@@ -43,6 +43,7 @@ import {
     DropdownPopupInputToken,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -54,6 +55,7 @@ import {
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { DATE_PICKER_DEFAULT_MESSAGES } from "../../i18n/date-picker.default-messages";
 import {
     datePickerBaseThemeVariants,
     DatePickerVariantInput,
@@ -102,6 +104,7 @@ export class DatePickerComponent
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #id = createElementControlId();
     protected readonly baseClass = computed(() => {
         const focused = this.#dropdownService.popupRef() != null;
@@ -139,6 +142,7 @@ export class DatePickerComponent
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly messages = this.#i18n.componentMessages("datePicker", DATE_PICKER_DEFAULT_MESSAGES);
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
     protected readonly pickerPopupClass = computed(() => {
@@ -156,6 +160,7 @@ export class DatePickerComponent
     /**
      * @description Emits when the popup is about to close. This event is preventable.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly close = output<PopupCloseEvent>();
 
     /**
@@ -311,6 +316,14 @@ export class DatePickerComponent
         });
     }
 
+    public focus(): void {
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input && !this.readonly()) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
+    }
+
     protected onCalendarValueChange(date: Date | Date[] | null): void {
         const singleDate = Array.isArray(date) ? null : date;
         this.setCurrentDate(singleDate);
@@ -383,14 +396,6 @@ export class DatePickerComponent
             );
         }
         return date1 === date2;
-    }
-
-    public focus(): void {
-        const input = this.#hostElementRef.nativeElement.querySelector("input");
-        if (input && !this.readonly()) {
-            input.focus();
-            input.setSelectionRange(input.value.length, input.value.length);
-        }
     }
 
     private handleKeydown(event: KeyboardEvent): void {
