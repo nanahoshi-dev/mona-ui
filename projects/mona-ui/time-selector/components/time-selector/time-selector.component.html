@@ -38,7 +38,7 @@
                 [value]="h.value"
                 [id]="`${hourListId}${h.value}`"
                 (click)="onHourChange(h.value)">
-                {{ h.viewValue | number: "2.0" }}
+                {{ formatTwoDigit(h.viewValue) }}
             </li>
         }
     </ol>
@@ -59,7 +59,7 @@
                 [value]="m.value"
                 [id]="`${minuteListId}${m.value}`"
                 (click)="onMinuteChange(m.value)">
-                {{ m.viewValue | number: "2.0" }}
+                {{ formatTwoDigit(m.viewValue) }}
             </li>
         }
     </ol>
@@ -81,7 +81,7 @@
                     [value]="s.value"
                     [id]="`${secondListId}${s.value}`"
                     (click)="onSecondChange(s.value)">
-                    {{ s.value | number: "2.0" }}
+                    {{ formatTwoDigit(s.value) }}
                 </li>
             }
         </ol>

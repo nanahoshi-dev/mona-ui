@@ -105,8 +105,8 @@ describe("ScrollViewComponent", () => {
                     page: (c: number) => `Seite ${c}`,
                     pageOf: (c: number, t: number) => `Seite ${c} von ${t}`,
                     previousPage: "Vorherige Seite",
-                    scrollPagerLeft: "Pager links",
-                    scrollPagerRight: "Pager rechts"
+                    scrollPagerNext: "Pager rechts",
+                    scrollPagerPrevious: "Pager links"
                 }
             }
         });

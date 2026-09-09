@@ -1,4 +1,4 @@
-import { DatePipe, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     Component,
@@ -53,7 +53,6 @@ import { compareDates } from "../../utils/compareDates";
     templateUrl: "./calendar.component.html",
     imports: [
         ButtonDirective,
-        DatePipe,
         MonthDayDirective,
         DecadeYearDirective,
         YearMonthDirective,
@@ -507,6 +506,10 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
         }
         this.navigatedDate.set(direction === "prev" ? date.minus(unit).toJSDate() : date.plus(unit).toJSDate());
+    }
+
+    protected getWeekNumber(date: Date): number {
+        return DateTime.fromJSDate(date).setLocale(this.#i18n.localeId()).weekNumber;
     }
 
     protected onTodayButtonClick(): void {

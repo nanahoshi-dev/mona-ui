@@ -1,7 +1,7 @@
-import { DecimalPipe, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input } from "@angular/core";
 import { getPercentage } from "@nanahoshi/mona-ui/common";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { Action } from "@nanahoshi/mona-ui/internal";
 
 import { twMerge } from "tailwind-merge";
@@ -32,7 +32,7 @@ import {
             }
         }
     `,
-    imports: [DecimalPipe, NgTemplateOutlet],
+    imports: [NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",
         "[attr.aria-busy]": "indeterminate() || null",
@@ -55,6 +55,13 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
+    protected readonly formattedProgress = computed(() => {
+        return formatNumber(this.progress(), this.#i18n.localeId(), {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+            useGrouping: false
+        });
+    });
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
         const classes = progressBarBaseThemeVariants({ rounded });

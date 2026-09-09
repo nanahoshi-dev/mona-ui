@@ -16,7 +16,7 @@
                 [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
             </ng-container>
         } @else {
-            <span [class]="labelClasses()" [style]="labelStyles()">{{ progress() | number: "1.0-2" }}</span>
+            <span [class]="labelClasses()" [style]="labelStyles()">{{ formattedProgress() }}</span>
         }
     }
 </div>
@@ -35,7 +35,7 @@
                     [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
                 </ng-container>
             } @else {
-                <span [class]="labelClasses()" [style]="labelStyles()">{{ progress() | number: "1.0-2" }}</span>
+                <span [class]="labelClasses()" [style]="labelStyles()">{{ formattedProgress() }}</span>
             }
         }
     </div>

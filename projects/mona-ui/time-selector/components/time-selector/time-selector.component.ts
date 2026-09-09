@@ -1,4 +1,3 @@
-import { DecimalPipe } from "@angular/common";
 import {
     afterNextRender,
     Component,
@@ -27,7 +26,7 @@ import {
     TimeLimiterPipe,
     TimeSelectorService
 } from "@nanahoshi/mona-ui/date-input";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { DateTime } from "luxon";
 import { fromEvent, tap } from "rxjs";
@@ -49,7 +48,7 @@ import {
 @Component({
     selector: "mona-time-selector",
     templateUrl: "./time-selector.component.html",
-    imports: [DecimalPipe, TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective, TimeSelectorListDirective],
+    imports: [TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective, TimeSelectorListDirective],
     host: {
         role: "group",
         "[attr.aria-label]": "ariaLabel() || messages().timeSelector",
@@ -245,6 +244,13 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
 
     public focus(): void {
         this.focusList(this.focusedList());
+    }
+
+    protected formatTwoDigit(value: number): string {
+        return formatNumber(value, this.#i18n.localeId(), {
+            minimumIntegerDigits: 2,
+            useGrouping: false
+        });
     }
 
     protected onBlur(): void {

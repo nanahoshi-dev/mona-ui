@@ -68,7 +68,7 @@
             <button
                 type="button"
                 [class]="pagerArrowClass()"
-                [attr.aria-label]="messages().scrollPagerLeft"
+                [attr.aria-label]="messages().scrollPagerPrevious"
                 (click)="onPagerScroll(pagerListElement, 'left', 'single')"
                 (mousedown)="onPagerScroll(pagerListElement, 'left', 'continuous')">
                 <svg
@@ -109,7 +109,7 @@
             <button
                 type="button"
                 [class]="pagerArrowClass()"
-                [attr.aria-label]="messages().scrollPagerRight"
+                [attr.aria-label]="messages().scrollPagerNext"
                 (click)="onPagerScroll(pagerListElement, 'right', 'single')"
                 (mousedown)="onPagerScroll(pagerListElement, 'right', 'continuous')">
                 <svg

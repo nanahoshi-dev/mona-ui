@@ -84,7 +84,7 @@
             @if (weekNumber()) {
                 @let firstEntry = row | monaTakeFirst;
                 @if (firstEntry) {
-                    @let week = firstEntry.key | date: "w";
+                    @let week = getWeekNumber(firstEntry.key);
                     <div>{{ week }}</div>
                 }
             }
