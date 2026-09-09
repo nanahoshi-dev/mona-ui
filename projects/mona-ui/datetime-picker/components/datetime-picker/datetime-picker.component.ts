@@ -128,10 +128,11 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
         const format = this.format();
+        const locale = this.#i18n.localeId();
         if (!value) {
             return "";
         }
-        return DateTime.fromJSDate(value).toFormat(format);
+        return DateTime.fromJSDate(value).setLocale(locale).toFormat(format);
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
@@ -421,14 +422,15 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
             return;
         }
 
-        const dateTime = DateTime.fromFormat(this.currentDateString(), this.format());
+        const locale = this.#i18n.localeId();
+        const dateTime = DateTime.fromFormat(this.currentDateString(), this.format(), { locale });
         if (this.dateStringEquals(this.value(), dateTime.toJSDate())) {
             this.touch.emit();
             return;
         }
         if (dateTime.isValid) {
             const value = this.value();
-            if (value && DateTime.fromJSDate(value).equals(dateTime)) {
+            if (value && DateTime.fromJSDate(value).setLocale(locale).equals(dateTime)) {
                 this.touch.emit();
                 return;
             }
@@ -482,9 +484,10 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
         if (date1 && date2) {
+            const locale = this.#i18n.localeId();
             return (
-                DateTime.fromJSDate(date1).toFormat(this.format()) ===
-                DateTime.fromJSDate(date2).toFormat(this.format())
+                DateTime.fromJSDate(date1).setLocale(locale).toFormat(this.format()) ===
+                DateTime.fromJSDate(date2).setLocale(locale).toFormat(this.format())
             );
         }
         return date1 === date2;

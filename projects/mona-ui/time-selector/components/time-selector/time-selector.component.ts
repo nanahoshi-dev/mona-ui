@@ -106,7 +106,8 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     });
     protected readonly maxDate = computed(() => {
         const max = this.max();
-        return max ? DateTime.fromJSDate(max) : null;
+        const locale = this.#i18n.localeId();
+        return max ? DateTime.fromJSDate(max).setLocale(locale) : null;
     });
     protected readonly meridiem = signal<Meridiem>("AM");
     protected readonly meridiemListId = createElementControlId();
@@ -114,7 +115,8 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly messages = this.#i18n.componentMessages("timeSelector", TIME_SELECTOR_DEFAULT_MESSAGES);
     protected readonly minDate = computed(() => {
         const min = this.min();
-        return min ? DateTime.fromJSDate(min) : null;
+        const locale = this.#i18n.localeId();
+        return min ? DateTime.fromJSDate(min).setLocale(locale) : null;
     });
     protected readonly minute = computed(() => this.navigatedDate().minute);
     protected readonly minuteListId = createElementControlId();
@@ -123,7 +125,10 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly navigatedDate = signal(DateTime.now());
     protected readonly navigatedDateText = computed(() => {
         const hourFormat = this.hourFormat();
-        return this.navigatedDate().toLocaleString({ hour: "numeric", minute: "numeric", hour12: hourFormat === "12" });
+        const locale = this.#i18n.localeId();
+        return this.navigatedDate()
+            .setLocale(locale)
+            .toLocaleString({ hour: "numeric", minute: "numeric", hour12: hourFormat === "12" });
     });
     protected readonly pmMeridiemVisible = computed(() => {
         const max = this.max();
@@ -210,7 +215,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
                 this.setDateValues();
                 const value = this.value();
                 if (value) {
-                    const dt = DateTime.fromJSDate(value);
+                    const dt = DateTime.fromJSDate(value).setLocale(this.#i18n.localeId());
                     if (dt.isValid) {
                         this.navigatedDate.set(dt);
                     } else {
@@ -279,7 +284,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         if (this.disabled() || this.readonly()) {
             return;
         }
-        let now = DateTime.now();
+        let now = DateTime.now().setLocale(this.#i18n.localeId());
         const min = this.minDate();
         const max = this.maxDate();
         if (min && now < min) {
@@ -407,20 +412,21 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     private initializeNavigatedDate(date: Date | null): void {
         const min = this.min();
         const max = this.max();
+        const locale = this.#i18n.localeId();
         if (!date) {
-            this.navigatedDate.set(DateTime.now());
+            this.navigatedDate.set(DateTime.now().setLocale(locale));
         } else if (min && date < min) {
-            const minDate = DateTime.fromJSDate(min);
+            const minDate = DateTime.fromJSDate(min).setLocale(locale);
             if (minDate.isValid) {
                 this.navigatedDate.set(minDate);
             }
         } else if (max && date > max) {
-            const maxDate = DateTime.fromJSDate(max);
+            const maxDate = DateTime.fromJSDate(max).setLocale(locale);
             if (maxDate.isValid) {
                 this.navigatedDate.set(maxDate);
             }
         } else {
-            const dateToSet = DateTime.fromJSDate(date);
+            const dateToSet = DateTime.fromJSDate(date).setLocale(locale);
             if (dateToSet.isValid) {
                 this.navigatedDate.set(dateToSet);
             }

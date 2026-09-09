@@ -87,10 +87,11 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
         const format = this.format();
+        const locale = this.#i18n.localeId();
         if (!value) {
             return "";
         }
-        return DateTime.fromJSDate(value).toFormat(format);
+        return DateTime.fromJSDate(value).setLocale(locale).toFormat(format);
     });
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() != null);
     protected readonly inputAttributes = computed<AttributeConfig>(() => {
@@ -332,9 +333,10 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
         if (date1 && date2) {
+            const locale = this.#i18n.localeId();
             return (
-                DateTime.fromJSDate(date1).toFormat(this.format()) ===
-                DateTime.fromJSDate(date2).toFormat(this.format())
+                DateTime.fromJSDate(date1).setLocale(locale).toFormat(this.format()) ===
+                DateTime.fromJSDate(date2).setLocale(locale).toFormat(this.format())
             );
         }
         return date1 === date2;
@@ -342,8 +344,9 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
 
     private generateValidDateTime(dateString: string): DateTime | null {
         const value = this.value();
-        const valueDate = value ? DateTime.fromJSDate(value) : DateTime.now();
-        let dateTime = DateTime.fromFormat(dateString, this.format());
+        const locale = this.#i18n.localeId();
+        const valueDate = value ? DateTime.fromJSDate(value).setLocale(locale) : DateTime.now().setLocale(locale);
+        let dateTime = DateTime.fromFormat(dateString, this.format(), { locale });
         if (dateTime.isValid) {
             return dateTime.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
         }
@@ -351,7 +354,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         const minDate = this.min();
         const date = minDate ?? maxDate;
         if (date) {
-            const newDate = DateTime.fromJSDate(date);
+            const newDate = DateTime.fromJSDate(date).setLocale(locale);
             dateTime = newDate.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
             return dateTime;
         }
@@ -409,7 +412,8 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
 
     private setDateValues(): void {
         const value = this.value();
-        this.navigatedDate.set(value ?? DateTime.now().toJSDate());
+        const locale = this.#i18n.localeId();
+        this.navigatedDate.set(value ?? DateTime.now().setLocale(locale).toJSDate());
         if (value) {
             this.updateCurrentDateString(value, this.format());
         }
@@ -436,7 +440,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
             this.currentDateString.set("");
             return;
         }
-        const dateString = DateTime.fromJSDate(date).toFormat(format);
+        const dateString = DateTime.fromJSDate(date).setLocale(this.#i18n.localeId()).toFormat(format);
         this.currentDateString.set(dateString);
     }
 }
