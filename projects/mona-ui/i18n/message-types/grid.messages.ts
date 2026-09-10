@@ -11,6 +11,7 @@ export interface MonaGridMessages {
     readonly dragColumnHeaderToGroup: string;
     readonly edit: string;
     readonly editRow: string;
+    readonly fieldValidationError?: string;
     filterByColumn(column: string): string;
     readonly filterPlaceholder: string;
     readonly modified: string;

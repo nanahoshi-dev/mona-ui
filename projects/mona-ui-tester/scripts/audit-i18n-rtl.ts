@@ -665,7 +665,15 @@ export const TECHNICAL_SEMANTIC_STRINGS = new Set([
     "aria-describedby",
     "aria-roledescription",
     "aria-label-start",
-    "aria-label-end"
+    "aria-label-end",
+    "true",
+    "false",
+    "assertive",
+    "polite",
+    "off",
+    "mixed",
+    "ascending",
+    "descending"
 ]);
 
 export const SEMANTIC_OBJECT_KEYS = new Set([
@@ -715,7 +723,8 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
         Node.isParenthesizedExpression(node) ||
         Node.isAsExpression(node) ||
         Node.isTypeAssertion(node) ||
-        Node.isNonNullExpression(node)
+        Node.isNonNullExpression(node) ||
+        Node.isSatisfiesExpression(node)
     ) {
         return collectLiteralFragments(node.getExpression());
     }
@@ -730,7 +739,8 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
         if (
             op === SyntaxKind.PlusToken ||
             op === SyntaxKind.BarBarToken ||
-            op === SyntaxKind.QuestionQuestionToken
+            op === SyntaxKind.QuestionQuestionToken ||
+            op === SyntaxKind.AmpersandAmpersandToken
         ) {
             return [
                 ...collectLiteralFragments(node.getLeft()),
@@ -759,7 +769,9 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
             exprText === "computed" ||
             exprText.endsWith(".computed") ||
             exprText === "signal" ||
-            exprText.endsWith(".signal")
+            exprText.endsWith(".signal") ||
+            exprText === "linkedSignal" ||
+            exprText.endsWith(".linkedSignal")
         ) {
             const fragments: LiteralFragment[] = [];
             for (const arg of node.getArguments()) {
@@ -993,11 +1005,53 @@ export function scanTypeScriptAst(
             }
         }
 
-        // 4. Semantic functions, methods, and getters returning string literals
-        const semanticFnRegex = /(?:label|title|message|placeholder|tooltip|description|announcement|aria)/i;
+        const isSemanticName = (name: string): boolean => {
+            if (/(?:label|title|message|placeholder|tooltip|description|announcement|emptyText)/i.test(name)) {
+                return true;
+            }
+            if (/(?:^|[a-z0-9_#])Aria(?:[A-Z0-9_]|$)/.test(name) || /^#?aria(?:[A-Z0-9_]|$)/.test(name)) {
+                return true;
+            }
+            return false;
+        };
+        const isAriaSemanticName = (name: string): boolean => {
+            return (
+                /(?:^|[a-z0-9_#])Aria(?:[A-Z0-9_]|$)/.test(name) ||
+                /^#?aria(?:[A-Z0-9_]|$)/.test(name) ||
+                /announcement/i.test(name)
+            );
+        };
         const predicatePrefixRegex = /^(?:is|has|should|can|check)[A-Z]/;
         const technicalFnSuffixRegex =
             /(?:transform|origin|style|styles|class|classes|options|config|rect|size|bounds|width|height|coord|coords|coordinate|coordinates|pattern|regex|index|key|id)$/i;
+
+        // 3b. Semantic class property declarations (e.g. title, tooltip, message, label, placeholder, description, emptyText)
+        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+            const propName = prop.getName();
+            if (propName.toLowerCase().includes("arialabel") || propName.toLowerCase().includes("announcement")) {
+                continue;
+            }
+            if (isSemanticName(propName) && !predicatePrefixRegex.test(propName) && !technicalFnSuffixRegex.test(propName)) {
+                const init = prop.getInitializer();
+                if (init) {
+                    const fragments = collectLiteralFragments(init);
+                    for (const frag of fragments) {
+                        const val = frag.text.trim();
+                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                            const isAria = isAriaSemanticName(propName);
+                            violations.push({
+                                category: isAria ? "i18n-aria" : "i18n-text",
+                                detail: `Hard-coded text in semantic property "${propName}": "${val}"`,
+                                file: filePath,
+                                line: frag.node.getStartLineNumber()
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Semantic functions, methods, and getters returning string literals
 
         const candidateFunctions: { name: string; returnExprs: (Node | undefined)[] }[] = [];
 
@@ -1052,7 +1106,7 @@ export function scanTypeScriptAst(
 
         for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
             const name = varDecl.getName();
-            if (name && semanticFnRegex.test(name) && !predicatePrefixRegex.test(name)) {
+            if (name && isSemanticName(name) && !predicatePrefixRegex.test(name)) {
                 const init = varDecl.getInitializer();
                 if (init && Node.isArrowFunction(init)) {
                     const body = init.getBody();
@@ -1077,13 +1131,13 @@ export function scanTypeScriptAst(
         }
 
         for (const { name: fnName, returnExprs } of candidateFunctions) {
-            if (semanticFnRegex.test(fnName) && !technicalFnSuffixRegex.test(fnName)) {
+            if (isSemanticName(fnName) && !technicalFnSuffixRegex.test(fnName)) {
                 for (const expr of returnExprs) {
                     const fragments = collectLiteralFragments(expr);
                     for (const frag of fragments) {
                         const val = frag.text.trim();
                         if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
-                            const isAria = /(?:aria|announcement)/i.test(fnName);
+                            const isAria = isAriaSemanticName(fnName);
                             violations.push({
                                 category: isAria ? "i18n-aria" : "i18n-text",
                                 detail: `Hard-coded text returned from semantic helper "${fnName}": "${val}"`,

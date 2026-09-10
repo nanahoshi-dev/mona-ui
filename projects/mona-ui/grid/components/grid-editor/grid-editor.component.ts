@@ -22,6 +22,7 @@ import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
 import { Column } from "../../models/Column";
 import type { GridEditSession } from "../../models/GridEditSession";
 import type { GridEditTemplateContext } from "../../models/GridEditTemplateContext";
+import { GridService } from "../../services/grid.service";
 import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } from "../../styles/grid.styles";
 
 const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
@@ -47,6 +48,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
 export class GridEditorComponent {
     readonly #datePopupOpen = signal(false);
     readonly #elementRef = inject(ElementRef<HTMLElement>);
+    readonly #gridService = inject(GridService, { optional: true });
     #ignoreNextBooleanFocusOut = false;
     private readonly numericTextBoxRef = viewChild(NumericTextBoxComponent);
     private readonly textBoxRef = viewChild(TextBoxComponent);
@@ -74,7 +76,7 @@ export class GridEditorComponent {
     });
     protected readonly fieldErrorMessage = computed(() => {
         const [firstError] = this.formField()().errors();
-        return firstError?.message ?? "Invalid value.";
+        return firstError?.message ?? this.#gridService?.messages().fieldValidationError ?? "";
     });
     protected readonly formField = computed<FieldTree<unknown>>(() => {
         const field = this.session().form[this.column().field];

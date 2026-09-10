@@ -275,6 +275,57 @@ describe("audit-i18n-rtl", () => {
             });
         });
 
+        it("detects hard-coded strings in semantic class property declarations (computed, linkedSignal, signal)", () => {
+            const code = `
+                export class DemoComponent {
+                    protected readonly title = computed(() => "Delete item");
+                    protected readonly tooltip = linkedSignal(() => "Retry request");
+                    protected readonly message = signal("Loading items");
+                    protected readonly customPlaceholder = "Search records...";
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(4);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes('property "title": "Delete item"'))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes('property "tooltip": "Retry request"'))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes('property "message": "Loading items"'))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes('property "customPlaceholder": "Search records..."'))).toBe(true);
+        });
+
+        it("ignores semantic class properties using localized messages or dynamic signals", () => {
+            const code = `
+                export class CleanDemoComponent {
+                    protected readonly title = computed(() => this.messages().title);
+                    protected readonly tooltip = linkedSignal(() => this.messages().retry);
+                    protected readonly message = signal(this.messages().loading);
+                    protected readonly ariaLabel = computed(() => this.messages().close);
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("clean-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("detects literals inside logical AND expressions and satisfies expressions", () => {
+            const code = `
+                export class LogicalComponent {
+                    protected readonly ariaLabel = computed(() => this.expanded() && "Collapse panel");
+                    protected readonly options = {
+                        label: this.enabled() && ("Disable feature" satisfies string)
+                    };
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("logical.component.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Collapse panel"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Disable feature"))).toBe(true);
+        });
+
         it("detects indirect DOMRect.left / right coordinate access", () => {
             const code = `
                 function getPosition(el: HTMLElement) {
