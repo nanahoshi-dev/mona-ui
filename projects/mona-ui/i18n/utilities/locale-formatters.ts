@@ -5,8 +5,15 @@ export interface NumberSymbols {
     readonly digits: ReadonlyMap<string, string>;
 }
 
+export interface NumberGroupingPattern {
+    readonly primaryGroupSize: number;
+    readonly secondaryGroupSize: number;
+    readonly groupSeparator: string;
+}
+
 const numberSymbolsCache = new Map<string, NumberSymbols>();
 const numberFormatterCache = new Map<string, Intl.NumberFormat>();
+const numberGroupingCache = new Map<string, NumberGroupingPattern>();
 
 function serializeOptions(options?: Intl.NumberFormatOptions): string {
     if (!options) {
@@ -14,6 +21,49 @@ function serializeOptions(options?: Intl.NumberFormatOptions): string {
     }
     const keys = Object.keys(options).sort();
     return keys.map(k => `${k}:${String((options as Record<string, unknown>)[k])}`).join(";");
+}
+
+export function getNumberGroupingPattern(localeId: string): NumberGroupingPattern {
+    let pattern = numberGroupingCache.get(localeId);
+    if (!pattern) {
+        try {
+            const formatter = new Intl.NumberFormat(localeId, {
+                useGrouping: true,
+                maximumFractionDigits: 0
+            });
+            const parts = formatter.formatToParts(123456789012345);
+            const integerParts = parts.filter(p => p.type === "integer");
+            const groupParts = parts.filter(p => p.type === "group");
+            const groupSeparator = groupParts[0]?.value ?? getNumberSymbols(localeId).group ?? ",";
+
+            if (integerParts.length >= 2) {
+                const primaryStr = integerParts[integerParts.length - 1].value.replace(/[\u061C\u200E\u200F\s]/g, "");
+                const secondaryStr = integerParts[integerParts.length - 2].value.replace(/[\u061C\u200E\u200F\s]/g, "");
+                const primaryGroupSize = Array.from(primaryStr).length;
+                const secondaryGroupSize = Array.from(secondaryStr).length;
+                pattern = {
+                    primaryGroupSize: primaryGroupSize > 0 ? primaryGroupSize : 3,
+                    secondaryGroupSize: secondaryGroupSize > 0 ? secondaryGroupSize : 3,
+                    groupSeparator
+                };
+            } else {
+                pattern = {
+                    primaryGroupSize: 3,
+                    secondaryGroupSize: 3,
+                    groupSeparator
+                };
+            }
+        } catch {
+            const groupSeparator = getNumberSymbols(localeId).group ?? ",";
+            pattern = {
+                primaryGroupSize: 3,
+                secondaryGroupSize: 3,
+                groupSeparator
+            };
+        }
+        numberGroupingCache.set(localeId, pattern);
+    }
+    return pattern;
 }
 
 export function getNumberSymbols(localeId: string): NumberSymbols {
@@ -27,6 +77,7 @@ export function getNumberSymbols(localeId: string): NumberSymbols {
             digitMap.set(String.fromCharCode(0x0660 + i), String(i)); // Arabic-Indic
             digitMap.set(String.fromCharCode(0x06f0 + i), String(i)); // Eastern Arabic-Indic / Persian
             digitMap.set(String.fromCharCode(0x09e6 + i), String(i)); // Bengali
+            digitMap.set(String.fromCharCode(0x0966 + i), String(i)); // Devanagari
         }
 
         try {
@@ -91,6 +142,8 @@ export function normalizeLocalizedDigits(text: string, localeId?: string): strin
                 result += String(code - 0x06f0);
             } else if (code >= 0x09e6 && code <= 0x09ef) {
                 result += String(code - 0x09e6);
+            } else if (code >= 0x0966 && code <= 0x096f) {
+                result += String(code - 0x0966);
             } else {
                 result += char;
             }
@@ -177,116 +230,128 @@ export function parseLocalizedNumber(
         return null;
     }
 
-    // Remove all whitespace, non-breaking spaces, and narrow no-break spaces
-    cleaned = cleaned.replace(/[\s\u00A0\u202F]/g, "");
-
     const mode: LocalizedNumberParseMode =
         options?.mode ?? (options?.alternateDecimal ? "edit" : "locale");
 
     if (mode === "locale") {
-        if (symbols.decimal === ",") {
-            // Comma is the ONLY decimal separator in comma-decimal locales (de-DE, tr-TR, fr-FR)
-            if (cleaned.indexOf(",") !== cleaned.lastIndexOf(",")) {
+        const grouping = getNumberGroupingPattern(localeId);
+        const groupSep = grouping.groupSeparator;
+        const isSpaceGroup = /[\s\u00A0\u202F]/.test(groupSep);
+        const decimalSep = symbols.decimal;
+
+        // In strict locale mode, if grouping separator is not space-like, any internal whitespace is invalid
+        if (!isSpaceGroup && /[\s\u00A0\u202F]/.test(cleaned)) {
+            return null;
+        }
+
+        // Split integer and fraction by canonical decimal separator
+        let intPart: string;
+        let fracPart: string | null = null;
+
+        if (decimalSep && cleaned.includes(decimalSep)) {
+            if (cleaned.indexOf(decimalSep) !== cleaned.lastIndexOf(decimalSep)) {
                 return null;
             }
-            if (symbols.group === ".") {
-                if (cleaned.includes(".")) {
-                    const intPart = cleaned.includes(",") ? cleaned.split(",")[0] : cleaned;
-                    const dotParts = intPart.split(".");
-                    if (dotParts[0].length < 1 || dotParts[0].length > 3 || !/^\d+$/.test(dotParts[0])) {
-                        return null;
-                    }
-                    for (let i = 1; i < dotParts.length; i++) {
-                        if (dotParts[i].length !== 3 || !/^\d{3}$/.test(dotParts[i])) {
-                            return null;
-                        }
-                    }
-                    // Dot cannot appear after comma
-                    if (cleaned.includes(",") && cleaned.indexOf(".") > cleaned.indexOf(",")) {
-                        return null;
-                    }
-                    cleaned = intPart.replace(/\./g, "") + (cleaned.includes(",") ? "," + cleaned.split(",")[1] : "");
+            const decimalIdx = cleaned.indexOf(decimalSep);
+            intPart = cleaned.slice(0, decimalIdx);
+            fracPart = cleaned.slice(decimalIdx + decimalSep.length);
+        } else {
+            // If the string contains an unexpected decimal-like character that is not the group separator, reject
+            if (decimalSep === "," && groupSep !== "." && cleaned.includes(".")) {
+                return null;
+            }
+            if (decimalSep === "." && groupSep !== "," && cleaned.includes(",")) {
+                return null;
+            }
+            intPart = cleaned;
+        }
+
+        // Fractional part validation
+        if (fracPart !== null) {
+            // Group separators or whitespace are never permitted in the fractional part
+            if (groupSep && fracPart.includes(groupSep)) {
+                return null;
+            }
+            if (/[\s\u00A0\u202F]/.test(fracPart)) {
+                return null;
+            }
+            if (fracPart.length > 0 && !/^\d+$/.test(fracPart)) {
+                return null;
+            }
+        }
+
+        // Integer part validation
+        if (intPart.length === 0) {
+            if (fracPart === null || fracPart.length === 0) {
+                return null;
+            }
+            intPart = "0";
+        } else {
+            let intGroups: string[];
+            let hasGroup = false;
+
+            if (isSpaceGroup) {
+                if (/[\s\u00A0\u202F]/.test(intPart)) {
+                    hasGroup = true;
+                    // Splitting by single space character preserves empty strings for consecutive spaces
+                    intGroups = intPart.split(/[\s\u00A0\u202F]/);
+                } else {
+                    intGroups = [intPart];
                 }
             } else {
-                if (cleaned.includes(".")) {
-                    return null;
-                }
-                if (symbols.group) {
-                    cleaned = cleaned.replaceAll(symbols.group, "");
-                }
-            }
-
-            if (cleaned.includes(",")) {
-                const parts = cleaned.split(",");
-                if (parts[1].length === 0) {
-                    cleaned = parts[0];
-                } else if (!/^\d+$/.test(parts[1])) {
-                    return null;
+                if (groupSep && intPart.includes(groupSep)) {
+                    hasGroup = true;
+                    intGroups = intPart.split(groupSep);
                 } else {
-                    cleaned = parts[0] + "." + parts[1];
+                    intGroups = [intPart];
                 }
-            } else if (!/^\d+$/.test(cleaned)) {
-                return null;
-            }
-        } else if (symbols.decimal === ".") {
-            // Dot is the ONLY decimal separator in dot-decimal locales (en-US, etc.)
-            if (cleaned.indexOf(".") !== cleaned.lastIndexOf(".")) {
-                return null;
-            }
-            if (symbols.group === ",") {
-                if (cleaned.includes(",")) {
-                    const intPart = cleaned.includes(".") ? cleaned.split(".")[0] : cleaned;
-                    const commaParts = intPart.split(",");
-                    if (commaParts[0].length < 1 || commaParts[0].length > 3 || !/^\d+$/.test(commaParts[0])) {
-                        return null;
-                    }
-                    for (let i = 1; i < commaParts.length; i++) {
-                        if (commaParts[i].length !== 3 || !/^\d{3}$/.test(commaParts[i])) {
-                            return null;
-                        }
-                    }
-                    if (cleaned.includes(".") && cleaned.indexOf(",") > cleaned.indexOf(".")) {
-                        return null;
-                    }
-                    cleaned = intPart.replace(/,/g, "") + (cleaned.includes(".") ? "." + cleaned.split(".")[1] : "");
-                }
-            } else if (symbols.group) {
-                if (cleaned.includes(",")) {
-                    return null;
-                }
-                cleaned = cleaned.replaceAll(symbols.group, "");
             }
 
-            if (cleaned.includes(".")) {
-                const parts = cleaned.split(".");
-                if (parts[1].length === 0) {
-                    cleaned = parts[0];
-                } else if (!/^\d+$/.test(parts[1])) {
+            if (hasGroup) {
+                if (intGroups.length < 2) {
                     return null;
                 }
-            } else if (!/^\d+$/.test(cleaned)) {
-                return null;
-            }
-        } else {
-            // Locales with other decimal symbols (e.g. Arabic ٫ U+066B, Persian /, etc.)
-            cleaned = cleaned.replace(/\u066C/g, "");
-            if (symbols.group) {
-                cleaned = cleaned.replaceAll(symbols.group, "");
-            }
-            if (cleaned.includes(",") || (symbols.decimal !== "." && cleaned.includes("."))) {
-                return null;
-            }
-            if (symbols.decimal) {
-                if (cleaned.includes(symbols.decimal)) {
-                    if (cleaned.indexOf(symbols.decimal) !== cleaned.lastIndexOf(symbols.decimal)) {
+
+                // Last (rightmost) group: must match primaryGroupSize digits
+                const lastGroup = intGroups[intGroups.length - 1];
+                if (lastGroup.length !== grouping.primaryGroupSize || !/^\d+$/.test(lastGroup)) {
+                    return null;
+                }
+
+                // Intermediate groups: must match secondaryGroupSize digits
+                for (let i = 1; i < intGroups.length - 1; i++) {
+                    const midGroup = intGroups[i];
+                    if (midGroup.length !== grouping.secondaryGroupSize || !/^\d+$/.test(midGroup)) {
                         return null;
                     }
-                    cleaned = cleaned.replace(symbols.decimal, ".");
+                }
+
+                // First group: must have 1..secondaryGroupSize digits
+                const firstGroup = intGroups[0];
+                if (
+                    firstGroup.length < 1 ||
+                    firstGroup.length > grouping.secondaryGroupSize ||
+                    !/^\d+$/.test(firstGroup)
+                ) {
+                    return null;
+                }
+
+                intPart = intGroups.join("");
+            } else {
+                // Ungrouped integer must consist solely of digits
+                if (!/^\d+$/.test(intPart)) {
+                    return null;
                 }
             }
         }
+
+        const normalizedStr = sign + intPart + (fracPart && fracPart.length > 0 ? "." + fracPart : "");
+        const num = Number(normalizedStr);
+        return Number.isFinite(num) ? num : null;
     } else {
         // mode === "edit": permissive interactive editing with alternate decimal separator
+        cleaned = cleaned.replace(/[\s\u00A0\u202F]/g, "");
+
         if (symbols.group && symbols.group !== ".") {
             cleaned = cleaned.replaceAll(symbols.group, "");
         }
@@ -324,11 +389,11 @@ export function parseLocalizedNumber(
                 }
             }
         }
-    }
 
-    const fullStr = sign + cleaned;
-    const num = Number(fullStr);
-    return Number.isFinite(num) ? num : null;
+        const fullStr = sign + cleaned;
+        const num = Number(fullStr);
+        return Number.isFinite(num) ? num : null;
+    }
 }
 
 export function validateLocalizedNumber(
@@ -361,26 +426,14 @@ export function validateLocalizedNumber(
 
     let fractionDigits = 0;
     if (mode === "locale") {
-        if (symbols.decimal === ",") {
-            if (normalized.includes(",")) {
-                const fracPart = normalized.slice(normalized.lastIndexOf(",") + 1).replace(/\D/g, "");
-                fractionDigits = fracPart.length;
-            }
-        } else if (symbols.decimal === ".") {
-            if (normalized.includes(".")) {
-                const fracPart = normalized.slice(normalized.lastIndexOf(".") + 1).replace(/\D/g, "");
-                fractionDigits = fracPart.length;
-            }
-        } else {
-            if (symbols.decimal && normalized.includes(symbols.decimal)) {
-                const fracPart = normalized
-                    .slice(normalized.lastIndexOf(symbols.decimal) + symbols.decimal.length)
-                    .replace(/\D/g, "");
-                fractionDigits = fracPart.length;
-            } else if (normalized.includes("\u066B")) {
-                const fracPart = normalized.slice(normalized.lastIndexOf("\u066B") + 1).replace(/\D/g, "");
-                fractionDigits = fracPart.length;
-            }
+        if (symbols.decimal && normalized.includes(symbols.decimal)) {
+            const fracPart = normalized
+                .slice(normalized.lastIndexOf(symbols.decimal) + symbols.decimal.length)
+                .replace(/\D/g, "");
+            fractionDigits = fracPart.length;
+        } else if (normalized.includes("\u066B")) {
+            const fracPart = normalized.slice(normalized.lastIndexOf("\u066B") + 1).replace(/\D/g, "");
+            fractionDigits = fracPart.length;
         }
     } else {
         let sep: string | null = null;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     formatNumber,
+    getNumberGroupingPattern,
     getNumberSymbols,
     normalizeLocalizedDigits,
     normalizeLocalizedInput,
@@ -38,6 +39,52 @@ describe("locale-formatters", () => {
             const symbols = getNumberSymbols("fa-IR");
             expect(symbols.digits.get("\u06F0")).toBe("0");
             expect(symbols.digits.get("\u06F9")).toBe("9");
+        });
+    });
+
+    describe("getNumberGroupingPattern", () => {
+        it("returns Western 3-3 grouping for en-US and de-DE", () => {
+            const enPattern = getNumberGroupingPattern("en-US");
+            expect(enPattern.primaryGroupSize).toBe(3);
+            expect(enPattern.secondaryGroupSize).toBe(3);
+            expect(enPattern.groupSeparator).toBe(",");
+
+            const dePattern = getNumberGroupingPattern("de-DE");
+            expect(dePattern.primaryGroupSize).toBe(3);
+            expect(dePattern.secondaryGroupSize).toBe(3);
+            expect(dePattern.groupSeparator).toBe(".");
+        });
+
+        it("returns Indian 3-2 grouping for hi-IN, en-IN, bn-BD, and mr-IN", () => {
+            const hiPattern = getNumberGroupingPattern("hi-IN");
+            expect(hiPattern.primaryGroupSize).toBe(3);
+            expect(hiPattern.secondaryGroupSize).toBe(2);
+            expect(hiPattern.groupSeparator).toBe(",");
+
+            const enInPattern = getNumberGroupingPattern("en-IN");
+            expect(enInPattern.primaryGroupSize).toBe(3);
+            expect(enInPattern.secondaryGroupSize).toBe(2);
+            expect(enInPattern.groupSeparator).toBe(",");
+
+            const bnPattern = getNumberGroupingPattern("bn-BD");
+            expect(bnPattern.primaryGroupSize).toBe(3);
+            expect(bnPattern.secondaryGroupSize).toBe(2);
+
+            const mrPattern = getNumberGroupingPattern("mr-IN");
+            expect(mrPattern.primaryGroupSize).toBe(3);
+            expect(mrPattern.secondaryGroupSize).toBe(2);
+        });
+
+        it("returns localized grouping separator for ar-SA and fa-IR", () => {
+            const arPattern = getNumberGroupingPattern("ar-SA");
+            expect(arPattern.primaryGroupSize).toBe(3);
+            expect(arPattern.secondaryGroupSize).toBe(3);
+            expect(arPattern.groupSeparator).toBe("\u066C");
+
+            const faPattern = getNumberGroupingPattern("fa-IR");
+            expect(faPattern.primaryGroupSize).toBe(3);
+            expect(faPattern.secondaryGroupSize).toBe(3);
+            expect(faPattern.groupSeparator).toBe("\u066C");
         });
     });
 
@@ -106,6 +153,66 @@ describe("locale-formatters", () => {
         it("parses localized Persian digits and minus in fa-IR", () => {
             expect(parseLocalizedNumber("۱۲۳۴٫۵", "fa-IR")).toBe(1234.5);
             expect(parseLocalizedNumber("\u200E\u2212۱۲٬۳۴۵٫۶", "fa-IR")).toBe(-12345.6);
+        });
+
+        it("parses canonical Indian 3-2-2 grouping in hi-IN, en-IN, bn-BD, and mr-IN", () => {
+            expect(parseLocalizedNumber("1,23,45,678.9", "hi-IN", { mode: "locale" })).toBe(12345678.9);
+            expect(parseLocalizedNumber("1,23,45,678.9", "en-IN", { mode: "locale" })).toBe(12345678.9);
+            expect(parseLocalizedNumber("12,34,567.89", "hi-IN", { mode: "locale" })).toBe(1234567.89);
+            expect(parseLocalizedNumber("12,34,567.89", "en-IN", { mode: "locale" })).toBe(1234567.89);
+
+            // Bengali digits and grouping
+            expect(parseLocalizedNumber("১,২৩,৪৫,৬৭৮.৯", "bn-BD", { mode: "locale" })).toBe(12345678.9);
+            expect(parseLocalizedNumber("১২,৩৪,৫৬৭.৮৯", "bn-BD", { mode: "locale" })).toBe(1234567.89);
+
+            // Marathi / Devanagari digits and grouping
+            expect(parseLocalizedNumber("१,२३,४५,६७८.९", "mr-IN", { mode: "locale" })).toBe(12345678.9);
+            expect(parseLocalizedNumber("१२,३४,५६७.८९", "mr-IN", { mode: "locale" })).toBe(1234567.89);
+        });
+
+        it("rejects malformed Western and Indian groupings in strict locale mode", () => {
+            // Western malformed
+            expect(parseLocalizedNumber("1,23,456", "en-US", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("12,34", "en-US", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1,,234", "en-US", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1,234,56", "en-US", { mode: "locale" })).toBeNull();
+
+            // Indian malformed (rejects Western 3-3 grouping in Indian locale)
+            expect(parseLocalizedNumber("1,234,567", "hi-IN", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1,2,34,567", "hi-IN", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("12,345,67", "hi-IN", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1,,23,456", "hi-IN", { mode: "locale" })).toBeNull();
+
+            // Arabic malformed grouping
+            expect(parseLocalizedNumber("١٬٢٬٣٤٥٫٦", "ar-SA", { mode: "locale" })).toBeNull();
+
+            // French malformed spacing
+            expect(parseLocalizedNumber("1   234,5", "fr-FR", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("12 34,5", "fr-FR", { mode: "locale" })).toBeNull();
+        });
+
+        it("round-trips canonical numbers formatted by Intl across test locales", () => {
+            const locales = [
+                "en-US",
+                "de-DE",
+                "fr-FR",
+                "hi-IN",
+                "en-IN",
+                "bn-BD",
+                "mr-IN",
+                "ar-SA",
+                "fa-IR"
+            ];
+            const testValues = [12, 1234, 12345, 1234567, 12345678.9, -12345678.9];
+
+            for (const loc of locales) {
+                const formatter = new Intl.NumberFormat(loc, { maximumFractionDigits: 1 });
+                for (const val of testValues) {
+                    const formatted = formatter.format(val);
+                    const parsed = parseLocalizedNumber(formatted, loc, { mode: "locale" });
+                    expect(parsed).toBe(val);
+                }
+            }
         });
 
         it("returns null for empty or invalid input", () => {
