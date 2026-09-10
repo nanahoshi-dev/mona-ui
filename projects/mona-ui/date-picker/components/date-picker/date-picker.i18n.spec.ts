@@ -80,4 +80,42 @@ describe("DatePickerComponent i18n", () => {
         await fixture.whenStable();
         expect(input.value).toBe("15 Oktober 2026");
     });
+
+    it("handles complex BCP-47 Unicode extensions without errors and preserves Gregorian dates", async () => {
+        TestBed.configureTestingModule({
+            imports: [DatePickerI18nTestHostComponent]
+        });
+        const fixture = TestBed.createComponent(DatePickerI18nTestHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.componentInstance.format.set("yyyy-MM-dd");
+        fixture.componentInstance.value.set(new Date(2026, 8, 10));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const input = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+
+        // 1. en-US-u-ca-persian-nu-arab
+        i18n.use({ id: "en-US-u-ca-persian-nu-arab", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBeTruthy();
+
+        // 2. ar-SA-u-ca-islamic-umalqura-nu-arab
+        i18n.use({ id: "ar-SA-u-ca-islamic-umalqura-nu-arab", direction: "rtl", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBeTruthy();
+
+        // 3. fa-IR-u-nu-latn-ca-persian
+        i18n.use({ id: "fa-IR-u-nu-latn-ca-persian", direction: "rtl", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("2026-09-10");
+
+        // Verify model date remains Gregorian 2026-09-10
+        const date = fixture.componentInstance.value();
+        expect(date?.getFullYear()).toBe(2026);
+        expect(date?.getMonth()).toBe(8);
+        expect(date?.getDate()).toBe(10);
+    });
 });

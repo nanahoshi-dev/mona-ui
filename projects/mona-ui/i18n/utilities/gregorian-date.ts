@@ -9,9 +9,15 @@ export function normalizeGregorianLocale(localeId: string): string {
     if (!localeId) {
         return localeId;
     }
-    let normalized = localeId.replace(/-u-ca-[a-zA-Z0-9]+/gi, "");
-    normalized = normalized.replace(/-u$/i, "");
-    return normalized;
+    try {
+        if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
+            const loc = new Intl.Locale(localeId, { calendar: "gregory" });
+            return loc.toString();
+        }
+    } catch {
+        // Fallback safely if localeId is malformed
+    }
+    return localeId;
 }
 
 /**
@@ -65,10 +71,21 @@ export function parseGregorianDate(
     localeId: string
 ): DateTime {
     const locale = normalizeGregorianLocale(localeId);
-    const normalizedText = normalizeLocalizedDigits(text, locale);
-    let dt = DateTime.fromFormat(normalizedText, format, { locale, outputCalendar: "gregory" });
+    let dt = DateTime.fromFormat(text, format, { locale, outputCalendar: "gregory" });
     if (!dt.isValid) {
-        dt = DateTime.fromFormat(text, format, { locale, outputCalendar: "gregory" });
+        const normalizedText = normalizeLocalizedDigits(text, locale);
+        let latnLocale = locale;
+        try {
+            if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
+                latnLocale = new Intl.Locale(locale, { numberingSystem: "latn" }).toString();
+            }
+        } catch {
+            // fallback
+        }
+        dt = DateTime.fromFormat(normalizedText, format, { locale: latnLocale, outputCalendar: "gregory" });
+        if (!dt.isValid) {
+            dt = DateTime.fromFormat(normalizedText, format, { locale, outputCalendar: "gregory" });
+        }
     }
     return dt;
 }

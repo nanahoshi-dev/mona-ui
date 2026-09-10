@@ -294,7 +294,23 @@ describe("CalendarComponent i18n", () => {
         await fixture.whenStable();
         expect(getHeading()).toBe("May 2026");
 
-        // 6. Selected model Date remains unchanged
+        // 6. Complex Unicode extensions with multiple keys and multi-subtag calendars
+        i18n.use({ id: "en-US-u-ca-persian-nu-arab", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBeTruthy();
+
+        i18n.use({ id: "ar-SA-u-ca-islamic-umalqura-nu-arab", direction: "rtl", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBeTruthy();
+
+        i18n.use({ id: "fa-IR-u-nu-latn-ca-persian", direction: "rtl", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getHeading()).toBeTruthy();
+
+        // 7. Selected model Date remains unchanged
         expect(fixture.componentInstance.value()?.getFullYear()).toBe(2026);
         expect(fixture.componentInstance.value()?.getMonth()).toBe(4);
         expect(fixture.componentInstance.value()?.getDate()).toBe(31);
