@@ -40,12 +40,7 @@ import {
 import { twMerge } from "tailwind-merge";
 import {
     formatNumber,
-    getNumberSymbols,
-    type LocalizedNumberParseMode,
     MonaI18nService,
-    normalizeLocalizedDigits,
-    normalizeLocalizedInput,
-    parseLocalizedNumber,
     validateLocalizedNumber,
     validateLocalizedNumberEdit
 } from "@nanahoshi/mona-ui/i18n";
@@ -135,7 +130,8 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
 
     /**
-     * @description Number of decimals to show.
+     * @description Number of fractional decimal places to display and accept. Values are truncated to an integer
+     * and clamped to the range 0–20. Non-finite and negative values normalize to 0.
      * @default 0
      */
     public readonly decimals = input(0, {
@@ -482,27 +478,41 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     }
 
     private parseValue(value: string | null | undefined): number | null {
-        const normalizedValue = value == null ? "" : value;
-        this.rawInputValue.set(normalizedValue);
-        if (normalizedValue === "" || normalizedValue === "-") {
-            this.#pendingPaste = false;
-            return null;
-        }
+        const raw = value == null ? "" : value;
+        this.rawInputValue.set(raw);
 
         const isPaste = this.#pendingPaste;
         this.#pendingPaste = false;
 
-        const mode: LocalizedNumberParseMode = isPaste ? "locale" : "edit";
-        const validation = validateLocalizedNumber(normalizedValue, this.#i18n.localeId(), {
-            mode,
+        if (isPaste) {
+            const validation = validateLocalizedNumber(raw, this.#i18n.localeId(), {
+                mode: "locale",
+                decimals: this.decimals()
+            });
+
+            return validation.valid && validation.value !== null ? validation.value : this.value();
+        }
+
+        if (raw === "") {
+            return null;
+        }
+
+        const edit = validateLocalizedNumberEdit(raw, this.#i18n.localeId(), {
             decimals: this.decimals()
         });
 
-        if (!validation.valid || validation.value === null) {
+        if (!edit.valid) {
             return this.value();
         }
 
-        return validation.value;
+        if (edit.value === null) {
+            // Transitional states such as "-" or a bare separator.
+            // Preserve the prior semantic value unless the explicit
+            // component contract says otherwise.
+            return this.value();
+        }
+
+        return edit.value;
     }
 
     private setBeforeInputSubscription(): void {

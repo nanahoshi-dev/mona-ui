@@ -10660,7 +10660,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Number of decimals to show.",
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
         "kind": "input",
         "name": "decimals",
         "type": "number",

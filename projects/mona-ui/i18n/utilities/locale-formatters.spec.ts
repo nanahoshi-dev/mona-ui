@@ -432,6 +432,36 @@ describe("locale-formatters", () => {
             });
         });
 
+        it("strictly rejects leading, trailing, and embedded whitespace in edit mode", () => {
+            const whitespaceVariants = [
+                " 12",
+                "12 ",
+                "\t12",
+                "12\t",
+                "\n12",
+                "12\n",
+                "\r12",
+                "12\r",
+                "\u00A012",
+                "12\u00A0",
+                "\u202F12",
+                "12\u202F",
+                "1 2",
+                "1\u00A02",
+                "1\u202F2"
+            ];
+            for (const text of whitespaceVariants) {
+                expect(
+                    validateLocalizedNumberEdit(text, "en-US", { decimals: 2 }),
+                    `Should reject whitespace variant "${text}"`
+                ).toEqual({
+                    valid: false,
+                    complete: false,
+                    value: null
+                });
+            }
+        });
+
         it("validates transitional and complete states in de-DE", () => {
             expect(validateLocalizedNumberEdit("12,", "de-DE", { decimals: 3 })).toEqual({
                 valid: true,

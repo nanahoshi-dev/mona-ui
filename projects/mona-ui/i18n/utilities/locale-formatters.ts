@@ -527,20 +527,20 @@ export function validateLocalizedNumberEdit(
     if (text == null) {
         return { valid: true, complete: false, value: null };
     }
-    const trimmed = String(text).trim();
-    if (trimmed === "") {
+    const raw = String(text);
+    if (raw === "") {
         return { valid: true, complete: false, value: null };
+    }
+
+    // Reject control or whitespace characters in interactive typing
+    if (/[\s\u00A0\u202F]/.test(raw)) {
+        return { valid: false, complete: false, value: null };
     }
 
     const symbols = getNumberSymbols(localeId);
 
-    // Reject control or whitespace characters in interactive typing
-    if (/[\s\u00A0\u202F]/.test(trimmed)) {
-        return { valid: false, complete: false, value: null };
-    }
-
     // Normalize minus signs and bidi controls
-    let normalized = normalizeLocalizedMinus(trimmed, symbols);
+    let normalized = normalizeLocalizedMinus(raw, symbols);
     // Normalize localized digits to ASCII
     normalized = normalizeLocalizedDigits(normalized, localeId);
 
@@ -624,7 +624,7 @@ export function validateLocalizedNumberEdit(
             return { valid: false, complete: false, value: null };
         }
 
-        const parsed = parseLocalizedNumber(trimmed, localeId, { mode: "edit" });
+        const parsed = parseLocalizedNumber(raw, localeId, { mode: "edit" });
         const complete = fracPart.length > 0 && (intPart.length > 0 || fracPart.length > 0);
 
         return {
@@ -639,7 +639,7 @@ export function validateLocalizedNumberEdit(
         return { valid: false, complete: false, value: null };
     }
 
-    const parsed = parseLocalizedNumber(trimmed, localeId, { mode: "edit" });
+    const parsed = parseLocalizedNumber(raw, localeId, { mode: "edit" });
     return {
         valid: true,
         complete: true,

@@ -496,6 +496,109 @@ describe("NumericTextBoxComponent", () => {
             await waitForStable(hostFixture);
             expect(hostFixture.componentInstance.value()).toBe(1.5);
         });
+
+        describe("direct input and edit validation without beforeinput", () => {
+            it("rejects malformed repeated comma direct input and preserves prior model value", async () => {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                hostFixture.componentInstance.decimals.set(2);
+                hostFixture.componentInstance.value.set(12);
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, "12,3,4");
+                await waitForStable(hostFixture);
+
+                expect(hostFixture.componentInstance.value()).toBe(12);
+            });
+
+            it("rejects malformed repeated dot direct input and preserves prior model value", async () => {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                hostFixture.componentInstance.decimals.set(2);
+                hostFixture.componentInstance.value.set(12);
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, "12.3.4");
+                await waitForStable(hostFixture);
+
+                expect(hostFixture.componentInstance.value()).toBe(12);
+            });
+
+            it("rejects direct input with whitespace and preserves prior model value", async () => {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                hostFixture.componentInstance.decimals.set(2);
+                hostFixture.componentInstance.value.set(12);
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, " 12");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
+
+                updateInputValue(hostFixture, "12 ");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
+
+                updateInputValue(hostFixture, "1 2");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
+            });
+
+            it("accepts valid en-US alternate comma decimal separator on direct input", async () => {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                hostFixture.componentInstance.decimals.set(2);
+                hostFixture.componentInstance.value.set(12);
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, "12,5");
+                await waitForStable(hostFixture);
+
+                expect(hostFixture.componentInstance.value()).toBe(12.5);
+            });
+
+            it("accepts valid de-DE alternate dot decimal separator on direct input", async () => {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                const i18nService = TestBed.inject(MonaI18nService);
+                i18nService.use({ id: "de-DE", direction: "ltr", messages: {} });
+
+                hostFixture.componentInstance.decimals.set(2);
+                hostFixture.componentInstance.value.set(12);
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, "12.5");
+                await waitForStable(hostFixture);
+
+                expect(hostFixture.componentInstance.value()).toBe(12.5);
+            });
+
+            it("preserves prior semantic model on transitional states like trailing separator or lone sign", async () => {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                hostFixture.componentInstance.decimals.set(2);
+                hostFixture.componentInstance.value.set(12);
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, "12.");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
+
+                updateInputValue(hostFixture, "12,");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
+
+                updateInputValue(hostFixture, "-");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
+            });
+
+            it("clears semantic model to null when direct input is empty string", async () => {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                hostFixture.componentInstance.decimals.set(2);
+                hostFixture.componentInstance.value.set(12);
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, "");
+                await waitForStable(hostFixture);
+
+                expect(hostFixture.componentInstance.value()).toBeNull();
+            });
+        });
     });
 });
 
