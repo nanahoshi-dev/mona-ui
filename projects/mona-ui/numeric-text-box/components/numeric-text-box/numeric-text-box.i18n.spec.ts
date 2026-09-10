@@ -623,6 +623,111 @@ describe("NumericTextBoxComponent i18n integration", () => {
         expect(nonPasteEvent.defaultPrevented).toBe(false);
     });
 
+    it("clears paste transaction state on rejected paste and allows immediate alternate decimal typing", async () => {
+        await TestBed.configureTestingModule({
+            imports: [NumericTextBoxI18nTestHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+        const host = fixture.componentInstance;
+        const i18n = TestBed.inject(MonaI18nService);
+        host.decimals.set(2);
+        i18n.use(DE_LOCALE);
+        await waitForStable(fixture);
+
+        const input = getInput(fixture);
+        focusInput(input);
+        await waitForStable(fixture);
+
+        function simulateBrowserPaste(clipboardText: string | null): boolean {
+            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as any;
+            if (clipboardText !== null) {
+                pasteEvent.clipboardData = {
+                    getData: (format: string) => (format === "text/plain" ? clipboardText : "")
+                };
+            }
+            const pasteAllowed = input.dispatchEvent(pasteEvent);
+            if (!pasteAllowed || pasteEvent.defaultPrevented) {
+                return false;
+            }
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: null,
+                inputType: "insertFromPaste"
+            });
+            const beforeInputAllowed = input.dispatchEvent(beforeInputEvent);
+            if (!beforeInputAllowed || beforeInputEvent.defaultPrevented) {
+                return false;
+            }
+
+            const text = clipboardText ?? "";
+            const start = input.selectionStart ?? 0;
+            const end = input.selectionEnd ?? input.value.length;
+            input.value = input.value.slice(0, start) + text + input.value.slice(end);
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            fixture.detectChanges();
+            return true;
+        }
+
+        async function typeChar(char: string): Promise<boolean> {
+            const start = input.selectionStart ?? input.value.length;
+            const end = input.selectionEnd ?? input.value.length;
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: char,
+                inputType: "insertText"
+            });
+            const allowed = input.dispatchEvent(event);
+            if (allowed && !event.defaultPrevented) {
+                input.value = input.value.slice(0, start) + char + input.value.slice(end);
+                input.selectionStart = input.selectionEnd = start + char.length;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                await waitForStable(fixture);
+                return true;
+            }
+            return false;
+        }
+
+        // 1. Existing input is "12"
+        input.value = "12";
+        input.selectionStart = input.selectionEnd = 2;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        await waitForStable(fixture);
+        expect(host.value()).toBe(12);
+
+        // 2. User pastes "12.5" (invalid under strict paste in de-DE)
+        expect(simulateBrowserPaste("12.5")).toBe(false);
+        // Assert input and value remain "12"
+        expect(input.value).toBe("12");
+        expect(host.value()).toBe(12);
+
+        // 3. Immediately type "." (alternate decimal separator in edit mode)
+        expect(await typeChar(".")).toBe(true);
+
+        // 4. Continue typing "5"
+        expect(await typeChar("5")).toBe(true);
+
+        // 5. Value must be 12.5, proving paste state did not leak into edit mode
+        expect(host.value()).toBe(12.5);
+
+        // 6. Test rejected over-precision paste followed by typing (in de-DE, comma is decimal)
+        expect(simulateBrowserPaste("99,999")).toBe(false);
+        expect(await typeChar("0")).toBe(true); // "12.50" (2 decimals, at limit)
+        expect(await typeChar("0")).toBe(false); // "12.500" (3 decimals, exceeds limit)
+
+        // 7. Test paste event with clipboardData === null does not leave component stuck in paste mode
+        const nullPasteEvent = new Event("paste", { bubbles: true, cancelable: true });
+        input.dispatchEvent(nullPasteEvent);
+        // Normal typing still works immediately after
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        expect(await typeChar("7")).toBe(true);
+        expect(host.value()).toBe(7);
+    });
+
     describe("parseLocalizedNumber ambiguity contract", () => {
         it("documents generic locale parser interpretation of 1.234 in de-DE vs edit mode", () => {
             // In public generic parser, 1.234 without edit mode treats single dot with 3 digits as grouping

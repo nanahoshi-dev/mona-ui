@@ -78,7 +78,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
-    #lastInputSource: "typing" | "paste" = "typing";
+    #pendingPaste = false;
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
     protected readonly classes = computed(() => {
@@ -366,6 +366,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     }
 
     public onBlur(event: FocusEvent): void {
+        this.#pendingPaste = false;
         const relatedTarget = event.relatedTarget as Node | null;
         if (relatedTarget && this.#hostElementRef.nativeElement.contains(relatedTarget)) {
             return;
@@ -450,35 +451,42 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     }
 
     protected onPaste(event: ClipboardEvent): void {
-        this.#lastInputSource = "paste";
         const pastedText = event.clipboardData?.getData("text/plain");
-        if (pastedText != null) {
-            const inputElement = this.valueTextBoxRef()?.nativeElement;
-            if (inputElement) {
-                const { value, selectionStart, selectionEnd } = inputElement;
-                const start = selectionStart ?? value.length;
-                const end = selectionEnd ?? value.length;
-                const proposedValue = value.slice(0, start) + pastedText + value.slice(end);
-                const validation = validateLocalizedNumber(proposedValue, this.#i18n.localeId(), {
-                    mode: "locale",
-                    decimals: this.decimals()
-                });
-                if (!validation.valid || validation.value === null) {
-                    event.preventDefault();
-                }
-            }
+        if (pastedText == null) {
+            this.#pendingPaste = false;
+            return;
         }
+        const inputElement = this.valueTextBoxRef()?.nativeElement;
+        if (!inputElement) {
+            this.#pendingPaste = false;
+            return;
+        }
+        const { value, selectionStart, selectionEnd } = inputElement;
+        const start = selectionStart ?? value.length;
+        const end = selectionEnd ?? value.length;
+        const proposedValue = value.slice(0, start) + pastedText + value.slice(end);
+        const validation = validateLocalizedNumber(proposedValue, this.#i18n.localeId(), {
+            mode: "locale",
+            decimals: this.decimals()
+        });
+        if (!validation.valid || validation.value === null) {
+            event.preventDefault();
+            this.#pendingPaste = false;
+            return;
+        }
+        this.#pendingPaste = true;
     }
 
     private parseValue(value: string | null | undefined): number | null {
         const normalizedValue = value == null ? "" : value;
         this.rawInputValue.set(normalizedValue);
         if (normalizedValue === "" || normalizedValue === "-") {
+            this.#pendingPaste = false;
             return null;
         }
 
-        const isPaste = this.#lastInputSource === "paste";
-        this.#lastInputSource = "typing";
+        const isPaste = this.#pendingPaste;
+        this.#pendingPaste = false;
 
         const mode: LocalizedNumberParseMode = isPaste ? "locale" : "edit";
         const validation = validateLocalizedNumber(normalizedValue, this.#i18n.localeId(), {
@@ -497,14 +505,15 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         this.beforeInput$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe((event: InputEvent): void => {
             const inputElement = event.target as HTMLInputElement;
 
+            const isPaste =
+                event.inputType === "insertFromPaste" || (this.#pendingPaste && event.inputType !== "insertText");
+            if (!isPaste) {
+                this.#pendingPaste = false;
+            }
+
             const insertedText =
                 event.data ??
                 (event as unknown as { dataTransfer?: DataTransfer }).dataTransfer?.getData("text/plain");
-
-            const isPaste = event.inputType === "insertFromPaste" || this.#lastInputSource === "paste";
-            if (isPaste) {
-                this.#lastInputSource = "paste";
-            }
 
             if (insertedText == null) {
                 return;
@@ -526,11 +535,14 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                 });
                 if (!validation.valid || validation.value === null) {
                     event.preventDefault();
+                    this.#pendingPaste = false;
+                } else {
+                    this.#pendingPaste = true;
                 }
                 return;
             }
 
-            this.#lastInputSource = "typing";
+            this.#pendingPaste = false;
 
             const symbols = getNumberSymbols(localeId);
 
