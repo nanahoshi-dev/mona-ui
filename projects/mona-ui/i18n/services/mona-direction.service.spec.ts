@@ -73,6 +73,65 @@ describe("MonaDirectionService and direction utilities", () => {
             middle.setAttribute("dir", "   ");
             expect(resolveComponentDirection(child, null)).toBe("rtl");
         });
+
+        it("prioritizes computed CSS direction when dir='rtl' but CSS direction is 'ltr'", () => {
+            const div = document.createElement("div");
+            div.setAttribute("dir", "rtl");
+            div.style.direction = "ltr";
+            const child = document.createElement("span");
+            div.appendChild(child);
+            document.body.appendChild(div);
+            try {
+                expect(resolveComponentDirection(child, null)).toBe("ltr");
+            } finally {
+                document.body.removeChild(div);
+            }
+        });
+
+        it("prioritizes computed CSS direction when dir='ltr' but CSS direction is 'rtl'", () => {
+            const div = document.createElement("div");
+            div.setAttribute("dir", "ltr");
+            div.style.direction = "rtl";
+            const child = document.createElement("span");
+            div.appendChild(child);
+            document.body.appendChild(div);
+            try {
+                expect(resolveComponentDirection(child, null)).toBe("rtl");
+            } finally {
+                document.body.removeChild(div);
+            }
+        });
+
+        it("prioritizes computed CSS direction over CDK Directionality", () => {
+            const fakeDir = { value: "ltr", change: new EventEmitter<any>() } as Directionality;
+            const div = document.createElement("div");
+            div.style.direction = "rtl";
+            const child = document.createElement("span");
+            div.appendChild(child);
+            document.body.appendChild(div);
+            try {
+                expect(resolveComponentDirection(child, fakeDir)).toBe("rtl");
+            } finally {
+                document.body.removeChild(div);
+            }
+        });
+
+        it("prioritizes computed CSS direction on ancestor with invalid dir attribute", () => {
+            const root = document.createElement("div");
+            root.setAttribute("dir", "rtl");
+            const middle = document.createElement("div");
+            middle.setAttribute("dir", "invalid");
+            middle.style.direction = "ltr";
+            root.appendChild(middle);
+            const child = document.createElement("span");
+            middle.appendChild(child);
+            document.body.appendChild(root);
+            try {
+                expect(resolveComponentDirection(child, null)).toBe("ltr");
+            } finally {
+                document.body.removeChild(root);
+            }
+        });
     });
 
     describe("injectComponentDirection", () => {
@@ -108,9 +167,14 @@ describe("MonaDirectionService and direction utilities", () => {
             expect(fixture.componentInstance.direction()).toBe("ltr");
 
             fakeDirectionality.value = "rtl";
-            changeEmitter.emit("rtl");
-            fixture.detectChanges();
-            expect(fixture.componentInstance.direction()).toBe("rtl");
+            document.documentElement.setAttribute("dir", "rtl");
+            try {
+                changeEmitter.emit("rtl");
+                fixture.detectChanges();
+                expect(fixture.componentInstance.direction()).toBe("rtl");
+            } finally {
+                document.documentElement.removeAttribute("dir");
+            }
         });
     });
 

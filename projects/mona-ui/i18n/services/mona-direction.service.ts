@@ -20,7 +20,7 @@ import type { MonaTextDirection } from "../models/mona-direction";
  * that can contradict CSS and `:dir(...)`.
  */
 function readComputedDirection(element: Element | null | undefined): MonaTextDirection | null {
-    if (!element) {
+    if (!element || !element.isConnected) {
         return null;
     }
     const view = element.ownerDocument?.defaultView ?? (typeof window !== "undefined" ? window : undefined);
@@ -59,21 +59,21 @@ export function resolveComponentDirection(
 ): MonaTextDirection {
     const element = hostElement instanceof ElementRef ? hostElement.nativeElement : hostElement;
 
-    // 1. Ancestor explicit dir attribute ("ltr", "rtl", or "auto")
+    // 1. Browser-authoritative path (computed CSS direction)
+    const computed = readComputedDirection(element);
+    if (computed) {
+        return computed;
+    }
+
+    // 2. Non-browser / SSR fallback: ancestor explicit dir attribute ("ltr", "rtl", or "auto")
     const explicit = findNearestValidDirState(element);
     if (explicit) {
         return explicit;
     }
 
-    // 2. Angular CDK Directionality
+    // 3. Angular CDK Directionality fallback
     if (directionality?.value === "rtl" || directionality?.value === "ltr") {
         return directionality.value;
-    }
-
-    // 3. Computed CSS direction (e.g. style="direction: rtl" or platform inherited direction)
-    const computed = readComputedDirection(element);
-    if (computed) {
-        return computed;
     }
 
     return "ltr";
