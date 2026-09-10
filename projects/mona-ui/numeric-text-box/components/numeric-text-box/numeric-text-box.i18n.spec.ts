@@ -360,6 +360,162 @@ describe("NumericTextBoxComponent i18n integration", () => {
         expect(host.value()).toBe(1.234);
     });
 
+    it("supports sequential typing with alternate comma in dot-decimal locales (en-US) without corrupting semantic value", async () => {
+        await TestBed.configureTestingModule({
+            imports: [NumericTextBoxI18nTestHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+        const host = fixture.componentInstance;
+        const i18n = TestBed.inject(MonaI18nService);
+        host.decimals.set(3);
+        i18n.use({ id: "en-US", direction: "ltr", messages: {} });
+        await waitForStable(fixture);
+
+        const input = getInput(fixture);
+        focusInput(input);
+        await waitForStable(fixture);
+
+        async function typeChar(char: string): Promise<boolean> {
+            const start = input.selectionStart ?? input.value.length;
+            const end = input.selectionEnd ?? input.value.length;
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: char,
+                inputType: "insertText"
+            });
+            const allowed = input.dispatchEvent(event);
+            if (allowed && !event.defaultPrevented) {
+                input.value = input.value.slice(0, start) + char + input.value.slice(end);
+                input.selectionStart = input.selectionEnd = start + char.length;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                await waitForStable(fixture);
+                return true;
+            }
+            return false;
+        }
+
+        // Type 1 , 2 3 4 in en-US
+        expect(await typeChar("1")).toBe(true);
+        expect(host.value()).toBe(1);
+        expect(await typeChar(",")).toBe(true);
+        expect(host.value()).toBe(1);
+        expect(await typeChar("2")).toBe(true);
+        expect(host.value()).toBe(1.2);
+        expect(await typeChar("3")).toBe(true);
+        expect(host.value()).toBe(1.23);
+        expect(await typeChar("4")).toBe(true);
+        // Must be 1.234 and NEVER silently become 1234
+        expect(host.value()).toBe(1.234);
+        expect(host.value()).not.toBe(1234);
+
+        // Test precision rejection at decimals = 3 (typing 5th decimal digit rejected)
+        expect(await typeChar("5")).toBe(false);
+        expect(host.value()).toBe(1.234);
+
+        // Test decimals = 2 precision with comma in en-US
+        host.decimals.set(2);
+        host.value.set(null);
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        await waitForStable(fixture);
+
+        expect(await typeChar("1")).toBe(true);
+        expect(await typeChar(",")).toBe(true);
+        expect(await typeChar("2")).toBe(true);
+        expect(await typeChar("3")).toBe(true);
+        expect(host.value()).toBe(1.23);
+        // Attempting to type another digit must be rejected
+        expect(await typeChar("4")).toBe(false);
+        expect(host.value()).toBe(1.23);
+    });
+
+    it("clamps decimals input to finite non-negative values up to 20", async () => {
+        await TestBed.configureTestingModule({
+            imports: [NumericTextBoxI18nTestHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+        const host = fixture.componentInstance;
+        await waitForStable(fixture);
+
+        const comp = fixture.debugElement.query(By.directive(NumericTextBoxComponent)).componentInstance as NumericTextBoxComponent;
+
+        host.decimals.set(Infinity as any);
+        await waitForStable(fixture);
+        expect(comp.decimals()).toBe(0);
+
+        host.decimals.set(-5);
+        await waitForStable(fixture);
+        expect(comp.decimals()).toBe(0);
+
+        host.decimals.set(100);
+        await waitForStable(fixture);
+        expect(comp.decimals()).toBe(20);
+    });
+
+    it("counts normalized Unicode digits correctly without UTF-16 code unit inflation in astral numbering systems", async () => {
+        const isMathsansSupported = (() => {
+            try {
+                return new Intl.NumberFormat("en-US-u-nu-mathsans").format(1) === "\u{1D7E3}";
+            } catch {
+                return false;
+            }
+        })();
+
+        if (!isMathsansSupported) {
+            return;
+        }
+
+        await TestBed.configureTestingModule({
+            imports: [NumericTextBoxI18nTestHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+        const host = fixture.componentInstance;
+        const i18n = TestBed.inject(MonaI18nService);
+        host.decimals.set(2);
+        i18n.use({ id: "en-US-u-nu-mathsans", direction: "ltr", messages: {} });
+        await waitForStable(fixture);
+
+        const input = getInput(fixture);
+        focusInput(input);
+        await waitForStable(fixture);
+
+        async function typeChar(char: string): Promise<boolean> {
+            const start = input.selectionStart ?? input.value.length;
+            const end = input.selectionEnd ?? input.value.length;
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: char,
+                inputType: "insertText"
+            });
+            const allowed = input.dispatchEvent(event);
+            if (allowed && !event.defaultPrevented) {
+                input.value = input.value.slice(0, start) + char + input.value.slice(end);
+                input.selectionStart = input.selectionEnd = start + char.length;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                await waitForStable(fixture);
+                return true;
+            }
+            return false;
+        }
+
+        // Type 𝟣 . 𝟤 𝟥 in mathsans (decimals = 2)
+        // 𝟣 = \u{1D7E3}, 𝟤 = \u{1D7E4}, 𝟥 = \u{1D7E5}, 𝟦 = \u{1D7E6}
+        expect(await typeChar("\u{1D7E3}")).toBe(true);
+        expect(await typeChar(".")).toBe(true);
+        expect(await typeChar("\u{1D7E4}")).toBe(true);
+        expect(await typeChar("\u{1D7E5}")).toBe(true);
+        expect(host.value()).toBe(1.23);
+
+        // 3rd fractional digit must be rejected even though 2 astral digits had length 4 UTF-16 code units
+        expect(await typeChar("\u{1D7E6}")).toBe(false);
+        expect(host.value()).toBe(1.23);
+    });
+
     it("supports pasting localized grouped numbers across locales and validates decimals", async () => {
         await TestBed.configureTestingModule({
             imports: [NumericTextBoxI18nTestHostComponent]

@@ -46,7 +46,8 @@ import {
     normalizeLocalizedDigits,
     normalizeLocalizedInput,
     parseLocalizedNumber,
-    validateLocalizedNumber
+    validateLocalizedNumber,
+    validateLocalizedNumberEdit
 } from "@nanahoshi/mona-ui/i18n";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
@@ -140,7 +141,10 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public readonly decimals = input(0, {
         transform: (value: number) => {
             const num = Math.trunc(value);
-            return Number.isNaN(num) || num < 0 ? 0 : num;
+            if (!Number.isFinite(num) || num < 0) {
+                return 0;
+            }
+            return Math.min(20, num);
         }
     });
 
@@ -544,49 +548,10 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
 
             this.#pendingPaste = false;
 
-            const symbols = getNumberSymbols(localeId);
-
-            // Normalize minus, bidi controls, and digits
-            const normalized = normalizeLocalizedInput(proposedValue, localeId);
-
-            if (normalized.lastIndexOf("-") > 0) {
-                event.preventDefault();
-                return;
-            }
-            if ((normalized.match(/-/g) || []).length > 1) {
-                event.preventDefault();
-                return;
-            }
-
-            const decimalSep = symbols.decimal;
-            const sepChars = decimalSep === "." ? ["\\."] : ["\\.", `\\${decimalSep}`];
-            const sepRegex = new RegExp(`[${sepChars.join("")}]`, "g");
-            const sepCount = (proposedValue.match(sepRegex) || []).length;
-            if (sepCount > 1) {
-                event.preventDefault();
-                return;
-            }
-
-            if (decimals === 0 && sepCount > 0) {
-                event.preventDefault();
-                return;
-            }
-
-            if (sepCount === 1) {
-                const sepChar = proposedValue.includes(decimalSep) ? decimalSep : ".";
-                const decimalPart = proposedValue.split(sepChar)[1];
-                if (decimalPart && decimalPart.length > decimals) {
-                    event.preventDefault();
-                    return;
-                }
-            }
-
-            let normalizedForRegex = normalized;
-            if (decimalSep !== "." && normalizedForRegex.includes(decimalSep)) {
-                normalizedForRegex = normalizedForRegex.replaceAll(decimalSep, ".");
-            }
-            const numericRegex = new RegExp(`^-?\\d*(\\.\\d{0,${decimals}})?$`);
-            if (!numericRegex.test(normalizedForRegex)) {
+            const editValidation = validateLocalizedNumberEdit(proposedValue, localeId, {
+                decimals
+            });
+            if (!editValidation.valid) {
                 event.preventDefault();
             }
         });

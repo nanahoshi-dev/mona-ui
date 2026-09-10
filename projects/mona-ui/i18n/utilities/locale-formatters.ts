@@ -9,6 +9,7 @@ export interface NumberGroupingPattern {
     readonly primaryGroupSize: number;
     readonly secondaryGroupSize: number;
     readonly groupSeparator: string;
+    readonly minimumGroupedIntegerDigits: number;
 }
 
 const numberSymbolsCache = new Map<string, NumberSymbols>();
@@ -36,6 +37,23 @@ export function getNumberGroupingPattern(localeId: string): NumberGroupingPatter
             const groupParts = parts.filter(p => p.type === "group");
             const groupSeparator = groupParts[0]?.value ?? getNumberSymbols(localeId).group ?? ",";
 
+            let minimumGroupedIntegerDigits = 4;
+            try {
+                const defaultFormatter = new Intl.NumberFormat(localeId);
+                let probe = 1000;
+                let digits = 4;
+                while (digits <= 8) {
+                    if (defaultFormatter.formatToParts(probe).some(p => p.type === "group")) {
+                        minimumGroupedIntegerDigits = digits;
+                        break;
+                    }
+                    probe *= 10;
+                    digits++;
+                }
+            } catch {
+                minimumGroupedIntegerDigits = 4;
+            }
+
             if (integerParts.length >= 2) {
                 const primaryStr = integerParts[integerParts.length - 1].value.replace(/[\u061C\u200E\u200F\s]/g, "");
                 const secondaryStr = integerParts[integerParts.length - 2].value.replace(/[\u061C\u200E\u200F\s]/g, "");
@@ -44,13 +62,15 @@ export function getNumberGroupingPattern(localeId: string): NumberGroupingPatter
                 pattern = {
                     primaryGroupSize: primaryGroupSize > 0 ? primaryGroupSize : 3,
                     secondaryGroupSize: secondaryGroupSize > 0 ? secondaryGroupSize : 3,
-                    groupSeparator
+                    groupSeparator,
+                    minimumGroupedIntegerDigits
                 };
             } else {
                 pattern = {
                     primaryGroupSize: 3,
                     secondaryGroupSize: 3,
-                    groupSeparator
+                    groupSeparator,
+                    minimumGroupedIntegerDigits
                 };
             }
         } catch {
@@ -58,7 +78,8 @@ export function getNumberGroupingPattern(localeId: string): NumberGroupingPatter
             pattern = {
                 primaryGroupSize: 3,
                 secondaryGroupSize: 3,
-                groupSeparator
+                groupSeparator,
+                minimumGroupedIntegerDigits: 4
             };
         }
         numberGroupingCache.set(localeId, pattern);
@@ -236,8 +257,13 @@ export function parseLocalizedNumber(
     if (mode === "locale") {
         const grouping = getNumberGroupingPattern(localeId);
         const groupSep = grouping.groupSeparator;
-        const isSpaceGroup = /[\s\u00A0\u202F]/.test(groupSep);
+        const isSpaceGroup = /[ \u00A0\u202F]/.test(groupSep);
         const decimalSep = symbols.decimal;
+
+        // Reject non-accepted control or whitespace characters (tabs, newlines, formfeeds)
+        if (/[^\S\u0020\u00A0\u202F]/.test(cleaned)) {
+            return null;
+        }
 
         // In strict locale mode, if grouping separator is not space-like, any internal whitespace is invalid
         if (!isSpaceGroup && /[\s\u00A0\u202F]/.test(cleaned)) {
@@ -291,10 +317,10 @@ export function parseLocalizedNumber(
             let hasGroup = false;
 
             if (isSpaceGroup) {
-                if (/[\s\u00A0\u202F]/.test(intPart)) {
+                if (/[ \u00A0\u202F]/.test(intPart)) {
                     hasGroup = true;
-                    // Splitting by single space character preserves empty strings for consecutive spaces
-                    intGroups = intPart.split(/[\s\u00A0\u202F]/);
+                    // Splitting by single accepted space character preserves empty strings for consecutive spaces
+                    intGroups = intPart.split(/[ \u00A0\u202F]/);
                 } else {
                     intGroups = [intPart];
                 }
@@ -309,6 +335,12 @@ export function parseLocalizedNumber(
 
             if (hasGroup) {
                 if (intGroups.length < 2) {
+                    return null;
+                }
+
+                // Canonical strict check: must meet locale's minimum grouping threshold
+                const totalGroupedDigits = intGroups.join("").length;
+                if (totalGroupedDigits < grouping.minimumGroupedIntegerDigits) {
                     return null;
                 }
 
@@ -350,9 +382,10 @@ export function parseLocalizedNumber(
         return Number.isFinite(num) ? num : null;
     } else {
         // mode === "edit": permissive interactive editing with alternate decimal separator
-        cleaned = cleaned.replace(/[\s\u00A0\u202F]/g, "");
+        cleaned = cleaned.replace(/[ \u00A0\u202F]/g, "");
 
-        if (symbols.group && symbols.group !== ".") {
+        // Strip non-dot/non-comma locale group separators (e.g. Arabic \u066C)
+        if (symbols.group && symbols.group !== "." && symbols.group !== ",") {
             cleaned = cleaned.replaceAll(symbols.group, "");
         }
         cleaned = cleaned.replace(/[\u066C]/g, "");
@@ -384,7 +417,7 @@ export function parseLocalizedNumber(
                 const commaParts = cleaned.split(",");
                 if (commaParts.length === 2) {
                     cleaned = commaParts[0] + "." + commaParts[1];
-                } else {
+                } else if (commaParts.length > 2) {
                     cleaned = cleaned.replace(/,/g, "");
                 }
             }
@@ -422,7 +455,7 @@ export function validateLocalizedNumber(
     const symbols = getNumberSymbols(localeId);
     let normalized = normalizeLocalizedMinus(trimmed, symbols);
     normalized = normalizeLocalizedDigits(normalized, localeId);
-    normalized = normalized.replace(/[\s\u00A0\u202F]/g, "");
+    normalized = normalized.replace(/[ \u00A0\u202F]/g, "");
 
     let fractionDigits = 0;
     if (mode === "locale") {
@@ -447,7 +480,7 @@ export function validateLocalizedNumber(
                 }
             }
         } else {
-            if (symbols.decimal && normalized.includes(symbols.decimal)) {
+            if (symbols.decimal && symbols.decimal !== "." && symbols.decimal !== "," && normalized.includes(symbols.decimal)) {
                 sep = symbols.decimal;
             } else if (normalized.includes(".")) {
                 sep = ".";
@@ -475,3 +508,141 @@ export function validateLocalizedNumber(
     return { value: parsed, valid: true, fractionDigits };
 }
 
+export interface LocalizedNumberEditValidationResult {
+    readonly valid: boolean;
+    readonly complete: boolean;
+    readonly value: number | null;
+}
+
+export interface ValidateLocalizedNumberEditOptions {
+    readonly decimals?: number;
+    readonly allowSign?: boolean;
+}
+
+export function validateLocalizedNumberEdit(
+    text: string | null | undefined,
+    localeId: string,
+    options?: ValidateLocalizedNumberEditOptions
+): LocalizedNumberEditValidationResult {
+    if (text == null) {
+        return { valid: true, complete: false, value: null };
+    }
+    const trimmed = String(text).trim();
+    if (trimmed === "") {
+        return { valid: true, complete: false, value: null };
+    }
+
+    const symbols = getNumberSymbols(localeId);
+
+    // Reject control or whitespace characters in interactive typing
+    if (/[\s\u00A0\u202F]/.test(trimmed)) {
+        return { valid: false, complete: false, value: null };
+    }
+
+    // Normalize minus signs and bidi controls
+    let normalized = normalizeLocalizedMinus(trimmed, symbols);
+    // Normalize localized digits to ASCII
+    normalized = normalizeLocalizedDigits(normalized, localeId);
+
+    // Sign handling
+    const allowSign = options?.allowSign ?? true;
+    if (normalized.startsWith("-") || normalized.startsWith("+")) {
+        if (!allowSign) {
+            return { valid: false, complete: false, value: null };
+        }
+        normalized = normalized.slice(1);
+    }
+    if (normalized.includes("-") || normalized.includes("+")) {
+        return { valid: false, complete: false, value: null };
+    }
+
+    // If input was just "-" or "+"
+    if (normalized === "") {
+        return { valid: true, complete: false, value: null };
+    }
+
+    // Identify allowed decimal separators
+    const primaryDec = symbols.decimal || ".";
+    // Candidate separators: primary decimal, plus alternate '.' or ','
+    const candidateSeparators = new Set<string>();
+    candidateSeparators.add(primaryDec);
+    if (primaryDec === ".") {
+        candidateSeparators.add(",");
+    } else if (primaryDec === ",") {
+        candidateSeparators.add(".");
+    } else {
+        candidateSeparators.add(".");
+        candidateSeparators.add(",");
+    }
+    if (primaryDec === "\u066B") {
+        candidateSeparators.add(".");
+        candidateSeparators.add(",");
+    }
+
+    // Count how many separators from the candidate set appear
+    let foundSep: string | null = null;
+    let sepIndex = -1;
+
+    for (let i = 0; i < normalized.length; i++) {
+        for (const sep of candidateSeparators) {
+            if (normalized.startsWith(sep, i)) {
+                if (foundSep !== null) {
+                    // More than one separator is rejected in edit mode
+                    return { valid: false, complete: false, value: null };
+                }
+                foundSep = sep;
+                sepIndex = i;
+                i += sep.length - 1;
+                break;
+            }
+        }
+    }
+
+    const decimals = options?.decimals ?? 0;
+
+    if (foundSep !== null) {
+        if (decimals === 0) {
+            // No decimal point permitted when decimals === 0
+            return { valid: false, complete: false, value: null };
+        }
+
+        const intPart = normalized.slice(0, sepIndex);
+        const fracPart = normalized.slice(sepIndex + foundSep.length);
+
+        // Integer part before separator must consist purely of ASCII digits (or empty, e.g. ".5")
+        if (intPart.length > 0 && !/^\d+$/.test(intPart)) {
+            return { valid: false, complete: false, value: null };
+        }
+
+        // Fractional part after separator must consist purely of ASCII digits (or empty, e.g. "12.")
+        if (fracPart.length > 0 && !/^\d+$/.test(fracPart)) {
+            return { valid: false, complete: false, value: null };
+        }
+
+        // Count fraction digits using normalized ASCII characters (safe against UTF-16 astral splitting)
+        if (fracPart.length > decimals) {
+            return { valid: false, complete: false, value: null };
+        }
+
+        const parsed = parseLocalizedNumber(trimmed, localeId, { mode: "edit" });
+        const complete = fracPart.length > 0 && (intPart.length > 0 || fracPart.length > 0);
+
+        return {
+            valid: true,
+            complete,
+            value: parsed
+        };
+    }
+
+    // No separator found: must be purely ASCII digits
+    if (!/^\d+$/.test(normalized)) {
+        return { valid: false, complete: false, value: null };
+    }
+
+    const parsed = parseLocalizedNumber(trimmed, localeId, { mode: "edit" });
+    return {
+        valid: true,
+        complete: true,
+        value: parsed
+    };
+}
