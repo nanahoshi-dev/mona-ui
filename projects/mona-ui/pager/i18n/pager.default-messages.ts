@@ -12,6 +12,5 @@ export const PAGER_DEFAULT_MESSAGES = {
     pageStatus: (page: number, totalPages: number) => `Page ${page} of ${totalPages}`,
     pageText: "Page",
     previousPageLabel: "Previous page",
-    rangeLabel: (start: number, end: number, total: number) => `${start} - ${end} of ${total} items`,
     rangeStatus: (start: number, end: number, total: number) => `${start} - ${end} of ${total} items`
 } satisfies MonaPagerMessages;

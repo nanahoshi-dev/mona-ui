@@ -19,7 +19,6 @@ const SAMPLE_PAGER_FALLBACK: MonaPagerMessages = {
     pageStatus: (page, totalPages) => `Page ${page} of ${totalPages}`,
     pageText: "Page",
     previousPageLabel: "Previous page",
-    rangeLabel: (start, end, total) => `${start} - ${end} of ${total} items`,
     rangeStatus: (start, end, total) => `${start} - ${end} of ${total} items`
 };
 

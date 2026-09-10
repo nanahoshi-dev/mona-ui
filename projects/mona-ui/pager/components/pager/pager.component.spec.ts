@@ -715,7 +715,6 @@ describe("PagerComponent i18n and localization", () => {
                 pageSizeLabel: pageSize => `${pageSize} / sayfa`,
                 pageText: "Sayfa",
                 previousPageLabel: "Önceki sayfa",
-                rangeLabel: (start, end, total) => `${start} - ${end} / ${total} öğe`,
                 rangeStatus: (start, end, total) => `${start} - ${end} / ${total} öğe`
             }
         }
@@ -853,6 +852,46 @@ describe("PagerComponent i18n and localization", () => {
         fixture.detectChanges();
 
         expect(getInfoText()).toContain("21 ila 30 arası (100 kayıt)");
+    });
+
+    describe("rangeStatus precedence matrix", () => {
+        it("renders fallback message when no locale or application override is provided", () => {
+            setup(100, 10, 20);
+            expect(getInfoText()).toContain("21 - 30 of 100 items");
+        });
+
+        it("renders locale rangeStatus when locale is set without application override", () => {
+            setup(100, 10, 20);
+            i18nService.use(testTurkishLocale);
+            fixture.detectChanges();
+
+            expect(getInfoText()).toContain("21 - 30 / 100 öğe");
+        });
+
+        it("renders application override rangeStatus over fallback when no locale is set", () => {
+            setup(100, 10, 20);
+            i18nService.setMessages({
+                pager: {
+                    rangeStatus: (start, end, total) => `Items ${start} to ${end} (Total: ${total})`
+                }
+            });
+            fixture.detectChanges();
+
+            expect(getInfoText()).toContain("Items 21 to 30 (Total: 100)");
+        });
+
+        it("renders application override rangeStatus over locale rangeStatus (application override outranks locale)", () => {
+            setup(100, 10, 20);
+            i18nService.use(testTurkishLocale);
+            i18nService.setMessages({
+                pager: {
+                    rangeStatus: (start, end, total) => `ÖZEL: ${start}..${end} (${total})`
+                }
+            });
+            fixture.detectChanges();
+
+            expect(getInfoText()).toContain("ÖZEL: 21..30 (100)");
+        });
     });
 
     it("respects application-level message overrides over locale and fallback", () => {

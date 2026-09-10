@@ -8,8 +8,23 @@ import {
     type Signal,
     signal
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { MonaTextDirection } from "../models/mona-direction";
+
+const RTL_CHAR_REGEX = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+const LTR_CHAR_REGEX =
+    /[A-Za-z\u00C0-\u024F\u0370-\u052F\u1E00-\u1EFF\u2C00-\u2DDF\uA720-\uA7FF\uAB30-\uAB6F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/;
+
+export function detectFirstStrongDirection(text: string): MonaTextDirection | null {
+    for (const ch of text) {
+        if (RTL_CHAR_REGEX.test(ch)) {
+            return "rtl";
+        }
+        if (LTR_CHAR_REGEX.test(ch)) {
+            return "ltr";
+        }
+    }
+    return null;
+}
 
 export function resolveComponentDirection(
     hostElement?: ElementRef<HTMLElement> | HTMLElement | null,
@@ -17,7 +32,8 @@ export function resolveComponentDirection(
 ): MonaTextDirection {
     const element = hostElement instanceof ElementRef ? hostElement.nativeElement : hostElement;
     if (typeof element?.closest === "function") {
-        const rawDir = element.closest("[dir]")?.getAttribute("dir")?.trim().toLowerCase();
+        const closestDir = element.closest("[dir]");
+        const rawDir = closestDir?.getAttribute("dir")?.trim().toLowerCase();
         if (rawDir === "rtl" || rawDir === "ltr") {
             return rawDir;
         }
@@ -28,8 +44,15 @@ export function resolveComponentDirection(
                 : typeof window !== "undefined"
                   ? window.getComputedStyle(element).direction?.toLowerCase()
                   : undefined;
-            if (computedDir === "rtl" || computedDir === "ltr") {
-                return computedDir;
+            if (computedDir === "rtl") {
+                return "rtl";
+            }
+            const firstStrong = detectFirstStrongDirection(closestDir?.textContent ?? "");
+            if (firstStrong) {
+                return firstStrong;
+            }
+            if (computedDir === "ltr") {
+                return "ltr";
             }
         }
     }
@@ -85,21 +108,63 @@ function observeDocumentDirChanges(doc: Document, callback: () => void): () => v
     };
 }
 
+export interface DirectionObserverHandle {
+    (): void;
+    check: () => void;
+    updateAutoObserver: () => void;
+}
+
 export function observeComponentDirection(
     hostElement: ElementRef<HTMLElement> | HTMLElement | null | undefined,
     directionality: Directionality | null | undefined,
     onChange: (dir: MonaTextDirection) => void
-): () => void {
+): DirectionObserverHandle {
     const element = hostElement instanceof ElementRef ? hostElement.nativeElement : hostElement;
     let currentDir = resolveComponentDirection(element, directionality);
 
+    let autoContentObserver: MutationObserver | null = null;
+    let observedAutoElement: Element | null = null;
+
+    const updateAutoContentObserver = () => {
+        if (typeof MutationObserver === "undefined" || !element?.closest) {
+            return;
+        }
+        const closestDir = element.closest("[dir]");
+        const isAuto = closestDir?.getAttribute("dir")?.trim().toLowerCase() === "auto";
+        if (isAuto && closestDir) {
+            if (observedAutoElement !== closestDir) {
+                if (autoContentObserver) {
+                    autoContentObserver.disconnect();
+                }
+                observedAutoElement = closestDir;
+                autoContentObserver = new MutationObserver(() => {
+                    check();
+                });
+                autoContentObserver.observe(closestDir, {
+                    childList: true,
+                    characterData: true,
+                    subtree: true
+                });
+            }
+        } else {
+            if (autoContentObserver) {
+                autoContentObserver.disconnect();
+                autoContentObserver = null;
+                observedAutoElement = null;
+            }
+        }
+    };
+
     const check = () => {
+        updateAutoContentObserver();
         const nextDir = resolveComponentDirection(element, directionality);
         if (nextDir !== currentDir) {
             currentDir = nextDir;
             onChange(nextDir);
         }
     };
+
+    updateAutoContentObserver();
 
     const cleanupFns: Array<() => void> = [];
 
@@ -124,11 +189,27 @@ export function observeComponentDirection(
         }
     }
 
-    return () => {
-        for (const fn of cleanupFns) {
-            fn();
+    cleanupFns.push(() => {
+        if (autoContentObserver) {
+            autoContentObserver.disconnect();
+            autoContentObserver = null;
+            observedAutoElement = null;
         }
-    };
+    });
+
+    const handle: DirectionObserverHandle = Object.assign(
+        () => {
+            for (const fn of cleanupFns) {
+                fn();
+            }
+        },
+        {
+            check,
+            updateAutoObserver: updateAutoContentObserver
+        }
+    );
+
+    return handle;
 }
 
 export function injectComponentDirection(hostElementRef?: ElementRef<HTMLElement>): Signal<MonaTextDirection> {
@@ -136,52 +217,21 @@ export function injectComponentDirection(hostElementRef?: ElementRef<HTMLElement
     const hostRef = hostElementRef ?? inject(ElementRef<HTMLElement>, { optional: true });
     const destroyRef = inject(DestroyRef, { optional: true });
 
-    const cdkDir = signal<MonaTextDirection>(
-        directionality?.value === "rtl" || directionality?.value === "ltr"
-            ? directionality.value
-            : "ltr"
-    );
-
     const domVersion = signal<number>(0);
-
-    if (directionality && destroyRef) {
-        directionality.change
-            .pipe(takeUntilDestroyed(destroyRef))
-            .subscribe(dir => {
-                if (dir === "rtl" || dir === "ltr") {
-                    cdkDir.set(dir);
-                }
-            });
-    }
+    let updateAutoObserverFn = () => {};
 
     if (destroyRef) {
         const cleanup = observeComponentDirection(hostRef, directionality, () => {
             domVersion.update(v => v + 1);
         });
+        updateAutoObserverFn = cleanup.updateAutoObserver;
         destroyRef.onDestroy(() => cleanup());
     }
 
     return computed(() => {
         domVersion();
-        const element = hostRef instanceof ElementRef ? hostRef.nativeElement : hostRef;
-        if (typeof element?.closest === "function") {
-            const rawDir = element.closest("[dir]")?.getAttribute("dir")?.trim().toLowerCase();
-            if (rawDir === "rtl" || rawDir === "ltr") {
-                return rawDir;
-            }
-            if (rawDir === "auto") {
-                const defaultView = element.ownerDocument?.defaultView;
-                const computedDir = defaultView
-                    ? defaultView.getComputedStyle(element).direction?.toLowerCase()
-                    : typeof window !== "undefined"
-                      ? window.getComputedStyle(element).direction?.toLowerCase()
-                      : undefined;
-                if (computedDir === "rtl" || computedDir === "ltr") {
-                    return computedDir;
-                }
-            }
-        }
-        return cdkDir();
+        updateAutoObserverFn();
+        return resolveComponentDirection(hostRef, directionality);
     });
 }
 

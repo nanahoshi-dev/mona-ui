@@ -15,6 +15,5 @@ export interface MonaPagerMessages {
     readonly pageText: string;
     readonly previousPageLabel: string;
 
-    rangeLabel(start: number, end: number, total: number): string;
     rangeStatus(start: number, end: number, total: number): string;
 }

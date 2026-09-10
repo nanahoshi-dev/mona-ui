@@ -1,7 +1,7 @@
 import { Directionality } from "@angular/cdk/bidi";
 import { Component, ElementRef, EventEmitter, inject } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "./mona-i18n.service";
 import {
     injectComponentDirection,
@@ -185,6 +185,65 @@ describe("MonaDirectionService and direction utilities", () => {
             expect(fixture.componentInstance.direction()).toBe("rtl");
 
             document.body.removeChild(parent);
+        });
+
+        it("reacts dynamically to content-driven direction changes with dir='auto'", async () => {
+            const container = document.createElement("div");
+            container.setAttribute("dir", "auto");
+            const textSpan = document.createElement("span");
+            textSpan.textContent = "Hello world";
+            container.appendChild(textSpan);
+            document.body.appendChild(container);
+
+            TestBed.configureTestingModule({
+                imports: [TestDirectionConsumerComponent]
+            });
+            const fixture = TestBed.createComponent(TestDirectionConsumerComponent);
+            container.appendChild(fixture.nativeElement);
+            fixture.detectChanges();
+
+            expect(fixture.componentInstance.direction()).toBe("ltr");
+
+            // Change content to Arabic text without changing dir attribute
+            textSpan.textContent = "مرحبا بالعالم";
+            await new Promise(resolve => setTimeout(resolve, 20));
+            fixture.detectChanges();
+
+            expect(fixture.componentInstance.direction()).toBe("rtl");
+
+            // Switch content back to Latin text
+            textSpan.textContent = "Welcome back";
+            await new Promise(resolve => setTimeout(resolve, 20));
+            fixture.detectChanges();
+
+            expect(fixture.componentInstance.direction()).toBe("ltr");
+
+            document.body.removeChild(container);
+        });
+
+        it("does not install content observers for normal dir='ltr' or dir='rtl' consumers", () => {
+            const observeSpy = vi.spyOn(MutationObserver.prototype, "observe");
+
+            const div = document.createElement("div");
+            div.setAttribute("dir", "ltr");
+            document.body.appendChild(div);
+
+            TestBed.configureTestingModule({
+                imports: [TestDirectionConsumerComponent]
+            });
+            const fixture = TestBed.createComponent(TestDirectionConsumerComponent);
+            div.appendChild(fixture.nativeElement);
+            fixture.detectChanges();
+
+            const contentObserverCalls = observeSpy.mock.calls.filter(args => {
+                const options = args[1] as MutationObserverInit;
+                return options?.childList === true || options?.characterData === true;
+            });
+
+            expect(contentObserverCalls).toHaveLength(0);
+
+            observeSpy.mockRestore();
+            document.body.removeChild(div);
         });
     });
 });
