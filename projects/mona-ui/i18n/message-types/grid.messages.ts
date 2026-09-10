@@ -28,4 +28,5 @@ export interface MonaGridMessages {
     readonly save: string;
     readonly saveRow: string;
     readonly selectAllRows: string;
+    selectRow(rowNumber: number): string;
 }

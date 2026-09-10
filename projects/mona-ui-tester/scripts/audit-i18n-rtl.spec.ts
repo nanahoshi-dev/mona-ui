@@ -136,7 +136,111 @@ describe("audit-i18n-rtl", () => {
             const violations: AuditViolation[] = [];
             scanTypeScriptAst("clean-panel.component.ts", code, violations);
 
-            expect(violations).toHaveLength(0);
+        });
+
+        it("detects double-quoted string literals inside host binding expressions (quote symmetry)", () => {
+            const code = `
+                @Component({
+                    selector: "test-panel",
+                    template: "",
+                    host: {
+                        "[attr.aria-label]": 'open() ? "Close panel" : "Open panel"'
+                    }
+                })
+                export class TestPanelComponent {}
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-panel.component.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Close panel"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Open panel"))).toBe(true);
+        });
+
+        it("detects ampersands and entities inside host binding expressions", () => {
+            const code = `
+                @Component({
+                    selector: "test-panel",
+                    template: "",
+                    host: {
+                        "[title]": 'ready() ? "Ready & waiting" : messages().busy'
+                    }
+                })
+                export class TestPanelComponent {}
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-panel.component.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0]).toMatchObject({
+                category: "i18n-text",
+                detail: expect.stringContaining("Ready & waiting")
+            });
+        });
+
+        it("fails closed with an audit violation when host binding expression is malformed", () => {
+            const code = `
+                @Component({
+                    selector: "test-panel",
+                    template: "",
+                    host: {
+                        "[attr.aria-label]": "open(?"
+                    }
+                })
+                export class TestMalformedPanelComponent {}
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-malformed-panel.component.ts", code, violations);
+
+            expect(violations.length).toBeGreaterThan(0);
+            expect(violations.some(v => v.detail.includes("Host binding parse error"))).toBe(true);
+        });
+
+        it("flags only the hard-coded branch in computed accessibility property with mixed messages() and literals", () => {
+            const code = `
+                export class PanelComponent {
+                    protected readonly ariaLabel = computed(() =>
+                        this.expanded() ? "Collapse panel" : this.messages().expandPanel
+                    );
+                    protected readonly panelAriaLabel = computed(() =>
+                        this.expanded() ? this.messages().collapseHeader : \`Open \${this.panelName()}\`
+                    );
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-panel.component.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations[0]).toMatchObject({
+                category: "i18n-aria",
+                detail: expect.stringContaining("Collapse panel")
+            });
+            expect(violations[1]).toMatchObject({
+                category: "i18n-aria",
+                detail: expect.stringContaining("Open")
+            });
+        });
+
+        it("detects conditional and template expressions in semantic object properties", () => {
+            const code = `
+                export const item1 = {
+                    label: enabled ? "Disable feature" : "Enable feature"
+                };
+                export const item2 = {
+                    title: \`Delete \${name}\`
+                };
+                export const item3 = {
+                    message: error ? "Retry request" : messages().ready
+                };
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-objects.ts", code, violations);
+
+            expect(violations).toHaveLength(4);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Disable feature"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Enable feature"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Delete"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Retry request"))).toBe(true);
         });
 
         it("ignores technical tokens in object properties", () => {
@@ -547,6 +651,87 @@ describe("audit-i18n-rtl", () => {
             scanTypeScriptAst("test-chart.ts", code, violations);
 
             expect(violations).toHaveLength(0);
+        });
+
+        it("detects template expressions returned from semantic helper functions", () => {
+            const code = `
+                function getAriaLabel(page: number): string {
+                    return \`Page \${page}\`;
+                }
+                function getTitle(name: string): string {
+                    return \`Delete \${name}?\`;
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-helper.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Page"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Delete"))).toBe(true);
+        });
+
+        it("ignores technical transform helpers returning template expressions", () => {
+            const code = `
+                class ChartComponent {
+                    public computeLabelTransform(x: number): string {
+                        return \`translate(\${x}px, 0)\`;
+                    }
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-chart.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("detects hard-coded text returned from semantic getters (class accessors and object accessors)", () => {
+            const code = `
+                class ComponentState {
+                    public get ariaLabel(): string {
+                        return "Close panel";
+                    }
+                    public get title(): string {
+                        return \`Delete \${this.name}\`;
+                    }
+                }
+                const stateObj = {
+                    get ariaLabel() {
+                        return "Close dialog";
+                    }
+                };
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-getters.ts", code, violations);
+
+            expect(violations).toHaveLength(3);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Close panel"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Delete"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Close dialog"))).toBe(true);
+        });
+
+        it("audits semantic helpers ending in DOM/data entity nouns (Element, Event, Type, Node)", () => {
+            const code = `
+                function getAriaLabelForElement(el: HTMLElement): string {
+                    return "Element label";
+                }
+                function getMessageForEvent(e: Event): string {
+                    return "Event message";
+                }
+                function getTitleForType(t: string): string {
+                    return "Type title";
+                }
+                function getDescriptionForNode(n: Node): string {
+                    return "Node description";
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-noun-helpers.ts", code, violations);
+
+            expect(violations).toHaveLength(4);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Element label"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Event message"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Type title"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Node description"))).toBe(true);
         });
     });
 

@@ -1742,7 +1742,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             matchingHit.formattedFrom ?? (matchingHit.fromValue !== undefined ? String(matchingHit.fromValue) : "");
         const toStr = matchingHit.formattedTo ?? (matchingHit.toValue !== undefined ? String(matchingHit.toValue) : "");
         if (isRange && fromStr && toStr) {
-            return `${matchingHit.seriesName}: ${xStr}, ${fromStr} to ${toStr}`;
+            const title = `${matchingHit.seriesName}: ${xStr}`;
+            return this.messages().rangeDescription(title, fromStr, toStr);
         }
         return `${matchingHit.seriesName}: ${xStr}, ${yStr}`;
     }

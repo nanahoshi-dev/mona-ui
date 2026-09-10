@@ -545,8 +545,20 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "i18n-text",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-resource-manager.ts",
-        lineSnippet: 'message: "',
+        lineSnippet: "message:",
         reason: "Internal export rejection diagnostic error messages"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/chart/internal/layout/cartesian-series-policy.ts",
+        lineSnippet: "message:",
+        reason: "Internal series policy diagnostic warning messages"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/chart/internal/data/cartesian-stack-engine.ts",
+        lineSnippet: "message:",
+        reason: "Internal stack engine diagnostic warning messages"
     }
 ];
 
@@ -670,6 +682,96 @@ export const SEMANTIC_OBJECT_KEYS = new Set([
     "message"
 ]);
 
+export interface LiteralFragment {
+    node: Node;
+    text: string;
+}
+
+export function collectLiteralFragments(node: Node | undefined): LiteralFragment[] {
+    if (!node) {
+        return [];
+    }
+    if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) {
+        return [{ node, text: node.getLiteralText() }];
+    }
+    if (Node.isTemplateExpression(node)) {
+        const fragments: LiteralFragment[] = [];
+        const head = node.getHead();
+        const headText = head.getLiteralText();
+        if (headText) {
+            fragments.push({ node: head, text: headText });
+        }
+        for (const span of node.getTemplateSpans()) {
+            const spanLit = span.getLiteral();
+            const spanText = spanLit.getLiteralText();
+            if (spanText) {
+                fragments.push({ node: spanLit, text: spanText });
+            }
+            fragments.push(...collectLiteralFragments(span.getExpression()));
+        }
+        return fragments;
+    }
+    if (
+        Node.isParenthesizedExpression(node) ||
+        Node.isAsExpression(node) ||
+        Node.isTypeAssertion(node) ||
+        Node.isNonNullExpression(node)
+    ) {
+        return collectLiteralFragments(node.getExpression());
+    }
+    if (Node.isConditionalExpression(node)) {
+        return [
+            ...collectLiteralFragments(node.getWhenTrue()),
+            ...collectLiteralFragments(node.getWhenFalse())
+        ];
+    }
+    if (Node.isBinaryExpression(node)) {
+        const op = node.getOperatorToken().getKind();
+        if (
+            op === SyntaxKind.PlusToken ||
+            op === SyntaxKind.BarBarToken ||
+            op === SyntaxKind.QuestionQuestionToken
+        ) {
+            return [
+                ...collectLiteralFragments(node.getLeft()),
+                ...collectLiteralFragments(node.getRight())
+            ];
+        }
+        return [];
+    }
+    if (Node.isArrowFunction(node) || Node.isFunctionExpression(node)) {
+        const body = node.getBody();
+        if (Node.isBlock(body)) {
+            const returns = body.getDescendantsOfKind(SyntaxKind.ReturnStatement);
+            const fragments: LiteralFragment[] = [];
+            for (const ret of returns) {
+                fragments.push(...collectLiteralFragments(ret.getExpression()));
+            }
+            return fragments;
+        } else {
+            return collectLiteralFragments(body);
+        }
+    }
+    if (Node.isCallExpression(node)) {
+        const expr = node.getExpression();
+        const exprText = expr.getText();
+        if (
+            exprText === "computed" ||
+            exprText.endsWith(".computed") ||
+            exprText === "signal" ||
+            exprText.endsWith(".signal")
+        ) {
+            const fragments: LiteralFragment[] = [];
+            for (const arg of node.getArguments()) {
+                fragments.push(...collectLiteralFragments(arg));
+            }
+            return fragments;
+        }
+        return [];
+    }
+    return [];
+}
+
 const sharedTsProject = new Project({
     useInMemoryFileSystem: true,
     compilerOptions: {
@@ -720,10 +822,21 @@ export function scanTypeScriptAst(
                                                 const isBound = rawPropName.startsWith("[");
                                                 if (isBound) {
                                                     try {
-                                                        const dummyHtml = `<div [${cleanPropName}]="${rawVal}"></div>`;
+                                                        const escapedVal = rawVal.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+                                                        const dummyHtml = `<div [${cleanPropName}]="${escapedVal}"></div>`;
                                                         const parsed = parseTemplate(dummyHtml, filePath, {
                                                             preserveWhitespaces: false
                                                         });
+                                                        if (parsed.errors && parsed.errors.length > 0) {
+                                                            for (const e of parsed.errors) {
+                                                                violations.push({
+                                                                    category: isAria ? "i18n-aria" : "i18n-text",
+                                                                    detail: `Host binding parse error in ${rawPropName}: ${e.msg}`,
+                                                                    file: filePath,
+                                                                    line: prop.getStartLineNumber()
+                                                                });
+                                                            }
+                                                        }
                                                         if (
                                                             parsed.nodes &&
                                                             parsed.nodes.length > 0 &&
@@ -749,24 +862,13 @@ export function scanTypeScriptAst(
                                                                 }
                                                             }
                                                         }
-                                                    } catch {
-                                                        if (
-                                                            (rawVal.startsWith("'") && rawVal.endsWith("'")) ||
-                                                            (rawVal.startsWith('"') && rawVal.endsWith('"'))
-                                                        ) {
-                                                            const unquoted = rawVal.slice(1, -1).trim();
-                                                            if (
-                                                                isUserFacingText(unquoted) &&
-                                                                !TECHNICAL_SEMANTIC_STRINGS.has(unquoted)
-                                                            ) {
-                                                                violations.push({
-                                                                    category: isAria ? "i18n-aria" : "i18n-text",
-                                                                    detail: `Static host binding ${rawPropName}: "${unquoted}"`,
-                                                                    file: filePath,
-                                                                    line: prop.getStartLineNumber()
-                                                                });
-                                                            }
-                                                        }
+                                                    } catch (err) {
+                                                        violations.push({
+                                                            category: isAria ? "i18n-aria" : "i18n-text",
+                                                            detail: `Exception parsing host binding ${rawPropName}: ${String(err)}`,
+                                                            file: filePath,
+                                                            line: prop.getStartLineNumber()
+                                                        });
                                                     }
                                                 } else {
                                                     if (
@@ -846,15 +948,19 @@ export function scanTypeScriptAst(
                     const propName = prop.getName();
                     if (SEMANTIC_OBJECT_KEYS.has(propName)) {
                         const init = prop.getInitializer();
-                        if (init && (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init))) {
-                            const val = init.getLiteralText().trim();
-                            if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
-                                violations.push({
-                                    category: "i18n-text",
-                                    detail: `Hard-coded literal property "${propName}": "${val}"`,
-                                    file: filePath,
-                                    line: prop.getStartLineNumber()
-                                });
+                        if (init) {
+                            const fragments = collectLiteralFragments(init);
+                            for (const frag of fragments) {
+                                const val = frag.text.trim();
+                                if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                                    const isAria = propName.toLowerCase().startsWith("aria");
+                                    violations.push({
+                                        category: isAria ? "i18n-aria" : "i18n-text",
+                                        detail: `Hard-coded literal property "${propName}": "${val}"`,
+                                        file: filePath,
+                                        line: frag.node.getStartLineNumber()
+                                    });
+                                }
                             }
                         }
                     }
@@ -863,66 +969,35 @@ export function scanTypeScriptAst(
         }
 
         // 3. Computed accessibility properties and string getters
-        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
-            const propName = prop.getName();
+        for (const node of [
+            ...sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration),
+            ...sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)
+        ]) {
+            const propName = node.getName();
             if (propName.toLowerCase().includes("arialabel") || propName.toLowerCase().includes("announcement")) {
-                const init = prop.getInitializer();
-                if (init && Node.isCallExpression(init)) {
-                    const text = init.getText();
-                    if (!text.includes("messages()") && !text.includes("this.#i18n") && !text.includes("this.i18n")) {
-                        const stringLiterals = init.getDescendantsOfKind(SyntaxKind.StringLiteral);
-                        for (const sl of stringLiterals) {
-                            const val = sl.getLiteralText().trim();
-                            if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
-                                violations.push({
-                                    category: "i18n-aria",
-                                    detail: `Hard-coded text in accessibility property "${propName}": "${val}"`,
-                                    file: filePath,
-                                    line: sl.getStartLineNumber()
-                                });
-                            }
+                const init = node.getInitializer();
+                if (init) {
+                    const fragments = collectLiteralFragments(init);
+                    for (const frag of fragments) {
+                        const val = frag.text.trim();
+                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                            violations.push({
+                                category: "i18n-aria",
+                                detail: `Hard-coded text in accessibility property "${propName}": "${val}"`,
+                                file: filePath,
+                                line: frag.node.getStartLineNumber()
+                            });
                         }
                     }
                 }
             }
         }
 
-        // 4. Semantic functions and methods returning string literals
+        // 4. Semantic functions, methods, and getters returning string literals
         const semanticFnRegex = /(?:label|title|message|placeholder|tooltip|description|announcement|aria)/i;
         const predicatePrefixRegex = /^(?:is|has|should|can|check)[A-Z]/;
-        const technicalFnSuffixRegex = /(?:transform|origin|style|styles|class|classes|options|config|context|rect|size|bounds|width|height|coord|coords|coordinate|coordinates|attribute|type|target|id|element|node|index|key|prop|property|event|handler|listener|pattern|regex)$/i;
-
-        function collectReturnedValueLiterals(node: Node | undefined): Node[] {
-            if (!node) {
-                return [];
-            }
-            if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) {
-                return [node];
-            }
-            if (Node.isParenthesizedExpression(node)) {
-                return collectReturnedValueLiterals(node.getExpression());
-            }
-            if (Node.isConditionalExpression(node)) {
-                return [
-                    ...collectReturnedValueLiterals(node.getWhenTrue()),
-                    ...collectReturnedValueLiterals(node.getWhenFalse())
-                ];
-            }
-            if (Node.isBinaryExpression(node)) {
-                const op = node.getOperatorToken().getKind();
-                if (
-                    op === SyntaxKind.PlusToken ||
-                    op === SyntaxKind.BarBarToken ||
-                    op === SyntaxKind.QuestionQuestionToken
-                ) {
-                    return [
-                        ...collectReturnedValueLiterals(node.getLeft()),
-                        ...collectReturnedValueLiterals(node.getRight())
-                    ];
-                }
-            }
-            return [];
-        }
+        const technicalFnSuffixRegex =
+            /(?:transform|origin|style|styles|class|classes|options|config|rect|size|bounds|width|height|coord|coords|coordinate|coordinates|pattern|regex|index|key|id)$/i;
 
         const candidateFunctions: { name: string; returnExprs: (Node | undefined)[] }[] = [];
 
@@ -946,6 +1021,31 @@ export function scanTypeScriptAst(
                         name,
                         returnExprs: method.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
                     });
+                }
+            }
+            for (const getter of cls.getGetAccessors()) {
+                const name = getter.getName();
+                const returnType = getter.getReturnTypeNode()?.getText().trim();
+                if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
+                    candidateFunctions.push({
+                        name,
+                        returnExprs: getter.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                    });
+                }
+            }
+        }
+
+        for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+            for (const prop of obj.getProperties()) {
+                if (Node.isGetAccessorDeclaration(prop)) {
+                    const name = prop.getName();
+                    const returnType = prop.getReturnTypeNode()?.getText().trim();
+                    if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
+                        candidateFunctions.push({
+                            name,
+                            returnExprs: prop.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                        });
+                    }
                 }
             }
         }
@@ -979,18 +1079,16 @@ export function scanTypeScriptAst(
         for (const { name: fnName, returnExprs } of candidateFunctions) {
             if (semanticFnRegex.test(fnName) && !technicalFnSuffixRegex.test(fnName)) {
                 for (const expr of returnExprs) {
-                    const lits = collectReturnedValueLiterals(expr);
-                    for (const lit of lits) {
-                        const val = (lit as { getLiteralText?: () => string }).getLiteralText
-                            ? (lit as { getLiteralText: () => string }).getLiteralText().trim()
-                            : "";
+                    const fragments = collectLiteralFragments(expr);
+                    for (const frag of fragments) {
+                        const val = frag.text.trim();
                         if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
                             const isAria = /(?:aria|announcement)/i.test(fnName);
                             violations.push({
                                 category: isAria ? "i18n-aria" : "i18n-text",
                                 detail: `Hard-coded text returned from semantic helper "${fnName}": "${val}"`,
                                 file: filePath,
-                                line: lit.getStartLineNumber()
+                                line: frag.node.getStartLineNumber()
                             });
                         }
                     }

@@ -29,5 +29,6 @@ export const GRID_DEFAULT_MESSAGES = {
     rowValidationError: "This row has validation errors.",
     save: "Save",
     saveRow: "Save row",
-    selectAllRows: "Select all rows"
+    selectAllRows: "Select all rows",
+    selectRow: (rowNumber: number) => `Select row ${rowNumber}`
 } satisfies MonaGridMessages;
