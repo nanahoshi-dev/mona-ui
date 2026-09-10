@@ -53,6 +53,26 @@ describe("MonaDirectionService and direction utilities", () => {
             // Subtree is RTL even though root Directionality is LTR
             expect(resolveComponentDirection(child, fakeDir)).toBe("rtl");
         });
+
+        it("skips invalid or empty dir attribute and inherits from valid ancestor", () => {
+            const root = document.createElement("div");
+            root.setAttribute("dir", "rtl");
+
+            const middle = document.createElement("div");
+            middle.setAttribute("dir", "invalid");
+            root.appendChild(middle);
+
+            const child = document.createElement("span");
+            middle.appendChild(child);
+
+            expect(resolveComponentDirection(child, null)).toBe("rtl");
+
+            middle.setAttribute("dir", "");
+            expect(resolveComponentDirection(child, null)).toBe("rtl");
+
+            middle.setAttribute("dir", "   ");
+            expect(resolveComponentDirection(child, null)).toBe("rtl");
+        });
     });
 
     describe("injectComponentDirection", () => {
@@ -380,6 +400,35 @@ describe("MonaDirectionService and direction utilities", () => {
 
             observeSpy.mockRestore();
             disconnectSpy.mockRestore();
+            document.body.removeChild(container);
+        });
+
+        it("ignores intermediate invalid dir when finding auto root", async () => {
+            const container = document.createElement("div");
+            container.setAttribute("dir", "auto");
+            const textSpan = document.createElement("span");
+            textSpan.textContent = "Hello world";
+            container.appendChild(textSpan);
+
+            const invalidWrapper = document.createElement("div");
+            invalidWrapper.setAttribute("dir", "garbage");
+            container.appendChild(invalidWrapper);
+
+            document.body.appendChild(container);
+
+            let observedDir: MonaTextDirection = "ltr";
+            const cleanup = observeComponentDirection(invalidWrapper, null, dir => {
+                observedDir = dir;
+            });
+
+            expect(resolveComponentDirection(invalidWrapper, null)).toBe("ltr");
+
+            textSpan.textContent = "مرحبا بالعالم";
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            expect(observedDir).toBe("rtl");
+
+            cleanup();
             document.body.removeChild(container);
         });
     });

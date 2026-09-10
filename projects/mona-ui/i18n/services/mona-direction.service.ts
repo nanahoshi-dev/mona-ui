@@ -35,29 +35,47 @@ function readComputedDirection(element: Element | null | undefined): MonaTextDir
     }
 }
 
+function findNearestValidDirState(element: Element | null | undefined): MonaTextDirection | null {
+    let current: Element | null | undefined = element;
+    while (current) {
+        const rawDir = current.getAttribute?.("dir")?.trim().toLowerCase();
+        if (rawDir === "rtl" || rawDir === "ltr") {
+            return rawDir;
+        }
+        if (rawDir === "auto") {
+            const computedDir = readComputedDirection(current) ?? readComputedDirection(element);
+            if (computedDir) {
+                return computedDir;
+            }
+        }
+        current = current.parentElement;
+    }
+    return null;
+}
+
 export function resolveComponentDirection(
     hostElement?: ElementRef<HTMLElement> | HTMLElement | null,
     directionality?: Directionality | null
 ): MonaTextDirection {
     const element = hostElement instanceof ElementRef ? hostElement.nativeElement : hostElement;
-    if (typeof element?.closest === "function") {
-        const closestDir = element.closest("[dir]");
-        const rawDir = closestDir?.getAttribute("dir")?.trim().toLowerCase();
-        if (rawDir === "rtl" || rawDir === "ltr") {
-            return rawDir;
-        }
-        if (rawDir === "auto") {
-            // A valid browser-computed direction is authoritative. Never override a correct
-            // platform-resolved `ltr`/`rtl` answer with a JavaScript text heuristic.
-            const computedDir = readComputedDirection(closestDir) ?? readComputedDirection(element);
-            if (computedDir) {
-                return computedDir;
-            }
-        }
+
+    // 1. Ancestor explicit dir attribute ("ltr", "rtl", or "auto")
+    const explicit = findNearestValidDirState(element);
+    if (explicit) {
+        return explicit;
     }
+
+    // 2. Angular CDK Directionality
     if (directionality?.value === "rtl" || directionality?.value === "ltr") {
         return directionality.value;
     }
+
+    // 3. Computed CSS direction (e.g. style="direction: rtl" or platform inherited direction)
+    const computed = readComputedDirection(element);
+    if (computed) {
+        return computed;
+    }
+
     return "ltr";
 }
 
@@ -179,18 +197,30 @@ export function observeComponentDirection(
     let observedAutoElement: Element | null = null;
 
     const updateAutoContentObserver = () => {
-        if (typeof MutationObserver === "undefined" || !element?.closest) {
+        if (typeof MutationObserver === "undefined" || !element) {
             return;
         }
-        const closestDir = element.closest("[dir]");
-        const isAuto = closestDir?.getAttribute("dir")?.trim().toLowerCase() === "auto";
-        if (isAuto && closestDir) {
-            if (observedAutoElement !== closestDir) {
+        let autoRoot: Element | null = null;
+        let current: Element | null = element;
+        while (current) {
+            const rawDir = current.getAttribute?.("dir")?.trim().toLowerCase();
+            if (rawDir === "auto") {
+                autoRoot = current;
+                break;
+            }
+            if (rawDir === "rtl" || rawDir === "ltr") {
+                break;
+            }
+            current = current.parentElement;
+        }
+
+        if (autoRoot) {
+            if (observedAutoElement !== autoRoot) {
                 if (unobserveAuto) {
                     unobserveAuto();
                 }
-                observedAutoElement = closestDir;
-                unobserveAuto = observeAutoDirectionChanges(closestDir, () => check());
+                observedAutoElement = autoRoot;
+                unobserveAuto = observeAutoDirectionChanges(autoRoot, () => check());
             }
         } else {
             if (unobserveAuto) {
