@@ -5,7 +5,8 @@ import {
     normalizeLocalizedDigits,
     normalizeLocalizedInput,
     normalizeLocalizedMinus,
-    parseLocalizedNumber
+    parseLocalizedNumber,
+    validateLocalizedNumber
 } from "./locale-formatters";
 
 describe("locale-formatters", () => {
@@ -77,6 +78,26 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("-1.234,5", "de-DE")).toBe(-1234.5);
         });
 
+        it("supports explicit locale vs edit parse modes for comma-decimal locales", () => {
+            // de-DE strict locale mode (paste)
+            expect(parseLocalizedNumber("1.234", "de-DE", { mode: "locale" })).toBe(1234);
+            expect(parseLocalizedNumber("12,5", "de-DE", { mode: "locale" })).toBe(12.5);
+            expect(parseLocalizedNumber("1.234,5", "de-DE", { mode: "locale" })).toBe(1234.5);
+            expect(parseLocalizedNumber("12.5", "de-DE", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1.23", "de-DE", { mode: "locale" })).toBeNull();
+
+            // de-DE edit mode (interactive typing)
+            expect(parseLocalizedNumber("1.234", "de-DE", { mode: "edit" })).toBe(1.234);
+            expect(parseLocalizedNumber("12.5", "de-DE", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("1.23", "de-DE", { mode: "edit" })).toBe(1.23);
+
+            // tr-TR equivalent matrix
+            expect(parseLocalizedNumber("1.234", "tr-TR", { mode: "locale" })).toBe(1234);
+            expect(parseLocalizedNumber("12,5", "tr-TR", { mode: "locale" })).toBe(12.5);
+            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBe(12.5);
+        });
+
         it("parses localized Arabic digits and decimal comma in ar-SA", () => {
             expect(parseLocalizedNumber("١٢٣٤٫٥", "ar-SA")).toBe(1234.5);
             expect(parseLocalizedNumber("؜-١٢٬٣٤٥٫٦", "ar-SA")).toBe(-12345.6);
@@ -94,6 +115,62 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("-", "en-US")).toBeNull();
             expect(parseLocalizedNumber("+", "en-US")).toBeNull();
             expect(parseLocalizedNumber("abc", "en-US")).toBeNull();
+        });
+    });
+
+    describe("validateLocalizedNumber", () => {
+        it("validates precision and canonical format in de-DE", () => {
+            const v1 = validateLocalizedNumber("1.234", "de-DE", { mode: "locale", decimals: 3 });
+            expect(v1).toEqual({ value: 1234, valid: true, fractionDigits: 0 });
+
+            const v2 = validateLocalizedNumber("12.5", "de-DE", { mode: "locale", decimals: 3 });
+            expect(v2).toEqual({ value: null, valid: false, fractionDigits: 0 });
+
+            const v3 = validateLocalizedNumber("12.5", "de-DE", { mode: "edit", decimals: 3 });
+            expect(v3).toEqual({ value: 12.5, valid: true, fractionDigits: 1 });
+
+            const v4 = validateLocalizedNumber("1.234,567", "de-DE", { mode: "locale", decimals: 3 });
+            expect(v4).toEqual({ value: 1234.567, valid: true, fractionDigits: 3 });
+
+            const v5 = validateLocalizedNumber("1.234,5678", "de-DE", { mode: "locale", decimals: 3 });
+            expect(v5).toEqual({ value: 1234.5678, valid: false, fractionDigits: 4 });
+        });
+
+        it("validates precision and grouping in en-US", () => {
+            const v1 = validateLocalizedNumber("1,234.56", "en-US", { mode: "locale", decimals: 2 });
+            expect(v1).toEqual({ value: 1234.56, valid: true, fractionDigits: 2 });
+
+            const v2 = validateLocalizedNumber("1,234.567", "en-US", { mode: "locale", decimals: 2 });
+            expect(v2).toEqual({ value: 1234.567, valid: false, fractionDigits: 3 });
+
+            const v3 = validateLocalizedNumber("12,5", "en-US", { mode: "locale", decimals: 2 });
+            expect(v3).toEqual({ value: null, valid: false, fractionDigits: 0 });
+        });
+
+        it("validates Unicode scripts precision uniformly", () => {
+            // Bengali digits
+            expect(validateLocalizedNumber("১২.৩৪", "bn-BD", { mode: "locale", decimals: 2 })).toEqual({
+                value: 12.34,
+                valid: true,
+                fractionDigits: 2
+            });
+            expect(validateLocalizedNumber("১২.৩৪৫", "bn-BD", { mode: "locale", decimals: 2 })).toEqual({
+                value: 12.345,
+                valid: false,
+                fractionDigits: 3
+            });
+
+            // Devanagari digits
+            expect(validateLocalizedNumber("१२.३४", "mr-IN", { mode: "locale", decimals: 2 })).toEqual({
+                value: 12.34,
+                valid: true,
+                fractionDigits: 2
+            });
+            expect(validateLocalizedNumber("१२.३४५", "mr-IN", { mode: "locale", decimals: 2 })).toEqual({
+                value: 12.345,
+                valid: false,
+                fractionDigits: 3
+            });
         });
     });
 

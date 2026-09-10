@@ -111,13 +111,17 @@ describe("Numeric locale infrastructure", () => {
             expect(parseLocalizedNumber("1.234,5", "de-DE")).toBe(1234.5);
             expect(parseLocalizedNumber("12,5", "de-DE")).toBe(12.5);
             expect(parseLocalizedNumber("12,5", "de-DE")).not.toBe(125);
-            expect(parseLocalizedNumber("12.5", "de-DE")).toBe(12.5);
+            // In strict locale mode, "12.5" is rejected as non-canonical paste; in edit mode it is accepted
+            expect(parseLocalizedNumber("12.5", "de-DE", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("12.5", "de-DE", { mode: "edit" })).toBe(12.5);
         });
 
         it("parses tr-TR decimal comma numbers accurately", () => {
             expect(parseLocalizedNumber("12,5", "tr-TR")).toBe(12.5);
             expect(parseLocalizedNumber("1.234,5", "tr-TR")).toBe(1234.5);
             expect(parseLocalizedNumber("\u221212,5", "tr-TR")).toBe(-12.5);
+            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBe(12.5);
         });
 
         it("parses fr-FR numbers with space/narrow-space grouping", () => {
@@ -495,6 +499,128 @@ describe("NumericTextBoxComponent i18n integration", () => {
         expect(paste("१२.३४")).toBe(true);
         expect(host.value()).toBe(12.34);
         expect(paste("१२.३४५")).toBe(false);
+    });
+
+    it("handles realistic browser paste event sequence with null beforeinput.data and validates precision", async () => {
+        await TestBed.configureTestingModule({
+            imports: [NumericTextBoxI18nTestHostComponent]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+        const host = fixture.componentInstance;
+        const i18n = TestBed.inject(MonaI18nService);
+        host.decimals.set(2);
+        await waitForStable(fixture);
+
+        const input = getInput(fixture);
+        focusInput(input);
+        await waitForStable(fixture);
+
+        // Helper that simulates real browser paste sequence:
+        // 1. paste event with ClipboardEvent.clipboardData
+        // 2. beforeinput event with data: null and inputType: "insertFromPaste"
+        // 3. input change event
+        function simulateBrowserPaste(clipboardText: string): boolean {
+            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as any;
+            pasteEvent.clipboardData = {
+                getData: (format: string) => (format === "text/plain" ? clipboardText : "")
+            };
+            const pasteAllowed = input.dispatchEvent(pasteEvent);
+            if (!pasteAllowed || pasteEvent.defaultPrevented) {
+                return false;
+            }
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: null,
+                inputType: "insertFromPaste"
+            });
+            const beforeInputAllowed = input.dispatchEvent(beforeInputEvent);
+            if (!beforeInputAllowed || beforeInputEvent.defaultPrevented) {
+                return false;
+            }
+
+            const start = input.selectionStart ?? 0;
+            const end = input.selectionEnd ?? input.value.length;
+            input.value = input.value.slice(0, start) + clipboardText + input.value.slice(end);
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            fixture.detectChanges();
+            return true;
+        }
+
+        // Case 1: en-US, decimals=2, clipboard="1.234", beforeinput.data=null -> rejected, model unchanged
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        host.value.set(null);
+        await waitForStable(fixture);
+        expect(simulateBrowserPaste("1.234")).toBe(false);
+        expect(host.value()).toBeNull();
+
+        // Case 2: en-US, decimals=2, clipboard="1.23", beforeinput.data=null -> accepted as 1.23
+        expect(simulateBrowserPaste("1.23")).toBe(true);
+        expect(host.value()).toBe(1.23);
+
+        // Case 3: de-DE, decimals=2, clipboard="1.234" -> accepted as 1234
+        i18n.use(DE_LOCALE);
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        host.value.set(null);
+        await waitForStable(fixture);
+        expect(simulateBrowserPaste("1.234")).toBe(true);
+        expect(host.value()).toBe(1234);
+
+        // Case 3b: de-DE, decimals=2, clipboard="12.5" -> rejected under strict paste
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        host.value.set(null);
+        await waitForStable(fixture);
+        expect(simulateBrowserPaste("12.5")).toBe(false);
+        expect(host.value()).toBeNull();
+
+        // Case 4: Unicode digit scripts
+        // bn-BD: Bengali digits (১২.৩৪ -> 12.34, ১২.৩৪৫ -> reject)
+        i18n.use({ id: "bn-BD", direction: "ltr", messages: {} });
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        host.value.set(null);
+        await waitForStable(fixture);
+        expect(simulateBrowserPaste("১২.৩৪")).toBe(true);
+        expect(host.value()).toBe(12.34);
+        expect(simulateBrowserPaste("১২.৩৪৫")).toBe(false);
+
+        // mr-IN: Devanagari digits (१२.३४ -> 12.34, १२.३४५ -> reject)
+        i18n.use({ id: "mr-IN", direction: "ltr", messages: {} });
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        host.value.set(null);
+        await waitForStable(fixture);
+        expect(simulateBrowserPaste("१२.३४")).toBe(true);
+        expect(host.value()).toBe(12.34);
+        expect(simulateBrowserPaste("१२.३४५")).toBe(false);
+
+        // Case 5: Partial selection replacement
+        // Input has "100", select "00", paste "23" -> proposed "123"
+        i18n.use({ id: "en-US", direction: "ltr", messages: {} });
+        host.decimals.set(2);
+        input.value = "100";
+        input.selectionStart = 1;
+        input.selectionEnd = 3;
+        expect(simulateBrowserPaste("23")).toBe(true);
+        expect(host.value()).toBe(123);
+
+        // Multi-character non-paste input (e.g. IME or text replacement) is not treated as paste
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        const nonPasteEvent = new InputEvent("beforeinput", {
+            bubbles: true,
+            cancelable: true,
+            data: "12",
+            inputType: "insertText"
+        });
+        const nonPasteAllowed = input.dispatchEvent(nonPasteEvent);
+        expect(nonPasteAllowed).toBe(true);
+        expect(nonPasteEvent.defaultPrevented).toBe(false);
     });
 
     describe("parseLocalizedNumber ambiguity contract", () => {

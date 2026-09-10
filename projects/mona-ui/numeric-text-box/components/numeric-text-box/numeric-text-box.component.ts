@@ -41,10 +41,12 @@ import { twMerge } from "tailwind-merge";
 import {
     formatNumber,
     getNumberSymbols,
+    type LocalizedNumberParseMode,
     MonaI18nService,
     normalizeLocalizedDigits,
     normalizeLocalizedInput,
-    parseLocalizedNumber
+    parseLocalizedNumber,
+    validateLocalizedNumber
 } from "@nanahoshi/mona-ui/i18n";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
@@ -447,8 +449,25 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         });
     }
 
-    protected onPaste(): void {
+    protected onPaste(event: ClipboardEvent): void {
         this.#lastInputSource = "paste";
+        const pastedText = event.clipboardData?.getData("text/plain");
+        if (pastedText != null) {
+            const inputElement = this.valueTextBoxRef()?.nativeElement;
+            if (inputElement) {
+                const { value, selectionStart, selectionEnd } = inputElement;
+                const start = selectionStart ?? value.length;
+                const end = selectionEnd ?? value.length;
+                const proposedValue = value.slice(0, start) + pastedText + value.slice(end);
+                const validation = validateLocalizedNumber(proposedValue, this.#i18n.localeId(), {
+                    mode: "locale",
+                    decimals: this.decimals()
+                });
+                if (!validation.valid || validation.value === null) {
+                    event.preventDefault();
+                }
+            }
+        }
     }
 
     private parseValue(value: string | null | undefined): number | null {
@@ -461,14 +480,17 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         const isPaste = this.#lastInputSource === "paste";
         this.#lastInputSource = "typing";
 
-        const parsed = isPaste
-            ? parseLocalizedNumber(normalizedValue, this.#i18n.localeId())
-            : parseLocalizedNumber(normalizedValue, this.#i18n.localeId(), { alternateDecimal: true });
-        if (parsed === null) {
+        const mode: LocalizedNumberParseMode = isPaste ? "locale" : "edit";
+        const validation = validateLocalizedNumber(normalizedValue, this.#i18n.localeId(), {
+            mode,
+            decimals: this.decimals()
+        });
+
+        if (!validation.valid || validation.value === null) {
             return this.value();
         }
 
-        return parsed;
+        return validation.value;
     }
 
     private setBeforeInputSubscription(): void {
@@ -478,6 +500,12 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             const insertedText =
                 event.data ??
                 (event as unknown as { dataTransfer?: DataTransfer }).dataTransfer?.getData("text/plain");
+
+            const isPaste = event.inputType === "insertFromPaste" || this.#lastInputSource === "paste";
+            if (isPaste) {
+                this.#lastInputSource = "paste";
+            }
+
             if (insertedText == null) {
                 return;
             }
@@ -489,79 +517,22 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
 
             const proposedValue = value.slice(0, selectionStart) + insertedText + value.slice(selectionEnd);
             const localeId = this.#i18n.localeId();
-            const symbols = getNumberSymbols(localeId);
             const decimals = this.decimals();
 
-            const isPaste = event.inputType === "insertFromPaste" || insertedText.length > 1;
             if (isPaste) {
-                this.#lastInputSource = "paste";
-                const parsed = parseLocalizedNumber(proposedValue, localeId);
-                if (parsed === null || !Number.isFinite(parsed)) {
+                const validation = validateLocalizedNumber(proposedValue, localeId, {
+                    mode: "locale",
+                    decimals
+                });
+                if (!validation.valid || validation.value === null) {
                     event.preventDefault();
-                    return;
-                }
-                if (decimals === 0) {
-                    let hasDecimal = !Number.isInteger(parsed);
-                    if (!hasDecimal) {
-                        if (symbols.decimal === ",") {
-                            if (proposedValue.includes(",")) {
-                                hasDecimal = true;
-                            } else if (proposedValue.includes(".")) {
-                                const dotParts = proposedValue.split(".");
-                                if (dotParts.length === 2 && dotParts[1].length !== 3) {
-                                    hasDecimal = true;
-                                }
-                            }
-                        } else {
-                            if (
-                                proposedValue.includes(symbols.decimal) ||
-                                proposedValue.includes("\u066B") ||
-                                proposedValue.includes("/")
-                            ) {
-                                hasDecimal = true;
-                            }
-                        }
-                    }
-                    if (hasDecimal) {
-                        event.preventDefault();
-                        return;
-                    }
-                } else {
-                    let fracStr = "";
-                    if (symbols.decimal === ",") {
-                        if (proposedValue.includes(",")) {
-                            fracStr = proposedValue.slice(proposedValue.lastIndexOf(",") + 1);
-                        } else if (proposedValue.includes(".")) {
-                            const dotParts = proposedValue.split(".");
-                            if (dotParts.length === 2 && dotParts[1].length !== 3) {
-                                fracStr = dotParts[1];
-                            }
-                        }
-                    } else {
-                        if (proposedValue.includes(symbols.decimal)) {
-                            fracStr = proposedValue.slice(
-                                proposedValue.lastIndexOf(symbols.decimal) + symbols.decimal.length
-                            );
-                        } else if (proposedValue.includes(".")) {
-                            fracStr = proposedValue.slice(proposedValue.lastIndexOf(".") + 1);
-                        } else if (proposedValue.includes("\u066B")) {
-                            fracStr = proposedValue.slice(proposedValue.lastIndexOf("\u066B") + 1);
-                        } else if (proposedValue.includes("/")) {
-                            fracStr = proposedValue.slice(proposedValue.lastIndexOf("/") + 1);
-                        }
-                    }
-                    if (fracStr) {
-                        const fracDigits = normalizeLocalizedDigits(fracStr, localeId).replace(/\D/g, "");
-                        if (fracDigits.length > decimals) {
-                            event.preventDefault();
-                            return;
-                        }
-                    }
                 }
                 return;
             }
 
             this.#lastInputSource = "typing";
+
+            const symbols = getNumberSymbols(localeId);
 
             // Normalize minus, bidi controls, and digits
             const normalized = normalizeLocalizedInput(proposedValue, localeId);
