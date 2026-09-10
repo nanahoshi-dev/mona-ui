@@ -401,6 +401,131 @@ describe("audit-i18n-rtl", () => {
             expect(violations[0].detail).toContain('property "tooltip": "Retry request"');
         });
 
+        it("ignores literals in nested arrow functions inside linkedSignal computation", () => {
+            const code = `
+                export class NestedArrowLinkedSignalComponent {
+                    protected readonly tooltip = linkedSignal({
+                        source: this.retryState,
+                        computation() {
+                            const helper = () => {
+                                return "Nested arrow detail";
+                            };
+                            return this.messages().ready;
+                        }
+                    });
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("nested-arrow-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("ignores literals in nested concise arrow functions inside semantic method", () => {
+            const code = `
+                export class NestedConciseArrowComponent {
+                    public getLabel(): string {
+                        const helper = () => "Do not audit me";
+                        return this.messages().label;
+                    }
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("nested-concise-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("ignores literals in nested block-bodied arrow functions inside semantic method", () => {
+            const code = `
+                export class NestedBlockArrowComponent {
+                    public getLabel(): string {
+                        const helper = () => {
+                            return "Do not audit me either";
+                        };
+                        return this.messages().label;
+                    }
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("nested-block-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("ignores literals in nested function declarations inside semantic method", () => {
+            const code = `
+                export class NestedFunctionDeclComponent {
+                    public getLabel(): string {
+                        function helper(): string {
+                            return "Nested only";
+                        }
+                        return this.messages().label;
+                    }
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("nested-fn-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("ignores literals in nested class methods inside semantic method", () => {
+            const code = `
+                export class NestedClassMethodComponent {
+                    public getLabel(): string {
+                        class Helper {
+                            value(): string {
+                                return "Nested class literal";
+                            }
+                        }
+                        return this.messages().label;
+                    }
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("nested-class-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("detects literals returned directly by semantic method", () => {
+            const code = `
+                export class DirectMethodReturnComponent {
+                    public getTooltip(): string {
+                        return "Missing image";
+                    }
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("direct-method-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0].category).toBe("i18n-text");
+            expect(violations[0].detail).toContain('"getTooltip": "Missing image"');
+        });
+
+        it("detects template and conditional fragments in direct linkedSignal computation return", () => {
+            const code = `
+                export class FragmentMethodDemoComponent {
+                    protected readonly tooltip = linkedSignal({
+                        source: this.retryState,
+                        computation() {
+                            return this.isError()
+                                ? \`Template: \${this.code()} - Missing item\`
+                                : "Fallback label";
+                        }
+                    });
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("fragment-demo.component.ts", code, violations);
+
+            expect(violations.length).toBeGreaterThanOrEqual(2);
+            expect(violations.some(v => v.detail.includes("Missing item"))).toBe(true);
+            expect(violations.some(v => v.detail.includes("Fallback label"))).toBe(true);
+        });
+
         it("detects literals inside logical AND expressions and satisfies expressions", () => {
             const code = `
                 export class LogicalComponent {

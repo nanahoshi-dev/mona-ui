@@ -19,7 +19,7 @@ import {
     TmplAstText,
     TmplAstTextAttribute
 } from "@angular/compiler";
-import { Node, Project, SyntaxKind } from "ts-morph";
+import { Node, Project, type ReturnStatement, SyntaxKind } from "ts-morph";
 
 export type AuditCategory = "i18n-text" | "i18n-aria" | "rtl-physical-style" | "rtl-manual-review";
 
@@ -725,6 +725,30 @@ export interface LiteralFragment {
     text: string;
 }
 
+function isFunctionLikeScope(node: Node): boolean {
+    return (
+        Node.isArrowFunction(node) ||
+        Node.isFunctionDeclaration(node) ||
+        Node.isFunctionExpression(node) ||
+        Node.isMethodDeclaration(node) ||
+        Node.isGetAccessorDeclaration(node) ||
+        Node.isSetAccessorDeclaration(node) ||
+        Node.isConstructorDeclaration(node)
+    );
+}
+
+export function getDirectReturnStatements(scopeNode: Node): ReturnStatement[] {
+    const functionScope = isFunctionLikeScope(scopeNode)
+        ? scopeNode
+        : scopeNode.getFirstAncestor(ancestor => isFunctionLikeScope(ancestor)) ?? scopeNode;
+
+    const returns = scopeNode.getDescendantsOfKind(SyntaxKind.ReturnStatement);
+    return returns.filter(returnStmt => {
+        const owner = returnStmt.getFirstAncestor(ancestor => isFunctionLikeScope(ancestor));
+        return owner === functionScope;
+    });
+}
+
 export function collectLiteralFragments(node: Node | undefined): LiteralFragment[] {
     if (!node) {
         return [];
@@ -782,7 +806,7 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
     if (Node.isArrowFunction(node) || Node.isFunctionExpression(node)) {
         const body = node.getBody();
         if (Node.isBlock(body)) {
-            const returns = body.getDescendantsOfKind(SyntaxKind.ReturnStatement);
+            const returns = getDirectReturnStatements(node);
             const fragments: LiteralFragment[] = [];
             for (const ret of returns) {
                 fragments.push(...collectLiteralFragments(ret.getExpression()));
@@ -820,7 +844,7 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
                     } else if (computation && Node.isMethodDeclaration(computation)) {
                         const body = computation.getBody();
                         if (body) {
-                            const returns = body.getDescendantsOfKind(SyntaxKind.ReturnStatement);
+                            const returns = getDirectReturnStatements(computation);
                             for (const ret of returns) {
                                 fragments.push(...collectLiteralFragments(ret.getExpression()));
                             }
@@ -1114,7 +1138,7 @@ export function scanTypeScriptAst(
             if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
                 candidateFunctions.push({
                     name,
-                    returnExprs: fn.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                    returnExprs: getDirectReturnStatements(fn).map(r => r.getExpression())
                 });
             }
         }
@@ -1126,7 +1150,7 @@ export function scanTypeScriptAst(
                 if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
                     candidateFunctions.push({
                         name,
-                        returnExprs: method.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                        returnExprs: getDirectReturnStatements(method).map(r => r.getExpression())
                     });
                 }
             }
@@ -1136,7 +1160,7 @@ export function scanTypeScriptAst(
                 if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
                     candidateFunctions.push({
                         name,
-                        returnExprs: getter.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                        returnExprs: getDirectReturnStatements(getter).map(r => r.getExpression())
                     });
                 }
             }
@@ -1150,7 +1174,7 @@ export function scanTypeScriptAst(
                     if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
                         candidateFunctions.push({
                             name,
-                            returnExprs: prop.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                            returnExprs: getDirectReturnStatements(prop).map(r => r.getExpression())
                         });
                     }
                 }
@@ -1166,7 +1190,7 @@ export function scanTypeScriptAst(
                     if (Node.isBlock(body)) {
                         candidateFunctions.push({
                             name,
-                            returnExprs: body.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                            returnExprs: getDirectReturnStatements(body).map(r => r.getExpression())
                         });
                     } else {
                         candidateFunctions.push({
@@ -1177,7 +1201,7 @@ export function scanTypeScriptAst(
                 } else if (init && Node.isFunctionExpression(init)) {
                     candidateFunctions.push({
                         name,
-                        returnExprs: init.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                        returnExprs: getDirectReturnStatements(init).map(r => r.getExpression())
                     });
                 }
             }
