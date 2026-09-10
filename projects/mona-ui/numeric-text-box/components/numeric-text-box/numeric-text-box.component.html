@@ -18,6 +18,7 @@
     (focusout)="inputFocusOut.emit($event)"
     (blur)="onBlur($event)"
     (beforeinput)="beforeInput$.next($event)"
+    (paste)="onPaste()"
     (wheel)="wheel$.next($event)"
     [size]="size()"
     [class]="inputClasses()"

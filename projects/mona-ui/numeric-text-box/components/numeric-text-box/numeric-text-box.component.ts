@@ -42,6 +42,7 @@ import {
     formatNumber,
     getNumberSymbols,
     MonaI18nService,
+    normalizeLocalizedDigits,
     normalizeLocalizedInput,
     parseLocalizedNumber
 } from "@nanahoshi/mona-ui/i18n";
@@ -75,6 +76,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
+    #lastInputSource: "typing" | "paste" = "typing";
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
     protected readonly classes = computed(() => {
@@ -445,6 +447,10 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         });
     }
 
+    protected onPaste(): void {
+        this.#lastInputSource = "paste";
+    }
+
     private parseValue(value: string | null | undefined): number | null {
         const normalizedValue = value == null ? "" : value;
         this.rawInputValue.set(normalizedValue);
@@ -452,7 +458,12 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             return null;
         }
 
-        const parsed = parseLocalizedNumber(normalizedValue, this.#i18n.localeId(), { alternateDecimal: true });
+        const isPaste = this.#lastInputSource === "paste";
+        this.#lastInputSource = "typing";
+
+        const parsed = isPaste
+            ? parseLocalizedNumber(normalizedValue, this.#i18n.localeId())
+            : parseLocalizedNumber(normalizedValue, this.#i18n.localeId(), { alternateDecimal: true });
         if (parsed === null) {
             return this.value();
         }
@@ -483,46 +494,65 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
 
             const isPaste = event.inputType === "insertFromPaste" || insertedText.length > 1;
             if (isPaste) {
-                const parsed = parseLocalizedNumber(proposedValue, localeId, { alternateDecimal: true });
+                this.#lastInputSource = "paste";
+                const parsed = parseLocalizedNumber(proposedValue, localeId);
                 if (parsed === null || !Number.isFinite(parsed)) {
                     event.preventDefault();
                     return;
                 }
                 if (decimals === 0) {
-                    const hasDecimal =
-                        proposedValue.includes(symbols.decimal) ||
-                        proposedValue.includes(".") ||
-                        proposedValue.includes("\u066B") ||
-                        !Number.isInteger(parsed);
+                    let hasDecimal = !Number.isInteger(parsed);
+                    if (!hasDecimal) {
+                        if (symbols.decimal === ",") {
+                            if (proposedValue.includes(",")) {
+                                hasDecimal = true;
+                            } else if (proposedValue.includes(".")) {
+                                const dotParts = proposedValue.split(".");
+                                if (dotParts.length === 2 && dotParts[1].length !== 3) {
+                                    hasDecimal = true;
+                                }
+                            }
+                        } else {
+                            if (
+                                proposedValue.includes(symbols.decimal) ||
+                                proposedValue.includes("\u066B") ||
+                                proposedValue.includes("/")
+                            ) {
+                                hasDecimal = true;
+                            }
+                        }
+                    }
                     if (hasDecimal) {
                         event.preventDefault();
                         return;
                     }
                 } else {
-                    let decimalIndex = -1;
+                    let fracStr = "";
                     if (symbols.decimal === ",") {
                         if (proposedValue.includes(",")) {
-                            decimalIndex = proposedValue.lastIndexOf(",");
+                            fracStr = proposedValue.slice(proposedValue.lastIndexOf(",") + 1);
                         } else if (proposedValue.includes(".")) {
                             const dotParts = proposedValue.split(".");
-                            if (dotParts.length === 2) {
-                                decimalIndex = proposedValue.indexOf(".");
+                            if (dotParts.length === 2 && dotParts[1].length !== 3) {
+                                fracStr = dotParts[1];
                             }
                         }
                     } else {
                         if (proposedValue.includes(symbols.decimal)) {
-                            decimalIndex = proposedValue.lastIndexOf(symbols.decimal);
+                            fracStr = proposedValue.slice(
+                                proposedValue.lastIndexOf(symbols.decimal) + symbols.decimal.length
+                            );
                         } else if (proposedValue.includes(".")) {
-                            decimalIndex = proposedValue.lastIndexOf(".");
+                            fracStr = proposedValue.slice(proposedValue.lastIndexOf(".") + 1);
                         } else if (proposedValue.includes("\u066B")) {
-                            decimalIndex = proposedValue.lastIndexOf("\u066B");
+                            fracStr = proposedValue.slice(proposedValue.lastIndexOf("\u066B") + 1);
+                        } else if (proposedValue.includes("/")) {
+                            fracStr = proposedValue.slice(proposedValue.lastIndexOf("/") + 1);
                         }
                     }
-                    if (decimalIndex !== -1) {
-                        const fracStr = proposedValue
-                            .slice(decimalIndex + 1)
-                            .replace(/[^\d\u0660-\u0669\u06F0-\u06F9]/g, "");
-                        if (fracStr.length > decimals) {
+                    if (fracStr) {
+                        const fracDigits = normalizeLocalizedDigits(fracStr, localeId).replace(/\D/g, "");
+                        if (fracDigits.length > decimals) {
                             event.preventDefault();
                             return;
                         }
@@ -530,6 +560,8 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                 }
                 return;
             }
+
+            this.#lastInputSource = "typing";
 
             // Normalize minus, bidi controls, and digits
             const normalized = normalizeLocalizedInput(proposedValue, localeId);

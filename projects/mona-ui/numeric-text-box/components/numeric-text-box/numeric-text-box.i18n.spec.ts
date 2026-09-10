@@ -425,6 +425,76 @@ describe("NumericTextBoxComponent i18n integration", () => {
         // But integer paste is allowed
         expect(paste("1,234")).toBe(true);
         expect(host.value()).toBe(1234);
+
+        // de-DE grouped integer paste at decimals=0, 2, 3
+        i18n.use(DE_LOCALE);
+        await waitForStable(fixture);
+
+        host.decimals.set(0);
+        await waitForStable(fixture);
+        expect(paste("1.234")).toBe(true);
+        expect(host.value()).toBe(1234);
+
+        host.decimals.set(2);
+        await waitForStable(fixture);
+        expect(paste("1.234")).toBe(true);
+        expect(host.value()).toBe(1234);
+
+        host.decimals.set(3);
+        await waitForStable(fixture);
+        expect(paste("1.234")).toBe(true);
+        expect(host.value()).toBe(1234);
+
+        expect(paste("12,5")).toBe(true);
+        expect(host.value()).toBe(12.5);
+
+        // Sequential typing of 1.234 in de-DE with decimals=3 interprets '.' as alternate decimal
+        function typeChar(char: string): boolean {
+            const start = input.selectionStart ?? input.value.length;
+            const end = input.selectionEnd ?? input.value.length;
+            const event = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: char,
+                inputType: "insertText"
+            });
+            const allowed = input.dispatchEvent(event);
+            if (allowed && !event.defaultPrevented) {
+                input.value = input.value.slice(0, start) + char + input.value.slice(end);
+                input.selectionStart = input.selectionEnd = start + char.length;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                fixture.detectChanges();
+                return true;
+            }
+            return false;
+        }
+
+        input.value = "";
+        input.selectionStart = input.selectionEnd = 0;
+        expect(typeChar("1")).toBe(true);
+        expect(typeChar(".")).toBe(true);
+        expect(typeChar("2")).toBe(true);
+        expect(typeChar("3")).toBe(true);
+        expect(typeChar("4")).toBe(true);
+        expect(host.value()).toBe(1.234);
+
+        // Unicode paste precision validation
+        host.decimals.set(2);
+        await waitForStable(fixture);
+
+        // bn-BD (Bengali digits)
+        i18n.use({ id: "bn-BD", direction: "ltr", messages: {} });
+        await waitForStable(fixture);
+        expect(paste("১২.৩৪")).toBe(true);
+        expect(host.value()).toBe(12.34);
+        expect(paste("১২.৩৪৫")).toBe(false);
+
+        // mr-IN (Devanagari digits)
+        i18n.use({ id: "mr-IN", direction: "ltr", messages: {} });
+        await waitForStable(fixture);
+        expect(paste("१२.३४")).toBe(true);
+        expect(host.value()).toBe(12.34);
+        expect(paste("१२.३४५")).toBe(false);
     });
 
     describe("parseLocalizedNumber ambiguity contract", () => {
