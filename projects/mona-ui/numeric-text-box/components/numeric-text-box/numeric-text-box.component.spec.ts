@@ -506,7 +506,14 @@ describe("NumericTextBoxComponent", () => {
 
                 updateInputValue(hostFixture, "12,3,4");
                 await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
 
+                updateInputValue(hostFixture, "12,34,567");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
+
+                updateInputValue(hostFixture, "1,2,3");
+                await waitForStable(hostFixture);
                 expect(hostFixture.componentInstance.value()).toBe(12);
             });
 
@@ -518,7 +525,18 @@ describe("NumericTextBoxComponent", () => {
 
                 updateInputValue(hostFixture, "12.3.4");
                 await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
 
+                const i18nService = TestBed.inject(MonaI18nService);
+                i18nService.use({ id: "fr-FR", direction: "ltr", messages: {} });
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, "12.34.567");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
+
+                updateInputValue(hostFixture, "1.2.3");
+                await waitForStable(hostFixture);
                 expect(hostFixture.componentInstance.value()).toBe(12);
             });
 
@@ -549,8 +567,11 @@ describe("NumericTextBoxComponent", () => {
 
                 updateInputValue(hostFixture, "12,5");
                 await waitForStable(hostFixture);
-
                 expect(hostFixture.componentInstance.value()).toBe(12.5);
+
+                updateInputValue(hostFixture, "1,5");
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(1.5);
             });
 
             it("accepts valid de-DE alternate dot decimal separator on direct input", async () => {
@@ -566,6 +587,21 @@ describe("NumericTextBoxComponent", () => {
                 await waitForStable(hostFixture);
 
                 expect(hostFixture.componentInstance.value()).toBe(12.5);
+            });
+
+            it("accepts valid fr-FR alternate dot decimal separator on direct input", async () => {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                const i18nService = TestBed.inject(MonaI18nService);
+                i18nService.use({ id: "fr-FR", direction: "ltr", messages: {} });
+
+                hostFixture.componentInstance.decimals.set(2);
+                hostFixture.componentInstance.value.set(12);
+                await waitForStable(hostFixture);
+
+                updateInputValue(hostFixture, "1.5");
+                await waitForStable(hostFixture);
+
+                expect(hostFixture.componentInstance.value()).toBe(1.5);
             });
 
             it("preserves prior semantic model on transitional states like trailing separator or lone sign", async () => {

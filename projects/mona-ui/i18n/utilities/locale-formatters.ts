@@ -381,50 +381,87 @@ export function parseLocalizedNumber(
         const num = Number(normalizedStr);
         return Number.isFinite(num) ? num : null;
     } else {
-        // mode === "edit": permissive interactive editing with alternate decimal separator
-        cleaned = cleaned.replace(/[ \u00A0\u202F]/g, "");
-
-        // Strip non-dot/non-comma locale group separators (e.g. Arabic \u066C)
-        if (symbols.group && symbols.group !== "." && symbols.group !== ",") {
-            cleaned = cleaned.replaceAll(symbols.group, "");
+        // mode === "edit": editor buffer grammar with exactly one decimal separator (locale primary or alternate)
+        // No group separators or internal whitespace permitted in editor buffer
+        if (/[\s\u00A0\u202F]/.test(cleaned)) {
+            return null;
         }
-        cleaned = cleaned.replace(/[\u066C]/g, "");
 
-        if (symbols.decimal === ",") {
-            if (cleaned.includes(",")) {
-                cleaned = cleaned.replace(/\./g, "").replace(",", ".");
-            } else if (cleaned.includes(".")) {
-                const dotParts = cleaned.split(".");
-                if (dotParts.length === 2) {
-                    // Single dot in edit mode is treated as alternate decimal
-                    cleaned = dotParts[0] + "." + dotParts[1];
-                } else if (dotParts.length > 2) {
-                    // Multiple dots => group separators
-                    cleaned = cleaned.replace(/\./g, "");
+        const primaryDec = symbols.decimal || ".";
+        const candidateSeparators = new Set<string>();
+        candidateSeparators.add(primaryDec);
+        if (primaryDec === ".") {
+            candidateSeparators.add(",");
+        } else if (primaryDec === ",") {
+            candidateSeparators.add(".");
+        } else {
+            candidateSeparators.add(".");
+            candidateSeparators.add(",");
+        }
+        if (primaryDec === "\u066B") {
+            candidateSeparators.add(".");
+            candidateSeparators.add(",");
+        }
+        if (primaryDec === "/") {
+            candidateSeparators.add(".");
+            candidateSeparators.add(",");
+        }
+
+        let foundSep: string | null = null;
+        let sepIndex = -1;
+
+        for (let i = 0; i < cleaned.length; i++) {
+            for (const sep of candidateSeparators) {
+                if (cleaned.startsWith(sep, i)) {
+                    if (foundSep !== null) {
+                        // More than one separator (or repeated alternate separators) is rejected
+                        return null;
+                    }
+                    foundSep = sep;
+                    sepIndex = i;
+                    i += sep.length - 1;
+                    break;
                 }
+            }
+        }
+
+        // Reject if any non-candidate dot or comma remains
+        if (cleaned.includes(".") && !candidateSeparators.has(".")) {
+            return null;
+        }
+        if (cleaned.includes(",") && !candidateSeparators.has(",")) {
+            return null;
+        }
+
+        let intPart: string;
+        let fracPart: string;
+
+        if (foundSep !== null) {
+            intPart = cleaned.slice(0, sepIndex);
+            fracPart = cleaned.slice(sepIndex + foundSep.length);
+
+            if (intPart.length > 0 && !/^\d+$/.test(intPart)) {
+                return null;
+            }
+            if (fracPart.length > 0 && !/^\d+$/.test(fracPart)) {
+                return null;
+            }
+            if (intPart.length === 0 && fracPart.length === 0) {
+                return null;
             }
         } else {
-            if (symbols.decimal !== ".") {
-                cleaned = cleaned.replaceAll(symbols.decimal, ".");
+            if (!/^\d+$/.test(cleaned)) {
+                return null;
             }
-            cleaned = cleaned.replace(/\u066B/g, ".");
-            if (cleaned.includes("/")) {
-                cleaned = cleaned.replace(/\//g, ".");
-            }
-            if (cleaned.includes(".")) {
-                cleaned = cleaned.replace(/,/g, "");
-            } else if (cleaned.includes(",")) {
-                const commaParts = cleaned.split(",");
-                if (commaParts.length === 2) {
-                    cleaned = commaParts[0] + "." + commaParts[1];
-                } else if (commaParts.length > 2) {
-                    cleaned = cleaned.replace(/,/g, "");
-                }
-            }
+            intPart = cleaned;
+            fracPart = "";
         }
 
-        const fullStr = sign + cleaned;
-        const num = Number(fullStr);
+        const normalizedStr =
+            sign +
+            (intPart.length > 0 ? intPart : "0") +
+            (fracPart.length > 0 ? "." + fracPart : cleaned.endsWith(foundSep ?? "") ? "" : "");
+        const num = Number(normalizedStr);
         return Number.isFinite(num) ? num : null;
     }
 }

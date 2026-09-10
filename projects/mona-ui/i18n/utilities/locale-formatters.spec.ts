@@ -159,8 +159,17 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("12,5", "en-US", { mode: "edit" })).toBe(12.5);
             expect(parseLocalizedNumber("1,23", "en-US", { mode: "edit" })).toBe(1.23);
             expect(parseLocalizedNumber("0,123", "en-US", { mode: "edit" })).toBe(0.123);
-            expect(parseLocalizedNumber("1,234.5", "en-US", { mode: "edit" })).toBe(1234.5);
-            expect(parseLocalizedNumber("1,234,567", "en-US", { mode: "edit" })).toBe(1234567);
+            expect(parseLocalizedNumber("1.5", "en-US", { mode: "edit" })).toBe(1.5);
+            // Grouped inputs are handled by mode: 'locale', not rescued by edit mode
+            expect(parseLocalizedNumber("1,234.5", "en-US", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("1,234,567", "en-US", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("12,34,567", "en-US", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("1,2,3", "en-US", { mode: "edit" })).toBeNull();
+
+            // fr-FR edit mode
+            expect(parseLocalizedNumber("1.5", "fr-FR", { mode: "edit" })).toBe(1.5);
+            expect(parseLocalizedNumber("12.34.567", "fr-FR", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("1.2.3", "fr-FR", { mode: "edit" })).toBeNull();
         });
 
         it("enforces canonical grouping threshold in strict mode (es-ES, pl-PL, lv-LV, pt-PT)", () => {

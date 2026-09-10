@@ -497,22 +497,27 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             return null;
         }
 
+        if (raw.trim() !== raw) {
+            return this.value();
+        }
+
         const edit = validateLocalizedNumberEdit(raw, this.#i18n.localeId(), {
             decimals: this.decimals()
         });
 
-        if (!edit.valid) {
-            return this.value();
+        if (edit.valid) {
+            return edit.value === null ? this.value() : edit.value;
         }
 
-        if (edit.value === null) {
-            // Transitional states such as "-" or a bare separator.
-            // Preserve the prior semantic value unless the explicit
-            // component contract says otherwise.
-            return this.value();
+        const localeValidation = validateLocalizedNumber(raw, this.#i18n.localeId(), {
+            mode: "locale",
+            decimals: this.decimals()
+        });
+        if (localeValidation.valid && localeValidation.value !== null) {
+            return localeValidation.value;
         }
 
-        return edit.value;
+        return this.value();
     }
 
     private setBeforeInputSubscription(): void {
