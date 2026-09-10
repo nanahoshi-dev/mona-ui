@@ -343,6 +343,64 @@ describe("audit-i18n-rtl", () => {
             expect(violations).toHaveLength(0);
         });
 
+        it("detects hard-coded strings in linkedSignal config object method shorthand", () => {
+            const code = `
+                export class MethodDemoComponent {
+                    protected readonly tooltip = linkedSignal({
+                        source: this.retryState,
+                        computation() {
+                            return "Retry request";
+                        }
+                    });
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("method-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0].category).toBe("i18n-text");
+            expect(violations[0].detail).toContain('property "tooltip": "Retry request"');
+        });
+
+        it("ignores linkedSignal config object method shorthand using localized messages", () => {
+            const code = `
+                export class CleanMethodDemoComponent {
+                    protected readonly tooltip = linkedSignal({
+                        source: this.retryState,
+                        computation() {
+                            return this.messages().retry;
+                        }
+                    });
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("clean-method-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("detects hard-coded strings in linkedSignal method shorthand with branching", () => {
+            const code = `
+                export class BranchMethodDemoComponent {
+                    protected readonly tooltip = linkedSignal({
+                        source: this.retryState,
+                        computation() {
+                            if (this.error()) {
+                                return "Retry request";
+                            }
+                            return this.messages().ready;
+                        }
+                    });
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("branch-method-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0].category).toBe("i18n-text");
+            expect(violations[0].detail).toContain('property "tooltip": "Retry request"');
+        });
+
         it("detects literals inside logical AND expressions and satisfies expressions", () => {
             const code = `
                 export class LogicalComponent {

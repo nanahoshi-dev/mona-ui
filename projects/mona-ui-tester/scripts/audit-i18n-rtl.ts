@@ -820,7 +820,10 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
                     } else if (computation && Node.isMethodDeclaration(computation)) {
                         const body = computation.getBody();
                         if (body) {
-                            fragments.push(...collectLiteralFragments(body));
+                            const returns = body.getDescendantsOfKind(SyntaxKind.ReturnStatement);
+                            for (const ret of returns) {
+                                fragments.push(...collectLiteralFragments(ret.getExpression()));
+                            }
                         }
                     }
                 } else {
