@@ -11,28 +11,28 @@ import {
 import type { MonaTextDirection } from "../models/mona-direction";
 
 /**
- * Reads the platform-resolved CSS `direction` for an element.
+ * Reads semantic document direction for a connected browser element using `:dir(rtl)` and `:dir(ltr)`.
  *
- * Browsers implement the HTML auto-directionality algorithm in full, including Unicode bidi
- * classification of the first strong character (L/AL/R only) and the exclusion rules for nested
- * explicit-direction subtrees, `bdi`, `script`, `style`, and `textarea`. Mona therefore delegates
- * `dir="auto"` resolution to the platform instead of reimplementing a partial Unicode-range heuristic
- * that can contradict CSS and `:dir(...)`.
+ * Mona UI direction-sensitive behaviors follow semantic document directionality
+ * (`:dir(...)`, `[dir]`, and CDK Directionality), matching Tailwind's `rtl:`/`ltr:`
+ * variant matching. Styling-only CSS `direction` property is not treated as the
+ * authoritative Mona direction switch.
  */
-function readComputedDirection(element: Element | null | undefined): MonaTextDirection | null {
+function readSemanticDirection(element: Element | null | undefined): MonaTextDirection | null {
     if (!element || !element.isConnected) {
         return null;
     }
-    const view = element.ownerDocument?.defaultView ?? (typeof window !== "undefined" ? window : undefined);
-    if (!view || typeof view.getComputedStyle !== "function") {
-        return null;
-    }
     try {
-        const direction = view.getComputedStyle(element).direction?.trim().toLowerCase();
-        return direction === "rtl" || direction === "ltr" ? direction : null;
+        if (element.matches(":dir(rtl)")) {
+            return "rtl";
+        }
+        if (element.matches(":dir(ltr)")) {
+            return "ltr";
+        }
     } catch {
-        return null;
+        // selector unsupported / environment limitation
     }
+    return null;
 }
 
 function findNearestValidDirState(element: Element | null | undefined): MonaTextDirection | null {
@@ -43,9 +43,9 @@ function findNearestValidDirState(element: Element | null | undefined): MonaText
             return rawDir;
         }
         if (rawDir === "auto") {
-            const computedDir = readComputedDirection(current) ?? readComputedDirection(element);
-            if (computedDir) {
-                return computedDir;
+            const semanticDir = readSemanticDirection(current) ?? readSemanticDirection(element);
+            if (semanticDir) {
+                return semanticDir;
             }
         }
         current = current.parentElement;
@@ -59,13 +59,13 @@ export function resolveComponentDirection(
 ): MonaTextDirection {
     const element = hostElement instanceof ElementRef ? hostElement.nativeElement : hostElement;
 
-    // 1. Browser-authoritative path (computed CSS direction)
-    const computed = readComputedDirection(element);
-    if (computed) {
-        return computed;
+    // 1. Connected browser semantic direction (:dir(rtl) / :dir(ltr))
+    const semantic = readSemanticDirection(element);
+    if (semantic) {
+        return semantic;
     }
 
-    // 2. Non-browser / SSR fallback: ancestor explicit dir attribute ("ltr", "rtl", or "auto")
+    // 2. Non-browser / unattached DOM fallback: nearest ancestor explicit dir attribute ("ltr", "rtl", or "auto")
     const explicit = findNearestValidDirState(element);
     if (explicit) {
         return explicit;
@@ -139,7 +139,7 @@ function observeAutoDirectionChanges(autoRoot: Element, callback: () => void): (
     if (!entry) {
         const callbacks = new Set<() => void>();
         const observer = new MutationObserver(() => {
-            const currentDir = readComputedDirection(autoRoot);
+            const currentDir = readSemanticDirection(autoRoot);
             if (entry && (entry.lastDirection === null || currentDir !== entry.lastDirection)) {
                 entry.lastDirection = currentDir;
                 for (const cb of Array.from(callbacks)) {
@@ -156,7 +156,7 @@ function observeAutoDirectionChanges(autoRoot: Element, callback: () => void): (
             refCount: 0,
             observer,
             callbacks,
-            lastDirection: readComputedDirection(autoRoot)
+            lastDirection: readSemanticDirection(autoRoot)
         };
         autoDirectionObservers.set(autoRoot, entry);
     }

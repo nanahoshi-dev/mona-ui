@@ -74,7 +74,7 @@ describe("MonaDirectionService and direction utilities", () => {
             expect(resolveComponentDirection(child, null)).toBe("rtl");
         });
 
-        it("prioritizes computed CSS direction when dir='rtl' but CSS direction is 'ltr'", () => {
+        it("prioritizes semantic document direction when dir='rtl' but CSS direction is 'ltr'", () => {
             const div = document.createElement("div");
             div.setAttribute("dir", "rtl");
             div.style.direction = "ltr";
@@ -82,13 +82,15 @@ describe("MonaDirectionService and direction utilities", () => {
             div.appendChild(child);
             document.body.appendChild(div);
             try {
-                expect(resolveComponentDirection(child, null)).toBe("ltr");
+                // Semantic document direction is RTL (matching Tailwind rtl: and :dir(rtl))
+                expect(resolveComponentDirection(child, null)).toBe("rtl");
+                expect(child.matches(":dir(rtl)")).toBe(true);
             } finally {
                 document.body.removeChild(div);
             }
         });
 
-        it("prioritizes computed CSS direction when dir='ltr' but CSS direction is 'rtl'", () => {
+        it("prioritizes semantic document direction when dir='ltr' but CSS direction is 'rtl'", () => {
             const div = document.createElement("div");
             div.setAttribute("dir", "ltr");
             div.style.direction = "rtl";
@@ -96,27 +98,31 @@ describe("MonaDirectionService and direction utilities", () => {
             div.appendChild(child);
             document.body.appendChild(div);
             try {
-                expect(resolveComponentDirection(child, null)).toBe("rtl");
+                // Semantic document direction is LTR (matching Tailwind ltr: and :dir(ltr))
+                expect(resolveComponentDirection(child, null)).toBe("ltr");
+                expect(child.matches(":dir(rtl)")).toBe(false);
+                expect(child.matches(":dir(ltr)")).toBe(true);
             } finally {
                 document.body.removeChild(div);
             }
         });
 
-        it("prioritizes computed CSS direction over CDK Directionality", () => {
-            const fakeDir = { value: "ltr", change: new EventEmitter<any>() } as Directionality;
+        it("maintains default semantic LTR direction when only CSS direction is set to 'rtl' without dir attribute", () => {
             const div = document.createElement("div");
             div.style.direction = "rtl";
             const child = document.createElement("span");
             div.appendChild(child);
             document.body.appendChild(div);
             try {
-                expect(resolveComponentDirection(child, fakeDir)).toBe("rtl");
+                // Without semantic dir attribute, document direction remains LTR (Tailwind rtl: remains inactive)
+                expect(resolveComponentDirection(child, null)).toBe("ltr");
+                expect(child.matches(":dir(rtl)")).toBe(false);
             } finally {
                 document.body.removeChild(div);
             }
         });
 
-        it("prioritizes computed CSS direction on ancestor with invalid dir attribute", () => {
+        it("inherits semantic direction from ancestor when intermediate ancestor has invalid dir attribute and CSS direction", () => {
             const root = document.createElement("div");
             root.setAttribute("dir", "rtl");
             const middle = document.createElement("div");
@@ -127,9 +133,29 @@ describe("MonaDirectionService and direction utilities", () => {
             middle.appendChild(child);
             document.body.appendChild(root);
             try {
-                expect(resolveComponentDirection(child, null)).toBe("ltr");
+                // Inherits semantic RTL from valid root ancestor
+                expect(resolveComponentDirection(child, null)).toBe("rtl");
+                expect(child.matches(":dir(rtl)")).toBe(true);
             } finally {
                 document.body.removeChild(root);
+            }
+        });
+
+        it("resolves nested dir override correctly across layers", () => {
+            const outer = document.createElement("div");
+            outer.setAttribute("dir", "rtl");
+            const inner = document.createElement("div");
+            inner.setAttribute("dir", "ltr");
+            const child = document.createElement("span");
+            inner.appendChild(child);
+            outer.appendChild(inner);
+            document.body.appendChild(outer);
+            try {
+                expect(resolveComponentDirection(child, null)).toBe("ltr");
+                expect(child.matches(":dir(rtl)")).toBe(false);
+                expect(child.matches(":dir(ltr)")).toBe(true);
+            } finally {
+                document.body.removeChild(outer);
             }
         });
     });
@@ -236,16 +262,17 @@ describe("MonaDirectionService and direction utilities", () => {
             expect(resolveComponentDirection(child, null)).toBe("ltr");
         });
 
-        it("resolves dir='auto' using computed style direction", () => {
+        it("resolves dir='auto' using semantic document direction", () => {
             const div = document.createElement("div");
             div.setAttribute("dir", "auto");
-            div.style.direction = "rtl";
+            div.textContent = "مرحبا";
             document.body.appendChild(div);
 
             const child = document.createElement("span");
             div.appendChild(child);
 
             expect(resolveComponentDirection(child, null)).toBe("rtl");
+            expect(child.matches(":dir(rtl)")).toBe(true);
             document.body.removeChild(div);
         });
 

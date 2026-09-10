@@ -94,6 +94,30 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().classList.contains("translate-x-full")).toBe(true);
         });
 
+        it("should dock against logical start edge and slide out in semantic RTL", () => {
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            fixture.componentInstance.side.set("start");
+            goCompact();
+
+            expect(sidebar().matches(":dir(rtl)")).toBe(true);
+            // In RTL, start-0 is physically right, and Tailwind rtl:translate-x-full moves it rightwards offcanvas
+            expect(sidebar().classList.contains("start-0")).toBe(true);
+            expect(sidebar().classList.contains("rtl:translate-x-full")).toBe(true);
+        });
+
+        it("should maintain coherent LTR drawer positioning and translation under CSS-only direction override", () => {
+            fixture.nativeElement.setAttribute("dir", "ltr");
+            fixture.nativeElement.style.direction = "rtl";
+            fixture.componentInstance.side.set("start");
+            goCompact();
+
+            // Under semantic Option A, Tailwind rtl: is inactive, so start-0 stays LTR-aligned with -translate-x-full
+            expect(sidebar().matches(":dir(rtl)")).toBe(false);
+            expect(sidebar().matches(":dir(ltr)")).toBe(true);
+            expect(sidebar().classList.contains("start-0")).toBe(true);
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(true);
+        });
+
         it("should never present an icon rail, having the room to show everything", () => {
             openDrawer();
             service.collapse();

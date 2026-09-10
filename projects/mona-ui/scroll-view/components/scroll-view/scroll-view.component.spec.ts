@@ -191,4 +191,62 @@ describe("ScrollViewComponent", () => {
         expect(prevChevron.classList.contains("rtl:rotate-180")).toBe(true);
         expect(nextChevron.classList.contains("rtl:rotate-180")).toBe(true);
     });
+
+    it("maintains coherent LTR keyboard navigation and icon state under CSS-only direction override", () => {
+        fixture.componentRef.setInput("arrows", true);
+        fixture.componentRef.setInput("data", ["Item 1", "Item 2", "Item 3"]);
+        fixture.componentRef.setInput("index", 0);
+
+        const host = fixture.nativeElement as HTMLElement;
+        host.setAttribute("dir", "ltr");
+        host.style.direction = "rtl";
+        fixture.detectChanges();
+
+        // Under semantic Option A, Mona behavior stays LTR and matches Tailwind's :dir(ltr) / inactive rtl:
+        expect(host.matches(":dir(rtl)")).toBe(false);
+        expect(host.matches(":dir(ltr)")).toBe(true);
+
+        const prevChevron = host.querySelector("[data-navigate-prev] svg") as SVGElement;
+        expect(prevChevron.matches(":dir(rtl)")).toBe(false);
+
+        // ArrowRight navigates next (LTR behavior)
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+        fixture.detectChanges();
+        expect(component.index()).toBe(1);
+
+        // ArrowLeft navigates prev (LTR behavior)
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
+        fixture.detectChanges();
+        expect(component.index()).toBe(0);
+    });
+
+    it("unifies keyboard navigation, transforms, and animation direction under semantic RTL", () => {
+        fixture.componentRef.setInput("arrows", true);
+        fixture.componentRef.setInput("data", ["Item 1", "Item 2", "Item 3"]);
+        fixture.componentRef.setInput("index", 0);
+
+        const host = fixture.nativeElement as HTMLElement;
+        host.setAttribute("dir", "rtl");
+        fixture.detectChanges();
+
+        expect(host.matches(":dir(rtl)")).toBe(true);
+
+        const prevChevron = host.querySelector("[data-navigate-prev] svg") as SVGElement;
+        const nextChevron = host.querySelector("[data-navigate-next] svg") as SVGElement;
+
+        // Visual icon mirror matches semantic RTL state
+        expect(prevChevron.matches(":dir(rtl)")).toBe(true);
+        expect(nextChevron.matches(":dir(rtl)")).toBe(true);
+        expect(prevChevron.classList.contains("rtl:rotate-180")).toBe(true);
+
+        // ArrowLeft navigates next (RTL behavior)
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
+        fixture.detectChanges();
+        expect(component.index()).toBe(1);
+
+        // ArrowRight navigates prev (RTL behavior)
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+        fixture.detectChanges();
+        expect(component.index()).toBe(0);
+    });
 });

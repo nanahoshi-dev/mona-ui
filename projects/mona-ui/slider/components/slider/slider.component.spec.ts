@@ -326,6 +326,31 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toBe(5);
         });
+
+        it("maintains coherent LTR keyboard navigation and handle geometry under CSS-only direction override", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "ltr");
+            fixture.nativeElement.style.direction = "rtl";
+            await waitForStable(fixture);
+
+            const handle = getHandle(fixture);
+            // Under semantic Option A, Tailwind rtl: is inactive and matches LTR behavior
+            expect(handle.matches(":dir(rtl)")).toBe(false);
+            expect(handle.matches(":dir(ltr)")).toBe(true);
+
+            // ArrowRight still increases value in LTR
+            dispatchKeydown(handle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(6);
+
+            dispatchKeydown(handle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(5);
+        });
     });
 });
 
