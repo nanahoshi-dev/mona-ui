@@ -323,6 +323,96 @@ describe("RangeSliderComponent", () => {
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([2, 8]);
         });
+
+        it("maintains coherent LTR keyboard navigation and handle geometry under CSS-only direction override", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "ltr");
+            fixture.nativeElement.style.direction = "rtl";
+            await waitForStable(fixture);
+
+            const primaryHandle = getPrimaryHandle(fixture);
+            const secondaryHandle = getSecondaryHandle(fixture);
+
+            expect(primaryHandle.matches(":dir(ltr)")).toBe(true);
+            expect(primaryHandle.matches(":dir(rtl)")).toBe(false);
+            expect(secondaryHandle.matches(":dir(ltr)")).toBe(true);
+            expect(secondaryHandle.matches(":dir(rtl)")).toBe(false);
+
+            // Initial positions for value [2, 8] with min 0, max 10
+            expect(primaryHandle.style.insetInlineStart).toBe("20%");
+            expect(secondaryHandle.style.insetInlineStart).toBe("80%");
+
+            // Secondary handle: ArrowRight increases in LTR
+            dispatchKeydown(secondaryHandle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 9]);
+            expect(secondaryHandle.style.insetInlineStart).toBe("90%");
+
+            dispatchKeydown(secondaryHandle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+            expect(secondaryHandle.style.insetInlineStart).toBe("80%");
+
+            // Primary handle: ArrowRight increases in LTR
+            dispatchKeydown(primaryHandle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([3, 8]);
+            expect(primaryHandle.style.insetInlineStart).toBe("30%");
+
+            dispatchKeydown(primaryHandle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+            expect(primaryHandle.style.insetInlineStart).toBe("20%");
+        });
+
+        it("maintains coherent RTL keyboard navigation and handle geometry under CSS-only direction override", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            fixture.nativeElement.style.direction = "ltr";
+            await waitForStable(fixture);
+
+            const primaryHandle = getPrimaryHandle(fixture);
+            const secondaryHandle = getSecondaryHandle(fixture);
+
+            expect(primaryHandle.matches(":dir(rtl)")).toBe(true);
+            expect(primaryHandle.matches(":dir(ltr)")).toBe(false);
+            expect(secondaryHandle.matches(":dir(rtl)")).toBe(true);
+            expect(secondaryHandle.matches(":dir(ltr)")).toBe(false);
+
+            // Initial positions for value [2, 8] with min 0, max 10
+            expect(primaryHandle.style.insetInlineStart).toBe("20%");
+            expect(secondaryHandle.style.insetInlineStart).toBe("80%");
+
+            // Secondary handle: ArrowRight decreases in RTL
+            dispatchKeydown(secondaryHandle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 7]);
+            expect(secondaryHandle.style.insetInlineStart).toBe("70%");
+
+            dispatchKeydown(secondaryHandle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+            expect(secondaryHandle.style.insetInlineStart).toBe("80%");
+
+            // Primary handle: ArrowRight decreases in RTL
+            dispatchKeydown(primaryHandle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([1, 8]);
+            expect(primaryHandle.style.insetInlineStart).toBe("10%");
+
+            dispatchKeydown(primaryHandle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+            expect(primaryHandle.style.insetInlineStart).toBe("20%");
+        });
     });
 });
 

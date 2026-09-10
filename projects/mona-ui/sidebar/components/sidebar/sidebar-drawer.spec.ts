@@ -105,7 +105,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().classList.contains("rtl:translate-x-full")).toBe(true);
         });
 
-        it("should maintain coherent LTR drawer positioning and translation under CSS-only direction override", () => {
+        it("should maintain coherent LTR drawer start positioning and translation under CSS-only direction override", () => {
             fixture.nativeElement.setAttribute("dir", "ltr");
             fixture.nativeElement.style.direction = "rtl";
             fixture.componentInstance.side.set("start");
@@ -116,6 +116,76 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().matches(":dir(ltr)")).toBe(true);
             expect(sidebar().classList.contains("start-0")).toBe(true);
             expect(sidebar().classList.contains("-translate-x-full")).toBe(true);
+            expect(sidebar().getAttribute("data-side")).toBe("start");
+            expect(sidebar().getAttribute("data-state")).toBe("collapsed");
+            expect(sidebar().style.width).toBe("calc(1px + 18rem)");
+
+            query(".trigger").click();
+            fixture.detectChanges();
+            expect(sidebar().getAttribute("data-state")).toBe("expanded");
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(false);
+        });
+
+        it("should maintain coherent LTR drawer end positioning and translation under CSS-only direction override", () => {
+            fixture.nativeElement.setAttribute("dir", "ltr");
+            fixture.nativeElement.style.direction = "rtl";
+            fixture.componentInstance.side.set("end");
+            goCompact();
+
+            expect(sidebar().matches(":dir(rtl)")).toBe(false);
+            expect(sidebar().matches(":dir(ltr)")).toBe(true);
+            expect(sidebar().classList.contains("end-0")).toBe(true);
+            expect(sidebar().classList.contains("translate-x-full")).toBe(true);
+            expect(sidebar().getAttribute("data-side")).toBe("end");
+            expect(sidebar().getAttribute("data-state")).toBe("collapsed");
+            expect(sidebar().style.width).toBe("calc(1px + 18rem)");
+
+            query(".trigger").click();
+            fixture.detectChanges();
+            expect(sidebar().getAttribute("data-state")).toBe("expanded");
+            expect(sidebar().classList.contains("translate-x-full")).toBe(false);
+        });
+
+        it("should maintain coherent RTL drawer start positioning and translation under CSS-only direction override", () => {
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            fixture.nativeElement.style.direction = "ltr";
+            fixture.componentInstance.side.set("start");
+            goCompact();
+
+            expect(sidebar().matches(":dir(rtl)")).toBe(true);
+            expect(sidebar().matches(":dir(ltr)")).toBe(false);
+            expect(sidebar().classList.contains("start-0")).toBe(true);
+            expect(sidebar().classList.contains("rtl:translate-x-full")).toBe(true);
+            expect(sidebar().getAttribute("data-side")).toBe("start");
+            expect(sidebar().getAttribute("data-state")).toBe("collapsed");
+            expect(sidebar().style.width).toBe("calc(1px + 18rem)");
+
+            query(".trigger").click();
+            fixture.detectChanges();
+            expect(sidebar().getAttribute("data-state")).toBe("expanded");
+            expect(sidebar().classList.contains("rtl:translate-x-full")).toBe(false);
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(false);
+        });
+
+        it("should maintain coherent RTL drawer end positioning and translation under CSS-only direction override", () => {
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            fixture.nativeElement.style.direction = "ltr";
+            fixture.componentInstance.side.set("end");
+            goCompact();
+
+            expect(sidebar().matches(":dir(rtl)")).toBe(true);
+            expect(sidebar().matches(":dir(ltr)")).toBe(false);
+            expect(sidebar().classList.contains("end-0")).toBe(true);
+            expect(sidebar().classList.contains("rtl:-translate-x-full")).toBe(true);
+            expect(sidebar().getAttribute("data-side")).toBe("end");
+            expect(sidebar().getAttribute("data-state")).toBe("collapsed");
+            expect(sidebar().style.width).toBe("calc(1px + 18rem)");
+
+            query(".trigger").click();
+            fixture.detectChanges();
+            expect(sidebar().getAttribute("data-state")).toBe("expanded");
+            expect(sidebar().classList.contains("rtl:-translate-x-full")).toBe(false);
+            expect(sidebar().classList.contains("translate-x-full")).toBe(false);
         });
 
         it("should never present an icon rail, having the room to show everything", () => {

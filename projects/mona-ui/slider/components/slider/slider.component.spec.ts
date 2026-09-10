@@ -341,15 +341,48 @@ describe("SliderComponent", () => {
             // Under semantic Option A, Tailwind rtl: is inactive and matches LTR behavior
             expect(handle.matches(":dir(rtl)")).toBe(false);
             expect(handle.matches(":dir(ltr)")).toBe(true);
+            expect(handle.style.insetInlineStart).toBe("50%");
+            expect(handle.classList.contains("data-[orientation=\"horizontal\"]:translate-x-[-50%]")).toBe(true);
 
             // ArrowRight still increases value in LTR
             dispatchKeydown(handle, "ArrowRight");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toBe(6);
+            expect(handle.style.insetInlineStart).toBe("60%");
 
             dispatchKeydown(handle, "ArrowLeft");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toBe(5);
+            expect(handle.style.insetInlineStart).toBe("50%");
+        });
+
+        it("maintains coherent RTL keyboard navigation and handle geometry under CSS-only direction override", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            fixture.nativeElement.style.direction = "ltr";
+            await waitForStable(fixture);
+
+            const handle = getHandle(fixture);
+            expect(handle.matches(":dir(rtl)")).toBe(true);
+            expect(handle.matches(":dir(ltr)")).toBe(false);
+            expect(handle.style.insetInlineStart).toBe("50%");
+            expect(handle.classList.contains("rtl:data-[orientation=\"horizontal\"]:translate-x-[50%]")).toBe(true);
+
+            // ArrowRight decreases value in RTL
+            dispatchKeydown(handle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(4);
+            expect(handle.style.insetInlineStart).toBe("40%");
+
+            // ArrowLeft increases value in RTL
+            dispatchKeydown(handle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(5);
+            expect(handle.style.insetInlineStart).toBe("50%");
         });
     });
 });

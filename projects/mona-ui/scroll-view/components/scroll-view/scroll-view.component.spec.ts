@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { afterEach } from "vitest";
+import { afterEach, vi } from "vitest";
 import { ScrollViewComponent } from "./scroll-view.component";
 
 describe("ScrollViewComponent", () => {
@@ -192,7 +192,7 @@ describe("ScrollViewComponent", () => {
         expect(nextChevron.classList.contains("rtl:rotate-180")).toBe(true);
     });
 
-    it("maintains coherent LTR keyboard navigation and icon state under CSS-only direction override", () => {
+    it("maintains coherent LTR keyboard navigation, Prev/Next click scrolling, animation direction, and icon state under CSS-only direction override", () => {
         fixture.componentRef.setInput("arrows", true);
         fixture.componentRef.setInput("data", ["Item 1", "Item 2", "Item 3"]);
         fixture.componentRef.setInput("index", 0);
@@ -207,7 +207,11 @@ describe("ScrollViewComponent", () => {
         expect(host.matches(":dir(ltr)")).toBe(true);
 
         const prevChevron = host.querySelector("[data-navigate-prev] svg") as SVGElement;
+        const nextChevron = host.querySelector("[data-navigate-next] svg") as SVGElement;
         expect(prevChevron.matches(":dir(rtl)")).toBe(false);
+        expect(prevChevron.matches(":dir(ltr)")).toBe(true);
+        expect(nextChevron.matches(":dir(rtl)")).toBe(false);
+        expect(nextChevron.matches(":dir(ltr)")).toBe(true);
 
         // ArrowRight navigates next (LTR behavior)
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
@@ -218,6 +222,107 @@ describe("ScrollViewComponent", () => {
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
         fixture.detectChanges();
         expect(component.index()).toBe(0);
+
+        // Prev / Next button clicks with animation direction verification
+        const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
+        const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
+
+        // Click Next arrow advances to index 1 with LTR slide-in-from-right animation
+        nextArrow.click();
+        fixture.detectChanges();
+        expect(component.index()).toBe(1);
+        expect(component["enterAnimation"]()).toBe("slide-in-from-right");
+        expect(component["leaveAnimation"]()).toBe("slide-out-to-left");
+
+        // Click Prev arrow returns to index 0 with LTR slide-in-from-left animation
+        prevArrow.click();
+        fixture.detectChanges();
+        expect(component.index()).toBe(0);
+        expect(component["enterAnimation"]()).toBe("slide-in-from-left");
+        expect(component["leaveAnimation"]()).toBe("slide-out-to-right");
+
+        // Pager scroll delta maintains LTR semantics (negative for left, positive for right)
+        vi.useFakeTimers();
+        try {
+            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            component["onPagerScroll"](mockList, "left", "single");
+            vi.advanceTimersByTime(60);
+            expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: -100 });
+
+            component["onPagerScroll"](mockList, "right", "single");
+            vi.advanceTimersByTime(60);
+            expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it("maintains coherent RTL keyboard navigation, Prev/Next click scrolling, animation direction, and icon state under CSS-only direction override", () => {
+        fixture.componentRef.setInput("arrows", true);
+        fixture.componentRef.setInput("data", ["Item 1", "Item 2", "Item 3"]);
+        fixture.componentRef.setInput("index", 0);
+
+        const host = fixture.nativeElement as HTMLElement;
+        host.setAttribute("dir", "rtl");
+        host.style.direction = "ltr";
+        fixture.detectChanges();
+
+        expect(host.matches(":dir(rtl)")).toBe(true);
+        expect(host.matches(":dir(ltr)")).toBe(false);
+
+        const prevChevron = host.querySelector("[data-navigate-prev] svg") as SVGElement;
+        const nextChevron = host.querySelector("[data-navigate-next] svg") as SVGElement;
+
+        // Rendered icon state matches semantic RTL (:dir(rtl)), not CSS direction: ltr
+        expect(prevChevron.matches(":dir(rtl)")).toBe(true);
+        expect(prevChevron.matches(":dir(ltr)")).toBe(false);
+        expect(nextChevron.matches(":dir(rtl)")).toBe(true);
+        expect(nextChevron.matches(":dir(ltr)")).toBe(false);
+        expect(prevChevron.classList.contains("rtl:rotate-180")).toBe(true);
+        expect(nextChevron.classList.contains("rtl:rotate-180")).toBe(true);
+
+        // In RTL, ArrowLeft navigates forward (next)
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
+        fixture.detectChanges();
+        expect(component.index()).toBe(1);
+
+        // In RTL, ArrowRight navigates backward (previous)
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+        fixture.detectChanges();
+        expect(component.index()).toBe(0);
+
+        // Prev / Next button clicks with animation direction verification
+        const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
+        const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
+
+        // In RTL, clicking Next arrow advances index to 1 with RTL slide-in-from-left animation
+        nextArrow.click();
+        fixture.detectChanges();
+        expect(component.index()).toBe(1);
+        expect(component["enterAnimation"]()).toBe("slide-in-from-left");
+        expect(component["leaveAnimation"]()).toBe("slide-out-to-right");
+
+        // In RTL, clicking Prev arrow returns index to 0 with RTL slide-in-from-right animation
+        prevArrow.click();
+        fixture.detectChanges();
+        expect(component.index()).toBe(0);
+        expect(component["enterAnimation"]()).toBe("slide-in-from-right");
+        expect(component["leaveAnimation"]()).toBe("slide-out-to-left");
+
+        // Pager scroll delta inverts in RTL (positive for left, negative for right)
+        vi.useFakeTimers();
+        try {
+            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            component["onPagerScroll"](mockList, "left", "single");
+            vi.advanceTimersByTime(60);
+            expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
+
+            component["onPagerScroll"](mockList, "right", "single");
+            vi.advanceTimersByTime(60);
+            expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: -100 });
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it("unifies keyboard navigation, transforms, and animation direction under semantic RTL", () => {
