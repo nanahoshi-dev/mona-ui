@@ -61,7 +61,7 @@ describe("gregorian-date utilities", () => {
             expect(normalized).toContain("nu-arab");
         });
 
-        it("falls back gracefully on malformed locale strings", () => {
+        it("does not rewrite malformed locale strings", () => {
             expect(normalizeGregorianLocale("invalid---locale")).toBe("invalid---locale");
         });
     });
