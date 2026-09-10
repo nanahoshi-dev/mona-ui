@@ -248,8 +248,20 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
-        lineRange: [60, 190],
-        reason: "Spinner radial keyframe dot positions in circular coordinate geometry"
+        lineRange: [60, 76],
+        reason: "Spinner pulsing triad dot positions in 2D circular coordinate geometry"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+        lineRange: [106, 153],
+        reason: "Spinner pulsing ring 8-segment radial dot positions in octagon geometry"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+        lineRange: [171, 190],
+        reason: "Spinner converging 4-corner segment positions in Cartesian square geometry"
     },
 
     // Manual review exemptions for directional gradients, translate transforms, and DOM/coordinate operations
@@ -562,6 +574,24 @@ export const ALLOWLIST: AllowlistEntry[] = [
     }
 ];
 
+export function matchesFilePattern(filePath: string, pattern: string): boolean {
+    const normFile = filePath.replace(/\\/g, "/");
+    const normPattern = pattern.replace(/\\/g, "/");
+    if (normFile === normPattern) {
+        return true;
+    }
+    if (normFile.endsWith("/" + normPattern)) {
+        if (normPattern.startsWith("projects/")) {
+            const prefix = normFile.slice(0, -(normPattern.length + 1));
+            if (prefix.includes("projects/")) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 export function isAllowlisted(
     violation: AuditViolation,
     lineContent?: string,
@@ -573,7 +603,7 @@ export function isAllowlisted(
             continue;
         }
         const normalizedPattern = entry.filePattern.replace(/\\/g, "/");
-        if (!normalizedFile.includes(normalizedPattern)) {
+        if (!matchesFilePattern(normalizedFile, normalizedPattern)) {
             continue;
         }
         if (entry.lineRange) {

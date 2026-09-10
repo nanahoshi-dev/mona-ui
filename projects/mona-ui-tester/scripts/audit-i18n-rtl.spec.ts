@@ -7,6 +7,7 @@ import {
     isAllowlisted,
     isUserFacingText,
     MANUAL_REVIEW_PATTERNS,
+    matchesFilePattern,
     scanFileContent,
     scanTemplateNodes,
     scanTypeScriptAst
@@ -136,6 +137,7 @@ describe("audit-i18n-rtl", () => {
             const violations: AuditViolation[] = [];
             scanTypeScriptAst("clean-panel.component.ts", code, violations);
 
+            expect(violations).toHaveLength(0);
         });
 
         it("detects double-quoted string literals inside host binding expressions (quote symmetry)", () => {
@@ -483,6 +485,47 @@ describe("audit-i18n-rtl", () => {
             const line = '<div [style.left.px]="x"></div>';
             expect(isAllowlisted(otherViolation, line, customAllowlist)).toBe(false);
         });
+
+        it("matches exact canonical file path and rejects similar substrings like .backup or nested duplicate prefixes", () => {
+            const pattern = "projects/mona-ui/chart/foo.ts";
+            expect(matchesFilePattern("projects/mona-ui/chart/foo.ts", pattern)).toBe(true);
+            expect(matchesFilePattern("C:/repo/projects/mona-ui/chart/foo.ts", pattern)).toBe(true);
+            expect(matchesFilePattern("projects/mona-ui/chart/foo.ts.backup", pattern)).toBe(false);
+            expect(matchesFilePattern("projects/mona-ui/other/projects/mona-ui/chart/foo.ts", pattern)).toBe(false);
+
+            const allowlist: AllowlistEntry[] = [
+                {
+                    category: "rtl-physical-style",
+                    filePattern: "projects/mona-ui/chart/foo.ts",
+                    lineSnippet: "[style.left.px]",
+                    reason: "Exact match test"
+                }
+            ];
+
+            const exactViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical style",
+                file: "projects/mona-ui/chart/foo.ts",
+                line: 1
+            };
+            const backupViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical style",
+                file: "projects/mona-ui/chart/foo.ts.backup",
+                line: 1
+            };
+            const nestedViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical style",
+                file: "projects/mona-ui/other/projects/mona-ui/chart/foo.ts",
+                line: 1
+            };
+
+            const snippet = '<div [style.left.px]="x"></div>';
+            expect(isAllowlisted(exactViolation, snippet, allowlist)).toBe(true);
+            expect(isAllowlisted(backupViolation, snippet, allowlist)).toBe(false);
+            expect(isAllowlisted(nestedViolation, snippet, allowlist)).toBe(false);
+        });
     });
 
     describe("Manual review pattern detection", () => {
@@ -812,6 +855,54 @@ describe("audit-i18n-rtl", () => {
                 line: 210
             };
             expect(isAllowlisted(outsideViolation, "left: 10px;", rangeAllowlist)).toBe(false);
+        });
+
+        it("validates narrowed spinner keyframe block ranges (triad, ring, converge)", () => {
+            const triadViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical CSS property",
+                file: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+                line: 68
+            };
+            const ringViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical CSS property",
+                file: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+                line: 120
+            };
+            const convergeViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical CSS property",
+                file: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+                line: 178
+            };
+            const intermediateViolation1: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical CSS property",
+                file: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+                line: 90
+            };
+            const intermediateViolation2: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical CSS property",
+                file: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+                line: 160
+            };
+            const trailingViolation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: "Physical CSS property",
+                file: "projects/mona-ui/spinner/components/spinner/spinner.component.css",
+                line: 200
+            };
+
+            // Using default ALLOWLIST
+            expect(isAllowlisted(triadViolation, "left: 0;")).toBe(true);
+            expect(isAllowlisted(ringViolation, "left: 73%;")).toBe(true);
+            expect(isAllowlisted(convergeViolation, "right: 0;")).toBe(true);
+
+            expect(isAllowlisted(intermediateViolation1, "left: 0;")).toBe(false);
+            expect(isAllowlisted(intermediateViolation2, "right: 0;")).toBe(false);
+            expect(isAllowlisted(trailingViolation, "left: 0;")).toBe(false);
         });
     });
 });
