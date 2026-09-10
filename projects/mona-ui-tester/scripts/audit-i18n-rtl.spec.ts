@@ -78,7 +78,7 @@ describe("audit-i18n-rtl", () => {
             expect(violations).toHaveLength(1);
             expect(violations[0]).toMatchObject({
                 category: "i18n-aria",
-                detail: expect.stringContaining('Static host binding [attr.aria-roledescription]: "carousel"')
+                detail: expect.stringMatching(/(?:Static|Literal string in) host binding \[attr\.aria-roledescription\]: "carousel"/)
             });
         });
 
@@ -96,6 +96,45 @@ describe("audit-i18n-rtl", () => {
             `;
             const violations: AuditViolation[] = [];
             scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("detects literal strings inside complex host binding expressions (ternaries, binary expressions)", () => {
+            const code = `
+                @Component({
+                    selector: "test-panel",
+                    template: "",
+                    host: {
+                        "[attr.aria-label]": "open() ? 'Close panel' : 'Open panel'",
+                        "[title]": "error() ? 'Retry request' : messages().ready"
+                    }
+                })
+                export class TestPanelComponent {}
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-panel.component.ts", code, violations);
+
+            expect(violations).toHaveLength(3);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Close panel"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Open panel"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Retry request"))).toBe(true);
+        });
+
+        it("ignores host binding expressions using messages() and dynamic expressions without literals", () => {
+            const code = `
+                @Component({
+                    selector: "test-panel",
+                    template: "",
+                    host: {
+                        "[attr.aria-label]": "open() ? messages().close : messages().open",
+                        "[title]": "error() ? messages().retry : messages().ready"
+                    }
+                })
+                export class CleanPanelComponent {}
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("clean-panel.component.ts", code, violations);
 
             expect(violations).toHaveLength(0);
         });
@@ -435,6 +474,79 @@ describe("audit-i18n-rtl", () => {
             expect(violations).toHaveLength(2);
             expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Unlocalized inline label"))).toBe(true);
             expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Inline close button"))).toBe(true);
+        });
+
+        it("fails closed with an audit violation when inline template has syntax errors", () => {
+            const code = `
+                @Component({
+                    selector: "mona-test-malformed",
+                    template: \`<div><span></div></span>\`
+                })
+                export class TestMalformedComponent {}
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-malformed.component.ts", code, violations);
+
+            expect(violations.length).toBeGreaterThan(0);
+            expect(violations.some(v => v.detail.includes("Inline template parse error"))).toBe(true);
+        });
+    });
+
+    describe("Semantic helper return literal scanning", () => {
+        it("detects hard-coded text returned from semantic helper functions", () => {
+            const code = `
+                function getDefaultTitle() {
+                    return "Info";
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-helper.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0]).toMatchObject({
+                category: "i18n-text",
+                detail: expect.stringContaining('Hard-coded text returned from semantic helper "getDefaultTitle": "Info"')
+            });
+        });
+
+        it("detects hard-coded text returned from class methods with semantic names", () => {
+            const code = `
+                class NotificationHelper {
+                    public getCloseTitle(): string {
+                        return "Close notification";
+                    }
+                    public getAriaAnnouncement(): string {
+                        return "New notification arrived";
+                    }
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-helper.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Close notification"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("New notification arrived"))).toBe(true);
+        });
+
+        it("ignores predicate methods and technical return values", () => {
+            const code = `
+                class ChartComponent {
+                    public isOutsideLabel(): boolean {
+                        const position = "outside";
+                        return position === "outside";
+                    }
+                    public computeLabelTransform(): string {
+                        return "translate(0, -50%)";
+                    }
+                    public getMessage(): string {
+                        return messages().messageText;
+                    }
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test-chart.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
         });
     });
 

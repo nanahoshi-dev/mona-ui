@@ -716,32 +716,70 @@ export function scanTypeScriptAst(
                                                 (Node.isStringLiteral(init) ||
                                                     Node.isNoSubstitutionTemplateLiteral(init))
                                             ) {
-                                                let rawVal = init.getLiteralText().trim();
+                                                const rawVal = init.getLiteralText().trim();
                                                 const isBound = rawPropName.startsWith("[");
-                                                let isStaticLiteral = false;
                                                 if (isBound) {
-                                                    if (
-                                                        (rawVal.startsWith("'") && rawVal.endsWith("'")) ||
-                                                        (rawVal.startsWith('"') && rawVal.endsWith('"'))
-                                                    ) {
-                                                        rawVal = rawVal.slice(1, -1).trim();
-                                                        isStaticLiteral = true;
+                                                    try {
+                                                        const dummyHtml = `<div [${cleanPropName}]="${rawVal}"></div>`;
+                                                        const parsed = parseTemplate(dummyHtml, filePath, {
+                                                            preserveWhitespaces: false
+                                                        });
+                                                        if (
+                                                            parsed.nodes &&
+                                                            parsed.nodes.length > 0 &&
+                                                            parsed.nodes[0] instanceof TmplAstElement
+                                                        ) {
+                                                            const el = parsed.nodes[0] as TmplAstElement;
+                                                            for (const inp of el.inputs) {
+                                                                const literals = collectLiteralStrings(inp.value);
+                                                                for (const strVal of literals) {
+                                                                    if (
+                                                                        isUserFacingText(strVal) &&
+                                                                        !TECHNICAL_SEMANTIC_STRINGS.has(strVal)
+                                                                    ) {
+                                                                        violations.push({
+                                                                            category: isAria
+                                                                                ? "i18n-aria"
+                                                                                : "i18n-text",
+                                                                            detail: `Literal string in host binding ${rawPropName}: "${strVal.trim()}"`,
+                                                                            file: filePath,
+                                                                            line: prop.getStartLineNumber()
+                                                                        });
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    } catch {
+                                                        if (
+                                                            (rawVal.startsWith("'") && rawVal.endsWith("'")) ||
+                                                            (rawVal.startsWith('"') && rawVal.endsWith('"'))
+                                                        ) {
+                                                            const unquoted = rawVal.slice(1, -1).trim();
+                                                            if (
+                                                                isUserFacingText(unquoted) &&
+                                                                !TECHNICAL_SEMANTIC_STRINGS.has(unquoted)
+                                                            ) {
+                                                                violations.push({
+                                                                    category: isAria ? "i18n-aria" : "i18n-text",
+                                                                    detail: `Static host binding ${rawPropName}: "${unquoted}"`,
+                                                                    file: filePath,
+                                                                    line: prop.getStartLineNumber()
+                                                                });
+                                                            }
+                                                        }
                                                     }
                                                 } else {
-                                                    isStaticLiteral = true;
-                                                }
-                                                if (
-                                                    isStaticLiteral &&
-                                                    isUserFacingText(rawVal) &&
-                                                    !rawVal.startsWith("messages().") &&
-                                                    !rawVal.startsWith("{{")
-                                                ) {
-                                                    violations.push({
-                                                        category: isAria ? "i18n-aria" : "i18n-text",
-                                                        detail: `Static host binding ${rawPropName}: "${rawVal}"`,
-                                                        file: filePath,
-                                                        line: prop.getStartLineNumber()
-                                                    });
+                                                    if (
+                                                        isUserFacingText(rawVal) &&
+                                                        !TECHNICAL_SEMANTIC_STRINGS.has(rawVal)
+                                                    ) {
+                                                        violations.push({
+                                                            category: isAria ? "i18n-aria" : "i18n-text",
+                                                            detail: `Static host binding ${rawPropName}: "${rawVal}"`,
+                                                            file: filePath,
+                                                            line: prop.getStartLineNumber()
+                                                        });
+                                                    }
                                                 }
                                             }
                                         }
@@ -761,21 +799,36 @@ export function scanTypeScriptAst(
                                 ) {
                                     const templateText = templateInit.getLiteralText();
                                     if (templateText.trim()) {
+                                        const templateStartLine = templateInit.getStartLineNumber();
                                         try {
                                             const parsed = parseTemplate(templateText, filePath, {
                                                 preserveWhitespaces: false
                                             });
+                                            if (parsed.errors && parsed.errors.length > 0) {
+                                                for (const e of parsed.errors) {
+                                                    violations.push({
+                                                        category: "i18n-text",
+                                                        detail: `Inline template parse error: ${e.msg}`,
+                                                        file: filePath,
+                                                        line: templateStartLine + (e.span?.start?.line ?? 0)
+                                                    });
+                                                }
+                                            }
                                             if (parsed.nodes) {
                                                 const inlineViolations: AuditViolation[] = [];
                                                 scanTemplateNodes(parsed.nodes, filePath, inlineViolations);
-                                                const templateStartLine = templateInit.getStartLineNumber();
                                                 for (const iv of inlineViolations) {
                                                     iv.line = templateStartLine + iv.line - 1;
                                                     violations.push(iv);
                                                 }
                                             }
-                                        } catch {
-                                            // Ignore parsing errors for template expressions that cannot be parsed standalone
+                                        } catch (err) {
+                                            violations.push({
+                                                category: "i18n-text",
+                                                detail: `Exception parsing inline template: ${String(err)}`,
+                                                file: filePath,
+                                                line: templateStartLine
+                                            });
                                         }
                                     }
                                 }
@@ -834,7 +887,118 @@ export function scanTypeScriptAst(
             }
         }
 
-        // 4. Indirect DOMRect access tracking
+        // 4. Semantic functions and methods returning string literals
+        const semanticFnRegex = /(?:label|title|message|placeholder|tooltip|description|announcement|aria)/i;
+        const predicatePrefixRegex = /^(?:is|has|should|can|check)[A-Z]/;
+        const technicalFnSuffixRegex = /(?:transform|origin|style|styles|class|classes|options|config|context|rect|size|bounds|width|height|coord|coords|coordinate|coordinates|attribute|type|target|id|element|node|index|key|prop|property|event|handler|listener|pattern|regex)$/i;
+
+        function collectReturnedValueLiterals(node: Node | undefined): Node[] {
+            if (!node) {
+                return [];
+            }
+            if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) {
+                return [node];
+            }
+            if (Node.isParenthesizedExpression(node)) {
+                return collectReturnedValueLiterals(node.getExpression());
+            }
+            if (Node.isConditionalExpression(node)) {
+                return [
+                    ...collectReturnedValueLiterals(node.getWhenTrue()),
+                    ...collectReturnedValueLiterals(node.getWhenFalse())
+                ];
+            }
+            if (Node.isBinaryExpression(node)) {
+                const op = node.getOperatorToken().getKind();
+                if (
+                    op === SyntaxKind.PlusToken ||
+                    op === SyntaxKind.BarBarToken ||
+                    op === SyntaxKind.QuestionQuestionToken
+                ) {
+                    return [
+                        ...collectReturnedValueLiterals(node.getLeft()),
+                        ...collectReturnedValueLiterals(node.getRight())
+                    ];
+                }
+            }
+            return [];
+        }
+
+        const candidateFunctions: { name: string; returnExprs: (Node | undefined)[] }[] = [];
+
+        for (const fn of sf.getFunctions()) {
+            const name = fn.getName();
+            const returnType = fn.getReturnTypeNode()?.getText().trim();
+            if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
+                candidateFunctions.push({
+                    name,
+                    returnExprs: fn.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                });
+            }
+        }
+
+        for (const cls of sf.getClasses()) {
+            for (const method of cls.getMethods()) {
+                const name = method.getName();
+                const returnType = method.getReturnTypeNode()?.getText().trim();
+                if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
+                    candidateFunctions.push({
+                        name,
+                        returnExprs: method.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                    });
+                }
+            }
+        }
+
+        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+            const name = varDecl.getName();
+            if (name && semanticFnRegex.test(name) && !predicatePrefixRegex.test(name)) {
+                const init = varDecl.getInitializer();
+                if (init && Node.isArrowFunction(init)) {
+                    const body = init.getBody();
+                    if (Node.isBlock(body)) {
+                        candidateFunctions.push({
+                            name,
+                            returnExprs: body.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                        });
+                    } else {
+                        candidateFunctions.push({
+                            name,
+                            returnExprs: [body]
+                        });
+                    }
+                } else if (init && Node.isFunctionExpression(init)) {
+                    candidateFunctions.push({
+                        name,
+                        returnExprs: init.getDescendantsOfKind(SyntaxKind.ReturnStatement).map(r => r.getExpression())
+                    });
+                }
+            }
+        }
+
+        for (const { name: fnName, returnExprs } of candidateFunctions) {
+            if (semanticFnRegex.test(fnName) && !technicalFnSuffixRegex.test(fnName)) {
+                for (const expr of returnExprs) {
+                    const lits = collectReturnedValueLiterals(expr);
+                    for (const lit of lits) {
+                        const val = (lit as { getLiteralText?: () => string }).getLiteralText
+                            ? (lit as { getLiteralText: () => string }).getLiteralText().trim()
+                            : "";
+                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                            const isAria = /(?:aria|announcement)/i.test(fnName);
+                            violations.push({
+                                category: isAria ? "i18n-aria" : "i18n-text",
+                                detail: `Hard-coded text returned from semantic helper "${fnName}": "${val}"`,
+                                file: filePath,
+                                line: lit.getStartLineNumber()
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // 5. Indirect DOMRect access tracking
         const domRectVarNames = new Set<string>();
         for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
             const init = varDecl.getInitializer();
