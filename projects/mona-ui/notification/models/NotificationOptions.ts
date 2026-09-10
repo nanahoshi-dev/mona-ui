@@ -15,8 +15,7 @@ export interface NotificationOptions {
     closable?: boolean;
 
     /**
-     * @description The accessible title/tooltip for the close button.
-     * @default "Close"
+     * @description The accessible title/tooltip for the close button. Defaults to localized "Close".
      */
     closeTitle?: string;
 
@@ -53,8 +52,7 @@ export interface NotificationOptions {
     progressBar?: boolean;
 
     /**
-     * @description The notification's title.
-     * @default a title derived from `type` (e.g. "Info", "Success", "Warning", "Error")
+     * @description The notification's title. Defaults to localized title derived from `type` (e.g. "Info", "Success", "Warning", "Error").
      */
     title?: string;
 

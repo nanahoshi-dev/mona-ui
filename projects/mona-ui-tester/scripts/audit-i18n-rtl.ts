@@ -547,18 +547,6 @@ export const ALLOWLIST: AllowlistEntry[] = [
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-resource-manager.ts",
         lineSnippet: 'message: "',
         reason: "Internal export rejection diagnostic error messages"
-    },
-    {
-        category: "i18n-text",
-        filePattern: "projects/mona-ui/notification/components/notification/notification.component.html",
-        lineSnippet: "data().options.closeTitle || 'Close'",
-        reason: "Notification close button fallback title when closeTitle option is not specified"
-    },
-    {
-        category: "i18n-aria",
-        filePattern: "projects/mona-ui/notification/components/notification/notification.component.html",
-        lineSnippet: "data().options.closeTitle || 'Close'",
-        reason: "Notification close button fallback aria-label when closeTitle option is not specified"
     }
 ];
 

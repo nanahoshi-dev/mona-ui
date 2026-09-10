@@ -30,6 +30,7 @@ export * from "./message-types/grid.messages";
 export * from "./message-types/list.messages";
 export * from "./message-types/list-box.messages";
 export * from "./message-types/multi-select.messages";
+export * from "./message-types/notification.messages";
 export * from "./message-types/numeric-text-box.messages";
 export * from "./message-types/otp-input.messages";
 export * from "./message-types/pager.messages";

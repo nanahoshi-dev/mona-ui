@@ -20,6 +20,7 @@ import type { MonaGridMessages } from "../message-types/grid.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
 import type { MonaListBoxMessages } from "../message-types/list-box.messages";
 import type { MonaMultiSelectMessages } from "../message-types/multi-select.messages";
+import type { MonaNotificationMessages } from "../message-types/notification.messages";
 import type { MonaNumericTextBoxMessages } from "../message-types/numeric-text-box.messages";
 import type { MonaOtpInputMessages } from "../message-types/otp-input.messages";
 import type { MonaPagerMessages } from "../message-types/pager.messages";
@@ -61,6 +62,7 @@ export interface MonaLocaleMessages {
     list: MonaListMessages;
     listBox: MonaListBoxMessages;
     multiSelect: MonaMultiSelectMessages;
+    notification: MonaNotificationMessages;
     numericTextBox: MonaNumericTextBoxMessages;
     otpInput: MonaOtpInputMessages;
     pager: MonaPagerMessages;

@@ -32,7 +32,7 @@
                 }
             </div>
             <div class="flex flex-col flex-1">
-                <div [class]="headerClass()">{{ data().options.title }}</div>
+                <div [class]="headerClass()">{{ title() }}</div>
                 <div [class]="contentClass()">
                     @if (isStringContent()) {
                         <span [class]="textClass()" title="{{ data().options.content }}">{{
@@ -62,8 +62,8 @@
                 look="link"
                 rounded="none"
                 [iconOnly]="true"
-                [title]="data().options.closeTitle || 'Close'"
-                [attr.aria-label]="data().options.closeTitle || 'Close'"
+                [title]="closeTitle()"
+                [attr.aria-label]="closeTitle()"
                 (click)="close()">
                 <svg lucideX [size]="14" aria-hidden="true"></svg>
             </button>

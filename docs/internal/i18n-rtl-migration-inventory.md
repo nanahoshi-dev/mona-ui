@@ -13,7 +13,7 @@ This document establishes the repository baseline for the Mona UI Internationali
 
 ## 2. Secondary Entry Points Inventory
 
-The following 68 secondary entry points exist in `projects/mona-ui/`:
+The following 69 secondary entry points exist in `projects/mona-ui/`:
 
 1. `auto-complete`
 2. `avatar`
@@ -97,6 +97,7 @@ The following 68 secondary entry points exist in `projects/mona-ui/`:
 - `grid`: Column menu (Sort Ascending, Sort Descending, Filter, Columns), No records available, Grouping drop-zone text
 - `list` / `internal/list`: No data available
 - `color-picker`: Cancel, Apply
+- `notification`: default titles (Info, Success, Warning, Error), close button title / aria-label
 
 ### 3.2 Components with Built-in Accessibility Text (`aria-label`, `title`, `placeholder`)
 - `pager`: First page, Previous page, Next page, Last page, Page {n}, Jump forward {n} pages, Jump back {n} pages
@@ -109,6 +110,7 @@ The following 68 secondary entry points exist in `projects/mona-ui/`:
 - `stepper`: Step {n} of {total}, completed, current
 - `tabs`: Previous tab, Next tab, Close tab
 - `chip`: Remove chip
+- `notification`: Close button accessible title / aria-label
 
 ### 3.3 Locale-Sensitive Formatting
 - Numbers: `numeric-text-box`, `pager`, `slider`, `rating`
