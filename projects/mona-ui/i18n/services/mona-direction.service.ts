@@ -10,20 +10,29 @@ import {
 } from "@angular/core";
 import type { MonaTextDirection } from "../models/mona-direction";
 
-const RTL_CHAR_REGEX = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
-const LTR_CHAR_REGEX =
-    /[A-Za-z\u00C0-\u024F\u0370-\u052F\u1E00-\u1EFF\u2C00-\u2DDF\uA720-\uA7FF\uAB30-\uAB6F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/;
-
-export function detectFirstStrongDirection(text: string): MonaTextDirection | null {
-    for (const ch of text) {
-        if (RTL_CHAR_REGEX.test(ch)) {
-            return "rtl";
-        }
-        if (LTR_CHAR_REGEX.test(ch)) {
-            return "ltr";
-        }
+/**
+ * Reads the platform-resolved CSS `direction` for an element.
+ *
+ * Browsers implement the HTML auto-directionality algorithm in full, including Unicode bidi
+ * classification of the first strong character (L/AL/R only) and the exclusion rules for nested
+ * explicit-direction subtrees, `bdi`, `script`, `style`, and `textarea`. Mona therefore delegates
+ * `dir="auto"` resolution to the platform instead of reimplementing a partial Unicode-range heuristic
+ * that can contradict CSS and `:dir(...)`.
+ */
+function readComputedDirection(element: Element | null | undefined): MonaTextDirection | null {
+    if (!element) {
+        return null;
     }
-    return null;
+    const view = element.ownerDocument?.defaultView ?? (typeof window !== "undefined" ? window : undefined);
+    if (!view || typeof view.getComputedStyle !== "function") {
+        return null;
+    }
+    try {
+        const direction = view.getComputedStyle(element).direction?.trim().toLowerCase();
+        return direction === "rtl" || direction === "ltr" ? direction : null;
+    } catch {
+        return null;
+    }
 }
 
 export function resolveComponentDirection(
@@ -38,21 +47,11 @@ export function resolveComponentDirection(
             return rawDir;
         }
         if (rawDir === "auto") {
-            const defaultView = element.ownerDocument?.defaultView;
-            const computedDir = defaultView
-                ? defaultView.getComputedStyle(element).direction?.toLowerCase()
-                : typeof window !== "undefined"
-                  ? window.getComputedStyle(element).direction?.toLowerCase()
-                  : undefined;
-            if (computedDir === "rtl") {
-                return "rtl";
-            }
-            const firstStrong = detectFirstStrongDirection(closestDir?.textContent ?? "");
-            if (firstStrong) {
-                return firstStrong;
-            }
-            if (computedDir === "ltr") {
-                return "ltr";
+            // A valid browser-computed direction is authoritative. Never override a correct
+            // platform-resolved `ltr`/`rtl` answer with a JavaScript text heuristic.
+            const computedDir = readComputedDirection(closestDir) ?? readComputedDirection(element);
+            if (computedDir) {
+                return computedDir;
             }
         }
     }
@@ -108,6 +107,60 @@ function observeDocumentDirChanges(doc: Document, callback: () => void): () => v
     };
 }
 
+interface AutoDirectionObserverEntry {
+    refCount: number;
+    readonly observer: MutationObserver;
+    readonly callbacks: Set<() => void>;
+    lastDirection: MonaTextDirection | null;
+}
+
+const autoDirectionObservers = new WeakMap<Element, AutoDirectionObserverEntry>();
+
+function observeAutoDirectionChanges(autoRoot: Element, callback: () => void): () => void {
+    let entry = autoDirectionObservers.get(autoRoot);
+    if (!entry) {
+        const callbacks = new Set<() => void>();
+        const observer = new MutationObserver(() => {
+            const currentDir = readComputedDirection(autoRoot);
+            if (entry && (entry.lastDirection === null || currentDir !== entry.lastDirection)) {
+                entry.lastDirection = currentDir;
+                for (const cb of Array.from(callbacks)) {
+                    cb();
+                }
+            }
+        });
+        observer.observe(autoRoot, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+        entry = {
+            refCount: 0,
+            observer,
+            callbacks,
+            lastDirection: readComputedDirection(autoRoot)
+        };
+        autoDirectionObservers.set(autoRoot, entry);
+    }
+
+    entry.refCount++;
+    entry.callbacks.add(callback);
+
+    let cleanedUp = false;
+    return () => {
+        if (cleanedUp || !entry) {
+            return;
+        }
+        cleanedUp = true;
+        entry.callbacks.delete(callback);
+        entry.refCount--;
+        if (entry.refCount <= 0) {
+            entry.observer.disconnect();
+            autoDirectionObservers.delete(autoRoot);
+        }
+    };
+}
+
 export interface DirectionObserverHandle {
     (): void;
     check: () => void;
@@ -122,7 +175,7 @@ export function observeComponentDirection(
     const element = hostElement instanceof ElementRef ? hostElement.nativeElement : hostElement;
     let currentDir = resolveComponentDirection(element, directionality);
 
-    let autoContentObserver: MutationObserver | null = null;
+    let unobserveAuto: (() => void) | null = null;
     let observedAutoElement: Element | null = null;
 
     const updateAutoContentObserver = () => {
@@ -133,23 +186,16 @@ export function observeComponentDirection(
         const isAuto = closestDir?.getAttribute("dir")?.trim().toLowerCase() === "auto";
         if (isAuto && closestDir) {
             if (observedAutoElement !== closestDir) {
-                if (autoContentObserver) {
-                    autoContentObserver.disconnect();
+                if (unobserveAuto) {
+                    unobserveAuto();
                 }
                 observedAutoElement = closestDir;
-                autoContentObserver = new MutationObserver(() => {
-                    check();
-                });
-                autoContentObserver.observe(closestDir, {
-                    childList: true,
-                    characterData: true,
-                    subtree: true
-                });
+                unobserveAuto = observeAutoDirectionChanges(closestDir, () => check());
             }
         } else {
-            if (autoContentObserver) {
-                autoContentObserver.disconnect();
-                autoContentObserver = null;
+            if (unobserveAuto) {
+                unobserveAuto();
+                unobserveAuto = null;
                 observedAutoElement = null;
             }
         }
@@ -190,9 +236,9 @@ export function observeComponentDirection(
     }
 
     cleanupFns.push(() => {
-        if (autoContentObserver) {
-            autoContentObserver.disconnect();
-            autoContentObserver = null;
+        if (unobserveAuto) {
+            unobserveAuto();
+            unobserveAuto = null;
             observedAutoElement = null;
         }
     });

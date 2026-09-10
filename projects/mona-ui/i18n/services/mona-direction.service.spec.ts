@@ -3,9 +3,11 @@ import { Component, ElementRef, EventEmitter, inject } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "./mona-i18n.service";
+import type { MonaTextDirection } from "../models/mona-direction";
 import {
     injectComponentDirection,
     MonaDirectionService,
+    observeComponentDirection,
     resolveComponentDirection
 } from "./mona-direction.service";
 
@@ -163,6 +165,58 @@ describe("MonaDirectionService and direction utilities", () => {
             document.body.removeChild(div);
         });
 
+        it("trusts the platform for dir='auto' instead of a Unicode text heuristic", () => {
+            const cases: Array<{ html: string; expected: "ltr" | "rtl"; note: string }> = [
+                {
+                    html: "\u0661\u0662\u0663 Hello",
+                    expected: "ltr",
+                    note: "Arabic-Indic digits are bidi class AN, not strong RTL"
+                },
+                {
+                    html: "\u0905 \u0645\u0631\u062d\u0628\u0627",
+                    expected: "ltr",
+                    note: "Devanagari letter is the first strong L character"
+                },
+                {
+                    html: "\u0645\u0631\u062d\u0628\u0627 Hello",
+                    expected: "rtl",
+                    note: "Arabic letter is the first strong R character"
+                },
+                {
+                    html: '<span dir="rtl">\u0645\u0631\u062d\u0628\u0627</span> Hello',
+                    expected: "ltr",
+                    note: "nested explicit-direction subtree is excluded from the outer auto determination"
+                },
+                {
+                    html: "<bdi>\u0645\u0631\u062d\u0628\u0627</bdi> Hello",
+                    expected: "ltr",
+                    note: "bdi subtrees are excluded from the outer auto determination"
+                },
+                {
+                    html: "\u05B0Hello",
+                    expected: "ltr",
+                    note: "Hebrew combining mark (NSM) is not a strong character"
+                }
+            ];
+
+            for (const { html, expected, note } of cases) {
+                const container = document.createElement("div");
+                container.setAttribute("dir", "auto");
+                container.innerHTML = html;
+                document.body.appendChild(container);
+
+                const child = document.createElement("span");
+                container.appendChild(child);
+
+                expect(resolveComponentDirection(child, null), note).toBe(expected);
+                // Mona's TypeScript direction must agree with the CSS the browser actually applies.
+                expect(getComputedStyle(container).direction, note).toBe(expected);
+                expect(child.matches(":dir(rtl)"), note).toBe(expected === "rtl");
+
+                document.body.removeChild(container);
+            }
+        });
+
         it("detects dynamic ancestor dir change via mutation observer", async () => {
             const parent = document.createElement("div");
             parent.setAttribute("dir", "ltr");
@@ -204,19 +258,27 @@ describe("MonaDirectionService and direction utilities", () => {
 
             expect(fixture.componentInstance.direction()).toBe("ltr");
 
+            const expectAgreement = (expected: "ltr" | "rtl") => {
+                expect(fixture.componentInstance.direction()).toBe(expected);
+                expect(getComputedStyle(container).direction).toBe(expected);
+                expect(fixture.nativeElement.matches(":dir(rtl)")).toBe(expected === "rtl");
+            };
+
+            expectAgreement("ltr");
+
             // Change content to Arabic text without changing dir attribute
             textSpan.textContent = "مرحبا بالعالم";
             await new Promise(resolve => setTimeout(resolve, 20));
             fixture.detectChanges();
 
-            expect(fixture.componentInstance.direction()).toBe("rtl");
+            expectAgreement("rtl");
 
             // Switch content back to Latin text
             textSpan.textContent = "Welcome back";
             await new Promise(resolve => setTimeout(resolve, 20));
             fixture.detectChanges();
 
-            expect(fixture.componentInstance.direction()).toBe("ltr");
+            expectAgreement("ltr");
 
             document.body.removeChild(container);
         });
@@ -244,6 +306,81 @@ describe("MonaDirectionService and direction utilities", () => {
 
             observeSpy.mockRestore();
             document.body.removeChild(div);
+        });
+
+        it("shares a single content MutationObserver across multiple consumers under the same dir='auto' root", async () => {
+            const observeSpy = vi.spyOn(MutationObserver.prototype, "observe");
+            const disconnectSpy = vi.spyOn(MutationObserver.prototype, "disconnect");
+
+            const container = document.createElement("div");
+            container.setAttribute("dir", "auto");
+            const textSpan = document.createElement("span");
+            textSpan.textContent = "Hello world";
+            container.appendChild(textSpan);
+
+            const children = Array.from({ length: 10 }, () => {
+                const child = document.createElement("span");
+                container.appendChild(child);
+                return child;
+            });
+            document.body.appendChild(container);
+
+            const observedDirections: MonaTextDirection[] = Array.from({ length: 10 }, () => "ltr");
+            const cleanups = children.map((child, index) =>
+                observeComponentDirection(child, null, dir => {
+                    observedDirections[index] = dir;
+                })
+            );
+
+            // Initial direction for all consumers should be LTR
+            for (const child of children) {
+                expect(resolveComponentDirection(child, null)).toBe("ltr");
+            }
+
+            // Only ONE content observer is attached to the container root, not 10
+            const rootContentObserverCalls = observeSpy.mock.calls.filter(args => {
+                const target = args[0] as Element;
+                const options = args[1] as MutationObserverInit;
+                return target === container && (options?.childList === true || options?.characterData === true);
+            });
+            expect(rootContentObserverCalls).toHaveLength(1);
+
+            // Change content to Arabic text -> all 10 consumers update to RTL
+            textSpan.textContent = "مرحبا بالعالم";
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            for (let i = 0; i < 10; i++) {
+                expect(observedDirections[i]).toBe("rtl");
+            }
+
+            // Content change that does NOT change direction should not fire callbacks
+            let spuriousCallbackFired = false;
+            const extraCleanup = observeComponentDirection(children[0], null, () => {
+                spuriousCallbackFired = true;
+            });
+            textSpan.textContent = "مرحبا بالجميع"; // Still RTL
+            await new Promise(resolve => setTimeout(resolve, 50));
+            expect(spuriousCallbackFired).toBe(false);
+            extraCleanup();
+
+            const previousDisconnectCount = disconnectSpy.mock.calls.length;
+
+            // Destroy 9 consumers: root content observer must NOT disconnect
+            for (let i = 0; i < 9; i++) {
+                cleanups[i]();
+            }
+            // Disconnect should not have been called on the container observer yet
+            const containerDisconnectsBeforeFinal = disconnectSpy.mock.calls.filter(
+                call => call.length === 0 // disconnect() has 0 args
+            );
+
+            // Destroy the final consumer: now the shared observer disconnects
+            cleanups[9]();
+            expect(disconnectSpy.mock.calls.length).toBeGreaterThan(previousDisconnectCount);
+
+            observeSpy.mockRestore();
+            disconnectSpy.mockRestore();
+            document.body.removeChild(container);
         });
     });
 });
