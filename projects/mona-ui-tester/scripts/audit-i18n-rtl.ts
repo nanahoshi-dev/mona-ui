@@ -799,13 +799,33 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
             exprText === "computed" ||
             exprText.endsWith(".computed") ||
             exprText === "signal" ||
-            exprText.endsWith(".signal") ||
+            exprText.endsWith(".signal")
+        ) {
+            const fragments: LiteralFragment[] = [];
+            for (const arg of node.getArguments()) {
+                fragments.push(...collectLiteralFragments(arg));
+            }
+            return fragments;
+        }
+        if (
             exprText === "linkedSignal" ||
             exprText.endsWith(".linkedSignal")
         ) {
             const fragments: LiteralFragment[] = [];
             for (const arg of node.getArguments()) {
-                fragments.push(...collectLiteralFragments(arg));
+                if (Node.isObjectLiteralExpression(arg)) {
+                    const computation = arg.getProperty("computation");
+                    if (computation && Node.isPropertyAssignment(computation)) {
+                        fragments.push(...collectLiteralFragments(computation.getInitializer()));
+                    } else if (computation && Node.isMethodDeclaration(computation)) {
+                        const body = computation.getBody();
+                        if (body) {
+                            fragments.push(...collectLiteralFragments(body));
+                        }
+                    }
+                } else {
+                    fragments.push(...collectLiteralFragments(arg));
+                }
             }
             return fragments;
         }

@@ -311,6 +311,38 @@ describe("audit-i18n-rtl", () => {
             expect(violations).toHaveLength(0);
         });
 
+        it("detects hard-coded strings in linkedSignal config object overload", () => {
+            const code = `
+                export class DemoComponent {
+                    protected readonly tooltip = linkedSignal({
+                        source: this.retryState,
+                        computation: () => "Retry request"
+                    });
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0].category).toBe("i18n-text");
+            expect(violations[0].detail).toContain('property "tooltip": "Retry request"');
+        });
+
+        it("ignores linkedSignal config object overload using localized messages", () => {
+            const code = `
+                export class CleanDemoComponent {
+                    protected readonly tooltip = linkedSignal({
+                        source: this.retryState,
+                        computation: () => this.messages().retry
+                    });
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("clean-demo.component.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
         it("detects literals inside logical AND expressions and satisfies expressions", () => {
             const code = `
                 export class LogicalComponent {
