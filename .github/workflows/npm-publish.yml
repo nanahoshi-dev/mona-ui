@@ -38,6 +38,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test audit tooling
+        run: npm run test:audit
+
+      - name: Audit i18n and RTL readiness
+        run: npm run audit:i18n-rtl:strict
+
       - name: Build
         run: npm run build:prod
 
