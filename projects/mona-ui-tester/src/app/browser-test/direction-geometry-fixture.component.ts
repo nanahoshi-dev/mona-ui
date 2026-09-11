@@ -776,6 +776,24 @@ export class ShadowSidebarFixtureComponent {
                             </ng-template>
                         </mona-scroll-view>
                     </div>
+                    <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView Disabled (animate=false)</h3>
+                        <mona-scroll-view
+                            data-testid="scroll-view-anim-disabled"
+                            [data]="manyPages"
+                            [width]="300"
+                            [height]="130"
+                            [arrows]="true"
+                            [infinite]="true"
+                            [pageable]="true"
+                            [animate]="false">
+                            <ng-template let-item>
+                                <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                    {{ item.title }}
+                                </div>
+                            </ng-template>
+                        </mona-scroll-view>
+                    </div>
                 </div>
             </section>
         </div>

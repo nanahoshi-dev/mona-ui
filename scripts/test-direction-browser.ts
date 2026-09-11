@@ -190,21 +190,29 @@ function parseTranslateXSign(transformStr: string): "positive" | "negative" | "z
         }
         return val > 0 ? "positive" : "negative";
     }
-    const matrixMatch = transformStr.match(/matrix(?:3d)?\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*(-?[\d.]+)/i);
-    if (matrixMatch) {
-        const tx = parseFloat(matrixMatch[1]);
-        if (Math.abs(tx) < 0.0001) {
-            return "zero";
+    const matrix3dMatch = transformStr.match(/^matrix3d\((.+)\)$/i);
+    if (matrix3dMatch) {
+        const parts = matrix3dMatch[1].split(",").map(s => parseFloat(s.trim()));
+        if (parts.length === 16 && !isNaN(parts[12])) {
+            const tx = parts[12];
+            if (Math.abs(tx) < 0.0001) {
+                return "zero";
+            }
+            return tx > 0 ? "positive" : "negative";
         }
-        return tx > 0 ? "positive" : "negative";
     }
-    if (/\b0(%|px)?\b/.test(transformStr)) {
-        return "zero";
+    const matrixMatch = transformStr.match(/^matrix\((.+)\)$/i);
+    if (matrixMatch) {
+        const parts = matrixMatch[1].split(",").map(s => parseFloat(s.trim()));
+        if (parts.length === 6 && !isNaN(parts[4])) {
+            const tx = parts[4];
+            if (Math.abs(tx) < 0.0001) {
+                return "zero";
+            }
+            return tx > 0 ? "positive" : "negative";
+        }
     }
-    if (transformStr.includes("-")) {
-        return "negative";
-    }
-    return "positive";
+    throw new Error(`Unable to confidently parse translateX sign from transform: "${transformStr}"`);
 }
 
 async function runTests(): Promise<void> {
@@ -1116,7 +1124,7 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] Genuine mouse hold on pager arrow produced multiple scrollBy calls (got ${callsDuringHold})`
                 );
 
-                // Verify physical delta direction during continuous scroll
+                // Verify physical delta direction and smooth behavior during continuous scroll
                 const holdCalls = await pagerList.evaluate(el => (el as any).__scrollByCalls || []);
                 const expectedDeltaSign = !isRtl ? 1 : -1;
                 for (const call of holdCalls) {
@@ -1124,9 +1132,13 @@ async function runTests(): Promise<void> {
                         Math.sign(call.left) === expectedDeltaSign,
                         `[${scenario.name}] Pager scrollBy delta (${call.left}) matches expected physical direction (${expectedDeltaSign > 0 ? "positive" : "negative"})`
                     );
+                    assert(
+                        call.behavior === "smooth",
+                        `[${scenario.name}] Pager scrollBy under no-preference requests behavior='smooth' (got '${call.behavior}')`
+                    );
                 }
 
-                // Wait longer than the single-scroll timer (60ms) and hold reset timeout (150ms)
+                // Wait longer than the single-scroll timer (60ms)
                 await page.waitForTimeout(250);
                 const callsAfterWait = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
                 assert(
@@ -1141,6 +1153,19 @@ async function runTests(): Promise<void> {
                 assert(
                     callsAfterClick === callsAfterWait + 1,
                     `[${scenario.name}] Short click on pager arrow performed exactly one additional scrollBy call (expected ${callsAfterWait + 1}, got ${callsAfterClick})`
+                );
+
+                // Test non-primary right-button hold: must not trigger pager scrolling
+                const callsBeforeRight = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                await pagerNextArrow.hover();
+                await page.mouse.down({ button: "right" });
+                await page.waitForTimeout(180);
+                await page.mouse.up({ button: "right" });
+                await page.waitForTimeout(100);
+                const callsAfterRight = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                assert(
+                    callsAfterRight === callsBeforeRight,
+                    `[${scenario.name}] Secondary right-click hold does not trigger pager scrolling (before: ${callsBeforeRight}, after: ${callsAfterRight})`
                 );
 
                 // Distant item centering
@@ -1488,8 +1513,42 @@ async function runTests(): Promise<void> {
 
         const stdScrollView = reducedSection.locator('[data-testid="scroll-view-anim-standard"]');
         const customScrollView = reducedSection.locator('[data-testid="scroll-view-anim-custom"]');
+        const disabledScrollView = reducedSection.locator('[data-testid="scroll-view-anim-disabled"]');
         const stdNextBtn = stdScrollView.locator('button[data-navigate-next="true"]');
         const customNextBtn = customScrollView.locator('button[data-navigate-next="true"]');
+        const disabledNextBtn = disabledScrollView.locator('button[data-navigate-next="true"]');
+
+        // Instrument stdScrollView pager scrollBy and Element.prototype.scrollIntoView
+        const stdPagerList = stdScrollView.locator("ul").nth(1);
+        await stdPagerList.evaluate(el => {
+            const list = el as HTMLElement & { __scrollByCalls?: Array<{ left: number; behavior?: string }> };
+            list.__scrollByCalls = [];
+            const originalScrollBy = list.scrollBy.bind(list);
+            list.scrollBy = function (options?: ScrollToOptions | number, y?: number) {
+                if (typeof options === "object") {
+                    list.__scrollByCalls!.push({ left: options.left ?? 0, behavior: options.behavior });
+                    return originalScrollBy(options);
+                } else {
+                    list.__scrollByCalls!.push({ left: options ?? 0 });
+                    return originalScrollBy(options, y);
+                }
+            };
+        });
+        await page.evaluate(() => {
+            (window as any).__scrollIntoViewCalls = [];
+            const originalScrollIntoView = Element.prototype.scrollIntoView;
+            Element.prototype.scrollIntoView = function (options?: boolean | ScrollIntoViewOptions) {
+                if (typeof options === "object") {
+                    (window as any).__scrollIntoViewCalls.push({
+                        tag: this.tagName,
+                        behavior: options.behavior
+                    });
+                }
+                return originalScrollIntoView.call(this, options);
+            };
+        });
+
+        const stdPagerNext = stdScrollView.locator('button[aria-label="Scroll pager next"]');
 
         // Helper to capture animationstart events and their computed animationDuration
         const captureAnimationDuration = async (
@@ -1530,7 +1589,11 @@ async function runTests(): Promise<void> {
             });
         };
 
-        // Test 1: no-preference + animate=true -> ~500ms
+        // Test 1: no-preference:
+        // - animate=true -> ~500ms
+        // - animate=false -> 0ms
+        // - pager scrollBy -> behavior="smooth"
+        // - scrollIntoView -> behavior="smooth"
         await page.emulateMedia({ reducedMotion: "no-preference" });
         const stdControl = await captureAnimationDuration(async () => {
             await stdNextBtn.click();
@@ -1541,7 +1604,43 @@ async function runTests(): Promise<void> {
         );
         await page.waitForTimeout(600); // allow slide animation to complete
 
-        // Test 2: reduce + animate=true -> ~1ms
+        // Disabled fixture under no-preference remains 0ms
+        await disabledNextBtn.click();
+        await page.waitForTimeout(100);
+        const disabledDurationNoPref = await disabledScrollView.evaluate(host => {
+            const slide = host.querySelector("li[role='group']") as HTMLElement;
+            const dur = window.getComputedStyle(slide).animationDuration;
+            return dur.endsWith("ms") ? parseFloat(dur) : parseFloat(dur) * 1000;
+        });
+        assert(
+            disabledDurationNoPref === 0,
+            `[Control: no-preference] Disabled ScrollView (animate=false) animationDuration is 0ms (got ${disabledDurationNoPref}ms)`
+        );
+
+        // Test scrollBy and scrollIntoView behavior under no-preference
+        await stdPagerNext.click();
+        await page.waitForTimeout(150);
+        const noPrefScrollBy = await stdPagerList.evaluate(el => (el as any).__scrollByCalls || []);
+        assert(
+            noPrefScrollBy.length > 0 && noPrefScrollBy[noPrefScrollBy.length - 1].behavior === "smooth",
+            `[Control: no-preference] Pager scrollBy requests behavior='smooth' (got '${noPrefScrollBy[noPrefScrollBy.length - 1]?.behavior}')`
+        );
+
+        const dot5 = stdScrollView.locator('li[data-page-index="5"] button');
+        await dot5.click();
+        await page.waitForTimeout(200);
+        const noPrefIntoView = await page.evaluate(() => (window as any).__scrollIntoViewCalls || []);
+        assert(
+            noPrefIntoView.length > 0 && noPrefIntoView[noPrefIntoView.length - 1].behavior === "smooth",
+            `[Control: no-preference] scrollIntoView requests behavior='smooth' (got '${noPrefIntoView[noPrefIntoView.length - 1]?.behavior}')`
+        );
+
+        // Test 2: reduce:
+        // - animate=true -> ~1ms
+        // - animate=1200 -> ~1ms
+        // - animate=false -> 0ms (capped at min(0ms, 1ms))
+        // - pager scrollBy -> behavior="auto"
+        // - scrollIntoView -> behavior="auto"
         await page.emulateMedia({ reducedMotion: "reduce" });
         const stdReduced = await captureAnimationDuration(async () => {
             await stdNextBtn.click();
@@ -1552,7 +1651,6 @@ async function runTests(): Promise<void> {
         );
         await page.waitForTimeout(100);
 
-        // Test 3: reduce + animate=1200 -> still ~1ms
         const customReduced = await captureAnimationDuration(async () => {
             await customNextBtn.click();
         }, customScrollView);
@@ -1562,7 +1660,41 @@ async function runTests(): Promise<void> {
         );
         await page.waitForTimeout(100);
 
-        // Test 4: Restore no-preference on custom fixture -> ~1200ms control
+        // Disabled fixture under reduced-motion remains 0ms (never increased to 1ms)
+        await disabledNextBtn.click();
+        await page.waitForTimeout(100);
+        const disabledDurationReduce = await disabledScrollView.evaluate(host => {
+            const slide = host.querySelector("li[role='group']") as HTMLElement;
+            const dur = window.getComputedStyle(slide).animationDuration;
+            return dur.endsWith("ms") ? parseFloat(dur) : parseFloat(dur) * 1000;
+        });
+        assert(
+            disabledDurationReduce === 0,
+            `[Reduced Motion] Disabled ScrollView (animate=false) remains 0ms under reduced-motion (got ${disabledDurationReduce}ms)`
+        );
+
+        // Test scrollBy and scrollIntoView behavior under reduced-motion
+        await stdPagerList.evaluate(el => { (el as any).__scrollByCalls = []; });
+        await page.evaluate(() => { (window as any).__scrollIntoViewCalls = []; });
+
+        await stdPagerNext.click();
+        await page.waitForTimeout(150);
+        const reduceScrollBy = await stdPagerList.evaluate(el => (el as any).__scrollByCalls || []);
+        assert(
+            reduceScrollBy.length > 0 && reduceScrollBy[reduceScrollBy.length - 1].behavior === "auto",
+            `[Reduced Motion] Pager scrollBy requests behavior='auto' (got '${reduceScrollBy[reduceScrollBy.length - 1]?.behavior}')`
+        );
+
+        const dot12 = stdScrollView.locator('li[data-page-index="12"] button');
+        await dot12.click();
+        await page.waitForTimeout(200);
+        const reduceIntoView = await page.evaluate(() => (window as any).__scrollIntoViewCalls || []);
+        assert(
+            reduceIntoView.length > 0 && reduceIntoView[reduceIntoView.length - 1].behavior === "auto",
+            `[Reduced Motion] scrollIntoView requests behavior='auto' (got '${reduceIntoView[reduceIntoView.length - 1]?.behavior}')`
+        );
+
+        // Test 3: Restore no-preference on custom fixture -> ~1200ms control
         await page.emulateMedia({ reducedMotion: "no-preference" });
         const customControl = await captureAnimationDuration(async () => {
             await customNextBtn.click();
@@ -1573,7 +1705,7 @@ async function runTests(): Promise<void> {
         );
         await page.waitForTimeout(1300);
 
-        console.log("    [PASS] ScrollView prefers-reduced-motion override and animationDuration contract verified\n");
+        console.log("    [PASS] ScrollView prefers-reduced-motion override, animationDuration contract & programmatic scrollBehavior verified\n");
 
         console.log("==================================================");
         console.log("  ALL BROWSER DIRECTION GEOMETRY TESTS PASSED!");
