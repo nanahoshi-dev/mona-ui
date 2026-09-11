@@ -259,6 +259,13 @@ export function observeComponentDirection(
             elObserver.observe(element, { attributes: true, attributeFilter: ["dir"] });
             cleanupFns.push(() => elObserver.disconnect());
 
+            const root = element.getRootNode?.();
+            if (root && root !== element && root !== element.ownerDocument) {
+                const rootObserver = new MutationObserver(() => check());
+                rootObserver.observe(root, { attributes: true, attributeFilter: ["dir"], subtree: true });
+                cleanupFns.push(() => rootObserver.disconnect());
+            }
+
             if (element.ownerDocument) {
                 cleanupFns.push(observeDocumentDirChanges(element.ownerDocument, check));
             }

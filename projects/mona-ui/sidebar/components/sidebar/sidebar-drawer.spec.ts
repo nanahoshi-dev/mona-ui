@@ -68,6 +68,12 @@ describe("Sidebar drawer on a compact viewport", () => {
         fixture.detectChanges();
     });
 
+    const waitForStable = async (): Promise<void> => {
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+    };
+
     describe("presentation", () => {
         it("should become a modal dialog rather than a column", () => {
             openDrawer();
@@ -94,15 +100,40 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().classList.contains("translate-x-full")).toBe(true);
         });
 
-        it("should dock against logical start edge and slide out in semantic RTL", () => {
+        it("should dock against logical start edge and slide out in semantic RTL", async () => {
             fixture.nativeElement.setAttribute("dir", "rtl");
+            await waitForStable();
             fixture.componentInstance.side.set("start");
             goCompact();
 
             expect(sidebar().matches(":dir(rtl)")).toBe(true);
-            // In RTL, start-0 is physically right, and Tailwind rtl:translate-x-full moves it rightwards offcanvas
-            expect(sidebar().classList.contains("start-0")).toBe(true);
-            expect(sidebar().classList.contains("rtl:translate-x-full")).toBe(true);
+            // In RTL, start maps to physical right, anchored at right-0 and translated off-screen via translate-x-full
+            expect(sidebar().classList.contains("right-0")).toBe(true);
+            expect(sidebar().classList.contains("translate-x-full")).toBe(true);
+            expect(sidebar().classList.contains("left-0")).toBe(false);
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(false);
+
+            query(".trigger").click();
+            fixture.detectChanges();
+            expect(sidebar().classList.contains("translate-x-full")).toBe(false);
+        });
+
+        it("should dock against logical end edge and slide out in semantic RTL", async () => {
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            await waitForStable();
+            fixture.componentInstance.side.set("end");
+            goCompact();
+
+            expect(sidebar().matches(":dir(rtl)")).toBe(true);
+            // In RTL, end maps to physical left, anchored at left-0 and translated off-screen via -translate-x-full
+            expect(sidebar().classList.contains("left-0")).toBe(true);
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(true);
+            expect(sidebar().classList.contains("right-0")).toBe(false);
+            expect(sidebar().classList.contains("translate-x-full")).toBe(false);
+
+            query(".trigger").click();
+            fixture.detectChanges();
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(false);
         });
 
         it("should maintain coherent LTR drawer start positioning and translation under CSS-only direction override", () => {
@@ -111,11 +142,11 @@ describe("Sidebar drawer on a compact viewport", () => {
             fixture.componentInstance.side.set("start");
             goCompact();
 
-            // Under semantic Option A, Tailwind rtl: is inactive, so start-0 stays LTR-aligned with -translate-x-full
             expect(sidebar().matches(":dir(rtl)")).toBe(false);
             expect(sidebar().matches(":dir(ltr)")).toBe(true);
-            expect(sidebar().classList.contains("start-0")).toBe(true);
+            expect(sidebar().classList.contains("left-0")).toBe(true);
             expect(sidebar().classList.contains("-translate-x-full")).toBe(true);
+            expect(sidebar().classList.contains("right-0")).toBe(false);
             expect(sidebar().getAttribute("data-side")).toBe("start");
             expect(sidebar().getAttribute("data-state")).toBe("collapsed");
             expect(sidebar().style.width).toBe("calc(1px + 18rem)");
@@ -134,8 +165,9 @@ describe("Sidebar drawer on a compact viewport", () => {
 
             expect(sidebar().matches(":dir(rtl)")).toBe(false);
             expect(sidebar().matches(":dir(ltr)")).toBe(true);
-            expect(sidebar().classList.contains("end-0")).toBe(true);
+            expect(sidebar().classList.contains("right-0")).toBe(true);
             expect(sidebar().classList.contains("translate-x-full")).toBe(true);
+            expect(sidebar().classList.contains("left-0")).toBe(false);
             expect(sidebar().getAttribute("data-side")).toBe("end");
             expect(sidebar().getAttribute("data-state")).toBe("collapsed");
             expect(sidebar().style.width).toBe("calc(1px + 18rem)");
@@ -146,16 +178,18 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().classList.contains("translate-x-full")).toBe(false);
         });
 
-        it("should maintain coherent RTL drawer start positioning and translation under CSS-only direction override", () => {
+        it("should maintain coherent RTL drawer start positioning and translation under CSS-only direction override", async () => {
             fixture.nativeElement.setAttribute("dir", "rtl");
             fixture.nativeElement.style.direction = "ltr";
+            await waitForStable();
             fixture.componentInstance.side.set("start");
             goCompact();
 
             expect(sidebar().matches(":dir(rtl)")).toBe(true);
             expect(sidebar().matches(":dir(ltr)")).toBe(false);
-            expect(sidebar().classList.contains("start-0")).toBe(true);
-            expect(sidebar().classList.contains("rtl:translate-x-full")).toBe(true);
+            expect(sidebar().classList.contains("right-0")).toBe(true);
+            expect(sidebar().classList.contains("translate-x-full")).toBe(true);
+            expect(sidebar().classList.contains("left-0")).toBe(false);
             expect(sidebar().getAttribute("data-side")).toBe("start");
             expect(sidebar().getAttribute("data-state")).toBe("collapsed");
             expect(sidebar().style.width).toBe("calc(1px + 18rem)");
@@ -163,20 +197,22 @@ describe("Sidebar drawer on a compact viewport", () => {
             query(".trigger").click();
             fixture.detectChanges();
             expect(sidebar().getAttribute("data-state")).toBe("expanded");
-            expect(sidebar().classList.contains("rtl:translate-x-full")).toBe(false);
+            expect(sidebar().classList.contains("translate-x-full")).toBe(false);
             expect(sidebar().classList.contains("-translate-x-full")).toBe(false);
         });
 
-        it("should maintain coherent RTL drawer end positioning and translation under CSS-only direction override", () => {
+        it("should maintain coherent RTL drawer end positioning and translation under CSS-only direction override", async () => {
             fixture.nativeElement.setAttribute("dir", "rtl");
             fixture.nativeElement.style.direction = "ltr";
+            await waitForStable();
             fixture.componentInstance.side.set("end");
             goCompact();
 
             expect(sidebar().matches(":dir(rtl)")).toBe(true);
             expect(sidebar().matches(":dir(ltr)")).toBe(false);
-            expect(sidebar().classList.contains("end-0")).toBe(true);
-            expect(sidebar().classList.contains("rtl:-translate-x-full")).toBe(true);
+            expect(sidebar().classList.contains("left-0")).toBe(true);
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(true);
+            expect(sidebar().classList.contains("right-0")).toBe(false);
             expect(sidebar().getAttribute("data-side")).toBe("end");
             expect(sidebar().getAttribute("data-state")).toBe("collapsed");
             expect(sidebar().style.width).toBe("calc(1px + 18rem)");
@@ -184,7 +220,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             query(".trigger").click();
             fixture.detectChanges();
             expect(sidebar().getAttribute("data-state")).toBe("expanded");
-            expect(sidebar().classList.contains("rtl:-translate-x-full")).toBe(false);
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(false);
             expect(sidebar().classList.contains("translate-x-full")).toBe(false);
         });
 

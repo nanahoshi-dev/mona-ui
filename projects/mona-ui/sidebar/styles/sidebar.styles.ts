@@ -326,6 +326,10 @@ export const sidebarThemeVariants = cva(
                 `,
                 false: ""
             },
+            drawerPhysicalSide: {
+                left: "",
+                right: ""
+            },
             open: {
                 true: "",
                 false: ""
@@ -338,10 +342,10 @@ export const sidebarThemeVariants = cva(
             { drawer: false, variant: "inset", flush: true, class: "h-full" },
             // A drawer is a surface in its own right whatever the docked variant looks like, so the
             // variant's margins, rounding and transparency are all dropped for it.
-            { drawer: true, side: "start", class: "start-0" },
-            { drawer: true, side: "end", class: "end-0" },
-            { drawer: true, open: false, side: "start", class: "-translate-x-full rtl:translate-x-full" },
-            { drawer: true, open: false, side: "end", class: "translate-x-full rtl:-translate-x-full" },
+            { drawer: true, drawerPhysicalSide: "left", class: "left-0" },
+            { drawer: true, drawerPhysicalSide: "right", class: "right-0" },
+            { drawer: true, open: false, drawerPhysicalSide: "left", class: "-translate-x-full" },
+            { drawer: true, open: false, drawerPhysicalSide: "right", class: "translate-x-full" },
             { drawer: true, variant: "floating", class: "rounded-none" },
             { drawer: true, variant: "inset", class: "bg-(--color-sidebar)" }
         ]
