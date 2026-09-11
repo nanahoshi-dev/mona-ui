@@ -326,14 +326,38 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
-        lineSnippet: "left-0",
+        lineSnippet: 'physicalSide: "left", class: "border-r border-(--color-sidebar-border)"',
+        reason: "Sidebar non-drawer physical border variant mapped from semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+        lineSnippet: 'physicalSide: "right", class: "border-l border-(--color-sidebar-border)"',
+        reason: "Sidebar non-drawer physical border variant mapped from semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+        lineSnippet: '{ drawer: true, physicalSide: "left", class: "left-0" }',
         reason: "Sidebar drawer physical side variants mapped from semantic HTML direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
-        lineSnippet: "right-0",
+        lineSnippet: '{ drawer: true, physicalSide: "right", class: "right-0" }',
         reason: "Sidebar drawer physical side variants mapped from semantic HTML direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+        lineSnippet: 'left: "right-0"',
+        reason: "Sidebar rail physical edge variant mapped from semantic HTML direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+        lineSnippet: 'right: "left-0"',
+        reason: "Sidebar rail physical edge variant mapped from semantic HTML direction"
     },
     {
         category: "rtl-physical-style",
@@ -646,13 +670,13 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
-        lineSnippet: "-translate-x-full",
+        lineSnippet: '{ drawer: true, open: false, physicalSide: "left", class: "-translate-x-full" }',
         reason: "Sidebar slide-in transform with explicit RTL counterpart"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
-        lineSnippet: "translate-x-full",
+        lineSnippet: '{ drawer: true, open: false, physicalSide: "right", class: "translate-x-full" }',
         reason: "Sidebar slide-out transform with explicit RTL counterpart"
     },
     {

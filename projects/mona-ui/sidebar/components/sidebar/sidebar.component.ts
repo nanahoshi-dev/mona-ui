@@ -67,7 +67,7 @@ export class SidebarComponent {
     readonly #sidebarService = inject(SidebarService);
     #restoreFocusTo: HTMLElement | null = null;
 
-    protected readonly drawerPhysicalSide = computed<"left" | "right">(() => {
+    protected readonly physicalSide = computed<"left" | "right">(() => {
         const isRtl = this.#direction() === "rtl";
         const side = this.#sidebarService.side();
         if (side === "start") {
@@ -75,13 +75,13 @@ export class SidebarComponent {
         }
         return isRtl ? "left" : "right";
     });
+    protected readonly drawerPhysicalSide = this.physicalSide;
 
     protected readonly baseClass = computed(() => {
         const variantClass = sidebarThemeVariants({
             drawer: this.drawer(),
-            drawerPhysicalSide: this.drawerPhysicalSide(),
+            physicalSide: this.physicalSide(),
             open: this.#sidebarService.mobileOpen(),
-            side: this.#sidebarService.side(),
             variant: this.variant(),
             flush: this.offCanvasClosed()
         });

@@ -83,13 +83,13 @@ describe("Sidebar parts", () => {
         it("should sit on the sidebar's inner edge and follow the side", () => {
             expect(query("mona-sidebar").classList.contains("relative")).toBe(true);
             expect(query(".rail").classList.contains("absolute")).toBe(true);
-            expect(query(".rail").classList.contains("end-0")).toBe(true);
+            expect(query(".rail").classList.contains("right-0")).toBe(true);
 
             component.side.set("right");
             fixture.detectChanges();
 
-            expect(query(".rail").classList.contains("start-0")).toBe(true);
-            expect(query(".rail").classList.contains("end-0")).toBe(false);
+            expect(query(".rail").classList.contains("left-0")).toBe(true);
+            expect(query(".rail").classList.contains("right-0")).toBe(false);
         });
 
         it("should toggle the sidebar and mirror its state", () => {
@@ -287,10 +287,10 @@ describe("Sidebar parts", () => {
             // Counts the borders on the inline axis straight off each variant's classes, so changing a
             // border without changing the allowance fails here rather than silently clipping an avatar.
             const inlineBorders = (variant: SidebarVariant): number => {
-                const classes = sidebarThemeVariants({ variant, side: "start", flush: false, drawer: false }).split(
+                const classes = sidebarThemeVariants({ variant, physicalSide: "left", flush: false, drawer: false }).split(
                     /\s+/
                 );
-                return classes.includes("border") ? 2 : classes.filter(name => name === "border-e").length;
+                return classes.includes("border") ? 2 : classes.filter(name => name === "border-r").length;
             };
 
             for (const variant of ["sidebar", "floating", "inset"] as const) {
@@ -311,7 +311,7 @@ describe("Sidebar parts", () => {
     describe("variants", () => {
         it("should draw only an edge border in the default variant", () => {
             const sidebar = query("mona-sidebar");
-            expect(sidebar.classList.contains("border-e")).toBe(true);
+            expect(sidebar.classList.contains("border-r")).toBe(true);
             expect(sidebar.classList.contains("rounded-lg")).toBe(false);
             expect(query(".inset").classList.contains("rounded-lg")).toBe(false);
         });
@@ -323,7 +323,7 @@ describe("Sidebar parts", () => {
             const sidebar = query("mona-sidebar");
             expect(sidebar.classList.contains("rounded-lg")).toBe(true);
             expect(sidebar.classList.contains("shadow-(--shadow-raised)")).toBe(true);
-            expect(sidebar.classList.contains("border-e")).toBe(false);
+            expect(sidebar.classList.contains("border-r")).toBe(false);
         });
 
         it("should move the raised surface onto the inset for the inset variant", () => {

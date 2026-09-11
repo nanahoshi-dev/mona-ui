@@ -1,15 +1,18 @@
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
     effect,
+    ElementRef,
     inject,
     input,
     signal,
     untracked
 } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import { SidebarLayoutService } from "../../services/sidebar-layout.service";
 import { sidebarBackdropThemeVariants, sidebarLayoutBaseThemeVariants } from "../../styles/sidebar.styles";
@@ -49,10 +52,20 @@ import { sidebarBackdropThemeVariants, sidebarLayoutBaseThemeVariants } from "..
     providers: [SidebarLayoutService]
 })
 export class SidebarLayoutComponent {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
+    readonly #host = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #layoutService = inject(SidebarLayoutService);
     readonly #matches = signal(false);
+    readonly #cssDirection = signal<"ltr" | "rtl">("ltr");
+
     protected readonly backdropClass = computed(() => sidebarBackdropThemeVariants({ open: this.mobileOpen() }));
-    protected readonly baseClass = computed(() => twMerge(sidebarLayoutBaseThemeVariants(), this.userClass()));
+    protected readonly baseClass = computed(() =>
+        twMerge(
+            sidebarLayoutBaseThemeVariants({ reverse: this.#cssDirection() === "rtl" }),
+            this.userClass()
+        )
+    );
     protected readonly compact = this.#layoutService.compact;
 
     /** One backdrop serves every sidebar, because only one of their drawers is ever open. */
@@ -76,6 +89,7 @@ export class SidebarLayoutComponent {
 
     public constructor() {
         this.#watchBreakpoint();
+        this.#watchCssDirection();
     }
 
     protected onBackdropClick(): void {
@@ -129,5 +143,52 @@ export class SidebarLayoutComponent {
                 this.#matches.set(current.matches);
             });
         });
+    }
+
+    #watchCssDirection(): void {
+        const updateCssDirection = (): void => {
+            if (typeof window === "undefined") {
+                return;
+            }
+            const el = this.#host.nativeElement;
+            const computedDir = window.getComputedStyle(el).direction;
+            if (computedDir === "rtl" || computedDir === "ltr") {
+                this.#cssDirection.set(computedDir);
+            }
+        };
+
+        updateCssDirection();
+
+        effect(() => {
+            this.#direction();
+            updateCssDirection();
+        });
+
+        afterNextRender(() => {
+            updateCssDirection();
+        });
+
+        if (typeof MutationObserver !== "undefined") {
+            const observer = new MutationObserver(() => {
+                updateCssDirection();
+            });
+
+            observer.observe(this.#host.nativeElement, {
+                attributes: true,
+                attributeFilter: ["style", "class", "dir"]
+            });
+
+            if (typeof document !== "undefined" && document.documentElement) {
+                observer.observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ["style", "class", "dir"],
+                    subtree: true
+                });
+            }
+
+            this.#destroyRef.onDestroy(() => {
+                observer.disconnect();
+            });
+        }
     }
 }

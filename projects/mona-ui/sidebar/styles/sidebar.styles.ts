@@ -38,9 +38,20 @@ export const sidebarBorderAllowance: Readonly<Record<SidebarVariant, string>> = 
  */
 export const sidebarLayoutBaseThemeVariants = cva(
     `
-        relative flex flex-row w-full h-screen h-dvh
+        relative flex w-full h-screen h-dvh
         overflow-hidden
-    `
+    `,
+    {
+        variants: {
+            reverse: {
+                true: "flex-row-reverse",
+                false: "flex-row"
+            }
+        },
+        defaultVariants: {
+            reverse: false
+        }
+    }
 );
 
 export const sidebarContentThemeVariants = cva("flex-1", {
@@ -287,13 +298,9 @@ export const sidebarThemeVariants = cva(
     `,
     {
         variants: {
-            // `side` only decides placement; the border it implies is applied per variant below,
-            // so the `floating` and `inset` treatments are not left fighting a single edge border.
-            // Flex order is already direction-relative, which is why the borders below have to be
-            // logical too — a physical `border-r` would land on the wrong edge under RTL.
-            side: {
-                start: "order-first",
-                end: "order-last"
+            physicalSide: {
+                left: "order-first",
+                right: "order-last"
             },
             variant: {
                 sidebar: `h-full ${themeRaisedBackdropClasses}`,
@@ -313,10 +320,10 @@ export const sidebarThemeVariants = cva(
                 false: ""
             },
             /**
-             * The compact presentation. The panel leaves the flex flow and becomes an overlay pinned to
-             * one edge, sliding in on `translate` rather than `width` — a drawer that animated its width
-             * would reflow its own contents for the whole transition.
-             */
+              * The compact presentation. The panel leaves the flex flow and becomes an overlay pinned to
+              * one edge, sliding in on `translate` rather than `width` — a drawer that animated its width
+              * would reflow its own contents for the whole transition.
+              */
             drawer: {
                 true: `
                     absolute inset-y-0 z-50 h-full m-0
@@ -326,29 +333,28 @@ export const sidebarThemeVariants = cva(
                 `,
                 false: ""
             },
-            drawerPhysicalSide: {
-                left: "",
-                right: ""
-            },
             open: {
                 true: "",
                 false: ""
             }
         },
         compoundVariants: [
-            { drawer: false, variant: "sidebar", side: "start", class: "border-e border-(--color-sidebar-border)" },
-            { drawer: false, variant: "sidebar", side: "end", class: "border-s border-(--color-sidebar-border)" },
+            { drawer: false, variant: "sidebar", physicalSide: "left", class: "border-r border-(--color-sidebar-border)" },
+            { drawer: false, variant: "sidebar", physicalSide: "right", class: "border-l border-(--color-sidebar-border)" },
             { drawer: false, variant: "floating", flush: true, class: "h-full" },
             { drawer: false, variant: "inset", flush: true, class: "h-full" },
             // A drawer is a surface in its own right whatever the docked variant looks like, so the
             // variant's margins, rounding and transparency are all dropped for it.
-            { drawer: true, drawerPhysicalSide: "left", class: "left-0" },
-            { drawer: true, drawerPhysicalSide: "right", class: "right-0" },
-            { drawer: true, open: false, drawerPhysicalSide: "left", class: "-translate-x-full" },
-            { drawer: true, open: false, drawerPhysicalSide: "right", class: "translate-x-full" },
+            { drawer: true, physicalSide: "left", class: "left-0" },
+            { drawer: true, physicalSide: "right", class: "right-0" },
+            { drawer: true, open: false, physicalSide: "left", class: "-translate-x-full" },
+            { drawer: true, open: false, physicalSide: "right", class: "translate-x-full" },
             { drawer: true, variant: "floating", class: "rounded-none" },
             { drawer: true, variant: "inset", class: "bg-(--color-sidebar)" }
-        ]
+        ],
+        defaultVariants: {
+            physicalSide: "left"
+        }
     }
 );
 
@@ -401,12 +407,15 @@ export const sidebarRailThemeVariants = cva(
     `,
     {
         variants: {
-            // The rail sits on the sidebar's inner edge, which is the opposite one to the side it is
-            // docked against. Logical, so it stays on the inner edge under RTL.
-            side: {
-                start: "end-0",
-                end: "start-0"
+            // The rail sits on the sidebar's inner edge, which is the opposite one to the physical side it is
+            // docked against.
+            physicalSide: {
+                left: "right-0",
+                right: "left-0"
             }
+        },
+        defaultVariants: {
+            physicalSide: "left"
         }
     }
 );

@@ -103,16 +103,26 @@ describe("SidebarLayoutComponent", () => {
     });
 
     it("should order and border the sidebar according to side", () => {
-        // Logical, not physical. Flex order is already direction-relative, so a physical border
-        // would land on the outer edge instead of the inner one under RTL.
         expect(getSidebar().classList.contains("order-first")).toBe(true);
-        expect(getSidebar().classList.contains("border-e")).toBe(true);
+        expect(getSidebar().classList.contains("border-r")).toBe(true);
 
         component.side.set("right");
         fixture.detectChanges();
 
         expect(getSidebar().classList.contains("order-last")).toBe(true);
-        expect(getSidebar().classList.contains("border-s")).toBe(true);
+        expect(getSidebar().classList.contains("border-l")).toBe(true);
+    });
+
+    it("should apply flex-row-reverse when CSS direction is RTL to compensate for row reversal", async () => {
+        const layoutEl = fixture.nativeElement.querySelector("mona-sidebar-layout") as HTMLElement;
+        expect(layoutEl.classList.contains("flex-row")).toBe(true);
+        expect(layoutEl.classList.contains("flex-row-reverse")).toBe(false);
+
+        layoutEl.style.direction = "rtl";
+        await new Promise(resolve => setTimeout(resolve, 50));
+        fixture.detectChanges();
+
+        expect(layoutEl.classList.contains("flex-row-reverse")).toBe(true);
     });
 
     it("should expose the sidebar's own service instance to its descendants", () => {
