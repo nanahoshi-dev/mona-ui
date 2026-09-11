@@ -1509,7 +1509,7 @@ async function runTests(): Promise<void> {
         // In RTL, Next arrow displaces content rightward (increasing X for p0).
         const p0BeforeRtlStep = (await dynP0.boundingBox())!.x;
         await dynPagerNext.click();
-        await page.waitForTimeout(300);
+        await page.waitForTimeout(500);
         const p0AfterRtlStep = (await dynP0.boundingBox())!.x;
         assert(
             p0AfterRtlStep > p0BeforeRtlStep,
@@ -1517,11 +1517,22 @@ async function runTests(): Promise<void> {
         );
 
         // Step 3: Repeat with RTL -> LTR symmetry
+        // Reset to known RTL position (0) so rapid Next steps have full headroom towards -maxScroll
+        await page.evaluate(() => {
+            const list = document.querySelector('[data-testid="scroll-view-dynamic"] li[data-page-item="true"]')?.parentElement;
+            if (list) {
+                list.scrollLeft = 0;
+            }
+            (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount = 0;
+        });
+        await page.waitForTimeout(150);
+
+        // Reset scrollend counter after settling at known RTL position
         await page.evaluate(() => {
             (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount = 0;
         });
 
-        // Issue rapid clicks in RTL to establish an in-flight smooth scroll in RTL
+        // Issue rapid clicks in RTL to establish an in-flight smooth scroll in RTL (-100, -200, -300)
         await dynPagerNext.click({ delay: 10 });
         await dynPagerNext.click({ delay: 10 });
         await dynPagerNext.click({ delay: 10 });
