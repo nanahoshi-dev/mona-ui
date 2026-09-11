@@ -894,4 +894,167 @@ describe("NumericTextBoxComponent i18n integration", () => {
             expect(parseLocalizedNumber("0.123", "tr-TR", { alternateDecimal: true })).toBe(0.123);
         });
     });
+
+    describe("Single separator typing vs paste ambiguity contract at decimals >= 3", () => {
+        let fixture: ComponentFixture<NumericTextBoxI18nTestHostComponent>;
+        let host: NumericTextBoxI18nTestHostComponent;
+        let input: HTMLInputElement;
+
+        beforeEach(async () => {
+            TestBed.configureTestingModule({
+                imports: [NumericTextBoxI18nTestHostComponent]
+            });
+            fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+            host = fixture.componentInstance;
+            host.decimals.set(3);
+            input = getInput(fixture);
+            await waitForStable(fixture);
+        });
+
+        function simulatePaste(clipboardText: string): boolean {
+            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true });
+            Object.defineProperty(pasteEvent, "clipboardData", {
+                value: {
+                    getData: (format: string) => (format === "text/plain" ? clipboardText : "")
+                }
+            });
+            const pasteAllowed = input.dispatchEvent(pasteEvent);
+            if (!pasteAllowed || pasteEvent.defaultPrevented) {
+                return false;
+            }
+
+            const beforeInputEvent = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: null,
+                inputType: "insertFromPaste"
+            });
+            const beforeInputAllowed = input.dispatchEvent(beforeInputEvent);
+            if (!beforeInputAllowed || beforeInputEvent.defaultPrevented) {
+                return false;
+            }
+
+            const start = input.selectionStart ?? 0;
+            const end = input.selectionEnd ?? input.value.length;
+            input.value = input.value.slice(0, start) + clipboardText + input.value.slice(end);
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            fixture.detectChanges();
+            return true;
+        }
+
+        async function typeString(text: string): Promise<boolean> {
+            for (const char of text) {
+                const start = input.selectionStart ?? input.value.length;
+                const end = input.selectionEnd ?? input.value.length;
+                const event = new InputEvent("beforeinput", {
+                    bubbles: true,
+                    cancelable: true,
+                    data: char,
+                    inputType: "insertText"
+                });
+                const allowed = input.dispatchEvent(event);
+                if (!allowed || event.defaultPrevented) {
+                    return false;
+                }
+                input.value = input.value.slice(0, start) + char + input.value.slice(end);
+                input.selectionStart = input.selectionEnd = start + char.length;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                await waitForStable(fixture);
+            }
+            return true;
+        }
+
+        it("treats en-US direct typing of 1,234 as decimal 1.234 and formats as 1.234 on blur", async () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ direction: "ltr", id: "en-US", messages: {} });
+            await waitForStable(fixture);
+
+            focusInput(input);
+            await waitForStable(fixture);
+
+            const typed = await typeString("1,234");
+            expect(typed).toBe(true);
+            expect(host.value()).toBe(1.234);
+
+            blurInput(input);
+            await waitForStable(fixture);
+            expect(input.value).toBe("1.234");
+        });
+
+        it("treats en-US paste of 1,234 as grouping separator (1234) and formats as 1234.000 on blur", async () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ direction: "ltr", id: "en-US", messages: {} });
+            await waitForStable(fixture);
+
+            focusInput(input);
+            await waitForStable(fixture);
+
+            const pasted = simulatePaste("1,234");
+            expect(pasted).toBe(true);
+            expect(host.value()).toBe(1234);
+
+            blurInput(input);
+            await waitForStable(fixture);
+            expect(input.value).toBe("1234.000");
+        });
+
+        it("treats de-DE direct typing of 1.234 as decimal 1.234 and formats as 1,234 on blur", async () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use(DE_LOCALE);
+            await waitForStable(fixture);
+
+            focusInput(input);
+            await waitForStable(fixture);
+
+            const typed = await typeString("1.234");
+            expect(typed).toBe(true);
+            expect(host.value()).toBe(1.234);
+
+            blurInput(input);
+            await waitForStable(fixture);
+            expect(input.value).toBe("1,234");
+        });
+
+        it("treats de-DE paste of 1.234 as grouping separator (1234) and formats as 1234,000 on blur", async () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use(DE_LOCALE);
+            await waitForStable(fixture);
+
+            focusInput(input);
+            await waitForStable(fixture);
+
+            const pasted = simulatePaste("1.234");
+            expect(pasted).toBe(true);
+            expect(host.value()).toBe(1234);
+
+            blurInput(input);
+            await waitForStable(fixture);
+            expect(input.value).toBe("1234,000");
+        });
+
+        it("rejects repeated separators when typing in both en-US and de-DE", async () => {
+            const i18n = TestBed.inject(MonaI18nService);
+
+            // en-US: typing 1,,234 or 1..234
+            i18n.use({ direction: "ltr", id: "en-US", messages: {} });
+            await waitForStable(fixture);
+            focusInput(input);
+            await waitForStable(fixture);
+
+            expect(await typeString("1,")).toBe(true);
+            expect(await typeString(",")).toBe(false); // second comma rejected
+            expect(await typeString(".")).toBe(false); // dot after comma rejected
+
+            // de-DE: typing 1..234 or 1,,234
+            input.value = "";
+            i18n.use(DE_LOCALE);
+            await waitForStable(fixture);
+            focusInput(input);
+            await waitForStable(fixture);
+
+            expect(await typeString("1.")).toBe(true);
+            expect(await typeString(".")).toBe(false); // second dot rejected
+            expect(await typeString(",")).toBe(false); // comma after dot rejected
+        });
+    });
 });
