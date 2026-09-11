@@ -1,6 +1,7 @@
 import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    afterRenderEffect,
     Component,
     computed,
     contentChild,
@@ -213,7 +214,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     protected readonly pagerArrowClass = computed(() => {
         return scrollViewPagerArrowThemeVariants();
     });
-    protected readonly pagerArrowVisible = signal(true);
+    protected readonly pagerArrowVisible = signal(false);
     protected readonly pagerClass = computed(() => {
         const pagerOverlay = this.pagerOverlay();
         return scrollViewPagerThemeVariants({ pagerOverlay });
@@ -363,8 +364,51 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
             this.#scroll$.complete();
             this.#resizeObserver?.disconnect();
         });
+        afterRenderEffect({
+            read: onCleanup => {
+                const pagerListElementRef = this.pagerListElementRef();
+                this.itemCount();
+
+                this.#resizeObserver?.disconnect();
+                this.#resizeObserver = null;
+
+                onCleanup(() => {
+                    this.#resizeObserver?.disconnect();
+                    this.#resizeObserver = null;
+                });
+
+                if (!pagerListElementRef) {
+                    this.pagerArrowVisible.set(false);
+                    this.#resetPagerScrollState();
+                    return;
+                }
+
+                const element = pagerListElementRef.nativeElement;
+                if (this.#pagerScrollContext && this.#pagerScrollContext.element !== element) {
+                    this.#resetPagerScrollState();
+                }
+
+                const scrollWidth = element.scrollWidth;
+                const clientWidth = element.clientWidth;
+                this.pagerArrowVisible.set(scrollWidth > clientWidth);
+
+                if (typeof ResizeObserver !== "undefined") {
+                    this.#resizeObserver = new ResizeObserver(() => {
+                        const currentScrollWidth = element.scrollWidth;
+                        const currentClientWidth = element.clientWidth;
+                        this.pagerArrowVisible.set(currentScrollWidth > currentClientWidth);
+                        if (this.#pagerScrollContext && this.#pagerScrollContext.element === element) {
+                            const currentMaxScroll = Math.max(0, currentScrollWidth - currentClientWidth);
+                            if (this.#pagerScrollContext.maxScroll !== currentMaxScroll) {
+                                this.#resetPagerScrollState();
+                            }
+                        }
+                    });
+                    this.#resizeObserver.observe(element);
+                }
+            }
+        });
         afterNextRender(() => {
-            this.setPagerListResizeObserver();
             this.setSubscriptions();
             this.scrollActivePageIntoView();
         });
@@ -666,19 +710,6 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         });
     }
 
-    private setPagerListResizeObserver(): void {
-        const pagerListElementRef = this.pagerListElementRef();
-        if (pagerListElementRef) {
-            const element = pagerListElementRef.nativeElement;
-            this.pagerArrowVisible.set(element.scrollWidth > element.clientWidth);
-            this.#resizeObserver = new ResizeObserver(() => {
-                const scrollWidth = element.scrollWidth;
-                const clientWidth = element.clientWidth;
-                this.pagerArrowVisible.set(scrollWidth > clientWidth);
-            });
-            this.#resizeObserver.observe(element);
-        }
-    }
 
     private setSubscriptions(): void {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
