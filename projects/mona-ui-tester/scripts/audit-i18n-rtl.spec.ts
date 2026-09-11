@@ -1120,4 +1120,149 @@ describe("audit-i18n-rtl", () => {
             expect(isAllowlisted(trailingViolation, "left: 0;")).toBe(false);
         });
     });
+
+    describe("TypeScript-authored physical CSS styles", () => {
+        it("detects physical properties in function returning Partial<CSSStyleDeclaration>", () => {
+            const code = `
+                function makeStyle(): Partial<CSSStyleDeclaration> {
+                    return { left: "10px" };
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style property "left" in style object')
+            });
+        });
+
+        it("detects physical properties in object with satisfies Partial<CSSStyleDeclaration>", () => {
+            const code = `
+                const position = 50;
+                const s = { right: \`\${position}%\` } satisfies Partial<CSSStyleDeclaration>;
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style property "right" in style object')
+            });
+        });
+
+        it("detects assignments to styles.left and styles.right on style objects", () => {
+            const code = `
+                const styles: Partial<CSSStyleDeclaration> = {};
+                styles.right = "20%";
+                styles.left = "10px";
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style assignment to "right"')
+            });
+            expect(violations[1]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style assignment to "left"')
+            });
+        });
+
+        it("detects assignment to element.style.left and this.element.nativeElement.style.right", () => {
+            const code = `
+                element.style.left = "0";
+                this.element.nativeElement.style.right = "0";
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style assignment to "left"')
+            });
+            expect(violations[1]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style assignment to "right"')
+            });
+        });
+
+        it("detects Object.assign with element.style", () => {
+            const code = `
+                Object.assign(element.style, { left: "10px", top: "20px" });
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(1);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style property "left" in style object')
+            });
+        });
+
+        it("detects physical properties in nested spread inside style object", () => {
+            const code = `
+                function transform(isRtl: boolean): Partial<CSSStyleDeclaration> {
+                    return {
+                        position: "absolute",
+                        ...(isRtl ? { right: "10%" } : { left: "10%" })
+                    };
+                }
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations.some(v => v.detail.includes('"right"'))).toBe(true);
+            expect(violations.some(v => v.detail.includes('"left"'))).toBe(true);
+        });
+
+        it("ignores data bounds, coordinates, and rect objects without style context", () => {
+            const code = `
+                const bounds = { left: 10, right: 20 };
+                const rect = { left: 0, top: 0, width: 100, height: 50 };
+                rect.left = 10;
+                const point = { left: 5 };
+                windowRef.move({ top: 0, left: 0 });
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("ignores CVA variant maps containing left and right keys", () => {
+            const code = `
+                const variants = cva("base", {
+                    variants: {
+                        position: {
+                            top: "after:top-0",
+                            left: "after:left-0",
+                            right: "after:right-0"
+                        }
+                    }
+                });
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("allows intentional allowlisted Cartesian and semantic physical styles", () => {
+            const violation: AuditViolation = {
+                category: "rtl-physical-style",
+                detail: 'Physical style assignment to "right"',
+                file: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
+                line: 20
+            };
+            expect(isAllowlisted(violation, "styles.right = `${valuePosition}%`;")).toBe(true);
+        });
+    });
 });

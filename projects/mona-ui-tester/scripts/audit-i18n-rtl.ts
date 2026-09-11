@@ -263,6 +263,132 @@ export const ALLOWLIST: AllowlistEntry[] = [
         lineRange: [171, 190],
         reason: "Spinner converging 4-corner segment positions in Cartesian square geometry"
     },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/styles/slider.styles.ts",
+        lineSnippet: "left-0",
+        reason: "Slider tick container physical positioning pinned to left-0"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
+        lineSnippet: "[style.left.%]",
+        reason: "Slider handle and selection physical left coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
+        lineSnippet: "[style.right.%]",
+        reason: "Slider handle and selection physical right coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+        lineSnippet: "[style.left.%]",
+        reason: "RangeSlider handles and selection physical left coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+        lineSnippet: "[style.right.%]",
+        reason: "RangeSlider handles and selection physical right coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
+        lineSnippet: "styles.right",
+        reason: "Slider label horizontal physical coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
+        lineSnippet: "styles.left",
+        reason: "Slider label horizontal physical coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
+        lineSnippet: "styles[side]",
+        reason: "Slider vertical label horizontal physical side intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/pipes/tick-style.pipe.ts",
+        lineSnippet: "right:",
+        reason: "Slider tick horizontal physical coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/pipes/tick-style.pipe.ts",
+        lineSnippet: "left:",
+        reason: "Slider tick horizontal physical coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+        lineSnippet: "left-0",
+        reason: "Sidebar drawer physical side variants mapped from semantic HTML direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+        lineSnippet: "right-0",
+        reason: "Sidebar drawer physical side variants mapped from semantic HTML direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/scroll-view/styles/scroll-view.styles.ts",
+        lineSnippet: "left-0",
+        reason: "ScrollView navigation arrow physical side variants mapped from semantic HTML direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/scroll-view/styles/scroll-view.styles.ts",
+        lineSnippet: "right-0",
+        reason: "ScrollView navigation arrow physical side variants mapped from semantic HTML direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
+        lineSnippet: "stagingContainer.style.left",
+        reason: "Chart export staging container offscreen positioning (-99999px)"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
+        lineSnippet: "island.frozenRoot.style.left",
+        reason: "Chart export island root staging position"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/window/models/WindowReference.ts",
+        lineSnippet: "element.style.left",
+        reason: "Desktop window floating coordinate management operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
+        lineSnippet: "element.style.left",
+        reason: "Desktop window drag handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/window/directives/window-resize-handler.directive.ts",
+        lineSnippet: "element.style.left",
+        reason: "Desktop window resize handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/internal/tree/components/tree-drop-hint/tree-drop-hint.component.ts",
+        lineSnippet: "left,",
+        reason: "Tree drop hint position calculation explicitly branches on isRtl"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/internal/utils/setWindowStyles.ts",
+        lineSnippet: "left,",
+        reason: "Desktop window floating coordinate management operates in 2D viewport coordinates"
+    },
 
     // Manual review exemptions for directional gradients, translate transforms, and DOM/coordinate operations
     {
@@ -459,9 +585,21 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
+        lineSnippet: "translateX(50%)",
+        reason: "Slider label RTL center alignment on tick"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/slider/pipes/tick-style.pipe.ts",
         lineSnippet: "translateX(-50%)",
         reason: "Slider tick mark center alignment"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/slider/pipes/tick-style.pipe.ts",
+        lineSnippet: "translateX(50%)",
+        reason: "Slider tick mark RTL center alignment"
     },
     {
         category: "rtl-manual-review",
@@ -508,13 +646,13 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
-        lineSnippet: "-translate-x-full rtl:translate-x-full",
+        lineSnippet: "-translate-x-full",
         reason: "Sidebar slide-in transform with explicit RTL counterpart"
     },
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
-        lineSnippet: "translate-x-full rtl:-translate-x-full",
+        lineSnippet: "translate-x-full",
         reason: "Sidebar slide-out transform with explicit RTL counterpart"
     },
     {
@@ -1268,6 +1406,273 @@ export function scanTypeScriptAst(
                         });
                     }
                 }
+            }
+        }
+
+        // 6. TypeScript-authored physical style objects and assignments
+        const PHYSICAL_STYLE_PROPERTY_NAMES = new Set([
+            "left",
+            "right",
+            "marginLeft",
+            "marginRight",
+            "paddingLeft",
+            "paddingRight",
+            "borderLeft",
+            "borderRight",
+            "borderLeftWidth",
+            "borderRightWidth",
+            "borderLeftColor",
+            "borderRightColor",
+            "borderTopLeftRadius",
+            "borderTopRightRadius",
+            "borderBottomLeftRadius",
+            "borderBottomRightRadius",
+            "margin-left",
+            "margin-right",
+            "padding-left",
+            "padding-right",
+            "border-left",
+            "border-right"
+        ]);
+
+        const CSS_SIBLING_PROPERTIES = new Set([
+            "top",
+            "bottom",
+            "width",
+            "height",
+            "transform",
+            "position",
+            "zIndex",
+            "display",
+            "backgroundColor",
+            "background",
+            "color",
+            "transformOrigin",
+            "opacity",
+            "overflow",
+            "visibility",
+            "willChange",
+            "backfaceVisibility",
+            "flex",
+            "flexGrow",
+            "flexShrink",
+            "flexBasis",
+            "cursor",
+            "pointerEvents"
+        ]);
+
+        const isCssStyleType = (typeText: string | undefined): boolean => {
+            if (!typeText) {
+                return false;
+            }
+            return /CSSStyleDeclaration|CSSProperties|StyleDeclaration/.test(typeText);
+        };
+
+        const isStyleName = (name: string | undefined): boolean => {
+            if (!name) {
+                return false;
+            }
+            return /(?:^|_)styles?(?:$|_|[A-Z])/i.test(name);
+        };
+
+        const hasCssUnit = (text: string): boolean => {
+            return /(?:px|%|rem|em|vh|vw|calc\(|translateX\(|translateY\(|translate\()/i.test(text);
+        };
+
+        const isStyleObject = (obj: Node): boolean => {
+            if (!Node.isObjectLiteralExpression(obj)) {
+                return false;
+            }
+
+            // 1. Inside cva() call -> not a CSSStyleDeclaration (CVA variants)
+            const cvaCall = obj.getFirstAncestor(
+                n => Node.isCallExpression(n) && n.getExpression().getText().endsWith("cva")
+            );
+            if (cvaCall) {
+                return false;
+            }
+
+            // 2. Type assertion / satisfies with CSSStyleDeclaration
+            const parent = obj.getParent();
+            if (parent && (Node.isAsExpression(parent) || Node.isSatisfiesExpression(parent))) {
+                if (isCssStyleType(parent.getTypeNode()?.getText())) {
+                    return true;
+                }
+            }
+
+            // 3. Nested inside another style object (e.g. spread, conditional, parenthesized)
+            let curr: Node | undefined = parent;
+            while (
+                curr &&
+                (Node.isParenthesizedExpression(curr) ||
+                    Node.isConditionalExpression(curr) ||
+                    Node.isSpreadAssignment(curr))
+            ) {
+                curr = curr.getParent();
+            }
+            if (curr && Node.isObjectLiteralExpression(curr) && curr !== obj) {
+                if (isStyleObject(curr)) {
+                    return true;
+                }
+            }
+
+            // 4. Object.assign(target, { ... }) where target ends in .style or is a style name
+            if (parent && Node.isCallExpression(parent)) {
+                const callText = parent.getExpression().getText();
+                if (callText === "Object.assign" || callText.endsWith(".assign")) {
+                    const args = parent.getArguments();
+                    if (args.length > 0 && args[0] !== obj) {
+                        const firstArgText = args[0].getText();
+                        if (firstArgText.endsWith(".style") || isStyleName(firstArgText)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // 5. Enclosing variable declaration
+            const varDecl = obj.getFirstAncestorByKind(SyntaxKind.VariableDeclaration);
+            if (varDecl) {
+                if (isCssStyleType(varDecl.getTypeNode()?.getText())) {
+                    return true;
+                }
+                if (isStyleName(varDecl.getName())) {
+                    return true;
+                }
+            }
+
+            // 6. Enclosing property declaration
+            const propDecl = obj.getFirstAncestorByKind(SyntaxKind.PropertyDeclaration);
+            if (propDecl) {
+                if (isCssStyleType(propDecl.getTypeNode()?.getText())) {
+                    return true;
+                }
+                if (isStyleName(propDecl.getName())) {
+                    return true;
+                }
+            }
+
+            // 7. Enclosing return statement of a function / method / getter / arrow
+            const retStmt = obj.getFirstAncestorByKind(SyntaxKind.ReturnStatement);
+            if (retStmt) {
+                const fn = retStmt.getFirstAncestor(
+                    n =>
+                        Node.isFunctionDeclaration(n) ||
+                        Node.isMethodDeclaration(n) ||
+                        Node.isGetAccessorDeclaration(n) ||
+                        Node.isArrowFunction(n) ||
+                        Node.isFunctionExpression(n)
+                );
+                if (fn) {
+                    if ("getReturnTypeNode" in fn && typeof fn.getReturnTypeNode === "function") {
+                        const rt = fn.getReturnTypeNode();
+                        if (isCssStyleType(rt?.getText())) {
+                            return true;
+                        }
+                    }
+                    if ("getName" in fn && typeof fn.getName === "function") {
+                        const fnName = fn.getName();
+                        if (isStyleName(fnName)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // 8. Enclosing call expression (e.g. computed<Partial<CSSStyleDeclaration>>(() => ({ ... })))
+            const callExpr = obj.getFirstAncestorByKind(SyntaxKind.CallExpression);
+            if (callExpr) {
+                for (const typeArg of callExpr.getTypeArguments()) {
+                    if (isCssStyleType(typeArg.getText())) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        };
+
+        for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+            if (!isStyleObject(obj)) {
+                continue;
+            }
+            for (const prop of obj.getProperties()) {
+                if (Node.isPropertyAssignment(prop) || Node.isShorthandPropertyAssignment(prop)) {
+                    const rawName = prop.getName().replace(/['"]/g, "");
+                    if (PHYSICAL_STYLE_PROPERTY_NAMES.has(rawName)) {
+                        violations.push({
+                            category: "rtl-physical-style",
+                            detail: `Physical style property "${rawName}" in style object`,
+                            file: filePath,
+                            line: prop.getStartLineNumber()
+                        });
+                    }
+                }
+            }
+        }
+
+        for (const binExpr of sf.getDescendantsOfKind(SyntaxKind.BinaryExpression)) {
+            if (binExpr.getOperatorToken().getKind() !== SyntaxKind.EqualsToken) {
+                continue;
+            }
+            const left = binExpr.getLeft();
+            let propName: string | null = null;
+            let targetExpr: Node | null = null;
+
+            if (Node.isPropertyAccessExpression(left)) {
+                propName = left.getName();
+                targetExpr = left.getExpression();
+            } else if (Node.isElementAccessExpression(left)) {
+                const arg = left.getArgumentExpression();
+                if (arg && (Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg))) {
+                    propName = arg.getLiteralText();
+                } else if (arg && Node.isIdentifier(arg)) {
+                    const argName = arg.getText();
+                    if (argName === "side" || argName === "directionSide" || argName === "physicalSide") {
+                        propName = argName;
+                    }
+                }
+                targetExpr = left.getExpression();
+            }
+
+            if (!propName || !targetExpr) {
+                continue;
+            }
+
+            const isPhysical = PHYSICAL_STYLE_PROPERTY_NAMES.has(propName) || propName === "side";
+            if (!isPhysical) {
+                continue;
+            }
+
+            const targetText = targetExpr.getText();
+            const isTargetStyle =
+                targetText.endsWith(".style") ||
+                isStyleName(targetText) ||
+                /(?:^|[\s._])styles?$/i.test(targetText);
+
+            let isStyleAssignment = isTargetStyle;
+            if (!isStyleAssignment && Node.isIdentifier(targetExpr)) {
+                for (const v of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+                    if (v.getName() === targetExpr.getText() && isCssStyleType(v.getTypeNode()?.getText())) {
+                        isStyleAssignment = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!isStyleAssignment && hasCssUnit(binExpr.getRight().getText())) {
+                if (!/rect|bounds|point|coords|offset|box/i.test(targetText)) {
+                    isStyleAssignment = true;
+                }
+            }
+
+            if (isStyleAssignment) {
+                violations.push({
+                    category: "rtl-physical-style",
+                    detail: `Physical style assignment to "${propName}": "${binExpr.getText().trim()}"`,
+                    file: filePath,
+                    line: binExpr.getStartLineNumber()
+                });
             }
         }
     } finally {
