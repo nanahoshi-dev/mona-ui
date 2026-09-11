@@ -1,11 +1,15 @@
-import { Component, signal, viewChild } from "@angular/core";
+import { Component, signal, viewChild, ViewEncapsulation } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { SidebarInsetDirective } from "../../directives/sidebar-inset.directive";
 import { SidebarTriggerDirective } from "../../directives/sidebar-trigger.directive";
 import { SidebarService } from "../../services/sidebar.service";
-import { SidebarLayoutComponent } from "./sidebar-layout.component";
+import {
+    resolveSidebarLayoutBaseClass,
+    resolveSidebarLayoutReverse,
+    SidebarLayoutComponent
+} from "./sidebar-layout.component";
 
 @Component({
     template: `
@@ -25,6 +29,27 @@ class SidebarLayoutHostComponent {
     public readonly layout = viewChild.required(SidebarLayoutComponent);
     public readonly side = signal<"left" | "right">("left");
     public readonly width = signal<string | number>("16rem");
+}
+
+@Component({
+    template: `
+        <div class="shadow-container" style="direction: ltr;">
+            <mona-sidebar-layout>
+                <mona-sidebar [(expanded)]="expanded" side="left">
+                    <div class="sidebar-body">Navigation</div>
+                </mona-sidebar>
+                <main monaSidebarInset class="inset">
+                    <button monaSidebarTrigger class="trigger">Toggle</button>
+                </main>
+            </mona-sidebar-layout>
+        </div>
+    `,
+    imports: [SidebarLayoutComponent, SidebarComponent, SidebarInsetDirective, SidebarTriggerDirective],
+    encapsulation: ViewEncapsulation.ShadowDom
+})
+class ShadowLayoutHostComponent {
+    public readonly expanded = signal(true);
+    public readonly layout = viewChild.required(SidebarLayoutComponent);
 }
 
 describe("SidebarLayoutComponent", () => {
@@ -132,5 +157,173 @@ describe("SidebarLayoutComponent", () => {
 
         expect(component.expanded()).toBe(false);
         expect(getSidebar().getAttribute("data-state")).toBe("collapsed");
+    });
+
+    describe("resolveSidebarLayoutReverse and SSR compensation matrix", () => {
+        it("should fall back to semantic LTR when browser CSS direction is unavailable (SSR)", () => {
+            const reverse = resolveSidebarLayoutReverse({
+                semanticDirection: "ltr",
+                browserCssDirection: null
+            });
+            expect(reverse).toBe(false);
+
+            const baseClass = resolveSidebarLayoutBaseClass({
+                semanticDirection: "ltr",
+                browserCssDirection: null
+            });
+            expect(baseClass).toContain("flex-row");
+            expect(baseClass).not.toContain("flex-row-reverse");
+        });
+
+        it("should fall back to semantic RTL when browser CSS direction is unavailable (SSR)", () => {
+            const reverse = resolveSidebarLayoutReverse({
+                semanticDirection: "rtl",
+                browserCssDirection: null
+            });
+            expect(reverse).toBe(true);
+
+            const baseClass = resolveSidebarLayoutBaseClass({
+                semanticDirection: "rtl",
+                browserCssDirection: null
+            });
+            expect(baseClass).toContain("flex-row-reverse");
+        });
+
+        it("should use browser CSS LTR when semantic direction is LTR", () => {
+            const reverse = resolveSidebarLayoutReverse({
+                semanticDirection: "ltr",
+                browserCssDirection: "ltr"
+            });
+            expect(reverse).toBe(false);
+
+            const baseClass = resolveSidebarLayoutBaseClass({
+                semanticDirection: "ltr",
+                browserCssDirection: "ltr"
+            });
+            expect(baseClass).toContain("flex-row");
+            expect(baseClass).not.toContain("flex-row-reverse");
+        });
+
+        it("should compensate with flex-row-reverse when browser CSS is RTL and semantic is LTR", () => {
+            const reverse = resolveSidebarLayoutReverse({
+                semanticDirection: "ltr",
+                browserCssDirection: "rtl"
+            });
+            expect(reverse).toBe(true);
+
+            const baseClass = resolveSidebarLayoutBaseClass({
+                semanticDirection: "ltr",
+                browserCssDirection: "rtl"
+            });
+            expect(baseClass).toContain("flex-row-reverse");
+        });
+
+        it("should compensate with flex-row-reverse when browser CSS is RTL and semantic is RTL", () => {
+            const reverse = resolveSidebarLayoutReverse({
+                semanticDirection: "rtl",
+                browserCssDirection: "rtl"
+            });
+            expect(reverse).toBe(true);
+
+            const baseClass = resolveSidebarLayoutBaseClass({
+                semanticDirection: "rtl",
+                browserCssDirection: "rtl"
+            });
+            expect(baseClass).toContain("flex-row-reverse");
+        });
+
+        it("should use flex-row when browser CSS is LTR and semantic is RTL", () => {
+            const reverse = resolveSidebarLayoutReverse({
+                semanticDirection: "rtl",
+                browserCssDirection: "ltr"
+            });
+            expect(reverse).toBe(false);
+
+            const baseClass = resolveSidebarLayoutBaseClass({
+                semanticDirection: "rtl",
+                browserCssDirection: "ltr"
+            });
+            expect(baseClass).toContain("flex-row");
+            expect(baseClass).not.toContain("flex-row-reverse");
+        });
+    });
+
+    describe("CSS direction observation and churn isolation", () => {
+        it("should not wake sidebar layout compensation on unrelated document class churn", async () => {
+            const distantNode = document.createElement("div");
+            distantNode.className = "unrelated-distant-node";
+            document.body.appendChild(distantNode);
+
+            try {
+                const initialRefreshCount = component.layout().compensationRefreshCount();
+
+                // Mutate class on distant node
+                distantNode.className = "unrelated-distant-node modified-class";
+                distantNode.style.color = "red";
+                await new Promise(resolve => setTimeout(resolve, 30));
+
+                expect(component.layout().compensationRefreshCount()).toBe(initialRefreshCount);
+            } finally {
+                document.body.removeChild(distantNode);
+            }
+        });
+
+        it("should update compensation when ancestor class/style direction changes", async () => {
+            const layoutEl = fixture.nativeElement.querySelector("mona-sidebar-layout") as HTMLElement;
+            const container = fixture.nativeElement as HTMLElement;
+
+            container.style.direction = "rtl";
+            await new Promise(resolve => setTimeout(resolve, 50));
+            fixture.detectChanges();
+
+            expect(layoutEl.classList.contains("flex-row-reverse")).toBe(true);
+
+            container.style.direction = "ltr";
+            await new Promise(resolve => setTimeout(resolve, 50));
+            fixture.detectChanges();
+
+            expect(layoutEl.classList.contains("flex-row-reverse")).toBe(false);
+        });
+
+        it("should re-evaluate compensation on window resize", async () => {
+            const initialCount = component.layout().compensationRefreshCount();
+            window.dispatchEvent(new Event("resize"));
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            expect(component.layout().compensationRefreshCount()).toBeGreaterThan(initialCount);
+        });
+
+        it("should observe CSS direction change when ancestor is inside a ShadowRoot", async () => {
+            const shadowFixture = TestBed.createComponent(ShadowLayoutHostComponent);
+            document.body.appendChild(shadowFixture.nativeElement);
+            shadowFixture.detectChanges();
+
+            const layout = shadowFixture.componentInstance.layout();
+            const shadowContainer = shadowFixture.nativeElement.shadowRoot?.querySelector(".shadow-container") as HTMLElement;
+
+            try {
+                expect(layout).toBeTruthy();
+                expect(shadowContainer).toBeTruthy();
+
+                const initialCount = layout.compensationRefreshCount();
+
+                // Mutate style on shadowContainer (inside ShadowRoot)
+                shadowContainer.style.direction = "rtl";
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                expect(layout.compensationRefreshCount()).toBeGreaterThan(initialCount);
+
+                const afterContainerCount = layout.compensationRefreshCount();
+
+                // Mutate style on outer shadow host element (traversed out of ShadowRoot)
+                shadowFixture.nativeElement.style.direction = "rtl";
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                expect(layout.compensationRefreshCount()).toBeGreaterThan(afterContainerCount);
+            } finally {
+                shadowFixture.destroy();
+                document.body.removeChild(shadowFixture.nativeElement);
+            }
+        });
     });
 });
