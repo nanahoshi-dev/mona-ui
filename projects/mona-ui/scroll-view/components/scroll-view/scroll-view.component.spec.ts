@@ -1784,6 +1784,191 @@ describe("ScrollViewComponent", () => {
             }
         });
 
+        it("releases implicit pointer capture on accepted touch pointerdown", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                arrowBtn.hasPointerCapture = vi.fn().mockReturnValue(true);
+                arrowBtn.releasePointerCapture = vi.fn();
+                document.body.appendChild(arrowBtn);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 2000
+                } as unknown as HTMLUListElement;
+
+                const down = new PointerEvent("pointerdown", {
+                    button: 0,
+                    isPrimary: true,
+                    pointerId: 42,
+                    pointerType: "touch"
+                });
+                Object.defineProperty(down, "currentTarget", { value: arrowBtn });
+                component["onPagerPointerDown"](down, mockList, "right");
+
+                expect(arrowBtn.hasPointerCapture).toHaveBeenCalledWith(42);
+                expect(arrowBtn.releasePointerCapture).toHaveBeenCalledWith(42);
+                expect(arrowBtn.releasePointerCapture).toHaveBeenCalledTimes(1);
+
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2);
+
+                // Release on control
+                const up = new PointerEvent("pointerup", { pointerId: 42, pointerType: "touch" });
+                Object.defineProperty(up, "target", { value: arrowBtn });
+                document.dispatchEvent(up);
+
+                // Trailing click should be suppressed
+                const click = new PointerEvent("click", { button: 0, detail: 1, pointerId: 42 });
+                component["onPagerClick"](click, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2); // no extra step
+
+                arrowBtn.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("releases implicit pointer capture on rejected touch pointerdown", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                arrowBtn.hasPointerCapture = vi.fn().mockReturnValue(true);
+                arrowBtn.releasePointerCapture = vi.fn();
+                const outsideEl = document.createElement("div");
+                document.body.appendChild(arrowBtn);
+                document.body.appendChild(outsideEl);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 2000
+                } as unknown as HTMLUListElement;
+
+                // Pointer A active
+                const downA = new PointerEvent("pointerdown", {
+                    button: 0,
+                    isPrimary: true,
+                    pointerId: 1,
+                    pointerType: "touch"
+                });
+                Object.defineProperty(downA, "currentTarget", { value: arrowBtn });
+                component["onPagerPointerDown"](downA, mockList, "right");
+
+                // Pointer B rejected
+                const downB = new PointerEvent("pointerdown", {
+                    button: 0,
+                    isPrimary: true,
+                    pointerId: 2,
+                    pointerType: "touch"
+                });
+                Object.defineProperty(downB, "currentTarget", { value: arrowBtn });
+                component["onPagerPointerDown"](downB, mockList, "right");
+
+                expect(arrowBtn.hasPointerCapture).toHaveBeenCalledWith(2);
+                expect(arrowBtn.releasePointerCapture).toHaveBeenCalledWith(2);
+
+                // B releases outside
+                const upB = new PointerEvent("pointerup", { pointerId: 2, pointerType: "touch" });
+                Object.defineProperty(upB, "target", { value: outsideEl });
+                document.dispatchEvent(upB);
+
+                // Release A
+                const upA = new PointerEvent("pointerup", { pointerId: 1, pointerType: "touch" });
+                Object.defineProperty(upA, "target", { value: outsideEl });
+                document.dispatchEvent(upA);
+
+                // Because B released away, B's record was deleted. A click with B's pointerId is a normal click (not swallowed as rejected)
+                const clickB = new PointerEvent("click", { button: 0, detail: 1, pointerId: 2 });
+                component["onPagerClick"](clickB, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(1);
+
+                arrowBtn.remove();
+                outsideEl.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("does not call releasePointerCapture when hasPointerCapture returns false (mouse path)", () => {
+            const arrowBtn = document.createElement("button");
+            arrowBtn.hasPointerCapture = vi.fn().mockReturnValue(false);
+            arrowBtn.releasePointerCapture = vi.fn();
+            document.body.appendChild(arrowBtn);
+
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 2000
+            } as unknown as HTMLUListElement;
+
+            const down = new PointerEvent("pointerdown", {
+                button: 0,
+                isPrimary: true,
+                pointerId: 10,
+                pointerType: "mouse"
+            });
+            Object.defineProperty(down, "currentTarget", { value: arrowBtn });
+            component["onPagerPointerDown"](down, mockList, "right");
+
+            expect(arrowBtn.hasPointerCapture).toHaveBeenCalledWith(10);
+            expect(arrowBtn.releasePointerCapture).not.toHaveBeenCalled();
+
+            const up = new PointerEvent("pointerup", { pointerId: 10, pointerType: "mouse" });
+            document.dispatchEvent(up);
+            arrowBtn.remove();
+        });
+
+        it("proceeds normally without throwing if releasePointerCapture throws", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                arrowBtn.hasPointerCapture = vi.fn().mockReturnValue(true);
+                arrowBtn.releasePointerCapture = vi.fn().mockImplementation(() => {
+                    throw new DOMException("The element does not have capture.", "NotFoundError");
+                });
+                document.body.appendChild(arrowBtn);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 2000
+                } as unknown as HTMLUListElement;
+
+                const down = new PointerEvent("pointerdown", {
+                    button: 0,
+                    isPrimary: true,
+                    pointerId: 20,
+                    pointerType: "touch"
+                });
+                Object.defineProperty(down, "currentTarget", { value: arrowBtn });
+
+                expect(() => {
+                    component["onPagerPointerDown"](down, mockList, "right");
+                }).not.toThrow();
+
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2);
+
+                const up = new PointerEvent("pointerup", { pointerId: 20, pointerType: "touch" });
+                Object.defineProperty(up, "target", { value: arrowBtn });
+                document.dispatchEvent(up);
+
+                arrowBtn.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
         it("scrollend support path does not use wall-clock expiry and clears on scrollend", () => {
             vi.useFakeTimers();
             try {
@@ -2360,6 +2545,185 @@ describe("ScrollViewComponent", () => {
             expect(observer.observe).toHaveBeenCalledWith(pager);
 
             localFixture.destroy();
+        });
+    });
+
+    describe("active index normalization and reconciliation", () => {
+        it("normalizes active index and reconciles model on non-infinite data shrink", () => {
+            const data40 = Array.from({ length: 40 }, (_, i) => `Page ${i + 1}`);
+            fixture.componentRef.setInput("data", data40);
+            fixture.componentRef.setInput("infinite", false);
+            fixture.componentRef.setInput("pageable", true);
+            fixture.componentRef.setInput("arrows", true);
+            fixture.componentRef.setInput("index", 30);
+            fixture.detectChanges();
+
+            expect(component["viewIndex"]()).toBe(30);
+            expect(component.index()).toBe(30);
+
+            const host = fixture.nativeElement as HTMLElement;
+            expect(host.getAttribute("aria-label")).toBe("Page 31 of 40");
+            let activeSlide = host.querySelector("li[role='group']") as HTMLLIElement;
+            expect(activeSlide).not.toBeNull();
+            expect(activeSlide.getAttribute("aria-label")).toBe("Page 31 of 40");
+
+            // Shrink data to 8 items
+            const data8 = Array.from({ length: 8 }, (_, i) => `Page ${i + 1}`);
+            fixture.componentRef.setInput("data", data8);
+            fixture.detectChanges();
+
+            // After data shrink from 40 to 8:
+            // 1. viewIndex() normalized to 7 (8 - 1)
+            expect(component["viewIndex"]()).toBe(7);
+            // 2. model index() is reconciled to 7
+            expect(component.index()).toBe(7);
+            // 3. One active slide exists and is not blank
+            activeSlide = host.querySelector("li[role='group']") as HTMLLIElement;
+            expect(activeSlide).not.toBeNull();
+            expect(activeSlide.getAttribute("aria-label")).toBe("Page 8 of 8");
+            // 4. Host aria-label is updated
+            expect(host.getAttribute("aria-label")).toBe("Page 8 of 8");
+            // 5. Exactly one pager item has aria-current=true
+            const currentPagerButtons = host.querySelectorAll("button[aria-current='true']");
+            expect(currentPagerButtons.length).toBe(1);
+            expect(currentPagerButtons[0].getAttribute("aria-label")).toBe("Page 8");
+            // 6. Next arrow is hidden at the last page; Previous arrow is visible
+            const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
+            const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
+            expect(prevArrow.classList.contains("hidden")).toBe(false);
+            expect(nextArrow.classList.contains("hidden")).toBe(true);
+        });
+
+        it("clamps active index and reconciles model when data shrinks to one item", () => {
+            const data10 = Array.from({ length: 10 }, (_, i) => `Page ${i + 1}`);
+            fixture.componentRef.setInput("data", data10);
+            fixture.componentRef.setInput("infinite", false);
+            fixture.componentRef.setInput("pageable", true);
+            fixture.componentRef.setInput("arrows", true);
+            fixture.componentRef.setInput("index", 5);
+            fixture.detectChanges();
+
+            // Shrink to 1 item
+            fixture.componentRef.setInput("data", ["Only Page"]);
+            fixture.detectChanges();
+
+            expect(component["viewIndex"]()).toBe(0);
+            expect(component.index()).toBe(0);
+
+            const host = fixture.nativeElement as HTMLElement;
+            expect(host.getAttribute("aria-label")).toBe("Page 1 of 1");
+            const activeSlide = host.querySelector("li[role='group']") as HTMLLIElement;
+            expect(activeSlide).not.toBeNull();
+            expect(activeSlide.getAttribute("aria-label")).toBe("Page 1 of 1");
+
+            // Navigation arrows are hidden for single item
+            const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
+            const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
+            expect(prevArrow.classList.contains("hidden")).toBe(true);
+            expect(nextArrow.classList.contains("hidden")).toBe(true);
+
+            // Navigation is inert
+            component["navigateLeft"](false);
+            expect(component.index()).toBe(0);
+            component["navigateRight"](false);
+            expect(component.index()).toBe(0);
+        });
+
+        it("clears active slide and disables impossible ARIA labels when data shrinks to empty", () => {
+            fixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
+            fixture.componentRef.setInput("infinite", false);
+            fixture.componentRef.setInput("pageable", true);
+            fixture.componentRef.setInput("arrows", true);
+            fixture.componentRef.setInput("index", 1);
+            fixture.detectChanges();
+
+            // Shrink to empty
+            fixture.componentRef.setInput("data", []);
+            fixture.detectChanges();
+
+            expect(component["viewIndex"]()).toBe(0);
+            const host = fixture.nativeElement as HTMLElement;
+            expect(host.getAttribute("aria-label")).toBeNull();
+            const activeSlides = host.querySelectorAll("li[role='group']");
+            expect(activeSlides.length).toBe(0);
+            const currentPagerButtons = host.querySelectorAll("button[aria-current='true']");
+            expect(currentPagerButtons.length).toBe(0);
+
+            // Arrows are hidden
+            const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
+            const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
+            expect(prevArrow.classList.contains("hidden")).toBe(true);
+            expect(nextArrow.classList.contains("hidden")).toBe(true);
+
+            // Navigation methods are inert
+            component["navigateLeft"](false);
+            component["navigateRight"](false);
+        });
+
+        it("clamps invalid initial finite index and reconciles model", () => {
+            fixture.componentRef.setInput("data", ["A", "B", "C"]);
+            fixture.componentRef.setInput("infinite", false);
+
+            // index = -1
+            fixture.componentRef.setInput("index", -1);
+            fixture.detectChanges();
+            expect(component["viewIndex"]()).toBe(0);
+            expect(component.index()).toBe(0);
+
+            // index = 3 (>= itemCount)
+            fixture.componentRef.setInput("index", 3);
+            fixture.detectChanges();
+            expect(component["viewIndex"]()).toBe(2);
+            expect(component.index()).toBe(2);
+
+            // index = 100
+            fixture.componentRef.setInput("index", 100);
+            fixture.detectChanges();
+            expect(component["viewIndex"]()).toBe(2);
+            expect(component.index()).toBe(2);
+        });
+
+        it("wraps negative infinite index using positive modulo and reconciles model", () => {
+            fixture.componentRef.setInput("data", ["A", "B", "C"]);
+            fixture.componentRef.setInput("infinite", true);
+
+            // index = -1 -> wraps to 2
+            fixture.componentRef.setInput("index", -1);
+            fixture.detectChanges();
+            expect(component["viewIndex"]()).toBe(2);
+            expect(component.index()).toBe(2);
+
+            // index = -4 -> wraps to 2
+            fixture.componentRef.setInput("index", -4);
+            fixture.detectChanges();
+            expect(component["viewIndex"]()).toBe(2);
+            expect(component.index()).toBe(2);
+
+            // index = 5 -> wraps to 2
+            fixture.componentRef.setInput("index", 5);
+            fixture.detectChanges();
+            expect(component["viewIndex"]()).toBe(2);
+            expect(component.index()).toBe(2);
+        });
+
+        it("navigates from canonical normalized state rather than stale invalid model index", () => {
+            fixture.componentRef.setInput("data", ["A", "B", "C"]);
+            fixture.componentRef.setInput("infinite", false);
+            fixture.componentRef.setInput("index", 10);
+            fixture.detectChanges();
+
+            expect(component["viewIndex"]()).toBe(2);
+            expect(component.index()).toBe(2);
+
+            // Navigate left moves to 1 (not 9)
+            component["navigateLeft"](false);
+            expect(component.index()).toBe(1);
+            expect(component["viewIndex"]()).toBe(1);
+
+            // Navigate right moves back to 2
+            component["navigateRight"](false);
+            expect(component.index()).toBe(2);
+            expect(component["viewIndex"]()).toBe(2);
         });
     });
 });

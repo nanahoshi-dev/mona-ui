@@ -7,6 +7,7 @@ import {
     contentChild,
     DestroyRef,
     DOCUMENT,
+    effect,
     ElementRef,
     inject,
     input,
@@ -62,6 +63,20 @@ interface PagerScrollContext {
     readonly element: HTMLUListElement;
     readonly maxScroll: number;
     target: number;
+}
+
+function normalizeScrollViewIndex(rawIndex: number, itemCount: number, infinite: boolean): number {
+    if (itemCount <= 0) {
+        return 0;
+    }
+
+    const finiteIndex = Number.isFinite(rawIndex) ? Math.trunc(rawIndex) : 0;
+
+    if (infinite) {
+        return ((finiteIndex % itemCount) + itemCount) % itemCount;
+    }
+
+    return Math.max(0, Math.min(itemCount - 1, finiteIndex));
 }
 
 @Component({
@@ -155,13 +170,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     readonly #scroll$ = new Subject<void>();
     readonly #suppressedPagerClickPointerIds = new Set<number>();
     readonly #viewIndex = computed(() => {
-        const infinite = this.infinite();
-        const index = this.index();
-        const viewData = this.viewData();
-        if (viewData.length === 0) {
-            return 0;
-        }
-        return infinite ? index % viewData.length : index;
+        return normalizeScrollViewIndex(this.index(), this.itemCount(), this.infinite());
     });
     #activePagerPointerControl: HTMLElement | null = null;
     #activePagerPointerId: number | null = null;
@@ -204,7 +213,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         return effectiveDir === "right" ? "slide-out-to-left" : "slide-out-to-right";
     });
     protected readonly leftArrowClass = computed(() => {
-        const hidden = !this.arrows() || !(this.infinite() || this.index() !== 0);
+        const count = this.itemCount();
+        const hidden = !this.arrows() || count <= 1 || !(this.infinite() || this.viewIndex() !== 0);
         const side = this.isRtl() ? "right" : "left";
         return scrollViewArrowThemeVariants({ hidden, side });
     });
@@ -229,7 +239,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     });
     protected readonly pagerListElementRef = viewChild<ElementRef<HTMLUListElement>>("pagerListElement");
     protected readonly rightArrowClass = computed(() => {
-        const hidden = !this.arrows() || !(this.infinite() || this.index() !== this.itemCount() - 1);
+        const count = this.itemCount();
+        const hidden = !this.arrows() || count <= 1 || !(this.infinite() || this.viewIndex() !== count - 1);
         const side = this.isRtl() ? "left" : "right";
         return scrollViewArrowThemeVariants({ hidden, side });
     });
@@ -326,6 +337,17 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     public readonly width = input.required<string | number>();
 
     public constructor() {
+        effect(() => {
+            const rawIndex = this.index();
+            const count = this.itemCount();
+            if (count === 0) {
+                return;
+            }
+            const normalizedIndex = this.#viewIndex();
+            if (rawIndex !== normalizedIndex) {
+                this.index.set(normalizedIndex);
+            }
+        });
         this.#directionFromIndex = toSignal(
             toObservable(this.#viewIndex).pipe(
                 startWith(0),
@@ -472,7 +494,13 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         if (!event.isPrimary || event.button !== 0) {
             return;
         }
-        const control = (event.currentTarget ?? event.target) as HTMLElement | null;
+        const currentTarget = event.currentTarget as HTMLElement | null;
+        const target = event.target as HTMLElement | null;
+        this.#releasePagerPointerCapture(currentTarget, event.pointerId);
+        if (target !== currentTarget) {
+            this.#releasePagerPointerCapture(target, event.pointerId);
+        }
+        const control = (currentTarget ?? target) as HTMLElement | null;
         if (this.#activePagerPointerId !== null) {
             this.#rejectedPagerPointers.set(event.pointerId, {
                 control,
@@ -616,6 +644,24 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         );
     }
 
+    #releasePagerPointerCapture(control: HTMLElement | null, pointerId: number): void {
+        if (
+            control == null ||
+            typeof control.hasPointerCapture !== "function" ||
+            typeof control.releasePointerCapture !== "function"
+        ) {
+            return;
+        }
+
+        try {
+            if (control.hasPointerCapture(pointerId)) {
+                control.releasePointerCapture(pointerId);
+            }
+        } catch {
+            // Do not let an implementation-specific capture race break pager interaction.
+        }
+    }
+
     #resetPagerScrollState(): void {
         if (this.#pagerScrollCompletionCleanup) {
             this.#pagerScrollCompletionCleanup();
@@ -699,8 +745,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     }
 
     private navigateLeft(infinite: boolean): void {
-        const currentIndex = this.index();
-        const dataLength = this.viewData().length;
+        const currentIndex = this.#viewIndex();
+        const dataLength = this.itemCount();
         if (dataLength === 0) {
             return;
         }
@@ -712,8 +758,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     }
 
     private navigateRight(infinite: boolean): void {
-        const currentIndex = this.index();
-        const dataLength = this.viewData().length;
+        const currentIndex = this.#viewIndex();
+        const dataLength = this.itemCount();
         if (dataLength === 0) {
             return;
         }
