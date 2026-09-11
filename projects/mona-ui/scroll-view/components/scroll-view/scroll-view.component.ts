@@ -163,6 +163,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
         return infinite ? index % viewData.length : index;
     });
+    #activePagerPointerControl: HTMLElement | null = null;
     #activePagerPointerId: number | null = null;
     #continuousTicked = false;
     #pagerScrollCompletionCleanup: (() => void) | null = null;
@@ -483,6 +484,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.#rejectedPagerPointers.delete(event.pointerId);
         this.#suppressedPagerClickPointerIds.delete(event.pointerId);
         this.#activePagerPointerId = event.pointerId;
+        this.#activePagerPointerControl = control;
         this.#continuousTicked = false;
 
         this.#ensureDocumentPointerListeners();
@@ -573,11 +575,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
                 if (!isUp) {
                     this.#rejectedPagerPointers.delete(event.pointerId);
                 } else {
-                    const targetNode = event.target as Node | null;
-                    const isWithinControl =
-                        rejected.control == null ||
-                        (targetNode != null && rejected.control.contains(targetNode)) ||
-                        (typeof event.composedPath === "function" && event.composedPath().includes(rejected.control));
+                    const isWithinControl = this.#isPointerReleaseWithinControl(event, rejected.control ?? null);
 
                     if (isWithinControl) {
                         rejected.phase = "awaiting-click";
@@ -590,21 +588,32 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
             return;
         }
         this.#scroll$.next();
-        if (isUp && this.#continuousTicked) {
+        const shouldSuppressTrailingClick =
+            isUp &&
+            this.#continuousTicked &&
+            this.#isPointerReleaseWithinControl(event, this.#activePagerPointerControl);
+
+        if (shouldSuppressTrailingClick) {
             this.#suppressedPagerClickPointerIds.add(event.pointerId);
         } else {
             this.#suppressedPagerClickPointerIds.delete(event.pointerId);
         }
         this.#continuousTicked = false;
         this.#activePagerPointerId = null;
+        this.#activePagerPointerControl = null;
         this.#cleanupDocumentPointerListenersIfNeeded();
     }
 
-    #updatePagerArrowVisibility(list: HTMLUListElement, pager: HTMLElement): void {
-        const requiredWidth = list.scrollWidth;
-        const arrowFreeAvailableWidth = pager.clientWidth;
+    #isPointerReleaseWithinControl(event: PointerEvent, control: HTMLElement | null): boolean {
+        if (control == null) {
+            return true;
+        }
 
-        this.pagerArrowVisible.set(requiredWidth > arrowFreeAvailableWidth);
+        const targetNode = event.target as Node | null;
+        return (
+            (targetNode != null && control.contains(targetNode)) ||
+            (typeof event.composedPath === "function" && event.composedPath().includes(control))
+        );
     }
 
     #resetPagerScrollState(): void {
@@ -668,8 +677,16 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.#scroll$.next();
         this.#continuousTicked = false;
         this.#activePagerPointerId = null;
+        this.#activePagerPointerControl = null;
         this.#suppressedPagerClickPointerIds.clear();
         this.#rejectedPagerPointers.clear();
+    }
+
+    #updatePagerArrowVisibility(list: HTMLUListElement, pager: HTMLElement): void {
+        const requiredWidth = list.scrollWidth;
+        const arrowFreeAvailableWidth = pager.clientWidth;
+
+        this.pagerArrowVisible.set(requiredWidth > arrowFreeAvailableWidth);
     }
 
     private navigate(direction: ScrollDirection, infinite: boolean): void {

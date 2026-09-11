@@ -1611,6 +1611,179 @@ describe("ScrollViewComponent", () => {
             outsideEl.remove();
         });
 
+        it("does not leave trailing-click suppression when active long hold releases outside originating arrow", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                const outsideEl = document.createElement("div");
+                document.body.appendChild(arrowBtn);
+                document.body.appendChild(outsideEl);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+
+                // Pointer A starts hold on arrowBtn
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                Object.defineProperty(pointerADown, "currentTarget", { value: arrowBtn });
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+
+                vi.advanceTimersByTime(180); // 3 repeat ticks
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(3);
+
+                // Pointer A moves outside and releases on outsideEl
+                const pointerAUpAway = new PointerEvent("pointerup", { pointerId: 10 });
+                Object.defineProperty(pointerAUpAway, "target", { value: outsideEl });
+                document.dispatchEvent(pointerAUpAway);
+
+                // Because A released away, no click should be suppressed!
+                // 1. Later click with pointerId 10 is NOT suppressed
+                const laterClickA = new PointerEvent("click", { button: 0, detail: 1, pointerId: 10 });
+                component["onPagerClick"](laterClickA, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(4);
+
+                // 2. Compatibility MouseEvent (without pointerId, detail=1) is NOT suppressed
+                const compatClick = new MouseEvent("click", { button: 0, detail: 1 });
+                component["onPagerClick"](compatClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(5);
+
+                arrowBtn.remove();
+                outsideEl.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("suppresses trailing click when active long hold releases on originating arrow", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                document.body.appendChild(arrowBtn);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+
+                // Pointer A starts hold on arrowBtn
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                Object.defineProperty(pointerADown, "currentTarget", { value: arrowBtn });
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+
+                vi.advanceTimersByTime(180); // 3 repeat ticks
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(3);
+
+                // Pointer A releases on arrowBtn
+                const pointerAUpOnControl = new PointerEvent("pointerup", { pointerId: 10 });
+                Object.defineProperty(pointerAUpOnControl, "target", { value: arrowBtn });
+                document.dispatchEvent(pointerAUpOnControl);
+
+                // Trailing click from A arrives -> suppressed (0 additional steps)
+                const trailingClick = new PointerEvent("click", { button: 0, detail: 1, pointerId: 10 });
+                component["onPagerClick"](trailingClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(3);
+
+                arrowBtn.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("does not suppress later click when active hold is canceled", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                document.body.appendChild(arrowBtn);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+
+                // Pointer A starts hold on arrowBtn
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                Object.defineProperty(pointerADown, "currentTarget", { value: arrowBtn });
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+
+                vi.advanceTimersByTime(120); // 2 ticks
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2);
+
+                // Pointer A cancels
+                const pointerACancel = new PointerEvent("pointercancel", { pointerId: 10 });
+                document.dispatchEvent(pointerACancel);
+
+                // A subsequent click with pointerId 10 or compatibility click is NOT suppressed
+                const click = new PointerEvent("click", { button: 0, detail: 1, pointerId: 10 });
+                component["onPagerClick"](click, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(3);
+
+                arrowBtn.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("prevents accumulation of stale suppression state across multiple touch/pen release-away gestures", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                const outsideEl = document.createElement("div");
+                document.body.appendChild(arrowBtn);
+                document.body.appendChild(outsideEl);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 2000
+                } as unknown as HTMLUListElement;
+
+                // Multiple distinct touch/pen pointer IDs perform repeated hold followed by release away
+                const touchPointerIds = [101, 102, 103, 104, 105];
+                let totalTicks = 0;
+
+                for (const pid of touchPointerIds) {
+                    const down = new PointerEvent("pointerdown", {
+                        button: 0,
+                        isPrimary: true,
+                        pointerId: pid,
+                        pointerType: "touch"
+                    });
+                    Object.defineProperty(down, "currentTarget", { value: arrowBtn });
+                    component["onPagerPointerDown"](down, mockList, "right");
+
+                    vi.advanceTimersByTime(120); // 2 ticks per gesture
+                    totalTicks += 2;
+                    expect(mockList.scrollTo).toHaveBeenCalledTimes(totalTicks);
+
+                    const upAway = new PointerEvent("pointerup", { pointerId: pid, pointerType: "touch" });
+                    Object.defineProperty(upAway, "target", { value: outsideEl });
+                    document.dispatchEvent(upAway);
+                }
+
+                // Verify suppression set is empty: a later legacy compatibility click (no pointerId) is not swallowed
+                const compatClick = new MouseEvent("click", { button: 0, detail: 1 });
+                component["onPagerClick"](compatClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(totalTicks + 1);
+
+                arrowBtn.remove();
+                outsideEl.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
         it("scrollend support path does not use wall-clock expiry and clears on scrollend", () => {
             vi.useFakeTimers();
             try {
