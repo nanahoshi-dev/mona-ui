@@ -59,6 +59,7 @@ interface RejectedPagerPointer {
 interface PagerScrollContext {
     readonly direction: "ltr" | "rtl";
     readonly element: HTMLUListElement;
+    readonly maxScroll: number;
     target: number;
 }
 
@@ -565,9 +566,11 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
 
     #scrollPagerBy(element: HTMLUListElement, direction: ScrollDirection): void {
         const currentDirection = this.isRtl() ? "rtl" : "ltr";
+        const maxScroll = Math.max(0, (element.scrollWidth ?? 0) - (element.clientWidth ?? 0));
         const sameContext =
             this.#pagerScrollContext?.element === element &&
-            this.#pagerScrollContext.direction === currentDirection;
+            this.#pagerScrollContext.direction === currentDirection &&
+            this.#pagerScrollContext.maxScroll === maxScroll;
 
         const currentScrollLeft = element.scrollLeft ?? 0;
         const base = sameContext ? this.#pagerScrollContext!.target : currentScrollLeft;
@@ -578,18 +581,24 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
         const target = base + offset;
 
-        const maxScroll = Math.max(0, (element.scrollWidth ?? 0) - (element.clientWidth ?? 0));
-        let clampedTarget = target;
-        if (maxScroll > 0) {
-            if (currentDirection === "ltr") {
-                clampedTarget = Math.max(0, Math.min(maxScroll, target));
-            } else {
-                clampedTarget = Math.max(-maxScroll, Math.min(0, target));
-            }
+        const clampedTarget =
+            currentDirection === "ltr"
+                ? Math.max(0, Math.min(maxScroll, target))
+                : Math.max(-maxScroll, Math.min(0, target));
+
+        if (!sameContext && clampedTarget === currentScrollLeft) {
+            this.#resetPagerScrollState();
+            return;
         }
+
+        if (sameContext && clampedTarget === this.#pagerScrollContext!.target) {
+            return;
+        }
+
         this.#pagerScrollContext = {
             direction: currentDirection,
             element,
+            maxScroll,
             target: clampedTarget
         };
 

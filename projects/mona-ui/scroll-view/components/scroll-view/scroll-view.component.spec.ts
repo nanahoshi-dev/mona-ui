@@ -257,7 +257,12 @@ describe("ScrollViewComponent", () => {
         // Pager scroll delta maintains LTR semantics (negative for left, positive for right)
         vi.useFakeTimers();
         try {
-            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 200,
+                scrollWidth: 1000
+            } as unknown as HTMLUListElement;
             component["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "left");
             vi.advanceTimersByTime(60);
             expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: -100 });
@@ -331,7 +336,12 @@ describe("ScrollViewComponent", () => {
         // Pager scroll delta inverts in RTL (positive for left, negative for right)
         vi.useFakeTimers();
         try {
-            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: -200,
+                scrollWidth: 1000
+            } as unknown as HTMLUListElement;
             component["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "left");
             vi.advanceTimersByTime(60);
             expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
@@ -408,7 +418,7 @@ describe("ScrollViewComponent", () => {
         it("executes single scroll on primary pointer short click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
                 const upEvent = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
                 const clickEvent = new MouseEvent("click", { detail: 1, button: 0 });
@@ -428,7 +438,7 @@ describe("ScrollViewComponent", () => {
         it("executes repeated hold scrolling and suppresses trailing pointer click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
                 const upEvent = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
                 const clickEvent = new MouseEvent("click", { detail: 1, button: 0 });
@@ -450,7 +460,7 @@ describe("ScrollViewComponent", () => {
         it("rejects non-primary mouse button on pointerdown and click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
                 const rightDown = new PointerEvent("pointerdown", { isPrimary: true, button: 2, pointerId: 1 });
                 const middleDown = new PointerEvent("pointerdown", { isPrimary: true, button: 1, pointerId: 1 });
                 const rightClick = new MouseEvent("click", { detail: 1, button: 2 });
@@ -474,7 +484,7 @@ describe("ScrollViewComponent", () => {
         it("rejects non-primary pointer", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
                 const nonPrimaryDown = new PointerEvent("pointerdown", { isPrimary: false, button: 0, pointerId: 2 });
 
                 component["onPagerPointerDown"](nonPrimaryDown, mockList, "right");
@@ -488,7 +498,7 @@ describe("ScrollViewComponent", () => {
         it("respects pointerId ownership during hold release", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
                 const wrongUp = new PointerEvent("pointerup", { pointerId: 11 });
                 const matchingUp = new PointerEvent("pointerup", { pointerId: 10 });
@@ -514,7 +524,7 @@ describe("ScrollViewComponent", () => {
         it("stops hold on pointercancel and preserves subsequent keyboard activation", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
                 const cancelEvent = new PointerEvent("pointercancel", { pointerId: 10 });
                 const keyboardClick = new MouseEvent("click", { detail: 0, button: 0 });
@@ -539,7 +549,7 @@ describe("ScrollViewComponent", () => {
         it("preserves keyboard activation even after pointer release without generated click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
                 const upEvent = new PointerEvent("pointerup", { pointerId: 10 });
                 const keyboardClick = new MouseEvent("click", { detail: 0, button: 0 });
@@ -560,7 +570,7 @@ describe("ScrollViewComponent", () => {
         });
 
         it("executes two rapid primary short clicks as two independent scroll steps", () => {
-            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
             const down1 = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
             const up1 = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
             const click1 = new MouseEvent("click", { detail: 1, button: 0 });
@@ -581,7 +591,7 @@ describe("ScrollViewComponent", () => {
         });
 
         it("executes rapid alternating arrow clicks without losing steps and respects RTL inversion", () => {
-            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
             const clickRight = new MouseEvent("click", { detail: 1, button: 0 });
             const clickLeft = new MouseEvent("click", { detail: 1, button: 0 });
 
@@ -602,7 +612,7 @@ describe("ScrollViewComponent", () => {
         });
 
         it("executes rapid keyboard activations immediately and independently", () => {
-            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
             const keyboardClick1 = new MouseEvent("click", { detail: 0, button: 0 });
             const keyboardClick2 = new MouseEvent("click", { detail: 0, button: 0 });
 
@@ -615,7 +625,7 @@ describe("ScrollViewComponent", () => {
         it("preserves accepted short click when followed immediately by a continuous hold", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
                 const click = new MouseEvent("click", { detail: 1, button: 0 });
                 const holdDown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 5 });
                 const holdUp = new PointerEvent("pointerup", { pointerId: 5 });
@@ -645,7 +655,13 @@ describe("ScrollViewComponent", () => {
         it("rejects cross-pointer acquisition while an active hold exists and suppresses rejected pointer click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollTo: vi.fn(), scrollBy: vi.fn(), scrollLeft: 0 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const pointerADown = new PointerEvent("pointerdown", {
                     isPrimary: true,
                     button: 0,
@@ -710,7 +726,13 @@ describe("ScrollViewComponent", () => {
         it("does not allow an unrelated pointer click to consume owner trailing-click suppression", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollTo: vi.fn(), scrollBy: vi.fn(), scrollLeft: 0 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const pointerADown = new PointerEvent("pointerdown", {
                     isPrimary: true,
                     button: 0,
@@ -749,7 +771,13 @@ describe("ScrollViewComponent", () => {
         });
 
         it("accumulates intended scroll target across rapid consecutive clicks", () => {
-            const mockList = { scrollTo: vi.fn(), scrollBy: vi.fn(), scrollLeft: 0 } as unknown as HTMLUListElement;
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 1000
+            } as unknown as HTMLUListElement;
             const click1 = new PointerEvent("click", { pointerId: 1, detail: 1, button: 0 });
             const click2 = new PointerEvent("click", { pointerId: 1, detail: 1, button: 0 });
 
@@ -761,7 +789,13 @@ describe("ScrollViewComponent", () => {
         });
 
         it("accumulates intended scroll target across rapid alternating Next and Previous clicks", () => {
-            const mockList = { scrollTo: vi.fn(), scrollBy: vi.fn(), scrollLeft: 0 } as unknown as HTMLUListElement;
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 1000
+            } as unknown as HTMLUListElement;
             const clickNext = new PointerEvent("click", { pointerId: 1, detail: 1, button: 0 });
             const clickPrev = new PointerEvent("click", { pointerId: 1, detail: 1, button: 0 });
 
@@ -784,7 +818,13 @@ describe("ScrollViewComponent", () => {
         it("accumulates intended scroll target during continuous hold ticks", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollTo: vi.fn(), scrollBy: vi.fn(), scrollLeft: 0 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
                 const upEvent = new PointerEvent("pointerup", { pointerId: 1 });
 
@@ -804,7 +844,12 @@ describe("ScrollViewComponent", () => {
         it("allows a new pointer to acquire hold after prior pointer completes", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const pointerADown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
                 const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
                 const pointerBDown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 20 });
@@ -829,7 +874,12 @@ describe("ScrollViewComponent", () => {
         it("allows a new pointer to acquire hold after prior pointer is canceled", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const pointerADown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
                 const pointerACancel = new PointerEvent("pointercancel", { pointerId: 10 });
                 const pointerBDown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 20 });
@@ -929,8 +979,148 @@ describe("ScrollViewComponent", () => {
             expect(mockListB.scrollTo).toHaveBeenNthCalledWith(1, { behavior: "smooth", left: 100 });
         });
 
+        it("never accumulates impossible targets when maxScroll is 0 (zero-range clamping and no-op boundary)", () => {
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 200
+            };
+            const listElement = mockList as unknown as HTMLUListElement;
+            const clickRight = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
+
+            // Clicks when maxScroll = 0 and scrollLeft = 0 are clamped to 0 -> no-op -> no scrollTo call
+            component["onPagerClick"](clickRight, listElement, "right");
+            component["onPagerClick"](clickRight, listElement, "right");
+            component["onPagerClick"](clickRight, listElement, "right");
+
+            expect(mockList.scrollTo).not.toHaveBeenCalled();
+            expect(mockList.scrollBy).not.toHaveBeenCalled();
+        });
+
+        it("resynchronizes cumulative target cleanly on no-overflow to overflow transition", () => {
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 200
+            };
+            const listElement = mockList as unknown as HTMLUListElement;
+            const clickRight = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
+
+            // Attempt while maxScroll = 0
+            component["onPagerClick"](clickRight, listElement, "right");
+            expect(mockList.scrollTo).not.toHaveBeenCalled();
+
+            // Pager contents expand so maxScroll is now 500 (scrollWidth 700 - clientWidth 200)
+            mockList.scrollWidth = 700;
+
+            // First click under new maxScroll must start from actual scrollLeft (0) -> target exactly 100, NOT 200+
+            component["onPagerClick"](clickRight, listElement, "right");
+            expect(mockList.scrollTo).toHaveBeenCalledTimes(1);
+            expect(mockList.scrollTo).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
+        });
+
+        it("resynchronizes cumulative target from actual position when scroll range shrinks", () => {
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 400,
+                scrollTo: vi.fn(),
+                scrollWidth: 1000
+            };
+            const listElement = mockList as unknown as HTMLUListElement;
+            const clickRight = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
+            const clickLeft = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
+
+            // Next from 400 -> target 500 (maxScroll = 800)
+            component["onPagerClick"](clickRight, listElement, "right");
+            expect(mockList.scrollTo).toHaveBeenNthCalledWith(1, { behavior: "smooth", left: 500 });
+
+            // Range shrinks: maxScroll is now 200 (scrollWidth 400 - clientWidth 200), actual scrollLeft clamped to 200
+            mockList.scrollWidth = 400;
+            mockList.scrollLeft = 200;
+
+            // Previous (left) must resynchronize from actual scrollLeft 200 (not stale 500) -> target 100!
+            component["onPagerClick"](clickLeft, listElement, "left");
+            expect(mockList.scrollTo).toHaveBeenNthCalledWith(2, { behavior: "smooth", left: 100 });
+        });
+
+        it("handles zero-range and range shrink with RTL symmetry", () => {
+            vi.spyOn(component as unknown as { isRtl: () => boolean }, "isRtl").mockReturnValue(true);
+
+            // Zero-range in RTL
+            const mockListZero = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 200
+            };
+            const listElementZero = mockListZero as unknown as HTMLUListElement;
+            const clickRight = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
+            const clickLeft = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
+
+            component["onPagerClick"](clickRight, listElementZero, "right");
+            component["onPagerClick"](clickLeft, listElementZero, "left");
+            expect(mockListZero.scrollTo).not.toHaveBeenCalled();
+
+            // Range shrink in RTL:
+            // Large range: scrollWidth 1000, clientWidth 200 (maxScroll 800)
+            // scrollLeft = -400. Next in RTL (right) moves towards negative -> target -500
+            const mockListShrink = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: -400,
+                scrollTo: vi.fn(),
+                scrollWidth: 1000
+            };
+            const listElementShrink = mockListShrink as unknown as HTMLUListElement;
+
+            component["onPagerClick"](clickRight, listElementShrink, "right");
+            expect(mockListShrink.scrollTo).toHaveBeenNthCalledWith(1, { behavior: "smooth", left: -500 });
+
+            // Range shrinks: maxScroll = 200 (scrollWidth 400 - clientWidth 200), scrollLeft clamped to -200
+            mockListShrink.scrollWidth = 400;
+            mockListShrink.scrollLeft = -200;
+
+            // Previous in RTL (left) moves towards positive (0):
+            // base is actual -200 (not stale -500), offset is +100 -> target -100!
+            component["onPagerClick"](clickLeft, listElementShrink, "left");
+            expect(mockListShrink.scrollTo).toHaveBeenNthCalledWith(2, { behavior: "smooth", left: -100 });
+        });
+
+        it("does not restart scroll or extend completion when in-flight boundary target is repeated", () => {
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 300 // maxScroll = 100
+            };
+            const listElement = mockList as unknown as HTMLUListElement;
+            const clickRight = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
+
+            // First click reaches boundary: target = 100
+            component["onPagerClick"](clickRight, listElement, "right");
+            expect(mockList.scrollTo).toHaveBeenCalledTimes(1);
+            expect(mockList.scrollTo).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
+
+            // Second click while in flight: target clamped to 100 === existing target -> duplicate boundary suppressed
+            component["onPagerClick"](clickRight, listElement, "right");
+            expect(mockList.scrollTo).toHaveBeenCalledTimes(1);
+        });
+
         it("accumulates intended scroll target across 3 rapid consecutive steps", () => {
-            const mockList = { scrollBy: vi.fn(), scrollLeft: 0, scrollTo: vi.fn() } as unknown as HTMLUListElement;
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 1000
+            } as unknown as HTMLUListElement;
             const click1 = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
             const click2 = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
             const click3 = new PointerEvent("click", { button: 0, detail: 1, pointerId: 1 });
@@ -947,7 +1137,13 @@ describe("ScrollViewComponent", () => {
         it("preserves rejected pointer state across a later owner acquisition and rejects trailing click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn(), scrollLeft: 0, scrollTo: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
                 const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
                 const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
@@ -993,7 +1189,13 @@ describe("ScrollViewComponent", () => {
         it("removes only itself when rejected pointer receives pointercancel while another remains tracked", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn(), scrollLeft: 0, scrollTo: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
                 const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
                 const pointerDDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 40 });
@@ -1025,7 +1227,13 @@ describe("ScrollViewComponent", () => {
         it("does not allow a new owner to erase a pending pointer trailing-click suppression", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn(), scrollLeft: 0, scrollTo: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
                 const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
                 const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
@@ -1051,7 +1259,13 @@ describe("ScrollViewComponent", () => {
         it("safely clears stale suppression/rejection for the same pointerId when reused for a fresh press", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { scrollBy: vi.fn(), scrollLeft: 0, scrollTo: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const down1 = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
                 const up1 = new PointerEvent("pointerup", { pointerId: 10 });
 
@@ -1527,7 +1741,12 @@ describe("ScrollViewComponent", () => {
 
     describe("reduced-motion scrolling behavior", () => {
         it("uses smooth behavior under default no-preference", () => {
-            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollWidth: 1000
+            } as unknown as HTMLUListElement;
             const mockButton = { scrollIntoView: vi.fn() } as unknown as HTMLButtonElement;
 
             vi.useFakeTimers();
@@ -1567,7 +1786,12 @@ describe("ScrollViewComponent", () => {
 
                 expect(localComp["scrollBehavior"]()).toBe("instant");
 
-                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const mockButton = { scrollIntoView: vi.fn() } as unknown as HTMLButtonElement;
 
                 vi.useFakeTimers();
