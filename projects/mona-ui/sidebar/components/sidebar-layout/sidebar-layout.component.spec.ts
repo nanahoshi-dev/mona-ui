@@ -4,12 +4,13 @@ import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { SidebarInsetDirective } from "../../directives/sidebar-inset.directive";
 import { SidebarTriggerDirective } from "../../directives/sidebar-trigger.directive";
-import { SidebarService } from "../../services/sidebar.service";
 import {
     resolveSidebarLayoutBaseClass,
-    resolveSidebarLayoutReverse,
-    SidebarLayoutComponent
-} from "./sidebar-layout.component";
+    resolveSidebarLayoutReverse
+} from "../../internal/sidebar-layout-direction";
+import * as SidebarPublicApi from "../../public-api";
+import { SidebarService } from "../../services/sidebar.service";
+import { SidebarLayoutComponent } from "./sidebar-layout.component";
 
 @Component({
     template: `
@@ -250,20 +251,24 @@ describe("SidebarLayoutComponent", () => {
 
     describe("CSS direction observation and churn isolation", () => {
         it("should not wake sidebar layout compensation on unrelated document class churn", async () => {
+            const layoutEl = fixture.nativeElement.querySelector("mona-sidebar-layout") as HTMLElement;
+            const computedStyleSpy = vi.spyOn(window, "getComputedStyle");
             const distantNode = document.createElement("div");
             distantNode.className = "unrelated-distant-node";
             document.body.appendChild(distantNode);
 
             try {
-                const initialRefreshCount = component.layout().compensationRefreshCount();
+                const initialCalls = computedStyleSpy.mock.calls.filter(([target]) => target === layoutEl).length;
 
                 // Mutate class on distant node
                 distantNode.className = "unrelated-distant-node modified-class";
                 distantNode.style.color = "red";
                 await new Promise(resolve => setTimeout(resolve, 30));
 
-                expect(component.layout().compensationRefreshCount()).toBe(initialRefreshCount);
+                const afterCalls = computedStyleSpy.mock.calls.filter(([target]) => target === layoutEl).length;
+                expect(afterCalls).toBe(initialCalls);
             } finally {
+                computedStyleSpy.mockRestore();
                 document.body.removeChild(distantNode);
             }
         });
@@ -286,11 +291,19 @@ describe("SidebarLayoutComponent", () => {
         });
 
         it("should re-evaluate compensation on window resize", async () => {
-            const initialCount = component.layout().compensationRefreshCount();
-            window.dispatchEvent(new Event("resize"));
-            await new Promise(resolve => setTimeout(resolve, 50));
+            const layoutEl = fixture.nativeElement.querySelector("mona-sidebar-layout") as HTMLElement;
+            const computedStyleSpy = vi.spyOn(window, "getComputedStyle");
 
-            expect(component.layout().compensationRefreshCount()).toBeGreaterThan(initialCount);
+            try {
+                const initialCalls = computedStyleSpy.mock.calls.filter(([target]) => target === layoutEl).length;
+                window.dispatchEvent(new Event("resize"));
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                const afterCalls = computedStyleSpy.mock.calls.filter(([target]) => target === layoutEl).length;
+                expect(afterCalls).toBeGreaterThan(initialCalls);
+            } finally {
+                computedStyleSpy.mockRestore();
+            }
         });
 
         it("should observe CSS direction change when ancestor is inside a ShadowRoot", async () => {
@@ -300,30 +313,46 @@ describe("SidebarLayoutComponent", () => {
 
             const layout = shadowFixture.componentInstance.layout();
             const shadowContainer = shadowFixture.nativeElement.shadowRoot?.querySelector(".shadow-container") as HTMLElement;
+            const layoutEl = shadowFixture.nativeElement.shadowRoot?.querySelector("mona-sidebar-layout") as HTMLElement;
+            const computedStyleSpy = vi.spyOn(window, "getComputedStyle");
 
             try {
                 expect(layout).toBeTruthy();
                 expect(shadowContainer).toBeTruthy();
+                expect(layoutEl).toBeTruthy();
 
-                const initialCount = layout.compensationRefreshCount();
+                const initialCalls = computedStyleSpy.mock.calls.filter(([target]) => target === layoutEl).length;
 
                 // Mutate style on shadowContainer (inside ShadowRoot)
                 shadowContainer.style.direction = "rtl";
                 await new Promise(resolve => setTimeout(resolve, 50));
 
-                expect(layout.compensationRefreshCount()).toBeGreaterThan(initialCount);
-
-                const afterContainerCount = layout.compensationRefreshCount();
+                const afterContainerCalls = computedStyleSpy.mock.calls.filter(([target]) => target === layoutEl).length;
+                expect(afterContainerCalls).toBeGreaterThan(initialCalls);
 
                 // Mutate style on outer shadow host element (traversed out of ShadowRoot)
                 shadowFixture.nativeElement.style.direction = "rtl";
                 await new Promise(resolve => setTimeout(resolve, 50));
 
-                expect(layout.compensationRefreshCount()).toBeGreaterThan(afterContainerCount);
+                const afterHostCalls = computedStyleSpy.mock.calls.filter(([target]) => target === layoutEl).length;
+                expect(afterHostCalls).toBeGreaterThan(afterContainerCalls);
             } finally {
+                computedStyleSpy.mockRestore();
                 shadowFixture.destroy();
                 document.body.removeChild(shadowFixture.nativeElement);
             }
+        });
+    });
+
+    describe("public API surface", () => {
+        it("should not export internal layout direction helpers from public API", () => {
+            expect("resolveSidebarLayoutReverse" in SidebarPublicApi).toBe(false);
+            expect("resolveSidebarLayoutBaseClass" in SidebarPublicApi).toBe(false);
+        });
+
+        it("should not expose test-only properties on SidebarLayoutComponent instance", () => {
+            const layoutInstance = component.layout() as unknown as Record<string, unknown>;
+            expect("compensationRefreshCount" in layoutInstance).toBe(false);
         });
     });
 });

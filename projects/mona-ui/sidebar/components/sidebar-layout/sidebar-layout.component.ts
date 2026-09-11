@@ -12,27 +12,10 @@ import {
     untracked
 } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
-import { injectComponentDirection, type MonaTextDirection } from "@nanahoshi/mona-ui/i18n";
-import { twMerge } from "tailwind-merge";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
+import { resolveSidebarLayoutBaseClass } from "../../internal/sidebar-layout-direction";
 import { SidebarLayoutService } from "../../services/sidebar-layout.service";
-import { sidebarBackdropThemeVariants, sidebarLayoutBaseThemeVariants } from "../../styles/sidebar.styles";
-
-export function resolveSidebarLayoutReverse(options: {
-    semanticDirection: MonaTextDirection;
-    browserCssDirection?: "ltr" | "rtl" | null;
-}): boolean {
-    const effectiveDirection = options.browserCssDirection ?? options.semanticDirection;
-    return effectiveDirection === "rtl";
-}
-
-export function resolveSidebarLayoutBaseClass(options: {
-    semanticDirection: MonaTextDirection;
-    browserCssDirection?: "ltr" | "rtl" | null;
-    userClass?: string;
-}): string {
-    const reverse = resolveSidebarLayoutReverse(options);
-    return twMerge(sidebarLayoutBaseThemeVariants({ reverse }), options.userClass ?? "");
-}
+import { sidebarBackdropThemeVariants } from "../../styles/sidebar.styles";
 
 function getComposedAncestors(startElement: Element): Element[] {
     const chain: Element[] = [];
@@ -100,9 +83,6 @@ export class SidebarLayoutComponent {
     readonly #layoutService = inject(SidebarLayoutService);
     readonly #matches = signal(false);
     readonly #browserCssDirection = signal<"ltr" | "rtl" | null>(null);
-
-    /** Internal counter tracking compensation recalculation passes for testability. */
-    public readonly compensationRefreshCount = signal(0);
 
     protected readonly backdropClass = computed(() => sidebarBackdropThemeVariants({ open: this.mobileOpen() }));
     protected readonly baseClass = computed(() =>
@@ -204,7 +184,6 @@ export class SidebarLayoutComponent {
         let updateAncestorObservers = (): void => {};
 
         const updateCssDirection = (): void => {
-            this.compensationRefreshCount.update(c => c + 1);
             if (typeof window === "undefined") {
                 this.#browserCssDirection.set(null);
                 return;
