@@ -609,6 +609,12 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
+        lineSnippet: "scrollLeft",
+        reason: "ScrollView pager calculates cumulative scroll target from element scrollLeft"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/segmented/components/segmented/segmented.component.ts",
         lineSnippet: "offsetLeft",
         reason: "Segmented pill offsetLeft calculation relative to parent container"
