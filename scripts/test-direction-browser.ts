@@ -1447,6 +1447,69 @@ async function runTests(): Promise<void> {
         assert(Math.abs(dStartBox.x - dynCurrentLayoutBox.x) <= 4, "After returning to LTR: start sidebar returned to physical LEFT");
         assert(Math.abs(dEndBox.x + dEndBox.width - (dynCurrentLayoutBox.x + dynCurrentLayoutBox.width)) <= 4, "After returning to LTR: end sidebar returned to physical RIGHT");
 
+        // Dynamic ScrollView direction mutation and cumulative pager target resynchronization
+        console.log("    Testing Dynamic ScrollView pager target resynchronization across direction mutations");
+        const dynScrollView = dynamicSection.locator('[data-testid="scroll-view-dynamic"]');
+        await dynScrollView.scrollIntoViewIfNeeded();
+
+        const dynPagerNext = dynScrollView.locator('button[aria-label="Scroll pager next"]');
+        const dynPagerPrev = dynScrollView.locator('button[aria-label="Scroll pager previous"]');
+        const dynP0 = dynScrollView.locator('li[data-page-index="0"]');
+
+        // Initial state is LTR (as set at line 1440)
+        // Verify LTR pager next arrow is on physical right, prev on physical left
+        let nextBox = await dynPagerNext.boundingBox();
+        let prevBox = await dynPagerPrev.boundingBox();
+        assert(nextBox !== null && prevBox !== null, "Dynamic ScrollView pager arrow boxes available");
+        assert(prevBox.x < nextBox.x, "Dynamic ScrollView LTR: Prev arrow is left of Next arrow");
+
+        const p0InitialX = (await dynP0.boundingBox())!.x;
+
+        // Step 1: Click Next in LTR -> moves content left (displaces negatively in X)
+        await dynPagerNext.click();
+        await page.waitForTimeout(250);
+        const p0AfterLtrStep1 = (await dynP0.boundingBox())!.x;
+        assert(p0AfterLtrStep1 < p0InitialX, "Dynamic ScrollView LTR: clicking pager next displaces content leftward");
+
+        // Step 2: Immediately toggle direction to RTL while displaced
+        await page.click('[data-testid="set-dynamic-rtl"]');
+        await page.waitForTimeout(300);
+
+        // Verify RTL layout: Next arrow is on physical left, Prev arrow is on physical right
+        nextBox = await dynPagerNext.boundingBox();
+        prevBox = await dynPagerPrev.boundingBox();
+        assert(nextBox !== null && prevBox !== null, "Dynamic ScrollView pager arrow boxes after RTL toggle");
+        assert(prevBox.x > nextBox.x, "Dynamic ScrollView RTL: Prev arrow is right of Next arrow");
+
+        // In RTL, click Next arrow:
+        // Must calculate from actual current position rather than a stale LTR target.
+        // In RTL, Next arrow displaces content rightward (increasing X for p0).
+        const p0BeforeRtlStep = (await dynP0.boundingBox())!.x;
+        await dynPagerNext.click();
+        await page.waitForTimeout(250);
+        const p0AfterRtlStep = (await dynP0.boundingBox())!.x;
+        assert(
+            p0AfterRtlStep > p0BeforeRtlStep,
+            `Dynamic ScrollView RTL: clicking pager next displaces content rightward from current position (before: ${p0BeforeRtlStep}, after: ${p0AfterRtlStep})`
+        );
+
+        // Step 3: Toggle direction back to LTR
+        await page.click('[data-testid="set-dynamic-ltr"]');
+        await page.waitForTimeout(300);
+
+        // In LTR, click Next arrow:
+        // Must calculate from actual current position rather than stale RTL target.
+        // In LTR, Next arrow displaces content leftward (decreasing X for p0).
+        const p0BeforeLtrStep2 = (await dynP0.boundingBox())!.x;
+        await dynPagerNext.click();
+        await page.waitForTimeout(250);
+        const p0AfterLtrStep2 = (await dynP0.boundingBox())!.x;
+        assert(
+            p0AfterLtrStep2 < p0BeforeLtrStep2,
+            `Dynamic ScrollView LTR: clicking pager next displaces content leftward from current position (before: ${p0BeforeLtrStep2}, after: ${p0AfterLtrStep2})`
+        );
+
+        console.log("    [PASS] Dynamic ScrollView pager target resynchronization across direction mutations verified\n");
         console.log("    [PASS] Dynamic dir mutation reactive layout updates verified\n");
 
         // 8. Dynamic CSS-only Ancestor Class Toggle (#fixture-dynamic-css)

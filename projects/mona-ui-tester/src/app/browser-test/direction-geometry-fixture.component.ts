@@ -649,6 +649,25 @@ export class ShadowSidebarFixtureComponent {
                         </mona-sidebar>
                     </mona-sidebar-layout>
                 </div>
+
+                <!-- Dynamic ScrollView -->
+                <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative; margin-top: 16px;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 14px;">Dynamic ScrollView (overflowing pager)</h3>
+                    <mona-scroll-view
+                        data-testid="scroll-view-dynamic"
+                        [data]="manyPages"
+                        [width]="300"
+                        [height]="130"
+                        [arrows]="true"
+                        [infinite]="true"
+                        [pageable]="true">
+                        <ng-template let-item>
+                            <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                {{ item.title }}
+                            </div>
+                        </ng-template>
+                    </mona-scroll-view>
+                </div>
             </section>
 
             <!-- 6. Dynamic CSS ancestor class toggle fixture -->
@@ -800,46 +819,35 @@ export class ShadowSidebarFixtureComponent {
     `
 })
 export class DirectionGeometryFixtureComponent {
+    public readonly dockedEndOpenLtr = signal(true);
+    public readonly dockedEndOpenRtl = signal(true);
+    public readonly dockedEndOpenSplitLtr = signal(true);
+    public readonly dockedEndOpenSplitRtl = signal(true);
+    public readonly dockedStartOpenLtr = signal(true);
+    public readonly dockedStartOpenRtl = signal(true);
+    public readonly dockedStartOpenSplitLtr = signal(true);
+    public readonly dockedStartOpenSplitRtl = signal(true);
+    public readonly dynamicCssClass = signal("");
+    public readonly dynamicDir = signal<"ltr" | "rtl">("ltr");
     public readonly manyPages: FixturePageItem[] = Array.from({ length: 40 }, (_, i) => ({
         id: i + 1,
         title: `Page ${i + 1}`
     }));
-
-    public readonly sidebarStartOpenLtr = signal(false);
-    public readonly sidebarEndOpenLtr = signal(false);
-
-    public readonly sidebarStartOpenRtl = signal(false);
-    public readonly sidebarEndOpenRtl = signal(false);
-
-    public readonly sidebarStartOpenSplitLtr = signal(false);
-    public readonly sidebarEndOpenSplitLtr = signal(false);
-
-    public readonly sidebarStartOpenSplitRtl = signal(false);
-    public readonly sidebarEndOpenSplitRtl = signal(false);
-
-    public readonly dockedStartOpenLtr = signal(true);
-    public readonly dockedEndOpenLtr = signal(true);
-
-    public readonly dockedStartOpenRtl = signal(true);
-    public readonly dockedEndOpenRtl = signal(true);
-
-    public readonly dockedStartOpenSplitLtr = signal(true);
-    public readonly dockedEndOpenSplitLtr = signal(true);
-
-    public readonly dockedStartOpenSplitRtl = signal(true);
-    public readonly dockedEndOpenSplitRtl = signal(true);
-
-    public readonly sliderValueLtr = signal(20);
-    public readonly sliderValueRtl = signal(20);
-    public readonly sliderValueSplitLtr = signal(20);
-    public readonly sliderValueSplitRtl = signal(20);
-
     public readonly rangeValueLtr = signal<[number, number]>([20, 80]);
     public readonly rangeValueRtl = signal<[number, number]>([20, 80]);
     public readonly rangeValueSplitLtr = signal<[number, number]>([20, 80]);
     public readonly rangeValueSplitRtl = signal<[number, number]>([20, 80]);
-
-    public readonly dynamicDir = signal<"ltr" | "rtl">("ltr");
-    public readonly dynamicCssClass = signal("");
     public readonly shadowFixtureRef = viewChild.required<ShadowSidebarFixtureComponent>("shadowFixture");
+    public readonly sidebarEndOpenLtr = signal(false);
+    public readonly sidebarEndOpenRtl = signal(false);
+    public readonly sidebarEndOpenSplitLtr = signal(false);
+    public readonly sidebarEndOpenSplitRtl = signal(false);
+    public readonly sidebarStartOpenLtr = signal(false);
+    public readonly sidebarStartOpenRtl = signal(false);
+    public readonly sidebarStartOpenSplitLtr = signal(false);
+    public readonly sidebarStartOpenSplitRtl = signal(false);
+    public readonly sliderValueLtr = signal(20);
+    public readonly sliderValueRtl = signal(20);
+    public readonly sliderValueSplitLtr = signal(20);
+    public readonly sliderValueSplitRtl = signal(20);
 }
