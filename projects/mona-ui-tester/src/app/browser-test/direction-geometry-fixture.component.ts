@@ -657,6 +657,10 @@ export class ShadowSidebarFixtureComponent {
                         <button type="button" data-testid="set-dynamic-pages-40" (click)="dynamicPageCount.set(40)">40 Pages</button>
                         <button type="button" data-testid="set-dynamic-pages-8" (click)="dynamicPageCount.set(8)">8 Pages</button>
                         <button type="button" data-testid="set-dynamic-pages-2" (click)="dynamicPageCount.set(2)">2 Pages</button>
+                        <button type="button" data-testid="set-dynamic-infinite" (click)="dynamicScrollViewInfinite.set(true)">Infinite</button>
+                        <button type="button" data-testid="set-dynamic-finite" (click)="dynamicScrollViewInfinite.set(false)">Finite</button>
+                        <button type="button" data-testid="set-dynamic-index-30" (click)="dynamicScrollViewIndex.set(30)">Index 30</button>
+                        <button type="button" data-testid="set-dynamic-index-0" (click)="dynamicScrollViewIndex.set(0)">Index 0</button>
                     </div>
                     <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
                         <mona-scroll-view
@@ -665,7 +669,8 @@ export class ShadowSidebarFixtureComponent {
                             [width]="300"
                             [height]="130"
                             [arrows]="true"
-                            [infinite]="true"
+                            [infinite]="dynamicScrollViewInfinite()"
+                            [(index)]="dynamicScrollViewIndex"
                             [pageable]="true">
                             <ng-template let-item>
                                 <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
@@ -838,6 +843,8 @@ export class DirectionGeometryFixtureComponent {
     public readonly dynamicDir = signal<"ltr" | "rtl">("ltr");
     public readonly dynamicPageCount = signal(40);
     public readonly dynamicPages = computed(() => this.manyPages.slice(0, this.dynamicPageCount()));
+    public readonly dynamicScrollViewIndex = signal(0);
+    public readonly dynamicScrollViewInfinite = signal(true);
     public readonly manyPages: FixturePageItem[] = Array.from({ length: 40 }, (_, i) => ({
         id: i + 1,
         title: `Page ${i + 1}`

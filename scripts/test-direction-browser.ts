@@ -1665,6 +1665,94 @@ async function runTests(): Promise<void> {
         await page.waitForTimeout(300);
 
         console.log("    [PASS] Dynamic ScrollView pager arrow hysteresis elimination verified\n");
+
+        // Non-infinite active-index normalization on data shrink & expansion in LTR and RTL
+        console.log("    Testing Dynamic ScrollView non-infinite active-index normalization on data shrink & expansion");
+
+        const runNonInfiniteShrinkSequence = async (dirName: "LTR" | "RTL") => {
+            // 1. Switch to finite (non-infinite) mode
+            await page.click('[data-testid="set-dynamic-finite"]');
+            await page.waitForTimeout(100);
+
+            // 2. Set active index to 30 (out of 40 pages: 0-39)
+            await page.click('[data-testid="set-dynamic-index-30"]');
+            await page.waitForFunction(() => {
+                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] li[role="group"]');
+                return slides.length === 1;
+            });
+
+            // Verify active slide exists and displays Page 31
+            let activeSlide = dynScrollView.locator("li[role='group']");
+            assert((await activeSlide.count()) > 0, `[${dirName}] Non-infinite active slide exists at index 30`);
+            let slideText = (await activeSlide.innerText()).trim();
+            assert(slideText === "Page 31", `[${dirName}] Non-infinite active slide text is 'Page 31' (got '${slideText}')`);
+            let hostAriaLabel = await dynScrollView.getAttribute("aria-label");
+            assert(hostAriaLabel === "Page 31 of 40", `[${dirName}] Non-infinite host aria-label is 'Page 31 of 40' (got '${hostAriaLabel}')`);
+
+            // 3. Shrink data to 8 items (indices 0-7)
+            await page.click('[data-testid="set-dynamic-pages-8"]');
+            await page.waitForFunction(() => {
+                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] li[role="group"]');
+                return slides.length === 1;
+            });
+
+            // Verify carousel is NOT blank: normalized to index 7 (Page 8)
+            activeSlide = dynScrollView.locator("li[role='group']");
+            assert((await activeSlide.count()) > 0, `[${dirName}] Active slide exists after non-infinite data shrink (not blank)`);
+            slideText = (await activeSlide.innerText()).trim();
+            assert(slideText === "Page 8", `[${dirName}] Active slide normalized to 'Page 8' after shrink to 8 items (got '${slideText}')`);
+            hostAriaLabel = await dynScrollView.getAttribute("aria-label");
+            assert(hostAriaLabel === "Page 8 of 8", `[${dirName}] Host aria-label normalized to 'Page 8 of 8' (got '${hostAriaLabel}')`);
+
+            // Verify navigation arrow boundaries at last page (index 7 of 8):
+            // Next arrow must be hidden, Prev arrow must be visible
+            const nextArrow = dynScrollView.locator("button[data-navigate-next]");
+            const prevArrow = dynScrollView.locator("button[data-navigate-prev]");
+            assert(await nextArrow.evaluate(el => el.classList.contains("hidden")), `[${dirName}] Main Next arrow is hidden at last page`);
+            assert(!(await prevArrow.evaluate(el => el.classList.contains("hidden"))), `[${dirName}] Main Prev arrow is visible at last page`);
+
+            // Verify pager dot active state: exactly one dot has aria-current='true'
+            const currentDots = dynScrollView.locator("button[aria-current='true']");
+            assert((await currentDots.count()) === 1, `[${dirName}] Exactly one pager dot has aria-current='true'`);
+            const dotLabel = await currentDots.getAttribute("aria-label");
+            assert(dotLabel === "Page 8", `[${dirName}] Active pager dot label is 'Page 8' (got '${dotLabel}')`);
+
+            // 4. Expand back to 40 items and verify stable behavior
+            await page.click('[data-testid="set-dynamic-pages-40"]');
+            await page.waitForFunction(() => {
+                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] li[role="group"]');
+                return slides.length === 1;
+            });
+            activeSlide = dynScrollView.locator("li[role='group']");
+            assert((await activeSlide.count()) > 0, `[${dirName}] Active slide remains rendered after re-expansion to 40`);
+            hostAriaLabel = await dynScrollView.getAttribute("aria-label");
+            assert(hostAriaLabel === "Page 8 of 40", `[${dirName}] Host aria-label after expansion is 'Page 8 of 40' (got '${hostAriaLabel}')`);
+
+            // Reset index to 0 before next test
+            await page.click('[data-testid="set-dynamic-index-0"]');
+            await page.waitForFunction(() => {
+                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] li[role="group"]');
+                return slides.length === 1;
+            });
+        };
+
+        // Run in LTR
+        await page.click('[data-testid="set-dynamic-ltr"]');
+        await page.waitForTimeout(200);
+        await runNonInfiniteShrinkSequence("LTR");
+
+        // Run in RTL
+        await page.click('[data-testid="set-dynamic-rtl"]');
+        await page.waitForTimeout(200);
+        await runNonInfiniteShrinkSequence("RTL");
+
+        // Restore dynamic fixture state: infinite = true, index = 0, pages = 40, dir = LTR
+        await page.click('[data-testid="set-dynamic-infinite"]');
+        await page.click('[data-testid="set-dynamic-index-0"]');
+        await page.click('[data-testid="set-dynamic-ltr"]');
+        await page.waitForTimeout(200);
+
+        console.log("    [PASS] Dynamic ScrollView non-infinite active-index normalization on data shrink & expansion verified in LTR & RTL\n");
         console.log("    [PASS] Dynamic dir mutation reactive layout updates verified\n");
 
         // 8. Dynamic CSS-only Ancestor Class Toggle (#fixture-dynamic-css)
@@ -2034,6 +2122,133 @@ async function runTests(): Promise<void> {
         await page.waitForTimeout(1300);
 
         console.log("    [PASS] ScrollView prefers-reduced-motion override, animationDuration contract & programmatic scrollBehavior verified\n");
+
+        // 12. ScrollView Real-Browser Touch Pager Hold & Capture-Safe Release-Away Verification
+        console.log("--> Testing Real-Browser Touch Pager Hold & Capture-Safe Release-Away Verification");
+        const touchContext = await browser.newContext({
+            viewport: { width: 1280, height: 900 },
+            hasTouch: true
+        });
+        const touchPage = await touchContext.newPage();
+        await touchPage.goto(url, { waitUntil: "networkidle" });
+        await touchPage.waitForSelector("#fixture-ltr");
+
+        const touchScrollView = touchPage.locator('[data-testid="scroll-view-ltr"]');
+        await touchScrollView.scrollIntoViewIfNeeded();
+        const touchPagerNext = touchScrollView.locator('button[aria-label="Scroll pager next"]');
+        const touchPagerList = touchScrollView.locator('ul[class*="overflow-hidden"]');
+
+        await touchPagerList.evaluate(el => {
+            const list = el as { __scrollByCalls?: unknown[]; __scrollToCalls?: unknown[]; scrollBy: (...args: unknown[]) => void; scrollTo: (...args: unknown[]) => void };
+            list.__scrollByCalls = [];
+            list.__scrollToCalls = [];
+            const origScrollBy = list.scrollBy.bind(list);
+            list.scrollBy = function (...args: unknown[]) {
+                list.__scrollByCalls!.push(args);
+                return origScrollBy(...args);
+            };
+            const origScrollTo = list.scrollTo.bind(list);
+            list.scrollTo = function (...args: unknown[]) {
+                list.__scrollToCalls!.push(args);
+                return origScrollTo(...args);
+            };
+        });
+
+        const cdp = await touchContext.newCDPSession(touchPage);
+        const touchNextBox = await touchPagerNext.boundingBox();
+        assert(touchNextBox !== null, "Touch pager next button bounding box available");
+        const nextCenterX = Math.round(touchNextBox.x + touchNextBox.width / 2);
+        const nextCenterY = Math.round(touchNextBox.y + touchNextBox.height / 2);
+
+        // Gesture 1: Real Chromium touch hold on Next arrow -> repeat ticks -> drag outside to (0, 0) -> touchEnd outside.
+        // Proves:
+        // 1. Touch interaction generated repeat ticks.
+        // 2. Component released implicit pointer capture so release at (0,0) is recognized as outside.
+        // 3. Release away does not leave stale suppression: subsequent normal tap/click executes exactly one scroll step.
+        await cdp.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: nextCenterX, y: nextCenterY }]
+        });
+        await touchPage.waitForTimeout(180); // produce repeat ticks (60ms interval)
+
+        const callsDuringTouchHold = await touchPagerList.evaluate(
+            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+        );
+        assert(
+            callsDuringTouchHold >= 2,
+            `Real touch hold produced repeat scroll ticks (got ${callsDuringTouchHold})`
+        );
+
+        // Touch move outside Next button
+        await cdp.send("Input.dispatchTouchEvent", {
+            type: "touchMove",
+            touchPoints: [{ x: 0, y: 0 }]
+        });
+        await touchPage.waitForTimeout(50);
+
+        // Touch end outside Next button
+        await cdp.send("Input.dispatchTouchEvent", {
+            type: "touchEnd",
+            touchPoints: []
+        });
+        await touchPage.waitForTimeout(100);
+
+        const callsAfterTouchReleaseAway = await touchPagerList.evaluate(
+            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+        );
+
+        // Normal subsequent tap/click on Next button must NOT be suppressed by stale suppression
+        await touchPagerNext.click();
+        await touchPage.waitForTimeout(200);
+
+        const callsAfterSubsequentTap = await touchPagerList.evaluate(
+            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+        );
+        assert(
+            callsAfterSubsequentTap === callsAfterTouchReleaseAway + 1,
+            `Normal click after touch release-away executed exactly one scroll step without stale suppression (expected ${callsAfterTouchReleaseAway + 1}, got ${callsAfterSubsequentTap})`
+        );
+
+        // Gesture 2: Touch hold on Next arrow -> repeat ticks -> touchEnd on the arrow itself.
+        // Proves:
+        // 4. Release on arrow suppresses trailing click: no extra scroll step after release.
+        const callsBeforeOnControlHold = callsAfterSubsequentTap;
+
+        await cdp.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: nextCenterX, y: nextCenterY }]
+        });
+        await touchPage.waitForTimeout(180);
+
+        const callsDuringOnControlHold = await touchPagerList.evaluate(
+            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+        );
+        assert(
+            callsDuringOnControlHold >= callsBeforeOnControlHold + 2,
+            `Second touch hold on control produced repeat scroll ticks (before: ${callsBeforeOnControlHold}, during: ${callsDuringOnControlHold})`
+        );
+
+        await cdp.send("Input.dispatchTouchEvent", {
+            type: "touchEnd",
+            touchPoints: []
+        });
+        await touchPage.waitForTimeout(250); // wait longer than single-scroll timer (60ms)
+
+        const callsAfterOnControlEnd = await touchPagerList.evaluate(
+            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+        );
+        assert(
+            callsAfterOnControlEnd === callsDuringOnControlHold,
+            `Touch hold release on arrow suppressed trailing click: no extra scroll step after release (hold: ${callsDuringOnControlHold}, after wait: ${callsAfterOnControlEnd})`
+        );
+
+        await touchContext.close();
+        console.log("    [PASS] Real-Browser Touch Pager Hold & Capture-Safe Release-Away verified\n");
 
         console.log("==================================================");
         console.log("  ALL BROWSER DIRECTION GEOMETRY TESTS PASSED!");
