@@ -1,4 +1,4 @@
-import { Component, signal, viewChild, ViewEncapsulation } from "@angular/core";
+import { Component, computed, signal, viewChild, ViewEncapsulation } from "@angular/core";
 import { RangeSliderComponent, SliderComponent } from "@nanahoshi/mona-ui/slider";
 import {
     SidebarComponent,
@@ -651,22 +651,29 @@ export class ShadowSidebarFixtureComponent {
                 </div>
 
                 <!-- Dynamic ScrollView -->
-                <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative; margin-top: 16px;">
+                <div style="margin-top: 16px;">
                     <h3 style="margin: 0 0 8px 0; font-size: 14px;">Dynamic ScrollView (overflowing pager)</h3>
-                    <mona-scroll-view
-                        data-testid="scroll-view-dynamic"
-                        [data]="manyPages"
-                        [width]="300"
-                        [height]="130"
-                        [arrows]="true"
-                        [infinite]="true"
-                        [pageable]="true">
-                        <ng-template let-item>
-                            <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
-                                {{ item.title }}
-                            </div>
-                        </ng-template>
-                    </mona-scroll-view>
+                    <div style="display: flex; gap: 4px; margin-bottom: 8px;">
+                        <button type="button" data-testid="set-dynamic-pages-40" (click)="dynamicPageCount.set(40)">40 Pages</button>
+                        <button type="button" data-testid="set-dynamic-pages-8" (click)="dynamicPageCount.set(8)">8 Pages</button>
+                        <button type="button" data-testid="set-dynamic-pages-2" (click)="dynamicPageCount.set(2)">2 Pages</button>
+                    </div>
+                    <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
+                        <mona-scroll-view
+                            data-testid="scroll-view-dynamic"
+                            [data]="dynamicPages()"
+                            [width]="300"
+                            [height]="130"
+                            [arrows]="true"
+                            [infinite]="true"
+                            [pageable]="true">
+                            <ng-template let-item>
+                                <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                    {{ item.title }}
+                                </div>
+                            </ng-template>
+                        </mona-scroll-view>
+                    </div>
                 </div>
             </section>
 
@@ -829,6 +836,8 @@ export class DirectionGeometryFixtureComponent {
     public readonly dockedStartOpenSplitRtl = signal(true);
     public readonly dynamicCssClass = signal("");
     public readonly dynamicDir = signal<"ltr" | "rtl">("ltr");
+    public readonly dynamicPageCount = signal(40);
+    public readonly dynamicPages = computed(() => this.manyPages.slice(0, this.dynamicPageCount()));
     public readonly manyPages: FixturePageItem[] = Array.from({ length: 40 }, (_, i) => ({
         id: i + 1,
         title: `Page ${i + 1}`

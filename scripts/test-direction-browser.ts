@@ -1177,6 +1177,42 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] Short click on pager arrow performed exactly one additional scrollBy call (expected ${callsAfterWait + 1}, got ${callsAfterClick})`
                 );
 
+                // Reset to page 0 to ensure ample scroll headroom for hold release-away test
+                const dot0 = scrollView.locator('li[data-page-index="0"] button');
+                await dot0.click();
+                await page.waitForTimeout(400);
+
+                // Test hold release-away: long hold produces ticks, moves mouse outside before release,
+                // and confirms the subsequent normal click is NOT swallowed by stale suppression state
+                const callsBeforeReleaseAway = await pagerList.evaluate(
+                    el => ((el as { __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+                );
+                await pagerNextArrow.hover();
+                await page.mouse.down();
+                await page.waitForTimeout(180); // produce repeat ticks
+                await page.mouse.move(0, 0); // move away from the button before releasing
+                await page.mouse.up();
+                await page.waitForTimeout(100);
+
+                const callsAfterReleaseAway = await pagerList.evaluate(
+                    el => ((el as { __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+                );
+                assert(
+                    callsAfterReleaseAway >= callsBeforeReleaseAway + 2,
+                    `[${scenario.name}] Continuous hold before release-away produced multiple scroll ticks (before: ${callsBeforeReleaseAway}, after: ${callsAfterReleaseAway})`
+                );
+
+                // Subsequent normal click on Next arrow: must NOT be suppressed by the prior release-away gesture
+                await pagerNextArrow.click();
+                await page.waitForTimeout(200);
+                const callsAfterNormalClick = await pagerList.evaluate(
+                    el => ((el as { __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+                );
+                assert(
+                    callsAfterNormalClick === callsAfterReleaseAway + 1,
+                    `[${scenario.name}] Normal click after hold release-away executed exactly one scroll step (expected ${callsAfterReleaseAway + 1}, got ${callsAfterNormalClick})`
+                );
+
                 // Test non-primary right-button hold: must not trigger pager scrolling
                 const callsBeforeRight = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
                 await pagerNextArrow.hover();
@@ -1191,7 +1227,6 @@ async function runTests(): Promise<void> {
                 );
 
                 // Establish known pager scroll position at page 0 before rapid activation tests
-                const dot0 = scrollView.locator('li[data-page-index="0"] button');
                 await dot0.click();
                 await page.waitForTimeout(500); // allow active page centering to settle
                 await pagerList.evaluate(el => {
@@ -1568,6 +1603,68 @@ async function runTests(): Promise<void> {
         );
 
         console.log("    [PASS] Dynamic ScrollView pager target resynchronization across direction mutations verified\n");
+
+        // Pager arrow overflow hysteresis: verify arrows disappear when page count shrinks
+        // to a size that exceeds arrow-reduced list width but fits in arrow-free pager width
+        console.log("    Testing Dynamic ScrollView pager arrow hysteresis elimination on data shrink and expand");
+        // 1. Initial 40 pages: overflow forces both pager arrows to be visible
+        assert(await dynPagerNext.isVisible(), "Dynamic ScrollView with 40 pages: Next arrow is visible");
+        assert(await dynPagerPrev.isVisible(), "Dynamic ScrollView with 40 pages: Prev arrow is visible");
+
+        // 2. Reduce to 8 pages (fits in arrow-free pager width 300px, but exceeds arrow-reduced width ~220px)
+        await page.click('[data-testid="set-dynamic-pages-8"]');
+        await page.waitForTimeout(300);
+
+        const pagerGeometry = await page.evaluate(() => {
+            const scrollView = document.querySelector('[data-testid="scroll-view-dynamic"]');
+            const pagerRoot = scrollView?.querySelector('[data-pager-root="true"]') as HTMLElement | null;
+            const list = scrollView?.querySelector('ul[class*="overflow-hidden"]') as HTMLElement | null;
+            return {
+                listClientWidth: list?.clientWidth ?? 0,
+                listScrollWidth: list?.scrollWidth ?? 0,
+                pagerWidth: pagerRoot?.clientWidth ?? 0
+            };
+        });
+
+        assert(
+            pagerGeometry.listScrollWidth <= pagerGeometry.pagerWidth,
+            `8 pages content (${pagerGeometry.listScrollWidth}px) fits in arrow-free pager capacity (${pagerGeometry.pagerWidth}px)`
+        );
+
+        const nextCount8 = await dynPagerNext.count();
+        const nextVisible8 = nextCount8 > 0 && (await dynPagerNext.isVisible());
+        const prevCount8 = await dynPagerPrev.count();
+        const prevVisible8 = prevCount8 > 0 && (await dynPagerPrev.isVisible());
+
+        assert(
+            !nextVisible8,
+            `Dynamic ScrollView with 8 pages: Next arrow disappeared when content fits in arrow-free capacity (scrollWidth: ${pagerGeometry.listScrollWidth}, pagerWidth: ${pagerGeometry.pagerWidth})`
+        );
+        assert(
+            !prevVisible8,
+            "Dynamic ScrollView with 8 pages: Prev arrow disappeared when content fits in arrow-free capacity"
+        );
+
+        // 3. Expand back to 40 pages: arrows must return immediately
+        await page.click('[data-testid="set-dynamic-pages-40"]');
+        await page.waitForTimeout(300);
+
+        assert(await dynPagerNext.isVisible(), "Dynamic ScrollView expanded back to 40 pages: Next arrow returned");
+        assert(await dynPagerPrev.isVisible(), "Dynamic ScrollView expanded back to 40 pages: Prev arrow returned");
+
+        // 4. Shrink to 2 pages: arrows remain hidden
+        await page.click('[data-testid="set-dynamic-pages-2"]');
+        await page.waitForTimeout(300);
+
+        const nextCount2 = await dynPagerNext.count();
+        const nextVisible2 = nextCount2 > 0 && (await dynPagerNext.isVisible());
+        assert(!nextVisible2, "Dynamic ScrollView with 2 pages: Next arrow is hidden");
+
+        // Restore to 40 pages
+        await page.click('[data-testid="set-dynamic-pages-40"]');
+        await page.waitForTimeout(300);
+
+        console.log("    [PASS] Dynamic ScrollView pager arrow hysteresis elimination verified\n");
         console.log("    [PASS] Dynamic dir mutation reactive layout updates verified\n");
 
         // 8. Dynamic CSS-only Ancestor Class Toggle (#fixture-dynamic-css)
