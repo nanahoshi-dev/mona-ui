@@ -266,62 +266,110 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/styles/slider.styles.ts",
-        lineSnippet: "left-0",
-        reason: "Slider tick container physical positioning pinned to left-0"
+        lineSnippet: 'data-[orientation="horizontal"]:left-0',
+        reason: "Slider horizontal tick container physical positioning pinned to left-0"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/styles/slider.styles.ts",
+        lineSnippet: 'data-[orientation="vertical"]:left-0',
+        reason: "Slider vertical tick container physical positioning pinned to left-0"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
-        lineSnippet: "[style.left.%]",
+        lineSnippet: '[style.left.%]="horizontalSelectionLeft()"',
         reason: "Slider handle and selection physical left coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
-        lineSnippet: "[style.right.%]",
+        lineSnippet: '[style.right.%]="horizontalSelectionRight()"',
         reason: "Slider handle and selection physical right coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
+        lineSnippet: "!isRtl() ? handlePosition() : undefined",
+        reason: "Slider horizontal handle physical left coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
+        lineSnippet: "isRtl() ? handlePosition() : undefined",
+        reason: "Slider horizontal handle physical right coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: "[style.left.%]",
+        lineSnippet: '[style.left.%]="horizontalSelectionLeft()"',
         reason: "RangeSlider handles and selection physical left coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: "[style.right.%]",
+        lineSnippet: '[style.right.%]="horizontalSelectionRight()"',
         reason: "RangeSlider handles and selection physical right coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+        lineSnippet: "!isRtl() ? primaryHandlePosition() : undefined",
+        reason: "RangeSlider primary handle physical left coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+        lineSnippet: "isRtl() ? primaryHandlePosition() : undefined",
+        reason: "RangeSlider primary handle physical right coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+        lineSnippet: "!isRtl() ? secondaryHandlePosition() : undefined",
+        reason: "RangeSlider secondary handle physical left coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+        lineSnippet: "isRtl() ? secondaryHandlePosition() : undefined",
+        reason: "RangeSlider secondary handle physical right coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
-        lineSnippet: "styles.right",
+        lineSnippet: "styles.right = `${valuePosition}%`;",
         reason: "Slider label horizontal physical coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
-        lineSnippet: "styles.left",
+        lineSnippet: "styles.left = `${valuePosition}%`;",
         reason: "Slider label horizontal physical coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/pipes/label-style.pipe.ts",
-        lineSnippet: "styles[side]",
+        lineSnippet: 'styles[side] = "100%";',
         reason: "Slider vertical label horizontal physical side intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/pipes/tick-style.pipe.ts",
-        lineSnippet: "right:",
+        lineSnippet: "{ right: `${position}%` }",
         reason: "Slider tick horizontal physical coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/pipes/tick-style.pipe.ts",
-        lineSnippet: "left:",
+        lineSnippet: "{ left: `${position}%` }",
         reason: "Slider tick horizontal physical coordinate intentionally chosen from Mona semantic direction"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/slider/pipes/tick-style.pipe.ts",
+        lineSnippet: 'left: "50%"',
+        reason: "Slider vertical tick Cartesian horizontal centering (50%)"
     },
     {
         category: "rtl-physical-style",
@@ -362,13 +410,13 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/scroll-view/styles/scroll-view.styles.ts",
-        lineSnippet: "left-0",
+        lineSnippet: 'left: "left-0"',
         reason: "ScrollView navigation arrow physical side variants mapped from semantic HTML direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/scroll-view/styles/scroll-view.styles.ts",
-        lineSnippet: "right-0",
+        lineSnippet: 'right: "right-0"',
         reason: "ScrollView navigation arrow physical side variants mapped from semantic HTML direction"
     },
     {
@@ -1496,7 +1544,50 @@ export function scanTypeScriptAst(
             if (!name) {
                 return false;
             }
-            return /(?:^|_)styles?(?:$|_|[A-Z])/i.test(name);
+            const raw = name.includes(".") ? (name.split(".").pop() ?? name) : name;
+            const clean = raw.replace(/^#+/, "").replace(/^[_\s]+|[_\s]+$/g, "");
+            if (!clean) {
+                return false;
+            }
+
+            // Explicit negative exclusions: metadata, IDs, guides, tokens, sheets, or non-style words
+            if (
+                /^(?:lifestyle|stylesheet|style(?:Id|Token|Guide|Sheet|Name|Type|Key|Index|Doc|Rule|Prop|Class))/i.test(
+                    clean
+                )
+            ) {
+                return false;
+            }
+
+            // 1. Exact "style" or "styles" (case-insensitive for standalone words like "Style" or "styles")
+            if (/^styles?$/i.test(clean)) {
+                return true;
+            }
+
+            // 2. Exact "styleObject" or "stylesObject"
+            if (/^styles?Object$/i.test(clean)) {
+                return true;
+            }
+
+            // 3. camelCase suffix ending in Style or Styles: [a-z0-9]Styles?$
+            // Examples: handleStyle, handleStyles, computedHandleStyle, labelStyles, makeStyle, createStyles
+            if (/[a-z0-9]Styles?$/.test(clean)) {
+                return true;
+            }
+
+            // 4. snake_case suffix: _styles?$ (case-insensitive)
+            // Examples: handle_style, make_styles
+            if (/[a-z0-9]_styles?$/i.test(clean)) {
+                return true;
+            }
+
+            // 5. kebab-case suffix: -styles?$ (case-insensitive)
+            // Examples: handle-style, make-styles
+            if (/[a-z0-9]-styles?$/i.test(clean)) {
+                return true;
+            }
+
+            return false;
         };
 
         const hasCssUnit = (text: string): boolean => {
@@ -1576,29 +1667,26 @@ export function scanTypeScriptAst(
                 }
             }
 
-            // 7. Enclosing return statement of a function / method / getter / arrow
-            const retStmt = obj.getFirstAncestorByKind(SyntaxKind.ReturnStatement);
-            if (retStmt) {
-                const fn = retStmt.getFirstAncestor(
-                    n =>
-                        Node.isFunctionDeclaration(n) ||
-                        Node.isMethodDeclaration(n) ||
-                        Node.isGetAccessorDeclaration(n) ||
-                        Node.isArrowFunction(n) ||
-                        Node.isFunctionExpression(n)
-                );
-                if (fn) {
-                    if ("getReturnTypeNode" in fn && typeof fn.getReturnTypeNode === "function") {
-                        const rt = fn.getReturnTypeNode();
-                        if (isCssStyleType(rt?.getText())) {
-                            return true;
-                        }
+            // 7. Enclosing function / method / getter / arrow / return statement
+            const fn = obj.getFirstAncestor(
+                n =>
+                    Node.isFunctionDeclaration(n) ||
+                    Node.isMethodDeclaration(n) ||
+                    Node.isGetAccessorDeclaration(n) ||
+                    Node.isArrowFunction(n) ||
+                    Node.isFunctionExpression(n)
+            );
+            if (fn) {
+                if ("getReturnTypeNode" in fn && typeof fn.getReturnTypeNode === "function") {
+                    const rt = fn.getReturnTypeNode();
+                    if (isCssStyleType(rt?.getText())) {
+                        return true;
                     }
-                    if ("getName" in fn && typeof fn.getName === "function") {
-                        const fnName = fn.getName();
-                        if (isStyleName(fnName)) {
-                            return true;
-                        }
+                }
+                if ("getName" in fn && typeof fn.getName === "function") {
+                    const fnName = fn.getName();
+                    if (isStyleName(fnName)) {
+                        return true;
                     }
                 }
             }
@@ -1696,6 +1784,85 @@ export function scanTypeScriptAst(
                     detail: `Physical style assignment to "${propName}": "${binExpr.getText().trim()}"`,
                     file: filePath,
                     line: binExpr.getStartLineNumber()
+                });
+            }
+        }
+
+        const isPhysicalCssProperty = (prop: string): boolean => {
+            const p = prop.trim().toLowerCase();
+            if (p === "left" || p === "right") {
+                return true;
+            }
+            if (p === "margin-left" || p === "margin-right" || p === "marginleft" || p === "marginright") {
+                return true;
+            }
+            if (p === "padding-left" || p === "padding-right" || p === "paddingleft" || p === "paddingright") {
+                return true;
+            }
+            if (
+                p.startsWith("border-left") ||
+                p.startsWith("border-right") ||
+                p.startsWith("borderleft") ||
+                p.startsWith("borderright")
+            ) {
+                return true;
+            }
+            if (/^border-(?:top|bottom)-(?:left|right)-radius$/.test(p)) {
+                return true;
+            }
+            if (/^border(?:top|bottom)(?:left|right)radius$/i.test(p)) {
+                return true;
+            }
+            return false;
+        };
+
+        for (const callExpr of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+            const expr = callExpr.getExpression();
+            if (!Node.isPropertyAccessExpression(expr)) {
+                continue;
+            }
+            if (expr.getName() !== "setProperty") {
+                continue;
+            }
+
+            const receiver = expr.getExpression();
+            const receiverText = receiver.getText();
+            const isReceiverStyle =
+                receiverText.endsWith(".style") ||
+                isStyleName(receiverText) ||
+                /(?:^|[\s._])styles?$/i.test(receiverText);
+
+            let isStyleCall = isReceiverStyle;
+            if (!isStyleCall && Node.isIdentifier(receiver)) {
+                for (const v of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+                    if (v.getName() === receiver.getText() && isCssStyleType(v.getTypeNode()?.getText())) {
+                        isStyleCall = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!isStyleCall) {
+                continue;
+            }
+
+            const args = callExpr.getArguments();
+            if (args.length === 0) {
+                continue;
+            }
+
+            const firstArg = args[0];
+            let propName: string | null = null;
+            if (Node.isStringLiteral(firstArg) || Node.isNoSubstitutionTemplateLiteral(firstArg)) {
+                propName = firstArg.getLiteralText();
+            }
+
+            if (propName && isPhysicalCssProperty(propName)) {
+                violations.push({
+                    category: "rtl-physical-style",
+                    detail: `Physical style property "${propName}" in setProperty call: "${callExpr.getText().trim()}"`,
+                    file: filePath,
+                    line: callExpr.getStartLineNumber()
                 });
             }
         }

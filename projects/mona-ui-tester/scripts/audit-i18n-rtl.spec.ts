@@ -1264,5 +1264,117 @@ describe("audit-i18n-rtl", () => {
             };
             expect(isAllowlisted(violation, "styles.right = `${valuePosition}%`;")).toBe(true);
         });
+
+        it("detects physical styles in camelCase style helpers, methods, and properties", () => {
+            const code = `
+                function makeHandleStyle() {
+                    return { left: "10px" };
+                }
+
+                class Demo {
+                    handleStyle() {
+                        return { right: "20%" };
+                    }
+
+                    readonly computedHandleStyle = computed(() => ({
+                        marginLeft: "4px"
+                    }));
+                }
+
+                const labelStyles = {
+                    paddingRight: "1rem"
+                };
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(4);
+            expect(violations.some(v => v.detail.includes('"left"'))).toBe(true);
+            expect(violations.some(v => v.detail.includes('"right"'))).toBe(true);
+            expect(violations.some(v => v.detail.includes('"marginLeft"'))).toBe(true);
+            expect(violations.some(v => v.detail.includes('"paddingRight"'))).toBe(true);
+        });
+
+        it("ignores non-style objects with coincidental names like lifestyle, styleId, styleTokenName, styleGuideText, and stylesheetMetadata", () => {
+            const code = `
+                const lifestyle = { left: 10, right: 20 };
+                const stylesheetMetadata = { left: "0px", right: "0px" };
+                const styleId = { left: "id-1", right: "id-2" };
+                const styleTokenName = { left: "token-left", right: "token-right" };
+                const styleGuideText = { left: "Guide Left", right: "Guide Right" };
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(0);
+        });
+
+        it("detects physical properties written via CSSStyleDeclaration.setProperty()", () => {
+            const code = `
+                element.style.setProperty("left", "10px");
+                styles.setProperty("padding-right", "1rem");
+                configuration.setProperty("left", 10);
+            `;
+            const violations: AuditViolation[] = [];
+            scanTypeScriptAst("test.ts", code, violations);
+
+            expect(violations).toHaveLength(2);
+            expect(violations[0]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style property "left" in setProperty call')
+            });
+            expect(violations[1]).toMatchObject({
+                category: "rtl-physical-style",
+                detail: expect.stringContaining('Physical style property "padding-right" in setProperty call')
+            });
+        });
+
+        describe("narrowed allowlists and same-file regression guards", () => {
+            it("slider.styles.ts: allows orientation-qualified left-0, but rejects unrelated left-0", () => {
+                const violation: AuditViolation = {
+                    category: "rtl-physical-style",
+                    detail: "Physical position utility",
+                    file: "projects/mona-ui/slider/styles/slider.styles.ts",
+                    line: 74
+                };
+                expect(isAllowlisted(violation, 'data-[orientation="horizontal"]:left-0')).toBe(true);
+                expect(isAllowlisted(violation, 'data-[orientation="vertical"]:left-0')).toBe(true);
+                expect(isAllowlisted(violation, 'data-[role="unrelated"]:left-0')).toBe(false);
+                expect(isAllowlisted(violation, "left-0")).toBe(false);
+            });
+
+            it("scroll-view.styles.ts: allows variant key-value left/right-0, but rejects unrelated left/right-0", () => {
+                const violationLeft: AuditViolation = {
+                    category: "rtl-physical-style",
+                    detail: "Physical position utility",
+                    file: "projects/mona-ui/scroll-view/styles/scroll-view.styles.ts",
+                    line: 58
+                };
+                const violationRight: AuditViolation = {
+                    category: "rtl-physical-style",
+                    detail: "Physical position utility",
+                    file: "projects/mona-ui/scroll-view/styles/scroll-view.styles.ts",
+                    line: 59
+                };
+                expect(isAllowlisted(violationLeft, 'left: "left-0"')).toBe(true);
+                expect(isAllowlisted(violationRight, 'right: "right-0"')).toBe(true);
+                expect(isAllowlisted(violationLeft, 'content: "left-0"')).toBe(false);
+                expect(isAllowlisted(violationRight, 'content: "right-0"')).toBe(false);
+                expect(isAllowlisted(violationLeft, "left-0")).toBe(false);
+            });
+
+            it("sidebar.styles.ts: allows variant rail left: right-0 and right: left-0, but rejects unrelated physical utilities", () => {
+                const violation: AuditViolation = {
+                    category: "rtl-physical-style",
+                    detail: "Physical position utility",
+                    file: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
+                    line: 413
+                };
+                expect(isAllowlisted(violation, 'left: "right-0"')).toBe(true);
+                expect(isAllowlisted(violation, 'right: "left-0"')).toBe(true);
+                expect(isAllowlisted(violation, 'other: "right-0"')).toBe(false);
+                expect(isAllowlisted(violation, 'other: "left-0"')).toBe(false);
+            });
+        });
     });
 });
