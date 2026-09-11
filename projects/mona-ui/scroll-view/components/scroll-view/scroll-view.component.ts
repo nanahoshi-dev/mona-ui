@@ -219,6 +219,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         const pagerOverlay = this.pagerOverlay();
         return scrollViewPagerThemeVariants({ pagerOverlay });
     });
+    protected readonly pagerElementRef = viewChild<ElementRef<HTMLDivElement>>("pagerElement");
     protected readonly pagerListClass = computed(() => {
         return scrollViewPagerListThemeVariants();
     });
@@ -367,6 +368,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         afterRenderEffect({
             read: onCleanup => {
                 const pagerListElementRef = this.pagerListElementRef();
+                const pagerElementRef = this.pagerElementRef();
                 this.itemCount();
 
                 this.#resizeObserver?.disconnect();
@@ -377,34 +379,32 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
                     this.#resizeObserver = null;
                 });
 
-                if (!pagerListElementRef) {
+                if (!pagerListElementRef || !pagerElementRef) {
                     this.pagerArrowVisible.set(false);
                     this.#resetPagerScrollState();
                     return;
                 }
 
                 const element = pagerListElementRef.nativeElement;
+                const pagerElement = pagerElementRef.nativeElement;
                 if (this.#pagerScrollContext && this.#pagerScrollContext.element !== element) {
                     this.#resetPagerScrollState();
                 }
 
-                const scrollWidth = element.scrollWidth;
-                const clientWidth = element.clientWidth;
-                this.pagerArrowVisible.set(scrollWidth > clientWidth);
+                this.#updatePagerArrowVisibility(element, pagerElement);
 
                 if (typeof ResizeObserver !== "undefined") {
                     this.#resizeObserver = new ResizeObserver(() => {
-                        const currentScrollWidth = element.scrollWidth;
-                        const currentClientWidth = element.clientWidth;
-                        this.pagerArrowVisible.set(currentScrollWidth > currentClientWidth);
+                        this.#updatePagerArrowVisibility(element, pagerElement);
                         if (this.#pagerScrollContext && this.#pagerScrollContext.element === element) {
-                            const currentMaxScroll = Math.max(0, currentScrollWidth - currentClientWidth);
+                            const currentMaxScroll = Math.max(0, element.scrollWidth - element.clientWidth);
                             if (this.#pagerScrollContext.maxScroll !== currentMaxScroll) {
                                 this.#resetPagerScrollState();
                             }
                         }
                     });
                     this.#resizeObserver.observe(element);
+                    this.#resizeObserver.observe(pagerElement);
                 }
             }
         });
@@ -598,6 +598,13 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.#continuousTicked = false;
         this.#activePagerPointerId = null;
         this.#cleanupDocumentPointerListenersIfNeeded();
+    }
+
+    #updatePagerArrowVisibility(list: HTMLUListElement, pager: HTMLElement): void {
+        const requiredWidth = list.scrollWidth;
+        const arrowFreeAvailableWidth = pager.clientWidth;
+
+        this.pagerArrowVisible.set(requiredWidth > arrowFreeAvailableWidth);
     }
 
     #resetPagerScrollState(): void {

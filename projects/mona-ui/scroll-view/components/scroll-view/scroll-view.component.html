@@ -64,6 +64,8 @@
 
 @if (pageable()) {
     <div
+        #pagerElement
+        data-pager-root="true"
         [class]="pagerClass()"
         [style.direction]="isRtl() ? 'rtl' : 'ltr'"
         [style.backdrop-filter]="'blur(' + pagerBlur() + 'px)'">

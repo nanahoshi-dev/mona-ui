@@ -1864,6 +1864,7 @@ describe("ScrollViewComponent", () => {
         let originalResizeObserver: typeof ResizeObserver;
         let mockScrollWidth = 0;
         let mockClientWidth = 0;
+        let mockPagerClientWidth = 0;
         let observerInstances: Array<{
             callback: ResizeObserverCallback;
             disconnect: ReturnType<typeof vi.fn>;
@@ -1876,6 +1877,7 @@ describe("ScrollViewComponent", () => {
             observerInstances = [];
             mockScrollWidth = 0;
             mockClientWidth = 0;
+            mockPagerClientWidth = 0;
 
             class MockRO {
                 public callback: ResizeObserverCallback;
@@ -1899,11 +1901,21 @@ describe("ScrollViewComponent", () => {
                 configurable: true,
                 get: () => mockClientWidth
             });
+            Object.defineProperty(HTMLDivElement.prototype, "clientWidth", {
+                configurable: true,
+                get: function (this: HTMLDivElement) {
+                    if (this.hasAttribute("data-pager-root") || this.classList.contains("inset-x-0")) {
+                        return mockPagerClientWidth || mockClientWidth;
+                    }
+                    return 0;
+                }
+            });
         });
 
         afterEach(() => {
             Reflect.deleteProperty(HTMLUListElement.prototype, "scrollWidth");
             Reflect.deleteProperty(HTMLUListElement.prototype, "clientWidth");
+            Reflect.deleteProperty(HTMLDivElement.prototype, "clientWidth");
             vi.stubGlobal("ResizeObserver", originalResizeObserver);
         });
 
@@ -2072,6 +2084,107 @@ describe("ScrollViewComponent", () => {
             mockClientWidth = 250;
             observer.callback([], observer as unknown as ResizeObserver);
             expect(localComp["pagerArrowVisible"]()).toBe(false);
+
+            localFixture.destroy();
+        });
+
+        it("hides arrows when content exceeds arrow-reduced list width but fits in arrow-free pager width", () => {
+            // Pager capacity is 300px.
+            // When arrows were visible, list clientWidth was reduced to 220px.
+            // Content is 250px.
+            // Under old hysteresis defect: 250 > 220 kept arrows visible.
+            // Under arrow-free capacity fix: 250 <= 300 correctly hides arrows.
+            mockPagerClientWidth = 300;
+            mockClientWidth = 220;
+            mockScrollWidth = 250;
+
+            const localFixture = TestBed.createComponent(ScrollViewComponent);
+            localFixture.componentRef.setInput("width", 500);
+            localFixture.componentRef.setInput("height", 375);
+            localFixture.componentRef.setInput("pageable", true);
+            localFixture.componentRef.setInput("data", ["Page 1", "Page 2", "Page 3", "Page 4", "Page 5"]);
+            localFixture.detectChanges();
+
+            const localComp = localFixture.componentInstance;
+            expect(localComp["pagerArrowVisible"]()).toBe(false);
+            localFixture.destroy();
+        });
+
+        it("shows arrows when content exceeds arrow-free pager width", () => {
+            // Pager capacity is 300px.
+            // Content is 340px > 300px.
+            mockPagerClientWidth = 300;
+            mockClientWidth = 220;
+            mockScrollWidth = 340;
+
+            const localFixture = TestBed.createComponent(ScrollViewComponent);
+            localFixture.componentRef.setInput("width", 500);
+            localFixture.componentRef.setInput("height", 375);
+            localFixture.componentRef.setInput("pageable", true);
+            localFixture.componentRef.setInput("data", ["Page 1", "Page 2", "Page 3", "Page 4", "Page 5"]);
+            localFixture.detectChanges();
+
+            const localComp = localFixture.componentInstance;
+            expect(localComp["pagerArrowVisible"]()).toBe(true);
+            localFixture.destroy();
+        });
+
+        it("dynamically hides arrows when responsive widening makes content fit into arrow-free capacity", () => {
+            // Start: pager width 240, content 280 -> 280 > 240 -> arrows visible
+            mockPagerClientWidth = 240;
+            mockClientWidth = 160;
+            mockScrollWidth = 280;
+
+            const localFixture = TestBed.createComponent(ScrollViewComponent);
+            localFixture.componentRef.setInput("width", 500);
+            localFixture.componentRef.setInput("height", 375);
+            localFixture.componentRef.setInput("pageable", true);
+            localFixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
+            localFixture.detectChanges();
+
+            const localComp = localFixture.componentInstance;
+            expect(localComp["pagerArrowVisible"]()).toBe(true);
+            expect(observerInstances.length).toBe(1);
+            const observer = observerInstances[0];
+
+            // Widen pager to 320: content 280 <= 320 -> arrows hidden
+            mockPagerClientWidth = 320;
+            mockClientWidth = 320;
+            observer.callback([], observer as unknown as ResizeObserver);
+            expect(localComp["pagerArrowVisible"]()).toBe(false);
+
+            // Narrow back to 240: content 280 > 240 -> arrows return
+            mockPagerClientWidth = 240;
+            mockClientWidth = 160;
+            observer.callback([], observer as unknown as ResizeObserver);
+            expect(localComp["pagerArrowVisible"]()).toBe(true);
+
+            localFixture.destroy();
+        });
+
+        it("observes both pager list and pager container in ResizeObserver", () => {
+            mockPagerClientWidth = 300;
+            mockClientWidth = 300;
+            mockScrollWidth = 100;
+
+            const localFixture = TestBed.createComponent(ScrollViewComponent);
+            localFixture.componentRef.setInput("width", 500);
+            localFixture.componentRef.setInput("height", 375);
+            localFixture.componentRef.setInput("pageable", true);
+            localFixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
+            localFixture.detectChanges();
+
+            const localComp = localFixture.componentInstance;
+            expect(observerInstances.length).toBe(1);
+            const observer = observerInstances[0];
+
+            const list = localComp["pagerListElementRef"]()?.nativeElement;
+            const pager = localComp["pagerElementRef"]()?.nativeElement;
+
+            expect(list).toBeInstanceOf(HTMLUListElement);
+            expect(pager).toBeInstanceOf(HTMLDivElement);
+            expect(observer.observe).toHaveBeenCalledWith(list);
+            expect(observer.observe).toHaveBeenCalledWith(pager);
 
             localFixture.destroy();
         });
